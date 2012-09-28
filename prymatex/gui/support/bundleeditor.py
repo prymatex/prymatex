@@ -45,12 +45,17 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         
         return QtGui.QDialog.exec_(self)
         
-    def execEditor(self, typeFilter = None, namespaceFilter = None):
+    def execEditor(self, typeFilter = None, namespaceFilter = None, filterModel = None, filterText = None):
         self.namespace = namespaceFilter
         self.proxyTreeModel.setFilterNamespace(namespaceFilter)
         self.proxyTreeModel.setFilterBundleItemType(typeFilter)
         index = self.comboBoxItemFilter.findData(typeFilter)
         self.comboBoxItemFilter.setCurrentIndex(index)
+        
+        #Filter button
+        self.bundleFilterDialog.setModel(filterModel or self.manager.bundleProxyModel)
+        self.pushButtonFilter.setText(filterText or self.defaullFilterText)
+
         self.exec_()
         
     def execCommand(self):
@@ -193,7 +198,10 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         self.toolbarMenu.aboutToShow.connect(conditionalEnabledTemplateFile)
         
         self.pushButtonAdd.setMenu(self.toolbarMenu)
+        
+        #Bundle global filter dialog
         self.bundleFilterDialog = PMXBundleFilter(self)
+        self.defaullFilterText = "Filter"
 
     #==========================================================
     # Filter Top Bar
@@ -344,8 +352,10 @@ class PMXBundleFilter(QtGui.QDialog):
         self.manager = bundleEditor.application.supportManager
         self.setWindowFlags(QtCore.Qt.Dialog)
         self.proxy = QtGui.QSortFilterProxyModel(self)
-        self.proxy.setSourceModel(self.manager.bundleProxyModel)
         self.tableBundleItems.setModel(self.proxy)
+        
+    def setModel(self, model):
+        self.proxy.setSourceModel(model)
         
     def setupUi(self, BundleFilter):
         BundleFilter.setObjectName(_fromUtf8("BundleFilter"))
@@ -370,7 +380,7 @@ class PMXBundleFilter(QtGui.QDialog):
         self.retranslateUi(BundleFilter)
 
     def retranslateUi(self, BundleFilter):
-        BundleFilter.setWindowTitle(_('Enable/Disable Bundles'))
+        BundleFilter.setWindowTitle(_('Enable/Disable bundles'))
         self.labelHelp.setText(_('You should keep the Source, Text and TextMate bundles enabled, as these provide base functionality relied upon by other bundles.'))
         
     def show(self):

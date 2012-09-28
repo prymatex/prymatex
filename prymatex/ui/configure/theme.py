@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configure/theme.ui'
 #
-# Created: Thu Jun  7 06:28:45 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Wed Sep 12 18:54:21 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,6 +18,7 @@ except AttributeError:
 class Ui_FontThemeWidget(object):
     def setupUi(self, FontThemeWidget):
         FontThemeWidget.setObjectName(_fromUtf8("FontThemeWidget"))
+        FontThemeWidget.resize(427, 428)
         self.verticalLayout_2 = QtGui.QVBoxLayout(FontThemeWidget)
         self.verticalLayout_2.setSpacing(2)
         self.verticalLayout_2.setMargin(0)
@@ -111,9 +112,13 @@ class Ui_FontThemeWidget(object):
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
         self.pushButtonAdd = QtGui.QPushButton(self.groupBox)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("list-add"))
+        self.pushButtonAdd.setIcon(icon)
         self.pushButtonAdd.setObjectName(_fromUtf8("pushButtonAdd"))
         self.horizontalLayout_3.addWidget(self.pushButtonAdd)
         self.pushButtonRemove = QtGui.QPushButton(self.groupBox)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("list-remove"))
+        self.pushButtonRemove.setIcon(icon)
         self.pushButtonRemove.setObjectName(_fromUtf8("pushButtonRemove"))
         self.horizontalLayout_3.addWidget(self.pushButtonRemove)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -143,7 +148,5 @@ class Ui_FontThemeWidget(object):
         self.label_8.setText(_('Line Highlight'))
         self.label_5.setText(_('Selection'))
         self.label_7.setText(_('Caret'))
-        self.pushButtonAdd.setText(_('+'))
-        self.pushButtonRemove.setText(_('-'))
         self.label_9.setText(_('Scope Selector'))
 

@@ -71,7 +71,7 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
         if self.filePath is not None:
             baseIcon = resources.getIcon(self.filePath)
         if self.isModified():
-            baseIcon = resources.getIcon("save")
+            baseIcon = resources.getIcon("document-save")
         if self.externalAction != None:
             importantIcon = resources.getIcon("important")
             baseIcon = utils.combineIcons(baseIcon, importantIcon, 0.8)
@@ -126,21 +126,55 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
         return self.externalAction == self.application.fileManager.CHANGED
 
     def isExternalDeleted(self):
+        # FIXME: Rename or move files make produces bogus behavior 
         return self.externalAction == self.application.fileManager.DELETED    
 
+    #============================================================
+    # Bundle Item Handler
+    #============================================================
+    def bundleItemHandler(self):
+        return None
+        
+    #============================================================
+    # Global navigation api
+    #============================================================
+    def nextLocation(self):
+        return False
+        
+    def previousLocation(self):
+        return False
+
+    def lastLocation(self):
+        return False
+        
+    def locationCount(self):
+        return 0
+
+    def resetLocationIndex(self, back = True):
+        pass
+
+    #============================================================
+    # Cursor positions as tuple
+    #============================================================
     def setCursorPosition(self, cursorPosition):
         pass
 
     def cursorPosition(self):
         return (0, 0)
-        
+
     def contributeToTabMenu(self):
         ''' When an editor is right clicked on it's tab, the editor
         can provide custom actions to the menu through this callback'''
         return []
     
     def runKeyHelper(self, event):
-        return PMXBaseWidgetComponent.runKeyHelper(self, event.key())
+        runHelper = False
+        for helper in self.findHelpers(event.key()):
+            runHelper = helper.accept(event)
+            if runHelper:
+                helper.execute(event)
+                break
+        return runHelper
         
     #======================================================================
     # For Plugin Manager administrator
@@ -153,11 +187,15 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
 # Base Helper
 #======================================================================    
 class PMXBaseEditorKeyHelper(PMXBaseKeyHelper):
-    def accept(self, editor, event):
-        return PMXBaseKeyHelper.accept(self, editor, event.key())
+    def initialize(self, editor):
+        PMXBaseKeyHelper.initialize(self, editor)
+        self.editor = editor
+
+    def accept(self, event):
+        return PMXBaseKeyHelper.accept(self, event.key())
     
-    def execute(self, editor, event):
-        PMXBaseKeyHelper.accept(self, editor, event.key())
+    def execute(self, event):
+        PMXBaseKeyHelper.accept(self, event.key())
 
 #======================================================================
 # Base Addon

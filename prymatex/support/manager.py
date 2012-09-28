@@ -10,8 +10,7 @@ import uuid as uuidmodule
 import subprocess
 from glob import glob
 
-from prymatex.core.cache import memoized, removeMemoizedArgument, removeMemoizedFunction
-from prymatex.support.bundle import PMXBundle, PMXBundleItem
+from prymatex.support.bundle import PMXBundle, PMXBundleItem, PMXRunningContext
 from prymatex.support.macro import PMXMacro
 from prymatex.support.syntax import PMXSyntax
 from prymatex.support.snippet import PMXSnippet
@@ -24,7 +23,9 @@ from prymatex.support.score import PMXScoreManager
 from prymatex.support.utils import ensurePath
 from prymatex.support.cache import PMXSupportCache
 
-from prymatex.utils.decorator.helpers import printtime
+from prymatex.utils.decorators.deprecated import deprecated
+from prymatex.utils.decorators.helpers import printtime
+from prymatex.utils.decorators.memoize import dynamic_memoized, remove_memoized_argument, remove_memoized_function
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand, PMXProject ]
 
@@ -64,19 +65,23 @@ class PMXSupportBaseManager(object):
     # Namespaces
     #---------------------------------------------------
     def addNamespace(self, name, path):
-        self.namespaces[name] = {}
+        # TODO: Quiza migrar a algo con mas forma para encapsular los namespace
+        self.namespaces[name] = { "dirname": path }
         self.nsorder.append(name)
         for element in self.ELEMENTS:
-            epath = os.path.join(path, element)
-            if not os.path.exists(epath):
+            elementPath = os.path.join(path, element)
+            if not os.path.exists(elementPath):
                 continue
-            #Si es el primero es el protegido
-            if len(self.nsorder) == 1:
-                var = "_".join([ self.VAR_PREFIX, element.upper(), 'PATH' ])
-            else:
-                var = "_".join([ self.VAR_PREFIX, name.upper(), element.upper(), 'PATH' ])
-            self.namespaces[name][element] = self.environment[var] = epath
+            self.addNamespaceElement(name, element, elementPath)
         return name
+
+    def addNamespaceElement(self, namespace, element, path):
+        if namespace == self.protectedNamespace:
+            # Es el protected namespace ?
+            var = "_".join([ self.VAR_PREFIX, element.upper(), 'PATH' ])
+        else:
+            var = "_".join([ self.VAR_PREFIX, namespace.upper(), element.upper(), 'PATH' ])
+        self.namespaces[namespace][element] = self.environment[var] = path
 
     def hasNamespace(self, name):
         return name in self.namespaces
@@ -84,16 +89,19 @@ class PMXSupportBaseManager(object):
     @property
     def protectedNamespace(self):
         return self.nsorder[self.PROTECTEDNS]
-        
+
     @property
     def defaultNamespace(self):
         if len(self.nsorder) < 2:
             raise Exception("No default namespace")
         return self.nsorder[self.DEFAULTNS]
 
+    @property
+    def safeNamespaces(self):
+        return self.nsorder[self.DEFAULTNS:][:]
+
     def addProjectNamespace(self, project):
         #TODO: Asegurar que no esta ya cargado eso del md5 es medio trucho
-        project.ensureBundles()
         path = project.projectPath
         project.namespace = project.name
         while project.namespace in self.namespaces:
@@ -107,24 +115,59 @@ class PMXSupportBaseManager(object):
                 if bundle.enabled:
                     self.populateBundle(bundle)
 
+    #---------------------------------------------------
+    # Environment
+    #---------------------------------------------------
     def addToEnvironment(self, name, value):
         self.environment[name] = value
 
     def updateEnvironment(self, env):
         self.environment.update(env)
 
-    def buildEnvironment(self):
+    def buildEnvironment(self, systemEnvironment = True):
         env = {}
-        env.update(os.environ)
+        if systemEnvironment:
+            env.update(os.environ)
         env.update(self.environment)
         return env
     
-    def basePath(self, element, namespace):
+    def projectEnvironment(self, project):
+        assert hasattr(project, 'namespace'), "El proyecto no tienen namespace"
+        namespace = project.namespace
+        env = {}
+        for element in self.ELEMENTS:
+            key = "_".join([ self.VAR_PREFIX, "PROJECT", element.upper(), 'PATH'])
+            path, exists = self.namespaceElementPath(namespace, element)
+            if exists:
+                env[key] = path
+        return env
+
+    #---------------------------------------------------
+    # Paths for namespaces
+    #---------------------------------------------------
+    def namespaceElementPath(self, namespace, element, create = False):
+        assert namespace in self.namespaces, "The %s namespace is not registered" % namespace
+        assert element in self.ELEMENTS, "The %s namespace is not registered" % namespace
+        path = os.path.join(self.namespaces[namespace]["dirname"], element)
+        if element not in self.namespaces[namespace] and create:
+            # TODO Usar el del fileManager
+            os.makedirs(path)
+            self.addNamespaceElement(namespace, element, path)
+        return path, os.path.exists(path)
+        
+    @deprecated
+    def basePath(self, element, namespace, create = False):
         if namespace not in self.namespaces:
             raise Exception("The %s namespace is not registered" % namespace)
         if element in self.namespaces[namespace]:
             return self.namespaces[namespace][element]
-    
+        elif create and element in self.ELEMENTS:
+            path = os.path.join(self.namespaces[namespace], element)
+            # TODO Usar el del fileManager
+            os.makedirs(path)
+            self.addNamespaceElement(namespace, element, path)
+            return self.namespaces[namespace][element]
+
     #---------------------------------------------------
     # Tools
     #---------------------------------------------------
@@ -146,7 +189,7 @@ class PMXSupportBaseManager(object):
         return ''.join(validPath)
 
     def runProcess(self, context, callback):
-        """ Synchronous run process"""
+        """Synchronous run process"""
         origWD = os.getcwd() # remember our original working directory
         if context.workingDirectory is not None:
             os.chdir(context.workingDirectory)
@@ -169,6 +212,26 @@ class PMXSupportBaseManager(object):
             os.chdir(origWD)
         
         callback(context)
+
+    def buildAdHocCommand(self, commandScript, bundle, name = None, commandInput = "none", commandOutput = "insertText"):
+        commandHash = {    'command': commandScript, 
+                             'input': commandInput,
+                            'output': commandOutput }
+        commandHash['name'] = name if name is not None else "Ad-Hoc command %s" % commandScript
+        
+        command = PMXCommand(self.uuidgen(), dataHash = commandHash)
+        command.setBundle(bundle)
+        command.setManager(self)
+        return command
+    
+    def buildAdHocSnippet(self, snippetContent, bundle, name = None, tabTrigger = None):
+        snippetHash = {    'content': snippetContent,
+                           'tabTrigger': tabTrigger  }
+        snippetHash['name'] = name if name is not None else "Ad-Hoc snippet"
+        snippet = PMXSnippet(self.uuidgen(), dataHash = snippetHash)
+        snippet.setBundle(bundle)
+        snippet.setManager(self)
+        return snippet
 
     #---------------------------------------------------
     # Message Handler
@@ -357,6 +420,41 @@ class PMXSupportBaseManager(object):
                 klass.loadBundleItem(path, namespace, bundle, self)
         self.populatedBundle(bundle)
 
+    #---------------------------------------------------
+    # CACHE COHERENCE
+    #---------------------------------------------------
+    def updateBundleItemCacheCoherence(self, bundleItem, attrs):
+        # TODO Terminar, identificar las funciones y borrar las cosas como corresponde
+        #Deprecate keyEquivalent in cache
+        if 'keyEquivalent' in attrs and bundleItem.keyEquivalent != attrs['keyEquivalent']:
+            remove_memoized_argument(bundleItem.keyEquivalent)
+            remove_memoized_argument(attrs['keyEquivalent'])
+            #Delete list of all keyEquivalent
+            remove_memoized_function(self.getAllKeyEquivalentItems)
+            
+        #Deprecate tabTrigger in cache
+        if 'tabTrigger' in attrs and bundleItem.tabTrigger != attrs['tabTrigger']:
+            remove_memoized_argument(bundleItem.tabTrigger)
+            remove_memoized_argument(attrs['tabTrigger'])
+            #Delete list of all tabTrigers
+            remove_memoized_function(self.getAllTabTriggerItems)
+
+        #Deprecate scope in cache
+        def test_scope_bundleItem(itemType):
+            def test_scope(f, key, fkey):
+                reference = None
+                if itemType == PMXPreference.TYPE and f.func_name == "getPreferenceSettings":
+                    reference = fkey[1]
+                elif f.func_name in [ "getTabTriggerItem", "getKeyEquivalentItem" ]:
+                    reference = fkey[2]
+                return reference is not None and bool(self.scores.score(key, reference)) or False
+                
+            return test_scope
+
+        if 'scope' in attrs and bundleItem.scope != attrs['scope']:
+            remove_memoized_argument(bundleItem.scope, condition = test_scope_bundleItem(bundleItem.TYPE))
+            remove_memoized_argument(attrs['scope'], condition = test_scope_bundleItem(bundleItem.TYPE))
+        
     #---------------------------------------------------
     # MANAGED OBJECTS INTERFACE
     #---------------------------------------------------
@@ -583,19 +681,9 @@ class PMXSupportBaseManager(object):
             #Updates que no son updates
             return item
 
-        #Deprecate keyEquivalent in cache
-        if 'keyEquivalent' in attrs and item.keyEquivalent != attrs['keyEquivalent']:
-            removeMemoizedArgument(item.keyEquivalent)
-            removeMemoizedArgument(attrs['keyEquivalent'])
-            
-        #Deprecate tabTrigger in cache
-        if 'tabTrigger' in attrs and item.tabTrigger != attrs['tabTrigger']:
-            removeMemoizedArgument(item.tabTrigger)
-            removeMemoizedArgument(attrs['tabTrigger'])
-            #Delete list of all tabTrigers
-            removeMemoizedFunction(self.getAllTabTriggerItems)
-
-        #TODO: Este paso es importante para obtener el namespace, quiza ponerlo en un metodo para trabajarlo un poco m�s
+        self.updateBundleItemCacheCoherence(item, attrs)
+         
+        #TODO: Este paso es importante para obtener el namespace, quiza ponerlo en un metodo para trabajarlo un poco más
         namespace = namespace or self.defaultNamespace
         
         if item.bundle.isProtected and not item.bundle.isSafe:
@@ -808,6 +896,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # PREFERENCES
     #---------------------------------------------------------------
+    @dynamic_memoized
     def getPreferences(self, scope):
         with_bundle = []
         with_scope = []
@@ -823,7 +912,7 @@ class PMXSupportBaseManager(object):
         with_scope.sort(key = lambda t: t[0], reverse = True)
         return map(lambda item: item[1], with_bundle + with_scope) + without_scope
 
-    @memoized
+    @dynamic_memoized
     def getPreferenceSettings(self, scope):
         return PMXPreference.buildSettings(self.getPreferences(scope))
         
@@ -832,23 +921,24 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     def getAllTabTriggerItems(self):
         """
-        Return a list of all tab triggers
-        ['class', 'def', ...]
+        Return a list of all tab triggers items
         """
         raise NotImplementedError
     
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
         """Return a list of tab triggers bundle items"""
         raise NotImplementedError
-    
     #---------------------------------------------------------------
     # TABTRIGGERS
     #---------------------------------------------------------------
-    #@printtime
+    @dynamic_memoized
+    def getAllTabTriggerSymbols(self):
+        return map(lambda item: item.tabTrigger, self.getAllTabTriggerItems())
+        
+    @dynamic_memoized
     def getTabTriggerSymbol(self, line, index):
         line = line[:index][::-1]
-        tabTriggerItems = self.getAllTabTriggerItems()
-        search = map(lambda item: (item.tabTrigger, line.find(item.tabTrigger[::-1]), len(item.tabTrigger)), tabTriggerItems)
+        search = map(lambda tabTrigger: (tabTrigger, line.find(tabTrigger[::-1]), len(tabTrigger)), self.getAllTabTriggerSymbols())
         search = filter(lambda (trigger, value, length): value == 0, search)
         if search:
             best = ("", 0)
@@ -857,7 +947,7 @@ class PMXSupportBaseManager(object):
                     best = (trigger, length)
             return best[0]
 
-    #@printtime
+    @dynamic_memoized
     def getAllTabTiggerItemsByScope(self, scope):
         with_scope = []
         without_scope = []
@@ -872,11 +962,11 @@ class PMXSupportBaseManager(object):
         with_scope = map(lambda (score, item): item, with_scope)
         return with_scope + without_scope
 
-    #@printtime
-    def getTabTriggerItem(self, keyword, scope):
+    @dynamic_memoized
+    def getTabTriggerItem(self, tabTrigger, scope):
         with_scope = []
         without_scope = []
-        for item in self.getAllBundleItemsByTabTrigger(keyword):
+        for item in self.getAllBundleItemsByTabTrigger(tabTrigger):
             if not item.scope:
                 without_scope.append(item)
             else:
@@ -890,6 +980,12 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     # KEYEQUIVALENT INTERFACE
     #---------------------------------------------------
+    def getAllKeyEquivalentItems(self):
+        """
+        Return a list of all key equivalent items
+        """
+        raise NotImplementedError
+        
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
         """Return a list of key equivalent bundle items"""
         raise NotImplementedError
@@ -897,7 +993,11 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # KEYEQUIVALENT
     #---------------------------------------------------------------
-    #@printtime
+    @dynamic_memoized
+    def getAllKeyEquivalentCodes(self):
+        return map(lambda item: item.keyEquivalent, self.getAllKeyEquivalentItems())
+        
+    @dynamic_memoized
     def getKeyEquivalentItem(self, code, scope):
         with_scope = []
         without_scope = []
@@ -924,7 +1024,6 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # FILE EXTENSION, for drag commands
     #---------------------------------------------------------------
-    #@printtime
     def getFileExtensionItem(self, path, scope):
         with_scope = []
         without_scope = []
@@ -1098,12 +1197,12 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
         '''
             Return all preferences
         '''
-        return self.PREFERENCES
+        return self.PREFERENCES 
     
     #---------------------------------------------------
     # TABTRIGGERS INTERFACE
     #---------------------------------------------------
-    def getAllTabTriggersMnemonics(self):
+    def getAllTabTriggerSymbols(self):
         """
         Return a list of tab triggers
         ['class', 'def', ...]

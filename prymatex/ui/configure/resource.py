@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configure/resource.ui'
 #
-# Created: Thu Jun  7 06:28:45 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Fri Sep  7 14:19:37 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,11 +18,13 @@ except AttributeError:
 class Ui_ResouceWidget(object):
     def setupUi(self, ResouceWidget):
         ResouceWidget.setObjectName(_fromUtf8("ResouceWidget"))
-        self.verticalLayout = QtGui.QVBoxLayout(ResouceWidget)
-        self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(0)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        ResouceWidget.resize(314, 221)
+        self._2 = QtGui.QVBoxLayout(ResouceWidget)
+        self._2.setSpacing(2)
+        self._2.setMargin(0)
+        self._2.setObjectName(_fromUtf8("_2"))
         self.formLayout = QtGui.QFormLayout()
+        self.formLayout.setLabelAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.formLayout.setHorizontalSpacing(2)
         self.formLayout.setObjectName(_fromUtf8("formLayout"))
         self.labelPath = QtGui.QLabel(ResouceWidget)
@@ -53,7 +55,7 @@ class Ui_ResouceWidget(object):
         self.textLabelLastModified.setText(_fromUtf8(""))
         self.textLabelLastModified.setObjectName(_fromUtf8("textLabelLastModified"))
         self.formLayout.setWidget(3, QtGui.QFormLayout.FieldRole, self.textLabelLastModified)
-        self.verticalLayout.addLayout(self.formLayout)
+        self._2.addLayout(self.formLayout)
 
         self.retranslateUi(ResouceWidget)
         QtCore.QMetaObject.connectSlotsByName(ResouceWidget)

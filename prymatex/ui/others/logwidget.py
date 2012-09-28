@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/others/logwidget.ui'
+# Form implementation generated from reading ui file 'resources\ui\others\logwidget.ui'
 #
-# Created: Mon Nov 14 16:26:18 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Mon Sep 10 07:37:28 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 

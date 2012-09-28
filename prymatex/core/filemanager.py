@@ -14,6 +14,8 @@ import fnmatch
 from PyQt4 import QtCore, QtGui
 
 from prymatex.utils import osextra
+from prymatex.utils.decorators import deprecated
+
 from prymatex.core.plugin import PMXBaseComponent
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core import exceptions
@@ -120,7 +122,7 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
     #========================================================
     # Path handling, create, move, copy, link, delete
     #========================================================
-    def _onerror(func, path, exc_info):
+    def _onerror(func, path, exc_info): #@NoSelf
         import stat
         if not os.access(path, os.W_OK):
             # Is the error an access error ?
@@ -158,6 +160,7 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
     #==================================================================
     # Path data
     #==================================================================
+    exists = lambda self, path: os.path.exists(path)
     extension = lambda self, path: os.path.splitext(path.lower())[-1][1:]
     splitext = lambda self, path: os.path.splitext(path)
     dirname = lambda self, path: os.path.dirname(path)
@@ -165,16 +168,16 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
     mimeType = lambda self, path: mimetypes.guess_type(path)[0] or ""
     issubpath = lambda self, childPath, parentPath: osextra.path.issubpath(childPath, parentPath)
     fullsplit = lambda self, path: osextra.path.fullsplit(path)
+    normcase = lambda self, path: os.path.normcase(path)
+    normpath = lambda self, path: os.path.normpath(path)
+    realpath = lambda self, path: os.path.realpath(path)
+    relpath = lambda self, path: os.path.relpath(path)
+
     def expandVars(self, text):
         context = self.application.supportManager.buildEnvironment()
         path = osextra.path.expand_shell_var(text, context = context)
         if os.path.exists(path):
             return path
-
-    def normpath(self, path):
-        """ os.path.normpath and os.path.realpath, con condimentos de prymatex """
-        path = os.path.realpath(path)
-        return os.path.normpath(path)
     
     #==================================================================
     # Handling files for retrieving data. open, read, write, close
@@ -187,7 +190,7 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
         Open and read a file, return the content.
         """
         if not os.path.exists(filePath):
-            raise exceptions.IOException("The file does not exist")
+            raise exceptions.IOException("The file does not exist: %s" % filePath)
         if not os.path.isfile(filePath):
             raise exceptions.IOException("%s is not a file" % filePath)
         self.last_directory = os.path.dirname(filePath)
@@ -232,7 +235,7 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
         self.logger.debug("Unwatch path %s" % path)
         self.fileWatcher.removePath(path)
     
-    def getDirectory(self, filePath = None):
+    def directory(self, filePath = None):
         """
         Obtiene un directorio para el path
         """
@@ -242,6 +245,10 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
         if os.path.isdir(filePath):
             return filePath
         return os.path.dirname(filePath)
+        
+    @deprecated
+    def getDirectory(self, filePath = None):
+        return self.directory(filePath)
 
     def listDirectory(self, directory, absolute = False, filePatterns = []):
         if not os.path.isdir(directory):

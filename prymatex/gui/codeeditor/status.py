@@ -97,7 +97,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         #Create bundle menu
         self.menuBundle = QtGui.QMenu(self)
         self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundle)
-        self.pushButtonMenuBundle.setMenu(self.menuBundle)
+        self.toolButtonMenuBundle.setMenu(self.menuBundle)
         
     def setupWidgetCommand(self):
         self.comboBoxInput.addItem("None", "none")

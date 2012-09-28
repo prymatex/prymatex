@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>629</width>
-    <height>249</height>
+    <height>267</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,8 +29,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/dialog-close.png</normaloff>:/icons/actions/dialog-close.png</iconset>
+         <iconset theme="dialog-close">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -103,8 +104,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/dialog-close.png</normaloff>:/icons/actions/dialog-close.png</iconset>
+         <iconset theme="dialog-close">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -153,8 +155,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/dialog-close.png</normaloff>:/icons/actions/dialog-close.png</iconset>
+         <iconset theme="dialog-close">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -184,8 +187,9 @@ p, li { white-space: pre-wrap; }
          <string>Next</string>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/go-down.png</normaloff>:/icons/actions/go-down.png</iconset>
+         <iconset theme="go-down-search">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -195,8 +199,9 @@ p, li { white-space: pre-wrap; }
          <string>Previous</string>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/go-up.png</normaloff>:/icons/actions/go-up.png</iconset>
+         <iconset theme="go-up-search">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -238,8 +243,9 @@ p, li { white-space: pre-wrap; }
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/dialog-close.png</normaloff>:/icons/actions/dialog-close.png</iconset>
+         <iconset theme="dialog-close">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -299,8 +305,9 @@ p, li { white-space: pre-wrap; }
          <string>Previous</string>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/go-up.png</normaloff>:/icons/actions/go-up.png</iconset>
+         <iconset theme="go-up-search">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -317,8 +324,9 @@ p, li { white-space: pre-wrap; }
          <string>Next</string>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/go-down.png</normaloff>:/icons/actions/go-down.png</iconset>
+         <iconset theme="go-down-search">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -377,8 +385,9 @@ p, li { white-space: pre-wrap; }
             <string>Find All</string>
            </property>
            <property name="icon">
-            <iconset resource="../../resources.qrc">
-             <normaloff>:/icons/actions/edit-find.png</normaloff>:/icons/actions/edit-find.png</iconset>
+            <iconset theme="edit-find">
+             <normaloff/>
+            </iconset>
            </property>
           </widget>
          </item>
@@ -419,8 +428,9 @@ p, li { white-space: pre-wrap; }
          <string/>
         </property>
         <property name="icon">
-         <iconset>
-          <normaloff>:/editor/modes/cursors.png</normaloff>:/editor/modes/cursors.png</iconset>
+         <iconset theme="modes-cursors">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -442,8 +452,9 @@ p, li { white-space: pre-wrap; }
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/editor/modes/snippet.png</normaloff>:/editor/modes/snippet.png</iconset>
+         <iconset theme="modes-snippet">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -465,8 +476,9 @@ p, li { white-space: pre-wrap; }
          <string/>
         </property>
         <property name="icon">
-         <iconset>
-          <normaloff>:/editor/modes/insert.png</normaloff>:/editor/modes/insert.png</iconset>
+         <iconset theme="modes-insert">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -484,21 +496,14 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonMenuBundle">
-        <property name="maximumSize">
-         <size>
-          <width>45</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
+       <widget class="QToolButton" name="toolButtonMenuBundle">
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/run-build.png</normaloff>:/icons/actions/run-build.png</iconset>
+         <iconset theme="applications-system"/>
         </property>
-        <property name="flat">
+        <property name="popupMode">
+         <enum>QToolButton::MenuButtonPopup</enum>
+        </property>
+        <property name="autoRaise">
          <bool>true</bool>
         </property>
        </widget>
@@ -524,8 +529,6 @@ p, li { white-space: pre-wrap; }
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

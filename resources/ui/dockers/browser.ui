@@ -41,8 +41,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/go-previous.png</normaloff>:/icons/actions/go-previous.png</iconset>
+         <iconset theme="go-previous">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -70,8 +71,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/go-next.png</normaloff>:/icons/actions/go-next.png</iconset>
+         <iconset theme="go-next">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -93,8 +95,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/view-refresh.png</normaloff>:/icons/actions/view-refresh.png</iconset>
+         <iconset theme="view-refresh">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -119,8 +122,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/dialog-close.png</normaloff>:/icons/actions/dialog-close.png</iconset>
+         <iconset theme="dialog-close">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -135,22 +139,21 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonOptions">
-        <property name="maximumSize">
-         <size>
-          <width>45</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
+       <widget class="QToolButton" name="toolButtonOptions">
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/configure.png</normaloff>:/icons/actions/configure.png</iconset>
+         <iconset theme="configure"/>
         </property>
-        <property name="flat">
+        <property name="popupMode">
+         <enum>QToolButton::MenuButtonPopup</enum>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonIconOnly</enum>
+        </property>
+        <property name="autoRaise">
          <bool>true</bool>
+        </property>
+        <property name="arrowType">
+         <enum>Qt::NoArrow</enum>
         </property>
        </widget>
       </item>
@@ -172,7 +175,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../resources.qrc">
+    <iconset>
      <normaloff>:/icons/actions/system-switch-user.png</normaloff>:/icons/actions/system-switch-user.png</iconset>
    </property>
    <property name="text">
@@ -187,7 +190,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../resources.qrc">
+    <iconset>
      <normaloff>:/icons/actions/network-connect.png</normaloff>:/icons/actions/network-connect.png</iconset>
    </property>
    <property name="text">
@@ -205,8 +208,6 @@
    <header>QtWebKit/QWebView</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../../resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

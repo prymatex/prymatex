@@ -12,11 +12,9 @@ if __name__ == '__main__':
     
 from prymatex.support.utils import compileRegexp, OPTION_CAPTURE_GROUP, OPTION_MULTILINE
 
-from prymatex.support.bundle import PMXBundleItem
+from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
 from prymatex.support.processor import PMXSyntaxProcessor
 from prymatex.support.syntax import PMXSyntax
-from prymatex.support.utils import prepareShellScript, deleteFile
-from subprocess import Popen, PIPE, STDOUT
 
 SNIPPET_SYNTAX = { 
  'patterns': [{'captures': {'1': {'name': 'keyword.escape.snippet'}},
@@ -233,9 +231,10 @@ class TextNode(Node):
     
 #Snippet root
 class Snippet(NodeList):
-    def __init__(self, scope, parent = None):
-        super(Snippet, self).__init__(scope, parent)
-        
+    def __init__(self, scope, snippetItem):
+        super(Snippet, self).__init__(scope)
+        self.snippetItem = snippetItem
+
     def render(self, processor):
         self.start = processor.cursorPosition()
         super(Snippet, self).render(processor)
@@ -533,16 +532,22 @@ class Shell(NodeList):
             return super(Shell, self).close(scope, text)
         return node
     
+    @property
+    def manager(self):
+        if not hasattr(self, "_manager"):
+            item = self
+            while not isinstance(item, Snippet):
+                item = item.parent
+            self._manager = item.snippetItem.manager
+        return self._manager
+    
     def execute(self, processor):
         # TODO Migrar a runing context
-        command, env, tempFile = prepareShellScript(unicode(self), processor.environment)
-        process = Popen(command, stdout=PIPE, stderr=STDOUT, env = env)
-        text = process.stdout.read()
-        text = text.strip()
-        process.stdout.close()
-        _ = process.wait()
-        deleteFile(tempFile)
-        self.content = text.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
+        def afterExecute(context):
+            self.content = context.outputValue.strip().replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
+        with PMXRunningContext(self, unicode(self), processor.environment) as context:
+            context.asynchronous = False
+            self.manager.runProcess(context, afterExecute)
         
     def render(self, processor):
         if not hasattr(self, 'content'):
@@ -590,9 +595,9 @@ class Condition(Node):
         self.current += element.replace('\\n', '\n').replace('\\t', '\t')
 
 class PMXSnippetSyntaxProcessor(PMXSyntaxProcessor):
-    def __init__(self):
+    def __init__(self, snippetItem):
         self.current = None
-        self.node = Snippet("root")
+        self.node = Snippet("root", snippetItem)
         self.taborder = {}
 
     def openTag(self, name, start):
@@ -609,7 +614,7 @@ class PMXSnippetSyntaxProcessor(PMXSyntaxProcessor):
                 self.taborder[self.node.index] = self.node.taborder(container)
         self.index = end
 
-    def beginLine(self, line, stack):
+    def beginLine(self, line):
         if self.current != None:
             if self.index != len(self.current):
                 self.node.append(self.current[self.index:len(self.current)])
@@ -659,7 +664,7 @@ class PMXSnippet(PMXBundleItem):
         return self.snippet != None
     
     def compile(self):
-        processor = PMXSnippetSyntaxProcessor()
+        processor = PMXSnippetSyntaxProcessor(self)
         self.parser.parse(self.content, processor)
         self.snippet = processor.node
         self.addTaborder(processor.taborder)
@@ -720,8 +725,8 @@ class PMXSnippet(PMXBundleItem):
             self.taborder.append(holder)
         if lastHolder is not None:
             lastHolder.last = True
-        elif self.taborder:
-            self.taborder[-1].last = True
+        #elif self.taborder:
+        #    self.taborder[-1].last = True
         self.taborder.append(lastHolder)
             
 

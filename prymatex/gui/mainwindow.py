@@ -6,16 +6,17 @@ from string import Template
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex.core import exceptions
+from prymatex.core.settings import pmxConfigPorperty
 from prymatex.ui.mainwindow import Ui_MainWindow
 from prymatex.gui.actions import MainWindowActions
-from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core import exceptions
-from prymatex.utils.i18n import ugettext as _
 from prymatex.gui import utils, dialogs
 from prymatex.gui.utils import textToObjectName, extendQMenu
 from prymatex.gui.statusbar import PMXStatusBar
+from prymatex.gui.processors import MainWindowCommandProcessor
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
+from prymatex.utils.i18n import ugettext as _
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     """Prymatex main window"""
@@ -29,20 +30,24 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     #=========================================================
     SETTINGS_GROUP = 'MainWindow'
 
-    windowTitleTemplate = pmxConfigPorperty(default = "$PMX_APP_NAME")
+    @pmxConfigPorperty(default = "$PMX_APP_NAME ($PMX_VERSION)")
+    def windowTitleTemplate(self, titleTemplate):
+         self.titleTemplate = Template(titleTemplate)
     
     @pmxConfigPorperty(default = True)
     def showMenuBar(self, value):
         self._showMenuBar = value
         self.menuBar().setShown(value)
     
+    _editorHistory = []
+    _editorHistoryIndex = 0
+    
     # Constructor
     def __init__(self, application):
         """
         The main window
         @param parent: The QObject parent, in this case it should be the QApp
-        @param files_to_open: The set of files to be opened when the window
-                              is shown in the screen.
+        @param files_to_open: The set of files to be opened when the window is shown in the screen.
         """
         QtGui.QMainWindow.__init__(self)
         self.application = application
@@ -56,9 +61,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         
         # Connect Signals
         self.splitTabWidget.currentWidgetChanged.connect(self.on_currentWidgetChanged)
+        self.splitTabWidget.currentWidgetChanged.connect(self.setWindowTitleForEditor)
         self.splitTabWidget.tabCloseRequest.connect(self.closeEditor)
         self.splitTabWidget.tabCreateRequest.connect(self.addEmptyEditor)
-        self.application.supportManager.bundleItemTriggered.connect(self.insertBundleItem)
+        self.application.supportManager.bundleItemTriggered.connect(self.on_bundleItemTriggered)
         
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.dockers = []
@@ -67,19 +73,57 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
 
         self.setAcceptDrops(True)
         
-        self.setMainWindowAsActionParent()
+        #self.setMainWindowAsActionParent()
         self.setupHelpMenuMiscConnections()
-    
-    
-    def insertBundleItem(self, item):
+        
+        self.bundleItem_handler = self.insertBundleItem
+        
+        #Processor de comandos local a la main window
+        self.commandProcessor = MainWindowCommandProcessor(self)
+        self.__forseLocalCommandProcessor = False
+
+    #==========================================================================
+    # Bundle Items
+    #==========================================================================
+    def on_bundleItemTriggered(self, bundleItem):
+        if self.bundleItem_handler is not None:
+            self.bundleItem_handler(bundleItem)
+
+    def insertBundleItem(self, bundleItem, **processorSettings):
         '''Insert selected bundle item in current editor if possible'''
-        editor = self.currentEditor()
-        if editor:
-            self.currentEditor().insertBundleItem(item)
-        else:
-            QtGui.QMessageBox.information(self, _("No editor open"), 
-                                          _("%s needs an editor to run") % item.name)
+        assert not bundleItem.isEditorNeeded(), "Bundle Item needs editor"
+        
+        self.commandProcessor.configure(processorSettings)
+        bundleItem.execute(self.commandProcessor)
+
+    # Browser error
+    def showErrorInBrowser(self, title, summary, exitcode = -1, **settings):
+        from prymatex.support.utils import makeHyperlinks
+        from prymatex.utils import html
+        commandScript = '''
+            source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
             
+            html_header "An error has occurred while executing command %(name)s"
+            echo -e "<pre>%(output)s</pre>"
+            echo -e "<p>Exit code was: %(exitcode)d</p>"
+            html_footer
+        ''' % {
+                'name': html.escape(title),
+                'output': html.escape(summary),
+                'exitcode': exitcode}
+        bundle = self.application.supportManager.getBundle(self.application.supportManager.defaultBundleForNewBundleItems)
+        command = self.application.supportManager.buildAdHocCommand(commandScript,
+            bundle,
+            name = "Error runing %s" % title,
+            commandOutput = 'showAsHTML')
+        self.bundleItem_handler(command, **settings)
+        
+    def buildEnvironment(self):
+        env = {}
+        for docker in self.dockers:
+            env.update(docker.buildEnvironment())
+        return env
+
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import PMXGeneralWidget
@@ -209,7 +253,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             for editorClass, actions in self.customEditorActions.iteritems():
                 map(lambda action: action.setVisible(False), actions)
         else:
-            currentEditorClass = editor.__class__ 
+            currentEditorClass = editor.__class__
             
             for editorClass, actions in self.customEditorActions.iteritems():
                 for action in actions:
@@ -218,14 +262,17 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
                         action.setChecked(action.testChecked(editor))
 
     def showMessage(self, message):
-        #Busca el show message en el editor sino ver otra forma de mostrar el mensaje
-        self.currentEditor().showMessage(message)
+        # TODO: Hacer el showMessage de la main window
+        if self.currentEditor() is not None:
+            self.currentEditor().showMessage(message)
+        else:
+            print "TODO: Hacer el showMessage de la mainWindow"
     
     #============================================================
     # Create and manage editors
     #============================================================
     def addEmptyEditor(self):
-        editor = self.application.getEditorInstance(parent = self)
+        editor = self.application.createEditorInstance(parent = self)
         self.addEditor(editor)
         return editor
         
@@ -235,12 +282,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
 
     def findEditorForFile(self, filePath):
         # Find open editor for fileInfo
-        for editor in self.splitTabWidget.getAllWidgets():
+        for editor in self.splitTabWidget.allWidgets():
             if editor.filePath == filePath:
                 return editor
 
     def editors(self):
-        return self.splitTabWidget.getAllWidgets()
+        return self.splitTabWidget.allWidgets()
         
     def setCurrentEditor(self, editor):
         self.splitTabWidget.setCurrentWidget(editor)
@@ -249,21 +296,31 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         return self.splitTabWidget.currentWidget()
     
     def on_currentWidgetChanged(self, editor):
-        #TODO: que la statusbar se conecte como los dockers
-        self.statusBar().setCurrentEditor(editor)
         #Update Menu
         self.updateMenuForEditor(editor)        
-
-        template = Template(self.windowTitleTemplate)
-        title = [ editor.tabTitle() ] if editor is not None else []
-        title.append(template.safe_substitute(**self.application.supportManager.buildEnvironment()))
-        self.setWindowTitle(" - ".join(title))
         
-        self.currentEditorChanged.emit(editor)
+        #Avisar al manager si tenemos editor y preparar el handler
+        self.application.supportManager.setEditorAvailable(editor is not None)
         if editor is not None:
+            self.bundleItem_handler = editor.bundleItemHandler() or self.insertBundleItem
+        else:
+            self.bundleItem_handler = self.insertBundleItem    
+        
+        #Emitir señal de cambio
+        self.currentEditorChanged.emit(editor)
+
+        if editor is not None:
+            self.addEditorToHistory(editor)
             editor.setFocus()
             self.application.checkExternalAction(self, editor)
-                    
+            
+    def setWindowTitleForEditor(self, editor):
+        #Set Window Title for editor, editor can be None
+        titleChunks = [ self.titleTemplate.safe_substitute(**self.application.supportManager.buildEnvironment()) ]
+        if editor is not None:
+            titleChunks.insert(0, editor.tabTitle())
+        self.setWindowTitle(" - ".join(titleChunks))
+        
     def saveEditor(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor()
         if editor.isExternalChanged():
@@ -312,6 +369,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         if editor is not None and editor.isNew() and not editor.isModified():
             self.closeEditor(editor)
     
+    #=========================================================
+    # Handle history
+    #=========================================================
+    def addEditorToHistory(self, editor):
+        if self._editorHistory and self._editorHistory[self._editorHistoryIndex] == editor:
+            return
+        self._editorHistory.insert(self._editorHistoryIndex, editor)
+        
     #===========================================================================
     # MainWindow Events
     #===========================================================================
@@ -331,6 +396,35 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
                     return
         
     #===========================================================================
+    # MainWindow State
+    #===========================================================================
+    def saveState(self):
+        #Documentos abiertos
+        openDocumentsOnQuit = []
+        for editor in self.editors():
+            if not editor.isNew():
+                openDocumentsOnQuit.append((editor.filePath, editor.cursorPosition()))
+        state = {
+            "self": QtGui.QMainWindow.saveState(self),
+            "dockers": dict(map(lambda dock: (dock.objectName(), dock.saveState()), self.dockers)),
+            "documents": openDocumentsOnQuit,
+            "geometry": self.saveGeometry(),
+        }
+        return state
+
+    def restoreState(self, state):
+        try:
+            map(lambda dock: dock.restoreState(state["dockers"][dock.objectName()]), self.dockers)
+            self.restoreGeometry(state["geometry"])
+            for doc in state["documents"]:
+                self.application.openFile(*doc, mainWindow = self)
+            QtGui.QMainWindow.restoreState(self, state["self"])
+            
+        except (TypeError, ValueError) as e:
+            self.logger.error("Could not restore state for %s. Reason %s" % (self, e))
+
+
+    #===========================================================================
     # Drag and Drop
     #===========================================================================
     def dragEnterEvent(self, event):
@@ -340,7 +434,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     def dropEvent(self, event):
         def collectFiles(paths):
             from glob import glob
-            ''' Recursively collect fileInfos '''
+            '''Recursively collect fileInfos'''
             for path in paths:
                 if os.path.isfile(path):
                     yield path

@@ -6,7 +6,6 @@ from PyQt4 import QtGui, QtCore
 from prymatex.gui import utils
 from prymatex.support.processor import PMXCommandProcessor
 from prymatex.support.snippet import PMXSnippet
-from prymatex.support.command import PMXCommand
 
 class PMXCommandProcessor(PMXCommandProcessor):
     def __init__(self, editor):
@@ -14,7 +13,9 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor = editor
 
     def environment(self, command):
-        environment = self.editor.buildEnvironment(command.buildEnvironment())
+        environment = command.buildEnvironment()
+        environment.update(self.editor.mainWindow.buildEnvironment())
+        environment.update(self.editor.buildEnvironment())
         environment.update(self.baseEnvironment)
         return environment
 
@@ -133,32 +134,16 @@ class PMXCommandProcessor(PMXCommandProcessor):
        
     # Outpus function
     def error(self, context):
-        #TODO: Mover esto a un lugar donde no dependa del processor mostrar un error en el borwser, quiza a la mainWindow
-        #para poder llamarlos como showErrorInBrowser o algo asi :)
         if self.errorCommand:
-            #Prevenir la entrada recursiva
             raise Exception(context.errorValue)
-        from prymatex.support.utils import makeHyperlinks
-        from prymatex.utils import html
-        command = '''
-            source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
-            
-            html_header "An error has occurred while executing command %(name)s"
-            echo -e "<pre>%(output)s</pre>"
-            echo -e "<p>Exit code was: %(exitcode)d</p>"
-            html_footer
-        ''' % {'output': html.escape(context.errorValue),
-               'name': html.escape(context.description()),
-               'exitcode': context.outputType}
-        commandHash = { 'command': command, 
-                           'name': "Error runing %s" % context.description(),
-                          'input': 'none',
-                         'output': 'showAsHTML' }
-        command = PMXCommand(self.editor.application.supportManager.uuidgen(), dataHash = commandHash)
-        command.setBundle(context.bundleItem.bundle)
-        command.setManager(context.bundleItem.manager)
-        self.editor.insertBundleItem(command, errorCommand = True)
-        
+        else:
+            self.editor.mainWindow.showErrorInBrowser(
+                context.description(),
+                context.errorValue,
+                context.outputType,
+                errorCommand = True
+            )
+
     def discard(self, context):
         pass
         
@@ -195,17 +180,12 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor.insertText(context.outputValue)
         
     def insertAsSnippet(self, context):
-        snippetHash = {    'content': context.outputValue, 
-                       'name': context.bundleItem.name,
-                 'tabTrigger': context.bundleItem.tabTrigger,
-              'keyEquivalent': context.bundleItem.keyEquivalent }
-        snippet = PMXSnippet(self.editor.application.supportManager.uuidgen(), dataHash = snippetHash)
-        snippet.setBundle(context.bundleItem.bundle)
-        snippet.setManager(context.bundleItem.manager)
+        snippet = self.editor.application.supportManager.buildAdHocSnippet(context.outputValue, context.bundleItem.bundle, tabTrigger = context.bundleItem.tabTrigger)
         self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
             
     def showAsHTML(self, context):
-        self.editor.mainWindow.browser.setHtml(context.outputValue, context.bundleItem)
+        self.editor.mainWindow.browser.setRunningContext(context)
+        #self.editor.mainWindow.browser.setHtml(context.outputValue, context.bundleItem)
 
     timespanFactor = 1
     def showAsTooltip(self, context):

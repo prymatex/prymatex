@@ -6,15 +6,16 @@ import fnmatch
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex.core.plugin import PMXBaseComponent
 from prymatex.core import exceptions
 from prymatex.core.settings import USER_HOME_PATH, pmxConfigPorperty
 from prymatex.gui.project.models import PMXProjectTreeModel
-from prymatex.gui.project.proxies import PMXProjectTreeProxyModel
+from prymatex.gui.project.proxies import PMXProjectTreeProxyModel, ProjectMenuProxyModel
 from prymatex.gui.project.base import PMXProject
 from prymatex.core.exceptions import ProjectExistsException, FileException
 from prymatex.utils.i18n import ugettext as _
 
-class PMXProjectManager(QtCore.QObject):
+class PMXProjectManager(QtCore.QObject, PMXBaseComponent):
     #Signals
     projectAdded = QtCore.pyqtSignal(object)
     projectRemoved = QtCore.pyqtSignal(object)
@@ -33,11 +34,19 @@ class PMXProjectManager(QtCore.QObject):
     def __init__(self, application):
         QtCore.QObject.__init__(self)
         self.fileManager = application.fileManager
+        self.supportManager = application.supportManager
+
         self.projectTreeModel = PMXProjectTreeModel(self)
-        
+
         self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
-    
+
+        self.projectMenuProxyModel = ProjectMenuProxyModel(self)
+        self.projectMenuProxyModel.setSourceModel(self.application.supportManager.bundleProxyModel)
+
+        self.supportManager.bundleAdded.connect(self.on_supportManager_bundleAdded)
+        self.supportManager.bundleRemoved.connect(self.on_supportManager_bundleRemoved)
+
     @classmethod
     def contributeToSettings(cls):
         return []
@@ -49,6 +58,16 @@ class PMXProjectManager(QtCore.QObject):
             char = char if char in self.VALID_PATH_CARACTERS else '-'
             validPath.append(char)
         return ''.join(validPath)
+
+    def on_supportManager_bundleAdded(self, bundle):
+        for project in self.getAllProjects():
+            if project.namespace is not None and bundle.hasNamespace(project.namespace) and not project.hasBundleMenu(bundle):
+                self.addProjectBundleMenu(project, bundle)
+
+    def on_supportManager_bundleRemoved(self, bundle):
+        for project in self.getAllProjects():
+            if project.namespace is not None and bundle.hasNamespace(project.namespace) and project.hasBundleMenu(bundle):
+                self.removeProjectBundleMenu(project, bundle)
 
     def loadProjects(self):
         for path in self.knownProjects[:]:
@@ -69,11 +88,17 @@ class PMXProjectManager(QtCore.QObject):
     def removeFromKnowProjects(self, project):
         self.knownProjects.remove(project.path)
         self.settings.setValue('knownProjects', self.knownProjects)
+    
+    def buildEnvironment(self):
+        return {}
+    
+    def supportProjectEnvironment(self, project):
+        return self.supportManager.projectEnvironment(project)
 
     #---------------------------------------------------
     # PROJECT CRUD
     #---------------------------------------------------
-    def createProject(self, name, directory, reuseDirectory = True):
+    def createProject(self, name, directory, description = None, reuseDirectory = True):
         """
         Crea un proyecto nuevo lo agrega en los existentes y lo retorna,
         """
@@ -82,7 +107,7 @@ class PMXProjectManager(QtCore.QObject):
             os.makedirs(directory)
         elif not reuseDirectory:
             raise Exception()
-        project = PMXProject(directory, { "name": name })
+        project = PMXProject(directory, { "name": name, "description": description })
         try:
             project.save()
         except ProjectExistsException:
@@ -103,8 +128,7 @@ class PMXProjectManager(QtCore.QObject):
         return project
     
     def updateProject(self, project, **attrs):
-        """Actualiza un proyecto
-        """
+        """Actualiza un proyecto"""
         if len(attrs) == 1 and "name" in attrs and attrs["name"] == item.name:
             #Updates que no son updates
             return item
@@ -132,8 +156,8 @@ class PMXProjectManager(QtCore.QObject):
     #---------------------------------------------------
     def addProject(self, project):
         project.setManager(self)
-        if project.hasBundles() or project.hasThemes():
-            self.application.supportManager.addProjectNamespace(project)
+        # Todo proyecto define un namespace en el manager de support
+        self.application.supportManager.addProjectNamespace(project)
         self.projectTreeModel.appendProject(project)
         self.projectAdded.emit(project)
 
@@ -143,15 +167,15 @@ class PMXProjectManager(QtCore.QObject):
     def removeProject(self, project):
         self.removeFromKnowProjects(project)
         self.projectTreeModel.removeProject(project)
-    
+
     def getAllProjects(self):
         #TODO: devolver un copia o no hace falta?
         return self.projectTreeModel.rootNode.childrenNodes
-        
+
     def openProject(self, project):
         # Cuando abro un proyecto agrego su namespace al support para aportar bundles y themes
         print project.directory
-    
+
     def closeProject(self, project):
         # Cuando cierro un proyecto quito su namespace al support
         print project.directory
@@ -161,7 +185,15 @@ class PMXProjectManager(QtCore.QObject):
         projects.append(project.filePath)
         project.setWorkingSet(workingSet)
         self.projectTreeModel.dataChanged.emit()
-        
+
+    def addProjectBundleMenu(self, project, bundle):
+        project.addBundleMenu(bundle)
+        project.save()
+
+    def removeProjectBundleMenu(self, project, bundle):
+        project.removeBundleMenu(bundle)
+        project.save()
+
     def findProjectForPath(self, path):
         for project in self.getAllProjects():
             if self.application.fileManager.issubpath(path, project.path):

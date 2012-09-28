@@ -6,10 +6,9 @@ from PyQt4 import QtCore, QtGui
 from prymatex import resources
 from prymatex.core import exceptions
 from prymatex.gui import dialogs
-from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
-from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
-from prymatex.gui.about import PMXAboutDialog
-
+from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
+from prymatex.gui.dialogs.project import PMXNewProjectDialog
+from prymatex.gui.dialogs.about import PMXAboutDialog
 
 class MainWindowActions(object):
     
@@ -47,7 +46,7 @@ class MainWindowActions(object):
         self.addEmptyEditor()
 
     @QtCore.pyqtSlot()
-    def on_actionNewFileFromTemplate_triggered(self):
+    def on_actionNewFromTemplate_triggered(self):
         filePath = PMXNewFromTemplateDialog.newFileFromTemplate(parent = self)
 
         if filePath:
@@ -102,13 +101,13 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionCloseAll_triggered(self):
-        for w in self.splitTabWidget.getAllWidgets():
+        for w in self.splitTabWidget.allWidgets():
             self.closeEditor(editor = w)
 
     @QtCore.pyqtSlot()
     def on_actionCloseOthers_triggered(self):
         current = self.currentEditor()
-        for w in self.splitTabWidget.getAllWidgets():
+        for w in self.splitTabWidget.allWidgets():
             if w is not current:
                 self.closeEditor(editor = w)
     
@@ -185,7 +184,7 @@ class MainWindowActions(object):
         """ 
         Shows select tab, and change to selected 
         """
-        tabs = self.splitTabWidget.getAllWidgets()
+        tabs = self.splitTabWidget.allWidgets()
         def tabsToDict(tabs):
             for tab in tabs:
                 image = tab.tabIcon()
@@ -195,7 +194,39 @@ class MainWindowActions(object):
         if index is not None:
             tab = tabs[index]
             self.splitTabWidget.setCurrentWidget(tab)
-            
+    
+    @QtCore.pyqtSlot()
+    def on_actionJumpToTabWindow_triggered(self):
+        if self.currentEditor() is not None:
+            self.currentEditor().setFocus()
+    
+    # Global navigation
+    @QtCore.pyqtSlot()
+    def on_actionLocationBack_triggered(self):
+        editor = self._editorHistory[self._editorHistoryIndex]
+        if editor.previousLocation() or not self._editorHistory or self._editorHistoryIndex >= len(self._editorHistory) - 1:
+            return
+        editor.resetLocationIndex()
+        self._editorHistoryIndex += 1
+        self.setCurrentEditor(self._editorHistory[self._editorHistoryIndex])
+        
+    @QtCore.pyqtSlot()
+    def on_actionLocationForward_triggered(self):
+        editor = self._editorHistory[self._editorHistoryIndex]
+        if editor.nextLocation() or self._editorHistoryIndex == 0:
+            return
+        editor.resetLocationIndex(False)
+        self._editorHistoryIndex -= 1
+        self.setCurrentEditor(self._editorHistory[self._editorHistoryIndex])
+    
+    @QtCore.pyqtSlot()
+    def on_actionLastEditLocation_triggered(self):
+        for index, editor in enumerate(self._editorHistory):
+            if editor.lastLocation():
+                self._editorHistoryIndex = index
+                self.setCurrentEditor(editor)
+                break
+
     #============================================================
     # Bundles Actions
     #============================================================
@@ -256,7 +287,6 @@ class MainWindowActions(object):
         QtGui.qApp.aboutQt()
 
     aboutDialog = None
-            
     @QtCore.pyqtSlot()
     def on_actionAbout_triggered(self):
         # Lazy 
@@ -268,8 +298,7 @@ class MainWindowActions(object):
     def on_actionProjectHomepage_triggered(self):
         import webbrowser
         import prymatex
-        url = getattr(prymatex, '__url__', "https://github.com/D3f0/prymatex")
-        webbrowser.open(url)
+        webbrowser.open(getattr(prymatex, '__url__', "https://github.com/prymatex/prymatex"))
     
     SCREENSHOT_FORMAT = 'png'
     
@@ -305,7 +334,7 @@ class MainWindowActions(object):
         
         ACTION_MAPPING = {
                           self.actionReadDocumentation: prymatex.__source__ + '/wiki',
-                          self.actionReport_Bug: 'https://github.com/prymatex/prymatex/issues?utf8=%E2%9C%93',
+                          self.actionReportBug: 'https://github.com/prymatex/prymatex/issues?utf8=%E2%9C%93',
                           self.actionTranslatePrymatex: 'https://prymatex.com/translate',
                           self.actionProjectHomepage: prymatex.__url__
         }

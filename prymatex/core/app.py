@@ -5,20 +5,22 @@ import os
 import sys
 import logging
 import inspect
+from logging import getLogger
 
 from PyQt4 import QtGui, QtCore, Qt
 
 import prymatex
+from prymatex import resources
 
 from prymatex.core import exceptions
 from prymatex.core.logger import NameFilter
-from prymatex.core.settings import PMXSettings
+from prymatex.core.settings import PMXProfile
 
-from prymatex.utils.decorator import deprecated
+from prymatex.utils.decorators import deprecated
 from prymatex.utils import coroutines
-from prymatex.utils import decorator as deco
 from prymatex.utils.i18n import ugettext as _
-from prymatex.utils.decorator.helpers import printtime
+from prymatex.utils.decorators.helpers import printtime, logtime
+
 
 class PMXApplication(QtGui.QApplication):
     """The application instance.
@@ -37,12 +39,34 @@ class PMXApplication(QtGui.QApplication):
         self.setOrganizationDomain(prymatex.__url__)
         self.setOrganizationName(prymatex.__author__)
 
+        resources.loadPrymatexResources(PMXProfile.PMX_RESOURCES_PATH)
+
+        #Style
+        self.setStyleSheet(resources.APPLICATION_STYLE)
+
         #Connects
         self.aboutToQuit.connect(self.closePrymatex)
 
+    def buildSplashScreen(self):
+        from prymatex.widgets.splash import SplashScreen
+        splash_image = resources.getImage('prymatex-splash')
+        splash = SplashScreen(splash_image)
+        splash.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.SplashScreen)
+        
+        splashFont = QtGui.QFont()
+        splashFont.setFamily("Arial")
+        splashFont.setBold(True)
+        splashFont.setPixelSize(9)
+        splashFont.setStretch(125)
+ 
+        splash.setFont(splashFont);
+        splash.setMask(splash_image.mask())
+        
+        return splash
+        
     def loadGraphicalUserInterface(self):
-        splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/splash.svg"))
-        splash.show()
+        splash = self.buildSplashScreen()
+        #splash.show()
         try:
             self.cacheManager = self.setupCacheManager()        #Cache system Manager
             self.pluginManager = self.setupPluginManager()      #Prepare plugin manager
@@ -67,7 +91,6 @@ class PMXApplication(QtGui.QApplication):
             self.supportManager.loadSupport(splash.showMessage)
             self.settingsDialog.loadSettings()
             
-            self.setupStyleSheet()
             # Creates the Main Window
             self.createMainWindow()
             
@@ -89,7 +112,7 @@ class PMXApplication(QtGui.QApplication):
         
     def switchProfile(self):
         from prymatex.gui.dialogs.profile import PMXProfileDialog
-        profile = PMXProfileDialog.switchProfile(PMXSettings.PMX_PROFILES_FILE)
+        profile = PMXProfileDialog.switchProfile(PMXProfile.PMX_PROFILES_FILE)
         if profile is not None and profile != self.settings.PMX_PROFILE_NAME:
             self.restart()
         
@@ -97,17 +120,21 @@ class PMXApplication(QtGui.QApplication):
         self.exit(self.RESTART_CODE)
 
     def buildSettings(self, profile):
-        if profile is None or (profile == "" and PMXSettings.askForProfile()):
+        if profile is None or (profile == "" and not PMXProfile.PMX_PROFILES_DONTASK):
             #Select profile
             from prymatex.gui.dialogs.profile import PMXProfileDialog
-            profile = PMXProfileDialog.selectProfile(PMXSettings.PMX_PROFILES_FILE)
+            profile = PMXProfileDialog.selectProfile(PMXProfile.PMX_PROFILES_FILE)
         elif profile == "":
             #Find default profile in config
-            profile = PMXSettings.defaultProfile()
+            profile = PMXProfile.PMX_PROFILE_DEFAULT
+            
+        #Settings
         from prymatex.gui.dialogs.settings import PMXSettingsDialog
-        self.settings = PMXSettings(profile)
+        if not profile:
+            raise ValueError("Invalid Profile")
+        self.settings = PMXProfile(profile)
         self.settingsDialog = PMXSettingsDialog(self)
-
+        
     def checkSingleInstance(self):
         """
         Checks if there's another instance using current profile
@@ -122,13 +149,6 @@ class PMXApplication(QtGui.QApplication):
             f = open(self.fileLock, 'w')
             f.write('%s' % self.applicationPid())
             f.close()
-
-    #========================================================
-    # Application Style Sheet
-    #========================================================
-    def setupStyleSheet(self):
-        from prymatex import resources
-        self.setStyleSheet(resources.APPLICATION_STYLE)
         
     #========================================================
     # Logging system and loggers
@@ -182,7 +202,7 @@ class PMXApplication(QtGui.QApplication):
     #========================================================
     # Managers
     #========================================================
-    @deco.logtime
+    @logtime
     def setupSupportManager(self):
         from prymatex.gui.support.manager import PMXSupportManager
         
@@ -199,6 +219,7 @@ class PMXApplication(QtGui.QApplication):
                 'TM_SUPPORT_PATH': manager.environment['PMX_SUPPORT_PATH'],
                 'TM_BUNDLES_PATH': manager.environment['PMX_BUNDLES_PATH'],
                 'TM_THEMES_PATH': manager.environment['PMX_THEMES_PATH'],
+                'TM_PID': self.applicationPid(),
                 #Prymatex 
                 'PMX_APP_NAME': self.applicationName().title(),
                 'PMX_APP_PATH': self.settings.value('PMX_APP_PATH'),
@@ -312,24 +333,13 @@ class PMXApplication(QtGui.QApplication):
     def closePrymatex(self):
         self.logger.debug("Close")
 
-        #Guardar documentos abiertos
-        openDocumentsOnQuit = []
-        for editor in self.mainWindow.editors():
-            if not editor.isNew():
-                openDocumentsOnQuit.append((editor.filePath, editor.cursorPosition()))
-        self.settings.setValue("openDocuments", openDocumentsOnQuit)
-
-        #Guardar geometria de la mainWindow
-        self.settings.setValue("mainWindowGeometry", self.mainWindow.saveGeometry())
-        self.settings.setValue("mainWindowState", self.mainWindow.saveState())
-        
-        self.settings.sync()
+        self.settings.saveState(self.mainWindow)
         os.unlink(self.fileLock)
     
-    def commitData(self):
+    def commitData(self, manager):
         print "Commit data"
         
-    def saveState(self, session_manager):
+    def saveState(self, manager):
         print "saveState"
         pass
     
@@ -347,6 +357,10 @@ class PMXApplication(QtGui.QApplication):
             self.extendComponent(settingClass)
             self.settingsDialog.register(settingClass(componentClass.settings))
 
+    def createWidgetInstance(self, widgetClass, parent):
+        # TODO Que parent sea opcional y pueda ser la mainWindow si no viene seteado
+        return self.pluginManager.createWidgetInstance(widgetClass, parent)
+    
     #========================================================
     # Create Zmq Sockets
     #========================================================
@@ -359,36 +373,30 @@ class PMXApplication(QtGui.QApplication):
     #========================================================
     # Editors and mainWindow handle
     #========================================================
+    def createEditorInstance(self, filePath = None, parent = None):
+        editorClass = filePath is not None and self.pluginManager.findEditorClassForFile(filePath) or self.pluginManager.defaultEditor()
+        
+        if editorClass is not None:
+            return self.createWidgetInstance(editorClass, parent)
+    
     def createMainWindow(self):
         """Creates the windows"""
         from prymatex.gui.mainwindow import PMXMainWindow
 
-        print PMXMainWindow.application
-        
         #TODO: Testeame con mas de una
         for _ in range(1):
-            self.mainWindow = PMXMainWindow(self)
+            mainWindow = PMXMainWindow(self)
 
             #Configure and add dockers
-            self.pluginManager.populateMainWindow(self.mainWindow)
-            self.settings.configure(self.mainWindow)
-
-            geometry = self.settings.value("mainWindowGeometry")
-            state = self.settings.value("mainWindowState")
+            self.pluginManager.populateMainWindow(mainWindow)
+            self.settings.configure(mainWindow)
+            mainWindow.show()
+            self.settings.restoreState(mainWindow)
             
-            if geometry:
-                self.mainWindow.restoreGeometry(geometry)
-            if state:
-                self.mainWindow.restoreState(state)
-
-            self.mainWindow.show()
-            
-            openDocuments = self.settings.value("openDocuments") or []
-
-            for doc in openDocuments:
-                self.openFile(*doc)
-            else:
-                self.mainWindow.addEmptyEditor()
+            if not mainWindow.editors():
+                mainWindow.addEmptyEditor()
+                    
+            self.mainWindow = mainWindow
 
     def showMessage(self, message):
         #Si tengo mainwindow vamos por este camino, sino hacerlo llegar de otra forma
@@ -401,34 +409,50 @@ class PMXApplication(QtGui.QApplication):
         #Para cada mainwindow buscar el editor
         return self.mainWindow, self.mainWindow.findEditorForFile(filePath)
             
-    def getEditorInstance(self, filePath = None, parent = None):
-        return self.pluginManager.createEditor(filePath, parent)
+    def canBeHandled(self, filePath):
+        #from prymatex.utils.pyqtdebug import ipdb_set_trace
+        #ipdb_set_trace()
+        ext = os.path.splitext(filePath)[1].replace('.', '')
+        for fileTypes in  [ syntax.item.fileTypes for syntax in 
+                            self.supportManager.getAllSyntaxes()
+                            if hasattr(syntax.item, 'fileTypes') and
+                            syntax.item.fileTypes ]:
+            
+            if ext in fileTypes:
+                return True
+        return False
     
-    #@printtime
-    def openFile(self, filePath, cursorPosition = (0,0), focus = True):
+    def openFile(self, filePath, cursorPosition = None, focus = True, mainWindow = None, useTasks = True):
         """Open a editor in current window"""
+        filePath = self.fileManager.normcase(filePath)
+        
         if self.fileManager.isOpen(filePath):
             mainWindow, editor = self.findEditorForFile(filePath)
             if editor is not None:
                 mainWindow.setCurrentEditor(editor)
-                editor.setCursorPosition(cursorPosition)
-        else:
-            editor = self.getEditorInstance(filePath, self.mainWindow)
+                if isinstance(cursorPosition, tuple):
+                    editor.setCursorPosition(cursorPosition)
+        elif self.fileManager.exists(filePath):
+            mainWindow = mainWindow or self.mainWindow
+            editor = self.createEditorInstance(filePath, mainWindow)
             project = self.projectManager.findProjectForPath(filePath)
             if project != None:
                 self.logger.debug("The file %s belongs to project %s", (filePath, project.path))
                 editor.setProject(project)
-            def on_editorReady(editor, cursorPosition, focus):
+            def on_editorReady(mainWindow, editor, cursorPosition, focus):
                 def editorReady(openResult):
-                    editor.setCursorPosition(cursorPosition)
-                    self.mainWindow.tryCloseEmptyEditor()
-                    self.mainWindow.addEditor(editor, focus)
+                    if isinstance(cursorPosition, tuple):
+                        editor.setCursorPosition(cursorPosition)
+                    mainWindow.tryCloseEmptyEditor()
+                    mainWindow.addEditor(editor, focus)
                 return editorReady
-            if inspect.isgeneratorfunction(editor.open):
+            if useTasks and inspect.isgeneratorfunction(editor.open):
                 task = self.scheduler.newTask( editor.open(filePath) )
-                task.done.connect( on_editorReady(editor, cursorPosition, focus) )
+                task.done.connect( on_editorReady(mainWindow, editor, cursorPosition, focus) )
+            elif inspect.isgeneratorfunction(editor.open):
+                on_editorReady(mainWindow, editor, cursorPosition, focus)(list(editor.open(filePath)))
             else:
-                on_editorReady(editor, cursorPosition, focus)(editor.open(filePath))
+                on_editorReady(mainWindow, editor, cursorPosition, focus)(editor.open(filePath))
 
     def openDirectory(self, directoryPath):
         raise NotImplementedError("Directory contents should be opened as files here")        

@@ -1,37 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
+import os, sys
 
 from PyQt4 import QtGui, QtCore
 
-from prymatex import resources_rc
-from prymatex.core.cache import memoized
+from prymatex.utils import osextra
+from prymatex.utils.decorators.memoize import memoized
 
 #===============================================================
 # IMAGES AND ICONS
+# http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
 #===============================================================
 
+THEME_ICON_TEST = "document-open"
+
 INTERNAL = {
-    #Bundles
-    "bundle-item-bundle": ":/items/bundles/bundle.png",
-    "bundle-item-template": ":/items/bundles/templates.png",
-    "bundle-item-command": ":/items/bundles/commands.png",
-    "bundle-item-syntax": ":/items/bundles/languages.png",
-    "bundle-item-project": ":/items/bundles/project.png",
-    "bundle-item-preference": ":/items/bundles/preferences.png",
-    "bundle-item-dragcommand": ":/items/bundles/drag-commands.png",
-    "bundle-item-snippet": ":/items/bundles/snippets.png",
-    "bundle-item-macro": ":/items/bundles/macros.png",
-    "bundle-item-templatefile": ":/items/bundles/template-files.png",
-    
-    #Editor Sidebar
-    "foldingtop": ":/editor/sidebar/folding-top.png",
-    "foldingbottom": ":/editor/sidebar/folding-bottom.png",
-    "foldingcollapsed": ":/editor/sidebar/folding-collapsed.png",
-    "foldingellipsis": ":/editor/sidebar/folding-ellipsis.png",
-    "bookmarkflag": ":/editor/sidebar/bookmark-flag.png",
-    
     #Icons
     "save": ":/icons/actions/document-save.png",
     "inserttext": ":/icons/actions/insert-text.png",
@@ -53,34 +37,66 @@ INTERNAL = {
     "closeall":":/icons/actions/project-development-close-all.png",
     "copy":":/icons/actions/edit-copy.png",
     "find":":/icons/actions/edit-find.png",
+}
 
-    # Bullets
-    "bulletred": ":/icons/icons/bullet-red.png",
-    "bulletblue": ":/icons/icons/bullet-blue.png",
-    "bulletgreen": ":/icons/icons/bullet-green.png",
+# TODO: Migrar al uso de la calve por defecto
+STATICMAPPING = (
+    #Splash Image
+    (os.path.normcase("splash.png"), "prymatex-splash"),
     
-    # For Dock
-    "terminal":":/icons/apps/utilities-terminal.png", 
-    "browser":":/icons/apps/internet-web-browser.png",
-    "filemanager":":/icons/apps/system-file-manager.png",
-    "project": ":/icons/actions/project-development.png",
-    "bookmark": ":/icons/actions/rating.png",
-    "symbols": ":/icons/actions/code-context.png",
-    "console": ":/icons/dockers/console.png",
+    # Process
+    (os.path.normcase("groups/red.png"), "porcess-not-running"),
+    (os.path.normcase("groups/yellow.png"), "porcess-starting"),
+    (os.path.normcase("groups/green.png"), "porcess-running"),
+    
+    # Symbols
+    (os.path.normcase("groups/blue.png"), "symbol-class"),
+    (os.path.normcase("groups/green.png"), "symbol-block"),
+    (os.path.normcase("groups/yellow.png"), "symbol-context"),
+    (os.path.normcase("groups/ligthblue.png"), "symbol-function"),
+    (os.path.normcase("groups/brown.png"), "symbol-typedef"),
+    (os.path.normcase("groups/red.png"), "symbol-variable"),
     
     # Scope Root Groups
-    "scope-root-comment": ":/bullets/groups/blue.png",
-    "scope-root-constant": ":/bullets/groups/yellow.png",
-    "scope-root-entity": ":/bullets/groups/ligthblue.png",
-    "scope-root-invalid": ":/bullets/groups/red.png",
-    "scope-root-keyword": ":/bullets/groups/green.png",
-    "scope-root-markup": ":/bullets/groups/violet.png",
-    "scope-root-meta": ":/bullets/groups/darkviolet.png",
-    "scope-root-storage": ":/bullets/groups/gray.png",
-    "scope-root-string": ":/bullets/groups/darkgreen.png",
-    "scope-root-support": ":/bullets/groups/brown.png",
-    "scope-root-variable": ":/bullets/groups/orange.png"
-}
+    (os.path.normcase("groups/blue.png"), "scope-root-comment"),
+    (os.path.normcase("groups/yellow.png"), "scope-root-constant"),
+    (os.path.normcase("groups/ligthblue.png"), "scope-root-entity"),
+    (os.path.normcase("groups/red.png"), "scope-root-invalid"),
+    (os.path.normcase("groups/green.png"), "scope-root-keyword"),
+    (os.path.normcase("groups/violet.png"), "scope-root-markup"),
+    (os.path.normcase("groups/darkviolet.png"), "scope-root-meta"),
+    (os.path.normcase("groups/gray.png"), "scope-root-storage"),
+    (os.path.normcase("groups/darkgreen.png"), "scope-root-string"),
+    (os.path.normcase("groups/brown.png"), "scope-root-support"),
+    (os.path.normcase("groups/orange.png"), "scope-root-variable"),
+    
+    #Editor Sidebar
+    (os.path.normcase("sidebar/folding-top.png"), "foldingtop"),
+    (os.path.normcase("sidebar/folding-bottom.png"), "foldingbottom"),
+    (os.path.normcase("sidebar/folding-collapsed.png"), "foldingcollapsed"),
+    (os.path.normcase("sidebar/folding-ellipsis.png"), "foldingellipsis"),
+    (os.path.normcase("sidebar/bookmark-flag.png"), "bookmarkflag"),
+    
+    #Bundles
+    (os.path.normcase("bundles/bundle.png"), "bundle-item-bundle"),
+    (os.path.normcase("bundles/templates.png"), "bundle-item-template"),
+    (os.path.normcase("bundles/commands.png"), "bundle-item-command"),
+    (os.path.normcase("bundles/languages.png"), "bundle-item-syntax"),
+    (os.path.normcase("bundles/project.png"), "bundle-item-project"),
+    (os.path.normcase("bundles/preferences.png"), "bundle-item-preference"),
+    (os.path.normcase("bundles/drag-commands.png"), "bundle-item-dragcommand"),
+    (os.path.normcase("bundles/snippets.png"), "bundle-item-snippet"),
+    (os.path.normcase("bundles/macros.png"), "bundle-item-macro"),
+    (os.path.normcase("bundles/template-files.png"), "bundle-item-templatefile"),
+    
+    #Editor Sidebar
+    (os.path.normcase("modes/cursors.png"), "modes-cursors"),
+    (os.path.normcase("modes/snippet.png"), "modes-snippet"),
+    (os.path.normcase("modes/insert.png"), "modes-insert"),
+)
+
+RESOURCES = {}
+RESOURCES_READY = False
 
 EXTERNAL = {}
 
@@ -88,6 +104,92 @@ PLUGINS = {}
 
 FileIconProvider = QtGui.QFileIconProvider()
 
+def getImagePath(index):
+    return RESOURCES.get(index) or EXTERNAL.get(index)
+
+@memoized
+def getImage(index):
+    path = getImagePath(index)
+    if path is not None:
+        return QtGui.QPixmap(path)
+
+#http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
+@memoized
+def getIcon(index, default = None):
+    '''
+    Makes the best effort to find an icon for an index.
+    Index can be a path, a Qt resource path, an integer.
+    @return: QIcon instance or None if no icon could be retrieved
+    '''
+    #Try icon in db
+    path = getImagePath(index)
+    if path is not None:
+        return QtGui.QIcon(path)
+    elif isinstance(index, basestring):
+        #Try file path
+        if os.path.isfile(index):
+            return FileIconProvider.icon(QtCore.QFileInfo(index))
+        elif os.path.isdir(index):
+            return FileIconProvider.icon(QtGui.QFileIconProvider.Folder)
+        elif QtGui.QIcon.hasThemeIcon(index):
+            return QtGui.QIcon._fromTheme(index)
+        elif default is not None:
+            return default
+        else:
+            print "falta icono", index
+            return QtGui.QIcon._fromTheme(index)
+    elif isinstance(index, int):
+        #Try icon by int index in fileicon provider
+        return FileIconProvider.icon(index)
+
+#===============================================================
+# LOAD RESOURCES
+#===============================================================
+def buildResourceKey(filename, namePrefixes):
+    resourceKey, _ = os.path.splitext(filename)
+    index = -1
+    while resourceKey in RESOURCES and index:
+        newKey = "-".join(namePrefixes[index:] + [resourceKey])
+        if newKey == resourceKey:
+            raise Exception("Esto no puede ocurrir")
+        index -= 1
+        resourceKey = newKey
+    return resourceKey
+
+def loadResources(resourcesPath, staticMapping = []):
+    resources ={}
+    iconsPath = os.path.join(resourcesPath, "Icons")
+    imagesPath = os.path.join(resourcesPath, "Images")
+    #Load custom images and icons
+    for pixmapPath in [ imagesPath, iconsPath ]:
+        for dirpath, dirnames, filenames in os.walk(pixmapPath):
+            for filename in filenames:
+                iconPath = os.path.join(dirpath, filename)
+                staticNames = filter(lambda (path, names): iconPath.endswith(path), staticMapping)
+                if staticNames:
+                    for name in staticNames:
+                        resources[name[1]] = iconPath
+                else:
+                    name = buildResourceKey(filename, osextra.path.fullsplit(dirpath))
+                    resources[name] = iconPath
+    return resources
+
+def loadPrymatexResources(resourcesPath, themeName = "oxygen"):
+    global RESOURCES, RESOURCES_READY
+    if not RESOURCES_READY:
+        themesPath = os.path.join(resourcesPath, "IconThemes")
+        #Test icon theme:
+        if not QtGui.QIcon.hasThemeIcon(THEME_ICON_TEST):
+            #Add icon theme
+            QtGui.QIcon.setThemeSearchPaths([ themesPath ])
+            QtGui.QIcon.setThemeName(themeName)
+        RESOURCES = loadResources(resourcesPath, STATICMAPPING)
+        
+        #Install fromTheme custom function
+        QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
+        QtGui.QIcon.fromTheme = staticmethod(getIcon)
+        RESOURCES_READY = True
+    
 #===============================================================
 # PRYMATEX STYLES
 # http://developer.qt.nokia.com/doc/qt-4.8/stylesheet-reference.html
@@ -117,38 +219,6 @@ FIND_MATCH_STYLE = 'background-color: #dea;'
 #===============================================================
 # FUNCTIONS
 #===============================================================
-
-def getImagePath(index):
-    return INTERNAL.get(index) or EXTERNAL.get(index)
-
-@memoized
-def getImage(index):
-    path = getImagePath(index)
-    if path is not None:
-        return QtGui.QPixmap(path)
-
-@memoized
-def getIcon(index):
-    '''
-    Makes the best effort to find an icon for an index.
-    Index can be a path, a Qt resource path, an integer.
-    @return: QIcon instance or None if no icon could be retrieved
-    '''
-    #Try icon in db
-    path = getImagePath(index)
-    if path is not None:
-        return QtGui.QIcon(path)
-    elif isinstance(index, basestring):
-        #Try file path
-        if os.path.isfile(index):
-            return FileIconProvider.icon(QtCore.QFileInfo(index))
-        elif os.path.isdir(index):
-            return FileIconProvider.icon(QtGui.QFileIconProvider.Folder)
-        return FileIconProvider.icon(QtGui.QFileIconProvider.File)
-    elif isinstance(index, int):
-        #Try icon by int index in fileicon provider
-        return FileIconProvider.icon(index)
-
 def getFileType(fileInfo):
     return FileIconProvider.type(fileInfo)
 
@@ -165,4 +235,3 @@ class ResourceProvider(dict):
         if index in self:
             return QtGui.QIcon(self[index])
         return getIcon(index)
-    

@@ -4,10 +4,13 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
+from prymatex.support import PMXCommand
+
 from prymatex.models.tree import TreeNode, TreeModel
 from prymatex.models.mimes import PyMimeData
-from prymatex.gui.support import qtadapter
 from prymatex.models.proxies import bisect_key
+
+from prymatex.gui.support import qtadapter
 
 #====================================================
 # Bundle Tree Node
@@ -70,6 +73,8 @@ class PMXBundleTreeNode(TreeNode):
         if parent is not None:
             receiver = lambda item = self: item.manager.bundleItemTriggered.emit(item)
             self.action = self.buildTriggerItemAction(parent, receiver)
+            #Que la accion referencia a su nodo
+            self.action.bundleTreeNode = self
             return self.action
         elif hasattr(self, "action"):
             return self.action
@@ -84,6 +89,19 @@ class PMXBundleTreeNode(TreeNode):
             hash['keyEquivalent'] = qtadapter.buildKeyEquivalent(hash['keyEquivalent'])
         self.item.update(hash)
 
+    def isEditorNeeded(self):
+        return self.isTextInputNeeded() or self.producingOutputText()
+
+    def isTextInputNeeded(self):
+        if isinstance(self.item, PMXCommand):
+            return self.item.input not in [ "none" ]
+        return True
+
+    def producingOutputText(self):
+        if isinstance(self.item, PMXCommand):
+            return self.item.output not in [ "discard", "showAsHTML", "showAsTooltip", "createNewDocument", "openAsNewDocument"]
+        return True
+        
 #====================================================
 # Bundle Tree Model
 #====================================================
@@ -95,7 +113,7 @@ class PMXBundleTreeModel(TreeModel):
         self.manager.bundleItemChanged.connect(self.on_manager_bundleItemChanged)
     
     def on_manager_bundleItemChanged(self, treeNode):
-        treeNode.name = treeNode.item.name
+        treeNode.nodeName = treeNode.item.name
         index = self.createIndex(treeNode.row(), 0, treeNode)
         self.dataChanged.emit(index, index)
     
@@ -468,8 +486,8 @@ class PMXMenuTreeModel(TreeModel):
             elif node.nodeType == PMXBundleMenuTreeNode.SUBMENU:
                 self.add_submenu(node, submenus)
             elif node.nodeType == PMXBundleMenuTreeNode.SEPARATOR:
-                items.append(node.name)
-        submenus[submenuNode.data] = { "items": items, "name": submenuNode.name }
+                items.append(node.nodeName)
+        submenus[submenuNode.data] = { "items": items, "name": submenuNode.nodeName }
         
     def getMainMenu(self):
         items = []
@@ -481,7 +499,7 @@ class PMXMenuTreeModel(TreeModel):
                 items.append(node.data)
                 self.add_submenu(node, submenus)
             elif node.nodeType == PMXBundleMenuTreeNode.SEPARATOR:
-                items.append(node.name)
+                items.append(node.nodeName)
         mainMenu = {"items": items, "submenus": submenus }
         excludedItems = self.excludedModel.getExcludedItems()
         if excludedItems:
@@ -491,7 +509,7 @@ class PMXMenuTreeModel(TreeModel):
     def data(self, index, role):
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.EditRole ]:
             node = self.node(index)
-            return node.name
+            return node.nodeName
         else:
             return None
 
@@ -501,11 +519,11 @@ class PMXMenuTreeModel(TreeModel):
         if role == QtCore.Qt.EditRole:  
             node = self.node(index)
             if node.nodeType == PMXBundleMenuTreeNode.SUBMENU:
-                node.name = value
+                node.nodeName = value
                 self.menuChanged.emit()
             elif node.nodeType == PMXBundleMenuTreeNode.ITEM:
                 self.manager.updateBundleItem(node.data, name = value)
-                node.name = value
+                node.nodeName = value
             self.dataChanged.emit(index, index)
             return True
         return False
@@ -546,12 +564,12 @@ class PMXMenuTreeModel(TreeModel):
             #The node belongs to a exludeListModel
             if dragNode.nodeType == PMXBundleMenuTreeNode.SEPARATOR:
                 #Make a copy of separator
-                separatorNode = PMXBundleMenuTreeNode(dragNode.name, PMXBundleMenuTreeNode.SEPARATOR)
+                separatorNode = PMXBundleMenuTreeNode(dragNode.nodeName, PMXBundleMenuTreeNode.SEPARATOR)
                 parentNode.insertChild(row, separatorNode)
             elif dragNode.nodeType == PMXBundleMenuTreeNode.SUBMENU:
                 #Make a copy of submenu
                 uuid = str(self.manager.uuidgen()).upper()
-                submenuNode = PMXBundleMenuTreeNode(dragNode.name, PMXBundleMenuTreeNode.SUBMENU, uuid)
+                submenuNode = PMXBundleMenuTreeNode(dragNode.nodeName, PMXBundleMenuTreeNode.SUBMENU, uuid)
                 parentNode.insertChild(row, submenuNode)
             elif dragNode.nodeType == PMXBundleMenuTreeNode.ITEM:
                 self.excludedModel.removeMenuItem(dragNode)
@@ -615,7 +633,7 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
     def data(self, index, role):
         if role == QtCore.Qt.DisplayRole:
             node = self.nodes[index.row()]
-            return node.name
+            return node.nodeName
         else:
             return None
     
@@ -677,9 +695,9 @@ class PMXProcessTableModel(QtCore.QAbstractTableModel):
     STATES_STRING = {0: "NotRunning",
                      1: "Starting",
                      2: "Running" }
-    STATES_ICONS = {0: resources.getIcon("bulletred"),
-                    1: resources.getIcon("bulletyellow"),
-                    2: resources.getIcon("bulletgreen") }
+    STATES_ICONS = {0: resources.getIcon("porcess-not-running"),
+                    1: resources.getIcon("porcess-starting"),
+                    2: resources.getIcon("porcess-running") }
                     
     def __init__(self, manager, parent = None): 
         QtCore.QAbstractTableModel.__init__(self, parent)

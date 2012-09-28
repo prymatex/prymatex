@@ -15,6 +15,7 @@ class PMXProjectTreeModel(TreeModel):
         #projectManager is a qObject
         TreeModel.__init__(self, projectManager)
         self.projectManager = projectManager
+        self.fileManager = projectManager.fileManager
         
     def rowCount(self, parent):
         parentNode = self.node(parent)
@@ -25,19 +26,23 @@ class PMXProjectTreeModel(TreeModel):
     def data(self, index, role):
         node = self.node(index)
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            return node.name
+            return node.nodeName
         elif role == QtCore.Qt.DecorationRole:
             return node.icon
 
-    def refreshProjectByPath(self, path):
-        index = self.indexForPath(path)
-        self.refresh(index)
-    
     def indexForPath(self, path):
-        node = self.nodeForPath(path)
-        index = self.createIndex(node.row(), 0, node) if node != None else QtCore.QModelIndex()
-        return index
-        
+        currentIndex = QtCore.QModelIndex()
+        while self.rowCount(currentIndex):
+            goAhead = False
+            for node in self.node(currentIndex).childrenNodes:
+                if self.fileManager.issubpath(path, node.path):
+                    currentIndex = self.createIndex(node.row(), 0, node)
+                    goAhead = True
+                    break
+            if not goAhead:
+                break
+        return currentIndex
+
     #========================================================================
     # Custom methods
     #========================================================================
@@ -54,35 +59,51 @@ class PMXProjectTreeModel(TreeModel):
             child._populated = False
         parentNode._populated = True
 	
-    def refresh(self, index):
-        node = self.node(index)
-        while not os.path.exists(node.path):
-            index = index.parent()
-            node = self.node(index)
-        #TODO: Ver que pasa si llegamos al root, quiere decir que el project no esta mas
-        if node.isdir:
-            self.beginRemoveRows(index, 0, node.childCount() - 1)
-            for child in node.childrenNodes:
-                node.removeAllChild()
-            self.endRemoveRows()
-            self._load_directory(node, index, True)
-            
+    def _update_directory(self, parentNode, parentIndex, notify = False):
+        names = os.listdir(parentNode.path)
+        addNames = filter(lambda name: parentNode.findChildByName(name) is None, names)
+        removeNodes = filter(lambda node: node.nodeName not in names, parentNode.childrenNodes)
+                
+        #Quitamos elementos eliminados
+        for node in removeNodes:
+            if notify:
+                self.beginRemoveRows(parentIndex, node.row(), node.row())
+            parentNode.removeChild(node)
+            if notify:
+                self.endRemoveRows()
+
+        #Agregamos elementos nuevos
+        if notify: 
+            self.beginInsertRows(parentIndex, parentNode.childCount(), parentNode.childCount() + len(addNames) - 1)
+        for name in addNames:
+            node = FileSystemTreeNode(name, parentNode)
+            node._populated = False
+            parentNode.appendChild(node)
+        if notify: 
+            self.endInsertRows()
+
+    def _collect_expanded_subdirs(self, parentNode):
+        subDirs = filter(lambda node: node.isdir and node._populated, parentNode.childrenNodes)
+        collected = []
+        for dirNode in subDirs:
+            collected += self._collect_expanded_subdirs(dirNode)
+        return collected + subDirs
+        
+    def refresh(self, updateIndex):
+        updateNode = self.node(updateIndex)
+        while not updateNode.isRootNode() and not os.path.exists(updateNode.path):
+            updateIndex = updateIndex.parent()
+            updateNode = self.node(updateIndex)
+        if not updateNode.isRootNode() and updateNode.isdir:
+            for node in self._collect_expanded_subdirs(updateNode) + [updateNode]:
+                self._update_directory(node, self.createIndex(node.row(), 0, node), True)
+
+    def refreshPath(self, path):
+        index = self.indexForPath(path)
+        self.refresh(index)
+    
     def nodeForPath(self, path):
-        currentNode = self.rootNode
-        while currentNode.childrenNodes:
-            goAhead = False
-            for node in currentNode.childrenNodes:
-                prefix = os.path.commonprefix([node.path, path])
-                if prefix == path:
-                    return node
-                elif prefix == node.path:
-                    currentNode = node
-                    goAhead = True
-                    break
-            if not goAhead:
-                break
-        if currentNode != self.rootNode:
-            return currentNode
+        return self.node(self.indexForPath)
 
     def projectForPath(self, path):
         for project in self.rootNode.childrenNodes:
@@ -95,13 +116,8 @@ class PMXProjectTreeModel(TreeModel):
             return node.path
     
     def isDir(self, index):
-        try:
-            return index.internalPointer().isdir
-        except AttributeError as _exc:
-            # Not in tree, should check through python 
-            print index.data()
-            return False
-    
+        return self.node(index).isdir
+        
     def appendProject(self, project):
         project._populated = False
         self.beginInsertRows(QtCore.QModelIndex(), self.rootNode.childCount(), self.rootNode.childCount())

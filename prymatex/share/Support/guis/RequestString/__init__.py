@@ -14,12 +14,25 @@ class RequestStringDialog(QtGui.QDialog, Ui_RequestStringDialog, PMXBaseDialog):
         self.setupUi(self)
         
     def setParameters(self, parameters):
-        print parameters
-
+        if 'title' in parameters:
+            self.setWindowTitle(parameters['title'])
+        if 'prompt' in parameters:
+            self.labelPrompt.setText(parameters['prompt'])
+        if 'button1' in parameters:
+            self.pushButton1.setText(parameters['button1'])
+        if 'button2' in parameters:
+            self.pushButton2.setText(parameters['button2'])
+    
+    def on_pushButton1_pressed(self):
+        self.accept()
+    
+    def on_pushButton2_pressed(self):
+        self.close()
+        
     def execModal(self):
         code = self.exec_()
         if code == QtGui.QDialog.Accepted:
-            return self.textValue()
-        return ""
+            return {'returnArgument': self.lineEdit.text()}
+        return {}
         
 dialogClass = RequestStringDialog

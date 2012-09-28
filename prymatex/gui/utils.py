@@ -103,9 +103,11 @@ def extendQMenu(menu, items, useSeparatorName = False):
             action = menu.addSeparator()
             actions.append(action)
         elif isinstance(item, basestring) and item.startswith("--"):
+            name = item[item.rfind("-") + 1:]
             action = menu.addSeparator()
+            action.setObjectName(textToObjectName(name, prefix = "section"))
             if useSeparatorName:
-                action.setText(item[2:])
+                action.setText(name)
             actions.append(action)
         elif isinstance(item, dict) and 'items' in item:
             submenu, subactions = createQMenu(item, menu)
@@ -153,7 +155,7 @@ def chunkSections(items):
     sections = []
     start = 0
     for i in xrange(0, len(items)):
-        if isinstance(items[i], basestring) and items[i].startswith('-'):
+        if isinstance(items[i], basestring) and items[i].startswith('-') and start != i:
             sections.append(items[start:i])
             start = i
     sections.append(items[start:len(items)])
@@ -162,11 +164,12 @@ def chunkSections(items):
 def sectionNumberRange(items, index):
     sections = chunkSections(items)
     section = sections[index]
-    begin = items.index(section[0])
-    end = items.index(section[-1]) + 1
+    begin = items.index(section[0]) if section else 0
+    end = items.index(section[-1]) + 1 if section else 1
     return begin, end
 
 def extendMenuSection(menu, newItems, section = 0, position = None):
+    # TODO: Implementar algo para usar section = None, puedo ponerlo en cualquier lugar del menu con su posicion
     if not isinstance(newItems, list):
         newItems = [ newItems ]
     menuItems = menu.setdefault('items', [])
@@ -184,6 +187,24 @@ def extendMenuSection(menu, newItems, section = 0, position = None):
             position += 1
         newSection = newSection[:position] + newItems + newSection[position:]
     menu["items"] = menuItems[:begin] + newSection + menuItems[end:]
+
+def updateMenu(menuBase, menuUpdates):
+    # TODO Quiza sea mejor que en lugar de usar las tuplas sobreponer un dicionario con otro
+    def find_or_create_submenu(menu, name):
+        items = menu["items"] if isinstance(menu, dict) and "items" in menu else menu.values()
+        for item in items:
+            if isinstance(item, dict) and "title" in item and item["title"] == name:
+                return item
+        newMenu = { "title": name, "items": [] }
+        items.append(newMenu)
+        return newMenu
+
+    for names, update in menuUpdates.iteritems():
+        names = names if isinstance(names, (list, tuple)) else [ names ]
+        menu = reduce(lambda menu, name: find_or_create_submenu(menu, name), names, menuBase)
+        position = update.pop('position', None)
+        section = update.pop('section', 0)
+        extendMenuSection(menu, update, section = section, position = position)
 
 def combineIcons(icon1, icon2, scale = 1):
     newIcon = QtGui.QIcon()

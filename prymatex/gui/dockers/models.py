@@ -51,7 +51,7 @@ class DirectoryTreeNode(TreeNode):
         
     @property
     def path(self):
-        return os.path.join(self.parentNode.path, self.name)
+        return os.path.join(self.parentNode.path, self.nodeName)
     
     @property
     def icon(self):

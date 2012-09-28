@@ -3,11 +3,10 @@
 
 import string
 
-try:
-    from PyQt4 import QtGui
-    from PyQt4.Qt import QKeySequence, Qt
-except:
-    from prymatex.support.qtmock import Qt, QKeySequence
+from PyQt4 import QtGui
+from PyQt4.Qt import QKeySequence, Qt
+
+from prymatex.utils.decorators.memoize import memoized
 from prymatex.support.modmap import get_keymap_table
 '''
     caret, foreground, selection, invisibles, lineHighlight, gutter, background
@@ -84,6 +83,7 @@ def keyboardLayoutKeys(key):
             return (True, key)
     return (shift, key)
 
+@memoized
 def buildKeyEquivalent(sequence):
     nemonic = []
     if sequence & Qt.CTRL:
@@ -121,7 +121,8 @@ def buildKeyEquivalent(sequence):
                     key = unichr(orig)
             nemonic.append(key)
             return u"".join(nemonic)
-    
+
+@memoized    
 def buildKeySequence(nemonic):
     nemonic = list(nemonic)
     sequence = []

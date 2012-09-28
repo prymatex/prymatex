@@ -15,13 +15,13 @@ SIGNALS = dict([(keyname, getattr(signal, keyname)) for keyname in dir(signal) i
 
 class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "F7"
-    ICON = resources.getIcon("symbols")
+    ICON = resources.getIcon("application-x-executable-script")
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
-        self.setWindowTitle(_("Process"))
-        self.setObjectName(_("ProcessDock"))
+        self.setWindowTitle(_("External process"))
+        self.setObjectName(_("ExternalProcessDock"))
         PMXBaseDock.__init__(self)
         self.processTableModel = self.application.supportManager.processTableModel
         self.tableViewProcess = QtGui.QTableView()

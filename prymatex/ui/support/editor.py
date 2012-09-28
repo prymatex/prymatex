@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/support/editor.ui'
 #
-# Created: Thu Jun  7 06:28:45 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Wed Sep 12 18:54:21 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -46,14 +46,20 @@ class Ui_BundleEditor(object):
         self.toolbarLayout.setSpacing(2)
         self.toolbarLayout.setObjectName(_fromUtf8("toolbarLayout"))
         self.pushButtonAdd = QtGui.QPushButton(self.verticalLayoutWidget)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("list-add"))
+        self.pushButtonAdd.setIcon(icon)
         self.pushButtonAdd.setObjectName(_fromUtf8("pushButtonAdd"))
         self.toolbarLayout.addWidget(self.pushButtonAdd)
         self.pushButtonRemove = QtGui.QPushButton(self.verticalLayoutWidget)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("list-remove"))
+        self.pushButtonRemove.setIcon(icon)
         self.pushButtonRemove.setObjectName(_fromUtf8("pushButtonRemove"))
         self.toolbarLayout.addWidget(self.pushButtonRemove)
         spacerItem = QtGui.QSpacerItem(98, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.toolbarLayout.addItem(spacerItem)
         self.pushButtonFilter = QtGui.QPushButton(self.verticalLayoutWidget)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("view-filter"))
+        self.pushButtonFilter.setIcon(icon)
         self.pushButtonFilter.setObjectName(_fromUtf8("pushButtonFilter"))
         self.toolbarLayout.addWidget(self.pushButtonFilter)
         self.treeLayout.addLayout(self.toolbarLayout)
@@ -100,11 +106,8 @@ class Ui_BundleEditor(object):
 
     def retranslateUi(self, BundleEditor):
         BundleEditor.setWindowTitle(_('Bundle Editor'))
-        self.pushButtonAdd.setText(_('+'))
-        self.pushButtonRemove.setText(_('-'))
-        self.pushButtonFilter.setText(_('Filter List'))
+        self.pushButtonFilter.setText(_('Filter'))
         self.labelTitle.setText(_('No item selected'))
         self.labelActivation.setText(_('Activation:'))
         self.labelScopeSelector.setText(_('Scope Selector:'))
 
-from prymatex import resources_rc

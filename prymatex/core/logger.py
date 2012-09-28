@@ -1,4 +1,4 @@
-#!/SRr/bin/env python
+#!/srr/bin/env python
 # -*- coding: utf-8 -*-
 
 import logging

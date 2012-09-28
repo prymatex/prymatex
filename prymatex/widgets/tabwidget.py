@@ -60,6 +60,9 @@ class _TabWidget(QtGui.QTabWidget):
             prune.hide()
             prune.deleteLater()
 
+    def mouseDoubleClickEvent(self, event):
+        self._root._tab_create_request(self)
+        
     def tabRemoved(self, idx):
         """ Reimplemented to update the record of the current tab if it is removed. """
         
@@ -99,7 +102,6 @@ class _DragableTabBar(QtGui.QTabBar):
             self._root._move_right(self.parent(), self.currentIndex())
         else:
             e.ignore()
-
     
     def widgetAtPos(self, pos):
         ''' Returns the widget at position (QPoint)'''

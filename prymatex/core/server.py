@@ -11,7 +11,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
 from prymatex.core.plugin import PMXBaseComponent
-from prymatex.utils.importlib import import_module, import_from_directory
+from prymatex.utils.importlib import import_from_directory
 
 class PrymatexServer(QtCore.QObject, PMXBaseComponent):
     def __init__(self, application):
@@ -42,15 +42,14 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
             raise reason
 
     def loadDialogClass(self, moduleName, directory):
-        module = import_from_directory(directory, moduleName) if directory is not None else import_module(moduleName)
+        # module = import_from_directory(directory, moduleName) if directory is not None else import_module(moduleName)
+        module = import_from_directory(directory, moduleName)
         dialogClass = getattr(module, 'dialogClass')
         self.application.populateComponent(dialogClass)
         return dialogClass
         
     def createDialogInstance(self, dialogClass, mainWindow, async = False):
-        instance = dialogClass(mainWindow)
-        self.application.settings.configure(instance)
-        instance.initialize(mainWindow)
+        instance = self.application.createWidgetInstance(dialogClass, mainWindow)
         if async:
             instanceId = id(instance)
             self.instances[instanceId] = instance
@@ -184,8 +183,19 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
     def alert(self, **kwargs):
         self.sendResult()
     
+    def mate(self, **kwargs):
+        if "paths" in kwargs:
+            for path in kwargs["paths"]:
+                self.application.openFile(path)
+        self.sendResult()
+    
     def open(self, **kwargs):
         self.application.handleUrlCommand(kwargs["url"])
+        self.sendResult()
+
+    def terminal(self, **kwargs):
+        for command in kwargs["commands"]:
+            self.application.mainWindow.terminal.runCommand(command)
         self.sendResult()
 
     def debug(self, **kwargs):

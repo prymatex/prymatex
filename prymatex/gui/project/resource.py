@@ -7,8 +7,7 @@ from prymatex.gui.project.models import PMXPropertyTreeNode
 from prymatex.ui.configure.resource import Ui_ResouceWidget
 
 class PMXResouceWidget(QtGui.QWidget, PMXPropertyTreeNode, Ui_ResouceWidget):
-    """Resouce
-    """
+    """Resouce"""
     NAMESPACE = ""
     TITLE = "Resouce"
     def __init__(self, parent = None):
@@ -22,3 +21,7 @@ class PMXResouceWidget(QtGui.QWidget, PMXPropertyTreeNode, Ui_ResouceWidget):
     
     def edit(self, fileSystemItem):
         self.fileSystemItem = fileSystemItem
+        self.textLabelPath.setText(self.fileSystemItem.path)
+        self.textLabelType.setText(self.fileSystemItem.path)
+        self.textLabelLocation.setText(self.fileSystemItem.path)
+        self.textLabelLastModified.setText(self.fileSystemItem.path)

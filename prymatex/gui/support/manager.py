@@ -8,7 +8,7 @@ import uuid as uuidmodule
 from PyQt4 import QtCore, QtGui
 
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core.cache import memoized
+from prymatex.utils.decorators.memoize import dynamic_memoized
 from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeListModel, PMXThemeStylesTableModel, PMXThemeStyleRow, PMXProcessTableModel
 from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel, PMXTemplateProxyModel, PMXProjectProxyModel
 from prymatex.support.manager import PMXSupportBaseManager
@@ -45,12 +45,19 @@ class PMXBundleMenuGroup(QtCore.QObject):
                 menu.addAction(action)
             elif uuid in submenus:
                 submenu = QtGui.QMenu(submenus[uuid]['name'], parent)
+                
+                #Conectamos el about to show para filtar un poco los items cuando se muestra el menu
+                submenu.aboutToShow.connect(self.on_bundleMenu_aboutToShow)
+                
                 menu.addMenu(submenu)
                 self.buildMenu(submenus[uuid]['items'], submenu, submenus, parent)
 
     def buildBundleMenu(self, bundle):
         menu = QtGui.QMenu(bundle.buildBundleAccelerator())
         menu.ID = id(bundle.mainMenu)
+        
+        #Conectamos el about to show para filtar un poco los items cuando se muestra el menu
+        menu.aboutToShow.connect(self.on_bundleMenu_aboutToShow)
         return menu
 
     def addBundle(self, bundle):
@@ -59,10 +66,10 @@ class PMXBundleMenuGroup(QtCore.QObject):
         # Primero agregarlo a los containers porque estos usan self.menus para ordenar
         self.addToContainers(menu)
         self.menus[bundle] = menu
-    
+
     def menuForBundle(self, bundle):
         return self.menus.get(bundle)
-        
+
     def addToContainers(self, menu):
         currentTitles = sorted(map(lambda menu: menu.title().replace("&","").lower(), self.menus.values()))
         index = bisect(currentTitles, menu.title().replace("&","").lower())
@@ -72,11 +79,17 @@ class PMXBundleMenuGroup(QtCore.QObject):
                 container.insertMenu(currentActions[offset + index], menu)
             else:
                 container.addMenu(menu)
-    
+
     def removeFromContainers(self, menu):
         for container, offset in self.containers:
             container.removeAction(menu.menuAction())
 
+    def on_bundleMenu_aboutToShow(self):
+        menu = self.sender()
+        for action in menu.actions():
+            if hasattr(action, "bundleTreeNode"):
+                action.setDisabled(action.bundleTreeNode.isEditorNeeded() and not self.manager.editorAvailable)
+            
     def on_manager_bundleItemChanged(self, item):
         action = item.triggerItemAction()
         if action is not None:
@@ -86,7 +99,7 @@ class PMXBundleMenuGroup(QtCore.QObject):
                 
     def on_manager_bundleChanged(self, bundle):
         menu = self.menus.get(bundle, None)
-        #ACA un assert no puede ser que no tenga menu el bundle
+        #FIXME un assert no puede ser que no tenga menu el bundle
         if menu is not None:
             title = bundle.buildBundleAccelerator()
             if title != menu.title():
@@ -96,6 +109,7 @@ class PMXBundleMenuGroup(QtCore.QObject):
             if bundle.enabled != menu.menuAction().isVisible():
                 menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
             if id(bundle.mainMenu) != menu.ID:
+                # TODO Ver si no tengo que desconectar las señales de los submenues
                 menu.clear()
                 submenus = bundle.mainMenu['submenus'] if bundle.mainMenu is not None and 'submenus' in bundle.mainMenu else {}
                 items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
@@ -204,15 +218,18 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     def contributeToSettings(cls):
         from prymatex.gui.settings.environment import PMXEnvVariablesWidget
         return [ PMXEnvVariablesWidget ]
-    
+
+    def setEditorAvailable(self, available):
+        self.editorAvailable = available
+
     def appendMenuToBundleMenuGroup(self, menu, offset = None):
         self.bundleMenuGroup.appendMenu(menu, offset)
 
     def menuForBundle(self, bundle):
         return self.bundleMenuGroup.menuForBundle(bundle)
         
-    def buildEnvironment(self):
-        env = PMXSupportBaseManager.buildEnvironment(self)
+    def buildEnvironment(self, systemEnvironment = True):
+        env = PMXSupportBaseManager.buildEnvironment(self, systemEnvironment)
         for var in self.shellVariables:
             if var['enabled']:
                 env[var['variable']] = var['value']
@@ -263,6 +280,12 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
             process.closeWriteChannel()
         else:
             process.start(context.shellCommand, QtCore.QIODevice.ReadOnly)
+
+    def buildAdHocCommand(self, *largs, **kwargs):
+        return PMXBundleTreeNode(PMXSupportBaseManager.buildAdHocCommand(self, *largs, **kwargs))
+
+    def buildAdHocSnippet(self, *largs, **kwargs):
+        return PMXBundleTreeNode(PMXSupportBaseManager.buildAdHocSnippet(self, *largs, **kwargs))
 
     #---------------------------------------------------
     # MANAGED OBJECTS OVERRIDE INTERFACE
@@ -380,14 +403,14 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     #---------------------------------------------------
     # PREFERENCES OVERRIDE INTERFACE
     #---------------------------------------------------
-    @memoized
+    @dynamic_memoized
     def getAllPreferences(self):
         return self.preferenceProxyModel.getAllItems()
     
     #---------------------------------------------------
     # TABTRIGGERS OVERRIDE INTERFACE
     #---------------------------------------------------
-    @memoized
+    @dynamic_memoized
     def getAllTabTriggerItems(self):
         tabTriggers = []
         for item in self.actionItemsProxyModel.getAllItems():
@@ -395,7 +418,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
                 tabTriggers.append(item)
         return tabTriggers
         
-    @memoized
+    @dynamic_memoized
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
         items = []
         for item in self.actionItemsProxyModel.getAllItems():
@@ -406,7 +429,15 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     #---------------------------------------------------
     # KEYEQUIVALENT OVERRIDE INTERFACE
     #---------------------------------------------------
-    @memoized
+    @dynamic_memoized
+    def getAllKeyEquivalentItems(self):
+        keyEquivalent = []
+        for item in self.actionItemsProxyModel.getAllItems() + self.syntaxProxyModel.getAllItems():
+            if item.keyEquivalent != None:
+                keyEquivalent.append(item)
+        return keyEquivalent
+        
+    @dynamic_memoized
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
         items = []
         for item in self.actionItemsProxyModel.getAllItems():

@@ -128,7 +128,9 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
 class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     def __init__(self, editor):
         PMXBaseEditorMode.__init__(self, editor)
-        self.helper = helpers.MultiCursorHelper()
+        # TODO: Buscar una forma mejor de obtener o trabajar con este helper en el modo, quiza filtarndo por clase en el evento
+        self.helper = helpers.MultiCursorHelper(editor)
+        self.helper.initialize(editor)
         self.cursors = []
         self.selectedCursors = []
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
@@ -379,9 +381,9 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     def keyPressEvent(self, event):
         if bool(event.modifiers() & QtCore.Qt.ControlModifier):
             self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
-        if self.helper.accept(self.editor, event):
+        if self.helper.accept(event):
             cursor = self.cursors[0] if event.modifiers() & QtCore.Qt.ShiftModifier else self.cursors[-1]
-            self.helper.execute(self.editor, event, cursor)
+            self.helper.execute(event, cursor)
         elif event.key() == QtCore.Qt.Key_Escape:
             #Deprecated usar una lista de cursores ordenados para tomar de [0] y [-1]
             scursor = min(self.cursors, key = lambda cursor: cursor.position())
@@ -496,7 +498,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         for columnIndex in range(self.completionModel().sourceModel().columnCount()):
             width += self.popup().sizeHintForColumn(columnIndex)
         self.popupView.setMinimumWidth(width)
-        
+      
     def hasSource(self, source):
         return source in self.activeSources
         
@@ -510,6 +512,12 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
 
     def setActivatedCallback(self, callback):
         self.activatedCallback = callback
+
+    def setSource(self, source):
+        self.activeSources.append(source)
+        self.currentSource = source
+        self.completionModel().sourceModel().setSuggestions(self.completerSuggestions[source])
+        self.fixPopupViewSize()
 
     def setSuggestions(self, suggestions, source):
         self.completerSuggestions[source] = suggestions

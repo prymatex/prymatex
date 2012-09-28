@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/profile.ui'
 #
-# Created: Thu May 10 16:19:51 2012
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Mon Sep 24 20:41:18 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -33,12 +33,18 @@ class Ui_ProfileDialog(object):
         self.verticalLayout_2 = QtGui.QVBoxLayout()
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.buttonCreate = QtGui.QPushButton(ProfileDialog)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("list-add-user"))
+        self.buttonCreate.setIcon(icon)
         self.buttonCreate.setObjectName(_fromUtf8("buttonCreate"))
         self.verticalLayout_2.addWidget(self.buttonCreate)
         self.buttonRename = QtGui.QPushButton(ProfileDialog)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("user-properties"))
+        self.buttonRename.setIcon(icon)
         self.buttonRename.setObjectName(_fromUtf8("buttonRename"))
         self.verticalLayout_2.addWidget(self.buttonRename)
         self.buttonDelete = QtGui.QPushButton(ProfileDialog)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("list-remove-user"))
+        self.buttonDelete.setIcon(icon)
         self.buttonDelete.setObjectName(_fromUtf8("buttonDelete"))
         self.verticalLayout_2.addWidget(self.buttonDelete)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
@@ -59,9 +65,13 @@ class Ui_ProfileDialog(object):
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem1)
         self.buttonExit = QtGui.QPushButton(ProfileDialog)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("application-exit"))
+        self.buttonExit.setIcon(icon)
         self.buttonExit.setObjectName(_fromUtf8("buttonExit"))
         self.horizontalLayout_2.addWidget(self.buttonExit)
         self.buttonStartPrymatex = QtGui.QPushButton(ProfileDialog)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("system-run"))
+        self.buttonStartPrymatex.setIcon(icon)
         self.buttonStartPrymatex.setObjectName(_fromUtf8("buttonStartPrymatex"))
         self.horizontalLayout_2.addWidget(self.buttonStartPrymatex)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
@@ -79,4 +89,3 @@ class Ui_ProfileDialog(object):
         self.buttonExit.setText(_('Exit'))
         self.buttonStartPrymatex.setText(_('Start Prymatex'))
 
-from prymatex import resources_rc

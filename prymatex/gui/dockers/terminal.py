@@ -14,7 +14,8 @@ from prymatex.utils.i18n import ugettext as _
 QTERMWIDGET_IMPORT_SUGGESTOIN = '''
 QTermWidget disabled because of:
 {}
-Please install QTermWidget. Please note QTermWidget consists in a C++ with Python binding.
+Please install QTermWidget. Please note QTermWidget consists 
+in a C++ with Python binding.
 Get/Update it at https://github.com/prymatex/qtermwidget
 '''
 
@@ -25,7 +26,7 @@ class PMXTabTerminals(QtGui.QTabWidget):
         self.setupCornerWidget()
         self.setupSignals()
         self.setTabsClosable(True)
-        self.setMinimumHeight(200)
+        #self.setMinimumHeight(200)
     
     def setupSignals(self):    
         self.tabCloseRequested.connect(lambda index, s = self: s.removeTab(index))
@@ -65,11 +66,18 @@ class PMXTabTerminals(QtGui.QTabWidget):
         self.pushConfigTerminal = QtGui.QPushButton("C")
         
         #self.pushConfigTerminal.setIcon(getIcon('preference'))
-        self.pushConfigTerminal.setObjectName('pushConfigTerminal')
-        self.pushConfigTerminal.setToolTip('Configure terminal')
-        self.pushConfigTerminal.setFlat(True)
-        layout.addWidget(self.pushConfigTerminal)
+        # self.pushConfigTerminal.setObjectName('pushConfigTerminal')
+        # self.pushConfigTerminal.setToolTip('Configure terminal')
+        # self.pushConfigTerminal.setFlat(True)
+        # layout.addWidget(self.pushConfigTerminal)
+        self.cornerMenuButton = QtGui.QPushButton()        
+        self.cornerMenuButtonMenu = QtGui.QMenu()
+        self.cornerMenuButton.setMenu(self.cornerMenuButtonMenu)
+        self.cornerMenuButtonMenu.addAction("Alfa")
+        self.cornerMenuButtonMenu.addAction("Beta")
+        self.cornerMenuButtonMenu.addAction("Gama")
         
+        layout.addWidget(self.cornerMenuButton)
         
         # Close
         self.pushCloseTerminal = QtGui.QPushButton()
@@ -198,6 +206,16 @@ class PMXTabTerminals(QtGui.QTabWidget):
             return
         super(PMXTabTerminals, self).mousePressEvent(event)
     
+    def buildSingalMenu(self, process_pid):
+        '''Creates a singal with add hock menu events'''
+        menu = QtGui.QMenu(_('Send &Singal'))
+        # Signals
+        
+        
+    def sendSignalToCurrentProcess(self):
+        pass
+    
+    
     def quitTab(self, index = None):
         if index is None:
             index = self.currentIndex()
@@ -216,7 +234,7 @@ class PMXTabTerminals(QtGui.QTabWidget):
     
 class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "F4"
-    ICON = resources.getIcon("terminal")
+    ICON = resources.getIcon("utilities-terminal")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
     #=======================================================================
@@ -242,9 +260,7 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.setObjectName(_("TerminalDock"))
         self.tabTerminals = PMXTabTerminals(self)
         self.setWidget(self.tabTerminals)
-        self.setupSocket()
         self.installEventFilter(self)
-    
     
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
@@ -258,28 +274,6 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
                 return
         return super(PMXTerminalDock, self).eventFilter(obj, event)
     
-    #====================================================
-    # ZMQ External actions
-    #====================================================
-    def setupSocket(self):
-        self.socket = self.application.zmqSocket(zmq.REP, "Terminal")
-        self.socket.readyRead.connect(self.socketReadyRead)
-    
-    def socketReadyRead(self):
-        command = self.socket.recv_pyobj()
-        name = command.get("name")
-        args = command.get("args", [])
-        kwargs = command.get("kwargs", {})
-
-        method = getattr(self, name)
-        method(*args, **kwargs)
-        self.sendResult()
-        
-    def sendResult(self, value = None):
-        value = str(value) if value is not None else "ok"
-        #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}
-        self.socket.send_pyobj({ "result": value })
-
     #========================================================
     # Commands
     #========================================================
@@ -288,10 +282,7 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
             self.show()
         self.raise_()
         self.terminal.sendText("%s\n" % command)
-        
-    def chdir(self, directory):
-        self.runCommand('cd "%s"' % directory)
-        
+
     @property
     def terminal(self):
         return self.widget().currentWidget()
@@ -301,10 +292,8 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
         from prymatex.gui.settings.terminal import PMXTerminalSettings
         return [ PMXTerminalSettings ]
     
-    
-    
     def showEvent(self, event):
-        self.widget().setFocus()
+        self.terminal.setFocus()
         
 #===============================================================================
 # Signals

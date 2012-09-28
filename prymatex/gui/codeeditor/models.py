@@ -15,7 +15,6 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
     def __init__(self, editor): 
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
-        #self.editor.textChanged.connect(self.on_editor_textChanged)
         self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
         self.blocks = []
         
@@ -50,6 +49,9 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
             return "%d - %s" % (block.blockNumber() + 1, block.text().strip())
         elif role == QtCore.Qt.DecorationRole:
             return resources.getIcon('bookmarkflag')
+
+    def lineNumbers(self):
+        return map(lambda block: block.lineNumber(), self.blocks)
 
     def toggleBookmark(self, block):
         try:
@@ -95,20 +97,25 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         self.logger = editor.application.getLogger('.'.join([self.__class__.__module__, self.__class__.__name__]))
         self.symbolChanged = False
         self.editor.textChanged.connect(self.on_editor_textChanged)
+        self.editor.beforeOpen.connect(self.on_editor_beforeOpen)
+        self.editor.afterOpen.connect(self.on_editor_afterOpen)
         self.blocks = []
         self.icons = {
-            "class": resources.getIcon("bulletred"),
-            "block": resources.getIcon("bulletblue"),
-            "context": resources.getIcon("bulletpink"),
-            "function": resources.getIcon("bulletblue"),
-            "typedef": resources.getIcon("bulletyellow"),
-            "variable": resources.getIcon("bulletgreen")
+            "class": resources.getIcon("symbol-class"),
+            "block": resources.getIcon("symbol-block"),
+            "context": resources.getIcon("symbol-context"),
+            "function": resources.getIcon("symbol-function"),
+            "typedef": resources.getIcon("symbol-typedef"),
+            "variable": resources.getIcon("symbol-variable")
         }
         
-    def _purge_blocks(self):
-        def validSymbolBlock(block):
-            return block.userData() is not None and block.userData().symbol != None
-        self.blocks = filter(validSymbolBlock, self.blocks)
+    def on_editor_afterOpen(self):
+        self.editor.textChanged.disconnect(self.on_editor_textChanged)
+        
+    def on_editor_beforeOpen(self):
+        self.editor.textChanged.connect(self.on_editor_textChanged)
+        self.layoutChanged.emit()
+        self.symbolChanged = False
         
     def on_editor_textChanged(self):
         if self.symbolChanged:
@@ -117,6 +124,11 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
             self.layoutChanged.emit()
             self.symbolChanged = False
 
+    def _purge_blocks(self):
+        def validSymbolBlock(block):
+            return block.userData() is not None and block.userData().symbol != None
+        self.blocks = filter(validSymbolBlock, self.blocks)
+        
     def addSymbolBlock(self, block):
         if block not in self.blocks:
             indexes = map(lambda block: block.blockNumber(), self.blocks)

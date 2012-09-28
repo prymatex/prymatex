@@ -133,8 +133,7 @@ class PMXMessageOverlay(QtGui.QLabel, PMXBaseOverlay):
             x = parentRect.width() - self.width() - self.paddingLeft
             y = parentRect.height() - self.height() - self.paddingBottom
         self.setGeometry(x, y, self.width(), self.height())
-        
-    
+
     def resizeEvent(self, event):
         QtGui.QLabel.resizeEvent(self, event)
         self.updatePosition()

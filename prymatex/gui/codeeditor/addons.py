@@ -27,23 +27,14 @@ class CodeEditorObjectAddon(QtCore.QObject, PMXBaseEditorAddon):
 class CompleterAddon(CodeEditorObjectAddon):
     def __init__(self, parent):
         CodeEditorObjectAddon.__init__(self, parent)
-        self.positionCounter = []
 
     def initialize(self, editor):
         CodeEditorObjectAddon.initialize(self, editor)
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
-        if not event.modifiers() and RE_CHAR.match(event.text()):
-            if not self.positionCounter or self.positionCounter[-1] + 1 == self.editor.textCursor().position():
-                self.positionCounter.append(self.editor.textCursor().position())
-                if len(self.positionCounter) == 3:
-                    self.editor.runCompleter()
-                    self.positionCounter = []
-            else:
-                self.positionCounter = []
-        elif self.positionCounter:
-            self.positionCounter = []
+        if event.text() and self.editor.currentWord(direction = "left", search = False)[0]:
+            self.editor.showCachedCompleter()
         
 class SmartUnindentAddon(CodeEditorObjectAddon):
     def initialize(self, editor):
@@ -64,6 +55,7 @@ class SmartUnindentAddon(CodeEditorObjectAddon):
 class SpellCheckerAddon(CodeEditorObjectAddon):
     def __init__(self, parent):
         CodeEditorObjectAddon.__init__(self, parent)
+        self.spellingOnType = False
         self.wordCursors = []
         self.currentSpellTask = None
         self.setupSpellChecker()
@@ -72,9 +64,32 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
         CodeEditorObjectAddon.initialize(self, editor)
         if self.dictionary is not None:
             editor.registerTextCharFormatBuilder("#spell", self.textCharFormat_spell_builder)
-            editor.afterOpened.connect(self.on_editor_afterOpened)
+            editor.syntaxReady.connect(self.on_editor_syntaxReady)
             self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
 
+    @classmethod
+    def contributeToMainMenu(cls):
+        def on_actionSpellingOnType_toggled(editor, checked):
+            instance = editor.addonByClass(cls)
+            instance.spellingOnType = checked
+
+        def on_actionSpellingOnType_testChecked(editor):
+            instance = editor.addonByClass(cls)
+            return instance.spellingOnType
+        
+        baseMenu = "Edit"
+        menuEntry = {'title': 'Spelling',
+                 'items': [
+                    {'title': 'Show Spelling'},
+                    {'title': 'Check Spelling'},
+                    {'title': 'Check Spelling as You Type',
+                      'callback': on_actionSpellingOnType_toggled,
+                      'checkable': True,
+                      'testChecked': on_actionSpellingOnType_testChecked
+                    }
+                ]}
+        return { baseMenu: menuEntry }
+        
     def contributeToContextMenu(self, cursor):
         items = []
         cursors = filter(lambda c: c.selectionStart() <= cursor.selectionStart() <= cursor.selectionEnd() <= c.selectionEnd(), self.wordCursors)
@@ -105,7 +120,9 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
         return format
 
     def spellWordsForBlock(self, block):
-        spellRange = filter(lambda ((start, end), p): p.spellChecking,  block.userData().preferences)
+        #TODO: Proveer algo de esto directamente desde el editor
+        spellRange = filter(lambda ((start, end), p): p.spellChecking, 
+            map(lambda ((start, end), scope): ((start, end), self.editor.preferenceSettings(scope)), block.userData().scopeRanges()))
         for ran, p in spellRange:
             wordRangeList = block.userData().wordsRanges(ran[0], ran[1])
             for (start, end), word, group in wordRangeList:
@@ -133,7 +150,7 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
     def on_actionSpell_toggled(self, cursor):
         print cursor.selectedText()
         
-    def on_editor_afterOpened(self):
+    def on_editor_syntaxReady(self):
         self.currentSpellTask = self.application.scheduler.newTask(self.spellCheckAllDocument())
         def on_spellReady():
             self.currentSpellTask = None

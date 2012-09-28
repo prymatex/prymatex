@@ -12,9 +12,9 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.dockers.proxies import PMXFileSystemProxyModel
 from prymatex.gui.utils import createQMenu
 from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
-from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
+from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
-from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
+from prymatex.gui.dialogs.project import PMXNewProjectDialog
 
 #==============================================================
 # TODO: Migrar esta validacion para el rename al filemanager
@@ -76,7 +76,7 @@ class PMXFileSystemItemDelegate(QtGui.QItemDelegate):
 
 class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks, PMXBaseDock):
     SHORTCUT = "Shift+F8"
-    ICON = resources.getIcon("filemanager")
+    ICON = resources.getIcon("system-file-manager")
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
     
     #=======================================================================

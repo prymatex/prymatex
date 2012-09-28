@@ -5,6 +5,8 @@ import sys
 
 from PyQt4 import QtCore, QtGui
 
+#TODO: Refactor del paquete plugin, por un nombre mas de base
+
 class PMXBaseComponent(object):
     def initialize(self):
         raise NotImplemented
@@ -20,11 +22,14 @@ class PMXBaseComponent(object):
     def contributeToMainMenu(cls):
         return {}
 
+    def buildEnvironment(self, **kwargs):
+        return {}
+
 class PMXBaseWidgetComponent(PMXBaseComponent):
-    KEY_HELPERS = {}
     def __init__(self):
         self.overlays = []
         self.addons = []
+        self.keyHelpers = {}
             
     def initialize(self, mainWindow):
         self.mainWindow = mainWindow
@@ -32,6 +37,8 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
             overlay.initialize(self)
         for addon in self.addons:
             addon.initialize(self)
+        for keyHelpers in self.keyHelpers.values():
+            map(lambda keyHelper: keyHelper.initialize(self), keyHelpers)
 
     def updateOverlays(self):
         for overlay in self.overlays:
@@ -50,30 +57,41 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
         return addons[0]
 
     # Helpers api
-    @classmethod
-    def addKeyHelper(cls, helper):
-        helpers = cls.KEY_HELPERS.setdefault(helper.KEY, [])
+    def addKeyHelper(self, helper):
+        helpers = self.keyHelpers.setdefault(helper.KEY, [])
         helpers.append(helper)
 
+    def keyHelperByClass(self, klass):
+        keyHelper = filter(lambda keyHelper: isinstance(keyHelper, klass), self.keyHelpers)
+        #TODO: Solo uno
+        return keyHelper[0]
+        
     def findHelpers(self, key):
-        helpers = self.KEY_HELPERS[Key_Any][:]
-        return helpers + self.KEY_HELPERS.get(key, [])
+        helpers = []
+        if Key_Any in self.keyHelpers:
+            helpers += self.keyHelpers[Key_Any]
+        helpers += self.keyHelpers.get(key, [])
+        return helpers
 
-    #TODO: Poder filtrar que key helpers no quiero que corra o otra cosa
-    def runKeyHelper(self, key):
-        runHelper = False
-        for helper in self.findHelpers(key):
-            runHelper = helper.accept(self, key)
-            if runHelper:
-                helper.execute(self, key)
-                break
-        return runHelper
-
+    def runKeyHelper(self, *largs, **kwargs):
+        raise NotImplemented
+        
     @classmethod
     def contributeToMainMenu(cls, addonClasses):
         return PMXBaseComponent.contributeToMainMenu()
         
+    def saveState(self):
+        """Returns a Python dictionary containing the state of the editor."""
+        return {}
+    
+    def restoreState(self, state):
+        """Restore the state from the given state (returned by a previous call to saveState())."""
+        pass
+    
 class PMXBaseOverlay(object):
+    def __init__(self, widget):
+        pass
+        
     def initialize(self, widget):
         pass
     
@@ -83,12 +101,23 @@ class PMXBaseOverlay(object):
     def updateOverlay(self):
         pass
 
-class PMXBaseAddon(PMXBaseComponent):
+class PMXBaseAddon(object):
+    def __init__(self, widget):
+        pass
+        
     def initialize(self, widget):
         pass
     
     def finalize(self):
         pass
+
+    @classmethod
+    def contributeToSettings(cls):
+        return []
+
+    @classmethod
+    def contributeToMainMenu(cls):
+        return {}
 
     def contributeToContextMenu(self):
         return []
@@ -96,9 +125,18 @@ class PMXBaseAddon(PMXBaseComponent):
 Key_Any = 0
 class PMXBaseKeyHelper(object):
     KEY = Key_Any
-    def accept(self, widget, key):
+    def __init__(self, widget):
+        pass
+        
+    def initialize(self, widget):
+        pass
+    
+    def finalize(self):
+        pass
+
+    def accept(self, key):
         return self.KEY == key
     
-    def execute(self, widget, key):
+    def execute(self, key):
         pass
 

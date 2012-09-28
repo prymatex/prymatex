@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/emergencytrace.ui'
 #
-# Created: Thu May 10 16:19:50 2012
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Wed Sep 12 18:54:21 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -63,4 +63,3 @@ class Ui_TracebackDialog(object):
         self.pushCopy.setText(_('&Copy'))
         self.pushClose.setText(_('&Close'))
 
-from prymatex import resources_rc

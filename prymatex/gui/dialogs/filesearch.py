@@ -112,7 +112,7 @@ class PMXFileSearchDialog(QtGui.QDialog, Ui_SearchDialog):
         directories = []
         if self.radioButtonWorkspace.isChecked():
             for project in self.application.projectManager.getAllProjects():
-                self.model.addGroup(project.name, project.directory)
+                self.model.addGroup(project.nodeName, project.directory)
                 directories.append(project.directory)
         self.fileSearchThread.searchInFiles(directories, filters, searchPattern, recursive, byPhrase)
         

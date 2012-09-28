@@ -12,17 +12,18 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex import resources
             
 class PMXStatusBar(QtGui.QStatusBar):
-    def __init__(self, parent):
-        QtGui.QStatusBar.__init__(self, parent)
+    def __init__(self, mainWindow):
+        QtGui.QStatusBar.__init__(self, mainWindow)
+        mainWindow.currentEditorChanged.connect(self.on_currentEditorChanged)
         self.statusBars = []
         self.activeBars = []
         self.customActions = {}
-        
+
     def addPermanentWidget(self, widget):
         self.statusBars.append(widget)
         QtGui.QStatusBar.addPermanentWidget(self, widget, 1)
     
-    def setCurrentEditor(self, editor):
+    def on_currentEditorChanged(self, editor):
         self.activeBars = []
         if editor is None:
             #Propagate and hide

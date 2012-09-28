@@ -4,11 +4,9 @@
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import QColor
 
-from prymatex.core.plugin.editor import PMXBaseEditorAddon
 from prymatex import resources
-from logging import getLogger
-
-logger = getLogger(__name__)
+from prymatex.core.plugin.editor import PMXBaseEditorAddon
+from prymatex.gui.codeeditor.addons import HighlightCurrentSelectionAddon
 
 class PMXSideBar(QtGui.QWidget):
     updateRequest = QtCore.pyqtSignal()
@@ -144,12 +142,13 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
             instance = editor.addonByClass(cls)
             return instance.isVisible()
         
+        baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
         menuEntry = {'title': "Line Numbers",
             'callback': on_actionShowLineNumbers_toggled,
             'shortcut': 'F10',
             'checkable': True,
             'testChecked': on_actionShowLineNumbers_testChecked }
-        return [ menuEntry ]
+        return { baseMenu: menuEntry }
 
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
@@ -207,7 +206,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
             if v1 - v2 < 35:
                 v1 = 255 if h2 < 128 else 0
                 color = QtGui.QColor.fromHsv(h1, s1, v1)
-                logger.debug("Changing foreground color to %s" % str(color.getRgb()))  
+                self.editor.logger.debug("Changing foreground color to %s" % str(color.getRgb()))  
         self.__foreground = color
     
     __background = QtGui.QColor()
@@ -248,12 +247,13 @@ class BookmarkSideBarAddon(SideBarWidgetAddon):
             instance = editor.addonByClass(cls)
             return instance.isVisible()
         
+        baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
         menuEntry = {'title': "Bookmarks",
             'callback': on_actionShowBookmarks_toggled,
             'shortcut': 'Alt+F10',
             'checkable': True,
             'testChecked': on_actionShowBookmarks_testChecked }
-        return [ menuEntry ]
+        return { baseMenu: menuEntry} 
 
     def paintEvent(self, event):
         font_metrics = QtGui.QFontMetrics(self.editor.font)
@@ -317,12 +317,13 @@ class FoldingSideBarAddon(SideBarWidgetAddon):
             instance = editor.addonByClass(cls)
             return instance.isVisible()
         
+        baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
         menuEntry = {'title': 'Foldings',
             'callback': on_actionShowFoldings_toggled,
             'shortcut': 'Shift+F10',
             'checkable': True,
             'testChecked': on_actionShowFoldings_testChecked }
-        return [ menuEntry ]
+        return {baseMenu: menuEntry} 
 
     def paintEvent(self, event):
         font_metrics = QtGui.QFontMetrics(self.editor.font)
@@ -372,3 +373,85 @@ class FoldingSideBarAddon(SideBarWidgetAddon):
                 self.editor.codeFoldingUnfold(block)
             else:
                 self.editor.codeFoldingFold(block)
+
+class SelectionSideBarAddon(SideBarWidgetAddon):
+    ALIGNMENT = QtCore.Qt.AlignRight
+    
+    def __init__(self, parent):
+        SideBarWidgetAddon.__init__(self, parent)
+        self.setFixedWidth(10)
+        
+    def initialize(self, editor):
+        SideBarWidgetAddon.initialize(self, editor)
+        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
+        self.editor.themeChanged.connect(self.updateColours)
+        # TODO: Mejorar esto, es muy feo
+        self.highlightCurrentSelectionAddon = self.editor.addonByClass(HighlightCurrentSelectionAddon)
+        editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
+        
+    def updateColours(self):
+        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
+        self.repaint(self.rect())
+    
+    def on_editor_cursorPositionChanged(self):
+        self.update()
+
+    @classmethod
+    def contributeToMainMenu(cls):
+        def on_actionShowSelection_toggled(editor, checked):
+            instance = editor.addonByClass(cls)
+            instance.setVisible(checked)
+
+        def on_actionShowSelection_testChecked(editor):
+            instance = editor.addonByClass(cls)
+            return instance.isVisible()
+        
+        baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
+        menuEntry = {'title': 'Selection',
+            'callback': on_actionShowSelection_toggled,
+            'shortcut': 'Shift+F10',
+            'checkable': True,
+            'testChecked': on_actionShowSelection_testChecked }
+        return {baseMenu: menuEntry} 
+
+    def visibleBlockCount(self):
+        # TODO esto se puede hacer sin contar, haciendo unas cuentas
+        block = self.editor.firstVisibleBlock()
+        viewport_offset = self.editor.contentOffset()
+        page_bottom = self.editor.viewport().height()
+        line_count = 0
+        while block.isValid():
+            line_count += 1
+            position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
+            if position.y() > page_bottom:
+                break
+            block = block.next()
+        return line_count
+
+    def paintEvent(self, event):
+        font_metrics = QtGui.QFontMetrics(self.editor.font)
+        page_bottom = self.editor.viewport().height()
+        
+        lineHeight = font_metrics.height()
+        totalBlockCount = self.editor.document().blockCount()
+        visibleBlockCount = self.visibleBlockCount()
+        
+        rectHeight = visibleBlockCount * lineHeight / totalBlockCount
+        rectHeight = rectHeight if rectHeight else 1
+        
+        painter = QtGui.QPainter(self)
+        painter.fillRect(self.rect(), self.background)
+
+        block = self.editor.firstVisibleBlock()
+        viewport_offset = self.editor.contentOffset()
+        
+        for cursor in self.highlightCurrentSelectionAddon.highlightCursors:
+            y = cursor.block().blockNumber()
+            painter.fillRect(0, y * rectHeight, 10, rectHeight, self.editor.colours['selection'])
+
+        painter.end()
+        QtGui.QWidget.paintEvent(self, event)
+        
+    def mousePressEvent(self, event):
+        block = self.translatePosition(event.pos())
+        print block

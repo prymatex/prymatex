@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>terminal "cd $TM_DIRECTORY"
+if [ -n "$TM_PROJECT_PATH" ]; then
+	if [  -f "$TM_PROJECT_PATH/Support/lib/bash_init.sh" ]; then
+		terminal "source $TM_PROJECT_PATH/Support/lib/bash_init.sh"
+	fi
+fi
+</string>
+	<key>input</key>
+	<string>none</string>
+	<key>name</key>
+	<string>Set in terminal</string>
+	<key>output</key>
+	<string>discard</string>
+	<key>uuid</key>
+	<string>44480E58-0425-11E2-8E7F-001E4C8CBB6E</string>
+</dict>
+</plist>

@@ -12,6 +12,7 @@ from prymatex.ui.support.bundle import Ui_Menu
 from prymatex.ui.support.templatefile import Ui_TemplateFile
 from prymatex.ui.support.preference import Ui_Preference
 from prymatex.ui.support.macro import Ui_Macro
+from prymatex.ui.support.project import Ui_Project
 from prymatex.gui.support.models import PMXMenuTreeModel, PMXExcludedListModel
 from pprint import pformat
 import ast
@@ -224,6 +225,9 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
         self.comboBoxOutput.addItem("Open as New Document", "openAsNewDocument")
         self.comboBoxOutput.currentIndexChanged[int].connect(self.on_comboBoxOutput_changed)
         
+        self.labelInputOption.setVisible(False)
+        self.comboBoxFallbackInput.setVisible(False)
+        
         self.command.setTabStopWidth(TABWIDTH)
         self.menuCommandTemplates = QtGui.QMenu()
         
@@ -308,6 +312,7 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
         if command is None:
             command = self.DEFAULTS['command']
         self.command.setPlainText(command)
+        
         #BeforeRunningCommand
         beforeRunningCommand = bundleItem.beforeRunningCommand
         if beforeRunningCommand is None:
@@ -315,13 +320,15 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
         index = self.comboBoxBeforeRunning.findData(beforeRunningCommand)
         if index != -1:
             self.comboBoxBeforeRunning.setCurrentIndex(index)
+
         #Input
-        input = bundleItem.input
-        if input is None:
-            input = self.changes['input'] = self.DEFAULTS['input']
-        index = self.comboBoxInput.findData(input)
+        commandInput = bundleItem.input
+        if commandInput is None:
+            commandInput = self.changes['input'] = self.DEFAULTS['input']
+        index = self.comboBoxInput.findData(commandInput)
         if index != -1:
             self.comboBoxInput.setCurrentIndex(index)
+
         #Output
         output = bundleItem.output
         if output is None:
@@ -617,7 +624,7 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
         super(PMXBundleWidget, self).edit(bundle)
         self.treeMenuModel.setBundle(bundle)
 
-class PMXProjectWidget(PMXEditorBaseWidget, Ui_Template):
+class PMXProjectWidget(PMXEditorBaseWidget, Ui_Project):
     TYPE = 'project'
     DEFAULTS = {
                 'command': '''if [[ ! -f "$TM_NEW_PROJECT_LOCATION" ]]; then
@@ -629,7 +636,6 @@ fi"'''}
     def __init__(self, parent = None):
         PMXEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
-        self.comboBoxOutput.addItem("Insert as Text", "insertText")
         self.command.setTabStopWidth(TABWIDTH)
 
     @QtCore.pyqtSlot()
@@ -640,13 +646,6 @@ fi"'''}
         else:
             self.changes.pop('command', None)
     
-    @QtCore.pyqtSlot(str)
-    def on_lineEditExtension_textEdited(self, text):
-        if text != self.bundleItem.extension:
-            self.changes['extension'] = text
-        else:
-            self.changes.pop('extension', None)
-            
     @property
     def title(self):
         if self.bundleItem != None:

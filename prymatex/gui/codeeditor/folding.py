@@ -5,27 +5,36 @@ from bisect import bisect
 from PyQt4 import QtCore, QtGui
 from prymatex.support import PMXSyntax
 
-class PMXEditorFolding(object):
+class PMXEditorFolding(QtCore.QObject):
     def __init__(self, editor):
+        QtCore.QObject.__init__(self, editor)
         self.editor = editor
         self.logger = editor.application.getLogger('.'.join([self.__class__.__module__, self.__class__.__name__]))
         self.indentSensitive = False
         self.foldingUpdated = True
         self.editor.textChanged.connect(self.on_editor_textChanged)
+        self.editor.beforeOpen.connect(self.on_editor_beforeOpen)
+        self.editor.syntaxReady.connect(self.on_editor_syntaxReady)
         self.blocks = []
         self.folding = []
-
-    def _purge_blocks(self):
-        def validFoldingBlock(block):
-            return block.userData() is not None and block.userData().foldingMark != None
-        self.blocks = filter(validFoldingBlock, self.blocks)
 
     def on_editor_textChanged(self):
         if not self.foldingUpdated:
             self.logger.debug("Purgar y actualizar folding")
             self._purge_blocks()
             self.updateFolding()
-            self.foldingUpdated = True
+
+    def on_editor_beforeOpen(self):
+        self.editor.textChanged.disconnect(self.on_editor_textChanged)
+        
+    def on_editor_syntaxReady(self):
+        self.editor.textChanged.connect(self.on_editor_textChanged)
+        self.updateFolding()
+            
+    def _purge_blocks(self):
+        def validFoldingBlock(block):
+            return block.userData() is not None and block.userData().foldingMark != None
+        self.blocks = filter(validFoldingBlock, self.blocks)
 
     def addFoldingBlock(self, block):
         if block not in self.blocks:
@@ -41,13 +50,14 @@ class PMXEditorFolding(object):
             self.foldingUpdated = False
         
     def updateFolding(self):
+        # TODO Update en una tarea aparte para no molestar
         self.folding = []
         if self.indentSensitive:
             self.updateIndentFoldingBlocks()
         else:
             self.updateFoldingBlocks()
-        #self.editor.sidebar.update()
-
+        self.foldingUpdated = True
+        
     def updateFoldingBlocks(self):
         nest = 0
         for block in self.blocks:

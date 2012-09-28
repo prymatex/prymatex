@@ -35,15 +35,17 @@ class PMXManagedObject(object):
     def delete(self, namespace):
         raise NotImplemented
 
+    def uuidAsUnicode(self):
+        return unicode(self.uuid).upper()
+
     @property
     def enabled(self):
         return self.manager.isEnabled(self.uuid)
                 
     @property
     def hash(self):
-        return { 'uuid': unicode(self.uuid).upper() }
+        return { 'uuid': self.uuidAsUnicode() }
 
-    
     def path(self, namespace):
         return self.sources[namespace][self._PATH]
 
@@ -151,6 +153,7 @@ class PMXBundle(PMXManagedObject):
             pass
             
     def buildEnvironment(self):
+        # TODO Aca no tiene porque ser un copy el manager tiene que manejar esta situacion, viola la encapsulacion
         env = copy(self.manager.buildEnvironment())
         env['TM_BUNDLE_PATH'] = self.currentPath
         if self.support != None:
@@ -272,6 +275,13 @@ class PMXBundleItem(PMXManagedObject):
         pass
         
 class PMXRunningContext(object):
+    TEMPLATE = u"""Item Name: {itemName}
+    Asynchronous: {asynchronous}
+    Working Directory: {workingDirectory}
+    Input:  Type {inputType}, Value {inputValue}
+    Environment: {environment}
+    Output: Type {outputType}, Value {outputValue}
+    """
     def __init__(self, bundleItem, shellCommand, environment):
         self.bundleItem = bundleItem
         self.inputType, self.inputValue = None, None
@@ -288,9 +298,34 @@ class PMXRunningContext(object):
     def __exit__(self, type, value, traceback):
         if not self.asynchronous:
             self.removeTempFile()
-        
+
+    def __unicode__(self):
+        return self.TEMPLATE.format(
+                itemName = self.bundleItem.name,
+                asynchronous = self.asynchronous,
+                workingDirectory = self.workingDirectory,
+                inputType = self.inputType,
+                inputValue = self.inputValue,
+                environment = self.environment,
+                outputType = self.outputType,
+                outputValue = self.outputValue
+        )
+
+    def __str__(self):
+        return self.TEMPLATE.format(
+                itemName = self.bundleItem.name,
+                asynchronous = self.asynchronous,
+                workingDirectory = self.workingDirectory,
+                inputType = self.inputType,
+                inputValue = self.inputValue,
+                environment = self.environment,
+                outputType = self.outputType,
+                outputValue = self.outputValue
+        )
+
     def description(self):
         return self.bundleItem.name or "No Name"
         
     def removeTempFile(self):
-        utils.deleteFile(self.tempFile)
+        if os.path.exists(self.tempFile):
+            utils.deleteFile(self.tempFile)

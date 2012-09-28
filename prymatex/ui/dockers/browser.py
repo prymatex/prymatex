@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/browser.ui'
 #
-# Created: Thu Jun  7 06:28:45 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Wed Sep 12 18:54:22 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -31,8 +31,7 @@ class Ui_BrowserDock(object):
         self.buttonBack = QtGui.QPushButton(self.dockWidgetContents)
         self.buttonBack.setMaximumSize(QtCore.QSize(24, 24))
         self.buttonBack.setText(_fromUtf8(""))
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/go-previous.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("go-previous"))
         self.buttonBack.setIcon(icon)
         self.buttonBack.setFlat(True)
         self.buttonBack.setObjectName(_fromUtf8("buttonBack"))
@@ -42,18 +41,16 @@ class Ui_BrowserDock(object):
         self.buttonNext.setMaximumSize(QtCore.QSize(24, 24))
         self.buttonNext.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.buttonNext.setText(_fromUtf8(""))
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/go-next.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.buttonNext.setIcon(icon1)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("go-next"))
+        self.buttonNext.setIcon(icon)
         self.buttonNext.setFlat(True)
         self.buttonNext.setObjectName(_fromUtf8("buttonNext"))
         self.horizontalLayout.addWidget(self.buttonNext)
         self.buttonReload = QtGui.QPushButton(self.dockWidgetContents)
         self.buttonReload.setMaximumSize(QtCore.QSize(24, 24))
         self.buttonReload.setText(_fromUtf8(""))
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/view-refresh.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.buttonReload.setIcon(icon2)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("view-refresh"))
+        self.buttonReload.setIcon(icon)
         self.buttonReload.setFlat(True)
         self.buttonReload.setObjectName(_fromUtf8("buttonReload"))
         self.horizontalLayout.addWidget(self.buttonReload)
@@ -63,9 +60,8 @@ class Ui_BrowserDock(object):
         self.buttonStop = QtGui.QPushButton(self.dockWidgetContents)
         self.buttonStop.setMaximumSize(QtCore.QSize(24, 24))
         self.buttonStop.setText(_fromUtf8(""))
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-close.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.buttonStop.setIcon(icon3)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("dialog-close"))
+        self.buttonStop.setIcon(icon)
         self.buttonStop.setFlat(True)
         self.buttonStop.setObjectName(_fromUtf8("buttonStop"))
         self.horizontalLayout.addWidget(self.buttonStop)
@@ -74,15 +70,15 @@ class Ui_BrowserDock(object):
         self.line.setFrameShadow(QtGui.QFrame.Sunken)
         self.line.setObjectName(_fromUtf8("line"))
         self.horizontalLayout.addWidget(self.line)
-        self.pushButtonOptions = QtGui.QPushButton(self.dockWidgetContents)
-        self.pushButtonOptions.setMaximumSize(QtCore.QSize(45, 24))
-        self.pushButtonOptions.setText(_fromUtf8(""))
-        icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/configure.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushButtonOptions.setIcon(icon4)
-        self.pushButtonOptions.setFlat(True)
-        self.pushButtonOptions.setObjectName(_fromUtf8("pushButtonOptions"))
-        self.horizontalLayout.addWidget(self.pushButtonOptions)
+        self.toolButtonOptions = QtGui.QToolButton(self.dockWidgetContents)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("configure"))
+        self.toolButtonOptions.setIcon(icon)
+        self.toolButtonOptions.setPopupMode(QtGui.QToolButton.MenuButtonPopup)
+        self.toolButtonOptions.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
+        self.toolButtonOptions.setAutoRaise(True)
+        self.toolButtonOptions.setArrowType(QtCore.Qt.NoArrow)
+        self.toolButtonOptions.setObjectName(_fromUtf8("toolButtonOptions"))
+        self.horizontalLayout.addWidget(self.toolButtonOptions)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.webView = QtWebKit.QWebView(self.dockWidgetContents)
         self.webView.setUrl(QtCore.QUrl(_fromUtf8("about:blank")))
@@ -91,15 +87,15 @@ class Ui_BrowserDock(object):
         BrowserDock.setWidget(self.dockWidgetContents)
         self.actionSyncEditor = QtGui.QAction(BrowserDock)
         self.actionSyncEditor.setCheckable(True)
-        icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/system-switch-user.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionSyncEditor.setIcon(icon5)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/system-switch-user.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionSyncEditor.setIcon(icon)
         self.actionSyncEditor.setObjectName(_fromUtf8("actionSyncEditor"))
         self.actionConnectEditor = QtGui.QAction(BrowserDock)
         self.actionConnectEditor.setCheckable(True)
-        icon6 = QtGui.QIcon()
-        icon6.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/network-connect.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionConnectEditor.setIcon(icon6)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/network-connect.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionConnectEditor.setIcon(icon1)
         self.actionConnectEditor.setObjectName(_fromUtf8("actionConnectEditor"))
 
         self.retranslateUi(BrowserDock)
@@ -117,4 +113,3 @@ class Ui_BrowserDock(object):
         self.actionConnectEditor.setToolTip(_('Connect browser with current editor'))
 
 from PyQt4 import QtWebKit
-from prymatex import resources_rc
