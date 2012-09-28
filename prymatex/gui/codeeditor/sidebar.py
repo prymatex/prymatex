@@ -429,16 +429,22 @@ class SelectionSideBarAddon(SideBarWidgetAddon):
         return line_count
 
     def paintEvent(self, event):
+        #print scrollBar.minimum(), scrollBar.value(), scrollBar.maximum()
+            
         font_metrics = QtGui.QFontMetrics(self.editor.font)
         page_bottom = self.editor.viewport().height()
         
         lineHeight = font_metrics.height()
         totalBlockCount = self.editor.document().blockCount()
         visibleBlockCount = self.visibleBlockCount()
-        
-        rectHeight = visibleBlockCount * lineHeight / totalBlockCount
-        rectHeight = rectHeight if rectHeight else 1
-        
+
+        scrollBar = self.editor.verticalScrollBar()
+        if scrollBar.maximum():
+            rectRelation = float(scrollBar.height()) / float(scrollBar.maximum())
+        else:
+            rectRelation = lineHeight
+        rectHeight = round(rectRelation) if rectRelation >= 1 else 1
+
         painter = QtGui.QPainter(self)
         painter.fillRect(self.rect(), self.background)
 
@@ -447,7 +453,7 @@ class SelectionSideBarAddon(SideBarWidgetAddon):
         
         for cursor in self.highlightCurrentSelectionAddon.highlightCursors:
             y = cursor.block().blockNumber()
-            painter.fillRect(0, y * rectHeight, 10, rectHeight, self.editor.colours['selection'])
+            painter.fillRect(0, round(y * rectRelation), 10, rectHeight, self.editor.colours['selection'])
 
         painter.end()
         QtGui.QWidget.paintEvent(self, event)
