@@ -58,7 +58,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     modeChanged = QtCore.pyqtSignal()
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
-
+    extraSelectionChanged = QtCore.pyqtSignal()
+    
     afterOpen = QtCore.pyqtSignal()
     afterSave = QtCore.pyqtSignal()
     afterClose = QtCore.pyqtSignal()
@@ -744,6 +745,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             if isinstance(addon, CodeEditorObjectAddon):
                 extraSelections += addon.extraSelections()
         self.setExtraSelections(extraSelections)
+        self.extraSelectionChanged.emit()
         
     def buildExtraSelections(self, styleHash, cursors):
         extraSelections = []

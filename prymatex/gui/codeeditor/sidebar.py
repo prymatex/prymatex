@@ -385,15 +385,15 @@ class SelectionSideBarAddon(SideBarWidgetAddon):
         SideBarWidgetAddon.initialize(self, editor)
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
         self.editor.themeChanged.connect(self.updateColours)
-        # TODO: Mejorar esto, es muy feo
-        self.highlightCurrentSelectionAddon = self.editor.addonByClass(HighlightCurrentSelectionAddon)
-        editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
+        #self.editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
+        self.editor.extraSelectionChanged.connect(self.on_editor_extraSelectionChanged)
         
     def updateColours(self):
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
         self.repaint(self.rect())
     
-    def on_editor_cursorPositionChanged(self):
+    def on_editor_extraSelectionChanged(self):
+        print self.editor.extraSelections()
         self.update()
 
     @classmethod
@@ -451,8 +451,8 @@ class SelectionSideBarAddon(SideBarWidgetAddon):
         block = self.editor.firstVisibleBlock()
         viewport_offset = self.editor.contentOffset()
         
-        for cursor in self.highlightCurrentSelectionAddon.highlightCursors:
-            y = cursor.block().blockNumber()
+        for selection in self.editor.extraSelections():
+            y = selection.cursor.block().blockNumber()
             painter.fillRect(0, round(y * rectRelation), 10, rectHeight, self.editor.colours['selection'])
 
         painter.end()
