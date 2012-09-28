@@ -43,3 +43,4 @@ def registerPlugin(manager):
     manager.registerAddon(CodeEditor, sidebar.BookmarkSideBarAddon)
     manager.registerAddon(CodeEditor, sidebar.LineNumberSideBarAddon)
     manager.registerAddon(CodeEditor, sidebar.FoldingSideBarAddon)
+    manager.registerAddon(CodeEditor, sidebar.SelectionSideBarAddon)
