@@ -69,39 +69,6 @@ class SideBarWidgetAddon(QtGui.QWidget, PMXBaseEditorAddon):
 #=======================================
 # SideBar Widgets
 #=======================================
-class ExtraSelectionSideBarAddon(SideBarWidgetAddon):
-    def paintEvent(self, event):
-        editorFont = QtGui.QFont(self.editor.font)
-        page_bottom = self.editor.viewport().height()
-        font_metrics = QtGui.QFontMetrics(editorFont)
-        painter = QtGui.QPainter(self)
-        painter.setPen(self.editor.colours["foreground"])
-        painter.fillRect(self.rect(), self.editor.colours["foreground"])
-        
-        block = self.editor.firstVisibleBlock()
-        viewport_offset = self.editor.contentOffset()
-        line_count = block.blockNumber()
-        
-        while block.isValid():
-            line_count += 1
-            # The top left position of the block in the document
-            position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
-            # Check if the position of the block is out side of the visible area
-            if position.y() > page_bottom:
-                break
-
-            # Draw the line number right justified at the y position of the line.
-            if block.isVisible():
-                #Line Numbers
-                leftPosition = self.width() - font_metrics.width(str(line_count)) - 2
-                painter.drawText(leftPosition,
-                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - 2,
-                    str(line_count))
-
-            block = block.next()
-        painter.end()
-        QtGui.QWidget.paintEvent(self, event)
-
 class LineNumberSideBarAddon(SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
     MARGIN = 10
@@ -124,7 +91,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
     def updateColours(self):
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
         self.foreground = self.editor.colours["foreground"]
-        self.repaint(self.rect())
+        self.update()
 
     def updateWidth(self, newBlockCount):
         width = self.fontMetrics().width(str(newBlockCount)) + self.MARGIN
@@ -188,7 +155,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
 
         painter.end()
         QtGui.QWidget.paintEvent(self, event)
-    
+    """
     __foreground = QtGui.QColor()
     @property
     def foreground(self):
@@ -218,7 +185,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
     def background(self, color):
         assert isinstance(color, QtGui.QColor)
         self.__background = color
-        
+    """
     
 class BookmarkSideBarAddon(SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
@@ -390,10 +357,9 @@ class SelectionSideBarAddon(SideBarWidgetAddon):
         
     def updateColours(self):
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
-        self.repaint(self.rect())
+        self.update()
     
     def on_editor_extraSelectionChanged(self):
-        print self.editor.extraSelections()
         self.update()
 
     @classmethod
@@ -452,6 +418,7 @@ class SelectionSideBarAddon(SideBarWidgetAddon):
         viewport_offset = self.editor.contentOffset()
         
         for selection in self.editor.extraSelections():
+            #if selection.styleHash == "#selection":
             y = selection.cursor.block().blockNumber()
             painter.fillRect(0, round(y * rectRelation), 10, rectHeight, self.editor.colours['selection'])
 
