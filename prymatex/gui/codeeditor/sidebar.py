@@ -352,7 +352,6 @@ class SelectionSideBarAddon(SideBarWidgetAddon):
         SideBarWidgetAddon.initialize(self, editor)
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
         self.editor.themeChanged.connect(self.updateColours)
-        #self.editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
         self.editor.extraSelectionChanged.connect(self.on_editor_extraSelectionChanged)
         
     def updateColours(self):
@@ -417,9 +416,8 @@ class SelectionSideBarAddon(SideBarWidgetAddon):
         block = self.editor.firstVisibleBlock()
         viewport_offset = self.editor.contentOffset()
         
-        for selection in self.editor.extraSelections():
-            #if selection.styleHash == "#selection":
-            y = selection.cursor.block().blockNumber()
+        for cursor in self.editor.extraSelectionCursorsByHash("#selection"):
+            y = cursor.block().blockNumber()
             painter.fillRect(0, round(y * rectRelation), 10, rectHeight, self.editor.colours['selection'])
 
         painter.end()

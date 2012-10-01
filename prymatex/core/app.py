@@ -38,6 +38,7 @@ class PMXApplication(QtGui.QApplication):
         self.setApplicationVersion(prymatex.__version__)
         self.setOrganizationDomain(prymatex.__url__)
         self.setOrganizationName(prymatex.__author__)
+        self.platform = sys.platform
 
         resources.loadPrymatexResources(PMXProfile.PMX_RESOURCES_PATH)
 

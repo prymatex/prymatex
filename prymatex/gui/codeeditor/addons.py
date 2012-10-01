@@ -174,18 +174,10 @@ class HighlightCurrentSelectionAddon(CodeEditorAddon):
 
     def initialize(self, editor):
         CodeEditorAddon.initialize(self, editor)
-        editor.registerTextCharFormatBuilder("#currentSelection", self.textCharFormat_currentSelection_builder)
         editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
 
-    def textCharFormat_currentSelection_builder(self):
-        format = QtGui.QTextCharFormat()
-        color = QtGui.QColor(self.editor.colours['selection'])
-        color.setAlpha(128)
-        format.setBackground(color)
-        return format
-
     def extraSelectionCursors(self):
-        return { "#currentSelection": self.highlightCursors[:] }
+        return { "#selection": self.highlightCursors[:] }
 
     def on_editor_cursorPositionChanged(self):
         cursor = self.editor.textCursor()

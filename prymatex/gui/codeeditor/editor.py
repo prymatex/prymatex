@@ -747,9 +747,18 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         for addon in self.addons:
             if isinstance(addon, CodeEditorAddon):
                 self.extraSelectionCursors.update(addon.extraSelectionCursors())
-        extraSelections = reduce(lambda l1, l2: l1 + l2, map(lambda (hash, cursors): self.buildExtraSelections(hash, cursors), self.extraSelectionCursors.iteritems()), [])
+        extraSelections = reduce(
+            lambda l1, l2: l1 + l2, 
+            map(
+                lambda (styleHash, cursors): self.buildExtraSelections(styleHash, cursors),
+                self.extraSelectionCursors.iteritems()
+            ), [])
+        print self.extraSelectionCursors
         self.setExtraSelections(extraSelections)
         self.extraSelectionChanged.emit()
+
+    def extraSelectionCursorsByHash(self, styleHash):
+        return self.extraSelectionCursors[styleHash] if styleHash in self.extraSelectionCursors else []
         
     def buildExtraSelections(self, styleHash, cursors):
         extraSelections = []
@@ -758,7 +767,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             selection = QtGui.QTextEdit.ExtraSelection()
             selection.format = self.syntaxHighlighter.highlightFormat(styleHash)
             selection.cursor = cursor
-            #selection.styleHash = styleHash
             extraSelections.append(selection)
         return extraSelections
 
@@ -799,9 +807,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cr = self.contentsRect()
         self.leftBar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.leftBar.width(), cr.height()))
         rightBarPosition = cr.right() - self.rightBar.width()
-        # TODO Ver que pasa en windows y en linux
-        #if self.verticalScrollBar().isVisible():
-        #    rightBarPosition -= self.verticalScrollBar().width()
+        if self.application.platform == "win32" and self.verticalScrollBar().isVisible():
+            rightBarPosition -= self.verticalScrollBar().width()
         self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
         self.updateOverlays()
     
