@@ -160,7 +160,9 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
         self.pushButtonInvisibles.setStyleSheet("background-color: " + QColor2RGBA(settings['invisibles'])[:7])
         self.pushButtonLineHighlight.setStyleSheet("background-color: " + QColor2RGBA(settings['lineHighlight'])[:7])
         self.pushButtonCaret.setStyleSheet("background-color: " + QColor2RGBA(settings['caret'])[:7])
-        self.pushButtonGutter.setStyleSheet("background-color: " + QColor2RGBA(settings['gutter'])[:7])
+        if 'gutter' in settings:
+            #Not all themes has the gutter color
+            self.pushButtonGutter.setStyleSheet("background-color: " + QColor2RGBA(settings['gutter'])[:7])
         self.application.supportManager.themeStyleProxyModel.setFilterRegExp(unicode(theme.uuid))
         
         #Set color for table view
