@@ -35,7 +35,7 @@ class DockWidgetToolBar(QtGui.QToolBar):
         
         #Restore action
         self.restoreAction = QtGui.QAction(self)
-        self.restoreAction.setIcon(resources.getIcon("stack"))
+        self.restoreAction.setIcon(resources.getIcon("image-stack"))
         self.restoreAction.triggered.connect(self.hide)
         self.addAction(self.restoreAction)
         

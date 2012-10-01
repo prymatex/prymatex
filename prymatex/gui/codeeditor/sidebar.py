@@ -379,33 +379,16 @@ class SelectionSideBarAddon(SideBarWidgetAddon):
             'testChecked': on_actionShowSelection_testChecked }
         return {baseMenu: menuEntry} 
 
-    def visibleBlockCount(self):
-        # TODO esto se puede hacer sin contar, haciendo unas cuentas
-        block = self.editor.firstVisibleBlock()
-        viewport_offset = self.editor.contentOffset()
-        page_bottom = self.editor.viewport().height()
-        line_count = 0
-        while block.isValid():
-            line_count += 1
-            position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
-            if position.y() > page_bottom:
-                break
-            block = block.next()
-        return line_count
-
     def paintEvent(self, event):
-        #print scrollBar.minimum(), scrollBar.value(), scrollBar.maximum()
             
         font_metrics = QtGui.QFontMetrics(self.editor.font)
         page_bottom = self.editor.viewport().height()
         
         lineHeight = font_metrics.height()
-        totalBlockCount = self.editor.document().blockCount()
-        visibleBlockCount = self.visibleBlockCount()
 
         scrollBar = self.editor.verticalScrollBar()
-        if scrollBar.maximum():
-            rectRelation = float(scrollBar.height()) / float(scrollBar.maximum())
+        if scrollBar.isVisible():
+            rectRelation = float(scrollBar.height()) / float(self.editor.document().blockCount())
         else:
             rectRelation = lineHeight
         rectHeight = round(rectRelation) if rectRelation >= 1 else 1
@@ -413,12 +396,13 @@ class SelectionSideBarAddon(SideBarWidgetAddon):
         painter = QtGui.QPainter(self)
         painter.fillRect(self.rect(), self.background)
 
-        block = self.editor.firstVisibleBlock()
         viewport_offset = self.editor.contentOffset()
         
         for cursor in self.editor.extraSelectionCursorsByHash("#selection"):
-            y = cursor.block().blockNumber()
-            painter.fillRect(0, round(y * rectRelation), 10, rectHeight, self.editor.colours['selection'])
+            y = round(cursor.block().blockNumber() * rectRelation)
+            if rectRelation == lineHeight:
+                y += viewport_offset.y()
+            painter.fillRect(0, y, 10, rectHeight, self.editor.colours['selection'])
 
         painter.end()
         QtGui.QWidget.paintEvent(self, event)

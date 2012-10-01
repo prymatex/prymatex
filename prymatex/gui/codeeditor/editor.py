@@ -753,7 +753,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 lambda (styleHash, cursors): self.buildExtraSelections(styleHash, cursors),
                 self.extraSelectionCursors.iteritems()
             ), [])
-        print self.extraSelectionCursors
         self.setExtraSelections(extraSelections)
         self.extraSelectionChanged.emit()
 
@@ -822,7 +821,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         font.setBold(True)
         painter.setFont(font)
             
-        painter.setPen(self.colours['gutter'])
+        painter.setPen(self.colours['selection'])
         offset = self.contentOffset()
         block = self.firstVisibleBlock()
         viewport_offset = self.contentOffset()
