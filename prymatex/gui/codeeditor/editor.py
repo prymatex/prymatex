@@ -23,7 +23,7 @@ from prymatex.core import exceptions
 from prymatex.gui.support.models import PMXBundleTreeNode
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.gui import utils
-from prymatex.gui.codeeditor.addons import CodeEditorObjectAddon
+from prymatex.gui.codeeditor.addons import CodeEditorAddon
 from prymatex.gui.codeeditor.sidebar import PMXSideBar, SideBarWidgetAddon
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
@@ -33,6 +33,7 @@ from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListMo
 
 from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
+from prymatex.utils.datastructures import MultiListsDict
 
 from prymatex.utils.decorators.helpers import printtime
 from prymatex.core.exceptions import IOException
@@ -185,6 +186,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
         #Highlighter
         self.syntaxHighlighter = PMXSyntaxHighlighter(self)
+        self.extraSelectionCursors = MultiListsDict()
         
         #Modes
         self.multiCursorMode = PMXMultiCursorEditorMode(self)
@@ -207,7 +209,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         #Cursor history
         self._cursorHistory, self._cursorHistoryIndex = [], 0
-
+        
         #Esta señal es especial porque es emitida en el setFont por los settings
         self.fontChanged.connect(self.on_fontChanged)
         #Basic setup
@@ -733,17 +735,19 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return format
         
     def highlightEditor(self):
+        self.extraSelectionCursors.clear()
         extraSelections = []
         if self.multiCursorMode.isActive():
-            extraSelections += self.multiCursorMode.extraSelections()
+            self.extraSelectionCursors.update(self.multiCursorMode.extraSelectionCursors())
         else:
             cursor = self.textCursor()
             cursor.clearSelection()
-            extraSelections += self.buildExtraSelections("#line", cursor)
-            extraSelections += self.buildExtraSelections("#brace", filter(lambda c: c is not None, list(self._currentBraces)))
+            self.extraSelectionCursors["#line"] = [cursor]
+            self.extraSelectionCursors["#brace"] = filter(lambda cursor: cursor is not None, list(self._currentBraces))
         for addon in self.addons:
-            if isinstance(addon, CodeEditorObjectAddon):
-                extraSelections += addon.extraSelections()
+            if isinstance(addon, CodeEditorAddon):
+                self.extraSelectionCursors.update(addon.extraSelectionCursors())
+        extraSelections = reduce(lambda l1, l2: l1 + l2, map(lambda (hash, cursors): self.buildExtraSelections(hash, cursors), self.extraSelectionCursors.iteritems()), [])
         self.setExtraSelections(extraSelections)
         self.extraSelectionChanged.emit()
         
@@ -1512,7 +1516,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor = self.cursorForPosition(point)
         items = ["-"]
         for addon in self.addons:
-            if isinstance(addon, CodeEditorObjectAddon):
+            if isinstance(addon, CodeEditorAddon):
                 items += addon.contributeToContextMenu(cursor)
         
         if len(items) > 1:

@@ -22,6 +22,9 @@ class PMXBaseEditorMode(object):
     def inactive(self):
         pass
 
+    def extraSelectionCursors(self):
+        return {}
+        
     def keyPressEvent(self, event):
         QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
         
@@ -144,18 +147,17 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         self.editor.application.restoreOverrideCursor()
         self.editor.modeChanged.emit()
 
-    def extraSelections(self):
-        extraSelections = []
-        cursorSelections = filter(lambda c: c.hasSelection(), map(lambda c: QtGui.QTextCursor(c), self.cursors))
+    def extraSelectionCursors(self):
+        cursors = {}
+        cursors["#selection"] = filter(lambda c: c.hasSelection(), map(lambda c: QtGui.QTextCursor(c), self.cursors))
         cursorLines = []
         for cursorLine in map(lambda c: QtGui.QTextCursor(c), self.cursors):
             if all(map(lambda c: c.block() != cursorLine.block(), cursorLines)):
                 cursorLine.clearSelection()
                 cursorLines.append(cursorLine)
-        extraSelections += self.editor.buildExtraSelections("#line", cursorLines)
-        extraSelections += self.editor.buildExtraSelections("#selection", cursorSelections)
-        return extraSelections
-
+        cursors["#line"] = cursorLines
+        return cursors
+    
     @property
     def isDragCursor(self):
         return self.startPoint != None and self.dragPoint != None
