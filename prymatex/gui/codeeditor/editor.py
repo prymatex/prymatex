@@ -144,7 +144,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def theme(self, uuid):
         theme = self.application.supportManager.getTheme(uuid)
 
-        firstTime = not self.syntaxHighlighter.hasTheme()
         self.syntaxHighlighter.setTheme(theme)
         self.colours = theme.settings
         
