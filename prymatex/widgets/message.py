@@ -58,18 +58,18 @@ class PopupMessageWidget(QtGui.QLabel):
         self.timeoutTimer.timeout.connect(self.animationOut.start)
         self.hide()
         
-    def showMessage(self, message, timeout = 2000, icon = None, point = None, hrefCallbacks = {} ):
+    def showMessage(self, message, timeout = 2000, icon = None, point = None, linkMap = {} ):
         '''
         @param message: Text message, can be HTML
         @param timeout: Timeout before message fades
         @param icon: A QIcon instance to show
-        @param pos: An x, y tuple with message position
-        @param link_map: 
+        @param point: An QPoint with message position
+        @param linkMap: 
         '''
         self.setText(message)
-        self.updatePosition(point)
         self.adjustSize()
-        self.linkMap = hrefCallbacks
+        self.updatePosition(point)
+        self.linkMap = linkMap
         self.timeoutTimer.setInterval(timeout)
         self.show()
         self.animationIn.start()
