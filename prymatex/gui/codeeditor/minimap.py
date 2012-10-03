@@ -4,26 +4,11 @@ import sys
 
 from PyQt4 import QtGui, QtCore
 
-from prymatex.core.plugin import PMXBaseOverlay
-from prymatex.gui.overlays.message import PMXMessageOverlay
+from prymatex.gui.codeeditor.sidebar import SideBarWidgetAddon
 
-class EditorMessageOverlay(PMXMessageOverlay):      
-    def initialize(self, editor):
-        PMXMessageOverlay.initialize(self, editor)
-        editor.themeChanged.connect(self.on_editor_themeChanged)
-        #Save editor
-        self.editor = editor
-        #Reparent to the mainWindow
-        self.setParent(editor.mainWindow)
+class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
+    ALIGNMENT = QtCore.Qt.AlignRight
     
-    def on_editor_themeChanged(self):
-        # Update Message Colors
-        self.setMessageTextColor( self.editor.colours['background'])
-        self.setMessageBackgroundColor( self.editor.colours['foreground'] )
-        self.setMessageBorderColor( self.editor.colours['selection'])
-
-class MiniMapOverlay(QtGui.QPlainTextEdit, PMXBaseOverlay):
-
     def __init__(self, parent):
         QtGui.QPlainTextEdit.__init__(self, parent)
         font = self.document().defaultFont()
@@ -51,7 +36,7 @@ class MiniMapOverlay(QtGui.QPlainTextEdit, PMXBaseOverlay):
         self.slider.show()
 
     def initialize(self, editor):
-        PMXBaseOverlay.initialize(self, editor)
+        SideBarWidgetAddon.initialize(self, editor)
         self.editor = editor
         editor.textChanged.connect(self.updateDocumentText)
         editor.themeChanged.connect(self.on_editor_themeChanged)

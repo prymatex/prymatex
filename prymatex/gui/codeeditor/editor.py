@@ -280,7 +280,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         userData.words = words
         
     def showSyntaxMessage(self, syntax):
-        self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
+        self.mainWindow.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
 
     def on_modificationChanged(self, value):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
@@ -809,7 +809,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         if self.application.platform == "win32" and self.verticalScrollBar().isVisible():
             rightBarPosition -= self.verticalScrollBar().width()
         self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
-        self.updateOverlays()
     
     def paintEvent(self, event):
         QtGui.QPlainTextEdit.paintEvent(self, event)

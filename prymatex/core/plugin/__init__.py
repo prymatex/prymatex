@@ -27,25 +27,15 @@ class PMXBaseComponent(object):
 
 class PMXBaseWidgetComponent(PMXBaseComponent):
     def __init__(self):
-        self.overlays = []
         self.addons = []
         self.keyHelpers = {}
             
     def initialize(self, mainWindow):
         self.mainWindow = mainWindow
-        for overlay in self.overlays:
-            overlay.initialize(self)
         for addon in self.addons:
             addon.initialize(self)
         for keyHelpers in self.keyHelpers.values():
             map(lambda keyHelper: keyHelper.initialize(self), keyHelpers)
-
-    def updateOverlays(self):
-        for overlay in self.overlays:
-            overlay.updateOverlay()
-    
-    def addOverlay(self, overlay):
-        self.overlays.append(overlay)
 
     # Addons api    
     def addAddon(self, addon):
@@ -86,19 +76,6 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
     
     def restoreState(self, state):
         """Restore the state from the given state (returned by a previous call to saveState())."""
-        pass
-    
-class PMXBaseOverlay(object):
-    def __init__(self, widget):
-        pass
-        
-    def initialize(self, widget):
-        pass
-    
-    def finalize(self):
-        pass
-    
-    def updateOverlay(self):
         pass
 
 class PMXBaseAddon(object):

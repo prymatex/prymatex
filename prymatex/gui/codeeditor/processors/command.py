@@ -199,18 +199,18 @@ class PMXCommandProcessor(PMXCommandProcessor):
         #TODO: Una mejor forma de mostrar en html la salida 
         cursor = self.editor.textCursor()
         point = self.editor.cursorRect(cursor).bottomRight()
+        point = self.editor.mapToGlobal(point)
         html = """
             <span>%s</span><hr>
             <div style='text-align: right; font-size: small;'><a href='copy'>Copy</a>
             </div>""" % context.outputValue.strip().replace('\n', '<br/>').replace(' ', '&nbsp;')
         timeout = timeout * self.timespanFactor
         callbacks = {
-                   'copy': lambda s = context.outputValue: QtGui.qApp.instance().clipboard().setText(s)
+            'copy': lambda s = context.outputValue: QtGui.qApp.instance().clipboard().setText(s)
         }
-        pos = (point.x() + 30, point.y() + 5)
         timeout = timeout * self.timespanFactor
         
-        self.editor.showMessage(html, timeout = timeout, pos = pos, hrefCallbacks = callbacks)
+        self.editor.mainWindow.showMessage(html, timeout = timeout, point = point, hrefCallbacks = callbacks)
         
     def createNewDocument(self, context):
         editor= self.editor.mainWindow.addEmptyEditor()
