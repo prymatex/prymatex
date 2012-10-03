@@ -57,8 +57,7 @@
         <string>Terminate</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>:/icons/emblems/emblem-important.png</normaloff>:/icons/emblems/emblem-important.png</iconset>
+        <iconset theme="application-exit"/>
        </property>
       </widget>
      </item>
@@ -79,8 +78,7 @@
         <string>&amp;Close</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>:/icons/actions/dialog-cancel.png</normaloff>:/icons/actions/dialog-cancel.png</iconset>
+        <iconset theme="dialog-close"/>
        </property>
       </widget>
      </item>
