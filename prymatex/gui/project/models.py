@@ -83,20 +83,19 @@ class PMXProjectTreeModel(TreeModel):
             self.endInsertRows()
 
     def _collect_expanded_subdirs(self, parentNode):
-        subDirs = filter(lambda node: node.isdir and node._populated, parentNode.childrenNodes)
-        collected = []
-        for dirNode in subDirs:
-            collected += self._collect_expanded_subdirs(dirNode)
-        return collected + subDirs
-        
+        return filter(lambda node: node.isdir and node._populated, parentNode.childrenNodes)
+
     def refresh(self, updateIndex):
         updateNode = self.node(updateIndex)
         while not updateNode.isRootNode() and not os.path.exists(updateNode.path):
             updateIndex = updateIndex.parent()
             updateNode = self.node(updateIndex)
         if not updateNode.isRootNode() and updateNode.isdir:
-            for node in self._collect_expanded_subdirs(updateNode) + [updateNode]:
+            updateNodes = [ updateNode ]
+            while updateNodes:
+                node = updateNodes.pop(0)
                 self._update_directory(node, self.createIndex(node.row(), 0, node), True)
+                updateNodes += self._collect_expanded_subdirs(node)
 
     def refreshPath(self, path):
         index = self.indexForPath(path)
@@ -116,7 +115,8 @@ class PMXProjectTreeModel(TreeModel):
             return node.path
     
     def isDir(self, index):
-        return self.node(index).isdir
+        node = self.node(index)
+        return node.isdir if not node.isRootNode() else False
         
     def appendProject(self, project):
         project._populated = False
