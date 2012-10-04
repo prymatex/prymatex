@@ -187,7 +187,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.mainWindow.browser.setRunningContext(context)
         #self.editor.mainWindow.browser.setHtml(context.outputValue, context.bundleItem)
 
-    timespanFactor = 1
     def showAsTooltip(self, context):
         # Chicho's sense of statistics
         linesToRead = context.outputValue.count('\n') or context.outputValue.count('<br')
@@ -196,21 +195,17 @@ class PMXCommandProcessor(PMXCommandProcessor):
         else:
             timeout = linesToRead * 700
             
-        #TODO: Una mejor forma de mostrar en html la salida 
-        cursor = self.editor.textCursor()
-        point = self.editor.cursorRect(cursor).bottomRight()
+        point = self.editor.cursorRect(self.editor.textCursor()).bottomRight()
+        point = self.editor.mapToGlobal(point)
         html = """
             <span>%s</span><hr>
             <div style='text-align: right; font-size: small;'><a href='copy'>Copy</a>
             </div>""" % context.outputValue.strip().replace('\n', '<br/>').replace(' ', '&nbsp;')
-        timeout = timeout * self.timespanFactor
         callbacks = {
-                   'copy': lambda s = context.outputValue: QtGui.qApp.instance().clipboard().setText(s)
+            'copy': lambda s = context.outputValue: QtGui.qApp.instance().clipboard().setText(s)
         }
-        pos = (point.x() + 30, point.y() + 5)
-        timeout = timeout * self.timespanFactor
         
-        self.editor.showMessage(html, timeout = timeout, pos = pos, hrefCallbacks = callbacks)
+        self.editor.mainWindow.showMessage(html, timeout = timeout, point = point, linkMap = callbacks)
         
     def createNewDocument(self, context):
         editor= self.editor.mainWindow.addEmptyEditor()

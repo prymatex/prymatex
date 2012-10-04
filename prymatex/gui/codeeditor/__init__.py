@@ -5,9 +5,9 @@ from PyQt4 import QtCore
 
 from prymatex.gui.codeeditor.dockers import PMXCodeBookmarksDock, PMXCodeSymbolsDock
 from prymatex.gui.codeeditor.editor import CodeEditor
-from prymatex.gui.codeeditor import helpers, addons, sidebar
+from prymatex.gui.codeeditor import helpers, addons, sidebar, minimap
 from prymatex.gui.codeeditor.status import PMXCodeEditorStatus
-from prymatex.gui.codeeditor.overlay import EditorMessageOverlay, MiniMapOverlay
+#from prymatex.gui.codeeditor.overlay import EditorMessageOverlay, MiniMapOverlay
 
 def registerPlugin(manager):
     manager.registerEditor(CodeEditor)
@@ -15,8 +15,6 @@ def registerPlugin(manager):
     manager.registerDocker(PMXCodeSymbolsDock)
     manager.registerDocker(PMXCodeBookmarksDock)
     
-    #manager.registerOverlay(CodeEditor, MiniMapOverlay)
-    manager.registerOverlay(CodeEditor, EditorMessageOverlay)
     
     manager.registerKeyHelper(CodeEditor, helpers.KeyEquivalentHelper)
     manager.registerKeyHelper(CodeEditor, helpers.SmartTypingPairsHelper)
@@ -40,6 +38,7 @@ def registerPlugin(manager):
     manager.registerAddon(CodeEditor, addons.SpellCheckerAddon)
     manager.registerAddon(CodeEditor, addons.HighlightCurrentSelectionAddon)
 
+    #manager.registerAddon(CodeEditor, minimap.MiniMapAddon)
     manager.registerAddon(CodeEditor, sidebar.BookmarkSideBarAddon)
     manager.registerAddon(CodeEditor, sidebar.LineNumberSideBarAddon)
     manager.registerAddon(CodeEditor, sidebar.FoldingSideBarAddon)

@@ -11,34 +11,34 @@ from prymatex.support import PMXPreferenceSettings
 
 RE_CHAR = re.compile(r"(\w)", re.UNICODE)
 
-class CodeEditorObjectAddon(QtCore.QObject, PMXBaseEditorAddon):
+class CodeEditorAddon(QtCore.QObject, PMXBaseEditorAddon):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
 
     def initialize(self, editor):
         PMXBaseEditorAddon.initialize(self, editor)
 
-    def extraSelections(self):
-        return []
-        
+    def extraSelectionCursors(self):
+        return {}
+
     def contributeToContextMenu(self, cursor):
         return PMXBaseEditorAddon.contributeToContextMenu(self)
-        
-class CompleterAddon(CodeEditorObjectAddon):
+
+class CompleterAddon(CodeEditorAddon):
     def __init__(self, parent):
-        CodeEditorObjectAddon.__init__(self, parent)
+        CodeEditorAddon.__init__(self, parent)
 
     def initialize(self, editor):
-        CodeEditorObjectAddon.initialize(self, editor)
+        CodeEditorAddon.initialize(self, editor)
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
         if event.text() and self.editor.currentWord(direction = "left", search = False)[0]:
             self.editor.showCachedCompleter()
         
-class SmartUnindentAddon(CodeEditorObjectAddon):
+class SmartUnindentAddon(CodeEditorAddon):
     def initialize(self, editor):
-        CodeEditorObjectAddon.initialize(self, editor)
+        CodeEditorAddon.initialize(self, editor)
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
@@ -52,16 +52,16 @@ class SmartUnindentAddon(CodeEditorObjectAddon):
             if PMXPreferenceSettings.INDENT_DECREASE in indentMarks and previousBlock.isValid() and currentBlock.userData().indent >= previousBlock.userData().indent:
                 self.editor.unindentBlocks(cursor)
 
-class SpellCheckerAddon(CodeEditorObjectAddon):
+class SpellCheckerAddon(CodeEditorAddon):
     def __init__(self, parent):
-        CodeEditorObjectAddon.__init__(self, parent)
+        CodeEditorAddon.__init__(self, parent)
         self.spellingOnType = False
         self.wordCursors = []
         self.currentSpellTask = None
         self.setupSpellChecker()
         
     def initialize(self, editor):
-        CodeEditorObjectAddon.initialize(self, editor)
+        CodeEditorAddon.initialize(self, editor)
         if self.dictionary is not None:
             editor.registerTextCharFormatBuilder("#spell", self.textCharFormat_spell_builder)
             editor.syntaxReady.connect(self.on_editor_syntaxReady)
@@ -76,7 +76,7 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
         def on_actionSpellingOnType_testChecked(editor):
             instance = editor.addonByClass(cls)
             return instance.spellingOnType
-        
+
         baseMenu = "Edit"
         menuEntry = {'title': 'Spelling',
                  'items': [
@@ -89,7 +89,7 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
                     }
                 ]}
         return { baseMenu: menuEntry }
-        
+
     def contributeToContextMenu(self, cursor):
         items = []
         cursors = filter(lambda c: c.selectionStart() <= cursor.selectionStart() <= cursor.selectionEnd() <= c.selectionEnd(), self.wordCursors)
@@ -100,9 +100,9 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
                 'callback': lambda word = word, cursor = cursor: cursor.insertText(word) })
         return items
 
-    def extraSelections(self):
-        return self.editor.buildExtraSelections("#spell", self.wordCursors)
-        
+    def extraSelectionCursors(self):
+        return { "#spell": self.wordCursors[:] }
+
     def setupSpellChecker(self):
         try:
             import enchant
@@ -167,25 +167,17 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
                 self.spellCheckWord(word, block, start, end)
         self.editor.highlightEditor()
         
-class HighlightCurrentSelectionAddon(CodeEditorObjectAddon):
+class HighlightCurrentSelectionAddon(CodeEditorAddon):
     def __init__(self, parent):
-        CodeEditorObjectAddon.__init__(self, parent)
+        CodeEditorAddon.__init__(self, parent)
         self.highlightCursors = []
 
     def initialize(self, editor):
-        CodeEditorObjectAddon.initialize(self, editor)
-        editor.registerTextCharFormatBuilder("#currentSelection", self.textCharFormat_currentSelection_builder)
+        CodeEditorAddon.initialize(self, editor)
         editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
 
-    def textCharFormat_currentSelection_builder(self):
-        format = QtGui.QTextCharFormat()
-        color = QtGui.QColor(self.editor.colours['selection'])
-        color.setAlpha(128)
-        format.setBackground(color)
-        return format
-
-    def extraSelections(self):
-        return self.editor.buildExtraSelections("#currentSelection", self.highlightCursors)
+    def extraSelectionCursors(self):
+        return { "#selection": self.highlightCursors[:] }
 
     def on_editor_cursorPositionChanged(self):
         cursor = self.editor.textCursor()

@@ -69,39 +69,6 @@ class SideBarWidgetAddon(QtGui.QWidget, PMXBaseEditorAddon):
 #=======================================
 # SideBar Widgets
 #=======================================
-class ExtraSelectionSideBarAddon(SideBarWidgetAddon):
-    def paintEvent(self, event):
-        editorFont = QtGui.QFont(self.editor.font)
-        page_bottom = self.editor.viewport().height()
-        font_metrics = QtGui.QFontMetrics(editorFont)
-        painter = QtGui.QPainter(self)
-        painter.setPen(self.editor.colours["foreground"])
-        painter.fillRect(self.rect(), self.editor.colours["foreground"])
-        
-        block = self.editor.firstVisibleBlock()
-        viewport_offset = self.editor.contentOffset()
-        line_count = block.blockNumber()
-        
-        while block.isValid():
-            line_count += 1
-            # The top left position of the block in the document
-            position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
-            # Check if the position of the block is out side of the visible area
-            if position.y() > page_bottom:
-                break
-
-            # Draw the line number right justified at the y position of the line.
-            if block.isVisible():
-                #Line Numbers
-                leftPosition = self.width() - font_metrics.width(str(line_count)) - 2
-                painter.drawText(leftPosition,
-                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - 2,
-                    str(line_count))
-
-            block = block.next()
-        painter.end()
-        QtGui.QWidget.paintEvent(self, event)
-
 class LineNumberSideBarAddon(SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
     MARGIN = 10
@@ -124,7 +91,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
     def updateColours(self):
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
         self.foreground = self.editor.colours["foreground"]
-        self.repaint(self.rect())
+        self.update()
 
     def updateWidth(self, newBlockCount):
         width = self.fontMetrics().width(str(newBlockCount)) + self.MARGIN
@@ -188,7 +155,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
 
         painter.end()
         QtGui.QWidget.paintEvent(self, event)
-    
+    """
     __foreground = QtGui.QColor()
     @property
     def foreground(self):
@@ -218,7 +185,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
     def background(self, color):
         assert isinstance(color, QtGui.QColor)
         self.__background = color
-        
+    """
     
 class BookmarkSideBarAddon(SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
@@ -385,15 +352,13 @@ class SelectionSideBarAddon(SideBarWidgetAddon):
         SideBarWidgetAddon.initialize(self, editor)
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
         self.editor.themeChanged.connect(self.updateColours)
-        # TODO: Mejorar esto, es muy feo
-        self.highlightCurrentSelectionAddon = self.editor.addonByClass(HighlightCurrentSelectionAddon)
-        editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
+        self.editor.extraSelectionChanged.connect(self.on_editor_extraSelectionChanged)
         
     def updateColours(self):
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
-        self.repaint(self.rect())
+        self.update()
     
-    def on_editor_cursorPositionChanged(self):
+    def on_editor_extraSelectionChanged(self):
         self.update()
 
     @classmethod
@@ -414,40 +379,30 @@ class SelectionSideBarAddon(SideBarWidgetAddon):
             'testChecked': on_actionShowSelection_testChecked }
         return {baseMenu: menuEntry} 
 
-    def visibleBlockCount(self):
-        # TODO esto se puede hacer sin contar, haciendo unas cuentas
-        block = self.editor.firstVisibleBlock()
-        viewport_offset = self.editor.contentOffset()
-        page_bottom = self.editor.viewport().height()
-        line_count = 0
-        while block.isValid():
-            line_count += 1
-            position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
-            if position.y() > page_bottom:
-                break
-            block = block.next()
-        return line_count
-
     def paintEvent(self, event):
+            
         font_metrics = QtGui.QFontMetrics(self.editor.font)
         page_bottom = self.editor.viewport().height()
         
         lineHeight = font_metrics.height()
-        totalBlockCount = self.editor.document().blockCount()
-        visibleBlockCount = self.visibleBlockCount()
-        
-        rectHeight = visibleBlockCount * lineHeight / totalBlockCount
-        rectHeight = rectHeight if rectHeight else 1
-        
+
+        scrollBar = self.editor.verticalScrollBar()
+        if scrollBar.isVisible():
+            rectRelation = float(scrollBar.height()) / float(self.editor.document().blockCount())
+        else:
+            rectRelation = lineHeight
+        rectHeight = round(rectRelation) if rectRelation >= 1 else 1
+
         painter = QtGui.QPainter(self)
         painter.fillRect(self.rect(), self.background)
 
-        block = self.editor.firstVisibleBlock()
         viewport_offset = self.editor.contentOffset()
         
-        for cursor in self.highlightCurrentSelectionAddon.highlightCursors:
-            y = cursor.block().blockNumber()
-            painter.fillRect(0, y * rectHeight, 10, rectHeight, self.editor.colours['selection'])
+        for cursor in self.editor.extraSelectionCursorsByHash("#selection"):
+            y = round(cursor.block().blockNumber() * rectRelation)
+            if rectRelation == lineHeight:
+                y += viewport_offset.y()
+            painter.fillRect(0, y, 10, rectHeight, self.editor.colours['selection'])
 
         painter.end()
         QtGui.QWidget.paintEvent(self, event)

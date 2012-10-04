@@ -23,7 +23,7 @@ from prymatex.core import exceptions
 from prymatex.gui.support.models import PMXBundleTreeNode
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.gui import utils
-from prymatex.gui.codeeditor.addons import CodeEditorObjectAddon
+from prymatex.gui.codeeditor.addons import CodeEditorAddon
 from prymatex.gui.codeeditor.sidebar import PMXSideBar, SideBarWidgetAddon
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
@@ -33,6 +33,7 @@ from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListMo
 
 from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
+from prymatex.utils.datastructures import MultiListsDict
 
 from prymatex.utils.decorators.helpers import printtime
 from prymatex.core.exceptions import IOException
@@ -58,7 +59,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     modeChanged = QtCore.pyqtSignal()
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
-
+    extraSelectionChanged = QtCore.pyqtSignal()
+    
     afterOpen = QtCore.pyqtSignal()
     afterSave = QtCore.pyqtSignal()
     afterClose = QtCore.pyqtSignal()
@@ -142,7 +144,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def theme(self, uuid):
         theme = self.application.supportManager.getTheme(uuid)
 
-        firstTime = not self.syntaxHighlighter.hasTheme()
         self.syntaxHighlighter.setTheme(theme)
         self.colours = theme.settings
         
@@ -184,6 +185,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
         #Highlighter
         self.syntaxHighlighter = PMXSyntaxHighlighter(self)
+        self.extraSelectionCursors = MultiListsDict()
         
         #Modes
         self.multiCursorMode = PMXMultiCursorEditorMode(self)
@@ -206,7 +208,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         #Cursor history
         self._cursorHistory, self._cursorHistoryIndex = [], 0
-
+        
         #Esta señal es especial porque es emitida en el setFont por los settings
         self.fontChanged.connect(self.on_fontChanged)
         #Basic setup
@@ -277,7 +279,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         userData.words = words
         
     def showSyntaxMessage(self, syntax):
-        self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
+        self.mainWindow.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
 
     def on_modificationChanged(self, value):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
@@ -732,18 +734,29 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return format
         
     def highlightEditor(self):
+        self.extraSelectionCursors.clear()
         extraSelections = []
         if self.multiCursorMode.isActive():
-            extraSelections += self.multiCursorMode.extraSelections()
+            self.extraSelectionCursors.update(self.multiCursorMode.extraSelectionCursors())
         else:
             cursor = self.textCursor()
             cursor.clearSelection()
-            extraSelections += self.buildExtraSelections("#line", cursor)
-            extraSelections += self.buildExtraSelections("#brace", filter(lambda c: c is not None, list(self._currentBraces)))
+            self.extraSelectionCursors["#line"] = [cursor]
+            self.extraSelectionCursors["#brace"] = filter(lambda cursor: cursor is not None, list(self._currentBraces))
         for addon in self.addons:
-            if isinstance(addon, CodeEditorObjectAddon):
-                extraSelections += addon.extraSelections()
+            if isinstance(addon, CodeEditorAddon):
+                self.extraSelectionCursors.update(addon.extraSelectionCursors())
+        extraSelections = reduce(
+            lambda l1, l2: l1 + l2, 
+            map(
+                lambda (styleHash, cursors): self.buildExtraSelections(styleHash, cursors),
+                self.extraSelectionCursors.iteritems()
+            ), [])
         self.setExtraSelections(extraSelections)
+        self.extraSelectionChanged.emit()
+
+    def extraSelectionCursorsByHash(self, styleHash):
+        return self.extraSelectionCursors[styleHash] if styleHash in self.extraSelectionCursors else []
         
     def buildExtraSelections(self, styleHash, cursors):
         extraSelections = []
@@ -792,10 +805,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cr = self.contentsRect()
         self.leftBar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.leftBar.width(), cr.height()))
         rightBarPosition = cr.right() - self.rightBar.width()
-        if self.verticalScrollBar().isVisible():
+        if self.application.platform == "win32" and self.verticalScrollBar().isVisible():
             rightBarPosition -= self.verticalScrollBar().width()
         self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
-        self.updateOverlays()
     
     def paintEvent(self, event):
         QtGui.QPlainTextEdit.paintEvent(self, event)
@@ -807,7 +819,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         font.setBold(True)
         painter.setFont(font)
             
-        painter.setPen(self.colours['gutter'])
+        painter.setPen(self.colours['selection'])
         offset = self.contentOffset()
         block = self.firstVisibleBlock()
         viewport_offset = self.contentOffset()
@@ -1508,7 +1520,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor = self.cursorForPosition(point)
         items = ["-"]
         for addon in self.addons:
-            if isinstance(addon, CodeEditorObjectAddon):
+            if isinstance(addon, CodeEditorAddon):
                 items += addon.contributeToContextMenu(cursor)
         
         if len(items) > 1:

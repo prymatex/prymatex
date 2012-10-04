@@ -38,6 +38,7 @@ class PMXApplication(QtGui.QApplication):
         self.setApplicationVersion(prymatex.__version__)
         self.setOrganizationDomain(prymatex.__url__)
         self.setOrganizationName(prymatex.__author__)
+        self.platform = sys.platform
 
         resources.loadPrymatexResources(PMXProfile.PMX_RESOURCES_PATH)
 
@@ -163,9 +164,8 @@ class PMXApplication(QtGui.QApplication):
         level = [ logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG ][verbose % 5]
         
         # File name
-        d = datetime.now().strftime('%d-%m-%Y-%H-%M-%S')
-        filename = os.path.join(self.settings.PMX_LOG_PATH, 'messages-%s.log' % d)
-        logging.basicConfig(filename = filename, level=level)
+        filename = os.path.join(self.settings.PMX_LOG_PATH, '%s-%s.log' % (logging.getLevelName(level), datetime.now().strftime('%d-%m-%Y')))
+        logging.basicConfig(filename=filename, level=level)
         
         # Console handler
         ch = logging.StreamHandler()

@@ -37,7 +37,7 @@ class PMXTabTerminals(QtGui.QTabWidget):
         layout = QtGui.QHBoxLayout()
         # Add
         self.pushAddNewTerminal = QtGui.QPushButton()
-        self.pushAddNewTerminal.setIcon(resources.getIcon('terminal'))
+        self.pushAddNewTerminal.setIcon(resources.getIcon('utilities-terminal'))
         self.pushAddNewTerminal.setToolTip(_("Add new terminal"))
         self.pushAddNewTerminal.setFlat(True)
 
@@ -55,7 +55,7 @@ class PMXTabTerminals(QtGui.QTabWidget):
         
         # Paste
         self.pushPasteIntoTerminal = QtGui.QPushButton()
-        self.pushPasteIntoTerminal.setIcon(resources.getIcon('paste'))
+        self.pushPasteIntoTerminal.setIcon(resources.getIcon('edit-paste'))
         self.pushPasteIntoTerminal.setObjectName('pushPasteIntoTerminal')
         self.pushPasteIntoTerminal.setToolTip('Paste text into terminal')
         self.pushPasteIntoTerminal.setFlat(True)

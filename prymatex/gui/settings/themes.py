@@ -19,6 +19,9 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
                              'foreground': '#000000',
                              'invisibles': '#BFBFBF',
                              'lineHighlight': '#00000012',
+                             'gutter': '#FFFFFF',
+                             'gutterForeground': '#000000',
+                             'lineHighlight': '#00000012',
                              'selection': '#A6CBFF' },
                 #Names and scopes
                 'styles': [ ('Comment', 'comment'),
@@ -113,6 +116,7 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
         self.pushButtonInvisibles.pressed.connect(lambda element = 'invisibles': self.on_pushButtonColor_pressed(element))
         self.pushButtonLineHighlight.pressed.connect(lambda element = 'lineHighlight': self.on_pushButtonColor_pressed(element))
         self.pushButtonCaret.pressed.connect(lambda element = 'caret': self.on_pushButtonColor_pressed(element))
+        self.pushButtonGutter.pressed.connect(lambda element = 'gutter': self.on_pushButtonColor_pressed(element))
         #Font
         font = self.settingGroup.value('font')
         if font is not None:
@@ -156,6 +160,9 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
         self.pushButtonInvisibles.setStyleSheet("background-color: " + QColor2RGBA(settings['invisibles'])[:7])
         self.pushButtonLineHighlight.setStyleSheet("background-color: " + QColor2RGBA(settings['lineHighlight'])[:7])
         self.pushButtonCaret.setStyleSheet("background-color: " + QColor2RGBA(settings['caret'])[:7])
+        if 'gutter' in settings:
+            #Not all themes has the gutter color
+            self.pushButtonGutter.setStyleSheet("background-color: " + QColor2RGBA(settings['gutter'])[:7])
         self.application.supportManager.themeStyleProxyModel.setFilterRegExp(unicode(theme.uuid))
         
         #Set color for table view

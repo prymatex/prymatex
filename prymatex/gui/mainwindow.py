@@ -14,8 +14,11 @@ from prymatex.gui import utils, dialogs
 from prymatex.gui.utils import textToObjectName, extendQMenu
 from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.gui.processors import MainWindowCommandProcessor
+
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
+from prymatex.widgets.message import PopupMessageWidget
+
 from prymatex.utils.i18n import ugettext as _
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
@@ -76,11 +79,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         #self.setMainWindowAsActionParent()
         self.setupHelpMenuMiscConnections()
         
-        self.bundleItem_handler = self.insertBundleItem
+        self.popupMessage = PopupMessageWidget(self)
         
         #Processor de comandos local a la main window
         self.commandProcessor = MainWindowCommandProcessor(self)
-        self.__forseLocalCommandProcessor = False
+        self.bundleItem_handler = self.insertBundleItem
 
     #==========================================================================
     # Bundle Items
@@ -261,13 +264,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
                     if editorClass == currentEditorClass and action.isCheckable() and hasattr(action, 'testChecked'):
                         action.setChecked(action.testChecked(editor))
 
-    def showMessage(self, message):
-        # TODO: Hacer el showMessage de la main window
-        if self.currentEditor() is not None:
-            self.currentEditor().showMessage(message)
-        else:
-            print "TODO: Hacer el showMessage de la mainWindow"
-    
+    def showMessage(self, *largs, **kwargs):
+        self.popupMessage.showMessage(*largs, **kwargs)
+        
     #============================================================
     # Create and manage editors
     #============================================================

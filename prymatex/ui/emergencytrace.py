@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/emergencytrace.ui'
 #
-# Created: Wed Sep 12 18:54:21 2012
+# Created: Wed Oct  3 19:45:15 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,21 +33,19 @@ class Ui_TracebackDialog(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.pushButtonKillApp = QtGui.QPushButton(TracebackDialog)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/emblems/emblem-important.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("application-exit"))
         self.pushButtonKillApp.setIcon(icon)
         self.pushButtonKillApp.setObjectName(_fromUtf8("pushButtonKillApp"))
         self.horizontalLayout.addWidget(self.pushButtonKillApp)
         self.pushCopy = QtGui.QPushButton(TracebackDialog)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-copy.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushCopy.setIcon(icon1)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-copy.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushCopy.setIcon(icon)
         self.pushCopy.setObjectName(_fromUtf8("pushCopy"))
         self.horizontalLayout.addWidget(self.pushCopy)
         self.pushClose = QtGui.QPushButton(TracebackDialog)
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushClose.setIcon(icon2)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("dialog-close"))
+        self.pushClose.setIcon(icon)
         self.pushClose.setObjectName(_fromUtf8("pushClose"))
         self.horizontalLayout.addWidget(self.pushClose)
         self.verticalLayout.addLayout(self.horizontalLayout)

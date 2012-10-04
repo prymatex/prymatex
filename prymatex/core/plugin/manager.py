@@ -52,7 +52,6 @@ class PMXPluginManager(PMXBaseComponent):
         self.dockers = []
         self.statusBars = []
         self.keyHelpers = {}
-        self.overlays = {}
         self.addons = {}
         self.instances = {}
     
@@ -82,13 +81,7 @@ class PMXPluginManager(PMXBaseComponent):
         helperClass.plugin = self.currentPluginDescriptor
         keyHelperClasses = self.keyHelpers.setdefault(widgetClass, [])
         keyHelperClasses.append(helperClass)
-        
-    def registerOverlay(self, widgetClass, overlayClass):
-        self.application.extendComponent(overlayClass)
-        overlayClass.plugin = self.currentPluginDescriptor
-        overlayClasses = self.overlays.setdefault(widgetClass, [])
-        overlayClasses.append(overlayClass)
-
+    
     def registerAddon(self, widgetClass, addonClass):
         self.application.populateComponent(addonClass)
         addonClass.plugin = self.currentPluginDescriptor
@@ -101,10 +94,6 @@ class PMXPluginManager(PMXBaseComponent):
     def createWidgetInstance(self, widgetClass, mainWindow):
         instance = widgetClass(mainWindow)
         
-        for overlayClass in self.overlays.get(widgetClass, []):
-            overlay = overlayClass(instance)
-            instance.addOverlay(overlay)
-
         for addonClass in self.addons.get(widgetClass, []):
             addon = addonClass(instance)
             instance.addAddon(addon)
