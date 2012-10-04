@@ -56,15 +56,6 @@ def build_prymatex_profile(path):
     os.makedirs(os.path.join(path, 'log'), 0700)
     os.makedirs(os.path.join(path, 'cache'), 0700)
     os.makedirs(os.path.join(path, 'screenshot'), 0700)
-
-def get_prymatex_profiles_file(path):
-    filePath = os.path.join(path, PRYMATEX_PROFILES_NAME)
-    if not os.path.exists(filePath):
-        pf = open(filePath, 'w')
-        pf.write("\n".join(["[General]", "dontask=True", "", "[Profile0]", "name=default", "path=" + os.path.join(path, "default"), "default=True"]))
-        pf.flush()
-        pf.close()
-    return filePath
     
 class TextMateSettings(object):
     def __init__(self, file):
@@ -222,7 +213,7 @@ class PMXProfile(object):
     USER_HOME_PATH = USER_HOME_PATH
     PMX_PREFERENCES_PATH = get_textmate_preferences_user_path()
     # Profiles
-    PMX_PROFILES_FILE = get_prymatex_profiles_file(PMX_HOME_PATH)
+    PMX_PROFILES_FILE = os.path.join(PMX_HOME_PATH, PRYMATEX_PROFILES_NAME)
     PMX_PROFILES = {}
     PMX_PROFILE_DEFAULT = None
     PMX_PROFILES_DONTASK = True
@@ -342,15 +333,20 @@ class PMXProfile(object):
 def load_prymatex_profiles():
     """docstring for load_prymatex_profiles"""
     config = ConfigParser()
-    config.read(PMXProfile.PMX_PROFILES_FILE)
-    for section in config.sections():
-        if section.startswith("Profile"):
-            profile = { "name": config.get(section, "name"),
-                        "path": config.get(section, "path"),
-                        "default": config.getboolean(section, "default")}
-            if profile["default"]:
-                PMXProfile.PMX_PROFILE_DEFAULT = profile["name"]
-            PMXProfile.PMX_PROFILES[profile["name"]] = profile
-    PMXProfile.PMX_PROFILES_DONTASK = config.getboolean("General", "dontask")
+    if os.path.exists(PMXProfile.PMX_PROFILES_FILE):
+        config.read(PMXProfile.PMX_PROFILES_FILE)
+        for section in config.sections():
+            if section.startswith("Profile"):
+                profile = { "name": config.get(section, "name"),
+                            "path": config.get(section, "path"),
+                            "default": config.getboolean(section, "default")}
+                if profile["default"]:
+                    PMXProfile.PMX_PROFILE_DEFAULT = profile["name"]
+                PMXProfile.PMX_PROFILES[profile["name"]] = profile
+        PMXProfile.PMX_PROFILES_DONTASK = config.getboolean("General", "dontask")
+    else:
+        PMXProfile.PMX_PROFILE_DEFAULT = "default"
+        PMXProfile.PMX_PROFILES_DONTASK = True
+        PMXProfile.PMX_PROFILES = {}
 
 load_prymatex_profiles()
