@@ -249,6 +249,12 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         else:
             self.leftBar.addWidget(widget)
 
+    def showSyntaxMessage(self, syntax):
+        self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
+    
+    def showMessage(self, *largs, **kwargs):
+        self.mainWindow.showMessage(*largs, **kwargs)
+        
     #================================================================
     # Update editor status, called from Highlighter
     #================================================================
@@ -278,9 +284,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.alreadyTypedWords.addWordsBlock(block, filter(lambda word: word not in userData.words, words))
         userData.words = words
         
-    def showSyntaxMessage(self, syntax):
-        self.mainWindow.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
-
     def on_modificationChanged(self, value):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
     
