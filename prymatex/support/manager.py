@@ -510,7 +510,7 @@ class PMXSupportBaseManager(object):
     def populatedBundle(self, bundle):
         """Llamado luego de popular un bundle"""
         pass
-        
+
     def getAllBundles(self):
         return []
     

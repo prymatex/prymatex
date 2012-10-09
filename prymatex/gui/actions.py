@@ -252,9 +252,7 @@ class MainWindowActions(object):
         
     @QtCore.pyqtSlot()
     def on_actionReloadBundles_triggered(self):
-        editor = self.currentEditor()
-        showMessageFunction = editor.showMessage if editor is not None else lambda message: message
-        self.application.supportManager.reloadSupport(showMessageFunction)
+        self.application.supportManager.reloadSupport(self.showMessage)
 
     #============================================================
     # Preferences Actions

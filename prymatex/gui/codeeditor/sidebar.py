@@ -55,10 +55,10 @@ class SideBarWidgetAddon(QtGui.QWidget, PMXBaseEditorAddon):
         ys = position.y()
         
         block = self.editor.firstVisibleBlock()
-        viewport_offset = self.editor.contentOffset()
+        offset = self.editor.contentOffset()
         page_bottom = self.editor.viewport().height()
         while block.isValid():
-            blockPosition = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
+            blockPosition = self.editor.blockBoundingGeometry(block).topLeft() + offset
             if blockPosition.y() > page_bottom:
                 break
             if blockPosition.y() < ys and (blockPosition.y() + fh) > ys:

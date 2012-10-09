@@ -61,6 +61,9 @@ class PMXBundleMenuGroup(QtCore.QObject):
         return menu
 
     def addBundle(self, bundle):
+        """
+            Add bundle to menu collection, all bundle has one QMenu in the collection
+        """
         menu = self.buildBundleMenu(bundle)
         menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
         # Primero agregarlo a los containers porque estos usan self.menus para ordenar
@@ -98,38 +101,36 @@ class PMXBundleMenuGroup(QtCore.QObject):
                 action.setText(text)
                 
     def on_manager_bundleChanged(self, bundle):
-        menu = self.menus.get(bundle, None)
-        #FIXME un assert no puede ser que no tenga menu el bundle
-        if menu is not None:
-            title = bundle.buildBundleAccelerator()
-            if title != menu.title():
-                self.removeFromContainers(menu)
-                menu.setTitle(title)
-                self.addToContainers(menu)
-            if bundle.enabled != menu.menuAction().isVisible():
-                menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
-            if id(bundle.mainMenu) != menu.ID:
-                # TODO Ver si no tengo que desconectar las señales de los submenues
-                menu.clear()
-                submenus = bundle.mainMenu['submenus'] if bundle.mainMenu is not None and 'submenus' in bundle.mainMenu else {}
-                items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
-                self.buildMenu(items, menu, submenus, menu)
-                menu.ID = id(bundle.mainMenu)
+        menu = self.menus[bundle]
+        title = bundle.buildBundleAccelerator()
+        if title != menu.title():
+            self.removeFromContainers(menu)
+            menu.setTitle(title)
+            self.addToContainers(menu)
+        if bundle.enabled != menu.menuAction().isVisible():
+            menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
+        if id(bundle.mainMenu) != menu.ID:
+            # TODO Ver si no tengo que desconectar las señales de los submenues
+            menu.clear()
+            submenus = bundle.mainMenu['submenus'] if bundle.mainMenu is not None and 'submenus' in bundle.mainMenu else {}
+            items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
+            self.buildMenu(items, menu, submenus, menu)
+            menu.ID = id(bundle.mainMenu)
 
     def on_manager_bundleAdded(self, bundle):
         assert bundle not in self.menus, "The bundle is in menus"
         self.addBundle(bundle)
 
     def on_manager_bundlePopulated(self, bundle):
-        menu = self.menus.get(bundle)
+        menu = self.menus[bundle]
+        menu.clear()
         if bundle.mainMenu is not None:
             submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
             items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
             self.buildMenu(items, menu, submenus, menu)
 
     def on_manager_bundleRemoved(self, bundle):
-        if bundle in self.menus:
-            self.removeFromContainers(self.menus[bundle])
+        self.removeFromContainers(self.menus[bundle])
 
 class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     #Signals for bundle
