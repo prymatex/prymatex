@@ -64,7 +64,7 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
         else:
             timeout = linesToRead * 700
             
-        self.mainWindow.currentEditor().showMessage(html, timeout = timeout)
+        self.mainWindow.showMessage(context.outputValue, timeout = timeout)
         
     def createNewDocument(self, context):
         editor = self.mainWindow.addEmptyEditor()

@@ -823,33 +823,33 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         painter.setFont(font)
             
         painter.setPen(self.colours['selection'])
-        offset = self.contentOffset()
         block = self.firstVisibleBlock()
-        viewport_offset = self.contentOffset()
-        line_count = block.blockNumber()
+        offset = self.contentOffset()
         while block.isValid() and block.userData():
-            line_count += 1
             # The top left position of the block in the document
-            position = self.blockBoundingGeometry(block).topLeft() + viewport_offset
+            # position = self.blockBoundingGeometry(block).topLeft() + offset
+            position = self.blockBoundingGeometry(block).topLeft()
             # Check if the position of the block is out side of the visible area
             if position.y() > page_bottom:
                 break
-
-            user_data = block.userData()
-            if block.isVisible() and self.folding.isStart(self.folding.getFoldingMark(block)) and user_data.folded:
-                painter.drawPixmap(font_metrics.width(block.text()) + 10,
-                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.getImage("foldingellipsis").height(),
-                    resources.getImage("foldingellipsis"))
-            
-            for s in range(0, (len(user_data.indent) / len(self.tabKeyBehavior()))):
-                linePositionX = (font_metrics.width("#") * self.tabStopSize * s) + font_metrics.width("#") + offset.x()
-                painter.drawLine(linePositionX, round(position.y()), linePositionX, font_metrics.height() + round(position.y()))
-
-            if self.showMarginLine:
-                painter.drawLine(self.pos_margin + offset.x(), round(position.y()), self.pos_margin + offset.x(), font_metrics.height() + round(position.y()))
-            
+            positionY = round(position.y())
+            if block.isVisible():
+                
+                user_data = block.userData()
+                if self.folding.isStart(self.folding.getFoldingMark(block)) and user_data.folded:
+                    painter.drawPixmap(font_metrics.width(block.text()) + 10,
+                        positionY + font_metrics.ascent() + font_metrics.descent() - resources.getImage("foldingellipsis").height(),
+                        resources.getImage("foldingellipsis"))
+                
+                for s in range(0, (len(user_data.indent) / len(self.tabKeyBehavior()))):
+                    positionX = (font_metrics.width("#") * self.tabStopSize * s) + font_metrics.width("#") + offset.x()
+                    painter.drawLine(positionX, positionY, positionX, positionY + font_metrics.height())
+                
             block = block.next()
 
+        if self.showMarginLine:
+            painter.drawLine(self.pos_margin + offset.x(), 0, self.pos_margin + offset.x(), self.viewport().height())
+                    
         if self.multiCursorMode.isActive():
             ctrl_down = bool(self.application.keyboardModifiers() & QtCore.Qt.ControlModifier)
             for index, cursor in enumerate(self.multiCursorMode.cursors, 1):
