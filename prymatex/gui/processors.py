@@ -57,13 +57,9 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
         self.mainWindow.browser.setRunningContext(context)
 
     def showAsTooltip(self, context):
-        # TODO Otra forma de mostrar como tooltip si no hay editor
-        linesToRead = context.outputValue.count('\n') or context.outputValue.count('<br')
-        if linesToRead > 10:
-            timeout = 8000
-        else:
-            timeout = linesToRead * 700
-            
+        message = context.outputValue.strip()
+        timeout = len(message) * 20
+
         self.mainWindow.showMessage(context.outputValue, timeout = timeout)
         
     def createNewDocument(self, context):
