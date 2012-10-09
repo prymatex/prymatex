@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/support/editor.ui'
 #
-# Created: Wed Sep 12 18:54:21 2012
+# Created: Tue Oct  9 14:36:13 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,8 +18,7 @@ except AttributeError:
 class Ui_BundleEditor(object):
     def setupUi(self, BundleEditor):
         BundleEditor.setObjectName(_fromUtf8("BundleEditor"))
-        BundleEditor.resize(700, 433)
-        BundleEditor.setMinimumSize(QtCore.QSize(700, 433))
+        BundleEditor.setMinimumSize(QtCore.QSize(700, 575))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         BundleEditor.setWindowIcon(icon)
