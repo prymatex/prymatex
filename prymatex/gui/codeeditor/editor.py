@@ -1830,7 +1830,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.setTextCursor(memento)
         
     def on_document_undoCommandAdded(self):
-        self.saveLocationMemento(self.textCursor())
+        self.saveLocationMemento(self.newCursorAtPosition(self.textCursor().position() - 1))
     
     #===========================================================================
     # Drag and Drop

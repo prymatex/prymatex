@@ -378,10 +378,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.addHistoryEntry({"editor": self.sender(), "memento": memento})
         
     def addEditorToHistory(self, editor):
+        if self._editorHistory and self._editorHistory[self._editorHistoryIndex]["editor"] == editor:
+            return
         self.addHistoryEntry({"editor": editor})
         
     def addHistoryEntry(self, entry):
-        entry.setdefault("memento", None)
         self._editorHistory = [entry] + self._editorHistory[self._editorHistoryIndex:]
         self._editorHistoryIndex = 0
         

@@ -206,16 +206,18 @@ class MainWindowActions(object):
         if self._editorHistory and self._editorHistoryIndex < len(self._editorHistory) - 1:
             self._editorHistoryIndex += 1
             entry = self._editorHistory[self._editorHistoryIndex]
-            print entry
-            #self.setCurrentEditor(self._editorHistory[self._editorHistoryIndex])
+            if "memento" in entry:
+                entry["editor"].restoreLocationMemento(entry["memento"])
+            self.setCurrentEditor(entry["editor"])
         
     @QtCore.pyqtSlot()
     def on_actionLocationForward_triggered(self):
         if self._editorHistoryIndex != 0:
             self._editorHistoryIndex -= 1
             entry = self._editorHistory[self._editorHistoryIndex]
-            print entry
-            #self.setCurrentEditor()
+            if "memento" in entry:
+                entry["editor"].restoreLocationMemento(entry["memento"])
+            self.setCurrentEditor(entry["editor"])
     
     @QtCore.pyqtSlot()
     def on_actionLastEditLocation_triggered(self):
