@@ -115,6 +115,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     ShowFolding           = 1<<4
     WordWrap              = 1<<5
     MarginLine            = 1<<6
+    IndentGuide           = 1<<7
     
     #=======================================================================
     # Settings
@@ -503,10 +504,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             flags |= self.ShowLineAndParagraphs
         if self.showMarginLine:
             flags |= self.MarginLine
-        # if self.sidebar.showLineNumbers:
-        #     flags |= self.ShowLineNumbers
-        # if self.sidebar.showFolding:
-        #     flags |= self.ShowFolding
+        if self.showIndentGuide:
+            flags |= self.IndentGuide
         if options.wrapMode() & QtGui.QTextOption.WordWrap:
             flags |= self.WordWrap
         return flags
@@ -529,9 +528,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         options.setFlags(oFlags)
         self.document().setDefaultTextOption(options)
         self.showMarginLine = bool(flags & self.MarginLine)
-        # self.sidebar.showLineNumbers = bool(flags & self.ShowLineNumbers)
-        # self.sidebar.showFolding = bool(flags & self.ShowFolding)
-        
+        self.showIndentGuide = bool(flags & self.IndentGuide)
+
     # Syntax
     def getSyntax(self):
         return self.syntaxHighlighter.syntax
@@ -839,10 +837,10 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                     painter.drawPixmap(font_metrics.width(block.text()) + 10,
                         positionY + font_metrics.ascent() + font_metrics.descent() - resources.getImage("foldingellipsis").height(),
                         resources.getImage("foldingellipsis"))
-                
-                for s in range(0, (len(user_data.indent) / len(self.tabKeyBehavior()))):
-                    positionX = (font_metrics.width("#") * self.tabStopSize * s) + font_metrics.width("#") + offset.x()
-                    painter.drawLine(positionX, positionY, positionX, positionY + font_metrics.height())
+                if self.showIndentGuide:
+                    for s in range(0, (len(user_data.indent) / len(self.tabKeyBehavior()))):
+                        positionX = (font_metrics.width("#") * self.tabStopSize * s) + font_metrics.width("#") + offset.x()
+                        painter.drawLine(positionX, positionY, positionX, positionY + font_metrics.height())
                 
             block = block.next()
 
@@ -1594,10 +1592,15 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                  'callback': cls.on_actionWordWrap_toggled,
                  'checkable': True,
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.WordWrap) },
+                "-",
                 {'title': "Margin Line",
                  'callback': cls.on_actionMarginLine_toggled,
                  'checkable': True,
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.MarginLine) },
+                {'title': "Indent Guide",
+                 'callback': cls.on_actionIndentGuide_toggled,
+                 'checkable': True,
+                 'testChecked': lambda editor: bool(editor.getFlags() & editor.IndentGuide) },
             ]}
         text = {
             'title': 'Text',
@@ -1757,7 +1760,14 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         else:
             flags = self.getFlags() & ~self.MarginLine
         self.setFlags(flags)
-        
+
+    def on_actionIndentGuide_toggled(self, checked):
+        if checked:
+            flags = self.getFlags() | self.IndentGuide
+        else:
+            flags = self.getFlags() & ~self.IndentGuide
+        self.setFlags(flags)
+    
     def on_actionShowBookmarks_toggled(self, checked):
         if checked:
             flags = self.getFlags() | self.ShowBookmarks
