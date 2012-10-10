@@ -186,11 +186,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             area = self.dockWidgetArea(dock)
             self.dockToolBars[area].show()
         
-    def addEditor(self, editor, focus = True):
-        self.splitTabWidget.addTab(editor)
-        if focus:
-            self.setCurrentEditor(editor)
-            
     def createCustomEditorMainMenu(self, name):
         menu = QtGui.QMenu(name, self.menubar)
         objectName = textToObjectName(name, prefix = "menu")
@@ -274,11 +269,19 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         editor = self.application.createEditorInstance(parent = self)
         self.addEditor(editor)
         return editor
-        
+
     def removeEditor(self, editor):
+        self.disconnect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_newLocationMemento)
         self.splitTabWidget.removeTab(editor)
+        # TODO Ver si el remove borra el editor y como acomoda el historial
         del editor
 
+    def addEditor(self, editor, focus = True):
+        self.splitTabWidget.addTab(editor)
+        self.connect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_newLocationMemento)
+        if focus:
+            self.setCurrentEditor(editor)
+    
     def findEditorForFile(self, filePath):
         # Find open editor for fileInfo
         for editor in self.splitTabWidget.allWidgets():
@@ -369,12 +372,18 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             self.closeEditor(editor)
     
     #=========================================================
-    # Handle history
+    # Handle location history
     #=========================================================
+    def on_newLocationMemento(self, memento):
+        self.addHistoryEntry({"editor": self.sender(), "memento": memento})
+        
     def addEditorToHistory(self, editor):
-        if self._editorHistory and self._editorHistory[self._editorHistoryIndex] == editor:
-            return
-        self._editorHistory.insert(self._editorHistoryIndex, editor)
+        self.addHistoryEntry({"editor": editor})
+        
+    def addHistoryEntry(self, entry):
+        entry.setdefault("memento", None)
+        self._editorHistory = [entry] + self._editorHistory[self._editorHistoryIndex:]
+        self._editorHistoryIndex = 0
         
     #===========================================================================
     # MainWindow Events

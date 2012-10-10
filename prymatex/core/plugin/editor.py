@@ -138,21 +138,13 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
     #============================================================
     # Global navigation api
     #============================================================
-    def nextLocation(self):
-        return False
+    def saveLocationMemento(self, memento):
+        # TODO Ver que va a pasar con esto de emitir señales y no heredar de qobject
+        self.emit(QtCore.SIGNAL("newLocationMemento"), memento)
         
-    def previousLocation(self):
-        return False
-
-    def lastLocation(self):
-        return False
-        
-    def locationCount(self):
-        return 0
-
-    def resetLocationIndex(self, back = True):
+    def restoreLocationMemento(self, memento):
         pass
-
+    
     #============================================================
     # Cursor positions as tuple
     #============================================================

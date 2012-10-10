@@ -203,29 +203,28 @@ class MainWindowActions(object):
     # Global navigation
     @QtCore.pyqtSlot()
     def on_actionLocationBack_triggered(self):
-        editor = self._editorHistory[self._editorHistoryIndex]
-        if editor.previousLocation() or not self._editorHistory or self._editorHistoryIndex >= len(self._editorHistory) - 1:
-            return
-        editor.resetLocationIndex()
-        self._editorHistoryIndex += 1
-        self.setCurrentEditor(self._editorHistory[self._editorHistoryIndex])
+        if self._editorHistory and self._editorHistoryIndex < len(self._editorHistory) - 1:
+            self._editorHistoryIndex += 1
+            entry = self._editorHistory[self._editorHistoryIndex]
+            print entry
+            #self.setCurrentEditor(self._editorHistory[self._editorHistoryIndex])
         
     @QtCore.pyqtSlot()
     def on_actionLocationForward_triggered(self):
-        editor = self._editorHistory[self._editorHistoryIndex]
-        if editor.nextLocation() or self._editorHistoryIndex == 0:
-            return
-        editor.resetLocationIndex(False)
-        self._editorHistoryIndex -= 1
-        self.setCurrentEditor(self._editorHistory[self._editorHistoryIndex])
+        if self._editorHistoryIndex != 0:
+            self._editorHistoryIndex -= 1
+            entry = self._editorHistory[self._editorHistoryIndex]
+            print entry
+            #self.setCurrentEditor()
     
     @QtCore.pyqtSlot()
     def on_actionLastEditLocation_triggered(self):
         for index, editor in enumerate(self._editorHistory):
-            if editor.lastLocation():
-                self._editorHistoryIndex = index
-                self.setCurrentEditor(editor)
-                break
+            #if editor.lastLocation(): 
+            # TODO La logica para ver si es un last edit
+            self._editorHistoryIndex = index
+            self.setCurrentEditor(editor)
+            break
 
     #============================================================
     # Bundles Actions

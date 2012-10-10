@@ -207,7 +207,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.completerTask = self.application.scheduler.idleTask()
         
         #Cursor history
-        self._cursorHistory, self._cursorHistoryIndex = [], 0
+        #self._cursorHistory, self._cursorHistoryIndex = [], 0
         
         #Esta señal es especial porque es emitida en el setFont por los settings
         self.fontChanged.connect(self.on_fontChanged)
@@ -228,7 +228,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.themeChanged.connect(self.highlightEditor)
         
         self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)
-        self.document().undoAvailable.connect(self.on_document_undoAvailable)
 
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
@@ -1827,50 +1826,12 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor.setPosition(position)
         return cursor
         
+    def restoreLocationMemento(self, memento):
+        self.setTextCursor(memento)
+        
     def on_document_undoCommandAdded(self):
-        self._cursorHistoryIndex = 0
-        #Inserto el cursor
-        self._cursorHistory.insert(self._cursorHistoryIndex, self.newCursorAtPosition(self.textCursor().position() - 1))
-        #Filtrar los que sean iguales
-        positions = []
-        for position in map(lambda cursor: cursor.position(), self._cursorHistory):
-            if position not in positions:
-                positions.append(position)
-        self._cursorHistory = map(lambda position: self.newCursorAtPosition(position), positions)
-        #Solo los ultimos N cursores
-        self._cursorHistory = self._cursorHistory[:10]
-
-    def on_document_undoAvailable(self, available):
-        if not available:
-            self._cursorHistory, self._cursorHistoryIndex = [], 0
-
-    def nextLocation(self):
-        if self._cursorHistoryIndex == 0:
-            return False
-        self._cursorHistoryIndex -= 1
-        self.setTextCursor(self._cursorHistory[self._cursorHistoryIndex])
-        return True
-        
-    def previousLocation(self):
-        if not self._cursorHistory or self._cursorHistoryIndex >= len(self._cursorHistory) - 1:
-            return False
-        self._cursorHistoryIndex += 1
-        self.setTextCursor(self._cursorHistory[self._cursorHistoryIndex])
-        return True
-
-    def lastLocation(self):
-        if not self.locationCount():
-            return False
-        self._cursorHistoryIndex = 0
-        self.setTextCursor(self._cursorHistory[self._cursorHistoryIndex])
-        return True
-        
-    def locationCount(self):
-        return len(self._cursorHistory)
-
-    def resetLocationIndex(self, back = True):
-        self._cursorHistoryIndex = 0 if not back else len(self._cursorHistory)
-
+        self.saveLocationMemento(self.textCursor())
+    
     #===========================================================================
     # Drag and Drop
     #===========================================================================
