@@ -436,6 +436,7 @@ class PMXApplication(QtGui.QApplication):
             mainWindow = mainWindow or self.mainWindow
             editor = self.createEditorInstance(filePath, mainWindow)
             project = self.projectManager.findProjectForPath(filePath)
+            # TODO Esto de poner proyecto no va aca, sino que pasa cuando se guarda un archivo dentro de un proyecto?
             if project != None:
                 self.logger.debug("The file %s belongs to project %s", (filePath, project.path))
                 editor.setProject(project)
