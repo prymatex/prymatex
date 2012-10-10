@@ -169,7 +169,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Sidebars
         self.leftBar = PMXSideBar(self)
         self.rightBar = PMXSideBar(self)
-        self.updateViewportMargins()
+        #self.updateViewportMargins()
 
         #Models
         self.bookmarkListModel = PMXBookmarkListModel(self)
@@ -243,12 +243,11 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.addSideBarWidget(addon)
 
     def addSideBarWidget(self, widget):
-        #widget.setParent(self.rightBar)
         if widget.ALIGNMENT == QtCore.Qt.AlignRight:
             self.rightBar.addWidget(widget)
         else:
             self.leftBar.addWidget(widget)
-
+        
     def showSyntaxMessage(self, syntax):
         self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
     
@@ -622,10 +621,15 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         else:
             self.rightBar.update(0, rect.y(), self.rightBar.width(), rect.height())
             self.leftBar.update(0, rect.y(), self.leftBar.width(), rect.height())
-        if rect.contains(self.viewport().rect()):
-            self.rightBar.update()
-            self.leftBar.update()
-            
+    
+    def updateSideBarsGeometry(self):
+        cr = self.contentsRect()
+        self.leftBar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.leftBar.width(), cr.height()))
+        rightBarPosition = cr.right() - self.rightBar.width()
+        if self.application.platform == "win32" and self.verticalScrollBar().isVisible():
+            rightBarPosition -= self.verticalScrollBar().width()
+        self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
+    
     #=======================================================================
     # Braces
     #=======================================================================
@@ -800,15 +804,15 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # QPlainTextEdit Events
     #=======================================================================
+    def focusInEvent(self, event):
+        # TODO No es para este evento pero hay que poner en alugn lugar el update de las side bars
+        QtGui.QPlainTextEdit.focusInEvent(self, event)
+        self.updateSideBarsGeometry()
+        
     def resizeEvent(self, event):
         QtGui.QPlainTextEdit.resizeEvent(self, event)
-        cr = self.contentsRect()
-        self.leftBar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.leftBar.width(), cr.height()))
-        rightBarPosition = cr.right() - self.rightBar.width()
-        if self.application.platform == "win32" and self.verticalScrollBar().isVisible():
-            rightBarPosition -= self.verticalScrollBar().width()
-        self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
-    
+        self.updateSideBarsGeometry()
+
     def paintEvent(self, event):
         QtGui.QPlainTextEdit.paintEvent(self, event)
         page_bottom = self.viewport().height()
@@ -1840,7 +1844,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.setTextCursor(memento)
         
     def on_document_undoCommandAdded(self):
-        self.saveLocationMemento(self.newCursorAtPosition(self.textCursor().position() - 1))
+        cursor = self.textCursor()
+        if not (cursor.atEnd() or cursor.atStart()):
+            self.saveLocationMemento(self.newCursorAtPosition(cursor.position() - 1))
     
     #===========================================================================
     # Drag and Drop

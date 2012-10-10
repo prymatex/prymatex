@@ -31,9 +31,9 @@ class PMXSideBar(QtGui.QWidget):
                 width += widget.width()
         return width
 
-    def scroll(self, *args):
+    def scroll(self, *largs):
         for index in range(self.horizontalLayout.count()):
-            self.horizontalLayout.itemAt(index).widget().scroll(*args)
+            self.horizontalLayout.itemAt(index).widget().scroll(*largs)
 
 #========================================
 # BASE EDITOR SIDEBAR ADDON

@@ -221,12 +221,12 @@ class MainWindowActions(object):
     
     @QtCore.pyqtSlot()
     def on_actionLastEditLocation_triggered(self):
-        for index, editor in enumerate(self._editorHistory):
-            #if editor.lastLocation(): 
-            # TODO La logica para ver si es un last edit
-            self._editorHistoryIndex = index
-            self.setCurrentEditor(editor)
-            break
+        for index, entry in enumerate(self._editorHistory):
+            if "memento" in entry:
+                entry["editor"].restoreLocationMemento(entry["memento"])
+                self.setCurrentEditor(entry["editor"])
+                self._editorHistoryIndex = index
+                break
 
     #============================================================
     # Bundles Actions
