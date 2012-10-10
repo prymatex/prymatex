@@ -1,1 +1,0 @@
-GriffonCommand.new("test-app").run

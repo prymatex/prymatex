@@ -1,4 +1,0 @@
-#!/usr/bin/env ruby
-IMAGEINFO = ENV['TM_SUPPORT_PATH'] + '/bin/imageinfo.exe'
-imgdim = `\"#{IMAGEINFO}\" \"#{ARGV[-1].chomp}\"`.split("\n")
-print " pixelWidth: #{imgdim[2]}\n pixelHeight: #{imgdim[3]}"

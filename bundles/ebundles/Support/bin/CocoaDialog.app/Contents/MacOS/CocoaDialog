@@ -1,2 +1,0 @@
-#!/bin/bash
-wine $TM_SUPPORT_PATH/bin/CocoaDialog.exe $*
