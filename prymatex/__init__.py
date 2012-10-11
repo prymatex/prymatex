@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+#Setup sip
+import sip
+sip.setapi('QDate', 2)
+sip.setapi('QTime', 2)
+sip.setapi('QDateTime', 2)
+sip.setapi('QUrl', 2)
+sip.setapi('QTextStream', 2)
+sip.setapi('QVariant', 2)
+sip.setapi('QString', 2)
+
 VERSION = (0, 9, 6, 'alpha', 0)
 
 def get_git_revision(path=None):

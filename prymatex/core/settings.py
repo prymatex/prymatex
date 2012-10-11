@@ -207,7 +207,6 @@ class PMXProfile(object):
     TM_SETTINGS_NAME = TEXTMATE_SETTINGS_NAME
     PMX_APP_PATH = get_prymatex_app_path()
     PMX_SHARE_PATH = os.path.join(PMX_APP_PATH, 'share')
-    PMX_RESOURCES_PATH = os.path.join(PMX_APP_PATH, 'resources')
     PMX_HOME_PATH = get_prymatex_home_path()
     PMX_PLUGINS_PATH = os.path.join(PMX_HOME_PATH, 'Plugins')
     USER_HOME_PATH = USER_HOME_PATH

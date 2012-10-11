@@ -40,7 +40,7 @@ class PMXApplication(QtGui.QApplication):
         self.setOrganizationName(prymatex.__author__)
         self.platform = sys.platform
 
-        resources.loadPrymatexResources(PMXProfile.PMX_RESOURCES_PATH)
+        resources.loadPrymatexResources(PMXProfile.PMX_SHARE_PATH)
 
         #Style
         self.setStyleSheet(resources.APPLICATION_STYLE)
