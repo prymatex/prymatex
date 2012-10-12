@@ -1115,21 +1115,11 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
     def runCompleter(self):
         settings = self.currentPreferenceSettings()
-        if settings.disableDefaultCompletion and settings.executeCompletionCommand:
-            self.executeCompletionCommand(settings)
-        else:
-            def on_suggestionsReady(suggestions):
-                 if bool(suggestions):
-                    self.showCompleter(suggestions)
-            self.defaultCompletion(settings, on_suggestionsReady)
+        def on_suggestionsReady(suggestions):
+             if bool(suggestions):
+                self.showCompleter(suggestions)
+        self.defaultCompletion(settings, on_suggestionsReady)
 
-    def executeCompletionCommand(self, settings):
-        commandHash = settings.executeCompletionCommand
-        command = PMXCommand(self.application.supportManager.uuidgen(), dataHash = commandHash)
-        command.setBundle(settings.getBundle("executeCompletionCommand"))
-        command.setManager(settings.getManager("executeCompletionCommand"))
-        self.insertBundleItem(command)
-    
     def defaultCompletion(self, settings, callback):
         if not self.completerTask.isRunning():
             self.completerTask = self.application.scheduler.newTask(self.completionSuggestions(settings = settings))

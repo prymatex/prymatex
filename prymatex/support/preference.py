@@ -7,7 +7,6 @@
     
     completions, an array of additional candidates when cycling through completion candidates from the current document.
     completionCommand, a shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
-    executeCompletionCommand, a command item
     disableDefaultCompletion, set to 1 if you want to exclude matches from the current document when asking for completion candidates (useful when you provide your own completion command).
 
     decreaseIndentPattern, regular expression.
@@ -33,7 +32,7 @@ from prymatex.support.snippet import PMXSnippet
 from prymatex.support.processor import PMXDebugSnippetProcessor
 
 class PMXPreferenceSettings(object):
-    KEYS = [    'completions', 'completionCommand', 'executeCompletionCommand', 'disableDefaultCompletion', 'showInSymbolList', 'symbolTransformation', 
+    KEYS = [    'completions', 'completionCommand', 'disableDefaultCompletion', 'showInSymbolList', 'symbolTransformation', 
                 'highlightPairs', 'smartTypingPairs', 'shellVariables', 'spellChecking',
                 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
     INDENT_KEYS = [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
@@ -99,16 +98,10 @@ class PMXPreferenceMasterSettings(object):
                 return settings.completionCommand
                 
     @property
-    def executeCompletionCommand(self):
-        for settings in self.settings:
-            if settings.executeCompletionCommand is not None:
-                return settings.executeCompletionCommand
-                
-    @property
     def disableDefaultCompletion(self):
         for settings in self.settings:
-            if settings.executeCompletionCommand is not None:
-                return settings.executeCompletionCommand
+            if settings.disableDefaultCompletion is not None:
+                return settings.disableDefaultCompletion
         
     @property
     def showInSymbolList(self):

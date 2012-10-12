@@ -193,6 +193,10 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
         self.application.handleUrlCommand(kwargs["url"])
         self.sendResult()
 
+    def completer(self, **kwargs):
+        self.application.currentEditor().runCompleter()
+        self.sendResult()
+        
     def terminal(self, **kwargs):
         for command in kwargs["commands"]:
             self.application.mainWindow.terminal.runCommand(command)
