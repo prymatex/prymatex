@@ -15,30 +15,6 @@ from prymatex.utils.decorators.memoize import memoized
 
 THEME_ICON_TEST = "document-open"
 
-INTERNAL = {
-    #Icons
-    "save": ":/icons/actions/document-save.png",
-    "inserttext": ":/icons/actions/insert-text.png",
-    "codefunction": ":/icons/actions/code-function.png",
-    "codevariable": ":/icons/actions/code-variable.png",
-    "projectnew": ":/icons/actions/project-development-new-template.png",
-    "projectopen": ":/icons/actions/project-open.png",
-    "projectclose": ":/icons/actions/project-development-close.png",
-    "important": ":/icons/emblems/emblem-important.png",
-    "stack-open": ":/icons/emblems/image-stack-open.png",
-    "stack": ":/icons/emblems/image-stack.png",    
-
-    "gearfile": ":/icons/actions/run-build-file.png",
-    "gearconfigure": ":/icons/actions/run-build-configure.png",
-    "textcolor": ":/icons/actions/format-text-color.png",
-    
-    # For menus
-    "close":":/icons/actions/document-close.png", 
-    "closeall":":/icons/actions/project-development-close-all.png",
-    "copy":":/icons/actions/edit-copy.png",
-    "find":":/icons/actions/edit-find.png",
-}
-
 # TODO: Migrar al uso de la calve por defecto
 STATICMAPPING = (
     #Splash Image
@@ -98,18 +74,20 @@ STATICMAPPING = (
 RESOURCES = {}
 RESOURCES_READY = False
 
-EXTERNAL = {}
-
-PLUGINS = {}
-
 FileIconProvider = QtGui.QFileIconProvider()
 
-def getImagePath(index):
-    return RESOURCES.get(index) or EXTERNAL.get(index)
+def getResourcePath(name, sources = None):
+    if sources is not None:
+        sources = sources if isinstance(sources, (list, tuple)) else (sources, )
+    else:
+        sources = RESOURCES.keys()
+    for source in sources:
+        if source in RESOURCES and name in RESOURCES[source]:
+            return RESOURCES[source].get(name)
 
 @memoized
 def getImage(index):
-    path = getImagePath(index)
+    path = getResourcePath(index)
     if path is not None:
         return QtGui.QPixmap(path)
 
@@ -122,7 +100,7 @@ def getIcon(index, default = None):
     @return: QIcon instance or None if no icon could be retrieved
     '''
     #Try icon in db
-    path = getImagePath(index)
+    path = getResourcePath(index, ["Icons", "External"])
     if path is not None:
         return QtGui.QIcon(path)
     elif isinstance(index, basestring):
@@ -145,10 +123,10 @@ def getIcon(index, default = None):
 #===============================================================
 # LOAD RESOURCES
 #===============================================================
-def buildResourceKey(filename, namePrefixes):
+def buildResourceKey(filename, namePrefixes, installedKeys):
     resourceKey, _ = os.path.splitext(filename)
     index = -1
-    while resourceKey in RESOURCES and index:
+    while resourceKey in installedKeys and index:
         newKey = "-".join(namePrefixes[index:] + [resourceKey])
         if newKey == resourceKey:
             raise Exception("Esto no puede ocurrir")
@@ -157,22 +135,22 @@ def buildResourceKey(filename, namePrefixes):
     return resourceKey
 
 def loadResources(resourcesPath, staticMapping = []):
-    resources ={}
-    iconsPath = os.path.join(resourcesPath, "Icons")
-    imagesPath = os.path.join(resourcesPath, "Images")
-    print iconsPath, imagesPath
-    #Load custom images and icons
-    for pixmapPath in [ imagesPath, iconsPath ]:
-        for dirpath, dirnames, filenames in os.walk(pixmapPath):
+    def loadSourcePath(sourcePath):
+        sources ={}
+        for dirpath, dirnames, filenames in os.walk(sourcePath):
             for filename in filenames:
                 iconPath = os.path.join(dirpath, filename)
                 staticNames = filter(lambda (path, names): iconPath.endswith(path), staticMapping)
                 if staticNames:
                     for name in staticNames:
-                        resources[name[1]] = iconPath
+                        sources[name[1]] = iconPath
                 else:
-                    name = buildResourceKey(filename, osextra.path.fullsplit(dirpath))
-                    resources[name] = iconPath
+                    name = buildResourceKey(filename, osextra.path.fullsplit(dirpath), sources)
+                    sources[name] = iconPath
+        return sources
+    resources = {}
+    for source in [ "Icons", "Images" ]:
+        resources[source] = loadSourcePath(os.path.join(resourcesPath, source))
     return resources
 
 def loadPrymatexResources(resourcesPath, themeName = "oxygen"):
@@ -185,7 +163,7 @@ def loadPrymatexResources(resourcesPath, themeName = "oxygen"):
             QtGui.QIcon.setThemeSearchPaths([ themesPath ])
             QtGui.QIcon.setThemeName(themeName)
         RESOURCES = loadResources(resourcesPath, STATICMAPPING)
-        
+
         #Install fromTheme custom function
         QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
         QtGui.QIcon.fromTheme = staticmethod(getIcon)
@@ -223,8 +201,9 @@ FIND_MATCH_STYLE = 'background-color: #dea;'
 def getFileType(fileInfo):
     return FileIconProvider.type(fileInfo)
 
-def registerImagePath(index, path):
-    EXTERNAL[index] = path
+def registerImagePath(name, path):
+    external = RESOURCES.setdefault("External", {})
+    external[name] = path
     
 class ResourceProvider(dict):
     def getImage(self, index):
