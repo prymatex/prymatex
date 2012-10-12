@@ -61,10 +61,8 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
         
     def setFilePath(self, filePath):
         self.filePath = filePath
+        self.project = self.application.projectManager.findProjectForPath(filePath)
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
-        
-    def setProject(self, project):
-        self.project = project
         
     def tabIcon(self):
         baseIcon = QtGui.QIcon()
