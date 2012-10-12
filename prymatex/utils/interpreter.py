@@ -1,10 +1,13 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# Copyright © 2009-2010 Pierre Raybaut
-# Licensed under the terms of the MIT License
-# (see spyderlib/__init__.py for details)
 
-"""Shell Interpreter"""
+"""
+Shell Interpreter
+
+Come from Spyder
+Source code (spyderlib/utils/interpreter.py) Copyright © 2009-2010 Pierre Raybaut
+Licensed under the terms of the MIT License
+"""
 
 import sys
 import atexit
@@ -18,7 +21,7 @@ from subprocess import Popen, PIPE
 from code import InteractiveConsole
 
 # Local imports:
-from spyderlib.utils.dochelpers import isdefined
+from prymatex.utils.dochelpers import isdefined
 from prymatex.utils import encoding
 
 # Force Python to search modules in the current directory first:

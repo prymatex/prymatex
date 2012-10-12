@@ -5,12 +5,11 @@ import os
 import sys
 import logging
 import inspect
-from logging import getLogger
-
-from PyQt4 import QtGui, QtCore, Qt
 
 import prymatex
 from prymatex import resources
+
+from prymatex.qt import QtGui, QtCore, Qt
 
 from prymatex.core import exceptions
 from prymatex.core.logger import NameFilter
@@ -34,7 +33,7 @@ class PMXApplication(QtGui.QApplication):
         QtGui.QApplication.__init__(self, [])
         
         # Some init's
-        self.setApplicationName(prymatex.__name__)
+        self.setApplicationName(prymatex.__name__.title())
         self.setApplicationVersion(prymatex.__version__)
         self.setOrganizationDomain(prymatex.__url__)
         self.setOrganizationName(prymatex.__author__)

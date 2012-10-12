@@ -12,20 +12,20 @@ Licensed under the terms of the MIT License
 import os, re
 import os.path as osp
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 # Local import
+import prymatex
 from prymatex import resources
 from prymatex.utils import programs
 
 def qapplication(translate=True):
-    """Return QApplication instance
-    Creates it if it doesn't already exist"""
+    """Return QApplication instance creates it if it doesn't already exist"""
     app = QtGui.QApplication.instance()
     if not app:
-        # Set Application name for Gnome 3
-        # https://groups.google.com/forum/#!topic/pyside/24qxvwfrRDs
-        app = QtGui.QApplication(['Spyder'])
+        app = QtGui.QApplication([])
+        # Set Application name for Gnome 3 (https://groups.google.com/forum/#!topic/pyside/24qxvwfrRDs)
+        app.setApplicationName(prymatex.__name__.title())
     if translate:
         install_translator(app)
     return app

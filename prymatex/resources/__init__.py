@@ -3,7 +3,7 @@
 
 import os, sys
 
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
 
 from prymatex.utils import osextra
 from prymatex.utils.decorators.memoize import memoized
@@ -160,6 +160,7 @@ def loadResources(resourcesPath, staticMapping = []):
     resources ={}
     iconsPath = os.path.join(resourcesPath, "Icons")
     imagesPath = os.path.join(resourcesPath, "Images")
+    print iconsPath, imagesPath
     #Load custom images and icons
     for pixmapPath in [ imagesPath, iconsPath ]:
         for dirpath, dirnames, filenames in os.walk(pixmapPath):
