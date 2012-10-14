@@ -39,7 +39,8 @@ class GitHubSearchBundleThread(QtCore.QThread):
                                        proxy_pass = data.password)
         # TODO: Socks
         
-        http = httplib2.Http(proxy_info = proxy)
+        http = httplib2.Http(proxy_info=proxy,
+                             disable_ssl_certificate_validation=True)
         
         return http
     
