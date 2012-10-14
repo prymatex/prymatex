@@ -430,7 +430,6 @@ class CommandHandler(object):
     def close_window(self, options, args):
         """docstring for close_window"""
         kwargs = {}
-        kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
         kwargs["token"] = options.close_window
 
         command = {"name": "close_window", "kwargs": kwargs}
@@ -441,7 +440,6 @@ class CommandHandler(object):
     def wait_for_input(self, options, args):
         """docstring for wait_for_input"""
         kwargs = {}
-        kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
         kwargs["token"] = options.wait_for_input
 
         command = {"name": "wait_for_input", "kwargs": kwargs}

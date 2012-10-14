@@ -95,21 +95,18 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
         self.sendResult()
 
     def close_window(self, **kwargs):
-        try:
-            parameters = plistlib.readPlistFromString(kwargs["parameters"])
-        except ExpatError:
-            parameters = {}
         instance = self.dialogInstance(int(kwargs["token"]))
         instance.close()
         self.sendResult()
 
     def wait_for_input(self, **kwargs):
-        try:
-            parameters = plistlib.readPlistFromString(kwargs["parameters"])
-        except ExpatError:
-            parameters = {}
         instance = self.dialogInstance(int(kwargs["token"]))
-        self.sendResult()
+        def sendInputResult(result):
+            if result is not None:
+                self.sendResult(result)
+            else:
+                self.sendResult({}) 
+        instance.waitForInput(sendInputResult)
 
     def modal_window(self, **kwargs):
         try:
