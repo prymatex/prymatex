@@ -8,7 +8,7 @@ from prymatex import resources
 from prymatex.core.plugin.editor import PMXBaseEditorAddon
 from prymatex.gui.codeeditor.addons import HighlightCurrentSelectionAddon
 
-class PMXSideBar(QtGui.QWidget):
+class CodeEditorSideBar(QtGui.QWidget):
     updateRequest = QtCore.pyqtSignal()
     
     def __init__(self, editor):
@@ -21,7 +21,13 @@ class PMXSideBar(QtGui.QWidget):
         
     def addWidget(self, widget):
         self.horizontalLayout.addWidget(widget)
-        widget.updateRequest.connect(lambda sidebar = self: sidebar.updateRequest.emit())
+        widget.installEventFilter(self)
+
+    def eventFilter(self, obj, event):
+        if event.type() in [ QtCore.QEvent.Hide, QtCore.QEvent.Show ]:
+            self.updateRequest.emit()
+            return True
+        return QtCore.QObject.eventFilter(self, obj, event)
 
     def width(self):
         width = 0
@@ -38,16 +44,8 @@ class PMXSideBar(QtGui.QWidget):
 #========================================
 # BASE EDITOR SIDEBAR ADDON
 #========================================
-class SideBarWidgetAddon(QtGui.QWidget, PMXBaseEditorAddon):
+class SideBarWidgetAddon(PMXBaseEditorAddon):
     ALIGNMENT = None
-    updateRequest = QtCore.pyqtSignal()
-    
-    def __init__(self, parent):
-        QtGui.QWidget.__init__(self, parent)
-    
-    def setVisible(self, value):
-        QtGui.QWidget.setVisible(self, value)
-        self.updateRequest.emit()
 
     def translatePosition(self, position):
         font_metrics = QtGui.QFontMetrics(self.editor.font)
@@ -69,9 +67,12 @@ class SideBarWidgetAddon(QtGui.QWidget, PMXBaseEditorAddon):
 #=======================================
 # SideBar Widgets
 #=======================================
-class LineNumberSideBarAddon(SideBarWidgetAddon):
+class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
     MARGIN = 10
+    def __init__(self, parent):
+        QtGui.QWidget.__init__(self, parent)
+
     def initialize(self, editor):
         SideBarWidgetAddon.initialize(self, editor)
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
@@ -87,7 +88,6 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
         self.editor.blockCountChanged.connect(self.updateWidth)
         self.editor.themeChanged.connect(self.updateColours)
     
-    
     def updateColours(self):
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
         self.foreground = self.editor.colours["foreground"]
@@ -97,7 +97,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
         width = self.fontMetrics().width(str(newBlockCount)) + self.MARGIN
         if self.width() != width:
             self.setFixedWidth(width)
-            self.updateRequest.emit()
+            #self.updateSideBarRequest.emit()
 
     @classmethod
     def contributeToMainMenu(cls):
@@ -187,11 +187,11 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
         self.__background = color
     """
     
-class BookmarkSideBarAddon(SideBarWidgetAddon):
+class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
     def __init__(self, parent):
-        SideBarWidgetAddon.__init__(self, parent)
+        QtGui.QWidget.__init__(self, parent)
         self.bookmarkflagImage = resources.getImage("bookmarkflag")
         self.setFixedWidth(self.bookmarkflagImage.width())
         
@@ -255,11 +255,11 @@ class BookmarkSideBarAddon(SideBarWidgetAddon):
         self.editor.toggleBookmark(block)
         self.repaint(self.rect())
             
-class FoldingSideBarAddon(SideBarWidgetAddon):
+class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
     def __init__(self, parent):
-        SideBarWidgetAddon.__init__(self, parent)
+        QtGui.QWidget.__init__(self, parent)
         self.foldingcollapsedImage = resources.getImage("foldingcollapsed")
         self.foldingtopImage = resources.getImage("foldingtop")
         self.foldingbottomImage = resources.getImage("foldingbottom")
@@ -341,11 +341,11 @@ class FoldingSideBarAddon(SideBarWidgetAddon):
             else:
                 self.editor.codeFoldingFold(block)
 
-class SelectionSideBarAddon(SideBarWidgetAddon):
+class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignRight
     
     def __init__(self, parent):
-        SideBarWidgetAddon.__init__(self, parent)
+        QtGui.QWidget.__init__(self, parent)
         self.setFixedWidth(10)
         
     def initialize(self, editor):

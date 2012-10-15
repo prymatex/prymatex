@@ -384,18 +384,16 @@ class PMXApplication(QtGui.QApplication):
 
         #TODO: Testeame con mas de una
         for _ in range(1):
-            mainWindow = PMXMainWindow(self)
+            self.mainWindow = PMXMainWindow(self)
 
             #Configure and add dockers
-            self.pluginManager.populateMainWindow(mainWindow)
-            self.settings.configure(mainWindow)
-            mainWindow.show()
-            self.settings.restoreState(mainWindow)
+            self.pluginManager.populateMainWindow(self.mainWindow)
+            self.settings.configure(self.mainWindow)
+            self.mainWindow.show()
+            self.settings.restoreState(self.mainWindow)
             
-            if not mainWindow.editors():
-                mainWindow.addEmptyEditor()
-                    
-            self.mainWindow = mainWindow
+            if not self.mainWindow.editors():
+                self.mainWindow.addEmptyEditor()
 
     def showMessage(self, message):
         #Si tengo mainwindow vamos por este camino, sino hacerlo llegar de otra forma

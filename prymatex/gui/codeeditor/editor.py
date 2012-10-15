@@ -24,7 +24,7 @@ from prymatex.gui.support.models import PMXBundleTreeNode
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.gui import utils
 from prymatex.gui.codeeditor.addons import CodeEditorAddon
-from prymatex.gui.codeeditor.sidebar import PMXSideBar, SideBarWidgetAddon
+from prymatex.gui.codeeditor.sidebar import CodeEditorSideBar, SideBarWidgetAddon
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
@@ -167,8 +167,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         PMXBaseEditor.__init__(self)
 
         #Sidebars
-        self.leftBar = PMXSideBar(self)
-        self.rightBar = PMXSideBar(self)
+        self.leftBar = CodeEditorSideBar(self)
+        self.rightBar = CodeEditorSideBar(self)
         #self.updateViewportMargins()
 
         #Models

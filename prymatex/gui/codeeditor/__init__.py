@@ -38,7 +38,7 @@ def registerPlugin(manager):
     manager.registerAddon(CodeEditor, addons.SpellCheckerAddon)
     manager.registerAddon(CodeEditor, addons.HighlightCurrentSelectionAddon)
 
-    #manager.registerAddon(CodeEditor, minimap.MiniMapAddon)
+    manager.registerAddon(CodeEditor, minimap.MiniMapAddon)
     manager.registerAddon(CodeEditor, sidebar.BookmarkSideBarAddon)
     manager.registerAddon(CodeEditor, sidebar.LineNumberSideBarAddon)
     manager.registerAddon(CodeEditor, sidebar.FoldingSideBarAddon)
