@@ -80,8 +80,8 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
             self.skip = cursor1 is not None and cursor2 is not None and character == cursor2.selectedText()
             return self.skip
 
-        ctrl_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
-        if isOpen and ctrl_down:
+        meta_down = bool(event.modifiers() & QtCore.Qt.MetaModifier)
+        if isOpen and meta_down:
             self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor, direction = "left")
             if self.cursor1 is not None and self.cursor2 is not None:
                 self.cursor1.setPosition(self.cursor1.selectionEnd())
@@ -98,11 +98,16 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
                 self.cursor1.insertText(self.pair[0])
                 self.cursor2.insertText(self.pair[1])
             else:
-                position = cursor.selectionStart()
+                position = cursor.position()
+                cursorBegin = cursor.selectionStart() == position
                 text = self.pair[0] + cursor.selectedText() + self.pair[1]
                 cursor.insertText(text)
-                cursor.setPosition(position)
-                cursor.setPosition(position + len(text), QtGui.QTextCursor.KeepAnchor)
+                if cursorBegin:
+                    cursor.setPosition(position + len(text))
+                    cursor.setPosition(position, QtGui.QTextCursor.KeepAnchor)
+                else:
+                    cursor.setPosition(position - len(text) + 2)
+                    cursor.setPosition(position + 2, QtGui.QTextCursor.KeepAnchor)
                 self.editor.setTextCursor(cursor)
         elif self.cursor1 is not None and self.cursor2 is not None:
             self.cursor1.insertText(self.pair[0])
