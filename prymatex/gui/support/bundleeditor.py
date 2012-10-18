@@ -18,6 +18,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         self.namespace = None
         self.application = application
         self.manager = self.application.supportManager
+        self.proxyTreeModel = self.manager.bundleProxyTreeModel
         
         self.finished.connect(self.on_bundleEditor_finished)
         
@@ -206,6 +207,10 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
     #==========================================================
     # Filter Top Bar
     #==========================================================
+    def on_comboBoxItemFilter_returnPressed(self):
+        self.proxyTreeModel.setFilterBundleItemType(None)
+        self.proxyTreeModel.setFilterRegExp(".*%s.*" % self.comboBoxItemFilter.currentText())
+    
     @QtCore.pyqtSlot(int)
     def on_comboBoxItemFilter_activated(self, index):
         value = self.comboBoxItemFilter.itemData(index)
@@ -221,7 +226,9 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-preference"), "Preferences", "preference")
         self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-template"), "Templates", "template templatefile")
         self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-project"), "Projects", "project templatefile")
-    
+        self.comboBoxItemFilter.setInsertPolicy(QtGui.QComboBox.NoInsert)
+        self.comboBoxItemFilter.lineEdit().returnPressed.connect(self.on_comboBoxItemFilter_returnPressed)
+        
     #==========================================================
     # Tree View
     #==========================================================
@@ -254,7 +261,6 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
             self.editTreeItem(None)
             
     def configTreeView(self, manager = None):
-        self.proxyTreeModel = self.manager.bundleProxyTreeModel
         self.proxyTreeModel.dataChanged.connect(self.on_proxyTreeModel_dataChanged)
         
         self.treeView.setModel(self.proxyTreeModel)

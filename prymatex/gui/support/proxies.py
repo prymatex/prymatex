@@ -24,7 +24,7 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
             if node.TYPE not in self.bundleItemTypesFilter:
                 return False
         regexp = self.filterRegExp()
-        if not regexp.isEmpty():
+        if not (regexp.isEmpty() or node.TYPE == "bundle"):
             return regexp.indexIn(node.name) != -1
         return True
         
@@ -61,7 +61,7 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
         else:
             self.namespacesFilter = [ "prymatex", "user" ]
         self.setFilterRegExp("")
-        
+    
     def setFilterBundleItemType(self, bundleItemType):
         if bundleItemType:
             self.bundleItemTypesFilter = [ "bundle" ] + bundleItemType.split()
