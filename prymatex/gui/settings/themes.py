@@ -47,7 +47,7 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
 
     NAMESPACE = "editor"
     TITLE = "Font and Themes"
-    ICON = resources.getIcon("textcolor")
+    ICON = resources.getIcon("fill-color")
     
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)

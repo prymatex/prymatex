@@ -9,7 +9,7 @@ from prymatex.gui.settings.models import PMXSettingTreeNode
 
 class PMXGeneralWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_GeneralWidget):
     TITLE = "General"
-    ICON = resources.getIcon("gearconfigure")
+    ICON = resources.getIcon("preferences-other")
     
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)

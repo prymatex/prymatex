@@ -65,6 +65,7 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
     def setCurrentSettingWidget(self, widget):
         self.stackedWidget.setCurrentWidget(widget)
         self.textLabelTitle.setText(widget.title)
+        self.textLabelPixmap.setPixmap(widget.icon.pixmap(20, 20))
         self.setWindowTitle("%s - %s" % (self.baseWindowTitle, widget.title))
     
     def register(self, widget):

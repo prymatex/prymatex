@@ -10,7 +10,7 @@ from prymatex.gui.codeeditor.editor import CodeEditor
     
 class PMXEditorWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_EditorWidget):
     TITLE = "Editor"
-    ICON = resources.getIcon("gearfile")
+    ICON = resources.getIcon("accessories-text-editor")
     
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)

@@ -69,6 +69,7 @@ class PMXPropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseWidgetCompo
         widget.edit(self.proxyModelProperties.fileSystemItem)
         self.stackedWidget.setCurrentWidget(widget)
         self.textLabelTitle.setText(widget.title)
+        self.textLabelPixmap.setPixmap(widget.icon.pixmap(20, 20))
         self.setWindowTitle("%s - %s" % (self.baseWindowTitle, widget.title))
     
     def register(self, widget):
