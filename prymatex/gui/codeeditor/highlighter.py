@@ -47,7 +47,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         for method in dir(editor):
             match = RE_MAGIC_FORMAT_BUILDER.match(method)
             if match:
-                self.registerTextCharFormatBuilder("#%s" % match.group(1), getattr(editor, method))
+                self.registerTextCharFormatBuilder("%s" % match.group(1), getattr(editor, method))
     
         #Conect signals
         self.editor.afterOpen.connect(self.on_editor_afterOpen)
@@ -114,7 +114,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def setupBlockUserData(self, text, block, userData):
         userData.setRanges(self.processor.scopeRanges)
         userData.setChunks(self.processor.lineChunks)
-            
+        # TODO UserDataProcessors?
         #1 Update words
         if userData.words != self.processor.words:
             self.editor.updateWords(block, userData, self.processor.words)
@@ -198,15 +198,15 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             if format is not None:
                 self.setFormat(start, end - start, format)
 
-    def highlightFormat(self, scopeOrHash):
+    def highlightFormat(self, scope):
         if self.theme is None:
             return None
-        if scopeOrHash not in PMXSyntaxHighlighter.FORMAT_CACHE:
-            if scopeOrHash in self.textCharFormatBuilders:
-                format = self.textCharFormatBuilders[scopeOrHash]()
+        if scope not in PMXSyntaxHighlighter.FORMAT_CACHE:
+            if scope in self.textCharFormatBuilders:
+                format = self.textCharFormatBuilders[scope]()
             else:
                 format = QtGui.QTextCharFormat()
-                settings = self.theme.getStyle(scopeOrHash)
+                settings = self.theme.getStyle(scope)
                 if 'foreground' in settings:
                     format.setForeground(settings['foreground'])
                 if 'background' in settings:
@@ -218,5 +218,5 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                         format.setFontUnderline(True)
                     if 'italic' in settings['fontStyle']:
                         format.setFontItalic(True)
-            PMXSyntaxHighlighter.FORMAT_CACHE[scopeOrHash] = format 
-        return PMXSyntaxHighlighter.FORMAT_CACHE[scopeOrHash]
+            PMXSyntaxHighlighter.FORMAT_CACHE[scope] = format 
+        return PMXSyntaxHighlighter.FORMAT_CACHE[scope]

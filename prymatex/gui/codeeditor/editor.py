@@ -338,7 +338,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     
     def reload(self):
         self.beforeReload.emit()
-        PMXBaseEditor.reload(self)
+        content = self.application.fileManager.readFile(self.filePath)
+        self.setPlainText(content)
         self.afterReload.emit()
 
     def saveState(self):
@@ -745,29 +746,32 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         else:
             cursor = self.textCursor()
             cursor.clearSelection()
-            self.extraSelectionCursors["#line"] = [cursor]
-            self.extraSelectionCursors["#brace"] = filter(lambda cursor: cursor is not None, list(self._currentBraces))
+            self.extraSelectionCursors["line"] = [cursor]
+            self.extraSelectionCursors["brace"] = filter(lambda cursor: cursor is not None, list(self._currentBraces))
         for addon in self.addons:
             if isinstance(addon, CodeEditorAddon):
                 self.extraSelectionCursors.update(addon.extraSelectionCursors())
         extraSelections = reduce(
             lambda l1, l2: l1 + l2, 
             map(
-                lambda (styleHash, cursors): self.buildExtraSelections(styleHash, cursors),
+                lambda (scope, cursors): self.buildExtraSelections(scope, cursors),
                 self.extraSelectionCursors.iteritems()
             ), [])
         self.setExtraSelections(extraSelections)
         self.extraSelectionChanged.emit()
 
-    def extraSelectionCursorsByHash(self, styleHash):
-        return self.extraSelectionCursors[styleHash] if styleHash in self.extraSelectionCursors else []
+    def extraSelectionCursorsByScope(self, scope):
+        # TODO tomar los scopes buscando por cadena, quiza si esto crece sea mejor el score
+        cursors = filter(lambda (key, _): key.startswith(scope), self.extraSelectionCursors.iteritems())
+        print cursors
+        return reduce(lambda c1, (key, c2): c1 + c2, cursors, [])
         
-    def buildExtraSelections(self, styleHash, cursors):
+    def buildExtraSelections(self, scope, cursors):
         extraSelections = []
         cursors = cursors if isinstance(cursors, list) else [ cursors ]
         for cursor in cursors:
             selection = QtGui.QTextEdit.ExtraSelection()
-            selection.format = self.syntaxHighlighter.highlightFormat(styleHash)
+            selection.format = self.syntaxHighlighter.highlightFormat(scope)
             selection.cursor = cursor
             extraSelections.append(selection)
         return extraSelections

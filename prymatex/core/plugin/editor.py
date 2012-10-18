@@ -31,8 +31,6 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
     def open(self, filePath):
         """ Open file """
         self.application.fileManager.openFile(filePath)
-        content = self.application.fileManager.readFile(filePath)
-        self.setPlainText(content)
         self.setFilePath(filePath)
 
     def save(self, filePath):
@@ -55,8 +53,6 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
 
     def reload(self):
         """ Reload current file """
-        content = self.application.fileManager.readFile(self.filePath)
-        self.setPlainText(content)
         self.setExternalAction(None)
         
     def setFilePath(self, filePath):

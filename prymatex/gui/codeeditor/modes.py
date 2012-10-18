@@ -149,13 +149,13 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
 
     def extraSelectionCursors(self):
         cursors = {}
-        cursors["#selection"] = filter(lambda c: c.hasSelection(), map(lambda c: QtGui.QTextCursor(c), self.cursors))
+        cursors["selection"] = filter(lambda c: c.hasSelection(), map(lambda c: QtGui.QTextCursor(c), self.cursors))
         cursorLines = []
         for cursorLine in map(lambda c: QtGui.QTextCursor(c), self.cursors):
             if all(map(lambda c: c.block() != cursorLine.block(), cursorLines)):
                 cursorLine.clearSelection()
                 cursorLines.append(cursorLine)
-        cursors["#line"] = cursorLines
+        cursors["line"] = cursorLines
         return cursors
     
     @property

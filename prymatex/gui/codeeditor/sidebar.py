@@ -380,7 +380,6 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         return {baseMenu: menuEntry} 
 
     def paintEvent(self, event):
-            
         font_metrics = QtGui.QFontMetrics(self.editor.font)
         page_bottom = self.editor.viewport().height()
         
@@ -397,8 +396,8 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         painter.fillRect(self.rect(), self.background)
 
         viewport_offset = self.editor.contentOffset()
-        
-        for cursor in self.editor.extraSelectionCursorsByHash("#selection"):
+
+        for cursor in self.editor.extraSelectionCursorsByScope("selection"):
             y = round(cursor.block().blockNumber() * rectRelation)
             if rectRelation == lineHeight:
                 y += viewport_offset.y()

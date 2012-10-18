@@ -63,7 +63,7 @@ class SpellCheckerAddon(CodeEditorAddon):
     def initialize(self, editor):
         CodeEditorAddon.initialize(self, editor)
         if self.dictionary is not None:
-            editor.registerTextCharFormatBuilder("#spell", self.textCharFormat_spell_builder)
+            editor.registerTextCharFormatBuilder("spell", self.textCharFormat_spell_builder)
             editor.syntaxReady.connect(self.on_editor_syntaxReady)
             self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
 
@@ -174,10 +174,18 @@ class HighlightCurrentSelectionAddon(CodeEditorAddon):
 
     def initialize(self, editor):
         CodeEditorAddon.initialize(self, editor)
+        editor.registerTextCharFormatBuilder("selection.extra", self.textCharFormat_extraSelection_builder)
         editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
 
+    def textCharFormat_extraSelection_builder(self):
+        format = QtGui.QTextCharFormat()
+        color = QtGui.QColor(self.editor.colours['selection'])
+        color.setAlpha(128)
+        format.setBackground(color)
+        return format
+    
     def extraSelectionCursors(self):
-        return { "#selection": self.highlightCursors[:] }
+        return { "selection.extra": self.highlightCursors[:] }
 
     def on_editor_cursorPositionChanged(self):
         cursor = self.editor.textCursor()
