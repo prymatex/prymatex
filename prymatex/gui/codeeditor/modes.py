@@ -242,8 +242,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         return hight, width, puntos
         
     def addMergeCursor(self, cursor):
-        """
-        Only can add new cursors, if the cursor has selection then try to merge with others
+        """Only can add new cursors, if the cursor has selection then try to merge with others
         """
         firstCursor = not bool(self.cursors)
         if cursor.hasSelection():

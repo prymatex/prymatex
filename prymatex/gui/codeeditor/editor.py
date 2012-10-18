@@ -339,7 +339,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def reload(self):
         self.beforeReload.emit()
         content = self.application.fileManager.readFile(self.filePath)
-        self.setPlainText(content)
+        self.updatePlainText(content)
+        PMXBaseEditor.reload(self)
         self.afterReload.emit()
 
     def saveState(self):
@@ -763,7 +764,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def extraSelectionCursorsByScope(self, scope):
         # TODO tomar los scopes buscando por cadena, quiza si esto crece sea mejor el score
         cursors = filter(lambda (key, _): key.startswith(scope), self.extraSelectionCursors.iteritems())
-        print cursors
         return reduce(lambda c1, (key, c2): c1 + c2, cursors, [])
         
     def buildExtraSelections(self, scope, cursors):
@@ -974,6 +974,32 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #==========================================================================
     # Insert API
     #==========================================================================
+    def updatePlainText(self, text):
+        # TODO Muejejejejejejejejej
+        import difflib
+        
+        def insert_action(cursor, text):
+            def _insert():
+                cursor.insertText(text)
+            return _insert
+
+        def delete_action(cursor):
+            def _delete():
+                cursor.removeSelectedText()
+            return _delete
+        
+        sequenceMatcher = difflib.SequenceMatcher(None, self.toPlainText(), text)
+        opcodes = sequenceMatcher.get_opcodes()
+        insertCodes = filter(lambda opcode: opcode[0] == "insert", opcodes)
+        deleteCodes = filter(lambda opcode: opcode[0] == "delete", opcodes)
+        
+        insertActions = map(lambda code: insert_action(self.newCursorAtPosition(code[1], code[2]), text[code[3]:code[4]]), insertCodes)
+        deleteActions = map(lambda code: delete_action(self.newCursorAtPosition(code[1], code[2])), deleteCodes)
+        
+        map(lambda action: action(), insertActions + deleteActions)
+        
+        self.ensureCursorVisible()
+
     def insertNewLine(self, cursor = None):
         cursor = cursor or self.textCursor()
         block = cursor.block()
@@ -1829,9 +1855,11 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #===========================================================================
     # Navigation API
     #===========================================================================
-    def newCursorAtPosition(self, position):
+    def newCursorAtPosition(self, position, anchor = None):
         cursor = QtGui.QTextCursor(self.document())
         cursor.setPosition(position)
+        if anchor is not None:
+            cursor.setPosition(anchor, QtGui.QTextCursor.KeepAnchor)
         return cursor
         
     def restoreLocationMemento(self, memento):
