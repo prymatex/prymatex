@@ -102,7 +102,7 @@ class PMXPluginManager(PMXBaseComponent):
             keyHelper = keyHelperClass(instance)
             instance.addKeyHelper(keyHelper)
             
-        self.application.settings.configure(instance)
+        self.application.profile.configure(instance)
         instance.initialize(mainWindow)
         
         instances = self.instances.setdefault(widgetClass, [])

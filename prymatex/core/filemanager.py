@@ -61,7 +61,7 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
     def __init__(self, application):
         QtCore.QObject.__init__(self)
         
-        self.last_directory = application.settings.USER_HOME_PATH
+        self.last_directory = application.profile.USER_HOME_PATH
         self.fileWatcher = QtCore.QFileSystemWatcher()
         self.fileWatcher.fileChanged.connect(self.on_fileChanged)
         self.fileWatcher.directoryChanged.connect(self.on_directoryChanged)

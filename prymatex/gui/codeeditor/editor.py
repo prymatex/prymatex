@@ -975,28 +975,26 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # Insert API
     #==========================================================================
     def updatePlainText(self, text):
-        # TODO Muejejejejejejejejej
+        # delta update Muejejejejejejejejej
         import difflib
         
-        def insert_action(cursor, text):
-            def _insert():
+        def perform_action(code, cursor, text=""):
+            def _nop():
+                pass
+            def _action():
                 cursor.insertText(text)
-            return _insert
-
-        def delete_action(cursor):
-            def _delete():
-                cursor.removeSelectedText()
-            return _delete
+            return _action if code in ["insert", "replace", "delete"] else _nop
         
         sequenceMatcher = difflib.SequenceMatcher(None, self.toPlainText(), text)
         opcodes = sequenceMatcher.get_opcodes()
-        insertCodes = filter(lambda opcode: opcode[0] == "insert", opcodes)
-        deleteCodes = filter(lambda opcode: opcode[0] == "delete", opcodes)
         
-        insertActions = map(lambda code: insert_action(self.newCursorAtPosition(code[1], code[2]), text[code[3]:code[4]]), insertCodes)
-        deleteActions = map(lambda code: delete_action(self.newCursorAtPosition(code[1], code[2])), deleteCodes)
+        actions = map(lambda code: perform_action(code[0], self.newCursorAtPosition(code[1], code[2]), text[code[3]:code[4]]), opcodes)
         
-        map(lambda action: action(), insertActions + deleteActions)
+        cursor = self.textCursor()
+        
+        cursor.beginEditBlock()
+        map(lambda action: action(), actions)
+        cursor.endEditBlock()
         
         self.ensureCursorVisible()
 
