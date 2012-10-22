@@ -89,7 +89,10 @@ class PMXProjectManager(QtCore.QObject, PMXBaseComponent):
         self.knownProjects.remove(project.path)
         self.settings.setValue('knownProjects', self.knownProjects)
     
-    def buildEnvironment(self):
+    #---------------------------------------------------
+    # Environment
+    #---------------------------------------------------
+    def environmentVariables(self):
         return {}
     
     def supportProjectEnvironment(self, project):

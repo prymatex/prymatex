@@ -26,10 +26,6 @@ class PMXBaseComponent(object):
         """Return a dictionary with the defined variables of this component.
         """
         return {}
-    
-    def buildEnvironment(self, **kwargs):
-        """DEPRECATED"""
-        return {}
 
 class PMXBaseWidgetComponent(PMXBaseComponent):
     def __init__(self):

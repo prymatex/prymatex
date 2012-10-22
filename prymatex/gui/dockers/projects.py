@@ -67,38 +67,14 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         indexes = self.treeViewProjects.selectedIndexes()
         if indexes:
             node = self.currentNode()
-            paths = map(lambda node: self.application.fileManager.normcase(node.path), [ self.projectTreeProxyModel.node(index) for index in indexes ])
+            paths = map(lambda node: self.application.fileManager.normcase(node.path),
+                        [ self.projectTreeProxyModel.node(index) for index in indexes ])
             environment.update({
                 'TM_SELECTED_FILE': node.path, 
                 'TM_SELECTED_FILES': " ".join(["'%s'" % path for path in paths ])
             })
         return environment
-
-    def buildEnvironment(self):
-        indexes = self.treeViewProjects.selectedIndexes()
-        env = {}
-        if indexes:
-            node = self.currentNode()
-            paths = map(lambda node: self.application.fileManager.normcase(node.path), [ self.projectTreeProxyModel.node(index) for index in indexes ])
-            env = {
-                'TM_SELECTED_FILE': node.path, 
-                'TM_SELECTED_FILES': " ".join(["'%s'" % path for path in paths ])
-            }
-            
-            if node.isfile:
-                env.update({
-                    'TM_FILEPATH': node.path,
-                    'TM_FILENAME': node.nodeName,
-                    'TM_DIRECTORY': node.parentNode.path,
-                })
-            else:
-                env.update({
-                    'TM_DIRECTORY': node.path,
-                })
-            
-            env.update(node.project.buildEnvironment())
-        return env
-            
+        
     def keyPressEvent(self, event):
         if not self.runKeyHelper(event):
             return QtGui.QDockWidget.keyPressEvent(self, event)
@@ -206,7 +182,13 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
     def on_contextMenu_triggered(self, action):
         if hasattr(action, "bundleTreeNode"):
-            self.mainWindow.insertBundleItem(action.bundleTreeNode)
+            node = self.currentNode()
+            env =   {   'TM_FILEPATH': node.path,
+                        'TM_FILENAME': node.nodeName,
+                        'TM_DIRECTORY': node.parentNode.path } if node.isfile else {   'TM_DIRECTORY': node.path }
+            
+            env.update(node.project.environmentVariables())
+            self.mainWindow.insertBundleItem(action.bundleTreeNode, environment = env)
     
     def extendFileSystemItemMenu(self, menu, node):
         utils.extendMenuSection(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete, self.actionRename])

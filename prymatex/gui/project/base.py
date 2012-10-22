@@ -116,14 +116,14 @@ class PMXProject(FileSystemTreeNode):
             except OSError:
                 pass
     
-    def buildEnvironment(self):
-        env = self.manager.buildEnvironment()
+    def environmentVariables(self):
+        environment = self.manager.environmentVariables()
         if isinstance(self.shellVariables, list):
             for var in self.shellVariables:
                 if var['enabled']:
-                    env[var['variable']] = var['value']
-        env.update(self.environment)
-        return env
+                    environment[var['variable']] = var['value']
+        environment.update(self.environment)
+        return environment
 
     @classmethod
     def loadProject(cls, path, manager):
