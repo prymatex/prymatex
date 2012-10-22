@@ -20,8 +20,7 @@ PMXSyntaxProcessor = type("PMXSyntaxProcessor", (object, ), {
 
 ######################### Command Processor #########################
 PMXCommandProcessor = type("PMXCommandProcessor", (object, ), {
-    "runCommand": nop,
-    "environment": nop,
+    "environmentVariables": nop,
     #Inputs
     "document": nop,
     "line": nop,
@@ -55,6 +54,7 @@ PMXCommandProcessor = type("PMXCommandProcessor", (object, ), {
 PMXSnippetProcessor = type("PMXSnippetProcessor", (object, ), {
     "startSnippet": nop,
     "endSnippet": nop,
+    "environmentVariables": nop,
     # transformations
     "startTransformation": nop,
     "endTransformation": nop,
@@ -70,6 +70,7 @@ PMXSnippetProcessor = type("PMXSnippetProcessor", (object, ), {
 PMXMacroProcessor = type("PMXMacroProcessor", (object, ), {
     "startMacro": nop,
     "endMacro": nop,
+    "environmentVariables": nop,
     # Move
     "moveRight": nop,
     "moveLeft": nop,

@@ -11,8 +11,7 @@ class PMXMacroProcessor(PMXMacroProcessor):
         super(PMXMacroProcessor, self).__init__()
         self.editor = editor
 
-    @property
-    def environment(self):
+    def environmentVariables(self):
         return self.__env
         
     def configure(self, settings):

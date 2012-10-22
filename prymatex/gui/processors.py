@@ -12,9 +12,8 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
         super(PMXCommandProcessor, self).__init__()
         self.mainWindow = mainWindow
 
-    def environment(self, command):
-        environment = command.buildEnvironment()
-        environment.update(self.mainWindow.buildEnvironment())
+    def environmentVariables(self):
+        environment = self.mainWindow.environmentVariables()
         environment.update(self.baseEnvironment)
         return environment
 

@@ -365,8 +365,9 @@ class VariableTabstop(Node):
         return node
     
     def render(self, processor):
-        if self.name in processor.environment:
-            processor.insertText(processor.environment[self.name])
+        environment = processor.environmentVariables()
+        if self.name in environment:
+            processor.insertText(environment[self.name])
 
 class VariablePlaceholder(NodeList):
     def __init__(self, scope, parent = None):
@@ -383,8 +384,9 @@ class VariablePlaceholder(NodeList):
     
     def render(self, processor):
         self.start = processor.cursorPosition()
-        if self.name in processor.environment:
-            processor.insertText(processor.environment[self.name])
+        environment = processor.environmentVariables()
+        if self.name in environment:
+            processor.insertText(environment[self.name])
         else:
             super(VariablePlaceholder, self).render(processor)
         self.end = processor.cursorPosition()
@@ -412,8 +414,9 @@ class VariableTransformation(Node):
         return node
     
     def render(self, processor):
-        if self.name in processor.environment:
-            text = self.regexp.transform(processor.environment[self.name], processor)
+        environment = processor.environmentVariables()
+        if self.name in environment:
+            text = self.regexp.transform(environment[self.name], processor)
             processor.insertText(text)
 
 class Regexp(NodeList):
@@ -545,7 +548,7 @@ class Shell(NodeList):
         # TODO Migrar a runing context
         def afterExecute(context):
             self.content = context.outputValue.strip().replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
-        with PMXRunningContext(self, unicode(self), processor.environment) as context:
+        with PMXRunningContext(self, unicode(self), processor.environmentVariables()) as context:
             context.asynchronous = False
             self.manager.runProcess(context, afterExecute)
         

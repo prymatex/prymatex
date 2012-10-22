@@ -151,7 +151,14 @@ class PMXBundle(PMXManagedObject):
             shutil.rmtree(self.path(namespace))
         except:
             pass
-            
+    
+    def environmentVariables(self):
+        environment = self.manager.environmentVariables()
+        environment['TM_BUNDLE_PATH'] = self.currentPath
+        if self.support != None:
+            environment['TM_BUNDLE_SUPPORT'] = self.support
+        return environment
+        
     def buildEnvironment(self):
         # TODO Aca no tiene porque ser un copy el manager tiene que manejar esta situacion, viola la encapsulacion
         env = copy(self.manager.buildEnvironment())
@@ -243,6 +250,9 @@ class PMXBundleItem(PMXManagedObject):
         except:
             pass
     
+    def environmentVariables(self):
+        return self.bundle.environmentVariables()
+    
     def buildEnvironment(self, **kwargs):
         env = self.bundle.buildEnvironment()
         return env
@@ -279,20 +289,23 @@ class PMXRunningContext(object):
     Asynchronous: {asynchronous}
     Working Directory: {workingDirectory}
     Input:  Type {inputType}, Value {inputValue}
-    Environment: {environment}
+    Base Environment: {baseEnvironment}
     Output: Type {outputType}, Value {outputValue}
     """
-    def __init__(self, bundleItem, shellCommand, environment):
+    def __init__(self, bundleItem, shellCommand, baseEnvironment):
         self.bundleItem = bundleItem
         self.inputType, self.inputValue = None, None
         self.shellCommand = shellCommand
-        self.environment = environment
+        self.baseEnvironment = baseEnvironment
         self.asynchronous = False
         self.outputValue = self.outputType = None
         self.workingDirectory = None
         
     def __enter__(self):
-        self.shellCommand, self.environment, self.tempFile = utils.prepareShellScript(self.shellCommand, self.environment)
+        #Build the full las environment with gui environment and support environment
+        environment = self.baseEnvironment.copy()
+        environment.update(self.bundleItem.environmentVariables())
+        self.shellCommand, self.environment, self.tempFile = utils.prepareShellScript(self.shellCommand, environment)
         return self
 
     def __exit__(self, type, value, traceback):

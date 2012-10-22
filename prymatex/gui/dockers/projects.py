@@ -62,6 +62,18 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         map(lambda index: index.isValid() and self.treeViewProjects.setExpanded(index, True), 
             map(lambda path: self.projectTreeProxyModel.indexForPath(path), state["expanded"]))
 
+    def environmentVariables(self):
+        environment = PMXBaseDock.environmentVariables(self)
+        indexes = self.treeViewProjects.selectedIndexes()
+        if indexes:
+            node = self.currentNode()
+            paths = map(lambda node: self.application.fileManager.normcase(node.path), [ self.projectTreeProxyModel.node(index) for index in indexes ])
+            environment.update({
+                'TM_SELECTED_FILE': node.path, 
+                'TM_SELECTED_FILES': " ".join(["'%s'" % path for path in paths ])
+            })
+        return environment
+
     def buildEnvironment(self):
         indexes = self.treeViewProjects.selectedIndexes()
         env = {}

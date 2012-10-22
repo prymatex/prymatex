@@ -118,6 +118,9 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     # Environment
     #---------------------------------------------------
+    def environmentVariables(self):
+        return self.environment.copy()
+    
     def addToEnvironment(self, name, value):
         self.environment[name] = value
 

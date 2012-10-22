@@ -82,10 +82,14 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
 
         meta_down = bool(event.modifiers() & QtCore.Qt.MetaModifier)
         if isOpen and meta_down:
-            self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor, direction = "left")
+            self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor)
             if self.cursor1 is not None and self.cursor2 is not None:
-                self.cursor1.setPosition(self.cursor1.selectionEnd())
-                self.cursor2.setPosition(self.cursor2.selectionStart())
+                if cursor.position() == self.cursor1.selectionStart():
+                    self.cursor1.setPosition(self.cursor1.selectionStart())
+                    self.cursor2.setPosition(self.cursor2.selectionEnd())
+                else:
+                    self.cursor1.setPosition(self.cursor1.selectionEnd())
+                    self.cursor2.setPosition(self.cursor2.selectionStart())
         word, wordStart, wordEnd = self.editor.currentWord(search = False)
         return not (wordStart <= cursor.position() < wordEnd)
         

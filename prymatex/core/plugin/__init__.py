@@ -21,8 +21,14 @@ class PMXBaseComponent(object):
     @classmethod
     def contributeToMainMenu(cls):
         return {}
-
+        
+    def environmentVariables(self):
+        """Return a dictionary with the defined variables of this component.
+        """
+        return {}
+    
     def buildEnvironment(self, **kwargs):
+        """DEPRECATED"""
         return {}
 
 class PMXBaseWidgetComponent(PMXBaseComponent):

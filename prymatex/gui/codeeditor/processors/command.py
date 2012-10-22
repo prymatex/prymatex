@@ -12,10 +12,9 @@ class PMXCommandProcessor(PMXCommandProcessor):
         super(PMXCommandProcessor, self).__init__()
         self.editor = editor
 
-    def environment(self, command):
-        environment = command.buildEnvironment()
-        environment.update(self.editor.mainWindow.buildEnvironment())
-        environment.update(self.editor.buildEnvironment())
+    def environmentVariables(self):
+        environment = self.editor.mainWindow.environmentVariables()
+        environment.update(self.editor.environmentVariables())
         environment.update(self.baseEnvironment)
         return environment
 
@@ -189,7 +188,9 @@ class PMXCommandProcessor(PMXCommandProcessor):
 
     def showAsTooltip(self, context):
         message = context.outputValue.strip()
-        timeout = len(message) * 20
+        timeout = len(message) * 10
+        if timeout > 2000:
+            timeout = 2000
 
         point = self.editor.cursorRect(self.editor.textCursor()).bottomRight()
         point = self.editor.mapToGlobal(point)

@@ -14,8 +14,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.tabreplacement = "\t"
         self.indentation = ""
 
-    @property
-    def environment(self, format = None):
+    def environmentVariables(self):
         return self.__env
     
     def configure(self, settings):

@@ -121,6 +121,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             commandOutput = 'showAsHTML')
         self.bundleItem_handler(command, **settings)
         
+    def environmentVariables(self):
+        env = {}
+        for docker in self.dockers:
+            env.update(docker.buildEnvironment())
+        return env
+
     def buildEnvironment(self):
         env = {}
         for docker in self.dockers:
@@ -303,10 +309,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         
         #Avisar al manager si tenemos editor y preparar el handler
         self.application.supportManager.setEditorAvailable(editor is not None)
-        if editor is not None:
-            self.bundleItem_handler = editor.bundleItemHandler() or self.insertBundleItem
-        else:
-            self.bundleItem_handler = self.insertBundleItem    
+        self.bundleItem_handler = editor.bundleItemHandler() or self.insertBundleItem if editor is not None else self.insertBundleItem    
         
         #Emitir señal de cambio
         self.currentEditorChanged.emit(editor)
