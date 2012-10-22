@@ -1094,7 +1094,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             environment['TM_DIRECTORY'] = self.application.fileManager.dirname(self.filePath)
         if self.project is not None:
             self.logger.debug("Add project to environment")
-            environment.update(self.project.buildEnvironment())
+            environment.update(self.project.environmentVariables())
         if cursor.hasSelection():
             self.logger.debug("Add selection to environment")
             environment['TM_SELECTED_TEXT'] = utils.replaceLineBreaks(cursor.selectedText())
@@ -1106,48 +1106,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         environment.update(preferences.shellVariables)
         return environment
         
-    def buildEnvironment(self): 
-        """ http://manual.macromates.com/en/environment_variables.html """
-        cursor = self.textCursor()
-        block = cursor.block()
-        line = block.text()
-        scope = self.currentScope()
-        preferences = self.preferenceSettings(scope)
-        current_word, start, end = self.currentWord()
-        env = {
-                'TM_CURRENT_LINE': line,
-                'TM_LINE_INDEX': cursor.columnNumber(),
-                'TM_LINE_NUMBER': block.blockNumber() + 1,
-                'TM_COLUMN_NUMBER': cursor.columnNumber() + 1,
-                'TM_SCOPE': scope,
-                'TM_MODE': self.getSyntax().name,
-                'TM_SOFT_TABS': self.tabStopSoft and unicode('YES') or unicode('NO'),
-                'TM_TAB_SIZE': self.tabStopSize,
-                'TM_NESTEDLEVEL': self.folding.getNestedLevel(block)
-        }
-
-        if current_word:
-            self.logger.debug("Add current word to environment")
-            env['TM_CURRENT_WORD'] = current_word
-        if self.filePath is not None:
-            self.logger.debug("Add file path to environment")
-            env['TM_FILEPATH'] = self.filePath
-            env['TM_FILENAME'] = self.application.fileManager.basename(self.filePath)
-            env['TM_DIRECTORY'] = self.application.fileManager.dirname(self.filePath)
-        if self.project is not None:
-            self.logger.debug("Add project to environment")
-            env.update(self.project.buildEnvironment())
-        if cursor.hasSelection():
-            self.logger.debug("Add selection to environment")
-            env['TM_SELECTED_TEXT'] = utils.replaceLineBreaks(cursor.selectedText())
-            start, end = self.getSelectionBlockStartEnd()
-            env['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
-            env['TM_INPUT_START_LINE'] = start.blockNumber() + 1
-            env['TM_INPUT_START_LINE_INDEX'] = cursor.selectionStart() - start.position()
-
-        env.update(preferences.shellVariables)
-        return env
-
     #==========================================================================
     # Completer
     #==========================================================================

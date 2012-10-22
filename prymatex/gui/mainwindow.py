@@ -124,13 +124,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     def environmentVariables(self):
         env = {}
         for docker in self.dockers:
-            env.update(docker.buildEnvironment())
-        return env
-
-    def buildEnvironment(self):
-        env = {}
-        for docker in self.dockers:
-            env.update(docker.buildEnvironment())
+            env.update(docker.environmentVariables())
         return env
 
     @classmethod

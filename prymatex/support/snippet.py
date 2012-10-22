@@ -506,7 +506,7 @@ class Regexp(NodeList):
                 result += pattern.sub(repl, text)
             elif isinstance(child, Condition):
                 for match in pattern.finditer(text):
-                    repl = match.group(child.index) != None and child.insertion or child.otherwise
+                    repl = child.index <= len(match.groups()) != None and child.insertion or child.otherwise
                     if repl != None:
                         repl = self.prepare_replacement(repl)
                         result += pattern.sub(repl, match.group(0))
