@@ -20,6 +20,8 @@ PMXSyntaxProcessor = type("PMXSyntaxProcessor", (object, ), {
 
 ######################### Command Processor #########################
 PMXCommandProcessor = type("PMXCommandProcessor", (object, ), {
+    "startCommand": nop,
+    "endCommand": nop,
     "environmentVariables": nop,
     #Inputs
     "document": nop,

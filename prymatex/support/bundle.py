@@ -289,23 +289,21 @@ class PMXRunningContext(object):
     Asynchronous: {asynchronous}
     Working Directory: {workingDirectory}
     Input:  Type {inputType}, Value {inputValue}
-    Base Environment: {baseEnvironment}
+    Environment: {environment}
     Output: Type {outputType}, Value {outputValue}
     """
-    def __init__(self, bundleItem, shellCommand, baseEnvironment):
+    def __init__(self, bundleItem, shellCommand, environment):
         self.bundleItem = bundleItem
         self.inputType, self.inputValue = None, None
         self.shellCommand = shellCommand
-        self.baseEnvironment = baseEnvironment
+        self.environment = environment
         self.asynchronous = False
         self.outputValue = self.outputType = None
         self.workingDirectory = None
         
     def __enter__(self):
         #Build the full las environment with gui environment and support environment
-        environment = self.baseEnvironment.copy()
-        environment.update(self.bundleItem.environmentVariables())
-        self.shellCommand, self.environment, self.tempFile = utils.prepareShellScript(self.shellCommand, environment)
+        self.shellCommand, self.environment, self.tempFile = utils.prepareShellScript(self.shellCommand, self.environment)
         return self
 
     def __exit__(self, type, value, traceback):

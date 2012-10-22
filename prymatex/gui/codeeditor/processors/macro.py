@@ -10,14 +10,7 @@ class PMXMacroProcessor(PMXMacroProcessor):
     def __init__(self, editor):
         super(PMXMacroProcessor, self).__init__()
         self.editor = editor
-
-    def environmentVariables(self):
-        return self.__env
-        
-    def configure(self, settings):
-        self.tabTriggered = settings.get("tabTriggered", False)
-        self.disableIndent = settings.get("disableIndent", False)
-        self.baseEnvironment = settings.get("environment", {})
+        self.__env = {}
 
     def startMacro(self, macro):
         """docstring for startMacro"""
@@ -29,6 +22,14 @@ class PMXMacroProcessor(PMXMacroProcessor):
         
     def endMacro(self, macro):
         pass
+
+    def environmentVariables(self):
+        return self.__env
+        
+    def configure(self, settings):
+        self.tabTriggered = settings.get("tabTriggered", False)
+        self.disableIndent = settings.get("disableIndent", False)
+        self.baseEnvironment = settings.get("environment", {})
 
     # Move
     # QTextCursor::NoMove 0 Keep the cursor where it is 

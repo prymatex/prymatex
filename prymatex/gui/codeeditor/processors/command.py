@@ -11,13 +11,21 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def __init__(self, editor):
         super(PMXCommandProcessor, self).__init__()
         self.editor = editor
+        self.__env = {}
 
+    def startCommand(self, command):
+        self.command = command
+        self.__env = command.environmentVariables()
+        self.__env.update(self.editor.mainWindow.environmentVariables())
+        self.__env.update(self.editor.environmentVariables())
+        self.__env.update(self.baseEnvironment)
+        
+    def endCommand(self, command):
+        self.command = None
+        
     def environmentVariables(self):
-        environment = self.editor.mainWindow.environmentVariables()
-        environment.update(self.editor.environmentVariables())
-        environment.update(self.baseEnvironment)
-        return environment
-
+        return self.__env
+        
     def configure(self, settings):
         self.asynchronous = settings.get("asynchronous", True)
         self.tabTriggered = settings.get("tabTriggered", False)

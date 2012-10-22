@@ -40,7 +40,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
         return self.editor.snippetProcessor.snippet is not None
 
     def inactive(self):
-        self.editor.snippetProcessor.endSnippet()
+        self.editor.endSnippet()
 
     def keyPressEvent(self, event):
         cursor = self.editor.textCursor()
@@ -113,7 +113,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             return QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             
     def endSnippet(self, event = None):
-        self.editor.snippetProcessor.endSnippet()
+        self.editor.snippetProcessor.endSnippet(self.editor.snippetProcessor.snippet)
         if event is not None:
             return self.editor.keyPressEvent(event)
 

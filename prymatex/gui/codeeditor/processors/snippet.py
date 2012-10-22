@@ -13,15 +13,8 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.transformation = None
         self.tabreplacement = "\t"
         self.indentation = ""
+        self.__env = {}
 
-    def environmentVariables(self):
-        return self.__env
-    
-    def configure(self, settings):
-        self.tabTriggered = settings.get("tabTriggered", False)
-        self.disableIndent = settings.get("disableIndent", False)
-        self.baseEnvironment = settings.get("environment", {})
-        
     def startSnippet(self, snippet):
         """Inicia el snippet"""
         self.snippet = snippet
@@ -36,16 +29,24 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.tabreplacement = self.editor.tabKeyBehavior()
         self.indentation = "" if self.disableIndent else cursor.block().userData().indent
         
-        self.__env = snippet.buildEnvironment()
-        self.__env.update(self.editor.mainWindow.buildEnvironment())
-        self.__env.update(self.editor.buildEnvironment())
+        self.__env = snippet.environmentVariables()
+        self.__env.update(self.editor.mainWindow.environmentVariables())
+        self.__env.update(self.editor.environmentVariables())
         self.__env.update(self.baseEnvironment)
     
-    def endSnippet(self):
+    def endSnippet(self, snippet):
         """Termina el snippet"""
         self.snippet = None
         self.editor.modeChanged.emit()
 
+    def environmentVariables(self):
+        return self.__env
+    
+    def configure(self, settings):
+        self.tabTriggered = settings.get("tabTriggered", False)
+        self.disableIndent = settings.get("disableIndent", False)
+        self.baseEnvironment = settings.get("environment", {})
+        
     def startTransformation(self, transformation):
         #TODO: que pasa si tiene transformaciones anidadas, creo que es mejor una lista
         self.transformation = True

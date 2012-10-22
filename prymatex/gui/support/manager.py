@@ -237,7 +237,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         #Extend wiht the user shell variables
         for var in self.shellVariables:
             if var['enabled']:
-                env[var['variable']] = var['value']
+                environment[var['variable']] = var['value']
         return environment
     
     def buildEnvironment(self, systemEnvironment = True):

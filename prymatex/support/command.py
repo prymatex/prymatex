@@ -95,7 +95,8 @@ class PMXCommand(PMXBundleItem):
         self.executeCallback(processor, functools.partial(self.afterExecute, processor))
         
     def executeCallback(self, processor, callback):
-        if self.beforeExecute(processor): 
+        processor.startCommand(self)
+        if self.beforeExecute(processor):
             with PMXRunningContext(self, self.systemCommand(), processor.environmentVariables()) as context:
                 context.asynchronous = processor.asynchronous
                 context.inputType, context.inputValue = self.getInputText(processor)
@@ -115,6 +116,7 @@ class PMXCommand(PMXBundleItem):
         
         #Delete temp file
         context.removeTempFile()
+        processor.endCommand(self)
 
 class PMXDragCommand(PMXCommand):
     KEYS = [    'draggedFileExtensions' ]

@@ -682,7 +682,7 @@ class PMXSnippet(PMXBundleItem):
         if holder != None:
             processor.selectHolder(holder)
         else:
-            processor.endSnippet()
+            processor.endSnippet(self)
     
     @property
     def start(self):
