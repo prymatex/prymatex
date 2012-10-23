@@ -7,6 +7,9 @@ upperCase = string.upper
     
 lowerCase = string.lower
 
+to_ascii = lambda s: filter(lambda c: c in string.ascii_letters, s)
+to_ascii_cap = lambda s: to_ascii(s).capitalize()
+
 def titleCase(text):
     return text.title()
     

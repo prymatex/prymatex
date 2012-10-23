@@ -20,7 +20,6 @@ from prymatex.utils import coroutines
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime, logtime
 
-
 class PMXApplication(QtGui.QApplication):
     """The application instance.
     There can't be two apps running simultaneously, since configuration issues may occur.
@@ -52,9 +51,20 @@ class PMXApplication(QtGui.QApplication):
         self.platform = sys.platform
 
         resources.loadPrymatexResources(PMXProfile.PMX_SHARE_PATH)
-
+        
         #Connects
         self.aboutToQuit.connect(self.closePrymatex)
+
+    def installTranslator(self):
+        pass
+        #slanguage = QtCore.QLocale.system().name()
+        #print language
+        #self.translator = QtCore.QTranslator()
+        #print os.path.join(PMXProfile.PMX_SHARE_PATH, "Languages")
+        
+        #self.translator.load(settings.LANGUAGE)
+        #self.installTranslator(translator)
+        
 
     def buildSplashScreen(self):
         from prymatex.widgets.splash import SplashScreen

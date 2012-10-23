@@ -18,8 +18,10 @@ from prymatex.utils.modmap import get_keymap_table
     * Alt -> ~
 '''
 
-#caret, foreground, selection, invisibles, lineHighbuildQColorlight, gutter, background
-def RGBA2QColor(rgba):
+#======================
+# Colors
+#======================
+def rgba2color(rgba):
     '''
     @param rgba: A html formated color string i.e.: #RRGGBB or #RRGGBBAA
     @return: If rgba is a valid color, a QColor isntance
@@ -31,7 +33,7 @@ def RGBA2QColor(rgba):
         raise ValueError("Invalid RGBA value %s", rgba)
     return QtGui.QColor(int(red, 16), int(green, 16), int(blue, 16), int(alpha or 'FF', 16))
 
-def QColor2RGBA(color):
+def color2rgba(color):
     '''
     @param color: A QColor, int, str, unicode instance
     @return: If color is a valid, a html formated color string i.e.: #RRGGBB or #RRGGBBAA
@@ -50,6 +52,9 @@ def QColor2RGBA(color):
     else:
         raise ValueError("Invalid color value %s" % color)
   
+#======================
+# Key Equivalents
+#======================
 QTCHARCODES = {9: Qt.Key_Backspace,
                10: Qt.Key_Return,
                127: Qt.Key_Delete,
@@ -64,19 +69,7 @@ QTCHARCODES = {9: Qt.Key_Backspace,
 
 KEYMAP = get_keymap_table()
 
-def keyboardLayoutQtKeys(character):
-    keys = []
-
-    for _, keysyms in KEYMAP.iteritems():
-        if character == keysyms[1]:
-            keys.append(Qt.SHIFT) #Add Shift
-    code = ord(character.upper())
-    if code in QTCHARCODES:
-        code = QTCHARCODES[code]
-    keys.append(code)
-    return keys
-
-def keyboardLayoutKeys(key):
+def _keyboard_layout_keys(key):
     shift = False
     for _, keysyms in KEYMAP.iteritems():
         if key == keysyms[1]:
@@ -84,7 +77,7 @@ def keyboardLayoutKeys(key):
     return (shift, key)
 
 @memoized
-def buildKeyEquivalent(sequence):
+def keysequence2keyequivalent(sequence):
     nemonic = []
     if sequence & Qt.CTRL:
         nemonic.append(u"^")
@@ -110,7 +103,7 @@ def buildKeyEquivalent(sequence):
         return u"".join(nemonic)
     else:
         #Seguro que apreto shift
-        shift, code = keyboardLayoutKeys(key)
+        shift, code = _keyboard_layout_keys(key)
         if shift:
             nemonic.remove(u"$")
             nemonic.append(key)
@@ -122,8 +115,20 @@ def buildKeyEquivalent(sequence):
             nemonic.append(key)
             return u"".join(nemonic)
 
+def _keyboard_layout_qtkeys(character):
+    keys = []
+
+    for _, keysyms in KEYMAP.iteritems():
+        if character == keysyms[1]:
+            keys.append(Qt.SHIFT) #Add Shift
+    code = ord(character.upper())
+    if code in QTCHARCODES:
+        code = QTCHARCODES[code]
+    keys.append(code)
+    return keys
+
 @memoized    
-def buildKeySequence(nemonic):
+def keyequivalent2keysequence(nemonic):
     nemonic = list(nemonic)
     sequence = []
     if u"^" in nemonic:
@@ -139,7 +144,7 @@ def buildKeySequence(nemonic):
         sequence.append(Qt.META)
         nemonic.remove(u"@")
     if len(nemonic) == 1:
-        keys = keyboardLayoutQtKeys(nemonic.pop())
+        keys = _keyboard_layout_qtkeys(nemonic.pop())
         if Qt.SHIFT in keys and Qt.SHIFT in sequence:
             keys.remove(Qt.SHIFT)
         sequence.extend(keys)

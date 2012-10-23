@@ -4,20 +4,24 @@
 import os
 from string import Template
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.ui.mainwindow import Ui_MainWindow
+
+from prymatex.qt.compat import getSaveFileName
+from prymatex.qt.helpers.widgets import center_widget
+from prymatex.qt.helpers.menus import create_menu, extend_menu
+
 from prymatex.gui.actions import MainWindowActions
-from prymatex.gui import utils, dialogs
-from prymatex.gui.utils import textToObjectName, extendQMenu
 from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.gui.processors import MainWindowCommandProcessor
 
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
 from prymatex.widgets.message import PopupMessageWidget
+
+from prymatex.ui.mainwindow import Ui_MainWindow
 
 from prymatex.utils.i18n import ugettext as _
 
@@ -69,7 +73,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.splitTabWidget.tabCreateRequest.connect(self.addEmptyEditor)
         self.application.supportManager.bundleItemTriggered.connect(self.on_bundleItemTriggered)
         
-        utils.centerWidget(self, scale = (0.9, 0.8))
+        center_widget(self, scale = (0.9, 0.8))
         self.dockers = []
         self.customEditorActions = {}
         self.customDockActions = {}
@@ -187,10 +191,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             self.dockToolBars[area].show()
         
     def createCustomEditorMainMenu(self, name):
-        menu = QtGui.QMenu(name, self.menubar)
-        objectName = textToObjectName(name, prefix = "menu")
-        menu.setObjectName(objectName)
-        setattr(self, objectName, menu)
+        menu, _ = create_menu(self.menubar, { "text": name })
+        # TODO settatr the objectName to self
         action = self.menubar.insertMenu(self.menuNavigation.children()[0], menu)
         return menu, action
 
@@ -201,7 +203,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             menu, action = self.createCustomEditorMainMenu(name)
             actions.append(action)
         if 'items' in settings:
-            actions.extend(extendQMenu(menu, settings['items']))
+            actions.extend(extend_menu(menu, settings['items']))
         return actions
 
     def registerEditorClassActions(self, editorClass, actions):
@@ -334,9 +336,13 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             fileDirectory = self.application.fileManager.getDirectory(self.projects.currentPath()) if editor.isNew() else editor.fileDirectory()
             fileName = editor.fileName()
             fileFilters = editor.fileFilters()
-            filePath = dialogs.getSaveFile( fileDirectory, title = "Save file as" if saveAs else "Save file", 
-                                            filters = fileFilters, 
-                                            name = fileName)
+            # TODO Armar el archivo destino y no solo el basedir
+            filePath = getSaveFileName(
+                self, 
+                caption = "Save file as" if saveAs else "Save file", 
+                basedir = fileDirectory, 
+                filters = fileFilters
+            )
         else:
             filePath = editor.filePath
 

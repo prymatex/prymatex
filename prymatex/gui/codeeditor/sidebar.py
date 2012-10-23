@@ -69,7 +69,7 @@ class SideBarWidgetAddon(PMXBaseEditorAddon):
 #=======================================
 class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
-    MARGIN = 10
+    MARGIN = 4
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
 
@@ -83,7 +83,7 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         self.normalMetrics = QtGui.QFontMetrics(self.normalFont)
         self.boldMetrics = QtGui.QFontMetrics(self.boldFont)
         
-        self.setFixedWidth(self.fontMetrics().width("0") + self.MARGIN)
+        self.setFixedWidth(self.boldMetrics.width("#") + self.MARGIN * 2)
 
         self.editor.blockCountChanged.connect(self.updateWidth)
         self.editor.themeChanged.connect(self.updateColours)
@@ -94,10 +94,10 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         self.update()
 
     def updateWidth(self, newBlockCount):
-        width = self.fontMetrics().width(str(newBlockCount)) + self.MARGIN
+        width = self.boldMetrics.width(str(newBlockCount)) + self.MARGIN * 2
         if self.width() != width:
             self.setFixedWidth(width)
-            #self.updateSideBarRequest.emit()
+            self.editor.updateViewportMargins()
 
     @classmethod
     def contributeToMainMenu(cls):
@@ -110,7 +110,7 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             return instance.isVisible()
         
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
-        menuEntry = {'title': "Line Numbers",
+        menuEntry = {'text': "Line Numbers",
             'callback': on_actionShowLineNumbers_toggled,
             'shortcut': 'F10',
             'checkable': True,
@@ -142,51 +142,20 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
                 numberText = str(line_count)
                 if block == current_block:
                     painter.setFont(self.boldFont)
-                    leftPosition = self.width() - (self.boldMetrics.width(numberText) + round(self.MARGIN / 2))
+                    leftPosition = self.width() - (self.boldMetrics.width(numberText) + self.MARGIN)
                     topPosition = position.y() + self.boldMetrics.ascent() + self.boldMetrics.descent() - 2
                     painter.drawText(leftPosition, topPosition, numberText)
                 else:
                     painter.setFont(self.normalFont)
-                    leftPosition = self.width() - (self.normalMetrics.width(numberText) + round(self.MARGIN / 2))
+                    leftPosition = self.width() - (self.normalMetrics.width(numberText) + self.MARGIN)
                     topPosition = position.y() + self.normalMetrics.ascent() + self.normalMetrics.descent() - 2
                     painter.drawText(leftPosition, topPosition, numberText)
-
+            
             block = block.next()
 
         painter.end()
         QtGui.QWidget.paintEvent(self, event)
-    """
-    __foreground = QtGui.QColor()
-    @property
-    def foreground(self):
-        return self.__foreground
-    
-    @foreground.setter
-    def foreground(self, color):
-        assert isinstance(color, QtGui.QColor)
-        # http://www.qtcentre.org/wiki/index.php?title=Adaptive_Coloring_for_Syntax_Highlighting#The_HSV_Color_Space
-        # Yet to be perfected...
-        h1, s1, v1, _ = color.getHsv()
-        h2, s2, v2, _ = color.getHsv()
-        if h1 == h2 == -1 and s1 == s2:
-            # Lilely to be gray
-            if v1 - v2 < 35:
-                v1 = 255 if h2 < 128 else 0
-                color = QtGui.QColor.fromHsv(h1, s1, v1)
-                self.editor.logger.debug("Changing foreground color to %s" % str(color.getRgb()))  
-        self.__foreground = color
-    
-    __background = QtGui.QColor()
-    @property
-    def background(self):
-        return self.__background
-    
-    @background.setter
-    def background(self, color):
-        assert isinstance(color, QtGui.QColor)
-        self.__background = color
-    """
-    
+
 class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
@@ -215,7 +184,7 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             return instance.isVisible()
         
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
-        menuEntry = {'title': "Bookmarks",
+        menuEntry = {'text': "Bookmarks",
             'callback': on_actionShowBookmarks_toggled,
             'shortcut': 'Alt+F10',
             'checkable': True,
@@ -285,7 +254,7 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             return instance.isVisible()
         
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
-        menuEntry = {'title': 'Foldings',
+        menuEntry = {'text': 'Foldings',
             'callback': on_actionShowFoldings_toggled,
             'shortcut': 'Shift+F10',
             'checkable': True,
@@ -372,7 +341,7 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             return instance.isVisible()
         
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
-        menuEntry = {'title': 'Selection',
+        menuEntry = {'text': 'Selection',
             'callback': on_actionShowSelection_toggled,
             'shortcut': 'Shift+F10',
             'checkable': True,

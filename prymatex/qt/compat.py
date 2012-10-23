@@ -10,7 +10,7 @@ from prymatex.qt import QtGui
 # Wrappers around QFileDialog static methods
 #===============================================================================
 
-def getexistingdirectory(parent=None, caption='', basedir='',
+def getExistingDirectory(parent=None, caption='', basedir='',
                          options=QtGui.QFileDialog.ShowDirsOnly):
     """Wrapper around QtGui.QFileDialog.getExistingDirectory static method
     Compatible with PyQt >=v4.4 (API #1 and #2) and PySide >=v1.0"""
@@ -91,7 +91,7 @@ def _qfiledialog_wrapper(attr, parent=None, caption='', basedir='',
     # Always returns the tuple (output, selectedfilter)
     return output, selectedfilter
 
-def getopenfilename(parent=None, caption='', basedir='', filters='',
+def getOpenFileName(parent=None, caption='', basedir='', filters='',
                     selectedfilter='', options=None):
     """Wrapper around QtGui.QFileDialog.getOpenFileName static method
     Returns a tuple (filename, selectedfilter) -- when dialog box is canceled,
@@ -102,7 +102,7 @@ def getopenfilename(parent=None, caption='', basedir='', filters='',
                                 filters=filters, selectedfilter=selectedfilter,
                                 options=options)
 
-def getopenfilenames(parent=None, caption='', basedir='', filters='',
+def getOpenFileNames(parent=None, caption='', basedir='', filters='',
                      selectedfilter='', options=None):
     """Wrapper around QtGui.QFileDialog.getOpenFileNames static method
     Returns a tuple (filenames, selectedfilter) -- when dialog box is canceled,
@@ -113,7 +113,7 @@ def getopenfilenames(parent=None, caption='', basedir='', filters='',
                                 filters=filters, selectedfilter=selectedfilter,
                                 options=options)
 
-def getsavefilename(parent=None, caption='', basedir='', filters='',
+def getSaveFileName(parent=None, caption='', basedir='', filters='',
                     selectedfilter='', options=None):
     """Wrapper around QtGui.QFileDialog.getSaveFileName static method
     Returns a tuple (filename, selectedfilter) -- when dialog box is canceled,
@@ -127,8 +127,8 @@ def getsavefilename(parent=None, caption='', basedir='', filters='',
 if __name__ == '__main__':
     from prymatex.utils.qthelpers import qapplication
     app = qapplication()
-    print repr(getexistingdirectory())
-    print repr(getopenfilename(filters='*.py;;*.txt'))
-    print repr(getopenfilenames(filters='*.py;;*.txt'))
-    print repr(getsavefilename(filters='*.py;;*.txt'))
+    print repr(getExistingDirectory())
+    print repr(getOpenFileName(filters='*.py;;*.txt'))
+    print repr(getOpenFileNames(filters='*.py;;*.txt'))
+    print repr(getSaveFileName(filters='*.py;;*.txt'))
     sys.exit()
