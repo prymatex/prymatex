@@ -1,28 +1,18 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-#=======================================================================
-# Standard library imports
-#=======================================================================
 import re
 from bisect import bisect
 
-#=======================================================================
-# Related third party imports
-#=======================================================================
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
-#=======================================================================
-# Local application / Library specific imports
-#=======================================================================
 from prymatex import resources
-from prymatex.utils import coroutines
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.plugin.editor import PMXBaseEditor
 from prymatex.core import exceptions
-from prymatex.gui.support.models import PMXBundleTreeNode
-from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
+from prymatex.qt.helpers.menus import extend_menu, update_menu
 from prymatex.gui import utils
+from prymatex.gui.support.models import PMXBundleTreeNode
 from prymatex.gui.codeeditor.addons import CodeEditorAddon
 from prymatex.gui.codeeditor.sidebar import CodeEditorSideBar, SideBarWidgetAddon
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
@@ -31,12 +21,13 @@ from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
 from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXAlreadyTypedWords
 
+from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
+
+from prymatex.utils import coroutines
 from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.datastructures import MultiListsDict
-
 from prymatex.utils.decorators.helpers import printtime
-from prymatex.core.exceptions import IOException
 
 class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
@@ -1536,7 +1527,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
         #Bundle Menu
         bundleMenu = self.application.supportManager.menuForBundle(self.getSyntax().bundle)
-        utils.extendQMenu(menu, [ "-", bundleMenu ])
+        extend_menu(menu, [ "-", bundleMenu ])
 
         #Se lo pasamos a los addons
         cursor = self.cursorForPosition(point)
@@ -1546,7 +1537,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 items += addon.contributeToContextMenu(cursor)
         
         if len(items) > 1:
-            actions = utils.extendQMenu(menu, items)
+            actions = extend_menu(menu, items)
             for action in actions:
                 if hasattr(action, 'callback'):
                     if action.isCheckable():
@@ -1743,7 +1734,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             ]}
         menuContributions = { "Edit": edit, "View": view , "Text": text, "Navigation": navigation}
         for addon in addonClasses:
-            utils.updateMenu(menuContributions, addon.contributeToMainMenu())
+            update_menu(menuContributions, addon.contributeToMainMenu())
         return menuContributions
     
     @classmethod

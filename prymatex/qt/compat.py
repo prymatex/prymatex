@@ -35,6 +35,8 @@ def _qfiledialog_wrapper(attr, parent=None, caption='', basedir='',
                          filters='', selectedfilter='', options=None):
     if options is None:
         options = QtGui.QFileDialog.Options(0)
+    if isinstance(filters, (tuple, list)):
+        filters = ";;".join(filters)
     try:
         # PyQt <v4.6 (API #1)
         from prymatex.qt import QtCore
@@ -78,7 +80,7 @@ def _qfiledialog_wrapper(attr, parent=None, caption='', basedir='',
     else:
         # PyQt <v4.6 (API #1)
         output = result
-    if QtCore.QString is not None:
+    if hasattr(QtCore, "QString"):
         # PyQt API #1: conversions needed from QString/QStringList
         selectedfilter = unicode(selectedfilter)
         if isinstance(output, QtCore.QString):

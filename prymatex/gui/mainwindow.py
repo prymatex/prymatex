@@ -6,22 +6,18 @@ from string import Template
 
 from prymatex.qt import QtCore, QtGui
 
+from prymatex.ui.mainwindow import Ui_MainWindow
 from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
-
 from prymatex.qt.compat import getSaveFileName
 from prymatex.qt.helpers.widgets import center_widget
 from prymatex.qt.helpers.menus import create_menu, extend_menu
-
 from prymatex.gui.actions import MainWindowActions
 from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.gui.processors import MainWindowCommandProcessor
-
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
 from prymatex.widgets.message import PopupMessageWidget
-
-from prymatex.ui.mainwindow import Ui_MainWindow
 
 from prymatex.utils.i18n import ugettext as _
 
@@ -337,7 +333,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             fileName = editor.fileName()
             fileFilters = editor.fileFilters()
             # TODO Armar el archivo destino y no solo el basedir
-            filePath = getSaveFileName(
+            filePath, _ = getSaveFileName(
                 self, 
                 caption = "Save file as" if saveAs else "Save file", 
                 basedir = fileDirectory, 
@@ -346,7 +342,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         else:
             filePath = editor.filePath
 
-        if filePath is not None:
+        if filePath:
             editor.save(filePath)
     
     def closeEditor(self, editor = None, cancel = False):
