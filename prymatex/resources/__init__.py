@@ -192,6 +192,7 @@ QListView::item {
 }
 """
 
+# TODO: Take colors from Theme rather than HARDCODING
 FIND_NO_MATCH_STYLE = 'background-color: red; color: #fff;'
 FIND_MATCH_STYLE = 'background-color: #dea;'
 

@@ -379,8 +379,12 @@ class PMXApplication(QtGui.QApplication):
         self.extendComponent(componentClass)
         self.profile.registerConfigurable(componentClass)
         for settingClass in componentClass.contributeToSettings():
-            self.extendComponent(settingClass)
-            self.settingsDialog.register(settingClass(componentClass.settings))
+            try:
+                self.extendComponent(settingClass)
+                self.settingsDialog.register(settingClass(componentClass.settings))
+            except (RuntimeError, ImportError):
+                # TODO: Inform user but dont' prevent pmx from starting
+                pass
 
     def createWidgetInstance(self, widgetClass, parent):
         # TODO Que parent sea opcional y pueda ser la mainWindow si no viene seteado
