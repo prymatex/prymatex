@@ -73,12 +73,13 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
                 self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor)
             return True
         
-        isClose = character == self.pair[1] and self.pair[0] != self.pair[1]
+        isClose = character == self.pair[1]
         if isClose:
             #Es un caracter de cierre, veamos si tengo que saltarme algo hacia la derecha
             cursor1, cursor2 = self.editor.currentBracesPairs(cursor, direction = "right")
             self.skip = cursor1 is not None and cursor2 is not None and character == cursor2.selectedText()
-            return self.skip
+            if self.skip or self.pair[0] != self.pair[1]:
+                return self.skip
 
         meta_down = bool(event.modifiers() & QtCore.Qt.MetaModifier)
         if isOpen and meta_down:
