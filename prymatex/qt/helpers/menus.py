@@ -36,21 +36,19 @@ from prymatex.qt.helpers import text2objectname
 from prymatex.qt.helpers.actions import create_action
 
 def create_menu(parent, settings, useSeparatorName = False, connectActions = False):
-    actions = []
     text = settings.get("text", "Menu")
     menu = QtGui.QMenu(text, parent)
     menu.setObjectName(text2objectname(text, prefix = "menu"))
-    
+
     # attrs
     if settings.has_key("icon"):
         icon = settings["icon"]
         if isinstance(icon, basestring):
             icon = resources.getIcon(icon)
         menu.setIcon(icon)
-    
+
     # actions
-    subactions = extend_menu(menu, settings.get("items", []), useSeparatorName)
-    actions.extend(subactions)
+    actions = extend_menu(menu, settings.get("items", []), useSeparatorName)
     if connectActions:
         for action in actions:
             if hasattr(action, 'callback'):

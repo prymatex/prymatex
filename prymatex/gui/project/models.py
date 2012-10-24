@@ -26,7 +26,7 @@ class PMXProjectTreeModel(TreeModel):
     def data(self, index, role):
         node = self.node(index)
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            return node.nodeName
+            return node.nodeName()
         elif role == QtCore.Qt.DecorationRole:
             return node.icon
 
@@ -62,7 +62,7 @@ class PMXProjectTreeModel(TreeModel):
     def _update_directory(self, parentNode, parentIndex, notify = False):
         names = os.listdir(parentNode.path)
         addNames = filter(lambda name: parentNode.findChildByName(name) is None, names)
-        removeNodes = filter(lambda node: node.nodeName not in names, parentNode.childrenNodes)
+        removeNodes = filter(lambda node: node.nodeName() not in names, parentNode.childrenNodes)
                 
         #Quitamos elementos eliminados
         for node in removeNodes:

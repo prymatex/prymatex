@@ -46,12 +46,12 @@ class FileSystemTreeNode(TreeNode):
         if not hasattr(self, "_project"):
             self._project = self
             while not isinstance(self._project, PMXProject):
-                self._project = self._project.parentNode
+                self._project = self._project.nodeParent()
         return self._project    
 
     @property
     def path(self):
-        return os.path.join(self.parentNode.path, self.nodeName)
+        return os.path.join(self.nodeParent().path, self.nodeName())
     
     @property
     def icon(self):
@@ -76,7 +76,7 @@ class PMXProject(FileSystemTreeNode):
     def environment(self):
         env = {
             'TM_PROJECT_DIRECTORY': self.directory,
-            'TM_PROJECT_NAME': self.nodeName,
+            'TM_PROJECT_NAME': self.nodeName(),
             'TM_PROJECT_PATH': self.projectPath,
             'TM_PROJECT_NAMESPACE': self.namespace }
         env.update(self.manager.supportProjectEnvironment(self))

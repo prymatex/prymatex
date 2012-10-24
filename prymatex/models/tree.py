@@ -4,36 +4,47 @@
 from PyQt4 import QtCore
 
 class TreeNode(object):
-    def __init__(self, nodeName, parentNode = None):
+    def __init__(self, nodeName, nodeParent = None):
         #TODO: Migrar a atributos ocultos __nodeName, __parentNode y __childrenNodes
-        self.nodeName = nodeName
-        self.parentNode = parentNode
+        self.setNodeName(nodeName)
+        self.setNodeParent(nodeParent)
         self.childrenNodes = []
     
+    def setNodeName(self, name):
+        self.__nodeName = name
+        
+    def nodeName(self):
+        return self.__nodeName
+        
+    def setNodeParent(self, parent):
+        self.__nodeParent = parent
+        
+    def nodeParent(self):
+        return self.__nodeParent
+        
     def isRootNode(self):
-        return self.parentNode == None
+        return self.nodeParent() == None
     
     def appendChild(self, child):
         self.childrenNodes.append(child)
-        child.parentNode = self
+        child.setNodeParent(self)
 
     def insertChild(self, index, child):
         self.childrenNodes.insert(index, child)
-        child.parentNode = self
+        child.setNodeParent(self)
 
     def removeChild(self, child):
         self.childrenNodes.remove(child)
-        child.parentNode = None
+        child.setNodeParent(None)
     
     def findChildByName(self, nodeName):
         for child in self.childrenNodes:
-            if child.nodeName == nodeName:
+            if child.nodeName() == nodeName:
                 return child
 
     def removeAllChild(self):
         for child in self.childrenNodes:
-            child.parentNode = None
-        self.childrenNodes = []
+            self.removeChild(child)
 
     def childIndex(self, child):
         return self.childrenNodes.index(child)
@@ -46,8 +57,8 @@ class TreeNode(object):
             return self.childrenNodes[row]
     
     def row(self):
-        return self.parentNode.childIndex(self)
-        
+        return self.nodeParent().childIndex(self)
+
 class TreeModel(QtCore.QAbstractItemModel):  
     def __init__(self, parent = None):
         QtCore.QAbstractItemModel.__init__(self, parent)
@@ -70,7 +81,7 @@ class TreeModel(QtCore.QAbstractItemModel):
 
     def parent(self, index):
         node = self.node(index)
-        parentNode = node.parentNode
+        parentNode = node.nodeParent()
         if parentNode is None or parentNode.isRootNode():
             return QtCore.QModelIndex()
         return self.createIndex(parentNode.row(), 0, parentNode)

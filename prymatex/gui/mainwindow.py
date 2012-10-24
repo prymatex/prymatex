@@ -196,7 +196,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
                 settings["text"] = name
             menu, actions = create_menu(self.menubar, settings)
             setattr(self, menuAttr, menu)
-            self.menubar.insertMenu(self.menuNavigation.children()[0], menu)
+            actions.insert(0, self.menubar.insertMenu(self.menuNavigation.children()[0], menu))
         elif 'items' in settings:
             actions = extend_menu(menu, settings['items'])
         return actions
