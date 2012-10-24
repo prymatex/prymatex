@@ -389,24 +389,24 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         edit = {
             'items': [
                 '-',
-                {'title': "Find",
+                {'text': "Find",
                  'shortcut': "Ctrl+F",
                  'callback': cls.showIFind
                 },
-                {'title': "Replace",
+                {'text': "Replace",
                  'shortcut': "Ctrl+R",
                  'callback': cls.showFindReplace
                 }
             ]}
         text = {
             'items': [
-                {'title': 'Filter Through Command',
+                {'text': 'Filter Through Command',
                  'callback': cls.showCommand
                  }
             ]}
         navigation = {
             'items': [
-                {'title': 'Go To &Line',
+                {'text': 'Go To &Line',
                  'callback': cls.showGoToLine,
                  'shortcut': 'Meta+Ctrl+Shift+L',
                  }

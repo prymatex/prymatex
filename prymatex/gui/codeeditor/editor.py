@@ -1616,7 +1616,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.IndentGuide) },
             ]}
         text = {
-            'text': 'Text',
+            'text': '&Text',
             'items': [ 
                 {'text': 'Select',
                  'items': [

@@ -15,9 +15,9 @@ class PMXMacroProcessor(PMXMacroProcessor):
     def startMacro(self, macro):
         """docstring for startMacro"""
         self.macro = macro
-        self.__env = macro.buildEnvironment()
-        self.__env.update(self.editor.mainWindow.buildEnvironment())
-        self.__env.update(self.editor.buildEnvironment())
+        self.__env = macro.environmentVariables()
+        self.__env.update(self.editor.mainWindow.environmentVariables())
+        self.__env.update(self.editor.environmentVariables())
         self.__env.update(self.baseEnvironment)
         
     def endMacro(self, macro):

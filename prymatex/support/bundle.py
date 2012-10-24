@@ -159,14 +159,6 @@ class PMXBundle(PMXManagedObject):
             environment['TM_BUNDLE_SUPPORT'] = self.support
         return environment
         
-    def buildEnvironment(self):
-        # TODO Aca no tiene porque ser un copy el manager tiene que manejar esta situacion, viola la encapsulacion
-        env = copy(self.manager.buildEnvironment())
-        env['TM_BUNDLE_PATH'] = self.currentPath
-        if self.support != None:
-            env['TM_BUNDLE_SUPPORT'] = self.support
-        return env
-
     @classmethod
     def loadBundle(cls, path, namespace, manager):
         info_file = os.path.join(path, cls.FILE)
@@ -252,10 +244,6 @@ class PMXBundleItem(PMXManagedObject):
     
     def environmentVariables(self):
         return self.bundle.environmentVariables()
-    
-    def buildEnvironment(self, **kwargs):
-        env = self.bundle.buildEnvironment()
-        return env
         
     @classmethod
     def loadBundleItem(cls, path, namespace, bundle, manager):

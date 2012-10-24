@@ -10,6 +10,7 @@ from prymatex.ui.mainwindow import Ui_MainWindow
 from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.qt.compat import getSaveFileName
+from prymatex.qt.helpers import text2objectname
 from prymatex.qt.helpers.widgets import center_widget
 from prymatex.qt.helpers.menus import create_menu, extend_menu
 from prymatex.gui.actions import MainWindowActions
@@ -186,20 +187,18 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             area = self.dockWidgetArea(dock)
             self.dockToolBars[area].show()
         
-    def createCustomEditorMainMenu(self, name):
-        menu, _ = create_menu(self.menubar, { "text": name })
-        # TODO settatr the objectName to self
-        action = self.menubar.insertMenu(self.menuNavigation.children()[0], menu)
-        return menu, action
-
     def contributeToMainMenu(self, name, settings):
         actions = []
-        menu = getattr(self, "menu" + name, None)
+        menuAttr = text2objectname(name, prefix = "menu")
+        menu = getattr(self, menuAttr, None)
         if menu is None:
-            menu, action = self.createCustomEditorMainMenu(name)
-            actions.append(action)
-        if 'items' in settings:
-            actions.extend(extend_menu(menu, settings['items']))
+            if "text" not in settings:
+                settings["text"] = name
+            menu, actions = create_menu(self.menubar, settings)
+            setattr(self, menuAttr, menu)
+            self.menubar.insertMenu(self.menuNavigation.children()[0], menu)
+        elif 'items' in settings:
+            actions = extend_menu(menu, settings['items'])
         return actions
 
     def registerEditorClassActions(self, editorClass, actions):
