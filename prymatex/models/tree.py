@@ -62,7 +62,10 @@ class TreeNode(object):
 class TreeModel(QtCore.QAbstractItemModel):  
     def __init__(self, parent = None):
         QtCore.QAbstractItemModel.__init__(self, parent)
-        self.rootNode = TreeNode("Root")
+        self.rootNode = self.treeNodeFactory("root")
+
+    def treeNodeFactory(self, nodeName, nodeParent = None):
+        return TreeNode(nodeName, nodeParent)
 
     def rowCount(self, parent):
         parentNode = self.node(parent)

@@ -122,12 +122,17 @@ class TextMate(QtCore.QObject):
     def _system(self, command):
         self.parent().runCommand(command)
         
+    @QtCore.pyqtSlot(str)
+    def system(self, command):
+        self.parent().runCommand(command)
+        
     def isBusy(self):
         return True
     isBusy = QtCore.pyqtProperty("bool", isBusy)
     
 #=======================================================================
 # Browser Dock
+# TODO Hacer enfocado en las Pags y no en el webView
 #=======================================================================
 class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     SHORTCUT = "F9"
@@ -302,8 +307,8 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         map(lambda action: action.setChecked(False), [ self.actionSyncEditor, self.actionConnectEditor ])
         self.webView.load(link)
 
-    def on_webView_loadFinished(self, ready):
-        if not ready:
+    def on_webView_loadFinished(self, ok):
+        if not ok:
             return
         self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self))
         environment = ""
