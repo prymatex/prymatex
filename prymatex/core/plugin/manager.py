@@ -208,7 +208,8 @@ class PMXPluginManager(PMXBaseComponent):
             registerPluginFunction(self)
             self.endRegisterPlugin(True)
         except (ImportError, AttributeError), reason:
-            #TODO: Manejar estos errores
+            import traceback
+            traceback.print_exc()
             self.endRegisterPlugin(False)
             raise reason
     
@@ -222,7 +223,8 @@ class PMXPluginManager(PMXBaseComponent):
             registerPluginFunction(self)
             self.endRegisterPlugin(True)
         except (ImportError, AttributeError), reason:
-            #TODO: Manejar estos errores
+            import traceback
+            traceback.print_exc()
             self.endRegisterPlugin(False)
             raise reason
     
