@@ -5,11 +5,11 @@ import os
 from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
-from prymatex.gui.settings.models import PMXSettingTreeNode
+from prymatex.models.settings import SettingsTreeNode
 from prymatex.ui.configure.environment import Ui_Environment
 from prymatex.gui.models.environment import EnvironmentTableModel
 
-class PMXEnvVariablesWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_Environment):
+class PMXEnvVariablesWidget(QtGui.QWidget, SettingsTreeNode, Ui_Environment):
     """Environment variables
     """
     NAMESPACE = "general"
@@ -18,7 +18,7 @@ class PMXEnvVariablesWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_Environment):
     
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        PMXSettingTreeNode.__init__(self, "environment", settingGroup)
+        SettingsTreeNode.__init__(self, "environment", settingGroup)
         self.setupUi(self)
         self.setupVariablesTableModel()
     

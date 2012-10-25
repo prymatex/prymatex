@@ -1,21 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 from prymatex.ui.dialogs.treewidget import Ui_TreeWidgetDialog
-from prymatex.gui.settings.models import PMXSettingTreeNode
-from prymatex.gui.configure.models import PMXConfigureTreeModel
-from prymatex.gui.configure.proxies import PMXConfigureProxyModel
-
-class PMXProxySettingTreeNode(QtGui.QWidget, PMXSettingTreeNode):
-    def __init__(self, name, parent):
-        QtGui.QWidget.__init__(self)
-        PMXSettingTreeNode.__init__(self, name, parent)
-        self.setObjectName(name.title() + "Widget")
-
-    def loadSettings(self):
-        pass
+from prymatex.models.settings import SettingsTreeModel as PMXConfigureTreeModel
+from prymatex.models.settings import SortFilterSettingsProxyModel as PMXConfigureProxyModel
 
 class PMXSettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
     """Settings dialog, it's hold by the application under configdialog property
@@ -28,7 +18,7 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
         self.baseWindowTitle = self.windowTitle()
         
         self.model = PMXConfigureTreeModel(self)
-        self.model.proxyNodeFactory = self.proxyNodeFactory
+        self.model.proxySettingsCreated.connect(self.on_model_proxySettingsCreated)
         
         self.proxyModelSettings = PMXConfigureProxyModel(self)
         self.proxyModelSettings.setSourceModel(self.model)
@@ -38,10 +28,8 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
         self.stackedWidget = QtGui.QStackedWidget(self.splitter)
         self.widgetsLayout.addWidget(self.stackedWidget)
     
-    def proxyNodeFactory(self, name, parent):
-        proxyWidget = PMXProxySettingTreeNode(name, parent)
+    def on_model_proxySettingsCreated(self, proxyWidget):
         self.stackedWidget.addWidget(proxyWidget)
-        return proxyWidget
 
     def selectFirstIndex(self):
         firstIndex = self.proxyModelSettings.index(0, 0)
@@ -64,9 +52,9 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
     
     def setCurrentSettingWidget(self, widget):
         self.stackedWidget.setCurrentWidget(widget)
-        self.textLabelTitle.setText(widget.title)
-        self.textLabelPixmap.setPixmap(widget.icon.pixmap(20, 20))
-        self.setWindowTitle("%s - %s" % (self.baseWindowTitle, widget.title))
+        self.textLabelTitle.setText(widget.title())
+        self.textLabelPixmap.setPixmap(widget.icon().pixmap(20, 20))
+        self.setWindowTitle("%s - %s" % (self.baseWindowTitle, widget.title()))
     
     def register(self, widget):
         index = self.stackedWidget.addWidget(widget)

@@ -6,7 +6,7 @@ import fnmatch
 from PyQt4 import QtCore, QtGui
 
 from prymatex.gui.project.base import PMXProject
-from prymatex.gui.configure.proxies import PMXConfigureProxyModel
+from prymatex.models.configure import SortFilterConfigureProxyModel
 from prymatex.models.proxies import FlatTreeProxyModel
 
 class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
@@ -177,9 +177,9 @@ class PMXFileSystemProxyModel(FlatTreeProxyModel):
             items.append(self.sourceModel().node(index))
         return items
 
-class PMXPropertiesProxyModel(PMXConfigureProxyModel):
+class PMXPropertiesProxyModel(SortFilterConfigureProxyModel):
     def __init__(self, parent = None):
-        PMXConfigureProxyModel.__init__(self, parent)
+        SortFilterConfigureProxyModel.__init__(self, parent)
         self.fileSystemItem = None
     
     def filterAcceptsRow(self, sourceRow, sourceParent):

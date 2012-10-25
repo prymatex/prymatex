@@ -5,7 +5,7 @@ from PyQt4 import QtCore
 
 class TreeNode(object):
     def __init__(self, nodeName, nodeParent = None):
-        #TODO: Migrar a atributos ocultos __nodeName, __parentNode y __childrenNodes
+        #TODO: Migrar a atributos ocultos __childrenNodes
         self.setNodeName(nodeName)
         self.setNodeParent(nodeParent)
         self.childrenNodes = []
@@ -100,30 +100,10 @@ class TreeModel(QtCore.QAbstractItemModel):
         self.rootNode.removeAllChild()
         self.layoutChanged.emit()
         
-class NodeAlreadyExistsException(Exception):
-    pass
-
 class NamespaceTreeModel(TreeModel):  
     def __init__(self, separator = ".", parent = None):
         TreeModel.__init__(self, parent)
         self.separator = separator
-        self.__proxyNodeFactory = None
-        
-    @property
-    def proxyNodeFactory(self):
-        return self.__proxyNodeFactory
-        
-    @proxyNodeFactory.setter
-    def proxyNodeFactory(self, value):
-        self.__proxyNodeFactory = value
-
-    def createProxyNode(self, nodeName, parent):
-        if self.proxyNodeFactory is not None:
-            proxy = self.proxyNodeFactory(nodeName, parent)
-        else:
-            proxy = TreeNode(nodeName, parent)
-        proxy._isproxy = True
-        return proxy
         
     def nodeForNamespace(self, namespace, createProxy = False):
         node = self.rootNode
@@ -132,7 +112,8 @@ class NamespaceTreeModel(TreeModel):
             if name != "":
                 nextNode = node.findChildByName(name)
                 if nextNode is None and createProxy:
-                    nextNode = self.createProxyNode(name, node)
+                    nextNode = self.treeNodeFactory(name, node)
+                    nextNode._isproxy = True
                     node.appendChild(nextNode)
                     self.layoutChanged.emit()
                 elif nextNode is None:
@@ -147,7 +128,7 @@ class NamespaceTreeModel(TreeModel):
         parentNode = self.nodeForNamespace(namespace, True)
         parentIndex = self.createIndex(parentNode.row(), 0, parentNode) if not parentNode.isRootNode() else QtCore.QModelIndex()
         #Check if exit proxy for setting
-        proxy = parentNode.findChildByName(node.nodeName)
+        proxy = parentNode.findChildByName(node.nodeName())
         if proxy != None:
             if proxy._isproxy:
                 #Reparent
@@ -156,7 +137,7 @@ class NamespaceTreeModel(TreeModel):
                 parentNode.removeChild(proxy)
                 self.layoutChanged.emit()
             else:
-                raise NodeAlreadyExistsException()
+                raise Exception("Node Already Exists" % node.nodeName())
         self.beginInsertRows(parentIndex, node.childCount(), node.childCount())
         parentNode.appendChild(node)
         node._isproxy = False
