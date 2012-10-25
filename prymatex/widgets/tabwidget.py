@@ -18,7 +18,7 @@ import sip
 from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
-from prymatex.gui import utils
+from prymatex.qt.helpers.menus import create_menu
 
 class _TabWidget(QtGui.QTabWidget):
     """ The _TabWidget class is a QTabWidget with a dragable tab bar. """
@@ -115,17 +115,17 @@ class _DragableTabBar(QtGui.QTabBar):
             tabWidget = self.parent()
             tabSplitter = tabWidget.parent()
             tabMenu = { 
-                "title": "Tab Menu",
+                "text": "Tab Menu",
                 "items": [
-                    {   "title": "Close",
+                    {   "text": "Close",
                         "icon": resources.getIcon("close"),
                         "callback": partial(tabWidget._close_widget, widget) 
                     },
-                    {   "title": "Close All",
+                    {   "text": "Close All",
                         "icon": resources.getIcon("closeall"),
                         "callback": tabSplitter.closeAll
                     },
-                    {   "title": "Close Other",
+                    {   "text": "Close Other",
                         "callback": partial(tabSplitter.closeAllExceptWidget, widget)
                     }
                 ]
@@ -134,16 +134,16 @@ class _DragableTabBar(QtGui.QTabBar):
             if self.parent().count() > 1:
                 tabMenu["items"].append("-")
                 tabMenu["items"].append({
-                    "title": "Split Horizontally"                
+                    "text": "Split Horizontally"                
                 })
                 tabMenu["items"].append({
-                    "title": "Split Vertically"                
+                    "text": "Split Vertically"                
                 })
             tabMenu["items"].append("-")
             # Create custom menu (
             tabMenu["items"].extend(widget.contributeToTabMenu())
             
-            menu, actions = utils.createQMenu(tabMenu, self, connectActions = True)
+            menu, actions = create_menu(self, tabMenu, connectActions = True)
             
             # Display menu
             menu.exec_(e.globalPos())

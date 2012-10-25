@@ -1557,7 +1557,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         if self.filePath:
             menues.append({
                 "text": "Copy file path",
-                "icon": resources.getIcon("copy"),
+                "icon": resources.getIcon("edit-copy"),
                 "callback": lambda editor = self: QtGui.QApplication.clipboard().setText(editor.filePath)  })
         return menues
     
