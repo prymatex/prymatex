@@ -3,6 +3,24 @@
 
 from prymatex.qt import QtCore, QtGui
 
+def combine_icons(icon1, icon2, scale = 1):
+    newIcon = QtGui.QIcon()
+    sizes = icon1.availableSizes()
+    if not sizes:
+        sizes = [ QtCore.QSize(16, 16), QtCore.QSize(22, 22), QtCore.QSize(32, 32), QtCore.QSize(48, 48) ]
+    for size in sizes:
+        pixmap1 = icon1.pixmap(size)
+        pixmap2 = icon2.pixmap(size)
+        pixmap2 = pixmap2.scaled(pixmap1.width() * scale, pixmap1.height() * scale)
+        result = QtGui.QPixmap(size)
+        result.fill(QtCore.Qt.transparent)
+        painter = QtGui.QPainter(result)
+        painter.drawPixmap(0, 0, pixmap1)
+        painter.drawPixmap(pixmap1.width() - pixmap2.width(), pixmap1.height() - pixmap2.height(), pixmap2)
+        painter.end()
+        newIcon.addPixmap(result)
+    return newIcon
+
 def get_std_icon(name, size=None):
     """Get standard platform icon
     Call 'show_std_icons()' for details"""
@@ -40,7 +58,6 @@ class ShowStdIcons(QtGui.QWidget):
         self.setLayout(layout)
         self.setWindowTitle('Standard Platform Icons')
         self.setWindowIcon(get_std_icon('TitleBarMenuButton'))
-
 
 def show_std_icons():
     """

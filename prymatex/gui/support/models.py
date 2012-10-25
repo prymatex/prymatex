@@ -10,7 +10,8 @@ from prymatex.models.tree import TreeNode, TreeModel
 from prymatex.models.mimes import PyMimeData
 from prymatex.models.proxies import bisect_key
 
-from prymatex.gui.support import qtadapter
+from prymatex.qt.helpers.keysequences import keyequivalent2keysequence, keysequence2keyequivalent
+from prymatex.qt.helpers.colors import color2rgba, rgba2color
 
 #====================================================
 # Bundle Tree Node
@@ -33,7 +34,7 @@ class PMXBundleTreeNode(TreeNode):
     @property
     def keyEquivalent(self):
         if self.item.keyEquivalent is not None:
-            return qtadapter.buildKeySequence(self.item.keyEquivalent)
+            return keyequivalent2keysequence(self.item.keyEquivalent)
     
     @property
     def icon(self):
@@ -86,7 +87,7 @@ class PMXBundleTreeNode(TreeNode):
     
     def update(self, hash):
         if 'keyEquivalent' in hash:
-            hash['keyEquivalent'] = qtadapter.buildKeyEquivalent(hash['keyEquivalent'])
+            hash['keyEquivalent'] = keysequence2keyequivalent(hash['keyEquivalent'])
         self.item.update(hash)
 
     def isEditorNeeded(self):
@@ -254,7 +255,7 @@ class PMXThemeStyleRow(object):
         settings = {}
         for color_key in ['foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter']:
             if color_key in self.item.settings and self.item.settings[color_key]:
-                color = qtadapter.RGBA2QColor(self.item.settings[color_key])
+                color = rgba2color(self.item.settings[color_key])
                 settings[color_key] = color
         settings['fontStyle'] = self.item.settings['fontStyle'].split() if 'fontStyle' in self.item.settings else []
         return settings
@@ -264,7 +265,7 @@ class PMXThemeStyleRow(object):
             settings = {}
             for key in hash['settings'].keys():
                 if key in ['foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter']:
-                    settings[key] = qtadapter.QColor2RGBA(hash['settings'][key])
+                    settings[key] = color2rgba(hash['settings'][key])
             if 'fontStyle' in hash['settings']:
                 settings['fontStyle'] = " ".join(hash['settings']['fontStyle'])
             hash['settings'] = settings

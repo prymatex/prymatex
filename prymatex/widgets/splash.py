@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-from PyQt4 import QtGui, QtCore
-
+from prymatex.qt import QtGui, QtCore
 
 class SplashScreen(QtGui.QSplashScreen):
     def __init__(self, pixmap):
