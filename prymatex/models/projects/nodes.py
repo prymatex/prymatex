@@ -13,7 +13,7 @@ from prymatex import resources
 from prymatex.core import exceptions
 from prymatex.utils import plist
 
-__all__ = [ FileSystemNode, ProjectNode, PropertyTreeNode ]
+__all__ = [ 'FileSystemNode', 'ProjectNode', 'PropertyTreeNode' ]
 
 #=========================================
 # Nodes
@@ -38,7 +38,7 @@ class FileSystemNode(TreeNodeBase):
     
     def icon(self):
         return resources.getIcon(self.path())
-    
+      
 class ProjectNode(FileSystemNode):
     KEYS = [    'name', 'description', 'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 
                 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame', 'shellVariables', 'bundleMenu' ]
@@ -117,7 +117,9 @@ class ProjectNode(FileSystemNode):
             manager.addProject(project)
             return project
         except Exception, e:
-            print "Error in project %s (%s)" % (filePath, e)
+            import traceback
+            traceback.print_exc()
+            print "Error in project %s (%s)" % (path, e)
     
     def setManager(self, manager):
         self.manager = manager
@@ -125,11 +127,9 @@ class ProjectNode(FileSystemNode):
     def setWorkingSet(self, workingSet):
         self.workingSet = set
 
-    @property
     def path(self):
         return self.directory
     
-    @property
     def icon(self):
         if self.manager.isOpen(self):
             return resources.getIcon("project-development")

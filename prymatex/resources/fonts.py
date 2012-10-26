@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from spyderlib.qt import QtGui
+from prymatex.qt import QtGui
 
 SANS_SERIF = ['Sans Serif', 'DejaVu Sans', 'Bitstream Vera Sans',
               'Bitstream Charter', 'Times', 'Lucida Grande', 'Calibri',

@@ -276,11 +276,11 @@ class PMXApplication(QtGui.QApplication):
         return manager
     
     def setupProjectManager(self):
-        from prymatex.gui.project.manager import PMXProjectManager
+        from prymatex.managers.projects import ProjectManager
         
-        self.populateComponent(PMXProjectManager)
+        self.populateComponent(ProjectManager)
 
-        manager = PMXProjectManager(self)
+        manager = ProjectManager(self)
         self.profile.configure(manager)
         return manager
     

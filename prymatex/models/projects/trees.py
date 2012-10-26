@@ -2,10 +2,13 @@
 #-*- encoding: utf-8 -*-
 
 import codecs
+import fnmatch
 
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.models.tree import TreeModel as AbstractTreeModel
+from prymatex.models.tree import FlatTreeProxyModel
+from prymatex.models.configure import SortFilterConfigureProxyModel
 from prymatex.models.projects.nodes import ProjectNode, FileSystemNode
 
 #=========================================
@@ -18,8 +21,11 @@ class ProjectTreeModel(AbstractTreeModel):
         self.projectManager = projectManager
         self.fileManager = projectManager.fileManager
 
-    def treeNodeFactory(self, nodeName, nodeParent):
-        return FileSystemNode(nodeName, nodeParent)
+    def treeNodeFactory(self, nodeName, nodeParent = None):
+        if nodeParent is not None:
+            return FileSystemNode(nodeName, nodeParent)
+        else:
+            return AbstractTreeModel.treeNodeFactory(self, nodeName, nodeParent)
 
     def rowCount(self, parent):
         parentNode = self.node(parent)
@@ -169,7 +175,7 @@ class ProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         regexp = self.filterRegExp()        
         if not regexp.isEmpty():
             pattern = regexp.pattern()
-            #TODO: Hacerlo en el fileManager
+            #TODO: Hacerlo en el fileManager!!!
             match = any(map(lambda p: fnmatch.fnmatch(node.path(), p), map(lambda p: p.strip(), pattern.split(","))))
             return not match
         return True

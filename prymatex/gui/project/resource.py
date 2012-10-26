@@ -21,7 +21,7 @@ class PMXResouceWidget(QtGui.QWidget, PMXPropertyTreeNode, Ui_ResouceWidget):
     
     def edit(self, fileSystemItem):
         self.fileSystemItem = fileSystemItem
-        self.textLabelPath.setText(self.fileSystemItem.path)
-        self.textLabelType.setText(self.fileSystemItem.path)
-        self.textLabelLocation.setText(self.fileSystemItem.path)
-        self.textLabelLastModified.setText(self.fileSystemItem.path)
+        self.textLabelPath.setText(self.fileSystemItem.path())
+        self.textLabelType.setText(self.fileSystemItem.path())
+        self.textLabelLocation.setText(self.fileSystemItem.path())
+        self.textLabelLastModified.setText(self.fileSystemItem.path())

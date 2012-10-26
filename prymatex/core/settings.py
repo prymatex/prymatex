@@ -306,7 +306,8 @@ class PMXProfile(object):
 
     def restoreState(self, component):
         state = self.state.value(component.objectName())
-        component.restoreState(state)
+        if state:
+            component.restoreState(state)
         
     def setValue(self, name, value):
         self.qsettings.setValue(name, value)

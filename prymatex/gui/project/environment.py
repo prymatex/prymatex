@@ -25,7 +25,7 @@ class EnvironmentWidget(QtGui.QWidget, PMXPropertyTreeNode, Ui_Environment):
         self.project = project
         self.model.clear()
         self.model.addGroup('user', self.project.shellVariables, editable = True, checkable=True, foreground=QtCore.Qt.blue)
-        self.model.addGroup('project', self.project.environment)
+        self.model.addGroup('project', self.project.environment())
         self.model.addGroup('prymatex', self.application.supportManager.buildEnvironment(systemEnvironment = False), visible = False)
 
     def setupVariablesTableModel(self):

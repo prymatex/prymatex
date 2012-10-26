@@ -4,18 +4,17 @@
 import os, string, unicodedata
 import fnmatch
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
-from prymatex.core.plugin import PMXBaseComponent
+from prymatex.core import PMXBaseComponent
 from prymatex.core import exceptions
 from prymatex.core.settings import USER_HOME_PATH, pmxConfigPorperty
-from prymatex.gui.project.models import PMXProjectTreeModel
-from prymatex.gui.project.proxies import PMXProjectTreeProxyModel, ProjectMenuProxyModel
-from prymatex.gui.project.base import PMXProject
+from prymatex.models.projects import ProjectNode, ProjectTreeModel, ProjectTreeProxyModel, ProjectMenuProxyModel
 from prymatex.core.exceptions import ProjectExistsException, FileException
+
 from prymatex.utils.i18n import ugettext as _
 
-class PMXProjectManager(QtCore.QObject, PMXBaseComponent):
+class ProjectManager(QtCore.QObject, PMXBaseComponent):
     #Signals
     projectAdded = QtCore.pyqtSignal(object)
     projectRemoved = QtCore.pyqtSignal(object)
@@ -36,9 +35,9 @@ class PMXProjectManager(QtCore.QObject, PMXBaseComponent):
         self.fileManager = application.fileManager
         self.supportManager = application.supportManager
 
-        self.projectTreeModel = PMXProjectTreeModel(self)
+        self.projectTreeModel = ProjectTreeModel(self)
 
-        self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
+        self.projectTreeProxyModel = ProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
 
         self.projectMenuProxyModel = ProjectMenuProxyModel(self)
@@ -72,7 +71,7 @@ class PMXProjectManager(QtCore.QObject, PMXBaseComponent):
     def loadProjects(self):
         for path in self.knownProjects[:]:
             try:
-                PMXProject.loadProject(path, self)
+                ProjectNode.loadProject(path, self)
             except exceptions.FileNotExistsException as e:
                 print e
                 self.knownProjects.remove(path)
@@ -110,7 +109,7 @@ class PMXProjectManager(QtCore.QObject, PMXBaseComponent):
             os.makedirs(directory)
         elif not reuseDirectory:
             raise Exception()
-        project = PMXProject(directory, { "name": name, "description": description })
+        project = ProjectNode(directory, { "name": name, "description": description })
         try:
             project.save()
         except ProjectExistsException:
@@ -142,7 +141,7 @@ class PMXProjectManager(QtCore.QObject, PMXBaseComponent):
 
     def importProject(self, directory):
         try:
-            project = PMXProject.loadProject(directory, self)
+            project = ProjectNode.loadProject(directory, self)
         except exceptions.FileNotExistsException:
             raise exceptions.LocationIsNotProject()
         self.appendToKnowProjects(project)
@@ -199,5 +198,5 @@ class PMXProjectManager(QtCore.QObject, PMXBaseComponent):
 
     def findProjectForPath(self, path):
         for project in self.getAllProjects():
-            if self.application.fileManager.issubpath(path, project.path):
+            if self.application.fileManager.issubpath(path, project.path()):
                 return project

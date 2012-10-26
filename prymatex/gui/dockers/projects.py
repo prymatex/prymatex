@@ -54,7 +54,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     def saveState(self):
         expandedIndexes = filter(lambda index: self.treeViewProjects.isExpanded(index), self.projectTreeProxyModel.persistentIndexList())
-        expandedPaths = map(lambda index: self.projectTreeProxyModel.node(index).path, expandedIndexes)
+        expandedPaths = map(lambda index: self.projectTreeProxyModel.node(index).path(), expandedIndexes)
         return { "expanded": expandedPaths }
 
     def restoreState(self, state):
@@ -67,10 +67,10 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         indexes = self.treeViewProjects.selectedIndexes()
         if indexes:
             node = self.currentNode()
-            paths = map(lambda node: self.application.fileManager.normcase(node.path),
+            paths = map(lambda node: self.application.fileManager.normcase(node.path()),
                         [ self.projectTreeProxyModel.node(index) for index in indexes ])
             environment.update({
-                'TM_SELECTED_FILE': node.path, 
+                'TM_SELECTED_FILE': node.path(), 
                 'TM_SELECTED_FILES': " ".join(["'%s'" % path for path in paths ])
             })
         return environment
@@ -183,11 +183,11 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     def on_contextMenu_triggered(self, action):
         if hasattr(action, "bundleTreeNode"):
             node = self.currentNode()
-            env =   {   'TM_FILEPATH': node.path,
-                        'TM_FILENAME': node.nodeName,
-                        'TM_DIRECTORY': node.parentNode.path } if node.isfile else {   'TM_DIRECTORY': node.path }
+            env =   {   'TM_FILEPATH': node.path(),
+                        'TM_FILENAME': node.nodeName(),
+                        'TM_DIRECTORY': node.parentNode.path() } if node.isfile else {   'TM_DIRECTORY': node.path() }
             
-            env.update(node.project.environmentVariables())
+            env.update(node.project().environmentVariables())
             self.mainWindow.insertBundleItem(action.bundleTreeNode, environment = env)
     
     def extendFileSystemItemMenu(self, menu, node):
@@ -217,7 +217,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     def extendProjectBundleItemMenu(self, menu, node):
         #Menu de los bundles relacionados al proyecto
         #Try get all bundles for project bundle definition
-        bundles = map(lambda uuid: self.application.supportManager.getManagedObject(uuid), node.project.bundleMenu or [])
+        bundles = map(lambda uuid: self.application.supportManager.getManagedObject(uuid), node.project().bundleMenu or [])
         #Filter None bundles
         bundles = filter(lambda bundle: bundle is not None, bundles)
         #Sort by name
@@ -293,13 +293,13 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                 QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
                 QtGui.QMessageBox.Ok
             )
-            question.setDetailedText("Project location:\n%s" % treeNode.path)
+            question.setDetailedText("Project location:\n%s" % treeNode.path())
             ret = question.exec_()
             if ret == QtGui.QMessageBox.Ok:
                 self.application.projectManager.deleteProject(treeNode, removeFiles = question.isChecked())
         else:
             #Es un path
-            self.deletePath(treeNode.path)
+            self.deletePath(treeNode.path())
         self.projectTreeProxyModel.refresh(currentIndex.parent())
 
     @QtCore.pyqtSlot()
@@ -346,7 +346,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     def on_actionOpen_triggered(self):
         node = self.currentNode()
         if node.isfile:
-            self.application.openFile(node.path)
+            self.application.openFile(node.path())
         
     @QtCore.pyqtSlot()
     def on_actionOpenSystemEditor_triggered(self):
