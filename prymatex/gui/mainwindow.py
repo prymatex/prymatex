@@ -420,16 +420,17 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         return state
 
     def restoreState(self, state):
-        try:
-            map(lambda dock: dock.restoreState(state["dockers"][dock.objectName()]), self.dockers)
-            self.restoreGeometry(state["geometry"])
-            for doc in state["documents"]:
-                self.application.openFile(*doc, mainWindow = self)
-            QtGui.QMainWindow.restoreState(self, state["self"])
-            
-        except (TypeError, ValueError) as e:
-            self.logger.error("Could not restore state for %s. Reason %s" % (self, e))
-
+        # Restore dockers
+        for dock in self.dockers:
+            dockName = dock.objectName()
+            if dockName in state["dockers"]:
+                dock.restoreState(state["dockers"][dockName])
+        
+        # Restore Main window
+        self.restoreGeometry(state["geometry"])
+        for doc in state["documents"]:
+            self.application.openFile(*doc, mainWindow = self)
+        QtGui.QMainWindow.restoreState(self, state["self"])
 
     #===========================================================================
     # Drag and Drop
