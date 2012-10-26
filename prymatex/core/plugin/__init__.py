@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
-
-from PyQt4 import QtCore, QtGui
-
 #TODO: Refactor del paquete plugin, por un nombre mas de base
 
 class PMXBaseComponent(object):
