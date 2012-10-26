@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import os
 import codecs
 
 from prymatex.qt import QtCore, QtGui

@@ -36,7 +36,7 @@ class PMXSearchDock(QtGui.QDockWidget, Ui_SearchDock, PMXBaseDock):
         edit = {
             'items': [
                 "-",
-                {'title': "File Search",
+                {'text': "File Search",
                  'callback': cls.on_actionFileSearch_triggered }
             ]}
         return { "Edit": edit }

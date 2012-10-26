@@ -78,11 +78,11 @@ class SpellCheckerAddon(CodeEditorAddon):
             return instance.spellingOnType
 
         baseMenu = "Edit"
-        menuEntry = {'title': 'Spelling',
+        menuEntry = {'text': 'Spelling',
                  'items': [
-                    {'title': 'Show Spelling'},
-                    {'title': 'Check Spelling'},
-                    {'title': 'Check Spelling as You Type',
+                    {'text': 'Show Spelling'},
+                    {'text': 'Check Spelling'},
+                    {'text': 'Check Spelling as You Type',
                       'callback': on_actionSpellingOnType_toggled,
                       'checkable': True,
                       'testChecked': on_actionSpellingOnType_testChecked
