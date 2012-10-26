@@ -15,8 +15,6 @@ import sys
 from functools import partial
 
 from prymatex.qt import QtCore, QtGui
-
-from prymatex import resources
 from prymatex.qt.helpers.menus import create_menu
 
 class _TabWidget(QtGui.QTabWidget):
@@ -117,14 +115,14 @@ class _DragableTabBar(QtGui.QTabBar):
                 "text": "Tab Menu",
                 "items": [
                     {   "text": "Close",
-                        "icon": resources.getIcon("close"),
+                        "icon": "tab-close",
                         "callback": partial(tabWidget._close_widget, widget) 
                     },
                     {   "text": "Close All",
-                        "icon": resources.getIcon("closeall"),
                         "callback": tabSplitter.closeAll
                     },
                     {   "text": "Close Other",
+                        "icon": "tab-close-other",
                         "callback": partial(tabSplitter.closeAllExceptWidget, widget)
                     }
                 ]
@@ -133,10 +131,12 @@ class _DragableTabBar(QtGui.QTabBar):
             if self.parent().count() > 1:
                 tabMenu["items"].append("-")
                 tabMenu["items"].append({
-                    "text": "Split Horizontally"                
+                    "text": "Split Horizontally",
+                    "icon": "view-split-left-right"             
                 })
                 tabMenu["items"].append({
-                    "text": "Split Vertically"                
+                    "text": "Split Vertically",             
+                    "icon": "view-split-top-bottom"             
                 })
             tabMenu["items"].append("-")
             # Create custom menu (
