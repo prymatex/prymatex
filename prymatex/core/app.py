@@ -265,11 +265,11 @@ class PMXApplication(QtGui.QApplication):
         return manager
 
     def setupFileManager(self):
-        from prymatex.core.filemanager import PMXFileManager
+        from prymatex.managers.files import FileManager
         
-        self.populateComponent(PMXFileManager)
+        self.populateComponent(FileManager)
 
-        manager = PMXFileManager(self)
+        manager = FileManager(self)
         self.profile.configure(manager)
         
         manager.filesytemChange.connect(self.on_filesytemChange)
@@ -308,17 +308,20 @@ class PMXApplication(QtGui.QApplication):
         return kernelManager
 
     def setupCacheManager(self):
-        from prymatex.core.cache import PMXCacheManager
-        return PMXCacheManager()
+        from prymatex.managers.cache import CacheManager
+        return CacheManager()
         
     def setupPluginManager(self):
-        from prymatex.core.plugin.manager import PMXPluginManager
+        from prymatex.managers.plugins import PluginManager
         
-        self.populateComponent(PMXPluginManager)
+        self.populateComponent(PluginManager)
         
-        pluginManager = PMXPluginManager(self)
-        defaultDirectory = self.profile.value('PMX_PLUGINS_PATH')
-        pluginManager.addPluginDirectory(defaultDirectory)
+        pluginManager = PluginManager(self)
+        self.profile.configure(pluginManager)
+        
+        # TODO: Ruta de los plugins ver de aprovechar settings quiza esta sea una ruta base solamente
+        pluginManager.addPluginDirectory(self.profile.value('PMX_PLUGINS_PATH'))
+        
         pluginManager.loadPlugins()
         return pluginManager
 

@@ -4,12 +4,11 @@
 import os
 import codecs
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 from prymatex import resources
 from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
-from prymatex.gui.project.models import PMXProjectTreeModel
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui import utils
 
@@ -19,7 +18,8 @@ from prymatex.gui.dialogs.messages import CheckableMessageBox
 
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
-from prymatex.gui.project.base import PMXProject
+
+from prymatex.models.projects import ProjectNode
 
 class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXBaseDock):
     SHORTCUT = "F8"
@@ -193,7 +193,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     def extendFileSystemItemMenu(self, menu, node):
         utils.extendMenuSection(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete, self.actionRename])
         #utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal ], section = -1)
-        if isinstance(node, PMXProject):
+        if isinstance(node, ProjectNode):
             utils.extendMenuSection(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
             #utils.extendMenuSection(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
             #utils.extendMenuSection(menu, [self.actionBashInit], section = "interact")

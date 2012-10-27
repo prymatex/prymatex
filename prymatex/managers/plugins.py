@@ -39,7 +39,13 @@ class PluginDescriptor(object):
     def getIcon(self, key):
         return self.__entry["resources"].getIcon(key)
         
-class PluginManager(PMXBaseComponent):
+class PluginManager(QtCore.QObject, PMXBaseComponent):
+    
+    #=========================================================
+    # Settings
+    #=========================================================
+    SETTINGS_GROUP = 'PluginManager'
+    
     def __init__(self, application):
         self.application = application
         self.directories = []
@@ -169,7 +175,7 @@ class PluginManager(PMXBaseComponent):
     #==================================================
     def beginRegisterPlugin(self, pluginId, pluginEntry):
         self.modules[pluginId] = pluginEntry
-        self.currentPluginDescriptor = PMXPluginDescriptor(pluginEntry)
+        self.currentPluginDescriptor = PluginDescriptor(pluginEntry)
         
     def endRegisterPlugin(self, success):
         if not success:

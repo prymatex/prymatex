@@ -3,17 +3,17 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.gui.project.models import PMXPropertyTreeNode
+from prymatex.models.projects import PropertyTreeNode
 from prymatex.ui.configure.environment import Ui_Environment
 from prymatex.gui.models.environment import EnvironmentTableModel
 
-class EnvironmentWidget(QtGui.QWidget, PMXPropertyTreeNode, Ui_Environment):
+class EnvironmentWidget(QtGui.QWidget, PropertyTreeNode, Ui_Environment):
     """Environment variables"""
     NAMESPACE = ""
     TITLE = "Enviroment Variables"
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        PMXPropertyTreeNode.__init__(self, "environment")
+        PropertyTreeNode.__init__(self, "environment")
         self.setupUi(self)
         self.setupVariablesTableModel()
         self.project = None

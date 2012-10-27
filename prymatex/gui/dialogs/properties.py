@@ -6,14 +6,13 @@ from PyQt4 import QtCore, QtGui
 from prymatex.core.plugin import PMXBaseWidgetComponent
 
 from prymatex.ui.dialogs.treewidget import Ui_TreeWidgetDialog
-from prymatex.gui.project.models import PMXPropertyTreeNode
+from prymatex.models.projects import PropertyTreeNode, PropertiesProxyModel
 from prymatex.models.configure import ConfigureTreeModel
-from prymatex.gui.project.proxies import PMXPropertiesProxyModel
 
-class PMXProxyPropertyTreeNode(QtGui.QWidget, PMXPropertyTreeNode):
+class PMXProxyPropertyTreeNode(QtGui.QWidget, PropertyTreeNode):
     def __init__(self, name, parent):
         QtGui.QWidget.__init__(self)
-        PMXPropertyTreeNode.__init__(self, name, parent)
+        PropertyTreeNode.__init__(self, name, parent)
 
     def acceptFileSystemItem(self, fileSystemItem):
         return True
@@ -33,7 +32,7 @@ class PMXPropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseWidgetCompo
         self.model = ConfigureTreeModel(self)
         self.model.proxyConfigureCreated.connect(self.on_model_proxyConfigureCreated)
         
-        self.proxyModelProperties = PMXPropertiesProxyModel(self)
+        self.proxyModelProperties = PropertiesProxyModel(self)
         self.proxyModelProperties.setSourceModel(self.model)
         
         self.treeView.setModel(self.proxyModelProperties)

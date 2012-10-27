@@ -4,14 +4,14 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
-from prymatex.support import PMXCommand
 
 from prymatex.models.tree import TreeNode, TreeModel
 from prymatex.models.mimes import PyMimeData
-from prymatex.models.proxies import bisect_key
 
 from prymatex.qt.helpers.keysequences import keyequivalent2keysequence, keysequence2keyequivalent
 from prymatex.qt.helpers.colors import color2rgba, rgba2color
+
+from prymatex.utils.lists import bisect_key
 
 #====================================================
 # Bundle Tree Node
@@ -94,12 +94,12 @@ class PMXBundleTreeNode(TreeNode):
         return self.isTextInputNeeded() or self.producingOutputText()
 
     def isTextInputNeeded(self):
-        if isinstance(self.item, PMXCommand):
+        if self.item.TYPE == "command":
             return self.item.input not in [ "none" ]
         return True
 
     def producingOutputText(self):
-        if isinstance(self.item, PMXCommand):
+        if self.item.TYPE == "command":
             return self.item.output not in [ "discard", "showAsHTML", "showAsTooltip", "createNewDocument", "openAsNewDocument"]
         return True
         

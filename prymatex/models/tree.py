@@ -3,6 +3,8 @@
 
 from prymatex.qt import QtCore
 
+from prymatex.utils.lists import bisect_key
+
 class TreeNode(object):
     def __init__(self, nodeName, nodeParent = None):
         #TODO: Migrar a atributos ocultos __childrenNodes

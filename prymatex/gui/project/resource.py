@@ -3,16 +3,16 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.gui.project.models import PMXPropertyTreeNode
+from prymatex.models.projects import PropertyTreeNode
 from prymatex.ui.configure.resource import Ui_ResouceWidget
 
-class PMXResouceWidget(QtGui.QWidget, PMXPropertyTreeNode, Ui_ResouceWidget):
+class PMXResouceWidget(QtGui.QWidget, PropertyTreeNode, Ui_ResouceWidget):
     """Resouce"""
     NAMESPACE = ""
     TITLE = "Resouce"
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        PMXPropertyTreeNode.__init__(self, "resouce")
+        PropertyTreeNode.__init__(self, "resouce")
         self.setupUi(self)
         self.fileSystemItem = None
 

@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
-from prymatex.models.proxies import FlatTreeProxyModel
+from prymatex.models.tree import FlatTreeProxyModel
 
 class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, manager, parent = None):

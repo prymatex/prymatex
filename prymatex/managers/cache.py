@@ -2,13 +2,12 @@
 #-*- encoding: utf-8 -*-
 
 import sha
-import functools
 
-from PyQt4 import QtCore
+from prymatex.qt import QtCore, QtGui
 
-from prymatex.core.plugin import PMXBaseComponent
+from prymatex.core import PMXBaseComponent
 
-class PMXCacheManager(QtCore.QObject, PMXBaseComponent):
+class CacheManager(QtCore.QObject, PMXBaseComponent):
     def __init__(self):
         QtCore.QObject.__init__(self)
         self.memoize = {}
