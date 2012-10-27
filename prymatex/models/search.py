@@ -6,14 +6,14 @@ import os
 from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
-from prymatex.models.tree import NamespaceTreeModel, TreeNode
+from prymatex.models.trees import AbstractNamespaceTreeModel, TreeNodeBase
 
-class GroupTreeNode(TreeNode):
+class GroupTreeNode(TreeNodeBase):
     def __init__(self, name, directory, parent = None):
         self.title = name
         self.directory = directory
         self.identifier = unicode(hash(self.title))
-        TreeNode.__init__(self, self.identifier, parent)
+        TreeNodeBase.__init__(self, self.identifier, parent)
 
     def acceptPath(self, path):
         return os.path.commonprefix([self.directory, path]) == self.directory
@@ -22,62 +22,53 @@ class GroupTreeNode(TreeNode):
         dirName, fileName = os.path.dirname(path), os.path.basename(path)
         return self.identifier + dirName[len(self.directory):], fileName
 
-    @property
     def path(self):
         return os.path.join(self.directory)
     
-    @property
     def icon(self):
-        return resources.getIcon(self.path)
+        return resources.getIcon(self.path())
 
-class FileFoundTreeNode(TreeNode):
+class FileFoundTreeNode(TreeNodeBase):
     def __init__(self, name, path, parent = None):
         self.title = name
         self.__path = path
-        TreeNode.__init__(self, name, parent)
+        TreeNodeBase.__init__(self, name, parent)
         
-    @property
     def path(self):
         return os.path.join(self.__path)
     
-    @property
     def icon(self):
-        return resources.getIcon(self.path)
+        return resources.getIcon(self.path())
 
-class DirectoryTreeNode(TreeNode):
+class DirectoryTreeNode(TreeNodeBase):
     def __init__(self, name, parent = None):
         self.title = name
-        TreeNode.__init__(self, name, parent)
+        TreeNodeBase.__init__(self, name, parent)
         
-    @property
     def path(self):
-        return os.path.join(self.parentNode.path, self.nodeName)
+        return os.path.join(self.nodeParent().path(), self.nodeName())
     
-    @property
     def icon(self):
-        return resources.getIcon(self.path)
+        return resources.getIcon(self.path())
 
-class LineTreeNode(TreeNode):
+class LineTreeNode(TreeNodeBase):
     def __init__(self, lineNumber, lineContent, parent = None):
         self.title = "%s - %s" % (lineNumber, lineContent.strip())
         self.lineNumber = lineNumber
         self.identifier = unicode(hash(self.title))
-        TreeNode.__init__(self, self.identifier, parent)
+        TreeNodeBase.__init__(self, self.identifier, parent)
         
-    @property
     def path(self):
-        return self.parentNode.path
+        return self.nodeParent().path()
     
-    @property
     def icon(self):
-        return resources.getIcon(self.path)
+        return resources.getIcon(self.path())
 
-class PMXSearchTreeModel(NamespaceTreeModel):
+class SearchTreeModel(AbstractNamespaceTreeModel):
     def __init__(self, parent = None):
-        NamespaceTreeModel.__init__(self, separator = os.sep, parent = parent)
-        self.proxyNodeFactory = self.createProxyFileFoundNode
+        AbstractNamespaceTreeModel.__init__(self, separator = os.sep, parent = parent)
 
-    def createProxyFileFoundNode(self, name, parent):
+    def treeNodeFactory(self, name, parent = None):
         return DirectoryTreeNode(name, parent)
         
     def data(self, index, role):
@@ -85,7 +76,7 @@ class PMXSearchTreeModel(NamespaceTreeModel):
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             return node.title
         elif role == QtCore.Qt.DecorationRole:
-            return node.icon
+            return node.icon()
 
     def addGroup(self, name, directory):
         #Estos son los roots, agregar un default group para cuando se busque en otros lugares o el por defecto

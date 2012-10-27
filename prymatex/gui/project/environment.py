@@ -5,7 +5,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.models.projects import PropertyTreeNode
 from prymatex.ui.configure.environment import Ui_Environment
-from prymatex.gui.models.environment import EnvironmentTableModel
+from prymatex.models.environment import EnvironmentTableModel
 
 class EnvironmentWidget(QtGui.QWidget, PropertyTreeNode, Ui_Environment):
     """Environment variables"""

@@ -6,7 +6,7 @@ import codecs
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.models.tree import TreeNode as TreeNodeBase
+from prymatex.models.trees import TreeNodeBase
 from prymatex.models.configure import ConfigureTreeNode
 
 from prymatex import resources

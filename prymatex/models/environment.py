@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
-
-from prymatex import resources
-from prymatex.ui.configure.environment import Ui_Environment
+from prymatex.qt import QtCore, QtGui
 
 class EnvironmentTableModel(QtCore.QAbstractTableModel):
     variablesChanged = QtCore.pyqtSignal(str, list)

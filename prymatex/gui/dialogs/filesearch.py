@@ -4,10 +4,9 @@
 import os
 import Queue
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 from prymatex.ui.dialogs.search import Ui_SearchDialog
-from prymatex.models.tree import TreeNode, TreeModel
 
 class FileSearchThread(QtCore.QThread):
     foundPattern = QtCore.pyqtSignal(str, list)
@@ -112,7 +111,7 @@ class PMXFileSearchDialog(QtGui.QDialog, Ui_SearchDialog):
         directories = []
         if self.radioButtonWorkspace.isChecked():
             for project in self.application.projectManager.getAllProjects():
-                self.model.addGroup(project.nodeName, project.directory)
+                self.model.addGroup(project.nodeName(), project.directory)
                 directories.append(project.directory)
         self.fileSearchThread.searchInFiles(directories, filters, searchPattern, recursive, byPhrase)
         

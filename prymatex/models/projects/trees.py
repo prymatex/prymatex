@@ -6,10 +6,13 @@ import fnmatch
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.models.tree import TreeModel as AbstractTreeModel
-from prymatex.models.tree import FlatTreeProxyModel
+from prymatex.models.trees import AbstractTreeModel
+from prymatex.models.trees import FlatTreeProxyModel
 from prymatex.models.configure import SortFilterConfigureProxyModel
 from prymatex.models.projects.nodes import ProjectNode, FileSystemNode
+
+
+__all__ = [ 'ProjectTreeModel', 'ProjectTreeProxyModel', 'FileSystemProxyModel', 'PropertiesProxyModel', 'ProjectMenuProxyModel' ]
 
 #=========================================
 # Models
