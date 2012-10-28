@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.Qt import QColor
+from prymatex.qt import QtGui, QtCore
+
+from prymatex.core import PMXBaseEditorAddon
 
 from prymatex import resources
-from prymatex.core.plugin.editor import PMXBaseEditorAddon
-from prymatex.gui.codeeditor.addons import HighlightCurrentSelectionAddon
 
 class CodeEditorSideBar(QtGui.QWidget):
     updateRequest = QtCore.pyqtSignal()

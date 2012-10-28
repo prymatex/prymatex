@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
+
+from prymatex.core import PMXBaseStatusBar
 
 from prymatex import resources
-from prymatex.core.plugin.status import PMXBaseStatusBar
 from prymatex.gui.codeeditor.editor import CodeEditor
 from prymatex.ui.codeeditor.status import Ui_CodeEditorStatus
 

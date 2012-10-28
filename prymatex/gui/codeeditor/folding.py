@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from bisect import bisect
-from PyQt4 import QtCore, QtGui
+
+from prymatex.qr import QtCore, QtGui
+
 from prymatex.support import PMXSyntax
 
 class PMXEditorFolding(QtCore.QObject):

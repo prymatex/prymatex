@@ -3,10 +3,11 @@
 
 import os, sys, shutil
 
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
+
+from prymatex.core import PMXBaseDock
 
 from prymatex import resources
-from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.dockers.proxies import PMXFileSystemProxyModel

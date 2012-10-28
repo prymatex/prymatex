@@ -6,9 +6,10 @@ from bisect import bisect
 
 from prymatex.qt import QtCore, QtGui
 
+from prymatex.core import PMXBaseEditor
+
 from prymatex import resources
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core.plugin.editor import PMXBaseEditor
 from prymatex.core import exceptions
 from prymatex.qt.helpers.menus import extend_menu, update_menu
 from prymatex.gui import utils

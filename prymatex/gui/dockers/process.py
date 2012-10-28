@@ -4,12 +4,13 @@
 import os
 import signal
 
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
+
+from prymatex.core import PMXBaseDock
 
 from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui import utils
-from prymatex.core.plugin.dock import PMXBaseDock
 
 SIGNALS = dict([(keyname, getattr(signal, keyname)) for keyname in dir(signal) if keyname.startswith('SIG')])
 

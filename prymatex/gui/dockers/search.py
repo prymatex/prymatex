@@ -3,11 +3,12 @@
 
 import os
 
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
+
+from prymatex.core import PMXBaseDock
 
 from prymatex import resources
 from prymatex.ui.dockers.search import Ui_SearchDock
-from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
 from prymatex.models.search import SearchTreeModel, LineTreeNode
 from prymatex.gui.dialogs.filesearch import PMXFileSearchDialog

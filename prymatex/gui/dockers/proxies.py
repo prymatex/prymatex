@@ -2,10 +2,11 @@
 #-*- encoding: utf-8 -*-
 
 from __future__ import print_function
+
 import fnmatch
-import os
-from PyQt4 import QtCore, QtGui
-import sys
+import sys, os
+
+from prymatex.qt import QtCore, QtGui
     
 class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, parent = None):

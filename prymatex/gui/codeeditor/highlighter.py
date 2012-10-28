@@ -4,7 +4,7 @@
 import re
 from copy import copy
 
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
 
 from prymatex.gui.codeeditor.processors import PMXSyntaxProcessor
 from prymatex.gui.codeeditor.userdata import PMXBlockUserData

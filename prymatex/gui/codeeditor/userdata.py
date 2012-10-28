@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtGui
+from prymatex.qt import QtGui
 
 from prymatex.support.syntax import PMXSyntax
-from prymatex.utils.decorators.deprecated import deprecated
 
 class PMXBlockUserData(QtGui.QTextBlockUserData):
     def __init__(self):

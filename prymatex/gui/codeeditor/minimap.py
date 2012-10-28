@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
 
 from prymatex.gui.codeeditor.sidebar import SideBarWidgetAddon
 

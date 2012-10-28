@@ -3,10 +3,11 @@
 
 import re
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
+
+from prymatex.core import PMXBaseEditorAddon
 
 from prymatex.utils.lists import bisect_key
-from prymatex.core.plugin.editor import PMXBaseEditorAddon
 from prymatex.support import PMXPreferenceSettings
 
 RE_CHAR = re.compile(r"(\w)", re.UNICODE)

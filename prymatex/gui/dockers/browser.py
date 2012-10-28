@@ -5,16 +5,17 @@ import os
 import codecs
 from subprocess import Popen, PIPE, STDOUT
 
-from PyQt4 import QtCore, QtGui, QtWebKit
-from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
-from PyQt4.QtNetwork import QNetworkProxy
+from prymatex.qt import QtCore, QtGui, QtWebKit
+from prymatex.qt.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
+from prymatex.qt.QtNetwork import QNetworkProxy
+
+from prymatex.core import PMXBaseDock
 
 from prymatex import resources
 from prymatex.gui.utils import createQMenu
 from prymatex.ui.dockers.browser import Ui_BrowserDock
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.support.utils import prepareShellScript, deleteFile
-from prymatex.core.plugin.dock import PMXBaseDock
 
 class TmFileReply(QNetworkReply):
     def __init__(self, parent, url, operation):

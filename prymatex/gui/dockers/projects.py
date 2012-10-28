@@ -6,8 +6,9 @@ import codecs
 
 from prymatex.qt import QtCore, QtGui
 
+from prymatex.core import PMXBaseDock
+
 from prymatex import resources
-from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui import utils
