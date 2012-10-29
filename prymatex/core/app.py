@@ -351,6 +351,7 @@ class PMXApplication(QtGui.QApplication):
     # Dialogs
     #========================================================
     def setupDialogs(self):
+        # TODO: Creo que esto del bundle editor global asi no va a caminar muy bien
         #Bundle Editor
         from prymatex.gui.support.bundleeditor import PMXBundleEditor
         self.populateComponent(PMXBundleEditor)

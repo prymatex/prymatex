@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import os
-import sys
-import plistlib
+import os, sys, plistlib
 import zmq
 from xml.parsers.expat import ExpatError
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
+from prymatex.core import PMXBaseComponent
 
 from prymatex import resources
-from prymatex.core.plugin import PMXBaseComponent
 from prymatex.utils.importlib import import_from_directory
 
 class PrymatexServer(QtCore.QObject, PMXBaseComponent):

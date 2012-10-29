@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
-from prymatex.core.plugin import PMXBaseWidgetComponent
+from prymatex.core import PMXBaseWidgetComponent
 
 from prymatex.ui.dialogs.treewidget import Ui_TreeWidgetDialog
 from prymatex.models.projects import PropertyTreeNode, PropertiesProxyModel

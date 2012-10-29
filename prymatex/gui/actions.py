@@ -308,7 +308,7 @@ class MainWindowActions(object):
         from datetime import datetime
         now = datetime.now()
         baseName = now.strftime("%Y-%m-%d-%H_%M_%S") + '.' + self.SCREENSHOT_FORMAT
-        path = os.path.join(self.application.settings.PMX_SCREENSHOT_PATH, baseName)
+        path = os.path.join(self.application.profile.PMX_SCREENSHOT_PATH, baseName)
         pxm.save(path, self.SCREENSHOT_FORMAT)
         try:
             self.currentEditor().showMessage("%s saved" % baseName)

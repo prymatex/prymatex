@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
+
+from prymatex.core import PMXBaseWidgetComponent
 
 from prymatex import resources
 from prymatex.ui.support.editor import Ui_BundleEditor
 from prymatex.gui.support import widgets
-from prymatex.core.plugin import PMXBaseWidgetComponent
 
 class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
     BASE_EDITOR = -1 #El ultimo es el editor base, no tiene nada

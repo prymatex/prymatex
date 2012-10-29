@@ -8,7 +8,7 @@ from prymatex import resources
 from prymatex.ui.configure.theme import Ui_FontThemeWidget
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.models.delegates import PMXColorDelegate, PMXFontStyleDelegate
-from prymatex.gui.support.qtadapter import QColor2RGBA
+from prymatex.qt.helpers.colors import color2rgba
 from prymatex.utils.i18n import ugettext as _
 
 class PMXThemeWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
@@ -154,15 +154,15 @@ class PMXThemeWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
     
     def setThemeSettings(self, theme, changeSettings = True):
         settings = theme.settings
-        self.pushButtonForeground.setStyleSheet("background-color: " + QColor2RGBA(settings['foreground'])[:7])
-        self.pushButtonBackground.setStyleSheet("background-color: " + QColor2RGBA(settings['background'])[:7])
-        self.pushButtonSelection.setStyleSheet("background-color: " + QColor2RGBA(settings['selection'])[:7])
-        self.pushButtonInvisibles.setStyleSheet("background-color: " + QColor2RGBA(settings['invisibles'])[:7])
-        self.pushButtonLineHighlight.setStyleSheet("background-color: " + QColor2RGBA(settings['lineHighlight'])[:7])
-        self.pushButtonCaret.setStyleSheet("background-color: " + QColor2RGBA(settings['caret'])[:7])
+        self.pushButtonForeground.setStyleSheet("background-color: " + color2rgba(settings['foreground'])[:7])
+        self.pushButtonBackground.setStyleSheet("background-color: " + color2rgba(settings['background'])[:7])
+        self.pushButtonSelection.setStyleSheet("background-color: " + color2rgba(settings['selection'])[:7])
+        self.pushButtonInvisibles.setStyleSheet("background-color: " + color2rgba(settings['invisibles'])[:7])
+        self.pushButtonLineHighlight.setStyleSheet("background-color: " + color2rgba(settings['lineHighlight'])[:7])
+        self.pushButtonCaret.setStyleSheet("background-color: " + color2rgba(settings['caret'])[:7])
         if 'gutter' in settings:
             #Not all themes has the gutter color
-            self.pushButtonGutter.setStyleSheet("background-color: " + QColor2RGBA(settings['gutter'])[:7])
+            self.pushButtonGutter.setStyleSheet("background-color: " + color2rgba(settings['gutter'])[:7])
         self.application.supportManager.themeStyleProxyModel.setFilterRegExp(unicode(theme.uuid))
         
         #Set color for table view
