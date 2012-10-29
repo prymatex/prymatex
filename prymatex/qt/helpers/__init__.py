@@ -12,9 +12,7 @@ from prymatex.utils.text import to_ascii_cap
 
 # Local import
 import prymatex
-from prymatex import resources
 from prymatex.utils import programs
-
 
 def text2objectname(text, sufix = "", prefix = ""):
     """

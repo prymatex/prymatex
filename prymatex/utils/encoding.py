@@ -5,7 +5,7 @@
 Text encoding utilities, text file I/O
 
 Functions 'get_coding', 'decode', 'encode' and 'to_unicode' come from Eric4
-source code (Utilities/__init___.py) Copyright © 2003-2009 Detlev Offenbach
+source code (Utilities/__init__.py) Copyright © 2003-2009 Detlev Offenbach
 """
 
 import re, os, locale, sys

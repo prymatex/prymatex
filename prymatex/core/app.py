@@ -13,7 +13,8 @@ from prymatex.qt import QtGui, QtCore, Qt
 
 from prymatex.core import exceptions
 from prymatex.core.logger import NameFilter
-from prymatex.core.settings import PMXProfile, pmxConfigPorperty
+from prymatex.core.profile import PMXProfile
+from prymatex.core.settings import pmxConfigPorperty
 
 from prymatex.utils.decorators import deprecated
 from prymatex.utils import coroutines

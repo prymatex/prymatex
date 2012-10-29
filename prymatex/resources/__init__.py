@@ -5,7 +5,6 @@ import os, sys
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex.utils import osextra
 from prymatex.utils.decorators.memoize import memoized
 
 #===============================================================
@@ -135,6 +134,7 @@ def buildResourceKey(filename, namePrefixes, installedKeys):
     return resourceKey
 
 def loadResources(resourcesPath, staticMapping = []):
+    from prymatex.utils import osextra
     def loadSourcePath(sourcePath):
         sources ={}
         for dirpath, dirnames, filenames in os.walk(sourcePath):
