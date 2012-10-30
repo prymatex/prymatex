@@ -18,6 +18,7 @@ from prymatex.utils.decorators import deprecated
 
 from prymatex.core import PMXBaseComponent
 from prymatex.core.settings import pmxConfigPorperty
+from prymatex.utils.misc import get_home_dir
 from prymatex.core import exceptions
 
 class FileManager(QtCore.QObject, PMXBaseComponent):
@@ -61,7 +62,7 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     def __init__(self, application):
         QtCore.QObject.__init__(self)
         
-        self.last_directory = application.profile.USER_HOME_PATH
+        self.last_directory = get_home_dir()
         self.fileWatcher = QtCore.QFileSystemWatcher()
         self.fileWatcher.fileChanged.connect(self.on_fileChanged)
         self.fileWatcher.directoryChanged.connect(self.on_directoryChanged)

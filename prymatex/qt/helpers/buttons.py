@@ -8,9 +8,10 @@ from prymatex.qt.helpers import text2objectname
 
 def create_toolbutton(parent, settings):
     """Create a QToolButton"""
-    text = settings.get("text", "Tool Button")
-    button = QtGui.QToolButton(text, parent)
+    button = QtGui.QToolButton(parent)
+    text = settings["text"] if settings.has_key("text") else "No name"
     button.setObjectName(text2objectname(text, prefix = "toolButton"))
+    button.setText(text)
     
     # attrs
     if settings.has_key("icon"):

@@ -163,11 +163,14 @@ def loadPrymatexResources(resourcesPath, themeName = "oxygen"):
             QtGui.QIcon.setThemeSearchPaths([ themesPath ])
             QtGui.QIcon.setThemeName(themeName)
         RESOURCES = loadResources(resourcesPath, STATICMAPPING)
-
-        #Install fromTheme custom function
-        QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
-        QtGui.QIcon.fromTheme = staticmethod(getIcon)
+        installCustomFromThemeMethod()
         RESOURCES_READY = True
+        
+def installCustomFromThemeMethod():
+    #Install fromTheme custom function
+    QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
+    QtGui.QIcon.fromTheme = staticmethod(getIcon)
+    
     
 #===============================================================
 # PRYMATEX STYLES

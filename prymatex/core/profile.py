@@ -6,12 +6,11 @@ from ConfigParser import ConfigParser
 
 from prymatex.qt import QtCore
 
-from prymatex.core.settings import (USER_HOME_PATH,
-                                    get_prymatex_app_path,
+from prymatex.core.config import (  get_prymatex_app_path,
                                     get_prymatex_home_path,
-                                    get_textmate_preferences_user_path,
-                                    build_prymatex_profile,
-                                    TextMateSettings,
+                                    get_textmate_preferences_user_path)
+
+from prymatex.core.settings import (TextMateSettings,
                                     SettingsGroup,
                                     pmxConfigPorperty)
 
@@ -19,6 +18,16 @@ PRYMATEX_SETTINGS_NAME = "settings.ini"
 PRYMATEX_PROFILES_NAME = "profiles.ini"
 PRYMATEX_STATE_NAME = "state.ini"
 TEXTMATE_SETTINGS_NAME = "com.macromates.textmate.plist"
+
+def build_prymatex_profile(path):
+    '''
+    @see: PMXObject.pmxApp.getProfilePath(what, file)
+    '''
+    os.makedirs(path)
+    os.makedirs(os.path.join(path, 'tmp'), 0700)
+    os.makedirs(os.path.join(path, 'log'), 0700)
+    os.makedirs(os.path.join(path, 'cache'), 0700)
+    os.makedirs(os.path.join(path, 'screenshot'), 0700)
 
 class PMXProfile(object):
     PMX_SETTING_NAME = PRYMATEX_SETTINGS_NAME
@@ -28,7 +37,6 @@ class PMXProfile(object):
     PMX_SHARE_PATH = os.path.join(PMX_APP_PATH, 'share')
     PMX_HOME_PATH = get_prymatex_home_path()
     PMX_PLUGINS_PATH = os.path.join(PMX_HOME_PATH, 'Plugins')
-    USER_HOME_PATH = USER_HOME_PATH
     PMX_PREFERENCES_PATH = get_textmate_preferences_user_path()
     # Profiles
     PMX_PROFILES_FILE = os.path.join(PMX_HOME_PATH, PRYMATEX_PROFILES_NAME)

@@ -1,70 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-"""
-Application configuration based on Qt's QSettings module.
-"""
-import sys, os, plistlib
-from prymatex.utils.misc import get_home_dir
-
-#==============================================================================
-# Debug helpers
-#==============================================================================
-STDOUT = sys.stdout
-STDERR = sys.stderr
-
-#==============================================================================
-# Configuration paths
-#==============================================================================
-USER_HOME_PATH = get_home_dir()
-PRYMATEX_HOME_NAME = ".prymatex"
-TEXTMATE_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
-TEXTMATE_PREFERENCE_NAMES = ["Library", "Preferences"]
-
-def get_prymatex_app_path():
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-
-def get_prymatex_home_path():
-    path = os.path.join(USER_HOME_PATH, PRYMATEX_HOME_NAME)
-    if not os.path.exists(path):
-        os.makedirs(path)
-    #Create extra paths
-    for extra in ['Bundles', 'Themes', 'Plugins']:
-        extraPath = os.path.join(path, extra)
-        if not os.path.exists(extraPath):
-            os.makedirs(extraPath, 0700)
-    return path
-
-def get_textmate_preferences_user_path():
-    path = os.path.join(USER_HOME_PATH, *TEXTMATE_PREFERENCE_NAMES)
-    if not os.path.exists(path):
-        os.makedirs(path)
-    #Create extra files
-    webpreview = os.path.join(path, TEXTMATE_WEBPREVIEW_NAME)
-    if not os.path.exists(webpreview):
-        plistlib.writePlist({"SelectedTheme": "bright"}, webpreview)
-    return path
-
-def build_prymatex_profile(path):
-    '''
-    @see: PMXObject.pmxApp.getProfilePath(what, file)
-    '''
-    os.makedirs(path)
-    os.makedirs(os.path.join(path, 'tmp'), 0700)
-    os.makedirs(os.path.join(path, 'log'), 0700)
-    os.makedirs(os.path.join(path, 'cache'), 0700)
-    os.makedirs(os.path.join(path, 'screenshot'), 0700)
-
-def get_conf_path(filename=None):
-    """Return absolute path for configuration file with specified filename"""
-    from spyderlib import userconfig
-    conf_dir = osp.join(userconfig.get_home_dir(), SUBFOLDER)
-    if not osp.isdir(conf_dir):
-        os.mkdir(conf_dir)
-    if filename is None:
-        return conf_dir
-    else:
-        return osp.join(conf_dir, filename)
+import os, plistlib
 
 class TextMateSettings(object):
     def __init__(self, file):

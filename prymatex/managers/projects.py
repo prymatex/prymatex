@@ -8,7 +8,8 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import PMXBaseComponent
 from prymatex.core import exceptions
-from prymatex.core.settings import USER_HOME_PATH, pmxConfigPorperty
+from prymatex.core.settings import pmxConfigPorperty
+from prymatex.utils.misc import get_home_dir
 from prymatex.models.projects import ProjectNode, ProjectTreeModel, ProjectTreeProxyModel, ProjectMenuProxyModel
 from prymatex.core.exceptions import ProjectExistsException, FileException
 
@@ -24,7 +25,7 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
     #Settings
     SETTINGS_GROUP = 'ProjectManager'
     
-    workspaceDirectory  = pmxConfigPorperty(default = os.path.join(USER_HOME_PATH, "workspace"))  #Eclipse muejejeje
+    workspaceDirectory  = pmxConfigPorperty(default = os.path.join(get_home_dir(), "workspace"))  #Eclipse muejejeje
     knownProjects = pmxConfigPorperty(default = [])
     workingSets = pmxConfigPorperty(default = {})
     
