@@ -59,7 +59,7 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
         filePath = self.currentEditor().filePath if self.currentEditor() is not None else None
-        files = dialogs.getOpenFiles(directory = self.application.fileManager.getDirectory(filePath))
+        files = dialogs.getOpenFiles(directory = self.application.fileManager.directory(filePath))
         focus = len(files) == 1
         for filePath in files:
             editor = self.application.openFile(filePath, focus = focus)
@@ -75,7 +75,7 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionImportProject_triggered(self):
-        directory = QtGui.QFileDialog.getExistingDirectory(self, "Choose project location", self.application.fileManager.getDirectory())
+        directory = QtGui.QFileDialog.getExistingDirectory(self, "Choose project location", self.application.fileManager.directory())
         if directory:
             try:
                 self.application.projectManager.importProject(directory)
