@@ -1740,9 +1740,10 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     
     @classmethod
     def contributeToSettings(cls):
-        from prymatex.gui.settings.themes import PMXThemeWidget
-        from prymatex.gui.settings.editor import PMXEditorWidget
-        return [ PMXEditorWidget, PMXThemeWidget ]
+        from prymatex.gui.settings.themes import ThemeSettingsWidget
+        from prymatex.gui.settings.editor import EditorSettingsWidget
+        from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
+        return [ EditorSettingsWidget, ThemeSettingsWidget, AddonsSettingsWidgetFactory("editor") ]
 
     #===========================================================================
     # Menu Actions

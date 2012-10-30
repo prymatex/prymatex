@@ -165,8 +165,9 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     
     @classmethod
     def contributeToSettings(cls):
-        from prymatex.gui.settings.browser import PMXNetworkWidget
-        return [ PMXNetworkWidget ]
+        from prymatex.gui.settings.browser import NetworkSettingsWidget
+        from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
+        return [ NetworkSettingsWidget, AddonsSettingsWidgetFactory("browser") ]
         
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)

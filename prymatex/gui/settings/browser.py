@@ -9,7 +9,7 @@ from prymatex import resources
 from prymatex.ui.configure.browser import Ui_BrowserWidget
 from prymatex.models.settings import SettingsTreeNode
 
-class PMXNetworkWidget(QtGui.QWidget, SettingsTreeNode, Ui_BrowserWidget):
+class NetworkSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_BrowserWidget):
     """Setup browser"""
     TITLE = "Browser"
     ICON = resources.getIcon("internet-web-browser")

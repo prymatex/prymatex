@@ -11,7 +11,7 @@ from prymatex.models.delegates import PMXColorDelegate, PMXFontStyleDelegate
 from prymatex.qt.helpers.colors import color2rgba
 from prymatex.utils.i18n import ugettext as _
 
-class PMXThemeWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
+class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
     """Changes font and theme
     """
     DEFAULTS = {'settings': {'background': '#FFFFFF',

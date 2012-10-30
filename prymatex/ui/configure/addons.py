@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configure/addons.ui'
 #
-# Created: Sat Oct 27 10:13:15 2012
+# Created: Mon Oct 29 22:41:39 2012
 #      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
 #
 # WARNING! All changes made in this file will be lost!
@@ -15,23 +15,25 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class Ui_Terminal(object):
-    def setupUi(self, Terminal):
-        Terminal.setObjectName(_fromUtf8("Terminal"))
-        Terminal.resize(400, 300)
-        self.verticalLayout_2 = QtGui.QVBoxLayout(Terminal)
+class Ui_Addons(object):
+    def setupUi(self, Addons):
+        Addons.setObjectName(_fromUtf8("Addons"))
+        Addons.resize(400, 300)
+        self.verticalLayout_2 = QtGui.QVBoxLayout(Addons)
+        self.verticalLayout_2.setSpacing(2)
+        self.verticalLayout_2.setMargin(0)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
-        self.lineFont = QtGui.QLineEdit(Terminal)
-        self.lineFont.setReadOnly(True)
-        self.lineFont.setObjectName(_fromUtf8("lineFont"))
-        self.verticalLayout_2.addWidget(self.lineFont)
-        self.tableView = QtGui.QTableView(Terminal)
-        self.tableView.setObjectName(_fromUtf8("tableView"))
-        self.verticalLayout_2.addWidget(self.tableView)
+        self.lineEditFilter = QtGui.QLineEdit(Addons)
+        self.lineEditFilter.setReadOnly(True)
+        self.lineEditFilter.setObjectName(_fromUtf8("lineEditFilter"))
+        self.verticalLayout_2.addWidget(self.lineEditFilter)
+        self.tableViewAddons = QtGui.QTableView(Addons)
+        self.tableViewAddons.setObjectName(_fromUtf8("tableViewAddons"))
+        self.verticalLayout_2.addWidget(self.tableViewAddons)
 
-        self.retranslateUi(Terminal)
-        QtCore.QMetaObject.connectSlotsByName(Terminal)
+        self.retranslateUi(Addons)
+        QtCore.QMetaObject.connectSlotsByName(Addons)
 
-    def retranslateUi(self, Terminal):
-        Terminal.setWindowTitle(_('Terminal'))
+    def retranslateUi(self, Addons):
+        Addons.setWindowTitle(_('Terminal'))
 

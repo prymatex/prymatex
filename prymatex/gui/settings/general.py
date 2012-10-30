@@ -7,7 +7,7 @@ from prymatex import resources
 from prymatex.ui.configure.general import Ui_GeneralWidget
 from prymatex.models.settings import SettingsTreeNode
 
-class PMXGeneralWidget(QtGui.QWidget, SettingsTreeNode, Ui_GeneralWidget):
+class GeneralSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_GeneralWidget):
     TITLE = "General"
     ICON = resources.getIcon("preferences-other")
     

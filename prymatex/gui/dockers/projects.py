@@ -50,6 +50,12 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         #TODO: ver el tema de proveer servicios esta instalacion en la main window es pedorra
         mainWindow.projects = self
     
+    @classmethod
+    def contributeToSettings(cls):
+        from prymatex.gui.settings.project import ProjectSettingsWidget
+        from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
+        return [ ProjectSettingsWidget, AddonsSettingsWidgetFactory("project") ]
+    
     def addFileSystemNodeFormater(self, formater):
         self.projectTreeProxyModel.addNodeFormater(formater)
     
