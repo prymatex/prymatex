@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from PyQt4 import QtGui
+from prymatex.qt import QtGui
 
-from prymatex.core.plugin.dialog import PMXBaseDialog
+from prymatex.core import PMXBaseDialog
 
 from RequestItem.ui_requestitem import Ui_RequestItemDialog
 
