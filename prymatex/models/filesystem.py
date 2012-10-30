@@ -8,7 +8,7 @@ import sys, os
 
 from prymatex.qt import QtCore, QtGui
     
-class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
+class SortFilterFileSystemProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, parent = None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)
         self.application = QtGui.QApplication.instance()
@@ -27,10 +27,7 @@ class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
             match = any(map(lambda p: fnmatch.fnmatch(path, p), map(lambda p: p.strip(), pattern.split(","))))
             return not match
         return True
-    
-    def columnCount(self, parent):
-        return 1
-        
+      
     def lessThan(self, left, right):
         isleftdir = self.sourceModel().isDir(left)
         isrightdir = self.sourceModel().isDir(right)

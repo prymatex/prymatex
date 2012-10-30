@@ -4,14 +4,14 @@
 import os, sys, shutil
 
 from prymatex.qt import QtGui, QtCore
+from prymatex.qt.helpers.menus import create_menu
 
 from prymatex.core import PMXBaseDock
 
 from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.gui.dockers.proxies import PMXFileSystemProxyModel
-from prymatex.gui.utils import createQMenu
+from prymatex.models.filesystem import SortFilterFileSystemProxyModel
 from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
 from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
@@ -104,7 +104,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         self.fileSystemModel.setRootPath(QtCore.QDir.rootPath())
                 
         #Proxy para el file system tree view
-        self.fileSystemProxyModel = PMXFileSystemProxyModel(self)
+        self.fileSystemProxyModel = SortFilterFileSystemProxyModel(self)
         self.fileSystemProxyModel.setSourceModel(self.fileSystemModel)
         
         self.setupComboBoxLocation()
@@ -168,21 +168,21 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
     def setupTreeViewFileSystem(self):
         self.treeViewFileSystem.setModel(self.fileSystemProxyModel)
         
-        self.treeViewFileSystem.setHeaderHidden(True)
-        self.treeViewFileSystem.setUniformRowHeights(False)
+        #self.treeViewFileSystem.setHeaderHidden(True)
+        #self.treeViewFileSystem.setUniformRowHeights(False)
         
         #Setup Context Menu
         contextMenu = { 
             "title": "File System",
             "items": [
-                {   "title": "New",
+                {   "text": "New",
                     "items": [
                         self.actionNewFolder, self.actionNewFile, self.actionNewFromTemplate
                     ]
                 },
                 "-",
                 self.actionOpen,
-                {   "title": "Open With",
+                {   "text": "Open With",
                     "items": [
                         self.actionOpenDefaultEditor, self.actionOpenSystemEditor 
                     ]
@@ -196,13 +196,13 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
                 self.actionDelete,
             ]
         }
-        self.fileSystemMenu, self.fileSystemMenuActions = createQMenu(contextMenu, self)
+        self.fileSystemMenu, self.fileSystemMenuActions = create_menu(self, contextMenu)
 
         #Setup Context Menu
         optionsMenu = { 
             "title": "File System Options",
             "items": [
-                {   "title": "Order",
+                {   "text": "Order",
                     "items": [
                         (self.actionOrderByName, self.actionOrderBySize, self.actionOrderByDate, self.actionOrderByType),
                         "-", self.actionOrderDescending, self.actionOrderFoldersFirst
@@ -214,7 +214,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         self.actionOrderFoldersFirst.setChecked(True)
         self.actionOrderByName.trigger()
         
-        self.fileSystemOptionsMenu, _ = createQMenu(optionsMenu, self)
+        self.fileSystemOptionsMenu, _ = create_menu(self, optionsMenu)
         self.pushButtonOptions.setMenu(self.fileSystemOptionsMenu)
         
         #Connect context menu
