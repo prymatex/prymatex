@@ -136,7 +136,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor.deleteChar()
     
     def deleteDocument(self):
-        print "borrar documento"
         self.editor.document().clear()
        
     # Outpus function
@@ -165,16 +164,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.setTextCursor(cursor)
         
     def replaceDocument(self, context):
-        #1 Recuperar la posicion actual del cursor
-        position = self.editor.textCursor().position()
-        currentText = self.editor.toPlainText()
-        newText = context.outputValue
-        #if currentText[:position] != newText[:position]:
-        #    position += (len(newText) - len(currentText))
-        self.editor.setPlainText(newText)
-        cursor = self.editor.textCursor()
-        cursor.setPosition(position)
-        self.editor.setTextCursor(cursor)
+        self.editor.updatePlainText(context.outputValue)
         
     def insertText(self, context):
         cursor = self.editor.textCursor()
@@ -182,8 +172,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     def afterSelectedText(self, context):
         cursor = self.editor.textCursor()
-        position = cursor.selectionEnd()
-        cursor.setPosition(position)
+        cursor.setPosition(cursor.selectionEnd())
         cursor.insertText(context.outputValue)
         
     def insertAsSnippet(self, context):

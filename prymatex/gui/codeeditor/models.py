@@ -86,7 +86,7 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
         if index == 0:
             index = len(self.blocks)
         return self.blocks[index - 1]
-    
+
 #=========================================================
 # Symbol
 #=========================================================

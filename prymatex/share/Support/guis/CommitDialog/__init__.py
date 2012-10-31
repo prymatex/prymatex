@@ -112,7 +112,7 @@ class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
             message = self.textEditSummary.toPlainText()
             args.append("'%s'" % message)
             if message not in self.lastCommitSummary:
-                self.lastCommitSummary.append(message)
+                self.lastCommitSummary.insert(0, message)
                 self.settings.setValue("lastCommitSummary", self.lastCommitSummary)
             args.append(" ".join(self.filesTableModel.selectedFiles()))
             return " ".join(args)

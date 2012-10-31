@@ -533,7 +533,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def setSyntax(self, syntax):
         if self.syntaxHighlighter.syntax != syntax:
             self.syntaxHighlighter.setSyntax(syntax)
-            self.flyweightScopeFactory(syntax.scopeName)
+            self.flyweightScopeFactory([ syntax.scopeName ])
             self.syntaxChanged.emit(syntax)
 
     # Move text
