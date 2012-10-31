@@ -1,15 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""
-Running programs utilities
-
-Come from Spyder
-Source code (spyderlib/utils/programs.py) Copyright © 2009-2010 Pierre Raybaut
-Licensed under the terms of the MIT License
+"""Running programs utilities
+This code was adapted from spyderlib original developed by Pierre Raybaut
+spyderlib site:
+http://code.google.com/p/spyderlib
 """
 
 import os

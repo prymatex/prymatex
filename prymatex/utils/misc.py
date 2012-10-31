@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Miscellaneous utilities"""
+"""Miscellaneous utilities
+This code was adapted from spyderlib original developed by Pierre Raybaut
+spyderlib site:
+http://code.google.com/p/spyderlib
+"""
 
 import sys, os, shutil
 import os.path as osp

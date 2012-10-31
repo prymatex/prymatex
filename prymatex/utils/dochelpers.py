@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-Utilities and wrappers around inspect module
-
-Come from Spyder
-Source code (spyderlib/utils/dochelpers.py) Copyright © 2009-2010 Pierre Raybaut
-Licensed under the terms of the MIT License
+"""Utilities and wrappers around inspect module
+This code was adapted from spyderlib original developed by Pierre Raybaut
+spyderlib site:
+http://code.google.com/p/spyderlib
 """
 
 import inspect, re

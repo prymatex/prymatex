@@ -4,7 +4,7 @@
 from prymatex.qt import QtCore, QtGui
 
 from prymatex import resources
-from prymatex.qt.helpers import text2objectname
+from prymatex.qt.helpers.base import text2objectname
 
 from prymatex.utils import programs
 

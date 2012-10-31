@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# TODO: No son Mixin?
+
 class PMXBaseComponent(object):
     def initialize(self):
         raise NotImplemented
@@ -75,6 +77,10 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
         """Restore the state from the given state (returned by a previous call to saveState())."""
         pass
 
+    def showMessage(self, message, timeout = 0):
+        """Show message in main window's"""
+        self.mainWindow.showMessage(message, timeout)
+        
 class PMXBaseAddon(object):
     def __init__(self, widget):
         pass

@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-Text encoding utilities, text file I/O
-
+"""Text encoding utilities, text file I/O
 Functions 'get_coding', 'decode', 'encode' and 'to_unicode' come from Eric4
 source code (Utilities/__init__.py) Copyright © 2003-2009 Detlev Offenbach
 """

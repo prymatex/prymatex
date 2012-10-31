@@ -5,7 +5,7 @@ from PyQt4 import QtCore
 
 from prymatex.gui.dockers.filesystem import PMXFileSystemDock
 from prymatex.gui.dockers.browser import PMXBrowserDock
-#from prymatex.gui.dockers.logger import PMXLoggerDock
+from prymatex.gui.dockers.externalconsole import ExternalConsole
 from prymatex.gui.dockers.projects import PMXProjectDock
 from prymatex.gui.dockers.terminal import PMXTerminalDock
 from prymatex.gui.dockers.search import PMXSearchDock
@@ -25,4 +25,4 @@ def registerPlugin(manager):
     manager.registerDocker(PMXBrowserDock)
     manager.registerDocker(PMXSearchDock)
     manager.registerDocker(PMXProcessDock)
-    #manager.registerDocker(PMXLoggerDock)
+    manager.registerDocker(ExternalConsole)

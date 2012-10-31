@@ -25,11 +25,11 @@ class TextMateSettings(object):
         self.settings[name] = value
         self.sync()
     
-    def value(self, name):
+    def value(self, name, default = None):
         try:
             return self.settings[name]
         except KeyError:
-            return None
+            return default
     
     def clear(self):
         self.initializeSettings()
@@ -65,13 +65,13 @@ class SettingsGroup(object):
         else:
             return obj
     
-    def value(self, name):
+    def value(self, name, default = None):
         self.qsettings.beginGroup(self.name)
-        value = self.qsettings.value(name)
+        value = self.qsettings.value(name, default)
         self.qsettings.endGroup()
-        if value == None and name in self.settings:
+        if value is None and name in self.settings:
             #TODO: ver si tengo que pasarle un objeto
-            return self.settings[name].getDefault()
+            value = self.settings[name].getDefault()
         return SettingsGroup.toPyObject(value)
         
     def hasValue(self, name):
@@ -125,7 +125,7 @@ class pmxConfigPorperty(object):
             return self.default
         elif self.fget != None and obj != None:
             return self.fget(obj)
-        raise Exception("No value for %s" % self.name)
+        return None
     
     def toPyType(self, obj):
         if self.default != None:

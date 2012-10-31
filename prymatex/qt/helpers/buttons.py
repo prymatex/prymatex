@@ -4,7 +4,7 @@
 from prymatex.qt import QtCore, QtGui
 
 from prymatex import resources
-from prymatex.qt.helpers import text2objectname
+from prymatex.qt.helpers.base import text2objectname
 
 def create_toolbutton(parent, settings):
     """Create a QToolButton"""
@@ -27,6 +27,8 @@ def create_toolbutton(parent, settings):
         button.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
     button.setAutoRaise(settings.get("autoraise", True))
     
+    if settings.has_key("triggered") and callable(settings["triggered"]):
+        parent.connect(button, QtCore.SIGNAL("clicked()"), settings["triggered"])
     if settings.has_key("clicked") and callable(settings["clicked"]):
         parent.connect(button, QtCore.SIGNAL("clicked()"), settings["clicked"])
     if settings.has_key("toggled") and callable(settings["toggled"]):

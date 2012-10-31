@@ -139,11 +139,10 @@ class PMXProfile(object):
     def setValue(self, name, value):
         self.qsettings.setValue(name, value)
     
-    def value(self, name):
+    def value(self, name, default = None):
         if hasattr(self, name):
             return getattr(self, name)
-        value = self.qsettings.value(name)
-        return value
+        return self.qsettings.value(name, default)
 
     def clear(self):
         self.qsettings.clear()

@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-Shell Interpreter
-
-Come from Spyder
-Source code (spyderlib/utils/interpreter.py) Copyright © 2009-2010 Pierre Raybaut
-Licensed under the terms of the MIT License
+"""Shell Interpreter
+This code was adapted from spyderlib original developed by Pierre Raybaut
+spyderlib site:
+http://code.google.com/p/spyderlib
 """
 
 import sys
