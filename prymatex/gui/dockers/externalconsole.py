@@ -116,14 +116,38 @@ class ExternalConsole(QtGui.QDockWidget, PMXBaseDock):
 
     @classmethod
     def contributeToMainMenu(cls, addonClasses):
+        items = [
+            {'text': _('Open &interpreter'),
+             'icon': 'python',
+             'tip': _("Open a Python interpreter"),
+             'callback': cls.open_interpreter },
+            {'text': os.name == 'nt' and _("Open &command prompt") or _("Open &terminal"),
+             'icon': 'cmdprompt',
+             'tip': os.name == 'nt' and _("Open a Windows command prompt") or _("Open a terminal window inside Spyder"),
+             'callback': cls.open_terminal },
+            "-",
+            {'text': _("&Run..."),
+             'icon': 'run_small',
+             'tip': _("Run a Python script"),
+             'callback': cls.run_script }
+        ]
+        
+        if programs.is_module_installed('IPython', '>=0.12'):
+            items.append({'text': _("Start a new IPython kernel"),
+                                         'icon': 'ipython',
+                                         'callback': cls.start_ipython_kernel })
+
+        if programs.is_module_installed('IPython', '>=0.10'):
+            items.append({'text': _("Open IPython interpreter"),
+                                         'icon': 'ipython',
+                                         'tip': _("Open an IPython interpreter"),
+                                         'callback': cls.open_ipython })
+        
         interpreters = {
             'text': 'Interpreters',
-            'items': [
-                {'text': _('Open &interpreter'),
-                 'icon': 'python',
-                 'tip': _("Open a Python interpreter"),
-                 'callback': cls.open_interpreter }
-            ]}
+            'items': items
+        }
+                                                                          
         return { "Interpreters": interpreters }
                 
     def move_tab(self, index_from, index_to):
@@ -351,7 +375,7 @@ class ExternalConsole(QtGui.QDockWidget, PMXBaseDock):
                          self.pdb_has_stopped(fname, lineno, shell))
             #self.register_widget_shortcuts("Console", shellwidget.shell)
         else:
-            if os.name == 'posix':
+            if os.name == 'posixs':
                 cmd = 'gnome-terminal'
                 args = []
                 if programs.is_program_installed(cmd):
@@ -512,50 +536,6 @@ class ExternalConsole(QtGui.QDockWidget, PMXBaseDock):
         """
         return self.tabwidget.currentWidget()
         
-    def get_plugin_actions(self):
-        """Return a list of actions related to plugin"""
-        interpreter_action = create_action(self,
-                            _("Open &interpreter"), None,
-                            'python.png', _("Open a Python interpreter"),
-                            triggered=self.open_interpreter)
-        if os.name == 'nt':
-            text = _("Open &command prompt")
-            tip = _("Open a Windows command prompt")
-        else:
-            text = _("Open &terminal")
-            tip = _("Open a terminal window inside Spyder")
-        terminal_action = create_action(self, text, None, 'cmdprompt.png', tip,
-                                        triggered=self.open_terminal)
-        run_action = create_action(self,
-                            _("&Run..."), None,
-                            'run_small.png', _("Run a Python script"),
-                            triggered=self.run_script)
-
-        interact_menu_actions = [interpreter_action]
-        tools_menu_actions = [terminal_action]
-        self.menu_actions = [interpreter_action, terminal_action, run_action]
-        
-        ipython_kernel_action = create_action(self,
-                            _("Start a new IPython kernel"), None,
-                            'ipython.png', triggered=self.start_ipython_kernel)
-        if programs.is_module_installed('IPython', '>=0.12'):
-            self.menu_actions.insert(1, ipython_kernel_action)
-            interact_menu_actions.append(ipython_kernel_action)
-        
-        ipython_action = create_action(self,
-                            _("Open IPython interpreter"), None,
-                            'ipython.png',
-                            _("Open an IPython interpreter"),
-                            triggered=self.open_ipython)
-        if programs.is_module_installed('IPython', '>=0.10'):
-            self.menu_actions.insert(1, ipython_action)
-            interact_menu_actions.append(ipython_action)
-        
-        self.mainWindow.interact_menu_actions += interact_menu_actions
-        self.mainWindow.tools_menu_actions += tools_menu_actions
-        
-        return self.menu_actions+interact_menu_actions+tools_menu_actions
-    
     def register_plugin(self):
         """Register plugin in Spyder's main window"""
         if self.mainWindow.light:
