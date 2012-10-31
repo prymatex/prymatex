@@ -11,72 +11,75 @@ from prymatex.utils.lists import bisect_key
 
 class TreeNode(object):
     def __init__(self, nodeName, nodeParent = None):
-        #TODO: Migrar a atributos ocultos __childrenNodes
-        self.setNodeName(nodeName)
-        self.setNodeParent(nodeParent)
-        self.childrenNodes = []
+        self.__nodeName = nodeName
+        self.__nodeParent = nodeParent
+        self.__children = []
     
-    def setNodeName(self, name):
-        self.__nodeName = name
+    def setNodeName(self, nodeName):
+        self.__nodeName = nodeName
         
     def nodeName(self):
         return self.__nodeName
         
-    def setNodeParent(self, parent):
-        self.__nodeParent = parent
+    def setNodeParent(self, nodeParent):
+        self.__nodeParent = nodeParent
         
     def nodeParent(self):
         return self.__nodeParent
-        
+    
+    def childNodes(self):
+        return self.__children
+                
     def isRootNode(self):
-        return self.nodeParent() == None
+        return self.__nodeParent is None
     
     def appendChild(self, child):
-        self.childrenNodes.append(child)
+        self.__children.append(child)
         child.setNodeParent(self)
 
     def insertChild(self, index, child):
-        self.childrenNodes.insert(index, child)
+        self.__children.insert(index, child)
         child.setNodeParent(self)
 
     def removeChild(self, child):
-        self.childrenNodes.remove(child)
+        self.__children.remove(child)
         child.setNodeParent(None)
     
     def findChildByName(self, nodeName):
-        for child in self.childrenNodes:
+        for child in self.__children:
             if child.nodeName() == nodeName:
                 return child
 
     def removeAllChild(self):
-        for child in self.childrenNodes:
-            self.removeChild(child)
+        self.__children = []
 
+    def popChild(self, index = -1):
+        return self.__children.pop(index)
+        
     def childIndex(self, child):
-        return self.childrenNodes.index(child)
+        return self.__children.index(child)
         
     def childCount(self):
-        return len(self.childrenNodes)
+        return len(self.__children)
 
     def child(self, row):
-        if row < len(self.childrenNodes):
-            return self.childrenNodes[row]
+        if row < len(self.__children):
+            return self.__children[row]
     
     def row(self):
-        return self.nodeParent().childIndex(self)
+        return self.__nodeParent.childIndex(self)
 
 class TreeModel(QtCore.QAbstractItemModel):  
     def __init__(self, parent = None):
         QtCore.QAbstractItemModel.__init__(self, parent)
-        self.rootNode = self.treeNodeFactory("root")
+        self.rootNode = self.treeNodeFactory("root", None)
 
-    def treeNodeFactory(self, nodeName, nodeParent = None):
+    def treeNodeFactory(self, nodeName, nodeParent):
         return TreeNode(nodeName, nodeParent)
 
     def rowCount(self, parent):
-        parentNode = self.node(parent)
-        return parentNode.childCount()
-    
+        return self.node(parent).childCount()
+        
     def columnCount(self, parent):
         return 1  
 
@@ -138,7 +141,7 @@ class NamespaceTreeModel(TreeModel):
         if proxy != None:
             if proxy._isproxy:
                 #Reparent
-                for child in proxy.childrenNodes:
+                for child in proxy.childNodes():
                     node.appendChild(child)
                 parentNode.removeChild(proxy)
                 self.layoutChanged.emit()
@@ -180,7 +183,7 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
     
     def node(self, index):
         sIndex = self.mapToSource(index)
-        node = self.sourceModel().node(sIndex)
+        node = self.__sourceModel.node(sIndex)
         #El root node no puede estar en un flat proxy porque sino no es flat
         if not node.isRootNode():
             return node
@@ -210,11 +213,9 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
         if self.__sourceModel is None:
             return QtCore.QVariant()
         
-        mIndex = self.modelIndex(index)
-        row = mIndex.row()
-        parent = mIndex.parent()
+        sIndex = self.mapToSource(index)
         
-        return self.__sourceModel.data(self.__sourceModel.index(row, 0, parent), role)
+        return self.__sourceModel.data(sIndex, role)
 
     def flags(self, index):
         if self.__sourceModel is None or not index.isValid():  

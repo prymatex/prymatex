@@ -368,11 +368,11 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         self.bundleItemRemoved.emit(bundleItem)
         
     def getAllBundleItems(self):
-        items = []
+        nodes = []
         for bundle in self.getAllBundles():
-            for item in bundle.childrenNodes:
-                items.append(item)
-        return items
+            for node in bundle.childNodes():
+                nodes.append(node)
+        return nodes
         
     #---------------------------------------------------
     # TEMPLATEFILE OVERRIDE INTERFACE

@@ -47,7 +47,7 @@ class ProjectTreeModel(AbstractTreeModel):
         currentIndex = QtCore.QModelIndex()
         while self.rowCount(currentIndex):
             goAhead = False
-            for node in self.node(currentIndex).childrenNodes:
+            for node in self.node(currentIndex).childNodes():
                 if self.fileManager.issubpath(path, node.path()):
                     currentIndex = self.createIndex(node.row(), 0, node)
                     goAhead = True
@@ -68,14 +68,14 @@ class ProjectTreeModel(AbstractTreeModel):
             parentNode.appendChild(node)
         if notify: 
             self.endInsertRows()
-        for child in parentNode.childrenNodes:
+        for child in parentNode.childNodes():
             child._populated = False
         parentNode._populated = True
 	
     def _update_directory(self, parentNode, parentIndex, notify = False):
         names = self.fileManager.listDirectory(parentNode.path())
         addNames = filter(lambda name: parentNode.findChildByName(name) is None, names)
-        removeNodes = filter(lambda node: node.nodeName() not in names, parentNode.childrenNodes)
+        removeNodes = filter(lambda node: node.nodeName() not in names, parentNode.childNodes())
                 
         #Quitamos elementos eliminados
         for node in removeNodes:
@@ -96,7 +96,7 @@ class ProjectTreeModel(AbstractTreeModel):
             self.endInsertRows()
 
     def _collect_expanded_subdirs(self, parentNode):
-        return filter(lambda node: node.isdir and node._populated, parentNode.childrenNodes)
+        return filter(lambda node: node.isdir and node._populated, parentNode.childNodes())
 
     def refresh(self, updateIndex):
         updateNode = self.node(updateIndex)
@@ -118,7 +118,7 @@ class ProjectTreeModel(AbstractTreeModel):
         return self.node(self.indexForPath)
 
     def projectForPath(self, path):
-        for project in self.rootNode.childrenNodes:
+        for project in self.rootNode.childNodes():
             if self.fileManager.issubpath(project.path(), path):
                 return project
         

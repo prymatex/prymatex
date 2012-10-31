@@ -192,7 +192,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             node = self.currentNode()
             env =   {   'TM_FILEPATH': node.path(),
                         'TM_FILENAME': node.nodeName(),
-                        'TM_DIRECTORY': node.parentNode.path() } if node.isfile else {   'TM_DIRECTORY': node.path() }
+                        'TM_DIRECTORY': node.parentNode().path() } if node.isfile else {   'TM_DIRECTORY': node.path() }
             
             env.update(node.project().environmentVariables())
             self.mainWindow.insertBundleItem(action.bundleTreeNode, environment = env)

@@ -173,7 +173,7 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
 
     def getAllProjects(self):
         #TODO: devolver un copia o no hace falta?
-        return self.projectTreeModel.rootNode.childrenNodes
+        return self.projectTreeModel.rootNode.childNodes()
 
     def openProject(self, project):
         # Cuando abro un proyecto agrego su namespace al support para aportar bundles y themes

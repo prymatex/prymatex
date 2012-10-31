@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-"""External Console"""
+"""External Console
+This code was adapted from spyderlib original developed by Pierre Raybaut
+spyderlib site:
+http://code.google.com/p/spyderlib
+"""
 
 import sys
 import os

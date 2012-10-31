@@ -5,7 +5,8 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
 
-from prymatex.models.tree import TreeNode, TreeModel
+from prymatex.models.trees import TreeNodeBase
+from prymatex.models.trees import AbstractTreeModel
 from prymatex.models.mimes import PyMimeData
 
 from prymatex.qt.helpers.keysequences import keyequivalent2keysequence, keysequence2keyequivalent
@@ -16,13 +17,13 @@ from prymatex.utils.lists import bisect_key
 #====================================================
 # Bundle Tree Node
 #====================================================
-class PMXBundleTreeNode(TreeNode):
+class PMXBundleTreeNode(TreeNodeBase):
     """Bundle and bundle item decorator"""
     USED = []
     BANNED_ACCEL = ' \t'
     
     def __init__(self, item, parent = None):
-        TreeNode.__init__(self, item.name, parent)
+        TreeNodeBase.__init__(self, item.name, parent)
         self.item = item
 
     def __getattr__(self, name):
@@ -106,9 +107,9 @@ class PMXBundleTreeNode(TreeNode):
 #====================================================
 # Bundle Tree Model
 #====================================================
-class PMXBundleTreeModel(TreeModel): 
+class PMXBundleTreeModel(AbstractTreeModel): 
     def __init__(self, manager, parent = None):
-        TreeModel.__init__(self, parent)
+        AbstractTreeModel.__init__(self, parent)
         self.manager = manager
         self.manager.bundleChanged.connect(self.on_manager_bundleItemChanged)
         self.manager.bundleItemChanged.connect(self.on_manager_bundleItemChanged)
@@ -147,7 +148,7 @@ class PMXBundleTreeModel(TreeModel):
     def removeRows(self, position = 0, count = 1,  parent=QtCore.QModelIndex()):
         node = self.node(parent)
         self.beginRemoveRows(parent, position, position + count - 1)  
-        node.childrenNodes.pop(position)  
+        node.popChild(position)  
         self.endRemoveRows()
 
     #========================================================================
@@ -414,23 +415,23 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
 #===============================================
 # Bundle Menu Node
 #===============================================
-class PMXBundleMenuTreeNode(TreeNode):
+class PMXBundleMenuTreeNode(TreeNodeBase):
     ITEM = 0
     SUBMENU = 1
     SEPARATOR = 2
     def __init__(self, name, nodeType, data = None, parent = None):
-        TreeNode.__init__(self, name, parent)
+        TreeNodeBase.__init__(self, name, parent)
         self.data = data
         self.nodeType = nodeType
 
 #===============================================
 # Bundle Menu Tree Model
 #===============================================
-class PMXMenuTreeModel(TreeModel):
+class PMXMenuTreeModel(AbstractTreeModel):
     menuChanged = QtCore.pyqtSignal()
     
     def __init__(self, manager, parent = None):
-        TreeModel.__init__(self, parent)
+        AbstractTreeModel.__init__(self, parent)
         self.excludedModel = PMXExcludedListModel(manager, self)
         self.manager = manager
     
@@ -477,11 +478,11 @@ class PMXMenuTreeModel(TreeModel):
     
     def clear(self):
         self.excludedModel.clear()
-        TreeModel.clear(self)
+        AbstractTreeModel.clear(self)
 
     def add_submenu(self, submenuNode, submenus):
         items = []
-        for node in submenuNode.childrenNodes:
+        for node in submenuNode.childNodes():
             if node.nodeType == PMXBundleMenuTreeNode.ITEM:
                 items.append(str(node.data.uuid).upper())
             elif node.nodeType == PMXBundleMenuTreeNode.SUBMENU:
@@ -493,7 +494,7 @@ class PMXMenuTreeModel(TreeModel):
     def getMainMenu(self):
         items = []
         submenus = {}
-        for node in self.rootNode.childrenNodes:
+        for node in self.rootNode.childNodes():
             if node.nodeType == PMXBundleMenuTreeNode.ITEM:
                 items.append(str(node.data.uuid).upper())
             elif node.nodeType == PMXBundleMenuTreeNode.SUBMENU:
@@ -662,7 +663,7 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
         if node.nodeType == PMXBundleMenuTreeNode.SEPARATOR:
             self.menuModel.removeMenuItem(node)
         elif node.nodeType == PMXBundleMenuTreeNode.SUBMENU:
-            for child in node.childrenNodes[:]:
+            for child in node.childNodes():
                 self.appendMenuNode(child)
             self.menuModel.removeMenuItem(node)
         elif node.nodeType == PMXBundleMenuTreeNode.ITEM and node not in self.nodes:
