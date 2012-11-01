@@ -77,28 +77,29 @@ class TreeModel(QtCore.QAbstractItemModel):
     def treeNodeFactory(self, nodeName, nodeParent):
         return TreeNode(nodeName, nodeParent)
 
-    def rowCount(self, parent):
-        return self.node(parent).childCount()
+    def rowCount(self, parentIndex):
+        return self.node(parentIndex).childCount()
         
-    def columnCount(self, parent):
-        return 1  
+    def columnCount(self, parentIndex):
+        return 1
 
-    def index(self, row, column, parent):
-        parentNode = self.node(parent)
+    def index(self, row, column, parentIndex):
+        parentNode = self.node(parentIndex)
         childNode = parentNode.child(row)
         if childNode is not None:
             return self.createIndex(row, column, childNode)
         else:
             return QtCore.QModelIndex()
-
+    
     def parent(self, index):
         node = self.node(index)
         parentNode = node.nodeParent()
+        # Todo ver si puede llegar como index el root porque algo en este if no esta bien
         if parentNode is None or parentNode.isRootNode():
             return QtCore.QModelIndex()
         return self.createIndex(parentNode.row(), 0, parentNode)
     
-    def node(self, index = QtCore.QModelIndex()):
+    def node(self, index):
         if index.isValid():
             node = index.internalPointer()
             if node:
@@ -108,6 +109,22 @@ class TreeModel(QtCore.QAbstractItemModel):
     def clear(self):
         self.rootNode.removeAllChild()
         self.layoutChanged.emit()
+    
+    def appendNode(self, node, parentIndex = QtCore.QModelIndex()):
+        # TODO: validar y retornar falso si no se puede
+        parentNode = self.node(parentIndex)
+        self.beginInsertRows(parentIndex, node.childCount(), node.childCount())
+        parentNode.appendChild(node)
+        self.endInsertRows()
+        return True
+        
+    def removeNode(self, node, parentIndex = QtCore.QModelIndex()):
+        # TODO: validar y retornar falso si no se puede
+        parentNode = self.node(parentIndex)
+        self.beginRemoveRows(parentIndex, node.row(), node.row())
+        parentNode.removeChild(node)
+        self.endRemoveRows()
+        return True
         
 class NamespaceTreeModel(TreeModel):  
     def __init__(self, separator = ".", parent = None):

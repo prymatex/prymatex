@@ -365,7 +365,7 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
 
         viewport_offset = self.editor.contentOffset()
 
-        for cursor in self.editor.extraSelectionCursorsByScope("selection"):
+        for cursor in self.editor.searchExtraSelectionCursors("selection"):
             y = round(cursor.block().blockNumber() * rectRelation)
             if rectRelation == lineHeight:
                 y += viewport_offset.y()

@@ -13,23 +13,23 @@ from prymatex import resources
 from prymatex.core import exceptions
 from prymatex.utils import plist
 
-__all__ = [ 'FileSystemNode', 'ProjectNode', 'PropertyTreeNode' ]
+__all__ = [ 'FileSystemTreeNode', 'ProjectTreeNode', 'PropertyTreeNode' ]
 
 #=========================================
 # Nodes
 #=========================================
-class FileSystemNode(TreeNodeBase):
+class FileSystemTreeNode(TreeNodeBase):
     def __init__(self, name, parent = None):
         TreeNodeBase.__init__(self, name, parent)
         self.isdir = os.path.isdir(self.path())
         self.isfile = os.path.isfile(self.path())
         self.ishidden = name.startswith('.')
-        self.isproject = isinstance(self, ProjectNode)
+        self.isproject = isinstance(self, ProjectTreeNode)
 
     def project(self):
         if not hasattr(self, "_project"):
             self._project = self
-            while not isinstance(self._project, ProjectNode):
+            while not isinstance(self._project, ProjectTreeNode):
                 self._project = self._project.nodeParent()
         return self._project    
 
@@ -39,7 +39,7 @@ class FileSystemNode(TreeNodeBase):
     def icon(self):
         return resources.getIcon(self.path())
       
-class ProjectNode(FileSystemNode):
+class ProjectTreeNode(FileSystemTreeNode):
     KEYS = [    'name', 'description', 'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 
                 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame', 'shellVariables', 'bundleMenu' ]
     FILE = 'info.plist'
@@ -48,7 +48,7 @@ class ProjectNode(FileSystemNode):
     def __init__(self, directory, dataHash):
         self.directory = directory
         self.projectPath = os.path.join(self.path(), self.FOLDER)
-        FileSystemNode.__init__(self, dataHash.get("name"))
+        FileSystemTreeNode.__init__(self, dataHash.get("name"))
         self.workingSet = None
         self.manager = None
         self.namespace = None
@@ -64,13 +64,13 @@ class ProjectNode(FileSystemNode):
         return env
 
     def load(self, hash):
-        for key in ProjectNode.KEYS:
+        for key in ProjectTreeNode.KEYS:
             value = hash.get(key, None)
             setattr(self, key, value)
 
     def dataHash(self):
         dataHash = {}
-        for key in ProjectNode.KEYS:
+        for key in ProjectTreeNode.KEYS:
             value = getattr(self, key)
             if value != None:
                 dataHash[key] = value

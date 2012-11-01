@@ -9,7 +9,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.models.trees import AbstractTreeModel
 from prymatex.models.trees import FlatTreeProxyModel
 from prymatex.models.configure import SortFilterConfigureProxyModel
-from prymatex.models.projects.nodes import ProjectNode, FileSystemNode
+from prymatex.models.projects.nodes import FileSystemTreeNode
 
 
 __all__ = [ 'ProjectTreeModel', 'ProjectTreeProxyModel', 'FileSystemProxyModel', 'PropertiesProxyModel', 'ProjectMenuProxyModel' ]
@@ -24,9 +24,9 @@ class ProjectTreeModel(AbstractTreeModel):
         self.projectManager = projectManager
         self.fileManager = projectManager.fileManager
 
-    def treeNodeFactory(self, nodeName, nodeParent = None):
+    def treeNodeFactory(self, nodeName, nodeParent):
         if nodeParent is not None:
-            return FileSystemNode(nodeName, nodeParent)
+            return FileSystemTreeNode(nodeName, nodeParent)
         else:
             return AbstractTreeModel.treeNodeFactory(self, nodeName, nodeParent)
 
@@ -133,14 +133,10 @@ class ProjectTreeModel(AbstractTreeModel):
         
     def appendProject(self, project):
         project._populated = False
-        self.beginInsertRows(QtCore.QModelIndex(), self.rootNode.childCount(), self.rootNode.childCount())
-        self.rootNode.appendChild(project)
-        self.endInsertRows()
+        self.appendNode(project)
     
     def removeProject(self, project):
-        self.beginRemoveRows(QtCore.QModelIndex(), project.row(), project.row())
-        self.rootNode.removeChild(project)
-        self.endRemoveRows()
+        self.removeNode(project)
 
 #=========================================
 # Proxies

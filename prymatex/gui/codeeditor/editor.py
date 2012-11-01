@@ -7,6 +7,7 @@ from bisect import bisect
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import PMXBaseEditor
+from prymatex.widgets.texteditor import TextEditWidget
 
 from prymatex import resources
 from prymatex.core.settings import pmxConfigPorperty
@@ -27,10 +28,9 @@ from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, P
 from prymatex.utils import coroutines
 from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
-from prymatex.utils.datastructures import MultiListsDict
 from prymatex.utils.decorators.helpers import printtime
 
-class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
+class CodeEditor(TextEditWidget, PMXBaseEditor):
     #=======================================================================
     # Scope groups
     #=======================================================================
@@ -155,7 +155,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # INIT
     #================================================================
     def __init__(self, parent = None):
-        QtGui.QPlainTextEdit.__init__(self, parent)
+        TextEditWidget.__init__(self, parent)
         PMXBaseEditor.__init__(self)
 
         #Sidebars
@@ -178,7 +178,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
         #Highlighter
         self.syntaxHighlighter = PMXSyntaxHighlighter(self)
-        self.extraSelectionCursors = MultiListsDict()
+        #self.extraSelectionCursors = MultiListsDict()
         
         #Modes
         self.multiCursorMode = PMXMultiCursorEditorMode(self)
@@ -706,12 +706,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #TODO: Esto esta mal
         return self.beforeBrace(cursor) and self.afterBrace(cursor)
         
-    #=======================================================================
-    # Highlight Editor
-    #=======================================================================
-    def registerTextCharFormatBuilder(self, formatHash, formatBuilder):
-        self.syntaxHighlighter.registerTextCharFormatBuilder(formatHash, formatBuilder)
-        
+    # -------------------- Highlight Editor
     def textCharFormat_line_builder(self):
         format = QtGui.QTextCharFormat()
         format.setBackground(self.colours['lineHighlight'])
@@ -732,41 +727,20 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return format
         
     def highlightEditor(self):
-        self.extraSelectionCursors.clear()
-        extraSelections = []
+        self.clearExtraSelections(False)
         if self.multiCursorMode.isActive():
-            self.extraSelectionCursors.update(self.multiCursorMode.extraSelectionCursors())
+            self.updateExtraSelectionCursors(self.multiCursorMode.extraSelectionCursors())
         else:
             cursor = self.textCursor()
             cursor.clearSelection()
-            self.extraSelectionCursors["line"] = [cursor]
-            self.extraSelectionCursors["brace"] = filter(lambda cursor: cursor is not None, list(self._currentBraces))
+            self.extendExtraSelectionCursors("line", [ cursor ])
+            self.extendExtraSelectionCursors("brace", filter(lambda cursor: cursor is not None, list(self._currentBraces)))
         for addon in self.addons:
             if isinstance(addon, CodeEditorAddon):
-                self.extraSelectionCursors.update(addon.extraSelectionCursors())
-        extraSelections = reduce(
-            lambda l1, l2: l1 + l2, 
-            map(
-                lambda (scope, cursors): self.buildExtraSelections(scope, cursors),
-                self.extraSelectionCursors.iteritems()
-            ), [])
-        self.setExtraSelections(extraSelections)
+                self.updateExtraSelectionCursors(addon.extraSelectionCursors())
+        self.updateExtraSelections()
+        # Todo esta señal mandarla desde el updateExtraSelections
         self.extraSelectionChanged.emit()
-
-    def extraSelectionCursorsByScope(self, scope):
-        # TODO tomar los scopes buscando por cadena, quiza si esto crece sea mejor el score
-        cursors = filter(lambda (key, _): key.startswith(scope), self.extraSelectionCursors.iteritems())
-        return reduce(lambda c1, (key, c2): c1 + c2, cursors, [])
-        
-    def buildExtraSelections(self, scope, cursors):
-        extraSelections = []
-        cursors = cursors if isinstance(cursors, list) else [ cursors ]
-        for cursor in cursors:
-            selection = QtGui.QTextEdit.ExtraSelection()
-            selection.format = self.syntaxHighlighter.highlightFormat(scope)
-            selection.cursor = cursor
-            extraSelections.append(selection)
-        return extraSelections
 
     def select(self, selection):
         cursor = self.textCursor()

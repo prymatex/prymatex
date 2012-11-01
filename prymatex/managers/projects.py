@@ -10,7 +10,7 @@ from prymatex.core import PMXBaseComponent
 from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.utils.misc import get_home_dir
-from prymatex.models.projects import ProjectNode, ProjectTreeModel, ProjectTreeProxyModel, ProjectMenuProxyModel
+from prymatex.models.projects import ProjectTreeNode, ProjectTreeModel, ProjectTreeProxyModel, ProjectMenuProxyModel
 from prymatex.core.exceptions import ProjectExistsException, FileException
 
 from prymatex.utils.i18n import ugettext as _
@@ -72,7 +72,7 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
     def loadProjects(self):
         for path in self.knownProjects[:]:
             try:
-                ProjectNode.loadProject(path, self)
+                ProjectTreeNode.loadProject(path, self)
             except exceptions.FileNotExistsException as e:
                 print e
                 self.knownProjects.remove(path)
@@ -110,7 +110,7 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
             os.makedirs(directory)
         elif not reuseDirectory:
             raise Exception()
-        project = ProjectNode(directory, { "name": name, "description": description })
+        project = ProjectTreeNode(directory, { "name": name, "description": description })
         try:
             project.save()
         except ProjectExistsException:
@@ -142,7 +142,7 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
 
     def importProject(self, directory):
         try:
-            project = ProjectNode.loadProject(directory, self)
+            project = ProjectTreeNode.loadProject(directory, self)
         except exceptions.FileNotExistsException:
             raise exceptions.LocationIsNotProject()
         self.appendToKnowProjects(project)

@@ -20,7 +20,7 @@ from prymatex.gui.dialogs.messages import CheckableMessageBox
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 
-from prymatex.models.projects import ProjectNode
+from prymatex.models.projects import ProjectTreeNode
 
 class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXBaseDock):
     SHORTCUT = "F8"
@@ -200,7 +200,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     def extendFileSystemItemMenu(self, menu, node):
         utils.extendMenuSection(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete, self.actionRename])
         #utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal ], section = -1)
-        if isinstance(node, ProjectNode):
+        # TODO Quiza sea mejor ponerle un type y controlar contra una cadena
+        if isinstance(node, ProjectTreeNode):
             utils.extendMenuSection(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
             #utils.extendMenuSection(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
             #utils.extendMenuSection(menu, [self.actionBashInit], section = "interact")
