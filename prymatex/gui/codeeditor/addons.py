@@ -102,7 +102,7 @@ class SpellCheckerAddon(CodeEditorAddon):
         return items
 
     def extraSelectionCursors(self):
-        return { "#spell": self.wordCursors[:] }
+        return { "spell": self.wordCursors[:] }
 
     def setupSpellChecker(self):
         try:
