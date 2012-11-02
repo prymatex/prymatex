@@ -82,11 +82,11 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
         return True
 
     def appendToKnowProjects(self, project):
-        self.knownProjects.append(project.path)
+        self.knownProjects.append(project.path())
         self.settings.setValue('knownProjects', self.knownProjects)
 
     def removeFromKnowProjects(self, project):
-        self.knownProjects.remove(project.path)
+        self.knownProjects.remove(project.path())
         self.settings.setValue('knownProjects', self.knownProjects)
     
     #---------------------------------------------------
