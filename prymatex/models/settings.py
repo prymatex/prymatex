@@ -13,7 +13,10 @@ class SettingsTreeNode(ConfigureTreeNode):
 
     def loadSettings(self):
         pass
-
+    
+    @property
+    def childrenNodes(self):
+        return []
 # Proxy for namespaced models
 class ProxySettingsTreeNode(ProxyConfigureTreeNode):
     def loadSettings(self):
