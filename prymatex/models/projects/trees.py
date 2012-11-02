@@ -28,6 +28,7 @@ class ProjectTreeModel(AbstractTreeModel):
         if nodeParent is not None:
             return FileSystemTreeNode(nodeName, nodeParent)
         else:
+            # TODO: Quiza sea mejor hacer un custom root node
             return AbstractTreeModel.treeNodeFactory(self, nodeName, nodeParent)
 
     def rowCount(self, parent):
@@ -37,6 +38,8 @@ class ProjectTreeModel(AbstractTreeModel):
         return parentNode.childCount()
 
     def data(self, index, role):
+        if not index.isValid():
+            return None
         node = self.node(index)
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             return node.nodeName()
@@ -155,12 +158,9 @@ class ProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         self.nodeFormaters.append(formater)
         
     def data(self, index, role):
-        sIndex = self.mapToSource(index)
-        value = self.sourceModel().data(sIndex, role)
-        node = self.node(index)
-        if not node.isRootNode():
-            for formater in self.nodeFormaters:
-                value = formater(node, value, role)
+        value = self.sourceModel().data(self.mapToSource(index), role)
+        for formater in self.nodeFormaters:
+            value = formater(self.node(index), value, role)
         return value
 
     def filterAcceptsRow(self, sourceRow, sourceParent):
@@ -280,6 +280,7 @@ class ProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
     def supportedDropActions(self):
         return QtCore.Qt.CopyAction | QtCore.Qt.MoveAction | QtCore.Qt.LinkAction
 
+# TODO: Esto es parte de un intento de hacer un modelo para buscar entre archivos hacer algo con él
 class FileSystemProxyModel(FlatTreeProxyModel):
     def __init__(self, parent = None):
         FlatTreeProxyModel.__init__(self, parent)

@@ -148,7 +148,7 @@ class PMXBundleTreeModel(AbstractTreeModel):
     def removeRows(self, position = 0, count = 1,  parent=QtCore.QModelIndex()):
         node = self.node(parent)
         self.beginRemoveRows(parent, position, position + count - 1)  
-        node.popChild(position)  
+        node.popChild(position)
         self.endRemoveRows()
 
     #========================================================================
