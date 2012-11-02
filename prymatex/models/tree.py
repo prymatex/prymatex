@@ -113,7 +113,7 @@ class TreeModel(QtCore.QAbstractItemModel):
     def appendNode(self, node, parentIndex = QtCore.QModelIndex()):
         # TODO: validar y retornar falso si no se puede
         parentNode = self.node(parentIndex)
-        self.beginInsertRows(parentIndex, node.childCount(), node.childCount())
+        self.beginInsertRows(parentIndex, parentNode.childCount(), parentNode.childCount())
         parentNode.appendChild(node)
         self.endInsertRows()
         return True
