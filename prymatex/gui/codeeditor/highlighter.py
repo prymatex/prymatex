@@ -106,6 +106,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def setupBlockUserData(self, text, block, userData):
         userData.setRanges(self.processor.scopeRanges)
         userData.setChunks(self.processor.lineChunks)
+        userData.blank = text.strip() == ""
         # TODO UserDataProcessors?
         #1 Update words
         if userData.words != self.processor.words:
@@ -140,7 +141,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def highlightBlock(self, text):
         self.highlight_function(text)
-
+        
     def async_highlight(self, text):
         userData = self.currentBlock().userData()
         if userData:

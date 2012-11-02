@@ -799,28 +799,33 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         while block.isValid() and block.userData():
             # The top left position of the block in the document
             # position = self.blockBoundingGeometry(block).topLeft() + offset
-            position = self.blockBoundingGeometry(block).topLeft()
+            blockGeometry = self.blockBoundingGeometry(block)
             # Check if the position of the block is out side of the visible area
-            if position.y() > page_bottom:
+            if blockGeometry.top() > page_bottom:
                 break
-            positionY = round(position.y())
+            positionY = round(blockGeometry.top())
             if block.isVisible():
                 
                 user_data = block.userData()
                 if self.folding.isStart(self.folding.getFoldingMark(block)) and user_data.folded:
-                    painter.drawPixmap(font_metrics.width(block.text()) + 10,
+                    painter.drawPixmap(font_metrics.width(block.text()) + offset.x() + 5,
                         positionY + font_metrics.ascent() + font_metrics.descent() - resources.getImage("foldingellipsis").height(),
                         resources.getImage("foldingellipsis"))
                 if self.showIndentGuide:
-                    for s in range(0, (len(user_data.indent) / len(self.tabKeyBehavior()))):
-                        positionX = (font_metrics.width("#") * self.tabStopSize * s) + font_metrics.width("#") + offset.x()
-                        painter.drawLine(positionX, positionY, positionX, positionY + font_metrics.height())
+                    blockPattern = block
+                    while blockPattern.isValid() and blockPattern.userData() and blockPattern.userData().blank:
+                        blockPattern = blockPattern.next()
+                    if blockPattern.isValid() and blockPattern.userData():
+                        indentPattern = blockPattern.userData().indent
+                        for s in range(0, (len(indentPattern) / len(self.tabKeyBehavior()))):
+                            positionX = (font_metrics.width("#") * self.tabStopSize * s) + font_metrics.width("#") + offset.x()
+                            painter.drawLine(positionX, positionY, positionX, positionY + font_metrics.height())
                 
             block = block.next()
 
         if self.showMarginLine:
             painter.drawLine(self.pos_margin + offset.x(), 0, self.pos_margin + offset.x(), self.viewport().height())
-                    
+
         if self.multiCursorMode.isActive():
             ctrl_down = bool(self.application.keyboardModifiers() & QtCore.Qt.ControlModifier)
             for index, cursor in enumerate(self.multiCursorMode.cursors, 1):

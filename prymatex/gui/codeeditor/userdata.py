@@ -12,13 +12,15 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         self.foldingMark = PMXSyntax.FOLDING_NONE
         self.foldedLevel = 0
         self.folded = False
-        #Indent
+        # Indent and content
         self.indent = ""
+        self.blank = True
+        
         #Symbols
         self.symbol = None
         #Words
         self.words = []
-
+        
         self.textHash = None
         
         self.__cache = {}
