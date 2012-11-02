@@ -727,14 +727,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return format
         
     def highlightEditor(self):
-        self.clearExtraSelections(False)
-        if self.multiCursorMode.isActive():
-            self.updateExtraSelectionCursors(self.multiCursorMode.extraSelectionCursors())
-        else:
-            cursor = self.textCursor()
-            cursor.clearSelection()
-            self.extendExtraSelectionCursors("line", [ cursor ])
-            self.extendExtraSelectionCursors("brace", filter(lambda cursor: cursor is not None, list(self._currentBraces)))
+        cursor = self.textCursor()
+        cursor.clearSelection()
+        self.setExtraSelectionCursors("line", [ cursor ])
+        self.setExtraSelectionCursors("brace", filter(lambda cursor: cursor is not None, list(self._currentBraces)))
         for addon in self.addons:
             if isinstance(addon, CodeEditorAddon):
                 self.updateExtraSelectionCursors(addon.extraSelectionCursors())

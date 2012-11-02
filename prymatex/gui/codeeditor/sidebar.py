@@ -365,8 +365,8 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
 
         viewport_offset = self.editor.contentOffset()
 
-        for cursor in self.editor.searchExtraSelectionCursors("selection"):
-            y = round(cursor.block().blockNumber() * rectRelation)
+        for extra in self.editor.searchExtraSelections("selection"):
+            y = round(extra.cursor.block().blockNumber() * rectRelation)
             if rectRelation == lineHeight:
                 y += viewport_offset.y()
             painter.fillRect(0, y, 10, rectHeight, self.editor.colours['selection'])

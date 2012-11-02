@@ -13,7 +13,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         # TODO: Buscar sobre este atributo en la documnetación
         #self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         
-        self.extraSelectionCursors = {}
+        self.scopedExtraSelections = {}
         self.textCharFormatBuilders = {}
         self.registerTextCharFormatBuildersByName()
 
@@ -31,33 +31,32 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         return QtGui.QTextCharFormat()
 
     def extendExtraSelectionCursors(self, scope, cursors):
-        self.extraSelectionCursors.setdefault(scope, []).extend(cursors)
-        
-    def updateExtraSelectionCursors(self, extraSelectionCursors):
-        for scope, cursors in extraSelectionCursors.iteritems():
-            self.extendExtraSelectionCursors(scope, cursors)
-        
+        self.scopedExtraSelections.setdefault(scope, []).extend(self.__build_extra_selections(scope, cursors))
+
+    def setExtraSelectionCursors(self, scope, cursors):
+        self.scopedExtraSelections[scope] = self.__build_extra_selections(scope, cursors)
+    
+    def updateExtraSelectionCursors(self, cursorsDict):
+        map(lambda (scope, cursors): self.setExtraSelectionCursors(scope, cursors), cursorsDict.iteritems())
+    
     def updateExtraSelections(self):
         extraSelections = []
-        for scope, cursors in self.extraSelectionCursors.iteritems():
-            extraSelections.extend(self.buildExtraSelections(scope, cursors))
+        for _, extra in self.scopedExtraSelections.iteritems():
+            extraSelections.extend(extra)
         self.setExtraSelections(extraSelections)
 
-    def searchExtraSelectionCursors(self, scope):
-        cursors = filter(lambda (s, _): s.startswith(scope), self.extraSelectionCursors.iteritems())
+    def searchExtraSelections(self, scope):
+        cursors = filter(lambda (s, _): s.startswith(scope), self.scopedExtraSelections.iteritems())
         return reduce(lambda c1, (_, c2): c1 + c2, cursors, [])    
     
-    def clearExtraSelectionCursors(self, scope, applyExtraSelections = True):
-        del self.extraSelectionCursors[scope]
-        if applyExtraSelections:
-            self.updateExtraSelections()
+    def clearExtraSelectionCursors(self, scope):
+        del self.scopedExtraSelections[scope]
         
-    def clearExtraSelections(self, applyExtraSelections = True):
-        self.extraSelectionCursors.clear()
-        if applyExtraSelections:
-            self.updateExtraSelections()
+    def clearExtraSelections(self):
+        self.scopedExtraSelections.clear()
+        self.updateExtraSelections()
         
-    def buildExtraSelections(self, scope, cursors):
+    def __build_extra_selections(self, scope, cursors):
         extraSelections = []
         for cursor in cursors:
             selection = QtGui.QTextEdit.ExtraSelection()
