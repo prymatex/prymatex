@@ -968,23 +968,24 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def insertNewLine(self, cursor = None):
         cursor = cursor or self.textCursor()
         block = cursor.block()
+        userData = cursor.block().userData()
         settings = self.preferenceSettings(self.scope(cursor))
         indentMarks = settings.indent(block.text()[:cursor.columnNumber()])
         if PMXPreferenceSettings.INDENT_INCREASE in indentMarks:
             self.logger.debug("Increase indent")
-            indent = block.userData().indent + self.tabKeyBehavior()
+            indent = userData.indent + self.tabKeyBehavior()
         elif PMXPreferenceSettings.INDENT_NEXTLINE in indentMarks:
             #TODO: Creo que este no es el correcto
             self.logger.debug("Increase next line indent")
-            indent = block.userData().indent + self.tabKeyBehavior()
+            indent = userData.indent + self.tabKeyBehavior()
         elif PMXPreferenceSettings.UNINDENT in indentMarks:
             self.logger.debug("Unindent")
             indent = ""
         elif PMXPreferenceSettings.INDENT_DECREASE in indentMarks:
-            indent = block.userData().indent[:len(self.tabKeyBehavior())]
+            indent = userData.indent[:len(self.tabKeyBehavior())]
         else:
             self.logger.debug("Preserve indent")
-            indent = block.userData().indent
+            indent = block.userData().indent[:cursor.columnNumber()]
         cursor.insertText("\n%s" % indent)
         self.ensureCursorVisible()
 
