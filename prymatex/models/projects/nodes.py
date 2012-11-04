@@ -12,6 +12,7 @@ from prymatex.models.configure import ConfigureTreeNode
 from prymatex import resources
 from prymatex.core import exceptions
 from prymatex.utils import plist
+import shutil
 
 __all__ = [ 'FileSystemTreeNode', 'ProjectTreeNode', 'PropertyTreeNode' ]
 
