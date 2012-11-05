@@ -141,10 +141,10 @@ class EnvironmentTableModel(QtCore.QAbstractTableModel):
             self.endInsertRows()
 
     def removeRows(self, position, rows, parent = QtCore.QModelIndex()):
-        if any(map(lambda value: 'system' in value, self.variables[position:position + 1])):
-            return False
         self.beginRemoveRows(parent, position, position + rows - 1)
         row, group = self.mapToGroup(position)
+        if not group["editable"]:
+            return False
         for _ in range(rows):
             group['variables'].pop(row)
         self.variablesChanged.emit(group['name'], group['variables'])
