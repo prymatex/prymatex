@@ -3,7 +3,6 @@
 
 from PyQt4 import QtGui, QtCore
 
-from prymatex.gui import utils
 from prymatex.support.processor import PMXCommandProcessor
 
 #Este es un processor de commands para la Main Window

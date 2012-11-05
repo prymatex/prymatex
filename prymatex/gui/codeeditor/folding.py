@@ -63,8 +63,9 @@ class PMXEditorFolding(QtCore.QObject):
     def updateFoldingBlocks(self):
         nest = 0
         for block in self.blocks:
-            userData = block.userData()
-            nest += userData.foldingMark
+            if block.userData() is None:
+                break
+            nest += block.userData().foldingMark
             if nest >= 0:
                 self.folding.append(block)
 

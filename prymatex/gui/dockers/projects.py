@@ -5,13 +5,13 @@ import os
 import codecs
 
 from prymatex.qt import QtCore, QtGui
+from prymatex.qt.helpers import create_menu, extend_menu_section
 
 from prymatex.core import PMXBaseDock
 
 from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.gui import utils
 
 from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
 from prymatex.gui.dialogs.project import PMXNewProjectDialog
@@ -106,9 +106,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         
         #Setup Context Menu
         optionsMenu = { 
-            "title": "Project Options",
+            "text": "Project Options",
             "items": [
-                {   "title": "Order",
+                {   "text": "Order",
                     "items": [
                         (self.actionOrderByName, self.actionOrderBySize, self.actionOrderByDate, self.actionOrderByType),
                         "-", self.actionOrderDescending, self.actionOrderFoldersFirst
@@ -120,7 +120,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         self.actionOrderFoldersFirst.setChecked(True)
         self.actionOrderByName.trigger()
         
-        self.projectOptionsMenu, _ = utils.createQMenu(optionsMenu, self)
+        self.projectOptionsMenu, _ = create_menu(self, optionsMenu)
         self.pushButtonOptions.setMenu(self.projectOptionsMenu)
 
         #Connect context menu
@@ -146,9 +146,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     #================================================
     def buildContextMenu(self, index):    
         contextMenu = { 
-            "title": "Context",
+            "text": "Context",
             "items": [
-                {   "title": "New",
+                {   "text": "New",
                     "items": [
                         self.actionNewFolder, self.actionNewFile, "-", self.actionNewFromTemplate, self.actionNewProject,
                     ]
@@ -163,8 +163,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             self.extendFileSystemItemMenu(contextMenu, node)
             self.extendAddonsItemMenu(contextMenu, node)
             self.extendProjectBundleItemMenu(contextMenu, node)
-        # contextMenu, contextMenuActions = utils.createQMenu(contextMenu, self, useSeparatorName = True)
-        contextMenu, contextMenuActions = utils.createQMenu(contextMenu, self)
+        # contextMenu, contextMenuActions = create_menu(contextMenu, self, useSeparatorName = True)
+        contextMenu, contextMenuActions = create_menu(self, contextMenu)
         
         for action in contextMenuActions:
             if hasattr(action, "callback"):
@@ -198,21 +198,21 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             self.mainWindow.insertBundleItem(action.bundleTreeNode, environment = env)
     
     def extendFileSystemItemMenu(self, menu, node):
-        utils.extendMenuSection(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete, self.actionRename])
-        #utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal ], section = -1)
+        extend_menu_section(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete, self.actionRename])
+        #extend_menu_section(menu, ["--interact", self.actionSetInTerminal ], section = -1)
         # TODO Quiza sea mejor ponerle un type y controlar contra una cadena
         if isinstance(node, ProjectTreeNode):
-            utils.extendMenuSection(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
-            #utils.extendMenuSection(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
-            #utils.extendMenuSection(menu, [self.actionBashInit], section = "interact")
-            utils.extendMenuSection(menu, [self.actionBundleEditor], section = "bundles")
+            extend_menu_section(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
+            #extend_menu_section(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
+            #extend_menu_section(menu, [self.actionBashInit], section = "interact")
+            extend_menu_section(menu, [self.actionBundleEditor], section = "bundles")
         else:
-            utils.extendMenuSection(menu, [self.actionCut, self.actionCopy, self.actionPaste], section = "handlepaths", position = 0)
+            extend_menu_section(menu, [self.actionCut, self.actionCopy, self.actionPaste], section = "handlepaths", position = 0)
         if node.isfile:
-            utils.extendMenuSection(menu, self.actionOpen, section = "open", position = 0)
+            extend_menu_section(menu, self.actionOpen, section = "open", position = 0)
 
         #El final
-        utils.extendMenuSection(menu, ["--properties", self.actionProperties], section = -1)
+        extend_menu_section(menu, ["--properties", self.actionProperties], section = -1)
 
     def extendAddonsItemMenu(self, menu, node):
         #Menu de los addons
@@ -220,7 +220,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         for addon in self.addons:
             addonMenues.extend(addon.contributeToContextMenu(node))
         if len(addonMenues) > 1:
-            utils.extendMenuSection(menu, addonMenues, section = 'properties')
+            extend_menu_section(menu, addonMenues, section = 'properties')
         
     def extendProjectBundleItemMenu(self, menu, node):
         #Menu de los bundles relacionados al proyecto
@@ -232,7 +232,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         bundles = sorted(bundles, key=lambda bundle: bundle.name)
         if bundles:
             bundleMenues = map(lambda bundle: self.application.supportManager.menuForBundle(bundle), bundles)
-            utils.extendMenuSection(menu, bundleMenues, section = "bundles", position = 0)
+            extend_menu_section(menu, bundleMenues, section = "bundles", position = 0)
 
     #================================================
     # Tree View Project

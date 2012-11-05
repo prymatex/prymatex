@@ -230,11 +230,11 @@ class PMXApplication(QtGui.QApplication):
     #========================================================
     @logtime
     def setupSupportManager(self):
-        from prymatex.gui.support.manager import PMXSupportManager
+        from prymatex.managers.support import SupportManager
         
-        self.populateComponent(PMXSupportManager)
+        self.populateComponent(SupportManager)
 
-        manager = PMXSupportManager(self)
+        manager = SupportManager(self)
         self.profile.configure(manager)
         
         #Prepare prymatex namespace

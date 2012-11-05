@@ -13,8 +13,7 @@ from prymatex import resources
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core import exceptions
 from prymatex.qt.helpers.menus import extend_menu, update_menu
-from prymatex.gui import utils
-from prymatex.gui.support.models import PMXBundleTreeNode
+from prymatex.models.support import BundleItemTreeNode
 from prymatex.gui.codeeditor.addons import CodeEditorAddon
 from prymatex.gui.codeeditor.sidebar import CodeEditorSideBar, SideBarWidgetAddon
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
@@ -1065,7 +1064,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             environment.update(self.project.environmentVariables())
         if cursor.hasSelection():
             self.logger.debug("Add selection to environment")
-            environment['TM_SELECTED_TEXT'] = utils.replaceLineBreaks(cursor.selectedText())
+            environment['TM_SELECTED_TEXT'] = cursor.selectedText().replace(u"\u2029", '\n').replace(u"\u2028", '\n')
             start, end = self.getSelectionBlockStartEnd()
             environment['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
             environment['TM_INPUT_START_LINE'] = start.blockNumber() + 1
@@ -1484,7 +1483,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             elif isinstance(item,  basestring):
                 title = "%s 	&%d" % (item, index)
                 icon = QtGui.QIcon()
-            elif isinstance(item,  PMXBundleTreeNode):
+            elif isinstance(item,  BundleItemTreeNode):
                 title = "%s 	&%d" % (item.buildMenuTextEntry(False), index)
                 icon = item.icon
             menu.addAction(icon, title)

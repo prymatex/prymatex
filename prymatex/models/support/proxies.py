@@ -2,9 +2,9 @@
 #-*- encoding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
-from prymatex.models.tree import FlatTreeProxyModel
+from prymatex.models.trees import FlatTreeProxyModel
 
-class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
+class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
     def __init__(self, manager, parent = None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)
         self.manager = manager
@@ -69,7 +69,7 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
             self.bundleItemTypesFilter = self.bundleItemTypeOrder[:]
         self.setFilterRegExp("")
 
-class PMXBundleTypeFilterProxyModel(FlatTreeProxyModel):
+class BundleItemTypeProxyModel(FlatTreeProxyModel):
     def __init__(self, tipos, parent = None):
         FlatTreeProxyModel.__init__(self, parent)
         self.tipos = tipos if isinstance(tipos, list) else [ tipos ]
@@ -103,9 +103,9 @@ class PMXBundleTypeFilterProxyModel(FlatTreeProxyModel):
             items.append(index.internalPointer())
         return items
 
-class PMXBundleProxyModel(PMXBundleTypeFilterProxyModel):
+class BundleListModel(BundleItemTypeProxyModel):
     def __init__(self, parent = None):
-        super(PMXBundleProxyModel, self).__init__('bundle', parent)
+        BundleItemTypeProxyModel.__init__(self, 'bundle', parent)
     
     def data(self, index, role):
         if self.sourceModel() is None:
@@ -133,9 +133,9 @@ class PMXBundleProxyModel(PMXBundleTypeFilterProxyModel):
     def flags(self, index):
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
     
-class PMXSyntaxProxyModel(PMXBundleTypeFilterProxyModel):
+class SyntaxListModel(BundleItemTypeProxyModel):
     def __init__(self, parent = None):
-        PMXBundleTypeFilterProxyModel.__init__(self, 'syntax', parent)
+        BundleItemTypeProxyModel.__init__(self, 'syntax', parent)
     
     def data(self, index, role):
         if self.sourceModel() is None:
@@ -155,9 +155,9 @@ class PMXSyntaxProxyModel(PMXBundleTypeFilterProxyModel):
     def columnCount(self, parent):
         return 2
     
-class PMXTemplateProxyModel(PMXBundleTypeFilterProxyModel):
+class TemplateListModel(BundleItemTypeProxyModel):
     def __init__(self, parent = None):
-        PMXBundleTypeFilterProxyModel.__init__(self, 'template', parent)
+        BundleItemTypeProxyModel.__init__(self, 'template', parent)
     
     def data(self, index, role):
         if self.sourceModel() is None:
@@ -177,9 +177,9 @@ class PMXTemplateProxyModel(PMXBundleTypeFilterProxyModel):
     def columnCount(self, parent):
         return 2
 
-class PMXProjectProxyModel(PMXBundleTypeFilterProxyModel):
+class ProjectListModel(BundleItemTypeProxyModel):
     def __init__(self, parent = None):
-        PMXBundleTypeFilterProxyModel.__init__(self, 'project', parent)
+        BundleItemTypeProxyModel.__init__(self, 'project', parent)
     
     def data(self, index, role):
         if self.sourceModel() is None:
@@ -199,14 +199,14 @@ class PMXProjectProxyModel(PMXBundleTypeFilterProxyModel):
     def columnCount(self, parent):
         return 2
 
-class PMXThemeStyleTableProxyModel(QtGui.QSortFilterProxyModel):
+class ThemeStyleProxyTableModel(QtGui.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         regexp = self.filterRegExp()
         if regexp.isEmpty():
             return True
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = index.internalPointer()
-        return regexp.exactMatch(unicode(node.item.theme.uuid))
+        return regexp.exactMatch(unicode(node.style().theme.uuid))
         
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
         return True

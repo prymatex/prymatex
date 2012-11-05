@@ -3,7 +3,6 @@
 
 from PyQt4 import QtGui, QtCore
 
-from prymatex.gui import utils
 from prymatex.support.processor import PMXCommandProcessor
 from prymatex.support.snippet import PMXSnippet
 
@@ -83,7 +82,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def selection(self, format = None):
         cursor = self.editor.textCursor()
         if cursor.hasSelection():
-            text = utils.replaceLineBreaks(cursor.selectedText())
+            text = cursor.selectedText().replace(u"\u2029", '\n').replace(u"\u2028", '\n')
             if format == "xml":
                 firstBlock, lastBlock = self.editor.getSelectionBlockStartEnd()
                 return self.formatAsXml(text, firstBlock, lastBlock, cursor.selectionStart() - firstBlock.position(), cursor.selectionEnd() - lastBlock.position())

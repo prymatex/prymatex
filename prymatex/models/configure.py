@@ -52,7 +52,7 @@ class ConfigureTreeModelBase(AbstractNamespaceTreeModel):
             return node.icon()
 
     def addConfigNode(self, node):
-        self.addNamespaceNode(node.NAMESPACE, node)
+        self.insertNamespaceNode(node.NAMESPACE, node)
        
 class ConfigureTreeModel(ConfigureTreeModelBase):
     proxyConfigureCreated = QtCore.pyqtSignal(object)

@@ -3,10 +3,10 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.gui import utils
+from prymatex.qt.helpers.keyevents import KEY_NUMBERS
 from prymatex.utils.lists import bisect_key
 from prymatex.gui.codeeditor import helpers
-from prymatex.gui.support.models import PMXBundleTreeNode
+from prymatex.models.support import BundleItemTreeNode
 from prymatex.gui.codeeditor.models import PMXCompleterTableModel
 
 class PMXBaseEditorMode(object):
@@ -90,7 +90,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             #Capture Text
             cursor.setPosition(currentHolder.start)
             cursor.setPosition(currentHolder.end - length, QtGui.QTextCursor.KeepAnchor)
-            selectedText = utils.replaceLineBreaks(cursor.selectedText())
+            selectedText = cursor.selectedText().replace(u"\u2029", '\n').replace(u"\u2028", '\n')
             currentHolder.setContent(selectedText)
             
             #Remove text
@@ -395,9 +395,9 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
             #Se termino la joda
         elif event.modifiers() == QtCore.Qt.ControlModifier and event.key() in [ QtCore.Qt.Key_Z]:
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
-        elif bool(event.modifiers() & QtCore.Qt.ControlModifier) and event.key() in utils.KEY_NUMBERS:
+        elif bool(event.modifiers() & QtCore.Qt.ControlModifier) and event.key() in KEY_NUMBERS:
             #Seleccionamos cursores de la multiseleccion
-            index = utils.KEY_NUMBERS.index(event.key())
+            index = KEY_NUMBERS.index(event.key())
             if index == 0:
                 if bool(event.modifiers() & QtCore.Qt.MetaModifier) and self.selectedCursors:
                     #Toggle
@@ -578,7 +578,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
                     cursor.insertText(suggestion['display'])
                 elif 'title' in suggestion:
                     cursor.insertText(suggestion['title'])
-            elif isinstance(suggestion, PMXBundleTreeNode):
+            elif isinstance(suggestion, BundleItemTreeNode):
                 cursor.removeSelectedText()
                 self.editor.insertBundleItem(suggestion)
             else:

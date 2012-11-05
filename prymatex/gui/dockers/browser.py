@@ -12,7 +12,7 @@ from prymatex.qt.QtNetwork import QNetworkProxy
 from prymatex.core import PMXBaseDock
 
 from prymatex import resources
-from prymatex.gui.utils import createQMenu
+from prymatex.qt.helpers import create_menu
 from prymatex.ui.dockers.browser import Ui_BrowserDock
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.support.utils import prepareShellScript, deleteFile
@@ -205,11 +205,11 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     def setupToolBar(self):
         #Setup Context Menu
         optionsMenu = { 
-            "title": "Browser Options",
+            "text": "Browser Options",
             "items": [ self.actionSyncEditor, self.actionConnectEditor ]
         }
 
-        self.browserOptionsMenu, _ = createQMenu(optionsMenu, self)
+        self.browserOptionsMenu, _ = create_menu(self, optionsMenu)
         self.toolButtonOptions.setMenu(self.browserOptionsMenu)
 
     def initialize(self, mainWindow):

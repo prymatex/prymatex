@@ -68,6 +68,9 @@ class TreeNode(object):
     
     def row(self):
         return self.__nodeParent.childIndex(self)
+        
+    def column(self):
+        return 0
 
 class TreeModel(QtCore.QAbstractItemModel):  
     def __init__(self, parent = None):
@@ -97,7 +100,13 @@ class TreeModel(QtCore.QAbstractItemModel):
         # Todo ver si puede llegar como index el root porque algo en este if no esta bien
         if parentNode is None or parentNode.isRootNode():
             return QtCore.QModelIndex()
-        return self.createIndex(parentNode.row(), 0, parentNode)
+        return self.createIndex(parentNode.row(), parentNode.column(), parentNode)
+    
+    def nodeIndex(self, node):
+        if not node.isRootNode():
+            return self.createIndex(node.row(), node.column(), node)
+        else:
+            return QtCore.QModelIndex()
     
     def node(self, index):
         if index.isValid():
@@ -110,17 +119,19 @@ class TreeModel(QtCore.QAbstractItemModel):
         self.rootNode.removeAllChild()
         self.layoutChanged.emit()
     
-    def appendNode(self, node, parentIndex = QtCore.QModelIndex()):
-        # TODO: validar y retornar falso si no se puede
-        parentNode = self.node(parentIndex)
+    def appendNode(self, node, parentNode = None):
+        # TODO: validar y retornar falso si no se puede, ver si el parent puede ser index y node
+        parentNode = parentNode or self.rootNode
+        parentIndex = self.nodeIndex(parentNode)
         self.beginInsertRows(parentIndex, parentNode.childCount(), parentNode.childCount())
         parentNode.appendChild(node)
         self.endInsertRows()
         return True
         
-    def removeNode(self, node, parentIndex = QtCore.QModelIndex()):
-        # TODO: validar y retornar falso si no se puede
-        parentNode = self.node(parentIndex)
+    def removeNode(self, node, parentNode = None):
+        # TODO: validar y retornar falso si no se puede, ver si el parent puede ser index y node
+        parentNode = parentNode or self.rootNode
+        parentIndex = self.nodeIndex(parentNode)
         self.beginRemoveRows(parentIndex, node.row(), node.row())
         parentNode.removeChild(node)
         self.endRemoveRows()
@@ -147,12 +158,13 @@ class NamespaceTreeModel(TreeModel):
                 node = nextNode
         return node
     
-    def addNode(self, node):
+    def insertNode(self, node):
+        # TODO esto es como un appendNode asi que no estaria mal que se use ese metodo
         return self.addNamespaceNode("", node)
 
-    def addNamespaceNode(self, namespace, node):
+    def insertNamespaceNode(self, namespace, node):
         parentNode = self.nodeForNamespace(namespace, True)
-        parentIndex = self.createIndex(parentNode.row(), 0, parentNode) if not parentNode.isRootNode() else QtCore.QModelIndex()
+        parentIndex = self.nodeIndex(parentNode)
         #Check if exit proxy for setting
         proxy = parentNode.findChildByName(node.nodeName())
         if proxy != None:

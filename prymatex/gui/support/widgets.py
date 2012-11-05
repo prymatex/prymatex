@@ -17,7 +17,7 @@ from prymatex.ui.support.templatefile import Ui_TemplateFile
 from prymatex.ui.support.preference import Ui_Preference
 from prymatex.ui.support.macro import Ui_Macro
 from prymatex.ui.support.project import Ui_Project
-from prymatex.gui.support.models import PMXMenuTreeModel, PMXExcludedListModel
+from prymatex.models.support import BundleItemMenuTreeModel
 
 TABWIDTH = 20
 
@@ -626,7 +626,7 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
         self.setupUi(self)
         manager = QtGui.QApplication.instance().supportManager
 
-        self.treeMenuModel = PMXMenuTreeModel(manager)
+        self.treeMenuModel = BundleItemMenuTreeModel(manager)
         self.treeMenuView.setModel(self.treeMenuModel)
         self.listExcludedView.setModel(self.treeMenuModel.excludedListModel())
 

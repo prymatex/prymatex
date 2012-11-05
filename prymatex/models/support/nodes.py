@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtGui, QtCore
-from prymatex.qt.helpers import keyequivalent2keysequence, keysequence2keyequivalent
+from prymatex.qt.helpers import keyequivalent2keysequence, keysequence2keyequivalent, rgba2color
 
 from prymatex import resources
 
@@ -99,3 +99,75 @@ class BundleItemTreeNode(TreeNodeBase):
         if self.__bundleItem.TYPE == "command":
             return self.__bundleItem.output not in [ "discard", "showAsHTML", "showAsTooltip", "createNewDocument", "openAsNewDocument"]
         return True
+
+#===============================================
+# Bundle Menu Node
+#===============================================
+class BundleItemMenuTreeNode(TreeNodeBase):
+    ITEM = 0
+    SUBMENU = 1
+    SEPARATOR = 2
+    def __init__(self, name, nodeType, data = None, parent = None):
+        TreeNodeBase.__init__(self, name, parent)
+        self.data = data
+        self.nodeType = nodeType
+
+#====================================================
+# Themes Styles Row
+#====================================================
+class ThemeStyleTableRow(object):
+    """Theme and Style decorator"""
+    def __init__(self, style, scores = None):
+        self.__style = style
+        self.scores = scores
+        self.STYLES_CACHE = {}
+    
+    def __getattr__(self, name):
+        # Quitar esta cosa fea
+        return getattr(self.__style, name)
+
+    def style(self):
+        return self.__style
+
+    @property
+    def settings(self):
+        settings = {}
+        for color_key in ['foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter']:
+            if color_key in self.__style.settings and self.__style.settings[color_key]:
+                color = rgba2color(self.__style.settings[color_key])
+                settings[color_key] = color
+        settings['fontStyle'] = self.__style.settings['fontStyle'].split() if 'fontStyle' in self.__style.settings else []
+        return settings
+    
+    def update(self, dataHash):
+        if 'settings' in dataHash:
+            settings = {}
+            for key in dataHash['settings'].keys():
+                if key in ['foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter']:
+                    settings[key] = color2rgba(dataHash['settings'][key])
+            if 'fontStyle' in dataHash['settings']:
+                settings['fontStyle'] = " ".join(dataHash['settings']['fontStyle'])
+            dataHash['settings'] = settings
+        self.__style.update(dataHash)
+    
+    def clearCache(self):
+        self.STYLES_CACHE = {}
+
+    def getStyle(self, scope = None):
+        if scope in self.STYLES_CACHE:
+            return self.STYLES_CACHE[scope]
+        base = {}
+        base.update(self.settings)
+        if scope == None:
+            return base
+        styles = []
+        for style in self.styles:
+            if style.scope != None:
+                score = self.scores.score(style.scope, scope)
+                if score != 0:
+                    styles.append((score, style))
+        styles.sort(key = lambda t: t[0])
+        for score, style in styles:
+            base.update(style.settings)
+        self.STYLES_CACHE[scope] = base
+        return base
