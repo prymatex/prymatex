@@ -25,7 +25,7 @@ from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListMo
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 
 from prymatex.utils import coroutines
-from prymatex.utils.text import convert_functions
+from prymatex.utils import sourcecode
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime
 
@@ -86,8 +86,16 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     MoveColumnRight = QtGui.QTextCursor.Right
     
     #================================================================
-    # Convert types, los numeros son los indeces de convert_functions
+    # Convert types
     #================================================================
+    CONVERTERS = [  sourcecode.upper_case, 
+                    sourcecode.lower_case, 
+                    sourcecode.title_case,
+                    sourcecode.opposite_case,
+                    sourcecode.spaces_to_tabs,
+                    sourcecode.tabs_to_spaces,
+                    sourcecode.transpose
+    ]
     ConvertToUppercase = 0
     ConvertToLowercase = 1
     ConvertToTitlecase = 2
@@ -576,7 +584,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # Convert Text
     def convertText(self, convertType):
         cursor = self.textCursor()
-        convertFunction = convert_functions[convertType]
+        convertFunction = self.CONVERTERS[convertType]
         if convertType == self.ConvertSpacesToTabs:
             self.replaceSpacesForTabs()
         elif convertType == self.ConvertTabsToSpaces:
