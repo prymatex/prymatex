@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Text encoding utilities, text file I/O
-Functions 'get_coding', 'decode', 'encode' and 'to_unicode' come from Eric4
-source code (Utilities/__init__.py) Copyright © 2003-2009 Detlev Offenbach
+"""Source code text utilities
+This code was adapted from spyderlib original developed by Pierre Raybaut
+spyderlib site:
+http://code.google.com/p/spyderlib
 """
 
 import re, os, locale, sys

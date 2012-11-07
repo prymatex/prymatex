@@ -25,7 +25,7 @@ from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListMo
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 
 from prymatex.utils import coroutines
-from prymatex.utils import sourcecode
+from prymatex.utils import text
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime
 
@@ -88,13 +88,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     #================================================================
     # Convert types
     #================================================================
-    CONVERTERS = [  sourcecode.upper_case, 
-                    sourcecode.lower_case, 
-                    sourcecode.title_case,
-                    sourcecode.opposite_case,
-                    sourcecode.spaces_to_tabs,
-                    sourcecode.tabs_to_spaces,
-                    sourcecode.transpose
+    CONVERTERS = [  text.upper_case, 
+                    text.lower_case, 
+                    text.title_case,
+                    text.opposite_case,
+                    text.spaces_to_tabs,
+                    text.tabs_to_spaces,
+                    text.transpose
     ]
     ConvertToUppercase = 0
     ConvertToLowercase = 1

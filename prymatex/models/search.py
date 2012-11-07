@@ -3,7 +3,7 @@
 
 import os
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 from prymatex import resources
 from prymatex.models.trees import AbstractNamespaceTreeModel, TreeNodeBase

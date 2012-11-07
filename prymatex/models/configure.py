@@ -3,8 +3,8 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.models.tree import TreeNode as TreeNodeBase
-from prymatex.models.tree import NamespaceTreeModel as AbstractNamespaceTreeModel
+from prymatex.models.trees import TreeNodeBase
+from prymatex.models.trees import AbstractNamespaceTreeModel
 
 #=========================================
 # Nodes and Models
