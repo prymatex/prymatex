@@ -16,9 +16,6 @@ THEME_ICON_TEST = "document-open"
 
 # TODO: Migrar al uso de la calve por defecto
 STATICMAPPING = (
-    #Splash Image
-    (os.path.normcase("splash.png"), "prymatex-splash"),
-    
     # Process
     (os.path.normcase("groups/red.png"), "porcess-not-running"),
     (os.path.normcase("groups/yellow.png"), "porcess-starting"),
@@ -86,7 +83,7 @@ def getResourcePath(name, sources = None):
 
 @memoized
 def getImage(index):
-    path = getResourcePath(index)
+    path = getResourcePath(index, ["Icons", "Images"])
     if path is not None:
         return QtGui.QPixmap(path)
 

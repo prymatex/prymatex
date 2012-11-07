@@ -269,6 +269,7 @@ class PMXSupportBaseManager(object):
             for path in paths:
                 theme = PMXTheme.loadTheme(path, namespace, self)
                 if theme is not None:
+                    self.showMessage("Loading theme\n%s" % theme.name)
                     loadedThemes.add(theme)
         return loadedThemes
         
@@ -282,6 +283,7 @@ class PMXSupportBaseManager(object):
             for path in paths:
                 bundle = PMXBundle.loadBundle(path, namespace, self)
                 if bundle is not None:
+                    self.showMessage("Loading bundle\n%s" % bundle.name)
                     loadedBundles.add(bundle)
         return loadedBundles
         
@@ -295,7 +297,7 @@ class PMXSupportBaseManager(object):
             # Search for support
             if bundle.support == None and os.path.exists(os.path.join(bpath, 'Support')):
                 bundle.setSupport(os.path.join(bpath, 'Support'))
-            self.showMessage("Loading bundle %s" % bundle.name)
+            self.showMessage("Populating\n%s" % bundle.name)
             for klass in BUNDLEITEM_CLASSES:
                 files = reduce(lambda x, y: x + glob(y), [ os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS ], [])
                 for path in files:
