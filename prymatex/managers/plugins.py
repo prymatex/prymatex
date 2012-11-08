@@ -19,6 +19,20 @@ from prymatex.utils.importlib import import_module, import_from_directory
 PLUGIN_EXTENSION = 'pmxplugin'
 PLUGIN_DESCRIPTOR_FILE = 'info.json'
 
+class ResourceProvider():
+    def __init__(self, resources):
+        self.resources = resources
+
+    def getImage(self, index, default = None):
+        if index in self.resources:
+            return QtGui.QPixmap(self.resources[index])
+        return resources.getImage(index)
+        
+    def getIcon(self, index, default = None):
+        if index in self.resources:
+            return QtGui.QIcon(self.resources[index])
+        return resources.getIcon(index)
+
 class PluginDescriptor(object):
     def __init__(self, entry):
         self.__entry = entry
@@ -183,22 +197,13 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         self.currentPluginDescriptor = None
         
     def loadResources(self, pluginDirectory, pluginEntry):
-        pluginResources = resources.ResourceProvider()
         if "resources" in pluginEntry:
             resourcesDirectory = os.path.join(pluginDirectory, pluginEntry["resources"])
-            for dirpath, dirnames, filenames in os.walk(resourcesDirectory):
-                dirParts = osextra.path.fullsplit(dirpath)
-                for filename in filenames:
-                    resourceKey, _ = os.path.splitext(filename)
-                    index = -1
-                    while resourceKey in pluginResources and index:
-                        newKey = "-".join(dirParts[index:] + [resourceKey])
-                        if newKey == resourceKey:
-                            raise Exception("Esto no puede ocurrir")
-                        index -= 1
-                        resourceKey = newKey
-                    pluginResources[resourceKey] = os.path.join(dirpath, filename)
-        pluginEntry["resources"] = pluginResources
+            res = resources.loadResources(resourcesDirectory)
+            pluginEntry["resources"] = ResourceProvider(res)
+        else:
+            # Global resources
+            pluginEntry["resources"] = resources
         
     def loadPlugin(self, pluginEntry):
         pluginId = pluginEntry.get("id")
@@ -220,7 +225,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
     
     def loadCoreModule(self, moduleName, pluginId):
         pluginEntry = {"id": pluginId,
-                       "resources": resources.ResourceProvider()}
+                       "resources": resources}
         self.beginRegisterPlugin(pluginId, pluginEntry)
         try:
             pluginEntry["module"] = import_module(moduleName)
