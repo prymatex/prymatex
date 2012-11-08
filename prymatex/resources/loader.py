@@ -98,15 +98,23 @@ def loadResources(resourcesPath, staticMapping = []):
         resources[source] = loadSourcePath(os.path.join(resourcesPath, source))
     return resources
 
-def loadPrymatexResources(resourcesPath, themeName = "oxygen"):
+def loadPrymatexResources(resourcesPath, preferedThemeName = "oxygen"):
     global RESOURCES, RESOURCES_READY
     if not RESOURCES_READY:
-        themesPath = os.path.join(resourcesPath, "IconThemes")
-        #Test icon theme:
+        #Test default theme:
         if not QtGui.QIcon.hasThemeIcon(THEME_ICON_TEST):
-            #Add icon theme
-            QtGui.QIcon.setThemeSearchPaths([ themesPath ])
-            QtGui.QIcon.setThemeName(themeName)
+            themePaths = QtGui.QIcon.themeSearchPaths()
+            themeNames = [preferedThemeName]
+            if os.path.exists("/usr/share/icons"):
+                themePaths.append("/usr/share/icons")
+                themeNames.extend(os.listdir("/usr/share/icons"))
+            themePaths.append(os.path.join(resourcesPath, "IconThemes"))
+            # Set and test
+            QtGui.QIcon.setThemeSearchPaths( themePaths )
+            for themeName in themeNames:
+                QtGui.QIcon.setThemeName(themeName)
+                if QtGui.QIcon.hasThemeIcon(THEME_ICON_TEST):
+                    break
         RESOURCES = loadResources(resourcesPath, STATICMAPPING)
         installCustomFromThemeMethod()
         RESOURCES_READY = True
