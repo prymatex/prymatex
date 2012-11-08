@@ -395,8 +395,9 @@ class PMXApplication(QtGui.QApplication):
     #========================================================
     # Create Zmq Sockets
     #========================================================
-    def zmqSocket(self, type, name, interface='tcp://127.0.0.1'):
-        socket = self.zmqContext.socket(type)
+    def zmqSocket(self, socketType, name, interface='tcp://127.0.0.1'):
+        # TODO ver la variable aca
+        socket = self.zmqContext.socket(socketType)
         port = socket.bind_to_random_port(interface)
         self.supportManager.addToEnvironment("PMX_" + name.upper() + "_PORT", port)
         return socket
