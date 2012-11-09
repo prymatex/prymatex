@@ -6,6 +6,8 @@ from string import Template
 
 from prymatex.qt import QtCore, QtGui
 
+from prymatex import resources
+
 from prymatex.ui.mainwindow import Ui_MainWindow
 from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
@@ -56,6 +58,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         QtGui.QMainWindow.__init__(self)
         self.application = application
         self.setupUi(self)
+        
+        self.setWindowIcon(resources.getIcon("prymatex"))
         
         self.setupDialogs()
         self.setupDockToolBars()

@@ -102,7 +102,7 @@ def loadPrymatexResources(resourcesPath, preferedThemeName = "oxygen"):
     global RESOURCES, RESOURCES_READY
     if not RESOURCES_READY:
         #Test default theme:
-        if not QtGui.QIcon.hasThemeIcon(THEME_ICON_TEST):
+        if QtGui.QIcon.hasThemeIcon(THEME_ICON_TEST):
             themePaths = QtGui.QIcon.themeSearchPaths()
             themeNames = [preferedThemeName]
             if os.path.exists("/usr/share/icons"):

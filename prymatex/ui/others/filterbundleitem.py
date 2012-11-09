@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/others/filterbundleitem.ui'
 #
-# Created: Mon Nov 14 16:19:58 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Nov  9 18:10:44 2012
+#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -37,8 +37,8 @@ class Ui_FilterThroughCommand(object):
         sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
         self.label.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
-        font.setWeight(75)
         font.setBold(True)
+        font.setWeight(75)
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout.addWidget(self.label)
@@ -120,7 +120,7 @@ class Ui_FilterThroughCommand(object):
     def retranslateUi(self, FilterThroughCommand):
         FilterThroughCommand.setWindowTitle(_('Filter Through Command'))
         self.label.setText(_('Command'))
-        self.comboCommand.setProperty(_fromUtf8("className"), _('bigPadding'))
+        self.comboCommand.setProperty("className", _('bigPadding'))
         self.groupBox.setTitle(_('Input'))
         self.radioInputNone.setText(_('&None'))
         self.radioInputSelection.setText(_('&Selection'))

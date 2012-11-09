@@ -10,13 +10,6 @@
     <height>600</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Prymatex Text Editor</string>
-  </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>:/images/prymatex/logo.png</normaloff>:/images/prymatex/logo.png</iconset>
-  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
@@ -461,7 +454,9 @@
   </action>
   <action name="actionRemoveAllRecentFiles">
    <property name="icon">
-    <iconset theme="edit-clear"/>
+    <iconset theme="edit-clear">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Remove All Recent Files</string>
@@ -545,7 +540,9 @@
   </action>
   <action name="actionImportProject">
    <property name="icon">
-    <iconset theme="project-open"/>
+    <iconset theme="project-open">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Import Project</string>

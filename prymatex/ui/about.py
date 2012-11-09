@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/about.ui'
 #
-# Created: Wed Sep 12 18:54:21 2012
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Fri Nov  9 18:24:39 2012
+#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,14 +19,9 @@ class Ui_AboutDialog(object):
     def setupUi(self, AboutDialog):
         AboutDialog.setObjectName(_fromUtf8("AboutDialog"))
         AboutDialog.resize(400, 465)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        AboutDialog.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(AboutDialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.labelLogo = QtGui.QLabel(AboutDialog)
-        self.labelLogo.setText(_fromUtf8(""))
-        self.labelLogo.setPixmap(QtGui.QPixmap(_fromUtf8(":/icons/prymatex/Prymatex_Logo.png")))
         self.labelLogo.setAlignment(QtCore.Qt.AlignCenter)
         self.labelLogo.setObjectName(_fromUtf8("labelLogo"))
         self.verticalLayout.addWidget(self.labelLogo)
@@ -37,7 +32,7 @@ class Ui_AboutDialog(object):
 "</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
 "<p align=\"center\" style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:11pt; font-weight:600;\">Prymatex</span></p>\n"
 "<hr />\n"
-"<p align=\"center\" style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Open Source Text Editor<br /><br />© Prymatex Team 2009-2012<br />van Haaster Diego<br />Defossé Nahuel</p></body></html>"))
+"<p align=\"center\" style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Open Source Text Editor<br /><br />© Prymatex Team 2009-2012<br />van Haaster Diego<br />Defoss&eacute; Nahuel</p></body></html>"))
         self.labelTitle.setObjectName(_fromUtf8("labelTitle"))
         self.verticalLayout.addWidget(self.labelTitle)
         self.textInformation = QtGui.QTextEdit(AboutDialog)
