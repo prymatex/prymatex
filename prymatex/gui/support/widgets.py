@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import ast
+from pprint import pformat
 
 from PyQt4 import QtCore, QtGui
+
+from prymatex import resources
 
 from prymatex.ui.support.snippet import Ui_Snippet
 from prymatex.ui.support.command import Ui_Command
@@ -13,9 +17,7 @@ from prymatex.ui.support.templatefile import Ui_TemplateFile
 from prymatex.ui.support.preference import Ui_Preference
 from prymatex.ui.support.macro import Ui_Macro
 from prymatex.ui.support.project import Ui_Project
-from prymatex.gui.support.models import PMXMenuTreeModel, PMXExcludedListModel
-from pprint import pformat
-import ast
+from prymatex.models.support import BundleItemMenuTreeModel
 
 TABWIDTH = 20
 
@@ -106,6 +108,34 @@ class PMXEditorBaseWidget(QtGui.QWidget):
     def edit(self, bundleItem):
         self.changes = {}
         self.bundleItem = bundleItem
+
+#============================================================
+# None Widget
+#============================================================
+class PMXNoneWidget(PMXEditorBaseWidget):
+    def __init__(self, parent = None):
+        PMXEditorBaseWidget.__init__(self, parent)
+        self.setupUi(self)
+
+    def setupUi(self, widget):
+        widget.setObjectName("NoneWidget")
+        self.gridLayout = QtGui.QGridLayout(widget)
+        self.gridLayout.setObjectName("gridLayout")
+        self.label = QtGui.QLabel(widget)
+        self.label.setEnabled(False)
+        self.label.setText("")
+        self.label.setPixmap(resources.getImage("prymo"))
+        self.label.setScaledContents(True)
+        self.label.setObjectName("labelPrymo")
+        self.gridLayout.addWidget(self.label, 1, 1, 1, 1)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.gridLayout.addItem(spacerItem, 1, 2, 1, 1)
+        spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.gridLayout.addItem(spacerItem1, 2, 1, 1, 1)
+        spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.gridLayout.addItem(spacerItem2, 0, 1, 1, 1)
+        spacerItem3 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.gridLayout.addItem(spacerItem3, 1, 0, 1, 1)
 
 #============================================================
 # Snippet Editor Widget
@@ -596,7 +626,7 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
         self.setupUi(self)
         manager = QtGui.QApplication.instance().supportManager
 
-        self.treeMenuModel = PMXMenuTreeModel(manager)
+        self.treeMenuModel = BundleItemMenuTreeModel(manager)
         self.treeMenuView.setModel(self.treeMenuModel)
         self.listExcludedView.setModel(self.treeMenuModel.excludedListModel())
 

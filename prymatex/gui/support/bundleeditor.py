@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
+
+from prymatex.core import PMXBaseWidgetComponent
 
 from prymatex import resources
 from prymatex.ui.support.editor import Ui_BundleEditor
 from prymatex.gui.support import widgets
-from prymatex.core.plugin import PMXBaseWidgetComponent
 
 class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
     BASE_EDITOR = -1 #El ultimo es el editor base, no tiene nada
@@ -18,6 +19,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         self.namespace = None
         self.application = application
         self.manager = self.application.supportManager
+        self.proxyTreeModel = self.manager.bundleProxyTreeModel
         
         self.finished.connect(self.on_bundleEditor_finished)
         
@@ -83,7 +85,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
                          widgets.PMXLanguageWidget(self),
                          widgets.PMXMacroWidget(self),
                          widgets.PMXProjectWidget(self),
-                         widgets.PMXEditorBaseWidget(self) ]
+                         widgets.PMXNoneWidget(self) ]
         for editor in self.editors:
             self.indexes[editor.TYPE] = self.stackedWidget.addWidget(editor)
         
@@ -95,7 +97,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
             return self.manager.getDefaultBundle()
         bundle = self.proxyTreeModel.node(index)
         while bundle.TYPE != 'bundle':
-            bundle = bundle.parentNode
+            bundle = bundle.parentNode()
         return bundle
     
     def createBundleItem(self, itemName, itemType):
@@ -131,7 +133,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         if index.isValid():
             template = self.proxyTreeModel.node(index)
             if template.TYPE == 'templatefile':
-                template = template.parentNode
+                template = template.parentNode()
         self.manager.createTemplateFile(u"untitled", template, self.namespace)
 
     def on_actionPreferences_triggered(self):
@@ -206,6 +208,10 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
     #==========================================================
     # Filter Top Bar
     #==========================================================
+    def on_comboBoxItemFilter_returnPressed(self):
+        self.proxyTreeModel.setFilterBundleItemType(None)
+        self.proxyTreeModel.setFilterRegExp(".*%s.*" % self.comboBoxItemFilter.currentText())
+    
     @QtCore.pyqtSlot(int)
     def on_comboBoxItemFilter_activated(self, index):
         value = self.comboBoxItemFilter.itemData(index)
@@ -221,7 +227,9 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-preference"), "Preferences", "preference")
         self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-template"), "Templates", "template templatefile")
         self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-project"), "Projects", "project templatefile")
-    
+        self.comboBoxItemFilter.setInsertPolicy(QtGui.QComboBox.NoInsert)
+        self.comboBoxItemFilter.lineEdit().returnPressed.connect(self.on_comboBoxItemFilter_returnPressed)
+        
     #==========================================================
     # Tree View
     #==========================================================
@@ -254,7 +262,6 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
             self.editTreeItem(None)
             
     def configTreeView(self, manager = None):
-        self.proxyTreeModel = self.manager.bundleProxyTreeModel
         self.proxyTreeModel.dataChanged.connect(self.on_proxyTreeModel_dataChanged)
         
         self.treeView.setModel(self.proxyTreeModel)

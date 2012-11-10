@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.Qt import QColor
+from prymatex.qt import QtGui, QtCore
+
+from prymatex.core import PMXBaseEditorAddon
 
 from prymatex import resources
-from prymatex.core.plugin.editor import PMXBaseEditorAddon
-from prymatex.gui.codeeditor.addons import HighlightCurrentSelectionAddon
 
-class PMXSideBar(QtGui.QWidget):
+class CodeEditorSideBar(QtGui.QWidget):
     updateRequest = QtCore.pyqtSignal()
     
     def __init__(self, editor):
@@ -21,7 +20,13 @@ class PMXSideBar(QtGui.QWidget):
         
     def addWidget(self, widget):
         self.horizontalLayout.addWidget(widget)
-        widget.updateRequest.connect(lambda sidebar = self: sidebar.updateRequest.emit())
+        widget.installEventFilter(self)
+
+    def eventFilter(self, obj, event):
+        if event.type() in [ QtCore.QEvent.Hide, QtCore.QEvent.Show ]:
+            self.updateRequest.emit()
+            return True
+        return QtCore.QObject.eventFilter(self, obj, event)
 
     def width(self):
         width = 0
@@ -31,23 +36,15 @@ class PMXSideBar(QtGui.QWidget):
                 width += widget.width()
         return width
 
-    def scroll(self, *args):
+    def scroll(self, *largs):
         for index in range(self.horizontalLayout.count()):
-            self.horizontalLayout.itemAt(index).widget().scroll(*args)
+            self.horizontalLayout.itemAt(index).widget().scroll(*largs)
 
 #========================================
 # BASE EDITOR SIDEBAR ADDON
 #========================================
-class SideBarWidgetAddon(QtGui.QWidget, PMXBaseEditorAddon):
+class SideBarWidgetAddon(PMXBaseEditorAddon):
     ALIGNMENT = None
-    updateRequest = QtCore.pyqtSignal()
-    
-    def __init__(self, parent):
-        QtGui.QWidget.__init__(self, parent)
-    
-    def setVisible(self, value):
-        QtGui.QWidget.setVisible(self, value)
-        self.updateRequest.emit()
 
     def translatePosition(self, position):
         font_metrics = QtGui.QFontMetrics(self.editor.font)
@@ -55,10 +52,10 @@ class SideBarWidgetAddon(QtGui.QWidget, PMXBaseEditorAddon):
         ys = position.y()
         
         block = self.editor.firstVisibleBlock()
-        viewport_offset = self.editor.contentOffset()
+        offset = self.editor.contentOffset()
         page_bottom = self.editor.viewport().height()
         while block.isValid():
-            blockPosition = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
+            blockPosition = self.editor.blockBoundingGeometry(block).topLeft() + offset
             if blockPosition.y() > page_bottom:
                 break
             if blockPosition.y() < ys and (blockPosition.y() + fh) > ys:
@@ -69,9 +66,12 @@ class SideBarWidgetAddon(QtGui.QWidget, PMXBaseEditorAddon):
 #=======================================
 # SideBar Widgets
 #=======================================
-class LineNumberSideBarAddon(SideBarWidgetAddon):
+class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
-    MARGIN = 10
+    MARGIN = 4
+    def __init__(self, parent):
+        QtGui.QWidget.__init__(self, parent)
+
     def initialize(self, editor):
         SideBarWidgetAddon.initialize(self, editor)
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
@@ -82,11 +82,10 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
         self.normalMetrics = QtGui.QFontMetrics(self.normalFont)
         self.boldMetrics = QtGui.QFontMetrics(self.boldFont)
         
-        self.setFixedWidth(self.fontMetrics().width("0") + self.MARGIN)
+        self.setFixedWidth(self.boldMetrics.width("#") + self.MARGIN * 2)
 
         self.editor.blockCountChanged.connect(self.updateWidth)
         self.editor.themeChanged.connect(self.updateColours)
-    
     
     def updateColours(self):
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
@@ -94,10 +93,10 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
         self.update()
 
     def updateWidth(self, newBlockCount):
-        width = self.fontMetrics().width(str(newBlockCount)) + self.MARGIN
+        width = self.boldMetrics.width(str(newBlockCount)) + self.MARGIN * 2
         if self.width() != width:
             self.setFixedWidth(width)
-            self.updateRequest.emit()
+            self.editor.updateViewportMargins()
 
     @classmethod
     def contributeToMainMenu(cls):
@@ -110,7 +109,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
             return instance.isVisible()
         
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
-        menuEntry = {'title': "Line Numbers",
+        menuEntry = {'text': "Line Numbers",
             'callback': on_actionShowLineNumbers_toggled,
             'shortcut': 'F10',
             'checkable': True,
@@ -142,56 +141,25 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
                 numberText = str(line_count)
                 if block == current_block:
                     painter.setFont(self.boldFont)
-                    leftPosition = self.width() - (self.boldMetrics.width(numberText) + round(self.MARGIN / 2))
+                    leftPosition = self.width() - (self.boldMetrics.width(numberText) + self.MARGIN)
                     topPosition = position.y() + self.boldMetrics.ascent() + self.boldMetrics.descent() - 2
                     painter.drawText(leftPosition, topPosition, numberText)
                 else:
                     painter.setFont(self.normalFont)
-                    leftPosition = self.width() - (self.normalMetrics.width(numberText) + round(self.MARGIN / 2))
+                    leftPosition = self.width() - (self.normalMetrics.width(numberText) + self.MARGIN)
                     topPosition = position.y() + self.normalMetrics.ascent() + self.normalMetrics.descent() - 2
                     painter.drawText(leftPosition, topPosition, numberText)
-
+            
             block = block.next()
 
         painter.end()
         QtGui.QWidget.paintEvent(self, event)
-    """
-    __foreground = QtGui.QColor()
-    @property
-    def foreground(self):
-        return self.__foreground
-    
-    @foreground.setter
-    def foreground(self, color):
-        assert isinstance(color, QtGui.QColor)
-        # http://www.qtcentre.org/wiki/index.php?title=Adaptive_Coloring_for_Syntax_Highlighting#The_HSV_Color_Space
-        # Yet to be perfected...
-        h1, s1, v1, _ = color.getHsv()
-        h2, s2, v2, _ = color.getHsv()
-        if h1 == h2 == -1 and s1 == s2:
-            # Lilely to be gray
-            if v1 - v2 < 35:
-                v1 = 255 if h2 < 128 else 0
-                color = QtGui.QColor.fromHsv(h1, s1, v1)
-                self.editor.logger.debug("Changing foreground color to %s" % str(color.getRgb()))  
-        self.__foreground = color
-    
-    __background = QtGui.QColor()
-    @property
-    def background(self):
-        return self.__background
-    
-    @background.setter
-    def background(self, color):
-        assert isinstance(color, QtGui.QColor)
-        self.__background = color
-    """
-    
-class BookmarkSideBarAddon(SideBarWidgetAddon):
+
+class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
     def __init__(self, parent):
-        SideBarWidgetAddon.__init__(self, parent)
+        QtGui.QWidget.__init__(self, parent)
         self.bookmarkflagImage = resources.getImage("bookmarkflag")
         self.setFixedWidth(self.bookmarkflagImage.width())
         
@@ -215,7 +183,7 @@ class BookmarkSideBarAddon(SideBarWidgetAddon):
             return instance.isVisible()
         
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
-        menuEntry = {'title': "Bookmarks",
+        menuEntry = {'text': "Bookmarks",
             'callback': on_actionShowBookmarks_toggled,
             'shortcut': 'Alt+F10',
             'checkable': True,
@@ -255,11 +223,11 @@ class BookmarkSideBarAddon(SideBarWidgetAddon):
         self.editor.toggleBookmark(block)
         self.repaint(self.rect())
             
-class FoldingSideBarAddon(SideBarWidgetAddon):
+class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
     def __init__(self, parent):
-        SideBarWidgetAddon.__init__(self, parent)
+        QtGui.QWidget.__init__(self, parent)
         self.foldingcollapsedImage = resources.getImage("foldingcollapsed")
         self.foldingtopImage = resources.getImage("foldingtop")
         self.foldingbottomImage = resources.getImage("foldingbottom")
@@ -285,7 +253,7 @@ class FoldingSideBarAddon(SideBarWidgetAddon):
             return instance.isVisible()
         
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
-        menuEntry = {'title': 'Foldings',
+        menuEntry = {'text': 'Foldings',
             'callback': on_actionShowFoldings_toggled,
             'shortcut': 'Shift+F10',
             'checkable': True,
@@ -341,11 +309,11 @@ class FoldingSideBarAddon(SideBarWidgetAddon):
             else:
                 self.editor.codeFoldingFold(block)
 
-class SelectionSideBarAddon(SideBarWidgetAddon):
+class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignRight
     
     def __init__(self, parent):
-        SideBarWidgetAddon.__init__(self, parent)
+        QtGui.QWidget.__init__(self, parent)
         self.setFixedWidth(10)
         
     def initialize(self, editor):
@@ -372,7 +340,7 @@ class SelectionSideBarAddon(SideBarWidgetAddon):
             return instance.isVisible()
         
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
-        menuEntry = {'title': 'Selection',
+        menuEntry = {'text': 'Selection',
             'callback': on_actionShowSelection_toggled,
             'shortcut': 'Shift+F10',
             'checkable': True,
@@ -380,7 +348,6 @@ class SelectionSideBarAddon(SideBarWidgetAddon):
         return {baseMenu: menuEntry} 
 
     def paintEvent(self, event):
-            
         font_metrics = QtGui.QFontMetrics(self.editor.font)
         page_bottom = self.editor.viewport().height()
         
@@ -397,9 +364,9 @@ class SelectionSideBarAddon(SideBarWidgetAddon):
         painter.fillRect(self.rect(), self.background)
 
         viewport_offset = self.editor.contentOffset()
-        
-        for cursor in self.editor.extraSelectionCursorsByHash("#selection"):
-            y = round(cursor.block().blockNumber() * rectRelation)
+
+        for extra in self.editor.searchExtraSelections("selection"):
+            y = round(extra.cursor.block().blockNumber() * rectRelation)
             if rectRelation == lineHeight:
                 y += viewport_offset.y()
             painter.fillRect(0, y, 10, rectHeight, self.editor.colours['selection'])

@@ -5,15 +5,15 @@ from PyQt4 import QtGui, QtCore
 
 from prymatex import resources
 from prymatex.ui.configure.general import Ui_GeneralWidget
-from prymatex.gui.settings.models import PMXSettingTreeNode
+from prymatex.models.settings import SettingsTreeNode
 
-class PMXGeneralWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_GeneralWidget):
+class GeneralSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_GeneralWidget):
     TITLE = "General"
-    ICON = resources.getIcon("gearconfigure")
+    ICON = resources.getIcon("preferences-other")
     
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        PMXSettingTreeNode.__init__(self, "general", settingGroup)
+        SettingsTreeNode.__init__(self, "general", settingGroup)
         self.setupUi(self)
 
         #self.comboTabVisibility.addItem("Always shown", PMXTabWidget.TABBAR_ALWAYS_SHOWN)

@@ -3,7 +3,6 @@
 
 from PyQt4 import QtGui, QtCore
 
-from prymatex.gui import utils
 from prymatex.support.processor import PMXCommandProcessor
 
 #Este es un processor de commands para la Main Window
@@ -11,13 +10,20 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
     def __init__(self, mainWindow):
         super(PMXCommandProcessor, self).__init__()
         self.mainWindow = mainWindow
+        self.__env = {}
 
-    def environment(self, command):
-        environment = command.buildEnvironment()
-        environment.update(self.mainWindow.buildEnvironment())
-        environment.update(self.baseEnvironment)
-        return environment
-
+    def startCommand(self, command):
+        self.command = command
+        self.__env = command.environmentVariables()
+        self.__env.update(self.mainWindow.environmentVariables())
+        self.__env.update(self.baseEnvironment)
+        
+    def endCommand(self, command):
+        self.command = None
+        
+    def environmentVariables(self):
+        return self.__env
+        
     def configure(self, settings):
         self.asynchronous = settings.get("asynchronous", True)
         self.baseEnvironment = settings.get("environment", {})
@@ -57,14 +63,10 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
         self.mainWindow.browser.setRunningContext(context)
 
     def showAsTooltip(self, context):
-        # TODO Otra forma de mostrar como tooltip si no hay editor
-        linesToRead = context.outputValue.count('\n') or context.outputValue.count('<br')
-        if linesToRead > 10:
-            timeout = 8000
-        else:
-            timeout = linesToRead * 700
-            
-        self.mainWindow.currentEditor().showMessage(html, timeout = timeout)
+        message = context.outputValue.strip()
+        timeout = len(message) * 20
+
+        self.mainWindow.showMessage(context.outputValue, timeout = timeout)
         
     def createNewDocument(self, context):
         editor = self.mainWindow.addEmptyEditor()

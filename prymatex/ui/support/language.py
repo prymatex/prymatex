@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/support/language.ui'
 #
-# Created: Mon Nov  7 18:31:02 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Nov  9 18:10:45 2012
+#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
 #
 # WARNING! All changes made in this file will be lost!
 

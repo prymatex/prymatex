@@ -151,15 +151,14 @@ class PMXBundle(PMXManagedObject):
             shutil.rmtree(self.path(namespace))
         except:
             pass
-            
-    def buildEnvironment(self):
-        # TODO Aca no tiene porque ser un copy el manager tiene que manejar esta situacion, viola la encapsulacion
-        env = copy(self.manager.buildEnvironment())
-        env['TM_BUNDLE_PATH'] = self.currentPath
+    
+    def environmentVariables(self):
+        environment = self.manager.environmentVariables()
+        environment['TM_BUNDLE_PATH'] = self.currentPath
         if self.support != None:
-            env['TM_BUNDLE_SUPPORT'] = self.support
-        return env
-
+            environment['TM_BUNDLE_SUPPORT'] = self.support
+        return environment
+        
     @classmethod
     def loadBundle(cls, path, namespace, manager):
         info_file = os.path.join(path, cls.FILE)
@@ -243,9 +242,8 @@ class PMXBundleItem(PMXManagedObject):
         except:
             pass
     
-    def buildEnvironment(self, **kwargs):
-        env = self.bundle.buildEnvironment()
-        return env
+    def environmentVariables(self):
+        return self.bundle.environmentVariables()
         
     @classmethod
     def loadBundleItem(cls, path, namespace, bundle, manager):
@@ -292,6 +290,7 @@ class PMXRunningContext(object):
         self.workingDirectory = None
         
     def __enter__(self):
+        #Build the full las environment with gui environment and support environment
         self.shellCommand, self.environment, self.tempFile = utils.prepareShellScript(self.shellCommand, self.environment)
         return self
 

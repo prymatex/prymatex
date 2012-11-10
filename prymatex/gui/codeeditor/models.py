@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 from bisect import bisect
-from copy import copy
 
 from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
-from prymatex.gui.support.models import PMXBundleTreeNode
+from prymatex.models.support import BundleItemTreeNode
 
 #=========================================================
 # Bookmark
@@ -86,7 +86,7 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
         if index == 0:
             index = len(self.blocks)
         return self.blocks[index - 1]
-    
+
 #=========================================================
 # Symbol
 #=========================================================
@@ -184,7 +184,7 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
 
     def setSuggestions(self, suggestions):
         self.suggestions = suggestions
-        self.columns = 2 if any(map(lambda s: isinstance(s, PMXBundleTreeNode), suggestions)) else 1
+        self.columns = 2 if any(map(lambda s: isinstance(s, BundleItemTreeNode), suggestions)) else 1
         self.layoutChanged.emit()
         
     def index(self, row, column, parent = QtCore.QModelIndex()):
@@ -209,7 +209,7 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
                     return suggestion['display']
                 elif 'title' in suggestion:
                     return suggestion['title']
-            elif isinstance(suggestion, PMXBundleTreeNode):
+            elif isinstance(suggestion, BundleItemTreeNode):
                 #Es un bundle item
                 if index.column() == 0:
                     return suggestion.tabTrigger
@@ -223,7 +223,7 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
             if index.column() == 0:
                 if isinstance(suggestion, dict) and 'image' in suggestion:
                     return resources.getIcon(suggestion['image'])
-                elif isinstance(suggestion, PMXBundleTreeNode):
+                elif isinstance(suggestion, BundleItemTreeNode):
                     return suggestion.icon
                 else:
                     return resources.getIcon('inserttext')
@@ -232,7 +232,7 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
                 if 'tool_tip_format' in suggestion:
                     print suggestion["tool_tip_format"]
                 return suggestion['tool_tip']
-            elif isinstance(suggestion, PMXBundleTreeNode):
+            elif isinstance(suggestion, BundleItemTreeNode):
                 return suggestion.name
         elif role == QtCore.Qt.ForegroundRole:
             return QtCore.Qt.lightGray
@@ -292,4 +292,4 @@ class PMXAlreadyTypedWords(object):
     def typedWords(self, block = None):
         #Purge words
         self._purge_words()
-        return copy(self.groups)
+        return self.groups.copy()

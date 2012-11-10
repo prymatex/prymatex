@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
+
+from prymatex.core import PMXBaseDock
 
 from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
-from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.gui.codeeditor.editor import CodeEditor
 
 class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):

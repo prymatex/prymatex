@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
-from prymatex.core.plugin.editor import PMXBaseEditorKeyHelper
+from prymatex.core import PMXBaseEditorKeyHelper
 
 class CodeEditorKeyHelper(PMXBaseEditorKeyHelper):
     def accept(self, event, cursor, scope):
@@ -73,20 +73,26 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
                 self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor)
             return True
         
-        isClose = character == self.pair[1] and self.pair[0] != self.pair[1]
+        isClose = character == self.pair[1]
         if isClose:
             #Es un caracter de cierre, veamos si tengo que saltarme algo hacia la derecha
             cursor1, cursor2 = self.editor.currentBracesPairs(cursor, direction = "right")
             self.skip = cursor1 is not None and cursor2 is not None and character == cursor2.selectedText()
-            return self.skip
+            if self.skip or self.pair[0] != self.pair[1]:
+                return self.skip
 
-        ctrl_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
-        if isOpen and ctrl_down:
-            self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor, direction = "left")
+        meta_down = bool(event.modifiers() & QtCore.Qt.MetaModifier)
+        if isOpen and meta_down:
+            self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor)
             if self.cursor1 is not None and self.cursor2 is not None:
-                self.cursor1.setPosition(self.cursor1.selectionEnd())
-                self.cursor2.setPosition(self.cursor2.selectionStart())
-        return True
+                if cursor.position() == self.cursor1.selectionStart():
+                    self.cursor1.setPosition(self.cursor1.selectionStart())
+                    self.cursor2.setPosition(self.cursor2.selectionEnd())
+                else:
+                    self.cursor1.setPosition(self.cursor1.selectionEnd())
+                    self.cursor2.setPosition(self.cursor2.selectionStart())
+        word, wordStart, wordEnd = self.editor.currentWord(search = False)
+        return not (wordStart <= cursor.position() < wordEnd)
         
     def execute(self, event, cursor = None, scope = None):
         cursor.beginEditBlock()
@@ -98,11 +104,16 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
                 self.cursor1.insertText(self.pair[0])
                 self.cursor2.insertText(self.pair[1])
             else:
-                position = cursor.selectionStart()
+                position = cursor.position()
+                cursorBegin = cursor.selectionStart() == position
                 text = self.pair[0] + cursor.selectedText() + self.pair[1]
                 cursor.insertText(text)
-                cursor.setPosition(position)
-                cursor.setPosition(position + len(text), QtGui.QTextCursor.KeepAnchor)
+                if cursorBegin:
+                    cursor.setPosition(position + len(text))
+                    cursor.setPosition(position, QtGui.QTextCursor.KeepAnchor)
+                else:
+                    cursor.setPosition(position - len(text) + 2)
+                    cursor.setPosition(position + 2, QtGui.QTextCursor.KeepAnchor)
                 self.editor.setTextCursor(cursor)
         elif self.cursor1 is not None and self.cursor2 is not None:
             self.cursor1.insertText(self.pair[0])
@@ -172,7 +183,7 @@ class BackspaceRemoveBracesHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Backspace
     def accept(self, event, cursor = None, scope = None):
         if cursor.hasSelection(): return False
-        self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor)
+        self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor, direction = "left")
         return self.cursor1 is not None and self.cursor2 is not None and (self.cursor1.selectionStart() == self.cursor2.selectionEnd() or self.cursor1.selectionEnd() == self.cursor2.selectionStart())
         
     def execute(self, event, cursor = None, scope = None):

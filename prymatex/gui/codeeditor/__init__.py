@@ -15,7 +15,6 @@ def registerPlugin(manager):
     manager.registerDocker(PMXCodeSymbolsDock)
     manager.registerDocker(PMXCodeBookmarksDock)
     
-    
     manager.registerKeyHelper(CodeEditor, helpers.KeyEquivalentHelper)
     manager.registerKeyHelper(CodeEditor, helpers.SmartTypingPairsHelper)
     manager.registerKeyHelper(CodeEditor, helpers.TabTriggerHelper)

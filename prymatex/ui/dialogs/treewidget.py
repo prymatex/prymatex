@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/treewidget.ui'
 #
-# Created: Wed Sep 12 18:54:21 2012
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Thu Oct 18 20:33:12 2012
+#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -49,6 +49,8 @@ class Ui_TreeWidgetDialog(object):
         self.widgetsLayout.setSpacing(2)
         self.widgetsLayout.setMargin(0)
         self.widgetsLayout.setObjectName(_fromUtf8("widgetsLayout"))
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.textLabelTitle = QtGui.QLabel(self.verticalLayoutWidget_2)
         font = QtGui.QFont()
         font.setPointSize(12)
@@ -56,7 +58,14 @@ class Ui_TreeWidgetDialog(object):
         font.setWeight(75)
         self.textLabelTitle.setFont(font)
         self.textLabelTitle.setObjectName(_fromUtf8("textLabelTitle"))
-        self.widgetsLayout.addWidget(self.textLabelTitle)
+        self.horizontalLayout.addWidget(self.textLabelTitle)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
+        self.textLabelPixmap = QtGui.QLabel(self.verticalLayoutWidget_2)
+        self.textLabelPixmap.setText(_fromUtf8(""))
+        self.textLabelPixmap.setObjectName(_fromUtf8("textLabelPixmap"))
+        self.horizontalLayout.addWidget(self.textLabelPixmap)
+        self.widgetsLayout.addLayout(self.horizontalLayout)
         self.line = QtGui.QFrame(self.verticalLayoutWidget_2)
         self.line.setFrameShape(QtGui.QFrame.HLine)
         self.line.setFrameShadow(QtGui.QFrame.Sunken)

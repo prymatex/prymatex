@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from bisect import bisect
-from PyQt4 import QtCore, QtGui
+
+from prymatex.qt import QtCore, QtGui
+
 from prymatex.support import PMXSyntax
 
 class PMXEditorFolding(QtCore.QObject):
@@ -26,11 +28,11 @@ class PMXEditorFolding(QtCore.QObject):
 
     def on_editor_beforeOpen(self):
         self.editor.textChanged.disconnect(self.on_editor_textChanged)
-        
+
     def on_editor_syntaxReady(self):
         self.editor.textChanged.connect(self.on_editor_textChanged)
         self.updateFolding()
-            
+
     def _purge_blocks(self):
         def validFoldingBlock(block):
             return block.userData() is not None and block.userData().foldingMark != None
@@ -42,13 +44,13 @@ class PMXEditorFolding(QtCore.QObject):
             index = bisect(indexes, block.blockNumber())
             self.blocks.insert(index, block)
             self.foldingUpdated = False
-        
+
     def removeFoldingBlock(self, block):
         if block in self.blocks:
             index = self.blocks.index(block)
             self.blocks.remove(block)
             self.foldingUpdated = False
-        
+
     def updateFolding(self):
         # TODO Update en una tarea aparte para no molestar
         self.folding = []
@@ -57,12 +59,13 @@ class PMXEditorFolding(QtCore.QObject):
         else:
             self.updateFoldingBlocks()
         self.foldingUpdated = True
-        
+
     def updateFoldingBlocks(self):
         nest = 0
         for block in self.blocks:
-            userData = block.userData()
-            nest += userData.foldingMark
+            if block.userData() is None:
+                break
+            nest += block.userData().foldingMark
             if nest >= 0:
                 self.folding.append(block)
 
@@ -72,7 +75,7 @@ class PMXEditorFolding(QtCore.QObject):
             block = self.editor.findPreviousEqualIndentBlock(block)
         if block is not None:
             return block
-    
+
     def tryCloseIndentBlock(self, block):
         #Buscar si corresponde cerrar algo antes
         openBlock = self.findPreviousEqualIndentOpenBlock(block)
@@ -88,7 +91,7 @@ class PMXEditorFolding(QtCore.QObject):
                 self.folding.append(closeBlock)
                 return closeBlock.userData().foldingMark
         return 0
-    
+
     def updateIndentFoldingBlocks(self):
         nest = 0
         for block in self.blocks:
@@ -119,7 +122,7 @@ class PMXEditorFolding(QtCore.QObject):
         if block in self.folding:
             userData = block.userData()
             return userData.foldingMark
-    
+
     def findBlockFoldClose(self, block):
         nest = 0
         assert block in self.folding, "The block is not in folding"
@@ -130,7 +133,7 @@ class PMXEditorFolding(QtCore.QObject):
                 nest += userData.foldingMark
             if nest <= 0:
                 return block
-    
+
     def findBlockFoldOpen(self, block):
         nest = 0
         assert block in self.folding, "The block is not in folding"
@@ -143,11 +146,11 @@ class PMXEditorFolding(QtCore.QObject):
                 nest += userData.foldingMark
             if nest >= 0:
                 return block
-    
+
     def getNestedLevel(self, block):
         blocks = filter(lambda fblock: fblock.userData() is not None and fblock.blockNumber() < block.blockNumber(), self.folding)
         return reduce(lambda x, y: x + y, map(lambda block: block.userData().foldingMark, blocks), 0)
-        
+
     def isStart(self, mark):
         if mark is None: return False
         return mark >= PMXSyntax.FOLDING_START
@@ -158,6 +161,6 @@ class PMXEditorFolding(QtCore.QObject):
 
     def isFolded(self, block):
         return self.isFoldingMark(block) and block.userData().folded
-    
+
     def isFoldingMark(self, block):
         return block in self.folding

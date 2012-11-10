@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
-from prymatex.core.plugin.dock import PMXBaseDockAddon
+from prymatex.core import PMXBaseDockAddon
 
 #========================================
 # BASE PROJECT ADDON

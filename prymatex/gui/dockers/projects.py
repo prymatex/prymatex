@@ -4,14 +4,14 @@
 import os
 import codecs
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
+from prymatex.qt.helpers import create_menu, extend_menu_section
+
+from prymatex.core import PMXBaseDock
 
 from prymatex import resources
-from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
-from prymatex.gui.project.models import PMXProjectTreeModel
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.gui import utils
 
 from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
 from prymatex.gui.dialogs.project import PMXNewProjectDialog
@@ -19,7 +19,8 @@ from prymatex.gui.dialogs.messages import CheckableMessageBox
 
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
-from prymatex.gui.project.base import PMXProject
+
+from prymatex.models.projects import ProjectTreeNode
 
 class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXBaseDock):
     SHORTCUT = "F8"
@@ -49,12 +50,18 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         #TODO: ver el tema de proveer servicios esta instalacion en la main window es pedorra
         mainWindow.projects = self
     
+    @classmethod
+    def contributeToSettings(cls):
+        from prymatex.gui.settings.project import ProjectSettingsWidget
+        from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
+        return [ ProjectSettingsWidget, AddonsSettingsWidgetFactory("project") ]
+    
     def addFileSystemNodeFormater(self, formater):
         self.projectTreeProxyModel.addNodeFormater(formater)
     
     def saveState(self):
         expandedIndexes = filter(lambda index: self.treeViewProjects.isExpanded(index), self.projectTreeProxyModel.persistentIndexList())
-        expandedPaths = map(lambda index: self.projectTreeProxyModel.node(index).path, expandedIndexes)
+        expandedPaths = map(lambda index: self.projectTreeProxyModel.node(index).path(), expandedIndexes)
         return { "expanded": expandedPaths }
 
     def restoreState(self, state):
@@ -62,31 +69,19 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         map(lambda index: index.isValid() and self.treeViewProjects.setExpanded(index, True), 
             map(lambda path: self.projectTreeProxyModel.indexForPath(path), state["expanded"]))
 
-    def buildEnvironment(self):
+    def environmentVariables(self):
+        environment = PMXBaseDock.environmentVariables(self)
         indexes = self.treeViewProjects.selectedIndexes()
-        env = {}
         if indexes:
             node = self.currentNode()
-            paths = map(lambda node: self.application.fileManager.normcase(node.path), [ self.projectTreeProxyModel.node(index) for index in indexes ])
-            env = {
-                'TM_SELECTED_FILE': node.path, 
+            paths = map(lambda node: self.application.fileManager.normcase(node.path()),
+                        [ self.projectTreeProxyModel.node(index) for index in indexes ])
+            environment.update({
+                'TM_SELECTED_FILE': node.path(), 
                 'TM_SELECTED_FILES': " ".join(["'%s'" % path for path in paths ])
-            }
-            
-            if node.isfile:
-                env.update({
-                    'TM_FILEPATH': node.path,
-                    'TM_FILENAME': node.nodeName,
-                    'TM_DIRECTORY': node.parentNode.path,
-                })
-            else:
-                env.update({
-                    'TM_DIRECTORY': node.path,
-                })
-            
-            env.update(node.project.buildEnvironment())
-        return env
-            
+            })
+        return environment
+        
     def keyPressEvent(self, event):
         if not self.runKeyHelper(event):
             return QtGui.QDockWidget.keyPressEvent(self, event)
@@ -111,9 +106,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         
         #Setup Context Menu
         optionsMenu = { 
-            "title": "Project Options",
+            "text": "Project Options",
             "items": [
-                {   "title": "Order",
+                {   "text": "Order",
                     "items": [
                         (self.actionOrderByName, self.actionOrderBySize, self.actionOrderByDate, self.actionOrderByType),
                         "-", self.actionOrderDescending, self.actionOrderFoldersFirst
@@ -125,7 +120,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         self.actionOrderFoldersFirst.setChecked(True)
         self.actionOrderByName.trigger()
         
-        self.projectOptionsMenu, _ = utils.createQMenu(optionsMenu, self)
+        self.projectOptionsMenu, _ = create_menu(self, optionsMenu)
         self.pushButtonOptions.setMenu(self.projectOptionsMenu)
 
         #Connect context menu
@@ -151,9 +146,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     #================================================
     def buildContextMenu(self, index):    
         contextMenu = { 
-            "title": "Context",
+            "text": "Context",
             "items": [
-                {   "title": "New",
+                {   "text": "New",
                     "items": [
                         self.actionNewFolder, self.actionNewFile, "-", self.actionNewFromTemplate, self.actionNewProject,
                     ]
@@ -168,8 +163,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             self.extendFileSystemItemMenu(contextMenu, node)
             self.extendAddonsItemMenu(contextMenu, node)
             self.extendProjectBundleItemMenu(contextMenu, node)
-        # contextMenu, contextMenuActions = utils.createQMenu(contextMenu, self, useSeparatorName = True)
-        contextMenu, contextMenuActions = utils.createQMenu(contextMenu, self)
+        # contextMenu, contextMenuActions = create_menu(contextMenu, self, useSeparatorName = True)
+        contextMenu, contextMenuActions = create_menu(self, contextMenu)
         
         for action in contextMenuActions:
             if hasattr(action, "callback"):
@@ -194,23 +189,30 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
     def on_contextMenu_triggered(self, action):
         if hasattr(action, "bundleTreeNode"):
-            self.mainWindow.insertBundleItem(action.bundleTreeNode)
+            node = self.currentNode()
+            env =   {   'TM_FILEPATH': node.path(),
+                        'TM_FILENAME': node.nodeName(),
+                        'TM_DIRECTORY': node.parentNode().path() } if node.isfile else {   'TM_DIRECTORY': node.path() }
+            
+            env.update(node.project().environmentVariables())
+            self.mainWindow.insertBundleItem(action.bundleTreeNode, environment = env)
     
     def extendFileSystemItemMenu(self, menu, node):
-        utils.extendMenuSection(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete, self.actionRename])
-        #utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal ], section = -1)
-        if isinstance(node, PMXProject):
-            utils.extendMenuSection(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
-            #utils.extendMenuSection(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
-            #utils.extendMenuSection(menu, [self.actionBashInit], section = "interact")
-            utils.extendMenuSection(menu, [self.actionBundleEditor], section = "bundles")
+        extend_menu_section(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete, self.actionRename])
+        #extend_menu_section(menu, ["--interact", self.actionSetInTerminal ], section = -1)
+        # TODO Quiza sea mejor ponerle un type y controlar contra una cadena
+        if isinstance(node, ProjectTreeNode):
+            extend_menu_section(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
+            #extend_menu_section(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
+            #extend_menu_section(menu, [self.actionBashInit], section = "interact")
+            extend_menu_section(menu, [self.actionBundleEditor], section = "bundles")
         else:
-            utils.extendMenuSection(menu, [self.actionCut, self.actionCopy, self.actionPaste], section = "handlepaths", position = 0)
+            extend_menu_section(menu, [self.actionCut, self.actionCopy, self.actionPaste], section = "handlepaths", position = 0)
         if node.isfile:
-            utils.extendMenuSection(menu, self.actionOpen, section = "open", position = 0)
+            extend_menu_section(menu, self.actionOpen, section = "open", position = 0)
 
         #El final
-        utils.extendMenuSection(menu, ["--properties", self.actionProperties], section = -1)
+        extend_menu_section(menu, ["--properties", self.actionProperties], section = -1)
 
     def extendAddonsItemMenu(self, menu, node):
         #Menu de los addons
@@ -218,19 +220,19 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         for addon in self.addons:
             addonMenues.extend(addon.contributeToContextMenu(node))
         if len(addonMenues) > 1:
-            utils.extendMenuSection(menu, addonMenues, section = 'properties')
+            extend_menu_section(menu, addonMenues, section = 'properties')
         
     def extendProjectBundleItemMenu(self, menu, node):
         #Menu de los bundles relacionados al proyecto
         #Try get all bundles for project bundle definition
-        bundles = map(lambda uuid: self.application.supportManager.getManagedObject(uuid), node.project.bundleMenu or [])
+        bundles = map(lambda uuid: self.application.supportManager.getManagedObject(uuid), node.project().bundleMenu or [])
         #Filter None bundles
         bundles = filter(lambda bundle: bundle is not None, bundles)
         #Sort by name
         bundles = sorted(bundles, key=lambda bundle: bundle.name)
         if bundles:
             bundleMenues = map(lambda bundle: self.application.supportManager.menuForBundle(bundle), bundles)
-            utils.extendMenuSection(menu, bundleMenues, section = "bundles", position = 0)
+            extend_menu_section(menu, bundleMenues, section = "bundles", position = 0)
 
     #================================================
     # Tree View Project
@@ -299,13 +301,13 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                 QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
                 QtGui.QMessageBox.Ok
             )
-            question.setDetailedText("Project location:\n%s" % treeNode.path)
+            question.setDetailedText("Project location:\n%s" % treeNode.path())
             ret = question.exec_()
             if ret == QtGui.QMessageBox.Ok:
                 self.application.projectManager.deleteProject(treeNode, removeFiles = question.isChecked())
         else:
             #Es un path
-            self.deletePath(treeNode.path)
+            self.deletePath(treeNode.path())
         self.projectTreeProxyModel.refresh(currentIndex.parent())
 
     @QtCore.pyqtSlot()
@@ -352,7 +354,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     def on_actionOpen_triggered(self):
         node = self.currentNode()
         if node.isfile:
-            self.application.openFile(node.path)
+            self.application.openFile(node.path())
         
     @QtCore.pyqtSlot()
     def on_actionOpenSystemEditor_triggered(self):

@@ -7,20 +7,20 @@ from PyQt4.QtNetwork import QNetworkProxy
 
 from prymatex import resources
 from prymatex.ui.configure.browser import Ui_BrowserWidget
-from prymatex.gui.settings.models import PMXSettingTreeNode
+from prymatex.models.settings import SettingsTreeNode
 
-class PMXNetworkWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_BrowserWidget):
+class NetworkSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_BrowserWidget):
     """Setup browser"""
     TITLE = "Browser"
     ICON = resources.getIcon("internet-web-browser")
     
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        PMXSettingTreeNode.__init__(self, "browser", settingGroup)
+        SettingsTreeNode.__init__(self, "browser", settingGroup)
         self.setupUi(self)
     
     def filterString(self):
-        return "proxyportnetwork" + PMXSettingTreeNode.filterString(self)
+        return "proxyportnetwork" + SettingsTreeNode.filterString(self)
     
     def on_lineEditProxy_textEdited(self, text):
         self.settingGroup.setValue("proxy", text)

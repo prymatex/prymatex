@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
+from prymatex.qt.helpers import text2objectname
 from prymatex import resources
-#TODO: Mover a prymatex.widgets
-from prymatex.gui import utils
   
 class DockWidgetToolBar(QtGui.QToolBar):
     """QMainWindow "mixin" which provides auto-hiding support for dock widgets (not toolbars)."""
@@ -22,7 +21,7 @@ class DockWidgetToolBar(QtGui.QToolBar):
         assert isinstance(parent, QtGui.QMainWindow)
         assert area in self.DOCK_AREA_TO_TB
         self._area = area
-        self.setObjectName(utils.textToObjectName(name, prefix="ToolBar"))
+        self.setObjectName(text2objectname(name, prefix="ToolBar"))
         self.setWindowTitle(name)
         
         #Button Style

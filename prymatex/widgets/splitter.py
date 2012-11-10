@@ -9,7 +9,7 @@
 
 import sip
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 from prymatex.widgets.tabwidget import _TabWidget, _DragableTabBar
 

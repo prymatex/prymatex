@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/support/editor.ui'
 #
-# Created: Wed Sep 12 18:54:21 2012
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Wed Oct 17 21:19:23 2012
+#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,8 +18,8 @@ except AttributeError:
 class Ui_BundleEditor(object):
     def setupUi(self, BundleEditor):
         BundleEditor.setObjectName(_fromUtf8("BundleEditor"))
-        BundleEditor.resize(700, 433)
-        BundleEditor.setMinimumSize(QtCore.QSize(700, 433))
+        BundleEditor.resize(708, 575)
+        BundleEditor.setMinimumSize(QtCore.QSize(700, 575))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         BundleEditor.setWindowIcon(icon)
@@ -37,6 +37,7 @@ class Ui_BundleEditor(object):
         self.treeLayout.setMargin(0)
         self.treeLayout.setObjectName(_fromUtf8("treeLayout"))
         self.comboBoxItemFilter = QtGui.QComboBox(self.verticalLayoutWidget)
+        self.comboBoxItemFilter.setEditable(True)
         self.comboBoxItemFilter.setObjectName(_fromUtf8("comboBoxItemFilter"))
         self.treeLayout.addWidget(self.comboBoxItemFilter)
         self.treeView = QtGui.QTreeView(self.verticalLayoutWidget)

@@ -4,17 +4,20 @@
 import os
 from string import Template
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
+from prymatex import resources
+
+from prymatex.ui.mainwindow import Ui_MainWindow
 from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.ui.mainwindow import Ui_MainWindow
+from prymatex.qt.compat import getSaveFileName
+from prymatex.qt.helpers import text2objectname
+from prymatex.qt.helpers.widgets import center_widget
+from prymatex.qt.helpers.menus import create_menu, extend_menu
 from prymatex.gui.actions import MainWindowActions
-from prymatex.gui import utils, dialogs
-from prymatex.gui.utils import textToObjectName, extendQMenu
 from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.gui.processors import MainWindowCommandProcessor
-
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
 from prymatex.widgets.message import PopupMessageWidget
@@ -56,6 +59,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.application = application
         self.setupUi(self)
         
+        self.setWindowIcon(resources.getIcon("prymatex"))
+        
         self.setupDialogs()
         self.setupDockToolBars()
         self.setupMenu()
@@ -69,7 +74,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.splitTabWidget.tabCreateRequest.connect(self.addEmptyEditor)
         self.application.supportManager.bundleItemTriggered.connect(self.on_bundleItemTriggered)
         
-        utils.centerWidget(self, scale = (0.9, 0.8))
+        center_widget(self, scale = (0.9, 0.8))
         self.dockers = []
         self.customEditorActions = {}
         self.customDockActions = {}
@@ -121,16 +126,17 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             commandOutput = 'showAsHTML')
         self.bundleItem_handler(command, **settings)
         
-    def buildEnvironment(self):
+    def environmentVariables(self):
         env = {}
         for docker in self.dockers:
-            env.update(docker.buildEnvironment())
+            env.update(docker.environmentVariables())
         return env
 
     @classmethod
     def contributeToSettings(cls):
-        from prymatex.gui.settings.general import PMXGeneralWidget
-        return [ PMXGeneralWidget ]
+        from prymatex.gui.settings.general import GeneralSettingsWidget
+        from prymatex.gui.settings.plugins import PluginsSettingsWidget
+        return [ GeneralSettingsWidget, PluginsSettingsWidget ]
         
     #============================================================
     # Setups
@@ -186,27 +192,18 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             area = self.dockWidgetArea(dock)
             self.dockToolBars[area].show()
         
-    def addEditor(self, editor, focus = True):
-        self.splitTabWidget.addTab(editor)
-        if focus:
-            self.setCurrentEditor(editor)
-            
-    def createCustomEditorMainMenu(self, name):
-        menu = QtGui.QMenu(name, self.menubar)
-        objectName = textToObjectName(name, prefix = "menu")
-        menu.setObjectName(objectName)
-        setattr(self, objectName, menu)
-        action = self.menubar.insertMenu(self.menuNavigation.children()[0], menu)
-        return menu, action
-
     def contributeToMainMenu(self, name, settings):
         actions = []
-        menu = getattr(self, "menu" + name, None)
+        menuAttr = text2objectname(name, prefix = "menu")
+        menu = getattr(self, menuAttr, None)
         if menu is None:
-            menu, action = self.createCustomEditorMainMenu(name)
-            actions.append(action)
-        if 'items' in settings:
-            actions.extend(extendQMenu(menu, settings['items']))
+            if "text" not in settings:
+                settings["text"] = name
+            menu, actions = create_menu(self.menubar, settings)
+            setattr(self, menuAttr, menu)
+            actions.insert(0, self.menubar.insertMenu(self.menuNavigation.children()[0], menu))
+        elif 'items' in settings:
+            actions = extend_menu(menu, settings['items'])
         return actions
 
     def registerEditorClassActions(self, editorClass, actions):
@@ -274,11 +271,19 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         editor = self.application.createEditorInstance(parent = self)
         self.addEditor(editor)
         return editor
-        
+
     def removeEditor(self, editor):
+        self.disconnect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_newLocationMemento)
         self.splitTabWidget.removeTab(editor)
+        # TODO Ver si el remove borra el editor y como acomoda el historial
         del editor
 
+    def addEditor(self, editor, focus = True):
+        self.splitTabWidget.addTab(editor)
+        self.connect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_newLocationMemento)
+        if focus:
+            self.setCurrentEditor(editor)
+    
     def findEditorForFile(self, filePath):
         # Find open editor for fileInfo
         for editor in self.splitTabWidget.allWidgets():
@@ -300,10 +305,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         
         #Avisar al manager si tenemos editor y preparar el handler
         self.application.supportManager.setEditorAvailable(editor is not None)
-        if editor is not None:
-            self.bundleItem_handler = editor.bundleItemHandler() or self.insertBundleItem
-        else:
-            self.bundleItem_handler = self.insertBundleItem    
+        self.bundleItem_handler = editor.bundleItemHandler() or self.insertBundleItem if editor is not None else self.insertBundleItem    
         
         #Emitir señal de cambio
         self.currentEditorChanged.emit(editor)
@@ -331,16 +333,20 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             if result == QtGui.QMessageBox.Yes:
                 saveAs = True
         if editor.isNew() or saveAs:
-            fileDirectory = self.application.fileManager.getDirectory(self.projects.currentPath()) if editor.isNew() else editor.fileDirectory()
+            fileDirectory = self.application.fileManager.directory(self.projects.currentPath()) if editor.isNew() else editor.fileDirectory()
             fileName = editor.fileName()
             fileFilters = editor.fileFilters()
-            filePath = dialogs.getSaveFile( fileDirectory, title = "Save file as" if saveAs else "Save file", 
-                                            filters = fileFilters, 
-                                            name = fileName)
+            # TODO Armar el archivo destino y no solo el basedir
+            filePath, _ = getSaveFileName(
+                self, 
+                caption = "Save file as" if saveAs else "Save file", 
+                basedir = fileDirectory, 
+                filters = fileFilters
+            )
         else:
             filePath = editor.filePath
 
-        if filePath is not None:
+        if filePath:
             editor.save(filePath)
     
     def closeEditor(self, editor = None, cancel = False):
@@ -369,12 +375,19 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             self.closeEditor(editor)
     
     #=========================================================
-    # Handle history
+    # Handle location history
     #=========================================================
+    def on_newLocationMemento(self, memento):
+        self.addHistoryEntry({"editor": self.sender(), "memento": memento})
+        
     def addEditorToHistory(self, editor):
-        if self._editorHistory and self._editorHistory[self._editorHistoryIndex] == editor:
+        if self._editorHistory and self._editorHistory[self._editorHistoryIndex]["editor"] == editor:
             return
-        self._editorHistory.insert(self._editorHistoryIndex, editor)
+        self.addHistoryEntry({"editor": editor})
+        
+    def addHistoryEntry(self, entry):
+        self._editorHistory = [entry] + self._editorHistory[self._editorHistoryIndex:]
+        self._editorHistoryIndex = 0
         
     #===========================================================================
     # MainWindow Events
@@ -412,16 +425,17 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         return state
 
     def restoreState(self, state):
-        try:
-            map(lambda dock: dock.restoreState(state["dockers"][dock.objectName()]), self.dockers)
-            self.restoreGeometry(state["geometry"])
-            for doc in state["documents"]:
-                self.application.openFile(*doc, mainWindow = self)
-            QtGui.QMainWindow.restoreState(self, state["self"])
-            
-        except (TypeError, ValueError) as e:
-            self.logger.error("Could not restore state for %s. Reason %s" % (self, e))
-
+        # Restore dockers
+        for dock in self.dockers:
+            dockName = dock.objectName()
+            if dockName in state["dockers"]:
+                dock.restoreState(state["dockers"][dockName])
+        
+        # Restore Main window
+        self.restoreGeometry(state["geometry"])
+        for doc in state["documents"]:
+            self.application.openFile(*doc, mainWindow = self)
+        QtGui.QMainWindow.restoreState(self, state["self"])
 
     #===========================================================================
     # Drag and Drop

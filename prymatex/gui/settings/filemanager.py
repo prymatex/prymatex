@@ -4,14 +4,14 @@
 from PyQt4 import QtGui, QtCore
 
 from prymatex.ui.configure.filemanager import Ui_FileManagerDialog
-from prymatex.gui.settings.models import PMXSettingTreeNode
+from prymatex.models.settings import SettingsTreeNode
 
-class PMXFileManagerWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FileManagerDialog):
+class PMXFileManagerWidget(QtGui.QWidget, SettingsTreeNode, Ui_FileManagerDialog):
     NAMESPACE = "general"
     TITLE = "Files"
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        PMXSettingTreeNode.__init__(self, "files", settingGroup)
+        SettingsTreeNode.__init__(self, "files", settingGroup)
         self.setupUi(self)
         self.loadEncodings()
         self.setupLineEndings()

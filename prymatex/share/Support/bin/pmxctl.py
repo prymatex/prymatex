@@ -204,10 +204,22 @@ def alert_parse_args(args):
 # ##############################################################################
 def open_parse_args(args):
     """
-    Add image files as named images for use by other commands/nibs.
-
-    images usage:
+    Open url
+    
+    open usage:
         "$DIALOG" open url
+    """ 
+    return None, args
+
+# ##############################################################################
+# completer
+# ##############################################################################
+def completer_parse_args(args):
+    """
+    Show default completer
+
+    completer usage:
+        "$DIALOG" completer
     """ 
     return None, args
 
@@ -378,6 +390,7 @@ PARSERS = {
            'images': images_parse_args,
            'alert': alert_parse_args,
            'open': open_parse_args,
+           'completer': completer_parse_args,
            'mate': mate_parse_args,
            'terminal': terminal_parse_args
            }
@@ -388,6 +401,9 @@ class CommandHandler(object):
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect('tcp://127.0.0.1:%s' % PMX_SERVER_PORT)
         
+    # ======================
+    # = New dialog methods =
+    # ======================
     def async_window(self, options, args):
         kwargs = {}
         kwargs["guiPath"] = args[0]
@@ -414,7 +430,6 @@ class CommandHandler(object):
     def close_window(self, options, args):
         """docstring for close_window"""
         kwargs = {}
-        kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
         kwargs["token"] = options.close_window
 
         command = {"name": "close_window", "kwargs": kwargs}
@@ -425,7 +440,6 @@ class CommandHandler(object):
     def wait_for_input(self, options, args):
         """docstring for wait_for_input"""
         kwargs = {}
-        kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
         kwargs["token"] = options.wait_for_input
 
         command = {"name": "wait_for_input", "kwargs": kwargs}
@@ -444,7 +458,10 @@ class CommandHandler(object):
         self.socket.send_pyobj(command)
         value = self.socket.recv()
         sys.stdout.write(value)
-        
+    
+    # ======================
+    # = Old dialgo methods =
+    # ======================
     def tooltip(self, options, args):
         kwargs = {}
         kwargs["message"] = "".join(args) if args else "".join(sys.stdin.readlines())
@@ -510,6 +527,13 @@ class CommandHandler(object):
                 _ = self.socket.recv()
             else:
                 os.popen("xdg-open %s" % url)
+    
+    def completer(self, options, urls):
+        kwargs = {}
+        command = {"name": "completer", "kwargs": kwargs}
+        self.socket.send_pyobj(command)
+        value = self.socket.recv()
+        sys.stdout.write(value)
     
     def mate(self, options, args):
         kwargs = {"paths": args}

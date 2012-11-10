@@ -1,14 +1,14 @@
 #-*- encoding: utf-8 -*-
-import zmq
-import random
+
 import signal
 import os
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
+
+from prymatex.core import PMXBaseDock
 
 from prymatex import resources
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
 
 QTERMWIDGET_IMPORT_SUGGESTOIN = '''

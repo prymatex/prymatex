@@ -59,7 +59,7 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
         filePath = self.currentEditor().filePath if self.currentEditor() is not None else None
-        files = dialogs.getOpenFiles(directory = self.application.fileManager.getDirectory(filePath))
+        files = dialogs.getOpenFiles(directory = self.application.fileManager.directory(filePath))
         focus = len(files) == 1
         for filePath in files:
             editor = self.application.openFile(filePath, focus = focus)
@@ -75,7 +75,7 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionImportProject_triggered(self):
-        directory = QtGui.QFileDialog.getExistingDirectory(self, "Choose project location", self.application.fileManager.getDirectory())
+        directory = QtGui.QFileDialog.getExistingDirectory(self, "Choose project location", self.application.fileManager.directory())
         if directory:
             try:
                 self.application.projectManager.importProject(directory)
@@ -203,28 +203,29 @@ class MainWindowActions(object):
     # Global navigation
     @QtCore.pyqtSlot()
     def on_actionLocationBack_triggered(self):
-        editor = self._editorHistory[self._editorHistoryIndex]
-        if editor.previousLocation() or not self._editorHistory or self._editorHistoryIndex >= len(self._editorHistory) - 1:
-            return
-        editor.resetLocationIndex()
-        self._editorHistoryIndex += 1
-        self.setCurrentEditor(self._editorHistory[self._editorHistoryIndex])
+        if self._editorHistory and self._editorHistoryIndex < len(self._editorHistory) - 1:
+            self._editorHistoryIndex += 1
+            entry = self._editorHistory[self._editorHistoryIndex]
+            if "memento" in entry:
+                entry["editor"].restoreLocationMemento(entry["memento"])
+            self.setCurrentEditor(entry["editor"])
         
     @QtCore.pyqtSlot()
     def on_actionLocationForward_triggered(self):
-        editor = self._editorHistory[self._editorHistoryIndex]
-        if editor.nextLocation() or self._editorHistoryIndex == 0:
-            return
-        editor.resetLocationIndex(False)
-        self._editorHistoryIndex -= 1
-        self.setCurrentEditor(self._editorHistory[self._editorHistoryIndex])
+        if self._editorHistoryIndex != 0:
+            self._editorHistoryIndex -= 1
+            entry = self._editorHistory[self._editorHistoryIndex]
+            if "memento" in entry:
+                entry["editor"].restoreLocationMemento(entry["memento"])
+            self.setCurrentEditor(entry["editor"])
     
     @QtCore.pyqtSlot()
     def on_actionLastEditLocation_triggered(self):
-        for index, editor in enumerate(self._editorHistory):
-            if editor.lastLocation():
+        for index, entry in enumerate(self._editorHistory):
+            if "memento" in entry:
+                entry["editor"].restoreLocationMemento(entry["memento"])
+                self.setCurrentEditor(entry["editor"])
                 self._editorHistoryIndex = index
-                self.setCurrentEditor(editor)
                 break
 
     #============================================================
@@ -252,9 +253,7 @@ class MainWindowActions(object):
         
     @QtCore.pyqtSlot()
     def on_actionReloadBundles_triggered(self):
-        editor = self.currentEditor()
-        showMessageFunction = editor.showMessage if editor is not None else lambda message: message
-        self.application.supportManager.reloadSupport(showMessageFunction)
+        self.application.supportManager.reloadSupport(self.showMessage)
 
     #============================================================
     # Preferences Actions
@@ -309,7 +308,7 @@ class MainWindowActions(object):
         from datetime import datetime
         now = datetime.now()
         baseName = now.strftime("%Y-%m-%d-%H_%M_%S") + '.' + self.SCREENSHOT_FORMAT
-        path = os.path.join(self.application.settings.PMX_SCREENSHOT_PATH, baseName)
+        path = os.path.join(self.application.profile.PMX_SCREENSHOT_PATH, baseName)
         pxm.save(path, self.SCREENSHOT_FORMAT)
         try:
             self.currentEditor().showMessage("%s saved" % baseName)

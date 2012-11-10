@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
 
 from prymatex.gui.codeeditor.sidebar import SideBarWidgetAddon
 
@@ -34,12 +34,14 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
 
         self.slider = SliderArea(self)
         self.slider.show()
+        self.setFixedWidth(60)
 
     def initialize(self, editor):
         SideBarWidgetAddon.initialize(self, editor)
         self.editor = editor
         editor.textChanged.connect(self.updateDocumentText)
         editor.themeChanged.connect(self.on_editor_themeChanged)
+        self.on_editor_themeChanged()
         
     def on_editor_themeChanged(self):
         #Editor colours
@@ -48,20 +50,11 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         border: 0px;
         selection-background-color: %s; }""" % (self.editor.colours['background'].name(), self.editor.colours['foreground'].name(), self.editor.colours['selection'].name())
         self.setStyleSheet(appStyle)
-        self.setOpacity(50)
 
     def updateDocumentText(self):
-        text = self.parent().toPlainText()
+        text = self.editor.toPlainText()
         self.setPlainText(text)
         
-    def updateOverlay(self):
-        parentRect = self.parent().viewport().rect()
-        
-        x = parentRect.width() - 100
-        self.setGeometry(x, 0, 150, parentRect.height())
-        self.slider.update_position()
-        self.update_visible_area()
-    
     def __calculate_max(self):
         line_height = self.editor.cursorRect().height()
         if line_height > 0:

@@ -5,16 +5,17 @@ import os
 import codecs
 from subprocess import Popen, PIPE, STDOUT
 
-from PyQt4 import QtCore, QtGui, QtWebKit
-from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
-from PyQt4.QtNetwork import QNetworkProxy
+from prymatex.qt import QtCore, QtGui, QtWebKit
+from prymatex.qt.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
+from prymatex.qt.QtNetwork import QNetworkProxy
+
+from prymatex.core import PMXBaseDock
 
 from prymatex import resources
-from prymatex.gui.utils import createQMenu
+from prymatex.qt.helpers import create_menu
 from prymatex.ui.dockers.browser import Ui_BrowserDock
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.support.utils import prepareShellScript, deleteFile
-from prymatex.core.plugin.dock import PMXBaseDock
 
 class TmFileReply(QNetworkReply):
     def __init__(self, parent, url, operation):
@@ -122,12 +123,17 @@ class TextMate(QtCore.QObject):
     def _system(self, command):
         self.parent().runCommand(command)
         
+    @QtCore.pyqtSlot(str)
+    def system(self, command):
+        self.parent().runCommand(command)
+        
     def isBusy(self):
         return True
     isBusy = QtCore.pyqtProperty("bool", isBusy)
     
 #=======================================================================
 # Browser Dock
+# TODO Hacer enfocado en las Pags y no en el webView
 #=======================================================================
 class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     SHORTCUT = "F9"
@@ -159,8 +165,9 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     
     @classmethod
     def contributeToSettings(cls):
-        from prymatex.gui.settings.browser import PMXNetworkWidget
-        return [ PMXNetworkWidget ]
+        from prymatex.gui.settings.browser import NetworkSettingsWidget
+        from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
+        return [ NetworkSettingsWidget, AddonsSettingsWidgetFactory("browser") ]
         
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
@@ -198,11 +205,11 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     def setupToolBar(self):
         #Setup Context Menu
         optionsMenu = { 
-            "title": "Browser Options",
+            "text": "Browser Options",
             "items": [ self.actionSyncEditor, self.actionConnectEditor ]
         }
 
-        self.browserOptionsMenu, _ = createQMenu(optionsMenu, self)
+        self.browserOptionsMenu, _ = create_menu(self, optionsMenu)
         self.toolButtonOptions.setMenu(self.browserOptionsMenu)
 
     def initialize(self, mainWindow):
@@ -302,8 +309,8 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         map(lambda action: action.setChecked(False), [ self.actionSyncEditor, self.actionConnectEditor ])
         self.webView.load(link)
 
-    def on_webView_loadFinished(self, ready):
-        if not ready:
+    def on_webView_loadFinished(self, ok):
+        if not ok:
             return
         self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self))
         environment = ""

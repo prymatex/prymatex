@@ -1,8 +1,0 @@
-# Verilog Bundle Comments
-
-## Infininight (msheets) - 2008-11-13
-
-* module should be removed from keywords so it's is only highlighted in the proper context.
-* Could use some indention preferences.
-
----

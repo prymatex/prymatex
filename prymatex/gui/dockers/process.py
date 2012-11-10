@@ -4,12 +4,13 @@
 import os
 import signal
 
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
+from prymatex.qt.helpers import create_menu
+
+from prymatex.core import PMXBaseDock
 
 from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
-from prymatex.gui import utils
-from prymatex.core.plugin.dock import PMXBaseDock
 
 SIGNALS = dict([(keyname, getattr(signal, keyname)) for keyname in dir(signal) if keyname.startswith('SIG')])
 
@@ -39,24 +40,24 @@ class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
 
         #Setup Context Menu
         contextMenu = { 
-            "title": "Process",
+            "text": "Process",
             "items": [ 
-                { "title": "Close",
+                { "text": "Close",
                   "callback": self.on_actionCloseProcess_triggered },
-                { "title": "Kill",
+                { "text": "Kill",
                   "callback": self.on_actionKill_triggered },
-                { "title": "Terminate",
+                { "text": "Terminate",
                   "callback": self.on_actionTerminate_triggered },
                 "-",
-                { "title": "Send Signal",
+                { "text": "Send Signal",
                   "items": map(lambda (key, value):
-                        { "title": "%s (%s)" % (key, value),
+                        { "text": "%s (%s)" % (key, value),
                           "callback": lambda _, signal = value: self.on_actionSendSignal_triggered(signal)
                         }, sorted(SIGNALS.iteritems(), key = lambda (k, v): v))
                 }
             ]
         }
-        self.processMenu, self.processMenuActions = utils.createQMenu(contextMenu, self)
+        self.processMenu, self.processMenuActions = create_menu(self, contextMenu)
 
         for action in self.processMenuActions:
             if hasattr(action, "callback"):

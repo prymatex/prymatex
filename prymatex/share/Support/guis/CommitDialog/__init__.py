@@ -2,11 +2,12 @@
 #-*- encoding: utf-8 -*-
 import sys
 
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
+from prymatex.qt.helpers.menus import create_menu
 
-from prymatex.core.plugin.dialog import PMXBaseDialog
+from prymatex.core import PMXBaseDialog
+
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.gui import utils
 
 from ui_commit import Ui_CommitDialog
 from model import FilesTableModel
@@ -29,19 +30,19 @@ class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
         selectMenu = { 
             "title": "Select Menu",
             "items": [
-                {   'title': 'Choose All',
+                {   'text': 'Choose All',
                     'callback': lambda dialog: dialog.chooseAll(),
                 },
-                {   'title': 'Choose None',
+                {   'text': 'Choose None',
                     'callback': lambda dialog: dialog.chooseNone(),
                 },
-                {   'title': 'Revert to Default Choices',
+                {   'text': 'Revert to Default Choices',
                     'callback': lambda dialog: dialog.revertChoices(),
                 },
             ]
         }
         
-        self.selectMenu, _ = utils.createQMenu(selectMenu, self, connectActions = True)
+        self.selectMenu, _ = create_menu(self, selectMenu, connectActions = True)
         self.toolButtonSelect.setMenu(self.selectMenu)
         
     def chooseAll(self):
@@ -111,7 +112,7 @@ class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
             message = self.textEditSummary.toPlainText()
             args.append("'%s'" % message)
             if message not in self.lastCommitSummary:
-                self.lastCommitSummary.append(message)
+                self.lastCommitSummary.insert(0, message)
                 self.settings.setValue("lastCommitSummary", self.lastCommitSummary)
             args.append(" ".join(self.filesTableModel.selectedFiles()))
             return " ".join(args)

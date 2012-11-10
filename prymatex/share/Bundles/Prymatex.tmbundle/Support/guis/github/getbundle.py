@@ -38,8 +38,11 @@ class GitHubSearchBundleThread(QtCore.QThread):
                                        proxy_user = data.username,
                                        proxy_pass = data.password)
         # TODO: Socks
+        # Disable SSL Certs to avoid erratic behaviour 
+        #http://pwnetics.wordpress.com/2012/02/06/ssl-certificate-verification-and-httplib2/
         
-        http = httplib2.Http(proxy_info = proxy)
+        http = httplib2.Http(proxy_info=proxy,
+                             disable_ssl_certificate_validation=True)
         
         return http
     

@@ -1,6 +1,9 @@
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
+
 import os
 
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core import exceptions

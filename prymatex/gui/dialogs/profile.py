@@ -7,7 +7,7 @@ from ConfigParser import ConfigParser
 from PyQt4 import QtCore, QtGui
 
 from prymatex.utils.i18n import ugettext as _
-from prymatex.core.settings import PMXProfile
+from prymatex.core.profile import PMXProfile
 from prymatex.ui.dialogs.profile import Ui_ProfileDialog
 
 DELETE_MESSAGE = """Deleting a profile will remove the profile from the list of available profiles and cannot be undone.

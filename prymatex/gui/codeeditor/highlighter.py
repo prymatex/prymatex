@@ -4,7 +4,7 @@
 import re
 from copy import copy
 
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
 
 from prymatex.gui.codeeditor.processors import PMXSyntaxProcessor
 from prymatex.gui.codeeditor.userdata import PMXBlockUserData
@@ -15,7 +15,6 @@ from prymatex.utils.decorators.helpers import printtime
 
 RE_WORD = re.compile(r"([A-Za-z_]\w+\b)", re.UNICODE)
 RE_WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
-RE_MAGIC_FORMAT_BUILDER = re.compile(r"textCharFormat_([A-Za-z]+)_builder", re.UNICODE)
 
 def whiteSpace(text):
     match = RE_WHITESPACE.match(text)
@@ -42,13 +41,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.highlight_function = self.realtime_highlight
         self.highlightTask = self.editor.application.scheduler.idleTask()
 
-        #Format builders
-        self.textCharFormatBuilders = {}
-        for method in dir(editor):
-            match = RE_MAGIC_FORMAT_BUILDER.match(method)
-            if match:
-                self.registerTextCharFormatBuilder("#%s" % match.group(1), getattr(editor, method))
-    
         #Conect signals
         self.editor.afterOpen.connect(self.on_editor_afterOpen)
 
@@ -114,7 +106,8 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def setupBlockUserData(self, text, block, userData):
         userData.setRanges(self.processor.scopeRanges)
         userData.setChunks(self.processor.lineChunks)
-            
+        userData.blank = text.strip() == ""
+        # TODO UserDataProcessors?
         #1 Update words
         if userData.words != self.processor.words:
             self.editor.updateWords(block, userData, self.processor.words)
@@ -148,7 +141,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def highlightBlock(self, text):
         self.highlight_function(text)
-
+        
     def async_highlight(self, text):
         userData = self.currentBlock().userData()
         if userData:
@@ -189,34 +182,28 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.setCurrentBlockState(blockState)
             self.applyFormat(userData)
 
-    def registerTextCharFormatBuilder(self, formatHash, formatBuilder):
-        self.textCharFormatBuilders[formatHash] = formatBuilder
-
     def applyFormat(self, userData):
         for (start, end), scopeHash in userData.scopeRanges():
             format = self.highlightFormat(self.editor.scopeName(scopeHash))
             if format is not None:
                 self.setFormat(start, end - start, format)
 
-    def highlightFormat(self, scopeOrHash):
+    def highlightFormat(self, scope):
         if self.theme is None:
             return None
-        if scopeOrHash not in PMXSyntaxHighlighter.FORMAT_CACHE:
-            if scopeOrHash in self.textCharFormatBuilders:
-                format = self.textCharFormatBuilders[scopeOrHash]()
-            else:
-                format = QtGui.QTextCharFormat()
-                settings = self.theme.getStyle(scopeOrHash)
-                if 'foreground' in settings:
-                    format.setForeground(settings['foreground'])
-                if 'background' in settings:
-                    format.setBackground(settings['background'])
-                if 'fontStyle' in settings:
-                    if 'bold' in settings['fontStyle']:
-                        format.setFontWeight(QtGui.QFont.Bold)
-                    if 'underline' in settings['fontStyle']:
-                        format.setFontUnderline(True)
-                    if 'italic' in settings['fontStyle']:
-                        format.setFontItalic(True)
-            PMXSyntaxHighlighter.FORMAT_CACHE[scopeOrHash] = format 
-        return PMXSyntaxHighlighter.FORMAT_CACHE[scopeOrHash]
+        if scope not in PMXSyntaxHighlighter.FORMAT_CACHE:
+            format = QtGui.QTextCharFormat()
+            settings = self.theme.getStyle(scope)
+            if 'foreground' in settings:
+                format.setForeground(settings['foreground'])
+            if 'background' in settings:
+                format.setBackground(settings['background'])
+            if 'fontStyle' in settings:
+                if 'bold' in settings['fontStyle']:
+                    format.setFontWeight(QtGui.QFont.Bold)
+                if 'underline' in settings['fontStyle']:
+                    format.setFontUnderline(True)
+                if 'italic' in settings['fontStyle']:
+                    format.setFontItalic(True)
+            PMXSyntaxHighlighter.FORMAT_CACHE[scope] = format 
+        return PMXSyntaxHighlighter.FORMAT_CACHE[scope]

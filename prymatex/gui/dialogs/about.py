@@ -1,12 +1,19 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import sys
-from PyQt4 import QtCore, QtGui, Qt
-from prymatex.ui.about import Ui_AboutDialog
 import prymatex
+
+from prymatex.qt import QtCore, QtGui, Qt
+from prymatex import resources
+
+from prymatex.ui.about import Ui_AboutDialog
 
 class PMXAboutDialog(Ui_AboutDialog, QtGui.QDialog):
     def __init__(self, parent = None):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
+        self.labelLogo.setPixmap(resources.getImage("logo"))
         self.textInformation.setReadOnly(True)
         self.fillVersionInfo()
         

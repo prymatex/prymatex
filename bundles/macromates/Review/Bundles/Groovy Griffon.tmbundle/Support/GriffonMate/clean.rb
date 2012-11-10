@@ -1,1 +1,0 @@
-GriffonCommand.new("clean").run

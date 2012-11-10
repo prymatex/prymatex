@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
-from prymatex.core.plugin import PMXBaseWidgetComponent
+from prymatex.core import PMXBaseWidgetComponent
 
 from prymatex.ui.dialogs.treewidget import Ui_TreeWidgetDialog
-from prymatex.gui.project.models import PMXPropertyTreeNode
-from prymatex.gui.configure.models import PMXConfigureTreeModel
-from prymatex.gui.project.proxies import PMXPropertiesProxyModel
+from prymatex.models.projects import PropertyTreeNode, PropertiesProxyModel
+from prymatex.models.configure import ConfigureTreeModel
 
-class PMXProxyPropertyTreeNode(QtGui.QWidget, PMXPropertyTreeNode):
+class PMXProxyPropertyTreeNode(QtGui.QWidget, PropertyTreeNode):
     def __init__(self, name, parent):
         QtGui.QWidget.__init__(self)
-        PMXPropertyTreeNode.__init__(self, name, parent)
+        PropertyTreeNode.__init__(self, name, parent)
 
     def acceptFileSystemItem(self, fileSystemItem):
         return True
@@ -30,10 +29,10 @@ class PMXPropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseWidgetCompo
         
         self.baseWindowTitle = self.windowTitle()
         
-        self.model = PMXConfigureTreeModel(self)
-        self.model.proxyNodeFactory = self.proxyNodeFactory
+        self.model = ConfigureTreeModel(self)
+        self.model.proxyConfigureCreated.connect(self.on_model_proxyConfigureCreated)
         
-        self.proxyModelProperties = PMXPropertiesProxyModel(self)
+        self.proxyModelProperties = PropertiesProxyModel(self)
         self.proxyModelProperties.setSourceModel(self.model)
         
         self.treeView.setModel(self.proxyModelProperties)
@@ -48,10 +47,8 @@ class PMXPropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseWidgetCompo
         treeNode = self.proxyModelProperties.node(firstIndex)
         self.setCurrentPropertyWidget(treeNode)
 
-    def proxyNodeFactory(self, name, parent):
-        proxyWidget = PMXProxyPropertyTreeNode(name, parent)
+    def on_model_proxyConfigureCreated(self, proxyWidget):
         self.stackedWidget.addWidget(proxyWidget)
-        return proxyWidget
         
     def on_lineEditFilter_textChanged(self, text):
         self.proxyModelProperties.setFilterRegExp(QtCore.QRegExp(text, QtCore.Qt.CaseInsensitive))
@@ -68,8 +65,9 @@ class PMXPropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseWidgetCompo
     def setCurrentPropertyWidget(self, widget):
         widget.edit(self.proxyModelProperties.fileSystemItem)
         self.stackedWidget.setCurrentWidget(widget)
-        self.textLabelTitle.setText(widget.title)
-        self.setWindowTitle("%s - %s" % (self.baseWindowTitle, widget.title))
+        self.textLabelTitle.setText(widget.title())
+        self.textLabelPixmap.setPixmap(widget.icon().pixmap(20, 20))
+        self.setWindowTitle("%s - %s" % (self.baseWindowTitle, widget.title()))
     
     def register(self, widget):
         index = self.stackedWidget.addWidget(widget)

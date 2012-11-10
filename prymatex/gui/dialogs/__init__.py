@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 import os
-
+    
 from PyQt4 import QtGui
 
 def getOpenFiles(directory):

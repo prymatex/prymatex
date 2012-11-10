@@ -3,10 +3,11 @@
 
 import re
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
+
+from prymatex.core import PMXBaseEditorAddon
 
 from prymatex.utils.lists import bisect_key
-from prymatex.core.plugin.editor import PMXBaseEditorAddon
 from prymatex.support import PMXPreferenceSettings
 
 RE_CHAR = re.compile(r"(\w)", re.UNICODE)
@@ -63,7 +64,7 @@ class SpellCheckerAddon(CodeEditorAddon):
     def initialize(self, editor):
         CodeEditorAddon.initialize(self, editor)
         if self.dictionary is not None:
-            editor.registerTextCharFormatBuilder("#spell", self.textCharFormat_spell_builder)
+            editor.registerTextCharFormatBuilder("spell", self.textCharFormat_spell_builder)
             editor.syntaxReady.connect(self.on_editor_syntaxReady)
             self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
 
@@ -78,11 +79,11 @@ class SpellCheckerAddon(CodeEditorAddon):
             return instance.spellingOnType
 
         baseMenu = "Edit"
-        menuEntry = {'title': 'Spelling',
+        menuEntry = {'text': 'Spelling',
                  'items': [
-                    {'title': 'Show Spelling'},
-                    {'title': 'Check Spelling'},
-                    {'title': 'Check Spelling as You Type',
+                    {'text': 'Show Spelling'},
+                    {'text': 'Check Spelling'},
+                    {'text': 'Check Spelling as You Type',
                       'callback': on_actionSpellingOnType_toggled,
                       'checkable': True,
                       'testChecked': on_actionSpellingOnType_testChecked
@@ -101,7 +102,7 @@ class SpellCheckerAddon(CodeEditorAddon):
         return items
 
     def extraSelectionCursors(self):
-        return { "#spell": self.wordCursors[:] }
+        return { "spell": self.wordCursors[:] }
 
     def setupSpellChecker(self):
         try:
@@ -174,10 +175,18 @@ class HighlightCurrentSelectionAddon(CodeEditorAddon):
 
     def initialize(self, editor):
         CodeEditorAddon.initialize(self, editor)
+        editor.registerTextCharFormatBuilder("selection.extra", self.textCharFormat_extraSelection_builder)
         editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
 
+    def textCharFormat_extraSelection_builder(self):
+        format = QtGui.QTextCharFormat()
+        color = QtGui.QColor(self.editor.colours['selection'])
+        color.setAlpha(128)
+        format.setBackground(color)
+        return format
+    
     def extraSelectionCursors(self):
-        return { "#selection": self.highlightCursors[:] }
+        return { "selection.extra": self.highlightCursors[:] }
 
     def on_editor_cursorPositionChanged(self):
         cursor = self.editor.textCursor()

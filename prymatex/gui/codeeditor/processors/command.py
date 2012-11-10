@@ -3,7 +3,6 @@
 
 from PyQt4 import QtGui, QtCore
 
-from prymatex.gui import utils
 from prymatex.support.processor import PMXCommandProcessor
 from prymatex.support.snippet import PMXSnippet
 
@@ -11,14 +10,21 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def __init__(self, editor):
         super(PMXCommandProcessor, self).__init__()
         self.editor = editor
+        self.__env = {}
 
-    def environment(self, command):
-        environment = command.buildEnvironment()
-        environment.update(self.editor.mainWindow.buildEnvironment())
-        environment.update(self.editor.buildEnvironment())
-        environment.update(self.baseEnvironment)
-        return environment
-
+    def startCommand(self, command):
+        self.command = command
+        self.__env = command.environmentVariables()
+        self.__env.update(self.editor.mainWindow.environmentVariables())
+        self.__env.update(self.editor.environmentVariables())
+        self.__env.update(self.baseEnvironment)
+        
+    def endCommand(self, command):
+        self.command = None
+        
+    def environmentVariables(self):
+        return self.__env
+        
     def configure(self, settings):
         self.asynchronous = settings.get("asynchronous", True)
         self.tabTriggered = settings.get("tabTriggered", False)
@@ -76,7 +82,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def selection(self, format = None):
         cursor = self.editor.textCursor()
         if cursor.hasSelection():
-            text = utils.replaceLineBreaks(cursor.selectedText())
+            text = cursor.selectedText().replace(u"\u2029", '\n').replace(u"\u2028", '\n')
             if format == "xml":
                 firstBlock, lastBlock = self.editor.getSelectionBlockStartEnd()
                 return self.formatAsXml(text, firstBlock, lastBlock, cursor.selectionStart() - firstBlock.position(), cursor.selectionEnd() - lastBlock.position())
@@ -129,7 +135,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor.deleteChar()
     
     def deleteDocument(self):
-        print "borrar documento"
         self.editor.document().clear()
        
     # Outpus function
@@ -158,16 +163,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.setTextCursor(cursor)
         
     def replaceDocument(self, context):
-        #1 Recuperar la posicion actual del cursor
-        position = self.editor.textCursor().position()
-        currentText = self.editor.toPlainText()
-        newText = context.outputValue
-        #if currentText[:position] != newText[:position]:
-        #    position += (len(newText) - len(currentText))
-        self.editor.setPlainText(newText)
-        cursor = self.editor.textCursor()
-        cursor.setPosition(position)
-        self.editor.setTextCursor(cursor)
+        self.editor.updatePlainText(context.outputValue)
         
     def insertText(self, context):
         cursor = self.editor.textCursor()
@@ -175,8 +171,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     def afterSelectedText(self, context):
         cursor = self.editor.textCursor()
-        position = cursor.selectionEnd()
-        cursor.setPosition(position)
+        cursor.setPosition(cursor.selectionEnd())
         cursor.insertText(context.outputValue)
         
     def insertAsSnippet(self, context):
@@ -188,15 +183,14 @@ class PMXCommandProcessor(PMXCommandProcessor):
         #self.editor.mainWindow.browser.setHtml(context.outputValue, context.bundleItem)
 
     def showAsTooltip(self, context):
-        # Chicho's sense of statistics
-        linesToRead = context.outputValue.count('\n') or context.outputValue.count('<br')
-        if linesToRead > 10:
-            timeout = 8000
-        else:
-            timeout = linesToRead * 700
-            
+        message = context.outputValue.strip()
+        timeout = len(message) * 10
+        if timeout > 2000:
+            timeout = 2000
+
         point = self.editor.cursorRect(self.editor.textCursor()).bottomRight()
         point = self.editor.mapToGlobal(point)
+        # TODO: Ver que pasa sin usar el html con los replace
         html = """
             <span>%s</span><hr>
             <div style='text-align: right; font-size: small;'><a href='copy'>Copy</a>
@@ -205,7 +199,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
             'copy': lambda s = context.outputValue: QtGui.qApp.instance().clipboard().setText(s)
         }
         
-        self.editor.mainWindow.showMessage(html, timeout = timeout, point = point, linkMap = callbacks)
+        self.editor.mainWindow.showMessage(message, timeout = timeout, point = point, linkMap = callbacks)
         
     def createNewDocument(self, context):
         editor= self.editor.mainWindow.addEmptyEditor()

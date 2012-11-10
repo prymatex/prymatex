@@ -1,44 +1,35 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-#=======================================================================
-# Standard library imports
-#=======================================================================
 import re
 from bisect import bisect
 
-#=======================================================================
-# Related third party imports
-#=======================================================================
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
-#=======================================================================
-# Local application / Library specific imports
-#=======================================================================
+from prymatex.core import PMXBaseEditor
+from prymatex.widgets.texteditor import TextEditWidget
+
 from prymatex import resources
-from prymatex.utils import coroutines
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core.plugin.editor import PMXBaseEditor
 from prymatex.core import exceptions
-from prymatex.gui.support.models import PMXBundleTreeNode
-from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
-from prymatex.gui import utils
+from prymatex.qt.helpers.menus import extend_menu, update_menu
+from prymatex.models.support import BundleItemTreeNode
 from prymatex.gui.codeeditor.addons import CodeEditorAddon
-from prymatex.gui.codeeditor.sidebar import PMXSideBar, SideBarWidgetAddon
+from prymatex.gui.codeeditor.sidebar import CodeEditorSideBar, SideBarWidgetAddon
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
 from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXAlreadyTypedWords
 
-from prymatex.utils.text import convert_functions
+from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
+
+from prymatex.utils import coroutines
+from prymatex.utils import text
 from prymatex.utils.i18n import ugettext as _
-from prymatex.utils.datastructures import MultiListsDict
-
 from prymatex.utils.decorators.helpers import printtime
-from prymatex.core.exceptions import IOException
 
-class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
+class CodeEditor(TextEditWidget, PMXBaseEditor):
     #=======================================================================
     # Scope groups
     #=======================================================================
@@ -95,8 +86,16 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     MoveColumnRight = QtGui.QTextCursor.Right
     
     #================================================================
-    # Convert types, los numeros son los indeces de convert_functions
+    # Convert types
     #================================================================
+    CONVERTERS = [  text.upper_case, 
+                    text.lower_case, 
+                    text.title_case,
+                    text.opposite_case,
+                    text.spaces_to_tabs,
+                    text.tabs_to_spaces,
+                    text.transpose
+    ]
     ConvertToUppercase = 0
     ConvertToLowercase = 1
     ConvertToTitlecase = 2
@@ -115,6 +114,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     ShowFolding           = 1<<4
     WordWrap              = 1<<5
     MarginLine            = 1<<6
+    IndentGuide           = 1<<7
     
     #=======================================================================
     # Settings
@@ -162,13 +162,13 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # INIT
     #================================================================
     def __init__(self, parent = None):
-        QtGui.QPlainTextEdit.__init__(self, parent)
+        TextEditWidget.__init__(self, parent)
         PMXBaseEditor.__init__(self)
 
         #Sidebars
-        self.leftBar = PMXSideBar(self)
-        self.rightBar = PMXSideBar(self)
-        self.updateViewportMargins()
+        self.leftBar = CodeEditorSideBar(self)
+        self.rightBar = CodeEditorSideBar(self)
+        #self.updateViewportMargins()
 
         #Models
         self.bookmarkListModel = PMXBookmarkListModel(self)
@@ -185,7 +185,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
         #Highlighter
         self.syntaxHighlighter = PMXSyntaxHighlighter(self)
-        self.extraSelectionCursors = MultiListsDict()
+        #self.extraSelectionCursors = MultiListsDict()
         
         #Modes
         self.multiCursorMode = PMXMultiCursorEditorMode(self)
@@ -207,7 +207,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.completerTask = self.application.scheduler.idleTask()
         
         #Cursor history
-        self._cursorHistory, self._cursorHistoryIndex = [], 0
+        #self._cursorHistory, self._cursorHistoryIndex = [], 0
         
         #Esta señal es especial porque es emitida en el setFont por los settings
         self.fontChanged.connect(self.on_fontChanged)
@@ -228,7 +228,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.themeChanged.connect(self.highlightEditor)
         
         self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)
-        self.document().undoAvailable.connect(self.on_document_undoAvailable)
 
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
@@ -243,12 +242,17 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.addSideBarWidget(addon)
 
     def addSideBarWidget(self, widget):
-        #widget.setParent(self.rightBar)
         if widget.ALIGNMENT == QtCore.Qt.AlignRight:
             self.rightBar.addWidget(widget)
         else:
             self.leftBar.addWidget(widget)
-
+        
+    def showSyntaxMessage(self, syntax):
+        self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
+    
+    def showMessage(self, *largs, **kwargs):
+        self.mainWindow.showMessage(*largs, **kwargs)
+        
     #================================================================
     # Update editor status, called from Highlighter
     #================================================================
@@ -278,9 +282,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.alreadyTypedWords.addWordsBlock(block, filter(lambda word: word not in userData.words, words))
         userData.words = words
         
-    def showSyntaxMessage(self, syntax):
-        self.mainWindow.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
-
     def on_modificationChanged(self, value):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
     
@@ -336,6 +337,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     
     def reload(self):
         self.beforeReload.emit()
+        content = self.application.fileManager.readFile(self.filePath)
+        self.updatePlainText(content)
         PMXBaseEditor.reload(self)
         self.afterReload.emit()
 
@@ -501,10 +504,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             flags |= self.ShowLineAndParagraphs
         if self.showMarginLine:
             flags |= self.MarginLine
-        # if self.sidebar.showLineNumbers:
-        #     flags |= self.ShowLineNumbers
-        # if self.sidebar.showFolding:
-        #     flags |= self.ShowFolding
+        if self.showIndentGuide:
+            flags |= self.IndentGuide
         if options.wrapMode() & QtGui.QTextOption.WordWrap:
             flags |= self.WordWrap
         return flags
@@ -527,9 +528,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         options.setFlags(oFlags)
         self.document().setDefaultTextOption(options)
         self.showMarginLine = bool(flags & self.MarginLine)
-        # self.sidebar.showLineNumbers = bool(flags & self.ShowLineNumbers)
-        # self.sidebar.showFolding = bool(flags & self.ShowFolding)
-        
+        self.showIndentGuide = bool(flags & self.IndentGuide)
+
     # Syntax
     def getSyntax(self):
         return self.syntaxHighlighter.syntax
@@ -540,7 +540,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def setSyntax(self, syntax):
         if self.syntaxHighlighter.syntax != syntax:
             self.syntaxHighlighter.setSyntax(syntax)
-            self.flyweightScopeFactory(syntax.scopeName)
+            self.flyweightScopeFactory([ syntax.scopeName ])
             self.syntaxChanged.emit(syntax)
 
     # Move text
@@ -584,7 +584,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # Convert Text
     def convertText(self, convertType):
         cursor = self.textCursor()
-        convertFunction = convert_functions[convertType]
+        convertFunction = self.CONVERTERS[convertType]
         if convertType == self.ConvertSpacesToTabs:
             self.replaceSpacesForTabs()
         elif convertType == self.ConvertTabsToSpaces:
@@ -622,10 +622,15 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         else:
             self.rightBar.update(0, rect.y(), self.rightBar.width(), rect.height())
             self.leftBar.update(0, rect.y(), self.leftBar.width(), rect.height())
-        if rect.contains(self.viewport().rect()):
-            self.rightBar.update()
-            self.leftBar.update()
-            
+    
+    def updateSideBarsGeometry(self):
+        cr = self.contentsRect()
+        self.leftBar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.leftBar.width(), cr.height()))
+        rightBarPosition = cr.right() - self.rightBar.width()
+        if self.application.platform == "win32" and self.verticalScrollBar().isVisible():
+            rightBarPosition -= self.verticalScrollBar().width()
+        self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
+    
     #=======================================================================
     # Braces
     #=======================================================================
@@ -708,12 +713,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #TODO: Esto esta mal
         return self.beforeBrace(cursor) and self.afterBrace(cursor)
         
-    #=======================================================================
-    # Highlight Editor
-    #=======================================================================
-    def registerTextCharFormatBuilder(self, formatHash, formatBuilder):
-        self.syntaxHighlighter.registerTextCharFormatBuilder(formatHash, formatBuilder)
-        
+    # -------------------- Highlight Editor
     def textCharFormat_line_builder(self):
         format = QtGui.QTextCharFormat()
         format.setBackground(self.colours['lineHighlight'])
@@ -734,39 +734,16 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return format
         
     def highlightEditor(self):
-        self.extraSelectionCursors.clear()
-        extraSelections = []
-        if self.multiCursorMode.isActive():
-            self.extraSelectionCursors.update(self.multiCursorMode.extraSelectionCursors())
-        else:
-            cursor = self.textCursor()
-            cursor.clearSelection()
-            self.extraSelectionCursors["#line"] = [cursor]
-            self.extraSelectionCursors["#brace"] = filter(lambda cursor: cursor is not None, list(self._currentBraces))
+        cursor = self.textCursor()
+        cursor.clearSelection()
+        self.setExtraSelectionCursors("line", [ cursor ])
+        self.setExtraSelectionCursors("brace", filter(lambda cursor: cursor is not None, list(self._currentBraces)))
         for addon in self.addons:
             if isinstance(addon, CodeEditorAddon):
-                self.extraSelectionCursors.update(addon.extraSelectionCursors())
-        extraSelections = reduce(
-            lambda l1, l2: l1 + l2, 
-            map(
-                lambda (styleHash, cursors): self.buildExtraSelections(styleHash, cursors),
-                self.extraSelectionCursors.iteritems()
-            ), [])
-        self.setExtraSelections(extraSelections)
+                self.updateExtraSelectionCursors(addon.extraSelectionCursors())
+        self.updateExtraSelections()
+        # Todo esta señal mandarla desde el updateExtraSelections
         self.extraSelectionChanged.emit()
-
-    def extraSelectionCursorsByHash(self, styleHash):
-        return self.extraSelectionCursors[styleHash] if styleHash in self.extraSelectionCursors else []
-        
-    def buildExtraSelections(self, styleHash, cursors):
-        extraSelections = []
-        cursors = cursors if isinstance(cursors, list) else [ cursors ]
-        for cursor in cursors:
-            selection = QtGui.QTextEdit.ExtraSelection()
-            selection.format = self.syntaxHighlighter.highlightFormat(styleHash)
-            selection.cursor = cursor
-            extraSelections.append(selection)
-        return extraSelections
 
     def select(self, selection):
         cursor = self.textCursor()
@@ -800,15 +777,15 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # QPlainTextEdit Events
     #=======================================================================
+    def focusInEvent(self, event):
+        # TODO No es para este evento pero hay que poner en alugn lugar el update de las side bars
+        QtGui.QPlainTextEdit.focusInEvent(self, event)
+        self.updateSideBarsGeometry()
+        
     def resizeEvent(self, event):
         QtGui.QPlainTextEdit.resizeEvent(self, event)
-        cr = self.contentsRect()
-        self.leftBar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.leftBar.width(), cr.height()))
-        rightBarPosition = cr.right() - self.rightBar.width()
-        if self.application.platform == "win32" and self.verticalScrollBar().isVisible():
-            rightBarPosition -= self.verticalScrollBar().width()
-        self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
-    
+        self.updateSideBarsGeometry()
+
     def paintEvent(self, event):
         QtGui.QPlainTextEdit.paintEvent(self, event)
         page_bottom = self.viewport().height()
@@ -820,32 +797,37 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         painter.setFont(font)
             
         painter.setPen(self.colours['selection'])
-        offset = self.contentOffset()
         block = self.firstVisibleBlock()
-        viewport_offset = self.contentOffset()
-        line_count = block.blockNumber()
+        offset = self.contentOffset()
         while block.isValid() and block.userData():
-            line_count += 1
             # The top left position of the block in the document
-            position = self.blockBoundingGeometry(block).topLeft() + viewport_offset
+            # position = self.blockBoundingGeometry(block).topLeft() + offset
+            blockGeometry = self.blockBoundingGeometry(block)
             # Check if the position of the block is out side of the visible area
-            if position.y() > page_bottom:
+            if blockGeometry.top() > page_bottom:
                 break
-
-            user_data = block.userData()
-            if block.isVisible() and self.folding.isStart(self.folding.getFoldingMark(block)) and user_data.folded:
-                painter.drawPixmap(font_metrics.width(block.text()) + 10,
-                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.getImage("foldingellipsis").height(),
-                    resources.getImage("foldingellipsis"))
-            
-            for s in range(0, (len(user_data.indent) / len(self.tabKeyBehavior()))):
-                linePositionX = (font_metrics.width("#") * self.tabStopSize * s) + font_metrics.width("#") + offset.x()
-                painter.drawLine(linePositionX, round(position.y()), linePositionX, font_metrics.height() + round(position.y()))
-
-            if self.showMarginLine:
-                painter.drawLine(self.pos_margin + offset.x(), round(position.y()), self.pos_margin + offset.x(), font_metrics.height() + round(position.y()))
-            
+            positionY = round(blockGeometry.top())
+            if block.isVisible():
+                
+                user_data = block.userData()
+                if self.folding.isStart(self.folding.getFoldingMark(block)) and user_data.folded:
+                    painter.drawPixmap(font_metrics.width(block.text()) + offset.x() + 5,
+                        positionY + font_metrics.ascent() + font_metrics.descent() - resources.getImage("foldingellipsis").height(),
+                        resources.getImage("foldingellipsis"))
+                if self.showIndentGuide:
+                    blockPattern = block
+                    while blockPattern.isValid() and blockPattern.userData() and blockPattern.userData().blank:
+                        blockPattern = blockPattern.next()
+                    if blockPattern.isValid() and blockPattern.userData():
+                        indentPattern = blockPattern.userData().indent
+                        for s in range(0, (len(indentPattern) / len(self.tabKeyBehavior()))):
+                            positionX = (font_metrics.width("#") * self.tabStopSize * s) + font_metrics.width("#") + offset.x()
+                            painter.drawLine(positionX, positionY, positionX, positionY + font_metrics.height())
+                
             block = block.next()
+
+        if self.showMarginLine:
+            painter.drawLine(self.pos_margin + offset.x(), 0, self.pos_margin + offset.x(), self.viewport().height())
 
         if self.multiCursorMode.isActive():
             ctrl_down = bool(self.application.keyboardModifiers() & QtCore.Qt.ControlModifier)
@@ -966,26 +948,51 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #==========================================================================
     # Insert API
     #==========================================================================
+    def updatePlainText(self, text):
+        # delta update Muejejejejejejejejej
+        import difflib
+        
+        def perform_action(code, cursor, text=""):
+            def _nop():
+                pass
+            def _action():
+                cursor.insertText(text)
+            return _action if code in ["insert", "replace", "delete"] else _nop
+        
+        sequenceMatcher = difflib.SequenceMatcher(None, self.toPlainText(), text)
+        opcodes = sequenceMatcher.get_opcodes()
+        
+        actions = map(lambda code: perform_action(code[0], self.newCursorAtPosition(code[1], code[2]), text[code[3]:code[4]]), opcodes)
+        
+        cursor = self.textCursor()
+        
+        cursor.beginEditBlock()
+        map(lambda action: action(), actions)
+        cursor.endEditBlock()
+        
+        self.ensureCursorVisible()
+
     def insertNewLine(self, cursor = None):
         cursor = cursor or self.textCursor()
         block = cursor.block()
+        userData = cursor.block().userData()
         settings = self.preferenceSettings(self.scope(cursor))
         indentMarks = settings.indent(block.text()[:cursor.columnNumber()])
         if PMXPreferenceSettings.INDENT_INCREASE in indentMarks:
             self.logger.debug("Increase indent")
-            indent = block.userData().indent + self.tabKeyBehavior()
+            indent = userData.indent + self.tabKeyBehavior()
         elif PMXPreferenceSettings.INDENT_NEXTLINE in indentMarks:
             #TODO: Creo que este no es el correcto
             self.logger.debug("Increase next line indent")
-            indent = block.userData().indent + self.tabKeyBehavior()
+            indent = userData.indent + self.tabKeyBehavior()
         elif PMXPreferenceSettings.UNINDENT in indentMarks:
             self.logger.debug("Unindent")
             indent = ""
         elif PMXPreferenceSettings.INDENT_DECREASE in indentMarks:
-            indent = block.userData().indent[:len(self.tabKeyBehavior())]
+            indent = userData.indent[:len(self.tabKeyBehavior())]
         else:
             self.logger.debug("Preserve indent")
-            indent = block.userData().indent
+            indent = block.userData().indent[:cursor.columnNumber()]
         cursor.insertText("\n%s" % indent)
         self.ensureCursorVisible()
 
@@ -1032,48 +1039,48 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         command = self.application.supportManager.buildAdHocCommand(commandScript, self.getSyntax().bundle, commandInput, commandOutput)
         self.insertBundleItem(command)
     
-    def buildEnvironment(self):
-        """ http://manual.macromates.com/en/environment_variables.html """
+    def environmentVariables(self):
+        environment = PMXBaseEditor.environmentVariables(self)
         cursor = self.textCursor()
         block = cursor.block()
         line = block.text()
         scope = self.currentScope()
         preferences = self.preferenceSettings(scope)
         current_word, start, end = self.currentWord()
-        env = {
+        environment.update({
                 'TM_CURRENT_LINE': line,
-                'TM_LINE_INDEX': cursor.columnNumber(), 
+                'TM_LINE_INDEX': cursor.columnNumber(),
                 'TM_LINE_NUMBER': block.blockNumber() + 1,
-                'TM_COLUMN_NUMBER': cursor.columnNumber() + 1, 
+                'TM_COLUMN_NUMBER': cursor.columnNumber() + 1,
                 'TM_SCOPE': scope,
                 'TM_MODE': self.getSyntax().name,
                 'TM_SOFT_TABS': self.tabStopSoft and unicode('YES') or unicode('NO'),
                 'TM_TAB_SIZE': self.tabStopSize,
                 'TM_NESTEDLEVEL': self.folding.getNestedLevel(block)
-        }
+        })
 
         if current_word:
             self.logger.debug("Add current word to environment")
-            env['TM_CURRENT_WORD'] = current_word
+            environment['TM_CURRENT_WORD'] = current_word
         if self.filePath is not None:
             self.logger.debug("Add file path to environment")
-            env['TM_FILEPATH'] = self.filePath
-            env['TM_FILENAME'] = self.application.fileManager.basename(self.filePath)
-            env['TM_DIRECTORY'] = self.application.fileManager.dirname(self.filePath)
+            environment['TM_FILEPATH'] = self.filePath
+            environment['TM_FILENAME'] = self.application.fileManager.basename(self.filePath)
+            environment['TM_DIRECTORY'] = self.application.fileManager.dirname(self.filePath)
         if self.project is not None:
             self.logger.debug("Add project to environment")
-            env.update(self.project.buildEnvironment())
+            environment.update(self.project.environmentVariables())
         if cursor.hasSelection():
             self.logger.debug("Add selection to environment")
-            env['TM_SELECTED_TEXT'] = utils.replaceLineBreaks(cursor.selectedText())
+            environment['TM_SELECTED_TEXT'] = cursor.selectedText().replace(u"\u2029", '\n').replace(u"\u2028", '\n')
             start, end = self.getSelectionBlockStartEnd()
-            env['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
-            env['TM_INPUT_START_LINE'] = start.blockNumber() + 1
-            env['TM_INPUT_START_LINE_INDEX'] = cursor.selectionStart() - start.position()
+            environment['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
+            environment['TM_INPUT_START_LINE'] = start.blockNumber() + 1
+            environment['TM_INPUT_START_LINE_INDEX'] = cursor.selectionStart() - start.position()
 
-        env.update(preferences.shellVariables)
-        return env
-
+        environment.update(preferences.shellVariables)
+        return environment
+        
     #==========================================================================
     # Completer
     #==========================================================================
@@ -1111,21 +1118,11 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
     def runCompleter(self):
         settings = self.currentPreferenceSettings()
-        if settings.disableDefaultCompletion and settings.executeCompletionCommand:
-            self.executeCompletionCommand(settings)
-        else:
-            def on_suggestionsReady(suggestions):
-                 if bool(suggestions):
-                    self.showCompleter(suggestions)
-            self.defaultCompletion(settings, on_suggestionsReady)
+        def on_suggestionsReady(suggestions):
+             if bool(suggestions):
+                self.showCompleter(suggestions)
+        self.defaultCompletion(settings, on_suggestionsReady)
 
-    def executeCompletionCommand(self, settings):
-        commandHash = settings.executeCompletionCommand
-        command = PMXCommand(self.application.supportManager.uuidgen(), dataHash = commandHash)
-        command.setBundle(settings.getBundle("executeCompletionCommand"))
-        command.setManager(settings.getManager("executeCompletionCommand"))
-        self.insertBundleItem(command)
-    
     def defaultCompletion(self, settings, callback):
         if not self.completerTask.isRunning():
             self.completerTask = self.application.scheduler.newTask(self.completionSuggestions(settings = settings))
@@ -1494,7 +1491,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             elif isinstance(item,  basestring):
                 title = "%s 	&%d" % (item, index)
                 icon = QtGui.QIcon()
-            elif isinstance(item,  PMXBundleTreeNode):
+            elif isinstance(item,  BundleItemTreeNode):
                 title = "%s 	&%d" % (item.buildMenuTextEntry(False), index)
                 icon = item.icon
             menu.addAction(icon, title)
@@ -1514,7 +1511,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
         #Bundle Menu
         bundleMenu = self.application.supportManager.menuForBundle(self.getSyntax().bundle)
-        utils.extendQMenu(menu, [ "-", bundleMenu ])
+        extend_menu(menu, [ "-", bundleMenu ])
 
         #Se lo pasamos a los addons
         cursor = self.cursorForPosition(point)
@@ -1524,7 +1521,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 items += addon.contributeToContextMenu(cursor)
         
         if len(items) > 1:
-            actions = utils.extendQMenu(menu, items)
+            actions = extend_menu(menu, items)
             for action in actions:
                 if hasattr(action, 'callback'):
                     if action.isCheckable():
@@ -1543,8 +1540,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             menues.append("-")
         if self.filePath:
             menues.append({
-                "title": "Copy file path",
-                "icon": resources.getIcon("copy"),
+                "text": "Copy file path",
+                "icon": resources.getIcon("edit-copy"),
                 "callback": lambda editor = self: QtGui.QApplication.clipboard().setText(editor.filePath)  })
         return menues
     
@@ -1552,178 +1549,184 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     @classmethod
     def contributeToMainMenu(cls, addonClasses):
         edit = {
-            'title': 'Edit',
+            'text': 'Edit',
             'items': [
                 '-',
-                {'title': 'Mode',
+                {'text': 'Mode',
                  'items': [
-                    {'title': 'Freehanded Editing', 'shortcut': 'Meta+Alt+E'},
-                    {'title': 'Overwrite Mode', 'shortcut': 'Meta+Alt+O'},
-                    {'title': 'Multi Edit Mode', 'shortcut': 'Meta+Alt+M'}
+                    {'text': 'Freehanded Editing', 'shortcut': 'Meta+Alt+E'},
+                    {'text': 'Overwrite Mode', 'shortcut': 'Meta+Alt+O'},
+                    {'text': 'Multi Edit Mode', 'shortcut': 'Meta+Alt+M'}
                  ]}
             ]
         }
         view = {
-            'title': 'View',
+            'text': 'View',
             'items': [
-                {'title': 'Font',
+                {'text': 'Font',
                  'items': [
-                     {'title': "Zoom In",
+                     {'text': "Zoom In",
                       'shortcut': "Ctrl++",
                       'callback': cls.zoomIn},
-                     {'title': "Zoom Out",
+                     {'text': "Zoom Out",
                       'shortcut': "Ctrl+-",
                       'callback': cls.zoomOut}
                 ]},
-                {'title': 'Left Gutter',
+                {'text': 'Left Gutter',
                  'items': []},
-                 {'title': 'Right Gutter',
+                 {'text': 'Right Gutter',
                  'items': []},
                 '-',
-                {'title': "Show Tabs And Spaces",
+                {'text': "Show Tabs And Spaces",
                  'callback': cls.on_actionShowTabsAndSpaces_toggled,
                  'checkable': True,
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowTabsAndSpaces) },
-                {'title': "Show Line And Paragraph",
+                {'text': "Show Line And Paragraph",
                  'callback': cls.on_actionShowLineAndParagraphs_toggled,
                  'checkable': True, 
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowLineAndParagraphs) }, 
-                {'title': "Word Wrap",
+                {'text': "Word Wrap",
                  'callback': cls.on_actionWordWrap_toggled,
                  'checkable': True,
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.WordWrap) },
-                {'title': "Margin Line",
+                "-",
+                {'text': "Margin Line",
                  'callback': cls.on_actionMarginLine_toggled,
                  'checkable': True,
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.MarginLine) },
+                {'text': "Indent Guide",
+                 'callback': cls.on_actionIndentGuide_toggled,
+                 'checkable': True,
+                 'testChecked': lambda editor: bool(editor.getFlags() & editor.IndentGuide) },
             ]}
         text = {
-            'title': 'Text',
+            'text': '&Text',
             'items': [ 
-                {'title': 'Select',
+                {'text': 'Select',
                  'items': [
-                    {'title': '&Word',
+                    {'text': '&Word',
                      'callback': lambda editor: editor.select(0),
                      'shortcut': 'Ctrl+Meta+W',
                      },
-                    {'title': '&Line',
+                    {'text': '&Line',
                      'callback': lambda editor: editor.select(1),
                      'shortcut': 'Ctrl+Meta+L',
                      },
-                    {'title': '&Paragraph',
+                    {'text': '&Paragraph',
                      'callback': lambda editor: editor.select(2),
                      'shortcut': '',
                      },
-                    {'title': 'Enclosing &Brackets',
+                    {'text': 'Enclosing &Brackets',
                      'callback': lambda editor: editor.select(editor.SelectEnclosingBrackets),
                      'shortcut': 'Ctrl+Meta+B',
                      },
-                    {'title': 'Current &Scope',
+                    {'text': 'Current &Scope',
                      'callback': lambda editor: editor.select(editor.SelectCurrentScope),
                      'shortcut': 'Ctrl+Meta+S',
                      },
-                    {'title': '&All',
+                    {'text': '&All',
                      'callback': lambda editor: editor.select(3),
                      'shortcut': 'Ctrl+A',
                      }    
                 ]},
-                {'title': 'Convert',
+                {'text': 'Convert',
                  'items': [
-                    {'title': 'To Uppercase',
+                    {'text': 'To Uppercase',
                      'shortcut': 'Ctrl+U',
                      'callback': lambda editor: editor.convertText(editor.ConvertToUppercase),
                      },
-                    {'title': 'To Lowercase',
+                    {'text': 'To Lowercase',
                      'shortcut': 'Ctrl+Shift+U',
                      'callback': lambda editor: editor.convertText(editor.ConvertToLowercase),
                      },
-                    {'title': 'To Titlecase',
+                    {'text': 'To Titlecase',
                      'shortcut': 'Ctrl+Alt+U',
                      'callback': lambda editor: editor.convertText(editor.ConvertToTitlecase),
                      },
-                    {'title': 'To Opposite Case',
+                    {'text': 'To Opposite Case',
                      'shortcut': 'Ctrl+G',
                      'callback': lambda editor: editor.convertText(editor.ConvertToOppositeCase),
                      }, '-',
-                    {'title': 'Tab to Spaces',
+                    {'text': 'Tab to Spaces',
                      'callback': lambda editor: editor.convertText(editor.ConvertTabsToSpaces),
                      },
-                    {'title': 'Spaces to Tabs',
+                    {'text': 'Spaces to Tabs',
                      'callback': lambda editor: editor.convertText(editor.ConvertSpacesToTabs),
                      }, '-',
-                    {'title': 'Transpose',
+                    {'text': 'Transpose',
                      'shortcut': 'Ctrl+T',
                      'callback': lambda editor: editor.convertText(editor.ConvertTranspose),
                      }
                 ]},
-                {'title': 'Move',
+                {'text': 'Move',
                  'items': [
-                    {'title': 'Line Up',
+                    {'text': 'Line Up',
                      'shortcut': 'Meta+Ctrl+Up',
                      'callback': lambda editor: editor.moveText(editor.MoveLineUp),
                      },
-                    {'title': 'Line Down',
+                    {'text': 'Line Down',
                      'shortcut': 'Meta+Ctrl+Down',
                      'callback': lambda editor: editor.moveText(editor.MoveLineDown),
                      },
-                    {'title': 'Column Left',
+                    {'text': 'Column Left',
                      'shortcut': 'Meta+Ctrl+Left',
                      'callback': lambda editor: editor.moveText(editor.MoveColumnLeft),
                      },
-                    {'title': 'Column Right',
+                    {'text': 'Column Right',
                      'shortcut': 'Meta+Ctrl+Right',
                      'callback': lambda editor: editor.moveText(editor.MoveColumnRight),
                      }  
                   ]},
                 '-',
-                {'title': 'Select Bundle Item',
+                {'text': 'Select Bundle Item',
                  'shortcut': 'Meta+Ctrl+T',
                  'callback': cls.on_actionSelectBundleItem_triggered,
                  },
-                {'title': 'Execute Line/Selection',
+                {'text': 'Execute Line/Selection',
                  'callback': lambda editor: editor.executeCommand(),
                  }
             ]}
         navigation = {
-            'title': 'Navigation',
+            'text': 'Navigation',
             'items': [
                 "-",
-                {'title': 'Toggle Bookmark',
+                {'text': 'Toggle Bookmark',
                  'callback': cls.toggleBookmark,
                  'shortcut': 'Meta+F12',
                  },
-                {'title': 'Next Bookmark',
+                {'text': 'Next Bookmark',
                  'callback': cls.bookmarkNext,
                  'shortcut': 'Meta+Alt+F12',
                  },
-                {'title': 'Previous Bookmark',
+                {'text': 'Previous Bookmark',
                  'callback': cls.bookmarkPrevious,
                  'shortcut': 'Meta+Shift+F12',
                  },
-                {'title': 'Remove All Bookmarks',
+                {'text': 'Remove All Bookmarks',
                  'callback': cls.removeAllBookmarks,
                  'shortcut': 'Meta+Ctrl+F12',
                  },
                 "-",
-                {'title': 'Go To &Symbol',
+                {'text': 'Go To &Symbol',
                  'callback': cls.on_actionGoToSymbol_triggered,
                  'shortcut': 'Meta+Ctrl+Shift+O',
                  },
-                {'title': 'Go To &Bookmark',
+                {'text': 'Go To &Bookmark',
                  'callback': cls.on_actionGoToBookmark_triggered,
                  'shortcut': 'Meta+Ctrl+Shift+B',
                  }
             ]}
         menuContributions = { "Edit": edit, "View": view , "Text": text, "Navigation": navigation}
         for addon in addonClasses:
-            utils.updateMenu(menuContributions, addon.contributeToMainMenu())
+            update_menu(menuContributions, addon.contributeToMainMenu())
         return menuContributions
     
     @classmethod
     def contributeToSettings(cls):
-        from prymatex.gui.settings.themes import PMXThemeWidget
-        from prymatex.gui.settings.editor import PMXEditorWidget
-        return [ PMXEditorWidget, PMXThemeWidget ]
+        from prymatex.gui.settings.themes import ThemeSettingsWidget
+        from prymatex.gui.settings.editor import EditorSettingsWidget
+        from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
+        return [ EditorSettingsWidget, ThemeSettingsWidget, AddonsSettingsWidgetFactory("editor") ]
 
     #===========================================================================
     # Menu Actions
@@ -1755,7 +1758,14 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         else:
             flags = self.getFlags() & ~self.MarginLine
         self.setFlags(flags)
-        
+
+    def on_actionIndentGuide_toggled(self, checked):
+        if checked:
+            flags = self.getFlags() | self.IndentGuide
+        else:
+            flags = self.getFlags() & ~self.IndentGuide
+        self.setFlags(flags)
+    
     def on_actionShowBookmarks_toggled(self, checked):
         if checked:
             flags = self.getFlags() | self.ShowBookmarks
@@ -1819,55 +1829,21 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #===========================================================================
     # Navigation API
     #===========================================================================
-    def newCursorAtPosition(self, position):
+    def newCursorAtPosition(self, position, anchor = None):
         cursor = QtGui.QTextCursor(self.document())
         cursor.setPosition(position)
+        if anchor is not None:
+            cursor.setPosition(anchor, QtGui.QTextCursor.KeepAnchor)
         return cursor
         
+    def restoreLocationMemento(self, memento):
+        self.setTextCursor(memento)
+        
     def on_document_undoCommandAdded(self):
-        self._cursorHistoryIndex = 0
-        #Inserto el cursor
-        self._cursorHistory.insert(self._cursorHistoryIndex, self.newCursorAtPosition(self.textCursor().position() - 1))
-        #Filtrar los que sean iguales
-        positions = []
-        for position in map(lambda cursor: cursor.position(), self._cursorHistory):
-            if position not in positions:
-                positions.append(position)
-        self._cursorHistory = map(lambda position: self.newCursorAtPosition(position), positions)
-        #Solo los ultimos N cursores
-        self._cursorHistory = self._cursorHistory[:10]
-
-    def on_document_undoAvailable(self, available):
-        if not available:
-            self._cursorHistory, self._cursorHistoryIndex = [], 0
-
-    def nextLocation(self):
-        if self._cursorHistoryIndex == 0:
-            return False
-        self._cursorHistoryIndex -= 1
-        self.setTextCursor(self._cursorHistory[self._cursorHistoryIndex])
-        return True
-        
-    def previousLocation(self):
-        if not self._cursorHistory or self._cursorHistoryIndex >= len(self._cursorHistory) - 1:
-            return False
-        self._cursorHistoryIndex += 1
-        self.setTextCursor(self._cursorHistory[self._cursorHistoryIndex])
-        return True
-
-    def lastLocation(self):
-        if not self.locationCount():
-            return False
-        self._cursorHistoryIndex = 0
-        self.setTextCursor(self._cursorHistory[self._cursorHistoryIndex])
-        return True
-        
-    def locationCount(self):
-        return len(self._cursorHistory)
-
-    def resetLocationIndex(self, back = True):
-        self._cursorHistoryIndex = 0 if not back else len(self._cursorHistory)
-
+        cursor = self.textCursor()
+        if not (cursor.atEnd() or cursor.atStart()):
+            self.saveLocationMemento(self.newCursorAtPosition(cursor.position() - 1))
+    
     #===========================================================================
     # Drag and Drop
     #===========================================================================

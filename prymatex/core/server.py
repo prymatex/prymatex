@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import os
-import sys
-import plistlib
+import os, sys, plistlib
 import zmq
 from xml.parsers.expat import ExpatError
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
+from prymatex.core import PMXBaseComponent
 
 from prymatex import resources
-from prymatex.core.plugin import PMXBaseComponent
 from prymatex.utils.importlib import import_from_directory
 
 class PrymatexServer(QtCore.QObject, PMXBaseComponent):
@@ -95,21 +93,18 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
         self.sendResult()
 
     def close_window(self, **kwargs):
-        try:
-            parameters = plistlib.readPlistFromString(kwargs["parameters"])
-        except ExpatError:
-            parameters = {}
         instance = self.dialogInstance(int(kwargs["token"]))
         instance.close()
         self.sendResult()
 
     def wait_for_input(self, **kwargs):
-        try:
-            parameters = plistlib.readPlistFromString(kwargs["parameters"])
-        except ExpatError:
-            parameters = {}
         instance = self.dialogInstance(int(kwargs["token"]))
-        self.sendResult()
+        def sendInputResult(result):
+            if result is not None:
+                self.sendResult(result)
+            else:
+                self.sendResult({}) 
+        instance.waitForInput(sendInputResult)
 
     def modal_window(self, **kwargs):
         try:
@@ -193,6 +188,10 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
         self.application.handleUrlCommand(kwargs["url"])
         self.sendResult()
 
+    def completer(self, **kwargs):
+        self.application.currentEditor().runCompleter()
+        self.sendResult()
+        
     def terminal(self, **kwargs):
         for command in kwargs["commands"]:
             self.application.mainWindow.terminal.runCommand(command)

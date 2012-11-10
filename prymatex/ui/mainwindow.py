@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Thu Sep 20 21:28:51 2012
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Fri Nov  9 18:10:44 2012
+#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,9 +19,6 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.resize(801, 600)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        MainWindow.setWindowIcon(icon)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
@@ -38,14 +35,14 @@ class Ui_MainWindow(object):
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
         self.menuRecentFiles = QtGui.QMenu(self.menuFile)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-open-recent.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.menuRecentFiles.setIcon(icon1)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-open-recent.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.menuRecentFiles.setIcon(icon)
         self.menuRecentFiles.setObjectName(_fromUtf8("menuRecentFiles"))
         self.menuNew = QtGui.QMenu(self.menuFile)
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.menuNew.setIcon(icon2)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.menuNew.setIcon(icon1)
         self.menuNew.setObjectName(_fromUtf8("menuNew"))
         self.menuView = QtGui.QMenu(self.menubar)
         self.menuView.setObjectName(_fromUtf8("menuView"))
@@ -283,7 +280,6 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(_('Prymatex Text Editor'))
         self.menuFile.setTitle(_('&File'))
         self.menuRecentFiles.setTitle(_('&Recent Files'))
         self.menuNew.setTitle(_('New'))

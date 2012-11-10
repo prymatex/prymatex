@@ -18,11 +18,11 @@ REPLACES = {
     '': "-"     #El backspace en una macro de latex
 }
 
-def readPlist(file):
+def readPlist(filePath):
     try:
-        data = plistlib.readPlist(file)
+        data = plistlib.readPlist(filePath)
     except Exception, e:
-        data = open(file).read()
+        data = open(filePath).read()
         for match in RE_XML_ILLEGAL.finditer(data):
             char = data[match.start():match.end()]
             if char in REPLACES:
@@ -31,5 +31,5 @@ def readPlist(file):
         data = plistlib.readPlistFromString(data)
     return data
     
-def writePlist(hash, file):
-    plistlib.writePlist(hash, file)
+def writePlist(dictionary, filePath):
+    plistlib.writePlist(dictionary, filePath)

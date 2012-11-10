@@ -4,7 +4,7 @@
 import cPickle
 import StringIO
 
-from PyQt4 import QtCore
+from prymatex.qt import QtCore
 
 class PyMimeData(QtCore.QMimeData):
     """ 

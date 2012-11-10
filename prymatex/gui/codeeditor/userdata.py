@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtGui
+from prymatex.qt import QtGui
 
 from prymatex.support.syntax import PMXSyntax
-from prymatex.utils.decorators.deprecated import deprecated
 
 class PMXBlockUserData(QtGui.QTextBlockUserData):
     def __init__(self):
@@ -13,13 +12,15 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         self.foldingMark = PMXSyntax.FOLDING_NONE
         self.foldedLevel = 0
         self.folded = False
-        #Indent
+        # Indent and content
         self.indent = ""
+        self.blank = True
+        
         #Symbols
         self.symbol = None
         #Words
         self.words = []
-
+        
         self.textHash = None
         
         self.__cache = {}
