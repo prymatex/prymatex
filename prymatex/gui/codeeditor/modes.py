@@ -153,7 +153,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                 cursorLine.clearSelection()
                 cursorLines.append(cursorLine)
         self.editor.setExtraSelectionCursors("line", cursorLines)
-        self.editor.updateExtraSelections()
+        self.editor.updateExtraSelections(["line", "selection"])
 
     @property
     def isDragCursor(self):
@@ -171,7 +171,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         return self.cursors
         
     def getDragCursorRect(self):
-        """Retorna un rectangulo que representa la zona del drag cursor"""
+        """Retorna un rectángulo que representa la zona del drag cursor"""
         return QtCore.QRect(self.startPoint, self.dragPoint)
     
     def mousePressPoint(self, point):

@@ -39,10 +39,13 @@ class TextEditWidget(QtGui.QPlainTextEdit):
     def updateExtraSelectionCursors(self, cursorsDict):
         map(lambda (scope, cursors): self.setExtraSelectionCursors(scope, cursors), cursorsDict.iteritems())
     
-    def updateExtraSelections(self):
+    def updateExtraSelections(self, order = []):
         extraSelections = []
-        for _, extra in self.scopedExtraSelections.iteritems():
-            extraSelections.extend(extra)
+        for scope in order:
+            extraSelections.extend(self.scopedExtraSelections[scope])
+        for scope, extra in self.scopedExtraSelections.iteritems():
+            if scope not in order:
+                extraSelections.extend(extra)
         self.setExtraSelections(extraSelections)
 
     def searchExtraSelections(self, scope):

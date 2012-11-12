@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtGui, QtCore
-from prymatex.qt.helpers import keyequivalent2keysequence, keysequence2keyequivalent, rgba2color
+from prymatex.qt.helpers import keyequivalent2keysequence, keysequence2keyequivalent, rgba2color, color2rgba
 
 from prymatex import resources
 
