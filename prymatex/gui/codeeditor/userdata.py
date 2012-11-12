@@ -5,7 +5,7 @@ from prymatex.qt import QtGui
 
 from prymatex.support.syntax import PMXSyntax
 
-class PMXBlockUserData(QtGui.QTextBlockUserData):
+class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
     def __init__(self):
         QtGui.QTextBlockUserData.__init__(self)
         #Folding

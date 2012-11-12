@@ -7,7 +7,7 @@ from copy import copy
 from prymatex.qt import QtGui, QtCore
 
 from prymatex.gui.codeeditor.processors import PMXSyntaxProcessor
-from prymatex.gui.codeeditor.userdata import PMXBlockUserData
+from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserData
 from prymatex.support.syntax import PMXSyntax
 from prymatex.utils.decorators.helpers import printtime
 
@@ -87,7 +87,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.syntax.parseLine(stack, text, self.processor)
             userData = block.userData()
             if userData is None:
-                userData = PMXBlockUserData()
+                userData = CodeEditorBlockUserData()
                 block.setUserData(userData)
             
             self.setupBlockUserData(text, block, userData)
@@ -168,7 +168,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.processor.endParsing(self.syntax.scopeName)
 
             if userData is None:
-                userData = PMXBlockUserData()
+                userData = CodeEditorBlockUserData()
                 self.setCurrentBlockUserData(userData)
 
             self.setupBlockUserData(text, self.currentBlock(), userData)
