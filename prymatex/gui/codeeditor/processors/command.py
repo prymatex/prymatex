@@ -184,7 +184,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
 
     def showAsTooltip(self, context):
         message = context.outputValue.strip()
-        timeout = len(message) * 10
+        timeout = len(message) * 20
         if timeout > 2000:
             timeout = 2000
 
