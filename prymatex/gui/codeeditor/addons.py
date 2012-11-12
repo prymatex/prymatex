@@ -97,7 +97,7 @@ class SpellCheckerAddon(CodeEditorAddon):
         if cursors:
             cursor = cursors[0]
             for word in self.dictionary.suggest(cursor.selectedText()):
-                items.append({'title': word,
+                items.append({'text': word,
                 'callback': lambda word = word, cursor = cursor: cursor.insertText(word) })
         return items
 

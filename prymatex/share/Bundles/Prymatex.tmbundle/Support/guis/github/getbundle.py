@@ -6,9 +6,9 @@ import urllib2, httplib2
 from urlparse import urlsplit
 
 # Third parties
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
 
-from prymatex.core.plugin.dialog import PMXBaseDialog
+from prymatex.core import PMXBaseDialog
 
 # UI
 from ui_githubclient import Ui_GitHubClientDialog
@@ -41,8 +41,7 @@ class GitHubSearchBundleThread(QtCore.QThread):
         # Disable SSL Certs to avoid erratic behaviour 
         #http://pwnetics.wordpress.com/2012/02/06/ssl-certificate-verification-and-httplib2/
         
-        http = httplib2.Http(proxy_info=proxy,
-                             disable_ssl_certificate_validation=True)
+        http = httplib2.Http(proxy_info=proxy)
         
         return http
     
