@@ -19,7 +19,7 @@ class BundleItemTreeModel(AbstractTreeModel):
         self.manager.bundleItemChanged.connect(self.on_manager_bundleItemChanged)
     
     def on_manager_bundleItemChanged(self, treeNode):
-        treeNode.setNodeName(treeNode.item.name)
+        treeNode.setNodeName(treeNode.bundleItem().name)
         index = self.createIndex(treeNode.row(), 0, treeNode)
         self.dataChanged.emit(index, index)
     

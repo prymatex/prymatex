@@ -20,8 +20,8 @@ from prymatex.support.utils import prepareShellScript, deleteFile
 class TmFileReply(QNetworkReply):
     def __init__(self, parent, url, operation):
         super(TmFileReply, self).__init__(parent)
-        file = codecs.open(url.path(), 'r', 'utf-8')
-        self.content = file.read().encode('utf-8')
+        fp = open(url.path(), 'r')
+        self.content = fp.read()
         self.offset = 0
         
         self.setHeader(QNetworkRequest.ContentTypeHeader, "text/html; charset=utf-8")

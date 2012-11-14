@@ -44,7 +44,10 @@ def compare(obj, keys, tests):
         return value == tests[key] and compare(obj, keys[1:], tests)
 
 class PMXSupportBaseManager(object):
-    ELEMENTS = ['Bundles', 'Support', 'Themes']
+    BUNDLES = 'Bundles'
+    SUPPORT = 'Support'
+    THEMES = 'Themes'
+    ELEMENTS = [BUNDLES, SUPPORT, THEMES]
     VAR_PREFIX = 'PMX'
     PROTECTEDNS = 0         #El primero es el protected
     DEFAULTNS = 1           #El segundo es el default
@@ -264,8 +267,8 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     def loadThemes(self, namespace):
         loadedThemes = set()
-        if 'Themes' in self.namespaces[namespace]:
-            paths = glob(os.path.join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
+        if self.THEMES in self.namespaces[namespace]:
+            paths = glob(os.path.join(self.namespaces[namespace][self.THEMES], '*.tmTheme'))
             for path in paths:
                 theme = PMXTheme.loadTheme(path, namespace, self)
                 if theme is not None:
@@ -278,8 +281,8 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     def loadBundles(self, namespace):
         loadedBundles = set()
-        if 'Bundles' in self.namespaces[namespace]:
-            paths = glob(os.path.join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
+        if self.BUNDLES in self.namespaces[namespace]:
+            paths = glob(os.path.join(self.namespaces[namespace][self.BUNDLES], '*.tmbundle'))
             for path in paths:
                 bundle = PMXBundle.loadBundle(path, namespace, self)
                 if bundle is not None:
@@ -295,8 +298,9 @@ class PMXSupportBaseManager(object):
         for namespace in nss:
             bpath = bundle.path(namespace)
             # Search for support
-            if bundle.support == None and os.path.exists(os.path.join(bpath, 'Support')):
-                bundle.setSupport(os.path.join(bpath, 'Support'))
+            supportPath = os.path.join(bpath, self.SUPPORT)
+            if not bundle.hasSupport() and os.path.exists(supportPath):
+                bundle.setSupport(supportPath)
             self.showMessage("Populating\n%s" % bundle.name)
             for klass in BUNDLEITEM_CLASSES:
                 files = reduce(lambda x, y: x + glob(y), [ os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS ], [])
@@ -328,9 +332,9 @@ class PMXSupportBaseManager(object):
     # RELOAD THEMES
     #---------------------------------------------------
     def reloadThemes(self, namespace):
-        if 'Themes' in self.namespaces[namespace]:
+        if self.THEMES in self.namespaces[namespace]:
             installedThemes = filter(lambda theme: theme.hasNamespace(namespace), self.getAllThemes())
-            themePaths = glob(os.path.join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
+            themePaths = glob(os.path.join(self.namespaces[namespace][self.THEMES], '*.tmTheme'))
             for theme in installedThemes:
                 themePath = theme.path(namespace)
                 if themePath in themePaths:
@@ -356,9 +360,9 @@ class PMXSupportBaseManager(object):
     # RELOAD BUNDLES
     #---------------------------------------------------
     def reloadBundles(self, namespace):
-        if 'Bundles' in self.namespaces[namespace]:
+        if self.BUNDLES in self.namespaces[namespace]:
             installedBundles = filter(lambda theme: theme.hasNamespace(namespace), self.getAllBundles())
-            bundlePaths = glob(os.path.join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
+            bundlePaths = glob(os.path.join(self.namespaces[namespace][self.BUNDLES], '*.tmbundle'))
             for bundle in installedBundles:
                 bundlePath = bundle.path(namespace)
                 if bundlePath in bundlePaths:
@@ -392,6 +396,7 @@ class PMXSupportBaseManager(object):
     def repopulateBundle(self, bundle):
         namespaces = bundle.namespaces[::-1]
         bundleItems = self.findBundleItems(bundle = bundle)
+        bundle.removeSupport()
         for namespace in namespaces:
             bpath = bundle.path(namespace)
             # Search for support
@@ -542,7 +547,7 @@ class PMXSupportBaseManager(object):
         Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle nuevo.
         """
         namespace = namespace or self.defaultNamespace
-        basePath = self.basePath("Bundles", namespace)
+        basePath = self.basePath(self.BUNDLES, namespace)
         path = ensurePath(os.path.join(basePath, "%s.tmbundle"), self.convertToValidPath(name))
         bundle = PMXBundle(self.uuidgen(), { 'name': name })
         bundle.setManager(self)
@@ -573,9 +578,11 @@ class PMXSupportBaseManager(object):
         
         if bundle.isProtected and not bundle.isSafe:
             #Safe bundle
-            basePath = self.basePath("Bundles", namespace)
+            basePath = self.basePath(self.BUNDLES, namespace)
             path = os.path.join(basePath, os.path.basename(bundle.path(self.protectedNamespace)))
             bundle.addSource(namespace, path)
+            if bundle.hasSupport():
+                bundle.relocateSupport(os.path.join(path, self.SUPPORT))
             self.logger.debug("Add namespace '%s' in source %s for bundle." % (namespace, path))
         elif not bundle.isProtected and "name" in attrs:
             #Move bundle
@@ -797,7 +804,7 @@ class PMXSupportBaseManager(object):
         if len(self.nsorder) < 2:
             return None
         if namespace is None: namespace = self.defaultNamespace
-        path = os.path.join(self.namespaces[namespace]['Themes'], "%s.tmTheme" % self.convertToValidPath(name))
+        path = os.path.join(self.namespaces[namespace][self.THEMES], "%s.tmTheme" % self.convertToValidPath(name))
         theme = PMXTheme(self.uuidgen(), namespace, { 'name': name }, path)
         theme = self.addTheme(theme)
         self.addManagedObject(theme)
@@ -821,7 +828,7 @@ class PMXSupportBaseManager(object):
         """
         namespace = namespace or self.defaultNamespace
         if theme.isProtected and not theme.isSafe:
-            path = os.path.join(self.namespaces[namespace]['Themes'], os.path.basename(theme.path(self.protectedNamespace)))
+            path = os.path.join(self.namespaces[namespace][self.THEMES], os.path.basename(theme.path(self.protectedNamespace)))
             theme.addSource(namespace, path)
         elif not theme.isProtected and "name" in attrs:
             path = ensurePath(os.path.join(os.path.dirname(theme.path(namespace)), "%s.tmTheme"), self.convertToValidPath(attrs["name"]))

@@ -1,4 +1,4 @@
-#!/usr/bin/env python -u
+#!/usr/bin/env python
 # encoding: utf-8
 
 # This is a rewrite of latexErrWarn.py
@@ -456,8 +456,10 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         texCommand = sys.argv[1]
     else:
-        sys.stderr.write("Usage: "+sys.argv[0]+" tex-command firstRun\n")
-        sys.exit(255)
+        texCommand = "latex"
+        
+        #sys.stderr.write("Usage: "+sys.argv[0]+" tex-command firstRun\n")
+        #sys.exit(255)
 
 #
 # Get preferences from TextMate or local directives
