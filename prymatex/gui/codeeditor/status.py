@@ -299,8 +299,11 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     def on_pushButtonReplaceAll_pressed(self):
         match, flags = self.getFindMatchAndFlags()
         replace = self.lineEditReplace.text()
-        self.currentEditor.replaceMatch(match, replace, flags, True)
-    
+        if len(match) == 0 and len(replace) == 0:
+            self.currentEditor.replaceMatch(match, replace, flags, False)
+        else:
+            self.currentEditor.replaceMatch(match, replace, flags, True)
+
     @QtCore.pyqtSlot()
     def on_pushButtonFindAll_pressed(self):
         match, flags = self.getFindMatchAndFlags()
