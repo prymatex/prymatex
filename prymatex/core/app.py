@@ -95,7 +95,6 @@ class PMXApplication(QtGui.QApplication):
             self.projectManager = self.setupProjectManager()    #Project Manager
             self.kernelManager = self.setupKernelManager()      #Console kernel Manager
             self.setupCoroutines()
-            self.setupZeroMQContext()
             self.setupMainWindow()
             self.setupServer()
 
@@ -326,24 +325,14 @@ class PMXApplication(QtGui.QApplication):
     def setupCoroutines(self):
         self.scheduler = coroutines.Scheduler(self)
 
-    def setupZeroMQContext(self):
-        try:
-            from prymatex.utils import zeromqt
-            self.zmqContext = zeromqt.ZeroMQTContext(parent = self)
-        except ImportError as e:
-            self.logger.warn("Warning: %s" % e)
-            self.zmqContext = None
-
     def setupMainWindow(self):
         from prymatex.gui.mainwindow import PMXMainWindow
         self.populateComponent(PMXMainWindow)
         
     def setupServer(self):
-        #Seria mejor que esto no falle pero bueno tengo que preguntar por none
-        if self.zmqContext is not None:
-            from prymatex.core.server import PrymatexServer
-            self.populateComponent(PrymatexServer)
-            self.server = PrymatexServer(self)
+        from prymatex.core.server import PrymatexServer
+        self.populateComponent(PrymatexServer)
+        self.server = PrymatexServer(self)
 
     #========================================================
     # Dialogs
@@ -395,10 +384,12 @@ class PMXApplication(QtGui.QApplication):
     #========================================================
     # Create Zmq Sockets
     #========================================================
-    def zmqSocket(self, socketType, name, interface='tcp://127.0.0.1'):
-        # TODO ver la variable aca
-        socket = self.zmqContext.socket(socketType)
-        port = socket.bind_to_random_port(interface)
+    def zmqSocket(self, socketType, name, addr='tcp://127.0.0.1'):
+        # TODO ver la variable aca, creo que merjor seria que la app genere environ pregunatando a los components
+        # que esta genera
+        from prymatex.utils.zeromqt import ZmqSocket
+        socket = ZmqSocket(socketType)
+        port = socket.bind_to_random_port(addr)
         self.supportManager.addToEnvironment("PMX_" + name.upper() + "_PORT", port)
         return socket
 

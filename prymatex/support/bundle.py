@@ -121,15 +121,13 @@ class PMXBundle(PMXManagedObject):
         
     def setSupport(self, support):
         self.support = support
-        
-    def removeSupport(self):
-        self.support = None
-        
+            
     def relocateSupport(self, path):
         assert self.hasSupport(), "bundle has not support"
         try:
             # TODO Ver que pasa si ya existe support
             shutil.copytree(self.support, path, symlinks = True)
+            self.support = path
         except:
             pass
         

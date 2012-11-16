@@ -396,12 +396,13 @@ class PMXSupportBaseManager(object):
     def repopulateBundle(self, bundle):
         namespaces = bundle.namespaces[::-1]
         bundleItems = self.findBundleItems(bundle = bundle)
-        bundle.removeSupport()
+        bundle.setSupport(None)
         for namespace in namespaces:
             bpath = bundle.path(namespace)
             # Search for support
-            if bundle.support == None and os.path.exists(os.path.join(bpath, 'Support')):
-                bundle.setSupport(os.path.join(bpath, 'Support'))
+            supportPath = os.path.join(bpath, self.SUPPORT)
+            if not bundle.hasSupport() and os.path.exists(supportPath):
+                bundle.setSupport(supportPath)
             bundleItemPaths = {}
             for klass in BUNDLEITEM_CLASSES:
                 klassPaths = reduce(lambda x, y: x + glob(y), [ os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS ], [])
