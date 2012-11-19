@@ -1279,7 +1279,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 if text[:positionStart].count(b2) % 2 == 0 and text[positionEnd:].count(b2) % 2 == 0:
                     return c2
 
-    def findMatchCursor(self, match, flags, findNext = False, cursor = None, cyclicFind = True):
+    def findMatchCursor(self, match, flags, findNext = False, cursor = None, cyclicFind = False):
         cursor = cursor or self.textCursor()
         if not findNext and cursor.hasSelection():
             cursor.setPosition(cursor.selectionStart())
@@ -1318,7 +1318,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         cursor.beginEditBlock()
         replaced = 0
         while True:
-            findCursor = self.findMatchCursor(match, flags)
+            if len(match) == 0 and len(text) == 0:
+                break
+            elif match == ' ' * len(match) and text == ' ' * len(text):
+                break
+            else:
+                findCursor = self.findMatchCursor(match, flags, cyclicFind = True)
             if not findCursor: break
             if isinstance(match, QtCore.QRegExp):
                 findCursor.insertText(re.sub(match.pattern(), text, cursor.selectedText()))
@@ -1330,12 +1335,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return replaced
     
     def replaceTabsForSpaces(self):
-        match = QtCore.QRegExp("	")
+        match = "\t"
         self.replaceMatch(match, " " * self.tabStopSize, QtGui.QTextDocument.FindFlags(), True)
         
     def replaceSpacesForTabs(self):
-        match = QtCore.QRegExp(" " * self.tabStopSize)
-        self.replaceMatch(match, "	", QtGui.QTextDocument.FindFlags(), True)
+        match = self.tabKeyBehavior()
+        self.replaceMatch(match, "\t", QtGui.QTextDocument.FindFlags(), True)
         
     #==========================================================================
     # Bookmarks and gotos

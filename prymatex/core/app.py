@@ -93,7 +93,6 @@ class PMXApplication(QtGui.QApplication):
             self.supportManager = self.setupSupportManager()    #Support Manager
             self.fileManager = self.setupFileManager()          #File Manager
             self.projectManager = self.setupProjectManager()    #Project Manager
-            self.kernelManager = self.setupKernelManager()      #Console kernel Manager
             self.setupCoroutines()
             self.setupMainWindow()
             self.setupServer()
@@ -281,29 +280,6 @@ class PMXApplication(QtGui.QApplication):
         self.profile.configure(manager)
         return manager
     
-    def setupKernelManager(self):
-        kernelManager = None
-        try:
-            from IPython.frontend.qt.kernelmanager import QtKernelManager
-            kernelManager = QtKernelManager()
-            kernelManager.start_kernel()
-            kernelManager.start_channels()
-            if hasattr(kernelManager, "connection_file"):
-                ipconnection = kernelManager.connection_file
-            else:
-                shell_port = kernelManager.shell_address[1]
-                iopub_port = kernelManager.sub_address[1]
-                stdin_port = kernelManager.stdin_address[1]
-                hb_port = kernelManager.hb_address[1]
-                ipconnection = "--shell={0} --iopub={1} --stdin={2} --hb={3}".format(shell_port, iopub_port, stdin_port, hb_port)
-            self.supportManager.updateEnvironment({ 
-                    "PMX_IPYTHON_CONNECTION": ipconnection
-            })
-        except ImportError as e:
-            self.logger.warn("Warning: %s" % e)
-            kernelManager = None
-        return kernelManager
-
     def setupCacheManager(self):
         from prymatex.managers.cache import CacheManager
         return CacheManager()
