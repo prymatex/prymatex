@@ -989,7 +989,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.logger.debug("Unindent")
             indent = ""
         elif PMXPreferenceSettings.INDENT_DECREASE in indentMarks:
-            indent = userData.indent[:len(self.tabKeyBehavior())]
+            self.logger.debug("Decrease indent")
+            indent = userData.indent[:-len(self.tabKeyBehavior())]
         else:
             self.logger.debug("Preserve indent")
             indent = block.userData().indent[:cursor.columnNumber()]
@@ -1419,7 +1420,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def findPreviousNoBlankBlock(self, block):
         """ Return previous no blank indent block """
         block = block.previous()
-        while block.isValid() and block.text().strip() == "":
+        while block.isValid() and block.userData() and block.userData().blank:
             block = block.previous()
         if block.isValid():
             return block
@@ -1428,37 +1429,28 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         """ Return previous equal indent block """
         indent = indent if indent != None else block.userData().indent
         block = self.findPreviousNoBlankBlock(block)
-        if block is not None:
-            userData = block.userData()
-            if userData is not None:
-                while block is not None and userData.indent > indent:
-                    block = self.findPreviousNoBlankBlock(block)
-                if userData.indent == indent:
-                    return block
-    
+        while block and block.userData() and block.userData().indent > indent:
+            block = self.findPreviousNoBlankBlock(block)
+        if block and block.userData() and block.userData().indent == indent:
+            return block
+            
     def findPreviousMoreIndentBlock(self, block, indent = None):
         """ Return previous more indent block """
         indent = indent if indent != None else block.userData().indent
         block = self.findPreviousNoBlankBlock(block)
-        if block is not None:
-            userData = block.userData()
-            if userData is not None:
-                while block is not None and userData.indent <= indent:
-                    block = self.findPreviousNoBlankBlock(block)
-                if block is not None:
-                    return block
+        while block and block.userData() and block.userData().indent <= indent:
+            block = self.findPreviousNoBlankBlock(block)
+        if block and block.userData():
+            return block
     
     def findPreviousLessIndentBlock(self, block, indent = None):
         """ Return previous less indent block """
         indent = indent if indent != None else block.userData().indent
         block = self.findPreviousNoBlankBlock(block)
-        if block is not None:
-            userData = block.userData()
-            if userData is not None:
-                while block is not None and userData.indent >= indent:
-                    block = self.findPreviousNoBlankBlock(block)
-                if block is not None:
-                    return block
+        while block and block.userData() and block.userData().indent >= indent:
+            block = self.findPreviousNoBlankBlock(block)
+        if block and block.userData():
+            return block
 
     def indentBlocks(self, cursor = None):
         """Indents text, block selections."""

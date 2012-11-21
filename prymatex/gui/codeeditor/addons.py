@@ -43,15 +43,16 @@ class SmartUnindentAddon(CodeEditorAddon):
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
-        #Solo si metio texto, sino lo hace cuando me muevo entre caracteres
+        #Solo si tiene texto y el cursor esta al final de un bloque
         if event.text():
             cursor = self.editor.textCursor()
-            currentBlock = cursor.block()
-            previousBlock = currentBlock.previous()
-            settings = self.editor.preferenceSettings(self.editor.currentScope())
-            indentMarks = settings.indent(currentBlock.text())
-            if PMXPreferenceSettings.INDENT_DECREASE in indentMarks and previousBlock.isValid() and currentBlock.userData().indent >= previousBlock.userData().indent:
-                self.editor.unindentBlocks(cursor)
+            block = cursor.block()
+            previousBlock = self.editor.findPreviousLessIndentBlock(block)
+            if previousBlock is not None:
+                settings = self.editor.preferenceSettings(self.editor.scope(cursor))
+                indentMarks = settings.indent(block.text()[:cursor.columnNumber()])
+                if PMXPreferenceSettings.INDENT_DECREASE in indentMarks and block.userData().indent > previousBlock.userData().indent:
+                    self.editor.unindentBlocks(cursor)
 
 class SpellCheckerAddon(CodeEditorAddon):
     def __init__(self, parent):
