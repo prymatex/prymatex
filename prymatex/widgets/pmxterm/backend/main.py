@@ -1,16 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import sys
 import zmq
 import argparse
 import tempfile
 import re
+import json
+import stat
+import signal
+from urlparse import urlparse
+
 from multiprocessing import Process, Queue
-
 from multiplexer import Multiplexer
-
-CONNECTION = re.compile(r"(?P<protocol>.*)\:\/\/(?P<host>[^:/ ]+).?(?P<port>[0-9]*)")
+from utils import get_pmxterm_dir
 
 # ===========
 # = Workers =
@@ -21,17 +25,17 @@ def worker_multiplexer(queue, addr):
     context = zmq.Context()
     zrep = context.socket(zmq.REP)
     
-    match = CONNECTION.match(addr)
-    if not match:
-        return
-
-    parts = match.groupdict()
-    if not parts["port"] and parts["protocol"] in ["tcp", "udp"]:
-        parts["port"] = zrep.bind_to_random_port(addr)
-        queue.put("%(protocol)s://%(host)s:%(port)s" % parts)
+    if not addr.port and addr.scheme in ["tcp", "udp"]:
+	addr = "%s://%s" % (addr.scheme, addr.netloc)
+        port = zrep.bind_to_random_port(addr)
+	addr = "%s:%d" % (addr, port)
+    elif addr.port and addr.scheme in ["tcp", "udp"]:
+	addr = "%s://%s" % (addr.scheme, addr.netloc)
+	zrep.bind(addr)
     else:
+	addr = "%s://%s" % (addr.scheme, addr.path)
         zrep.bind(addr)
-        queue.put(addr)
+    queue.put(("shell_address", addr))
     
     while True:
         pycmd = zrep.recv_pyobj()
@@ -46,17 +50,17 @@ def worker_notifier(queue, addr):
     context = zmq.Context()
     zpub = context.socket(zmq.PUB)
     
-    match = CONNECTION.match(addr)
-    if not match:
-        return
-
-    parts = match.groupdict().copy()
-    if not parts["port"] and parts["protocol"] in ["tcp", "udp"]:
-        parts["port"] = zpub.bind_to_random_port(addr)
-        queue.put("%(protocol)s://%(host)s:%(port)s" % parts)
+    if not addr.port and addr.scheme in ["tcp", "udp"]:
+	addr = "%s://%s" % (addr.scheme, addr.netloc)
+        port = zpub.bind_to_random_port(addr)
+	addr = "%s:%d" % (addr, port)
+    elif addr.port and addr.scheme in ["tcp", "udp"]:
+	addr = "%s://%s" % (addr.scheme, addr.netloc)
+	zpub.bind(addr)
     else:
+	addr = "%s://%s" % (addr.scheme, addr.path)
         zpub.bind(addr)
-        queue.put(addr)
+    queue.put(("pub_address", addr))
     
     while True:
         data = queue.get()
@@ -105,27 +109,47 @@ def get_addresses(args):
             pub_addr += ":%i" % args.pub_port
         if args.rep_port is not None:
             rep_addr += ":%i" % args.rep_port
-    return rep_addr, pub_addr
+    return urlparse(rep_addr), urlparse(pub_addr)
+
+MPROC = NPROC = CONNECTION_FILE = None
+
+def signal_handler(signal, frame):
+    global MPROC, NPROC
+    MPROC.terminate()
+    NPROC.terminate()
+    os.unlink(CONNECTION_FILE)
+    sys.exit(0)
+
 
 def main(args):
-    
+    global MPROC, NPROC, CONNECTION_FILE
     rep_addr, pub_addr = get_addresses(args)
     
     if rep_addr and pub_addr:
         queue = Queue()
     
         # Start the multiplexer
-        mproc = Process(target=worker_multiplexer, args=(queue, rep_addr))
-        mproc.start()
+        MPROC = Process(target=worker_multiplexer, args=(queue, rep_addr))
+        MPROC.start()
         
         # Start the notifier
-        nproc = Process(target=worker_notifier, args=(queue, pub_addr))
-        nproc.start()
+        NPROC = Process(target=worker_notifier, args=(queue, pub_addr))
+        NPROC.start()
         
-        a1, a2 = queue.get(), queue.get()
-        print a1, a2
-    else:    
+        info = dict([queue.get(), queue.get()])
+        descriptor, CONNECTION_FILE = tempfile.mkstemp(prefix="backend-", suffix=".json", dir = get_pmxterm_dir(), text = True)
+        tempFile = os.fdopen(descriptor, 'w+')
+        tempFile.write(json.dumps(info))
+        tempFile.close()
+        os.chmod(CONNECTION_FILE, stat.S_IREAD | stat.S_IWRITE)
+        print CONNECTION_FILE
+        print info.items()
+        
+        #Install signal handler
+        signal.signal(signal.SIGINT, signal_handler)
+    else:
         print "Address error, please read help"
+    sys.stdout.flush()
 
 if __name__ == "__main__":
     args = parse_arguments()

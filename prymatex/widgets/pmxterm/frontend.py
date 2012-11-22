@@ -10,9 +10,9 @@
 import sys
 import time
 
-from prymatex.qt import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
-from prymatex.widgets.pmxterm.session import Session
+from session import Session
 
 DEBUG = False
 
@@ -84,9 +84,7 @@ class TerminalWidget(QtGui.QWidget):
     session_closed = QtCore.pyqtSignal()
 
 
-    def __init__(self, parent=None, command="/bin/bash", 
-                    connection = None, notifier = None,
-                    font_name="Monospace", font_size=18):
+    def __init__(self, parent=None, font_name="Monospace", font_size=18):
         super(TerminalWidget, self).__init__(parent)
         self.parent().setTabOrder(self, self)
         self.setFocusPolicy(QtCore.Qt.WheelFocus)
@@ -110,21 +108,25 @@ class TerminalWidget(QtGui.QWidget):
         self._clipboard = QtGui.QApplication.clipboard()
         QtGui.QApplication.instance().lastWindowClosed.connect(Session.close_all)
         
-        # Create session
-        self._session = Session(connection, notifier, parent = self)
+    def setSession(self, session):
+        if self._session is not None:
+            self._session.readyRead.disconnect(self._session_readyRead)
+        self._session = session
         self._session.readyRead.connect(self._session_readyRead)
-        self._session.start(command)
         
             
     def send(self, s):
+        assert self._session is not None, "No session"
         self._session.write(s)
 
         
     def stop(self):
+        assert self._session is not None, "No session"
         self._session.stop()
 
         
     def pid(self):
+        assert self._session is not None, "No session"
         return self._session.pid()
 
 
@@ -143,14 +145,14 @@ class TerminalWidget(QtGui.QWidget):
         self.update_screen()
 
     def resizeEvent(self, event):
-        if not self._session.is_alive():
+        if self._session is None or not self._session.is_alive():
             return
         self._columns, self._rows = self._pixel2pos(self.width(), self.height())
         self._session.resize(self._columns, self._rows)
 
 
     def closeEvent(self, event):
-        if not self._session.is_alive():
+        if self._session is None or not self._session.is_alive():
             return
         self._session.close()
 
@@ -354,7 +356,7 @@ class TerminalWidget(QtGui.QWidget):
 
 
     def mouseReleaseEvent(self, QMouseEvent):
-        pass #self.update_screen()
+        self.update_screen()
 
 
     def _selection_rects(self, start_pos, end_pos):
@@ -463,4 +465,5 @@ class TerminalWidget(QtGui.QWidget):
 
         
     def is_alive(self):
+        assert self._session is not None, "No session"
         return (self._session and self._session.is_alive()) or False
