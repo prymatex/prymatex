@@ -10,9 +10,9 @@
 import sys
 import time
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
-from session import Session
+from prymatex.widgets.pmxterm.session import Session
 
 DEBUG = False
 

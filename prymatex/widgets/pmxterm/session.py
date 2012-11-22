@@ -5,9 +5,9 @@ import zmq
 import time
 import json
 
-from PyQt4 import QtCore
+from prymatex.qt import QtCore
 
-from zeromqt import ZmqSocket
+from prymatex.utils.zeromqt import ZmqSocket
 
 class Session(QtCore.QObject):
     readyRead = QtCore.pyqtSignal()

@@ -9,7 +9,7 @@ from prymatex.core import PMXBaseDock
 from prymatex import resources
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.utils.i18n import ugettext as _
-from prymatex.utils.programs import python_script_exists
+from prymatex.utils.misc import get_home_dir
 from prymatex.widgets.pmxterm import Session, TerminalWidget, ProcessInfo
 
 
@@ -18,7 +18,8 @@ class TabbedTerminal(QtGui.QTabWidget):
     
     def __init__(self, parent=None):
         super(TabbedTerminal, self).__init__(parent)
-        self.proc_info = ProcessInfo()
+        #Solo si no es windows
+        #self.proc_info = ProcessInfo()
         self.setTabPosition(QtGui.QTabWidget.South)
         self._new_button = QtGui.QPushButton(self)
         self._new_button.setText("New")
@@ -74,17 +75,18 @@ class TabbedTerminal(QtGui.QTabWidget):
             return
         idx = self.indexOf(term)
         pid = term.pid()
-        self.proc_info.update()
-        child_pids = [pid] + self.proc_info.all_children(pid)
-        for pid in reversed(child_pids):
-            cwd = self.proc_info.cwd(pid)
-            if cwd:
-                break
-        try:
-            cmd = self.proc_info.commands[pid]
-            title = "%s: %s" % (os.path.basename(cwd), cmd)
-        except:
-            title = "Terminal"
+        #Solo si no es windows
+        #self.proc_info.update()
+        #child_pids = [pid] + self.proc_info.all_children(pid)
+        #for pid in reversed(child_pids):
+        #    cwd = self.proc_info.cwd(pid)
+        #    if cwd:
+        #        break
+        #try:
+        #    cmd = self.proc_info.commands[pid]
+        #    title = "%s: %s" % (os.path.basename(cwd), cmd)
+        #except:
+        #    title = "Terminal"
         title = "Terminal"
         self.setTabText(idx, title)
         self.setWindowTitle(title)
@@ -132,19 +134,19 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.setObjectName(_("TerminalDock"))
         self.tabTerminals = TabbedTerminal(self)
         self.setWidget(self.tabTerminals)
-        self.runBackend()
+        #self.runBackend()
         
     def runBackend(self):
         self.backend = QtCore.QProcess(self)
         
-        self.backend.setWorkingDirectory(os.environ["HOME"])
+        self.backend.setWorkingDirectory(get_home_dir())
         
         self.connect(self.backend, QtCore.SIGNAL("readyReadStandardOutput()"),
                      self.write_output)
         self.connect(self.backend, QtCore.SIGNAL("finished(int,QProcess::ExitStatus)"),
                      self.finished)
         
-        from prymatex.widgets.pmxterm.backend import main
+        from prymatex.widgets.pmxterm import backend
         self.backend.start(sys.executable, [main.__file__, "-t", "ipc"])    
         self.backend.waitForStarted()
         
