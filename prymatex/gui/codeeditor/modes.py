@@ -239,8 +239,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         return hight, width, puntos
         
     def addMergeCursor(self, cursor):
-        """Only can add new cursors, if the cursor has selection then try to merge with others
-        """
+        """Only can add new cursors, if the cursor has selection then try to merge with others"""
         firstCursor = not bool(self.cursors)
         if cursor.hasSelection():
             newCursor = None
@@ -371,10 +370,10 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         self.highlightEditor()
 
     def canMoveRight(self):
-        return all(map(lambda c: not c.atEnd(), self.cursors))
+        return not self.cursors[-1].atEnd()
     
     def canMoveLeft(self):
-        return all(map(lambda c: not c.atStart(), self.cursors))
+        return not self.cursors[0].atStart()
     
     def keyPressEvent(self, event):
         if bool(event.modifiers() & QtCore.Qt.ControlModifier):
@@ -384,12 +383,12 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
             self.helper.execute(event, cursor)
         elif event.key() == QtCore.Qt.Key_Escape:
             #Deprecated usar una lista de cursores ordenados para tomar de [0] y [-1]
-            scursor = min(self.cursors, key = lambda cursor: cursor.position())
-            ecursor = max(self.cursors, key = lambda cursor: cursor.position())
-            self.editor.document().markContentsDirty(scursor.position(), ecursor.position())
-            if ecursor.hasSelection():
-                ecursor.clearSelection()
-            self.editor.setTextCursor(ecursor)
+            firstCursor = self.cursors[0]
+            lastCursor = self.cursors[-1]
+            self.editor.document().markContentsDirty(firstCursor.position(), lastCursor.position())
+            if lastCursor.hasSelection():
+                lastCursor.clearSelection()
+            self.editor.setTextCursor(lastCursor)
             self.inactive()
             self.highlightEditor()
             #Se termino la joda
@@ -423,6 +422,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                         cursor.movePosition(QtGui.QTextCursor.NextWord, mode)
                     else:
                         cursor.movePosition(QtGui.QTextCursor.NextCharacter, mode)
+                self.editor.setTextCursor(self.editor.newCursorAtPosition(cursor.position()))
                 self.highlightEditor()
         elif event.key() == QtCore.Qt.Key_Left:
             if self.canMoveLeft():
@@ -432,6 +432,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                         cursor.movePosition(QtGui.QTextCursor.PreviousWord, mode)
                     else:
                         cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, mode)
+                self.editor.setTextCursor(self.editor.newCursorAtPosition(cursor.position()))
                 self.highlightEditor()
         elif event.key() in [ QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown, QtCore.Qt.Key_End, QtCore.Qt.Key_Home]:
             #Desactivados por ahora
