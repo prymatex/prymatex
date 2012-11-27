@@ -50,7 +50,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     modeChanged = QtCore.pyqtSignal()
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
-    extraSelectionChanged = QtCore.pyqtSignal()
     
     afterOpen = QtCore.pyqtSignal()
     afterSave = QtCore.pyqtSignal()
@@ -742,9 +741,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             if isinstance(addon, CodeEditorAddon):
                 self.updateExtraSelectionCursors(addon.extraSelectionCursors())
         self.updateExtraSelections()
-        # Todo esta señal mandarla desde el updateExtraSelections
-        self.extraSelectionChanged.emit()
-
+        
     def select(self, selection):
         cursor = self.textCursor()
         if selection in [self.SelectLine, self.SelectParagraph, self.SelectAll]:
@@ -1228,113 +1225,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         milestone.userData().folded = False
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
-    #==========================================================================
-    # Find and Replace
-    #==========================================================================    
-    def findTypingPair(self, b1, b2, cursor, backward = False):
-        """
-        Busca b2 asumiendo que b1 es su antitesis de ese modo controla el balanceo.
-        b1 antitesis de b2
-        b2 texto a buscar
-        cursor representando la posicion a partir de la cual se busca
-        backward buscar para atras
-        Si b1 es igual a b2 no se controla el balanceo y se retorna la primera ocurrencia que se encuentre dentro del bloque actual
-        """
-        flags = QtGui.QTextDocument.FindFlags()
-        if backward:
-            flags |= QtGui.QTextDocument.FindBackward
-        if cursor.hasSelection():
-            if b1 == b2:
-                startPosition = cursor.selectionStart() if backward else cursor.selectionEnd()
-            else:
-                startPosition = cursor.selectionEnd() if backward else cursor.selectionStart()
-        else:
-            startPosition = cursor.position()
-        c1 = self.document().find(b1, startPosition, flags)
-        c2 = self.document().find(b2, startPosition, flags)
-        if b1 != b2:
-            #Balanceo solo si son distintos
-            if backward:
-                while c1 > c2:
-                    c1 = self.document().find(b1, c1.selectionStart(), flags)
-                    if c1 > c2:
-                        c2 = self.document().find(b2, c2.selectionStart(), flags)
-            else:
-                while not c1.isNull() and c1.position() != -1 and c1 < c2:
-                    c1 = self.document().find(b1, c1.selectionEnd(), flags)
-                    if c1.isNull():
-                        break
-                    if c1 < c2:
-                        c2 = self.document().find(b2, c2.selectionEnd(), flags)
-            if not c2.isNull():
-                return c2
-        else:
-            if not c2.isNull() and c2.block() == cursor.block():
-                #Ahora balanceamos usando el texto del block
-                block = cursor.block()
-                text = block.text()
-                positionStart = cursor.selectionEnd() if backward else cursor.selectionStart()
-                positionStart -= block.position()
-                positionEnd = c2.selectionEnd() if c2 > cursor else c2.selectionStart()
-                positionEnd -= block.position()
-                if text[:positionStart].count(b2) % 2 == 0 and text[positionEnd:].count(b2) % 2 == 0:
-                    return c2
-
-    def findMatchCursor(self, match, flags, findNext = False, cursor = None, cyclicFind = False):
-        cursor = cursor or self.textCursor()
-        if not findNext and cursor.hasSelection():
-            cursor.setPosition(cursor.selectionStart())
-        cursor = self.document().find(match, cursor, flags)
-        if cursor.isNull() and cyclicFind:
-            cursor = self.textCursor()
-            if flags & QtGui.QTextDocument.FindBackward:
-                cursor.movePosition(QtGui.QTextCursor.End)
-            else:
-                cursor.movePosition(QtGui.QTextCursor.Start)
-            cursor = self.document().find(match, cursor, flags)
-        if not cursor.isNull():
-            return cursor
-
-    def findMatch(self, match, flags, findNext = False):
-        cursor = self.findMatchCursor(match, flags, findNext)
-        if cursor is not None:
-            self.setTextCursor(cursor)
-            return True
-        return False
-    
-    def findAll(self, match, flags):
-        cursors = []
-        cursor = self.textCursor()
-        cursor.movePosition(QtGui.QTextCursor.Start)
-        cursor = self.findMatchCursor(match, flags, cursor = cursor, cyclicFind = False)
-        while cursor is not None:
-            cursors.append(cursor)
-            cursor = QtGui.QTextCursor(cursor)
-            cursor.setPosition(cursor.selectionEnd())
-            cursor = self.findMatchCursor(match, flags, cursor = cursor, cyclicFind = False)
-        return cursors
-            
-    def replaceMatch(self, match, text, flags, all = False):
-        cursor = self.textCursor()
-        cursor.beginEditBlock()
-        replaced = 0
-        while True:
-            if len(match) == 0 and len(text) == 0:
-                break
-            elif match == ' ' * len(match) and text == ' ' * len(text):
-                break
-            else:
-                findCursor = self.findMatchCursor(match, flags, cyclicFind = True)
-            if not findCursor: break
-            if isinstance(match, QtCore.QRegExp):
-                findCursor.insertText(re.sub(match.pattern(), text, cursor.selectedText()))
-            else:
-                findCursor.insertText(text)
-            replaced += 1
-            if not all: break
-        cursor.endEditBlock()
-        return replaced
-    
     def replaceTabsForSpaces(self):
         match = "\t"
         self.replaceMatch(match, " " * self.tabStopSize, QtGui.QTextDocument.FindFlags(), True)
