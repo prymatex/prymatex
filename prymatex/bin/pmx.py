@@ -2,6 +2,7 @@
 #-*- encoding: utf-8 -*-
 import os
 import sys
+import importlib
 
 
 # this will be replaced at install time
@@ -25,12 +26,9 @@ def areBasicImportsAvaliable():
     '''
     @return: True if all basic imports are available
     '''
-    # Check virtualenv
-    #if 'VIRTUALENVWRAPPER_PYTHON' in os.environ:
-    #    return True
     try:
         for name in BASIC_IMPORTS:
-            exec 'import %s' % name
+            importlib.import_module(name)
     except ImportError:
         return False
     return True
