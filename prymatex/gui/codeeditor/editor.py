@@ -1835,13 +1835,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     #===========================================================================
     # Navigation API
     #===========================================================================
-    def newCursorAtPosition(self, position, anchor = None):
-        cursor = QtGui.QTextCursor(self.document())
-        cursor.setPosition(position)
-        if anchor is not None:
-            cursor.setPosition(anchor, QtGui.QTextCursor.KeepAnchor)
-        return cursor
-        
     def restoreLocationMemento(self, memento):
         self.setTextCursor(memento)
         

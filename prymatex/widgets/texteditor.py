@@ -17,6 +17,14 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         self.textCharFormatBuilders = {}
         self.registerTextCharFormatBuildersByName()
 
+    #------ Cursors
+    def newCursorAtPosition(self, position, anchor = None):
+        cursor = QtGui.QTextCursor(self.document())
+        cursor.setPosition(position)
+        if anchor is not None:
+            cursor.setPosition(anchor, QtGui.QTextCursor.KeepAnchor)
+        return cursor
+        
     #------ Extra selections
     def registerTextCharFormatBuildersByName(self):
         for method in dir(self):

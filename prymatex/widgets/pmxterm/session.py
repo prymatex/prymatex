@@ -28,8 +28,7 @@ class Session(QtCore.QObject):
         self._height = height
         self._started = False
 
-    def connect(self, shell_address = None, pub_address = None, 
-            connection_file = None):
+    def connect(self, shell_address, pub_address):
         assert connection_file is not None or\
             (shell_address is not None and pub_address is not None ),\
             "No connection address or file"
