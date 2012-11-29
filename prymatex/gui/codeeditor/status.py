@@ -292,22 +292,25 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     def on_pushButtonReplace_pressed(self):
         match, flags = self.getFindMatchAndFlags()
         replace = self.lineEditReplace.text()
-        self.currentEditor.replaceMatch(match, replace, flags)
-        self.currentEditor.findMatch(match, flags)
+        if match and replace:
+            self.currentEditor.replaceMatch(match, replace, flags)
+            self.currentEditor.findMatch(match, flags)
     
     @QtCore.pyqtSlot()
     def on_pushButtonReplaceAll_pressed(self):
         match, flags = self.getFindMatchAndFlags()
         replace = self.lineEditReplace.text()
-        if len(match) == 0 and len(replace) == 0:
-            self.currentEditor.replaceMatch(match, replace, flags, False)
-        else:
-            self.currentEditor.replaceMatch(match, replace, flags, True)
-
+        if match and replace:
+            self.currentEditor.replaceMatch(match, replace, flags, allText = True)
+        # TODO: mensaje de cuantos remplazo
+        
     @QtCore.pyqtSlot()
     def on_pushButtonFindAll_pressed(self):
         match, flags = self.getFindMatchAndFlags()
-        self.currentEditor.findAll(match, flags)
+        cursors = self.currentEditor.findAll(match, flags)
+        self.currentEditor.setExtraSelectionCursors("selection", cursors)
+        self.currentEditor.updateExtraSelections()
+        # TODO: mensaje de cuantos encontro y ver que queremos hacer con ellos
         
     def getFindMatchAndFlags(self):
         flags = QtGui.QTextDocument.FindFlags()
@@ -341,7 +344,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     def on_lineEditIFind_textChanged(self, text):
         if text:
             _, flags = self.getIFindMatchAndFlags()
-            match = self.currentEditor.findMatch(text, flags)
+            match = self.currentEditor.findMatch(text, flags, cyclicFind = True)
             self.lineEditIFind.setStyleSheet(match and resources.FIND_MATCH_STYLE or resources.FIND_NO_MATCH_STYLE)
         else:
             #TODO: Buscar un clean style
@@ -350,7 +353,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     @QtCore.pyqtSlot()
     def on_pushButtonIFindNext_pressed(self):
         match, flags = self.getIFindMatchAndFlags()
-        self.currentEditor.findMatch(match, flags, True)
+        self.currentEditor.findMatch(match, flags, findNext = True)
 
     @QtCore.pyqtSlot()
     def on_pushButtonIFindPrevious_pressed(self):
