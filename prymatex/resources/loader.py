@@ -10,7 +10,7 @@ from prymatex.utils.decorators.memoize import memoized
 RESOURCES = {}
 RESOURCES_READY = False
 
-THEME_ICON_TEST = "document-open"
+THEME_ICON_TEST = "folder-sync"
 
 STATICMAPPING = (
     # Process
