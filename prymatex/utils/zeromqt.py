@@ -5,7 +5,7 @@ import zmq
 from zmq import FD, LINGER, IDENTITY, SUBSCRIBE, UNSUBSCRIBE, EVENTS, \
                 POLLIN, POLLOUT, POLLERR, NOBLOCK, ZMQError, EAGAIN
                 
-from PyQt4 import QtCore
+from prymatex.qt import QtCore
 
 class ZmqContext(object):
     self_=None
@@ -70,10 +70,16 @@ class ZmqSocket(QtCore.QObject):
 
     def activity(self):
         flags=self._socket.getsockopt(EVENTS)
-        if flags&POLLIN: self.readyRead.emit()
-        elif flags&POLLOUT: self.readyWrite.emit()
-        elif flags&POLLERR: print "ZmqSocket.activity(): POLLERR"
-        else: print "ZmqSocket.activity(): fail"
+        if flags&POLLIN: 
+            self.readyRead.emit()
+        elif flags&POLLOUT: 
+            self.readyWrite.emit()
+        elif flags&POLLERR: 
+            pass
+            #print "ZmqSocket.activity(): POLLERR"
+        else:
+            pass
+            #print "ZmqSocket.activity(): fail"
 
     def _recv(self, flags=NOBLOCK):
         try: _msg=self._socket.recv(flags=flags)

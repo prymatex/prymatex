@@ -1,14 +1,39 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import re
+from prymatex.utils import text
 
 from prymatex.qt import QtGui, QtCore
 
 class TextEditWidget(QtGui.QPlainTextEdit):
-    RE_MAGIC_FORMAT_BUILDER = re.compile(r"textCharFormat_([A-Za-z]+)_builder", re.UNICODE)
     #------ Signals
     extraSelectionChanged = QtCore.pyqtSignal()
+    fontChanged = QtCore.pyqtSignal()
+    
+    #------ Move types
+    MoveLineUp = QtGui.QTextCursor.Up
+    MoveLineDown = QtGui.QTextCursor.Down
+    MoveColumnLeft = QtGui.QTextCursor.Left
+    MoveColumnRight = QtGui.QTextCursor.Right
+    
+    #------ Convert functions
+    CONVERTERS = [  text.upper_case, 
+                    text.lower_case, 
+                    text.title_case,
+                    text.opposite_case,
+                    text.spaces_to_tabs,
+                    text.tabs_to_spaces,
+                    text.transpose
+    ]
+    
+    #------ Convert types
+    ConvertToUppercase = 0
+    ConvertToLowercase = 1
+    ConvertToTitlecase = 2
+    ConvertToOppositeCase = 3
+    ConvertSpacesToTabs = 4
+    ConvertTabsToSpaces = 5
+    ConvertTranspose = 6
     
     def __init__(self, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
@@ -16,9 +41,18 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         # TODO: Buscar sobre este atributo en la documnetación
         #self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         
-        self.scopedExtraSelections = {}
-        self.textCharFormatBuilders = {}
-        self.registerTextCharFormatBuildersByName()
+        self.__scopedExtraSelections = {}
+        self.__textCharFormatBuilders = {}
+        self.__fontMetrics = QtGui.QFontMetrics(self.document().defaultFont())
+
+    #------ Fonts
+    def setDocumentFont(self, font):
+        self.document().setDefaultFont(font)
+        self.__fontMetrics = QtGui.QFontMetrics(font)
+        self.fontChanged.emit()
+        
+    def fontMetrics(self):
+        return self.__fontMetrics
 
     #------ Find and Replace
     def findTypingPair(self, b1, b2, cursor, backward = False):
@@ -133,23 +167,17 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         return cursor
         
     #------ Extra selections
-    def registerTextCharFormatBuildersByName(self):
-        for method in dir(self):
-            match = self.RE_MAGIC_FORMAT_BUILDER.match(method)
-            if match:
-                self.registerTextCharFormatBuilder("%s" % match.group(1), getattr(self, method))
-
     def registerTextCharFormatBuilder(self, scope, formatBuilder):
-        self.textCharFormatBuilders[scope] = formatBuilder
+        self.__textCharFormatBuilders[scope] = formatBuilder
     
     def defaultTextCharFormatBuilder(self, scope):
         return QtGui.QTextCharFormat()
 
     def extendExtraSelectionCursors(self, scope, cursors):
-        self.scopedExtraSelections.setdefault(scope, []).extend(self.__build_extra_selections(scope, cursors))
+        self.__scopedExtraSelections.setdefault(scope, []).extend(self.__build_extra_selections(scope, cursors))
 
     def setExtraSelectionCursors(self, scope, cursors):
-        self.scopedExtraSelections[scope] = self.__build_extra_selections(scope, cursors)
+        self.__scopedExtraSelections[scope] = self.__build_extra_selections(scope, cursors)
     
     def updateExtraSelectionCursors(self, cursorsDict):
         map(lambda (scope, cursors): self.setExtraSelectionCursors(scope, cursors), cursorsDict.iteritems())
@@ -157,33 +185,96 @@ class TextEditWidget(QtGui.QPlainTextEdit):
     def updateExtraSelections(self, order = []):
         extraSelections = []
         for scope in order:
-            extraSelections.extend(self.scopedExtraSelections[scope])
-        for scope, extra in self.scopedExtraSelections.iteritems():
+            extraSelections.extend(self.__scopedExtraSelections[scope])
+        for scope, extra in self.__scopedExtraSelections.iteritems():
             if scope not in order:
                 extraSelections.extend(extra)
         self.setExtraSelections(extraSelections)
         self.extraSelectionChanged.emit()
         
     def searchExtraSelections(self, scope):
-        cursors = filter(lambda (s, _): s.startswith(scope), self.scopedExtraSelections.iteritems())
+        cursors = filter(lambda (s, _): s.startswith(scope), self.__scopedExtraSelections.iteritems())
         return reduce(lambda c1, (_, c2): c1 + c2, cursors, [])    
     
     def clearExtraSelectionCursors(self, scope):
-        del self.scopedExtraSelections[scope]
+        del self.__scopedExtraSelections[scope]
         
     def clearExtraSelections(self):
-        self.scopedExtraSelections.clear()
+        self.__scopedExtraSelections.clear()
         self.updateExtraSelections()
         
     def __build_extra_selections(self, scope, cursors):
         extraSelections = []
         for cursor in cursors:
             selection = QtGui.QTextEdit.ExtraSelection()
-            if scope in self.textCharFormatBuilders:
+            if scope in self.__textCharFormatBuilders:
                 # TODO: un FORMAT_CACHE
-                selection.format = self.textCharFormatBuilders[scope]()
+                selection.format = self.__textCharFormatBuilders[scope]()
             else:
                 selection.format = self.defaultTextCharFormatBuilder(scope)
             selection.cursor = cursor
             extraSelections.append(selection)
         return extraSelections
+    
+    #------ Move text
+    def moveText(self, moveType):
+        #TODO: Separar en funciones, sacar los tipos y mejorar
+        #Solo si tiene seleccion puede mover derecha y izquierda
+        cursor = self.textCursor()
+        cursor.beginEditBlock()
+        if cursor.hasSelection():
+            if (moveType == QtGui.QTextCursor.Left and cursor.selectionStart() == 0) or (moveType == QtGui.QTextCursor.Right and cursor.selectionEnd() == self.document().characterCount()):
+                return
+            openRight = cursor.position() == cursor.selectionEnd()
+            text = cursor.selectedText()
+            cursor.removeSelectedText()
+            cursor.movePosition(moveType)
+            start = cursor.position()
+            cursor.insertText(text)
+            end = cursor.position()
+            cursor = self.newCursorAtPosition(start, end) if openRight else self.newCursorAtPosition(end, start)
+        elif moveType in [QtGui.QTextCursor.Up, QtGui.QTextCursor.Down]:
+            if (moveType == QtGui.QTextCursor.Up and cursor.block() == cursor.document().firstBlock()) or (moveType == QtGui.QTextCursor.Down and cursor.block() == cursor.document().lastBlock()):
+                return
+            column = cursor.columnNumber()
+            cursor.select(QtGui.QTextCursor.LineUnderCursor)
+            text1 = cursor.selectedText()
+            cursor2 = QtGui.QTextCursor(cursor)
+            otherBlock = cursor.block().next() if moveType == QtGui.QTextCursor.Down else cursor.block().previous()
+            cursor2.setPosition(otherBlock.position())
+            cursor2.select(QtGui.QTextCursor.LineUnderCursor)
+            text2 = cursor2.selectedText()
+            cursor.insertText(text2)
+            cursor2.insertText(text1)
+            cursor.setPosition(otherBlock.position() + column)
+        cursor.endEditBlock()
+        self.setTextCursor(cursor)
+        
+    #------ Convert Text
+    def convertText(self, convertType):
+        #TODO: Separar en funciones, sacar los tipos y mejorar
+        cursor = self.textCursor()
+        convertFunction = self.CONVERTERS[convertType]
+        if convertType == self.ConvertSpacesToTabs:
+            self.replaceSpacesForTabs()
+        elif convertType == self.ConvertTabsToSpaces:
+            self.replaceTabsForSpaces()
+        else:
+            if not cursor.hasSelection():
+                word, start, end = self.currentWord()
+                position = cursor.position()
+                cursor.setPosition(start)
+                cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
+                cursor.insertText(convertFunction(word))
+                cursor.setPosition(position)
+            else:
+                openRight = cursor.position() == cursor.selectionEnd()
+                start, end = cursor.selectionStart(), cursor.selectionEnd()
+                cursor.insertText(convertFunction(cursor.selectedText()))
+                if openRight:
+                    cursor.setPosition(start)
+                    cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
+                else:
+                    cursor.setPosition(end)
+                    cursor.setPosition(start, QtGui.QTextCursor.KeepAnchor)
+            self.setTextCursor(cursor)
