@@ -8,7 +8,6 @@ from prymatex.qt import QtGui, QtCore
 class TextEditWidget(QtGui.QPlainTextEdit):
     #------ Signals
     extraSelectionChanged = QtCore.pyqtSignal()
-    fontChanged = QtCore.pyqtSignal()
     
     #------ Move types
     MoveLineUp = QtGui.QTextCursor.Up
@@ -43,16 +42,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         
         self.__scopedExtraSelections = {}
         self.__textCharFormatBuilders = {}
-        self.__fontMetrics = QtGui.QFontMetrics(self.document().defaultFont())
 
-    #------ Fonts
-    def setDocumentFont(self, font):
-        self.document().setDefaultFont(font)
-        self.__fontMetrics = QtGui.QFontMetrics(font)
-        self.fontChanged.emit()
-        
-    def fontMetrics(self):
-        return self.__fontMetrics
 
     #------ Find and Replace
     def findTypingPair(self, b1, b2, cursor, backward = False):

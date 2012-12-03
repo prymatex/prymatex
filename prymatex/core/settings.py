@@ -139,10 +139,9 @@ class pmxConfigPorperty(object):
         return self
         
     def __get__(self, instance, instance_type = None):
-        value = self.value if hasattr(self, 'value') else self.default
-        return value
+        return self.value if hasattr(self, 'value') else self.default
         
     def __set__(self, instance, value):
         self.value = value
-        if self.fset != None:
+        if self.fset is not None:
             self.fset(instance, value)

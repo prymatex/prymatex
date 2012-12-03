@@ -47,7 +47,7 @@ class SideBarWidgetAddon(PMXBaseEditorAddon):
     ALIGNMENT = None
 
     def translatePosition(self, position):
-        font_metrics = QtGui.QFontMetrics(self.editor.font)
+        font_metrics = QtGui.QFontMetrics(self.editor.font())
         fh = font_metrics.lineSpacing()
         ys = position.y()
         
@@ -76,8 +76,8 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         SideBarWidgetAddon.initialize(self, editor)
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
         self.foreground = self.editor.colours["foreground"]
-        self.normalFont = QtGui.QFont(self.editor.font)
-        self.boldFont = QtGui.QFont(self.editor.font)
+        self.normalFont = QtGui.QFont(self.editor.font())
+        self.boldFont = QtGui.QFont(self.editor.font())
         self.boldFont.setBold(True)
         self.normalMetrics = QtGui.QFontMetrics(self.normalFont)
         self.boldMetrics = QtGui.QFontMetrics(self.boldFont)
@@ -191,7 +191,7 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         return { baseMenu: menuEntry} 
 
     def paintEvent(self, event):
-        font_metrics = QtGui.QFontMetrics(self.editor.font)
+        font_metrics = QtGui.QFontMetrics(self.editor.font())
         page_bottom = self.editor.viewport().height()
        
         painter = QtGui.QPainter(self)
@@ -261,7 +261,7 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         return {baseMenu: menuEntry} 
 
     def paintEvent(self, event):
-        font_metrics = QtGui.QFontMetrics(self.editor.font)
+        font_metrics = QtGui.QFontMetrics(self.editor.font())
         page_bottom = self.editor.viewport().height()
        
         painter = QtGui.QPainter(self)
@@ -348,7 +348,7 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         return {baseMenu: menuEntry} 
 
     def paintEvent(self, event):
-        font_metrics = QtGui.QFontMetrics(self.editor.font)
+        font_metrics = QtGui.QFontMetrics(self.editor.font())
         page_bottom = self.editor.viewport().height()
         
         lineHeight = font_metrics.height()

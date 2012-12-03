@@ -118,17 +118,16 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
         self.pushButtonCaret.pressed.connect(lambda element = 'caret': self.on_pushButtonColor_pressed(element))
         self.pushButtonGutter.pressed.connect(lambda element = 'gutter': self.on_pushButtonColor_pressed(element))
         #Font
-        font = self.settingGroup.value('font')
-        if font is not None:
-            self.lineFont.setFont(font)
-            self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
+        font = self.settingGroup.value('defaultFont')
+        self.lineFont.setFont(font)
+        self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
     
     @QtCore.pyqtSignature('')
     def on_pushButtonChangeFont_pressed(self):
-        font = self.settingGroup.value('font')
+        font = self.settingGroup.value('defaultFont')
         font, ok = QtGui.QFontDialog.getFont(font, self, _("Select editor font"))
         if ok:
-            self.settingGroup.setValue('font', font)
+            self.settingGroup.setValue('defaultFont', font)
             self.lineFont.setFont(font)
             self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
     

@@ -33,17 +33,60 @@ def synchronized(func):
     return wrapper
 
 
+class ProcessInfo(object):
+    def update(self):
+        processes = [int(entry) for entry in os.listdir("/proc") if entry.isdigit()]
+        parent = {}
+        children = {}
+        commands = {}
+        for pid in processes:
+            with open("/proc/%s/stat" % pid) as f:
+                stat = f.read().split()
+                f.close()
+                cmd = stat[1]
+                ppid = int(stat[3])
+                parent[pid] = ppid
+                children.setdefault(ppid, []).append(pid)
+                commands[pid] = cmd
+        self.parent = parent
+        self.children = children
+        self.commands = commands
 
+
+    def all_children(self, pid):
+        cl = self.children.get(pid, [])[:]
+        for child_pid in cl:
+            cl.extend(self.children.get(child_pid, []))
+        return cl
+    
+
+    def cwd(self, pid):
+        try:
+            path = os.readlink("/proc/%s/cwd" % pid)
+        except OSError:
+            return
+        return path
+
+    def info(self, pid):
+        info = {}
+        cwd = self.cwd(pid)
+        if pid in self.commands and cwd:
+            info[pid] = (self.commands[pid], self.cwd(pid))
+            for child_pid in self.children.get(pid, []):
+                if child_pid:
+                    info.update(self.info(child_pid))
+        return info
+            
 
 class Multiplexer(object):
-
-
     def __init__(self, queue, cmd="/bin/bash", env_term = "xterm-color", timeout=60*60*24):
         # Set Linux signal handler
         if sys.platform in ("linux2", "linux3"):
             self.sigchldhandler = signal.signal(signal.SIGCHLD, signal.SIG_IGN)
             
-        # Session
+        self.processInfo = ProcessInfo()
+
+        # Sessions
         self.session = {}
         self.queue = queue
         self.cmd = cmd
@@ -283,10 +326,14 @@ class Multiplexer(object):
 
     def is_session_alive(self, sid):
         return self.session.get(sid, {}).get('state') == 'alive'
-        
-    def session_pid(self, sid):
-        return self.session.get(sid, {}).get("pid", None)
-        
+    
     def last_session_change(self, sid):
         return self.session.get(sid, {}).get("changed", None)
 
+    def session_pid(self, sid):
+        return self.session.get(sid, {}).get("pid", None)
+
+    def session_info(self, sid):
+        pid = self.session_pid(sid)
+        self.processInfo.update()
+        return self.processInfo.info(pid)

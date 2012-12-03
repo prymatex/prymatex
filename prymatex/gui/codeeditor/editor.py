@@ -100,11 +100,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setTabStopWidth(size * 9)
     
     @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
-    def font(self, font):
+    def defaultFont(self, font):
+        font.setFixedPitch(True)
         font.setStyleHint(QtGui.QFont.Monospace)
-        font.setStyleStrategy(QtGui.QFont.ForceIntegerMetrics)
+        #font.setStyleStrategy(QtGui.QFont.ForceIntegerMetrics)
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
-        self.setDocumentFont(font)
+        self.setFont(font)
 
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
     def theme(self, uuid):
@@ -1186,20 +1187,20 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     FONT_MAX_SIZE = 32
     FONT_MIN_SIZE = 6
     def zoomIn(self):
-        font = self.font
-        size = self.font.pointSize()
+        font = self.font()
+        size = font.pointSize()
         if size < self.FONT_MAX_SIZE:
             size += 1
             font.setPointSize(size)
-        self.font = font
+        self.setFont(font)
 
     def zoomOut(self):
-        font = self.font
+        font = self.font()
         size = font.pointSize()
         if size > self.FONT_MIN_SIZE:
             size -= 1
             font.setPointSize(size)
-        self.font = font
+        self.setFont(font)
 
     #===========================================================================
     # Text Indentation

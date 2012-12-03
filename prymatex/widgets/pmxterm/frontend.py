@@ -10,16 +10,32 @@
 import sys
 import time
 
-from prymatex.qt import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
-from prymatex.widgets.pmxterm.session import Session
+from session import Session
 
 DEBUG = False
 
 
-
 class TerminalWidget(QtGui.QWidget):
-
+    colormap = {
+      0: "#000",
+      1: "#b00",
+      2: "#0b0",
+      3: "#bb0",
+      4: "#00b",
+      5: "#b0b",
+      6: "#0bb",
+      7: "#bbb",
+      8: "#666",
+      9: "#f00",
+      10: "#0f0",
+      11: "#ff0",
+      12: "#00f",
+      13: "#f0f", 
+      14: "#000",
+      15: "#fff",
+    }
     
     foreground_color_map = {
       0: "#000",
@@ -39,6 +55,8 @@ class TerminalWidget(QtGui.QWidget):
       14: "#000", # negative
       15: "#fff", # default
     }
+    DEFAULT_BACKGROUND = 14
+    DEFAULT_FOREGROUND = 15
     background_color_map = {
       0: "#000",
       1: "#b00",
@@ -48,10 +66,15 @@ class TerminalWidget(QtGui.QWidget):
       5: "#b0b",
       6: "#0bb",
       7: "#bbb",
+      8: "#666",
+      9: "#f00",
+      10: "#0f0",
+      11: "#ff0",
       12: "#aaa", # cursor
       14: "#000", # default
       15: "#fff", # negative
     }
+    
     keymap = {
        QtCore.Qt.Key_Backspace: chr(127),
        QtCore.Qt.Key_Escape: chr(27),
@@ -81,10 +104,10 @@ class TerminalWidget(QtGui.QWidget):
     }
 
 
-    session_closed = QtCore.pyqtSignal()
+    sessionClosed = QtCore.pyqtSignal()
 
 
-    def __init__(self, parent=None, font_name="Monospace", font_size=18):
+    def __init__(self, session, parent=None, font_name="Consolas", font_size=11):
         super(TerminalWidget, self).__init__(parent)
         self.parent().setTabOrder(self, self)
         self.setFocusPolicy(QtCore.Qt.WheelFocus)
@@ -94,7 +117,8 @@ class TerminalWidget(QtGui.QWidget):
         font = QtGui.QFont(font_name)
         font.setPixelSize(font_size)
         self.setFont(font)
-        self._session = None
+        self.session = session
+        self.session.readyRead.connect(self.session_readyRead)
         self._last_update = None
         self._screen = []
         self._text = []
@@ -106,29 +130,21 @@ class TerminalWidget(QtGui.QWidget):
         self._press_pos = None
         self._selection = None
         self._clipboard = QtGui.QApplication.clipboard()
-        QtGui.QApplication.instance().lastWindowClosed.connect(Session.close_all)
-        
-    def setSession(self, session):
-        if self._session is not None:
-            self._session.readyRead.disconnect(self._session_readyRead)
-        self._session = session
-        self._session.readyRead.connect(self._session_readyRead)
-        
-            
+                
     def send(self, s):
-        assert self._session is not None, "No session"
-        self._session.write(s)
+        self.session.write(s)
 
         
     def stop(self):
-        assert self._session is not None, "No session"
-        self._session.stop()
+        self.session.stop()
 
         
     def pid(self):
-        assert self._session is not None, "No session"
-        return self._session.pid()
+        return self.session.pid()
 
+
+    def info(self):
+        return self.session.info()
 
     def setFont(self, font):
         super(TerminalWidget, self).setFont(font)
@@ -136,7 +152,7 @@ class TerminalWidget(QtGui.QWidget):
 
         
     def focusNextPrevChild(self, next):
-        if not self._session.is_alive():
+        if not self.session.is_alive():
             return True
         return False
 
@@ -145,24 +161,22 @@ class TerminalWidget(QtGui.QWidget):
         self.update_screen()
 
     def resizeEvent(self, event):
-        if self._session is None or not self._session.is_alive():
+        if not self.session.is_alive():
             return
         self._columns, self._rows = self._pixel2pos(self.width(), self.height())
-        self._session.resize(self._columns, self._rows)
-
+        self.session.resize(self._columns, self._rows)
 
     def closeEvent(self, event):
-        if self._session is None or not self._session.is_alive():
+        if not self.session.is_alive():
             return
-        self._session.close()
+        self.session.close()
 
 
-    def _session_readyRead(self):
-        if not self._session.is_alive():
-            self.session_closed.emit()
-            return
+    def session_readyRead(self):
+        #self.sessionClosed.emit()
+        #Controlar que la session este bien y si no es asi dispara señal
         old_screen = self._screen
-        (self._cursor_col, self._cursor_row), self._screen = self._session.dump()
+        (self._cursor_col, self._cursor_row), self._screen = self.session.dump()
         self._update_cursor_rect()
         if old_screen != self._screen:
             self._dirty = True
@@ -231,8 +245,6 @@ class TerminalWidget(QtGui.QWidget):
     def _paint_screen(self, painter):
         # Speed hacks: local name lookups are faster
         vars().update(QColor=QtGui.QColor, QBrush=QtGui.QBrush, QPen=QtGui.QPen, QRect=QtCore.QRect)
-        background_color_map = self.background_color_map
-        foreground_color_map = self.foreground_color_map
         char_width = self._char_width
         char_height = self._char_height
         painter_drawText = painter.drawText
@@ -240,8 +252,8 @@ class TerminalWidget(QtGui.QWidget):
         painter_setPen = painter.setPen
         align = QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft
         # set defaults
-        background_color = background_color_map[14]
-        foreground_color = foreground_color_map[15]
+        background_color = self.colormap[self.DEFAULT_BACKGROUND]
+        foreground_color = self.colormap[self.DEFAULT_FOREGROUND]
         brush = QtGui.QBrush(QtGui.QColor(background_color))
         painter_fillRect(self.rect(), brush)
         pen = QtGui.QPen(QtGui.QColor(foreground_color))
@@ -263,8 +275,8 @@ class TerminalWidget(QtGui.QWidget):
                     text_line += item
                 else:
                     foreground_color_idx, background_color_idx, underline_flag = item
-                    foreground_color = foreground_color_map[foreground_color_idx]
-                    background_color = background_color_map[background_color_idx]
+                    foreground_color = self.colormap[foreground_color_idx]
+                    background_color = self.colormap[background_color_idx]
                     pen = QtGui.QPen(QtGui.QColor(foreground_color))
                     brush = QtGui.QBrush(QtGui.QColor(background_color))
                     painter_setPen(pen)
@@ -465,5 +477,4 @@ class TerminalWidget(QtGui.QWidget):
 
         
     def is_alive(self):
-        assert self._session is not None, "No session"
-        return (self._session and self._session.is_alive()) or False
+        return (self.session and self.session.is_alive()) or False

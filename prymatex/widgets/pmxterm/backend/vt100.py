@@ -1143,10 +1143,10 @@ class Terminal(object):
 
     def dump(self):
         screen = []
-        attr_ = -1
         cx, cy = min(self.cx, self.w - 1), self.cy
         for y in range(0, self.h):
             wx = 0
+            attr_ = -1
             line = [""]
             for x in range(0, self.w):
                 d = self.screen[y * self.w + x]
@@ -1180,6 +1180,9 @@ class Terminal(object):
                 wx += self.utf8_charwidth(char)
                 if wx <= self.w:
                     line[-1] += unichr(char)
+            line.extend([(0x000f, 0x000e, False), u""])
             screen.append(line)
 
+        screen.append([(0x000f, 0x000e, False), u" " * self.w])
+        
         return (cx, cy), screen

@@ -10,7 +10,7 @@ from prymatex import resources
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.misc import get_home_dir
-from prymatex.widgets.pmxterm import Session, TerminalWidget, ProcessInfo
+from prymatex.widgets.pmxterm import BackendManager, TerminalWidget
 
 
 class TabbedTerminal(QtGui.QTabWidget):
@@ -49,21 +49,16 @@ class TabbedTerminal(QtGui.QTabWidget):
 
     
     def newTerminal(self):
-        assert self.connection_file is not None or self.connection_address is not None
         # Create session
-        session = Session(parent = self)
-        session.connect(connection_file = self.connection_file)
-        
-        term = TerminalWidget(parent = self)
-        term.setSession(session)
-        term.session_closed.connect(self._on_session_closed)
+        session = self.parent().localBackend.session()
+        term = TerminalWidget(session, parent = self)
+        term.sessionClosed.connect(self._on_session_closed)
         self.addTab(term, "Terminal")
         self._terms.append(term)
         self.setCurrentWidget(term)
-        
         session.start(os.environ["SHELL"])
         term.setFocus()
-
+        
         
     def timerEvent(self, event):
         self._update_title(self.currentWidget())
@@ -134,27 +129,9 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.setObjectName(_("TerminalDock"))
         self.tabTerminals = TabbedTerminal(self)
         self.setWidget(self.tabTerminals)
-        #self.runBackend()
+        self.backendManager = BackendManager(parent = self)
+        self.localBackend = self.backendManager.localBackend(workingDirectory = get_home_dir())
         
-    def runBackend(self):
-        self.backend = QtCore.QProcess(self)
-        
-        self.backend.setWorkingDirectory(get_home_dir())
-        
-        self.connect(self.backend, QtCore.SIGNAL("readyReadStandardOutput()"),
-                     self.write_output)
-        self.connect(self.backend, QtCore.SIGNAL("finished(int,QProcess::ExitStatus)"),
-                     self.finished)
-        
-        from prymatex.widgets.pmxterm import backend
-        self.backend.start(sys.executable, [main.__file__, "-t", "ipc"])    
-        self.backend.waitForStarted()
-        
-        
-    def write_output(self):
-        data = self.backend.readAllStandardOutput()
-        self.tabTerminals.setBackendConnections(*str(data).decode("utf-8").splitlines())
-        self.tabTerminals.newTerminal()
         
     def finished(self):
         pass
@@ -162,7 +139,8 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
         mainWindow.terminal = self
-    
+        self.tabTerminals.newTerminal()
+        
     #========================================================
     # Commands
     #========================================================

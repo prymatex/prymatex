@@ -232,7 +232,7 @@ class PMXTabTerminals(QtGui.QTabWidget):
         if not self.count():
             self.addTerminal()
     
-class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
+class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "F4"
     ICON = resources.getIcon("utilities-terminal")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
@@ -249,6 +249,8 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     
     @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
     def font(self, font):
+        font.setFixedPitch(True)
+        font.setStyleHint(QtGui.QFont.Monospace)
         for index in range(self.tabTerminals.count()):
             self.tabTerminals.widget(index).setTerminalFont(font)
 
@@ -272,7 +274,7 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
             if event.modifiers() == QtCore.Qt.ControlModifier and event.key() in [ QtCore.Qt.Key_W]:
                 print "W"
                 return
-        return super(PMXTerminalDock, self).eventFilter(obj, event)
+        return super(TerminalDock, self).eventFilter(obj, event)
     
     #========================================================
     # Commands
