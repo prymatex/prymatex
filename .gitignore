@@ -12,3 +12,6 @@ build/
 dist/
 src/
 fab*
+*.wpr
+*.wpu
+plugins
