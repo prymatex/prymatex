@@ -46,7 +46,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     syntaxChanged = QtCore.pyqtSignal(object)
     syntaxReady = QtCore.pyqtSignal(object)
     themeChanged = QtCore.pyqtSignal()
-    fontChanged = QtCore.pyqtSignal()
     modeChanged = QtCore.pyqtSignal()
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
@@ -77,33 +76,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     SelectCurrentScope = 5
     
     #================================================================
-    # Move types
-    #================================================================
-    MoveLineUp = QtGui.QTextCursor.Up
-    MoveLineDown = QtGui.QTextCursor.Down
-    MoveColumnLeft = QtGui.QTextCursor.Left
-    MoveColumnRight = QtGui.QTextCursor.Right
-    
-    #================================================================
-    # Convert types
-    #================================================================
-    CONVERTERS = [  text.upper_case, 
-                    text.lower_case, 
-                    text.title_case,
-                    text.opposite_case,
-                    text.spaces_to_tabs,
-                    text.tabs_to_spaces,
-                    text.transpose
-    ]
-    ConvertToUppercase = 0
-    ConvertToLowercase = 1
-    ConvertToTitlecase = 2
-    ConvertToOppositeCase = 3
-    ConvertSpacesToTabs = 4
-    ConvertTabsToSpaces = 5
-    ConvertTranspose = 6
-
-    #================================================================
     # Editor Flags
     #================================================================
     ShowTabsAndSpaces     = 1<<0
@@ -132,13 +104,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         font.setStyleHint(QtGui.QFont.Monospace)
         font.setStyleStrategy(QtGui.QFont.ForceIntegerMetrics)
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
-        self.document().setDefaultFont(font)
-        #print QtGui.QFontMetrics(self.document().defaultFont()).width(" ")
-        #print QtGui.QFontMetrics(self.document().defaultFont()).width("i")
-        #print QtGui.QFontMetrics(self.document().defaultFont()).width("w")
-        #print QtGui.QFontMetrics(self.document().defaultFont()).width("#")
-        self.fontChanged.emit()
-    
+        self.setDocumentFont(font)
+
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
     def theme(self, uuid):
         theme = self.application.supportManager.getTheme(uuid)
@@ -205,14 +172,14 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
         self.completerTask = self.application.scheduler.idleTask()
         
+        #Register text formaters
+        self.registerTextCharFormatBuilder("line", self.textCharFormat_line_builder)
+        self.registerTextCharFormatBuilder("brace", self.textCharFormat_brace_builder)
+        self.registerTextCharFormatBuilder("selection", self.textCharFormat_selection_builder)
+        
         #Cursor history
         #self._cursorHistory, self._cursorHistoryIndex = [], 0
         
-        #Esta señal es especial porque es emitida en el setFont por los settings
-        self.fontChanged.connect(self.on_fontChanged)
-        #Basic setup
-        #self.setCenterOnScroll(True)
-    
     # Connect Signals
     def connectSignals(self):
         self.rightBar.updateRequest.connect(self.updateViewportMargins)
@@ -302,12 +269,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.folding.indentSensitive = self.syntax().indentSensitive
         self.setBraces(self.syntax().scopeName)
         self.syntaxReady.emit(self.syntax())
-        
-    def on_fontChanged(self):
-        font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
-        self.pos_margin = font_metrics.width("#") * 80
-        self.setTabStopWidth(self.tabStopSize * font_metrics.width("#"))
-
+    
     #=======================================================================
     # Base Editor Interface
     #=======================================================================
@@ -542,72 +504,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.flyweightScopeFactory([ syntax.scopeName ])
             self.syntaxChanged.emit(syntax)
 
-    # Move text
-    def moveText(self, moveType):
-        #Solo si tiene seleccion puede mover derecha y izquierda
-        cursor = self.textCursor()
-        cursor.beginEditBlock()
-        if cursor.hasSelection():
-            if (moveType == QtGui.QTextCursor.Left and cursor.selectionStart() == 0) or (moveType == QtGui.QTextCursor.Right and cursor.selectionEnd() == self.document().characterCount()):
-                return
-            openRight = cursor.position() == cursor.selectionEnd()
-            text = cursor.selectedText()
-            cursor.removeSelectedText()
-            cursor.movePosition(moveType)
-            start = cursor.position()
-            cursor.insertText(text)
-            end = cursor.position()
-            if openRight:
-                cursor.setPosition(start)
-                cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-            else:
-                cursor.setPosition(end)
-                cursor.setPosition(start, QtGui.QTextCursor.KeepAnchor)
-        elif moveType in [QtGui.QTextCursor.Up, QtGui.QTextCursor.Down]:
-            if (moveType == QtGui.QTextCursor.Up and cursor.block() == cursor.document().firstBlock()) or (moveType == QtGui.QTextCursor.Down and cursor.block() == cursor.document().lastBlock()):
-                return
-            column = cursor.columnNumber()
-            cursor.select(QtGui.QTextCursor.LineUnderCursor)
-            text1 = cursor.selectedText()
-            cursor2 = QtGui.QTextCursor(cursor)
-            otherBlock = cursor.block().next() if moveType == QtGui.QTextCursor.Down else cursor.block().previous()
-            cursor2.setPosition(otherBlock.position())
-            cursor2.select(QtGui.QTextCursor.LineUnderCursor)
-            text2 = cursor2.selectedText()
-            cursor.insertText(text2)
-            cursor2.insertText(text1)
-            cursor.setPosition(otherBlock.position() + column)
-        cursor.endEditBlock()
-        self.setTextCursor(cursor)
-    
-    # Convert Text
-    def convertText(self, convertType):
-        cursor = self.textCursor()
-        convertFunction = self.CONVERTERS[convertType]
-        if convertType == self.ConvertSpacesToTabs:
-            self.replaceSpacesForTabs()
-        elif convertType == self.ConvertTabsToSpaces:
-            self.replaceTabsForSpaces()
-        else:
-            if not cursor.hasSelection():
-                word, start, end = self.currentWord()
-                position = cursor.position()
-                cursor.setPosition(start)
-                cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-                cursor.insertText(convertFunction(word))
-                cursor.setPosition(position)
-            else:
-                openRight = cursor.position() == cursor.selectionEnd()
-                start, end = cursor.selectionStart(), cursor.selectionEnd()
-                cursor.insertText(convertFunction(cursor.selectedText()))
-                if openRight:
-                    cursor.setPosition(start)
-                    cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-                else:
-                    cursor.setPosition(end)
-                    cursor.setPosition(start, QtGui.QTextCursor.KeepAnchor)
-            self.setTextCursor(cursor)
-        
     #=======================================================================
     # SideBars
     #=======================================================================
@@ -712,7 +608,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         #TODO: Esto esta mal
         return self.beforeBrace(cursor) and self.afterBrace(cursor)
         
-    # -------------------- Highlight Editor
+    #-------------------- Highlight Editor
     def textCharFormat_line_builder(self):
         format = QtGui.QTextCharFormat()
         format.setBackground(self.colours['lineHighlight'])
@@ -824,7 +720,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             block = block.next()
 
         if self.showMarginLine:
-            painter.drawLine(self.pos_margin + offset.x(), 0, self.pos_margin + offset.x(), self.viewport().height())
+            pos_margin = self.fontMetrics().width(" ") * 80
+            painter.drawLine(pos_margin + offset.x(), 0, pos_margin + offset.x(), self.viewport().height())
 
         if self.multiCursorMode.isActive():
             ctrl_down = bool(self.application.keyboardModifiers() & QtCore.Qt.ControlModifier)
@@ -1230,7 +1127,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.replaceMatch(match, " " * self.tabStopSize, QtGui.QTextDocument.FindFlags(), True)
         
     def replaceSpacesForTabs(self):
-        match = self.tabKeyBehavior()
+        match = " " * self.tabStopSize
         self.replaceMatch(match, "\t", QtGui.QTextDocument.FindFlags(), True)
         
     #==========================================================================

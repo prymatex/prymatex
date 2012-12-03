@@ -83,7 +83,7 @@ class PMXApplication(QtGui.QApplication):
         
     def loadGraphicalUserInterface(self):
         splash = self.buildSplashScreen()
-        splash.show()
+        #splash.show()
         try:
             self.cacheManager = self.setupCacheManager()        #Cache system Manager
             self.pluginManager = self.setupPluginManager()      #Prepare plugin manager

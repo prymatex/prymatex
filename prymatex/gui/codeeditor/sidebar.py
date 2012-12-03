@@ -68,7 +68,7 @@ class SideBarWidgetAddon(PMXBaseEditorAddon):
 #=======================================
 class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
-    MARGIN = 4
+    MARGIN = 2
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
 
