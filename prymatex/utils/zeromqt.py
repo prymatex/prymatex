@@ -88,16 +88,36 @@ class ZmqSocket(QtCore.QObject):
             else: raise ZMQError(e)
         else: return _msg
 
+    def _recv_multipart(self, flags=NOBLOCK):
+        try: _msg=self._socket.recv_multipart(flags=flags)
+        except ZMQError as e:
+            if e.errno==EAGAIN: return None
+            else: raise ZMQError(e)
+        else: return _msg
+    
     def recv(self):
-        _return=[]
+        _return = ""
         while 1:
-            _msg=self._recv()
-            if not _msg: break
-            _return.append(_msg)
-        return _return        
+            _msg = self._recv()
+            if not _msg:
+                break
+            _return += _msg
+        return _return   
+    
+    def recv_multipart(self):
+        _return = []
+        while 1:
+            _msg = self._recv_multipart()
+            if not _msg:
+                break
+            _return = _msg
+        return _return
+    
+    def recv_pyobj(self): return self._socket.recv_pyobj()
 
     def send(self, _msg): return self._socket.send(_msg)
     
     def send_pyobj(self, _msg): return self._socket.send_pyobj(_msg)
     
-    def recv_pyobj(self): return self._socket.recv_pyobj()
+    def send_multipart(self, _msg): return self._socket.send_multipart(_msg)
+    

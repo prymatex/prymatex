@@ -7,6 +7,7 @@ import zmq
 import argparse
 import stat
 import signal
+import tempfile
 
 from multiprocessing import Process, Queue
 from multiplexer import Multiplexer
@@ -49,7 +50,7 @@ def worker_notifier(queue_notifier, addr):
         
     while True:
         data = queue_notifier.get()
-        zpub.send(data)
+        zpub.send_multipart(data)
 
 
 # ==============
@@ -134,5 +135,7 @@ if __name__ == "__main__":
         mproc.terminate()
         sys.exit(0)
     
-    signal.signal(signal.SIGBREAK, signal_handler)
-    signal.signal(signal.SIGINT, signal_handler)
+    if sys.platform.startswith("linux"):
+        signal.signal(signal.SIGINT, signal_handler)
+    elif sys.platform == "win32":
+        signal.signal(signal.SIGBREAK, signal_handler)

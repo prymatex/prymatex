@@ -79,11 +79,6 @@ class Popen(subprocess.Popen):
         if self.universal_newlines:
             read = self._translate_newlines(read)
         return read
-
-class WinTerminal(Terminal):
-    def __init__(self, w, h):
-        Terminal.__init__(self, w, h)
-        self.vt100_mode_lfnewline = True
     
 class Multiplexer(object):
     def __init__(self, queue, timeout = 60*60*24):
@@ -109,7 +104,7 @@ class Multiplexer(object):
             # Start a new session
             self.session[sid] = {
                 'state':'unborn',
-                'term':	WinTerminal(w, h),
+                'term':	Terminal(w, h),
                 'time':	time.time(),
                 'w':	w,
                 'h':	h}
@@ -127,7 +122,7 @@ class Multiplexer(object):
         # Session
         self.session[sid]['state'] = 'alive'
         w, h = self.session[sid]['w'], self.session[sid]['h']
-        self.session[sid]['process'] = Popen(command, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE, universal_newlines = True)
+        self.session[sid]['process'] = Popen(command, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
         self.session[sid]['pid'] = self.session[sid]['process'].pid
         
         self.session[sid]['thread'] = threading.Thread(target=self.proc_read, args=(sid, ))
@@ -179,7 +174,7 @@ class Multiplexer(object):
             if data:
                 session['term'].write(data)
                 session["changed"] = time.time()
-                self.queue.put(sid)
+                self.queue.put([sid, str(session['term'].dump())])
             time.sleep(0.002)
         self.proc_bury(sid)
 

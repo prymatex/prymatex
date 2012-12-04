@@ -27,8 +27,6 @@ class TabbedTerminal(QtGui.QTabWidget):
         self.setCornerWidget(self._new_button)
         self.setTabsClosable(True)
         self.setMovable(True)
-        self.setWindowTitle("Terminal")
-        self.resize(800, 600)
         self._terms = []
         self.tabCloseRequested[int].connect(self._on_close_request)
         self.currentChanged[int].connect(self._on_current_changed)
@@ -69,19 +67,7 @@ class TabbedTerminal(QtGui.QTabWidget):
             self.setWindowTitle("Terminal")
             return
         idx = self.indexOf(term)
-        pid = term.pid()
-        #Solo si no es windows
-        #self.proc_info.update()
-        #child_pids = [pid] + self.proc_info.all_children(pid)
-        #for pid in reversed(child_pids):
-        #    cwd = self.proc_info.cwd(pid)
-        #    if cwd:
-        #        break
-        #try:
-        #    cmd = self.proc_info.commands[pid]
-        #    title = "%s: %s" % (os.path.basename(cwd), cmd)
-        #except:
-        #    title = "Terminal"
+        print term.info()
         title = "Terminal"
         self.setTabText(idx, title)
         self.setWindowTitle(title)
@@ -130,7 +116,7 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.tabTerminals = TabbedTerminal(self)
         self.setWidget(self.tabTerminals)
         self.backendManager = BackendManager(parent = self)
-        self.localBackend = self.backendManager.localBackend(workingDirectory = get_home_dir())
+        self.localBackend = self.backendManager.localBackend(workingDirectory = get_home_dir(), protocol = 'ipc')
         
         
     def finished(self):
