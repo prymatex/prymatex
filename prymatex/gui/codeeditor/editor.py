@@ -58,12 +58,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     beforeSave = QtCore.pyqtSignal()
     beforeClose = QtCore.pyqtSignal()
     beforeReload = QtCore.pyqtSignal()
-
-    #================================================================
-    # Regular expresions
-    #================================================================
-    #TODO: Ver que pasa con [A-Za-z_]+ en lugar de [A-Za-z_]*
-    RE_WORD = re.compile(r"[A-Za-z_]*")
     
     #================================================================
     # Selection types
@@ -378,12 +372,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         scopeHash = scopeOrHash if isinstance(scopeOrHash, int) else hash(scopeOrHash)
         if scopeHash in self.SCOPES:
             return self.SCOPES[scopeHash]["settings"]
-    
-    def wordUnderCursor(self):
-        """ Esto 'no' es lo mismo que currentWord """
-        cursor = self.textCursor()
-        cursor.select(QtGui.QTextCursor.WordUnderCursor)
-        return cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
 
     def scopeName(self, scopeHash):
         return self.SCOPES[scopeHash]["name"]
@@ -397,61 +385,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
     def currentScope(self):
         return self.scope(self.textCursor())
-
-    def currentWord(self, direction = "both", search = True):
-        return self.word(cursor = self.textCursor(), direction = direction, search = search)
-        
-    def word(self, cursor = None, pattern = RE_WORD, direction = "both", search = True):
-        cursor = cursor or self.textCursor()
-        line = cursor.block().text()
-        position = cursor.position()
-        columnNumber = cursor.columnNumber()
-        #Get text before and after the cursor position.
-        first_part, last_part = line[:columnNumber][::-1], line[columnNumber:]
-        
-        #Try left word
-        lword = rword = ""
-        m = pattern.match(first_part)
-        if m and direction in ("left", "both"):
-            lword = m.group(0)[::-1]
-        #Try right word
-        m = pattern.match(last_part)
-        if m and direction in ("right", "both"):
-            rword = m.group(0)
-        
-        if lword or rword:
-            return lword + rword, position - len(lword), position + len(rword)
-        
-        if not search: 
-            return "", position, position
-
-        lword = rword = ""
-        #Search left word
-        for i in range(len(first_part)):
-            lword += first_part[i]
-            m = pattern.search(first_part[i + 1:])
-            if m.group(0):
-                lword += m.group(0)
-                break
-        lword = lword[::-1]
-        #Search right word
-        for i in range(len(last_part)):
-            rword += last_part[i]
-            m = pattern.search(last_part[i:])
-            if m.group(0):
-                rword += m.group(0)
-                break
-        lword = lword.lstrip()
-        rword = rword.rstrip()
-        return lword + rword, position - len(lword), position + len(rword)
-    
-    def getSelectionBlockStartEnd(self, cursor = None):
-        cursor = cursor or self.textCursor()
-        start, end = cursor.selectionStart(), cursor.selectionEnd()
-        if start > end:
-            return self.document().findBlock(end), self.document().findBlock(start)
-        else:
-            return self.document().findBlock(start), self.document().findBlock(end)
 
     # Flags
     def getFlags(self):
@@ -966,7 +899,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if cursor.hasSelection():
             self.logger.debug("Add selection to environment")
             environment['TM_SELECTED_TEXT'] = cursor.selectedText().replace(u"\u2029", '\n').replace(u"\u2028", '\n')
-            start, end = self.getSelectionBlockStartEnd()
+            start, end = self.selectionBlockStartEnd()
             environment['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
             environment['TM_INPUT_START_LINE'] = start.blockNumber() + 1
             environment['TM_INPUT_START_LINE_INDEX'] = cursor.selectionStart() - start.position()
@@ -1120,11 +1053,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         milestone.userData().folded = False
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
-    def replaceTabsForSpaces(self):
+    def convertTabsToSpaces(self):
         match = "\t"
         self.replaceMatch(match, " " * self.tabStopSize, QtGui.QTextDocument.FindFlags(), True)
         
-    def replaceSpacesForTabs(self):
+    def convertSpacesToTabs(self):
         match = " " * self.tabStopSize
         self.replaceMatch(match, "\t", QtGui.QTextDocument.FindFlags(), True)
         
@@ -1242,7 +1175,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def indentBlocks(self, cursor = None):
         """Indents text, block selections."""
         cursor = QtGui.QTextCursor(cursor or self.textCursor())
-        start, end = self.getSelectionBlockStartEnd(cursor)
+        start, end = self.selectionBlockStartEnd(cursor)
         cursor.beginEditBlock()
         while True:
             cursor.setPosition(start.position())
@@ -1254,7 +1187,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def unindentBlocks(self, cursor = None):
         cursor = QtGui.QTextCursor(cursor or self.textCursor())
-        start, end = self.getSelectionBlockStartEnd(cursor)
+        start, end = self.selectionBlockStartEnd(cursor)
         cursor.beginEditBlock()
         while True:
             data = start.userData()
@@ -1426,29 +1359,29 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'items': [
                     {'text': 'To Uppercase',
                      'shortcut': 'Ctrl+U',
-                     'callback': lambda editor: editor.convertText(editor.ConvertToUppercase),
+                     'callback': lambda editor: editor.convertToUppercase(),
                      },
                     {'text': 'To Lowercase',
                      'shortcut': 'Ctrl+Shift+U',
-                     'callback': lambda editor: editor.convertText(editor.ConvertToLowercase),
+                     'callback': lambda editor: editor.convertToLowercase(),
                      },
                     {'text': 'To Titlecase',
                      'shortcut': 'Ctrl+Alt+U',
-                     'callback': lambda editor: editor.convertText(editor.ConvertToTitlecase),
+                     'callback': lambda editor: editor.convertToTitlecase(),
                      },
                     {'text': 'To Opposite Case',
                      'shortcut': 'Ctrl+G',
-                     'callback': lambda editor: editor.convertText(editor.ConvertToOppositeCase),
+                     'callback': lambda editor: editor.convertToOppositeCase(),
                      }, '-',
                     {'text': 'Tab to Spaces',
-                     'callback': lambda editor: editor.convertText(editor.ConvertTabsToSpaces),
+                     'callback': lambda editor: editor.convertTabsToSpaces(),
                      },
                     {'text': 'Spaces to Tabs',
-                     'callback': lambda editor: editor.convertText(editor.ConvertSpacesToTabs),
+                     'callback': lambda editor: editor.convertSpacesToTabs(),
                      }, '-',
                     {'text': 'Transpose',
                      'shortcut': 'Ctrl+T',
-                     'callback': lambda editor: editor.convertText(editor.ConvertTranspose),
+                     'callback': lambda editor: editor.convertTranspose(),
                      }
                 ]},
                 {'text': 'Move',

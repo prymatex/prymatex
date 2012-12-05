@@ -18,3 +18,4 @@ from prymatex.qt.helpers.keysequences import *
 from prymatex.qt.helpers.menus import *
 from prymatex.qt.helpers.mimedata import *
 from prymatex.qt.helpers.widgets import *
+from prymatex.qt.helpers.textcursors import *

@@ -1,38 +1,25 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+import re
+
 from prymatex.utils import text
 
 from prymatex.qt import QtGui, QtCore
+from prymatex.qt.helpers import textcursor2tuple
 
 class TextEditWidget(QtGui.QPlainTextEdit):
     #------ Signals
     extraSelectionChanged = QtCore.pyqtSignal()
+    
+    #------ Regular expresions
+    RE_WORD = re.compile(r"[A-Za-z_]*")
     
     #------ Move types
     MoveLineUp = QtGui.QTextCursor.Up
     MoveLineDown = QtGui.QTextCursor.Down
     MoveColumnLeft = QtGui.QTextCursor.Left
     MoveColumnRight = QtGui.QTextCursor.Right
-    
-    #------ Convert functions
-    CONVERTERS = [  text.upper_case, 
-                    text.lower_case, 
-                    text.title_case,
-                    text.opposite_case,
-                    text.spaces_to_tabs,
-                    text.tabs_to_spaces,
-                    text.transpose
-    ]
-    
-    #------ Convert types
-    ConvertToUppercase = 0
-    ConvertToLowercase = 1
-    ConvertToTitlecase = 2
-    ConvertToOppositeCase = 3
-    ConvertSpacesToTabs = 4
-    ConvertTabsToSpaces = 5
-    ConvertTranspose = 6
     
     def __init__(self, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
@@ -43,6 +30,74 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         self.__scopedExtraSelections = {}
         self.__textCharFormatBuilders = {}
 
+    #------ Retrieve text
+    def wordUnderCursor(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        cursor.select(QtGui.QTextCursor.WordUnderCursor)
+        return cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
+
+    def currentWord(self, direction = "both", search = True):
+        return self.word(cursor = self.textCursor(), direction = direction, search = search)
+        
+    def word(self, cursor = None, pattern = RE_WORD, direction = "both", search = True):
+        cursor = cursor or self.textCursor()
+        line = cursor.block().text()
+        position = cursor.position()
+        columnNumber = cursor.columnNumber()
+        #Get text before and after the cursor position.
+        first_part, last_part = line[:columnNumber][::-1], line[columnNumber:]
+        
+        #Try left word
+        lword = rword = ""
+        m = pattern.match(first_part)
+        if m and direction in ("left", "both"):
+            lword = m.group(0)[::-1]
+        #Try right word
+        m = pattern.match(last_part)
+        if m and direction in ("right", "both"):
+            rword = m.group(0)
+        
+        if lword or rword:
+            return lword + rword, position - len(lword), position + len(rword)
+        
+        if not search: 
+            return "", position, position
+
+        lword = rword = ""
+        #Search left word
+        for i in range(len(first_part)):
+            lword += first_part[i]
+            m = pattern.search(first_part[i + 1:])
+            if m.group(0):
+                lword += m.group(0)
+                break
+        lword = lword[::-1]
+        #Search right word
+        for i in range(len(last_part)):
+            rword += last_part[i]
+            m = pattern.search(last_part[i:])
+            if m.group(0):
+                rword += m.group(0)
+                break
+        lword = lword.lstrip()
+        rword = rword.rstrip()
+        return lword + rword, position - len(lword), position + len(rword)
+
+    #------ Retrieve cursors and blocks
+    def newCursorAtPosition(self, position, anchor = None):
+        cursor = QtGui.QTextCursor(self.document())
+        cursor.setPosition(position)
+        if anchor is not None:
+            cursor.setPosition(anchor, QtGui.QTextCursor.KeepAnchor)
+        return cursor
+
+    def selectionBlockStartEnd(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        start, end = cursor.selectionStart(), cursor.selectionEnd()
+        if start > end:
+            return self.document().findBlock(end), self.document().findBlock(start)
+        else:
+            return self.document().findBlock(start), self.document().findBlock(end)
 
     #------ Find and Replace
     def findTypingPair(self, b1, b2, cursor, backward = False):
@@ -148,14 +203,6 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         cursor.endEditBlock()
         return replaced
 
-    #------ Cursors
-    def newCursorAtPosition(self, position, anchor = None):
-        cursor = QtGui.QTextCursor(self.document())
-        cursor.setPosition(position)
-        if anchor is not None:
-            cursor.setPosition(anchor, QtGui.QTextCursor.KeepAnchor)
-        return cursor
-        
     #------ Extra selections
     def registerTextCharFormatBuilder(self, scope, formatBuilder):
         self.__textCharFormatBuilders[scope] = formatBuilder
@@ -241,30 +288,35 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         self.setTextCursor(cursor)
         
     #------ Convert Text
-    def convertText(self, convertType):
-        #TODO: Separar en funciones, sacar los tipos y mejorar
-        cursor = self.textCursor()
-        convertFunction = self.CONVERTERS[convertType]
-        if convertType == self.ConvertSpacesToTabs:
-            self.replaceSpacesForTabs()
-        elif convertType == self.ConvertTabsToSpaces:
-            self.replaceTabsForSpaces()
+    def __convert_text(self, cursor = None, convertFunction = lambda x: x):
+        cursor = cursor or self.textCursor()
+        tupleCursor = textcursor2tuple(cursor)
+        cursor.beginEditBlock()
+        if not cursor.hasSelection():
+            word, start, end = self.currentWord()
+            self.newCursorAtPosition(start, end).insertText(convertFunction(word))
         else:
-            if not cursor.hasSelection():
-                word, start, end = self.currentWord()
-                position = cursor.position()
-                cursor.setPosition(start)
-                cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-                cursor.insertText(convertFunction(word))
-                cursor.setPosition(position)
-            else:
-                openRight = cursor.position() == cursor.selectionEnd()
-                start, end = cursor.selectionStart(), cursor.selectionEnd()
-                cursor.insertText(convertFunction(cursor.selectedText()))
-                if openRight:
-                    cursor.setPosition(start)
-                    cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-                else:
-                    cursor.setPosition(end)
-                    cursor.setPosition(start, QtGui.QTextCursor.KeepAnchor)
-            self.setTextCursor(cursor)
+            cursor.insertText(convertFunction(cursor.selectedText()))
+        cursor.endEditBlock()
+        self.setTextCursor(self.newCursorAtPosition(*tupleCursor))
+
+    def convertToUppercase(self, cursor = None):
+        self.__convert_text(cursor, text.upper_case)
+        
+    def convertToLowercase(self, cursor = None):
+        self.__convert_text(cursor, text.lower_case)
+        
+    def convertToTitlecase(self, cursor = None):
+        self.__convert_text(cursor, text.title_case)
+        
+    def convertToOppositeCase(self, cursor = None):
+        self.__convert_text(cursor, text.opposite_case)
+    
+    def convertSpacesToTabs(self, cursor = None):
+        self.__convert_text(cursor, text.spaces_to_tabs)
+        
+    def convertTabsToSpaces(self, cursor = None):
+        self.__convert_text(cursor, text.tabs_to_spaces)
+        
+    def convertTranspose(self, cursor = None):
+        self.__convert_text(cursor, text.transpose)

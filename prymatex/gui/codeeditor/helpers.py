@@ -152,7 +152,7 @@ class TabIndentHelper(CodeEditorKeyHelper):
         return cursor.hasSelection() or self.editor.tabStopSoft
         
     def execute(self, event, cursor = None, scope = None):
-        start, end = self.editor.getSelectionBlockStartEnd()
+        start, end = self.editor.selectionBlockStartEnd()
         if start != end:
             #Tiene seleccion en distintos bloques, es un indentar
             self.editor.indentBlocks()
