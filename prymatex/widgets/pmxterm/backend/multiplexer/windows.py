@@ -18,6 +18,7 @@ from win32file import ReadFile, WriteFile
 from win32pipe import PeekNamedPipe
 import msvcrt
 
+from multiplexer import base
 from vt100 import Terminal
 
 class Popen(subprocess.Popen):
@@ -80,10 +81,13 @@ class Popen(subprocess.Popen):
             read = self._translate_newlines(read)
         return read
     
-class Multiplexer(object):
-    def __init__(self, queue, timeout = 60*60*24):
+class Multiplexer(base.Multiplexer):
+    def __init__(self, queue, cmd="cmd.exe", timeout=60*60*24):
+        base.Multiplexer.__init__(self)
+        
         # Session
         self.session = {}
+        self.cmd = cmd
         self.queue = queue
         self.timeout = timeout
         self.signal_stop = 0
@@ -108,7 +112,7 @@ class Multiplexer(object):
                 'time':	time.time(),
                 'w':	w,
                 'h':	h}
-            return self.__proc_spawn(sid, command)
+            return self.__proc_spawn(sid, command or self.cmd)
         elif self.session[sid]['state'] == 'alive':
             self.session[sid]['time'] = time.time()
             # Update terminal size

@@ -54,7 +54,7 @@ class TabbedTerminal(QtGui.QTabWidget):
         self.addTab(term, "Terminal")
         self._terms.append(term)
         self.setCurrentWidget(term)
-        session.start(os.environ["SHELL"])
+        session.start()
         term.setFocus()
         
         
@@ -116,7 +116,7 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.tabTerminals = TabbedTerminal(self)
         self.setWidget(self.tabTerminals)
         self.backendManager = BackendManager(parent = self)
-        self.localBackend = self.backendManager.localBackend(workingDirectory = get_home_dir(), protocol = 'ipc')
+        self.localBackend = self.backendManager.localBackend(workingDirectory = get_home_dir())
         
         
     def finished(self):

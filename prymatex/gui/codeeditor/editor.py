@@ -101,10 +101,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     
     @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
     def defaultFont(self, font):
-        font.setFixedPitch(True)
-        font.setStyleHint(QtGui.QFont.Monospace)
-        #font.setStyleStrategy(QtGui.QFont.ForceIntegerMetrics)
-        font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+        font.setStyleStrategy(font.styleStrategy() | QtGui.QFont.ForceIntegerMetrics | QtGui.QFont.PreferAntialias)
         self.setFont(font)
 
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
@@ -1189,17 +1186,19 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def zoomIn(self):
         font = self.font()
         size = font.pointSize()
-        if size < self.FONT_MAX_SIZE:
-            size += 1
-            font.setPointSize(size)
+        if size >= self.FONT_MAX_SIZE:
+            return
+        size += 1
+        font.setPointSize(size)
         self.setFont(font)
 
     def zoomOut(self):
         font = self.font()
         size = font.pointSize()
-        if size > self.FONT_MIN_SIZE:
-            size -= 1
-            font.setPointSize(size)
+        if size <= self.FONT_MIN_SIZE:
+            return
+        size -= 1
+        font.setPointSize(size)
         self.setFont(font)
 
     #===========================================================================
