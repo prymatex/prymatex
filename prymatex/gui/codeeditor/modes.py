@@ -153,7 +153,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                 cursorLine.clearSelection()
                 cursorLines.append(cursorLine)
         self.editor.setExtraSelectionCursors("line", cursorLines)
-        self.editor.updateExtraSelections(["line", "selection"])
+        self.editor.updateExtraSelections()
 
     @property
     def isDragCursor(self):

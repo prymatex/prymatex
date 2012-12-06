@@ -166,8 +166,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
         #Register text formaters
         self.registerTextCharFormatBuilder("line", self.textCharFormat_line_builder)
-        self.registerTextCharFormatBuilder("brace", self.textCharFormat_brace_builder)
         self.registerTextCharFormatBuilder("selection", self.textCharFormat_selection_builder)
+        self.registerTextCharFormatBuilder("brace", self.textCharFormat_brace_builder)
         
         #Cursor history
         #self._cursorHistory, self._cursorHistoryIndex = [], 0

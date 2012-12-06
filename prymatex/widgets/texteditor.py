@@ -28,7 +28,9 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         #self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         
         self.__scopedExtraSelections = {}
+        self.__updateExtraSelectionsOrder = []
         self.__textCharFormatBuilders = {}
+        
 
     #------ Retrieve text
     def wordUnderCursor(self, cursor = None):
@@ -205,6 +207,8 @@ class TextEditWidget(QtGui.QPlainTextEdit):
 
     #------ Extra selections
     def registerTextCharFormatBuilder(self, scope, formatBuilder):
+        # TODO Un poco mejor esto para soportar subscopes con puntos
+        self.__updateExtraSelectionsOrder.append(scope)
         self.__textCharFormatBuilders[scope] = formatBuilder
     
     def defaultTextCharFormatBuilder(self, scope):
@@ -219,13 +223,11 @@ class TextEditWidget(QtGui.QPlainTextEdit):
     def updateExtraSelectionCursors(self, cursorsDict):
         map(lambda (scope, cursors): self.setExtraSelectionCursors(scope, cursors), cursorsDict.iteritems())
     
-    def updateExtraSelections(self, order = []):
+    def updateExtraSelections(self):
         extraSelections = []
-        for scope in order:
-            extraSelections.extend(self.__scopedExtraSelections[scope])
-        for scope, extra in self.__scopedExtraSelections.iteritems():
-            if scope not in order:
-                extraSelections.extend(extra)
+        for scope in self.__updateExtraSelectionsOrder:
+            if scope in self.__scopedExtraSelections:
+                extraSelections.extend(self.__scopedExtraSelections[scope])
         self.setExtraSelections(extraSelections)
         self.extraSelectionChanged.emit()
         
