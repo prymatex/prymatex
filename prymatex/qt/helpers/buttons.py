@@ -3,7 +3,6 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex import resources
 from prymatex.qt.helpers.base import text2objectname
 
 def create_toolbutton(parent, settings):
@@ -15,10 +14,7 @@ def create_toolbutton(parent, settings):
     
     # attrs
     if settings.has_key("icon"):
-        icon = settings["icon"]
-        if isinstance(icon, basestring):
-            icon = resources.getIcon(icon)
-        button.setIcon(icon)
+        button.setIcon(settings["icon"])
     if settings.has_key("shortcut"):
         button.setShortcut(settings["shortcut"])
     if settings.has_key("tip"):

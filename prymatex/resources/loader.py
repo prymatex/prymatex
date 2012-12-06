@@ -11,6 +11,7 @@ RESOURCES = {}
 RESOURCES_READY = False
 
 THEME_ICON_TEST = "folder-sync"
+STANDARD_ICON_NAME = [name for name in dir(QtGui.QStyle) if name.startswith('SP_') ]
 
 STATICMAPPING = (
     # Process

@@ -1265,10 +1265,14 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             menues.append(bundleMenu)
             menues.append("-")
         if self.filePath:
-            menues.append({
-                "text": "Copy file path",
-                "icon": resources.getIcon("edit-copy"),
-                "callback": lambda editor = self: QtGui.QApplication.clipboard().setText(editor.filePath)  })
+            menues.extend([
+                {   "text": "Path to Clipboard",
+                    "callback": lambda editor = self: self.application.clipboard().setText(editor.filePath)  },
+                {   "text": "Name to Clipboard",
+                    "callback": lambda editor = self: self.application.clipboard().setText(editor.application.fileManager.basename(editor.filePath))  },
+                {   "text": "Directory to Clipboard",
+                    "callback": lambda editor = self: self.application.clipboard().setText(editor.application.fileManager.dirname(editor.filePath))  },
+                ])
         return menues
     
     # Contributes to Main Menu

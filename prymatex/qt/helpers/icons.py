@@ -3,6 +3,8 @@
 
 from prymatex.qt import QtCore, QtGui
 
+__all__ = [ "combine_icons", "get_std_icon" ]
+
 def combine_icons(icon1, icon2, scale = 1):
     newIcon = QtGui.QIcon()
     sizes = icon1.availableSizes()
@@ -21,17 +23,14 @@ def combine_icons(icon1, icon2, scale = 1):
         newIcon.addPixmap(result)
     return newIcon
 
-def get_std_icon(name, size=None):
-    """Get standard platform icon
-    Call 'show_std_icons()' for details"""
+def get_std_icon(name):
+    """Get standard platform icon Call 'show_std_icons()' for details"""
     if not name.startswith('SP_'):
-        name = 'SP_'+name
-    icon = QtGui.QWidget().style().standardIcon( getattr(QtGui.QStyle, name) )
-    if size is None:
-        return icon
-    else:
-        return QtGui.QIcon( icon.pixmap(size, size) )
-        
+        name = 'SP_' + name
+    standardIconName = getattr(QtGui.QStyle, name, None)
+    if standardIconName is not None:
+        return QtGui.QWidget().style().standardIcon( standardIconName )
+
 class ShowStdIcons(QtGui.QWidget):
     """
     Dialog showing standard icons
@@ -48,7 +47,7 @@ class ShowStdIcons(QtGui.QWidget):
                 icon_layout = QtGui.QHBoxLayout()
                 icon = get_std_icon(child)
                 label = QtGui.QLabel()
-                label.setPixmap(icon.pixmap(32, 32))
+                label.setPixmap(icon.pixmap(16, 16))
                 icon_layout.addWidget( label )
                 icon_layout.addWidget( QtGui.QLineEdit(child.replace('SP_', '')) )
                 col_layout.addLayout(icon_layout)
@@ -63,8 +62,9 @@ def show_std_icons():
     """
     Show all standard Icons
     """
-    app = qapplication()
+    app = QtGui.QApplication([])
     dialog = ShowStdIcons(None)
+    print get_std_icon("cacho")
     dialog.show()
     import sys
     sys.exit(app.exec_())

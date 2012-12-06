@@ -176,4 +176,5 @@ class BackendManager(QtCore.QObject):
             return self.backend("local", lines[-1], process)
         else:
             print str(process.readAllStandardError()).decode("utf-8")
+            sys.exit(-1)
 

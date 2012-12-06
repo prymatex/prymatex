@@ -3,7 +3,6 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex import resources
 from prymatex.qt.helpers.base import text2objectname
 
 from prymatex.utils import programs
@@ -24,10 +23,7 @@ def create_action(parent, settings):
     
     # attrs
     if settings.has_key("icon"):
-        icon = settings["icon"]
-        if isinstance(icon, basestring):
-            icon = resources.getIcon(icon)
-        action.setIcon(icon)
+        action.setIcon(settings["icon"])
     if settings.has_key("shortcut"):
         action.setShortcut(settings["shortcut"])
     if settings.has_key("tip"):
