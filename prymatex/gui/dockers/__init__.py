@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 from PyQt4 import QtCore
-
 from prymatex.gui.dockers.filesystem import PMXFileSystemDock
 from prymatex.gui.dockers.browser import PMXBrowserDock
 from prymatex.gui.dockers.projects import PMXProjectDock
@@ -20,7 +20,9 @@ def registerPlugin(manager):
     manager.registerKeyHelper(PMXProjectDock, helpers.CutHelper)
     manager.registerKeyHelper(PMXProjectDock, helpers.DeleteHelper)
     manager.registerDocker(PMXFileSystemDock)
-    manager.registerDocker(TerminalDock)
+    # Terminal hangs in OSX
+    if sys.platform != 'darwin':
+        manager.registerDocker(TerminalDock)
     manager.registerDocker(PMXBrowserDock)
     manager.registerDocker(PMXSearchDock)
     manager.registerDocker(PMXProcessDock)
