@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import traceback
 import os, sys
 from glob import glob
 
@@ -23,35 +24,20 @@ class ResourceProvider():
     def __init__(self, resources):
         self.resources = resources
 
-    def getImage(self, index, default = None):
+    def getImage(self, index, size = None, default = None):
         if index in self.resources:
             return QtGui.QPixmap(self.resources[index])
-        return resources.getImage(index)
+        return resources.getImage(index, size, default)
         
-    def getIcon(self, index, default = None):
+    def getIcon(self, index, size = None, default = None):
         if index in self.resources:
             return QtGui.QIcon(self.resources[index])
-        return resources.getIcon(index)
+        return resources.getIcon(index, size, default)
 
 class PluginDescriptor(object):
     def __init__(self, entry):
-        self.__entry = entry
-    
-    def __getitem__(self, name):
-        if name in self.__entry:
-            return self.__entry[name]
-        raise KeyError(name)
-    
-    def __getattr__(self, name):
-        if name in self.__entry:
-            return self.__entry[name]
-        raise AttributeError(name)
-        
-    def getImage(self, key):
-        return self.__entry["resources"].getImage(key)
-
-    def getIcon(self, key):
-        return self.__entry["resources"].getIcon(key)
+        for key, value in entry.iteritems():
+            setattr(self, key, value)
         
 class PluginManager(QtCore.QObject, PMXBaseComponent):
     
@@ -65,7 +51,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         self.directories = []
         
         self.currentPluginDescriptor = None
-        self.modules = {}
+        self.plugins = {}
         
         self.editors = []
         self.dockers = []
@@ -187,19 +173,13 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
     #==================================================
     # Load plugins
     #==================================================
-    def beginRegisterPlugin(self, pluginId, pluginEntry):
-        self.modules[pluginId] = pluginEntry
-        self.currentPluginDescriptor = PluginDescriptor(pluginEntry)
-        
-    def endRegisterPlugin(self, success):
-        if not success:
-            del self.modules[self.currentPluginDescriptor["id"]]
-        self.currentPluginDescriptor = None
-        
     def loadResources(self, pluginDirectory, pluginEntry):
-        if "resources" in pluginEntry:
-            resourcesDirectory = os.path.join(pluginDirectory, pluginEntry["resources"])
-            res = resources.loadResources(resourcesDirectory)
+        if "icon" in pluginEntry:
+            iconPath = os.path.join(pluginDirectory, pluginEntry["icon"])
+            pluginEntry["icon"] = QtGui.QIcon(iconPath)
+        if "share" in pluginEntry:
+            pluginEntry["share"] = os.path.join(pluginDirectory, pluginEntry["share"])
+            res = resources.loadResources(pluginEntry["share"])
             pluginEntry["resources"] = ResourceProvider(res)
         else:
             # Global resources
@@ -209,37 +189,43 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         pluginId = pluginEntry.get("id")
         packageName = pluginEntry.get("package")
         registerFunction = pluginEntry.get("register", "registerPlugin")
-        pluginDirectory = pluginEntry.get("path")    
+        pluginDirectory = pluginEntry.get("path")
         self.loadResources(pluginDirectory, pluginEntry)
-        self.beginRegisterPlugin(pluginId, pluginEntry)
         try:
             pluginEntry["module"] = import_from_directory(pluginDirectory, packageName)
             registerPluginFunction = getattr(pluginEntry["module"], registerFunction)
-            registerPluginFunction(self)
-            self.endRegisterPlugin(True)
-        except (ImportError, AttributeError), reason:
-            import traceback
+            if callable(registerPluginFunction):
+                self.plugins[pluginId] = pluginEntry
+                self.currentPluginDescriptor = PluginDescriptor(self.plugins[pluginId])
+                registerPluginFunction(self)
+        except Exception as reason:
+            # On exception remove entry
+            if pluginId in self.plugins:
+                del self.plugins[pluginId]
             traceback.print_exc()
-            self.endRegisterPlugin(False)
             raise reason
+        self.currentPluginDescriptor = None
     
     def loadCoreModule(self, moduleName, pluginId):
         pluginEntry = {"id": pluginId,
                        "resources": resources}
-        self.beginRegisterPlugin(pluginId, pluginEntry)
         try:
             pluginEntry["module"] = import_module(moduleName)
             registerPluginFunction = getattr(pluginEntry["module"], "registerPlugin")
-            registerPluginFunction(self)
-            self.endRegisterPlugin(True)
+            if callable(registerPluginFunction):
+                self.plugins[pluginId] = pluginEntry
+                self.currentPluginDescriptor = PluginDescriptor(self.plugins[pluginId])
+                registerPluginFunction(self)
         except (ImportError, AttributeError), reason:
-            import traceback
+            # On exception remove entry
+            if pluginId in self.plugins:
+                del self.plugins[pluginId]
             traceback.print_exc()
-            self.endRegisterPlugin(False)
             raise reason
-    
+        self.currentPluginDescriptor = None
+        
     def hasDependenciesResolved(self, pluginEntry):
-        return all(map(lambda dep: dep in self.modules, pluginEntry.get("depends", [])))
+        return all(map(lambda dep: dep in self.plugins, pluginEntry.get("depends", [])))
     
     def loadPlugins(self):
         self.loadCoreModule('prymatex.gui.codeeditor', 'org.prymatex.codeeditor')

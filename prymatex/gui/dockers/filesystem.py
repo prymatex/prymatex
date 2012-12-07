@@ -57,13 +57,11 @@ class PMXSafeFilesytemLineEdit(QtGui.QLineEdit):
         if sys.platform.count('win'):
             if text.upper() in self.DOS_NAMES:
                 return False
-        
         return False
     
 class PMXFileSystemItemDelegate(QtGui.QItemDelegate):
     def createEditor(self, parent, option, index):
-        """Create a new editor
-        """
+        """Create a new editor"""
         
         editor = PMXSafeFilesytemLineEdit(parent)
         editor.setText(index.data())
@@ -71,7 +69,7 @@ class PMXFileSystemItemDelegate(QtGui.QItemDelegate):
     
     def setEditorData(self, editor, index):
         return QtGui.QItemDelegate.setEditorData(self, editor, index)
-    
+        
     def setModelData(self, editor, model, index):
         return QtGui.QItemDelegate.setModelData(self, editor, model, index)
 
