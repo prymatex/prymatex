@@ -2,6 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 import re
+import difflib
 
 from prymatex.utils import text
 
@@ -322,3 +323,47 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         
     def convertTranspose(self, cursor = None):
         self.__convert_text(cursor, text.transpose)
+
+    #------ Update Text
+    def updatePlainText(self, text):
+        
+        def perform_action(code, cursor, text=""):
+            def _nop():
+                pass
+            def _action():
+                cursor.insertText(text)
+            return _action if code in ["insert", "replace", "delete"] else _nop
+        
+        sequenceMatcher = difflib.SequenceMatcher(None, self.toPlainText(), text)
+        opcodes = sequenceMatcher.get_opcodes()
+        
+        actions = map(lambda code: perform_action(code[0], self.newCursorAtPosition(code[1], code[2]), text[code[3]:code[4]]), opcodes)
+        
+        cursor = self.textCursor()
+        
+        cursor.beginEditBlock()
+        map(lambda action: action(), actions)
+        cursor.endEditBlock()
+        
+        self.ensureCursorVisible()
+
+    #------ Text Zoom
+    FONT_MAX_SIZE = 32
+    FONT_MIN_SIZE = 6
+    def zoomIn(self):
+        font = self.font()
+        size = font.pointSize()
+        if size >= self.FONT_MAX_SIZE:
+            return
+        size += 1
+        font.setPointSize(size)
+        self.setFont(font)
+
+    def zoomOut(self):
+        font = self.font()
+        size = font.pointSize()
+        if size <= self.FONT_MIN_SIZE:
+            return
+        size -= 1
+        font.setPointSize(size)
+        self.setFont(font)

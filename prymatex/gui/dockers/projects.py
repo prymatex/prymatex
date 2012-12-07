@@ -401,7 +401,13 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         if mimeData.hasUrls() and os.path.isdir(parentPath):
             for url in mimeData.urls():
                 srcPath = url.toLocalFile()
-                dstPath = os.path.join(parentPath, self.application.fileManager.basename(srcPath))
+                basename = self.application.fileManager.basename(srcPath)
+                dstPath = os.path.join(parentPath, basename)
+                while self.application.fileManager.exists(dstPath):
+                    basename, accepted = QtGui.QInputDialog.getText(self, _("New name"), 
+                        _("Destiny already exists, please use a new name"), text = basename)
+                    if not accepted: return
+                    dstPath = os.path.join(parentPath, basename)
                 if os.path.isdir(srcPath):
                     self.application.fileManager.copytree(srcPath, dstPath)
                 else:
@@ -414,8 +420,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     @QtCore.pyqtSlot()
     def on_pushButtonCustomFilters_pressed(self):
         filters, accepted = QtGui.QInputDialog.getText(self, _("Custom Filter"), 
-                                                        _("Enter the filters (separated by comma)\nOnly * and ? may be used for custom matching"), 
-                                                        text = self.customFilters)
+                                _("Enter the filters (separated by comma)\nOnly * and ? may be used for custom matching"), 
+                                text = self.customFilters)
         if accepted:
             #Save and set filters
             self.settings.setValue('customFilters', filters)
