@@ -35,6 +35,9 @@ class ResourceProvider():
         return resources.getIcon(index, size, default)
 
 class PluginDescriptor(object):
+    name = ""
+    description = ""
+    icon = None
     def __init__(self, entry):
         for key, value in entry.iteritems():
             setattr(self, key, value)
@@ -59,7 +62,12 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         self.keyHelpers = {}
         self.addons = {}
         self.instances = {}
-    
+
+    @classmethod
+    def contributeToSettings(cls):
+        from prymatex.gui.settings.plugins import PluginsSettingsWidget
+        return [ PluginsSettingsWidget ]
+            
     def addPluginDirectory(self, directory):
         self.directories.append(directory)
 
@@ -195,8 +203,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
             pluginEntry["module"] = import_from_directory(pluginDirectory, packageName)
             registerPluginFunction = getattr(pluginEntry["module"], registerFunction)
             if callable(registerPluginFunction):
-                self.plugins[pluginId] = pluginEntry
-                self.currentPluginDescriptor = PluginDescriptor(self.plugins[pluginId])
+                self.currentPluginDescriptor = self.plugins[pluginId] = PluginDescriptor(pluginEntry)
                 registerPluginFunction(self)
         except Exception as reason:
             # On exception remove entry
@@ -213,8 +220,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
             pluginEntry["module"] = import_module(moduleName)
             registerPluginFunction = getattr(pluginEntry["module"], "registerPlugin")
             if callable(registerPluginFunction):
-                self.plugins[pluginId] = pluginEntry
-                self.currentPluginDescriptor = PluginDescriptor(self.plugins[pluginId])
+                self.currentPluginDescriptor = self.plugins[pluginId] = PluginDescriptor(pluginEntry)
                 registerPluginFunction(self)
         except (ImportError, AttributeError), reason:
             # On exception remove entry
