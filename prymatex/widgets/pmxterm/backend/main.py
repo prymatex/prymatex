@@ -50,6 +50,8 @@ def worker_notifier(queue_notifier, addr):
         
     while True:
         data = queue_notifier.get()
+        if not isinstance(data, (tuple, list)):
+            data =  ( data, '' )
         zpub.send_multipart(data)
 
 

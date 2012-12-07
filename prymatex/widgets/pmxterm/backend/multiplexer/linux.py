@@ -80,7 +80,7 @@ class ProcessInfo(object):
             
 
 class Multiplexer(base.Multiplexer):
-    def __init__(self, queue, cmd="/bin/bash", env_term = "xterm-color", timeout=60*60*24):
+    def __init__(self, queue, cmd=os.environ["SHELL"], env_term = "xterm-color", timeout=60*60*24):
         
         base.Multiplexer.__init__(self)
         self.processInfo = ProcessInfo()
@@ -214,6 +214,7 @@ class Multiplexer(base.Multiplexer):
         self.proc_waitfordeath(sid)
         if sid in self.session:
             del self.session[sid]
+        self.queue.put(sid)
         return True
 
 
@@ -316,14 +317,9 @@ class Multiplexer(base.Multiplexer):
                 i = []
             for fd in i:
                 sid = fd2sid[fd]
-                self.proc_read(sid)
-                self.session[sid]["changed"] = time.time()
-                dump = None
-                try:
-                    dump = self.session[sid]["term"].dump()
-                except:
-                    pass
-                self.queue.put([ sid, str(dump) ])
+                if self.proc_read(sid) and sid in self.session:
+                    self.session[sid]["changed"] = time.time()
+                    self.queue.put([ sid, str(self.session[sid]["term"].dump()) ])
             if len(i):
                 time.sleep(0.002)
         self.proc_buryall()

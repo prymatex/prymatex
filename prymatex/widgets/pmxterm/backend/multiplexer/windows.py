@@ -16,6 +16,7 @@ import array
 
 from win32file import ReadFile, WriteFile
 from win32pipe import PeekNamedPipe
+import win32api
 import msvcrt
 
 from multiplexer import base
@@ -130,6 +131,7 @@ class Multiplexer(base.Multiplexer):
         self.session[sid]['pid'] = self.session[sid]['process'].pid
         
         self.session[sid]['thread'] = threading.Thread(target=self.proc_read, args=(sid, ))
+        # ver si daemon o no
         self.session[sid]['thread'].daemon = True
         self.session[sid]['thread'].start()
         self.proc_resize(sid, w, h)
@@ -137,33 +139,21 @@ class Multiplexer(base.Multiplexer):
 
 
     def proc_waitfordeath(self, sid):
-        try:
-            os.close(self.session[sid]['fd'])
-        except (KeyError, IOError, OSError):
-            pass
-        if sid in self.session:
-            if 'fd' in self.session[sid]:
-                del self.session[sid]['fd']
-        try:
-            os.waitpid(self.session[sid]['pid'], 0)
-        except (KeyError, IOError, OSError):
-            pass
-        if sid in self.session:
-            if 'pid' in self.session[sid]:
-                del self.session[sid]['pid']
         self.session[sid]['state'] = 'dead'
+        self.session[sid]['thread'].join()
         return True
 
 
     def proc_bury(self, sid):
         if self.session[sid]['state'] == 'alive':
             try:
-                os.kill(self.session[sid]['pid'], signal.SIGTERM)
+                win32api.TerminateProcess(int(self.session[sid]["process"]._handle), -1)
             except (IOError, OSError):
                 pass
         self.proc_waitfordeath(sid)
         if sid in self.session:
             del self.session[sid]
+        self.queue.put(sid)
         return True
 
     def proc_read(self, sid):
@@ -180,7 +170,6 @@ class Multiplexer(base.Multiplexer):
                 session["changed"] = time.time()
                 self.queue.put([sid, str(session['term'].dump())])
             time.sleep(0.002)
-        self.proc_bury(sid)
 
     def proc_write(self, sid, d):
         """

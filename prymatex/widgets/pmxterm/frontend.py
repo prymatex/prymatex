@@ -131,7 +131,6 @@ class TerminalWidget(QtGui.QWidget):
         self._cursor_rect = None
         self._cursor_col = 0
         self._cursor_row = 0
-        self._dirty = False
         self._blink = False
         self._press_pos = None
         self._selection = None
@@ -164,7 +163,7 @@ class TerminalWidget(QtGui.QWidget):
 
 
     def focusInEvent(self, event):
-        self.update_screen()
+        self.update()
 
 
     def resizeEvent(self, event):
@@ -179,14 +178,16 @@ class TerminalWidget(QtGui.QWidget):
 
 
     def session_readyRead(self):
-        self.session_screenReady(self.session.dump())
+        if not self.session.is_alive():
+            self.sessionClosed.emit()
+        else:
+            self.session_screenReady(self.session.dump())
+
 
     def session_screenReady(self, screen):
         old_screen = self._screen
         (self._cursor_col, self._cursor_row), self._screen = screen
         self._update_cursor_rect()
-        if old_screen != self._screen:
-            self._dirty = True
         if self.hasFocus():
             self._blink = not self._blink
         self.update()
@@ -206,26 +207,16 @@ class TerminalWidget(QtGui.QWidget):
         self._update_metrics()
         self._update_cursor_rect()
         self.resizeEvent(None)
-        self.update_screen()
-
-
-    def update_screen(self):
-        self._dirty = True
         self.update()
 
         
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
-        if self._dirty:
-            self._dirty = False
-            self._paint_screen(painter)
-        else:
-            if self._cursor_rect and not self._selection:
-                self._paint_cursor(painter)
+        self._paint_screen(painter)
+        if self._cursor_rect is not None:
+            self._paint_cursor(painter)
         if self._selection:
             self._paint_selection(painter)
-            self._dirty = True
-
 
     def _pixel2pos(self, x, y):
         col = int(round(x / self._char_width))
@@ -384,17 +375,17 @@ class TerminalWidget(QtGui.QWidget):
         elif button == QtCore.Qt.LeftButton:
             self._press_pos = event.pos()
             self._selection = None
-            self.update_screen()
+            self.update()
         elif button == QtCore.Qt.MiddleButton:
             self._press_pos = None
             self._selection = None
             text = unicode(self._clipboard.text(QtGui.QClipboard.Selection))
             self.send(text.encode("utf-8"))
-            #self.update_screen()
+            #self.update()
 
 
     def mouseReleaseEvent(self, QMouseEvent):
-        self.update_screen()
+        self.update()
 
 
     def _selection_rects(self, start_pos, end_pos):
@@ -463,7 +454,7 @@ class TerminalWidget(QtGui.QWidget):
                 print "%r copied to xselection" % sel
             self._clipboard.setText(sel, QtGui.QClipboard.Selection)
             
-            self.update_screen()
+            self.update()
 
 
         
@@ -499,7 +490,7 @@ class TerminalWidget(QtGui.QWidget):
             print "%r copied to xselection" % sel
         self._clipboard.setText(sel, QtGui.QClipboard.Selection)
 
-        self.update_screen()
+        self.update()
 
         
     def is_alive(self):
