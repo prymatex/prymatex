@@ -173,7 +173,7 @@ class BackendManager(QtCore.QObject):
             args.extend(["-a", address])
         
         process.start(sys.executable, args)    
-        dataAvailable  = process.waitForReadyRead(1000)
+        dataAvailable  = process.waitForReadyRead(2000)
         if dataAvailable:
             lines = str(process.readAllStandardOutput()).decode("utf-8").splitlines()
             return self.backend("local", lines[-1], process)
