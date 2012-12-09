@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/treewidget.ui'
 #
-# Created: Thu Oct 18 20:33:12 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Sun Dec  9 16:08:32 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 

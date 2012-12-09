@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configure/plugins.ui'
 #
-# Created: Mon Oct 29 22:51:36 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Sun Dec  9 16:10:17 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -29,6 +29,8 @@ class Ui_Plugins(object):
         self.verticalLayout_2.addWidget(self.lineEditFilter)
         self.tableViewPlugins = QtGui.QTableView(Plugins)
         self.tableViewPlugins.setObjectName(_fromUtf8("tableViewPlugins"))
+        self.tableViewPlugins.horizontalHeader().setVisible(False)
+        self.tableViewPlugins.verticalHeader().setVisible(False)
         self.verticalLayout_2.addWidget(self.tableViewPlugins)
 
         self.retranslateUi(Plugins)
