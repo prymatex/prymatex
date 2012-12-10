@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.qt import QtCore
+from prymatex.qt import QtCore, QtGui
 
 GITHUB_CLONE_URL = 'https://github.com/{username}/{name}.git'
 

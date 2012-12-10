@@ -34,7 +34,7 @@ class DockWidgetToolBar(QtGui.QToolBar):
         
         #Restore action
         self.restoreAction = QtGui.QAction(self)
-        self.restoreAction.setIcon(resources.getIcon("image-stack"))
+        self.restoreAction.setIcon(resources.getIcon("TitleBarUnshadeButton"))
         self.restoreAction.triggered.connect(self.hide)
         self.addAction(self.restoreAction)
         

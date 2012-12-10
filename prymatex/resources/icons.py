@@ -35,12 +35,9 @@ def __get_icon(index):
     @return: QIcon instance or None if no icon could be retrieved
     '''
     if isinstance(index, basestring):
-        if os.path.isfile(index):
+        if os.path.exists(index) and os.path.isabs(index):
             #File path Icon
             return __fileIconProvider.icon(QtCore.QFileInfo(index))
-        elif os.path.isdir(index):
-            #Folder Icon
-            return __fileIconProvider.icon(QtGui.QFileIconProvider.Folder)
         elif QtGui.QIcon.hasThemeIcon(index):
             #Theme Icon
             return QtGui.QIcon._fromTheme(index)
@@ -54,3 +51,4 @@ def __get_icon(index):
     elif isinstance(index, int):
         #Icon by int index in fileicon provider
         return __fileIconProvider.icon(index)
+    
