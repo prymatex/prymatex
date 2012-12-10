@@ -75,3 +75,23 @@ class RepositoryTableModel(QtCore.QAbstractTableModel):
     
     def flags(self, index):
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
+        
+class RepositoryProxyTableModel(QtGui.QSortFilterProxyModel):
+    def filterAcceptsRow(self, sourceRow, sourceParent):
+        return True
+        
+    def filterAcceptsColumn(self, sourceColumn, sourceParent):
+        return True
+        
+    def lessThan(self, left, right):
+        source = self.sourceModel()
+        lIndex = self.mapToSource(left)
+        rIndex = self.mapToSource(right)
+        leftRepo = source.repositories[lIndex.row()]
+        rightRepo = source.repositories[rIndex.row()]
+        if self.sortColumn() == 0:
+            return leftRepo["name"] > rightRepo["name"]
+        elif self.sortColumn() == 1:
+            return leftRepo["username"] > rightRepo["username"]
+        elif self.sortColumn() == 2:
+            return leftRepo["watchers"] > rightRepo["watchers"]
