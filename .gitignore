@@ -1,4 +1,5 @@
 .project
+resources/icon/*
 *~
 dict.*
 *.swp
