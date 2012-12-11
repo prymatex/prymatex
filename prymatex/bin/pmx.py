@@ -32,14 +32,14 @@ def areBasicImportsAvaliable():
     except ImportError:
         return False
     return True
-        
+
 
 # TODO: Accept Qt Arguments to QtApplication
 def runPrymatexApplication(options, files):
     from prymatex.core.app import PMXApplication
     from prymatex.core import exceptions
-    
-    def runPrymatexInstance(instanceOptions, instanceFiles = []):
+
+    def runPrymatexInstance(instanceOptions, instanceFiles=[]):
         global prymatexAppInstance
         if prymatexAppInstance is not None:
             prymatexAppInstance.unloadGraphicalUserInterface()
@@ -50,7 +50,7 @@ def runPrymatexApplication(options, files):
         except ValueError:
             return
         prymatexAppInstance.setupLogging(instanceOptions.verbose, instanceOptions.log_pattern)
-    
+        prymatexAppInstance.options = instanceOptions
         prymatexAppInstance.replaceSysExceptHook()
         prymatexAppInstance.checkSingleInstance()
         if options.reset_settings:
@@ -64,12 +64,12 @@ def runPrymatexApplication(options, files):
         returnCode = runPrymatexInstance(options, files)
     except exceptions.EnviromentNotSuitable:
         print "Prymatex can't run. Basic imports can't be found. Running in virtualenv?"
-        
-    
+
+
     except exceptions.AlreadyRunningError as ex:
         from PyQt4 import QtGui
         QtGui.QMessageBox.critical(None, ex.title, ex.message, QtGui.QMessageBox.Ok)
-    
+
     except:
         from traceback import format_exc
         traceback = format_exc()
@@ -89,10 +89,10 @@ def main(args):
         print "Check if you have: %s" % ', '.join(BASIC_IMPORTS)
         print
         return
-    
+
     from prymatex.core import cliparser
     options, files = cliparser.parse()
-    
+
     if options.devel:
         from prymatex.utils import autoreload
         autoreload.main(runPrymatexApplication, (options, files))
