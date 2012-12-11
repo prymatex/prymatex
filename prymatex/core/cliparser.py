@@ -32,7 +32,7 @@ parser.add_argument('-f', '--files', metavar='file', type=unicode,
     nargs='+', help='A file/s to edit', default=[])
 
 # Reverts custom options
-parser.add_argument('--reset-settings', metavar='reste_settings', default=False,
+parser.add_argument('--reset-settings', action='store_true', default=False,
                     help='Restore default settings for selected profile')
 
 parser.add_argument('-p', '--profile', metavar='profile', nargs="?", default="",
@@ -48,7 +48,7 @@ parser.add_argument('--verbose', default=0, type=int,
 parser.add_argument('--log-pattern', default='', type=str,
                 help='Set filter pattern for logging')
 
-parser.add_argument('-n', '--no-splash', default=False, type=bool,
+parser.add_argument('-n', '--no-splash', default=False, action='store_true',
                     help='Show spalsh screen')
 
 
