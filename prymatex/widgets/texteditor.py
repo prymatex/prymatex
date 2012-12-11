@@ -16,12 +16,6 @@ class TextEditWidget(QtGui.QPlainTextEdit):
     #------ Regular expresions
     RE_WORD = re.compile(r"[A-Za-z_]*")
     
-    #------ Move types
-    MoveLineUp = QtGui.QTextCursor.Up
-    MoveLineDown = QtGui.QTextCursor.Down
-    MoveColumnLeft = QtGui.QTextCursor.Left
-    MoveColumnRight = QtGui.QTextCursor.Right
-    
     def __init__(self, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
         
@@ -257,38 +251,58 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         return extraSelections
     
     #------ Move text
-    def moveText(self, moveType):
-        #TODO: Separar en funciones, sacar los tipos y mejorar
-        #Solo si tiene seleccion puede mover derecha y izquierda
-        cursor = self.textCursor()
+    def __move_line(self, cursor, moveType):
         cursor.beginEditBlock()
-        if cursor.hasSelection():
-            if (moveType == QtGui.QTextCursor.Left and cursor.selectionStart() == 0) or (moveType == QtGui.QTextCursor.Right and cursor.selectionEnd() == self.document().characterCount()):
-                return
-            openRight = cursor.position() == cursor.selectionEnd()
-            text = cursor.selectedText()
-            cursor.removeSelectedText()
-            cursor.movePosition(moveType)
-            start = cursor.position()
-            cursor.insertText(text)
-            end = cursor.position()
-            cursor = self.newCursorAtPosition(start, end) if openRight else self.newCursorAtPosition(end, start)
-        elif moveType in [QtGui.QTextCursor.Up, QtGui.QTextCursor.Down]:
-            if (moveType == QtGui.QTextCursor.Up and cursor.block() == cursor.document().firstBlock()) or (moveType == QtGui.QTextCursor.Down and cursor.block() == cursor.document().lastBlock()):
-                return
-            column = cursor.columnNumber()
-            cursor.select(QtGui.QTextCursor.LineUnderCursor)
-            text1 = cursor.selectedText()
-            cursor2 = QtGui.QTextCursor(cursor)
-            otherBlock = cursor.block().next() if moveType == QtGui.QTextCursor.Down else cursor.block().previous()
-            cursor2.setPosition(otherBlock.position())
-            cursor2.select(QtGui.QTextCursor.LineUnderCursor)
-            text2 = cursor2.selectedText()
-            cursor.insertText(text2)
-            cursor2.insertText(text1)
-            cursor.setPosition(otherBlock.position() + column)
+        column = cursor.columnNumber()
+        cursor.select(QtGui.QTextCursor.LineUnderCursor)
+        text1 = cursor.selectedText()
+        cursor2 = QtGui.QTextCursor(cursor)
+        otherBlock = cursor.block().next() if moveType == QtGui.QTextCursor.Down else cursor.block().previous()
+        cursor2 = self.newCursorAtPosition(otherBlock.position())
+        cursor2.select(QtGui.QTextCursor.LineUnderCursor)
+        text2 = cursor2.selectedText()
+        cursor.insertText(text2)
+        cursor2.insertText(text1)
+        cursor.setPosition(otherBlock.position() + column)
         cursor.endEditBlock()
         self.setTextCursor(cursor)
+        
+    def __move_text(self, cursor, moveType):
+        cursor.beginEditBlock()
+        openRight = cursor.position() == cursor.selectionEnd()
+        text = cursor.selectedText()
+        cursor.removeSelectedText()
+        cursor.movePosition(moveType)
+        start = cursor.position()
+        cursor.insertText(text)
+        end = cursor.position()
+        cursor = self.newCursorAtPosition(start, end) if openRight else self.newCursorAtPosition(end, start)
+        cursor.endEditBlock()
+        self.setTextCursor(cursor)
+        
+    def moveUp(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        if cursor.hasSelection():
+            self.__move_text(cursor, QtGui.QTextCursor.Up)
+        elif cursor.block() != self.document().firstBlock():
+            self.__move_line(cursor, QtGui.QTextCursor.Up)
+        
+    def moveDown(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        if cursor.hasSelection():
+            self.__move_text(cursor, QtGui.QTextCursor.Down)
+        elif cursor.block() != self.document().lastBlock():
+            self.__move_line(cursor, QtGui.QTextCursor.Down)
+        
+    def moveLeft(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        if cursor.hasSelection() and cursor.selectionStart() != 0:
+            self.__move_text(cursor, QtGui.QTextCursor.Left)
+        
+    def moveRight(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        if cursor.hasSelection() and cursor.selectionEnd() != self.document().characterCount():
+            self.__move_text(cursor, QtGui.QTextCursor.Right)
         
     #------ Convert Text
     def __convert_text(self, cursor = None, convertFunction = lambda x: x):
