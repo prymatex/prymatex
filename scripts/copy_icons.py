@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import os, shutil
 
 ICON_NAMES = ['view-fullscreen', 'application-x-executable-script',
@@ -18,7 +19,7 @@ ICON_NAMES = ['view-fullscreen', 'application-x-executable-script',
     'application-exit', 'configure', 'project-evelopment-new-template','document-open',
     'edit-copy', 'edit-redo', 'internet-web-browser', 'system-file-manager']
 
-SOURCE = os.path.abspath(os.path.join(__file__, '..', '..', 'prymatex', 'share', 'IconThemes', 'oxygen', '32x32'))
+SOURCE = "/%s" % os.path.join('usr', 'share', 'icons', 'oxygen', '32x32')
 DESTINITY = os.path.abspath(os.path.join(__file__, '..', '..', 'prymatex', 'share', 'Icons'))
 
 if __name__ == '__main__':
