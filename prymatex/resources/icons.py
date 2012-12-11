@@ -34,23 +34,21 @@ def __get_icon(index):
     Index can be a path, a Qt resource path, an integer.
     @return: QIcon instance or None if no icon could be retrieved
     '''
-    #Try icon in db
-    path = getResourcePath(index, ["Icons", "External"])
-    if path is not None:
-        return QtGui.QIcon(path)
-    elif isinstance(index, basestring):
-        if os.path.isfile(index):
+    if isinstance(index, basestring):
+        if os.path.exists(index) and os.path.isabs(index):
             #File path Icon
             return __fileIconProvider.icon(QtCore.QFileInfo(index))
-        elif os.path.isdir(index):
-            #Folder Icon
-            return __fileIconProvider.icon(QtGui.QFileIconProvider.Folder)
         elif QtGui.QIcon.hasThemeIcon(index):
             #Theme Icon
             return QtGui.QIcon._fromTheme(index)
-        else:
-            #Standard Icon
-            return get_std_icon(index)
+        else: 
+            #Try icon in the prymatex's resources
+            path = getResourcePath(index, ["Icons", "External"])
+            if path is not None:
+                return QtGui.QIcon(path)
+        #Standard Icon
+        return get_std_icon(index)
     elif isinstance(index, int):
         #Icon by int index in fileicon provider
         return __fileIconProvider.icon(index)
+    

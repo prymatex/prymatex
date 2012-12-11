@@ -9,8 +9,8 @@ from urlparse import urlsplit
 from prymatex.qt import QtGui, QtCore
 from prymatex.core import PMXBaseDialog
 from ui_githubclient import Ui_GitHubClientDialog
-from model import RepositoryTableModel
 import requests
+from model import RepositoryTableModel, RepositoryProxyTableModel
 
 GITHUB_API_SEARCH_URL = 'https://api.github.com/legacy/repos/search/%s+tmbundle'
 
@@ -55,7 +55,7 @@ class GithubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
 
         self.workerThread = GithubBundleSearchThread(self)
         self.model = RepositoryTableModel(self)
-        self.proxy = QtGui.QSortFilterProxyModel()
+        self.proxy = RepositoryProxyTableModel()
         self.proxy.setSourceModel(self.model)
 
         self.buttonSearch.setEnabled(False)
