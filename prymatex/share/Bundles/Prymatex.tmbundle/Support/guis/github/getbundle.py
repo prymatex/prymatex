@@ -75,7 +75,7 @@ class GithubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         self.tableViewResults.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
         self.tableViewResults.horizontalHeader().setSortIndicatorShown(True)
         self.tableViewResults.horizontalHeader().setClickable(True)
-
+        
     def loadComboBoxNamespace(self):
         for ns in self.application.supportManager.safeNamespaces:
             self.comboBoxNamespace.addItem(ns)
@@ -93,6 +93,8 @@ class GithubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         if repo["namespace"]:
             namespaceBundlePath, _ = self.application.supportManager.namespaceElementPath(repo["namespace"], "Bundles")
             self.labelDestiny.setText(os.path.join(namespaceBundlePath, repo["folder"]))
+        else:
+            self.labelDestiny.setText("")
         self.labelUrl.setText(repo["url"])
 
     def reloadSupport(self):
@@ -142,7 +144,6 @@ class GithubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         else:
             repo["namespace"] = None
         self.buttonOk.setEnabled(self.model.hasSelected())
-        self.setCurrentRepository(repo)
 
     def on_tableViewResults_activated(self, index):
         self.widgetInfo.setVisible(True)
@@ -157,6 +158,7 @@ class GithubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         self.model.addRepositories(data["repositories"])
         self.tableViewResults.resizeRowsToContents()
         self.tableViewResults.setEnabled(True)
+        self.proxy.sort(0)
 
     def retrivalError(self, reason):
         self.tableViewResults.setEnabled(True)

@@ -85,10 +85,8 @@ class RepositoryProxyTableModel(QtGui.QSortFilterProxyModel):
         
     def lessThan(self, left, right):
         source = self.sourceModel()
-        lIndex = self.mapToSource(left)
-        rIndex = self.mapToSource(right)
-        leftRepo = source.repositories[lIndex.row()]
-        rightRepo = source.repositories[rIndex.row()]
+        leftRepo = source.repositories[left.row()]
+        rightRepo = source.repositories[right.row()]
         if self.sortColumn() == 0:
             return leftRepo["name"] > rightRepo["name"]
         elif self.sortColumn() == 1:

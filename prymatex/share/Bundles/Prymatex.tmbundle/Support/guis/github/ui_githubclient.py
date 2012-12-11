@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'githubclient.ui'
 #
-# Created: Mon Sep 24 20:04:36 2012
+# Created: Tue Dec 11 14:59:00 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -48,6 +48,7 @@ class Ui_GitHubClientDialog(object):
         self.tableViewResults.setAlternatingRowColors(True)
         self.tableViewResults.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.tableViewResults.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.tableViewResults.setSortingEnabled(True)
         self.tableViewResults.setObjectName(_fromUtf8("tableViewResults"))
         self.verticalLayout.addWidget(self.tableViewResults)
         self.line_2 = QtGui.QFrame(GitHubClientDialog)
