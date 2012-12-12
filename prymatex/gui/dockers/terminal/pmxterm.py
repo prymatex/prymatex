@@ -46,6 +46,9 @@ class TabbedTerminal(QtGui.QTabWidget):
         self._update_title(term)
 
     
+    def currentTerminal(self):
+        return self.currentWidget()
+    
     def newTerminal(self):
         # Create session
         session = self.parent().localBackend.session()
@@ -131,11 +134,14 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
     # Commands
     #========================================================
     def runCommand(self, command):
+        self.sendCommand(command)
+    
+    def sendCommand(self, command):
         if not self.isVisible():
             self.show()
         self.raise_()
-        print command
-    
+        self.tabTerminals.currentTerminal().send("%s\n" % command)
+        
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.terminal import PMXTerminalSettings
