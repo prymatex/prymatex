@@ -57,7 +57,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
         self.setupPushButton()
     
     def loadSettings(self):
-        currentThemeUUID = self.settingGroup.hasValue('theme') and self.settingGroup.value('theme').upper() or None 
+        currentThemeUUID = self.settingGroup.hasValue('defaultTheme') and self.settingGroup.value('defaultTheme').upper() or None 
         currentTheme = self.application.supportManager.getTheme(currentThemeUUID)
         self.tableView.setModel(self.application.supportManager.themeStyleProxyModel)
         self.comboBoxThemes.setModel(self.application.supportManager.themeListModel)
@@ -171,7 +171,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
         self.tableView.setStyleSheet(tableStyle)
         
         if changeSettings:
-            self.settingGroup.setValue('theme', unicode(theme.uuid).upper())
+            self.settingGroup.setValue('defaultTheme', unicode(theme.uuid).upper())
             message = "<b>%s</b> theme set " % theme.name
             if theme.author is not None:
                 message += "<i>(by %s)</i>" % theme.author
