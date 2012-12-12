@@ -16,11 +16,14 @@ from prymatex.utils.decorators.memoize import memoized
 
 __fileIconProvider = QtGui.QFileIconProvider()
 
+NOTFOUND = set()
+
 def get_icon(index, size = None, default = None):
     icon = __get_icon(index)
     if icon is None and default is not None:
         icon = default
     elif icon is None:
+        NOTFOUND.add(index)
         icon = QtGui.QIcon(getResourcePath("notfound", ["Icons"]))
     if size is not None:
         size = size if isinstance(size, (tuple, list)) else (size, size)

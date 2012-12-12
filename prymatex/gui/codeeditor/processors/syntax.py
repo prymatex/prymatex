@@ -6,8 +6,6 @@ import re
 from prymatex.support import processor
 from prymatex.support.syntax import PMXSyntax
 
-RE_WORD = re.compile(r"([A-Za-z_]\w+\b)", re.UNICODE)
-
 class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
     def __init__(self, editor):
         self.editor = editor
@@ -55,5 +53,5 @@ class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
             self.scopeRanges.append( ((begin, end), scopeHash) )
             self.lineChunks.append( ((begin, end), self.line[begin:end]) )
             #TODO: Ver de sacar tambien los groups? y usar todo indexado por el scopeHash
-            self.words += map(lambda match: ((begin + match.span()[0], begin + match.span()[1]), match.group(), scopeGroup), RE_WORD.finditer(self.line[begin:end]))
+            self.words += map(lambda match: ((begin + match.span()[0], begin + match.span()[1]), match.group(), scopeGroup), self.editor.RE_WORD.finditer(self.line[begin:end]))
         self.lineIndex = end

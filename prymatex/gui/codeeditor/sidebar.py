@@ -69,35 +69,49 @@ class SideBarWidgetAddon(PMXBaseEditorAddon):
 class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
     MARGIN = 2
+    
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
 
     def initialize(self, editor):
         SideBarWidgetAddon.initialize(self, editor)
+        
+        self.__update_colours()
+        self.__update_fonts()
+        
+        # Connect signals
+        self.editor.themeChanged.connect(self.on_editor_themeChanged)
+        self.editor.blockCountChanged.connect(self.on_editor_blockCountChanged)
+        self.editor.fontChanged.connect(self.on_editor_fontChanged)
+    
+    def __update_colours(self):
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
         self.foreground = self.editor.colours["foreground"]
+        
+    def __update_fonts(self):
         self.normalFont = QtGui.QFont(self.editor.font())
         self.boldFont = QtGui.QFont(self.editor.font())
         self.boldFont.setBold(True)
         self.normalMetrics = QtGui.QFontMetrics(self.normalFont)
         self.boldMetrics = QtGui.QFontMetrics(self.boldFont)
-        
-        self.setFixedWidth(self.boldMetrics.width("#") + self.MARGIN * 2)
+        self.__update_width()
 
-        self.editor.blockCountChanged.connect(self.updateWidth)
-        self.editor.themeChanged.connect(self.updateColours)
-    
-    def updateColours(self):
-        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
-        self.foreground = self.editor.colours["foreground"]
-        self.update()
-
-    def updateWidth(self, newBlockCount):
-        width = self.boldMetrics.width(str(newBlockCount)) + self.MARGIN * 2
+    def __update_width(self, lineCount = None):
+        lineCount = lineCount or self.editor.document().lineCount()
+        width = self.boldMetrics.width(str(lineCount)) + self.MARGIN * 2
         if self.width() != width:
             self.setFixedWidth(width)
             self.editor.updateViewportMargins()
+        
+    def on_editor_themeChanged(self):
+        self.__update_colours()
 
+    def on_editor_blockCountChanged(self, newBlockCount):
+        self.__update_width(newBlockCount)
+
+    def on_editor_fontChanged(self):
+        self.__update_fonts()
+        
     @classmethod
     def contributeToMainMenu(cls):
         def on_actionShowLineNumbers_toggled(editor, checked):

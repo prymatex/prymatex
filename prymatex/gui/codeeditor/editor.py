@@ -60,16 +60,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     beforeReload = QtCore.pyqtSignal()
     
     #================================================================
-    # Selection types
-    #================================================================
-    SelectWord = QtGui.QTextCursor.WordUnderCursor #0
-    SelectLine = QtGui.QTextCursor.LineUnderCursor #1
-    SelectParagraph = QtGui.QTextCursor.BlockUnderCursor #2 este no es un paragraph pero no importa
-    SelectAll = QtGui.QTextCursor.Document #3
-    SelectEnclosingBrackets = 4
-    SelectCurrentScope = 5
-    
-    #================================================================
     # Editor Flags
     #================================================================
     ShowTabsAndSpaces     = 1<<0
@@ -99,7 +89,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setFont(font)
 
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
-    def theme(self, uuid):
+    def defaultTheme(self, uuid):
         theme = self.application.supportManager.getTheme(uuid)
 
         self.syntaxHighlighter.setTheme(theme)
@@ -569,35 +559,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 self.updateExtraSelectionCursors(addon.extraSelectionCursors())
         self.updateExtraSelections()
         
-    def select(self, selection):
-        cursor = self.textCursor()
-        if selection in [self.SelectLine, self.SelectParagraph, self.SelectAll]:
-            #Handle by editor
-            cursor.select(selection)
-        elif selection == self.SelectWord:
-            word, start, end = self.currentWord()
-            cursor.setPosition(start)
-            cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-        elif selection == self.SelectEnclosingBrackets:
-            flags = QtGui.QTextDocument.FindFlags()
-            flags |= QtGui.QTextDocument.FindBackward
-            foundCursors = map(lambda (openBrace, closeBrace): (self.document().find(openBrace, cursor.selectionStart(), flags), closeBrace), self.braces)
-            openCursor = reduce(lambda c1, c2: (not c1[0].isNull() and c1[0].selectionEnd() > c2[0].selectionEnd()) and c1 or c2, foundCursors)
-            if not openCursor[0].isNull():
-                closeCursor = self.findTypingPair(openCursor[0].selectedText(), openCursor[1], openCursor[0])
-                if openCursor[0].selectionEnd() <= cursor.selectionStart() <= closeCursor.selectionStart():
-                    cursor.setPosition(openCursor[0].selectionEnd())
-                    cursor.setPosition(closeCursor.selectionStart(), QtGui.QTextCursor.KeepAnchor)
-        elif selection == self.SelectCurrentScope:
-            block = cursor.block()
-            beginPosition = block.position()
-            # TODO Todo lo que implique userData centrarlo en una API en la instancia de cada editor
-            (start, end), scope = block.userData().scopeRange(cursor.columnNumber())
-            if scope is not None:
-                cursor.setPosition(beginPosition + start)
-                cursor.setPosition(beginPosition + end, QtGui.QTextCursor.KeepAnchor)
-        self.setTextCursor(cursor)
-
     #=======================================================================
     # QPlainTextEdit Events
     #=======================================================================
@@ -798,9 +759,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         cursor.insertText("\n%s" % indent)
         self.ensureCursorVisible()
 
-    #==========================================================================
-    # Bundle Items
-    #==========================================================================
+    # ------------ Bundle Items
     def bundleItemHandler(self):
         return self.insertBundleItem
         
@@ -972,20 +931,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
         yield coroutines.Return(suggestions)
 
-    #==========================================================================
-    # Folding
-    #==========================================================================
+    # ---------- Folding
     def codeFoldingFold(self, block):
-        self._fold(block)
-        # self.update()
-        # self.sidebar.update()
-
-    def codeFoldingUnfold(self, block):
-        self._unfold(block)
-        # self.update()
-        # self.sidebar.update()
-        
-    def _fold(self, block):
         milestone = block
         if self.folding.isStart(self.folding.getFoldingMark(milestone)):
             startBlock = milestone.next()
@@ -1010,7 +957,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         milestone.userData().folded = True
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
-    def _unfold(self, block):
+    def codeFoldingUnfold(self, block):
         milestone = block
         startBlock = milestone.next()
         endBlock = self.folding.findBlockFoldClose(milestone)
@@ -1029,6 +976,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         milestone.userData().folded = False
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
+    # ---------- Override convert tabs <---> spaces
     def convertTabsToSpaces(self):
         match = "\t"
         self.replaceMatch(match, " " * self.tabStopSize, QtGui.QTextDocument.FindFlags(), True)
@@ -1037,9 +985,32 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         match = " " * self.tabStopSize
         self.replaceMatch(match, "\t", QtGui.QTextDocument.FindFlags(), True)
         
-    #==========================================================================
-    # Bookmarks and gotos
-    #==========================================================================    
+    # -------------- Add select text functions
+    def selectEnclosingBrackets(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        flags = QtGui.QTextDocument.FindFlags()
+        flags |= QtGui.QTextDocument.FindBackward
+        foundCursors = map(lambda (openBrace, closeBrace): (self.document().find(openBrace, cursor.selectionStart(), flags), closeBrace), self.braces)
+        openCursor = reduce(lambda c1, c2: (not c1[0].isNull() and c1[0].selectionEnd() > c2[0].selectionEnd()) and c1 or c2, foundCursors)
+        if not openCursor[0].isNull():
+            closeCursor = self.findTypingPair(openCursor[0].selectedText(), openCursor[1], openCursor[0])
+            if openCursor[0].selectionEnd() <= cursor.selectionStart() <= closeCursor.selectionStart():
+                cursor.setPosition(openCursor[0].selectionEnd())
+                cursor.setPosition(closeCursor.selectionStart(), QtGui.QTextCursor.KeepAnchor)
+                self.setTextCursor(cursor)
+    
+    def selectCurrentScope(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        block = cursor.block()
+        beginPosition = block.position()
+        # TODO Todo lo que implique userData centrarlo en una API en la instancia de cada editor
+        (start, end), scope = block.userData().scopeRange(cursor.columnNumber())
+        if scope is not None:
+            cursor.setPosition(beginPosition + start)
+            cursor.setPosition(beginPosition + end, QtGui.QTextCursor.KeepAnchor)
+            self.setTextCursor(cursor)
+    
+    # ---------- Bookmarks and gotos
     def toggleBookmark(self, block = None):
         block = block or self.textCursor().block()
         self.bookmarkListModel.toggleBookmark(block)
@@ -1288,27 +1259,31 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 {'text': 'Select',
                  'items': [
                     {'text': '&Word',
-                     'callback': lambda editor: editor.select(0),
+                     'callback': lambda editor: editor.selectWordCurrent(),
+                     'shortcut': 'Ctrl+Meta+W',
+                     },
+                    {'text': '&Word Under',
+                     'callback': lambda editor: editor.selectWordUnder(),
                      'shortcut': 'Ctrl+Meta+W',
                      },
                     {'text': '&Line',
-                     'callback': lambda editor: editor.select(1),
+                     'callback': lambda editor: editor.selectLine(),
                      'shortcut': 'Ctrl+Meta+L',
                      },
                     {'text': '&Paragraph',
-                     'callback': lambda editor: editor.select(2),
+                     'callback': lambda editor: editor.selectParagraph(),
                      'shortcut': '',
                      },
                     {'text': 'Enclosing &Brackets',
-                     'callback': lambda editor: editor.select(editor.SelectEnclosingBrackets),
+                     'callback': lambda editor: editor.selectEnclosingBrackets(),
                      'shortcut': 'Ctrl+Meta+B',
                      },
                     {'text': 'Current &Scope',
-                     'callback': lambda editor: editor.select(editor.SelectCurrentScope),
+                     'callback': lambda editor: editor.selectCurrentScope(),
                      'shortcut': 'Ctrl+Meta+S',
                      },
                     {'text': '&All',
-                     'callback': lambda editor: editor.select(3),
+                     'callback': lambda editor: editor.selectDocument(),
                      'shortcut': 'Ctrl+A',
                      }    
                 ]},
@@ -1499,15 +1474,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         index = self.mainWindow.bookmarkSelectorDialog.select(bookmarkToDict(blocks))
         if index is not None:
             self.goToBlock(blocks[index])
-    
-    #============================================================
-    # Text Menu Actions
-    #============================================================
-    def on_actionExecute_triggered(self):
-        self.currentEditor().executeCommand()
-
-    def on_actionFilterThroughCommand_triggered(self):
-        self.statusBar().showCommand()
     
     #===========================================================================
     # Navigation API

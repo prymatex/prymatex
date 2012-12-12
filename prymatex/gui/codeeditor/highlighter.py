@@ -13,7 +13,6 @@ from prymatex.utils.decorators.helpers import printtime
 
 #TODO: Usar mas el modulo de string en general, string.punctuation, mover las regexp a otro lugar, recursos quiza?
 
-RE_WORD = re.compile(r"([A-Za-z_]\w+\b)", re.UNICODE)
 RE_WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
 
 def whiteSpace(text):

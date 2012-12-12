@@ -12,9 +12,10 @@ from prymatex.qt.helpers import textcursor2tuple
 class TextEditWidget(QtGui.QPlainTextEdit):
     #------ Signals
     extraSelectionChanged = QtCore.pyqtSignal()
+    fontChanged = QtCore.pyqtSignal()
     
     #------ Regular expresions
-    RE_WORD = re.compile(r"[A-Za-z_]*")
+    RE_WORD = re.compile(r"([A-Za-z_]\w+\b)", re.UNICODE)
     
     def __init__(self, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
@@ -25,7 +26,11 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         self.__scopedExtraSelections = {}
         self.__updateExtraSelectionsOrder = []
         self.__textCharFormatBuilders = {}
-        
+
+    #------ Overrides
+    def setFont(self, font):
+        QtGui.QPlainTextEdit.setFont(self, font)
+        self.fontChanged.emit()
 
     #------ Retrieve text
     def wordUnderCursor(self, cursor = None):
@@ -304,13 +309,39 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         if cursor.hasSelection() and cursor.selectionEnd() != self.document().characterCount():
             self.__move_text(cursor, QtGui.QTextCursor.Right)
         
+    #------ Select Text
+    def selectWordUnder(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        cursor.select(QtGui.QTextCursor.WordUnderCursor)
+        self.setTextCursor(cursor)
+        
+    def selectWordCurrent(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        _, start, end = self.word(cursor = cursor)
+        self.setTextCursor(self.newCursorAtPosition(start, end))
+        
+    def selectLine(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        cursor.select(QtGui.QTextCursor.LineUnderCursor)
+        self.setTextCursor(cursor)
+        
+    def selectParagraph(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        cursor.select(QtGui.QTextCursor.BlockUnderCursor)
+        self.setTextCursor(cursor)
+        
+    def selectDocument(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        cursor.select(QtGui.QTextCursor.Document)
+        self.setTextCursor(cursor)
+        
     #------ Convert Text
     def __convert_text(self, cursor = None, convertFunction = lambda x: x):
         cursor = cursor or self.textCursor()
         tupleCursor = textcursor2tuple(cursor)
         cursor.beginEditBlock()
         if not cursor.hasSelection():
-            word, start, end = self.currentWord()
+            word, start, end = self.word(cursor = cursor)
             self.newCursorAtPosition(start, end).insertText(convertFunction(word))
         else:
             cursor.insertText(convertFunction(cursor.selectedText()))

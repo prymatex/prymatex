@@ -63,11 +63,19 @@ class SpellCheckerAddon(CodeEditorAddon):
         self.currentSpellTask = None
         self.setupSpellChecker()
         
+    def setupSpellChecker(self):
+        try:
+            import enchant
+            # TODO: Use custom word list with DictWithPWL class
+            self.dictionary = enchant.Dict()
+        except Exception as e:
+            self.dictionary = None
+            
     def initialize(self, editor):
         CodeEditorAddon.initialize(self, editor)
         if self.dictionary is not None:
-            editor.registerTextCharFormatBuilder("spell", self.textCharFormat_spell_builder)
-            editor.syntaxReady.connect(self.on_editor_syntaxReady)
+            self.editor.registerTextCharFormatBuilder("spell", self.textCharFormat_spell_builder)
+            self.editor.syntaxReady.connect(self.on_editor_syntaxReady)
             self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
 
     @classmethod
@@ -106,14 +114,6 @@ class SpellCheckerAddon(CodeEditorAddon):
     def extraSelectionCursors(self):
         return { "spell": self.wordCursors[:] }
 
-    def setupSpellChecker(self):
-        try:
-            import enchant
-            # TODO: Use custom word list with DictWithPWL class
-            self.dictionary = enchant.Dict()
-        except Exception as e:
-            self.dictionary = None
-
     def textCharFormat_spell_builder(self):
         format = QtGui.QTextCharFormat()
         format.setFontUnderline(True)
@@ -121,15 +121,6 @@ class SpellCheckerAddon(CodeEditorAddon):
         format.setUnderlineStyle(QtGui.QTextCharFormat.SpellCheckUnderline)
         format.setBackground(QtCore.Qt.transparent)
         return format
-
-    def spellWordsForBlock(self, block):
-        #TODO: Proveer algo de esto directamente desde el editor
-        spellRange = filter(lambda ((start, end), p): p.spellChecking, 
-            map(lambda ((start, end), scope): ((start, end), self.editor.preferenceSettings(scope)), block.userData().scopeRanges()))
-        for ran, p in spellRange:
-            wordRangeList = block.userData().wordsRanges(ran[0], ran[1])
-            for (start, end), word, group in wordRangeList:
-                yield (start, end), word
 
     def cleanCursorsForBlock(self, block):
         self.wordCursors = filter(lambda cursor: cursor.block() != block, self.wordCursors)
@@ -144,7 +135,7 @@ class SpellCheckerAddon(CodeEditorAddon):
     def spellCheckAllDocument(self):
         block = self.editor.document().firstBlock()
         while block.isValid():
-            for (start, end), word in self.spellWordsForBlock(block):
+            for (start, end), word, _ in block.userData().words:
                 self.spellCheckWord(word, block, start, end)
             block = block.next()
             yield
@@ -166,7 +157,7 @@ class SpellCheckerAddon(CodeEditorAddon):
             cursor = self.editor.textCursor()
             block = cursor.block()
             self.cleanCursorsForBlock(block)
-            for (start, end), word in self.spellWordsForBlock(block):
+            for (start, end), word in block.userData().word:
                 self.spellCheckWord(word, block, start, end)
         self.editor.highlightEditor()
         
