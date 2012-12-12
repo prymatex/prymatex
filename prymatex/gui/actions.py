@@ -23,9 +23,7 @@ class MainWindowActions(object):
         #Bundles Menu
         self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
         
-    #============================================================
-    # About To Show Menus
-    #============================================================
+    # ------------ About To Show Menus
     def on_menuRecentFiles_aboutToShow(self):
         self.menuRecentFiles.clear()
         for index, filePath in enumerate(self.application.fileManager.fileHistory, 1):
@@ -38,9 +36,7 @@ class MainWindowActions(object):
         self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
         self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
 
-    #============================================================
-    # File Actions
-    #============================================================
+    # ------------ File Actions
     @QtCore.pyqtSlot()
     def on_actionNewEditor_triggered(self):
         self.addEmptyEditor()
@@ -119,9 +115,7 @@ class MainWindowActions(object):
     def on_actionSwitchProfile_triggered(self):
         self.application.switchProfile()
 
-    #============================================================
-    # Edit Actions
-    #============================================================
+    # ------------ Edit Actions
     @QtCore.pyqtSlot()
     def on_actionUndo_triggered(self):
         if self.currentEditor() is not None:
@@ -155,9 +149,7 @@ class MainWindowActions(object):
     def on_actionFindReplace_triggered(self):
         self.statusBar().showFindReplace()
         
-    #============================================================
-    # View Actions
-    #============================================================
+    # ------------ View Actions
     @QtCore.pyqtSlot()
     def on_actionZoomIn_triggered(self):
         if self.currentEditor() is not None:
@@ -168,9 +160,7 @@ class MainWindowActions(object):
         if self.currentEditor() is not None:
             self.currentEditor().zoomOut()
 
-    #============================================================
-    # Navigation Actions
-    #============================================================
+    # ------------ Navigation Actions
     @QtCore.pyqtSlot()
     def on_actionNextTab_triggered(self):
         self.splitTabWidget.focusNextTab()
@@ -200,7 +190,7 @@ class MainWindowActions(object):
         if self.currentEditor() is not None:
             self.currentEditor().setFocus()
     
-    # Global navigation
+    # ------------ Global navigation
     @QtCore.pyqtSlot()
     def on_actionLocationBack_triggered(self):
         if self._editorHistory and self._editorHistoryIndex < len(self._editorHistory) - 1:
@@ -228,9 +218,7 @@ class MainWindowActions(object):
                 self._editorHistoryIndex = index
                 break
 
-    #============================================================
-    # Bundles Actions
-    #============================================================
+    # ------------ Bundles Actions
     @QtCore.pyqtSlot()
     def on_actionShowBundleEditor_triggered(self):
         #TODO: mejorar esto
@@ -255,9 +243,7 @@ class MainWindowActions(object):
     def on_actionReloadBundles_triggered(self):
         self.application.supportManager.reloadSupport(self.showMessage)
 
-    #============================================================
-    # Preferences Actions
-    #============================================================
+    # ------------ Preferences Actions
     @QtCore.pyqtSlot(bool)
     def on_actionShowMenus_toggled(self, checked):
         self.menuBar().setVisible(checked)
@@ -278,9 +264,7 @@ class MainWindowActions(object):
     def on_actionSettings_triggered(self):
         self.application.settingsDialog.exec_()
             
-    #============================================================
-    # Help Actions
-    #============================================================
+    # ------------ Help Actions
     @QtCore.pyqtSlot()
     def on_actionAboutQt_triggered(self):
         QtGui.qApp.aboutQt()
@@ -288,7 +272,9 @@ class MainWindowActions(object):
     aboutDialog = None
     @QtCore.pyqtSlot()
     def on_actionAbout_triggered(self):
-        # Lazy 
+        # Lazy
+        from prymatex.resources import icons
+        print icons.NOTFOUND
         if not self.aboutDialog:
             self.aboutDialog = PMXAboutDialog(self) 
         self.aboutDialog.exec_()
