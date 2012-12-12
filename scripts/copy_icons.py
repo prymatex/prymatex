@@ -4,20 +4,10 @@
 import sys
 import os, shutil
 
-ICON_NAMES = ['view-fullscreen', 'application-x-executable-script',
-    'edit-delete', 'edit-clear', 'go-up', 'document-save-all', 'edit-cut',
-    'go-down-search', 'go-previus', 'project-development', 'go-previous-view',
-    'document-save-as', 'project-open', 'applications-system', 'code-class',
-    'edit-undo', 'code-variable', 'tab-cose-other', 'go-next', 'view-list-tree',
-    'view-filter', 'bookmarks-organize', 'fill-color', 'go-next-view', 'tab-new',
-    'document-save', 'tab-close', 'edit-reame', 'ksnapshot', 'help-about',
-    'document-open-recent', 'edit-find-project', 'preferences-other', 'folder-sync',
-    'applications-utilities', 'go-first-view', 'preferences-plugin-script',
-    'emblem-important', 'view-refresh', 'edit-find', 'dialog-close', 'list-add',
-    'list-remove', 'accessories-text-editor', 'system-swtch-user', 'go-up-search',
-    'document-new', 'folder-new', 'utilities-terminal', 'edit-paste', 'preferences-plugin',
-    'application-exit', 'configure', 'project-evelopment-new-template','document-open',
-    'edit-copy', 'edit-redo', 'internet-web-browser', 'system-file-manager']
+ICON_NAMES = ['tab-close-other', 'edit-rename', 'view-split-left-right',
+    'list-add-user', 'system-run', 'project-development-new-template', 'user-properties',
+    'bulletblue', 'go-previous', 'view-split-top-bottom', 'user-identity',
+    'system-switch-user', 'list-remove-user']
 
 SOURCE = "/%s" % os.path.join('usr', 'share', 'icons', 'oxygen', '32x32')
 DESTINITY = os.path.abspath(os.path.join(__file__, '..', '..', 'prymatex', 'share', 'Icons'))
@@ -29,10 +19,8 @@ if __name__ == '__main__':
         names = sourceNames.intersection(copyNames)
         if names:
             destpath = os.path.join(DESTINITY, dirpath[len(SOURCE) + 1:])
-            try:
+            if not os.path.exists(destpath):
                 os.makedirs(destpath)
-            except:
-                pass
         for name in names:
             name = filter(lambda f: f.startswith("%s." % name), filenames)[0]
             src = os.path.join(dirpath, name)
