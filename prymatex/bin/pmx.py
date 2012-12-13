@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
-import os
+from os.path import (abspath, dirname, realpath, exists)
 import sys
 import importlib
 
@@ -8,33 +8,18 @@ import importlib
 # this will be replaced at install time
 INSTALLED_BASE_DIR = "@ INSTALLED_BASE_DIR @"
 
-if os.path.exists(INSTALLED_BASE_DIR):
+if exists(INSTALLED_BASE_DIR):
     project_basedir = INSTALLED_BASE_DIR
 else:
-    project_basedir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))))
+    project_basedir = abspath(dirname(dirname(dirname(realpath(sys.argv[0])))))
 
 if project_basedir not in sys.path:
     sys.path.insert(0, project_basedir)
 
 prymatexAppInstance = None
 
-#===============================================================================
-# Note PyQt4 is needed by core so basic exceptions wont be even raised
-#===============================================================================
-BASIC_IMPORTS = ('sip', 'PyQt4', 'zmq')
-def areBasicImportsAvaliable():
-    '''
-    @return: True if all basic imports are available
-    '''
-    try:
-        for name in BASIC_IMPORTS:
-            importlib.import_module(name)
-    except ImportError:
-        return False
-    return True
-
-
 # TODO: Accept Qt Arguments to QtApplication
+# TODO: Move as much as possible to application since it has the responsibility of running
 def runPrymatexApplication(options, files):
     from prymatex.core.app import PMXApplication
     from prymatex.core import exceptions
@@ -51,13 +36,7 @@ def runPrymatexApplication(options, files):
             return
         prymatexAppInstance.setupLogging(instanceOptions.verbose, instanceOptions.log_pattern)
         prymatexAppInstance.options = instanceOptions
-        prymatexAppInstance.replaceSysExceptHook()
-        prymatexAppInstance.checkSingleInstance()
-        if options.reset_settings:
-            prymatexAppInstance.resetSettings()
-        prymatexAppInstance.loadGraphicalUserInterface()
-        prymatexAppInstance.openArgumentFiles(instanceFiles)
-        return prymatexAppInstance.exec_()
+        return prymatexAppInstance.execWithArgs(instanceFiles)
 
     returnCode = -1
     try:
@@ -83,13 +62,6 @@ def runPrymatexApplication(options, files):
     return returnCode
 
 def main(args):
-    if not areBasicImportsAvaliable():
-        print
-        print "Prymatex can't be started. Basic imports are note available."
-        print "Check if you have: %s" % ', '.join(BASIC_IMPORTS)
-        print
-        return
-
     from prymatex.core import cliparser
     options, files = cliparser.parse()
 

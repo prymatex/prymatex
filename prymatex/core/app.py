@@ -532,6 +532,16 @@ class PMXApplication(QtGui.QApplication):
 
         sys.excepthook = displayExceptionDialog
 
+    def execWithArgs(self, files):
+        '''Finishes setup of QApplication and run'''
+        self.replaceSysExceptHook()
+        self.checkSingleInstance()
+        if self.options.reset_settings:
+            self.resetSettings()
+        self.loadGraphicalUserInterface()
+        self.openArgumentFiles(files)
+        return self.exec_()
+
     def __str__(self):
         return '<PMXApplication at {} PID: {}>'.format(hash(self), os.getpid())
 
