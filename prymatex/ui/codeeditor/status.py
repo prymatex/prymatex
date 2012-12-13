@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/codeeditor/status.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/codeeditor/status.ui'
 #
-# Created: Fri Nov  9 18:10:45 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Thu Dec 13 10:07:22 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,7 +18,7 @@ except AttributeError:
 class Ui_CodeEditorStatus(object):
     def setupUi(self, CodeEditorStatus):
         CodeEditorStatus.setObjectName(_fromUtf8("CodeEditorStatus"))
-        CodeEditorStatus.resize(629, 267)
+        CodeEditorStatus.resize(629, 189)
         self.verticalLayout = QtGui.QVBoxLayout(CodeEditorStatus)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -26,6 +26,8 @@ class Ui_CodeEditorStatus(object):
         self.widgetCommand = QtGui.QWidget(CodeEditorStatus)
         self.widgetCommand.setObjectName(_fromUtf8("widgetCommand"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.widgetCommand)
+        self.horizontalLayout.setSpacing(2)
+        self.horizontalLayout.setMargin(0)
         self.horizontalLayout.setMargin(0)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.pushButtonCommandClose = QtGui.QPushButton(self.widgetCommand)
@@ -65,6 +67,8 @@ class Ui_CodeEditorStatus(object):
         self.widgetGoToLine = QtGui.QWidget(CodeEditorStatus)
         self.widgetGoToLine.setObjectName(_fromUtf8("widgetGoToLine"))
         self.horizontalLayout_3 = QtGui.QHBoxLayout(self.widgetGoToLine)
+        self.horizontalLayout_3.setSpacing(2)
+        self.horizontalLayout_3.setMargin(0)
         self.horizontalLayout_3.setMargin(0)
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
         self.pushButtonGoToLineClose = QtGui.QPushButton(self.widgetGoToLine)
@@ -88,6 +92,8 @@ class Ui_CodeEditorStatus(object):
         self.widgetIFind = QtGui.QWidget(CodeEditorStatus)
         self.widgetIFind.setObjectName(_fromUtf8("widgetIFind"))
         self.horizontalLayout_5 = QtGui.QHBoxLayout(self.widgetIFind)
+        self.horizontalLayout_5.setSpacing(2)
+        self.horizontalLayout_5.setMargin(0)
         self.horizontalLayout_5.setMargin(0)
         self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
         self.pushButtonIFindClose = QtGui.QPushButton(self.widgetIFind)
@@ -194,6 +200,8 @@ class Ui_CodeEditorStatus(object):
         self.widgetStatus = QtGui.QWidget(CodeEditorStatus)
         self.widgetStatus.setObjectName(_fromUtf8("widgetStatus"))
         self.horizontalLayout_2 = QtGui.QHBoxLayout(self.widgetStatus)
+        self.horizontalLayout_2.setSpacing(2)
+        self.horizontalLayout_2.setMargin(0)
         self.horizontalLayout_2.setMargin(0)
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.labelLineColumn = QtGui.QLabel(self.widgetStatus)
