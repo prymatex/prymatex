@@ -18,7 +18,7 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
         self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
         self.blocks = []
         
-    def _purge_blocks(self):
+    def __purge_blocks(self):
         self.blocks = filter(lambda block: block.userData() is not None, self.blocks)
         self.layoutChanged.emit()
 
@@ -26,11 +26,10 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
         return block in self.blocks
         
     def on_editor_blocksRemoved(self):
-        self._purge_blocks()
+        self.__purge_blocks()
         
     def on_editor_textChanged(self):
-        #TODO: solo hacer las acciones si tengo nuevo estado de folding motivado por un remove o un add
-        self._purge_blocks()
+        self.__purge_blocks()
 
     def index(self, row, column = 0, parent = None):
         if 0 <= row < len(self.blocks):
@@ -38,7 +37,7 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
         else:
             return QtCore.QModelIndex()
 
-    def rowCount (self, parent = None):
+    def rowCount(self, parent = None):
         return len(self.blocks)
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
@@ -120,11 +119,11 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
     def on_editor_textChanged(self):
         if self.symbolChanged:
             self.logger.debug("Purgar y actualizar symbols")
-            self._purge_blocks()
+            self.__purge_blocks()
             self.layoutChanged.emit()
             self.symbolChanged = False
 
-    def _purge_blocks(self):
+    def __purge_blocks(self):
         def validSymbolBlock(block):
             return block.userData() is not None and block.userData().symbol != None
         self.blocks = filter(validSymbolBlock, self.blocks)
@@ -166,7 +165,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
             return resources.getIcon("scope-root-entity")
 
     def findBlockIndex(self, block):
-        self._purge_blocks()
+        self.__purge_blocks()
         indexes = map(lambda block: block.blockNumber(), self.blocks)
         blockIndex = bisect(indexes, block.blockNumber()) - 1
         if blockIndex == -1:
@@ -255,7 +254,7 @@ class PMXAlreadyTypedWords(object):
         self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))
         self.groups = dict(map(lambda (group, words): (group, filter(lambda word: word in self.words, words)), self.groups.iteritems()))
 
-    def _purge_blocks(self):
+    def __purge_blocks(self):
         """ Quitar bloques que no van mas """
         def validWordBlock(block):
             return block.userData() is not None and bool(block.userData().words)
@@ -265,7 +264,7 @@ class PMXAlreadyTypedWords(object):
         self.words = words
 
     def on_editor_blocksRemoved(self):
-        self._purge_blocks()
+        self.__purge_blocks()
         
     def addWordsBlock(self, block, words):
         for index, word, group in words:
