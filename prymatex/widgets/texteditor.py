@@ -13,6 +13,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
     #------ Signals
     extraSelectionChanged = QtCore.pyqtSignal()
     fontChanged = QtCore.pyqtSignal()
+    aboutToTextChange = QtCore.pyqtSignal()
     
     #------ Regular expresions
     RE_WORD = re.compile(r"([A-Za-z_]\w+\b)", re.UNICODE)
@@ -32,6 +33,10 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         QtGui.QPlainTextEdit.setFont(self, font)
         self.fontChanged.emit()
 
+    def setPlainText(self, text):
+        self.aboutToTextChange.emit()
+        QtGui.QPlainTextEdit.setPlainText(self, text)
+    
     #------ Retrieve text
     def wordUnderCursor(self, cursor = None):
         cursor = cursor or self.textCursor()

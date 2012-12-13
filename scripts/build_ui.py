@@ -54,7 +54,8 @@ class QtUiBuild(object):
         """Compile the .ui files to python modules."""
         # Search for pyuic4 in python bin dir, then in the $Path.
         if py_file is None:
-            py_path = os.path.join('prymatex', *fullsplit(ui_file)[1:-1])
+            projectIndex = len(fullsplit(PROJECT_PATH))
+            py_path = os.path.join(PROJECT_PATH, 'prymatex', *fullsplit(ui_file)[projectIndex + 1:-1])
             py_file = os.path.split(ui_file)[1]
             py_file = os.path.splitext(py_file)[0] + '.py'
             py_file = os.path.join(py_path, py_file)

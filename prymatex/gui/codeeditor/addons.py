@@ -122,6 +122,15 @@ class SpellCheckerAddon(CodeEditorAddon):
         format.setBackground(QtCore.Qt.transparent)
         return format
 
+    def spellWordsForBlock(self, block):
+        #TODO: Proveer algo de esto directamente desde el editor
+        spellRange = filter(lambda ((start, end), p): p.spellChecking,
+            map(lambda ((start, end), scope): ((start, end), self.editor.preferenceSettings(scope)), block.userData().scopeRanges()))
+        for ran, p in spellRange:
+            wordRangeList = block.userData().wordsRanges(ran[0], ran[1])
+            for (start, end), word, _ in wordRangeList:
+                yield (start, end), word
+
     def cleanCursorsForBlock(self, block):
         self.wordCursors = filter(lambda cursor: cursor.block() != block, self.wordCursors)
 
@@ -135,7 +144,7 @@ class SpellCheckerAddon(CodeEditorAddon):
     def spellCheckAllDocument(self):
         block = self.editor.document().firstBlock()
         while block.isValid():
-            for (start, end), word, _ in block.userData().words:
+            for (start, end), word in self.spellWordsForBlock(block):
                 self.spellCheckWord(word, block, start, end)
             block = block.next()
             yield
@@ -157,7 +166,7 @@ class SpellCheckerAddon(CodeEditorAddon):
             cursor = self.editor.textCursor()
             block = cursor.block()
             self.cleanCursorsForBlock(block)
-            for (start, end), word in block.userData().word:
+            for (start, end), word in self.spellWordsForBlock(block):
                 self.spellCheckWord(word, block, start, end)
         self.editor.highlightEditor()
         
