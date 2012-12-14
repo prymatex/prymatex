@@ -95,9 +95,10 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         self.editor = editor
         self.logger = editor.application.getLogger('.'.join([self.__class__.__module__, self.__class__.__name__]))
         self.symbolChanged = False
-        self.editor.textChanged.connect(self.on_editor_textChanged)
-        self.editor.beforeOpen.connect(self.on_editor_beforeOpen)
-        self.editor.afterOpen.connect(self.on_editor_afterOpen)
+        self.editor.document().contentsChange.connect(self.on_document_contentsChange)
+        #self.editor.textChanged.connect(self.on_editor_textChanged)
+        #self.editor.beforeOpen.connect(self.on_editor_beforeOpen)
+        #self.editor.afterOpen.connect(self.on_editor_afterOpen)
         self.blocks = []
         self.icons = {
             "class": resources.getIcon("symbol-class"),
@@ -107,6 +108,35 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
             "typedef": resources.getIcon("symbol-typedef"),
             "variable": resources.getIcon("symbol-variable")
         }
+        self.editor.registerBlockUserDataHandler(self)
+
+    def contributeToBlockUserData(self, userData):
+        userData.symbol = None
+        
+    def processBlockUserData(self, text, block, userData):
+        symbolRange = filter(lambda ((start, end), p): p.showInSymbolList, 
+            map(lambda ((start, end), scope): ((start, end), self.editor.preferenceSettings(scope)), userData.scopeRanges()))
+        if symbolRange:
+            #TODO: Hacer la transformacion de los symbolos
+            #symbol = text[symbolRange[0][1]:symbolRange[-1][2]]
+            #symbol = symbolRange[0][0].transformSymbol(symbol)
+            symbol = text
+        else:
+            symbol = None
+
+        if userData.symbol != symbol:
+            if userData.symbol is None:
+                self.removeSymbolBlock(block)
+            else:
+                self.addSymbolBlock(block)
+            userData.symbol = symbol
+            
+        
+    def on_document_contentsChange(self, position, removed, added):
+        print "symbols", position, removed, added
+        print self.editor.document().findBlock(position).userData()
+        print self.editor.document().findBlock(position + added).userData()
+        print self.editor.document().findBlock(position - removed).userData()
         
     def on_editor_afterOpen(self):
         self.editor.textChanged.disconnect(self.on_editor_textChanged)
@@ -248,7 +278,27 @@ class PMXAlreadyTypedWords(object):
         self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
         self.words = {}
         self.groups = {}
+        self.editor.registerBlockUserDataHandler(self)
+
+    def contributeToBlockUserData(self, userData):
+        userData.words = []
         
+    def processBlockUserData(self, text, block, userData):
+        words = []
+        for chunk in userData.lineChunks():
+            scopeGroup = self.editor.scopeGroup(userData.scopeRange(chunk[0][0])[1])
+            words += map(
+                lambda match: ((chunk[0][0] + match.span()[0], chunk[0][0] + match.span()[1]), match.group(), scopeGroup), 
+                self.editor.RE_WORD.finditer(chunk[1]))
+        if userData.words != words:
+            #Quitar el block de las palabras anteriores
+            self.removeWordsBlock(block, filter(lambda word: word not in words, userData.words))
+            
+            #Agregar las palabras nuevas
+            self.addWordsBlock(block, filter(lambda word: word not in userData.words, words))
+            userData.words = words
+        
+            
     def _purge_words(self):
         """ Limpiar palabras """
         self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))

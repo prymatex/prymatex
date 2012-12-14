@@ -7,6 +7,7 @@ spyderlib site:
 http://code.google.com/p/spyderlib
 """
 
+import re
 import string
 
 to_ascii = lambda s: filter(lambda c: c in string.ascii_letters, s)
@@ -46,6 +47,14 @@ def has_mixed_eol_chars(text):
     correct_text = eol_chars.join((text+eol_chars).splitlines())
     return repr(correct_text) != repr(text)
 
+
+# ----------------- White Space tool --------------------
+RE_WHITESPACE = re.compile(r'^(\s+)', re.UNICODE)
+def whiteSpace(text):
+    match = RE_WHITESPACE.match(text)
+    if match:
+        return match.group(0)
+    return ''
 
 # ----------------- Python Source tests --------------------
 def is_builtin(text):

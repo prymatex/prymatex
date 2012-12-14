@@ -7,75 +7,54 @@ from copy import copy
 from prymatex.qt import QtGui, QtCore
 
 from prymatex.gui.codeeditor.processors import PMXSyntaxProcessor
-from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserData
 from prymatex.support.syntax import PMXSyntax
 from prymatex.utils.decorators.helpers import printtime
-
-#TODO: Usar mas el modulo de string en general, string.punctuation, mover las regexp a otro lugar, recursos quiza?
-
-RE_WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
-
-def whiteSpace(text):
-    match = RE_WHITESPACE.match(text)
-    try:
-        ws = match.group('whitespace')
-        return ws
-    except AttributeError:
-        return ''
 
 class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     NO_STATE = -1
     SINGLE_LINE = 1
     FORMAT_CACHE = {}
-    highlightReady = QtCore.pyqtSignal()
     
     def __init__(self, editor, syntax = None, theme = None):
-        QtGui.QSyntaxHighlighter.__init__(self, editor)
+        QtGui.QSyntaxHighlighter.__init__(self, editor.document())
         self.editor = editor
         self.processor = PMXSyntaxProcessor(editor)
         self.syntax = syntax
         self.theme = theme
+        self.__running = True
         
         #Highlight Function
         self.highlight_function = self.realtime_highlight
         self.highlightTask = self.editor.application.scheduler.idleTask()
 
-        #Conect signals
-        self.editor.afterOpen.connect(self.on_editor_afterOpen)
-
-    def on_editor_afterOpen(self):
+    def stop(self):
+        self.__running = False
+        if self.highlightTask.isRunning():
+            self.highlightTask.cancel()
+        
+    def runAsyncHighlight(self, callback):
         #Cuidado si estoy corriendo la tarea no correrla nuevamente
         if not self.highlightTask.isRunning():
             self.highlight_function = self.async_highlight
+            self.__running = True
             self.highlightTask = self.editor.application.scheduler.newTask(self.highlightAllDocument())
             def on_highlightReady():
                 #Restore realitme function
                 self.highlight_function = self.realtime_highlight
-                self.highlightReady.emit()
+                callback()
             self.highlightTask.done.connect(on_highlightReady)
 
-    @property
     def ready(self):
-        if self.theme and self.syntax:
-            self.setDocument(self.editor.document())
-            return True
-        return False
-    
+        return self.__running and self.theme is not None and self.syntax is not None
+
     def setSyntax(self, syntax):
-        if self.highlightTask.isRunning():
-            self.highlightTask.cancel()
         self.syntax = syntax
-        if self.ready:
-            self.on_editor_afterOpen()
+        self.rehighlight()
         
     def setTheme(self, theme):
         PMXSyntaxHighlighter.FORMAT_CACHE = {}
         self.theme = theme
-        if self.ready:
-            self.rehighlight()
-    
-    def hasTheme(self):
-        return self.theme is not None
+        self.rehighlight()
             
     def highlightAllDocument(self):
         block = self.document().begin()
@@ -86,7 +65,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.syntax.parseLine(stack, text, self.processor)
             userData = block.userData()
             if userData is None:
-                userData = CodeEditorBlockUserData()
+                userData = self.editor.blockUserDataFactory(block)
                 block.setUserData(userData)
             
             self.setupBlockUserData(text, block, userData)
@@ -103,43 +82,16 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.processor.endParsing(self.syntax.scopeName)
         
     def setupBlockUserData(self, text, block, userData):
-        userData.setRanges(self.processor.scopeRanges)
-        userData.setChunks(self.processor.lineChunks)
-        userData.blank = text.strip() == ""
-        # TODO UserDataProcessors?
-        #1 Update words
-        if userData.words != self.processor.words:
-            self.editor.updateWords(block, userData, self.processor.words)
-     
-        #2 Update Indent
-        indent = whiteSpace(text)
-        if indent != userData.indent:
-            userData.indent = indent
-            self.editor.updateIndent(block, userData, indent)
-
-        #3 Update Folding
-        foldingMark = self.syntax.folding(text)
-        if userData.foldingMark != foldingMark:
-            userData.foldingMark = foldingMark
-            self.editor.updateFolding(block, userData, foldingMark)
-            
-        #4 Update Symbols
-        symbolRange = filter(lambda ((start, end), p): p.showInSymbolList, 
-            map(lambda ((start, end), scope): ((start, end), self.editor.preferenceSettings(scope)), userData.scopeRanges()))
-        if symbolRange:
-            #TODO: Hacer la transformacion de los symbolos
-            #symbol = text[symbolRange[0][1]:symbolRange[-1][2]]
-            #symbol = symbolRange[0][0].transformSymbol(symbol)
-            symbol = text
-        else:
-            symbol = None
-
-        if userData.symbol != symbol:
-            userData.symbol = symbol
-            self.editor.updateSymbol(block, userData, symbol)
-
+        userData.setScopeRanges(self.processor.scopeRanges)
+        userData.setLineChunks(self.processor.lineChunks)
+        userData.setBlank(text.strip() == "")
+        
+        self.editor.processBlockUserData(text, block, userData)
+        
+    
     def highlightBlock(self, text):
-        self.highlight_function(text)
+        if self.ready():
+            self.highlight_function(text)
         
     def async_highlight(self, text):
         userData = self.currentBlock().userData()
@@ -167,7 +119,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.processor.endParsing(self.syntax.scopeName)
 
             if userData is None:
-                userData = CodeEditorBlockUserData()
+                userData = self.editor.blockUserDataFactory(self.currentBlock())
                 self.setCurrentBlockUserData(userData)
 
             self.setupBlockUserData(text, self.currentBlock(), userData)
@@ -188,8 +140,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 self.setFormat(start, end - start, format)
 
     def highlightFormat(self, scope):
-        if self.theme is None:
-            return None
         if scope not in PMXSyntaxHighlighter.FORMAT_CACHE:
             format = QtGui.QTextCharFormat()
             settings = self.theme.getStyle(scope)

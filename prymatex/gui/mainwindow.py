@@ -272,14 +272,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         return editor
 
     def removeEditor(self, editor):
-        self.disconnect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_newLocationMemento)
+        self.disconnect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_editor_newLocationMemento)
         self.splitTabWidget.removeTab(editor)
         # TODO Ver si el remove borra el editor y como acomoda el historial
         del editor
 
     def addEditor(self, editor, focus = True):
         self.splitTabWidget.addTab(editor)
-        self.connect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_newLocationMemento)
+        self.connect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_editor_newLocationMemento)
         if focus:
             self.setCurrentEditor(editor)
     
@@ -376,7 +376,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     #=========================================================
     # Handle location history
     #=========================================================
-    def on_newLocationMemento(self, memento):
+    def on_editor_newLocationMemento(self, memento):
         self.addHistoryEntry({"editor": self.sender(), "memento": memento})
         
     def addEditorToHistory(self, editor):

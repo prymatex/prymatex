@@ -7,19 +7,35 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.support import PMXSyntax
 
-class PMXEditorFolding(QtCore.QObject):
+class CodeEditorFolding(QtCore.QObject):
     def __init__(self, editor):
         QtCore.QObject.__init__(self, editor)
         self.editor = editor
         self.logger = editor.application.getLogger('.'.join([self.__class__.__module__, self.__class__.__name__]))
         self.indentSensitive = False
         self.foldingUpdated = True
-        self.editor.textChanged.connect(self.on_editor_textChanged)
-        self.editor.beforeOpen.connect(self.on_editor_beforeOpen)
-        self.editor.syntaxReady.connect(self.on_editor_syntaxReady)
+        #self.editor.textChanged.connect(self.on_editor_textChanged)
+        #self.editor.beforeOpen.connect(self.on_editor_beforeOpen)
+        #self.editor.syntaxReady.connect(self.on_editor_syntaxReady)
         self.blocks = []
         self.folding = []
+        
+        self.editor.registerBlockUserDataHandler(self)
 
+    def contributeToBlockUserData(self, userData):
+        userData.foldingMark = PMXSyntax.FOLDING_NONE
+        userData.foldedLevel = 0
+        userData.folded = False
+        
+    def processBlockUserData(self, text, block, userData):
+        newFoldingMark = self.editor.syntax().folding(text)
+        if userData.foldingMark != newFoldingMark:
+            if newFoldingMark == PMXSyntax.FOLDING_NONE:
+                self.removeFoldingBlock(block)
+            else:
+                self.addFoldingBlock(block)
+            userData.foldingMark = newFoldingMark
+    
     def on_editor_textChanged(self):
         if not self.foldingUpdated:
             self.logger.debug("Purgar y actualizar folding")

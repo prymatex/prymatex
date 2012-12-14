@@ -14,18 +14,19 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core import exceptions
 from prymatex.qt.helpers.menus import extend_menu, update_menu
 from prymatex.models.support import BundleItemTreeNode
+from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserData
 from prymatex.gui.codeeditor.addons import CodeEditorAddon
 from prymatex.gui.codeeditor.sidebar import CodeEditorSideBar, SideBarWidgetAddon
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
-from prymatex.gui.codeeditor.folding import PMXEditorFolding
+from prymatex.gui.codeeditor.folding import CodeEditorFolding
 from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXAlreadyTypedWords
 
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 
 from prymatex.utils import coroutines
-from prymatex.utils import text
+from prymatex.utils import text as texttools
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime
 
@@ -44,20 +45,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # Signals
     #=======================================================================
     syntaxChanged = QtCore.pyqtSignal(object)
-    syntaxReady = QtCore.pyqtSignal(object)
     themeChanged = QtCore.pyqtSignal()
     modeChanged = QtCore.pyqtSignal()
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     
-    afterOpen = QtCore.pyqtSignal()
-    afterSave = QtCore.pyqtSignal()
-    afterClose = QtCore.pyqtSignal()
-    afterReload = QtCore.pyqtSignal()
-    beforeOpen = QtCore.pyqtSignal()
-    beforeSave = QtCore.pyqtSignal()
-    beforeClose = QtCore.pyqtSignal()
-    beforeReload = QtCore.pyqtSignal()
+    aboutToHighlightChange = QtCore.pyqtSignal()
+    highlightChanged = QtCore.pyqtSignal()
     
     #================================================================
     # Editor Flags
@@ -76,7 +70,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     #=======================================================================
     SETTINGS_GROUP = 'CodeEditor'
     
-    defaultSyntax = pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
     tabStopSoft = pmxConfigPorperty(default = True)
     
     @pmxConfigPorperty(default = 4)
@@ -88,6 +81,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         font.setStyleStrategy(font.styleStrategy() | QtGui.QFont.ForceIntegerMetrics | QtGui.QFont.PreferAntialias)
         self.setFont(font)
 
+    @pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
+    def defaultSyntax(self, uuid):
+        syntax = self.application.supportManager.getBundleItem(uuid)
+        self.syntaxHighlighter.setSyntax(syntax)
+    
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
     def defaultTheme(self, uuid):
         theme = self.application.supportManager.getTheme(uuid)
@@ -113,10 +111,16 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         TextEditWidget.__init__(self, parent)
         PMXBaseEditor.__init__(self)
 
+        self.__blockUserDataHandlers = []
+        
+        self.braces = []
+        #Current braces for cursor position (leftBrace <|> rightBrace, oppositeLeftBrace, oppositeRightBrace) 
+        # <|> the cursor is allways here
+        self._currentBraces = (None, None, None, None)
+        
         #Sidebars
         self.leftBar = CodeEditorSideBar(self)
         self.rightBar = CodeEditorSideBar(self)
-        #self.updateViewportMargins()
 
         #Models
         self.bookmarkListModel = PMXBookmarkListModel(self)
@@ -124,7 +128,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.alreadyTypedWords = PMXAlreadyTypedWords(self)
         
         #Folding
-        self.folding = PMXEditorFolding(self)
+        self.folding = CodeEditorFolding(self)
         
         #Processors
         self.commandProcessor = PMXCommandProcessor(self)
@@ -133,17 +137,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
         #Highlighter
         self.syntaxHighlighter = PMXSyntaxHighlighter(self)
-        #self.extraSelectionCursors = MultiListsDict()
         
         #Modes
         self.multiCursorMode = PMXMultiCursorEditorMode(self)
         self.completerMode = PMXCompleterEditorMode(self)
         self.snippetMode = PMXSnippetEditorMode(self)
-        
-        self.braces = []
-        #Current braces for cursor position (leftBrace * rightBrace, oppositeLeftBrace, oppositeRightBrace) 
-        # * the cursor is allways here>
-        self._currentBraces = (None, None, None, None)
         
         #Block Count
         self.lastBlockCount = self.document().blockCount()
@@ -161,13 +159,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
         #Cursor history
         #self._cursorHistory, self._cursorHistoryIndex = [], 0
-        
+
     # Connect Signals
     def connectSignals(self):
         self.rightBar.updateRequest.connect(self.updateViewportMargins)
         self.leftBar.updateRequest.connect(self.updateViewportMargins)
         
-        self.syntaxHighlighter.highlightReady.connect(self.on_highlightReady)
         self.blockCountChanged.connect(self.on_blockCountChanged)
         self.updateRequest.connect(self.updateSideBars)
         self.cursorPositionChanged.connect(self.on_cursorPositionChanged)
@@ -180,10 +177,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
         self.connectSignals()
-        #Load Default Syntax
-        syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
-        self.setSyntax(syntax)
-    
+        
     def addAddon(self, addon):
         PMXBaseEditor.addAddon(self, addon)
         if isinstance(addon, SideBarWidgetAddon):
@@ -200,35 +194,29 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     
     def showMessage(self, *largs, **kwargs):
         self.mainWindow.showMessage(*largs, **kwargs)
-        
-    #================================================================
-    # Update editor status, called from Highlighter
-    #================================================================
-    def updateIndent(self, block, userData, indent):
-        self.logger.debug("Update Block Indent")
+
+    def setPlainText(self, text):
+        self.syntaxHighlighter.stop()
+        self.aboutToHighlightChange.emit()
+        QtGui.QPlainTextEdit.setPlainText(self, text)
+        self.syntaxHighlighter.runAsyncHighlight(lambda editor = self: editor.highlightChanged.emit())
+            
+    # --------------- Block User Data
+    def registerBlockUserDataHandler(self, handler):
+        self.__blockUserDataHandlers.append(handler)
     
-    def updateFolding(self, block, userData, foldingMark):
-        self.logger.debug("Update Block Folding")
-        if block.userData().foldingMark == None:
-            self.folding.removeFoldingBlock(block)
-        else:
-            self.folding.addFoldingBlock(block)
-        
-    def updateSymbol(self, block, userData, symbol):
-        self.logger.debug("Update Block Symbol")
-        if block.userData().symbol is None:
-            self.symbolListModel.removeSymbolBlock(block)
-        else:
-            self.symbolListModel.addSymbolBlock(block)
-        
-    def updateWords(self, block, userData, words):
-        self.logger.debug("Update Words")
-        #Quitar el block de las palabras anteriores
-        self.alreadyTypedWords.removeWordsBlock(block, filter(lambda word: word not in words, userData.words))
-        
-        #Agregar las palabras nuevas
-        self.alreadyTypedWords.addWordsBlock(block, filter(lambda word: word not in userData.words, words))
-        userData.words = words
+    def blockUserDataFactory(self, block):
+        userData = CodeEditorBlockUserData()
+        map(lambda handler: handler.contributeToBlockUserData(userData), self.__blockUserDataHandlers)
+        return userData
+
+    def processBlockUserData(self, text, block, userData):
+        # Indent
+        indent = texttools.whiteSpace(text)
+        if indent != userData.indent:
+            userData.indent = indent
+        # Handlers
+        map(lambda handler: handler.processBlockUserData(text, block, userData), self.__blockUserDataHandlers)
         
     def on_modificationChanged(self, value):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
@@ -247,11 +235,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setCurrentBraces()
         self.highlightEditor()
 
-    def on_highlightReady(self):
-        self.folding.indentSensitive = self.syntax().indentSensitive
-        self.setBraces(self.syntax().scopeName)
-        self.syntaxReady.emit(self.syntax())
-    
     #=======================================================================
     # Base Editor Interface
     #=======================================================================
@@ -260,30 +243,16 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return re.compile("text/.*").match(mimetype) is not None
 
     def open(self, filePath):
-        """ Custom open for large files, use coroutines """
+        """ Custom open for large files """
         self.application.fileManager.openFile(filePath)
         content = self.application.fileManager.readFile(filePath)
         self.setFilePath(filePath)
-        self.beforeOpen.emit()
         self.setPlainText(content)
-        self.afterOpen.emit()
-        
-    def save(self, filePath):
-        self.beforeSave.emit()
-        PMXBaseEditor.save(self, filePath)
-        self.afterSave.emit()
-
-    def close(self):
-        self.beforeClose.emit()
-        PMXBaseEditor.close(self)
-        self.afterClose.emit()
     
     def reload(self):
-        self.beforeReload.emit()
         content = self.application.fileManager.readFile(self.filePath)
         self.updatePlainText(content)
         PMXBaseEditor.reload(self)
-        self.afterReload.emit()
 
     def saveState(self):
         """Returns a Python dictionary containing the state of the editor."""
@@ -321,9 +290,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return PMXBaseEditor.tabTitle(self)
     
     def fileFilters(self):
-        if self.getSyntax() is not None:
-            return [ "%s (%s)" % (self.getSyntax().bundle.name, " ".join(map(lambda ft: "*." + ft, self.getSyntax().fileTypes))) ]
-        return PMXBaseEditor.fileFilters(self)
+        return [ "%s (%s)" % (self.syntax().bundle.name, " ".join(map(lambda ft: "*." + ft, self.syntax().fileTypes))) ]
+        #return PMXBaseEditor.fileFilters(self)
     
     def setCursorPosition(self, position):
         cursor = self.textCursor()
@@ -348,9 +316,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 "settings": cls.application.supportManager.getPreferenceSettings(scopeName),
                 "group": PMXSyntax.findGroup(scopeStack[::-1])
             })
-            return scopeHash, scopeData["group"]
-        else:
-            return scopeHash, cls.SCOPES[scopeHash]["group"]
+        return scopeHash
     
     #=======================================================================
     # Obteniendo datos del editor
@@ -360,12 +326,17 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def preferenceSettings(self, scopeOrHash):
         scopeHash = scopeOrHash if isinstance(scopeOrHash, int) else hash(scopeOrHash)
+        if scopeHash not in self.SCOPES and isinstance(scopeOrHash, basestring):
+            self.flyweightScopeFactory([ scopeOrHash ])
         if scopeHash in self.SCOPES:
             return self.SCOPES[scopeHash]["settings"]
-
+        
     def scopeName(self, scopeHash):
         return self.SCOPES[scopeHash]["name"]
 
+    def scopeGroup(self, scopeHash):
+        return self.SCOPES[scopeHash]["group"]
+        
     def scope(self, cursor):
         userData = cursor.block().userData()
         return self.syntax().scopeName if userData is None else self.scopeName(userData.scopeAtPosition(cursor.columnNumber()))
@@ -412,18 +383,29 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.showMarginLine = bool(flags & self.MarginLine)
         self.showIndentGuide = bool(flags & self.IndentGuide)
 
-    # Syntax
-    def getSyntax(self):
-        return self.syntaxHighlighter.syntax
-        
+    # ------------------- Syntax
     def syntax(self):
         return self.syntaxHighlighter.syntax
         
     def setSyntax(self, syntax):
         if self.syntaxHighlighter.syntax != syntax:
+            self.syntaxHighlighter.stop()
+            self.aboutToHighlightChange.emit()
+            
+            # Change braces
+            settings = self.preferenceSettings(syntax.scopeName)
+            self.braces = settings.smartTypingPairs
+            
+            # TODO que esto lo haga solo el folding cuando cambia la syntax
+            # Set folding type
+            self.folding.indentSensitive = syntax.indentSensitive
+            
+            # Set syntax
             self.syntaxHighlighter.setSyntax(syntax)
-            self.flyweightScopeFactory([ syntax.scopeName ])
             self.syntaxChanged.emit(syntax)
+            
+            # Run
+            self.syntaxHighlighter.runAsyncHighlight(lambda editor = self: editor.highlightChanged.emit())
 
     #=======================================================================
     # SideBars
@@ -450,11 +432,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     #=======================================================================
     # Braces
     #=======================================================================
-    def setBraces(self, scope):
-        settings = self.preferenceSettings(scope)
-        self.braces = settings.smartTypingPairs
-        #self.braces = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
-        
     def setCurrentBraces(self, cursor = None):
         cursor = QtGui.QTextCursor(cursor) if cursor is not None else QtGui.QTextCursor(self.textCursor())
         cursor.clearSelection()
@@ -797,7 +774,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def executeCommand(self, commandScript = None, commandInput = "none", commandOutput = "insertText"):
         if commandScript is None:
             commandScript = self.textCursor().selectedText() if self.textCursor().hasSelection() else self.textCursor().block().text()
-        command = self.application.supportManager.buildAdHocCommand(commandScript, self.getSyntax().bundle, commandInput, commandOutput)
+        command = self.application.supportManager.buildAdHocCommand(commandScript, self.syntax().bundle, commandInput, commandOutput)
         self.insertBundleItem(command)
     
     def environmentVariables(self):
@@ -814,7 +791,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 'TM_LINE_NUMBER': block.blockNumber() + 1,
                 'TM_COLUMN_NUMBER': cursor.columnNumber() + 1,
                 'TM_SCOPE': scope,
-                'TM_MODE': self.getSyntax().name,
+                'TM_MODE': self.syntax().name,
                 'TM_SOFT_TABS': self.tabStopSoft and unicode('YES') or unicode('NO'),
                 'TM_TAB_SIZE': self.tabStopSize,
                 'TM_NESTEDLEVEL': self.folding.getNestedLevel(block)
@@ -906,7 +883,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if settings.completionCommand:
             def commandCallback(context):
                 print unicode(context)
-            command = self.application.supportManager.buildAdHocCommand(settings.completionCommand, self.getSyntax().bundle, commandInput="document")
+            command = self.application.supportManager.buildAdHocCommand(settings.completionCommand, self.syntax().bundle, commandInput="document")
             self.commandProcessor.configure({ "asynchronous": False })
             command.executeCallback(self.commandProcessor, commandCallback)
             
@@ -1160,7 +1137,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         menu.setParent(self)
 
         #Bundle Menu
-        bundleMenu = self.application.supportManager.menuForBundle(self.getSyntax().bundle)
+        bundleMenu = self.application.supportManager.menuForBundle(self.syntax().bundle)
         extend_menu(menu, [ "-", bundleMenu ])
 
         #Se lo pasamos a los addons
@@ -1184,7 +1161,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # Contributes to Tab Menu
     def contributeToTabMenu(self):
         menues = []
-        bundleMenu = self.application.supportManager.menuForBundle(self.getSyntax().bundle)
+        bundleMenu = self.application.supportManager.menuForBundle(self.syntax().bundle)
         if bundleMenu is not None:
             menues.append(bundleMenu)
             menues.append("-")

@@ -8,53 +8,60 @@ from prymatex.support.syntax import PMXSyntax
 class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
     def __init__(self):
         QtGui.QTextBlockUserData.__init__(self)
-        #Folding
-        self.foldingMark = PMXSyntax.FOLDING_NONE
-        self.foldedLevel = 0
-        self.folded = False
         # Indent and content
         self.indent = ""
-        self.blank = True
-        
-        #Symbols
-        self.symbol = None
-        #Words
-        self.words = []
         
         self.textHash = None
         
+        self.__blank = True
+        self.__scopeRanges = []
+        self.__lineChunks = []
         self.__cache = {}
 
+    
     def __nonzero__(self):
-        return bool(self.ranges)
+        return bool(self.__scopeRanges)
     
-    def setRanges(self, ranges):
-        self.ranges = ranges
+    
+    def setScopeRanges(self, ranges):
+        self.__scopeRanges = ranges
+    
+    
+    def scopeRanges(self, start = None, end = None):
+        ranges = self.__scopeRanges[:]
+        if start is not None:
+            ranges = filter(lambda range: range[0][0] >= start, ranges)
+        if end is not None:
+            ranges = filter(lambda range: range[0][1] <= end, ranges)
+        return ranges
+    
+    
+    def setLineChunks(self, chunks):
+        self.__lineChunks = chunks
         
-    def setPreferences(self, preferences):
-        self.preferences = preferences
+        
+    def lineChunks(self):
+        return self.__lineChunks[:]
+        
+        
+    def setBlank(self, blank):
+        self.__blank = blank
     
-    def setChunks(self, chunks):
-        self.chunks = chunks
+    
+    def blank(self):
+        return self.__blank
+        
         
     def getLastScope(self):
-        return self.ranges[-1][1]
+        return self.__scopeRanges[-1][1]
         
     def scopeAtPosition(self, pos):
         return self.scopeRange(pos)[1]
     
     def scopeRange(self, pos):
         ranges = self.scopeRanges()
-        sr = filter(lambda ((start, end), scope): start <= pos <= end, self.ranges)
+        sr = filter(lambda ((start, end), scope): start <= pos <= end, self.__scopeRanges)
         return sr[0] if len(sr) >= 1 else ((0, 0), None)
-    
-    def scopeRanges(self, start = None, end = None):
-        ranges = self.ranges[:]
-        if start is not None:
-            ranges = filter(lambda range: range[0][0] >= start, ranges)
-        if end is not None:
-            ranges = filter(lambda range: range[0][1] <= end, ranges)
-        return ranges
     
     def isWordInScopes(self, word):
         return word in reduce(lambda scope, scope1: scope + " " + scope1[1], self.scopeRanges(), "")
@@ -72,7 +79,7 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
                 else:
                     accepted = accepted and any(map(lambda s: s.startswith(name), scope.split()))
             return accepted
-        return map(lambda scopeRange: scopeRange[0], filter(lambda scopeRange: groupFilter(scopeRange[1]), self.ranges))
+        return map(lambda scopeRange: scopeRange[0], filter(lambda scopeRange: groupFilter(scopeRange[1]), self.__scopeRanges))
 
     def wordsByGroup(self, nameFilter):
         groups = self.groups(nameFilter)

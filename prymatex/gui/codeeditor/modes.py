@@ -97,9 +97,9 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             self.selectSlice(self.editor.snippetProcessor.startPosition(), self.editor.snippetProcessor.endPosition() - length)
             self.editor.textCursor().removeSelectedText()
             #TODO: Hacer esto de purgar de una mejor forma
-            self.editor.symbolListModel._purge_blocks()
-            self.editor.folding._purge_blocks()
-            self.editor.alreadyTypedWords._purge_blocks()
+            #self.editor.symbolListModel._purge_blocks()
+            #self.editor.folding._purge_blocks()
+            #self.editor.alreadyTypedWords._purge_blocks()
             
             #Insert snippet
             self.editor.snippetProcessor.render()

@@ -148,7 +148,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
             self.connectEditor(self.currentEditor)
             self.comboBoxSymbols.setModel(self.currentEditor.symbolListModel)
             self.on_cursorPositionChanged(self.currentEditor)
-            self.on_syntaxChanged(self.currentEditor.getSyntax())
+            self.on_syntaxChanged(self.currentEditor.syntax())
             self.on_modeChanged(self.currentEditor)
             self.setTabSizeLabel(self.currentEditor)
         

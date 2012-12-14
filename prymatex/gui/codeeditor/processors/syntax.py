@@ -20,7 +20,6 @@ class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
         self.lineIndex = 0
         self.scopeRanges = []       #[ ((start, end), scopeHash) ... ]
         self.lineChunks = []        #[ ((start, end), chunk) ... ]
-        self.words = []             #[ ((start, end), word, group) ... ]
         
     def endLine(self, line):
         self.addToken(len(self.line) + 1)
@@ -49,9 +48,7 @@ class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
         begin = self.lineIndex
         # Solo si tengo realmente algo que agregar
         if begin != end:
-            scopeHash, scopeGroup = self.editor.flyweightScopeFactory(self.stackScopes)
+            scopeHash = self.editor.flyweightScopeFactory(self.stackScopes)
             self.scopeRanges.append( ((begin, end), scopeHash) )
             self.lineChunks.append( ((begin, end), self.line[begin:end]) )
-            #TODO: Ver de sacar tambien los groups? y usar todo indexado por el scopeHash
-            self.words += map(lambda match: ((begin + match.span()[0], begin + match.span()[1]), match.group(), scopeGroup), self.editor.RE_WORD.finditer(self.line[begin:end]))
         self.lineIndex = end
