@@ -70,7 +70,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         for i in range(len(first_part)):
             lword += first_part[i]
             m = pattern.search(first_part[i + 1:])
-            if m.group(0):
+            if m and m.group(0):
                 lword += m.group(0)
                 break
         lword = lword[::-1]
@@ -78,7 +78,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         for i in range(len(last_part)):
             rword += last_part[i]
             m = pattern.search(last_part[i:])
-            if m.group(0):
+            if m and m.group(0):
                 rword += m.group(0)
                 break
         lword = lword.lstrip()
