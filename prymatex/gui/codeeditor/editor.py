@@ -21,7 +21,7 @@ from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetPr
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import CodeEditorFolding
-from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXAlreadyTypedWords
+from prymatex.gui.codeeditor.models import SymbolListModel, BookmarkListModel, PMXAlreadyTypedWords
 
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 
@@ -123,8 +123,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.rightBar = CodeEditorSideBar(self)
 
         #Models
-        self.bookmarkListModel = PMXBookmarkListModel(self)
-        self.symbolListModel = PMXSymbolListModel(self)
+        self.bookmarkListModel = BookmarkListModel(self)
+        self.symbolListModel = SymbolListModel(self)
         self.alreadyTypedWords = PMXAlreadyTypedWords(self)
         
         #Folding

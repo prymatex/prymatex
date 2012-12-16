@@ -11,34 +11,39 @@ from prymatex.models.support import BundleItemTreeNode
 #=========================================================
 # Bookmark
 #=========================================================
-class PMXBookmarkListModel(QtCore.QAbstractListModel): 
+class BookmarkListModel(QtCore.QAbstractListModel): 
     def __init__(self, editor): 
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
-        self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
         self.blocks = []
+        # Connect
+        self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
         
-    def __purge_blocks(self):
-        self.blocks = filter(lambda block: block.userData() is not None, self.blocks)
-        self.layoutChanged.emit()
-
+    
     def __contains__(self, block):
         return block in self.blocks
         
-    def on_editor_blocksRemoved(self):
-        self.__purge_blocks()
         
-    def on_editor_textChanged(self):
-        self.__purge_blocks()
+    # -------- Signals
+    def on_editor_blocksRemoved(self):
+        self.blocks = filter(lambda block: block.userData() is not None, self.blocks)
+        self.layoutChanged.emit()
+        
+    def on_document_contentsChange(self, position, removed, added):
+        print position, removed, added
 
+    
+    # --------- List Model api
     def index(self, row, column = 0, parent = None):
         if 0 <= row < len(self.blocks):
             return self.createIndex(row, column, self.blocks[row])
         else:
             return QtCore.QModelIndex()
 
+
     def rowCount(self, parent = None):
         return len(self.blocks)
+
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
@@ -49,8 +54,11 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
         elif role == QtCore.Qt.DecorationRole:
             return resources.getIcon('bookmarkflag')
 
+
+    # ----------- Public api
     def lineNumbers(self):
         return map(lambda block: block.lineNumber(), self.blocks)
+
 
     def toggleBookmark(self, block):
         try:
@@ -65,10 +73,12 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
             self.blocks.insert(index, block)
             self.endInsertRows()
 
+
     def removeAllBookmarks(self):
         self.beginRemoveRows(QtCore.QModelIndex(), 0, len(self.blocks))
         self.blocks = []
         self.endRemoveRows()
+    
     
     def nextBookmark(self, block):
         if not len(self.blocks): return None
@@ -77,6 +87,7 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
         if index == len(self.blocks):
             index = 0
         return self.blocks[index]
+
 
     def previousBookmark(self, block):
         if not len(self.blocks): return None
@@ -89,29 +100,28 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
 #=========================================================
 # Symbol
 #=========================================================
-class PMXSymbolListModel(QtCore.QAbstractListModel): 
+class SymbolListModel(QtCore.QAbstractListModel): 
+    ICONS = {
+        "class": resources.getIcon("symbol-class"),
+        "block": resources.getIcon("symbol-block"),
+        "context": resources.getIcon("symbol-context"),
+        "function": resources.getIcon("symbol-function"),
+        "typedef": resources.getIcon("symbol-typedef"),
+        "variable": resources.getIcon("symbol-variable")
+    }
     def __init__(self, editor): 
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
-        self.logger = editor.application.getLogger('.'.join([self.__class__.__module__, self.__class__.__name__]))
-        self.symbolChanged = False
-        self.editor.document().contentsChange.connect(self.on_document_contentsChange)
-        #self.editor.textChanged.connect(self.on_editor_textChanged)
-        #self.editor.beforeOpen.connect(self.on_editor_beforeOpen)
-        #self.editor.afterOpen.connect(self.on_editor_afterOpen)
         self.blocks = []
-        self.icons = {
-            "class": resources.getIcon("symbol-class"),
-            "block": resources.getIcon("symbol-block"),
-            "context": resources.getIcon("symbol-context"),
-            "function": resources.getIcon("symbol-function"),
-            "typedef": resources.getIcon("symbol-typedef"),
-            "variable": resources.getIcon("symbol-variable")
-        }
         self.editor.registerBlockUserDataHandler(self)
-
+        #Connects
+        self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
+        self.editor.aboutToHighlightChange.connect(self.on_editor_aboutToHighlightChange)
+        
+    # -------------- Block User Data Handler Methods
     def contributeToBlockUserData(self, userData):
         userData.symbol = None
+        
         
     def processBlockUserData(self, text, block, userData):
         symbolRange = filter(lambda ((start, end), p): p.showInSymbolList, 
@@ -125,77 +135,63 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
             symbol = None
 
         if userData.symbol != symbol:
-            if userData.symbol is None:
-                self.removeSymbolBlock(block)
-            else:
-                self.addSymbolBlock(block)
             userData.symbol = symbol
+            if block in self.blocks:
+                index = self.blocks.index(block)
+                if symbol is None:
+                    self.beginRemoveRows(QtCore.QModelIndex(), index, index)
+                    self.blocks.remove(block)
+                    self.endRemoveRows()
+                else:
+                    self.dataChanged.emit(self.index(index), self.index(index))
+            else:
+                indexes = map(lambda block: block.blockNumber(), self.blocks)
+                index = bisect(indexes, block.blockNumber())
+                self.beginInsertRows(QtCore.QModelIndex(), index, index)
+                self.blocks.insert(index, block)
+                self.endInsertRows()
             
         
-    def on_document_contentsChange(self, position, removed, added):
-        print "symbols", position, removed, added
-        print self.editor.document().findBlock(position).userData()
-        print self.editor.document().findBlock(position + added).userData()
-        print self.editor.document().findBlock(position - removed).userData()
-        
-    def on_editor_afterOpen(self):
-        self.editor.textChanged.disconnect(self.on_editor_textChanged)
-        
-    def on_editor_beforeOpen(self):
-        self.editor.textChanged.connect(self.on_editor_textChanged)
-        self.layoutChanged.emit()
-        self.symbolChanged = False
-        
-    def on_editor_textChanged(self):
-        if self.symbolChanged:
-            self.logger.debug("Purgar y actualizar symbols")
-            self.__purge_blocks()
-            self.layoutChanged.emit()
-            self.symbolChanged = False
-
-    def __purge_blocks(self):
+    # ----------- Signals
+    def on_editor_blocksRemoved(self):
         def validSymbolBlock(block):
-            return block.userData() is not None and block.userData().symbol != None
+            return block.userData() is not None and block.userData().symbol is not None
         self.blocks = filter(validSymbolBlock, self.blocks)
+        self.layoutChanged.emit()
         
-    def addSymbolBlock(self, block):
-        if block not in self.blocks:
-            indexes = map(lambda block: block.blockNumber(), self.blocks)
-            index = bisect(indexes, block.blockNumber())
-            self.blocks.insert(index, block)
-            self.symbolChanged = True
-
-    def removeSymbolBlock(self, block):
-        if block in self.blocks:
-            index = self.blocks.index(block)
-            self.blocks.remove(block)
-            self.symbolChanged = True
-
+    
+    def on_editor_aboutToHighlightChange(self):
+        for block in self.blocks:
+            block.userData().symbol = None
+        self.blocks = []
+        self.layoutChanged.emit()
+    
+    
+    # ----------- Model api
     def index(self, row, column = 0, parent = None):
         if 0 <= row < len(self.blocks):
             return self.createIndex(row, column, self.blocks[row])
         else:
             return QtCore.QModelIndex()
 
+
     def rowCount(self, parent = None):
         return len(self.blocks)
 
+
     def data(self, index, role = QtCore.Qt.DisplayRole):
-        if not index.isValid() or not self.blocks:
+        if not index.isValid() or index.row() >= len(self.blocks):
             return None
         block = self.blocks[index.row()]
-        userData = block.userData()
-        #TODO: Ver donde es que pasa esto de que el userData sea None
-        if userData is None:
-            return None
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
-            return userData.symbol
+            return block.userData().symbol
         elif role == QtCore.Qt.DecorationRole:
             #userData.rootGroup(pos)
             return resources.getIcon("scope-root-entity")
 
+
+    # ------------- Public api
     def findBlockIndex(self, block):
-        self.__purge_blocks()
         indexes = map(lambda block: block.blockNumber(), self.blocks)
         blockIndex = bisect(indexes, block.blockNumber()) - 1
         if blockIndex == -1:

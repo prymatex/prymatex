@@ -10,8 +10,6 @@ from prymatex.core import PMXBaseEditorAddon
 from prymatex.utils.lists import bisect_key
 from prymatex.support import PMXPreferenceSettings
 
-RE_CHAR = re.compile(r"(\w)", re.UNICODE)
-
 class CodeEditorAddon(QtCore.QObject, PMXBaseEditorAddon):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
@@ -75,7 +73,7 @@ class SpellCheckerAddon(CodeEditorAddon):
         CodeEditorAddon.initialize(self, editor)
         if self.dictionary is not None:
             self.editor.registerTextCharFormatBuilder("spell", self.textCharFormat_spell_builder)
-            self.editor.syntaxReady.connect(self.on_editor_syntaxReady)
+            #self.editor.syntaxReady.connect(self.on_editor_syntaxReady)
             self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
 
     @classmethod
