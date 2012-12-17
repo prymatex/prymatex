@@ -89,10 +89,10 @@ class PMXMacroProcessor(PMXMacroProcessor):
         pass
     
     def selectLine(self):
-        self.editor.select(self.editor.SelectLine)
+        self.editor.selectLine()
     
     def selectHardLine(self):
-        self.editor.select(self.editor.SelectParagraph)
+        self.editor.selectParagraph()
 
     def deleteBackward(self):
         self.editor.textCursor().deletePreviousChar()

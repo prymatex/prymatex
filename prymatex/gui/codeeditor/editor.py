@@ -235,9 +235,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setCurrentBraces()
         self.highlightEditor()
 
-    #=======================================================================
-    # Base Editor Interface
-    #=======================================================================
+    # ------------- Base Editor Api
     @classmethod
     def acceptFile(cls, filePath, mimetype):
         return re.compile("text/.*").match(mimetype) is not None
@@ -249,6 +247,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setFilePath(filePath)
         self.setPlainText(content)
     
+    def close(self):
+        PMXBaseEditor.close(self)
+        QtGui.QPlainTextEdit.close(self)
+        
     def reload(self):
         content = self.application.fileManager.readFile(self.filePath)
         self.updatePlainText(content)

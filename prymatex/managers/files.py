@@ -176,19 +176,32 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     normpath = lambda self, path: os.path.normpath(path)
     realpath = lambda self, path: os.path.realpath(path)
     relpath = lambda self, path: os.path.relpath(path)
-
+    samefile = lambda self, path1, path2: os.path.samefile(path1, path2)
+    
     def expandVars(self, text):
         context = self.application.supportManager.buildEnvironment()
         path = osextra.path.expand_shell_var(text, context = context)
         if os.path.exists(path):
             return path
     
-    #==================================================================
-    # Handling files for retrieving data. open, read, write, close
-    #==================================================================
+    # -------------- Open file control
+    # Use only realpath for file watcher
     def isOpen(self, filePath):
-        return filePath in self.fileWatcher.files()
+        return self.realpath(filePath) in self.fileWatcher.files()
     
+    def isWatched(self, path):
+        path = self.realpath(path)
+        return path in self.fileWatcher.files() or path in self.fileWatcher.directories()
+        
+    def watchPath(self, path):
+        self.logger.debug("Watch path %s" % path)
+        self.fileWatcher.addPath(self.realpath(path))
+    
+    def unwatchPath(self, path):
+        self.logger.debug("Unwatch path %s" % path)
+        self.fileWatcher.removePath(self.realpath(path))
+    
+    # ---------- Handling files for retrieving data. open, read, write, close
     def openFile(self, filePath):
         """
         Open and read a file, return the content.
@@ -228,17 +241,6 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
         if self.isWatched(filePath):
             self.unwatchPath(filePath)
 
-    def isWatched(self, path):
-        return path in self.fileWatcher.files() or path in self.fileWatcher.directories()
-        
-    def watchPath(self, path):
-        self.logger.debug("Watch path %s" % path)
-        self.fileWatcher.addPath(path)
-    
-    def unwatchPath(self, path):
-        self.logger.debug("Unwatch path %s" % path)
-        self.fileWatcher.removePath(path)
-    
     def directory(self, filePath = None):
         """
         Obtiene un directorio para el path

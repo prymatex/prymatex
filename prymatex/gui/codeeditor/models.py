@@ -180,14 +180,16 @@ class SymbolListModel(QtCore.QAbstractListModel):
 
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
+        # TODO No funciona con los snippets
         if not index.isValid() or index.row() >= len(self.blocks):
             return None
-        block = self.blocks[index.row()]
-        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
-            return block.userData().symbol
-        elif role == QtCore.Qt.DecorationRole:
-            #userData.rootGroup(pos)
-            return resources.getIcon("scope-root-entity")
+        userData = self.blocks[index.row()].userData()
+        if userData:
+            if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
+                return userData.symbol
+            elif role == QtCore.Qt.DecorationRole:
+                #userData.rootGroup(pos)
+                return resources.getIcon("scope-root-entity")
 
 
     # ------------- Public api

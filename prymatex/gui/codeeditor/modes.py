@@ -81,7 +81,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             charactersBefore = cursor.document().characterCount()
             
             #Insert Text
-            self.editor.textCursor().beginEditBlock()
+            cursor.beginEditBlock()
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             positionAfter = cursor.position()
             charactersAfter = cursor.document().characterCount()
@@ -95,7 +95,8 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             
             #Remove text
             self.selectSlice(self.editor.snippetProcessor.startPosition(), self.editor.snippetProcessor.endPosition() - length)
-            self.editor.textCursor().removeSelectedText()
+            #self.editor.textCursor().removeSelectedText()
+            #self.editor.blockCountChanged.emit(self.editor.document().blockCount())
             #TODO: Hacer esto de purgar de una mejor forma
             #self.editor.symbolListModel._purge_blocks()
             #self.editor.folding._purge_blocks()
@@ -104,7 +105,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             #Insert snippet
             self.editor.snippetProcessor.render()
             self.setCursorPosition(currentHolder.start + holderPosition + (positionAfter - positionBefore))
-            self.editor.textCursor().endEditBlock()
+            cursor.endEditBlock()
         else:
             self.logger.debug("Con cualquier otra tecla sin texto")
             return QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
