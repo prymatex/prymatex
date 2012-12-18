@@ -22,6 +22,7 @@ from prymatex.support.theme import PMXTheme, PMXThemeStyle
 from prymatex.support.score import PMXScoreManager
 from prymatex.support.utils import ensurePath
 
+from prymatex.utils import scope
 from prymatex.utils.decorators.deprecated import deprecated
 from prymatex.utils.decorators.helpers import printtime
 from prymatex.utils.decorators.memoize import dynamic_memoized, remove_memoized_argument, remove_memoized_function
@@ -61,7 +62,6 @@ class PMXSupportBaseManager(object):
         self.ready = False
         self.environment = {}
         self.managedObjects = {}
-        self.scores = PMXScoreManager()
     
     #---------------------------------------------------
     # Namespaces
@@ -452,12 +452,12 @@ class PMXSupportBaseManager(object):
         #Deprecate scope in cache
         def test_scope_bundleItem(itemType):
             def test_scope(f, key, fkey):
-                reference = None
+                reference = ""
                 if itemType == PMXPreference.TYPE and f.func_name == "getPreferenceSettings":
                     reference = fkey[1]
                 elif f.func_name in [ "getTabTriggerItem", "getKeyEquivalentItem" ]:
                     reference = fkey[2]
-                return reference is not None and bool(self.scores.score(key, reference)) or False
+                return scope.Selector(key).does_match(reference)
                 
             return test_scope
 
