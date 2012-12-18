@@ -5,6 +5,7 @@ import os
 
 from prymatex.support.bundle import PMXManagedObject
 from prymatex.utils import plist
+from prymatex.utils import scope
 
 """foreground, background, selection, invisibles, lineHighlight, caret, gutter"""
 
@@ -16,7 +17,10 @@ class PMXThemeStyle(object):
 
     def load(self, dataHash):
         for key in PMXThemeStyle.KEYS:
-            setattr(self, key, dataHash.get(key, None))
+            value = dataHash.get(key, None)
+            if key == 'scope':
+                self.selector = scope.Selector(value)
+            setattr(self, key, value)
 
     @property
     def hash(self):
@@ -31,11 +35,14 @@ class PMXThemeStyle(object):
         
     def update(self, dataHash):
         for key in dataHash.keys():
+            value = dataHash[key]
             if key == 'settings':
-                self.settings.update(dataHash[key])
+                self.settings.update(value)
                 self.settings = dict(filter(lambda tupla: tupla[1] != None, self.settings.iteritems()))
-            else:
-                setattr(self, key, dataHash[key])
+                continue
+            elif key == 'scope':
+                self.selector = scope.Selector(value)
+            setattr(self, key, value)
     
 class PMXTheme(PMXManagedObject):
     KEYS = [    'name', 'comment', 'author', 'settings']

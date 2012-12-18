@@ -21,7 +21,6 @@ from prymatex.support.project import PMXProject
 from prymatex.support.theme import PMXTheme, PMXThemeStyle
 from prymatex.support.score import PMXScoreManager
 from prymatex.support.utils import ensurePath
-from prymatex.support.cache import PMXSupportCache
 
 from prymatex.utils.decorators.deprecated import deprecated
 from prymatex.utils.decorators.helpers import printtime
@@ -911,19 +910,15 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     @dynamic_memoized
     def getPreferences(self, scope):
-        with_bundle = []
-        with_scope = []
-        without_scope = []
-        for preference in self.getAllPreferences():
-            if not preference.scope:
-                without_scope.append(preference)
-            else:
-                score = self.scores.score(preference.scope, scope)
-                if score != 0:
-                    with_scope.append((score, preference))
-        with_bundle.sort(key = lambda t: t[0], reverse = True)
-        with_scope.sort(key = lambda t: t[0], reverse = True)
-        return map(lambda item: item[1], with_bundle + with_scope) + without_scope
+        # TODO: estoy repitiendo mucho esto de filtar por scope quiza una funcion aparte sea mejor
+        items = []
+        for item in self.getAllPreferences():
+            rank = []
+            if item.selector.does_match(scope, rank):
+                items.append((sum(rank), item))
+        items.sort(key = lambda t: t[0], reverse = True)
+        return map(lambda (score, item): item, items)
+        
 
     @dynamic_memoized
     def getPreferenceSettings(self, scope):
@@ -962,33 +957,23 @@ class PMXSupportBaseManager(object):
 
     @dynamic_memoized
     def getAllTabTiggerItemsByScope(self, scope):
-        with_scope = []
-        without_scope = []
+        items = []
         for item in self.getAllTabTriggerItems():
-            if not item.scope:
-                without_scope.append(item)
-            else:
-                score = self.scores.score(item.scope, scope)
-                if score != 0:
-                    with_scope.append((score, item))
-        with_scope.sort(key = lambda t: t[0], reverse = True)
-        with_scope = map(lambda (score, item): item, with_scope)
-        return with_scope + without_scope
+            rank = []
+            if item.selector.does_match(scope, rank):
+                items.append((sum(rank), item))
+        items.sort(key = lambda t: t[0], reverse = True)
+        return map(lambda (score, item): item, items)
 
     @dynamic_memoized
     def getTabTriggerItem(self, tabTrigger, scope):
-        with_scope = []
-        without_scope = []
+        items = []
         for item in self.getAllBundleItemsByTabTrigger(tabTrigger):
-            if not item.scope:
-                without_scope.append(item)
-            else:
-                score = self.scores.score(item.scope, scope)
-                if score != 0:
-                    with_scope.append((score, item))
-        with_scope.sort(key = lambda t: t[0], reverse = True)
-        with_scope = map(lambda (score, item): item, with_scope)
-        return with_scope and with_scope or without_scope
+            rank = []
+            if item.selector.does_match(scope, rank):
+                items.append((sum(rank), item))
+        items.sort(key = lambda t: t[0], reverse = True)
+        return map(lambda (score, item): item, items)
     
     #---------------------------------------------------
     # KEYEQUIVALENT INTERFACE
@@ -1012,18 +997,13 @@ class PMXSupportBaseManager(object):
         
     @dynamic_memoized
     def getKeyEquivalentItem(self, code, scope):
-        with_scope = []
-        without_scope = []
+        items = []
         for item in self.getAllBundleItemsByKeyEquivalent(code):
-            if not item.scope:
-                without_scope.append(item)
-            else:
-                score = self.scores.score(item.scope, scope)
-                if score != 0:
-                    with_scope.append((score, item))
-        with_scope.sort(key = lambda t: t[0], reverse = True)
-        with_scope = map(lambda (score, item): item, with_scope)
-        return with_scope and with_scope or without_scope
+            rank = []
+            if item.selector.does_match(scope, rank):
+                items.append((sum(rank), item))
+        items.sort(key = lambda t: t[0], reverse = True)
+        return map(lambda (score, item): item, items)
     
     #---------------------------------------------------
     # FILE EXTENSION INTERFACE
@@ -1038,19 +1018,14 @@ class PMXSupportBaseManager(object):
     # FILE EXTENSION, for drag commands
     #---------------------------------------------------------------
     def getFileExtensionItem(self, path, scope):
-        with_scope = []
-        without_scope = []
-        for item in self.getAllBundleItemsByFileExtension(path):
-            if not item.scope:
-                without_scope.append(item)
-            else:
-                score = self.scores.score(item.scope, scope)
-                if score != 0:
-                    with_scope.append((score, item))
-        with_scope.sort(key = lambda t: t[0], reverse = True)
-        with_scope = map(lambda (score, item): item, with_scope)
-        return with_scope and with_scope or without_scope
-    
+        items = []
+        for item in self.getAllBundleItemsByFileExtension(code):
+            rank = []
+            if item.selector.does_match(scope, rank):
+                items.append((sum(rank), item))
+        items.sort(key = lambda t: t[0], reverse = True)
+        return map(lambda (score, item): item, items)
+        
     #---------------------------------------------------
     # ACTION ITEMS INTERFACE
     #---------------------------------------------------

@@ -5,6 +5,7 @@ import os, re, shutil
 from copy import copy
 
 from prymatex.utils import plist
+from prymatex.utils import scope
 from prymatex.support import utils
 
 """
@@ -216,11 +217,17 @@ class PMXBundleItem(PMXManagedObject):
     
     def load(self, dataHash):
         for key in PMXBundleItem.KEYS:
-            setattr(self, key, dataHash.get(key, None))
+            value = dataHash.get(key, None)
+            if key == "scope":
+                self.selector = scope.Selector(value)
+            setattr(self, key, value)
     
     def update(self, dataHash):
         for key in dataHash.keys():
-            setattr(self, key, dataHash[key])
+            value = dataHash[key]
+            if key == "scope":
+                self.selector = scope.Selector(value)
+            setattr(self, key, value)
     
     def isChanged(self, dataHash):
         for key in dataHash.keys():

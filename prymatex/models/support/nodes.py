@@ -117,9 +117,8 @@ class BundleItemMenuTreeNode(TreeNodeBase):
 #====================================================
 class ThemeStyleTableRow(object):
     """Theme and Style decorator"""
-    def __init__(self, style, scores = None):
+    def __init__(self, style):
         self.__style = style
-        self.scores = scores
         self.STYLES_CACHE = {}
     
     def __getattr__(self, name):
@@ -162,10 +161,9 @@ class ThemeStyleTableRow(object):
             return base
         styles = []
         for style in self.styles:
-            if style.scope != None:
-                score = self.scores.score(style.scope, scope)
-                if score != 0:
-                    styles.append((score, style))
+            rank = []
+            if style.selector.does_match(scope, rank):
+                styles.append((sum(rank), style))
         styles.sort(key = lambda t: t[0])
         for score, style in styles:
             base.update(style.settings)

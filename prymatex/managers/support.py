@@ -391,7 +391,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager):
     # THEME OVERRIDE INTERFACE
     #---------------------------------------------------
     def addTheme(self, theme):
-        themeRow = ThemeStyleTableRow(theme, self.scores)
+        themeRow = ThemeStyleTableRow(theme)
         self.themeListModel.appendTheme(themeRow)
         self.themeAdded.emit(themeRow)
         return themeRow
