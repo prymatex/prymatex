@@ -1043,18 +1043,13 @@ class PMXSupportBaseManager(object):
         """
         Return a list of actions items for scope and without scope
         """
-        with_scope = []
-        without_scope = []
+        items = []
         for item in self.getAllActionItems():
-            if not item.scope:
-                without_scope.append(item)
-            else:
-                score = self.scores.score(item.scope, scope)
-                if score != 0:
-                    with_scope.append((score, item))
-        with_scope.sort(key = lambda t: t[0], reverse = True)
-        with_scope = map(lambda (score, item): item, with_scope)
-        return with_scope + without_scope
+            rank = []
+            if item.selector.does_match(scope, rank):
+                items.append((sum(rank), item))
+        items.sort(key = lambda t: t[0], reverse = True)
+        return map(lambda (score, item): item, items)
     
     #---------------------------------------------------
     # SYNTAXES INTERFACE
