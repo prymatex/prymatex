@@ -318,18 +318,25 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             })
         return scopeHash
     
-    # TODO Cambiar esto a scopeSettings son todos los valores del dic en la cache
+    
+    # TODO deprecated, use scopeSettings
     def preferenceSettings(self, scopeOrHash):
         scopeHash = scopeOrHash if isinstance(scopeOrHash, int) else hash(scopeOrHash)
         if scopeHash not in self.SCOPES and isinstance(scopeOrHash, basestring):
             self.flyweightScopeFactory([ scopeOrHash ])
         if scopeHash in self.SCOPES:
             return self.SCOPES[scopeHash]["settings"]
+    
+    def scopeSettings(self, scopeHash):
+        assert scopeHash in self.SCOPES
+        return self.SCOPES[scopeHash]["settings"]
         
     def scopeName(self, scopeHash):
+        assert scopeHash in self.SCOPES
         return self.SCOPES[scopeHash]["name"]
 
     def scopeGroup(self, scopeHash):
+        assert scopeHash in self.SCOPES
         return self.SCOPES[scopeHash]["group"]
         
     def scope(self, cursor):
@@ -340,6 +347,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return self.preferenceSettings(self.currentScope())
         
     def currentScope(self):
+        return self.scope(self.textCursor())
+        
+    def currentScopes(self):
         return self.scope(self.textCursor())
     
     #=======================================================================
@@ -718,9 +728,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def insertNewLine(self, cursor = None):
         cursor = cursor or self.textCursor()
         block = cursor.block()
+        positionInBlock = cursor.positionInBlock()
         userData = cursor.block().userData()
-        settings = self.preferenceSettings(self.scope(cursor))
-        indentMarks = settings.indent(block.text()[:cursor.positionInBlock()])
+        settings = self.scopeSettings(userData.scopeAtPosition(positionInBlock))
+        indentMarks = settings.indent(block.text()[:positionInBlock])
         if PMXPreferenceSettings.INDENT_INCREASE in indentMarks:
             self.logger.debug("Increase indent")
             indent = userData.indent + self.tabKeyBehavior()
@@ -736,7 +747,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             indent = userData.indent[:-len(self.tabKeyBehavior())]
         else:
             self.logger.debug("Preserve indent")
-            indent = block.userData().indent[:cursor.positionInBlock()]
+            indent = block.userData().indent[:positionInBlock]
         cursor.insertText("\n%s" % indent)
         self.ensureCursorVisible()
 
@@ -876,10 +887,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             #En una clausura
             self.completerTask.done.connect(on_completerTaskReady(callback))
 
+
     def completionSuggestions(self, cursor = None, scope = None, settings = None):
         cursor = cursor or self.textCursor()
-        scope = scope or self.scope(cursor)
-        settings = settings or self.preferenceSettings(scope)
+        scope = cursor.block().userData.scopeAtPosition(cursor.positionInBlock())
+        settings = self.scopeSettings(scope)
+        scopeName = self.scopeName(scope)
         
         #An array of additional candidates when cycling through completion candidates from the current document.
         completions = settings.completions[:]
@@ -893,7 +906,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             command.executeCallback(self.commandProcessor, commandCallback)
             
         #A tab tigger completion
-        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
+        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scopeName)
         
         typedWords = self.alreadyTypedWords.typedWords(cursor.block())
         
