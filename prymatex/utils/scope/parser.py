@@ -23,9 +23,11 @@ class Parser(object):
             self.it += 1
         return True
 		
-    def parse_char(self, *chars):
-        if self.it == self.last or self.source[self.it] not in chars:
+    def parse_char(self, chars, dest = None):
+        if self.it == self.last or self.source[self.it] not in tuple(chars):
             return False
+        if dest is not None:
+            dest.append(self.source[self.it])
         self.it += 1
         return True
 
@@ -85,8 +87,9 @@ class Parser(object):
 
     def parse_filter(self, res):
         bt = self.it
-        if self.parse_char("L","R","B") and self.parse_char(":") and self.ws():
-            fltr = types.FilterType(self.source[bt])
+        dest = []
+        if self.parse_char("LRB", dest) and self.parse_char(":") and self.ws():
+            fltr = types.FilterType(dest and dest[0] or None)
             if self.parse_group(fltr.selector) or self.parse_newpath(fltr.selector):
                 res.composites.append(fltr)
                 return True
@@ -100,20 +103,16 @@ class Parser(object):
 
     def parse_composite(self, res):
         rc = False
+        dest = []
         while True:
-            expression = types.ExpressionType()
+            expression = types.ExpressionType(dest and dest.pop() or None)
             if not self.parse_expression(expression):
                 break
             res.expressions.append(expression)
             rc = True
-            if not self.ws():
-                break
-            if self.parse_char("&", "|", "-"):
-                expression.op = self.source[self.it -1]
-            else:
-                break
-            if not self.ws():
-                break
+            if self.ws() and self.parse_char("&|-", dest) and self.ws():
+                continue
+            break
         return rc
 
     def parse_selector(self, res):
