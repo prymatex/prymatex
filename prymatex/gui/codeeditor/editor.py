@@ -326,6 +326,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def tabKeyBehavior(self):
         return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('	')
 
+    # TODO Cambiar esto a scopeSettings son todos los valores del dic en la cache
     def preferenceSettings(self, scopeOrHash):
         scopeHash = scopeOrHash if isinstance(scopeOrHash, int) else hash(scopeOrHash)
         if scopeHash not in self.SCOPES and isinstance(scopeOrHash, basestring):
@@ -394,6 +395,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.syntaxHighlighter.stop()
             self.aboutToHighlightChange.emit()
             
+            # TODO que esto lo haga solo el editor cuando cambia la syntax
             # Change braces
             settings = self.preferenceSettings(syntax.scopeName)
             self.braces = settings.smartTypingPairs
@@ -676,13 +678,14 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     #=======================================================================
     def runKeyHelper(self, event):
         #No tengo modo activo, intento con los helpers
-        #Obtener key, scope y cursor
+        # Obtener key, scopes y cursor
+        #leftScope, rightScope = self.currentScopes()
         scope = self.currentScope()
         cursor = self.textCursor()
         for helper in self.findHelpers(event.key()):
             #Buscar Entre los helpers
-            if helper.accept(event, cursor, scope):
-                helper.execute(event, cursor, scope)
+            if helper.accept(event, cursor, scope, scope):
+                helper.execute(event, cursor, scope, scope)
                 return True
         return False
 
