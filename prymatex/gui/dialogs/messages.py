@@ -3,7 +3,7 @@
 
 import os
 
-from PyQt4 import QtGui
+from prymatex.qt import QtGui
 
 class CheckableMessageBox(QtGui.QMessageBox):
     def __init__(self, *largs, **kwargs):
@@ -27,4 +27,3 @@ class CheckableMessageBox(QtGui.QMessageBox):
         question.setText(text)
         question.setCheckBoxText(checkText)
         return question
-        

@@ -16,6 +16,7 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
 from prymatex.gui.dialogs.project import PMXNewProjectDialog
 from prymatex.gui.dialogs.messages import CheckableMessageBox
+from prymatex.gui.dialogs.input import ReplaceRenameInputDialog
 
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
@@ -404,9 +405,10 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                 basename = self.application.fileManager.basename(srcPath)
                 dstPath = os.path.join(parentPath, basename)
                 while self.application.fileManager.exists(dstPath):
-                    basename, accepted = QtGui.QInputDialog.getText(self, _("New name"), 
-                        _("Destiny already exists, please use a new name"), text = basename)
-                    if not accepted: return
+                    basename, ret = ReplaceRenameInputDialog.getText(self, _("Already exists"), 
+                        _("Destiny already exists\nReplace or or replace?"), text = basename, )
+                    if ret == ReplaceRenameInputDialog.Cancel: return
+                    if ret == ReplaceRenameInputDialog.Replace: break
                     dstPath = os.path.join(parentPath, basename)
                 if os.path.isdir(srcPath):
                     self.application.fileManager.copytree(srcPath, dstPath)
