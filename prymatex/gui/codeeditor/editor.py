@@ -303,11 +303,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def cursorPosition(self):
         cursor = self.textCursor()
-        return (cursor.block().blockNumber(), cursor.columnNumber())
+        return (cursor.block().blockNumber(), cursor.positionInBlock())
 
-    #=======================================================================
-    # Scopes
-    #=======================================================================
+    # ---------------------- Scopes
     @classmethod
     def flyweightScopeFactory(cls, scopeStack):
         scopeName = " ".join(scopeStack)
@@ -320,12 +318,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             })
         return scopeHash
     
-    #=======================================================================
-    # Obteniendo datos del editor
-    #=======================================================================
-    def tabKeyBehavior(self):
-        return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('	')
-
     # TODO Cambiar esto a scopeSettings son todos los valores del dic en la cache
     def preferenceSettings(self, scopeOrHash):
         scopeHash = scopeOrHash if isinstance(scopeOrHash, int) else hash(scopeOrHash)
@@ -342,13 +334,20 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
     def scope(self, cursor):
         userData = cursor.block().userData()
-        return self.syntax().scopeName if userData is None else self.scopeName(userData.scopeAtPosition(cursor.columnNumber()))
+        return self.syntax().scopeName if userData is None else self.scopeName(userData.scopeAtPosition(cursor.positionInBlock()))
 
     def currentPreferenceSettings(self):
         return self.preferenceSettings(self.currentScope())
         
     def currentScope(self):
         return self.scope(self.textCursor())
+    
+    #=======================================================================
+    # Obteniendo datos del editor
+    #=======================================================================
+    def tabKeyBehavior(self):
+        return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('	')
+
 
     # Flags
     def getFlags(self):
@@ -721,7 +720,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         block = cursor.block()
         userData = cursor.block().userData()
         settings = self.preferenceSettings(self.scope(cursor))
-        indentMarks = settings.indent(block.text()[:cursor.columnNumber()])
+        indentMarks = settings.indent(block.text()[:cursor.positionInBlock()])
         if PMXPreferenceSettings.INDENT_INCREASE in indentMarks:
             self.logger.debug("Increase indent")
             indent = userData.indent + self.tabKeyBehavior()
@@ -737,7 +736,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             indent = userData.indent[:-len(self.tabKeyBehavior())]
         else:
             self.logger.debug("Preserve indent")
-            indent = block.userData().indent[:cursor.columnNumber()]
+            indent = block.userData().indent[:cursor.positionInBlock()]
         cursor.insertText("\n%s" % indent)
         self.ensureCursorVisible()
 
@@ -792,10 +791,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         current_word, start, end = self.currentWord()
         environment.update({
                 'TM_CURRENT_LINE': line,
-                'TM_LINE_INDEX': cursor.columnNumber(),
+                'TM_LINE_INDEX': cursor.positionInBlock(),
                 'TM_LINE_NUMBER': block.blockNumber() + 1,
-                'TM_COLUMN_NUMBER': cursor.columnNumber() + 1,
+                'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
                 'TM_SCOPE': scope,
+                'TM_SCOPE_LEFT': scope,
                 'TM_MODE': self.syntax().name,
                 'TM_SOFT_TABS': self.tabStopSoft and unicode('YES') or unicode('NO'),
                 'TM_TAB_SIZE': self.tabStopSize,
@@ -986,7 +986,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         block = cursor.block()
         beginPosition = block.position()
         # TODO Todo lo que implique userData centrarlo en una API en la instancia de cada editor
-        (start, end), scope = block.userData().scopeRange(cursor.columnNumber())
+        (start, end), scope = block.userData().scopeRange(cursor.positionInBlock())
         if scope is not None:
             cursor.setPosition(beginPosition + start)
             cursor.setPosition(beginPosition + end, QtGui.QTextCursor.KeepAnchor)
