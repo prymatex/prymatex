@@ -180,7 +180,6 @@ class PMXSyntax(PMXBundleItem):
                     value = compileRegexp( value )
                 except TypeError, e:
                     value = None
-                    print self.name, key, e
             setattr(self, key, value)
     
     @property
@@ -217,6 +216,7 @@ class PMXSyntax(PMXBundleItem):
         repository = {}
         if self.scopeName is not None:
             syntaxes = self.syntaxes
+            # TODO Usar el selector
             index = self.scopeName.find(".")
             while index != -1:
                 parentScopeName = self.scopeName[0:index]
