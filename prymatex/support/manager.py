@@ -29,6 +29,9 @@ from prymatex.utils.decorators.memoize import dynamic_memoized, remove_memoized_
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand, PMXProject ]
 
+# ======================================================
+# Tool function for compare bundle items by attributes
+# ======================================================
 def compare(obj, keys, tests):
     if not len(keys):
         return True
@@ -43,6 +46,11 @@ def compare(obj, keys, tests):
     else:
         return value == tests[key] and compare(obj, keys[1:], tests)
 
+# ======================================================
+# Manager of Bundles, Bundle Items and Themes
+# This objects contains the basic functions for items handling
+# Every set of items lives inside a namespace
+# ======================================================
 class PMXSupportBaseManager(object):
     BUNDLES = 'Bundles'
     SUPPORT = 'Support'
@@ -63,9 +71,7 @@ class PMXSupportBaseManager(object):
         self.environment = {}
         self.managedObjects = {}
     
-    #---------------------------------------------------
-    # Namespaces
-    #---------------------------------------------------
+    #------------- Namespaces ----------------------
     def addNamespace(self, name, path):
         # TODO: Quiza migrar a algo con mas forma para encapsular los namespace
         self.namespaces[name] = { "dirname": path }
@@ -117,9 +123,7 @@ class PMXSupportBaseManager(object):
                 if bundle.enabled:
                     self.populateBundle(bundle)
 
-    #---------------------------------------------------
-    # Environment
-    #---------------------------------------------------
+    #-------------- Environment ---------------------
     def environmentVariables(self):
         return self.environment.copy()
     
@@ -147,9 +151,7 @@ class PMXSupportBaseManager(object):
                 env[key] = path
         return env
 
-    #---------------------------------------------------
-    # Paths for namespaces
-    #---------------------------------------------------
+    #----------- Paths for namespaces --------------------
     def namespaceElementPath(self, namespace, element, create = False):
         assert namespace in self.namespaces, "The %s namespace is not registered" % namespace
         assert element in self.ELEMENTS, "The %s namespace is not registered" % namespace
@@ -173,9 +175,7 @@ class PMXSupportBaseManager(object):
             self.addNamespaceElement(namespace, element, path)
             return self.namespaces[namespace][element]
 
-    #---------------------------------------------------
-    # Tools
-    #---------------------------------------------------
+    #--------------- Tools --------------------
     def uuidgen(self, uuid = None):
         # TODO: ver que el uuid generado no este entre los elementos existentes
         if uuid is None:
@@ -238,16 +238,24 @@ class PMXSupportBaseManager(object):
         snippet.setManager(self)
         return snippet
 
-    #---------------------------------------------------
-    # Message Handler
-    #---------------------------------------------------
+    def __sort_filter_items(self, items, leftScope, rightScope = None):
+        context = scope.Context(leftScope, rightScope)
+        rank = []
+        sortFilterItems = []
+        for item in items:
+            if item.selector.does_match(context, rank):
+                sortFilterItems.append((rank.pop(), item))
+        sortFilterItems.sort(key = lambda t: t[0], reverse = True)
+        return map(lambda (score, item): item, sortFilterItems)
+
+        
+    #---------------- Message Handler ----------------
     def showMessage(self, message):
         if self.messageHandler is not None:
             self.messageHandler(message)
 
-    #---------------------------------------------------
-    # LOAD ALL SUPPORT
-    #---------------------------------------------------
+
+    #------------ LOAD ALL SUPPORT ----------------------------
     def loadSupport(self, callback = None):
         # Install message handler
         self.messageHandler = callback
@@ -261,9 +269,8 @@ class PMXSupportBaseManager(object):
         self.messageHandler = None
         self.ready = True
 
-    #---------------------------------------------------
-    # LOAD THEMES
-    #---------------------------------------------------
+
+    #-------------- LOAD THEMES ---------------------------
     def loadThemes(self, namespace):
         loadedThemes = set()
         if self.THEMES in self.namespaces[namespace]:
@@ -275,9 +282,8 @@ class PMXSupportBaseManager(object):
                     loadedThemes.add(theme)
         return loadedThemes
         
-    #---------------------------------------------------
-    # LOAD BUNDLES
-    #---------------------------------------------------
+
+    #------------- LOAD BUNDLES ------------------
     def loadBundles(self, namespace):
         loadedBundles = set()
         if self.BUNDLES in self.namespaces[namespace]:
@@ -288,10 +294,9 @@ class PMXSupportBaseManager(object):
                     self.showMessage("Loading bundle\n%s" % bundle.name)
                     loadedBundles.add(bundle)
         return loadedBundles
+
         
-    #---------------------------------------------------
-    # POPULATE BUNDLE AND LOAD BUNDLE ITEMS
-    #---------------------------------------------------
+    # ----------- POPULATE BUNDLE AND LOAD BUNDLE ITEMS
     def populateBundle(self, bundle):
         nss = bundle.namespaces[::-1]
         for namespace in nss:
@@ -308,9 +313,8 @@ class PMXSupportBaseManager(object):
         bundle.populated = True
         self.populatedBundle(bundle)
 
-    #---------------------------------------------------
-    # RELOAD SUPPORT
-    #---------------------------------------------------
+
+    # -------------------- RELOAD SUPPORT
     def reloadSupport(self, callback = None):
         #Reload Implica ver en todos los espacios de nombre instalados por cambios en los items
         # Install message handler
@@ -326,10 +330,9 @@ class PMXSupportBaseManager(object):
         # Uninstall message handler
         self.messageHandler = None
         self.logger.debug("End reload support.")
-    
-    #---------------------------------------------------
-    # RELOAD THEMES
-    #---------------------------------------------------
+
+
+    # ------------------ RELOAD THEMES
     def reloadThemes(self, namespace):
         if self.THEMES in self.namespaces[namespace]:
             installedThemes = filter(lambda theme: theme.hasNamespace(namespace), self.getAllThemes())
@@ -354,10 +357,9 @@ class PMXSupportBaseManager(object):
             for path in themePaths:
                 self.logger.debug("New theme %s." % path)
                 PMXTheme.loadTheme(path, namespace, self)
+
     
-    #---------------------------------------------------
-    # RELOAD BUNDLES
-    #---------------------------------------------------
+    # ---------------- RELOAD BUNDLES
     def reloadBundles(self, namespace):
         if self.BUNDLES in self.namespaces[namespace]:
             installedBundles = filter(lambda theme: theme.hasNamespace(namespace), self.getAllBundles())
@@ -389,9 +391,8 @@ class PMXSupportBaseManager(object):
                 self.logger.debug("New bundle %s." % path)
                 PMXBundle.loadBundle(path, namespace, self)
     
-    #---------------------------------------------------
-    # REPOPULATED BUNDLE AND RELOAD BUNDLE ITEMS
-    #---------------------------------------------------
+
+    # ----- REPOPULATED BUNDLE AND RELOAD BUNDLE ITEMS
     def repopulateBundle(self, bundle):
         namespaces = bundle.namespaces[::-1]
         bundleItems = self.findBundleItems(bundle = bundle)
@@ -430,9 +431,8 @@ class PMXSupportBaseManager(object):
                 klass.loadBundleItem(path, namespace, bundle, self)
         self.populatedBundle(bundle)
 
-    #---------------------------------------------------
-    # CACHE COHERENCE
-    #---------------------------------------------------
+
+    # --------------- CACHE COHERENCE
     def updateBundleItemCacheCoherence(self, bundleItem, attrs):
         # TODO Terminar, identificar las funciones y borrar las cosas como corresponde
         #Deprecate keyEquivalent in cache
@@ -457,6 +457,7 @@ class PMXSupportBaseManager(object):
                     reference = fkey[1]
                 elif f.func_name in [ "getTabTriggerItem", "getKeyEquivalentItem" ]:
                     reference = fkey[2]
+                    # TODO Hacelo con soporte para left and right scope
                 return scope.Selector(key).does_match(reference)
                 
             return test_scope
@@ -465,9 +466,8 @@ class PMXSupportBaseManager(object):
             remove_memoized_argument(bundleItem.scope, condition = test_scope_bundleItem(bundleItem.TYPE))
             remove_memoized_argument(attrs['scope'], condition = test_scope_bundleItem(bundleItem.TYPE))
         
-    #---------------------------------------------------
-    # MANAGED OBJECTS INTERFACE
-    #---------------------------------------------------
+
+    # ----------- MANAGED OBJECTS INTERFACE
     def setDeleted(self, uuid):
         """
         Marcar un managed object como eliminado
@@ -503,9 +503,8 @@ class PMXSupportBaseManager(object):
             uuid = uuidmodule.UUID(uuid)
         return self.managedObjects.get(uuid, None)
     
-    #---------------------------------------------------
-    # BUNDLE INTERFACE
-    #---------------------------------------------------
+
+    # ------------- BUNDLE INTERFACE
     def addBundle(self, bundle):
         return bundle
         
@@ -524,9 +523,8 @@ class PMXSupportBaseManager(object):
     def getAllBundles(self):
         return []
     
-    #---------------------------------------------------
-    # BUNDLE CRUD
-    #---------------------------------------------------
+
+    # ------------- BUNDLE CRUD
     def findBundles(self, **attrs):
         """
         Retorna todos los bundles que cumplan con attrs
@@ -620,9 +618,8 @@ class PMXSupportBaseManager(object):
                 self.populateBundle(bundle)
         self.modifyBundle(bundle)
     
-    #---------------------------------------------------
-    # BUNDLEITEM INTERFACE
-    #---------------------------------------------------
+    
+    # --------------- BUNDLEITEM INTERFACE
     def addBundleItem(self, bundleItem):
         return bundleItem
         
@@ -635,9 +632,8 @@ class PMXSupportBaseManager(object):
     def getAllBundleItems(self):
         return []
         
-    #---------------------------------------------------
-    # BUNDLEITEM CRUD
-    #---------------------------------------------------
+
+    # -------------- BUNDLEITEM CRUD
     def findBundleItems(self, **attrs):
         """
         Retorna todos los items que complan las condiciones en attrs
@@ -730,18 +726,16 @@ class PMXSupportBaseManager(object):
         self.removeManagedObject(item)
         self.removeBundleItem(item)
         
-    #---------------------------------------------------
-    # TEMPLATEFILE INTERFACE
-    #---------------------------------------------------
+
+    # ------------- TEMPLATEFILE INTERFACE
     def addTemplateFile(self, file):
         return file
     
     def removeTemplateFile(self, file):
         pass
     
-    #---------------------------------------------------
-    # TEMPLATEFILE CRUD
-    #---------------------------------------------------
+
+    # -------------- TEMPLATEFILE CRUD
     def createTemplateFile(self, name, template, namespace = None):
         namespace = namespace or self.defaultNamespace
         if template.isProtected and not template.isSafe:
@@ -772,9 +766,8 @@ class PMXSupportBaseManager(object):
             self.deleteBundleItem(template)
         self.removeTemplateFile(templateFile)
     
-    #---------------------------------------------------
-    # THEME INTERFACE
-    #---------------------------------------------------
+    
+    # ------------- THEME INTERFACE
     def addTheme(self, theme):
         return theme
     
@@ -787,9 +780,8 @@ class PMXSupportBaseManager(object):
     def getAllThemes(self):
         return []
     
-    #---------------------------------------------------
-    # THEME CRUD
-    #---------------------------------------------------
+
+    # ------------------ THEME CRUD
     def findThemes(self, **attrs):
         """
         Retorna todos los themes que complan las condiciones en attrs
@@ -852,18 +844,16 @@ class PMXSupportBaseManager(object):
         self.removeManagedObject(theme)
         self.removeTheme(theme)
     
-    #---------------------------------------------------
-    # THEMESTYLE INTERFACE
-    #---------------------------------------------------
+
+    # ----------------- THEMESTYLE INTERFACE
     def addThemeStyle(self, style):
         return style
     
     def removeThemeStyle(self, style):
         pass
     
-    #---------------------------------------------------
-    # THEMESTYLE CRUD
-    #---------------------------------------------------
+
+    # ------------ THEMESTYLE CRUD
     def createThemeStyle(self, name, scope, theme, namespace = None):
         namespace = namespace or self.defaultNamespace
         if theme.isProtected and not theme.isSafe:
@@ -896,37 +886,26 @@ class PMXSupportBaseManager(object):
         theme.updateMtime(namespace)
         self.removeThemeStyle(style)
         
-    #---------------------------------------------------
-    # PREFERENCES INTERFACE
-    #---------------------------------------------------
+    # ----------- PREFERENCES INTERFACE
     def getAllPreferences(self):
         """
         Return a list of all preferences bundle items
         """
         raise NotImplementedError
         
-    #---------------------------------------------------------------
-    # PREFERENCES
-    #---------------------------------------------------------------
+        
+    #----------------- PREFERENCES ---------------------
     @dynamic_memoized
     def getPreferences(self, scope):
-        # TODO: estoy repitiendo mucho esto de filtar por scope quiza una funcion aparte sea mejor
-        items = []
-        for item in self.getAllPreferences():
-            rank = []
-            if item.selector.does_match(scope, rank):
-                items.append((sum(rank), item))
-        items.sort(key = lambda t: t[0], reverse = True)
-        return map(lambda (score, item): item, items)
+        return self.__sort_filter_items(self.getAllPreferences(), scope)
         
 
     @dynamic_memoized
     def getPreferenceSettings(self, scope):
         return PMXPreference.buildSettings(self.getPreferences(scope))
         
-    #---------------------------------------------------
-    # TABTRIGGERS INTERFACE
-    #---------------------------------------------------
+
+    # ----------------- TABTRIGGERS INTERFACE
     def getAllTabTriggerItems(self):
         """
         Return a list of all tab triggers items
@@ -936,9 +915,9 @@ class PMXSupportBaseManager(object):
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
         """Return a list of tab triggers bundle items"""
         raise NotImplementedError
-    #---------------------------------------------------------------
-    # TABTRIGGERS
-    #---------------------------------------------------------------
+        
+        
+    # --------------- TABTRIGGERS
     @dynamic_memoized
     def getAllTabTriggerSymbols(self):
         return map(lambda item: item.tabTrigger, self.getAllTabTriggerItems())
@@ -957,27 +936,14 @@ class PMXSupportBaseManager(object):
 
     @dynamic_memoized
     def getAllTabTiggerItemsByScope(self, scope):
-        items = []
-        for item in self.getAllTabTriggerItems():
-            rank = []
-            if item.selector.does_match(scope, rank):
-                items.append((sum(rank), item))
-        items.sort(key = lambda t: t[0], reverse = True)
-        return map(lambda (score, item): item, items)
+        return self.__sort_filter_items(self.getAllTabTriggerItems(), scope)
 
     @dynamic_memoized
     def getTabTriggerItem(self, tabTrigger, scope):
-        items = []
-        for item in self.getAllBundleItemsByTabTrigger(tabTrigger):
-            rank = []
-            if item.selector.does_match(scope, rank):
-                items.append((sum(rank), item))
-        items.sort(key = lambda t: t[0], reverse = True)
-        return map(lambda (score, item): item, items)
+        return self.__sort_filter_items(self.getAllBundleItemsByTabTrigger(tabTrigger), scope)
     
-    #---------------------------------------------------
-    # KEYEQUIVALENT INTERFACE
-    #---------------------------------------------------
+
+    # -------------- KEYEQUIVALENT INTERFACE
     def getAllKeyEquivalentItems(self):
         """
         Return a list of all key equivalent items
@@ -987,79 +953,52 @@ class PMXSupportBaseManager(object):
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
         """Return a list of key equivalent bundle items"""
         raise NotImplementedError
+
         
-    #---------------------------------------------------------------
-    # KEYEQUIVALENT
-    #---------------------------------------------------------------
+    #-------------- KEYEQUIVALENT ------------------------
     @dynamic_memoized
     def getAllKeyEquivalentCodes(self):
         return map(lambda item: item.keyEquivalent, self.getAllKeyEquivalentItems())
         
+        
     @dynamic_memoized
     def getKeyEquivalentItem(self, code, scope):
-        items = []
-        for item in self.getAllBundleItemsByKeyEquivalent(code):
-            rank = []
-            if item.selector.does_match(scope, rank):
-                items.append((sum(rank), item))
-        items.sort(key = lambda t: t[0], reverse = True)
-        return map(lambda (score, item): item, items)
+        return self.__sort_filter_items(self.getAllBundleItemsByKeyEquivalent(code), scope)
+        
     
-    #---------------------------------------------------
-    # FILE EXTENSION INTERFACE
-    #---------------------------------------------------
+    # --------------- FILE EXTENSION INTERFACE
     def getAllBundleItemsByFileExtension(self, path):
         """
         Return a list of file extension bundle items
         """
         raise NotImplementedError
         
-    #---------------------------------------------------------------
-    # FILE EXTENSION, for drag commands
-    #---------------------------------------------------------------
-    def getFileExtensionItem(self, path, scope):
-        items = []
-        for item in self.getAllBundleItemsByFileExtension(code):
-            rank = []
-            if item.selector.does_match(scope, rank):
-                items.append((sum(rank), item))
-        items.sort(key = lambda t: t[0], reverse = True)
-        return map(lambda (score, item): item, items)
         
-    #---------------------------------------------------
-    # ACTION ITEMS INTERFACE
-    #---------------------------------------------------
+    #------------- FILE EXTENSION, for drag commands -------------------------
+    def getFileExtensionItem(self, path, scope):
+        return self.__sort_filter_items(self.getAllBundleItemsByFileExtension(path), scope)
+        
+        
+    # ------------- ACTION ITEMS INTERFACE
     def getAllActionItems(self):
         """
         Return action items
         """
         raise NotImplementedError
     
-    #---------------------------------------------------------------
-    # ACTION ITEMS FOR SCOPE
-    #---------------------------------------------------------------
-    #@printtime
-    def getActionItems(self, scope):
-        """
-        Return a list of actions items for scope and without scope
-        """
-        items = []
-        for item in self.getAllActionItems():
-            rank = []
-            if item.selector.does_match(scope, rank):
-                items.append((sum(rank), item))
-        items.sort(key = lambda t: t[0], reverse = True)
-        return map(lambda (score, item): item, items)
     
-    #---------------------------------------------------
-    # SYNTAXES INTERFACE
-    #---------------------------------------------------
+    #---------------- ACTION ITEMS FOR SCOPE ---------------------------------
+    def getActionItems(self, scope):
+        """Return a list of actions items for scope and without scope"""
+        return self.__sort_filter_items(self.getAllActionItems(), scope)
+        
+    
+    # ------------------ SYNTAXES INTERFACE
     def getAllSyntaxes(self):
         raise NotImplementedError
     
-    #---------------------------------------------------------------
-    # SYNTAXES
-    #---------------------------------------------------------------
+
+    # ------------------ SYNTAXES
     def getSyntaxesAsDictionary(self):
         return dict(map(lambda syntax: (syntax.scopeName, syntax), self.getAllSyntaxes()))
     
@@ -1104,9 +1043,8 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
     def __init__(self):
         super(PMXSupportPythonManager, self).__init__()
     
-    #---------------------------------------------------
-    # BUNDLE INTERFACE
-    #---------------------------------------------------
+
+    # --------------- BUNDLE INTERFACE
     def addBundle(self, bundle):
         '''
         @param bundle: PMXBundle instance
@@ -1129,9 +1067,8 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
         '''
         return self.BUNDLES.values()
     
-    #---------------------------------------------------
-    # BUNDLEITEM INTERFACE
-    #---------------------------------------------------
+    
+    # ----------------- BUNDLEITEM INTERFACE
     def addBundleItem(self, item):
         self.BUNDLE_ITEMS[item.uuid] = item
         if item.bundle.mainMenu != None:
@@ -1157,9 +1094,8 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
     def getAllBundleItems(self):
         return self.BUNDLE_ITEMS.values()
         
-    #---------------------------------------------------
-    # THEME INTERFACE
-    #---------------------------------------------------
+
+    # -------------- THEME INTERFACE
     def addTheme(self, theme):
         self.THEMES[theme.uuid] = theme
         return theme
@@ -1173,18 +1109,16 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
     def getAllThemes(self):
         return self.THEMES.values()
     
-    #---------------------------------------------------
-    # PREFERENCES INTERFACE
-    #---------------------------------------------------
+
+    # ------------ PREFERENCES INTERFACE
     def getAllPreferences(self):
         '''
             Return all preferences
         '''
         return self.PREFERENCES 
     
-    #---------------------------------------------------
-    # TABTRIGGERS INTERFACE
-    #---------------------------------------------------
+
+    # ---------------- TABTRIGGERS INTERFACE
     def getAllTabTriggerSymbols(self):
         """
         Return a list of tab triggers
@@ -1200,9 +1134,8 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
             return []
         return self.TAB_TRIGGERS[tabTrigger]
     
-    #---------------------------------------------------
-    # KEYEQUIVALENT INTERFACE
-    #---------------------------------------------------
+
+    # --------------- KEYEQUIVALENT INTERFACE
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
         """
         Return a list of key equivalent bundle items
@@ -1210,10 +1143,9 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
         if keyEquivalent not in self.KEY_EQUIVALENTS:
             return [] 
         return self.KEY_EQUIVALENTS[keyEquivalent]
+ 
     
-    #---------------------------------------------------------------
-    # SYNTAXES
-    #---------------------------------------------------------------
+    # -------------- SYNTAXES
     def getSyntaxes(self, sort = False):
         stxs = []
         for syntax in self.SYNTAXES.values():
