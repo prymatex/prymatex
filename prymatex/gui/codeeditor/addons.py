@@ -49,7 +49,7 @@ class SmartUnindentAddon(CodeEditorAddon):
             userData = cursor.userData()
             positionInBlock = cursor.positionInBlock()
             block = cursor.block()
-            settings = self.editor.scopeSettings(userData.scopeAtPosition(positionInBlock))
+            settings = self.editor.scope(cursor = cursor, attribute='settings')
             indentMarks = settings.indent(block.text()[:positionInBlock])
             indentGuide = self.editor.findPreviousNoBlankBlock(block)
             if PMXPreferenceSettings.INDENT_DECREASE in indentMarks and indentGuide is not None:

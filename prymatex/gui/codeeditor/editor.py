@@ -31,9 +31,7 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime
 
 class CodeEditor(TextEditWidget, PMXBaseEditor):
-    #=======================================================================
-    # Scope groups
-    #=======================================================================
+    # -------------------- Scope groups
     SORTED_GROUPS = [   "keyword", "entity", "meta", "variable", "markup", 
                         "support", "storage", "constant", "string", "comment", "invalid" ]
 
@@ -318,6 +316,25 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             })
         return scopeHash
     
+    
+    def scope(self, cursor = None, direction = "right", attribute = "name"):
+        cursor = cursor or self.textCursor()
+        userData = cursor.block().userData()
+        positionInBlock = cursor.positionInBlock()
+        if direction == "right":
+            # TODO: Cuando el syntax processor funcione bien sacar este or
+            rightScope = userData.scopeAtPosition(positionInBlock) or hash(self.syntax().scopeName)
+            return self.SCOPES[rightScope][attribute]
+        elif direction == "left":
+            # TODO: Cuando el syntax processor funcione bien sacar este or
+            leftScope = userData.scopeAtPosition(positionInBlock - 1) or hash(self.syntax().scopeName)
+            return self.SCOPES[leftScope][attribute]
+        elif direction == "both":
+            # TODO: Cuando el syntax processor funcione bien sacar este or
+            leftScope = userData.scopeAtPosition(positionInBlock - 1) or hash(self.syntax().scopeName)
+            rightScope = userData.scopeAtPosition(positionInBlock) or hash(self.syntax().scopeName)
+            return self.SCOPES[leftScope][attribute], self.SCOPES[rightScope][attribute]
+        
     
     def scopeSettings(self, scopeHash):
         assert scopeHash in self.SCOPES
@@ -704,13 +721,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     #=======================================================================
     def runKeyHelper(self, event):
         #No tengo modo activo, intento con los helpers
-        # Obtener key, scopes y cursor
-        leftScope, rightScope = self.currentScope(direction = "both")
         cursor = self.textCursor()
         for helper in self.findHelpers(event.key()):
             #Buscar Entre los helpers
-            if helper.accept(event, cursor, leftScope, rightScope):
-                helper.execute(event, cursor, leftScope, rightScope)
+            if helper.accept(event, cursor):
+                helper.execute(event, cursor)
                 return True
         return False
 
@@ -813,16 +828,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         cursor = self.textCursor()
         block = cursor.block()
         line = block.text()
-        leftScope, rightScope = self.currentScope(direction = "both")
-        preferences = self.scopeSettings(rightScope)
+        leftScope, rightScope = self.scope(direction = "both")
         current_word, start, end = self.currentWord()
         environment.update({
                 'TM_CURRENT_LINE': line,
                 'TM_LINE_INDEX': cursor.positionInBlock(),
                 'TM_LINE_NUMBER': block.blockNumber() + 1,
                 'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
-                'TM_SCOPE': self.scopeName(rightScope),
-                'TM_SCOPE_LEFT': self.scopeName(leftScope),
+                'TM_SCOPE': rightScope,
+                'TM_SCOPE_LEFT': leftScope,
                 'TM_MODE': self.syntax().name,
                 'TM_SOFT_TABS': self.tabStopSoft and unicode('YES') or unicode('NO'),
                 'TM_TAB_SIZE': self.tabStopSize,
@@ -847,8 +861,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             environment['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
             environment['TM_INPUT_START_LINE'] = start.blockNumber() + 1
             environment['TM_INPUT_START_LINE_INDEX'] = cursor.selectionStart() - start.position()
-
-        environment.update(preferences.shellVariables)
+        
+        settings = self.scope(attribute = 'settings')
+        environment.update(settings.shellVariables)
         return environment
         
     #==========================================================================
