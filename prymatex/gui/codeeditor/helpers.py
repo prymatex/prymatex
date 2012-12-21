@@ -19,7 +19,7 @@ class KeyEquivalentHelper(CodeEditorKeyHelper):
             return False
             
         leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both')
-        self.items = self.application.supportManager.getKeyEquivalentItem(keyseq, rightScope)
+        self.items = self.application.supportManager.getKeyEquivalentItem(keyseq, leftScope, rightScope)
         return bool(self.items)
 
     def execute(self, event, cursor = None):
@@ -35,7 +35,7 @@ class TabTriggerHelper(CodeEditorKeyHelper):
         
         leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both')
         trigger = self.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
-        self.items = self.application.supportManager.getTabTriggerItem(trigger, rightScope) if trigger is not None else []
+        self.items = self.application.supportManager.getTabTriggerItem(trigger, leftScope, rightScope) if trigger is not None else []
         return bool(self.items)
 
     def execute(self, event, cursor = None):

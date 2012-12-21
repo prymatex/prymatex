@@ -246,6 +246,7 @@ class PMXSupportBaseManager(object):
             if item.selector.does_match(context, rank):
                 sortFilterItems.append((rank.pop(), item))
         sortFilterItems.sort(key = lambda t: t[0], reverse = True)
+        #print leftScope, rightScope, map(lambda i: i.name, items), map(lambda i: (i[0], i[1].name), sortFilterItems)
         return map(lambda (score, item): item, sortFilterItems)
 
         
@@ -939,8 +940,8 @@ class PMXSupportBaseManager(object):
         return self.__sort_filter_items(self.getAllTabTriggerItems(), scope)
 
     @dynamic_memoized
-    def getTabTriggerItem(self, tabTrigger, scope):
-        return self.__sort_filter_items(self.getAllBundleItemsByTabTrigger(tabTrigger), scope)
+    def getTabTriggerItem(self, tabTrigger, leftScope, rightScope):
+        return self.__sort_filter_items(self.getAllBundleItemsByTabTrigger(tabTrigger), leftScope, rightScope)
     
 
     # -------------- KEYEQUIVALENT INTERFACE
@@ -962,8 +963,8 @@ class PMXSupportBaseManager(object):
         
         
     @dynamic_memoized
-    def getKeyEquivalentItem(self, code, scope):
-        return self.__sort_filter_items(self.getAllBundleItemsByKeyEquivalent(code), scope)
+    def getKeyEquivalentItem(self, code, leftScope, rightScope):
+        return self.__sort_filter_items(self.getAllBundleItemsByKeyEquivalent(code), leftScope, rightScope)
         
     
     # --------------- FILE EXTENSION INTERFACE
