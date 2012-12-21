@@ -125,7 +125,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
         
     def processBlockUserData(self, text, block, userData):
         symbolRange = filter(lambda ((start, end), p): p.showInSymbolList, 
-            map(lambda ((start, end), scope): ((start, end), self.editor.preferenceSettings(scope)), userData.scopeRanges()))
+            map(lambda ((start, end), scope): ((start, end), self.editor.scopeSettings(scope)), userData.scopeRanges()))
         if symbolRange:
             #TODO: Hacer la transformacion de los symbolos
             #symbol = text[symbolRange[0][1]:symbolRange[-1][2]]

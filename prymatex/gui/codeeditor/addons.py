@@ -29,6 +29,7 @@ class CompleterAddon(CodeEditorAddon):
 
     def initialize(self, editor):
         CodeEditorAddon.initialize(self, editor)
+        # TODO No usar esta señal porque el user data no esta listo
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
@@ -38,15 +39,18 @@ class CompleterAddon(CodeEditorAddon):
 class SmartUnindentAddon(CodeEditorAddon):
     def initialize(self, editor):
         CodeEditorAddon.initialize(self, editor)
-        self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
+        # TODO No usar esta señal porque el user data no esta listo
+        #self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
         #Solo si tiene texto
         if event.text():
             cursor = self.editor.textCursor()
+            userData = cursor.userData()
+            positionInBlock = cursor.positionInBlock()
             block = cursor.block()
-            settings = self.editor.preferenceSettings(self.editor.scope(cursor))
-            indentMarks = settings.indent(block.text()[:cursor.columnNumber()])
+            settings = self.editor.scopeSettings(userData.scopeAtPosition(positionInBlock))
+            indentMarks = settings.indent(block.text()[:positionInBlock])
             indentGuide = self.editor.findPreviousNoBlankBlock(block)
             if PMXPreferenceSettings.INDENT_DECREASE in indentMarks and indentGuide is not None:
                 previousBlock = self.editor.findPreviousLessIndentBlock(indentGuide)
@@ -74,7 +78,8 @@ class SpellCheckerAddon(CodeEditorAddon):
         if self.dictionary is not None:
             self.editor.registerTextCharFormatBuilder("spell", self.textCharFormat_spell_builder)
             #self.editor.syntaxReady.connect(self.on_editor_syntaxReady)
-            self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
+            # TODO No usar esta señal porque el user data no esta listo
+            #self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
 
     @classmethod
     def contributeToMainMenu(cls):
@@ -123,7 +128,7 @@ class SpellCheckerAddon(CodeEditorAddon):
     def spellWordsForBlock(self, block):
         #TODO: Proveer algo de esto directamente desde el editor
         spellRange = filter(lambda ((start, end), p): p.spellChecking,
-            map(lambda ((start, end), scope): ((start, end), self.editor.preferenceSettings(scope)), block.userData().scopeRanges()))
+            map(lambda ((start, end), scope): ((start, end), self.editor.scopeSettings(scope)), block.userData().scopeRanges()))
         for ran, p in spellRange:
             wordRangeList = block.userData().wordsRanges(ran[0], ran[1])
             for (start, end), word, _ in wordRangeList:

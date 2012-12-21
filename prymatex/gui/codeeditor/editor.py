@@ -319,39 +319,56 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return scopeHash
     
     
-    # TODO deprecated, use scopeSettings
-    def preferenceSettings(self, scopeOrHash):
-        scopeHash = scopeOrHash if isinstance(scopeOrHash, int) else hash(scopeOrHash)
-        if scopeHash not in self.SCOPES and isinstance(scopeOrHash, basestring):
-            self.flyweightScopeFactory([ scopeOrHash ])
-        if scopeHash in self.SCOPES:
-            return self.SCOPES[scopeHash]["settings"]
-    
     def scopeSettings(self, scopeHash):
         assert scopeHash in self.SCOPES
         return self.SCOPES[scopeHash]["settings"]
+    
         
     def scopeName(self, scopeHash):
         assert scopeHash in self.SCOPES
         return self.SCOPES[scopeHash]["name"]
 
+
     def scopeGroup(self, scopeHash):
         assert scopeHash in self.SCOPES
         return self.SCOPES[scopeHash]["group"]
-        
-    def scope(self, cursor):
-        userData = cursor.block().userData()
-        return self.syntax().scopeName if userData is None else self.scopeName(userData.scopeAtPosition(cursor.positionInBlock()))
-
-    def currentPreferenceSettings(self):
-        return self.preferenceSettings(self.currentScope())
-        
-    def currentScope(self):
-        return self.scope(self.textCursor())
-        
-    def currentScopes(self):
-        return self.scope(self.textCursor())
     
+
+    def currentScopeSettings(self):
+        return self.scopeSettings(self.currentScope())
+
+
+    def currentScope(self, direction = "right"):
+        return self.__current_scope(direction)
+
+
+    def currentScopeName(self, direction = "right"):
+        return self.__current_scope(direction, self.scopeName)
+
+
+    def currentScopeSettings(self, direction = "right"):
+        return self.__current_scope(direction, self.scopeSettings)
+
+
+    def currentScopeGroup(self, direction = "right"):
+        return self.__current_scope(direction, self.scopeGroup)
+
+
+    def __current_scope(self, direction = "right", lookup = lambda x: x):
+        cursor = self.textCursor()
+        userData = cursor.block().userData()
+        positionInBlock = cursor.positionInBlock()
+        if direction == "right":
+            rightScope = userData.scopeAtPosition(positionInBlock)
+            return lookup(rightScope)
+        elif direction == "left":
+            leftScope = userData.scopeAtPosition(positionInBlock - 1)
+            return lookup(leftScope)
+        elif direction == "both":
+            leftScope = userData.scopeAtPosition(positionInBlock - 1)
+            rightScope = userData.scopeAtPosition(positionInBlock)
+            return lookup(leftScope), lookup(rightScope)
+
     #=======================================================================
     # Obteniendo datos del editor
     #=======================================================================
@@ -406,7 +423,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             
             # TODO que esto lo haga solo el editor cuando cambia la syntax
             # Change braces
-            settings = self.preferenceSettings(syntax.scopeName)
+            settings = self.scopeSettings(self.flyweightScopeFactory([syntax.scopeName]))
             self.braces = settings.smartTypingPairs
             
             # TODO que esto lo haga solo el folding cuando cambia la syntax
@@ -688,13 +705,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def runKeyHelper(self, event):
         #No tengo modo activo, intento con los helpers
         # Obtener key, scopes y cursor
-        #leftScope, rightScope = self.currentScopes()
-        scope = self.currentScope()
+        leftScope, rightScope = self.currentScope(direction = "both")
         cursor = self.textCursor()
         for helper in self.findHelpers(event.key()):
             #Buscar Entre los helpers
-            if helper.accept(event, cursor, scope, scope):
-                helper.execute(event, cursor, scope, scope)
+            if helper.accept(event, cursor, leftScope, rightScope):
+                helper.execute(event, cursor, leftScope, rightScope)
                 return True
         return False
 
@@ -797,16 +813,16 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         cursor = self.textCursor()
         block = cursor.block()
         line = block.text()
-        scope = self.currentScope()
-        preferences = self.preferenceSettings(scope)
+        leftScope, rightScope = self.currentScope(direction = "both")
+        preferences = self.scopeSettings(rightScope)
         current_word, start, end = self.currentWord()
         environment.update({
                 'TM_CURRENT_LINE': line,
                 'TM_LINE_INDEX': cursor.positionInBlock(),
                 'TM_LINE_NUMBER': block.blockNumber() + 1,
                 'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
-                'TM_SCOPE': scope,
-                'TM_SCOPE_LEFT': scope,
+                'TM_SCOPE': self.scopeName(rightScope),
+                'TM_SCOPE_LEFT': self.scopeName(leftScope),
                 'TM_MODE': self.syntax().name,
                 'TM_SOFT_TABS': self.tabStopSoft and unicode('YES') or unicode('NO'),
                 'TM_TAB_SIZE': self.tabStopSize,
@@ -861,7 +877,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.completerMode.complete(self.cursorRect())
     
     def switchCompleter(self):
-        settings = self.currentPreferenceSettings()
+        settings = self.currentScopeSettings()
         if not self.completerMode.hasSource("default"):
             def on_suggestionsReady(suggestions):
                 if bool(suggestions):
@@ -871,7 +887,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.completerMode.switch()
 
     def runCompleter(self):
-        settings = self.currentPreferenceSettings()
+        settings = self.currentScopeSettings()
         def on_suggestionsReady(suggestions):
              if bool(suggestions):
                 self.showCompleter(suggestions)
@@ -1441,7 +1457,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setFlags(flags)
     
     def on_actionSelectBundleItem_triggered(self):
-        scope = self.currentScope()
+        scope = self.currentScopeName()
         items = self.application.supportManager.getActionItems(scope)
         def itemsToDict(items):
             for item in items:
@@ -1499,7 +1515,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         #mimeData = event.mimeData()
         if event.mimeData().hasUrls():
             files = map(lambda url: url.toLocalFile(), event.mimeData().urls())
-            scope = self.currentScope()
+            scope = self.currentScopeName()
             for file in files:                
                 items = self.application.supportManager.getFileExtensionItem(file, scope)
                 if items:
