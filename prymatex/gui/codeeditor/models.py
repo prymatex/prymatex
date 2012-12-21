@@ -124,8 +124,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
         
         
     def processBlockUserData(self, text, block, userData):
-        symbolRange = filter(lambda ((start, end), p): p.showInSymbolList, 
-            map(lambda ((start, end), scope): ((start, end), self.editor.scopeSettings(scope)), userData.scopeRanges()))
+        symbolRange = self.editor.scopes(attribute = 'settings', scope_filter = lambda attr: attr.showInSymbolList)
         if symbolRange:
             #TODO: Hacer la transformacion de los symbolos
             #symbol = text[symbolRange[0][1]:symbolRange[-1][2]]
@@ -284,7 +283,7 @@ class PMXAlreadyTypedWords(object):
     def processBlockUserData(self, text, block, userData):
         words = []
         for chunk in userData.lineChunks():
-            scopeGroup = self.editor.scopeGroup(userData.scopeRange(chunk[0][0])[1])
+            scopeGroup = self.editor.scope(blockPosition = chunk[0][0])
             words += map(
                 lambda match: ((chunk[0][0] + match.span()[0], chunk[0][0] + match.span()[1]), match.group(), scopeGroup), 
                 self.editor.RE_WORD.finditer(chunk[1]))

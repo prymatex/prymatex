@@ -134,8 +134,8 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.applyFormat(userData)
 
     def applyFormat(self, userData):
-        for (start, end), scopeHash in userData.scopeRanges():
-            format = self.highlightFormat(self.editor.scopeName(scopeHash))
+        for (start, end), scope in userData.scopeRanges():
+            format = self.highlightFormat(self.editor.scope(scopeHash = scope, attribute = 'name'))
             if format is not None:
                 self.setFormat(start, end - start, format)
 

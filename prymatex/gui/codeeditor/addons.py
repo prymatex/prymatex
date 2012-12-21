@@ -126,10 +126,8 @@ class SpellCheckerAddon(CodeEditorAddon):
         return format
 
     def spellWordsForBlock(self, block):
-        #TODO: Proveer algo de esto directamente desde el editor
-        spellRange = filter(lambda ((start, end), p): p.spellChecking,
-            map(lambda ((start, end), scope): ((start, end), self.editor.scopeSettings(scope)), block.userData().scopeRanges()))
-        for ran, p in spellRange:
+        spellRange = self.editor.scopes(attribute = 'settings', scope_filter = lambda attr: attr.spellChecking)
+        for ran, _ in spellRange:
             wordRangeList = block.userData().wordsRanges(ran[0], ran[1])
             for (start, end), word, _ in wordRangeList:
                 yield (start, end), word
