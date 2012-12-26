@@ -60,7 +60,7 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
     
     def scopeRange(self, pos):
         sr = filter(lambda ((start, end), scope): start <= pos < end, self.__scopeRanges)
-        return sr[0] if len(sr) >= 1 else ((0, 0), None)
+        return sr and sr.pop() or ((-1,-1), None)
     
     def isWordInScopes(self, word):
         return word in reduce(lambda scope, scope1: scope + " " + scope1[1], self.scopeRanges(), "")

@@ -256,7 +256,7 @@ class MultiCursorHelper(CodeEditorKeyHelper):
                 self.editor.centerCursor(newCursor)
 
 class PrintEditorStatusHelper(CodeEditorKeyHelper):
-    KEY = QtCore.Qt.Key_P
+    KEY = QtCore.Qt.Key_D
     def accept(self, event, cursor = None):
         control_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
         meta_down = bool(event.modifiers() & QtCore.Qt.MetaModifier)
@@ -266,6 +266,7 @@ class PrintEditorStatusHelper(CodeEditorKeyHelper):
         #Aca lo que queramos hacer
         userData = cursor.block().userData()
         print self.editor.currentWord()
+        print self.editor.scopes()
         print self.editor.wordUnderCursor(), cursor.position()
         for group in [ "comment", "constant", "entity", "invalid", "keyword", "markup", "meta", "storage", "string", "support", "variable" ]:
             print "%s: %s" % (group, cursor.block().userData().wordsByGroup(group))

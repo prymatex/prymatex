@@ -6,7 +6,7 @@ from copy import copy
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex.gui.codeeditor.processors import PMXSyntaxProcessor
+from prymatex.gui.codeeditor.processors import PMXSyntaxProcessor, CodeEditorSyntaxProcessor
 from prymatex.support.syntax import PMXSyntax
 from prymatex.utils.decorators.helpers import printtime
 
@@ -18,7 +18,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def __init__(self, editor, syntax = None, theme = None):
         QtGui.QSyntaxHighlighter.__init__(self, editor.document())
         self.editor = editor
-        self.processor = PMXSyntaxProcessor(editor)
+        self.processor = CodeEditorSyntaxProcessor(editor)
         self.syntax = syntax
         self.theme = theme
         self.__running = True
@@ -82,8 +82,8 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.processor.endParsing(self.syntax.scopeName)
         
     def setupBlockUserData(self, text, block, userData):
-        userData.setScopeRanges(self.processor.scopeRanges)
-        userData.setLineChunks(self.processor.lineChunks)
+        userData.setScopeRanges(self.processor.scopeRanges())
+        userData.setLineChunks(self.processor.lineChunks())
         userData.setBlank(text.strip() == "")
         
         self.editor.processBlockUserData(text, block, userData)

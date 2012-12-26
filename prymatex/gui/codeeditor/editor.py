@@ -300,6 +300,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # ---------------------- Scopes
     @classmethod
     def flyweightScopeFactory(cls, scopeStack):
+        # TODO Analizar mejor la utilidad de esto, quiza dejar los nombres en listas sea mejor
         scopeName = " ".join(scopeStack)
         scopeHash = hash(scopeName)
         if scopeHash not in cls.SCOPES:

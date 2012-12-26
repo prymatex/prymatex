@@ -30,7 +30,7 @@ def registerPlugin(manager):
     manager.registerKeyHelper(CodeEditor, helpers.OverwriteHelper)
     manager.registerKeyHelper(CodeEditor, helpers.MultiCursorHelper)
 
-    #manager.registerKeyHelper(CodeEditor, helpers.PrintEditorStatusHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.PrintEditorStatusHelper)
     
     #manager.registerAddon(CodeEditor, addons.CompleterAddon)
     manager.registerAddon(CodeEditor, addons.SmartUnindentAddon)

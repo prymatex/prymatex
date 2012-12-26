@@ -19,7 +19,6 @@ from prymatex.support.command import PMXCommand, PMXDragCommand
 from prymatex.support.template import PMXTemplate, PMXTemplateFile
 from prymatex.support.project import PMXProject
 from prymatex.support.theme import PMXTheme, PMXThemeStyle
-from prymatex.support.score import PMXScoreManager
 from prymatex.support.utils import ensurePath
 
 from prymatex.utils import scope
