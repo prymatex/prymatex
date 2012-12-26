@@ -76,31 +76,32 @@ class CodeEditorSyntaxProcessor(processor.PMXSyntaxProcessor):
         # Return [ ((start, end), scopeHash) ... ]
         keys = self.__scopeRanges.keys()
         keys.sort(cmp = self.cmp)
+        #print map(lambda key: (key, self.__scopeRanges[key]), keys)
         # TODO Analizar mejor la utilidad de esto, quiza dejar los nombres en listas sea mejor
         return map(lambda key: (key, self.editor.flyweightScopeFactory(self.__scopeRanges[key])), keys)
         
     def lineChunks(self):
         return self.__lineChunks
         
-    def setScopes(self, pathPositions):
-        self.__scopePath, self.__scopePosition = pathPositions
+    def setScopes(self, path):
+        self.__scopePath = path
 
     def scopes(self):
-        return self.__scopePath, self.__scopePosition
+        return self.__scopePath
     
     #START
     def startParsing(self, scope):
-        self.setScopes(( [ scope ], [ 0 ]))
+        self.setScopes([ scope ])
     
     #BEGIN NEW LINE
     def beginLine(self, line):
         self.line = line
+        self.__scopePosition = [0 for _ in range(len(self.__scopePath))]
         self.__scopeRanges = {}
         self.__lineChunks = []        #[ ((start, end), chunk) ... ]
         
     def endLine(self, line):
-        index = len(self.__scopePath) - 1
-        begin = self.__scopePosition[index]
+        begin = 0
         end = len(self.line) + 1
         path = self.__scopePath[:]
         path.reverse()
@@ -109,21 +110,22 @@ class CodeEditorSyntaxProcessor(processor.PMXSyntaxProcessor):
 
     #OPEN
     def openTag(self, scope, position):
+        #print "open", self.__scopePath, scope, position
         self.__scopePath.insert(0, scope)
         self.__scopePosition.insert(0, position)
         
     #CLOSE
     def closeTag(self, scope, position):
-        if scope in self.__scopePath:
-            index = self.__scopePath.index(scope)
-            begin = self.__scopePosition[index]
-            path = self.__scopePath[index:]
-            path.reverse()
-            self.__scopeRanges[(begin, position)] = path
-            # TODO Ver que pasa con esto de los lineChunks
-            self.__lineChunks.insert(0, ((begin, position), self.line[begin:position]) )
-            self.__scopePath.pop(index)
-            self.__scopePosition.pop(index)
+        #print "close", self.__scopePath, scope, position
+        index = self.__scopePath.index(scope)
+        begin = self.__scopePosition[index]
+        path = self.__scopePath[index:]
+        path.reverse()
+        self.__scopeRanges[(begin, position)] = path
+        # TODO Ver que pasa con esto de los lineChunks
+        self.__lineChunks.insert(0, ((begin, position), self.line[begin:position]) )
+        self.__scopePath.pop(index)
+        self.__scopePosition.pop(index)
     
     #END
     def endParsing(self, scope):

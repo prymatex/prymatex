@@ -10,6 +10,8 @@ from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
 from prymatex.gui.dialogs.project import PMXNewProjectDialog
 from prymatex.gui.dialogs.about import PMXAboutDialog
 
+from prymatex.utils.i18n import ugettext as _
+
 class MainWindowActions(object):
     
     splitTabWidget = None #Overriden in GUI Setup
@@ -180,7 +182,7 @@ class MainWindowActions(object):
                 image = tab.tabIcon()
                 if image is None: image = QtGui.QIcon()
                 yield [ dict(title = tab.tabTitle(), image = image), dict(title = tab.filePath) ]
-        index = self.tabSelectorDialog.select(tabsToDict(tabs))
+        index = self.selectorDialog.select(tabsToDict(tabs), title=_("Select tab"))
         if index is not None:
             tab = tabs[index]
             self.splitTabWidget.setCurrentWidget(tab)

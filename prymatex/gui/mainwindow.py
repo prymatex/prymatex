@@ -141,15 +141,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     # Setups
     #============================================================
     def setupDialogs(self):
-        from prymatex.gui.dialogs.selector import PMXSelectorDialog
+        from prymatex.gui.dialogs.selector import SelectorDialog
                 
         # Create dialogs
-        self.bundleSelectorDialog = PMXSelectorDialog(self, title = _("Select Bundle Item"))
-        # TODO: Connect these selectors 
-        self.tabSelectorDialog = PMXSelectorDialog(self, title = _("Select tab"))
-        self.symbolSelectorDialog = PMXSelectorDialog(self, title = _("Select Symbol"))
-        self.bookmarkSelectorDialog = PMXSelectorDialog(self, title = _("Select Bookmark"))
-    
+        self.selectorDialog = SelectorDialog(self)
+
+
     def setupDockToolBars(self):
         self.dockToolBars = {
             QtCore.Qt.LeftDockWidgetArea: DockWidgetToolBar("Left Dockers", QtCore.Qt.LeftDockWidgetArea, self),

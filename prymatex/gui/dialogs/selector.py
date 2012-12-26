@@ -8,12 +8,12 @@ from PyQt4 import QtCore, QtGui
 from prymatex import resources
 from prymatex.ui.dialogs.selector import Ui_SelectorDialog
 
-class PMXSelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
+class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
     '''
     This dialog allow the user to search through commands, snippets and macros in the current scope easily.
     An instance is hold in the main window and triggered with an action.
     '''
-    def __init__(self, parent = None, title = "Select item"):
+    def __init__(self, parent = None):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         
@@ -21,12 +21,6 @@ class PMXSelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         self.tableItems.installEventFilter(self)
         
         self.setWindowFlags(QtCore.Qt.Dialog)
-        self.proxy = QtGui.QSortFilterProxyModel(self)
-        self.tableItems.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        self.tableItems.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
-        self.tableItems.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
-        self.tableItems.setModel(self.proxy)
-        self.setWindowTitle(title)
     
     def createStandardItemModel(self, items):
         def dictToStandardItem(a_dict):
@@ -46,24 +40,28 @@ class PMXSelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
             model.appendRow(items)
         return model
         
-    def select(self, data):
-        """
-            @param items: List of rows, each row has a list of columns, and each column is a dict with "title", "image", "tooltip"
-            @return: The selected index
-        """
+    def select(self, data, title = "Select item"):
+        """ @param items: List of rows, each row has a list of columns, and each column is a dict with "title", "image", "tooltip"
+            @return: The selected index """
+
+        self.setWindowTitle(title)
+        
         self.index = None
         self.lineFilter.clear()
         self.lineFilter.setFocus()
         
         model = None
         if isinstance(data, collections.Iterable):
-            model = self.createStandardItemModel(data)
+            self.dataModel = QtGui.QSortFilterProxyModel(self)
+            self.dataModel.setSourceModel(self.createStandardItemModel(data))
         elif isinstance(data, QtCore.QAbstractItemModel):
-            model = data
+            self.dataModel = data
         else:
             raise Exception("No Data")
-        self.proxy.setSourceModel(model)
-        
+        self.tableItems.setModel(self.dataModel)
+        self.tableItems.resizeColumnsToContents()
+        self.tableItems.resizeRowsToContents()
+                
         self.tableItems.selectRow(0)
         if self.exec_() == self.Accepted:
             return self.index
@@ -92,22 +90,22 @@ class PMXSelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
             
     def on_lineFilter_textChanged(self, text):
         regexp = QtCore.QRegExp("*%s*" % text, QtCore.Qt.CaseInsensitive, QtCore.QRegExp.Wildcard)
-        self.proxy.setFilterRegExp(regexp)
+        self.dataModel.setFilterRegExp(regexp)
         self.tableItems.selectRow(0)
         
     def on_tableItems_activated(self, index):
-        sIndex = self.proxy.mapToSource(index)
+        sIndex = self.dataModel.mapToSource(index)
         self.index = sIndex.row()
         self.accept()
         
     def on_tableItems_doubleClicked(self, index):
-        sIndex = self.proxy.mapToSource(index)
+        sIndex = self.dataModel.mapToSource(index)
         self.index = sIndex.row()
         self.accept()
     
     def on_lineFilter_returnPressed(self):
         indexes = self.tableItems.selectedIndexes()
         if indexes:
-            sIndex = self.proxy.mapToSource(indexes[0])
+            sIndex = self.dataModel.mapToSource(indexes[0])
             self.index = sIndex.row()
             self.accept()

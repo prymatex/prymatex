@@ -1440,7 +1440,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         def itemsToDict(items):
             for item in items:
                 yield [dict(title = item.name, image = "bundle-item-%s" % item.TYPE), dict(title = item.bundle.name), dict(title = item.trigger)]
-        index = self.mainWindow.bundleSelectorDialog.select(itemsToDict(items))
+        index = self.mainWindow.selectorDialog.select(itemsToDict(items), title=_("Select Bundle Item"))
         if index is not None:
             self.insertBundleItem(items[index])
             
@@ -1451,7 +1451,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             for block in blocks:
                 userData = block.userData() 
                 yield [dict(title = userData.symbol, image = resources.getIcon('bulletblue'))]
-        index = self.mainWindow.symbolSelectorDialog.select(symbolToDict(blocks))
+        index = self.mainWindow.selectorDialog.select(symbolToDict(blocks), title = _("Select Symbol"))
         if index is not None:
             self.goToBlock(blocks[index])
         
@@ -1460,7 +1460,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         def bookmarkToDict(blocks):
             for block in blocks:
                 yield [dict(title = block.text(), image = resources.getIcon('bookmarkflag'))]
-        index = self.mainWindow.bookmarkSelectorDialog.select(bookmarkToDict(blocks))
+        index = self.mainWindow.selectorDialog.select(bookmarkToDict(blocks), title=_("Select Bookmark"))
         if index is not None:
             self.goToBlock(blocks[index])
     
