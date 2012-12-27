@@ -181,11 +181,10 @@ class MainWindowActions(object):
             for tab in tabs:
                 image = tab.tabIcon()
                 if image is None: image = QtGui.QIcon()
-                yield [ dict(title = tab.tabTitle(), image = image), dict(title = tab.filePath) ]
-        index = self.selectorDialog.select(tabsToDict(tabs), title=_("Select tab"))
-        if index is not None:
-            tab = tabs[index]
-            self.splitTabWidget.setCurrentWidget(tab)
+                yield ( dict(data = tab, title = tab.tabTitle(), image = image), dict(title = tab.filePath) )
+        itemRow = self.selectorDialog.select(tabsToDict(tabs), title=_("Select tab"))
+        if itemRow is not None:
+            self.splitTabWidget.setCurrentWidget(itemRow[0]['data'])
     
     @QtCore.pyqtSlot()
     def on_actionJumpToTabWindow_triggered(self):

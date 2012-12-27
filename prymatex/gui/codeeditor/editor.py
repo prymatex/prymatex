@@ -1376,9 +1376,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
         return [ EditorSettingsWidget, ThemeSettingsWidget, AddonsSettingsWidgetFactory("editor") ]
 
-    #===========================================================================
-    # Menu Actions
-    #===========================================================================
+    # ------------------ Menu Actions
     def on_actionShowTabsAndSpaces_toggled(self, checked):
         if checked:
             flags = self.getFlags() | self.ShowTabsAndSpaces
@@ -1439,10 +1437,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         items = self.application.supportManager.getActionItems(self.scope())
         def itemsToDict(items):
             for item in items:
-                yield [dict(title = item.name, image = "bundle-item-%s" % item.TYPE), dict(title = item.bundle.name), dict(title = item.trigger)]
-        index = self.mainWindow.selectorDialog.select(itemsToDict(items), title=_("Select Bundle Item"))
-        if index is not None:
-            self.insertBundleItem(items[index])
+                yield (dict(data = item, title = item.name, image = resources.getIcon("bundle-item-%s" % item.TYPE)), dict(title = item.bundle.name), dict(title = item.trigger))
+        itemRow = self.mainWindow.selectorDialog.select(itemsToDict(items), title=_("Select Bundle Item"))
+        if itemRow is not None:
+            self.insertBundleItem(itemRow[0]['data'])
             
     def on_actionGoToSymbol_triggered(self):
         #TODO: Usar el modelo
@@ -1450,19 +1448,19 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         def symbolToDict(blocks):
             for block in blocks:
                 userData = block.userData() 
-                yield [dict(title = userData.symbol, image = resources.getIcon('bulletblue'))]
-        index = self.mainWindow.selectorDialog.select(symbolToDict(blocks), title = _("Select Symbol"))
-        if index is not None:
-            self.goToBlock(blocks[index])
+                yield ( dict(data = block, title = userData.symbol, image = resources.getIcon('bulletblue')) )
+        itemRow = self.mainWindow.selectorDialog.select(symbolToDict(blocks), title = _("Select Symbol"))
+        if itemRow is not None:
+            self.goToBlock(itemRow[0]['data'])
         
     def on_actionGoToBookmark_triggered(self):
         blocks = self.bookmarkListModel.blocks
         def bookmarkToDict(blocks):
             for block in blocks:
-                yield [dict(title = block.text(), image = resources.getIcon('bookmarkflag'))]
-        index = self.mainWindow.selectorDialog.select(bookmarkToDict(blocks), title=_("Select Bookmark"))
-        if index is not None:
-            self.goToBlock(blocks[index])
+                yield ( dict(title = block.text(), image = resources.getIcon('bookmarkflag')) )
+        itemRow = self.mainWindow.selectorDialog.select(bookmarkToDict(blocks), title=_("Select Bookmark"))
+        if itemRow is not None:
+            self.goToBlock(itemRow[0]['data'])
     
     #===========================================================================
     # Navigation API
