@@ -22,6 +22,7 @@ from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 
 from prymatex.models.projects import ProjectTreeNode
+from prymatex.models.projects.tables import SelectableProjectFileModel
 
 class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXBaseDock):
     SHORTCUT = "F8"
@@ -57,6 +58,31 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
         return [ ProjectSettingsWidget, AddonsSettingsWidgetFactory("project") ]
     
+    # Contributes to Main Menu
+    @classmethod
+    def contributeToMainMenu(cls, addonClasses):
+        navigation = {
+            'text': 'Navigation',
+            'items': [
+                "-",
+                {'text': 'Go To Project File',
+                 'callback': cls.on_actionGoToProjectFile_triggered,
+                 'shortcut': 'Meta+Ctrl+Shift+F',
+                 }
+            ]}
+        menuContributions = { "Navigation": navigation}
+        for addon in addonClasses:
+            update_menu(menuContributions, addon.contributeToMainMenu())
+        return menuContributions
+    
+    # ------------------ Menu Actions
+    def on_actionGoToProjectFile_triggered(self):
+        filePath = self.mainWindow.selectorDialog.select(SelectableProjectFileModel(self.projectManager, parent = self), title=_("Select Project File"))
+        if filePath is not None:
+            index = self.projectTreeProxyModel.indexForPath(filePath)
+            self.treeViewProjects.setCurrentIndex(index)
+            self.application.openFile(filePath)
+
     def addFileSystemNodeFormater(self, formater):
         self.projectTreeProxyModel.addNodeFormater(formater)
     
