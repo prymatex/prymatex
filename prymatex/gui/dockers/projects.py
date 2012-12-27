@@ -46,6 +46,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
         self.setupPropertiesDialog()
         self.setupTreeViewProjects()
+        self.selectableProjectFileModel = SelectableProjectFileModel(self.projectManager, parent = self)
         
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
@@ -77,7 +78,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     # ------------------ Menu Actions
     def on_actionGoToProjectFile_triggered(self):
-        filePath = self.mainWindow.selectorDialog.select(SelectableProjectFileModel(self.projectManager, parent = self), title=_("Select Project File"))
+        filePath = self.mainWindow.selectorDialog.select(self.selectableProjectFileModel, title=_("Select Project File"))
         if filePath is not None:
             index = self.projectTreeProxyModel.indexForPath(filePath)
             self.treeViewProjects.setCurrentIndex(index)
