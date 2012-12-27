@@ -413,6 +413,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
             ]}
         navigation = {
             'items': [
+                "-",
                 {'text': 'Go To &Line',
                  'callback': cls.showGoToLine,
                  'shortcut': 'Meta+Ctrl+Shift+L',
