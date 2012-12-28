@@ -162,3 +162,12 @@ class HtmlDelegate(QtGui.QStyledItemDelegate):
 
         painter.restore()
         
+    def sizeHint(self, option, index):
+        options = QtGui.QStyleOptionViewItemV4(option)
+        self.initStyleOption(options,index)
+
+        doc = QtGui.QTextDocument()
+        doc.setHtml(options.text)
+        doc.setTextWidth(options.rect.width())
+        return QtCore.QSize(doc.idealWidth(), doc.size().height())
+        

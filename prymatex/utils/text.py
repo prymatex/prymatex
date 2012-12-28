@@ -9,6 +9,7 @@ http://code.google.com/p/spyderlib
 
 import re
 import string
+import difflib
 
 to_ascii = lambda s: filter(lambda c: c in string.ascii_letters, s)
 to_ascii_cap = lambda s: to_ascii(s).capitalize()
@@ -90,3 +91,13 @@ def opposite_case(text):
 
 tabs_to_spaces = lambda text, spaceLength = 4: text.replace('\t', ' ' * spaceLength)
 spaces_to_tabs = lambda text, spaceLength = 4: text.replace(' ' * spaceLength, '\t')
+
+# ----------------- Text matching -------------------------
+
+def matching_blocks(text1, text2):
+    print difflib.SequenceMatcher(None, text1, text2).get_grouped_opcodes()
+    return map(lambda m: (m[3], m[4]),
+        filter(
+            lambda m: m[0] == 'equal', 
+            difflib.SequenceMatcher(None, text1, text2).get_grouped_opcodes()))
+    

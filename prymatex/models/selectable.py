@@ -22,16 +22,19 @@ class SelectableModelMixin(object):
 # Selectable Model
 #=========================================================
 class SelectableModel(QtCore.QAbstractListModel):
-    """ data
-        [({row1}, {row2} ... {rowN}), ....]
+    """ data = [{item1}, ... {itemN}]
+        item = { display: {}, image, icon, tooltip}
     """
+    DEFALUT_TEMPLATE = "%(title)s"
     def __init__(self, data, parent = None): 
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.data = data
 
     def item(self, index):
-        if index.isValid():
+        if isinstance(index, QtCore.QModelIndex) and index.isValid():
             return self.data[index.row()]
+        if isinstance(index, int) and index < len(self.data):
+            return self.data[index]
 
     def rowCount (self, parent = None):
         return len(self.data)
@@ -40,19 +43,25 @@ class SelectableModel(QtCore.QAbstractListModel):
         if not index.isValid():
             return None
         item = self.data[index.row()]
-
-        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole ]:
-            return item.get('title')
+        
+        if role in [ QtCore.Qt.DisplayRole ]:
+            template = item.get('template', self.DEFALUT_TEMPLATE)
+            display = item.get('display', { 'title': item.get('title', '')})
+            return template % display
         elif role == QtCore.Qt.DecorationRole:
             return item.get('image') or item.get('icon')
+        elif role == QtCore.Qt.ToolTipRole and 'tooltip' in item:
+            return item['tooltip']
 
 class SelectableProxyModel(QtGui.QSortFilterProxyModel, SelectableModelMixin):
-    def __init__(self, parent = None):
+    def __init__(self, filterFunction, parent = None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)
+        self.__filterFunction = filterFunction
         self.__filterString = ""
-
+        
     def filterAcceptsRow(self, sourceRow, sourceParent):
-        return True
+        item = self.sourceModel().item(sourceRow)
+        return self.__filterFunction(self.__filterString, item)
 
     def setFilterString(self, string):
         self.__filterString = string

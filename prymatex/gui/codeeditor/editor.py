@@ -1434,14 +1434,43 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setFlags(flags)
     
     def on_actionSelectBundleItem_triggered(self):
-        items = self.application.supportManager.getActionItems(self.scope())
-        def itemsToDict(items):
-            for item in items:
-                #dict(title = item.bundle.name), dict(title = item.trigger))
-                yield dict(data = item, title = item.name, image = resources.getIcon("bundle-item-%s" % item.TYPE))
-        itemRow = self.mainWindow.selectorDialog.select(itemsToDict(items), title=_("Select Bundle Item"))
-        if itemRow is not None:
-            self.insertBundleItem(itemRow[0]['data'])
+        
+        # Filter function        
+        def bundleItemFilter(text, item):
+            if not text: return True
+            name = item["data"].name
+            matchs = texttools.matching_blocks(text.upper(), name.upper())
+            print matchs
+            if matchs:
+                current = 0
+                newName = ""
+                for match in matchs:
+                    newName += name[current:match[0]] + "<strong>" + name[match[0]:match[1]] + "</strong>"
+                    current = match[1]
+                item["display"]["name"] = newName + name[current:]
+            return bool(matchs)
+        
+        # Map to dict function    
+        def itemsToDict(bundleItems):
+            for bundleItem in bundleItems:
+                yield dict(data = bundleItem, 
+                    template = "<table width='100%%'><tr><td>%(name)s - %(bundle)s</td><td align='right'>%(trigger)s</td></tr></table>",
+                    display = { 
+                        "name": bundleItem.name, 
+                        "bundle": bundleItem.bundle.name, 
+                        "trigger": bundleItem.trigger
+                    }, 
+                    image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE))
+                    
+        # Go!!!
+        bundleItem = self.mainWindow.selectorDialog.select(
+            itemsToDict(self.application.supportManager.getActionItems(self.scope())), 
+            title=_("Select Bundle Item"),
+            filterFunction=bundleItemFilter)
+        
+        # Select one?
+        if bundleItem is not None:
+            self.insertBundleItem(bundleItem['data'])
             
     def on_actionGoToSymbol_triggered(self):
         #TODO: Usar el modelo

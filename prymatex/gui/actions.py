@@ -176,15 +176,19 @@ class MainWindowActions(object):
         """ 
         Shows select tab, and change to selected 
         """
-        tabs = self.splitTabWidget.allWidgets()
         def tabsToDict(tabs):
             for tab in tabs:
                 image = tab.tabIcon()
                 if image is None: image = QtGui.QIcon()
-                yield dict(data = tab, title = tab.tabTitle(), image = image)
-        itemRow = self.selectorDialog.select(tabsToDict(tabs), title=_("Select tab"))
-        if itemRow is not None:
-            self.splitTabWidget.setCurrentWidget(itemRow[0]['data'])
+                yield dict(data = tab, 
+                    template = "<table><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(file)s</small></td></tr></table>", 
+                    display = { "name": tab.tabTitle(), "file": tab.filePath }, 
+                    image = image)
+        item = self.selectorDialog.select(tabsToDict(self.splitTabWidget.allWidgets()),
+            title=_("Select tab"),
+            filterFunction = lambda text, item: item["display"]["name"].find(text) != -1)
+        if item is not None:
+            self.splitTabWidget.setCurrentWidget(item['data'])
     
     @QtCore.pyqtSlot()
     def on_actionJumpToTabWindow_triggered(self):

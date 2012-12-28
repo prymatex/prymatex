@@ -24,7 +24,7 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         self.setWindowFlags(QtCore.Qt.Dialog)
         self.listItems.setItemDelegate(HtmlDelegate())
         
-    def select(self, data, title = "Select item"):
+    def select(self, data, title = "Select item", filterFunction = lambda text, item: str(item).find(text) != -1):
         """ @param items: List of rows, each row has a list of columns, and each column is a dict with "title", "image", "tooltip"
             @return: The selected row """
 
@@ -36,7 +36,7 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         
         model = None
         if isinstance(data, collections.Iterable):
-            self.dataModel = SelectableProxyModel(self)
+            self.dataModel = SelectableProxyModel(filterFunction, parent = self)
             self.dataModel.setSourceModel(SelectableModel(list(data)))
         elif isinstance(data, QtCore.QAbstractItemModel):
             self.dataModel = data
