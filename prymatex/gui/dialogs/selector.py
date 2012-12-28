@@ -6,6 +6,7 @@ import collections
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.models.selectable import SelectableModel, SelectableProxyModel
+from prymatex.models.delegates import HtmlDelegate
 from prymatex.ui.dialogs.selector import Ui_SelectorDialog
 
 class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
@@ -21,6 +22,7 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         self.tableItems.installEventFilter(self)
         
         self.setWindowFlags(QtCore.Qt.Dialog)
+        self.tableItems.setItemDelegate(HtmlDelegate())
         
     def select(self, data, title = "Select item"):
         """ @param items: List of rows, each row has a list of columns, and each column is a dict with "title", "image", "tooltip"

@@ -16,10 +16,6 @@
     <height>371</height>
    </size>
   </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>:/images/prymatex/logo.png</normaloff>:/images/prymatex/logo.png</iconset>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>2</number>
@@ -32,6 +28,9 @@
    </item>
    <item>
     <widget class="QTableView" name="tableItems">
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
      <property name="selectionMode">
       <enum>QAbstractItemView::SingleSelection</enum>
      </property>

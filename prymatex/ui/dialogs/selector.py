@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/dialogs/selector.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dialogs/selector.ui'
 #
-# Created: Fri Nov  9 18:10:44 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Thu Dec 27 16:38:55 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -20,9 +20,6 @@ class Ui_SelectorDialog(object):
         SelectorDialog.setObjectName(_fromUtf8("SelectorDialog"))
         SelectorDialog.resize(600, 371)
         SelectorDialog.setMinimumSize(QtCore.QSize(600, 371))
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        SelectorDialog.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(SelectorDialog)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -31,6 +28,7 @@ class Ui_SelectorDialog(object):
         self.lineFilter.setObjectName(_fromUtf8("lineFilter"))
         self.verticalLayout.addWidget(self.lineFilter)
         self.tableItems = QtGui.QTableView(SelectorDialog)
+        self.tableItems.setAlternatingRowColors(True)
         self.tableItems.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.tableItems.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.tableItems.setShowGrid(False)
