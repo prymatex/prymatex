@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dialogs/selector.ui'
+# Form implementation generated from reading ui file 'C:\cygwin\home\dvanhaaster\workspace\prymatex\resources\ui\dialogs\selector.ui'
 #
-# Created: Thu Dec 27 16:38:55 2012
+# Created: Fri Dec 28 07:53:53 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,15 +27,10 @@ class Ui_SelectorDialog(object):
         self.lineFilter = QtGui.QLineEdit(SelectorDialog)
         self.lineFilter.setObjectName(_fromUtf8("lineFilter"))
         self.verticalLayout.addWidget(self.lineFilter)
-        self.tableItems = QtGui.QTableView(SelectorDialog)
-        self.tableItems.setAlternatingRowColors(True)
-        self.tableItems.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        self.tableItems.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.tableItems.setShowGrid(False)
-        self.tableItems.setObjectName(_fromUtf8("tableItems"))
-        self.tableItems.horizontalHeader().setVisible(False)
-        self.tableItems.verticalHeader().setVisible(False)
-        self.verticalLayout.addWidget(self.tableItems)
+        self.listItems = QtGui.QListView(SelectorDialog)
+        self.listItems.setAlternatingRowColors(True)
+        self.listItems.setObjectName(_fromUtf8("listItems"))
+        self.verticalLayout.addWidget(self.listItems)
 
         self.retranslateUi(SelectorDialog)
         QtCore.QMetaObject.connectSlotsByName(SelectorDialog)

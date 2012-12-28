@@ -1437,7 +1437,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         items = self.application.supportManager.getActionItems(self.scope())
         def itemsToDict(items):
             for item in items:
-                yield (dict(data = item, title = item.name, image = resources.getIcon("bundle-item-%s" % item.TYPE)), dict(title = item.bundle.name), dict(title = item.trigger))
+                #dict(title = item.bundle.name), dict(title = item.trigger))
+                yield dict(data = item, title = item.name, image = resources.getIcon("bundle-item-%s" % item.TYPE))
         itemRow = self.mainWindow.selectorDialog.select(itemsToDict(items), title=_("Select Bundle Item"))
         if itemRow is not None:
             self.insertBundleItem(itemRow[0]['data'])
@@ -1448,7 +1449,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         def symbolToDict(blocks):
             for block in blocks:
                 userData = block.userData() 
-                yield ( dict(data = block, title = userData.symbol, image = resources.getIcon('bulletblue')) )
+                yield dict(data = block, title = userData.symbol, image = resources.getIcon('bulletblue'))
         itemRow = self.mainWindow.selectorDialog.select(symbolToDict(blocks), title = _("Select Symbol"))
         if itemRow is not None:
             self.goToBlock(itemRow[0]['data'])
@@ -1457,7 +1458,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         blocks = self.bookmarkListModel.blocks
         def bookmarkToDict(blocks):
             for block in blocks:
-                yield ( dict(title = block.text(), image = resources.getIcon('bookmarkflag')) )
+                yield dict(title = block.text(), image = resources.getIcon('bookmarkflag'))
         itemRow = self.mainWindow.selectorDialog.select(bookmarkToDict(blocks), title=_("Select Bookmark"))
         if itemRow is not None:
             self.goToBlock(itemRow[0]['data'])

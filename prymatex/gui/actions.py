@@ -181,7 +181,7 @@ class MainWindowActions(object):
             for tab in tabs:
                 image = tab.tabIcon()
                 if image is None: image = QtGui.QIcon()
-                yield ( dict(data = tab, title = tab.tabTitle(), image = image), dict(title = tab.filePath) )
+                yield dict(data = tab, title = tab.tabTitle(), image = image)
         itemRow = self.selectorDialog.select(tabsToDict(tabs), title=_("Select tab"))
         if itemRow is not None:
             self.splitTabWidget.setCurrentWidget(itemRow[0]['data'])

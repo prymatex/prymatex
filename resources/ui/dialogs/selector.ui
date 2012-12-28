@@ -27,25 +27,10 @@
     <widget class="QLineEdit" name="lineFilter"/>
    </item>
    <item>
-    <widget class="QTableView" name="tableItems">
+    <widget class="QListView" name="listItems">
      <property name="alternatingRowColors">
       <bool>true</bool>
      </property>
-     <property name="selectionMode">
-      <enum>QAbstractItemView::SingleSelection</enum>
-     </property>
-     <property name="selectionBehavior">
-      <enum>QAbstractItemView::SelectRows</enum>
-     </property>
-     <property name="showGrid">
-      <bool>false</bool>
-     </property>
-     <attribute name="horizontalHeaderVisible">
-      <bool>false</bool>
-     </attribute>
-     <attribute name="verticalHeaderVisible">
-      <bool>false</bool>
-     </attribute>
     </widget>
    </item>
   </layout>
