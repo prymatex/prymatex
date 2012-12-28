@@ -1438,17 +1438,17 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         # Filter function        
         def bundleItemFilter(text, item):
             if not text: return True
+            
             name = item["data"].name
-            matchs = texttools.matching_blocks(text.upper(), name.upper())
-            print matchs
-            if matchs:
-                current = 0
-                newName = ""
-                for match in matchs:
-                    newName += name[current:match[0]] + "<strong>" + name[match[0]:match[1]] + "</strong>"
-                    current = match[1]
-                item["display"]["name"] = newName + name[current:]
-            return bool(matchs)
+            current = 0
+            newName = ""
+            for match in texttools.matching_blocks(text.upper(), name.upper()):
+                newName += name[current:match[0]] + "<strong>" + name[match[0]:match[1]] + "</strong>"
+                current = match[1]
+            else:
+                return False
+            item["display"]["name"] = newName + name[current:]
+            return True
         
         # Map to dict function    
         def itemsToDict(bundleItems):

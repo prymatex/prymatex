@@ -95,9 +95,8 @@ spaces_to_tabs = lambda text, spaceLength = 4: text.replace(' ' * spaceLength, '
 # ----------------- Text matching -------------------------
 
 def matching_blocks(text1, text2):
-    print difflib.SequenceMatcher(None, text1, text2).get_grouped_opcodes()
-    return map(lambda m: (m[3], m[4]),
-        filter(
-            lambda m: m[0] == 'equal', 
-            difflib.SequenceMatcher(None, text1, text2).get_grouped_opcodes()))
+    for matches in difflib.SequenceMatcher(None, text1, text2).get_grouped_opcodes():
+        print matches
+        for match in filter(lambda m: m[0] == 'equal', matches):
+            yield match[3], match[4]
     
