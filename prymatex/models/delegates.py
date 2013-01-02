@@ -140,13 +140,12 @@ class HtmlItemDelegate(QtGui.QItemDelegate):
     def drawDisplay(self, painter, option, rect, text):
         doc = QtGui.QTextDocument(self)
         doc.setHtml(text)
-        doc.setTextWidth(rect.width())
+        doc.setTextWidth(option.rect.width() - option.decorationSize.width())
         ctx = QtGui.QAbstractTextDocumentLayout.PaintContext()
 
         painter.save()
         
-        painter.translate(rect.topLeft());
-        painter.setClipRect(rect.translated(-rect.topLeft()))
+        painter.translate(QtCore.QPoint(rect.left(), option.rect.top()))
         dl = doc.documentLayout()
         dl.draw(painter, ctx)
         painter.restore()

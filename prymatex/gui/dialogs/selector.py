@@ -25,7 +25,9 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         self.listItems.setItemDelegate(HtmlItemDelegate(self))
         self.listItems.setResizeMode(QtGui.QListView.Adjust)
         
-    def select(self, data, title = "Select item", filterFunction = lambda text, item: str(item).find(text) != -1):
+    def select(self, data, title = "Select item", 
+        filterFunction = lambda text, item: str(item).find(text) != -1,
+        sortFunction = lambda leftItem, rightItem: True):
         """ @param items: List of rows, each row has a list of columns, and each column is a dict with "title", "image", "tooltip"
             @return: The selected row """
 
@@ -37,7 +39,7 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         
         model = None
         if isinstance(data, collections.Iterable):
-            self.dataModel = SelectableProxyModel(filterFunction, parent = self)
+            self.dataModel = SelectableProxyModel(filterFunction, sortFunction, parent = self)
             self.dataModel.setSourceModel(SelectableModel(list(data)))
         elif isinstance(data, QtCore.QAbstractItemModel):
             self.dataModel = data

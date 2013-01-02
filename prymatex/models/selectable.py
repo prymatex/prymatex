@@ -57,18 +57,25 @@ class SelectableModel(QtCore.QAbstractListModel):
             return item['tooltip']
 
 class SelectableProxyModel(QtGui.QSortFilterProxyModel, SelectableModelMixin):
-    def __init__(self, filterFunction, parent = None):
+    def __init__(self, filterFunction, sortFunction, parent = None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)
         self.__filterFunction = filterFunction
+        self.__sortFunction = sortFunction
         self.__filterString = ""
         
     def filterAcceptsRow(self, sourceRow, sourceParent):
         item = self.sourceModel().item(sourceRow)
         return self.__filterFunction(self.__filterString, item)
 
+    def lessThan(self, left, right):
+        leftItem = self.sourceModel().item(left)
+        rightItem = self.sourceModel().item(right)
+        return self.__sortFunction(leftItem, rightItem)
+        
     def setFilterString(self, string):
         self.__filterString = string
         self.invalidate()
+        self.sort(0)
         
     def filterString(self):
         return self.__filterString

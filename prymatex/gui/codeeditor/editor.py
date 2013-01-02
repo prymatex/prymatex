@@ -2,7 +2,7 @@
 # -*- encoding: utf-8 -*-
 
 import re
-from bisect import bisect
+import difflib
 
 from prymatex.qt import QtCore, QtGui
 
@@ -1441,19 +1441,19 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             if text:
                 index = 0
                 slices = []
-                ratio = 0.0
+                item["_ratio"] = difflib.SequenceMatcher(None, text.lower(), name.lower()).ratio()
                 for m in texttools.subsearch(text, name, ignoreCase = True):
                     slices.append(name[index:m[2]])
                     slices.append("<strong>" + name[m[2]:m[3]] + "</strong>")
-                    ratio += (float((m[3] - m[2])) / m[3])
-                    # TODO Feo ratio, algo mejor para poner una puntuacion
                     index = m[3]
-                if ratio < 0.7:
-                    return False
                 slices.append(name[index:])
                 name = "".join(slices)
             item["display"]["name"] = name
             return True
+        
+        # Sort function
+        def bundleItemSort(leftItem, rightItem):
+            return leftItem["_ratio"] > rightItem["_ratio"]
         
         # Map to dict function    
         def itemsToDict(bundleItems):
@@ -1471,7 +1471,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         bundleItem = self.mainWindow.selectorDialog.select(
             itemsToDict(self.application.supportManager.getActionItems(self.scope())), 
             title=_("Select Bundle Item"),
-            filterFunction=bundleItemFilter)
+            filterFunction=bundleItemFilter,
+            sortFunction=bundleItemSort)
 
         # Select one?
         if bundleItem is not None:
