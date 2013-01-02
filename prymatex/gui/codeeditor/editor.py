@@ -1442,11 +1442,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             name = item["data"].name
             current = 0
             newName = ""
-            for match in texttools.matching_blocks(text.upper(), name.upper()):
+            for match in texttools.matching_blocks(text.upper(), name.upper(), 0.7):
                 newName += name[current:match[0]] + "<strong>" + name[match[0]:match[1]] + "</strong>"
                 current = match[1]
-            else:
-                return False
+            if current == 0: return False
             item["display"]["name"] = newName + name[current:]
             return True
         
@@ -1461,17 +1460,17 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                         "trigger": bundleItem.trigger
                     }, 
                     image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE))
-                    
+
         # Go!!!
         bundleItem = self.mainWindow.selectorDialog.select(
             itemsToDict(self.application.supportManager.getActionItems(self.scope())), 
             title=_("Select Bundle Item"),
             filterFunction=bundleItemFilter)
-        
+
         # Select one?
         if bundleItem is not None:
             self.insertBundleItem(bundleItem['data'])
-            
+    
     def on_actionGoToSymbol_triggered(self):
         #TODO: Usar el modelo
         blocks = self.symbolListModel.blocks

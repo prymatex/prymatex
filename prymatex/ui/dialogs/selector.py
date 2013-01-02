@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\cygwin\home\dvanhaaster\workspace\prymatex\resources\ui\dialogs\selector.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dialogs/selector.ui'
 #
-# Created: Fri Dec 28 07:53:53 2012
+# Created: Fri Dec 28 14:20:45 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -29,6 +29,7 @@ class Ui_SelectorDialog(object):
         self.verticalLayout.addWidget(self.lineFilter)
         self.listItems = QtGui.QListView(SelectorDialog)
         self.listItems.setAlternatingRowColors(True)
+        self.listItems.setUniformItemSizes(True)
         self.listItems.setObjectName(_fromUtf8("listItems"))
         self.verticalLayout.addWidget(self.listItems)
 

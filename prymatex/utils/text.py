@@ -94,9 +94,10 @@ spaces_to_tabs = lambda text, spaceLength = 4: text.replace(' ' * spaceLength, '
 
 # ----------------- Text matching -------------------------
 
-def matching_blocks(text1, text2):
-    for matches in difflib.SequenceMatcher(None, text1, text2).get_grouped_opcodes():
-        print matches
-        for match in filter(lambda m: m[0] == 'equal', matches):
-            yield match[3], match[4]
-    
+def matching_blocks(text1, text2, ratio):
+    matcher = difflib.SequenceMatcher(None, text1, text2)
+    if matcher.ratio() >= ratio:
+        for matches in matcher.get_grouped_opcodes():
+            for match in filter(lambda m: m[0] == 'equal', matches):
+                yield match[3], match[4]
+        

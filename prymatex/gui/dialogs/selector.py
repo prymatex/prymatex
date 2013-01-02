@@ -22,7 +22,8 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         self.listItems.installEventFilter(self)
         
         self.setWindowFlags(QtCore.Qt.Dialog)
-        self.listItems.setItemDelegate(HtmlDelegate())
+        self.listItems.setItemDelegate(HtmlDelegate(self))
+        self.listItems.setResizeMode(QtGui.QListView.Adjust)
         
     def select(self, data, title = "Select item", filterFunction = lambda text, item: str(item).find(text) != -1):
         """ @param items: List of rows, each row has a list of columns, and each column is a dict with "title", "image", "tooltip"
@@ -76,11 +77,11 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         self.dataModel.setFilterString(text)
         self.listItems.setCurrentIndex(self.dataModel.index(0, 0))
         
-    def on_tableItems_activated(self, index):
+    def on_listItems_activated(self, index):
         self.selectedRow = self.dataModel.mapToSourceItem(index)
         self.accept()
         
-    def on_tableItems_doubleClicked(self, index):
+    def on_listItems_doubleClicked(self, index):
         self.selectedRow = self.dataModel.mapToSourceItem(index)
         self.accept()
     

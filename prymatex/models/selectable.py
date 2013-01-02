@@ -23,9 +23,12 @@ class SelectableModelMixin(object):
 #=========================================================
 class SelectableModel(QtCore.QAbstractListModel):
     """ data = [{item1}, ... {itemN}]
-        item = { display: {}, image, icon, tooltip}
+        item = { 
+            title: str or display: {}, 
+            image: QPixmap or icon: QIcon,
+            tooltip: str}
     """
-    DEFALUT_TEMPLATE = "%(title)s"
+    DEFALUT_TEMPLATE = "%s"
     def __init__(self, data, parent = None): 
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.data = data
@@ -45,8 +48,8 @@ class SelectableModel(QtCore.QAbstractListModel):
         item = self.data[index.row()]
         
         if role in [ QtCore.Qt.DisplayRole ]:
-            template = item.get('template', self.DEFALUT_TEMPLATE)
-            display = item.get('display', { 'title': item.get('title', '')})
+            template = item.get('template') or self.DEFALUT_TEMPLATE
+            display = item.get('display') or item.get('title') or ''
             return template % display
         elif role == QtCore.Qt.DecorationRole:
             return item.get('image') or item.get('icon')
