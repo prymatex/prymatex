@@ -135,19 +135,18 @@ class PMXFontStyleDelegate(QtGui.QStyledItemDelegate):
         widget.render(painter)
         painter.restore()
         
-class HtmlDelegate(QtGui.QStyledItemDelegate):
+class HtmlItemDelegate(QtGui.QItemDelegate):
 
-    def paint(self, painter, option, index):
-        model = index.model()
-        record = model.data(index)
+    def drawDisplay(self, painter, option, rect, text):
         doc = QtGui.QTextDocument(self)
-        doc.setHtml(record)
-        doc.setTextWidth(option.rect.width())
+        doc.setHtml(text)
+        doc.setTextWidth(rect.width())
         ctx = QtGui.QAbstractTextDocumentLayout.PaintContext()
 
         painter.save()
-        painter.translate(option.rect.topLeft());
-        painter.setClipRect(option.rect.translated(-option.rect.topLeft()))
+        
+        painter.translate(rect.topLeft());
+        painter.setClipRect(rect.translated(-rect.topLeft()))
         dl = doc.documentLayout()
         dl.draw(painter, ctx)
         painter.restore()

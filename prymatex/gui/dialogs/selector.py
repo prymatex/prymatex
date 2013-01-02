@@ -6,7 +6,7 @@ import collections
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.models.selectable import SelectableModel, SelectableProxyModel
-from prymatex.models.delegates import HtmlDelegate
+from prymatex.models.delegates import HtmlItemDelegate
 from prymatex.ui.dialogs.selector import Ui_SelectorDialog
 
 class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
@@ -22,7 +22,7 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         self.listItems.installEventFilter(self)
         
         self.setWindowFlags(QtCore.Qt.Dialog)
-        self.listItems.setItemDelegate(HtmlDelegate(self))
+        self.listItems.setItemDelegate(HtmlItemDelegate(self))
         self.listItems.setResizeMode(QtGui.QListView.Adjust)
         
     def select(self, data, title = "Select item", filterFunction = lambda text, item: str(item).find(text) != -1):
