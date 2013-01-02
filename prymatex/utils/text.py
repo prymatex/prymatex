@@ -92,12 +92,34 @@ def opposite_case(text):
 tabs_to_spaces = lambda text, spaceLength = 4: text.replace('\t', ' ' * spaceLength)
 spaces_to_tabs = lambda text, spaceLength = 4: text.replace(' ' * spaceLength, '\t')
 
+
+# ----------------- Text search -------------------------
+
+def subsearch(pattern, text, pstart = 0, tstart = 0, ignoreCase = False):
+    if not pattern or not text: []
+    if pstart == 0 and ignoreCase:
+        pattern = pattern.lower()
+        text = text.lower()
+    end = len(pattern)
+    begin = text.find(pattern, tstart)
+    while begin == -1 and end >= 0:
+        end -= 1
+        begin = text.find(pattern[:end], tstart)
+    if end <= 0:
+        return []
+    return [(pstart, pstart + end, begin, begin + end)] + \
+        subsearch(pattern[end:], text, pstart = end, tstart = begin + end)
+
 # ----------------- Text matching -------------------------
 
-def matching_blocks(text1, text2, ratio):
-    matcher = difflib.SequenceMatcher(None, text1, text2)
+def matching_blocks(text1, text2, ratio = 1.0, ignoreCase = False):
+    if ignoreCase:
+        matcher = difflib.SequenceMatcher(None, text1.lower(), text2.lower())
+    else:
+        matcher = difflib.SequenceMatcher(None, text1, text2)
     if matcher.ratio() >= ratio:
+        print text1, text2, list(matcher.get_grouped_opcodes())
         for matches in matcher.get_grouped_opcodes():
             for match in filter(lambda m: m[0] == 'equal', matches):
-                yield match[3], match[4]
+                yield match[1:]
         

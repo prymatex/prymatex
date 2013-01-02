@@ -68,7 +68,7 @@ class SelectableProxyModel(QtGui.QSortFilterProxyModel, SelectableModelMixin):
 
     def setFilterString(self, string):
         self.__filterString = string
-        self.invalidateFilter()
+        self.invalidate()
         
     def filterString(self):
         return self.__filterString

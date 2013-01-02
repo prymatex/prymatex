@@ -1437,16 +1437,22 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
         # Filter function        
         def bundleItemFilter(text, item):
-            if not text: return True
-            
             name = item["data"].name
-            current = 0
-            newName = ""
-            for match in texttools.matching_blocks(text.upper(), name.upper(), 0.7):
-                newName += name[current:match[0]] + "<strong>" + name[match[0]:match[1]] + "</strong>"
-                current = match[1]
-            if current == 0: return False
-            item["display"]["name"] = newName + name[current:]
+            if text:
+                index = 0
+                slices = []
+                ratio = 0.0
+                for m in texttools.subsearch(text, name, ignoreCase = True):
+                    slices.append(name[index:m[2]])
+                    slices.append("<strong>" + name[m[2]:m[3]] + "</strong>")
+                    ratio += (float((m[3] - m[2])) / m[3])
+                    # TODO Feo ratio, algo mejor para poner una puntuacion
+                    index = m[3]
+                if ratio < 0.7:
+                    return False
+                slices.append(name[index:])
+                name = "".join(slices)
+            item["display"]["name"] = name
             return True
         
         # Map to dict function    

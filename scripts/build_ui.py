@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import utils
 
 PROJECT_PATH = os.path.abspath(os.path.join(__file__, '..', '..'))
 
@@ -16,18 +17,6 @@ def has_been_updated(source, dest):
         return True
     return False
 
-def fullsplit(path, result=None):
-    """
-    Split a pathname into components (the opposite of os.path.join) in a platform-neutral way.
-    """
-    if result is None:
-        result = []
-    head, tail = os.path.split(path)
-    if head == '':
-        return [tail] + result
-    if head == path:
-        return result
-    return fullsplit(head, [tail] + result)
 
 class QtUiBuild(object):
     """Build PyQt (.ui) files and resources."""
@@ -54,8 +43,8 @@ class QtUiBuild(object):
         """Compile the .ui files to python modules."""
         # Search for pyuic4 in python bin dir, then in the $Path.
         if py_file is None:
-            projectIndex = len(fullsplit(PROJECT_PATH))
-            py_path = os.path.join(PROJECT_PATH, 'prymatex', *fullsplit(ui_file)[projectIndex + 1:-1])
+            projectIndex = len(utils.fullsplit(PROJECT_PATH))
+            py_path = os.path.join(PROJECT_PATH, 'prymatex', *utils.fullsplit(ui_file)[projectIndex + 1:-1])
             py_file = os.path.split(ui_file)[1]
             py_file = os.path.splitext(py_file)[0] + '.py'
             py_file = os.path.join(py_path, py_file)
@@ -92,7 +81,7 @@ class QtUiBuild(object):
             print("%s has not been modified" % rc_file )
 
     def create_package(self, dirpath):
-        pkgpath = os.path.join("prymatex", *fullsplit(dirpath)[1:])
+        pkgpath = os.path.join("prymatex", *utils.fullsplit(dirpath)[1:])
         if not os.path.exists(pkgpath):
             os.makedirs(pkgpath)
         init = os.path.join(pkgpath, '__init__.py')
