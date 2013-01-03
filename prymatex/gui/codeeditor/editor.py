@@ -14,6 +14,8 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core import exceptions
 from prymatex.qt.helpers.menus import extend_menu, update_menu
 from prymatex.models.support import BundleItemTreeNode
+from prymatex.models.selectable import selectableModelFactory
+
 from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserData
 from prymatex.gui.codeeditor.addons import CodeEditorAddon
 from prymatex.gui.codeeditor.sidebar import CodeEditorSideBar, SideBarWidgetAddon
@@ -1468,11 +1470,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                     image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE))
 
         # Go!!!
-        bundleItem = self.mainWindow.selectorDialog.select(
+        # TODO y si en lugar de estar armando el modelo lo dejo armado y le paso una funcion para los datos?
+        model = selectableModelFactory(self,
             itemsToDict(self.application.supportManager.getActionItems(self.scope())), 
-            title=_("Select Bundle Item"),
             filterFunction=bundleItemFilter,
             sortFunction=bundleItemSort)
+            
+        bundleItem = self.mainWindow.selectorDialog.select(model, title=_("Select Bundle Item"))
 
         # Select one?
         if bundleItem is not None:

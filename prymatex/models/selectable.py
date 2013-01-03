@@ -1,20 +1,27 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+import collections
 
 from prymatex import resources
+from prymatex.qt import QtCore, QtGui
 
 #=========================================================
 # Mixin for selector dialog
 #=========================================================
 class SelectableModelMixin(object):
+    def initialize(self, selector):
+        pass
+        
+        
     def mapToSourceItem(self, index):
         pass
+
 
     # ------------- Filter
     def setFilterString(self, string):
         pass
+
 
     def filterString(self):
         pass
@@ -68,7 +75,10 @@ class SelectableProxyModel(QtGui.QSortFilterProxyModel, SelectableModelMixin):
         self.__filterFunction = filterFunction
         self.__sortFunction = sortFunction
         self.__filterString = ""
-        
+
+    def initialize(self, selector):
+        self.selector = selector
+
     def filterAcceptsRow(self, sourceRow, sourceParent):
         item = self.sourceModel().item(sourceRow)
         return self.__filterFunction(self.__filterString, item)
@@ -88,3 +98,11 @@ class SelectableProxyModel(QtGui.QSortFilterProxyModel, SelectableModelMixin):
         
     def mapToSourceItem(self, index):
         return self.sourceModel().item(self.mapToSource(index))
+
+def selectableModelFactory(parent, iterable, 
+    filterFunction = lambda text, item: str(item).find(text) != -1,
+    sortFunction = lambda leftItem, rightItem: True):
+    assert isinstance(iterable, collections.Iterable)
+    model = SelectableProxyModel(filterFunction, sortFunction, parent = parent)
+    model.setSourceModel(SelectableModel(list(iterable)))
+    return model

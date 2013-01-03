@@ -174,8 +174,7 @@ class ProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         regexp = self.filterRegExp()        
         if not regexp.isEmpty():
             pattern = regexp.pattern()
-            #TODO: Hacerlo en el fileManager!!!
-            match = any(map(lambda p: fnmatch.fnmatch(node.path(), p), map(lambda p: p.strip(), pattern.split(","))))
+            match = self.fileManager.fnmatchany(node.path(), pattern.split(","))
             return not match
         return True
 

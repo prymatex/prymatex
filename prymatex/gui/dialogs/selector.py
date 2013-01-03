@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import collections
-
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.models.selectable import SelectableModel, SelectableProxyModel
 from prymatex.delegates import HtmlItemDelegate
 from prymatex.ui.dialogs.selector import Ui_SelectorDialog
 
@@ -25,32 +22,22 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         self.listItems.setItemDelegate(HtmlItemDelegate(self))
         self.listItems.setResizeMode(QtGui.QListView.Adjust)
         
-    def select(self, data, title = "Select item", 
-        filterFunction = lambda text, item: str(item).find(text) != -1,
-        sortFunction = lambda leftItem, rightItem: True):
+    def select(self, model, title = "Select item"):
         """ @param items: List of rows, each row has a list of columns, and each column is a dict with "title", "image", "tooltip"
             @return: The selected row """
 
+        self.model = model
         self.setWindowTitle(title)
-        
-        self.selectedRow = None
+        self.selected = None
         self.lineFilter.clear()
         self.lineFilter.setFocus()
         
-        model = None
-        if isinstance(data, collections.Iterable):
-            self.dataModel = SelectableProxyModel(filterFunction, sortFunction, parent = self)
-            self.dataModel.setSourceModel(SelectableModel(list(data)))
-        elif isinstance(data, QtCore.QAbstractItemModel):
-            self.dataModel = data
-        else:
-            raise Exception("No Data")
-        self.listItems.setModel(self.dataModel)
-                
-        self.listItems.setCurrentIndex(self.dataModel.index(0, 0))
+        self.model.initialize(self)
+        self.listItems.setModel(self.model)
+        self.listItems.setCurrentIndex(self.model.index(0, 0))
         self.exec_()
         
-        return self.selectedRow
+        return self.selected
     
     
     def eventFilter(self, obj, event):
@@ -76,19 +63,19 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         return QtGui.QWidget.eventFilter(self, obj, event)
             
     def on_lineFilter_textChanged(self, text):
-        self.dataModel.setFilterString(text)
-        self.listItems.setCurrentIndex(self.dataModel.index(0, 0))
+        self.model.setFilterString(text)
+        self.listItems.setCurrentIndex(self.model.index(0, 0))
         
     def on_listItems_activated(self, index):
-        self.selectedRow = self.dataModel.mapToSourceItem(index)
+        self.selected = self.model.mapToSourceItem(index)
         self.accept()
         
     def on_listItems_doubleClicked(self, index):
-        self.selectedRow = self.dataModel.mapToSourceItem(index)
+        self.selected = self.model.mapToSourceItem(index)
         self.accept()
     
     def on_lineFilter_returnPressed(self):
         indexes = self.listItems.selectedIndexes()
         if indexes:
-            self.selectedRow = self.dataModel.mapToSourceItem(indexes[0])
+            self.selected = self.model.mapToSourceItem(indexes[0])
             self.accept()

@@ -22,7 +22,7 @@ from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 
 from prymatex.models.projects import ProjectTreeNode
-from prymatex.models.projects.tables import SelectableProjectFileModel
+from prymatex.models.projects.lists import SelectableProjectFileModel
 
 class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXBaseDock):
     SHORTCUT = "F8"
@@ -35,7 +35,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     SETTINGS_GROUP = 'Projects'
     @pmxConfigPorperty(default = '')
     def customFilters(self, filters):
-        self.projectTreeProxyModel.setFilterRegExp(filters)
+        self.projectTreeProxyModel.setFilterRegExp(",".join(map(lambda p: p.strip(), filters.split(","))))
     
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)

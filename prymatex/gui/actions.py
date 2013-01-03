@@ -5,6 +5,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
 from prymatex.core import exceptions
+from prymatex.models.selectable import selectableModelFactory
 from prymatex.gui import dialogs
 from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
 from prymatex.gui.dialogs.project import PMXNewProjectDialog
@@ -184,9 +185,14 @@ class MainWindowActions(object):
                     template = "<table><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(file)s</small></td></tr></table>", 
                     display = { "name": tab.tabTitle(), "file": tab.filePath }, 
                     image = image)
-        item = self.selectorDialog.select(tabsToDict(self.splitTabWidget.allWidgets()),
-            title=_("Select tab"),
+
+        # Go!!!
+        model = selectableModelFactory(self,
+            tabsToDict(self.splitTabWidget.allWidgets()),
             filterFunction = lambda text, item: item["display"]["name"].find(text) != -1)
+        
+        item = self.selectorDialog.select(model,title=_("Select tab"))
+        
         if item is not None:
             self.splitTabWidget.setCurrentWidget(item['data'])
     

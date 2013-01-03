@@ -184,6 +184,9 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
         if os.path.exists(path):
             return path
     
+    def fnmatchany(self, filename, patterns):
+        return any(map(lambda pattern: fnmatch.fnmatch(filename, pattern), patterns))
+
     # -------------- Open file control
     # Use only realpath for file watcher
     def isOpen(self, filePath):
@@ -255,12 +258,14 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     def listDirectory(self, directory, absolute = False, filePatterns = []):
         if not os.path.isdir(directory):
             raise exceptions.DirectoryException("%s not exists" % directory)
-        names = os.listdir(directory)
+        filenames = os.listdir(directory)
         if filePatterns:
-            names = filter(lambda name: any(map(lambda pattern: os.path.isdir(os.path.join(directory, name)) or fnmatch.fnmatch(name, pattern), filePatterns)), names)
+            filenames = filter(
+                lambda filename: os.path.isdir(os.path.join(directory, filename)) or\
+                    self.fnmatchany(filename, filePatterns), filenames)
         if absolute:
-            return map(lambda name: os.path.join(directory, name), names)
-        return names
+            return map(lambda name: os.path.join(directory, name), filenames)
+        return filenames
 
     def lastModification(self, filePath):
         return QtCore.QFileInfo(filePath).lastModified()
