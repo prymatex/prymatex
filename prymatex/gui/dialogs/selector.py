@@ -6,7 +6,7 @@ import collections
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.models.selectable import SelectableModel, SelectableProxyModel
-from prymatex.models.delegates import HtmlItemDelegate
+from prymatex.delegates import HtmlItemDelegate
 from prymatex.ui.dialogs.selector import Ui_SelectorDialog
 
 class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
