@@ -16,13 +16,6 @@
     <height>433</height>
    </size>
   </property>
-  <property name="windowTitle">
-   <string>Dialog</string>
-  </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>:/images/prymatex/logo.png</normaloff>:/images/prymatex/logo.png</iconset>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <property name="spacing">
     <number>2</number>

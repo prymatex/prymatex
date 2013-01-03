@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>BrowserWidget</class>
  <widget class="QWidget" name="BrowserWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>592</width>
+    <height>192</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Browser</string>
   </property>
@@ -18,41 +26,43 @@
      <property name="title">
       <string>Connection</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QRadioButton" name="radioButtonNoProxy">
+     <layout class="QFormLayout" name="formLayout">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+      </property>
+      <property name="margin">
+       <number>6</number>
+      </property>
+      <item row="4" column="0">
+       <widget class="QLabel" name="labelProxy">
         <property name="text">
-         <string>No proxy</string>
+         <string>Proxy:</string>
         </property>
        </widget>
       </item>
-      <item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="lineEditProxy"/>
+      </item>
+      <item row="2" column="1">
+       <widget class="QRadioButton" name="radioButtonManualProxy">
+        <property name="text">
+         <string>Manual proxy configuration</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
        <widget class="QRadioButton" name="radioButtonSystemProxy">
         <property name="text">
          <string>Use system proxy settings</string>
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QRadioButton" name="radioButtonManualProxy">
+      <item row="0" column="1">
+       <widget class="QRadioButton" name="radioButtonNoProxy">
         <property name="text">
-         <string>Manual proxy configuration:</string>
+         <string>No proxy</string>
         </property>
        </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QLabel" name="labelProxy">
-          <property name="text">
-           <string>Proxy:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="lineEditProxy"/>
-        </item>
-       </layout>
       </item>
      </layout>
     </widget>

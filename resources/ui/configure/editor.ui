@@ -6,40 +6,119 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>199</width>
-    <height>209</height>
+    <width>415</width>
+    <height>351</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Editor</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="margin">
+    <number>6</number>
+   </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLabel" name="labelDefaultSyntax">
-       <property name="text">
-        <string>Default Syntax</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="comboBoxDefaultSyntax">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="checkBoxHighlight">
-     <property name="text">
-      <string>Highlight current line</string>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Source</string>
      </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <property name="margin">
+       <number>6</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="labelDefaultSyntax">
+          <property name="text">
+           <string>Default syntax</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboBoxDefaultSyntax">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxHighlight">
+        <property name="text">
+         <string>Highlight current line</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QCheckBox" name="checkBoxHighlight_4">
+          <property name="maximumSize">
+           <size>
+            <width>130</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Show margin line after</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spinBox">
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxHighlight_2">
+        <property name="text">
+         <string>Show tabs and spaces</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxHighlight_3">
+        <property name="text">
+         <string>Show line and paragraph</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxFolding_2">
+        <property name="text">
+         <string>Wrap lines</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
@@ -47,31 +126,28 @@
      <property name="title">
       <string>Gutter</string>
      </property>
-     <layout class="QFormLayout" name="formLayout">
-      <property name="horizontalSpacing">
-       <number>2</number>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="margin">
+       <number>6</number>
       </property>
-      <property name="verticalSpacing">
-       <number>2</number>
-      </property>
-      <item row="0" column="1">
+      <item>
        <widget class="QCheckBox" name="checkBoxLineNumbers">
         <property name="text">
-         <string>Show Line Numbers</string>
+         <string>Show line numbers</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item>
        <widget class="QCheckBox" name="checkBoxBookmarks">
         <property name="text">
-         <string>Show Bookmarks</string>
+         <string>Show bookmarks</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item>
        <widget class="QCheckBox" name="checkBoxFolding">
         <property name="text">
-         <string>Show Folding</string>
+         <string>Show folding</string>
         </property>
        </widget>
       </item>
