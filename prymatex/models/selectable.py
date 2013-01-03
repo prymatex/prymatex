@@ -12,19 +12,22 @@ class SelectableModelMixin(object):
     def mapToSourceItem(self, index):
         pass
 
+    # ------------- Filter
     def setFilterString(self, string):
         pass
 
     def filterString(self):
         pass
 
+    
+    
 #=========================================================
 # Selectable Model
 #=========================================================
 class SelectableModel(QtCore.QAbstractListModel):
     """ data = [{item1}, ... {itemN}]
         item = { 
-            title: str or display: {}, 
+            display: {} or str, 
             image: QPixmap or icon: QIcon,
             tooltip: str}
     """
@@ -48,9 +51,12 @@ class SelectableModel(QtCore.QAbstractListModel):
         item = self.data[index.row()]
         
         if role in [ QtCore.Qt.DisplayRole ]:
-            template = item.get('template') or self.DEFALUT_TEMPLATE
-            display = item.get('display') or item.get('title') or ''
-            return template % display
+            display = item.get('display')
+            if isinstance(display, dict):
+                template = item.get('template') or self.DEFALUT_TEMPLATE
+                return template % display
+            else:
+                return display
         elif role == QtCore.Qt.DecorationRole:
             return item.get('image') or item.get('icon')
         elif role == QtCore.Qt.ToolTipRole and 'tooltip' in item:
@@ -75,7 +81,7 @@ class SelectableProxyModel(QtGui.QSortFilterProxyModel, SelectableModelMixin):
     def setFilterString(self, string):
         self.__filterString = string
         self.invalidate()
-        self.sort(0)
+        #self.sort(0)
         
     def filterString(self):
         return self.__filterString

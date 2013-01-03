@@ -37,12 +37,12 @@ class SelectableProjectFileModel(QtCore.QAbstractTableModel, SelectableModelMixi
     def mapToSourceRow(self, index):
         return self.data[index.row()]
 
-    def setFilterRegExp(self, regexp):
+    def setFilterString(self, string):
         if self.projectFileTask.isRunning():
             self.projectFileTask.cancel()
             self.data = []
             self.layoutChanged.emit()
-        self.projectFileTask = self.manager.application.scheduler.newTask(self.__run_file_search(regexp.pattern()))
+        self.projectFileTask = self.manager.application.scheduler.newTask(self.__run_file_search(string))
 
     def __run_file_search(self, pattern):
         # TODO: sub tareas
