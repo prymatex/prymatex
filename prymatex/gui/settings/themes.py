@@ -116,7 +116,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
         self.pushButtonInvisibles.pressed.connect(lambda element = 'invisibles': self.on_pushButtonColor_pressed(element))
         self.pushButtonLineHighlight.pressed.connect(lambda element = 'lineHighlight': self.on_pushButtonColor_pressed(element))
         self.pushButtonCaret.pressed.connect(lambda element = 'caret': self.on_pushButtonColor_pressed(element))
-        self.pushButtonGutter.pressed.connect(lambda element = 'gutter': self.on_pushButtonColor_pressed(element))
+        self.pushButtonGutterBackground.pressed.connect(lambda element = 'gutter': self.on_pushButtonColor_pressed(element))
         #Font
         font = self.settingGroup.value('defaultFont')
         self.lineFont.setFont(font)
@@ -161,7 +161,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
         self.pushButtonCaret.setStyleSheet("background-color: " + color2rgba(settings['caret'])[:7])
         if 'gutter' in settings:
             #Not all themes has the gutter color
-            self.pushButtonGutter.setStyleSheet("background-color: " + color2rgba(settings['gutter'])[:7])
+            self.pushButtonGutterBackground.setStyleSheet("background-color: " + color2rgba(settings['gutter'])[:7])
         self.application.supportManager.themeStyleProxyModel.setFilterRegExp(unicode(theme.uuid))
         
         #Set color for table view

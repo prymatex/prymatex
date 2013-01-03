@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/configure/editor.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/editor.ui'
 #
-# Created: Fri Nov  9 18:10:45 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Wed Jan  2 21:01:22 2013
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,6 +18,7 @@ except AttributeError:
 class Ui_EditorWidget(object):
     def setupUi(self, EditorWidget):
         EditorWidget.setObjectName(_fromUtf8("EditorWidget"))
+        EditorWidget.resize(199, 209)
         self.verticalLayout = QtGui.QVBoxLayout(EditorWidget)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.horizontalLayout = QtGui.QHBoxLayout()
@@ -40,6 +41,7 @@ class Ui_EditorWidget(object):
         self.groupBox = QtGui.QGroupBox(EditorWidget)
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
         self.formLayout = QtGui.QFormLayout(self.groupBox)
+        self.formLayout.setSpacing(2)
         self.formLayout.setObjectName(_fromUtf8("formLayout"))
         self.checkBoxLineNumbers = QtGui.QCheckBox(self.groupBox)
         self.checkBoxLineNumbers.setObjectName(_fromUtf8("checkBoxLineNumbers"))
