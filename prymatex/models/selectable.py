@@ -11,14 +11,18 @@ from prymatex.qt import QtCore, QtGui
 #=========================================================
 class SelectableModelMixin(object):
     def initialize(self, selector):
-        pass
+        self.selector = selector
         
         
-    def mapToSourceItem(self, index):
+    def item(self, index):
         pass
 
 
     # ------------- Filter
+    def isFiltered(self):
+        return False
+
+
     def setFilterString(self, string):
         pass
 
@@ -31,17 +35,16 @@ class SelectableModelMixin(object):
 #=========================================================
 # Selectable Model
 #=========================================================
-class SelectableModel(QtCore.QAbstractListModel):
-    """ data = [{item1}, ... {itemN}]
-        item = { 
-            display: {} or str, 
-            image: QPixmap or icon: QIcon,
-            tooltip: str}
-    """
+class SelectableModel(QtCore.QAbstractListModel, SelectableModelMixin):
     DEFALUT_TEMPLATE = "%s"
-    def __init__(self, data, parent = None): 
+    def __init__(self, dataFunction, parent = None): 
         QtCore.QAbstractTableModel.__init__(self, parent)
-        self.data = data
+        self.__dataFunction = dataFunction
+        
+
+    def initialize(self, selector):
+        self.data = self.__dataFunction()
+
 
     def item(self, index):
         if isinstance(index, QtCore.QModelIndex) and index.isValid():
@@ -49,8 +52,10 @@ class SelectableModel(QtCore.QAbstractListModel):
         if isinstance(index, int) and index < len(self.data):
             return self.data[index]
 
+
     def rowCount (self, parent = None):
         return len(self.data)
+    
     
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
@@ -72,37 +77,51 @@ class SelectableModel(QtCore.QAbstractListModel):
 class SelectableProxyModel(QtGui.QSortFilterProxyModel, SelectableModelMixin):
     def __init__(self, filterFunction, sortFunction, parent = None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)
-        self.__filterFunction = filterFunction
-        self.__sortFunction = sortFunction
+        self.__filterFunction = filterFunction or (lambda filter, item: True)
+        self.__sortFunction = sortFunction or (lambda leftItem, rightItem: True)
         self.__filterString = ""
 
+
     def initialize(self, selector):
+        self.sourceModel().initialize(selector)
         self.selector = selector
+
 
     def filterAcceptsRow(self, sourceRow, sourceParent):
         item = self.sourceModel().item(sourceRow)
         return self.__filterFunction(self.__filterString, item)
 
+
     def lessThan(self, left, right):
         leftItem = self.sourceModel().item(left)
         rightItem = self.sourceModel().item(right)
         return self.__sortFunction(leftItem, rightItem)
+    
+    
+    def item(self, index):
+        return self.sourceModel().item(self.mapToSource(index))
+    
         
+    # --------- Filter
+    def isFiltered(self):
+        return True
+
+
     def setFilterString(self, string):
         self.__filterString = string
         self.invalidate()
         #self.sort(0)
-        
+
+
     def filterString(self):
         return self.__filterString
         
-    def mapToSourceItem(self, index):
-        return self.sourceModel().item(self.mapToSource(index))
-
-def selectableModelFactory(parent, iterable, 
-    filterFunction = lambda text, item: str(item).find(text) != -1,
-    sortFunction = lambda leftItem, rightItem: True):
-    assert isinstance(iterable, collections.Iterable)
-    model = SelectableProxyModel(filterFunction, sortFunction, parent = parent)
-    model.setSourceModel(SelectableModel(list(iterable)))
+        
+def selectableModelFactory(parent, dataFunction, 
+    filterFunction = None, sortFunction = None):
+    model = SelectableModel(dataFunction, parent = parent)
+    if filterFunction is not None or sortFunction is not None:
+        proxy = SelectableProxyModel(filterFunction, sortFunction, parent = parent)
+        proxy.setSourceModel(model)
+        return proxy
     return model
