@@ -2,7 +2,6 @@
 # -*- encoding: utf-8 -*-
 
 import re
-import difflib
 
 from prymatex.qt import QtCore, QtGui
 
@@ -14,7 +13,6 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core import exceptions
 from prymatex.qt.helpers.menus import extend_menu, update_menu
 from prymatex.models.support import BundleItemTreeNode
-from prymatex.models.selectable import selectableModelFactory
 
 from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserData
 from prymatex.gui.codeeditor.addons import CodeEditorAddon
@@ -23,7 +21,11 @@ from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetPr
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import CodeEditorFolding
-from prymatex.gui.codeeditor.models import SymbolListModel, BookmarkListModel, PMXAlreadyTypedWords
+from prymatex.gui.codeeditor.models import (SymbolListModel, BookmarkListModel, 
+                                            AlreadyTypedWords, 
+                                            bundleItemSelectableModelFactory,
+                                            bookmarkSelectableModelFactory,
+                                            symbolSelectableModelFactory)
 
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 
@@ -119,7 +121,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         #Models
         self.bookmarkListModel = BookmarkListModel(self)
         self.symbolListModel = SymbolListModel(self)
-        self.alreadyTypedWords = PMXAlreadyTypedWords(self)
+        self.alreadyTypedWords = AlreadyTypedWords(self)
+        self.bundleItemSelectableModel = bundleItemSelectableModelFactory(self)
+        self.symbolSelectableModel = symbolSelectableModelFactory(self)
+        self.bookmarkSelectableModel = bookmarkSelectableModelFactory(self)
         
         #Folding
         self.folding = CodeEditorFolding(self)
@@ -1436,71 +1441,22 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setFlags(flags)
     
     def on_actionSelectBundleItem_triggered(self):
-        
-        # Filter function        
-        def bundleItemFilter(text, item):
-            name = item["data"].name
-            if text:
-                index = 0
-                slices = []
-                item["_ratio"] = difflib.SequenceMatcher(None, text.lower(), name.lower()).ratio()
-                for m in texttools.subsearch(text, name, ignoreCase = True):
-                    slices.append(name[index:m[2]])
-                    slices.append("<strong>" + name[m[2]:m[3]] + "</strong>")
-                    index = m[3]
-                slices.append(name[index:])
-                name = "".join(slices)
-            item["display"]["name"] = name
-            return True
-        
-        # Sort function
-        def bundleItemSort(leftItem, rightItem):
-            return leftItem["_ratio"] > rightItem["_ratio"]
-        
-        # Map to dict function    
-        def itemsToDict(bundleItems):
-            for bundleItem in bundleItems:
-                yield dict(data = bundleItem, 
-                    template = "<table width='100%%'><tr><td>%(name)s - %(bundle)s</td><td align='right'>%(trigger)s</td></tr></table>",
-                    display = { 
-                        "name": bundleItem.name, 
-                        "bundle": bundleItem.bundle.name, 
-                        "trigger": bundleItem.trigger
-                    }, 
-                    image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE))
-
-        # Go!!!
-        # TODO y si en lugar de estar armando el modelo lo dejo armado y le paso una funcion para los datos?
-        model = selectableModelFactory(self,
-            itemsToDict(self.application.supportManager.getActionItems(self.scope())), 
-            filterFunction=bundleItemFilter,
-            sortFunction=bundleItemSort)
             
-        bundleItem = self.mainWindow.selectorDialog.select(model, title=_("Select Bundle Item"))
+        item = self.mainWindow.selectorDialog.select(self.bundleItemSelectableModel, title=_("Select Bundle Item"))
 
         # Select one?
-        if bundleItem is not None:
-            self.insertBundleItem(bundleItem['data'])
+        if item is not None:
+            self.insertBundleItem(item['data'])
     
     def on_actionGoToSymbol_triggered(self):
-        #TODO: Usar el modelo
-        blocks = self.symbolListModel.blocks
-        def symbolToDict(blocks):
-            for block in blocks:
-                userData = block.userData() 
-                yield dict(data = block, title = userData.symbol, image = resources.getIcon('bulletblue'))
-        itemRow = self.mainWindow.selectorDialog.select(symbolToDict(blocks), title = _("Select Symbol"))
-        if itemRow is not None:
-            self.goToBlock(itemRow[0]['data'])
+        item = self.mainWindow.selectorDialog.select(self.symbolSelectableModel, title = _("Select Symbol"))
+        if item is not None:
+            self.goToBlock(item['data'])
         
     def on_actionGoToBookmark_triggered(self):
-        blocks = self.bookmarkListModel.blocks
-        def bookmarkToDict(blocks):
-            for block in blocks:
-                yield dict(title = block.text(), image = resources.getIcon('bookmarkflag'))
-        itemRow = self.mainWindow.selectorDialog.select(bookmarkToDict(blocks), title=_("Select Bookmark"))
-        if itemRow is not None:
-            self.goToBlock(itemRow[0]['data'])
+        item = self.mainWindow.selectorDialog.select(self.bookmarkSelectableModel, title=_("Select Bookmark"))
+        if item is not None:
+            self.goToBlock(item['data'])
     
     #===========================================================================
     # Navigation API

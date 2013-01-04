@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 from prymatex import resources
 from prymatex.core import exceptions
@@ -174,24 +174,7 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionSelectTab_triggered(self):
-        """ 
-        Shows select tab, and change to selected 
-        """
-        def tabsToDict(tabs):
-            for tab in tabs:
-                image = tab.tabIcon()
-                if image is None: image = QtGui.QIcon()
-                yield dict(data = tab, 
-                    template = "<table><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(file)s</small></td></tr></table>", 
-                    display = { "name": tab.tabTitle(), "file": tab.filePath }, 
-                    image = image)
-
-        # Go!!!
-        model = selectableModelFactory(self,
-            tabsToDict(self.splitTabWidget.allWidgets()),
-            filterFunction = lambda text, item: item["display"]["name"].find(text) != -1)
-        
-        item = self.selectorDialog.select(model,title=_("Select tab"))
+        item = self.selectorDialog.select(self.tabSelectableModel, title=_("Select tab"))
         
         if item is not None:
             self.splitTabWidget.setCurrentWidget(item['data'])
@@ -336,3 +319,19 @@ class MainWindowActions(object):
         }
         for action, url in ACTION_MAPPING.iteritems():
             action.triggered.connect(partial(open, url))
+            
+def tabSelectableModelFactory(mainWindow):
+    """ 
+    Shows select tab, and change to selected 
+    """
+    def dataFunction():
+        return map(lambda tab: 
+            dict(data = tab, 
+                template = "<table><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(file)s</small></td></tr></table>", 
+                display = { "name": tab.tabTitle(), "file": tab.filePath }, 
+                image = tab.tabIcon()) 
+            ,mainWindow.splitTabWidget.allWidgets())
+
+    return selectableModelFactory(mainWindow,
+        dataFunction, filterFunction = lambda text, item: item["display"]["name"].find(text) != -1)
+        

@@ -35,18 +35,21 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     SETTINGS_GROUP = 'Projects'
     @pmxConfigPorperty(default = '')
     def customFilters(self, filters):
-        self.projectTreeProxyModel.setFilterRegExp(",".join(map(lambda p: p.strip(), filters.split(","))))
+        filters = map(lambda p: p.strip(), filters.split(","))
+        self.selectableProjectFileModel.setBaseFilters(filters)
+        self.projectTreeProxyModel.setFilterRegExp(",".join(filters))
     
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
         PMXBaseDock.__init__(self)
         self.setupUi(self)
         self.projectManager = self.application.projectManager
+        self.fileManager = self.application.fileManager
         self.projectTreeProxyModel = self.projectManager.projectTreeProxyModel
     
         self.setupPropertiesDialog()
         self.setupTreeViewProjects()
-        self.selectableProjectFileModel = SelectableProjectFileModel(self.projectManager, parent = self)
+        self.selectableProjectFileModel = SelectableProjectFileModel(self.projectManager, self.fileManager, parent = self)
         
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)

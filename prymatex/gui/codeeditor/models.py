@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import difflib
 from bisect import bisect
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 from prymatex import resources
+from prymatex.utils import text as texttools
+from prymatex.models.selectable import selectableModelFactory
 from prymatex.models.support import BundleItemTreeNode
 
 #=========================================================
@@ -18,21 +21,21 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         self.blocks = []
         # Connect
         self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
-        
-    
+
+
     def __contains__(self, block):
         return block in self.blocks
-        
-        
+
+
     # -------- Signals
     def on_editor_blocksRemoved(self):
         self.blocks = filter(lambda block: block.userData() is not None, self.blocks)
         self.layoutChanged.emit()
-        
+
     def on_document_contentsChange(self, position, removed, added):
         print position, removed, added
 
-    
+
     # --------- List Model api
     def index(self, row, column = 0, parent = None):
         if 0 <= row < len(self.blocks):
@@ -98,6 +101,21 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         return self.blocks[index - 1]
 
 #=========================================================
+# Bookmark Selectable Model
+#=========================================================  
+def bookmarkSelectableModelFactory(editor):
+    # Data function    
+    def bookmarkData():
+        leftScope, rightScope = editor.scope(direction = "both")
+        return map(lambda block: 
+            dict(display = block.text(), image = resources.getIcon('bookmarkflag')),
+            editor.bookmarkListModel.blocks)
+
+    return selectableModelFactory(editor, bookmarkData, 
+        filterFunction = lambda text, item: item["display"].find(text) != -1)
+
+
+#=========================================================
 # Symbol
 #=========================================================
 class SymbolListModel(QtCore.QAbstractListModel): 
@@ -121,8 +139,8 @@ class SymbolListModel(QtCore.QAbstractListModel):
     # -------------- Block User Data Handler Methods
     def contributeToBlockUserData(self, userData):
         userData.symbol = None
-        
-        
+
+
     def processBlockUserData(self, text, block, userData):
         symbolRange = self.editor.scopes(attribute = 'settings', scope_filter = lambda attr: attr.showInSymbolList)
         if symbolRange:
@@ -149,23 +167,23 @@ class SymbolListModel(QtCore.QAbstractListModel):
                 self.beginInsertRows(QtCore.QModelIndex(), index, index)
                 self.blocks.insert(index, block)
                 self.endInsertRows()
-            
-        
+
+
     # ----------- Signals
     def on_editor_blocksRemoved(self):
         def validSymbolBlock(block):
             return block.userData() is not None and block.userData().symbol is not None
         self.blocks = filter(validSymbolBlock, self.blocks)
         self.layoutChanged.emit()
-        
-    
+
+
     def on_editor_aboutToHighlightChange(self):
         for block in self.blocks:
             block.userData().symbol = None
         self.blocks = []
         self.layoutChanged.emit()
-    
-    
+
+
     # ----------- Model api
     def index(self, row, column = 0, parent = None):
         if 0 <= row < len(self.blocks):
@@ -198,6 +216,20 @@ class SymbolListModel(QtCore.QAbstractListModel):
         if blockIndex == -1:
             blockIndex = 0
         return blockIndex
+
+#=========================================================
+# Bookmark Selectable Model
+#=========================================================  
+def symbolSelectableModelFactory(editor):
+    # Data function    
+    def symbolData():
+        leftScope, rightScope = editor.scope(direction = "both")
+        return map(lambda block: 
+            dict(data = block, display = block.userData().symbol, image = resources.getIcon('bulletblue')),
+            editor.symbolListModel.blocks)
+
+    return selectableModelFactory(editor, symbolData, 
+        filterFunction = lambda text, item: item["display"].find(text) != -1)
 
 #=========================================================
 # Completer
@@ -269,7 +301,7 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
 #=========================================================
 # Word Struct for Completer
 #=========================================================
-class PMXAlreadyTypedWords(object):
+class AlreadyTypedWords(object):
     def __init__(self, editor):
         self.editor = editor
         self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
@@ -294,8 +326,8 @@ class PMXAlreadyTypedWords(object):
             #Agregar las palabras nuevas
             self.addWordsBlock(block, filter(lambda word: word not in userData.words, words))
             userData.words = words
-        
-            
+
+
     def _purge_words(self):
         """ Limpiar palabras """
         self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))
@@ -312,7 +344,7 @@ class PMXAlreadyTypedWords(object):
 
     def on_editor_blocksRemoved(self):
         self.__purge_blocks()
-        
+
     def addWordsBlock(self, block, words):
         for index, word, group in words:
             #Blocks
@@ -326,7 +358,7 @@ class PMXAlreadyTypedWords(object):
             if word not in words:
                 position = bisect(words, word)
                 words.insert(position, word)
-        
+
     def removeWordsBlock(self, block, words):
         for index, word, group in words:
             #Blocks
@@ -334,8 +366,51 @@ class PMXAlreadyTypedWords(object):
                 self.words[word].remove(block)
             if word in self.groups[group]:
                 self.groups[group].remove(word)
-        
+
     def typedWords(self, block = None):
         #Purge words
         self._purge_words()
         return self.groups.copy()
+
+#=========================================================
+# Bundle Item Selectable Model
+#=========================================================  
+def bundleItemSelectableModelFactory(editor):
+    # Data function    
+    def bundleItemData():
+        leftScope, rightScope = editor.scope(direction = "both")
+        return map(lambda bundleItem: 
+            dict(data = bundleItem, 
+                template = "<table width='100%%'><tr><td>%(name)s - %(bundle)s</td><td align='right'>%(trigger)s</td></tr></table>",
+                display = { 
+                    "name": bundleItem.name, 
+                    "bundle": bundleItem.bundle.name, 
+                    "trigger": bundleItem.trigger
+                }, 
+                image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE)),
+            editor.application.supportManager.getActionItems(leftScope, rightScope))
+
+
+    # Filter function        
+    def bundleItemFilter(text, item):
+        name = item["data"].name
+        if text:
+            index = 0
+            slices = []
+            item["_ratio"] = difflib.SequenceMatcher(None, text.lower(), name.lower()).ratio()
+            for m in texttools.subsearch(text, name, ignoreCase = True):
+                slices.append(name[index:m[2]])
+                slices.append("<strong>" + name[m[2]:m[3]] + "</strong>")
+                index = m[3]
+            slices.append(name[index:])
+            name = "".join(slices)
+        item["display"]["name"] = name
+        return True
+
+
+    # Sort function
+    def bundleItemSort(leftItem, rightItem):
+        return leftItem["_ratio"] > rightItem["_ratio"]
+
+    return selectableModelFactory(editor, bundleItemData, filterFunction=bundleItemFilter,
+            sortFunction=bundleItemSort)

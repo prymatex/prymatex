@@ -15,9 +15,10 @@ from prymatex.qt.compat import getSaveFileName
 from prymatex.qt.helpers import text2objectname
 from prymatex.qt.helpers.widgets import center_widget
 from prymatex.qt.helpers.menus import create_menu, extend_menu
-from prymatex.gui.actions import MainWindowActions
+from prymatex.gui.actions import MainWindowActions, tabSelectableModelFactory
 from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.gui.processors import MainWindowCommandProcessor
+from prymatex.gui.dialogs.selector import SelectorDialog
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
 from prymatex.widgets.message import PopupMessageWidget
@@ -61,7 +62,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         
         self.setWindowIcon(resources.getIcon("prymatex"))
         
-        self.setupDialogs()
+        # The selector dialog of this mainwindow
+        self.selectorDialog = SelectorDialog(self)
+
+        self.tabSelectableModel = tabSelectableModelFactory(self)
+        
         self.setupDockToolBars()
         self.setupMenu()
         
@@ -140,13 +145,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     #============================================================
     # Setups
     #============================================================
-    def setupDialogs(self):
-        from prymatex.gui.dialogs.selector import SelectorDialog
-                
-        # Create dialogs
-        self.selectorDialog = SelectorDialog(self)
-
-
     def setupDockToolBars(self):
         self.dockToolBars = {
             QtCore.Qt.LeftDockWidgetArea: DockWidgetToolBar("Left Dockers", QtCore.Qt.LeftDockWidgetArea, self),
