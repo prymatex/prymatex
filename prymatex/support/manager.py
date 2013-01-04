@@ -988,9 +988,9 @@ class PMXSupportBaseManager(object):
     
     
     #---------------- ACTION ITEMS FOR SCOPE ---------------------------------
-    def getActionItems(self, scope):
-        """Return a list of actions items for scope and without scope"""
-        return self.__sort_filter_items(self.getAllActionItems(), scope)
+    def getActionItems(self, leftScope, rightScope):
+        """Return a list of actions items for scope"""
+        return self.__sort_filter_items(self.getAllActionItems(), leftScope, rightScope)
         
     
     # ------------------ SYNTAXES INTERFACE
