@@ -18,7 +18,7 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
         self.fileManager = fileManager
         self.projectManager = projectManager
         self.projectFileTask = self.projectManager.application.scheduler.idleTask()
-        self.data = []
+        self.__files = []
         self.__baseFilters = []
 
 
@@ -41,13 +41,13 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
 
 
     def rowCount(self, parent = None):
-        return len(self.data)
+        return len(self.__files)
 
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
-        item = self.data[index.row()]
+        item = self.__files[index.row()]
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole ]:
             print item["name"]
             return item["name"]
@@ -55,20 +55,20 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
             return resources.getIcon(item["path"])
 
     def item(self, index):
-        return self.data[index.row()]
+        return self.__files[index.row()]
 
     def setFilterString(self, string):
         self.projectFileTask.cancel()
-        self.data = []
+        self.__files = []
         self.layoutChanged.emit()
         self.projectFileTask = self.projectManager.application.scheduler.newTask(self.__run_project_search(string))
 
     def __run_file_filter(self, rootDirectory, filenames, pattern):
         for filename in filenames:
             if not self.fileManager.fnmatchany(filename, self.__baseFilters):
-                count = len(self.data)
+                count = len(self.__files)
                 self.beginInsertRows(QtCore.QModelIndex(), count, count + 1)
-                self.data.append(
+                self.__files.append(
                     dict(name = filename,
                       path = os.path.join(rootDirectory, filename) ) )
                 self.endInsertRows()
