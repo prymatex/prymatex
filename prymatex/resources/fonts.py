@@ -6,15 +6,6 @@ import sys
 
 from prymatex.qt import QtGui
 
-SANS_SERIF = ['Sans Serif', 'DejaVu Sans', 'Bitstream Vera Sans',
-              'Bitstream Charter', 'Times', 'Lucida Grande', 'Calibri',
-              'MS Shell Dlg 2', 'Verdana', 'Geneva', 'Lucid', 'Arial',
-              'Helvetica', 'Avant Garde', 'sans-serif']
-
-MONOSPACE = ['Monospace', 'DejaVu Sans Mono', 'Consolas', 'Monaco',
-             'Bitstream Vera Sans Mono', 'Andale Mono', 'Liberation Mono',
-             'Courier New', 'Courier', 'monospace', 'Fixed', 'Terminal']
-
 if sys.platform == 'darwin':
     BIG = MEDIUM = SMALL = 12
 elif os.name == 'nt':
@@ -25,7 +16,7 @@ else:
     BIG = 12    
     MEDIUM = 9
     SMALL = 9
-    
+
 def font_is_installed(font):
     """Check if font is installed"""
     return [fam for fam in QtGui.QFontDatabase().families() if unicode(fam) == font]
