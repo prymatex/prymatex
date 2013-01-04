@@ -385,6 +385,9 @@ class IdleTask( QObject ):
     def isRunning(self):
         return False
     
+    def cancel(self):
+        pass
+
 class Scheduler( QObject ):
     longIteration = pyqtSignal( datetime.timedelta, Task )
     done = pyqtSignal()
