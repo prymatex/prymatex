@@ -18,8 +18,13 @@ class SelectableModelMixin(object):
         pass
 
 
+    # ------------- Sort
+    def isSortable(self):
+        return False
+
+
     # ------------- Filter
-    def isFiltered(self):
+    def isFilterable(self):
         return False
 
 
@@ -74,11 +79,12 @@ class SelectableModel(QtCore.QAbstractListModel, SelectableModelMixin):
         elif role == QtCore.Qt.ToolTipRole and 'tooltip' in item:
             return item['tooltip']
 
+
 class SelectableProxyModel(QtGui.QSortFilterProxyModel, SelectableModelMixin):
-    def __init__(self, filterFunction, sortFunction, parent = None):
+    def __init__(self, parent = None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)
-        self.__filterFunction = filterFunction or (lambda filter, item: True)
-        self.__sortFunction = sortFunction or (lambda leftItem, rightItem: True)
+        self.__filterFunction = None
+        self.__sortFunction = None
         self.__filterString = ""
 
 
@@ -88,11 +94,13 @@ class SelectableProxyModel(QtGui.QSortFilterProxyModel, SelectableModelMixin):
 
 
     def filterAcceptsRow(self, sourceRow, sourceParent):
+        if not self.__filterFunction: return True
         item = self.sourceModel().item(sourceRow)
         return self.__filterFunction(self.__filterString, item)
 
 
     def lessThan(self, left, right):
+        if not self.__sortFunction: return True
         leftItem = self.sourceModel().item(left)
         rightItem = self.sourceModel().item(right)
         return self.__sortFunction(leftItem, rightItem)
@@ -101,10 +109,22 @@ class SelectableProxyModel(QtGui.QSortFilterProxyModel, SelectableModelMixin):
     def item(self, index):
         return self.sourceModel().item(self.mapToSource(index))
     
+    # --------- Sort
+    def setSortFunction(self, sortFunction):
+        self.__sortFunction = sortFunction
+        
+        
+    def isSortable(self):
+        return self.__sortFunction is not None
+        
         
     # --------- Filter
-    def isFiltered(self):
-        return True
+    def setFilterFunction(self, filterFunction):
+        self.__filterFunction = filterFunction
+        
+        
+    def isFilterable(self):
+        return self.__filterString is not None
 
 
     def setFilterString(self, string):
@@ -120,8 +140,12 @@ class SelectableProxyModel(QtGui.QSortFilterProxyModel, SelectableModelMixin):
 def selectableModelFactory(parent, dataFunction, 
     filterFunction = None, sortFunction = None):
     model = SelectableModel(dataFunction, parent = parent)
-    if filterFunction is not None or sortFunction is not None:
-        proxy = SelectableProxyModel(filterFunction, sortFunction, parent = parent)
+    if filterFunction or sortFunction:
+        proxy = SelectableProxyModel(parent = parent)
+        if filterFunction is not None:
+            proxy.setFilterFunction(filterFunction)
+        if sortFunction is not None:
+            proxy.setSortFunction(sortFunction)
         proxy.setSourceModel(model)
-        return proxy
+        model = proxy
     return model

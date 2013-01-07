@@ -177,6 +177,7 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     realpath = lambda self, path: os.path.realpath(path)
     relpath = lambda self, path: os.path.relpath(path)
     samefile = lambda self, path1, path2: os.path.samefile(path1, path2)
+    fnmatch = lambda self, filename, pattern: fnmatch.fnmatch(filename, pattern)
     
     def expandVars(self, text):
         context = self.application.supportManager.buildEnvironment()

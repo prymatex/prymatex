@@ -383,6 +383,7 @@ def bundleItemSelectableModelFactory(editor):
             dict(data = bundleItem, 
                 template = "<table width='100%%'><tr><td>%(name)s - %(bundle)s</td><td align='right'>%(trigger)s</td></tr></table>",
                 display = { 
+                    "ratio": 1.0,
                     "name": bundleItem.name, 
                     "bundle": bundleItem.bundle.name, 
                     "trigger": bundleItem.trigger
@@ -397,7 +398,8 @@ def bundleItemSelectableModelFactory(editor):
         if text:
             index = 0
             slices = []
-            item["_ratio"] = difflib.SequenceMatcher(None, text.lower(), name.lower()).ratio()
+            item["ratio"] = difflib.SequenceMatcher(None, text.lower(), name.lower()).quick_ratio()
+            if len(text) > 4 and item["ratio"] < 0.4: return False
             for m in texttools.subsearch(text, name, ignoreCase = True):
                 slices.append(name[index:m[2]])
                 slices.append("<strong>" + name[m[2]:m[3]] + "</strong>")
@@ -410,7 +412,7 @@ def bundleItemSelectableModelFactory(editor):
 
     # Sort function
     def bundleItemSort(leftItem, rightItem):
-        return leftItem["_ratio"] > rightItem["_ratio"]
+        return leftItem["ratio"] > rightItem["ratio"]
 
     return selectableModelFactory(editor, bundleItemData, filterFunction=bundleItemFilter,
             sortFunction=bundleItemSort)

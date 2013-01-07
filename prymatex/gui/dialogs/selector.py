@@ -12,9 +12,15 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
     This dialog allow the user to search through commands, snippets and macros in the current scope easily.
     An instance is hold in the main window and triggered with an action.
     '''
+    TIMEOUT_SORT = 2000
     def __init__(self, parent = None):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
+        
+        self.model = None
+        self.sortTimer = QtCore.QTimer(self)
+        self.sortTimer.timeout.connect(self.on_sortTimer_timeout)
+        self.sortTimer.setSingleShot(True)
         
         self.lineFilter.installEventFilter(self)
         self.listItems.installEventFilter(self)
@@ -25,12 +31,16 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
 
 
     def setModel(self, model):
-        self.model = model
-        self.lineFilter.setVisible(model.isFiltered())
-        if model.isFiltered():
+        if self.model != model:
+            self.lineFilter.setVisible(model.isFilterable())
+            if model.isFilterable():
+                self.lineFilter.clear()
+                self.lineFilter.setFocus()
+            self.model = model
+            self.listItems.setModel(self.model)
+        else:
             self.lineFilter.clear()
             self.lineFilter.setFocus()
-        self.listItems.setModel(self.model)
         self.listItems.setCurrentIndex(self.model.index(0, 0))
 
 
@@ -45,6 +55,7 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         self.setModel(model)
         
         self.exec_()
+        self.sortTimer.stop()
         
         return self.selected
     
@@ -72,9 +83,18 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         return QtGui.QWidget.eventFilter(self, obj, event)
 
 
+    def on_sortTimer_timeout(self):
+        self.model.sort(0)
+        self.listItems.setCurrentIndex(self.model.index(0, 0))
+        
+        
+    # Not autoconnect, connect on model's needs
     def on_lineFilter_textChanged(self, text):
         self.model.setFilterString(text)
-        self.listItems.setCurrentIndex(self.model.index(0, 0))
+        if self.model.isSortable() and not self.sortTimer.isActive():
+            self.sortTimer.start(self.TIMEOUT_SORT)
+        else:
+            self.listItems.setCurrentIndex(self.model.index(0, 0))
 
 
     def on_listItems_activated(self, index):
