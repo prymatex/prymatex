@@ -206,18 +206,18 @@ class PMXPreferenceMasterSettings(object):
         for settings in self.settings:
             if getattr(settings, attrKey) is not None:
                 return settings.preference.bundle
-    
+
     def getManager(self, attrKey):
         for settings in self.settings:
             if getattr(settings, attrKey) is not None:
                 return settings.preference.manager
-                
+
     def indent(self, line):
         #IncreasePattern on return indent nextline
         #DecreasePattern evaluate line to decrease, no requiere del return
         #IncreaseOnlyNextLine on return indent nextline only
         #IgnoringLines evaluate line to unindent, no require el return
-        settings = self._findIndentSettings()
+        settings = self.__findIndentSettings()
         indent = []
         if settings.decreaseIndentPattern != None and settings.decreaseIndentPattern.search(line):
             indent.append(PMXPreferenceSettings.INDENT_DECREASE)
