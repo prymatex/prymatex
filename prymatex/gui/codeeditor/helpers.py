@@ -17,7 +17,7 @@ class KeyEquivalentHelper(CodeEditorKeyHelper):
         keyseq = int(event.modifiers()) + event.key()
         if keyseq not in self.application.supportManager.getAllKeyEquivalentCodes():
             return False
-            
+
         leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both')
         self.items = self.application.supportManager.getKeyEquivalentItem(keyseq, leftScope, rightScope)
         return bool(self.items)
@@ -32,7 +32,7 @@ class TabTriggerHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Tab
     def accept(self, event, cursor = None):
         if cursor.hasSelection(): return False
-        
+
         leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both')
         trigger = self.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
         self.items = self.application.supportManager.getTabTriggerItem(trigger, leftScope, rightScope) if trigger is not None else []

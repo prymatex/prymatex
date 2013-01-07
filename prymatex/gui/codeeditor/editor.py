@@ -137,6 +137,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         #Highlighter
         self.syntaxHighlighter = PMXSyntaxHighlighter(self)
         
+        # TODO Quiza algo como que los modos se registren solos?
         #Modes
         self.multiCursorMode = PMXMultiCursorEditorMode(self)
         self.completerMode = PMXCompleterEditorMode(self)
@@ -857,7 +858,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.completerMode.setCompletionPrefix(currentAlreadyTyped)
             self.completerMode.complete(self.cursorRect())
 
-    
+
     def switchCompleter(self):
         settings = self.scope(attribute='settings')
         if not self.completerMode.hasSource("default"):
@@ -879,7 +880,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def defaultCompletion(self, settings, callback):
         if not self.completerTask.isRunning():
-            self.completerTask = self.application.scheduler.newTask(self.completionSuggestions(settings = settings))
+            self.completerTask = self.application.scheduler.newTask(self.runCompletionSuggestions(settings = settings))
             def on_completerTaskReady(callback):
                 def completerTaskReady(result):
                     callback(result.value)
@@ -888,14 +889,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.completerTask.done.connect(on_completerTaskReady(callback))
 
 
-    def completionSuggestions(self, cursor = None, scope = None, settings = None):
+    def runCompletionSuggestions(self, cursor = None, scope = None, settings = None):
         cursor = cursor or self.textCursor()
         settings = settings or self.scope(cursor = cursor, attribute = 'settings')
         scope = scope or self.scope(cursor = cursor)
+        currentAlreadyTyped = self.currentWord(direction = "left", search = False)[0]
         
         #An array of additional candidates when cycling through completion candidates from the current document.
         completions = settings.completions[:]
-
+        
         #A shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
         if settings.completionCommand:
             def commandCallback(context):
@@ -907,18 +909,19 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         #A tab tigger completion
         tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
         
-        typedWords = self.alreadyTypedWords.typedWords(cursor.block())
+        typedWords = self.alreadyTypedWords.typedWords()
         
-        #Lo ponemos en la mezcladora
+        #Lo ponemos en la mezcladora por grupos
         suggestions = tabTriggers + map(lambda word: { "display": word, "image": "scope-root-keyword" }, completions)
         for group in CodeEditor.SORTED_GROUPS:
-            newWords = filter(lambda word: word not in completions, typedWords.pop(group, []))
+            newWords = filter(lambda word: word not in completions and word != currentAlreadyTyped, typedWords.pop(group, []))
             suggestions += map(lambda word: { "display": word, "image": "scope-root-%s" % group }, newWords)
             completions += newWords
             yield
         
+        #Finalizamos con las que quedaron guachas
         for words in typedWords.values():
-            newWords = filter(lambda word: word not in completions, words)
+            newWords = filter(lambda word: word not in completions and word != currentAlreadyTyped, words)
             suggestions += map(lambda word: { "display": word, "image": "scope-root-invalid" }, newWords)
             completions += newWords
             yield
