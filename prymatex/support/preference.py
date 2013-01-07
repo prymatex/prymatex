@@ -33,9 +33,11 @@ from prymatex.support.processor import PMXDebugSnippetProcessor
 
 class PMXPreferenceSettings(object):
     KEYS = [    'completions', 'completionCommand', 'disableDefaultCompletion', 'showInSymbolList', 'symbolTransformation', 
-                'highlightPairs', 'smartTypingPairs', 'shellVariables', 'spellChecking',
+                'highlightPairs', 'smartTypingPairs', 'shellVariables', 'spellChecking', 
+                'foldingIndentedBlockStart', 'foldingStartMarker', 'foldingStopMarker',
                 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
     INDENT_KEYS = [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
+    FOLDING_KEYS = [ 'foldingIndentedBlockStart', 'foldingStartMarker', 'foldingStopMarker' ]
     INDENT_INCREASE = 0
     INDENT_DECREASE = 1
     INDENT_NEXTLINE = 2
@@ -50,7 +52,7 @@ class PMXPreferenceSettings(object):
         for key in PMXPreferenceSettings.KEYS:
             value = getattr(self, key)
             if value != None:
-                if key in [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]:
+                if key in self.INDENT_KEYS or key in self.FOLDING_KEYS:
                     value = value.pattern
                 elif key in [ 'shellVariables' ]:
                     value = [ {'name': t[0], 'value': t[1] } for t in  value.iteritems() ]
@@ -67,7 +69,7 @@ class PMXPreferenceSettings(object):
         for key in self.KEYS:
             value = dataHash.get(key, None)
             if value != None:
-                if key in [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]:
+                if key in self.INDENT_KEYS or key in self.FOLDING_KEYS:
                     value = compileRegexp( value )
                 elif key in [ 'shellVariables' ]:
                     value = dict(map(lambda d: (d['name'], d['value']), value))
@@ -145,37 +147,61 @@ class PMXPreferenceMasterSettings(object):
         
     @property
     def decreaseIndentPattern(self):
-        settings = self._findIndentSettings()
+        settings = self.__findIndentSettings()
         if settings is not None:
             return settings.decreaseIndentPattern
             
     @property
     def increaseIndentPattern(self):
-        settings = self._findIndentSettings()
+        settings = self.__findIndentSettings()
         if settings is not None:
             return settings.increaseIndentPattern
             
     @property
     def indentNextLinePattern(self):
-        settings = self._findIndentSettings()
+        settings = self.__findIndentSettings()
         if settings is not None:
             return settings.indentNextLinePattern
             
     @property
     def unIndentedLinePattern(self):
-        settings = self._findIndentSettings()
+        settings = self.__findIndentSettings()
         if settings is not None:
             return settings.unIndentedLinePattern
-        
+
+    @property
+    def foldingIndentedBlockStart(self):
+        settings = self.__findFoldingSettings()
+        if settings is not None:
+            return settings.foldingIndentedBlockStart
+            
+    @property
+    def foldingStartMarker(self):
+        settings = self.__findFoldingSettings()
+        if settings is not None:
+            return settings.foldingStartMarker
+    
+    @property
+    def foldingStopMarker(self):
+        settings = self.__findFoldingSettings()
+        if settings is not None:
+            return settings.foldingStopMarker
+            
     def append(self, otherSettings):
         self.settings.append(otherSettings)
 
-    def _findIndentSettings(self):
+    def __findIndentSettings(self):
         #TODO: Algo de cache?
         for settings in self.settings:
             if any(map(lambda indentKey: getattr(settings, indentKey) is not None, PMXPreferenceSettings.INDENT_KEYS)):
                 return settings
-                
+
+    def __findFoldingSettings(self):
+        #TODO: Algo de cache?
+        for settings in self.settings:
+            if any(map(lambda foldingKey: getattr(settings, foldingKey) is not None, PMXPreferenceSettings.FOLDING_KEYS)):
+                return settings
+
     def getBundle(self, attrKey):
         for settings in self.settings:
             if getattr(settings, attrKey) is not None:
