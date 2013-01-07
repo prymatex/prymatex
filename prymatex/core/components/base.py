@@ -19,7 +19,12 @@ class PMXBaseComponent(object):
     def contributeToMainMenu(cls):
         """Contributions to the main menu"""
         return {}
-        
+
+    @classmethod
+    def contributeToShortcuts(cls):
+        """Contributions to the main menu"""
+        return []
+
     def environmentVariables(self):
         """Return a dictionary with the defined variables of this component."""
         return {}
