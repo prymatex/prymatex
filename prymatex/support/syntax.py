@@ -85,6 +85,7 @@ class PMXSyntaxNode(object):
         if captures:
             for key, value in captures:
                 if re.compile('^\d*$').match(key):
+                    # TODO 0 es igual a lo capturado no hace falta hacer el match.groups() seria directemente el pattern
                     if int(key) <= len(match.groups()):
                         #Problemas entre pytgon y ruby, al pones un span del match, en un None oniguruma me retorna (-1, -1),
                         #esto es importante para el filtro del llamador
