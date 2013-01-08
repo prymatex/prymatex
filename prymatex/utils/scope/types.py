@@ -247,4 +247,4 @@ class SelectorType(object):
         for composite in self.composites:
             if composite.does_match(lhs, rhs, rank):
                 return True
-            return False
+        return False

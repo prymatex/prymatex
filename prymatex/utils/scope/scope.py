@@ -46,9 +46,9 @@ class Context(object):
             
     def __str__(self):
         if self.left == self.right:
-            return "(l/r ‘%s’)" % str(self.left)
+            return "(l/r '%s')" % str(self.left)
         else:
-            "(left ‘%s’, right ‘%s’)" % (str(self.left), str(self.right))
+            "(left '%s', right '%s')" % (str(self.left), str(self.right))
             
     def __eq__(self, rhs):
         return self.left == rhs.left and self.right == rhs.right
