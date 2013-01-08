@@ -23,9 +23,7 @@ from prymatex.core import exceptions
 
 class FileManager(QtCore.QObject, PMXBaseComponent):
     """A File Manager"""
-    #=========================================================
-    # Signals
-    #=========================================================
+    # ------------ Signals
     fileCreated = QtCore.pyqtSignal(str)
     fileDeleted = QtCore.pyqtSignal(str)
     fileChanged = QtCore.pyqtSignal(str)
@@ -36,11 +34,9 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     directoryRenamed = QtCore.pyqtSignal(str, str)
 
     # Generic Signal 
-    filesytemChange = QtCore.pyqtSignal(str, int)
+    fileSytemChanged = QtCore.pyqtSignal(str, int)
 
-    #=========================================================
-    # Settings
-    #=========================================================
+    # ------------- Settings
     SETTINGS_GROUP = 'FileManager'
 
     fileHistory = pmxConfigPorperty(default = [])
@@ -48,9 +44,7 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     lineEnding = pmxConfigPorperty(default = 'unix')
     encoding = pmxConfigPorperty(default = 'utf-8')
 
-    #=========================================================
-    # Constants
-    #=========================================================
+    # ---------------- Constants
     CREATED = 1<<0
     DELETED = 1<<1
     RENAMED = 1<<2
@@ -64,17 +58,15 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
         
         self.last_directory = get_home_dir()
         self.fileWatcher = QtCore.QFileSystemWatcher()
-        self.fileWatcher.fileChanged.connect(self.on_fileChanged)
-        self.fileWatcher.directoryChanged.connect(self.on_directoryChanged)
+        self.fileWatcher.fileChanged.connect(self.on_fileWatcher_fileChanged)
+        self.fileWatcher.directoryChanged.connect(self.on_fileWatcher_directoryChanged)
         self.connectGenericSignal()
 
     @classmethod
     def contributeToSettings(cls):
         return [ ]
     
-    #========================================================
-    # Signals
-    #========================================================
+    # ------------- Signals
     def connectGenericSignal(self):
         UNARY_SINGAL_CONSTANT_MAP = (
             (self.fileCreated, FileManager.CREATED ),
@@ -89,25 +81,23 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
             (self.directoryRenamed, FileManager.RENAMED ),                       
         )
         for signal, associatedConstant in UNARY_SINGAL_CONSTANT_MAP:
-            signal.connect(lambda path, constant = associatedConstant: self.filesytemChange.emit(path, constant))
+            signal.connect(lambda path, constant = associatedConstant: self.fileSytemChanged.emit(path, constant))
         for signal, associatedConstant in BINARY_SINGAL_CONSTANT_MAP:
-            signal.connect(lambda _x, path, constant = associatedConstant: self.filesytemChange.emit(path, constant))
+            signal.connect(lambda _x, path, constant = associatedConstant: self.fileSytemChanged.emit(path, constant))
 
-    def on_fileChanged(self, filePath):
+    def on_fileWatcher_fileChanged(self, filePath):
         if not os.path.exists(filePath):
             self.fileDeleted.emit(filePath)
         else:
             self.fileChanged.emit(filePath)
     
-    def on_directoryChanged(self, directoryPath):
+    def on_fileWatcher_directoryChanged(self, directoryPath):
         if not os.path.exists(directoryPath):
             self.directoryDeleted.emit(directoryPath)
         else:
             self.directoryChanged.emit(directoryPath)
     
-    #========================================================
-    # History
-    #========================================================
+    # -------------- History
     def add_file_history(self, filePath):
         if filePath in self.fileHistory:
             self.fileHistory.remove(filePath)
@@ -164,6 +154,8 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     exists = lambda self, path: os.path.exists(path)
     isdir = lambda self, path: os.path.isdir(path)
     isfile = lambda self, path: os.path.isfile(path)
+    islink = lambda self, path: os.path.islink(path)
+    ismount = lambda self, path: os.path.ismount(path)
     join = lambda self, *path: os.path.join(*path)
     extension = lambda self, path: os.path.splitext(path.lower())[-1][1:]
     splitext = lambda self, path: os.path.splitext(path)
@@ -189,21 +181,19 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
         return any(map(lambda pattern: fnmatch.fnmatch(filename, pattern), patterns))
 
     # -------------- Open file control
-    # Use only realpath for file watcher
     def isOpen(self, filePath):
-        return self.realpath(filePath) in self.fileWatcher.files()
+        return filePath in self.fileWatcher.files()
     
     def isWatched(self, path):
-        path = self.realpath(path)
         return path in self.fileWatcher.files() or path in self.fileWatcher.directories()
         
     def watchPath(self, path):
         self.logger.debug("Watch path %s" % path)
-        self.fileWatcher.addPath(self.realpath(path))
+        self.fileWatcher.addPath(path)
     
     def unwatchPath(self, path):
         self.logger.debug("Unwatch path %s" % path)
-        self.fileWatcher.removePath(self.realpath(path))
+        self.fileWatcher.removePath(path)
     
     # ---------- Handling files for retrieving data. open, read, write, close
     def openFile(self, filePath):
