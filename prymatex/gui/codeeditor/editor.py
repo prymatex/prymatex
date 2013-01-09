@@ -342,9 +342,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             return self.SCOPES[leftScope][attribute], self.SCOPES[rightScope][attribute]
         
         
-    def scopes(self, cursor = None, attribute = "name", scope_filter = lambda attr: True):
-        cursor = cursor or self.textCursor()
-        userData = cursor.block().userData()
+    def scopes(self, block = None, attribute = "name", scope_filter = lambda attr: True):
+        block = block or self.textCursor().block()
+        userData = block.userData()
         if userData is None: return []
         return filter(
                     lambda ((start, end), attr): scope_filter(attr), 

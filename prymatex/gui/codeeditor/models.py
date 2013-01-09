@@ -142,7 +142,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
 
 
     def processBlockUserData(self, text, block, userData):
-        symbolRange = self.editor.scopes(attribute = 'settings', scope_filter = lambda attr: attr.showInSymbolList)
+        symbolRange = self.editor.scopes(block = block, attribute = 'settings', scope_filter = lambda attr: attr.showInSymbolList)
         if symbolRange:
             #TODO: Hacer la transformacion de los symbolos
             #symbol = text[symbolRange[0][1]:symbolRange[-1][2]]
@@ -367,8 +367,7 @@ class AlreadyTypedWords(object):
             if word in self.groups[group]:
                 self.groups[group].remove(word)
 
-    def typedWords(self, block = None):
-        #Purge words
+    def typedWords(self):
         self._purge_words()
         return self.groups.copy()
 
