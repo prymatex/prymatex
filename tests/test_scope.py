@@ -9,8 +9,7 @@ class ScopeSelectorTests(unittest.TestCase):
 
 
     def test_selector(self):
-        print repr(Selector("source.python meta.function.python, source.python meta.class.python"))
-        self.assertEqual(Selector("source.python meta.function.python, source.python meta.class.python").does_match("source.python meta.function"), True)
+        self.assertEqual(Selector("source.python meta.function.python, source.python meta.class.python").does_match("source.python meta.function.python"), True)
         
 
     def test_child_selector(self):

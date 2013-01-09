@@ -270,7 +270,7 @@ class PMXApplication(QtGui.QApplication):
         manager = FileManager(self)
         self.profile.configure(manager)
 
-        manager.filesytemChange.connect(self.on_filesytemChange)
+        manager.fileSytemChanged.connect(self.on_fileManager_fileSytemChanged)
         return manager
 
     def setupProjectManager(self):
@@ -514,7 +514,7 @@ class PMXApplication(QtGui.QApplication):
             elif result == QtGui.QMessageBox.Save:
                 mainWindow.saveEditor(editor)
 
-    def on_filesytemChange(self, filePath, change):
+    def on_fileManager_fileSytemChanged(self, filePath, change):
         mainWindow, editor = self.findEditorForFile(filePath)
         editor.setExternalAction(change)
         if mainWindow.currentEditor() == editor:
