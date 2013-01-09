@@ -67,7 +67,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
     def contributeToSettings(cls):
         from prymatex.gui.settings.plugins import PluginsSettingsWidget
         return [ PluginsSettingsWidget ]
-            
+
     def addPluginDirectory(self, directory):
         self.directories.append(directory)
 
@@ -78,29 +78,29 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         self.application.populateComponent(editorClass)
         editorClass.plugin = self.currentPluginDescriptor
         self.editors.append(editorClass)
- 
+
     def registerDocker(self, dockerClass):
         self.application.populateComponent(dockerClass)
         dockerClass.plugin = self.currentPluginDescriptor
         self.dockers.append(dockerClass)
-        
+
     def registerStatusBar(self, statusBarClass):
         self.application.populateComponent(statusBarClass)
         statusBarClass.plugin = self.currentPluginDescriptor
         self.statusBars.append(statusBarClass)
-    
+
     def registerKeyHelper(self, widgetClass, helperClass):
         self.application.extendComponent(helperClass)
         helperClass.plugin = self.currentPluginDescriptor
         keyHelperClasses = self.keyHelpers.setdefault(widgetClass, [])
         keyHelperClasses.append(helperClass)
-    
+
     def registerAddon(self, widgetClass, addonClass):
         self.application.populateComponent(addonClass)
         addonClass.plugin = self.currentPluginDescriptor
         addonClasses = self.addons.setdefault(widgetClass, [])
         addonClasses.append(addonClass)
-           
+
     #==================================================
     # Creando instancias
     #==================================================     

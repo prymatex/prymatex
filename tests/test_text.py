@@ -46,4 +46,3 @@ class TestSequenceFunctions(unittest.TestCase):
             slices.append(s2[index:m[2]])
             slices.append(s2[m[2]:m[3]])
             index = m[3]
-        print slices

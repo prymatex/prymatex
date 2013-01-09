@@ -4,10 +4,7 @@
 import sys
 import os, shutil
 
-ICON_NAMES = ['tab-close-other', 'edit-rename', 'view-split-left-right',
-    'list-add-user', 'system-run', 'project-development-new-template', 'user-properties',
-    'bulletblue', 'go-previous', 'view-split-top-bottom', 'user-identity',
-    'system-switch-user', 'list-remove-user']
+ICON_NAMES = ['folder', 'dialog-cancel']
 
 SOURCE = "/%s" % os.path.join('usr', 'share', 'icons', 'oxygen', '32x32')
 DESTINITY = os.path.abspath(os.path.join(__file__, '..', '..', 'prymatex', 'share', 'Icons'))
