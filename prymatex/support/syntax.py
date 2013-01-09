@@ -84,12 +84,13 @@ class PMXSyntaxNode(object):
         
         if captures:
             for key, value in captures:
-                if re.compile('^\d*$').match(key):
+                if key.isdigit():
                     # TODO 0 es igual a lo capturado no hace falta hacer el match.groups() seria directemente el pattern
-                    if int(key) <= len(match.groups()):
+                    index = int(key)
+                    if index <= len(match.groups()):
                         #Problemas entre pytgon y ruby, al pones un span del match, en un None oniguruma me retorna (-1, -1),
                         #esto es importante para el filtro del llamador
-                        matches.append([int(key), match.span(int(key)), value['name']])
+                        matches.append([index, match.span(index), value['name']])
                 else:
                     if match.groups()[ key ]:
                         matches.append([match.groups()[ key ], match.groupdict[ key ], value['name']])
@@ -103,7 +104,7 @@ class PMXSyntaxNode(object):
         elif self.begin:
             match = self.begin.search( string, position )
             if match:
-                return (self, match) 
+                return (self, match)
         elif self.end:
             pass
         else:
@@ -131,6 +132,8 @@ class PMXSyntaxNode(object):
                 if tmatch[1]:
                     if not match[1] or match[1].start() > tmatch[1].start():
                         match = tmatch
+                    #if tmatch[1].start() == position:
+                    #    break
         return match
 
 class PMXSyntaxProxy(object):

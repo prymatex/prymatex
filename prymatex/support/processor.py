@@ -120,7 +120,7 @@ class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
     def closeTag(self, name, position):
         print self.pprint( '', '} %d - %s' % (position, name), position + len(self.line_marks))
 
-    def newLine(self, line):
+    def beginLine(self, line):
         self.line_number += 1
         self.line_marks = '[%04s] ' % self.line_number
         print '%s%s' % (self.line_marks, line)
