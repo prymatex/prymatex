@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/theme.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/theme.ui'
 #
-# Created: Wed Jan  2 21:01:22 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Fri Jan 11 11:06:41 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -15,35 +15,35 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class Ui_FontThemeWidget(object):
-    def setupUi(self, FontThemeWidget):
-        FontThemeWidget.setObjectName(_fromUtf8("FontThemeWidget"))
-        FontThemeWidget.resize(586, 583)
-        self.verticalLayout_2 = QtGui.QVBoxLayout(FontThemeWidget)
-        self.verticalLayout_2.setSpacing(2)
-        self.verticalLayout_2.setMargin(0)
+class Ui_FontTheme(object):
+    def setupUi(self, FontTheme):
+        FontTheme.setObjectName(_fromUtf8("FontTheme"))
+        FontTheme.resize(475, 547)
+        self.verticalLayout_2 = QtGui.QVBoxLayout(FontTheme)
+        self.verticalLayout_2.setSpacing(6)
+        self.verticalLayout_2.setMargin(6)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
-        self.groupBoxFont = QtGui.QGroupBox(FontThemeWidget)
-        self.groupBoxFont.setObjectName(_fromUtf8("groupBoxFont"))
-        self.verticalLayout_3 = QtGui.QVBoxLayout(self.groupBoxFont)
-        self.verticalLayout_3.setSpacing(2)
-        self.verticalLayout_3.setMargin(6)
-        self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
-        self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.lineFont = QtGui.QLineEdit(self.groupBoxFont)
-        self.lineFont.setReadOnly(True)
-        self.lineFont.setObjectName(_fromUtf8("lineFont"))
-        self.horizontalLayout.addWidget(self.lineFont)
-        self.pushButtonChangeFont = QtGui.QPushButton(self.groupBoxFont)
-        self.pushButtonChangeFont.setObjectName(_fromUtf8("pushButtonChangeFont"))
-        self.horizontalLayout.addWidget(self.pushButtonChangeFont)
-        self.verticalLayout_3.addLayout(self.horizontalLayout)
-        self.checkBoxAntialias = QtGui.QCheckBox(self.groupBoxFont)
+        self.groupBoxFont_2 = QtGui.QGroupBox(FontTheme)
+        self.groupBoxFont_2.setObjectName(_fromUtf8("groupBoxFont_2"))
+        self.horizontalLayout_4 = QtGui.QHBoxLayout(self.groupBoxFont_2)
+        self.horizontalLayout_4.setSpacing(2)
+        self.horizontalLayout_4.setMargin(6)
+        self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
+        self.fontComboBoxName = QtGui.QFontComboBox(self.groupBoxFont_2)
+        self.fontComboBoxName.setFontFilters(QtGui.QFontComboBox.MonospacedFonts)
+        self.fontComboBoxName.setObjectName(_fromUtf8("fontComboBoxName"))
+        self.horizontalLayout_4.addWidget(self.fontComboBoxName)
+        self.spinBoxFontSize = QtGui.QSpinBox(self.groupBoxFont_2)
+        self.spinBoxFontSize.setMaximumSize(QtCore.QSize(50, 16777215))
+        self.spinBoxFontSize.setMinimum(7)
+        self.spinBoxFontSize.setObjectName(_fromUtf8("spinBoxFontSize"))
+        self.horizontalLayout_4.addWidget(self.spinBoxFontSize)
+        self.checkBoxAntialias = QtGui.QCheckBox(self.groupBoxFont_2)
+        self.checkBoxAntialias.setMaximumSize(QtCore.QSize(80, 16777215))
         self.checkBoxAntialias.setObjectName(_fromUtf8("checkBoxAntialias"))
-        self.verticalLayout_3.addWidget(self.checkBoxAntialias)
-        self.verticalLayout_2.addWidget(self.groupBoxFont)
-        self.groupBoxTheme = QtGui.QGroupBox(FontThemeWidget)
+        self.horizontalLayout_4.addWidget(self.checkBoxAntialias)
+        self.verticalLayout_2.addWidget(self.groupBoxFont_2)
+        self.groupBoxTheme = QtGui.QGroupBox(FontTheme)
         self.groupBoxTheme.setObjectName(_fromUtf8("groupBoxTheme"))
         self.verticalLayout = QtGui.QVBoxLayout(self.groupBoxTheme)
         self.verticalLayout.setSpacing(2)
@@ -105,6 +105,7 @@ class Ui_FontThemeWidget(object):
         self.label_7.setObjectName(_fromUtf8("label_7"))
         self.gridLayout.addWidget(self.label_7, 2, 2, 1, 1)
         self.pushButtonGutterBackground = QtGui.QPushButton(self.groupBoxTheme)
+        self.pushButtonGutterBackground.setMaximumSize(QtCore.QSize(50, 16777215))
         self.pushButtonGutterBackground.setText(_fromUtf8(""))
         self.pushButtonGutterBackground.setObjectName(_fromUtf8("pushButtonGutterBackground"))
         self.gridLayout.addWidget(self.pushButtonGutterBackground, 3, 3, 1, 1)
@@ -122,15 +123,16 @@ class Ui_FontThemeWidget(object):
         self.label_11.setObjectName(_fromUtf8("label_11"))
         self.gridLayout.addWidget(self.label_11, 3, 0, 1, 1)
         self.pushButtonGutterForeground = QtGui.QPushButton(self.groupBoxTheme)
+        self.pushButtonGutterForeground.setMaximumSize(QtCore.QSize(50, 16777215))
         self.pushButtonGutterForeground.setText(_fromUtf8(""))
         self.pushButtonGutterForeground.setObjectName(_fromUtf8("pushButtonGutterForeground"))
         self.gridLayout.addWidget(self.pushButtonGutterForeground, 3, 1, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout)
-        self.tableView = QtGui.QTableView(self.groupBoxTheme)
-        self.tableView.setShowGrid(False)
-        self.tableView.setSortingEnabled(True)
-        self.tableView.setObjectName(_fromUtf8("tableView"))
-        self.verticalLayout.addWidget(self.tableView)
+        self.tableViewStyles = QtGui.QTableView(self.groupBoxTheme)
+        self.tableViewStyles.setShowGrid(False)
+        self.tableViewStyles.setSortingEnabled(True)
+        self.tableViewStyles.setObjectName(_fromUtf8("tableViewStyles"))
+        self.verticalLayout.addWidget(self.tableViewStyles)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setSpacing(2)
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
@@ -155,14 +157,15 @@ class Ui_FontThemeWidget(object):
         self.horizontalLayout_3.addWidget(self.comboBoxScope)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
         self.verticalLayout_2.addWidget(self.groupBoxTheme)
+        spacerItem1 = QtGui.QSpacerItem(20, 116, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_2.addItem(spacerItem1)
 
-        self.retranslateUi(FontThemeWidget)
-        QtCore.QMetaObject.connectSlotsByName(FontThemeWidget)
+        self.retranslateUi(FontTheme)
+        QtCore.QMetaObject.connectSlotsByName(FontTheme)
 
-    def retranslateUi(self, FontThemeWidget):
-        FontThemeWidget.setWindowTitle(_('Form'))
-        self.groupBoxFont.setTitle(_('Font'))
-        self.pushButtonChangeFont.setText(_('Select'))
+    def retranslateUi(self, FontTheme):
+        FontTheme.setWindowTitle(_('Form'))
+        self.groupBoxFont_2.setTitle(_('Font'))
         self.checkBoxAntialias.setText(_('Anti alias'))
         self.groupBoxTheme.setTitle(_('Theme'))
         self.label_6.setText(_('Invisibles:'))

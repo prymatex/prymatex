@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/dialogs/treewidget.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/treewidget.ui'
 #
-# Created: Sun Dec  9 16:08:32 2012
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Fri Jan 11 10:55:13 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -20,9 +20,6 @@ class Ui_TreeWidgetDialog(object):
         TreeWidgetDialog.setObjectName(_fromUtf8("TreeWidgetDialog"))
         TreeWidgetDialog.resize(700, 433)
         TreeWidgetDialog.setMinimumSize(QtCore.QSize(700, 433))
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        TreeWidgetDialog.setWindowIcon(icon)
         self.verticalLayout_3 = QtGui.QVBoxLayout(TreeWidgetDialog)
         self.verticalLayout_3.setSpacing(2)
         self.verticalLayout_3.setMargin(0)
@@ -77,6 +74,5 @@ class Ui_TreeWidgetDialog(object):
         QtCore.QMetaObject.connectSlotsByName(TreeWidgetDialog)
 
     def retranslateUi(self, TreeWidgetDialog):
-        TreeWidgetDialog.setWindowTitle(_('Dialog'))
         self.textLabelTitle.setText(_('TextLabel'))
 

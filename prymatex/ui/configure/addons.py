@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/configure/addons.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/addons.ui'
 #
-# Created: Sun Dec  9 16:08:32 2012
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Fri Jan 11 10:55:13 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -21,17 +21,15 @@ class Ui_Addons(object):
         Addons.resize(400, 300)
         self.verticalLayout_2 = QtGui.QVBoxLayout(Addons)
         self.verticalLayout_2.setSpacing(2)
-        self.verticalLayout_2.setMargin(0)
+        self.verticalLayout_2.setMargin(6)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.lineEditFilter = QtGui.QLineEdit(Addons)
         self.lineEditFilter.setReadOnly(True)
         self.lineEditFilter.setObjectName(_fromUtf8("lineEditFilter"))
         self.verticalLayout_2.addWidget(self.lineEditFilter)
-        self.tableViewAddons = QtGui.QTableView(Addons)
-        self.tableViewAddons.setObjectName(_fromUtf8("tableViewAddons"))
-        self.tableViewAddons.horizontalHeader().setVisible(False)
-        self.tableViewAddons.verticalHeader().setVisible(False)
-        self.verticalLayout_2.addWidget(self.tableViewAddons)
+        self.listViewAddons = QtGui.QListView(Addons)
+        self.listViewAddons.setObjectName(_fromUtf8("listViewAddons"))
+        self.verticalLayout_2.addWidget(self.listViewAddons)
 
         self.retranslateUi(Addons)
         QtCore.QMetaObject.connectSlotsByName(Addons)

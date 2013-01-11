@@ -5,13 +5,13 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
 
-from prymatex.ui.configure.theme import Ui_FontThemeWidget
+from prymatex.ui.configure.theme import Ui_FontTheme
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.models.delegates import PMXColorDelegate, PMXFontStyleDelegate
 from prymatex.qt.helpers.colors import color2rgba
 from prymatex.utils.i18n import ugettext as _
 
-class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
+class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
     """Changes font and theme
     """
     DEFAULTS = {'settings': {'background': '#FFFFFF',
@@ -59,7 +59,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
     def loadSettings(self):
         currentThemeUUID = self.settingGroup.hasValue('defaultTheme') and self.settingGroup.value('defaultTheme').upper() or None 
         currentTheme = self.application.supportManager.getTheme(currentThemeUUID)
-        self.tableView.setModel(self.application.supportManager.themeStyleProxyModel)
+        self.tableViewStyles.setModel(self.application.supportManager.themeStyleProxyModel)
         self.comboBoxThemes.setModel(self.application.supportManager.themeListModel)
         if currentTheme is not None:
             self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.model().findIndex(currentTheme))
@@ -82,22 +82,22 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
     
     def on_comboBoxScope_changed(self, string):
         string = unicode(string)
-        index = self.tableView.currentIndex()
+        index = self.tableViewStyles.currentIndex()
         if index.isValid():
             style = self.application.supportManager.themeStyleProxyModel.mapToSource(index).internalPointer()
             if string != style.scope:
                 self.application.supportManager.updateThemeStyle(style, scope = string)
 
     def setupTableView(self):
-        self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
-        self.tableView.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.tableViewStyles.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.tableViewStyles.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
         
-        self.tableView.activated.connect(self.on_tableView_Activated)
-        self.tableView.pressed.connect(self.on_tableView_Activated)
-        self.tableView.setItemDelegateForColumn(1, PMXColorDelegate(self))
-        self.tableView.setItemDelegateForColumn(2, PMXColorDelegate(self))
-        self.tableView.setItemDelegateForColumn(3, PMXFontStyleDelegate(self))
-        self.tableView.setEditTriggers(QtGui.QAbstractItemView.AllEditTriggers)
+        self.tableViewStyles.activated.connect(self.on_tableView_Activated)
+        self.tableViewStyles.pressed.connect(self.on_tableView_Activated)
+        self.tableViewStyles.setItemDelegateForColumn(1, PMXColorDelegate(self))
+        self.tableViewStyles.setItemDelegateForColumn(2, PMXColorDelegate(self))
+        self.tableViewStyles.setItemDelegateForColumn(3, PMXFontStyleDelegate(self))
+        self.tableViewStyles.setEditTriggers(QtGui.QAbstractItemView.AllEditTriggers)
         
         #Conectar
         for _, scope in self.DEFAULTS['styles']:
@@ -119,8 +119,8 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
         self.pushButtonGutterBackground.pressed.connect(lambda element = 'gutter': self.on_pushButtonColor_pressed(element))
         #Font
         font = self.settingGroup.value('defaultFont')
-        self.lineFont.setFont(font)
-        self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
+        self.fontComboBoxName.setCurrentFont(font)
+        self.spinBoxFontSize.setValue(font.pointSize())
     
     @QtCore.pyqtSignature('')
     def on_pushButtonChangeFont_pressed(self):
@@ -128,8 +128,8 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
         font, ok = QtGui.QFontDialog.getFont(font, self, _("Select editor font"))
         if ok:
             self.settingGroup.setValue('defaultFont', font)
-            self.lineFont.setFont(font)
-            self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
+            self.fontComboBoxName.setCurrentFont(font)
+            self.spinBoxFontSize.setValue(font.pointSize())
     
     @QtCore.pyqtSignature('')
     def on_pushButtonAdd_pressed(self):
@@ -138,7 +138,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
     
     @QtCore.pyqtSignature('')
     def on_pushButtonRemove_pressed(self):
-        index = self.tableView.currentIndex()
+        index = self.tableViewStyles.currentIndex()
         if index.isValid():
             style = self.application.supportManager.themeStyleProxyModel.mapToSource(index).internalPointer()
             self.application.supportManager.deleteThemeStyle(style)
@@ -168,7 +168,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontThemeWidget):
         tableStyle = """QTableView {background-color: %s;
         color: %s;
         selection-background-color: %s; }""" % (settings['background'].name(), settings['foreground'].name(), settings['selection'].name())
-        self.tableView.setStyleSheet(tableStyle)
+        self.tableViewStyles.setStyleSheet(tableStyle)
         
         if changeSettings:
             self.settingGroup.setValue('defaultTheme', unicode(theme.uuid).upper())

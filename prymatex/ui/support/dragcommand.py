@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/support/dragcommand.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/support/dragcommand.ui'
 #
-# Created: Fri Nov  9 18:10:45 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Fri Jan 11 10:55:13 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 

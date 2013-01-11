@@ -33,11 +33,11 @@ class PMXTerminalSettings(QtGui.QWidget, SettingsTreeNode, Ui_Terminal):
         del t
         
     def loadSettings(self):
-        colorScheme = self.settingGroup.value('colorScheme')
-        self.comboColorScheme.setCurrentIndex(self.comboColorScheme.findData(colorScheme))    
+        #colorScheme = self.settingGroup.value('colorScheme')
+        #self.comboColorScheme.setCurrentIndex(self.comboColorScheme.findData(colorScheme))    
         font = self.settingGroup.value('font')
-        self.lineFont.setFont(font)
-        self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
+        self.comboBoxFontName.setCurrentFont(font)
+        self.spinBoxFontSize.setValue(font.pointSize())
         
     @QtCore.pyqtSlot(int)
     def on_comboColorScheme_activated(self, index):
@@ -50,5 +50,5 @@ class PMXTerminalSettings(QtGui.QWidget, SettingsTreeNode, Ui_Terminal):
         font, ok = QtGui.QFontDialog.getFont(font, self, _("Select terminal font"))
         if ok:
             self.settingGroup.setValue('font', font)
-            self.lineFont.setFont(font)
-            self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
+            self.comboBoxFontName.setCurrentFont(font)
+            self.spinBoxFontSize.setValue(font.pointSize())

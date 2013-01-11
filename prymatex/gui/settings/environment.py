@@ -30,14 +30,14 @@ class PMXEnvVariablesWidget(QtGui.QWidget, SettingsTreeNode, Ui_Environment):
     def setupVariablesTableModel(self):
         self.model = EnvironmentTableModel(self)
         self.model.variablesChanged.connect(self.on_variablesModel_userVariablesChanged)
-        self.tableView.setModel(self.model)
+        self.tableViewVariables.setModel(self.model)
         
-        self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
-        self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
-        self.tableView.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
-        self.model.rowsInserted.connect(self.tableView.resizeRowsToContents)
-        self.model.rowsRemoved.connect(self.tableView.resizeRowsToContents)
-        self.tableView.resizeRowsToContents()
+        self.tableViewVariables.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.tableViewVariables.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.tableViewVariables.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.model.rowsInserted.connect(self.tableViewVariables.resizeRowsToContents)
+        self.model.rowsRemoved.connect(self.tableViewVariables.resizeRowsToContents)
+        self.tableViewVariables.resizeRowsToContents()
         
         self.checkBox1.setText("User")
         self.checkBox1.setChecked(True)
@@ -64,5 +64,5 @@ class PMXEnvVariablesWidget(QtGui.QWidget, SettingsTreeNode, Ui_Environment):
         self.model.insertVariable()
         
     def on_pushRemove_pressed(self):
-        index = self.tableView.currentIndex()
+        index = self.tableViewVariables.currentIndex()
         self.model.removeRows(index.row() , 1)

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/dialogs/template.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/template.ui'
 #
-# Created: Fri Nov  9 18:10:44 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Fri Jan 11 10:55:13 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,16 +19,18 @@ class Ui_NewFromTemplateDialog(object):
     def setupUi(self, NewFromTemplateDialog):
         NewFromTemplateDialog.setObjectName(_fromUtf8("NewFromTemplateDialog"))
         NewFromTemplateDialog.setWindowModality(QtCore.Qt.WindowModal)
-        NewFromTemplateDialog.resize(450, 126)
+        NewFromTemplateDialog.resize(469, 130)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         NewFromTemplateDialog.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(NewFromTemplateDialog)
         self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(0)
+        self.verticalLayout.setMargin(6)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.formLayout_2 = QtGui.QFormLayout()
         self.formLayout_2.setFieldGrowthPolicy(QtGui.QFormLayout.ExpandingFieldsGrow)
+        self.formLayout_2.setLabelAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.formLayout_2.setSpacing(2)
         self.formLayout_2.setObjectName(_fromUtf8("formLayout_2"))
         self.label1 = QtGui.QLabel(NewFromTemplateDialog)
         self.label1.setObjectName(_fromUtf8("label1"))

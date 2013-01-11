@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/configure/environment.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/environment.ui'
 #
-# Created: Fri Nov  9 18:10:45 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Fri Jan 11 10:55:13 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,16 +18,16 @@ except AttributeError:
 class Ui_Environment(object):
     def setupUi(self, Environment):
         Environment.setObjectName(_fromUtf8("Environment"))
-        Environment.resize(189, 275)
+        Environment.resize(201, 275)
         self.verticalLayout = QtGui.QVBoxLayout(Environment)
         self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(0)
+        self.verticalLayout.setMargin(6)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.tableView = QtGui.QTableView(Environment)
-        self.tableView.setShowGrid(False)
-        self.tableView.setSortingEnabled(True)
-        self.tableView.setObjectName(_fromUtf8("tableView"))
-        self.verticalLayout.addWidget(self.tableView)
+        self.tableViewVariables = QtGui.QTableView(Environment)
+        self.tableViewVariables.setShowGrid(False)
+        self.tableViewVariables.setSortingEnabled(True)
+        self.tableViewVariables.setObjectName(_fromUtf8("tableViewVariables"))
+        self.verticalLayout.addWidget(self.tableViewVariables)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.checkBox1 = QtGui.QCheckBox(Environment)
@@ -41,16 +41,16 @@ class Ui_Environment(object):
         self.horizontalLayout.addWidget(self.checkBox3)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.pushAdd = QtGui.QPushButton(Environment)
+        self.pushButtonAdd = QtGui.QPushButton(Environment)
         icon = QtGui.QIcon.fromTheme(_fromUtf8("list-add"))
-        self.pushAdd.setIcon(icon)
-        self.pushAdd.setObjectName(_fromUtf8("pushAdd"))
-        self.horizontalLayout.addWidget(self.pushAdd)
-        self.pushRemove = QtGui.QPushButton(Environment)
+        self.pushButtonAdd.setIcon(icon)
+        self.pushButtonAdd.setObjectName(_fromUtf8("pushButtonAdd"))
+        self.horizontalLayout.addWidget(self.pushButtonAdd)
+        self.pushButtonRemove = QtGui.QPushButton(Environment)
         icon = QtGui.QIcon.fromTheme(_fromUtf8("list-remove"))
-        self.pushRemove.setIcon(icon)
-        self.pushRemove.setObjectName(_fromUtf8("pushRemove"))
-        self.horizontalLayout.addWidget(self.pushRemove)
+        self.pushButtonRemove.setIcon(icon)
+        self.pushButtonRemove.setObjectName(_fromUtf8("pushButtonRemove"))
+        self.horizontalLayout.addWidget(self.pushButtonRemove)
         self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.retranslateUi(Environment)

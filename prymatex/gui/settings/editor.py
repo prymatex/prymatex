@@ -4,11 +4,11 @@
 from PyQt4 import QtGui, QtCore
 
 from prymatex import resources
-from prymatex.ui.configure.editor import Ui_EditorWidget
+from prymatex.ui.configure.editor import Ui_Editor
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.gui.codeeditor.editor import CodeEditor
     
-class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_EditorWidget):
+class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
     TITLE = "Editor"
     ICON = resources.getIcon("accessories-text-editor")
     

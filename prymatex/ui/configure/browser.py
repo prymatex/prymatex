@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/configure/browser.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/browser.ui'
 #
-# Created: Fri Nov  9 18:10:45 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Fri Jan 11 10:55:13 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,33 +18,43 @@ except AttributeError:
 class Ui_BrowserWidget(object):
     def setupUi(self, BrowserWidget):
         BrowserWidget.setObjectName(_fromUtf8("BrowserWidget"))
+        BrowserWidget.resize(592, 225)
         self.verticalLayout = QtGui.QVBoxLayout(BrowserWidget)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.checkBoxDeveloperExtras = QtGui.QCheckBox(BrowserWidget)
+        self.groupBox_2 = QtGui.QGroupBox(BrowserWidget)
+        self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
+        self.formLayout_2 = QtGui.QFormLayout(self.groupBox_2)
+        self.formLayout_2.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
+        self.formLayout_2.setLabelAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.formLayout_2.setMargin(6)
+        self.formLayout_2.setSpacing(2)
+        self.formLayout_2.setObjectName(_fromUtf8("formLayout_2"))
+        self.checkBoxDeveloperExtras = QtGui.QCheckBox(self.groupBox_2)
         self.checkBoxDeveloperExtras.setObjectName(_fromUtf8("checkBoxDeveloperExtras"))
-        self.verticalLayout.addWidget(self.checkBoxDeveloperExtras)
+        self.formLayout_2.setWidget(2, QtGui.QFormLayout.FieldRole, self.checkBoxDeveloperExtras)
+        self.verticalLayout.addWidget(self.groupBox_2)
         self.groupBox = QtGui.QGroupBox(BrowserWidget)
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
-        self.verticalLayout_2 = QtGui.QVBoxLayout(self.groupBox)
-        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
-        self.radioButtonNoProxy = QtGui.QRadioButton(self.groupBox)
-        self.radioButtonNoProxy.setObjectName(_fromUtf8("radioButtonNoProxy"))
-        self.verticalLayout_2.addWidget(self.radioButtonNoProxy)
-        self.radioButtonSystemProxy = QtGui.QRadioButton(self.groupBox)
-        self.radioButtonSystemProxy.setObjectName(_fromUtf8("radioButtonSystemProxy"))
-        self.verticalLayout_2.addWidget(self.radioButtonSystemProxy)
-        self.radioButtonManualProxy = QtGui.QRadioButton(self.groupBox)
-        self.radioButtonManualProxy.setObjectName(_fromUtf8("radioButtonManualProxy"))
-        self.verticalLayout_2.addWidget(self.radioButtonManualProxy)
-        self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.formLayout = QtGui.QFormLayout(self.groupBox)
+        self.formLayout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
+        self.formLayout.setMargin(6)
+        self.formLayout.setSpacing(2)
+        self.formLayout.setObjectName(_fromUtf8("formLayout"))
         self.labelProxy = QtGui.QLabel(self.groupBox)
         self.labelProxy.setObjectName(_fromUtf8("labelProxy"))
-        self.horizontalLayout.addWidget(self.labelProxy)
+        self.formLayout.setWidget(4, QtGui.QFormLayout.LabelRole, self.labelProxy)
         self.lineEditProxy = QtGui.QLineEdit(self.groupBox)
         self.lineEditProxy.setObjectName(_fromUtf8("lineEditProxy"))
-        self.horizontalLayout.addWidget(self.lineEditProxy)
-        self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.formLayout.setWidget(4, QtGui.QFormLayout.FieldRole, self.lineEditProxy)
+        self.radioButtonManualProxy = QtGui.QRadioButton(self.groupBox)
+        self.radioButtonManualProxy.setObjectName(_fromUtf8("radioButtonManualProxy"))
+        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.radioButtonManualProxy)
+        self.radioButtonSystemProxy = QtGui.QRadioButton(self.groupBox)
+        self.radioButtonSystemProxy.setObjectName(_fromUtf8("radioButtonSystemProxy"))
+        self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.radioButtonSystemProxy)
+        self.radioButtonNoProxy = QtGui.QRadioButton(self.groupBox)
+        self.radioButtonNoProxy.setObjectName(_fromUtf8("radioButtonNoProxy"))
+        self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.radioButtonNoProxy)
         self.verticalLayout.addWidget(self.groupBox)
         spacerItem = QtGui.QSpacerItem(20, 15, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
@@ -54,10 +64,11 @@ class Ui_BrowserWidget(object):
 
     def retranslateUi(self, BrowserWidget):
         BrowserWidget.setWindowTitle(_('Browser'))
+        self.groupBox_2.setTitle(_('Source'))
         self.checkBoxDeveloperExtras.setText(_('Enable developer extras'))
         self.groupBox.setTitle(_('Connection'))
-        self.radioButtonNoProxy.setText(_('No proxy'))
-        self.radioButtonSystemProxy.setText(_('Use system proxy settings'))
-        self.radioButtonManualProxy.setText(_('Manual proxy configuration:'))
         self.labelProxy.setText(_('Proxy:'))
+        self.radioButtonManualProxy.setText(_('Manual proxy configuration'))
+        self.radioButtonSystemProxy.setText(_('Use system proxy settings'))
+        self.radioButtonNoProxy.setText(_('No proxy'))
 

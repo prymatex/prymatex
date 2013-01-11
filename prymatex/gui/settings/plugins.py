@@ -20,4 +20,4 @@ class PluginsSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Plugins):
         
     def loadSettings(self):
         self.model = PluginsTableModel(self.application.pluginManager)
-        self.tableViewPlugins.setModel(self.model)
+        self.listViewPlugins.setModel(self.model)

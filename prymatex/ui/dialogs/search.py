@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/dialogs/search.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/search.ui'
 #
-# Created: Fri Nov  9 18:10:44 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Fri Jan 11 10:55:13 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,14 +18,14 @@ except AttributeError:
 class Ui_SearchDialog(object):
     def setupUi(self, SearchDialog):
         SearchDialog.setObjectName(_fromUtf8("SearchDialog"))
-        SearchDialog.resize(482, 263)
+        SearchDialog.resize(482, 243)
         SearchDialog.setMinimumSize(QtCore.QSize(482, 0))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         SearchDialog.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(SearchDialog)
         self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(0)
+        self.verticalLayout.setMargin(6)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.groupBox = QtGui.QGroupBox(SearchDialog)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
@@ -36,6 +36,8 @@ class Ui_SearchDialog(object):
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
         self.formLayout = QtGui.QFormLayout(self.groupBox)
         self.formLayout.setFieldGrowthPolicy(QtGui.QFormLayout.ExpandingFieldsGrow)
+        self.formLayout.setMargin(6)
+        self.formLayout.setSpacing(2)
         self.formLayout.setObjectName(_fromUtf8("formLayout"))
         self.label = QtGui.QLabel(self.groupBox)
         self.label.setObjectName(_fromUtf8("label"))
@@ -86,6 +88,8 @@ class Ui_SearchDialog(object):
         self.groupBox_2.setSizePolicy(sizePolicy)
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.groupBox_2)
+        self.verticalLayout_2.setSpacing(2)
+        self.verticalLayout_2.setMargin(6)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.radioButtonWorkspace = QtGui.QRadioButton(self.groupBox_2)
         self.radioButtonWorkspace.setChecked(True)
@@ -123,6 +127,7 @@ class Ui_SearchDialog(object):
         self.verticalLayout_2.addLayout(self.horizontalLayout_3)
         self.verticalLayout.addWidget(self.groupBox_2)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
+        self.horizontalLayout_2.setSpacing(2)
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem1)

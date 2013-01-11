@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/dialogs/profile.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/profile.ui'
 #
-# Created: Fri Nov  9 18:10:44 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Fri Jan 11 10:55:13 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -24,13 +24,17 @@ class Ui_ProfileDialog(object):
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         ProfileDialog.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(ProfileDialog)
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setMargin(6)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.label = QtGui.QLabel(ProfileDialog)
         self.label.setObjectName(_fromUtf8("label"))
         self.verticalLayout.addWidget(self.label)
         self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setSpacing(2)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.verticalLayout_2 = QtGui.QVBoxLayout()
+        self.verticalLayout_2.setSpacing(2)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.buttonCreate = QtGui.QPushButton(ProfileDialog)
         icon = QtGui.QIcon.fromTheme(_fromUtf8("list-add-user"))
@@ -51,6 +55,7 @@ class Ui_ProfileDialog(object):
         self.verticalLayout_2.addItem(spacerItem)
         self.horizontalLayout.addLayout(self.verticalLayout_2)
         self.verticalLayout_3 = QtGui.QVBoxLayout()
+        self.verticalLayout_3.setSpacing(2)
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.listProfiles = QtGui.QListWidget(ProfileDialog)
         self.listProfiles.setObjectName(_fromUtf8("listProfiles"))
@@ -61,6 +66,7 @@ class Ui_ProfileDialog(object):
         self.horizontalLayout.addLayout(self.verticalLayout_3)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
+        self.horizontalLayout_2.setSpacing(2)
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem1)
