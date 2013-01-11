@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/treewidget.ui'
 #
-# Created: Fri Jan 11 10:55:13 2013
+# Created: Fri Jan 11 11:36:45 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -21,16 +21,16 @@ class Ui_TreeWidgetDialog(object):
         TreeWidgetDialog.resize(700, 433)
         TreeWidgetDialog.setMinimumSize(QtCore.QSize(700, 433))
         self.verticalLayout_3 = QtGui.QVBoxLayout(TreeWidgetDialog)
-        self.verticalLayout_3.setSpacing(2)
-        self.verticalLayout_3.setMargin(0)
+        self.verticalLayout_3.setSpacing(6)
+        self.verticalLayout_3.setMargin(6)
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.splitter = QtGui.QSplitter(TreeWidgetDialog)
-        self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.splitter.setObjectName(_fromUtf8("splitter"))
         self.verticalLayoutWidget = QtGui.QWidget(self.splitter)
         self.verticalLayoutWidget.setObjectName(_fromUtf8("verticalLayoutWidget"))
         self.treeLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget)
         self.treeLayout.setSpacing(2)
+        self.treeLayout.setMargin(0)
         self.treeLayout.setMargin(0)
         self.treeLayout.setObjectName(_fromUtf8("treeLayout"))
         self.lineEditFilter = QtGui.QLineEdit(self.verticalLayoutWidget)
@@ -43,10 +43,13 @@ class Ui_TreeWidgetDialog(object):
         self.verticalLayoutWidget_2 = QtGui.QWidget(self.splitter)
         self.verticalLayoutWidget_2.setObjectName(_fromUtf8("verticalLayoutWidget_2"))
         self.widgetsLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
-        self.widgetsLayout.setSpacing(2)
-        self.widgetsLayout.setMargin(0)
+        self.widgetsLayout.setSpacing(6)
+        self.widgetsLayout.setContentsMargins(6, -1, -1, -1)
         self.widgetsLayout.setObjectName(_fromUtf8("widgetsLayout"))
         self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setSpacing(2)
+        self.horizontalLayout.setMargin(0)
+        self.horizontalLayout.setMargin(0)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.textLabelTitle = QtGui.QLabel(self.verticalLayoutWidget_2)
         font = QtGui.QFont()

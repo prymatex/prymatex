@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/mainwindow.ui'
 #
-# Created: Fri Jan 11 10:55:13 2013
+# Created: Fri Jan 11 11:36:45 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -21,7 +21,7 @@ class Ui_Mainwindow(object):
         Mainwindow.resize(451, 333)
         self.verticalLayout = QtGui.QVBoxLayout(Mainwindow)
         self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(6)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.groupBox_2 = QtGui.QGroupBox(Mainwindow)
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))

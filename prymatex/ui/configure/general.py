@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/general.ui'
 #
-# Created: Fri Jan 11 10:55:13 2013
+# Created: Fri Jan 11 11:36:45 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -21,7 +21,7 @@ class Ui_General(object):
         General.resize(506, 274)
         self.verticalLayout = QtGui.QVBoxLayout(General)
         self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(6)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.groupBox_2 = QtGui.QGroupBox(General)
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
@@ -76,7 +76,7 @@ class Ui_General(object):
         self.groupBox_2.setTitle(_('Interface'))
         self.label_2.setText(_('Qt style:'))
         self.label_3.setText(_('Qt theme:'))
-        self.groupBox.setTitle(_('File format'))
+        self.groupBox.setTitle(_('Files'))
         self.labelEncoding.setText(_('Encoding'))
         self.labelLineEnding.setText(_('Line Ending'))
 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/resource.ui'
 #
-# Created: Fri Jan 11 10:55:13 2013
+# Created: Fri Jan 11 11:36:45 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -21,7 +21,7 @@ class Ui_ResouceWidget(object):
         ResouceWidget.resize(314, 218)
         self._2 = QtGui.QVBoxLayout(ResouceWidget)
         self._2.setSpacing(2)
-        self._2.setMargin(6)
+        self._2.setMargin(0)
         self._2.setObjectName(_fromUtf8("_2"))
         self.formLayout = QtGui.QFormLayout()
         self.formLayout.setLabelAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)

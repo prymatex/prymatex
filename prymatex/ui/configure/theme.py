@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/theme.ui'
 #
-# Created: Fri Jan 11 11:06:41 2013
+# Created: Fri Jan 11 11:31:15 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -21,7 +21,7 @@ class Ui_FontTheme(object):
         FontTheme.resize(475, 547)
         self.verticalLayout_2 = QtGui.QVBoxLayout(FontTheme)
         self.verticalLayout_2.setSpacing(6)
-        self.verticalLayout_2.setMargin(6)
+        self.verticalLayout_2.setMargin(0)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.groupBoxFont_2 = QtGui.QGroupBox(FontTheme)
         self.groupBoxFont_2.setObjectName(_fromUtf8("groupBoxFont_2"))

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/terminal.ui'
 #
-# Created: Fri Jan 11 10:55:13 2013
+# Created: Fri Jan 11 11:36:45 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -20,7 +20,8 @@ class Ui_Terminal(object):
         Terminal.setObjectName(_fromUtf8("Terminal"))
         Terminal.resize(400, 341)
         self.verticalLayout_2 = QtGui.QVBoxLayout(Terminal)
-        self.verticalLayout_2.setMargin(6)
+        self.verticalLayout_2.setSpacing(6)
+        self.verticalLayout_2.setMargin(0)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.groupBoxFont = QtGui.QGroupBox(Terminal)
         self.groupBoxFont.setObjectName(_fromUtf8("groupBoxFont"))

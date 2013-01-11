@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/environment.ui'
 #
-# Created: Fri Jan 11 10:55:13 2013
+# Created: Fri Jan 11 11:36:45 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -21,7 +21,7 @@ class Ui_Environment(object):
         Environment.resize(201, 275)
         self.verticalLayout = QtGui.QVBoxLayout(Environment)
         self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(6)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.tableViewVariables = QtGui.QTableView(Environment)
         self.tableViewVariables.setShowGrid(False)
