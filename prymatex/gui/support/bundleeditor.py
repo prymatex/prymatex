@@ -3,22 +3,19 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.core import PMXBaseWidgetComponent
-
 from prymatex import resources
 from prymatex.ui.support.editor import Ui_BundleEditor
 from prymatex.gui.support import widgets
 
-class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
+class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
     BASE_EDITOR = -1 #El ultimo es el editor base, no tiene nada
     
-    def __init__(self, application):
+    def __init__(self, application, manager):
         QtGui.QDialog.__init__(self)
-        PMXBaseWidgetComponent.__init__(self)
         self.setupUi(self)
         self.namespace = None
         self.application = application
-        self.manager = self.application.supportManager
+        self.manager = manager
         self.proxyTreeModel = self.manager.bundleProxyTreeModel
         
         self.finished.connect(self.on_bundleEditor_finished)
@@ -34,7 +31,8 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
 
     def on_bundleEditor_finished(self, code):
         self.saveChanges()
-    
+
+
     #==========================================================
     # exec the dialog Show
     #==========================================================
@@ -356,7 +354,6 @@ class PMXBundleFilter(QtGui.QDialog):
     def __init__(self, bundleEditor):
         super(PMXBundleFilter, self).__init__(bundleEditor)
         self.setupUi(self)
-        self.manager = bundleEditor.application.supportManager
         self.setWindowFlags(QtCore.Qt.Dialog)
         self.proxy = QtGui.QSortFilterProxyModel(self)
         self.tableBundleItems.setModel(self.proxy)

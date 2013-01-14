@@ -5,7 +5,7 @@
 
 class PMXBaseComponent(object):
     def initialize(self):
-        raise NotImplemented
+        pass
     
     def finalize(self):
         pass

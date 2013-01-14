@@ -101,11 +101,9 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         addonClasses = self.addons.setdefault(widgetClass, [])
         addonClasses.append(addonClass)
 
-    #==================================================
-    # Creando instancias
-    #==================================================     
-    def createWidgetInstance(self, widgetClass, mainWindow):
-        instance = widgetClass(mainWindow)
+    # -------------- Creando instancias
+    def createWidgetInstance(self, widgetClass, parent):
+        instance = widgetClass(parent)
         
         for addonClass in self.addons.get(widgetClass, []):
             addon = addonClass(instance)
@@ -115,12 +113,10 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
             keyHelper = keyHelperClass(instance)
             instance.addKeyHelper(keyHelper)
             
-        self.application.profile.configure(instance)
-        instance.initialize(mainWindow)
-        
         instances = self.instances.setdefault(widgetClass, [])
         instances.append(instance)
         return instance
+    
     
     def createCustomActions(self, mainWindow):
         for editorClass in self.editors:

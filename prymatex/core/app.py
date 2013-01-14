@@ -23,8 +23,10 @@ from prymatex.utils import coroutines
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime, logtime
 
+# Global dialogs
 from prymatex.gui.dialogs.profile import PMXProfileDialog
 from prymatex.gui.dialogs.settings import PMXSettingsDialog
+from prymatex.gui.support.bundleeditor import PMXBundleEditor
 
 class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     """The application instance.
@@ -103,11 +105,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             self.fileManager = self.setupFileManager()          #File Manager
             self.projectManager = self.setupProjectManager()    #Project Manager
             self.setupCoroutines()
-            self.setupMainWindow()
-            self.setupServer()
-
-            # Setup Dialogs
-            self.setupDialogs()
+            self.server = self.buildPrymatexServer()
 
             #Connect all loads
             self.projectManager.loadProjects()
@@ -153,15 +151,12 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         self.profile = PMXProfile(profileName)
         
         # Create the settings dialog
+        self.extendComponent(PMXSettingsDialog)
         self.settingsDialog = PMXSettingsDialog(self)
         
         # Prepare settings for application
-        applicationClass = self.__class__
-        self.profile.registerConfigurable(applicationClass)
-        for settingClass in applicationClass.contributeToSettings():
-            self.extendComponent(settingClass)
-            self.settingsDialog.register(settingClass(applicationClass.settings))
-        
+        self.registerConfigurable(self.__class__)
+
         # Configure application    
         self.profile.configure(self)
 
@@ -228,18 +223,14 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         elif msgType == Qt.QtSystemMsg:
             self.logger.debug("System: %s" % msgString)
 
-    #========================================================
-    # Managers
-    #========================================================
-    @logtime
+
+    # -------------------- Managers
     def setupSupportManager(self):
         from prymatex.managers.support import SupportManager
 
         self.populateComponent(SupportManager)
-
-        manager = SupportManager(self)
-        self.profile.configure(manager)
-
+        manager = self.createComponentInstance(SupportManager, self)
+        
         #Prepare prymatex namespace
         sharePath = self.profile.value('PMX_SHARE_PATH')
         manager.addNamespace('prymatex', sharePath)
@@ -266,15 +257,18 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
                 'PMX_TMP_PATH': self.profile.value('PMX_TMP_PATH'),
                 'PMX_LOG_PATH': self.profile.value('PMX_LOG_PATH')
         })
+        
+        # Create bundle editor dialog
+        self.extendComponent(PMXBundleEditor)
+        self.bundleEditorDialog = PMXBundleEditor(self, manager)
+        
         return manager
 
     def setupFileManager(self):
         from prymatex.managers.files import FileManager
 
         self.populateComponent(FileManager)
-
-        manager = FileManager(self)
-        self.profile.configure(manager)
+        manager = self.createComponentInstance(FileManager, self)
 
         manager.fileSytemChanged.connect(self.on_fileManager_fileSytemChanged)
         return manager
@@ -283,53 +277,39 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         from prymatex.managers.projects import ProjectManager
 
         self.populateComponent(ProjectManager)
-
-        manager = ProjectManager(self)
-        self.profile.configure(manager)
+        manager = self.createComponentInstance(ProjectManager, self)
         return manager
 
     def setupCacheManager(self):
         from prymatex.managers.cache import CacheManager
-        return CacheManager()
+        self.populateComponent(CacheManager)
+        return self.createComponentInstance(CacheManager, self)
+
 
     def setupPluginManager(self):
         from prymatex.managers.plugins import PluginManager
 
         self.populateComponent(PluginManager)
-
-        pluginManager = PluginManager(self)
-        self.profile.configure(pluginManager)
+        manager = self.createComponentInstance(PluginManager, self)
 
         # TODO: Ruta de los plugins ver de aprovechar settings quiza esta sea una ruta base solamente
-        pluginManager.addPluginDirectory(self.profile.value('PMX_PLUGINS_PATH'))
+        manager.addPluginDirectory(self.profile.value('PMX_PLUGINS_PATH'))
 
-        pluginManager.loadPlugins()
-        return pluginManager
+        manager.loadPlugins()
+        return manager
+
 
     def setupCoroutines(self):
         self.scheduler = coroutines.Scheduler(self)
 
-    def setupMainWindow(self):
-        from prymatex.gui.mainwindow import PMXMainWindow
-        self.populateComponent(PMXMainWindow)
 
-    def setupServer(self):
+    def buildPrymatexServer(self):
         from prymatex.core.server import PrymatexServer
         self.populateComponent(PrymatexServer)
-        self.server = PrymatexServer(self)
+        return self.createComponentInstance(PrymatexServer, self)
 
-    #========================================================
-    # Dialogs
-    #========================================================
-    def setupDialogs(self):
-        # TODO: Creo que esto del bundle editor global asi no va a caminar muy bien
-        #Bundle Editor
-        from prymatex.gui.support.bundleeditor import PMXBundleEditor
-        self.populateComponent(PMXBundleEditor)
 
-        self.bundleEditor = PMXBundleEditor(self)
-        #self.bundleEditor.setModal(True)
-
+    # --------------------- Application events
     def closePrymatex(self):
         self.logger.debug("Close")
 
@@ -343,24 +323,43 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         print "saveState"
         pass
 
-    #========================================================
-    # Components
-    #========================================================
+    # --------------------- Components
     def extendComponent(self, componentClass):
         componentClass.application = self
         componentClass.logger = self.getLogger('.'.join([componentClass.__module__, componentClass.__name__]))
 
-    def populateComponent(self, componentClass):
-        self.extendComponent(componentClass)
+
+    def registerConfigurable(self, componentClass):
         self.profile.registerConfigurable(componentClass)
         for settingClass in componentClass.contributeToSettings():
             self.extendComponent(settingClass)
             self.settingsDialog.register(settingClass(componentClass.settings))
 
-    def createWidgetInstance(self, widgetClass, parent):
-        # TODO Que parent sea opcional y pueda ser la mainWindow si no viene seteado
-        return self.pluginManager.createWidgetInstance(widgetClass, parent)
 
+    def populateComponent(self, componentClass):
+        self.extendComponent(componentClass)
+        self.registerConfigurable(componentClass)
+
+
+    def createComponentInstance(self, widgetClass, parent = None):
+        # TODO: Y si todo pasa por el plugin manager y se permiten los addons en los componentes?
+        instance = widgetClass(parent)
+        self.profile.configure(instance)
+        instance.initialize()
+        return instance
+
+
+    def createWidgetComponentInstance(self, widgetClass, parent = None):
+        return self.createWidgetInstance(widgetClass, parent)
+
+
+    def createWidgetInstance(self, widgetClass, parent = None):
+        instance = self.pluginManager.createWidgetInstance(widgetClass, parent)
+        self.profile.configure(instance)
+        instance.initialize(parent)
+        return instance
+        
+        
     #========================================================
     # Create Zmq Sockets
     #========================================================
@@ -385,6 +384,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     def createMainWindow(self):
         """Creates the windows"""
         from prymatex.gui.mainwindow import PMXMainWindow
+        self.populateComponent(PMXMainWindow)
 
         #TODO: Testeame con mas de una
         for _ in range(1):

@@ -3,12 +3,17 @@
 
 import fnmatch
 from bisect import bisect
-
 import uuid as uuidmodule
-from PyQt4 import QtCore, QtGui
 
+from prymatex.qt import QtCore, QtGui
+
+from prymatex.core import PMXBaseComponent
 from prymatex.core.settings import pmxConfigPorperty
+
+from prymatex.support.manager import PMXSupportBaseManager
+
 from prymatex.utils.decorators.memoize import dynamic_memoized
+
 from prymatex.models.process import ExternalProcessTableModel
 from prymatex.models.support import (BundleItemTreeModel, BundleItemTreeNode,
                                     ThemeListModel, ThemeStylesTableModel, 
@@ -16,7 +21,7 @@ from prymatex.models.support import (BundleItemTreeModel, BundleItemTreeNode,
 from prymatex.models.support import (BundleItemProxyTreeModel, BundleItemTypeProxyModel, 
                                     ThemeStyleProxyTableModel, BundleListModel, 
                                     SyntaxListModel, TemplateListModel, ProjectListModel)
-from prymatex.support.manager import PMXSupportBaseManager
+
 
 class BundleItemMenuGroup(QtCore.QObject):
     def __init__(self, manager):
@@ -137,7 +142,7 @@ class BundleItemMenuGroup(QtCore.QObject):
     def on_manager_bundleRemoved(self, bundle):
         self.removeFromContainers(self.menus[bundle])
 
-class SupportManager(QtCore.QObject, PMXSupportBaseManager):
+class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
     #Signals for bundle
     bundleAdded = QtCore.pyqtSignal(object)
     bundleRemoved = QtCore.pyqtSignal(object)

@@ -625,7 +625,7 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     def __init__(self, parent = None):
         super(PMXBundleWidget, self).__init__(parent)
         self.setupUi(self)
-        manager = QtGui.QApplication.instance().supportManager
+        manager = parent.manager
 
         self.treeMenuModel = BundleItemMenuTreeModel(manager)
         self.treeMenuView.setModel(self.treeMenuModel)
