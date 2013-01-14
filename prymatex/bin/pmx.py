@@ -30,10 +30,7 @@ def runPrymatexApplication(options, files):
             prymatexAppInstance.unloadGraphicalUserInterface()
             del prymatexAppInstance
         prymatexAppInstance = PrymatexApplication()
-        try:
-            prymatexAppInstance.buildSettings(instanceOptions.profile)
-        except ValueError:
-            return
+        prymatexAppInstance.buildProfile(instanceOptions.profile)
         prymatexAppInstance.setupLogging(instanceOptions.verbose, instanceOptions.log_pattern)
         prymatexAppInstance.options = instanceOptions
         return prymatexAppInstance.execWithArgs(instanceFiles)

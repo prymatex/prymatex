@@ -136,22 +136,18 @@ class PrymatexApplication(QtGui.QApplication):
     def restart(self):
         self.exit(self.RESTART_CODE)
 
-    def buildSettings(self, profile):
-        # TODO Cambiar este metodo a buildProfile
-        if profile is None or (profile == "" and not PMXProfile.PMX_PROFILES_DONTASK):
+    def buildProfile(self, profileName = None):
+        if profileName is None or (profileName == "" and not PMXProfile.PMX_PROFILES_DONTASK):
             #Select profile
             from prymatex.gui.dialogs.profile import PMXProfileDialog
-            profile = PMXProfileDialog.selectProfile(PMXProfile.PMX_PROFILES_FILE)
-        elif profile == "":
+            profileName = PMXProfileDialog.selectProfile(PMXProfile.PMX_PROFILES_FILE)
+        elif profileName == "":
             #Find default profile in config
-            profile = PMXProfile.PMX_PROFILE_DEFAULT
+            profileName = PMXProfile.PMX_PROFILE_DEFAULT
 
-        #Settings
+        self.profile = PMXProfile(profileName)
+
         from prymatex.gui.dialogs.settings import PMXSettingsDialog
-        if not profile:
-            raise ValueError("Invalid Profile")
-        self.profile = PMXProfile(profile)
-
         # Configure application
         self.profile.registerConfigurable(self.__class__)
         self.profile.configure(self)
