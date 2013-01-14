@@ -321,25 +321,26 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
     @QtCore.pyqtSlot()
     def on_actionDelete_triggered(self):
-        currentIndex = self.treeViewProjects.currentIndex()
-        treeNode = self.projectTreeProxyModel.node(currentIndex)
-        if treeNode.isproject:
-            #Es proyecto
-            question = CheckableMessageBox.questionFactory(self,
-                "Delete project",
-                "Are you sure you want to delete project '%s' from the workspace?" % treeNode.name,
-                "Delete project contents on disk (cannot be undone)",
-                QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
-                QtGui.QMessageBox.Ok
-            )
-            question.setDetailedText("Project location:\n%s" % treeNode.path())
-            ret = question.exec_()
-            if ret == QtGui.QMessageBox.Ok:
-                self.application.projectManager.deleteProject(treeNode, removeFiles = question.isChecked())
-        else:
-            #Es un path
-            self.deletePath(treeNode.path())
-        self.projectTreeProxyModel.refresh(currentIndex.parent())
+        # TODO: Cuidado porque si van cambiando los index puede ser que esto no se comporte como se espera
+        # es mejor unos maps antes para pasarlos a path
+        for index in self.treeViewProjects.selectedIndexes():
+            treeNode = self.projectTreeProxyModel.node(index)
+            if treeNode.isproject:
+                #Es proyecto
+                question = CheckableMessageBox.questionFactory(self,
+                    "Delete project",
+                    "Are you sure you want to delete project '%s' from the workspace?" % treeNode.name,
+                    "Delete project contents on disk (cannot be undone)",
+                    QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
+                    QtGui.QMessageBox.Ok
+                )
+                question.setDetailedText("Project location:\n%s" % treeNode.path())
+                ret = question.exec_()
+                if ret == QtGui.QMessageBox.Ok:
+                    self.application.projectManager.deleteProject(treeNode, removeFiles = question.isChecked())
+            else:
+                self.deletePath(treeNode.path())
+            self.projectTreeProxyModel.refresh(index.parent())
 
     @QtCore.pyqtSlot()
     def on_actionRemove_triggered(self):
