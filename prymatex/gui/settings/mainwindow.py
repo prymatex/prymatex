@@ -4,13 +4,13 @@
 from prymatex.qt import QtGui, QtCore
 
 from prymatex import resources
-from prymatex.ui.configure.mainwindow import Ui_Mainwindow
+from prymatex.ui.configure.mainwindow import Ui_MainWindow
 from prymatex.models.settings import SettingsTreeNode
 
-class MainWindowSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Mainwindow):
+class MainWindowSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_MainWindow):
     TITLE = "Main Window"
     NAMESPACE = "general"
-    ICON = resources.getIcon("preferences-other")
+    ICON = resources.getIcon("preferences-system-windows-actions")
     
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)

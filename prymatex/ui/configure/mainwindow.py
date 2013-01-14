@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/mainwindow.ui'
 #
-# Created: Fri Jan 11 11:36:45 2013
+# Created: Mon Jan 14 09:40:38 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -15,15 +15,15 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class Ui_Mainwindow(object):
-    def setupUi(self, Mainwindow):
-        Mainwindow.setObjectName(_fromUtf8("Mainwindow"))
-        Mainwindow.resize(451, 333)
-        self.verticalLayout = QtGui.QVBoxLayout(Mainwindow)
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName(_fromUtf8("MainWindow"))
+        MainWindow.resize(451, 333)
+        self.verticalLayout = QtGui.QVBoxLayout(MainWindow)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.groupBox_2 = QtGui.QGroupBox(Mainwindow)
+        self.groupBox_2 = QtGui.QGroupBox(MainWindow)
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
         self.formLayout_2 = QtGui.QFormLayout(self.groupBox_2)
         self.formLayout_2.setFieldGrowthPolicy(QtGui.QFormLayout.ExpandingFieldsGrow)
@@ -45,11 +45,11 @@ class Ui_Mainwindow(object):
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
 
-        self.retranslateUi(Mainwindow)
-        QtCore.QMetaObject.connectSlotsByName(Mainwindow)
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def retranslateUi(self, Mainwindow):
-        Mainwindow.setWindowTitle(_('General'))
+    def retranslateUi(self, MainWindow):
+        MainWindow.setWindowTitle(_('General'))
         self.groupBox_2.setTitle(_('Interface'))
         self.label_2.setText(_('Title template:'))
         self.labelTabVisibility.setText(_('Tab visibilty:'))

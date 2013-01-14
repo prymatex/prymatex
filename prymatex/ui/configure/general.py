@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/general.ui'
 #
-# Created: Fri Jan 11 11:36:45 2013
+# Created: Mon Jan 14 09:40:38 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -31,7 +31,6 @@ class Ui_General(object):
         self.formLayout.setSpacing(2)
         self.formLayout.setObjectName(_fromUtf8("formLayout"))
         self.comboBoxQtStyle = QtGui.QComboBox(self.groupBox_2)
-        self.comboBoxQtStyle.setEditable(True)
         self.comboBoxQtStyle.setObjectName(_fromUtf8("comboBoxQtStyle"))
         self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.comboBoxQtStyle)
         self.label_2 = QtGui.QLabel(self.groupBox_2)
@@ -41,7 +40,6 @@ class Ui_General(object):
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_3)
         self.comboBoxQtTheme = QtGui.QComboBox(self.groupBox_2)
-        self.comboBoxQtTheme.setEditable(True)
         self.comboBoxQtTheme.setObjectName(_fromUtf8("comboBoxQtTheme"))
         self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.comboBoxQtTheme)
         self.verticalLayout.addWidget(self.groupBox_2)

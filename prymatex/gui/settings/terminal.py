@@ -1,7 +1,8 @@
 
 import os
 
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
+
 from prymatex.ui.configure.terminal import Ui_Terminal
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.utils.i18n import ugettext as _

@@ -12,6 +12,7 @@ from prymatex import resources
 
 from prymatex.qt import QtGui, QtCore, Qt
 
+from prymatex.core.components import PMXBaseComponent
 from prymatex.core import exceptions
 from prymatex.core.logger import NameFilter
 from prymatex.core.profile import PMXProfile
@@ -22,14 +23,15 @@ from prymatex.utils import coroutines
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime, logtime
 
-class PrymatexApplication(QtGui.QApplication):
+from prymatex.gui.dialogs.profile import PMXProfileDialog
+from prymatex.gui.dialogs.settings import PMXSettingsDialog
+
+class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     """The application instance.
     There can't be two apps running simultaneously, since configuration issues may occur.
-    The application loads the PMX Support."""
+    The application loads the Support."""
 
-    #=======================================================================
-    # Settings
-    #=======================================================================
+    # ---------------------- Settings
     SETTINGS_GROUP = "Global"
 
     @pmxConfigPorperty(default=resources.APPLICATION_STYLE)
@@ -67,6 +69,11 @@ class PrymatexApplication(QtGui.QApplication):
         #self.translator.load(settings.LANGUAGE)
         #self.installTranslator(translator)
 
+    # ---------------------- PMXBaseComponent methods
+    @classmethod
+    def contributeToSettings(cls):
+        from prymatex.gui.settings.general import GeneralSettingsWidget
+        return [ GeneralSettingsWidget ]
 
     def buildSplashScreen(self):
         from prymatex.widgets.splash import SplashScreen
@@ -128,7 +135,6 @@ class PrymatexApplication(QtGui.QApplication):
         self.profile.clear()
 
     def switchProfile(self):
-        from prymatex.gui.dialogs.profile import PMXProfileDialog
         profile = PMXProfileDialog.switchProfile(PMXProfile.PMX_PROFILES_FILE)
         if profile is not None and profile != self.profile.PMX_PROFILE_NAME:
             self.restart()
@@ -139,21 +145,26 @@ class PrymatexApplication(QtGui.QApplication):
     def buildProfile(self, profileName = None):
         if profileName is None or (profileName == "" and not PMXProfile.PMX_PROFILES_DONTASK):
             #Select profile
-            from prymatex.gui.dialogs.profile import PMXProfileDialog
             profileName = PMXProfileDialog.selectProfile(PMXProfile.PMX_PROFILES_FILE)
         elif profileName == "":
             #Find default profile in config
             profileName = PMXProfile.PMX_PROFILE_DEFAULT
 
         self.profile = PMXProfile(profileName)
-
-        from prymatex.gui.dialogs.settings import PMXSettingsDialog
-        # Configure application
-        self.profile.registerConfigurable(self.__class__)
+        
+        # Create the settings dialog
+        self.settingsDialog = PMXSettingsDialog(self)
+        
+        # Prepare settings for application
+        applicationClass = self.__class__
+        self.profile.registerConfigurable(applicationClass)
+        for settingClass in applicationClass.contributeToSettings():
+            self.extendComponent(settingClass)
+            self.settingsDialog.register(settingClass(applicationClass.settings))
+        
+        # Configure application    
         self.profile.configure(self)
 
-        # TODO Este dialogo no va mas aca
-        self.settingsDialog = PMXSettingsDialog(self)
 
     def checkSingleInstance(self):
         """
@@ -170,9 +181,8 @@ class PrymatexApplication(QtGui.QApplication):
             f.write('%s' % self.applicationPid())
             f.close()
 
-    #========================================================
-    # Logging system and loggers
-    #========================================================
+
+    # --------------------- Logging system and loggers
     def getLogger(self, name):
         """ return logger, for filter by name in future """
         return logging.getLogger(name)
@@ -344,12 +354,8 @@ class PrymatexApplication(QtGui.QApplication):
         self.extendComponent(componentClass)
         self.profile.registerConfigurable(componentClass)
         for settingClass in componentClass.contributeToSettings():
-            try:
-                self.extendComponent(settingClass)
-                self.settingsDialog.register(settingClass(componentClass.settings))
-            except (RuntimeError, ImportError):
-                # TODO: Inform user but dont' prevent pmx from starting
-                pass
+            self.extendComponent(settingClass)
+            self.settingsDialog.register(settingClass(componentClass.settings))
 
     def createWidgetInstance(self, widgetClass, parent):
         # TODO Que parent sea opcional y pueda ser la mainWindow si no viene seteado

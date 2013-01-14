@@ -139,8 +139,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
 
     @classmethod
     def contributeToSettings(cls):
-        from prymatex.gui.settings.general import GeneralSettingsWidget
-        return [ GeneralSettingsWidget ]
+        from prymatex.gui.settings.mainwindow import MainWindowSettingsWidget
+        return [ MainWindowSettingsWidget ]
         
     #============================================================
     # Setups

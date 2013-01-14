@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 from prymatex import resources
 from prymatex.models.settings import SettingsTreeNode
@@ -13,7 +13,7 @@ class PMXEnvVariablesWidget(QtGui.QWidget, SettingsTreeNode, Ui_Environment):
     """Environment variables
     """
     NAMESPACE = "general"
-    TITLE = "Enviroment Variables"
+    TITLE = "Variables"
     ICON = resources.getIcon("code-variable")
     
     def __init__(self, settingGroup, parent = None):

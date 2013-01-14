@@ -3,7 +3,7 @@
 
 import os
 
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
 
 from prymatex import resources
 from prymatex.ui.configure.support import Ui_Support

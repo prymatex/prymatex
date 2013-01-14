@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 import os
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtNetwork import QNetworkProxy
+from prymatex.qt import QtGui, QtCore
+from prymatex.qt.QtNetwork import QNetworkProxy
 
 from prymatex import resources
 from prymatex.ui.configure.browser import Ui_BrowserWidget
