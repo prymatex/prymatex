@@ -154,12 +154,13 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
             
         mainWindow.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
         
+        # TODO: Ver esto de llamar a la application para crear que por otro lado llama nuevamente a esta instancia
         for dockClass in self.dockers:
-            dock = self.createWidgetInstance(dockClass, mainWindow)
+            dock = self.application.createWidgetComponentInstance(dockClass, mainWindow)
             mainWindow.addDock(dock, dock.PREFERED_AREA)
 
         for statusBarClass in self.statusBars:
-            status = self.createWidgetInstance(statusBarClass, mainWindow)
+            status = self.application.createWidgetComponentInstance(statusBarClass, mainWindow)
             mainWindow.addStatusBar(status)
     
     #==================================================

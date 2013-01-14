@@ -102,7 +102,8 @@ class SettingsGroup(object):
                 value = setting.getDefault(obj)
             else:
                 value = setting.toPyType(value)
-            setattr(obj, key, value)
+            if value is not None:
+                setattr(obj, key, value)
 
     def sync(self):
         for key, setting in self.settings.iteritems():
@@ -123,16 +124,14 @@ class pmxConfigPorperty(object):
     def getDefault(self, obj = None):
         if self.default != None:
             return self.default
-        elif self.fget != None and obj != None:
-            return self.fget(obj)
         return None
     
     def toPyType(self, obj):
         if self.default != None:
             obj_type = type(self.default)
-        elif self.fget != None:
-            obj_type = type(self.fget(obj))
-        return obj_type(obj)
+            return obj_type(obj)
+        return obj
+
 
     def __call__(self, function):
         self.fset = function

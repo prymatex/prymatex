@@ -36,9 +36,15 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     # ---------------------- Settings
     SETTINGS_GROUP = "Global"
 
-    @pmxConfigPorperty(default=resources.APPLICATION_STYLE)
-    def styleSheet(self, style):
-        self.setStyleSheet(style)
+    @pmxConfigPorperty()
+    def qtStyle(self, styleName):
+        self.setStyle(styleName)
+
+
+    @pmxConfigPorperty()
+    def qtStyleSheet(self, styleSheetName):
+        self.setStyleSheet(resources.STYLESHEETS[styleSheetName])
+
 
     askAboutExternalActions = pmxConfigPorperty(default=False)
 

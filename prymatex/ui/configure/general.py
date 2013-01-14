@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/general.ui'
 #
-# Created: Mon Jan 14 09:40:38 2013
+# Created: Mon Jan 14 12:09:12 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,9 +39,9 @@ class Ui_General(object):
         self.label_3 = QtGui.QLabel(self.groupBox_2)
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_3)
-        self.comboBoxQtTheme = QtGui.QComboBox(self.groupBox_2)
-        self.comboBoxQtTheme.setObjectName(_fromUtf8("comboBoxQtTheme"))
-        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.comboBoxQtTheme)
+        self.comboBoxQtStyleSheet = QtGui.QComboBox(self.groupBox_2)
+        self.comboBoxQtStyleSheet.setObjectName(_fromUtf8("comboBoxQtStyleSheet"))
+        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.comboBoxQtStyleSheet)
         self.verticalLayout.addWidget(self.groupBox_2)
         self.groupBox = QtGui.QGroupBox(General)
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
@@ -73,7 +73,7 @@ class Ui_General(object):
         General.setWindowTitle(_('General'))
         self.groupBox_2.setTitle(_('Interface'))
         self.label_2.setText(_('Qt style:'))
-        self.label_3.setText(_('Qt theme:'))
+        self.label_3.setText(_('Qt style sheet:'))
         self.groupBox.setTitle(_('Files'))
         self.labelEncoding.setText(_('Encoding'))
         self.labelLineEnding.setText(_('Line Ending'))

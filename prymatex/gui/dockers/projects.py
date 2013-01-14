@@ -35,6 +35,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     SETTINGS_GROUP = 'Projects'
     @pmxConfigPorperty(default = '')
     def customFilters(self, filters):
+        print filters
         filters = map(lambda p: p.strip(), filters.split(","))
         self.selectableProjectFileModel.setBaseFilters(filters)
         self.projectTreeProxyModel.setFilterRegExp(",".join(filters))
