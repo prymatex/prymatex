@@ -22,7 +22,7 @@ from prymatex.utils import coroutines
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime, logtime
 
-class PMXApplication(QtGui.QApplication):
+class PrymatexApplication(QtGui.QApplication):
     """The application instance.
     There can't be two apps running simultaneously, since configuration issues may occur.
     The application loads the PMX Support."""
@@ -543,6 +543,6 @@ class PMXApplication(QtGui.QApplication):
         return self.exec_()
 
     def __str__(self):
-        return '<PMXApplication at {} PID: {}>'.format(hash(self), os.getpid())
+        return '<PrymatexApplication at {} PID: {}>'.format(hash(self), os.getpid())
 
     __unicode__ = __repr__ = __str__

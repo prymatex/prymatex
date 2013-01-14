@@ -21,7 +21,7 @@ prymatexAppInstance = None
 # TODO: Accept Qt Arguments to QtApplication
 # TODO: Move as much as possible to application since it has the responsibility of running
 def runPrymatexApplication(options, files):
-    from prymatex.core.app import PMXApplication
+    from prymatex.core.app import PrymatexApplication
     from prymatex.core import exceptions
 
     def runPrymatexInstance(instanceOptions, instanceFiles=[]):
@@ -29,7 +29,7 @@ def runPrymatexApplication(options, files):
         if prymatexAppInstance is not None:
             prymatexAppInstance.unloadGraphicalUserInterface()
             del prymatexAppInstance
-        prymatexAppInstance = PMXApplication()
+        prymatexAppInstance = PrymatexApplication()
         try:
             prymatexAppInstance.buildSettings(instanceOptions.profile)
         except ValueError:
@@ -54,9 +54,9 @@ def runPrymatexApplication(options, files):
         traceback = format_exc()
         print(traceback)
 
-    if returnCode == PMXApplication.RESTART_CODE:
+    if returnCode == PrymatexApplication.RESTART_CODE:
         options.profile = ""
-        while returnCode == PMXApplication.RESTART_CODE:
+        while returnCode == PrymatexApplication.RESTART_CODE:
             returnCode = runPrymatexInstance(options)
 
     return returnCode
