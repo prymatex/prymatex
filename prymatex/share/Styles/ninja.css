@@ -1,0 +1,74 @@
+QToolBar {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+        stop: 0 #636363,stop: 1.0 #FFFFFF);
+}
+
+QToolBar::separator {
+    border-radius: 10px;
+    background: gray;
+    width: 2px; /* when vertical */
+    height: 2px; /* when horizontal */
+}
+
+QToolBar#custom {
+    border-radius: 5px;
+    border-width: 1px;
+    border-color:gray;
+    border-style: solid;
+}
+
+QPushButton#combo_button {
+    border: none;
+}
+
+QScrollBar:vertical{
+    border-left-width: 1px;
+    border-style:solid;
+    border-left-color: #9c9c9c;
+    background: #fcfcfc;
+    width: 11px;
+}
+
+QScrollBar:horizontal{
+    border-top-width: 1px;
+    border-style:solid;
+    border-top-color: #9c9c9c;
+    background: #fcfcfc;
+    height:12px;
+}
+
+QScrollBar::handle:vertical{
+    padding: 2px;
+    min-height: 50px;
+    background: #adadad;
+    border-radius: 5px;
+    border-width: 5px;
+}
+
+QScrollBar::handle:horizontal{
+    padding: 2px;
+    min-width: 50px;
+    background: #adadad;
+    border-radius: 5px;
+    border-width: 5px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical,
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical,
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal,
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal{
+    background: none;
+    border: none;
+}
+
+QLineEdit:focus {
+    border-style: solid;
+    border-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+        stop: 0 #aae3ef, stop: 1.0 #75d8ed);
+    border-width: 2px;
+    border-radius: 1px;
+}
