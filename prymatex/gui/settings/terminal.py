@@ -17,21 +17,6 @@ class PMXTerminalSettings(QtGui.QWidget, SettingsTreeNode, Ui_Terminal):
         SettingsTreeNode.__init__(self, "terminal", settingGroup)
         self.setupUi(self)
         
-        try:
-            from QTermWidget import QTermWidget
-        except ImportError:
-            return
-        
-        t = QTermWidget()
-        
-        self.comboScrollBar.addItem(_("No scrollbar"), t.NoScrollBar)
-        self.comboScrollBar.addItem(_("Left scrollbar"), t.ScrollBarLeft)
-        self.comboScrollBar.addItem(_("Right scrollbar"), t.ScrollBarRight)
-        
-        for name in t.availableColorSchemes():
-            self.comboColorScheme.addItem(name, name)
-        
-        del t
         
     def loadSettings(self):
         #colorScheme = self.settingGroup.value('colorScheme')
