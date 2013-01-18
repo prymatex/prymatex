@@ -46,43 +46,31 @@ class SettingsGroup(object):
         self.tmsettings = tmsettings
             
     def setValue(self, name, value):
-        #TODO: Ver que pasa con las listas
-        if name in self.settings:
+        setting = self.settings.get(name)
+        if setting:
             self.qsettings.beginGroup(self.name)
             self.qsettings.setValue(name, value)
             self.qsettings.endGroup()
-            if self.settings[name].tm_name != None:
-                self.tmsettings.setValue(self.settings[name].tm_name, value)
+            if setting.tm_name != None:
+                self.tmsettings.setValue(setting.tm_name, value)
             for listener in self.listeners:
                 setattr(listener, name, value)
     
-    @staticmethod
-    def toPyObject(obj):
-        if isinstance(obj, list):
-            return [SettingsGroup.toPyObject(o) for o in obj ]
-        elif isinstance(obj, dict):
-            return dict([(SettingsGroup.toPyObject(o[0]), SettingsGroup.toPyObject(o[1])) for o in obj.iteritems() ])
-        else:
-            return obj
-    
     def value(self, name, default = None):
-        self.qsettings.beginGroup(self.name)
-        value = self.qsettings.value(name, default)
-        self.qsettings.endGroup()
-        if value is None and name in self.settings:
-            #TODO: ver si tengo que pasarle un objeto
-            value = self.settings[name].getDefault()
-        return SettingsGroup.toPyObject(value)
+        setting = self.settings.get(name)
+        if setting:
+            self.qsettings.beginGroup(self.name)
+            value = self.qsettings.value(name, default)
+            self.qsettings.endGroup()
+            if value is None:
+                return self.settings[name].getDefault()
+            return setting.toPython(value)
         
     def hasValue(self, name):
         self.qsettings.beginGroup(self.name)
         value = self.qsettings.value(name)
         self.qsettings.endGroup()
-        if value == None and name in self.settings:
-            #TODO: ver si tengo que pasarle un objeto
-            return True
-        else:
-            return SettingsGroup.toPyObject(value) is not None
+        return name in self.settings and value is not None
     
     def addSetting(self, setting):
         self.settings[setting.name] = setting
@@ -101,7 +89,7 @@ class SettingsGroup(object):
             if value is None:
                 value = setting.getDefault(obj)
             else:
-                value = setting.toPyType(value)
+                value = setting.toPython(value)
             if value is not None:
                 setattr(obj, key, value)
 
@@ -116,30 +104,33 @@ class pmxConfigPorperty(object):
     """
     Configuration descriptor
     """
-    def __init__(self, default = None, fset = None, tm_name = None):
+    def __init__(self, valueType = None, default = None, fset = None, tm_name = None):
+        assert valueType is not None or default is not None, "Not type and not default value"
         self.default = default
+        self.valueType = valueType if valueType is not None else type(default)
         self.fset = fset
         self.tm_name = tm_name
     
-    def getDefault(self, obj = None):
-        if self.default != None:
-            return self.default
-        return None
-    
-    def toPyType(self, obj):
-        if self.default != None:
-            obj_type = type(self.default)
-            return obj_type(obj)
-        return obj
+    def getDefault(self):
+        return self.default
 
+
+    def toPython(self, value):
+        if self.valueType == bool and isinstance(value, basestring):
+            return value.lower() not in ('false', '0')
+        else:
+            return self.valueType(value)
+      
 
     def __call__(self, function):
         self.fset = function
         return self
-        
+
+
     def __get__(self, instance, instance_type = None):
         return self.value if hasattr(self, 'value') else self.default
-        
+
+
     def __set__(self, instance, value):
         self.value = value
         if self.fset is not None:

@@ -31,8 +31,22 @@ class GeneralSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_General):
             self.comboBoxQtStyleSheet.addItem(styleSheetName, styleSheetName)
             if currentStyleSheetName and styleSheetName == currentStyleSheetName:
                 self.comboBoxQtStyleSheet.setCurrentIndex(index)
-                
 
+        checks = ( self.checkBoxAskAboutExternalDeletions, self.checkBoxAskAboutExternalChanges )
+        map(lambda check: check.blockSignals(True), checks)
+        self.checkBoxAskAboutExternalDeletions.setChecked(self.settingGroup.value('askAboutExternalDeletions'))
+        self.checkBoxAskAboutExternalChanges.setChecked(self.settingGroup.value('askAboutExternalChanges'))
+        map(lambda check: check.blockSignals(False), checks)
+        
+
+    @QtCore.pyqtSlot(int)
+    def on_checkBoxAskAboutExternalDeletions_stateChanged(self, state):
+        self.settingGroup.setValue('askAboutExternalDeletions', state == QtCore.Qt.Checked)
+        
+    @QtCore.pyqtSlot(int)
+    def on_checkBoxAskAboutExternalChanges_stateChanged(self, state):
+        self.settingGroup.setValue('askAboutExternalChanges', state == QtCore.Qt.Checked)
+        
     @QtCore.pyqtSlot(str)
     def on_comboBoxQtStyle_activated(self, styleName):
         self.settingGroup.setValue('qtStyle', styleName)

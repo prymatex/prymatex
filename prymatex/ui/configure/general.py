@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/general.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/general.ui'
 #
-# Created: Mon Jan 14 12:09:12 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Thu Jan 17 19:51:02 2013
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -43,6 +43,21 @@ class Ui_General(object):
         self.comboBoxQtStyleSheet.setObjectName(_fromUtf8("comboBoxQtStyleSheet"))
         self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.comboBoxQtStyleSheet)
         self.verticalLayout.addWidget(self.groupBox_2)
+        self.groupBox_3 = QtGui.QGroupBox(General)
+        self.groupBox_3.setObjectName(_fromUtf8("groupBox_3"))
+        self.verticalLayout_2 = QtGui.QVBoxLayout(self.groupBox_3)
+        self.verticalLayout_2.setSpacing(2)
+        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
+        self.checkBoxAskAboutExternalDeletions = QtGui.QCheckBox(self.groupBox_3)
+        font = QtGui.QFont()
+        font.setItalic(False)
+        self.checkBoxAskAboutExternalDeletions.setFont(font)
+        self.checkBoxAskAboutExternalDeletions.setObjectName(_fromUtf8("checkBoxAskAboutExternalDeletions"))
+        self.verticalLayout_2.addWidget(self.checkBoxAskAboutExternalDeletions)
+        self.checkBoxAskAboutExternalChanges = QtGui.QCheckBox(self.groupBox_3)
+        self.checkBoxAskAboutExternalChanges.setObjectName(_fromUtf8("checkBoxAskAboutExternalChanges"))
+        self.verticalLayout_2.addWidget(self.checkBoxAskAboutExternalChanges)
+        self.verticalLayout.addWidget(self.groupBox_3)
         self.groupBox = QtGui.QGroupBox(General)
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
         self.formLayout_2 = QtGui.QFormLayout(self.groupBox)
@@ -74,6 +89,9 @@ class Ui_General(object):
         self.groupBox_2.setTitle(_('Interface'))
         self.label_2.setText(_('Qt style:'))
         self.label_3.setText(_('Qt style sheet:'))
+        self.groupBox_3.setTitle(_('External actions'))
+        self.checkBoxAskAboutExternalDeletions.setText(_('Ask about external file deletions? or remove editor'))
+        self.checkBoxAskAboutExternalChanges.setText(_('Ask about external file changes? or replace editor content'))
         self.groupBox.setTitle(_('Files'))
         self.labelEncoding.setText(_('Encoding'))
         self.labelLineEnding.setText(_('Line Ending'))

@@ -56,6 +56,7 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
 
     def reload(self):
         """ Reload current file """
+        self.setModified(False)
         self.setExternalAction(None)
         
     def setFilePath(self, filePath):
