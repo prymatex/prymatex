@@ -4,6 +4,8 @@
 import os
 import signal
 
+from prymatex.utils import osextra
+
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import create_menu
 
@@ -11,8 +13,6 @@ from prymatex.core import PMXBaseDock
 
 from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
-
-SIGNALS = dict([(keyname, getattr(signal, keyname)) for keyname in dir(signal) if keyname.startswith('SIG')])
 
 class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "F7"
@@ -53,7 +53,7 @@ class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
                   "items": map(lambda (key, value):
                         { "text": "%s (%s)" % (key, value),
                           "callback": lambda _, signal = value: self.on_actionSendSignal_triggered(signal)
-                        }, sorted(SIGNALS.iteritems(), key = lambda (k, v): v))
+                        }, sorted(osextra.SIGNALS.iteritems(), key = lambda (k, v): v))
                 }
             ]
         }
