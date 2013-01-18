@@ -62,6 +62,37 @@
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>External actions</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <item>
+       <widget class="QCheckBox" name="checkBoxAskAboutExternalDeletions">
+        <property name="font">
+         <font>
+          <italic>false</italic>
+         </font>
+        </property>
+        <property name="text">
+         <string>Ask about external file deletions? or remove editor</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxAskAboutExternalChanges">
+        <property name="text">
+         <string>Ask about external file changes? or replace editor content</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>Files</string>

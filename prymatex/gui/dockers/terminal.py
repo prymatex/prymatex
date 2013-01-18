@@ -113,17 +113,17 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
         PMXBaseDock.__init__(self)
-        self.backend = None
         self.setWindowTitle(_("Terminal"))
         self.setObjectName(_("TerminalDock"))
         self.tabTerminals = TabbedTerminal(self)
         self.setWidget(self.tabTerminals)
+        
+        # Backend Manager
         self.backendManager = BackendManager(parent = self)
+        self.application.aboutToQuit.connect(self.backendManager.closeAll)
+        
         self.localBackend = self.backendManager.localBackend(workingDirectory = get_home_dir())
         
-        
-    def finished(self):
-        pass
         
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)

@@ -242,9 +242,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def open(self, filePath):
         """ Custom open for large files """
-        self.application.fileManager.openFile(filePath)
+        PMXBaseEditor.open(self, filePath)
         content = self.application.fileManager.readFile(filePath)
-        self.setFilePath(filePath)
         self.setPlainText(content)
     
     def close(self):
@@ -252,9 +251,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         QtGui.QPlainTextEdit.close(self)
         
     def reload(self):
+        PMXBaseEditor.reload(self)
         content = self.application.fileManager.readFile(self.filePath)
         self.updatePlainText(content)
-        PMXBaseEditor.reload(self)
 
     def saveState(self):
         """Returns a Python dictionary containing the state of the editor."""

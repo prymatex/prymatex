@@ -65,21 +65,20 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
             self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.model().findIndex(currentTheme))
             self.setThemeSettings(currentTheme, False)
     
-    #==========================================================
-    # ComboBoxThemes
-    #==========================================================
+    
+    # ---------------------- ComboBoxThemes
     @QtCore.pyqtSlot(int)
     def on_comboBoxThemes_activated(self, index):
         theme = self.comboBoxThemes.model().themeForIndex(index)
         self.setThemeSettings(theme)
-        
-    #==========================================================
-    # TableView
-    #==========================================================
+
+
+    # --------------------- TableView
     def on_tableView_Activated(self, index):
         style = self.application.supportManager.themeStyleProxyModel.mapToSource(index).internalPointer()
         self.comboBoxScope.setEditText(style.scope) 
     
+
     def on_comboBoxScope_changed(self, string):
         string = unicode(string)
         index = self.tableViewStyles.currentIndex()
@@ -87,6 +86,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
             style = self.application.supportManager.themeStyleProxyModel.mapToSource(index).internalPointer()
             if string != style.scope:
                 self.application.supportManager.updateThemeStyle(style, scope = string)
+
 
     def setupTableView(self):
         self.tableViewStyles.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
@@ -104,10 +104,9 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
             self.comboBoxScope.addItem(scope)
         self.comboBoxScope.currentIndexChanged[str].connect(self.on_comboBoxScope_changed)
         self.comboBoxScope.editTextChanged.connect(self.on_comboBoxScope_changed)
+
     
-    #==========================================================
-    # Push Button
-    #==========================================================
+    # -------------------- Push Button
     def setupPushButton(self):
         #Colors
         self.pushButtonForeground.pressed.connect(lambda element = 'foreground': self.on_pushButtonColor_pressed(element))
@@ -122,6 +121,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         self.fontComboBoxName.setCurrentFont(font)
         self.spinBoxFontSize.setValue(font.pointSize())
     
+    
     @QtCore.pyqtSignature('')
     def on_pushButtonChangeFont_pressed(self):
         font = self.settingGroup.value('defaultFont')
@@ -131,10 +131,12 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
             self.fontComboBoxName.setCurrentFont(font)
             self.spinBoxFontSize.setValue(font.pointSize())
     
+    
     @QtCore.pyqtSignature('')
     def on_pushButtonAdd_pressed(self):
         theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
         style = self.application.supportManager.createThemeStyle('untitled', unicode(self.comboBoxScope.currentText()), theme)
+    
     
     @QtCore.pyqtSignature('')
     def on_pushButtonRemove_pressed(self):
@@ -143,6 +145,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
             style = self.application.supportManager.themeStyleProxyModel.mapToSource(index).internalPointer()
             self.application.supportManager.deleteThemeStyle(style)
     
+    
     def on_pushButtonColor_pressed(self, element):
         theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
         settings = theme.settings
@@ -150,6 +153,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         if ok:
             self.application.supportManager.updateTheme(theme, settings = { element: color })
             self.setThemeSettings(theme)
+    
     
     def setThemeSettings(self, theme, changeSettings = True):
         settings = theme.settings

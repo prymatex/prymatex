@@ -36,17 +36,18 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     # ---------------------- Settings
     SETTINGS_GROUP = "Global"
 
-    @pmxConfigPorperty()
+    @pmxConfigPorperty(valueType=str)
     def qtStyle(self, styleName):
         self.setStyle(styleName)
 
 
-    @pmxConfigPorperty()
+    @pmxConfigPorperty(valueType=str)
     def qtStyleSheet(self, styleSheetName):
         self.setStyleSheet(resources.STYLESHEETS[styleSheetName])
 
 
-    askAboutExternalActions = pmxConfigPorperty(default=False)
+    askAboutExternalDeletions = pmxConfigPorperty(default=False)
+    askAboutExternalChanges = pmxConfigPorperty(default=False)
 
     RESTART_CODE = 1000
 
@@ -503,7 +504,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             result = QtGui.QMessageBox.question(editor, _("File changed"),
                 _(message) % editor.filePath,
                 buttons=QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                defaultButton=QtGui.QMessageBox.Yes) if self.askAboutExternalActions else QtGui.QMessageBox.Yes
+                defaultButton=QtGui.QMessageBox.Yes) if self.askAboutExternalChanges else QtGui.QMessageBox.Yes
             if result == QtGui.QMessageBox.Yes:
                 if inspect.isgeneratorfunction(editor.reload):
                     task = self.scheduler.newTask(editor.reload())
@@ -516,7 +517,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             result = QtGui.QMessageBox.question(editor, _("File deleted"),
                 _(message) % editor.filePath,
                 buttons=QtGui.QMessageBox.Save | QtGui.QMessageBox.Close,
-                defaultButton=QtGui.QMessageBox.Close) if self.askAboutExternalActions else QtGui.QMessageBox.Close
+                defaultButton=QtGui.QMessageBox.Close) if self.askAboutExternalDeletions else QtGui.QMessageBox.Close
             if result == QtGui.QMessageBox.Close:
                 mainWindow.closeEditor(editor)
             elif result == QtGui.QMessageBox.Save:
