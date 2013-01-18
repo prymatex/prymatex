@@ -27,25 +27,21 @@ from prymatex.utils.i18n import ugettext as _
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     """Prymatex main window"""
-    #=========================================================
-    # Signals
-    #=========================================================
+    # --------------------- Signals
     currentEditorChanged = QtCore.pyqtSignal(object)
 
-    #=========================================================
-    # Settings
-    #=========================================================
+    # --------------------- Settings
     SETTINGS_GROUP = 'MainWindow'
 
     @pmxConfigPorperty(default = "$PMX_APP_NAME ($PMX_VERSION)")
     def windowTitleTemplate(self, titleTemplate):
          self.titleTemplate = Template(titleTemplate)
-    
+
     @pmxConfigPorperty(default = True)
     def showMenuBar(self, value):
         self._showMenuBar = value
         self.menuBar().setShown(value)
-    
+
     _editorHistory = []
     _editorHistoryIndex = 0
     
@@ -311,7 +307,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             
     def setWindowTitleForEditor(self, editor):
         #Set Window Title for editor, editor can be None
-        titleChunks = [ self.titleTemplate.safe_substitute(**self.application.supportManager.buildEnvironment()) ]
+        titleChunks = [ self.titleTemplate.safe_substitute(**self.application.supportManager.environmentVariables()) ]
         if editor is not None:
             titleChunks.insert(0, editor.tabTitle())
         self.setWindowTitle(" - ".join(titleChunks))

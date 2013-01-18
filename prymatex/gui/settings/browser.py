@@ -19,9 +19,6 @@ class NetworkSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_BrowserWidget):
         SettingsTreeNode.__init__(self, "browser", settingGroup)
         self.setupUi(self)
     
-    def filterString(self):
-        return "proxyportnetwork" + SettingsTreeNode.filterString(self)
-    
     def on_lineEditProxy_textEdited(self, text):
         self.settingGroup.setValue("proxy", text)
         

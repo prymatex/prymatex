@@ -19,12 +19,16 @@ class ConfigureTreeNode(TreeNodeBase):
         self.setIcon(self.ICON)
         
     def filterAcceptsNode(self, string):
-        if string in self.nodeName() + self.title():
+        string = string.lower()
+        if string in (self.nodeName() + self.title()).lower():
             return True
         for child in self.childNodes():
             if child.filterAcceptsNode(string):
                 return True
-        # TODO: Filtrar por QLabels
+        textItems = filter(lambda value: callable(getattr(value, "text", None)), map(lambda key: getattr(self, key), dir(self)))
+        for item in textItems:
+            if string in item.text().lower():
+                return True
         return False
     
     def title(self):

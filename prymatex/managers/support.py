@@ -243,19 +243,12 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
     # Environment
     #---------------------------------------------------
     def environmentVariables(self):
-        environment = PMXSupportBaseManager.buildEnvironment(self)
+        environment = PMXSupportBaseManager.environmentVariables(self)
         #Extend wiht the user shell variables
         for var in self.shellVariables:
             if var['enabled']:
                 environment[var['variable']] = var['value']
         return environment
-    
-    def buildEnvironment(self, systemEnvironment = True):
-        env = PMXSupportBaseManager.buildEnvironment(self, systemEnvironment)
-        for var in self.shellVariables:
-            if var['enabled']:
-                env[var['variable']] = var['value']
-        return env
     
     # Override loadSupport for emit signals
     def loadSupport(self, *largs, **kwargs):

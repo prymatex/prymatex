@@ -172,7 +172,7 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     fnmatch = lambda self, filename, pattern: fnmatch.fnmatch(filename, pattern)
     
     def expandVars(self, text):
-        context = self.application.supportManager.buildEnvironment()
+        context = self.application.supportManager.environmentVariables()
         path = osextra.path.expand_shell_var(text, context = context)
         if os.path.exists(path):
             return path

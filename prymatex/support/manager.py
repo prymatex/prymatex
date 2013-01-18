@@ -132,13 +132,6 @@ class PMXSupportBaseManager(object):
     def updateEnvironment(self, env):
         self.environment.update(env)
 
-    def buildEnvironment(self, systemEnvironment = True):
-        env = {}
-        if systemEnvironment:
-            env.update(os.environ)
-        env.update(self.environment)
-        return env
-    
     def projectEnvironment(self, project):
         assert hasattr(project, 'namespace'), "El proyecto no tienen namespace"
         namespace = project.namespace
