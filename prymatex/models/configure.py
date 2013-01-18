@@ -18,9 +18,15 @@ class ConfigureTreeNode(TreeNodeBase):
         self.setTitle(self.TITLE)
         self.setIcon(self.ICON)
         
-    def filterString(self):
-        return self.nodeName() + self.title() + reduce(lambda initial, child: initial + child.filterString(), self.childrenNodes, "")
-
+    def filterAcceptsNode(self, string):
+        if string in self.nodeName() + self.title():
+            return True
+        for child in self.childNodes():
+            if child.filterAcceptsNode(string):
+                return True
+        # TODO: Filtrar por QLabels
+        return False
+    
     def title(self):
         return self.__title
     
@@ -73,7 +79,7 @@ class SortFilterConfigureProxyModel(QtGui.QSortFilterProxyModel):
         node = self.sourceModel().node(sIndex)
         regexp = self.filterRegExp()
         if not regexp.isEmpty():
-            return regexp.indexIn(node.filterString()) != -1
+            return node.filterAcceptsNode(regexp.pattern())
         return True
 
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
