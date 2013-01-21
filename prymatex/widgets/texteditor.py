@@ -370,7 +370,13 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         self.__convert_text(cursor, text.transpose)
 
     #------ Update Text
-    def updatePlainText(self, text):
+    def updatePlainText(self, text, cursor = None):
+        if cursor and cursor.hasSelection():
+            sourceText = cursor.selectedText()
+            sourceOffset = cursor.selectionStart()
+        else:
+            sourceText = self.toPlainText()
+            sourceOffset = 0
         
         def perform_action(code, cursor, text=""):
             def _nop():
@@ -379,10 +385,15 @@ class TextEditWidget(QtGui.QPlainTextEdit):
                 cursor.insertText(text)
             return _action if code in ["insert", "replace", "delete"] else _nop
         
-        sequenceMatcher = difflib.SequenceMatcher(None, self.toPlainText(), text)
+        sequenceMatcher = difflib.SequenceMatcher(None, sourceText, text)
         opcodes = sequenceMatcher.get_opcodes()
         
-        actions = map(lambda code: perform_action(code[0], self.newCursorAtPosition(code[1], code[2]), text[code[3]:code[4]]), opcodes)
+        actions = map(
+            lambda code: perform_action(
+                code[0], 
+                self.newCursorAtPosition(code[1] + sourceOffset, code[2] + sourceOffset), text[code[3]:code[4]]
+            ),
+        opcodes)
         
         cursor = self.textCursor()
         
