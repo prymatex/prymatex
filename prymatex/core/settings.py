@@ -87,7 +87,7 @@ class SettingsGroup(object):
         for key, setting in self.settings.iteritems():
             value = self.value(key)
             if value is None:
-                value = setting.getDefault(obj)
+                value = setting.getDefault()
             else:
                 value = setting.toPython(value)
             if value is not None:
@@ -97,7 +97,7 @@ class SettingsGroup(object):
         for key, setting in self.settings.iteritems():
             if setting.default == None and self.listeners:
                 self.qsettings.beginGroup(self.name)
-                self.qsettings.setValue(key, setting.getDefault(self.listeners[0]))
+                self.qsettings.setValue(key, setting.getDefault())
                 self.qsettings.endGroup()
 
 class pmxConfigPorperty(object):
