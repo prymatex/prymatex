@@ -236,9 +236,9 @@ class Snippet(NodeList):
         self.snippetItem = snippetItem
 
     def render(self, processor):
-        self.start = processor.cursorPosition()
+        self.start = processor.caretPosition()
         super(Snippet, self).render(processor)
-        self.end = processor.cursorPosition()
+        self.end = processor.caretPosition()
 
 #Snippet structures
 class StructureTabstop(Node):
@@ -256,13 +256,13 @@ class StructureTabstop(Node):
         return node
 
     def render(self, processor, mirror = False):
-        self.start = processor.cursorPosition()
+        self.start = processor.caretPosition()
         if self.placeholder != None:
             self.placeholder.render(processor, mirror = True)
         else:
             if hasattr(self, 'content'):
                 processor.insertText(self.content)
-        self.end = processor.cursorPosition()
+        self.end = processor.caretPosition()
     
     def taborder(self, container):
         if type(container) == list:
@@ -290,7 +290,7 @@ class StructurePlaceholder(NodeList):
         
     def render(self, processor, mirror = False):
         if not mirror:
-            self.start = processor.cursorPosition()
+            self.start = processor.caretPosition()
         if hasattr(self, 'content'):
             processor.insertText(self.content)
         elif self.placeholder != None:
@@ -298,7 +298,7 @@ class StructurePlaceholder(NodeList):
         else:
             super(StructurePlaceholder, self).render(processor)
         if not mirror:
-            self.end = processor.cursorPosition()
+            self.end = processor.caretPosition()
     
     def taborder(self, container):
         if type(container) == list and container:
@@ -383,13 +383,13 @@ class VariablePlaceholder(NodeList):
         return node
     
     def render(self, processor):
-        self.start = processor.cursorPosition()
+        self.start = processor.caretPosition()
         environment = processor.environmentVariables()
         if self.name in environment:
             processor.insertText(environment[self.name])
         else:
             super(VariablePlaceholder, self).render(processor)
-        self.end = processor.cursorPosition()
+        self.end = processor.caretPosition()
     
 class VariableTransformation(Node):
     def __init__(self, scope, parent = None):
@@ -702,7 +702,9 @@ class PMXSnippet(PMXBundleItem):
         self.snippet.reset()
     
     def render(self, processor):
+        processor.startRender()
         self.snippet.render(processor)
+        processor.endRender()
         
     def addTaborder(self, taborder):
         self.taborder = []

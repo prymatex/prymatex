@@ -93,18 +93,19 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             selectedText = cursor.selectedText().replace(u"\u2029", '\n').replace(u"\u2028", '\n')
             currentHolder.setContent(selectedText)
             
-            #Remove text
-            self.selectSlice(self.editor.snippetProcessor.startPosition(), self.editor.snippetProcessor.endPosition() - length)
-            #self.editor.textCursor().removeSelectedText()
-            #self.editor.blockCountChanged.emit(self.editor.document().blockCount())
-            #TODO: Hacer esto de purgar de una mejor forma
-            #self.editor.symbolListModel._purge_blocks()
-            #self.editor.folding._purge_blocks()
-            #self.editor.alreadyTypedWords._purge_blocks()
+            # Wrap snippet
+            wrapCursor = self.editor.newCursorAtPosition(
+                self.editor.snippetProcessor.startPosition(), self.editor.snippetProcessor.endPosition() - length
+            )
             
             #Insert snippet
-            self.editor.snippetProcessor.render()
-            self.setCursorPosition(currentHolder.start + holderPosition + (positionAfter - positionBefore))
+            self.editor.snippetProcessor.render(wrapCursor)
+            
+            self.editor.setTextCursor(
+                self.editor.newCursorAtPosition(
+                    currentHolder.start + holderPosition + (positionAfter - positionBefore)
+                )
+            )
             cursor.endEditBlock()
         else:
             self.logger.debug("Con cualquier otra tecla sin texto")
@@ -115,16 +116,6 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
         if event is not None:
             return self.editor.keyPressEvent(event)
 
-    def setCursorPosition(self, position):
-        cursor = self.editor.textCursor()
-        cursor.setPosition(position)
-        self.editor.setTextCursor(cursor)
-        
-    def selectSlice(self, start, end):
-        cursor = self.editor.textCursor()
-        cursor.setPosition(start)
-        cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-        self.editor.setTextCursor(cursor)
 
 class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     def __init__(self, editor):

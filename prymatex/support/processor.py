@@ -56,12 +56,14 @@ PMXCommandProcessor = type("PMXCommandProcessor", (object, ), {
 PMXSnippetProcessor = type("PMXSnippetProcessor", (object, ), {
     "startSnippet": nop,
     "endSnippet": nop,
+    "startRender": nop,
+    "endRender": nop,
     "environmentVariables": nop,
     # transformations
     "startTransformation": nop,
     "endTransformation": nop,
-    # cursor or carret
-    "cursorPosition": nop,
+    # cursor or caret
+    "caretPosition": nop,
     # select
     "selectHolder": nop,
     # insert
