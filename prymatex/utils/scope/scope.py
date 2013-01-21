@@ -36,6 +36,7 @@ class Scope(object):
 
 wildcard = Scope("x-any")
 
+
 class Context(object):
     CONTEXTS = {}
     def __init__(self, left, right):
@@ -44,11 +45,11 @@ class Context(object):
 
     @classmethod
     def get(cls, left, right = None):
+        # TODO: Testing cache
         right = right or left
-        if left not in cls.CONTEXTS:
+        if left not in cls.CONTEXTS or right not in cls.CONTEXTS[left]:
             leftCache = cls.CONTEXTS.setdefault(left, {})
-            if right not in leftCache:
-                leftCache[right] = cls(left, right)
+            leftCache[right] = cls(left, right)
         return cls.CONTEXTS[left][right]
             
         
@@ -67,10 +68,11 @@ class Context(object):
     def __lt__(self, rhs):
         return self.left < rhs.left or self.left == self.rhs.left and self.right < rhs.right
 
+
 class Selector(object):
     def __init__(self, selector):
         self.selector = selector and Parser.selector(selector)
-
+        self.previousMatch = {}
 
     def __str__(self):
         return str(self.selector)
@@ -84,5 +86,11 @@ class Selector(object):
             return True
         if isinstance(context, (basestring, Scope)):
             context = Context.get(context)
+        # TODO: Testing cache
+        if context in self.previousMatch:
+            rank.append(self.previousMatch[context][1])
+            return self.previousMatch[context][0]
         if isinstance(context, Context):
-            return context.left == wildcard or context.right == wildcard or self.selector.does_match(context.left.path, context.right.path, rank)
+            match = context.left == wildcard or context.right == wildcard or self.selector.does_match(context.left.path, context.right.path, rank)
+            self.previousMatch[context] = (match, sum(rank))
+            return match
