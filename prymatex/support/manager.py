@@ -231,7 +231,7 @@ class PMXSupportBaseManager(object):
         return snippet
 
     def __sort_filter_items(self, items, leftScope, rightScope = None):
-        context = scope.Context(leftScope, rightScope)
+        context = scope.Context.get(leftScope, rightScope)
         rank = []
         sortFilterItems = []
         for item in items:

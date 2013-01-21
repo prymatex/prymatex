@@ -37,13 +37,21 @@ class Scope(object):
 wildcard = Scope("x-any")
 
 class Context(object):
-    def __init__(self, left, right = None):
+    CONTEXTS = {}
+    def __init__(self, left, right):
         self.left = isinstance(left, Scope) and left or Scope(left)
-        if right is not None:
-            self.right = isinstance(right, Scope) and right or Scope(right)
-        else:
-            self.right = isinstance(left, Scope) and left or Scope(left)
+        self.right = isinstance(right, Scope) and right or Scope(right)
+
+    @classmethod
+    def get(cls, left, right = None):
+        right = right or left
+        if left not in cls.CONTEXTS:
+            leftCache = cls.CONTEXTS.setdefault(left, {})
+            if right not in leftCache:
+                leftCache[right] = cls(left, right)
+        return cls.CONTEXTS[left][right]
             
+        
     def __str__(self):
         if self.left == self.right:
             return "(l/r '%s')" % str(self.left)
@@ -75,6 +83,6 @@ class Selector(object):
                 rank.append(0)
             return True
         if isinstance(context, (basestring, Scope)):
-            context = Context(context)
+            context = Context.get(context)
         if isinstance(context, Context):
             return context.left == wildcard or context.right == wildcard or self.selector.does_match(context.left.path, context.right.path, rank)
