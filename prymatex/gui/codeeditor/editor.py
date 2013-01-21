@@ -100,9 +100,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def defaultFlags(self, flags):
         self.setFlags(flags)
 
-    #================================================================
-    # INIT
-    #================================================================
+
+    # --------------------- init
     def __init__(self, parent = None):
         TextEditWidget.__init__(self, parent)
         PMXBaseEditor.__init__(self)
@@ -1057,9 +1056,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         else:
             QtGui.QPlainTextEdit.centerCursor(self)
 
-    #===========================================================================
-    # Text Indentation
-    #===========================================================================
+
+    # ------------------- Text Indentation
     def findPreviousNoBlankBlock(self, block):
         """ Return previous no blank indent block """
         block = block.previous()
@@ -1127,9 +1125,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             start = start.next()
         cursor.endEditBlock()
     
-    #===========================================================================
-    # Menus
-    #===========================================================================
+
+    # --------------- Menus
     # Flat Popup Menu
     def showFlatPopupMenu(self, menuItems, callback, cursorPosition = True):
         menu = QtGui.QMenu(self)
@@ -1460,9 +1457,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if item is not None:
             self.goToBlock(item['data'])
     
-    #===========================================================================
-    # Navigation API
-    #===========================================================================
+
+    # ---------------------- Navigation API
     def restoreLocationMemento(self, memento):
         self.setTextCursor(memento)
         
@@ -1471,9 +1467,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if not (cursor.atEnd() or cursor.atStart()):
             self.saveLocationMemento(self.newCursorAtPosition(cursor.position() - 1))
     
-    #===========================================================================
-    # Drag and Drop
-    #===========================================================================
+
+    # ----------------- Drag and Drop
     def dragEnterEvent(self, event):
         self.setFocus(QtCore.Qt.MouseFocusReason)
         mimeData = event.mimeData()
