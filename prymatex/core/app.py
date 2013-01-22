@@ -28,6 +28,7 @@ from prymatex.gui.dialogs.profile import PMXProfileDialog
 from prymatex.gui.dialogs.settings import PMXSettingsDialog
 from prymatex.gui.support.bundleeditor import PMXBundleEditor
 
+
 class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     """The application instance.
     There can't be two apps running simultaneously, since configuration issues may occur.
@@ -40,11 +41,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     def qtStyle(self, styleName):
         self.setStyle(styleName)
 
-
     @pmxConfigPorperty(valueType=str)
     def qtStyleSheet(self, styleSheetName):
         self.setStyleSheet(resources.STYLESHEETS[styleSheetName])
-
 
     askAboutExternalDeletions = pmxConfigPorperty(default=False)
     askAboutExternalChanges = pmxConfigPorperty(default=False)
@@ -82,7 +81,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import GeneralSettingsWidget
-        return [ GeneralSettingsWidget ]
+        return [GeneralSettingsWidget]
 
     def buildSplashScreen(self):
         from prymatex.widgets.splash import SplashScreen
@@ -103,14 +102,14 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         if not self.options.no_splash:
             splash.show()
         try:
-            self.cacheManager = self.setupCacheManager()        #Cache system Manager
-            self.pluginManager = self.setupPluginManager()      #Prepare plugin manager
+            self.cacheManager = self.setupCacheManager()  # Cache system Manager
+            self.pluginManager = self.setupPluginManager()  # Prepare plugin manager
 
             #TODO: Cambiar los setup por build, que retornen los manager
             # Loads
-            self.supportManager = self.setupSupportManager()    #Support Manager
-            self.fileManager = self.setupFileManager()          #File Manager
-            self.projectManager = self.setupProjectManager()    #Project Manager
+            self.supportManager = self.setupSupportManager()  # Support Manager
+            self.fileManager = self.setupFileManager()  # File Manager
+            self.projectManager = self.setupProjectManager()  # Project Manager
             self.setupCoroutines()
             self.server = self.buildPrymatexServer()
 
@@ -147,7 +146,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     def restart(self):
         self.exit(self.RESTART_CODE)
 
-    def buildProfile(self, profileName = None):
+    def buildProfile(self, profileName=None):
         if profileName is None or (profileName == "" and not PMXProfile.PMX_PROFILES_DONTASK):
             #Select profile
             profileName = PMXProfileDialog.selectProfile(PMXProfile.PMX_PROFILES_FILE)
@@ -156,17 +155,16 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             profileName = PMXProfile.PMX_PROFILE_DEFAULT
 
         self.profile = PMXProfile(profileName)
-        
+
         # Create the settings dialog
         self.extendComponent(PMXSettingsDialog)
         self.settingsDialog = PMXSettingsDialog(self)
-        
+
         # Prepare settings for application
         self.registerConfigurable(self.__class__)
 
-        # Configure application    
+        # Configure application
         self.profile.configure(self)
-
 
     def checkSingleInstance(self):
         """
@@ -183,7 +181,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             f.write('%s' % self.applicationPid())
             f.close()
 
-
     # --------------------- Logging system and loggers
     def getLogger(self, name):
         """ return logger, for filter by name in future """
@@ -192,7 +189,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     def setupLogging(self, verbose, namePattern):
         from datetime import datetime
 
-        level = [ logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG ][verbose % 5]
+        level = [logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG][verbose % 5]
 
         # File name
         filename = os.path.join(self.profile.PMX_LOG_PATH, '%s-%s.log' % (logging.getLevelName(level), datetime.now().strftime('%d-%m-%Y')))
@@ -230,45 +227,44 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         elif msgType == Qt.QtSystemMsg:
             self.logger.debug("System: %s" % msgString)
 
-
     # -------------------- Managers
     def setupSupportManager(self):
         from prymatex.managers.support import SupportManager
 
         self.populateComponent(SupportManager)
         manager = self.createComponentInstance(SupportManager, self)
-        
+
         #Prepare prymatex namespace
         sharePath = self.profile.value('PMX_SHARE_PATH')
         manager.addNamespace('prymatex', sharePath)
-        manager.updateEnvironment({ #TextMate Compatible :P
-                'TM_APP_PATH': self.profile.value('PMX_APP_PATH'),
-                'TM_SUPPORT_PATH': manager.environment['PMX_SUPPORT_PATH'],
-                'TM_BUNDLES_PATH': manager.environment['PMX_BUNDLES_PATH'],
-                'TM_THEMES_PATH': manager.environment['PMX_THEMES_PATH'],
-                'TM_PID': self.applicationPid(),
-                #Prymatex
-                'PMX_APP_NAME': self.applicationName().title(),
-                'PMX_APP_PATH': self.profile.value('PMX_APP_PATH'),
-                'PMX_PREFERENCES_PATH': self.profile.value('PMX_PREFERENCES_PATH'),
-                'PMX_VERSION': self.applicationVersion(),
-                'PMX_PID': self.applicationPid()
+        manager.updateEnvironment({  # TextMate Compatible :P
+            'TM_APP_PATH': self.profile.value('PMX_APP_PATH'),
+            'TM_SUPPORT_PATH': manager.environment['PMX_SUPPORT_PATH'],
+            'TM_BUNDLES_PATH': manager.environment['PMX_BUNDLES_PATH'],
+            'TM_THEMES_PATH': manager.environment['PMX_THEMES_PATH'],
+            'TM_PID': self.applicationPid(),
+            #Prymatex
+            'PMX_APP_NAME': self.applicationName().title(),
+            'PMX_APP_PATH': self.profile.value('PMX_APP_PATH'),
+            'PMX_PREFERENCES_PATH': self.profile.value('PMX_PREFERENCES_PATH'),
+            'PMX_VERSION': self.applicationVersion(),
+            'PMX_PID': self.applicationPid()
         })
 
         #Prepare user namespace
         homePath = self.profile.value('PMX_HOME_PATH')
         manager.addNamespace('user', homePath)
         manager.updateEnvironment({
-                'PMX_HOME_PATH': homePath,
-                'PMX_PROFILE_PATH': self.profile.value('PMX_PROFILE_PATH'),
-                'PMX_TMP_PATH': self.profile.value('PMX_TMP_PATH'),
-                'PMX_LOG_PATH': self.profile.value('PMX_LOG_PATH')
+            'PMX_HOME_PATH': homePath,
+            'PMX_PROFILE_PATH': self.profile.value('PMX_PROFILE_PATH'),
+            'PMX_TMP_PATH': self.profile.value('PMX_TMP_PATH'),
+            'PMX_LOG_PATH': self.profile.value('PMX_LOG_PATH')
         })
-        
+
         # Create bundle editor dialog
         self.extendComponent(PMXBundleEditor)
         self.bundleEditorDialog = PMXBundleEditor(self, manager)
-        
+
         return manager
 
     def setupFileManager(self):
@@ -292,7 +288,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         self.populateComponent(CacheManager)
         return self.createComponentInstance(CacheManager, self)
 
-
     def setupPluginManager(self):
         from prymatex.managers.plugins import PluginManager
 
@@ -305,23 +300,21 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         manager.loadPlugins()
         return manager
 
-
     def setupCoroutines(self):
         self.scheduler = coroutines.Scheduler(self)
-
 
     def buildPrymatexServer(self):
         from prymatex.core.server import PrymatexServer
         self.populateComponent(PrymatexServer)
         return self.createComponentInstance(PrymatexServer, self)
 
-
     # --------------------- Application events
     def closePrymatex(self):
         self.logger.debug("Close")
 
         self.profile.saveState(self.mainWindow)
-        os.unlink(self.fileLock)
+        if os.path.exists(self.fileLock):
+            os.unlink(self.fileLock)
 
     def commitData(self, manager):
         print "Commit data"
@@ -335,38 +328,32 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         componentClass.application = self
         componentClass.logger = self.getLogger('.'.join([componentClass.__module__, componentClass.__name__]))
 
-
     def registerConfigurable(self, componentClass):
         self.profile.registerConfigurable(componentClass)
         for settingClass in componentClass.contributeToSettings():
             self.extendComponent(settingClass)
             self.settingsDialog.register(settingClass(componentClass.settings))
 
-
     def populateComponent(self, componentClass):
         self.extendComponent(componentClass)
         self.registerConfigurable(componentClass)
 
-
-    def createComponentInstance(self, widgetClass, parent = None):
+    def createComponentInstance(self, widgetClass, parent=None):
         # TODO: Y si todo pasa por el plugin manager y se permiten los addons en los componentes?
         instance = widgetClass(parent)
         self.profile.configure(instance)
         instance.initialize()
         return instance
 
-
-    def createWidgetComponentInstance(self, widgetClass, parent = None):
+    def createWidgetComponentInstance(self, widgetClass, parent=None):
         return self.createWidgetInstance(widgetClass, parent)
 
-
-    def createWidgetInstance(self, widgetClass, parent = None):
+    def createWidgetInstance(self, widgetClass, parent=None):
         instance = self.pluginManager.createWidgetInstance(widgetClass, parent)
         self.profile.configure(instance)
         instance.initialize(parent)
         return instance
-        
-        
+
     #========================================================
     # Create Zmq Sockets
     #========================================================
@@ -421,17 +408,17 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         #from prymatex.utils.pyqtdebug import ipdb_set_trace
         #ipdb_set_trace()
         ext = os.path.splitext(filePath)[1].replace('.', '')
-        for fileTypes in  [ syntax.item.fileTypes for syntax in
-                            self.supportManager.getAllSyntaxes()
-                            if hasattr(syntax.item, 'fileTypes') and
-                            syntax.item.fileTypes ]:
+        for fileTypes in [syntax.item.fileTypes for syntax in
+                          self.supportManager.getAllSyntaxes()
+                          if hasattr(syntax.item, 'fileTypes') and
+                          syntax.item.fileTypes]:
 
             if ext in fileTypes:
                 return True
         return False
 
-
     __options = None
+
     @property
     def options(self):
         return self.__options
@@ -454,6 +441,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         elif self.fileManager.exists(filePath):
             mainWindow = mainWindow or self.mainWindow
             editor = self.createEditorInstance(filePath, mainWindow)
+
             def on_editorReady(mainWindow, editor, cursorPosition, focus):
                 def editorReady(openResult):
                     if isinstance(cursorPosition, tuple):
@@ -502,9 +490,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         if editor.isExternalChanged():
             message = "The file '%s' has been changed on the file system, Do you want to replace the editor contents with these changes?"
             result = QtGui.QMessageBox.question(editor, _("File changed"),
-                _(message) % editor.filePath,
-                buttons=QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                defaultButton=QtGui.QMessageBox.Yes) if self.askAboutExternalChanges else QtGui.QMessageBox.Yes
+                                                _(message) % editor.filePath,
+                                                buttons=QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                                                defaultButton=QtGui.QMessageBox.Yes) if self.askAboutExternalChanges else QtGui.QMessageBox.Yes
             if result == QtGui.QMessageBox.Yes:
                 if inspect.isgeneratorfunction(editor.reload):
                     task = self.scheduler.newTask(editor.reload())
@@ -515,9 +503,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         elif editor.isExternalDeleted():
             message = "The file '%s' has been deleted or is not accessible. Do you want to save your changes or close the editor without saving?"
             result = QtGui.QMessageBox.question(editor, _("File deleted"),
-                _(message) % editor.filePath,
-                buttons=QtGui.QMessageBox.Save | QtGui.QMessageBox.Close,
-                defaultButton=QtGui.QMessageBox.Close) if self.askAboutExternalDeletions else QtGui.QMessageBox.Close
+                                                _(message) % editor.filePath,
+                                                buttons=QtGui.QMessageBox.Save | QtGui.QMessageBox.Close,
+                                                defaultButton=QtGui.QMessageBox.Close) if self.askAboutExternalDeletions else QtGui.QMessageBox.Close
             if result == QtGui.QMessageBox.Close:
                 mainWindow.closeEditor(editor)
             elif result == QtGui.QMessageBox.Save:
