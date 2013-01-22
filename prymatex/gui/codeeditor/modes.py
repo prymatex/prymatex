@@ -67,15 +67,15 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             currentHolder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
             if currentHolder is None or currentHolder.last:
                 return self.endSnippet(event)
-            
+
             #Cuidado con los extremos del holder
             if not cursor.hasSelection():
                 if event.key() == QtCore.Qt.Key_Backspace and cursor.position() == currentHolder.start:
                     return self.endSnippet(event)
-                
+
                 if event.key() == QtCore.Qt.Key_Delete and cursor.position() == currentHolder.end:
                     return self.endSnippet(event)
-                
+
             holderPosition = cursor.selectionStart() - currentHolder.start
             positionBefore = cursor.selectionStart()
             charactersBefore = cursor.document().characterCount()

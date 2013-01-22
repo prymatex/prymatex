@@ -7,7 +7,7 @@ from prymatex import resources
 
 from prymatex.ui.configure.theme import Ui_FontTheme
 from prymatex.models.settings import SettingsTreeNode
-from prymatex.models.delegates import PMXColorDelegate, PMXFontStyleDelegate
+from prymatex.delegates.theme import FontStyleDelegate, ColorDelegate
 from prymatex.qt.helpers.colors import color2rgba
 from prymatex.utils.i18n import ugettext as _
 
@@ -89,14 +89,11 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
 
 
     def setupTableView(self):
-        self.tableViewStyles.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
-        self.tableViewStyles.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
-        
         self.tableViewStyles.activated.connect(self.on_tableView_Activated)
         self.tableViewStyles.pressed.connect(self.on_tableView_Activated)
-        self.tableViewStyles.setItemDelegateForColumn(1, PMXColorDelegate(self))
-        self.tableViewStyles.setItemDelegateForColumn(2, PMXColorDelegate(self))
-        self.tableViewStyles.setItemDelegateForColumn(3, PMXFontStyleDelegate(self))
+        self.tableViewStyles.setItemDelegateForColumn(1, ColorDelegate(self))
+        self.tableViewStyles.setItemDelegateForColumn(2, ColorDelegate(self))
+        self.tableViewStyles.setItemDelegateForColumn(3, FontStyleDelegate(self))
         self.tableViewStyles.setEditTriggers(QtGui.QAbstractItemView.AllEditTriggers)
         
         #Conectar
@@ -173,6 +170,9 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         color: %s;
         selection-background-color: %s; }""" % (settings['background'].name(), settings['foreground'].name(), settings['selection'].name())
         self.tableViewStyles.setStyleSheet(tableStyle)
+        self.tableViewStyles.resizeColumnsToContents()
+        self.tableViewStyles.resizeRowsToContents()
+        self.tableViewStyles.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
         
         if changeSettings:
             self.settingGroup.setValue('defaultTheme', unicode(theme.uuid).upper())

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/theme.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/theme.ui'
 #
-# Created: Thu Jan 17 19:51:02 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Tue Jan 22 10:15:33 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,7 +18,7 @@ except AttributeError:
 class Ui_FontTheme(object):
     def setupUi(self, FontTheme):
         FontTheme.setObjectName(_fromUtf8("FontTheme"))
-        FontTheme.resize(475, 547)
+        FontTheme.resize(605, 728)
         self.verticalLayout_2 = QtGui.QVBoxLayout(FontTheme)
         self.verticalLayout_2.setSpacing(6)
         self.verticalLayout_2.setMargin(0)
@@ -157,8 +157,6 @@ class Ui_FontTheme(object):
         self.horizontalLayout_3.addWidget(self.comboBoxScope)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
         self.verticalLayout_2.addWidget(self.groupBoxTheme)
-        spacerItem1 = QtGui.QSpacerItem(20, 116, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_2.addItem(spacerItem1)
 
         self.retranslateUi(FontTheme)
         QtCore.QMetaObject.connectSlotsByName(FontTheme)
