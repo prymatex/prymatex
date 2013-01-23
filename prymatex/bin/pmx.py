@@ -24,7 +24,7 @@ def runPrymatexApplication(options, files):
     from prymatex.core.app import PrymatexApplication
     from prymatex.core import exceptions
 
-    def runPrymatexInstance(instanceOptions, instanceFiles=[]):
+    def runPrymatexInstance(instanceOptions, instanceFiles = []):
         global prymatexAppInstance
         if prymatexAppInstance is not None:
             prymatexAppInstance.unloadGraphicalUserInterface()
@@ -35,26 +35,26 @@ def runPrymatexApplication(options, files):
         prymatexAppInstance.options = instanceOptions
         return prymatexAppInstance.execWithArgs(instanceFiles)
 
-    returnCode = -1
+    returnCode = PrymatexApplication.RESTART_CODE
     try:
-        returnCode = runPrymatexInstance(options, files)
+        while returnCode == PrymatexApplication.RESTART_CODE:
+            returnCode = runPrymatexInstance(options, files)
+            # Clean in case of restart
+            options.profile, files = "", []
     except exceptions.EnviromentNotSuitable:
         print "Prymatex can't run. Basic imports can't be found. Running in virtualenv?"
-
+        returnCode = -1
 
     except exceptions.AlreadyRunningError as ex:
         from PyQt4 import QtGui
         QtGui.QMessageBox.critical(None, ex.title, ex.message, QtGui.QMessageBox.Ok)
+        returnCode = -2
 
     except:
         from traceback import format_exc
         traceback = format_exc()
         print(traceback)
-
-    if returnCode == PrymatexApplication.RESTART_CODE:
-        options.profile = ""
-        while returnCode == PrymatexApplication.RESTART_CODE:
-            returnCode = runPrymatexInstance(options)
+        returnCode = -3
 
     return returnCode
 
