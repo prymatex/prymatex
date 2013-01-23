@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/terminal.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/terminal.ui'
 #
-# Created: Thu Jan 17 19:51:02 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Wed Jan 23 09:31:01 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,7 +18,7 @@ except AttributeError:
 class Ui_Terminal(object):
     def setupUi(self, Terminal):
         Terminal.setObjectName(_fromUtf8("Terminal"))
-        Terminal.resize(400, 341)
+        Terminal.resize(533, 268)
         self.verticalLayout_2 = QtGui.QVBoxLayout(Terminal)
         self.verticalLayout_2.setSpacing(6)
         self.verticalLayout_2.setMargin(0)
@@ -78,6 +78,9 @@ class Ui_Terminal(object):
         self.spinBoxBufferSize.setMaximumSize(QtCore.QSize(100, 16777215))
         self.spinBoxBufferSize.setObjectName(_fromUtf8("spinBoxBufferSize"))
         self.formLayout_2.setWidget(2, QtGui.QFormLayout.FieldRole, self.spinBoxBufferSize)
+        self.checkBox = QtGui.QCheckBox(self.groupBox_2)
+        self.checkBox.setObjectName(_fromUtf8("checkBox"))
+        self.formLayout_2.setWidget(3, QtGui.QFormLayout.SpanningRole, self.checkBox)
         self.verticalLayout_2.addWidget(self.groupBox_2)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem)
@@ -90,8 +93,9 @@ class Ui_Terminal(object):
         self.groupBoxFont.setTitle(_('Font'))
         self.checkBoxFontAntialias.setText(_('Anti alias'))
         self.groupBox.setTitle(_('Appearance'))
-        self.label.setText(_('Color Scheme:'))
+        self.label.setText(_('Color scheme:'))
         self.label_2.setText(_('Scroll:'))
-        self.groupBox_2.setTitle(_('Source'))
+        self.groupBox_2.setTitle(_('Behavior'))
         self.label_3.setText(_('Buffer:'))
+        self.checkBox.setText(_('Automatically synchronize the terminal with the current document when possible'))
 

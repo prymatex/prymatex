@@ -85,8 +85,8 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         self.editor.fontChanged.connect(self.on_editor_fontChanged)
     
     def __update_colours(self):
-        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
-        self.foreground = self.editor.colours["foreground"]
+        self.background = self.editor.colours['gutter']
+        self.foreground = self.editor.colours['gutterForeground']
         
     def __update_fonts(self):
         self.normalFont = QtGui.QFont(self.editor.font())
@@ -179,11 +179,13 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         
     def initialize(self, editor):
         SideBarWidgetAddon.initialize(self, editor)
-        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
+        self.background = self.editor.colours['gutter']
+        self.foreground = self.editor.colours['gutterForeground']
         self.editor.themeChanged.connect(self.updateColours)
         
     def updateColours(self):
-        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
+        self.background = self.editor.colours['gutter']
+        self.foreground = self.editor.colours['gutterForeground']
         self.repaint(self.rect())
 
     @classmethod

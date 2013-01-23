@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/general.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/general.ui'
 #
-# Created: Thu Jan 17 19:51:02 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Wed Jan 23 09:31:01 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -20,7 +20,7 @@ class Ui_General(object):
         General.setObjectName(_fromUtf8("General"))
         General.resize(506, 274)
         self.verticalLayout = QtGui.QVBoxLayout(General)
-        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setSpacing(6)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.groupBox_2 = QtGui.QGroupBox(General)
@@ -58,26 +58,6 @@ class Ui_General(object):
         self.checkBoxAskAboutExternalChanges.setObjectName(_fromUtf8("checkBoxAskAboutExternalChanges"))
         self.verticalLayout_2.addWidget(self.checkBoxAskAboutExternalChanges)
         self.verticalLayout.addWidget(self.groupBox_3)
-        self.groupBox = QtGui.QGroupBox(General)
-        self.groupBox.setObjectName(_fromUtf8("groupBox"))
-        self.formLayout_2 = QtGui.QFormLayout(self.groupBox)
-        self.formLayout_2.setFieldGrowthPolicy(QtGui.QFormLayout.ExpandingFieldsGrow)
-        self.formLayout_2.setMargin(6)
-        self.formLayout_2.setSpacing(2)
-        self.formLayout_2.setObjectName(_fromUtf8("formLayout_2"))
-        self.labelEncoding = QtGui.QLabel(self.groupBox)
-        self.labelEncoding.setObjectName(_fromUtf8("labelEncoding"))
-        self.formLayout_2.setWidget(0, QtGui.QFormLayout.LabelRole, self.labelEncoding)
-        self.comboBoxEncoding = QtGui.QComboBox(self.groupBox)
-        self.comboBoxEncoding.setObjectName(_fromUtf8("comboBoxEncoding"))
-        self.formLayout_2.setWidget(0, QtGui.QFormLayout.FieldRole, self.comboBoxEncoding)
-        self.labelLineEnding = QtGui.QLabel(self.groupBox)
-        self.labelLineEnding.setObjectName(_fromUtf8("labelLineEnding"))
-        self.formLayout_2.setWidget(1, QtGui.QFormLayout.LabelRole, self.labelLineEnding)
-        self.comboBoxLineEnding = QtGui.QComboBox(self.groupBox)
-        self.comboBoxLineEnding.setObjectName(_fromUtf8("comboBoxLineEnding"))
-        self.formLayout_2.setWidget(1, QtGui.QFormLayout.FieldRole, self.comboBoxLineEnding)
-        self.verticalLayout.addWidget(self.groupBox)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
 
@@ -92,7 +72,4 @@ class Ui_General(object):
         self.groupBox_3.setTitle(_('External actions'))
         self.checkBoxAskAboutExternalDeletions.setText(_('Ask about external file deletions? or remove editor'))
         self.checkBoxAskAboutExternalChanges.setText(_('Ask about external file changes? or replace editor content'))
-        self.groupBox.setTitle(_('Files'))
-        self.labelEncoding.setText(_('Encoding'))
-        self.labelLineEnding.setText(_('Line Ending'))
 

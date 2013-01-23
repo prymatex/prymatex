@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/browser.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/browser.ui'
 #
-# Created: Thu Jan 17 19:51:02 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Wed Jan 23 09:31:01 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -48,15 +48,15 @@ class Ui_BrowserWidget(object):
         self.lineEditProxy = QtGui.QLineEdit(self.groupBox)
         self.lineEditProxy.setObjectName(_fromUtf8("lineEditProxy"))
         self.formLayout.setWidget(4, QtGui.QFormLayout.FieldRole, self.lineEditProxy)
-        self.radioButtonManualProxy = QtGui.QRadioButton(self.groupBox)
-        self.radioButtonManualProxy.setObjectName(_fromUtf8("radioButtonManualProxy"))
-        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.radioButtonManualProxy)
-        self.radioButtonSystemProxy = QtGui.QRadioButton(self.groupBox)
-        self.radioButtonSystemProxy.setObjectName(_fromUtf8("radioButtonSystemProxy"))
-        self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.radioButtonSystemProxy)
         self.radioButtonNoProxy = QtGui.QRadioButton(self.groupBox)
         self.radioButtonNoProxy.setObjectName(_fromUtf8("radioButtonNoProxy"))
-        self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.radioButtonNoProxy)
+        self.formLayout.setWidget(0, QtGui.QFormLayout.SpanningRole, self.radioButtonNoProxy)
+        self.radioButtonSystemProxy = QtGui.QRadioButton(self.groupBox)
+        self.radioButtonSystemProxy.setObjectName(_fromUtf8("radioButtonSystemProxy"))
+        self.formLayout.setWidget(1, QtGui.QFormLayout.SpanningRole, self.radioButtonSystemProxy)
+        self.radioButtonManualProxy = QtGui.QRadioButton(self.groupBox)
+        self.radioButtonManualProxy.setObjectName(_fromUtf8("radioButtonManualProxy"))
+        self.formLayout.setWidget(2, QtGui.QFormLayout.SpanningRole, self.radioButtonManualProxy)
         self.verticalLayout.addWidget(self.groupBox)
         spacerItem = QtGui.QSpacerItem(20, 15, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
@@ -70,7 +70,7 @@ class Ui_BrowserWidget(object):
         self.checkBoxDeveloperExtras.setText(_('Enable developer extras'))
         self.groupBox.setTitle(_('Connection'))
         self.labelProxy.setText(_('Proxy:'))
-        self.radioButtonManualProxy.setText(_('Manual proxy configuration'))
-        self.radioButtonSystemProxy.setText(_('Use system proxy settings'))
         self.radioButtonNoProxy.setText(_('No proxy'))
+        self.radioButtonSystemProxy.setText(_('Use system proxy settings'))
+        self.radioButtonManualProxy.setText(_('Manual proxy configuration'))
 

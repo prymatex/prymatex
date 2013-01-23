@@ -17,7 +17,7 @@ from prymatex.utils.decorators.memoize import dynamic_memoized
 from prymatex.models.process import ExternalProcessTableModel
 from prymatex.models.support import (BundleItemTreeModel, BundleItemTreeNode,
                                     ThemeListModel, ThemeStylesTableModel, 
-                                    ThemeStyleTableRow)
+                                    ThemeTableRow, ThemeStyleTableRow)
 from prymatex.models.support import (BundleItemProxyTreeModel, BundleItemTypeProxyModel, 
                                     ThemeStyleProxyTableModel, BundleListModel, 
                                     SyntaxListModel, TemplateListModel, ProjectListModel)
@@ -389,7 +389,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
     # THEME OVERRIDE INTERFACE
     #---------------------------------------------------
     def addTheme(self, theme):
-        themeRow = ThemeStyleTableRow(theme)
+        themeRow = ThemeTableRow(theme)
         self.themeListModel.appendTheme(themeRow)
         self.themeAdded.emit(themeRow)
         return themeRow

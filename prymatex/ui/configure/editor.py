@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/editor.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/editor.ui'
 #
-# Created: Thu Jan 17 19:51:02 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Wed Jan 23 09:31:01 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -94,7 +94,7 @@ class Ui_Editor(object):
     def retranslateUi(self, Editor):
         Editor.setWindowTitle(_('Editor'))
         self.groupBox_2.setTitle(_('Source'))
-        self.labelDefaultSyntax.setText(_('Default syntax'))
+        self.labelDefaultSyntax.setText(_('Default syntax:'))
         self.checkBoxHighlightCurrenLine.setText(_('Highlight current line'))
         self.checkBoxShowMarginLine.setText(_('Show margin line after'))
         self.checkBoxShowTabSpaces.setText(_('Show tabs and spaces'))

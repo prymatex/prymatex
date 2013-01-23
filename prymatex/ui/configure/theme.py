@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/theme.ui'
 #
-# Created: Tue Jan 22 10:15:33 2013
+# Created: Wed Jan 23 09:31:01 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -168,11 +168,11 @@ class Ui_FontTheme(object):
         self.groupBoxTheme.setTitle(_('Theme'))
         self.label_6.setText(_('Invisibles:'))
         self.label_4.setText(_('Background:'))
-        self.label_10.setText(_('Gutter Background:'))
+        self.label_10.setText(_('Gutter background:'))
         self.label_5.setText(_('Selection:'))
         self.label_3.setText(_('Foreground:'))
         self.label_7.setText(_('Caret:'))
-        self.label_8.setText(_('Line Highlight:'))
-        self.label_11.setText(_('Gutter Foreground:'))
-        self.label_9.setText(_('Scope Selector:'))
+        self.label_8.setText(_('Line highlight:'))
+        self.label_11.setText(_('Gutter foreground:'))
+        self.label_9.setText(_('Scope selector:'))
 

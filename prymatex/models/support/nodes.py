@@ -113,44 +113,48 @@ class BundleItemMenuTreeNode(TreeNodeBase):
         self.nodeType = nodeType
 
 #====================================================
-# Themes Styles Row
+# Theme Table Row
 #====================================================
-class ThemeStyleTableRow(object):
+class ThemeTableRow(object):
     """Theme and Style decorator"""
-    def __init__(self, style):
-        self.__style = style
+    def __init__(self, themeItem):
+        self.__themeItem = themeItem
         self.STYLES_CACHE = {}
-    
-    def __getattr__(self, name):
-        # Quitar esta cosa fea
-        return getattr(self.__style, name)
 
-    def style(self):
-        return self.__style
+    # ---------------------------- Decorator
+    def __getattr__(self, name):
+        return getattr(self.__themeItem, name)
+
+
+    def themeItem(self):
+        return self.__themeItem
+
 
     @property
     def settings(self):
-        settings = {}
-        for color_key in ['foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter']:
-            if color_key in self.__style.settings and self.__style.settings[color_key]:
-                color = rgba2color(self.__style.settings[color_key])
-                settings[color_key] = color
-        settings['fontStyle'] = self.__style.settings['fontStyle'].split() if 'fontStyle' in self.__style.settings else []
+        settings = dict(map(lambda (key, value): (key, rgba2color(value)), filter(lambda (key, value): value.startswith('#'), self.__themeItem.settings.iteritems())))
+        
+        # Fix some color keys
+        settings.setdefault('gutter', settings['background'])
+        settings.setdefault('gutterForeground', settings['foreground'])
+        
+        # Fonts
+        settings['fontStyle'] = self.__themeItem.settings['fontStyle'].split() if 'fontStyle' in self.__themeItem.settings else []
         return settings
+
     
     def update(self, dataHash):
         if 'settings' in dataHash:
-            settings = {}
-            for key in dataHash['settings'].keys():
-                if key in ['foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter']:
-                    settings[key] = color2rgba(dataHash['settings'][key])
+            settings = dict(map(lambda (key, value): (key, color2rgba(value)), dataHash['settings'].iteritems()))
             if 'fontStyle' in dataHash['settings']:
                 settings['fontStyle'] = " ".join(dataHash['settings']['fontStyle'])
             dataHash['settings'] = settings
-        self.__style.update(dataHash)
+        self.__themeItem.update(dataHash)
+
     
     def clearCache(self):
         self.STYLES_CACHE = {}
+
 
     def getStyle(self, scope = None):
         if scope in self.STYLES_CACHE:
@@ -169,3 +173,39 @@ class ThemeStyleTableRow(object):
             base.update(style.settings)
         self.STYLES_CACHE[scope] = base
         return base
+
+
+#====================================================
+# Themes Styles Row
+#====================================================
+class ThemeStyleTableRow(object):
+    """Theme and Style decorator"""
+    def __init__(self, styleItem):
+        self.__styleItem = styleItem
+
+
+    # ---------------------------- Decorator
+    def __getattr__(self, name):
+        return getattr(self.__styleItem, name)
+
+
+    def styleItem(self):
+        return self.__styleItem
+
+
+    @property
+    def settings(self):
+        settings = dict(map(lambda (key, value): (key, rgba2color(value)), filter(lambda (key, value): value.startswith('#'), self.__styleItem.settings.iteritems())))
+        
+        # Fonts
+        settings['fontStyle'] = self.__styleItem.settings['fontStyle'].split() if 'fontStyle' in self.__styleItem.settings else []
+        return settings
+
+    
+    def update(self, dataHash):
+        if 'settings' in dataHash:
+            settings = dict(map(lambda (key, value): (key, color2rgba(value)), dataHash['settings'].iteritems()))
+            if 'fontStyle' in dataHash['settings']:
+                settings['fontStyle'] = " ".join(dataHash['settings']['fontStyle'])
+            dataHash['settings'] = settings
+        self.__styleItem.update(dataHash)

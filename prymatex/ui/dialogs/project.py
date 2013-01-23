@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/project.ui'
 #
-# Created: Fri Jan 11 10:55:13 2013
+# Created: Wed Jan 23 09:31:01 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,7 +19,7 @@ class Ui_NewProjectDialog(object):
     def setupUi(self, NewProjectDialog):
         NewProjectDialog.setObjectName(_fromUtf8("NewProjectDialog"))
         NewProjectDialog.setWindowModality(QtCore.Qt.WindowModal)
-        NewProjectDialog.resize(464, 323)
+        NewProjectDialog.resize(464, 332)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         NewProjectDialog.setWindowIcon(icon)
@@ -44,10 +44,6 @@ class Ui_NewProjectDialog(object):
         self.textDescription = QtGui.QTextEdit(NewProjectDialog)
         self.textDescription.setObjectName(_fromUtf8("textDescription"))
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.FieldRole, self.textDescription)
-        self.checkBoxUseDefaultLocation = QtGui.QCheckBox(NewProjectDialog)
-        self.checkBoxUseDefaultLocation.setChecked(True)
-        self.checkBoxUseDefaultLocation.setObjectName(_fromUtf8("checkBoxUseDefaultLocation"))
-        self.formLayout_2.setWidget(3, QtGui.QFormLayout.FieldRole, self.checkBoxUseDefaultLocation)
         self.label2 = QtGui.QLabel(NewProjectDialog)
         self.label2.setObjectName(_fromUtf8("label2"))
         self.formLayout_2.setWidget(4, QtGui.QFormLayout.LabelRole, self.label2)
@@ -64,9 +60,6 @@ class Ui_NewProjectDialog(object):
         self.buttonChoose.setObjectName(_fromUtf8("buttonChoose"))
         self.horizontalLayout_5.addWidget(self.buttonChoose)
         self.formLayout_2.setLayout(4, QtGui.QFormLayout.FieldRole, self.horizontalLayout_5)
-        self.checkBoxUseTemplate = QtGui.QCheckBox(NewProjectDialog)
-        self.checkBoxUseTemplate.setObjectName(_fromUtf8("checkBoxUseTemplate"))
-        self.formLayout_2.setWidget(6, QtGui.QFormLayout.FieldRole, self.checkBoxUseTemplate)
         self.label_2 = QtGui.QLabel(NewProjectDialog)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.formLayout_2.setWidget(7, QtGui.QFormLayout.LabelRole, self.label_2)
@@ -95,10 +88,6 @@ class Ui_NewProjectDialog(object):
         self.line_2.setFrameShadow(QtGui.QFrame.Sunken)
         self.line_2.setObjectName(_fromUtf8("line_2"))
         self.formLayout_2.setWidget(8, QtGui.QFormLayout.SpanningRole, self.line_2)
-        self.checkBoxAddToWorkingSet = QtGui.QCheckBox(NewProjectDialog)
-        self.checkBoxAddToWorkingSet.setChecked(False)
-        self.checkBoxAddToWorkingSet.setObjectName(_fromUtf8("checkBoxAddToWorkingSet"))
-        self.formLayout_2.setWidget(9, QtGui.QFormLayout.FieldRole, self.checkBoxAddToWorkingSet)
         self.label3 = QtGui.QLabel(NewProjectDialog)
         self.label3.setObjectName(_fromUtf8("label3"))
         self.formLayout_2.setWidget(10, QtGui.QFormLayout.LabelRole, self.label3)
@@ -123,6 +112,17 @@ class Ui_NewProjectDialog(object):
         self.comboBoxLicence = QtGui.QComboBox(NewProjectDialog)
         self.comboBoxLicence.setObjectName(_fromUtf8("comboBoxLicence"))
         self.formLayout_2.setWidget(2, QtGui.QFormLayout.FieldRole, self.comboBoxLicence)
+        self.checkBoxUseDefaultLocation = QtGui.QCheckBox(NewProjectDialog)
+        self.checkBoxUseDefaultLocation.setChecked(True)
+        self.checkBoxUseDefaultLocation.setObjectName(_fromUtf8("checkBoxUseDefaultLocation"))
+        self.formLayout_2.setWidget(3, QtGui.QFormLayout.SpanningRole, self.checkBoxUseDefaultLocation)
+        self.checkBoxUseTemplate = QtGui.QCheckBox(NewProjectDialog)
+        self.checkBoxUseTemplate.setObjectName(_fromUtf8("checkBoxUseTemplate"))
+        self.formLayout_2.setWidget(6, QtGui.QFormLayout.SpanningRole, self.checkBoxUseTemplate)
+        self.checkBoxAddToWorkingSet = QtGui.QCheckBox(NewProjectDialog)
+        self.checkBoxAddToWorkingSet.setChecked(False)
+        self.checkBoxAddToWorkingSet.setObjectName(_fromUtf8("checkBoxAddToWorkingSet"))
+        self.formLayout_2.setWidget(9, QtGui.QFormLayout.SpanningRole, self.checkBoxAddToWorkingSet)
         self.verticalLayout.addLayout(self.formLayout_2)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
@@ -151,14 +151,14 @@ class Ui_NewProjectDialog(object):
         NewProjectDialog.setWindowTitle(_('New Project'))
         self.label1.setText(_('Name:'))
         self.label.setText(_('Description:'))
-        self.checkBoxUseDefaultLocation.setText(_('Use default location'))
         self.label2.setText(_('Location:'))
         self.buttonChoose.setText(_('Ch&oose'))
-        self.checkBoxUseTemplate.setText(_('Use template'))
         self.label_2.setText(_('Template:'))
-        self.checkBoxAddToWorkingSet.setText(_('Add to working set'))
         self.label3.setText(_('Working set:'))
         self.label_3.setText(_('Licence:'))
+        self.checkBoxUseDefaultLocation.setText(_('Use default location'))
+        self.checkBoxUseTemplate.setText(_('Use template'))
+        self.checkBoxAddToWorkingSet.setText(_('Add to working set'))
         self.buttonCreate.setText(_('&Create'))
         self.buttonCancel.setText(_('C&ancel'))
 

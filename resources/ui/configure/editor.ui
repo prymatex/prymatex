@@ -37,7 +37,7 @@
         <item>
          <widget class="QLabel" name="labelDefaultSyntax">
           <property name="text">
-           <string>Default syntax</string>
+           <string>Default syntax:</string>
           </property>
          </widget>
         </item>
