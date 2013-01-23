@@ -110,9 +110,7 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
     
     def node(self, index):
         if index.isValid():
-            node = index.internalPointer()
-            if node:
-                return node
+            return index.internalPointer()
         return self.rootNode
     
     def clear(self):
