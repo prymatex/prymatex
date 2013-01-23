@@ -200,6 +200,7 @@ class ProjectListModel(BundleItemTypeProxyModel):
         return 2
 
 class ThemeStyleProxyTableModel(QtGui.QSortFilterProxyModel):
+    # ---------------- QtGui.QSortFilterProxyModel overrides
     def filterAcceptsRow(self, sourceRow, sourceParent):
         regexp = self.filterRegExp()
         if regexp.isEmpty():
@@ -207,11 +208,15 @@ class ThemeStyleProxyTableModel(QtGui.QSortFilterProxyModel):
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = index.internalPointer()
         return regexp.exactMatch(unicode(node.style().theme.uuid))
-        
-    def filterAcceptsColumn(self, sourceColumn, sourceParent):
-        return True
-        
+
+
     def lessThan(self, left, right):
         leftData = left.internalPointer()
         rightData = right.internalPointer()
         return rightData.name > leftData.name
+
+
+    # ------------------ Custom functions
+    def style(self, index):
+        return self.sourceModel().style(self.mapToSource(index))
+        

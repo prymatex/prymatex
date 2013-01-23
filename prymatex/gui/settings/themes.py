@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui
+from prymatex.qt.helpers import test_font_strategy
 
 from prymatex import resources
 
@@ -57,97 +58,57 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         self.setupTableView()
         self.setupPushButton()
 
+
     def loadSettings(self):
-        currentThemeUUID = self.settingGroup.hasValue('defaultTheme') and self.settingGroup.value('defaultTheme').upper() or None
-        try:
-            currentTheme = self.application.supportManager.getTheme(currentThemeUUID)
-        except TypeError:
-            # If theme has been deleted
-            currentTheme = None
-        self.tableViewStyles.setModel(self.application.supportManager.themeStyleProxyModel)
+        # Set models
         self.comboBoxThemes.setModel(self.application.supportManager.themeListModel)
+        self.tableViewStyles.setModel(self.application.supportManager.themeStyleProxyModel)
+        
+        currentThemeUUID = self.settingGroup.value('defaultTheme')
+        currentTheme = self.application.supportManager.getTheme(currentThemeUUID)
         if currentTheme is not None:
-            self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.model().findIndex(currentTheme))
-            self.setThemeSettings(currentTheme, False)
-
-    # ---------------------- ComboBoxThemes
-    @QtCore.pyqtSlot(int)
-    def on_comboBoxThemes_activated(self, index):
-        theme = self.comboBoxThemes.model().themeForIndex(index)
-        self.setThemeSettings(theme)
-
-    # --------------------- TableView
-    def on_tableView_Activated(self, index):
-        style = self.application.supportManager.themeStyleProxyModel.mapToSource(index).internalPointer()
-        self.comboBoxScope.setEditText(style.scope)
-
-    def on_comboBoxScope_changed(self, string):
-        string = unicode(string)
-        index = self.tableViewStyles.currentIndex()
-        if index.isValid():
-            style = self.application.supportManager.themeStyleProxyModel.mapToSource(index).internalPointer()
-            if string != style.scope:
-                self.application.supportManager.updateThemeStyle(style, scope=string)
-
-    def setupTableView(self):
-        self.tableViewStyles.activated.connect(self.on_tableView_Activated)
-        self.tableViewStyles.pressed.connect(self.on_tableView_Activated)
-        self.tableViewStyles.setItemDelegateForColumn(1, ColorDelegate(self))
-        self.tableViewStyles.setItemDelegateForColumn(2, ColorDelegate(self))
-        self.tableViewStyles.setItemDelegateForColumn(3, FontStyleDelegate(self))
-        self.tableViewStyles.setEditTriggers(QtGui.QAbstractItemView.AllEditTriggers)
-
-        #Conectar
-        for _, scope in self.DEFAULTS['styles']:
-            self.comboBoxScope.addItem(scope)
-        self.comboBoxScope.currentIndexChanged[str].connect(self.on_comboBoxScope_changed)
-        self.comboBoxScope.editTextChanged.connect(self.on_comboBoxScope_changed)
-
-    # -------------------- Push Button
-    def setupPushButton(self):
-        #Colors
-        self.pushButtonForeground.pressed.connect(lambda element='foreground': self.on_pushButtonColor_pressed(element))
-        self.pushButtonBackground.pressed.connect(lambda element='background': self.on_pushButtonColor_pressed(element))
-        self.pushButtonSelection.pressed.connect(lambda element='selection': self.on_pushButtonColor_pressed(element))
-        self.pushButtonInvisibles.pressed.connect(lambda element='invisibles': self.on_pushButtonColor_pressed(element))
-        self.pushButtonLineHighlight.pressed.connect(lambda element='lineHighlight': self.on_pushButtonColor_pressed(element))
-        self.pushButtonCaret.pressed.connect(lambda element='caret': self.on_pushButtonColor_pressed(element))
-        self.pushButtonGutterBackground.pressed.connect(lambda element='gutter': self.on_pushButtonColor_pressed(element))
-        #Font
+            self.updateUi(currentTheme)
+        
+        # Font
         font = self.settingGroup.value('defaultFont')
         self.fontComboBoxName.setCurrentFont(font)
         self.spinBoxFontSize.setValue(font.pointSize())
+        self.checkBoxAntialias.setChecked(test_font_strategy(font, QtGui.QFont.PreferAntialias))
+        
+        # Connect font signals
+        self.checkBoxAntialias.stateChanged.connect(self.setDefaultFontSetting)
+        self.spinBoxFontSize.valueChanged[int].connect(self.setDefaultFontSetting)
+        self.fontComboBoxName.activated.connect(self.setDefaultFontSetting)
 
-    @QtCore.pyqtSignature('')
-    def on_pushButtonChangeFont_pressed(self):
-        font = self.settingGroup.value('defaultFont')
-        font, ok = QtGui.QFontDialog.getFont(font, self, _("Select editor font"))
-        if ok:
-            self.settingGroup.setValue('defaultFont', font)
-            self.fontComboBoxName.setCurrentFont(font)
-            self.spinBoxFontSize.setValue(font.pointSize())
 
-    @QtCore.pyqtSignature('')
-    def on_pushButtonAdd_pressed(self):
-        theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
-        self.application.supportManager.createThemeStyle('untitled', unicode(self.comboBoxScope.currentText()), theme)
+    # ---------------------- Set Settings
+    def setDefaultFontSetting(self):
+        font = self.fontComboBoxName.currentFont()
+        font.setPointSize(self.spinBoxFontSize.value())
+        if self.checkBoxAntialias.isChecked():
+            font.setStyleStrategy(font.styleStrategy() | QtGui.QFont.PreferAntialias)
+        self.settingGroup.setValue('defaultFont', font)
 
-    @QtCore.pyqtSignature('')
-    def on_pushButtonRemove_pressed(self):
-        index = self.tableViewStyles.currentIndex()
-        if index.isValid():
-            style = self.application.supportManager.themeStyleProxyModel.mapToSource(index).internalPointer()
-            self.application.supportManager.deleteThemeStyle(style)
 
-    def on_pushButtonColor_pressed(self, element):
-        theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
-        settings = theme.settings
-        color, ok = QtGui.QColorDialog.getRgba(settings[element].rgba(), self)
-        if ok:
-            self.application.supportManager.updateTheme(theme, settings={element: color})
-            self.setThemeSettings(theme)
+    def setDefaultThemeSetting(self, theme):
+        self.settingGroup.setValue('defaultTheme', unicode(theme.uuid))
+        # TODO: Ver si el mensage esta bien aca
+        message = "<b>%s</b> theme set " % theme.name
+        if theme.author is not None:
+            message += "<i>(by %s)</i>" % theme.author
+        self.application.showMessage(message)
 
-    def setThemeSettings(self, theme, changeSettings=True):
+
+    # ---------------------- Themes
+    @QtCore.pyqtSlot(int)
+    def on_comboBoxThemes_activated(self, index):
+        theme = self.comboBoxThemes.model().themeForIndex(index)
+        self.updateUi(theme)
+        self.setDefaultThemeSetting(theme)
+
+
+    def updateUi(self, theme):
+        self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.model().findIndex(theme))    
         settings = theme.settings
         self.pushButtonForeground.setStyleSheet("background-color: " + color2rgba(settings['foreground'])[:7])
         self.pushButtonBackground.setStyleSheet("background-color: " + color2rgba(settings['background'])[:7])
@@ -169,9 +130,66 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         self.tableViewStyles.resizeRowsToContents()
         self.tableViewStyles.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
 
-        if changeSettings:
-            self.settingGroup.setValue('defaultTheme', unicode(theme.uuid).upper())
-            message = "<b>%s</b> theme set " % theme.name
-            if theme.author is not None:
-                message += "<i>(by %s)</i>" % theme.author
-            self.application.showMessage(message)
+
+    # --------------------- TableView
+    def setupTableView(self):
+        self.tableViewStyles.activated.connect(self.on_tableView_activatedOrPressed)
+        self.tableViewStyles.pressed.connect(self.on_tableView_activatedOrPressed)
+        
+        self.tableViewStyles.setItemDelegateForColumn(1, ColorDelegate(self))
+        self.tableViewStyles.setItemDelegateForColumn(2, ColorDelegate(self))
+        self.tableViewStyles.setItemDelegateForColumn(3, FontStyleDelegate(self))
+        self.tableViewStyles.setEditTriggers(QtGui.QAbstractItemView.AllEditTriggers)
+
+        # Combo default scopes
+        for _, scope in self.DEFAULTS['styles']:
+            self.comboBoxScope.addItem(scope)
+        self.comboBoxScope.currentIndexChanged[str].connect(self.on_comboBoxScope_changed)
+        self.comboBoxScope.editTextChanged.connect(self.on_comboBoxScope_changed)
+
+
+    def on_tableView_activatedOrPressed(self, index):
+        style = self.application.supportManager.themeStyleProxyModel.style(index)
+        self.comboBoxScope.setEditText(style.scope)
+
+
+    def on_comboBoxScope_changed(self, string):
+        index = self.tableViewStyles.currentIndex()
+        if index.isValid():
+            style = self.application.supportManager.themeStyleProxyModel.style(index)
+            if string != style.scope:
+                self.application.supportManager.updateThemeStyle(style, scope = string)
+
+
+    def on_pushButtonAdd_pressed(self):
+        theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
+        self.application.supportManager.createThemeStyle('untitled', unicode(self.comboBoxScope.currentText()), theme)
+
+
+    def on_pushButtonRemove_pressed(self):
+        index = self.tableViewStyles.currentIndex()
+        if index.isValid():
+            style = self.application.supportManager.themeStyleProxyModel.mapToSource(index).internalPointer()
+            self.application.supportManager.deleteThemeStyle(style)
+
+
+    # -------------------- Colors Push Button
+    def setupPushButton(self):
+        self.pushButtonForeground.pressed.connect(lambda element='foreground': self.on_pushButtonColor_pressed(element))
+        self.pushButtonBackground.pressed.connect(lambda element='background': self.on_pushButtonColor_pressed(element))
+        self.pushButtonSelection.pressed.connect(lambda element='selection': self.on_pushButtonColor_pressed(element))
+        self.pushButtonInvisibles.pressed.connect(lambda element='invisibles': self.on_pushButtonColor_pressed(element))
+        self.pushButtonLineHighlight.pressed.connect(lambda element='lineHighlight': self.on_pushButtonColor_pressed(element))
+        self.pushButtonCaret.pressed.connect(lambda element='caret': self.on_pushButtonColor_pressed(element))
+        self.pushButtonGutterBackground.pressed.connect(lambda element='gutter': self.on_pushButtonColor_pressed(element))
+        self.pushButtonGutterForeground.pressed.connect(lambda element='gutterForeground': self.on_pushButtonColor_pressed(element))
+
+
+    def on_pushButtonColor_pressed(self, element):
+        theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
+        settings = theme.settings
+        color, ok = QtGui.QColorDialog.getRgba(settings[element].rgba(), self)
+        if ok:
+            self.application.supportManager.updateTheme(theme, settings={element: color})
+            self.updateUi(theme)
+            self.setDefaultThemeSetting(theme)

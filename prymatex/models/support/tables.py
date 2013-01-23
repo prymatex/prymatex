@@ -12,13 +12,17 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
         self.manager = manager
         self.styles = []
         self.headers = ['Element', 'Fg', 'Bg', 'Font Style']
-        
+
+
+    # ---------------------- QtCore.QAbstractTableModel overrides
     def rowCount(self, parent):
         return len(self.styles)
-    
+
+
     def columnCount(self, parent):
         return 4
-    
+
+
     def data(self, index, role):
         if not index.isValid(): 
             return QtCore.QVariant() 
@@ -68,6 +72,7 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
             elif column == 2 and 'background' in settings:
                 return settings['background']
 
+
     def setData(self, index, value, role):
         """
         Retornar verdadero si se puedo hacer el camio, falso en caso contratio
@@ -89,31 +94,38 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
             self.dataChanged.emit(index, index)
             return True
         return False
-    
+
+
     def flags(self, index):
         if not index.isValid():  
             return QtCore.Qt.NoItemFlags  
         return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
-        
+
+
     def headerData(self, section, orientation, role):
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
                 return self.headers[section]
-    
+
+
     def index(self, row, column, parent = QtCore.QModelIndex()):
         style = self.styles[row]
         if style:
             return self.createIndex(row, column, style)
         else:
             return QtCore.QModelIndex()
+
+
+    # -------------------- Custom functions
+    def style(self, index):
+        if index.isValid():
+            return index.internalPointer()
     
-    #========================================================================
-    # Functions
-    #========================================================================
     def appendStyle(self, style):
         self.beginInsertRows(QtCore.QModelIndex(), len(self.styles), len(self.styles))
         self.styles.append(style)
         self.endInsertRows()
+
 
     def removeStyle(self, style):
         index = self.styles.index(style)
