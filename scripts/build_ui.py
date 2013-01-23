@@ -81,7 +81,8 @@ class QtUiBuild(object):
             print("%s has not been modified" % rc_file )
 
     def create_package(self, dirpath):
-        pkgpath = os.path.join("prymatex", *utils.fullsplit(dirpath)[1:])
+        projectIndex = len(utils.fullsplit(PROJECT_PATH))
+        pkgpath = os.path.join("prymatex", *utils.fullsplit(dirpath)[ projectIndex + 1: ])
         if not os.path.exists(pkgpath):
             os.makedirs(pkgpath)
         init = os.path.join(pkgpath, '__init__.py')
@@ -149,4 +150,4 @@ class QtUiBuild(object):
         cls._wrappeduic = True
 
 if __name__ == '__main__':
-    QtUiBuild(4).run()
+    QtUiBuild(0).run()
