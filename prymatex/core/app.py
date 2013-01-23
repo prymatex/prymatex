@@ -237,7 +237,14 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         #Prepare prymatex namespace
         sharePath = self.profile.value('PMX_SHARE_PATH')
         manager.addNamespace('prymatex', sharePath)
-        manager.updateEnvironment({  # TextMate Compatible :P
+        
+        #Prepare user namespace
+        homePath = self.profile.value('PMX_HOME_PATH')
+        manager.addNamespace('user', homePath)
+        
+        # Update environment
+        manager.updateEnvironment({  
+            # TextMate Compatible :P
             'TM_APP_PATH': self.profile.value('PMX_APP_PATH'),
             'TM_SUPPORT_PATH': manager.environment['PMX_SUPPORT_PATH'],
             'TM_BUNDLES_PATH': manager.environment['PMX_BUNDLES_PATH'],
@@ -248,18 +255,15 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             'PMX_APP_PATH': self.profile.value('PMX_APP_PATH'),
             'PMX_PREFERENCES_PATH': self.profile.value('PMX_PREFERENCES_PATH'),
             'PMX_VERSION': self.applicationVersion(),
-            'PMX_PID': self.applicationPid()
-        })
-
-        #Prepare user namespace
-        homePath = self.profile.value('PMX_HOME_PATH')
-        manager.addNamespace('user', homePath)
-        manager.updateEnvironment({
+            'PMX_PID': self.applicationPid(),
+            #User
             'PMX_HOME_PATH': homePath,
+            'PMX_PROFILE_NAME': self.profile.value('PMX_PROFILE_NAME'),
             'PMX_PROFILE_PATH': self.profile.value('PMX_PROFILE_PATH'),
             'PMX_TMP_PATH': self.profile.value('PMX_TMP_PATH'),
             'PMX_LOG_PATH': self.profile.value('PMX_LOG_PATH')
         })
+
 
         # Create bundle editor dialog
         self.extendComponent(PMXBundleEditor)

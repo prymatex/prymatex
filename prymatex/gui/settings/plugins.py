@@ -12,6 +12,7 @@ from prymatex.models.plugins import PluginsTableModel
 class PluginsSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Plugins):
     TITLE = "Plugins"
     ICON = resources.getIcon("preferences-plugin-script")
+    NAMESPACE = "general"
     
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
