@@ -37,11 +37,15 @@ def fullsplit(path, result = None):
         return result
     return fullsplit(head, [tail] + result)
 
-def issubpath(childPath, parentPath):
+def issubpath(childPath, parentPath, normpath = True, realpath = False):
     def fixpath(p):
-        return os.path.normcase(p) + os.sep
+        path = os.path.normcase(p)
+        path = normpath and os.path.normpath(path) or path
+        path = realpath and os.path.realpath(path) or path
+        return path + os.sep
     return fixpath(childPath).startswith(fixpath(parentPath))
 
 if __name__ == "__main__":
-    print issubpath("c:\cygwin\home\dvanhaaster\workspace\prymatex\prymatex\utils\osextra\path.py", "C:/cygwin/home/dvanhaaster/workspace/prymatex")
+    print issubpath("\cygwin\home\dvanhaaster\workspace\prymatex\prymatex\utils\osextra\path.py", "/cygwin/home/dvanhaaster/workspace/prymatex")
+    print issubpath("/home/diego/workspace/Prymatex/prymatex/setup.py", "/mnt/datos/workspace/Prymatex/prymatex", realpath=True)
     print expand_shell_var("$PATH/alfa")
