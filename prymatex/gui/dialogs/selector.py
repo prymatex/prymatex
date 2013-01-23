@@ -3,7 +3,7 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.delegates import HtmlItemDelegate
+from prymatex.delegates.items import HtmlItemDelegate
 from prymatex.ui.dialogs.selector import Ui_SelectorDialog
 
 
@@ -26,7 +26,7 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         self.listItems.installEventFilter(self)
         
         self.setWindowFlags(QtCore.Qt.Dialog)
-        self.listItems.setItemDelegate(HtmlItemDelegate(self))
+        self.listItems.setItemDelegate(HtmlItemDelegate(self.listItems))
         self.listItems.setResizeMode(QtGui.QListView.Adjust)
 
 
