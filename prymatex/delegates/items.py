@@ -20,8 +20,7 @@ class HtmlItemDelegate(QtGui.QItemDelegate):
 
 
     def sizeHint(self, option, index):
-        model = index.model()
-        record = model.data(index)
+        record = index.data()
         doc = QtGui.QTextDocument(self)
         doc.setHtml(record)
         doc.setTextWidth(option.rect.width())
@@ -49,15 +48,15 @@ class HtmlLinkItemDelegate(QtGui.QItemDelegate):
         for i in range(2):
             self.documents.append(QtGui.QTextDocument(self))
             self.documents[i].setDocumentMargin(0)
-        self.lastTextPos = QPoint(0,0)
+        self.lastTextPos = QtCore.QPoint(0,0)
 
     def drawDisplay(self, painter, option, rect, text): 
         # Because the state tells only if the mouse is over the row
         # we have to check if it is over the item too
-        mouseOver = option.state & QStyle.State_MouseOver \
+        mouseOver = option.state & QtGui.QStyle.State_MouseOver \
             and rect.contains(self.parent().viewport() \
-                .mapFromGlobal(QCursor.pos())) \
-            and option.state & QStyle.State_Enabled
+                .mapFromGlobal(QtGui.QCursor.pos())) \
+            and option.state & QtGui.QStyle.State_Enabled
 
         if mouseOver:
             # Use documents[0] and save the text position for editorEvent
@@ -72,9 +71,10 @@ class HtmlLinkItemDelegate(QtGui.QItemDelegate):
 
         doc.setDefaultFont(option.font)
         doc.setHtml(text)
-
+        doc.setTextWidth(option.rect.width() - option.decorationSize.width())
+        
         painter.save()
-        painter.translate(rect.topLeft())
+        painter.translate(QtCore.QPoint(rect.left(), option.rect.top()))
         ctx = QtGui.QAbstractTextDocumentLayout.PaintContext()
         ctx.palette = option.palette
         doc.documentLayout().draw(painter, ctx)
@@ -82,7 +82,7 @@ class HtmlLinkItemDelegate(QtGui.QItemDelegate):
 
     def editorEvent(self, event, model, option, index):
         if event.type() not in [QtCore.QEvent.MouseMove, QtCore.QEvent.MouseButtonRelease] \
-            or not (option.state & QStyle.State_Enabled):
+            or not (option.state & QtGui.QStyle.State_Enabled):
             return False                        
         # Get the link at the mouse position
         # (the explicit QPointF conversion is only needed for PyQt)
@@ -100,18 +100,9 @@ class HtmlLinkItemDelegate(QtGui.QItemDelegate):
         return False
 
     def sizeHint(self, option, index):
-        # The original size is calculated from the string with the html tags
-        # so we need to subtract from it the difference between the width
-        # of the text with and without the html tags
-        size = QtGui.QItemDelegate.sizeHint(self, option, index)
-
         # Use a QTextDocument to strip the tags
         doc = self.documents[1]
-        html = index.data() # must add .toString() for PyQt "API 1"
-        doc.setHtml(html)        
-        plainText = doc.toPlainText()
-
-        fontMetrics = QFontMetrics(option.font)                
-        diff = fontMetrics.width(html) - fontMetrics.width(plainText)
-
-        return size - QSize(diff, 0)
+        html = index.data()
+        doc.setHtml(html)
+        doc.setTextWidth(option.rect.width())
+        return QtCore.QSize(doc.idealWidth(), doc.size().height())
