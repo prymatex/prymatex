@@ -74,7 +74,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     
     @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
     def defaultFont(self, font):
-        font.setStyleStrategy(font.styleStrategy() | QtGui.QFont.ForceIntegerMetrics | QtGui.QFont.PreferAntialias)
         self.setFont(font)
 
     @pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
