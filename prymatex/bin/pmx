@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Run prymatex from any place!
+# Prymatex startup script for Unix platforms.
+# Tries to run in system's python2 (outside virtualenv)
+
+PMX_PATH=$(dirname $0)
+
+if [ $# -gt 0 ]; then
+    if [ $1 = '-u' ]; then
+
+        CURRENT=$(pwd)
+        cd $PMX_PATH/../..
+        if [ ! -d .git ]; then
+            echo "Your prymatex is not a git clone"
+            exit 1
+        fi
+        if [ $(which git 2>/dev/null) ]; then
+            BRANCH=$(git rev-parse --abbrev-ref HEAD)
+            git pull origin $BRANCH
+        else
+            echo "Could not find git in your PATH, install git to update"
+            exit
+        fi
+        cd $CURRENT
+
+        shift # Remove -u from $@
+    fi
+fi
+
+
+if [ -z $VIRTUAL_ENV ]; then
+    PYTHON=$(which python)
+else
+    # Could be improved using virtualenv's own shellscripts
+    #source $VIRTUAL_ENV/bin/activate
+    #deactivate
+    PYTHON=/usr/bin/python
+fi
+
+VERSION=$($PYTHON -c "import sys; sys.stdout.write(sys.version[0]+'\n')")
+
+if [ $VERSION -eq 3 ]; then
+    # Python 3 is not supported
+    if [ $(which "$PYTHON"2) ]; then
+        PYTHON="$PYTHON"2
+    else
+        echo "Python2 was not found, Prymatex needs python2 to run."
+        exit 1
+    fi
+fi
+
+$PYTHON $PMX_PATH/pmx.py $@ &
