@@ -1,0 +1,16 @@
+Prymatex End User Licence
+=========================
+
+Prymatex code is distributed under the terms of GPL V.2 licence, please
+refer to GPL.txt.
+
+Prymatex could not be possible without the help of other projects
+which are distributed under their respective licence terms.
+
+     * PyQt4 
+
+     * Ponyguruma (http://dev.pocoo.org/hg/sandbox/ponyguruma)
+
+     * QTermWidget
+
+     * IPython (http://ipython.org/)
