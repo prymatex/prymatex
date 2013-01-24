@@ -63,7 +63,8 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
 
     @classmethod
     def contributeToSettings(cls):
-        return [ ]
+        from prymatex.gui.settings.filemanager import FileManagerSettingsWidget
+        return [ FileManagerSettingsWidget ]
     
     # ------------- Signals
     def connectGenericSignal(self):

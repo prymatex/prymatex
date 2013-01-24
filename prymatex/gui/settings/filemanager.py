@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtGui, QtCore
+from prymatex import resources
 
 from prymatex.ui.configure.filemanager import Ui_FileManager
 from prymatex.models.settings import SettingsTreeNode
@@ -9,6 +10,8 @@ from prymatex.models.settings import SettingsTreeNode
 class FileManagerSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FileManager):
     NAMESPACE = "general"
     TITLE = "Files"
+    ICON = resources.getIcon("drive-harddisk")
+
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
         SettingsTreeNode.__init__(self, "files", settingGroup)
