@@ -79,11 +79,10 @@ def to_fs_from_unicode(unic):
 
 # Codecs for working with files and text.
 CODING_RE = re.compile(r"coding[:=]\s*([-\w_.]+)")
-CODECS = ['utf-8', 'iso8859-1',  'iso8859-15', 'koi8-r',
-          'koi8-u', 'iso8859-2', 'iso8859-3', 'iso8859-4', 'iso8859-5', 
-          'iso8859-6', 'iso8859-7', 'iso8859-8', 'iso8859-9', 
-          'iso8859-10', 'iso8859-13', 'iso8859-14', 'latin-1', 
-          'utf-16']
+CODECS = []
+with open(os.path.join(os.path.dirname(__file__), "codecs")) as openFile:
+    for line in openFile.read().splitlines():
+        CODECS.append(tuple(line.split(";")))
     
 def get_coding(text):
     """
@@ -164,7 +163,7 @@ def encode(text, orig_coding):
 def to_unicode(string):
     """Convert a string to unicode"""
     if not isinstance(string, unicode):
-        for codec in CODECS:
+        for codec, aliases, language in CODECS:
             try:
                 unic = unicode(string, codec)
             except UnicodeError:

@@ -143,7 +143,7 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
 
     def deletePath(self, path):
         if os.path.isfile(path):
-            # Mandar señal para cerrar editores
+            # Send signal for close editors
             os.unlink(path)
         else:
             shutil.rmtree(path, onerror = self._onerror)

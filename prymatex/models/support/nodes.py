@@ -170,7 +170,7 @@ class ThemeTableRow(object):
             if style.selector.does_match(scope, rank):
                 styles.append((rank.pop(), style))
         styles.sort(key = lambda t: t[0])
-        map(lambda style: base.update(style.settings), styles)
+        map(lambda style: base.update(style[1].settings), styles)
         self.STYLES_CACHE[scope] = base
         return base
 
