@@ -10,7 +10,7 @@ if [ $# -gt 0 ]; then
     if [ $1 = '-u' ]; then
 
         CURRENT=$(pwd)
-        cd $PMX_PATH/../..
+        cd $PMX_PATH/..
         if [ ! -d .git ]; then
             echo "Your prymatex is not a git clone"
             exit 1
@@ -50,4 +50,4 @@ if [ $VERSION -eq 3 ]; then
     fi
 fi
 
-$PYTHON $PMX_PATH/pmx.py $@ &
+$PYTHON $PMX_PATH/prymatex.py $@ &

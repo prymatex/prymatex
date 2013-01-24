@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/terminal.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/terminal.ui'
 #
-# Created: Wed Jan 23 09:31:01 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Thu Jan 24 13:52:49 2013
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -46,22 +46,20 @@ class Ui_Terminal(object):
         self.groupBox = QtGui.QGroupBox(Terminal)
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
         self.formLayout = QtGui.QFormLayout(self.groupBox)
+        self.formLayout.setFieldGrowthPolicy(QtGui.QFormLayout.ExpandingFieldsGrow)
         self.formLayout.setLabelAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.formLayout.setMargin(6)
         self.formLayout.setSpacing(2)
         self.formLayout.setObjectName(_fromUtf8("formLayout"))
-        self.comboBoxScheme = QtGui.QComboBox(self.groupBox)
-        self.comboBoxScheme.setObjectName(_fromUtf8("comboBoxScheme"))
-        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.comboBoxScheme)
-        self.comboBoxScrollBar = QtGui.QComboBox(self.groupBox)
-        self.comboBoxScrollBar.setObjectName(_fromUtf8("comboBoxScrollBar"))
-        self.formLayout.setWidget(3, QtGui.QFormLayout.FieldRole, self.comboBoxScrollBar)
         self.label = QtGui.QLabel(self.groupBox)
         self.label.setObjectName(_fromUtf8("label"))
         self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.label)
-        self.label_2 = QtGui.QLabel(self.groupBox)
-        self.label_2.setObjectName(_fromUtf8("label_2"))
-        self.formLayout.setWidget(3, QtGui.QFormLayout.LabelRole, self.label_2)
+        self.comboBoxScheme = QtGui.QComboBox(self.groupBox)
+        self.comboBoxScheme.setObjectName(_fromUtf8("comboBoxScheme"))
+        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.comboBoxScheme)
+        self.checkBoxEditorTheme = QtGui.QCheckBox(self.groupBox)
+        self.checkBoxEditorTheme.setObjectName(_fromUtf8("checkBoxEditorTheme"))
+        self.formLayout.setWidget(3, QtGui.QFormLayout.SpanningRole, self.checkBoxEditorTheme)
         self.verticalLayout_2.addWidget(self.groupBox)
         self.groupBox_2 = QtGui.QGroupBox(Terminal)
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
@@ -78,9 +76,9 @@ class Ui_Terminal(object):
         self.spinBoxBufferSize.setMaximumSize(QtCore.QSize(100, 16777215))
         self.spinBoxBufferSize.setObjectName(_fromUtf8("spinBoxBufferSize"))
         self.formLayout_2.setWidget(2, QtGui.QFormLayout.FieldRole, self.spinBoxBufferSize)
-        self.checkBox = QtGui.QCheckBox(self.groupBox_2)
-        self.checkBox.setObjectName(_fromUtf8("checkBox"))
-        self.formLayout_2.setWidget(3, QtGui.QFormLayout.SpanningRole, self.checkBox)
+        self.checkBoxSynchronize = QtGui.QCheckBox(self.groupBox_2)
+        self.checkBoxSynchronize.setObjectName(_fromUtf8("checkBoxSynchronize"))
+        self.formLayout_2.setWidget(3, QtGui.QFormLayout.SpanningRole, self.checkBoxSynchronize)
         self.verticalLayout_2.addWidget(self.groupBox_2)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem)
@@ -94,8 +92,8 @@ class Ui_Terminal(object):
         self.checkBoxFontAntialias.setText(_('Anti alias'))
         self.groupBox.setTitle(_('Appearance'))
         self.label.setText(_('Color scheme:'))
-        self.label_2.setText(_('Scroll:'))
+        self.checkBoxEditorTheme.setText(_('Use editor theme when possible'))
         self.groupBox_2.setTitle(_('Behavior'))
         self.label_3.setText(_('Buffer:'))
-        self.checkBox.setText(_('Automatically synchronize the terminal with the current document when possible'))
+        self.checkBoxSynchronize.setText(_('Automatically synchronize the terminal with the current editor when possible'))
 

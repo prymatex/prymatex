@@ -1,7 +1,4 @@
-include README.rst
 include AUTHORS
-include INSTALL
-include LICENSE
-include MANIFEST.in
+include *.txt
 recursive-include docs *
 recursive-include prymatex/share *

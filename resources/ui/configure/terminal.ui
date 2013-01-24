@@ -74,6 +74,9 @@
       <string>Appearance</string>
      </property>
      <layout class="QFormLayout" name="formLayout">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::ExpandingFieldsGrow</enum>
+      </property>
       <property name="labelAlignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
@@ -86,12 +89,6 @@
       <property name="margin">
        <number>6</number>
       </property>
-      <item row="2" column="1">
-       <widget class="QComboBox" name="comboBoxScheme"/>
-      </item>
-      <item row="3" column="1">
-       <widget class="QComboBox" name="comboBoxScrollBar"/>
-      </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
@@ -99,10 +96,13 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_2">
+      <item row="2" column="1">
+       <widget class="QComboBox" name="comboBoxScheme"/>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QCheckBox" name="checkBoxEditorTheme">
         <property name="text">
-         <string>Scroll:</string>
+         <string>Use editor theme when possible</string>
         </property>
        </widget>
       </item>
@@ -148,9 +148,9 @@
        </widget>
       </item>
       <item row="3" column="0" colspan="2">
-       <widget class="QCheckBox" name="checkBox">
+       <widget class="QCheckBox" name="checkBoxSynchronize">
         <property name="text">
-         <string>Automatically synchronize the terminal with the current document when possible</string>
+         <string>Automatically synchronize the terminal with the current editor when possible</string>
         </property>
        </widget>
       </item>

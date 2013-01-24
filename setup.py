@@ -78,12 +78,17 @@ packages, package_data = [], {}
 root_dir = os.path.dirname(__file__)
 if root_dir != '':
     os.chdir(root_dir)
+
 prymatex_dir = 'prymatex'
+share_dir = os.path.join('prymatex', 'share')
 
 for dirpath, dirnames, filenames in os.walk(prymatex_dir):
     # Ignore dirnames that start with '.'
     for i, dirname in enumerate(dirnames):
         if dirname.startswith('.'): del dirnames[i]
+    # Ignore share dir
+    if dirpath.startswith(share_dir):
+        continue
     if '__init__.py' in filenames:
         package = '.'.join(fullsplit(dirpath))
         packages.append(package)
@@ -119,8 +124,9 @@ setup(
 
     packages = packages,
     package_data = package_data,
-    scripts = ["prymatex/bin/pmx.py"],
+    scripts = ['bin/prymatex.py', 'bin/pmx'],
 
+    install_requires = [ 'pyzmq' ],
     cmdclass = {
         'install': CustomInstall
     }
