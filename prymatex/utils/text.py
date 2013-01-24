@@ -15,7 +15,7 @@ to_ascii = lambda s: filter(lambda c: c in string.ascii_letters, s)
 to_ascii_cap = lambda s: to_ascii(s).capitalize()
 
 # Order is important:
-EOL_CHARS = (("\r\n", 'nt'), ("\n", 'posix'), ("\r", 'mac'))
+EOL_CHARS = (("\r\n", 'DOS/Windows'), ("\n", 'UNIX'), ("\r", 'Macintosh'))
 
 # ----------------- EOL tools --------------------
 

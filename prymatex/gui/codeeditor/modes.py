@@ -56,7 +56,11 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
                 holder = self.editor.snippetProcessor.previousHolder(holder)
             if holder == None:
                 self.editor.showMessage("Last Holder")
-                self.setCursorPosition(self.editor.snippetProcessor.endPosition())
+                self.editor.setTextCursor(
+                    self.editor.newCursorAtPosition(
+                        self.editor.snippetProcessor.endPosition()
+                    )
+                )
                 self.endSnippet()
             else:
                 snippet = self.editor.snippetProcessor.snippet 

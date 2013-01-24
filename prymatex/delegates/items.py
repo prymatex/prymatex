@@ -4,27 +4,29 @@
 from prymatex.qt import QtGui, QtCore
 
 class HtmlItemDelegate(QtGui.QItemDelegate):
+    def __init__(self, parentView):
+        QtGui.QItemDelegate.__init__(self, parentView)
+        self.document = QtGui.QTextDocument(self)
+        self.document.setDocumentMargin(0)
 
     def drawDisplay(self, painter, option, rect, text):
-        doc = QtGui.QTextDocument(self)
-        doc.setHtml(text)
-        doc.setTextWidth(option.rect.width() - option.decorationSize.width())
+        self.document.setHtml(text)
+        self.document.setTextWidth(option.rect.width() - option.decorationSize.width())
         ctx = QtGui.QAbstractTextDocumentLayout.PaintContext()
 
         painter.save()
         
         painter.translate(QtCore.QPoint(rect.left(), option.rect.top()))
-        dl = doc.documentLayout()
+        dl = self.document.documentLayout()
         dl.draw(painter, ctx)
         painter.restore()
 
 
     def sizeHint(self, option, index):
         record = index.data()
-        doc = QtGui.QTextDocument(self)
-        doc.setHtml(record)
-        doc.setTextWidth(option.rect.width())
-        return QtCore.QSize(doc.idealWidth(), doc.size().height())
+        self.document.setHtml(record)
+        self.document.setTextWidth(option.rect.width())
+        return QtCore.QSize(self.document.idealWidth(), self.document.size().height())
 
 class HtmlLinkItemDelegate(QtGui.QItemDelegate):
     linkActivated = QtCore.pyqtSignal(str)

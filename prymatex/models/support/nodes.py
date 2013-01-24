@@ -20,14 +20,14 @@ class BundleItemTreeNode(TreeNodeBase):
         TreeNodeBase.__init__(self, bundleItem.name, nodeParent)
         self.__bundleItem = bundleItem
 
+    # ----------- Bundle Item attrs assessors -----------
     def __getattr__(self, name):
-        # Quitar esta cosa fea
         return getattr(self.__bundleItem, name)
 
     def bundleItem(self):
         return self.__bundleItem
 
-    # ----------- Item decoration -----------
+    # ----------- Bundle Item decoration -----------
     @property
     def keyEquivalent(self):
         if self.__bundleItem.keyEquivalent is not None:
@@ -121,7 +121,7 @@ class ThemeTableRow(object):
         self.__themeItem = themeItem
         self.STYLES_CACHE = {}
 
-    # ---------------------------- Decorator
+    # ----------- Theme attrs assessors -----------
     def __getattr__(self, name):
         return getattr(self.__themeItem, name)
 
@@ -130,6 +130,7 @@ class ThemeTableRow(object):
         return self.__themeItem
 
 
+    # ----------- Theme decoration -----------
     @property
     def settings(self):
         settings = dict(map(lambda (key, value): (key, rgba2color(value)), filter(lambda (key, value): value.startswith('#'), self.__themeItem.settings.iteritems())))
@@ -161,16 +162,15 @@ class ThemeTableRow(object):
             return self.STYLES_CACHE[scope]
         base = {}
         base.update(self.settings)
-        if scope == None:
+        if scope is None:
             return base
         styles = []
         for style in self.styles:
             rank = []
             if style.selector.does_match(scope, rank):
-                styles.append((sum(rank), style))
+                styles.append((rank.pop(), style))
         styles.sort(key = lambda t: t[0])
-        for score, style in styles:
-            base.update(style.settings)
+        map(lambda style: base.update(style[1].settings), styles)
         self.STYLES_CACHE[scope] = base
         return base
 
@@ -184,7 +184,7 @@ class ThemeStyleTableRow(object):
         self.__styleItem = styleItem
 
 
-    # ---------------------------- Decorator
+    # ----------- Item attrs assessors -----------
     def __getattr__(self, name):
         return getattr(self.__styleItem, name)
 
@@ -193,6 +193,7 @@ class ThemeStyleTableRow(object):
         return self.__styleItem
 
 
+    # ----------- Item decoration -----------
     @property
     def settings(self):
         settings = dict(map(lambda (key, value): (key, rgba2color(value)), filter(lambda (key, value): value.startswith('#'), self.__styleItem.settings.iteritems())))
