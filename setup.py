@@ -131,7 +131,6 @@ setup(
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Environment :: X11 Applications",
-        "Topic :: Utilities",
         "Topic :: Text Editors",
         "Operating System :: POSIX :: Linux",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
