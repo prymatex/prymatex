@@ -15,6 +15,7 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.utils import osextra
 from prymatex.utils.decorators import deprecated
+from prymatex.utils import encoding
 
 from prymatex.core import PMXBaseComponent
 from prymatex.core.settings import pmxConfigPorperty
@@ -41,8 +42,8 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
 
     fileHistory = pmxConfigPorperty(default = [])
     fileHistoryLength = pmxConfigPorperty(default = 10)
-    lineEnding = pmxConfigPorperty(default = 'unix')
-    encoding = pmxConfigPorperty(default = 'utf-8')
+    defaultEndOfLine = pmxConfigPorperty(default = 'unix')
+    defaultEncoding = pmxConfigPorperty(default = 'utf_8')
 
     # ---------------- Constants
     CREATED = 1<<0
@@ -51,8 +52,6 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     MOVED   = 1<<3
     CHANGED = 1<<4
     
-    ENCODINGS = ['windows-1253', 'iso-8859-7', 'macgreek']
-
     def __init__(self, application):
         QtCore.QObject.__init__(self)
         
@@ -211,24 +210,15 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
 
     def readFile(self, filePath):
         """Read from file"""
-        #TODO: Que se pueda hacer una rutina usando yield
-        for enc in [ self.encoding ] + self.ENCODINGS:
-            try:
-                fileRead = codecs.open(filePath, "r", encoding = enc)
-                content = fileRead.read()
-                break
-            except Exception, e:
-                print "File: %s, %s" % (filePath, e)
-        fileRead.close()
+        content, encode = encoding.read(filePath)
+        print encode
         return content
 
     def writeFile(self, filePath, content):
         """Function that actually save the content of a file."""
         self.unwatchPath(filePath)
-        fileWrite = codecs.open(filePath, "w", encoding = self.encoding)
-        fileWrite.write(content)
-        fileWrite.flush()
-        fileWrite.close()
+        encode = encoding.write(content, filePath, self.defaultEncoding)
+        print encode
         self.watchPath(filePath)
 
     def closeFile(self, filePath):
