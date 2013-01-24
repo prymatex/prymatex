@@ -45,8 +45,10 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
 
 
     def endRender(self):
-        self.editor.updatePlainText(self.output, self.snippetCursorWrapper)
-
+        if self.snippetCursorWrapper.hasSelection():
+            self.editor.updatePlainText(self.output, self.snippetCursorWrapper)
+        else:
+            self.snippetCursorWrapper.insertText(self.output)
 
     def environmentVariables(self):
         return self.__env
