@@ -121,10 +121,21 @@ setup(
     author_email = prymatex.__mail__,
     description = prymatex.__doc__,
     url = prymatex.__url__,
+    long_description=open('README.txt').read(),
 
     packages = packages,
     package_data = package_data,
     scripts = ['bin/prymatex.py', 'bin/pmx'],
+
+
+    classifiers=[
+        "Development Status :: 2 - Pre-Alpha",
+        "Environment :: X11 Applications",
+        "Topic :: Utilities",
+        "Topic :: Text Editors",
+        "Operating System :: POSIX :: Linux",
+        "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    ],
 
     install_requires = [ 'pyzmq' ],
     cmdclass = {
