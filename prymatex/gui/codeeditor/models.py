@@ -381,8 +381,8 @@ def bundleItemSelectableModelFactory(editor):
         return map(lambda bundleItem: 
             dict(data = bundleItem, 
                 template = "<table width='100%%'><tr><td>%(name)s - %(bundle)s</td><td align='right'>%(trigger)s</td></tr></table>",
+                ratio = 1.0,
                 display = { 
-                    "ratio": 1.0,
                     "name": bundleItem.name, 
                     "bundle": bundleItem.bundle.name, 
                     "trigger": bundleItem.trigger
