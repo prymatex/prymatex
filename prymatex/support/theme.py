@@ -8,8 +8,39 @@ from prymatex.utils import plist
 from prymatex.utils import scope
 
 """foreground, background, selection, invisibles, lineHighlight, caret, gutter
-prymatex add gutterForeground and gutterBackground
+prymatex add gutterForeground
 """
+
+DEFAULT_THEME_SETTINGS = {'background':         '#FFFFFF',
+                          'caret':              '#000000',
+                          'foreground':         '#000000',
+                          'invisibles':         '#BFBFBF',
+                          'lineHighlight':      '#00000012',
+                          'gutter':             '#FFFFFF',
+                          'gutterForeground':   '#000000',
+                          'lineHighlight':      '#00000012',
+                          'selection':          '#A6CBFF'}
+
+
+DEFAULT_SCOPE_SELECTORS = [('Comment', 'comment'),
+                           ('String', 'string'),
+                           ('Number', 'constant.numeric'),
+                           ('Built-in constant', 'constant.language'),
+                           ('User-defined constant', 'constant.character, constant.other'),
+                           ('Variable', 'variable.language, variable.other'),
+                           ('Keyword', 'keyword'),
+                           ('Storage', 'storage'),
+                           ('Class name', 'entity.name.class'),
+                           ('Inherited class', 'entity.other.inherited-class'),
+                           ('Function name', 'entity.name.function'),
+                           ('Function argument', 'variable.parameter'),
+                           ('Tag name', 'entity.name.tag'),
+                           ('Tag attribute', 'entity.other.attribute-name'),
+                           ('Library function', 'support.function'),
+                           ('Library constant', 'support.constant'),
+                           ('Library class/type', 'support.type, support.class'),
+                           ('Library variable', 'support.other.variable'),
+                           ('Invalid', 'invalid')]
 
 
 class PMXThemeStyle(object):

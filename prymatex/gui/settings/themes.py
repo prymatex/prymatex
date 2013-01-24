@@ -3,50 +3,20 @@
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.helpers import test_font_strategy
+from prymatex.qt.helpers.colors import color2rgba
 
 from prymatex import resources
-
 from prymatex.ui.configure.theme import Ui_FontTheme
+from prymatex.utils.i18n import ugettext as _
+
+from prymatex.support.theme import DEFAULT_THEME_SETTINGS, DEFAULT_SCOPE_SELECTORS
+
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.delegates.theme import FontStyleDelegate, ColorDelegate
-from prymatex.qt.helpers.colors import color2rgba
-from prymatex.utils.i18n import ugettext as _
 
 
 class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
-    """Changes font and theme
-    """
-    DEFAULTS = {'settings': {'background': '#FFFFFF',
-                             'caret': '#000000',
-                             'foreground': '#000000',
-                             'invisibles': '#BFBFBF',
-                             'lineHighlight': '#00000012',
-                             'gutter': '#FFFFFF',
-                             'gutterForeground': '#000000',
-                             'lineHighlight': '#00000012',
-                             'selection': '#A6CBFF'},
-                #Names and scopes
-                'styles': [('Comment', 'comment'),
-                           ('String', 'string'),
-                           ('Number', 'constant.numeric'),
-                           ('Built-in constant', 'constant.language'),
-                           ('User-defined constant', 'constant.character, constant.other'),
-                           ('Variable', 'variable.language, variable.other'),
-                           ('Keyword', 'keyword'),
-                           ('Storage', 'storage'),
-                           ('Class name', 'entity.name.class'),
-                           ('Inherited class', 'entity.other.inherited-class'),
-                           ('Function name', 'entity.name.function'),
-                           ('Function argument', 'variable.parameter'),
-                           ('Tag name', 'entity.name.tag'),
-                           ('Tag attribute', 'entity.other.attribute-name'),
-                           ('Library function', 'support.function'),
-                           ('Library constant', 'support.constant'),
-                           ('Library class/type', 'support.type, support.class'),
-                           ('Library variable', 'support.other.variable'),
-                           ('Invalid', 'invalid')]
-                }
-
+    """Changes font and theme"""
     NAMESPACE = "editor"
     TITLE = "Font and Themes"
     ICON = resources.getIcon("fill-color")
@@ -140,8 +110,8 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         self.tableViewStyles.setItemDelegateForColumn(3, FontStyleDelegate(self))
         self.tableViewStyles.setEditTriggers(QtGui.QAbstractItemView.AllEditTriggers)
 
-        # Combo default scopes
-        for _, scope in self.DEFAULTS['styles']:
+        # Combo default scope selectors
+        for _, scope in DEFAULT_SCOPE_SELECTORS:
             self.comboBoxScope.addItem(scope)
         self.comboBoxScope.currentIndexChanged[str].connect(self.on_comboBoxScope_changed)
         self.comboBoxScope.editTextChanged.connect(self.on_comboBoxScope_changed)
