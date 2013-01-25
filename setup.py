@@ -23,8 +23,29 @@ import os
 
 from distutils.command.install import install
 from distutils.command.build import build
-from distutils.command.install_data import install_data
 from distutils.core import setup
+
+#======================================
+# VALIDATE THE NEEDED MODULES
+#======================================
+
+# This modules can't be easy installed
+# Syntax: [(module, url of the tutorial)...]
+if sys.platform == 'win32':
+    NEEDED_MODULES = [("PyQt4",
+        "http://www.riverbankcomputing.co.uk/software/pyqt/intro"),
+        ('win32con', "http://sourceforge.net/projects/pywin32/files/pywin32/")]
+else:
+    NEEDED_MODULES = [("PyQt4",
+        "http://www.riverbankcomputing.co.uk/software/pyqt/intro"), ]
+
+
+for mn, urlm in NEEDED_MODULES:
+    try:
+        __import__(mn)
+    except ImportError:
+        print("Module '%s' not found. For more details: '%s'.\n" % (mn, urlm))
+        sys.exit(1)
 
 
 class CustomInstall(install):
@@ -127,16 +148,21 @@ setup(
     package_data = package_data,
     scripts = ['bin/prymatex.py', 'bin/pmx'],
 
-
-    classifiers=[
+    keywords = "editor python prymatex development",
+    classifiers = [
         "Development Status :: 2 - Pre-Alpha",
         "Environment :: X11 Applications",
         "Topic :: Text Editors",
+        "Topic :: Utilities",
         "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 2",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     ],
 
-    install_requires = [ 'pyzmq' ],
+    install_requires = [ 
+        'pyzmq' 
+    ],
+    
     cmdclass = {
         'install': CustomInstall
     }
