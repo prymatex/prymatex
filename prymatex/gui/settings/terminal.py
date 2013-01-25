@@ -24,11 +24,13 @@ class PMXTerminalSettings(QtGui.QWidget, SettingsTreeNode, Ui_Terminal):
         font = self.settingGroup.value('font')
         self.comboBoxFontName.setCurrentFont(font)
         self.spinBoxFontSize.setValue(font.pointSize())
-        
+
+
     @QtCore.pyqtSlot(int)
     def on_comboColorScheme_activated(self, index):
         scheme = self.comboColorScheme.itemData(index)
         self.settingGroup.setValue('colorScheme', scheme)
+
 
     @QtCore.pyqtSlot()
     def on_pushButtonChangeFont_pressed(self):

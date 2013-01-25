@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/filemanager.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/files.ui'
 #
-# Created: Fri Jan 25 10:19:08 2013
+# Created: Fri Jan 25 10:19:09 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -15,18 +15,15 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class Ui_FileManager(object):
-    def setupUi(self, FileManager):
-        FileManager.setObjectName(_fromUtf8("FileManager"))
-        FileManager.resize(493, 439)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-save.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        FileManager.setWindowIcon(icon)
-        self.verticalLayout = QtGui.QVBoxLayout(FileManager)
+class Ui_Files(object):
+    def setupUi(self, Files):
+        Files.setObjectName(_fromUtf8("Files"))
+        Files.resize(272, 281)
+        self.verticalLayout = QtGui.QVBoxLayout(Files)
         self.verticalLayout.setSpacing(6)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.groupBox_3 = QtGui.QGroupBox(FileManager)
+        self.groupBox_3 = QtGui.QGroupBox(Files)
         self.groupBox_3.setObjectName(_fromUtf8("groupBox_3"))
         self.formLayout_3 = QtGui.QFormLayout(self.groupBox_3)
         self.formLayout_3.setMargin(6)
@@ -42,7 +39,7 @@ class Ui_FileManager(object):
         self.spinBox.setObjectName(_fromUtf8("spinBox"))
         self.formLayout_3.setWidget(0, QtGui.QFormLayout.FieldRole, self.spinBox)
         self.verticalLayout.addWidget(self.groupBox_3)
-        self.groupBox = QtGui.QGroupBox(FileManager)
+        self.groupBox = QtGui.QGroupBox(Files)
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
         self.formLayout_2 = QtGui.QFormLayout(self.groupBox)
         self.formLayout_2.setFieldGrowthPolicy(QtGui.QFormLayout.ExpandingFieldsGrow)
@@ -65,27 +62,28 @@ class Ui_FileManager(object):
         self.checkBox.setObjectName(_fromUtf8("checkBox"))
         self.formLayout_2.setWidget(2, QtGui.QFormLayout.SpanningRole, self.checkBox)
         self.verticalLayout.addWidget(self.groupBox)
-        self.groupBox_2 = QtGui.QGroupBox(FileManager)
+        self.groupBox_2 = QtGui.QGroupBox(Files)
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
         self.formLayout = QtGui.QFormLayout(self.groupBox_2)
+        self.formLayout.setFieldGrowthPolicy(QtGui.QFormLayout.ExpandingFieldsGrow)
         self.formLayout.setMargin(6)
         self.formLayout.setSpacing(2)
         self.formLayout.setObjectName(_fromUtf8("formLayout"))
-        self.checkBox_3 = QtGui.QCheckBox(self.groupBox_2)
-        self.checkBox_3.setObjectName(_fromUtf8("checkBox_3"))
-        self.formLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.checkBox_3)
         self.checkBox_2 = QtGui.QCheckBox(self.groupBox_2)
         self.checkBox_2.setObjectName(_fromUtf8("checkBox_2"))
         self.formLayout.setWidget(0, QtGui.QFormLayout.SpanningRole, self.checkBox_2)
+        self.checkBox_3 = QtGui.QCheckBox(self.groupBox_2)
+        self.checkBox_3.setObjectName(_fromUtf8("checkBox_3"))
+        self.formLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.checkBox_3)
         self.verticalLayout.addWidget(self.groupBox_2)
-        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem = QtGui.QSpacerItem(20, 4, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
 
-        self.retranslateUi(FileManager)
-        QtCore.QMetaObject.connectSlotsByName(FileManager)
+        self.retranslateUi(Files)
+        QtCore.QMetaObject.connectSlotsByName(Files)
 
-    def retranslateUi(self, FileManager):
-        FileManager.setWindowTitle(_('File Manager'))
+    def retranslateUi(self, Files):
+        Files.setWindowTitle(_('Files'))
         self.groupBox_3.setTitle(_('Source'))
         self.label.setText(_('File history:'))
         self.groupBox.setTitle(_('File format'))
@@ -93,6 +91,6 @@ class Ui_FileManager(object):
         self.labelEndOfLine.setText(_('End of line:'))
         self.checkBox.setText(_('Automatic end of line detection'))
         self.groupBox_2.setTitle(_('Automatic cleanups'))
-        self.checkBox_3.setText(_('Append newline at end of file on save'))
         self.checkBox_2.setText(_('Remove trailing spaces'))
+        self.checkBox_3.setText(_('Append newline at end of file on save'))
 

@@ -1,21 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FileManager</class>
- <widget class="QDialog" name="FileManager">
+ <class>Edit</class>
+ <widget class="QWidget" name="Edit">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>493</width>
-    <height>439</height>
+    <width>279</width>
+    <height>305</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>File Manager</string>
-  </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>:/icons/actions/document-save.png</normaloff>:/icons/actions/document-save.png</iconset>
+   <string>Edit</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -25,95 +21,9 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>Source</string>
-     </property>
-     <layout class="QFormLayout" name="formLayout_3">
-      <property name="horizontalSpacing">
-       <number>2</number>
-      </property>
-      <property name="verticalSpacing">
-       <number>2</number>
-      </property>
-      <property name="margin">
-       <number>6</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>File history:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QSpinBox" name="spinBox">
-        <property name="minimum">
-         <number>10</number>
-        </property>
-        <property name="maximum">
-         <number>40</number>
-        </property>
-        <property name="singleStep">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>File format</string>
-     </property>
-     <layout class="QFormLayout" name="formLayout_2">
-      <property name="fieldGrowthPolicy">
-       <enum>QFormLayout::ExpandingFieldsGrow</enum>
-      </property>
-      <property name="horizontalSpacing">
-       <number>2</number>
-      </property>
-      <property name="verticalSpacing">
-       <number>2</number>
-      </property>
-      <property name="margin">
-       <number>6</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="QLabel" name="labelEncoding">
-        <property name="text">
-         <string>Encoding:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="comboBoxEncoding"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="labelEndOfLine">
-        <property name="text">
-         <string>End of line:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="comboBoxEndOfLine"/>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QCheckBox" name="checkBox">
-        <property name="text">
-         <string>Automatic end of line detection</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
-      <string>Automatic cleanups</string>
+      <string>Misc</string>
      </property>
      <layout class="QFormLayout" name="formLayout">
       <property name="horizontalSpacing">
@@ -128,14 +38,87 @@
       <item row="1" column="0">
        <widget class="QCheckBox" name="checkBox_3">
         <property name="text">
-         <string>Append newline at end of file on save</string>
+         <string>Auto brackets</string>
         </property>
        </widget>
       </item>
       <item row="0" column="0" colspan="2">
        <widget class="QCheckBox" name="checkBox_2">
         <property name="text">
-         <string>Remove trailing spaces</string>
+         <string>Remove trailing spaces while editing</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Text Cursor</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_2">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::ExpandingFieldsGrow</enum>
+      </property>
+      <property name="horizontalSpacing">
+       <number>2</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>2</number>
+      </property>
+      <property name="margin">
+       <number>6</number>
+      </property>
+      <item row="0" column="0" colspan="2">
+       <widget class="QCheckBox" name="checkBox_5">
+        <property name="text">
+         <string>Smart home and smart end</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_4">
+     <property name="title">
+      <string>Auto Completion</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_3">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::ExpandingFieldsGrow</enum>
+      </property>
+      <property name="horizontalSpacing">
+       <number>2</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>2</number>
+      </property>
+      <property name="margin">
+       <number>6</number>
+      </property>
+      <item row="0" column="0" colspan="2">
+       <widget class="QCheckBox" name="checkBox_6">
+        <property name="text">
+         <string>Enable auto completion</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Minimal word length to complete:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="spinBox">
+        <property name="minimum">
+         <number>3</number>
+        </property>
+        <property name="maximum">
+         <number>10</number>
         </property>
        </widget>
       </item>
@@ -149,8 +132,8 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>20</width>
-       <height>40</height>
+       <width>17</width>
+       <height>50</height>
       </size>
      </property>
     </spacer>

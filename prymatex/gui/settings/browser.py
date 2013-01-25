@@ -6,10 +6,10 @@ from prymatex.qt import QtGui, QtCore
 from prymatex.qt.QtNetwork import QNetworkProxy
 
 from prymatex import resources
-from prymatex.ui.configure.browser import Ui_BrowserWidget
+from prymatex.ui.configure.browser import Ui_Browser
 from prymatex.models.settings import SettingsTreeNode
 
-class NetworkSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_BrowserWidget):
+class NetworkSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Browser):
     """Setup browser"""
     TITLE = "Browser"
     ICON = resources.getIcon("internet-web-browser")

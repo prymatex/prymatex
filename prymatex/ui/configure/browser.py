@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/browser.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/browser.ui'
 #
-# Created: Thu Jan 24 13:52:48 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Fri Jan 25 10:19:09 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -15,15 +15,15 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class Ui_BrowserWidget(object):
-    def setupUi(self, BrowserWidget):
-        BrowserWidget.setObjectName(_fromUtf8("BrowserWidget"))
-        BrowserWidget.resize(592, 225)
-        self.verticalLayout = QtGui.QVBoxLayout(BrowserWidget)
+class Ui_Browser(object):
+    def setupUi(self, Browser):
+        Browser.setObjectName(_fromUtf8("Browser"))
+        Browser.resize(592, 225)
+        self.verticalLayout = QtGui.QVBoxLayout(Browser)
         self.verticalLayout.setSpacing(6)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.groupBox_2 = QtGui.QGroupBox(BrowserWidget)
+        self.groupBox_2 = QtGui.QGroupBox(Browser)
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
         self.formLayout_2 = QtGui.QFormLayout(self.groupBox_2)
         self.formLayout_2.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
@@ -35,7 +35,7 @@ class Ui_BrowserWidget(object):
         self.checkBoxDeveloperExtras.setObjectName(_fromUtf8("checkBoxDeveloperExtras"))
         self.formLayout_2.setWidget(2, QtGui.QFormLayout.FieldRole, self.checkBoxDeveloperExtras)
         self.verticalLayout.addWidget(self.groupBox_2)
-        self.groupBox = QtGui.QGroupBox(BrowserWidget)
+        self.groupBox = QtGui.QGroupBox(Browser)
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
         self.formLayout = QtGui.QFormLayout(self.groupBox)
         self.formLayout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
@@ -61,11 +61,11 @@ class Ui_BrowserWidget(object):
         spacerItem = QtGui.QSpacerItem(20, 15, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
 
-        self.retranslateUi(BrowserWidget)
-        QtCore.QMetaObject.connectSlotsByName(BrowserWidget)
+        self.retranslateUi(Browser)
+        QtCore.QMetaObject.connectSlotsByName(Browser)
 
-    def retranslateUi(self, BrowserWidget):
-        BrowserWidget.setWindowTitle(_('Browser'))
+    def retranslateUi(self, Browser):
+        Browser.setWindowTitle(_('Browser'))
         self.groupBox_2.setTitle(_('Source'))
         self.checkBoxDeveloperExtras.setText(_('Enable developer extras'))
         self.groupBox.setTitle(_('Connection'))

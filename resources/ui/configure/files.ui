@@ -1,21 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FileManager</class>
- <widget class="QDialog" name="FileManager">
+ <class>Files</class>
+ <widget class="QWidget" name="Files">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>493</width>
-    <height>439</height>
+    <width>272</width>
+    <height>281</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>File Manager</string>
-  </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>:/icons/actions/document-save.png</normaloff>:/icons/actions/document-save.png</iconset>
+   <string>Files</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -116,6 +112,9 @@
       <string>Automatic cleanups</string>
      </property>
      <layout class="QFormLayout" name="formLayout">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::ExpandingFieldsGrow</enum>
+      </property>
       <property name="horizontalSpacing">
        <number>2</number>
       </property>
@@ -125,17 +124,17 @@
       <property name="margin">
        <number>6</number>
       </property>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="checkBox_3">
-        <property name="text">
-         <string>Append newline at end of file on save</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0" colspan="2">
        <widget class="QCheckBox" name="checkBox_2">
         <property name="text">
          <string>Remove trailing spaces</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="checkBox_3">
+        <property name="text">
+         <string>Append newline at end of file on save</string>
         </property>
        </widget>
       </item>
@@ -150,7 +149,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>40</height>
+       <height>4</height>
       </size>
      </property>
     </spacer>

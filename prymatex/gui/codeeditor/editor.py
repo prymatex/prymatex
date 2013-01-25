@@ -1376,10 +1376,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     
     @classmethod
     def contributeToSettings(cls):
-        from prymatex.gui.settings.themes import ThemeSettingsWidget
+        from prymatex.gui.settings.theme import ThemeSettingsWidget
         from prymatex.gui.settings.editor import EditorSettingsWidget
+        from prymatex.gui.settings.edit import EditSettingsWidget
         from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
-        return [ EditorSettingsWidget, ThemeSettingsWidget, AddonsSettingsWidgetFactory("editor") ]
+        return [ EditorSettingsWidget, ThemeSettingsWidget, EditSettingsWidget, AddonsSettingsWidgetFactory("editor") ]
 
     # ------------------ Menu Actions
     def on_actionShowTabsAndSpaces_toggled(self, checked):

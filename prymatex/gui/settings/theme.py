@@ -18,7 +18,7 @@ from prymatex.delegates.theme import FontStyleDelegate, ColorDelegate
 class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
     """Changes font and theme"""
     NAMESPACE = "editor"
-    TITLE = "Font and Themes"
+    TITLE = "Appearance"
     ICON = resources.getIcon("fill-color")
 
     def __init__(self, settingGroup, parent=None):

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/general.ui'
 #
-# Created: Wed Jan 23 09:31:01 2013
+# Created: Fri Jan 25 10:19:09 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,6 @@ class Ui_General(object):
         self.groupBox_2 = QtGui.QGroupBox(General)
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
         self.formLayout = QtGui.QFormLayout(self.groupBox_2)
-        self.formLayout.setLabelAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.formLayout.setMargin(6)
         self.formLayout.setSpacing(2)
         self.formLayout.setObjectName(_fromUtf8("formLayout"))

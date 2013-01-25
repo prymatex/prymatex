@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/mainwindow.ui'
 #
-# Created: Mon Jan 14 09:40:38 2013
+# Created: Fri Jan 25 10:19:09 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,6 +27,8 @@ class Ui_MainWindow(object):
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
         self.formLayout_2 = QtGui.QFormLayout(self.groupBox_2)
         self.formLayout_2.setFieldGrowthPolicy(QtGui.QFormLayout.ExpandingFieldsGrow)
+        self.formLayout_2.setMargin(6)
+        self.formLayout_2.setSpacing(2)
         self.formLayout_2.setObjectName(_fromUtf8("formLayout_2"))
         self.label_2 = QtGui.QLabel(self.groupBox_2)
         self.label_2.setObjectName(_fromUtf8("label_2"))

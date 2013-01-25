@@ -42,8 +42,10 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
 
     fileHistory = pmxConfigPorperty(default = [])
     fileHistoryLength = pmxConfigPorperty(default = 10)
-    defaultEndOfLine = pmxConfigPorperty(default = 'unix')
     defaultEncoding = pmxConfigPorperty(default = 'utf_8')
+    defaultEndOfLine = pmxConfigPorperty(default = 'unix')
+    detectEndOfLine = pmxConfigPorperty(default = False)
+    removeTrailingSpaces = pmxConfigPorperty(default = False)
 
     # ---------------- Constants
     CREATED = 1<<0
@@ -51,10 +53,10 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     RENAMED = 1<<2
     MOVED   = 1<<3
     CHANGED = 1<<4
-    
+
     def __init__(self, application):
         QtCore.QObject.__init__(self)
-        
+
         self.last_directory = get_home_dir()
         self.fileWatcher = QtCore.QFileSystemWatcher()
         self.fileWatcher.fileChanged.connect(self.on_fileWatcher_fileChanged)
@@ -63,8 +65,8 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
 
     @classmethod
     def contributeToSettings(cls):
-        from prymatex.gui.settings.filemanager import FileManagerSettingsWidget
-        return [ FileManagerSettingsWidget ]
+        from prymatex.gui.settings.files import FilesSettingsWidget
+        return [ FilesSettingsWidget ]
     
     # ------------- Signals
     def connectGenericSignal(self):

@@ -15,27 +15,26 @@ to_ascii = lambda s: filter(lambda c: c in string.ascii_letters, s)
 to_ascii_cap = lambda s: to_ascii(s).capitalize()
 
 # Order is important:
-EOL_CHARS = (("\r\n", 'DOS/Windows'), ("\n", 'UNIX'), ("\r", 'Macintosh'))
+EOLS = (("\r\n", 'nt', 'DOS/Windows (\\r\\n)'), ("\n", 'posix', 'UNIX (\\n)'), ("\r", 'mac', 'Macintosh (\\r)'))
 
 # ----------------- EOL tools --------------------
-
 def get_eol_chars(text):
     """Get text EOL characters"""
-    for eol_chars, _os_name in EOL_CHARS:
+    for eol_chars, _os_name, _ in EOLS:
         if text.find(eol_chars) > -1:
             return eol_chars
 
 
 def get_os_name_from_eol_chars(eol_chars):
     """Return OS name from EOL characters"""
-    for chars, os_name in EOL_CHARS:
+    for chars, os_name, _ in EOLS:
         if eol_chars == chars:
             return os_name
 
 
 def get_eol_chars_from_os_name(os_name):
     """Return EOL characters from OS name"""
-    for eol_chars, name in EOL_CHARS:
+    for eol_chars, name, _ in EOLS:
         if name == os_name:
             return eol_chars
 
@@ -57,6 +56,7 @@ def whiteSpace(text):
         return match.group(0)
     return ''
 
+
 # ----------------- Python Source tests --------------------
 def is_builtin(text):
     """Test if passed string is the name of a Python builtin object"""
@@ -69,6 +69,7 @@ def is_keyword(text):
     """Test if passed string is the name of a Python keyword"""
     import keyword
     return text in keyword.kwlist
+
 
 # ----------------- Text convert tools --------------------
 lower_case = string.lower
@@ -94,7 +95,6 @@ spaces_to_tabs = lambda text, spaceLength = 4: text.replace(' ' * spaceLength, '
 
 
 # ----------------- Text search -------------------------
-
 def subsearch(pattern, text, pstart = 0, tstart = 0, ignoreCase = False):
     if not pattern or not text: []
     if pstart == 0 and ignoreCase:
@@ -110,8 +110,8 @@ def subsearch(pattern, text, pstart = 0, tstart = 0, ignoreCase = False):
     return [(pstart, pstart + end, begin, begin + end)] + \
         subsearch(pattern[end:], text, pstart = end, tstart = begin + end)
 
-# ----------------- Text matching -------------------------
 
+# ----------------- Text matching -------------------------
 def matching_blocks(text1, text2, ratio = 1.0, ignoreCase = False):
     if ignoreCase:
         matcher = difflib.SequenceMatcher(None, text1.lower(), text2.lower())
