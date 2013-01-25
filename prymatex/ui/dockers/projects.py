@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dockers/projects.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dockers/projects.ui'
 #
-# Created: Fri Jan 11 10:55:13 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Thu Jan 24 18:41:39 2013
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -140,10 +140,10 @@ class Ui_ProjectsDock(object):
         self.actionSetInTerminal.setObjectName(_fromUtf8("actionSetInTerminal"))
         self.actionRemove = QtGui.QAction(ProjectsDock)
         self.actionRemove.setObjectName(_fromUtf8("actionRemove"))
-        self.actionBundleEditor = QtGui.QAction(ProjectsDock)
+        self.actionProjectBundles = QtGui.QAction(ProjectsDock)
         icon = QtGui.QIcon.fromTheme(_fromUtf8("bundle-item-bundle"))
-        self.actionBundleEditor.setIcon(icon)
-        self.actionBundleEditor.setObjectName(_fromUtf8("actionBundleEditor"))
+        self.actionProjectBundles.setIcon(icon)
+        self.actionProjectBundles.setObjectName(_fromUtf8("actionProjectBundles"))
         self.actionBashInit = QtGui.QAction(ProjectsDock)
         self.actionBashInit.setObjectName(_fromUtf8("actionBashInit"))
         self.actionCopy = QtGui.QAction(ProjectsDock)
@@ -158,6 +158,8 @@ class Ui_ProjectsDock(object):
         icon = QtGui.QIcon.fromTheme(_fromUtf8("edit-paste"))
         self.actionPaste.setIcon(icon)
         self.actionPaste.setObjectName(_fromUtf8("actionPaste"))
+        self.actionSelectRelatedBundles = QtGui.QAction(ProjectsDock)
+        self.actionSelectRelatedBundles.setObjectName(_fromUtf8("actionSelectRelatedBundles"))
 
         self.retranslateUi(ProjectsDock)
         QtCore.QMetaObject.connectSlotsByName(ProjectsDock)
@@ -189,7 +191,8 @@ class Ui_ProjectsDock(object):
         self.actionOrderFoldersFirst.setText(_('Folders First'))
         self.actionSetInTerminal.setText(_('Set In Terminal'))
         self.actionRemove.setText(_('Remove'))
-        self.actionBundleEditor.setText(_('Bundle Editor'))
+        self.actionProjectBundles.setText(_('Project Bundles'))
+        self.actionProjectBundles.setToolTip(_('Bundles inside this project'))
         self.actionBashInit.setText(_('Bash Init'))
         self.actionCopy.setText(_('&Copy'))
         self.actionCopy.setShortcut(_('Ctrl+C'))
@@ -197,4 +200,6 @@ class Ui_ProjectsDock(object):
         self.actionCut.setShortcut(_('Ctrl+X'))
         self.actionPaste.setText(_('&Paste'))
         self.actionPaste.setShortcut(_('Ctrl+V'))
+        self.actionSelectRelatedBundles.setText(_('Select Related Bundles'))
+        self.actionSelectRelatedBundles.setToolTip(_('Choose bundles related to this project'))
 

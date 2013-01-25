@@ -17,8 +17,10 @@ from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
 from prymatex.gui.dialogs.project import PMXNewProjectDialog
 from prymatex.gui.dialogs.messages import CheckableMessageBox
 from prymatex.gui.dialogs.input import ReplaceRenameInputDialog
+from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
 
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
+
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 
 from prymatex.models.projects import ProjectTreeNode
@@ -50,7 +52,15 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
         self.setupPropertiesDialog()
         self.setupTreeViewProjects()
+        
+        # Model for selector dialog
         self.selectableProjectFileModel = SelectableProjectFileModel(self.projectManager, self.fileManager, parent = self)
+        
+        # Bundle Filter Dialog
+        self.bundleFilterDialog = BundleFilterDialog(self)
+        self.bundleFilterDialog.setWindowTitle("Select Related Bundles")
+        self.bundleFilterDialog.setModel(self.projectManager.projectMenuProxyModel)
+        self.bundleFilterDialog.setHelpVisible(False)
         
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
@@ -237,7 +247,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             extend_menu_section(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
             #extend_menu_section(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
             #extend_menu_section(menu, [self.actionBashInit], section = "interact")
-            extend_menu_section(menu, [self.actionBundleEditor], section = "bundles")
+            extend_menu_section(menu, [self.actionProjectBundles, self.actionSelectRelatedBundles], section = "bundles")
         else:
             extend_menu_section(menu, [self.actionCut, self.actionCopy, self.actionPaste], section = "handlepaths", position = 0)
         if node.isfile:
@@ -411,23 +421,35 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         if editor is not None and not editor.isNew():
             index = self.projectTreeProxyModel.indexForPath(editor.filePath)
             self.treeViewProjects.setCurrentIndex(index)
-    
+
     @QtCore.pyqtSlot()
-    def on_actionBundleEditor_triggered(self):
+    def on_actionProjectBundles_triggered(self):
         project = self.currentNode()
         if project.namespace is None:
             self.application.supportManager.addProjectNamespace(project)
         self.projectManager.projectMenuProxyModel.setCurrentProject(project)
-        self.application.bundleEditor.execEditor(namespaceFilter = project.namespace, filterText = "Menu", filterModel = self.projectManager.projectMenuProxyModel)
+        # TODO Terminar quitando el menu de filtros
+        self.application.bundleEditorDialog.execEditor(namespaceFilter = project.namespace)
     
+    @QtCore.pyqtSlot()
+    def on_actionSelectRelatedBundles_triggered(self):
+        project = self.currentNode()
+        if project.namespace is None:
+            self.application.supportManager.addProjectNamespace(project)
+        self.projectManager.projectMenuProxyModel.setCurrentProject(project)
+        self.bundleFilterDialog.exec_()
+        
+    @QtCore.pyqtSlot()
     def on_actionCopy_triggered(self):
         mimeData = self.projectTreeProxyModel.mimeData( self.treeViewProjects.selectedIndexes() )
         self.application.clipboard().setMimeData(mimeData)
         
+    @QtCore.pyqtSlot()
     def on_actionCut_triggered(self):
         mimeData = self.projectTreeProxyModel.mimeData( self.treeViewProjects.selectedIndexes() )
         self.application.clipboard().setMimeData(mimeData)
         
+    @QtCore.pyqtSlot()
     def on_actionPaste_triggered(self):
         parentPath = self.currentPath()
         mimeData = self.application.clipboard().mimeData()
