@@ -19,7 +19,7 @@
 Needed packages to run (using Debian/Ubuntu package names):
 """
 
-import os
+import sys, os
 
 from distutils.command.install import install
 from distutils.command.build import build
