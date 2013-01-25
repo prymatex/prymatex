@@ -6,6 +6,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex import resources
 from prymatex.ui.support.editor import Ui_BundleEditor
 from prymatex.gui.support import widgets
+from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
 
 class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
     BASE_EDITOR = -1 #El ultimo es el editor base, no tiene nada
@@ -45,17 +46,13 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
         
         return QtGui.QDialog.exec_(self)
         
-    def execEditor(self, typeFilter = None, namespaceFilter = None, filterModel = None, filterText = None):
+    def execEditor(self, typeFilter = None, namespaceFilter = None):
         self.namespace = namespaceFilter
         self.proxyTreeModel.setFilterNamespace(namespaceFilter)
         self.proxyTreeModel.setFilterBundleItemType(typeFilter)
         index = self.comboBoxItemFilter.findData(typeFilter)
         self.comboBoxItemFilter.setCurrentIndex(index)
         
-        #Filter button
-        self.bundleFilterDialog.setModel(filterModel or self.manager.bundleProxyModel)
-        self.pushButtonFilter.setText(filterText or self.defaullFilterText)
-
         self.exec_()
         
     def execCommand(self):
@@ -200,8 +197,8 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
         self.pushButtonAdd.setMenu(self.toolbarMenu)
         
         #Bundle global filter dialog
-        self.bundleFilterDialog = PMXBundleFilter(self)
-        self.defaullFilterText = "Filter"
+        self.bundleFilterDialog = BundleFilterDialog(self)
+        self.bundleFilterDialog.setModel(self.manager.bundleProxyModel)
 
     #==========================================================
     # Filter Top Bar
@@ -341,53 +338,3 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
                 self.lineTabTriggerActivation.setText(tabTrigger)
             index = 0 if keyEquivalent else 1
             self.comboBoxActivation.setCurrentIndex(index)
-
-from prymatex.utils.i18n import ugettext as _
-from PyQt4 import QtCore, QtGui
-
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    _fromUtf8 = lambda s: s
-
-class PMXBundleFilter(QtGui.QDialog):
-    def __init__(self, bundleEditor):
-        super(PMXBundleFilter, self).__init__(bundleEditor)
-        self.setupUi(self)
-        self.setWindowFlags(QtCore.Qt.Dialog)
-        self.proxy = QtGui.QSortFilterProxyModel(self)
-        self.tableBundleItems.setModel(self.proxy)
-        
-    def setModel(self, model):
-        self.proxy.setSourceModel(model)
-        
-    def setupUi(self, BundleFilter):
-        BundleFilter.setObjectName(_fromUtf8("BundleFilter"))
-        BundleFilter.resize(330, 400)
-        BundleFilter.setMinimumSize(QtCore.QSize(330, 400))
-        self.verticalLayout = QtGui.QVBoxLayout(BundleFilter)
-        self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(0)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.tableBundleItems = QtGui.QTableView(BundleFilter)
-        self.tableBundleItems.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        self.tableBundleItems.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.tableBundleItems.setShowGrid(False)
-        self.tableBundleItems.setObjectName(_fromUtf8("tableBundleItems"))
-        self.tableBundleItems.horizontalHeader().setVisible(False)
-        self.tableBundleItems.verticalHeader().setVisible(False)
-        self.verticalLayout.addWidget(self.tableBundleItems)
-        self.labelHelp = QtGui.QLabel(BundleFilter)
-        self.labelHelp.setWordWrap(True)
-        self.labelHelp.setObjectName(_fromUtf8("labelHelp"))
-        self.verticalLayout.addWidget(self.labelHelp)
-        self.retranslateUi(BundleFilter)
-
-    def retranslateUi(self, BundleFilter):
-        BundleFilter.setWindowTitle(_('Enable/Disable bundles'))
-        self.labelHelp.setText(_('You should keep the Source, Text and TextMate bundles enabled, as these provide base functionality relied upon by other bundles.'))
-        
-    def show(self):
-        self.tableBundleItems.resizeColumnsToContents()
-        self.tableBundleItems.resizeRowsToContents()
-        QtGui.QDialog.show(self)
