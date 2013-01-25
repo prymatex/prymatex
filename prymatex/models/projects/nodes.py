@@ -37,9 +37,24 @@ class FileSystemTreeNode(TreeNodeBase):
     def path(self):
         return os.path.join(self.nodeParent().path(), self.nodeName())
     
+    def relpath(self):
+        return os.path.join(self.nodeParent().relpath(), self.nodeName())
+    
     def icon(self):
         return resources.getIcon(self.path())
-      
+    
+    def type(self):
+        if self.isproject:
+            return "Project"
+        else:
+            return resources.get_file_type(self.path())
+  
+    def size(self):
+        return os.path.getsize(self.path())
+
+    def mtime(self):
+        return os.path.getmtime(self.paht())
+
 class ProjectTreeNode(FileSystemTreeNode):
     KEYS = [    'name', 'description', 'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 
                 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame', 'shellVariables', 'bundleMenu' ]
@@ -131,13 +146,15 @@ class ProjectTreeNode(FileSystemTreeNode):
     def path(self):
         return self.directory
     
+    def relpath(self):
+        return os.path.basename(self.directory)
+        
     def icon(self):
         if self.manager.isOpen(self):
             return resources.getIcon("project-development")
 
-    #==========================================
-    # Bundle Menu 
-    #==========================================
+
+    # --------------- Bundle Menu
     def addBundleMenu(self, bundle):
         if not isinstance(self.bundleMenu, list):
             self.bundleMenu = []

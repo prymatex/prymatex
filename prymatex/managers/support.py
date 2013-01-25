@@ -249,7 +249,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
             if var['enabled']:
                 environment[var['variable']] = var['value']
         return environment
-    
+
     # Override loadSupport for emit signals
     def loadSupport(self, *largs, **kwargs):
         PMXSupportBaseManager.loadSupport(self, *largs, **kwargs)
@@ -273,7 +273,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
         environment = QtCore.QProcessEnvironment()
         for key, value in context.environment.iteritems():
             environment.insert(key, value)
-                    
+
         process.setProcessEnvironment(environment)
 
         def onQProcessFinished(process, context, callback):

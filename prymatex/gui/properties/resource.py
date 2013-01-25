@@ -22,7 +22,8 @@ class ResoucePropertiesWidget(QtGui.QWidget, PropertyTreeNode, Ui_ResouceWidget)
     
     def edit(self, fileSystemItem):
         self.fileSystemItem = fileSystemItem
-        self.textLabelPath.setText(self.fileSystemItem.path())
-        self.textLabelType.setText(self.fileSystemItem.path())
+        self.textLabelPath.setText(self.fileSystemItem.relpath())
+        self.textLabelType.setText(self.fileSystemItem.type())
         self.textLabelLocation.setText(self.fileSystemItem.path())
+        self.textLabelSize.setText("%d bytes" % self.fileSystemItem.size())
         self.textLabelLastModified.setText(self.fileSystemItem.path())
