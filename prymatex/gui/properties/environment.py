@@ -7,7 +7,7 @@ from prymatex.models.projects import PropertyTreeNode
 from prymatex.ui.configure.environment import Ui_Environment
 from prymatex.models.environment import EnvironmentTableModel
 
-class EnvironmentWidget(QtGui.QWidget, PropertyTreeNode, Ui_Environment):
+class EnvironmentPropertiesWidget(QtGui.QWidget, PropertyTreeNode, Ui_Environment):
     """Environment variables"""
     NAMESPACE = ""
     TITLE = "Enviroment Variables"

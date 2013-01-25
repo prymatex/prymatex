@@ -147,7 +147,7 @@ class PMXSupportBaseManager(object):
         return env
 
     #----------- Paths for namespaces --------------------
-    def namespaceElementPath(self, namespace, element, create=False):
+    def namespaceElementPath(self, namespace, element, create = False):
         assert namespace in self.namespaces, "The %s namespace is not registered" % namespace
         assert element in self.ELEMENTS, "The %s namespace is not registered" % namespace
         path = os.path.join(self.namespaces[namespace]["dirname"], element)
@@ -509,16 +509,14 @@ class PMXSupportBaseManager(object):
 
     # ------------- BUNDLE CRUD
     def findBundles(self, **attrs):
-        """
-        Retorna todos los bundles que cumplan con attrs
-        """
+        """Retorna todos los bundles que cumplan con attrs"""
         bundles = []
         for bundle in self.getAllBundles():
             if compare(bundle, attrs.keys(), attrs):
                 bundles.append(bundle)
         return bundles
 
-    def createBundle(self, name, namespace=None):
+    def createBundle(self, name, namespace = None):
         """
         Crea un bundle nuevo lo agrega en los bundles y lo retorna,
         Precondiciones:
@@ -528,7 +526,7 @@ class PMXSupportBaseManager(object):
         Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle nuevo.
         """
         namespace = namespace or self.defaultNamespace
-        basePath = self.basePath(self.BUNDLES_NAME, namespace)
+        basePath, _ = self.namespaceElementPath(namespace, self.BUNDLES_NAME, create = True)
         path = ensurePath(os.path.join(basePath, "%s.tmbundle"), self.convertToValidPath(name))
         bundle = PMXBundle(self.uuidgen(), {'name': name})
         bundle.setManager(self)
@@ -538,9 +536,7 @@ class PMXSupportBaseManager(object):
         return bundle
 
     def readBundle(self, **attrs):
-        """
-        Retorna un bundle por sus atributos
-        """
+        """Retorna un bundle por sus atributos"""
         bundles = self.findBundles(**attrs)
         if len(bundles) > 1:
             raise Exception("More than one bundle")
@@ -549,7 +545,7 @@ class PMXSupportBaseManager(object):
     def getBundle(self, uuid):
         return self.getManagedObject(uuid)
 
-    def updateBundle(self, bundle, namespace=None, **attrs):
+    def updateBundle(self, bundle, namespace = None, **attrs):
         """Actualiza un bundle"""
         if len(attrs) == 1 and "name" in attrs and attrs["name"] == bundle.name:
             #Updates que no son updates
@@ -559,7 +555,7 @@ class PMXSupportBaseManager(object):
 
         if bundle.isProtected and not bundle.isSafe:
             #Safe bundle
-            basePath = self.basePath(self.BUNDLES_NAME, namespace)
+            basePath, _ = self.namespaceElementPath(namespace, self.BUNDLES_NAME, create = True)
             path = os.path.join(basePath, os.path.basename(bundle.path(self.protectedNamespace)))
             bundle.addSource(namespace, path)
             if bundle.hasSupport():
@@ -578,7 +574,7 @@ class PMXSupportBaseManager(object):
     def deleteBundle(self, bundle):
         """Elimina un bundle, si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado"""
         #Primero los items
-        items = self.findBundleItems(bundle=bundle)
+        items = self.findBundleItems(bundle = bundle)
 
         for item in items:
             self.deleteBundleItem(item)

@@ -26,7 +26,7 @@ from prymatex.utils.decorators.helpers import printtime, logtime
 # Global dialogs
 from prymatex.gui.dialogs.profile import PMXProfileDialog
 from prymatex.gui.dialogs.settings import PMXSettingsDialog
-from prymatex.gui.support.bundleeditor import PMXBundleEditor
+from prymatex.gui.dialogs.bundles.editor import BundleEditorDialog
 
 
 class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
@@ -266,8 +266,8 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
 
         # Create bundle editor dialog
-        self.extendComponent(PMXBundleEditor)
-        self.bundleEditorDialog = PMXBundleEditor(self, manager)
+        self.extendComponent(BundleEditorDialog)
+        self.bundleEditorDialog = BundleEditorDialog(self, manager)
 
         return manager
 

@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui
-
 from prymatex import resources
+
+# UI
 from prymatex.ui.support.editor import Ui_BundleEditor
-from prymatex.gui.support import widgets
+
+from prymatex.gui.dialogs.bundles import widgets
 from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
 
 class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditor):
@@ -82,7 +84,7 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditor):
                          widgets.CommandEditorWidget(self),
                          widgets.DragCommandEditorWidget(self),
                          widgets.BundleEditorWidget(self),
-                         widgets.TemplateEditorFileWidget(self),
+                         widgets.TemplateFileEditorWidget(self),
                          widgets.TemplateEditorWidget(self),
                          widgets.PreferenceEditorWidget(self),
                          widgets.LanguageEditorWidget(self),

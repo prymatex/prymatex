@@ -4,6 +4,8 @@
 from prymatex.qt import QtCore
 
 from prymatex.utils.lists import bisect_key
+
+from prymatex.models.mimes import PyMimeData
 from prymatex.models.support.nodes import BundleItemMenuTreeNode
 
 #====================================================

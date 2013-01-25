@@ -61,12 +61,12 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
 
     def on_supportManager_bundleAdded(self, bundle):
         for project in self.getAllProjects():
-            if project.namespace is not None and bundle.hasNamespace(project.namespace) and not project.hasBundleMenu(bundle):
+            if bundle.hasNamespace(project.namespace) and not project.hasBundleMenu(bundle):
                 self.addProjectBundleMenu(project, bundle)
 
     def on_supportManager_bundleRemoved(self, bundle):
         for project in self.getAllProjects():
-            if project.namespace is not None and bundle.hasNamespace(project.namespace) and project.hasBundleMenu(bundle):
+            if bundle.hasNamespace(project.namespace) and project.hasBundleMenu(bundle):
                 self.removeProjectBundleMenu(project, bundle)
 
     def loadProjects(self):

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import utils
 
 PROJECT_PATH = os.path.abspath(os.path.join(__file__, '..', '..'))
@@ -150,4 +151,8 @@ class QtUiBuild(object):
         cls._wrappeduic = True
 
 if __name__ == '__main__':
-    QtUiBuild(0).run()
+    verbose = 0
+    if len(sys.argv) > 1:
+        verbose = int(sys.argv[1])
+    sys.exit(QtUiBuild(verbose).run())
+    
