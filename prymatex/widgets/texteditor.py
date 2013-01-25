@@ -371,7 +371,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
 
     #------ Update Text
     def updatePlainText(self, text, cursor = None):
-        if cursor and cursor.hasSelection():
+        if cursor:
             sourceText = cursor.selectedText()
             sourceOffset = cursor.selectionStart()
         else:
