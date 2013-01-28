@@ -5,27 +5,31 @@ import os
 from string import Template
 
 from prymatex.qt import QtCore, QtGui
-
-from prymatex import resources
-
-from prymatex.ui.mainwindow import Ui_MainWindow
-from prymatex.core import exceptions
-from prymatex.core.settings import pmxConfigPorperty
 from prymatex.qt.compat import getSaveFileName
 from prymatex.qt.helpers import text2objectname
 from prymatex.qt.helpers.widgets import center_widget
 from prymatex.qt.helpers.menus import create_menu, extend_menu
+
+from prymatex import resources
+
+from prymatex.core import exceptions
+from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.components import PMXBaseComponent
+
+from prymatex.utils.i18n import ugettext as _
+
 from prymatex.gui.actions import MainWindowActions, tabSelectableModelFactory
 from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.gui.processors import MainWindowCommandProcessor
 from prymatex.gui.dialogs.selector import SelectorDialog
+
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
 from prymatex.widgets.message import PopupMessageWidget
 
-from prymatex.utils.i18n import ugettext as _
+from prymatex.ui.mainwindow import Ui_MainWindow
 
-class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
+class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBaseComponent):
     """Prymatex main window"""
     # --------------------- Signals
     currentEditorChanged = QtCore.pyqtSignal(object)
@@ -53,6 +57,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         @param files_to_open: The set of files to be opened when the window is shown in the screen.
         """
         QtGui.QMainWindow.__init__(self)
+        PMXBaseComponent.__init__(self)
+
         self.application = application
         self.setupUi(self)
         

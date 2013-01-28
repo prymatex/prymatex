@@ -33,6 +33,7 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
     
     def __init__(self, application):
         QtCore.QObject.__init__(self)
+        PMXBaseComponent.__init__(self)
         self.fileManager = application.fileManager
         self.supportManager = application.supportManager
 

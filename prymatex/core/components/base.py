@@ -4,8 +4,26 @@
 # TODO: No son Mixin?
 
 class PMXBaseComponent(object):
-    def initialize(self):
-        pass
+    def __init__(self):
+        self.__componentAddons = []
+
+    def initialize(self, parent = None):
+        for addon in self.__componentAddons:
+            addon.initialize(self)
+    
+    # ---------------- Addons api
+    def componentAddons(self):
+        return self.__componentAddons
+      
+
+    def addComponentAddon(self, addon):
+        self.__componentAddons.append(addon)
+
+
+    def componentAddonByClass(self, klass):
+        addons = filter(lambda addon: isinstance(addon, klass), self.__componentAddons)
+        #TODO: Solo uno
+        return addons[0]
     
     def finalize(self):
         pass
@@ -31,29 +49,19 @@ class PMXBaseComponent(object):
 
 class PMXBaseWidgetComponent(PMXBaseComponent):
     def __init__(self):
-        self.addons = []
+        PMXBaseComponent.__init__(self)
         self.keyHelpers = {}
             
     def initialize(self, mainWindow):
+        PMXBaseComponent.initialize(self, mainWindow)
         self.mainWindow = mainWindow
-        for addon in self.addons:
-            addon.initialize(self)
         for keyHelpers in self.keyHelpers.values():
             map(lambda keyHelper: keyHelper.initialize(self), keyHelpers)
 
     @classmethod
     def contributeToMainMenu(cls, addonClasses):
         return PMXBaseComponent.contributeToMainMenu()
-    
-    # Addons api    
-    def addAddon(self, addon):
-        self.addons.append(addon)
-        
-    def addonByClass(self, klass):
-        addons = filter(lambda addon: isinstance(addon, klass), self.addons)
-        #TODO: Solo uno
-        return addons[0]
-
+   
     # Helpers api
     def addKeyHelper(self, helper):
         helpers = self.keyHelpers.setdefault(helper.KEY, [])

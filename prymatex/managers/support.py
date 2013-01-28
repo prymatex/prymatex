@@ -180,6 +180,8 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
     def __init__(self, application):
         QtCore.QObject.__init__(self)
         PMXSupportBaseManager.__init__(self)
+        PMXBaseComponent.__init__(self)
+
         self.application = application
         self.bundleTreeModel = BundleItemTreeModel(self)
         self.themeListModel = ThemeListModel(self)

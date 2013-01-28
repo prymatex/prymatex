@@ -14,7 +14,8 @@ from prymatex.utils.importlib import import_from_directory
 class PrymatexServer(QtCore.QObject, PMXBaseComponent):
     def __init__(self, application):
         QtCore.QObject.__init__(self)
-        
+        PMXBaseComponent.__init__(self)
+
         self.dialogs = {}
         self.instances = {}
 

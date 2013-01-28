@@ -54,6 +54,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         """Inicialización de la aplicación."""
         #TODO: Pasar los argumentos a la QApplication
         QtGui.QApplication.__init__(self, [])
+        PMXBaseComponent.__init__(self)
 
         # Some init's
         self.setApplicationName(prymatex.__name__.title())

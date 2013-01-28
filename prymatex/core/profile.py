@@ -137,28 +137,36 @@ class PMXProfile(object):
 
 
     def configure(self, configurableInstance):
-        configurableInstance.settings.addListener(configurableInstance)
-        configurableInstance.settings.configure(configurableInstance)
+        configurables = [ configurableInstance ] + configurableInstance.componentAddons()
+        for configurable in configurables:
+            configurable.settings.addListener(configurable)
+            configurable.settings.configure(configurable)
+
 
     def saveState(self, component):
         self.state.setValue(component.objectName(), component.saveState())
         self.state.sync()
 
+
     def restoreState(self, component):
         state = self.state.value(component.objectName())
         if state:
             component.restoreState(state)
-        
+
+
     def setValue(self, name, value):
         self.qsettings.setValue(name, value)
-    
+
+
     def value(self, name, default = None):
         if hasattr(self, name):
             return getattr(self, name)
         return self.qsettings.value(name, default)
 
+
     def clear(self):
         self.qsettings.clear()
+
         
     def sync(self):
         #Save capture values from qt

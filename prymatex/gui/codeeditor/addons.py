@@ -84,11 +84,11 @@ class SpellCheckerAddon(CodeEditorAddon):
     @classmethod
     def contributeToMainMenu(cls):
         def on_actionSpellingOnType_toggled(editor, checked):
-            instance = editor.addonByClass(cls)
+            instance = editor.componentAddonByClass(cls)
             instance.spellingOnType = checked
 
         def on_actionSpellingOnType_testChecked(editor):
-            instance = editor.addonByClass(cls)
+            instance = editor.componentAddonByClass(cls)
             return instance.spellingOnType
 
         baseMenu = "Edit"

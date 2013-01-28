@@ -50,7 +50,9 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
     SETTINGS_GROUP = 'PluginManager'
     
     def __init__(self, application):
-        self.application = application
+        QtCore.QObject.__init__(self, application)
+        PMXBaseComponent.__init__(self)
+
         self.directories = []
         
         self.currentPluginDescriptor = None
@@ -107,7 +109,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         
         for addonClass in self.addons.get(widgetClass, []):
             addon = addonClass(instance)
-            instance.addAddon(addon)
+            instance.addComponentAddon(addon)
         
         for keyHelperClass in self.keyHelpers.get(widgetClass, []):
             keyHelper = keyHelperClass(instance)

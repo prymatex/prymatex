@@ -3,9 +3,10 @@
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex.core import PMXBaseEditorAddon
-
 from prymatex import resources
+
+from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core import PMXBaseEditorAddon
 
 class CodeEditorSideBar(QtGui.QWidget):
     updateRequest = QtCore.pyqtSignal()
@@ -69,6 +70,10 @@ class SideBarWidgetAddon(PMXBaseEditorAddon):
 class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
     MARGIN = 2
+
+    @pmxConfigPorperty(default = True)
+    def showLineNumbers(self, value):
+        self.setVisible(value)
     
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
@@ -115,11 +120,11 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     @classmethod
     def contributeToMainMenu(cls):
         def on_actionShowLineNumbers_toggled(editor, checked):
-            instance = editor.addonByClass(cls)
+            instance = editor.componentAddonByClass(cls)
             instance.setVisible(checked)
 
         def on_actionShowLineNumbers_testChecked(editor):
-            instance = editor.addonByClass(cls)
+            instance = editor.componentAddonByClass(cls)
             return instance.isVisible()
         
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
@@ -172,6 +177,11 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
 class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
+    @pmxConfigPorperty(default = False)
+    def showBookmarks(self, value):
+        self.setVisible(value)
+    
+    
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
         self.bookmarkflagImage = resources.getImage("bookmarkflag")
@@ -191,11 +201,11 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     @classmethod
     def contributeToMainMenu(cls):
         def on_actionShowBookmarks_toggled(editor, checked):
-            instance = editor.addonByClass(cls)
+            instance = editor.componentAddonByClass(cls)
             instance.setVisible(checked)
 
         def on_actionShowBookmarks_testChecked(editor):
-            instance = editor.addonByClass(cls)
+            instance = editor.componentAddonByClass(cls)
             return instance.isVisible()
         
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
@@ -242,6 +252,11 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
 class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
+    @pmxConfigPorperty(default = True)
+    def showFolding(self, value):
+        self.setVisible(value)
+    
+
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
         self.foldingcollapsedImage = resources.getImage("foldingcollapsed")
@@ -261,11 +276,11 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     @classmethod
     def contributeToMainMenu(cls):
         def on_actionShowFoldings_toggled(editor, checked):
-            instance = editor.addonByClass(cls)
+            instance = editor.componentAddonByClass(cls)
             instance.setVisible(checked)
 
         def on_actionShowFoldings_testChecked(editor):
-            instance = editor.addonByClass(cls)
+            instance = editor.componentAddonByClass(cls)
             return instance.isVisible()
         
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
@@ -328,6 +343,10 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
 class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignRight
     
+    @pmxConfigPorperty(default = False)
+    def showSelection(self, value):
+        self.setVisible(value)
+    
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
         self.setFixedWidth(10)
@@ -348,11 +367,11 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     @classmethod
     def contributeToMainMenu(cls):
         def on_actionShowSelection_toggled(editor, checked):
-            instance = editor.addonByClass(cls)
+            instance = editor.componentAddonByClass(cls)
             instance.setVisible(checked)
 
         def on_actionShowSelection_testChecked(editor):
-            instance = editor.addonByClass(cls)
+            instance = editor.componentAddonByClass(cls)
             return instance.isVisible()
         
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")

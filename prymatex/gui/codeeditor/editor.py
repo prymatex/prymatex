@@ -176,8 +176,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         PMXBaseEditor.initialize(self, mainWindow)
         self.connectSignals()
         
-    def addAddon(self, addon):
-        PMXBaseEditor.addAddon(self, addon)
+    # ----------- Override from PMXBaseComponent
+    def addComponentAddon(self, addon):
+        PMXBaseEditor.addComponentAddon(self, addon)
         if isinstance(addon, SideBarWidgetAddon):
             self.addSideBarWidget(addon)
 
@@ -541,7 +542,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         cursor.clearSelection()
         self.setExtraSelectionCursors("line", [ cursor ])
         self.setExtraSelectionCursors("brace", filter(lambda cursor: cursor is not None, list(self._currentBraces)))
-        for addon in self.addons:
+        for addon in self.componentAddons():
             if isinstance(addon, CodeEditorAddon):
                 self.updateExtraSelectionCursors(addon.extraSelectionCursors())
         self.updateExtraSelections()
@@ -1161,7 +1162,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         #Se lo pasamos a los addons
         cursor = self.cursorForPosition(point)
         items = ["-"]
-        for addon in self.addons:
+        for addon in self.componentAddons():
             if isinstance(addon, CodeEditorAddon):
                 items += addon.contributeToContextMenu(cursor)
         
