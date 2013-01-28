@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re, sys, os, stat, tempfile
+from pprint import pprint
 
 try:
     from ponyguruma import sre
@@ -34,8 +35,10 @@ http://en.wikipedia.org/wiki/Dennis_Ritchie
 def getSupportPath(environment):
     return environment["PMX_SUPPORT_PATH"]
 
+
 def getShellShebang(environment):
     return "#!%s" % environment.get("SHELL", SHELL_BASH)
+
 
 def buildShellScript(script, environment, shebang = None):
     shellScript = [ getShellShebang(environment) ] if shebang is None else [ shebang ]
@@ -46,6 +49,7 @@ def buildShellScript(script, environment, shebang = None):
     shellScript.append(script)
     return "\n".join(shellScript)
 
+
 def buildEnvScript(script, command, environment):
     supportPath = getSupportPath(environment)
 
@@ -53,15 +57,19 @@ def buildEnvScript(script, command, environment):
     envScript = [ "%s %s" % (shebang, command) ]
     envScript.append(script)
     return "\n".join(envScript)
+
     
 def has_shebang(line):
     return line.startswith("#!")
 
+
 def is_shell_shebang(line):
     return os.path.basename(line) in [ "bash", "sh", "csh", "zsh" ]
 
+
 def is_env_shebang(line):
     return os.path.basename(line) == "env"
+
 
 def shebang_patch(shebang, environment):
     shebangParts = shebang.split()
@@ -82,6 +90,7 @@ def shebang_patch(shebang, environment):
                     shebang = value + shebang[splitIndex:]
     return shebang
 
+
 def shebang_command(shebang, environment):
     shebangParts = shebang.split()
     if is_env_shebang(shebangParts[0]) and len(shebangParts) > 1:
@@ -96,6 +105,7 @@ def shebang_command(shebang, environment):
                 if key.startswith(prefix) and key[len(prefix):].lower() in shebang:
                     return ("%s %s") % (value, " ".join(shebangParts[1:]))
     return " ".join(shebangParts[1:])
+
 
 def ensureShellScript(script, environment):
     scriptLines = script.splitlines()
@@ -112,6 +122,7 @@ def ensureShellScript(script, environment):
         script = buildEnvScript(scriptContent, command, environment)
     return script
 
+
 #============================
 # UINX
 #============================
@@ -126,11 +137,13 @@ def ensureUnixEnvironment(environment):
             pass
     return codingenv
 
+
 def prepareUnixShellScript(script, environment):
     environment = ensureUnixEnvironment(environment)
     script = ensureShellScript(script, environment)
     tmpFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
     return tmpFile, environment, tmpFile
+
     
 #============================
 # WINDOWS
@@ -146,11 +159,13 @@ def ensureWindowsEnvironment(environment):
             pass
     return codingenv
 
+
 def prepareWindowsShellScript(script, environment):
     environment = ensureWindowsEnvironment(environment)
     script = ensureShellScript(script, environment)
     tmpFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
     return tmpFile, environment, tmpFile
+
     
 #============================
 # CYGWIN
@@ -161,6 +176,7 @@ def ensureCygwinPath(path):
         path = win32api.GetShortPathName(path)
         path = path.replace("\\", "/")
     return path
+
 
 def ensureCygwinEnvironment(environment):
     codingenv = {}
@@ -173,6 +189,7 @@ def ensureCygwinEnvironment(environment):
             pass
     return codingenv
 
+
 def prepareCygwinShellScript(script, environment):
     cygwinPath = environment.get("PMX_CYGWIN_PATH", PMX_CYGWIN_PATH)
     environment = ensureCygwinEnvironment(environment)
@@ -182,13 +199,21 @@ def prepareCygwinShellScript(script, environment):
     command = '%s\\bin\\env.exe "%s"' % (cygwinPath, tmpFile)
     return command, environment, tmpFile
 
-def prepareShellScript(script, environment):
-    assert 'PMX_SUPPORT_PATH' in environment, "PMX_SUPPORT_PATH is not in the environment"
+
+def prepareShellScript(script, variables):
+    #Aca entran las variables de prymatex, tengo que armar el environment con os.environ
+    assert 'PMX_SUPPORT_PATH' in variables, "PMX_SUPPORT_PATH is not in the environment"
+    
+    # Build final environment
+    environment = os.environ.copy()
+    environment.update(variables)
+    
     if sys.platform == "win32" and "PMX_CYGWIN_PATH" in environment:
         return prepareCygwinShellScript(script, environment)
     elif sys.platform == "win32":
         return prepareWindowsShellScript(script, environment)
     return prepareUnixShellScript(script, environment)
+
 
 def makeExecutableTempFile(content, directory):
     descriptor, name = tempfile.mkstemp(prefix='pmx', dir = directory)
@@ -198,8 +223,10 @@ def makeExecutableTempFile(content, directory):
     os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
     return name
 
+
 def deleteFile(filePath):
     os.unlink(filePath)
+
 
 def sh(cmd):
     """ Execute cmd and capture stdout, and return it as a string. """
@@ -211,6 +238,7 @@ def sh(cmd):
     finally:
         if pipe: pipe.close()
     return result
+
 
 def ensurePath(path, name, suffix = 0):
     """
@@ -224,6 +252,7 @@ def ensurePath(path, name, suffix = 0):
             return newPath
         else:
             return ensurePath(path, name, suffix + 1)
+
             
 def pathToLink(match):
     path = match.group('path')
@@ -239,8 +268,10 @@ def pathToLink(match):
     link = '<a href="txmt://open/%(attrs)s">%(text)s</a>' % data 
     return link
 
+
 def makeHyperlinks(text):
     return re.sub(RE_ABSPATH_LINENO, pathToLink, text)
+
 
 def compileRegexp(string, flags = []):
     #Muejejejeje
@@ -258,6 +289,7 @@ def compileRegexp(string, flags = []):
         except:
             #Mala leche
             pass
+
 
 if __name__ == '__main__':
     #http://en.wikipedia.org/wiki/Shebang_(Unix)
