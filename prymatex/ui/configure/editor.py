@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/editor.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/editor.ui'
 #
-# Created: Thu Jan 24 13:52:49 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Mon Jan 28 11:36:12 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -84,6 +84,9 @@ class Ui_Editor(object):
         self.checkBoxFolding = QtGui.QCheckBox(self.groupBox)
         self.checkBoxFolding.setObjectName(_fromUtf8("checkBoxFolding"))
         self.verticalLayout_2.addWidget(self.checkBoxFolding)
+        self.checkBoxSelection = QtGui.QCheckBox(self.groupBox)
+        self.checkBoxSelection.setObjectName(_fromUtf8("checkBoxSelection"))
+        self.verticalLayout_2.addWidget(self.checkBoxSelection)
         self.verticalLayout.addWidget(self.groupBox)
         spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem1)
@@ -100,8 +103,9 @@ class Ui_Editor(object):
         self.checkBoxShowTabSpaces.setText(_('Show tabs and spaces'))
         self.checkBoxShowLineParagraph.setText(_('Show line and paragraph'))
         self.checkBoxWrapLines.setText(_('Wrap lines'))
-        self.groupBox.setTitle(_('Gutter'))
+        self.groupBox.setTitle(_('Gutters'))
         self.checkBoxLineNumbers.setText(_('Show line numbers'))
         self.checkBoxBookmarks.setText(_('Show bookmarks'))
         self.checkBoxFolding.setText(_('Show folding'))
+        self.checkBoxSelection.setText(_('Show selected text'))
 

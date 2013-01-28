@@ -26,6 +26,12 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         self.projectCreated = None
         self.userEnvironment = []
         
+        # Build project keywords
+        self.syntaxKeywords = set()
+        map(lambda syntax: self.syntaxKeywords.update(syntax.scopeName.split('.')), self.application.supportManager.syntaxProxyModel.getAllItems())
+        print self.syntaxKeywords
+
+
     def setupComboTemplates(self):
         self.projectProxyModel = self.application.supportManager.projectProxyModel
         tableView = QtGui.QTableView(self)
@@ -49,7 +55,6 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         while True:
             path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose Location for Project"), directory)
             if path:
-                print path
                 if not os.path.exists(path): continue
                 path = os.path.abspath(path)
                 self.lineLocation.setText(path)
@@ -110,10 +115,6 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
             index = self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0)
             template = self.projectProxyModel.node(index)
             self.projectCreated.addBundleMenu(template.bundle)
-
-        if self.checkBoxAddToWorkingSet.isChecked():
-            workingSet = self.comboBoxWorkingSet.lineEdit().text()
-            self.application.projectManager.setWorkingSet(self.projectCreated, workingSet)
 
         self.accept()
 

@@ -7,6 +7,8 @@ from prymatex import resources
 from prymatex.ui.configure.editor import Ui_Editor
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.gui.codeeditor.editor import CodeEditor
+from prymatex.gui.codeeditor.sidebar import (LineNumberSideBarAddon, BookmarkSideBarAddon,
+                                FoldingSideBarAddon, SelectionSideBarAddon)
     
 class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
     TITLE = "Editor"
@@ -16,32 +18,35 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
         QtGui.QWidget.__init__(self, parent)
         SettingsTreeNode.__init__(self, "editor", settingGroup, profile)
         self.setupUi(self)
-        self.checkBoxLineNumbers.toggled.connect(self.on_gutterOption_toggled)
-        self.checkBoxFolding.toggled.connect(self.on_gutterOption_toggled)
-        self.checkBoxBookmarks.toggled.connect(self.on_gutterOption_toggled)
+        #self.checkBoxFolding.toggled.connect(self.on_gutterOption_toggled)
+        #self.checkBoxBookmarks.toggled.connect(self.on_gutterOption_toggled)
+        
+        # Default addons groups
+        self.bookmarksBarGroup = profile.groupByClass(BookmarkSideBarAddon)
+        self.lineNumberBarGroup = profile.groupByClass(LineNumberSideBarAddon)
+        self.foldingBarGroup = profile.groupByClass(FoldingSideBarAddon)
+        self.selectionBarGroup = profile.groupByClass(SelectionSideBarAddon)
+
 
     def loadSettings(self):
-        flags = int(self.settingGroup.value('defaultFlags'))
-        self.checkBoxFolding.setChecked(flags & CodeEditor.ShowFolding)
-        self.checkBoxBookmarks.setChecked(flags & CodeEditor.ShowBookmarks)
-        self.checkBoxLineNumbers.setChecked(flags & CodeEditor.ShowLineNumbers)
-        self.comboBoxDefaultSyntax.setModel(self.application.supportManager.syntaxProxyModel);
+        self.comboBoxDefaultSyntax.setModel(self.application.supportManager.syntaxProxyModel)
         self.comboBoxDefaultSyntax.setModelColumn(0)
+        
         uuid = self.settingGroup.value('defaultSyntax')
         syntax = self.application.supportManager.getBundleItem(uuid)
-        model = self.comboBoxDefaultSyntax.model()
-        index = model.findItemIndex(syntax)
+        index = self.comboBoxDefaultSyntax.model().findItemIndex(syntax)
         self.comboBoxDefaultSyntax.setCurrentIndex(index)
         
-    def on_gutterOption_toggled(self, checked):
-        flags = 0
-        if self.checkBoxFolding.isChecked():
-            flags |= CodeEditor.ShowFolding
-        if self.checkBoxBookmarks.isChecked():
-            flags |= CodeEditor.ShowBookmarks
-        if self.checkBoxLineNumbers.isChecked():
-            flags |= CodeEditor.ShowLineNumbers
-        self.settingGroup.setValue('defaultFlags', flags)
+        flags = int(self.settingGroup.value('defaultFlags'))
+        
+        self.checkBoxFolding.setChecked(self.foldingBarGroup.value("showFolding"))
+        self.checkBoxBookmarks.setChecked(self.bookmarksBarGroup.value("showBookmarks"))
+        self.checkBoxLineNumbers.setChecked(self.lineNumberBarGroup.value("showLineNumbers"))
+        #self.checkBoxSelection.setChecked(self.bookmarksBarGroup.value())
+        
+        
+    def on_checkBoxLineNumbers_toggled(self, checked):
+        self.lineNumberBarGroup.setValue('showLineNumbers', self.checkBoxLineNumbers.isChecked())
         
     @QtCore.pyqtSlot(int)
     def on_comboBoxDefaultSyntax_activated(self, index):

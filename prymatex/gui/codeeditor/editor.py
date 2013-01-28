@@ -56,12 +56,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # ------------------ Flags
     ShowTabsAndSpaces     = 1<<0
     ShowLineAndParagraphs = 1<<1
-    ShowBookmarks         = 1<<2
-    ShowLineNumbers       = 1<<3
-    ShowFolding           = 1<<4
-    WordWrap              = 1<<5
-    MarginLine            = 1<<6
-    IndentGuide           = 1<<7
+    WordWrap              = 1<<2
+    MarginLine            = 1<<3
+    IndentGuide           = 1<<4
     
     # ------------------- Settings
     SETTINGS_GROUP = 'CodeEditor'
@@ -95,7 +92,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setStyleSheet(appStyle)
         self.themeChanged.emit()
 
-    @pmxConfigPorperty(default = ShowLineNumbers)
+    @pmxConfigPorperty(default = MarginLine | IndentGuide)
     def defaultFlags(self, flags):
         self.setFlags(flags)
 
@@ -1418,30 +1415,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         else:
             flags = self.getFlags() & ~self.IndentGuide
         self.setFlags(flags)
-    
-    def on_actionShowBookmarks_toggled(self, checked):
-        if checked:
-            flags = self.getFlags() | self.ShowBookmarks
-        else:
-            flags = self.getFlags() & ~self.ShowBookmarks
-        self.setFlags(flags)
-    
-    def on_actionShowLineNumbers_toggled(self, checked):
-        if checked:
-            flags = self.getFlags() | self.ShowLineNumbers
-        else:
-            flags = self.getFlags() & ~self.ShowLineNumbers
-        self.setFlags(flags)
-        
-    def on_actionShowFoldings_toggled(self, checked):
-        if checked:
-            flags = self.getFlags() | self.ShowFolding
-        else:
-            flags = self.getFlags() & ~self.ShowFolding
-        self.setFlags(flags)
-    
+
+
     def on_actionSelectBundleItem_triggered(self):
-            
         item = self.mainWindow.selectorDialog.select(self.bundleItemSelectableModel, title=_("Select Bundle Item"))
 
         # Select one?

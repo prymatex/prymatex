@@ -127,7 +127,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Gutter</string>
+      <string>Gutters</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <property name="spacing">
@@ -154,6 +154,13 @@
        <widget class="QCheckBox" name="checkBoxFolding">
         <property name="text">
          <string>Show folding</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxSelection">
+        <property name="text">
+         <string>Show selected text</string>
         </property>
        </widget>
       </item>

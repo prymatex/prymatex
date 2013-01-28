@@ -28,6 +28,7 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
     workspaceDirectory  = pmxConfigPorperty(default = os.path.join(get_home_dir(), "workspace"))  #Eclipse muejejeje
     knownProjects = pmxConfigPorperty(default = [])
     workingSets = pmxConfigPorperty(default = {})
+    userKeywords = pmxConfigPorperty(default = [])
     
     VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
     
@@ -36,7 +37,7 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
         PMXBaseComponent.__init__(self)
         self.fileManager = application.fileManager
         self.supportManager = application.supportManager
-
+        
         self.projectTreeModel = ProjectTreeModel(self)
 
         self.projectTreeProxyModel = ProjectTreeProxyModel(self)
@@ -183,12 +184,6 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
     def closeProject(self, project):
         # Cuando cierro un proyecto quito su namespace al support
         print project.directory
-
-    def setWorkingSet(self, project, workingSet):
-        projects = self.workingSets.setdefault(workingSet)
-        projects.append(project.filePath)
-        project.setWorkingSet(workingSet)
-        self.projectTreeModel.dataChanged.emit()
 
     def addProjectBundleMenu(self, project, bundle):
         project.addBundleMenu(bundle)

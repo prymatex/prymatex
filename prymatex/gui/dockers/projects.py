@@ -265,7 +265,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     def extendAddonsItemMenu(self, menu, node):
         #Menu de los addons
         addonMenues = [ "-" ]
-        for addon in self.addons:
+        for addon in self.componentAddons():
             addonMenues.extend(addon.contributeToContextMenu(node))
         if len(addonMenues) > 1:
             extend_menu_section(menu, addonMenues, section = 'properties')
