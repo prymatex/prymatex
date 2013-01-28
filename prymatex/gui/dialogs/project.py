@@ -20,17 +20,42 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         model.setFilter(QtCore.QDir.Dirs)
         self.completerFileSystem = QtGui.QCompleter(model, self)
         self.lineLocation.setCompleter(self.completerFileSystem)
-        
+
+        self.setupComboKeywords()        
         self.setupComboTemplates()
         self.buttonCreate.setDefault(True)
         self.projectCreated = None
         self.userEnvironment = []
-        
-        # Build project keywords
-        self.syntaxKeywords = set()
-        map(lambda syntax: self.syntaxKeywords.update(syntax.scopeName.split('.')), self.application.supportManager.syntaxProxyModel.getAllItems())
-        print self.syntaxKeywords
 
+
+    def setupComboKeywords(self):
+         # Build project keywords
+        keywords = set()
+        map(lambda syntax: keywords.update(syntax.scopeName.split('.')), self.application.supportManager.syntaxProxyModel.getAllItems())
+
+        self.keywordsModel = QtGui.QStandardItemModel(self)
+        for index, keyword in enumerate(keywords):
+            item = QtGui.QStandardItem(keyword)
+            item.setText(keyword)
+            item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
+            item.setData(QtCore.Qt.Unchecked, QtCore.Qt.CheckStateRole)
+            self.keywordsModel.insertRow(index, item)
+        self.keywordsModel.dataChanged.connect(self.on_keywordsModel_dataChanged)
+        
+        self.comboBoxKeywords.setModel(self.keywordsModel)
+        self.comboBoxKeywords.lineEdit().editingFinished.connect(self.on_keywordsEdit_editingFinished)
+        
+    def on_keywordsEdit_editingFinished(self):
+        print self.comboBoxKeywords.lineEdit().text()
+      
+    def on_keywordsModel_dataChanged(self, topLeft, bottomRight):
+        current = self.comboBoxKeywords.lineEdit().text().split(", ")
+        if topLeft.data(QtCore.Qt.CheckStateRole) == QtCore.Qt.Unchecked:
+            current.remove(topLeft.data())    
+        elif topLeft.data(QtCore.Qt.CheckStateRole) == QtCore.Qt.Checked:
+            current.append(topLeft.data())
+        self.comboBoxKeywords.lineEdit().setText(", ".join(current))
+        
 
     def setupComboTemplates(self):
         self.projectProxyModel = self.application.supportManager.projectProxyModel
