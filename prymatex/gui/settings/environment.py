@@ -17,9 +17,9 @@ class PMXEnvVariablesWidget(QtGui.QWidget, SettingsTreeNode, Ui_Environment):
     TITLE = "Variables"
     ICON = resources.getIcon("code-variable")
     
-    def __init__(self, settingGroup, parent = None):
+    def __init__(self, settingGroup, profile = None, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "environment", settingGroup)
+        SettingsTreeNode.__init__(self, "environment", settingGroup, profile)
         self.setupUi(self)
         self.setupVariablesTableModel()
     

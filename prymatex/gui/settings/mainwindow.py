@@ -12,7 +12,7 @@ class MainWindowSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_MainWindow):
     NAMESPACE = "general"
     ICON = resources.getIcon("preferences-system-windows-actions")
     
-    def __init__(self, settingGroup, parent = None):
+    def __init__(self, settingGroup, profile = None, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "mainwindow", settingGroup)
+        SettingsTreeNode.__init__(self, "mainwindow", settingGroup, profile)
         self.setupUi(self)

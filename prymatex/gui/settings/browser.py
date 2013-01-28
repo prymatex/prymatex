@@ -14,9 +14,9 @@ class NetworkSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Browser):
     TITLE = "Browser"
     ICON = resources.getIcon("internet-web-browser")
     
-    def __init__(self, settingGroup, parent = None):
+    def __init__(self, settingGroup, profile = None, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "browser", settingGroup)
+        SettingsTreeNode.__init__(self, "browser", settingGroup, profile)
         self.setupUi(self)
     
     def on_lineEditProxy_textEdited(self, text):

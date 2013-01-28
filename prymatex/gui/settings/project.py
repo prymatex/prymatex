@@ -11,6 +11,6 @@ class ProjectSettingsWidget(QtGui.QWidget, SettingsTreeNode):
     TITLE = "Project"
     ICON = resources.getIcon("project-development")
     
-    def __init__(self, settingGroup, parent = None):
+    def __init__(self, settingGroup, profile = None, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "project", settingGroup)
+        SettingsTreeNode.__init__(self, "project", settingGroup, profile)

@@ -13,9 +13,9 @@ class GeneralSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_General):
     ICON = resources.getIcon("preferences-other")
 
 
-    def __init__(self, settingGroup, parent = None):
+    def __init__(self, settingGroup, profile = None, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "general", settingGroup)
+        SettingsTreeNode.__init__(self, "general", settingGroup, profile)
         self.setupUi(self)
 
 

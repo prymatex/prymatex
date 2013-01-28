@@ -108,22 +108,34 @@ class PMXProfile(object):
         self.tmsettings = TextMateSettings(os.path.join(self.PMX_PREFERENCES_PATH, self.TM_SETTINGS_NAME))
         self.state = QtCore.QSettings(os.path.join(self.PMX_PROFILE_PATH, self.PMX_STATE_NAME), QtCore.QSettings.IniFormat)
 
-    def getGroup(self, name):
+
+    # ------------------------ Setting Groups
+    def __group_name(self, configurableClass):
+        if hasattr(configurableClass, 'settings'):
+            return configurableClass.settings.name
+        return configurableClass.__dict__['SETTINGS_GROUP'] if 'SETTINGS_GROUP' in configurableClass.__dict__ else configurableClass.__name__
+        
+    def groupByName(self, name):
         if name not in self.GROUPS:
             self.GROUPS[name] = SettingsGroup(name, self.qsettings, self.tmsettings)
         return self.GROUPS[name]
     
+    
+    def groupByClass(self, configurableClass):
+        return self.groupByName(self.__group_name(configurableClass))
+
+
     def registerConfigurable(self, configurableClass):
-        #Prepare class group
-        groupName = configurableClass.__dict__['SETTINGS_GROUP'] if 'SETTINGS_GROUP' in configurableClass.__dict__ else configurableClass.__name__
-        configurableClass.settings = self.getGroup(groupName)
-        #Prepare configurable attributes
+        # Prepare class group
+        configurableClass.settings = self.groupByClass(configurableClass)
+        # Prepare configurable attributes
         for key, value in configurableClass.__dict__.iteritems():
             if isinstance(value, pmxConfigPorperty):
                 # TODO: Migrar a un sistema de nombres explicito
                 value.name = key
                 configurableClass.settings.addSetting(value)
-        
+
+
     def configure(self, configurableInstance):
         configurableInstance.settings.addListener(configurableInstance)
         configurableInstance.settings.configure(configurableInstance)

@@ -8,13 +8,15 @@ from prymatex.models.configure import SortFilterConfigureProxyModel as SortFilte
 
 
 class SettingsTreeNode(ConfigureTreeNode):
-    def __init__(self, name, settingGroup = None, parent = None):
+    def __init__(self, name, settingGroup, profile = None, parent = None):
         ConfigureTreeNode.__init__(self, name, parent)
         self.settingGroup = settingGroup
 
+
     def loadSettings(self):
         pass
-    
+
+
     @property
     def childrenNodes(self):
         return []

@@ -332,15 +332,20 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         componentClass.application = self
         componentClass.logger = self.getLogger('.'.join([componentClass.__module__, componentClass.__name__]))
 
+
     def registerConfigurable(self, componentClass):
         self.profile.registerConfigurable(componentClass)
         for settingClass in componentClass.contributeToSettings():
             self.extendComponent(settingClass)
-            self.settingsDialog.register(settingClass(componentClass.settings))
+            settingWidget = settingClass(componentClass.settings, profile = self.profile)
+            componentClass.settings.addDialog(settingWidget)
+            self.settingsDialog.register(settingWidget)
+
 
     def populateComponent(self, componentClass):
         self.extendComponent(componentClass)
         self.registerConfigurable(componentClass)
+
 
     def createComponentInstance(self, widgetClass, parent=None):
         # TODO: Y si todo pasa por el plugin manager y se permiten los addons en los componentes?

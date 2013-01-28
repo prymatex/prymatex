@@ -12,9 +12,9 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
     TITLE = "Editor"
     ICON = resources.getIcon("accessories-text-editor")
     
-    def __init__(self, settingGroup, parent = None):
+    def __init__(self, settingGroup, profile = None, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "editor", settingGroup)
+        SettingsTreeNode.__init__(self, "editor", settingGroup, profile)
         self.setupUi(self)
         self.checkBoxLineNumbers.toggled.connect(self.on_gutterOption_toggled)
         self.checkBoxFolding.toggled.connect(self.on_gutterOption_toggled)

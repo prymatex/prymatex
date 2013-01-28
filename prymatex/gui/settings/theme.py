@@ -21,9 +21,9 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
     TITLE = "Appearance"
     ICON = resources.getIcon("fill-color")
 
-    def __init__(self, settingGroup, parent=None):
+    def __init__(self, settingGroup, profile = None, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "theme", settingGroup)
+        SettingsTreeNode.__init__(self, "theme", settingGroup, profile)
         self.setupUi(self)
         self.setupTableView()
         self.setupPushButton()

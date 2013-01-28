@@ -16,9 +16,9 @@ class FilesSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Files):
     ICON = resources.getIcon("drive-harddisk")
 
 
-    def __init__(self, settingGroup, parent = None):
+    def __init__(self, settingGroup, profile = None, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "files", settingGroup)
+        SettingsTreeNode.__init__(self, "files", settingGroup, profile)
         self.setupUi(self)
         self.loadEncodings()
         self.setupLineEndings()

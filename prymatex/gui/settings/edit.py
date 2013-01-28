@@ -13,9 +13,9 @@ class EditSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Edit):
     ICON = resources.getIcon("document-edit")
 
 
-    def __init__(self, settingGroup, parent = None):
+    def __init__(self, settingGroup, profile = None, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "edit", settingGroup)
+        SettingsTreeNode.__init__(self, "edit", settingGroup, profile)
         self.setupUi(self)
 
 

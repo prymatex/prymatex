@@ -13,8 +13,8 @@ def AddonsSettingsWidgetFactory(namespace):
         NAMESPACE = namespace
         ICON = resources.getIcon("preferences-plugin")
         
-        def __init__(self, settingGroup, parent = None):
+        def __init__(self, settingGroup, profile = None, parent = None):
             QtGui.QWidget.__init__(self, parent)
-            SettingsTreeNode.__init__(self, "addons", settingGroup)
+            SettingsTreeNode.__init__(self, "addons", settingGroup, profile)
             self.setupUi(self)
     return AddonsSettingsWidget

@@ -12,9 +12,9 @@ class PMXTerminalSettings(QtGui.QWidget, SettingsTreeNode, Ui_Terminal):
     TITLE = "Terminal"
     ICON = resources.getIcon("utilities-terminal")
     
-    def __init__(self, settingGroup, parent = None):
+    def __init__(self, settingGroup, profile = None, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "terminal", settingGroup)
+        SettingsTreeNode.__init__(self, "terminal", settingGroup, profile)
         self.setupUi(self)
         
         
