@@ -236,7 +236,8 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         return reduce(lambda c1, (_, c2): c1 + c2, cursors, [])    
     
     def clearExtraSelectionCursors(self, scope):
-        del self.__scopedExtraSelections[scope]
+        if scope in self.__scopedExtraSelections:
+            del self.__scopedExtraSelections[scope]
         
     def clearExtraSelections(self):
         self.__scopedExtraSelections.clear()

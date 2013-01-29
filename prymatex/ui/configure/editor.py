@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/editor.ui'
 #
-# Created: Mon Jan 28 11:36:12 2013
+# Created: Tue Jan 29 09:29:34 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,7 @@ except AttributeError:
 class Ui_Editor(object):
     def setupUi(self, Editor):
         Editor.setObjectName(_fromUtf8("Editor"))
-        Editor.resize(415, 351)
+        Editor.resize(415, 352)
         self.verticalLayout = QtGui.QVBoxLayout(Editor)
         self.verticalLayout.setSpacing(6)
         self.verticalLayout.setMargin(0)
@@ -59,6 +59,9 @@ class Ui_Editor(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem)
         self.verticalLayout_3.addLayout(self.horizontalLayout_2)
+        self.checkBoxShowIndentGuide = QtGui.QCheckBox(self.groupBox_2)
+        self.checkBoxShowIndentGuide.setObjectName(_fromUtf8("checkBoxShowIndentGuide"))
+        self.verticalLayout_3.addWidget(self.checkBoxShowIndentGuide)
         self.checkBoxShowTabSpaces = QtGui.QCheckBox(self.groupBox_2)
         self.checkBoxShowTabSpaces.setObjectName(_fromUtf8("checkBoxShowTabSpaces"))
         self.verticalLayout_3.addWidget(self.checkBoxShowTabSpaces)
@@ -100,6 +103,7 @@ class Ui_Editor(object):
         self.labelDefaultSyntax.setText(_('Default syntax:'))
         self.checkBoxHighlightCurrenLine.setText(_('Highlight current line'))
         self.checkBoxShowMarginLine.setText(_('Show margin line after'))
+        self.checkBoxShowIndentGuide.setText(_('Show indent guide'))
         self.checkBoxShowTabSpaces.setText(_('Show tabs and spaces'))
         self.checkBoxShowLineParagraph.setText(_('Show line and paragraph'))
         self.checkBoxWrapLines.setText(_('Wrap lines'))

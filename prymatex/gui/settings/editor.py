@@ -18,8 +18,17 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
         QtGui.QWidget.__init__(self, parent)
         SettingsTreeNode.__init__(self, "editor", settingGroup, profile)
         self.setupUi(self)
-        #self.checkBoxFolding.toggled.connect(self.on_gutterOption_toggled)
-        #self.checkBoxBookmarks.toggled.connect(self.on_gutterOption_toggled)
+
+        self.checks = [(self.checkBoxWrapLines, CodeEditor.WordWrap),
+            (self.checkBoxShowTabSpaces, CodeEditor.ShowTabsAndSpaces),
+            (self.checkBoxShowLineParagraph, CodeEditor.ShowLineAndParagraphs),
+            (self.checkBoxShowIndentGuide, CodeEditor.IndentGuide),
+            (self.checkBoxHighlightCurrenLine, CodeEditor.HighlightCurrentLine),
+            (self.checkBoxShowMarginLine, CodeEditor.MarginLine),
+        ]
+        
+        for check, flag in self.checks:
+            check.toggled.connect(self.on_editorFlags_toggled)
         
         # Default addons groups
         self.bookmarksBarGroup = profile.groupByClass(BookmarkSideBarAddon)
@@ -37,20 +46,32 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
         index = self.comboBoxDefaultSyntax.model().findItemIndex(syntax)
         self.comboBoxDefaultSyntax.setCurrentIndex(index)
         
+        # Flags
         flags = int(self.settingGroup.value('defaultFlags'))
+        for check, flag in self.checks:
+            check.setChecked(bool(flags & flag))
+
+        self.spinBoxMarginLineSpace.setValue(self.settingGroup.value("marginLineSpaces"))
         
         self.checkBoxFolding.setChecked(self.foldingBarGroup.value("showFolding"))
         self.checkBoxBookmarks.setChecked(self.bookmarksBarGroup.value("showBookmarks"))
         self.checkBoxLineNumbers.setChecked(self.lineNumberBarGroup.value("showLineNumbers"))
-        #self.checkBoxSelection.setChecked(self.bookmarksBarGroup.value())
-        
-        
+
+
     def on_checkBoxLineNumbers_toggled(self, checked):
         self.lineNumberBarGroup.setValue('showLineNumbers', self.checkBoxLineNumbers.isChecked())
-        
+
+
     @QtCore.pyqtSlot(int)
     def on_comboBoxDefaultSyntax_activated(self, index):
         model = self.comboBoxDefaultSyntax.model()
         node = model.mapToSource(model.createIndex(index, 0))
         self.settingGroup.setValue('defaultSyntax', str(node.internalPointer().uuid).upper())
-    
+
+
+    def on_editorFlags_toggled(self, checked):
+        flags = 0
+        for check, flag in self.checks:
+            if check.isChecked():
+                flags |= flag
+        self.settingGroup.setValue('defaultFlags', flags)

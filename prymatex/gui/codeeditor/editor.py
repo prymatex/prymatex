@@ -34,6 +34,8 @@ from prymatex.utils import text as texttools
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime
 
+WIDTH_CHARACTER = "#"
+
 class CodeEditor(TextEditWidget, PMXBaseEditor):
     # -------------------- Scope groups
     SORTED_GROUPS = [   "keyword", "entity", "meta", "variable", "markup", 
@@ -59,11 +61,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     WordWrap              = 1<<2
     MarginLine            = 1<<3
     IndentGuide           = 1<<4
+    HighlightCurrentLine  = 1<<5
     
     # ------------------- Settings
     SETTINGS_GROUP = 'CodeEditor'
     
+    
     tabStopSoft = pmxConfigPorperty(default = True)
+    marginLineSpaces = pmxConfigPorperty(default = 80)
+    
     
     @pmxConfigPorperty(default = 4)
     def tabStopSize(self, size):
@@ -77,6 +83,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def defaultSyntax(self, uuid):
         syntax = self.application.supportManager.getBundleItem(uuid)
         self.syntaxHighlighter.setSyntax(syntax)
+    
     
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
     def defaultTheme(self, uuid):
@@ -92,7 +99,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setStyleSheet(appStyle)
         self.themeChanged.emit()
 
-    @pmxConfigPorperty(default = MarginLine | IndentGuide)
+    @pmxConfigPorperty(default = MarginLine | IndentGuide | HighlightCurrentLine)
     def defaultFlags(self, flags):
         self.setFlags(flags)
 
@@ -367,6 +374,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             flags |= self.MarginLine
         if self.showIndentGuide:
             flags |= self.IndentGuide
+        if self.showHighlightCurrentLine:
+            flags |= self.HighlightCurrentLine
         if options.wrapMode() & QtGui.QTextOption.WordWrap:
             flags |= self.WordWrap
         return flags
@@ -390,6 +399,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.document().setDefaultTextOption(options)
         self.showMarginLine = bool(flags & self.MarginLine)
         self.showIndentGuide = bool(flags & self.IndentGuide)
+        self.showHighlightCurrentLine = bool(flags & self.HighlightCurrentLine)
 
     # ------------------- Syntax
     def syntax(self):
@@ -537,7 +547,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def highlightEditor(self):
         cursor = self.textCursor()
         cursor.clearSelection()
-        self.setExtraSelectionCursors("line", [ cursor ])
+        if self.showHighlightCurrentLine:
+            self.setExtraSelectionCursors("line", [ cursor ])
+        else:
+            self.clearExtraSelectionCursors("line")
         self.setExtraSelectionCursors("brace", filter(lambda cursor: cursor is not None, list(self._currentBraces)))
         for addon in self.componentAddons():
             if isinstance(addon, CodeEditorAddon):
@@ -558,6 +571,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def paintEvent(self, event):
         QtGui.QPlainTextEdit.paintEvent(self, event)
         page_bottom = self.viewport().height()
+        # TODO: los widgets se pueden hacer del fontMetric, que tal poner algo que me retorne directamente el ancho de un caracter?
         font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
 
         painter = QtGui.QPainter(self.viewport())
@@ -585,18 +599,18 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                         resources.getImage("foldingellipsis"))
                 if self.showIndentGuide:
                     blockPattern = block
-                    while blockPattern.isValid() and blockPattern.userData() and blockPattern.userData().blank:
+                    while blockPattern.isValid() and blockPattern.userData() and blockPattern.userData().blank():
                         blockPattern = blockPattern.next()
                     if blockPattern.isValid() and blockPattern.userData():
                         indentPattern = blockPattern.userData().indent
                         for s in range(0, (len(indentPattern) / len(self.tabKeyBehavior()))):
-                            positionX = (font_metrics.width("#") * self.tabStopSize * s) + font_metrics.width("#") + offset.x()
+                            positionX = (font_metrics.width(WIDTH_CHARACTER) * self.tabStopSize * s) + font_metrics.width(WIDTH_CHARACTER) + offset.x()
                             painter.drawLine(positionX, positionY, positionX, positionY + font_metrics.height())
                 
             block = block.next()
 
         if self.showMarginLine:
-            pos_margin = self.fontMetrics().width(" ") * 80
+            pos_margin = self.fontMetrics().width(WIDTH_CHARACTER) * self.marginLineSpaces
             painter.drawLine(pos_margin + offset.x(), 0, pos_margin + offset.x(), self.viewport().height())
 
         if self.multiCursorMode.isActive():
@@ -1058,7 +1072,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def findPreviousNoBlankBlock(self, block):
         """ Return previous no blank indent block """
         block = block.previous()
-        while block.isValid() and block.userData() and block.userData().blank:
+        while block.isValid() and block.userData() and block.userData().blank():
             block = block.previous()
         if block.isValid():
             return block
@@ -1237,6 +1251,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'checkable': True,
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.WordWrap) },
                 "-",
+                {'text': "Highlight Current Line",
+                 'callback': cls.on_actionHighlightCurrentLine_toggled,
+                 'checkable': True,
+                 'testChecked': lambda editor: bool(editor.getFlags() & editor.HighlightCurrentLine) },
                 {'text': "Margin Line",
                  'callback': cls.on_actionMarginLine_toggled,
                  'checkable': True,
@@ -1380,6 +1398,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
         return [ EditorSettingsWidget, ThemeSettingsWidget, EditSettingsWidget, AddonsSettingsWidgetFactory("editor") ]
 
+
     # ------------------ Menu Actions
     def on_actionShowTabsAndSpaces_toggled(self, checked):
         if checked:
@@ -1387,27 +1406,39 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         else:
             flags = self.getFlags() & ~self.ShowTabsAndSpaces
         self.setFlags(flags)
-    
+
+
     def on_actionShowLineAndParagraphs_toggled(self, checked):
         if checked:
             flags = self.getFlags() | self.ShowLineAndParagraphs
         else:
             flags = self.getFlags() & ~self.ShowLineAndParagraphs
         self.setFlags(flags)
-        
+
+
     def on_actionWordWrap_toggled(self, checked):
         if checked:
             flags = self.getFlags() | self.WordWrap
         else:
             flags = self.getFlags() & ~self.WordWrap
         self.setFlags(flags)
-    
+
+
+    def on_actionHighlightCurrentLine_toggled(self, checked):
+        if checked:
+            flags = self.getFlags() | self.HighlightCurrentLine
+        else:
+            flags = self.getFlags() & ~self.HighlightCurrentLine
+        self.setFlags(flags)
+
+
     def on_actionMarginLine_toggled(self, checked):
         if checked:
             flags = self.getFlags() | self.MarginLine
         else:
             flags = self.getFlags() & ~self.MarginLine
         self.setFlags(flags)
+
 
     def on_actionIndentGuide_toggled(self, checked):
         if checked:
@@ -1423,17 +1454,19 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         # Select one?
         if item is not None:
             self.insertBundleItem(item['data'])
+
     
     def on_actionGoToSymbol_triggered(self):
         item = self.mainWindow.selectorDialog.select(self.symbolSelectableModel, title = _("Select Symbol"))
         if item is not None:
             self.goToBlock(item['data'])
-        
+
+
     def on_actionGoToBookmark_triggered(self):
         item = self.mainWindow.selectorDialog.select(self.bookmarkSelectableModel, title=_("Select Bookmark"))
         if item is not None:
             self.goToBlock(item['data'])
-    
+
 
     # ---------------------- Navigation API
     def restoreLocationMemento(self, memento):
