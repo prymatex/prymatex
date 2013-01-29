@@ -53,13 +53,28 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
 
         self.spinBoxMarginLineSpace.setValue(self.settingGroup.value("marginLineSpaces"))
         
-        self.checkBoxFolding.setChecked(self.foldingBarGroup.value("showFolding"))
-        self.checkBoxBookmarks.setChecked(self.bookmarksBarGroup.value("showBookmarks"))
         self.checkBoxLineNumbers.setChecked(self.lineNumberBarGroup.value("showLineNumbers"))
+        self.checkBoxBookmarks.setChecked(self.bookmarksBarGroup.value("showBookmarks"))
+        self.checkBoxFolding.setChecked(self.foldingBarGroup.value("showFolding"))
+        self.checkBoxSelection.setChecked(self.selectionBarGroup.value("showSelection"))
 
 
     def on_checkBoxLineNumbers_toggled(self, checked):
         self.lineNumberBarGroup.setValue('showLineNumbers', self.checkBoxLineNumbers.isChecked())
+
+    def on_checkBoxBookmarks_toggled(self, checked):
+        self.bookmarksBarGroup.setValue('showBookmarks', self.checkBoxBookmarks.isChecked())
+
+    def on_checkBoxFolding_toggled(self, checked):
+        self.foldingBarGroup.setValue('showFolding', self.checkBoxFolding.isChecked())
+        
+    def on_checkBoxSelection_toggled(self, checked):
+        self.selectionBarGroup.setValue('showSelection', self.checkBoxSelection.isChecked())
+
+    
+    @QtCore.pyqtSlot(int)
+    def on_spinBoxMarginLineSpace_valueChanged(self, value):
+        self.settingGroup.setValue('marginLineSpaces', value)
 
 
     @QtCore.pyqtSlot(int)

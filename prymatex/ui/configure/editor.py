@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/editor.ui'
 #
-# Created: Tue Jan 29 09:29:34 2013
+# Created: Tue Jan 29 10:09:21 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -54,6 +54,9 @@ class Ui_Editor(object):
         self.horizontalLayout_2.addWidget(self.checkBoxShowMarginLine)
         self.spinBoxMarginLineSpace = QtGui.QSpinBox(self.groupBox_2)
         self.spinBoxMarginLineSpace.setMaximumSize(QtCore.QSize(50, 16777215))
+        self.spinBoxMarginLineSpace.setMinimum(60)
+        self.spinBoxMarginLineSpace.setMaximum(100)
+        self.spinBoxMarginLineSpace.setProperty("value", 80)
         self.spinBoxMarginLineSpace.setObjectName(_fromUtf8("spinBoxMarginLineSpace"))
         self.horizontalLayout_2.addWidget(self.spinBoxMarginLineSpace)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -103,7 +106,7 @@ class Ui_Editor(object):
         self.labelDefaultSyntax.setText(_('Default syntax:'))
         self.checkBoxHighlightCurrenLine.setText(_('Highlight current line'))
         self.checkBoxShowMarginLine.setText(_('Show margin line after'))
-        self.checkBoxShowIndentGuide.setText(_('Show indent guide'))
+        self.checkBoxShowIndentGuide.setText(_('Show indent guides'))
         self.checkBoxShowTabSpaces.setText(_('Show tabs and spaces'))
         self.checkBoxShowLineParagraph.setText(_('Show line and paragraph'))
         self.checkBoxWrapLines.setText(_('Wrap lines'))

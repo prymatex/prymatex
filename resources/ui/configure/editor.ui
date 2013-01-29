@@ -83,6 +83,15 @@
             <height>16777215</height>
            </size>
           </property>
+          <property name="minimum">
+           <number>60</number>
+          </property>
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="value">
+           <number>80</number>
+          </property>
          </widget>
         </item>
         <item>
@@ -103,7 +112,7 @@
       <item>
        <widget class="QCheckBox" name="checkBoxShowIndentGuide">
         <property name="text">
-         <string>Show indent guide</string>
+         <string>Show indent guides</string>
         </property>
        </widget>
       </item>
