@@ -43,17 +43,16 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         self.keywordsModel.dataChanged.connect(self.on_keywordsModel_dataChanged)
         
         self.comboBoxKeywords.setModel(self.keywordsModel)
-        self.comboBoxKeywords.lineEdit().editingFinished.connect(self.on_keywordsEdit_editingFinished)
-        
-    def on_keywordsEdit_editingFinished(self):
-        print self.comboBoxKeywords.lineEdit().text()
+        self.comboBoxKeywords.lineEdit().setText("")
+        self.comboBoxKeywords.lineEdit().setReadOnly(True)
+
       
     def on_keywordsModel_dataChanged(self, topLeft, bottomRight):
-        current = self.comboBoxKeywords.lineEdit().text().split(", ")
-        if topLeft.data(QtCore.Qt.CheckStateRole) == QtCore.Qt.Unchecked:
-            current.remove(topLeft.data())    
-        elif topLeft.data(QtCore.Qt.CheckStateRole) == QtCore.Qt.Checked:
-            current.append(topLeft.data())
+        current = []
+        for row in xrange(self.keywordsModel.rowCount()):
+            index = self.keywordsModel.index(row, 0)
+            if index.data(QtCore.Qt.CheckStateRole) == QtCore.Qt.Checked:
+                current.append(index.data())
         self.comboBoxKeywords.lineEdit().setText(", ".join(current))
         
 
@@ -75,6 +74,7 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         self.comboBoxTemplate.setView(tableView)
         self.comboBoxTemplate.setModelColumn(0)
 
+
     def on_buttonChoose_pressed(self):
         directory = self.lineLocation.text()
         while True:
@@ -85,6 +85,7 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
                 self.lineLocation.setText(path)
                 self.lineProjectName.setText(os.path.basename(path))
             return
+
 
     def on_buttonCreate_pressed(self):
         name = self.lineProjectName.text()

@@ -56,8 +56,9 @@ class FileSystemTreeNode(TreeNodeBase):
         return os.path.getmtime(self.paht())
 
 class ProjectTreeNode(FileSystemTreeNode):
-    KEYS = [    'name', 'description', 'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 
-                'openDocuments', 'showFileHierarchyDrawer', 'windowFrame', 'shellVariables', 'bundleMenu' ]
+    KEYS = [    'name', 'description', 'licence', 'keywords', 
+                'currentDocument', 'metaData', 'openDocuments',
+                'shellVariables', 'bundleMenu' ]
     FILE = 'info.plist'
     FOLDER = '.pmxproject'
     
