@@ -10,7 +10,8 @@ from prymatex.core import PMXBaseComponent
 from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.utils.misc import get_home_dir
-from prymatex.models.projects import ProjectTreeNode, ProjectTreeModel, ProjectTreeProxyModel, ProjectMenuProxyModel
+from prymatex.models.projects import (ProjectTreeNode, ProjectTreeModel, 
+    ProjectTreeProxyModel, ProjectMenuProxyModel, KeywordsListModel)
 from prymatex.core.exceptions import ProjectExistsException, FileException
 
 from prymatex.utils.i18n import ugettext as _
@@ -27,8 +28,6 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
     
     workspaceDirectory  = pmxConfigPorperty(default = os.path.join(get_home_dir(), "workspace"))  #Eclipse muejejeje
     knownProjects = pmxConfigPorperty(default = [])
-    workingSets = pmxConfigPorperty(default = {})
-    userKeywords = pmxConfigPorperty(default = [])
     
     VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
     
@@ -39,6 +38,7 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
         self.supportManager = application.supportManager
         
         self.projectTreeModel = ProjectTreeModel(self)
+        self.keywordsListModel = KeywordsListModel(self)
 
         self.projectTreeProxyModel = ProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
@@ -48,6 +48,8 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
 
         self.supportManager.bundleAdded.connect(self.on_supportManager_bundleAdded)
         self.supportManager.bundleRemoved.connect(self.on_supportManager_bundleRemoved)
+        self.supportManager.bundleItemAdded.connect(self.on_supportManager_bundleItemAdded)
+        self.supportManager.bundleItemRemoved.connect(self.on_supportManager_bundleItemRemoved)
 
     @classmethod
     def contributeToSettings(cls):
@@ -61,6 +63,7 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
             validPath.append(char)
         return ''.join(validPath)
 
+    # -------------- Signals from suppor manager
     def on_supportManager_bundleAdded(self, bundle):
         for project in self.getAllProjects():
             if bundle.hasNamespace(project.namespace) and not project.hasBundleMenu(bundle):
@@ -71,6 +74,15 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
             if bundle.hasNamespace(project.namespace) and project.hasBundleMenu(bundle):
                 self.removeProjectBundleMenu(project, bundle)
 
+    def on_supportManager_bundleItemAdded(self, bundleItem):
+        if bundleItem.TYPE == "syntax":
+            self.keywordsListModel.addKeywords(bundleItem.scopeName.split('.'))
+
+    def on_supportManager_bundleItemRemoved(self, bundleItem):
+        if bundleItem.TYPE == "syntax":
+            self.keywordsListModel.removeKeywords(bundleItem.scopeName.split('.'))
+                
+    # -------------------- Load projects
     def loadProjects(self):
         for path in self.knownProjects[:]:
             try:

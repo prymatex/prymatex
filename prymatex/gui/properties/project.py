@@ -20,5 +20,9 @@ class ProjectPropertiesWidget(QtGui.QWidget, PropertyTreeNode, Ui_Project):
     def acceptFileSystemItem(self, fileSystemItem):
         return fileSystemItem.isproject
     
-    def edit(self, fileSystemItem):
-        pass
+    def edit(self, projectNode):
+        self.lineProjectName.setText(projectNode.name)
+        self.textDescription.setText(projectNode.description)
+        self.comboBoxKeywords.setText(projectNode.keywords)
+        self.comboBoxLicence.setText(projectNode.licence)
+        self.textLabelLocation.setText(projectNode.path())

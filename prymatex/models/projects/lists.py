@@ -15,7 +15,7 @@ from prymatex.models.selectable import SelectableModelMixin
 #====================================================
 class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin):
     def __init__(self, projectManager, fileManager, parent = None): 
-        QtCore.QAbstractTableModel.__init__(self, parent)
+        QtCore.QAbstractListModel.__init__(self, parent)
         self.fileManager = fileManager
         self.projectManager = projectManager
         self.projectFileTask = self.projectManager.application.scheduler.idleTask()
@@ -91,3 +91,56 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
     def __run_project_search(self, pattern):
         for project in self.projectManager.getAllProjects():
             yield self.__run_file_search(project.path(), pattern)
+
+#====================================================
+# Keywords
+#====================================================
+class KeywordsListModel(QtCore.QAbstractListModel):
+    def __init__(self, projectManager, parent = None): 
+        QtCore.QAbstractListModel.__init__(self, parent)
+        self.projectManager = projectManager
+        self.__keywords = []
+
+
+    def rowCount(self, parent = None):
+        return len(self.__keywords)
+
+
+    def data(self, index, role = QtCore.Qt.DisplayRole):
+        if not index.isValid():
+            return None
+        item = self.__keywords[index.row()]
+        if role == QtCore.Qt.DisplayRole:
+            return item["name"]
+        elif role == QtCore.Qt.CheckStateRole:
+            return item["selected"]
+        elif role == QtCore.Qt.ToolTipRole:
+            return item
+
+
+    def setData(self, index, data, role):
+        item = self.__keywords[index.row()]
+        if role == QtCore.Qt.CheckStateRole:
+            print item, data
+            item["selected"] = data
+            return True
+            
+
+    def keyword(self, index):
+        return self.__keywords[index.row()]
+
+    # ------------------ Add remove keywords
+    def addKeywords(self, keywords):
+        keywords = keywords if isinstance(keywords, (list, tuple)) else [ keywords ]
+        for keyword in keywords:
+            value = filter(lambda k: k["name"] == keyword, self.__keywords)
+            if not value:
+                self.__keywords.append({"name": keyword, "selected": False})
+
+
+    def removeKeywords(self, keywords):
+        keywords = keywords if isinstance(keywords, (list, tuple)) else [ keywords ]
+        for keyword in keywords:
+            value = filter(lambda k: k["name"] == keyword, self.__keywords)
+            if value:
+                self.__keywords.remove(value)

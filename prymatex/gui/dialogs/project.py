@@ -29,24 +29,12 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
 
 
     def setupComboKeywords(self):
-         # Build project keywords
-        keywords = set()
-        map(lambda syntax: keywords.update(syntax.scopeName.split('.')), self.application.supportManager.syntaxProxyModel.getAllItems())
-
-        self.keywordsModel = QtGui.QStandardItemModel(self)
-        for index, keyword in enumerate(keywords):
-            item = QtGui.QStandardItem(keyword)
-            item.setText(keyword)
-            item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-            item.setData(QtCore.Qt.Unchecked, QtCore.Qt.CheckStateRole)
-            self.keywordsModel.insertRow(index, item)
-        self.keywordsModel.dataChanged.connect(self.on_keywordsModel_dataChanged)
-        
-        self.comboBoxKeywords.setModel(self.keywordsModel)
+        # Build project keywords
+        self.comboBoxKeywords.setModel(self.application.projectManager.keywordsListModel)
         self.comboBoxKeywords.lineEdit().setText("")
         self.comboBoxKeywords.lineEdit().setReadOnly(True)
 
-      
+
     def on_keywordsModel_dataChanged(self, topLeft, bottomRight):
         current = []
         for row in xrange(self.keywordsModel.rowCount()):
