@@ -24,6 +24,7 @@ class ProjectTreeModel(AbstractTreeModel):
         self.projectManager = projectManager
         self.fileManager = projectManager.fileManager
 
+
     def treeNodeFactory(self, nodeName, nodeParent):
         if nodeParent is not None:
             return FileSystemTreeNode(nodeName, nodeParent)
@@ -31,11 +32,13 @@ class ProjectTreeModel(AbstractTreeModel):
             # TODO: Quiza sea mejor hacer un custom root node
             return AbstractTreeModel.treeNodeFactory(self, nodeName, nodeParent)
 
+
     def rowCount(self, parent):
         parentNode = self.node(parent)
         if not parentNode.isRootNode() and parentNode.isdir and not parentNode._populated:
             self._load_directory(parentNode, parent)
         return parentNode.childCount()
+
 
     def data(self, index, role):
         if not index.isValid():
@@ -45,6 +48,7 @@ class ProjectTreeModel(AbstractTreeModel):
             return node.nodeName()
         elif role == QtCore.Qt.DecorationRole:
             return node.icon()
+
 
     def indexForPath(self, path):
         currentIndex = QtCore.QModelIndex()

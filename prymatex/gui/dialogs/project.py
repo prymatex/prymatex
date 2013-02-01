@@ -30,17 +30,19 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
 
     def setupComboKeywords(self):
         # Build project keywords
-        self.comboBoxKeywords.setModel(self.application.projectManager.keywordsListModel)
+        self.application.projectManager.keywordsListModel.clear()
+        self.comboBoxKeywords.setModel(
+            self.application.projectManager.keywordsListModel
+        )
         self.comboBoxKeywords.lineEdit().setText("")
         self.comboBoxKeywords.lineEdit().setReadOnly(True)
+        self.application.projectManager.keywordsListModel.dataChanged.connect(
+            self.on_keywordsListModel_dataChanged
+        )
 
 
-    def on_keywordsModel_dataChanged(self, topLeft, bottomRight):
-        current = []
-        for row in xrange(self.keywordsModel.rowCount()):
-            index = self.keywordsModel.index(row, 0)
-            if index.data(QtCore.Qt.CheckStateRole) == QtCore.Qt.Checked:
-                current.append(index.data())
+    def on_keywordsListModel_dataChanged(self, topLeft, bottomRight):
+        current = self.application.projectManager.keywordsListModel.selectedKeywords()
         self.comboBoxKeywords.lineEdit().setText(", ".join(current))
         
 
@@ -65,14 +67,10 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
 
     def on_buttonChoose_pressed(self):
         directory = self.lineLocation.text()
-        while True:
-            path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose Location for Project"), directory)
-            if path:
-                if not os.path.exists(path): continue
-                path = os.path.abspath(path)
-                self.lineLocation.setText(path)
-                self.lineProjectName.setText(os.path.basename(path))
-            return
+        path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose Location for Project"), directory)
+        if path:
+            self.lineLocation.setText(path)
+            self.lineProjectName.setText(os.path.basename(path))
 
 
     def on_buttonCreate_pressed(self):
@@ -83,16 +81,19 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
             self.runTemplateForProject(name, location)
         else:
             self.runCreateProject(name, location)
-        
+
+
     def on_lineProjectName_textChanged(self, text):
         if self.checkBoxUseDefaultLocation.isChecked():
             projectPath = os.path.join(self.application.projectManager.workspaceDirectory, text)
             self.lineLocation.setText(projectPath)
         self.buttonCreate.setEnabled(bool(text.strip()))
-    
+
+
     def on_lineLocation_textChanged(self, text):
         if text and not self.checkBoxUseDefaultLocation.isChecked():
             self.lineProjectName.setText(os.path.basename(text))
+
 
     def on_checkBoxUseDefaultLocation_toggled(self, checked):
         self.lineLocation.setEnabled(not checked)
@@ -100,16 +101,19 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         if checked:
             projectPath = os.path.join(self.application.projectManager.workspaceDirectory, self.lineProjectName.text())
             self.lineLocation.setText(projectPath)
-    
+
+
     def on_checkBoxAddToWorkingSet_toggled(self, checked):
         self.comboBoxWorkingSet.setEnabled(checked)
     
     def on_checkBoxUseTemplate_toggled(self, checked):
         self.comboBoxTemplate.setEnabled(checked)
         self.buttonEnvironment.setEnabled(checked)
-        
+
+
     def on_buttonClose_pressed(self):
         self.reject()
+
 
     def on_buttonEnvironment_pressed(self):
         name = self.lineProjectName.text()
@@ -119,7 +123,8 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
             template = self.projectProxyModel.node(index)
             tEnv = template.buildEnvironment(projectName = name, projectLocation = location, localVars = True)
         self.userEnvironment = EnvironmentDialog.editEnvironment(self, self.userEnvironment, tEnv)
-        
+
+
     def runCreateProject(self, name, location):
         description = self.textDescription.toPlainText()
         self.projectCreated = self.application.projectManager.createProject(name, location, description)
@@ -132,8 +137,10 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
 
         self.accept()
 
+
     def afterRunTemplate(self, name, location):
         self.runCreateProject(name, location)
+
 
     def runTemplateForProject(self, name, location):
         index = self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0)
@@ -147,6 +154,7 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
                     environment[var['variable']] = var['value']
 
             template.execute(environment, self.afterRunTemplate)
+
     
     @classmethod
     def getNewProject(cls, parent = None, directory = None, name = None):

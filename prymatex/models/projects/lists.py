@@ -102,6 +102,7 @@ class KeywordsListModel(QtCore.QAbstractListModel):
         self.__keywords = []
 
 
+    # ------------------ QtCore.QAbstractListModel methods
     def rowCount(self, parent = None):
         return len(self.__keywords)
 
@@ -121,13 +122,28 @@ class KeywordsListModel(QtCore.QAbstractListModel):
     def setData(self, index, data, role):
         item = self.__keywords[index.row()]
         if role == QtCore.Qt.CheckStateRole:
-            print item, data
             item["selected"] = data
+            self.dataChanged.emit(index, index)
             return True
-            
+
+
+    def flags(self, index):
+        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
+
+
+    # ------------------ Custom functions
+    def clear(self):
+        for item in self.__keywords:
+            item["selected"] = 0
+
 
     def keyword(self, index):
         return self.__keywords[index.row()]
+
+
+    def selectedKeywords(self):
+        return map(lambda item: item["name"], filter(lambda item: item["selected"] == 2, self.__keywords))
+
 
     # ------------------ Add remove keywords
     def addKeywords(self, keywords):
@@ -135,7 +151,7 @@ class KeywordsListModel(QtCore.QAbstractListModel):
         for keyword in keywords:
             value = filter(lambda k: k["name"] == keyword, self.__keywords)
             if not value:
-                self.__keywords.append({"name": keyword, "selected": False})
+                self.__keywords.append({"name": keyword, "selected": 0})
 
 
     def removeKeywords(self, keywords):

@@ -31,7 +31,6 @@ settings = {
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex import resources
 from prymatex.qt.helpers.base import text2objectname
 from prymatex.qt.helpers.actions import create_action
 
@@ -42,10 +41,7 @@ def create_menu(parent, settings, useSeparatorName = False, connectActions = Fal
 
     # attrs
     if settings.has_key("icon"):
-        icon = settings["icon"]
-        if isinstance(icon, basestring):
-            icon = resources.getIcon(icon)
-        menu.setIcon(icon)
+        menu.setIcon(settings["icon"])
 
     # actions
     actions = extend_menu(menu, settings.get("items", []), useSeparatorName)

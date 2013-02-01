@@ -78,10 +78,12 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
         if bundleItem.TYPE == "syntax":
             self.keywordsListModel.addKeywords(bundleItem.scopeName.split('.'))
 
+
     def on_supportManager_bundleItemRemoved(self, bundleItem):
         if bundleItem.TYPE == "syntax":
             self.keywordsListModel.removeKeywords(bundleItem.scopeName.split('.'))
-                
+
+
     # -------------------- Load projects
     def loadProjects(self):
         for path in self.knownProjects[:]:
@@ -92,25 +94,31 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
                 self.knownProjects.remove(path)
                 self.settings.setValue('knownProjects', self.knownProjects)
 
+
     def isOpen(self, project):
         return True
+
 
     def appendToKnowProjects(self, project):
         self.knownProjects.append(project.path())
         self.settings.setValue('knownProjects', self.knownProjects)
 
+
     def removeFromKnowProjects(self, project):
         self.knownProjects.remove(project.path())
         self.settings.setValue('knownProjects', self.knownProjects)
-    
+
+
     #---------------------------------------------------
     # Environment
     #---------------------------------------------------
     def environmentVariables(self):
         return {}
-    
+
+
     def supportProjectEnvironment(self, project):
         return self.supportManager.projectEnvironment(project)
+
 
     #---------------------------------------------------
     # PROJECT CRUD

@@ -111,12 +111,11 @@ class BundleListModel(BundleItemTypeProxyModel):
         if self.sourceModel() is None:
             return QtCore.QVariant()
         
-        sIndex = self.mapToSource(index)
         if role == QtCore.Qt.CheckStateRole:
-            bundle = sIndex.internalPointer()
+            bundle = self.node(index)
             return QtCore.Qt.Checked if bundle.enabled else QtCore.Qt.Unchecked
         else:
-            return self.sourceModel().data(sIndex, role)
+            return BundleItemTypeProxyModel.data(self, index, role)
 
     def setData(self, index, value, role):
         if self.sourceModel() is None:
