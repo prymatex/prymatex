@@ -135,7 +135,7 @@ class TextMate(QtCore.QObject):
 # Browser Dock
 # TODO Hacer enfocado en las Pags y no en el webView
 #=======================================================================
-class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
+class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     SHORTCUT = "F9"
     ICON = resources.getIcon("internet-web-browser")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
@@ -212,14 +212,11 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.browserOptionsMenu, _ = create_menu(self, optionsMenu)
         self.toolButtonOptions.setMenu(self.browserOptionsMenu)
 
-    def initialize(self, mainWindow):
-        PMXBaseDock.initialize(self, mainWindow)
-        #TODO: ver el tema de proveer servicios esta instalacion en la main window es pedorra
-        mainWindow.browser = self
-        
+
     def showEvent(self, event):
         self.setFocus()
-    
+
+
     def event(self, event):
         if event.type() == QtCore.QEvent.KeyPress:
             if event.key() == QtCore.Qt.Key_Escape:

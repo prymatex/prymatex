@@ -21,7 +21,6 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.actions import MainWindowActions, tabSelectableModelFactory
 from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.gui.processors import MainWindowCommandProcessor
-from prymatex.gui.dialogs.selector import SelectorDialog
 
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
@@ -51,8 +50,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
     
     # Constructor
     def __init__(self, application):
-        """
-        The main window
+        """The main window
         @param parent: The QObject parent, in this case it should be the QApp
         @param files_to_open: The set of files to be opened when the window is shown in the screen.
         """
@@ -64,9 +62,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         
         self.setWindowIcon(resources.getIcon("prymatex"))
         
-        # The selector dialog of this mainwindow
-        self.selectorDialog = SelectorDialog(self)
-
         self.tabSelectableModel = tabSelectableModelFactory(self)
         
         self.setupDockToolBars()
@@ -83,8 +78,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         
         center_widget(self, scale = (0.9, 0.8))
         self.dockers = []
+        self.dialogs = []
         self.customEditorActions = {}
         self.customDockActions = {}
+        self.customDialogActions = {}
 
         self.setAcceptDrops(True)
         
@@ -97,12 +94,26 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         self.commandProcessor = MainWindowCommandProcessor(self)
         self.bundleItem_handler = self.insertBundleItem
 
-    #==========================================================================
-    # Bundle Items
-    #==========================================================================
+
+    # ---------- Implements PMXBaseComponent's interface
+    def environmentVariables(self):
+        env = {}
+        for docker in self.dockers:
+            env.update(docker.environmentVariables())
+        return env
+
+
+    @classmethod
+    def contributeToSettings(cls):
+        from prymatex.gui.settings.mainwindow import MainWindowSettingsWidget
+        return [ MainWindowSettingsWidget ]
+
+    
+    # --------------- Bundle Items
     def on_bundleItemTriggered(self, bundleItem):
         if self.bundleItem_handler is not None:
             self.bundleItem_handler(bundleItem)
+
 
     def insertBundleItem(self, bundleItem, **processorSettings):
         '''Insert selected bundle item in current editor if possible'''
@@ -110,6 +121,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         
         self.commandProcessor.configure(processorSettings)
         bundleItem.execute(self.commandProcessor)
+
 
     # Browser error
     def showErrorInBrowser(self, title, summary, exitcode = -1, **settings):
@@ -132,21 +144,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             name = "Error runing %s" % title,
             commandOutput = 'showAsHTML')
         self.bundleItem_handler(command, **settings)
-        
-    def environmentVariables(self):
-        env = {}
-        for docker in self.dockers:
-            env.update(docker.environmentVariables())
-        return env
 
-    @classmethod
-    def contributeToSettings(cls):
-        from prymatex.gui.settings.mainwindow import MainWindowSettingsWidget
-        return [ MainWindowSettingsWidget ]
-        
-    #============================================================
-    # Setups
-    #============================================================
+    
+    # -------------------- Setups
     def setupDockToolBars(self):
         self.dockToolBars = {
             QtCore.Qt.LeftDockWidgetArea: DockWidgetToolBar("Left Dockers", QtCore.Qt.LeftDockWidgetArea, self),
@@ -158,6 +158,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             self.addToolBar(DockWidgetToolBar.DOCK_AREA_TO_TB[dockArea], toolBar)
             toolBar.hide()
 
+
     def toggleDockToolBarVisibility(self):
         for toolBar in self.dockToolBars.values():
             if toolBar.isVisible():
@@ -165,13 +166,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             else:
                 toolBar.show()
 
-    #============================================================
-    # Componer la mainWindow
-    #============================================================
+
+    # ---------- Componer la mainWindow
     def addStatusBar(self, statusBar):
         self.statusBar().addPermanentWidget(statusBar)
-    
-    # Dockers    
+
+
     def addDock(self, dock, area):
         self.addDockWidget(area, dock)
         toggleAction = dock.toggleViewAction()
@@ -182,12 +182,24 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         dock.setTitleBarWidget(titleBar)
         dock.hide()
         self.dockers.append(dock)
-    
+
+
+    def addDialog(self, dialog):
+        self.dialogs.append(dialog)
+
+
+    def componentByName(self, name):
+        for component in self.dockers + self.dialogs:
+            if component.componentName() == name:
+                return component
+
+
     def on_dockWidgetTitleBar_collpaseAreaRequest(self, dock):
         if not dock.isFloating():
             area = self.dockWidgetArea(dock)
             self.dockToolBars[area].show()
-        
+
+
     def contributeToMainMenu(self, name, settings):
         actions = []
         menuAttr = text2objectname(name, prefix = "menu")
@@ -202,6 +214,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             actions = extend_menu(menu, settings['items'])
         return actions
 
+
     def registerEditorClassActions(self, editorClass, actions):
         self.logger.debug("%s, actions: %d" % (str(editorClass), len(actions)))
         #Conect Actions
@@ -210,7 +223,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
                 receiver = lambda checked, action = action: self.currentEditorActionDispatcher(checked, action)
                 self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
         self.customEditorActions[editorClass] = actions
-    
+
+
     def registerDockClassActions(self, dockClass, actions):
         self.logger.debug("%s, actions: %d" % (str(dockClass), len(actions)))
         #Conect Actions
@@ -219,10 +233,22 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
                 receiver = lambda checked, action = action: self.dockActionDispatcher(checked, action)
                 self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
         self.customDockActions[dockClass] = actions
-        
+
+    
+    def registerDialogClassActions(self, dialogClass, actions):
+        self.logger.debug("%s, actions: %d" % (str(dialogClass), len(actions)))
+        #Conect Actions
+        for action in actions:
+            if hasattr(action, 'callback'):
+                receiver = lambda checked, action = action: self.dialogActionDispatcher(checked, action)
+                self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
+        self.customDialogActions[dialogClass] = actions
+
+
     def registerStatusClassActions(self, statusClass, actions):
         self.statusBar().registerStatusClassActions(statusClass, actions)
-    
+
+
     def dockActionDispatcher(self, checked, action):
         #Find class for action
         dockClasses = filter(lambda (cls, actions): action in actions, self.customDockActions.items())
@@ -237,13 +263,31 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         if action.isCheckable():
             callbackArgs.append(checked)
         action.callback(*callbackArgs)
+
+
+    def dialogActionDispatcher(self, checked, action):
+        #Find class for action
+        dialogClasses = filter(lambda (cls, actions): action in actions, self.customDialogActions.items())
+        assert len(dialogClasses) == 1, "More than one dock class for action %s" % action
+        dialogClass = dialogClasses[0][0]
+        #Find instance
+        dockInstance = filter(lambda status: status.__class__ == dialogClass, self.dialogs)
+        assert len(dialogInstance) == 1, "More than one instance for class %s" % dialogClass
+        dialogInstance = dialogInstance[0]
         
+        callbackArgs = [ dialogInstance ]
+        if action.isCheckable():
+            callbackArgs.append(checked)
+        action.callback(*callbackArgs)
+
+    
     def currentEditorActionDispatcher(self, checked, action):
         callbackArgs = [self.currentEditor()]
         if action.isCheckable():
             callbackArgs.append(checked)
         action.callback(*callbackArgs)
-    
+
+
     def updateMenuForEditor(self, editor):
         if editor is None:
             for editorClass, actions in self.customEditorActions.iteritems():
@@ -257,16 +301,17 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
                     if editorClass == currentEditorClass and action.isCheckable() and hasattr(action, 'testChecked'):
                         action.setChecked(action.testChecked(editor))
 
+
     def showMessage(self, *largs, **kwargs):
         self.popupMessage.showMessage(*largs, **kwargs)
-        
-    #============================================================
-    # Create and manage editors
-    #============================================================
+
+
+    # ---------------- Create and manage editors
     def addEmptyEditor(self):
         editor = self.application.createEditorInstance(parent = self)
         self.addEditor(editor)
         return editor
+
 
     def removeEditor(self, editor):
         self.disconnect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_editor_newLocationMemento)
@@ -274,27 +319,33 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         # TODO Ver si el remove borra el editor y como acomoda el historial
         del editor
 
+
     def addEditor(self, editor, focus = True):
         self.splitTabWidget.addTab(editor)
         self.connect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_editor_newLocationMemento)
         if focus:
             self.setCurrentEditor(editor)
-    
+
+
     def findEditorForFile(self, filePath):
         # Find open editor for fileInfo
         for editor in self.splitTabWidget.allWidgets():
             if editor.filePath == filePath:
                 return editor
 
+
     def editors(self):
         return self.splitTabWidget.allWidgets()
-        
+
+
     def setCurrentEditor(self, editor):
         self.splitTabWidget.setCurrentWidget(editor)
-    
+
+
     def currentEditor(self):
         return self.splitTabWidget.currentWidget()
-    
+
+
     def on_currentWidgetChanged(self, editor):
         #Update Menu
         self.updateMenuForEditor(editor)        
@@ -310,14 +361,16 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             self.addEditorToHistory(editor)
             editor.setFocus()
             self.application.checkExternalAction(self, editor)
-            
+
+
     def setWindowTitleForEditor(self, editor):
         #Set Window Title for editor, editor can be None
         titleChunks = [ self.titleTemplate.safe_substitute(**self.application.supportManager.environmentVariables()) ]
         if editor is not None:
             titleChunks.insert(0, editor.tabTitle())
         self.setWindowTitle(" - ".join(titleChunks))
-        
+
+
     def saveEditor(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor()
         if editor.isExternalChanged():
@@ -344,7 +397,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
         if filePath:
             editor.save(filePath)
-    
+
+
     def closeEditor(self, editor = None, cancel = False):
         editor = editor or self.currentEditor()
         buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No
@@ -364,30 +418,31 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
                 raise exceptions.UserCancelException()
         editor.close()
         self.removeEditor(editor)
-    
+
+
     def tryCloseEmptyEditor(self, editor = None):
         editor = editor or self.currentEditor()
         if editor is not None and editor.isNew() and not editor.isModified():
             self.closeEditor(editor)
-    
-    #=========================================================
-    # Handle location history
-    #=========================================================
+
+
+    # ---------------- Handle location history
     def on_editor_newLocationMemento(self, memento):
         self.addHistoryEntry({"editor": self.sender(), "memento": memento})
-        
+
+
     def addEditorToHistory(self, editor):
         if self._editorHistory and self._editorHistory[self._editorHistoryIndex]["editor"] == editor:
             return
         self.addHistoryEntry({"editor": editor})
-        
+
+
     def addHistoryEntry(self, entry):
         self._editorHistory = [entry] + self._editorHistory[self._editorHistoryIndex:]
         self._editorHistoryIndex = 0
-        
-    #===========================================================================
-    # MainWindow Events
-    #===========================================================================
+
+
+    # ---------------- MainWindow Events
     def closeEvent(self, event):
         for editor in self.editors():
             while editor and editor.isModified():
@@ -402,10 +457,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
                 elif response == QtGui.QMessageBox.Cancel:
                     event.ignore()
                     return
-        
-    #===========================================================================
-    # MainWindow State
-    #===========================================================================
+
+
+    # ---------- MainWindow State
     def saveState(self):
         #Documentos abiertos
         openDocumentsOnQuit = []
@@ -420,6 +474,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         }
         return state
 
+
     def restoreState(self, state):
         # Restore dockers
         for dock in self.dockers:
@@ -433,13 +488,13 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             self.application.openFile(*doc, mainWindow = self)
         QtGui.QMainWindow.restoreState(self, state["self"])
 
-    #===========================================================================
-    # Drag and Drop
-    #===========================================================================
+
+    # ------------ Drag and Drop
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
-    
+
+
     def dropEvent(self, event):
         def collectFiles(paths):
             from glob import glob

@@ -146,17 +146,21 @@ class KeywordsListModel(QtCore.QAbstractListModel):
 
 
     # ------------------ Add remove keywords
+    def addKeyword(self, keyword):
+        value = filter(lambda k: k["name"] == keyword, self.__keywords)
+        if not value:
+            self.__keywords.append({"name": keyword, "selected": 0})
+        
     def addKeywords(self, keywords):
-        keywords = keywords if isinstance(keywords, (list, tuple)) else [ keywords ]
         for keyword in keywords:
-            value = filter(lambda k: k["name"] == keyword, self.__keywords)
-            if not value:
-                self.__keywords.append({"name": keyword, "selected": 0})
+            self.addKeyword(keyword)
 
 
+    def removeKeyword(self, keyword):
+        value = filter(lambda k: k["name"] == keyword, self.__keywords)
+        if value:
+            self.__keywords.remove(value)
+                
     def removeKeywords(self, keywords):
-        keywords = keywords if isinstance(keywords, (list, tuple)) else [ keywords ]
         for keyword in keywords:
-            value = filter(lambda k: k["name"] == keyword, self.__keywords)
-            if value:
-                self.__keywords.remove(value)
+            self.removeKeyword(keyword)

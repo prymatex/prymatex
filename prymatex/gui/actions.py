@@ -8,8 +8,6 @@ from prymatex.core import exceptions
 from prymatex.models.selectable import selectableModelFactory
 from prymatex.gui import dialogs
 from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
-from prymatex.gui.dialogs.project import PMXNewProjectDialog
-from prymatex.gui.dialogs.about import PMXAboutDialog
 
 from prymatex.utils.i18n import ugettext as _
 
@@ -53,7 +51,7 @@ class MainWindowActions(object):
     
     @QtCore.pyqtSlot()
     def on_actionNewProject_triggered(self):
-        PMXNewProjectDialog.getNewProject(self)
+        self.componentByName("projectdialog").createProject()
 
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
@@ -174,7 +172,8 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionSelectTab_triggered(self):
-        item = self.selectorDialog.select(self.tabSelectableModel, title=_("Select tab"))
+        selector = self.componentByName("selectordialog")
+        item = selector.select(self.tabSelectableModel, title=_("Select tab"))
         
         if item is not None:
             self.splitTabWidget.setCurrentWidget(item['data'])
@@ -259,15 +258,9 @@ class MainWindowActions(object):
     def on_actionAboutQt_triggered(self):
         QtGui.qApp.aboutQt()
 
-    aboutDialog = None
     @QtCore.pyqtSlot()
     def on_actionAbout_triggered(self):
-        # Lazy
-        from prymatex.resources import icons
-        print icons.NOTFOUND
-        if not self.aboutDialog:
-            self.aboutDialog = PMXAboutDialog(self) 
-        self.aboutDialog.exec_()
+        self.componentByName("aboutdialog").exec_()
         
     @QtCore.pyqtSlot()
     def on_actionProjectHomepage_triggered(self):

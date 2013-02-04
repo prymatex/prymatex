@@ -3,17 +3,20 @@
 
 import os
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
+from prymatex.core.components import PMXBaseDialog
 
 from prymatex.utils.i18n import ugettext as _
-from prymatex.ui.dialogs.project import Ui_NewProjectDialog
 from prymatex.gui.dialogs.environment import EnvironmentDialog
 
-class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
+
+from prymatex.ui.dialogs.project import Ui_ProjectDialog
+
+class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
     def __init__(self, parent = None):
         QtGui.QDialog.__init__(self, parent)
+        PMXBaseDialog.__init__(self)
         self.setupUi(self)
-        self.application = QtGui.QApplication.instance()
         
         model = QtGui.QFileSystemModel(self)
         model.setRootPath(QtCore.QDir.rootPath())
@@ -156,12 +159,10 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
             template.execute(environment, self.afterRunTemplate)
 
     
-    @classmethod
-    def getNewProject(cls, parent = None, directory = None, name = None):
-        dlg = cls(parent)
-        dlg.lineProjectName.setText(name or '')
-        dlg.buttonCreate.setEnabled(not directory is None and not name is None)
-        dlg.lineLocation.setText(directory or dlg.application.projectManager.workspaceDirectory)
-        dlg.checkBoxUseTemplate.setChecked(False)
-        if dlg.exec_() == dlg.Accepted:
-            return dlg.projectCreated
+    def createProject(self, title = "Create new project", directory = None, name = None):
+        self.lineProjectName.setText(name or '')
+        self.buttonCreate.setEnabled(not directory is None and not name is None)
+        self.lineLocation.setText(directory or self.application.projectManager.workspaceDirectory)
+        self.checkBoxUseTemplate.setChecked(False)
+        if self.exec_() == self.Accepted:
+            return self.projectCreated

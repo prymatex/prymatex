@@ -15,7 +15,7 @@ from prymatex.models.filesystem import SortFilterFileSystemProxyModel
 from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
 from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
-from prymatex.gui.dialogs.project import PMXNewProjectDialog
+
 
 #==============================================================
 # TODO: Migrar esta validacion para el rename al filemanager
@@ -461,7 +461,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
     @QtCore.pyqtSlot()
     def on_actionConvertIntoProject_triggered(self):
         _base, name = os.path.split(self.currentPath())
-        PMXNewProjectDialog.getNewProject(self, self.currentPath(), name)
+        self.mainWindow.componentByName("projectdialog").createProject(directory = self.currentPath(), name = name)
 
     def on_mainWindow_currentEditorChanged(self, editor):
         if editor is not None and not editor.isNew():

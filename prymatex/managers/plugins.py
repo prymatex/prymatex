@@ -60,6 +60,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         
         self.editors = []
         self.dockers = []
+        self.dialogs = []
         self.statusBars = []
         self.keyHelpers = {}
         self.addons = {}
@@ -91,6 +92,11 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         statusBarClass.plugin = self.currentPluginDescriptor
         self.statusBars.append(statusBarClass)
 
+    def registerDialog(self, dialogClass):
+        self.application.populateComponent(dialogClass)
+        dialogClass.plugin = self.currentPluginDescriptor
+        self.dialogs.append(dialogClass)
+
     def registerKeyHelper(self, widgetClass, helperClass):
         self.application.extendComponent(helperClass)
         helperClass.plugin = self.currentPluginDescriptor
@@ -118,8 +124,8 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         instances = self.instances.setdefault(widgetClass, [])
         instances.append(instance)
         return instance
-    
-    
+
+
     def createCustomActions(self, mainWindow):
         for editorClass in self.editors:
             addonClasses = self.addons.get(editorClass, [])
@@ -130,7 +136,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
                     actions = mainWindow.contributeToMainMenu(name, settings)
                     customEditorActions.extend(actions)
             mainWindow.registerEditorClassActions(editorClass, customEditorActions)
-        
+
         for dockClass in self.dockers:
             addonClasses = self.addons.get(dockClass, [])
             menus = dockClass.contributeToMainMenu(addonClasses)
@@ -140,7 +146,17 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
                     actions = mainWindow.contributeToMainMenu(name, settings)
                     customDockActions.extend(actions)
             mainWindow.registerDockClassActions(dockClass, customDockActions)
-        
+
+        for dialogClass in self.dialogs:
+            addonClasses = self.addons.get(dialogClass, [])
+            menus = dialogClass.contributeToMainMenu(addonClasses)
+            if menus is not None:
+                customStatusActions = []
+                for name, settings in menus.iteritems():
+                    actions = mainWindow.contributeToMainMenu(name, settings)
+                    customStatusActions.extend(actions)
+            mainWindow.registerDialogClassActions(dialogClass, customStatusActions)
+            
         for statusClass in self.statusBars:
             addonClasses = self.addons.get(statusClass, [])
             menus = statusClass.contributeToMainMenu(addonClasses)
@@ -150,7 +166,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
                     actions = mainWindow.contributeToMainMenu(name, settings)
                     customStatusActions.extend(actions)
             mainWindow.registerStatusClassActions(statusClass, customStatusActions)
-            
+
     def populateMainWindow(self, mainWindow):
         self.createCustomActions(mainWindow)
             
@@ -161,21 +177,26 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
             dock = self.application.createWidgetComponentInstance(dockClass, mainWindow)
             mainWindow.addDock(dock, dock.PREFERED_AREA)
 
+        for dialogClass in self.dialogs:
+            dialog = self.application.createWidgetComponentInstance(dialogClass, mainWindow)
+            mainWindow.addDialog(dialog)
+            
         for statusBarClass in self.statusBars:
             status = self.application.createWidgetComponentInstance(statusBarClass, mainWindow)
             mainWindow.addStatusBar(status)
     
-    #==================================================
-    # Handle editor classes
-    #==================================================
+    
+    # ------------ Handle editor classes
     def findEditorClassForFile(self, filePath):
         mimetype = self.application.fileManager.mimeType(filePath)
         for Klass in self.editors:
             if Klass.acceptFile(filePath, mimetype):
                 return Klass
     
+    
     def defaultEditor(self):
         return self.editors[0]
+
 
     #==================================================
     # Load plugins
@@ -235,6 +256,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
     def loadPlugins(self):
         self.loadCoreModule('prymatex.gui.codeeditor', 'org.prymatex.codeeditor')
         self.loadCoreModule('prymatex.gui.dockers', 'org.prymatex.dockers')
+        self.loadCoreModule('prymatex.gui.dialogs', 'org.prymatex.dialogs')
         loadLaterEntries = []
         for directory in self.directories:
             if not os.path.isdir(directory):

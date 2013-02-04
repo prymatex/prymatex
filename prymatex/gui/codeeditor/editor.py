@@ -1449,7 +1449,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
 
     def on_actionSelectBundleItem_triggered(self):
-        item = self.mainWindow.selectorDialog.select(self.bundleItemSelectableModel, title=_("Select Bundle Item"))
+        selector = self.mainWindow.componentByName("selectordialog")
+        item = selector.select(self.bundleItemSelectableModel, title=_("Select Bundle Item"))
 
         # Select one?
         if item is not None:
@@ -1457,13 +1458,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     
     def on_actionGoToSymbol_triggered(self):
-        item = self.mainWindow.selectorDialog.select(self.symbolSelectableModel, title = _("Select Symbol"))
+        selector = self.mainWindow.componentByName("selectordialog")
+        item = selector.select(self.symbolSelectableModel, title = _("Select Symbol"))
         if item is not None:
             self.goToBlock(item['data'])
 
 
     def on_actionGoToBookmark_triggered(self):
-        item = self.mainWindow.selectorDialog.select(self.bookmarkSelectableModel, title=_("Select Bookmark"))
+        selector = self.mainWindow.componentByName("selectordialog")
+        item = selector.select(self.bookmarkSelectableModel, title=_("Select Bookmark"))
         if item is not None:
             self.goToBlock(item['data'])
 

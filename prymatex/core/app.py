@@ -349,14 +349,15 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
 
     def createComponentInstance(self, widgetClass, parent=None):
-        # TODO: Y si todo pasa por el plugin manager y se permiten los addons en los componentes?
         instance = widgetClass(parent)
         self.profile.configure(instance)
         instance.initialize()
         return instance
 
+
     def createWidgetComponentInstance(self, widgetClass, parent=None):
         return self.createWidgetInstance(widgetClass, parent)
+
 
     def createWidgetInstance(self, widgetClass, parent=None):
         instance = self.pluginManager.createWidgetInstance(widgetClass, parent)

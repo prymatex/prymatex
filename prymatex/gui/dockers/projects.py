@@ -14,7 +14,6 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.core.settings import pmxConfigPorperty
 
 from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
-from prymatex.gui.dialogs.project import PMXNewProjectDialog
 from prymatex.gui.dialogs.messages import CheckableMessageBox
 from prymatex.gui.dialogs.input import ReplaceRenameInputDialog
 from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
@@ -334,7 +333,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
     @QtCore.pyqtSlot()
     def on_actionNewProject_triggered(self):
-        PMXNewProjectDialog.getNewProject(self)
+        self.mainWindow.componentByName("projectdialog").createProject()
 
     @QtCore.pyqtSlot()
     def on_actionDelete_triggered(self):

@@ -170,9 +170,7 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
         self.appendToKnowProjects(project)
 
     def deleteProject(self, project, removeFiles = False):
-        """
-        Elimina un proyecto
-        """
+        """Elimina un proyecto"""
         project.delete(removeFiles)
         self.removeProject(project)
 

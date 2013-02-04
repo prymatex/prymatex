@@ -6,12 +6,14 @@ import prymatex
 
 from prymatex.qt import QtCore, QtGui, Qt
 from prymatex import resources
+from prymatex.core.components import PMXBaseDialog
 
 from prymatex.ui.about import Ui_AboutDialog
 
-class PMXAboutDialog(Ui_AboutDialog, QtGui.QDialog):
+class AboutDialog(QtGui.QDialog, Ui_AboutDialog, PMXBaseDialog):
     def __init__(self, parent = None):
         QtGui.QDialog.__init__(self, parent)
+        PMXBaseDialog.__init__(self)
         self.setupUi(self)
         self.labelLogo.setPixmap(resources.getImage("logo"))
         self.textInformation.setReadOnly(True)
@@ -25,7 +27,6 @@ class PMXAboutDialog(Ui_AboutDialog, QtGui.QDialog):
         zmq_version = self.getZMQVersion()
         pony_version = self.getPonygurumaVersion()
         pyqt_version = Qt.qVersion()
-        ipython_version = self.getIPythonVersion()
         self.textInformation.setHtml('''
             <style>
                 dt {{ font-weight: bold; }}
@@ -38,17 +39,16 @@ class PMXAboutDialog(Ui_AboutDialog, QtGui.QDialog):
                 <dt>Command Line</dt><dd>{commandline}</dd>
                 <dt>PyQt4</dt><dd>{pyqt_version}</dd>
                 <dt>Ponyguruma Regex Library</dt><dd>{pony_version}</dd>
-                <dt>IPython</dt><dd>{ipython_version}</dd>
                 <dt>ZMQ Version</dt><dd>{zmq_version}</dd>
            </dl>
         '''.format(**locals()))
-    
+
     def getGitVersion(self):
         try:
             return prymatex.get_git_revision()
         except:
             return "GIT-Unknown"
-    
+
     def getZMQVersion(self):
         try:
             import zmq
@@ -56,19 +56,11 @@ class PMXAboutDialog(Ui_AboutDialog, QtGui.QDialog):
         except ImportError:
             return "Not installed"
         return "Error"
-    
+
     def getPonygurumaVersion(self):
         try:
             import ponyguruma
             return '.'.join(map(str, ponyguruma.VERSION))
-        except ImportError:
-            return "Not installed."
-        return "Error"
-            
-    def getIPythonVersion(self):
-        try:
-            import IPython
-            return IPython.__version__
         except ImportError:
             return "Not installed."
         return "Error"

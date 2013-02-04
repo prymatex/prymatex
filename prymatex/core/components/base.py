@@ -4,17 +4,25 @@
 # TODO: No son Mixin?
 
 class PMXBaseComponent(object):
+    NAME = None
     def __init__(self):
         self.__componentAddons = []
+        self.__componentName = self.NAME or self.__class__.__name__.lower()
+
 
     def initialize(self, parent = None):
         for addon in self.__componentAddons:
             addon.initialize(self)
+
     
     # ---------------- Addons api
     def componentAddons(self):
         return self.__componentAddons
-      
+
+
+    def componentName(self):
+        return self.__componentName
+
 
     def addComponentAddon(self, addon):
         self.__componentAddons.append(addon)
@@ -24,28 +32,34 @@ class PMXBaseComponent(object):
         addons = filter(lambda addon: isinstance(addon, klass), self.__componentAddons)
         #TODO: Solo uno
         return addons[0]
-    
+
+
     def finalize(self):
         pass
+
 
     @classmethod
     def contributeToSettings(cls):
         """Class contributions to the settings dialog"""
         return []
 
+
     @classmethod
     def contributeToMainMenu(cls):
         """Contributions to the main menu"""
         return {}
+
 
     @classmethod
     def contributeToShortcuts(cls):
         """Contributions to the main menu"""
         return []
 
+
     def environmentVariables(self):
         """Return a dictionary with the defined variables of this component."""
         return {}
+
 
 class PMXBaseWidgetComponent(PMXBaseComponent):
     def __init__(self):
