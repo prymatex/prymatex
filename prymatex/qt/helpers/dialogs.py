@@ -11,7 +11,7 @@ class DialogManager(QtCore.QObject):
     def __init__(self):
         QtCore.QObject.__init__(self)
         self.dialogs = {}
-        
+
     def show(self, dialog):
         """Generic method to show a non-modal dialog and keep reference
         to the QtCore.Qt C++ object"""
@@ -27,11 +27,11 @@ class DialogManager(QtCore.QObject):
                          lambda eid=id(dialog): self.dialog_finished(eid))
             self.connect(dialog, QtCore.SIGNAL('rejected()'),
                          lambda eid=id(dialog): self.dialog_finished(eid))
-        
+
     def dialog_finished(self, dialog_id):
         """Manage non-modal dialog boxes"""
         return self.dialogs.pop(dialog_id)
-    
+
     def close_all(self):
         """Close all opened dialog boxes"""
         for dlg in self.dialogs.values():
