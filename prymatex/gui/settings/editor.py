@@ -38,6 +38,7 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
 
 
     def loadSettings(self):
+        SettingsTreeNode.loadSettings(self)
         self.comboBoxDefaultSyntax.setModel(self.application.supportManager.syntaxProxyModel)
         self.comboBoxDefaultSyntax.setModelColumn(0)
         

@@ -18,6 +18,3 @@ class EditSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Edit):
         SettingsTreeNode.__init__(self, "edit", settingGroup, profile)
         self.setupUi(self)
 
-
-    def loadSettings(self):
-        pass

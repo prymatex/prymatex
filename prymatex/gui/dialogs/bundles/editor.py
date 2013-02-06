@@ -4,21 +4,24 @@
 from prymatex.qt import QtCore, QtGui
 from prymatex import resources
 
+from prymatex.core.components import PMXBaseDialog
+
 # UI
-from prymatex.ui.support.editor import Ui_BundleEditor
+from prymatex.ui.support.editor import Ui_BundleEditorDialog
 
 from prymatex.gui.dialogs.bundles import widgets
 from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
 
-class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditor):
+class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
     BASE_EDITOR = -1 #El ultimo es el editor base, no tiene nada
     
-    def __init__(self, application, manager):
-        QtGui.QDialog.__init__(self)
+    def __init__(self, parent = None):
+        QtGui.QDialog.__init__(self, parent)
+        PMXBaseDialog.__init__(self)
         self.setupUi(self)
         self.namespace = None
-        self.application = application
-        self.manager = manager
+        
+        self.manager = self.application.supportManager
         self.proxyTreeModel = self.manager.bundleProxyTreeModel
         
         self.finished.connect(self.on_bundleEditor_finished)

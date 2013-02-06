@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/profile.ui'
 #
-# Created: Fri Jan 11 10:55:13 2013
+# Created: Wed Feb  6 11:56:43 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -57,9 +57,9 @@ class Ui_ProfileDialog(object):
         self.verticalLayout_3 = QtGui.QVBoxLayout()
         self.verticalLayout_3.setSpacing(2)
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
-        self.listProfiles = QtGui.QListWidget(ProfileDialog)
-        self.listProfiles.setObjectName(_fromUtf8("listProfiles"))
-        self.verticalLayout_3.addWidget(self.listProfiles)
+        self.listViewProfiles = QtGui.QListView(ProfileDialog)
+        self.listViewProfiles.setObjectName(_fromUtf8("listViewProfiles"))
+        self.verticalLayout_3.addWidget(self.listViewProfiles)
         self.checkDontAsk = QtGui.QCheckBox(ProfileDialog)
         self.checkDontAsk.setObjectName(_fromUtf8("checkDontAsk"))
         self.verticalLayout_3.addWidget(self.checkDontAsk)

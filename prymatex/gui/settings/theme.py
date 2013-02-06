@@ -30,6 +30,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
 
 
     def loadSettings(self):
+        SettingsTreeNode.loadSettings(self)
         # Set models
         self.comboBoxThemes.setModel(self.application.supportManager.themeListModel)
         self.tableViewStyles.setModel(self.application.supportManager.themeStyleProxyModel)

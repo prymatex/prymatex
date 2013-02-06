@@ -25,11 +25,6 @@ from prymatex.utils import coroutines
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime, logtime
 
-# Global dialogs
-from prymatex.gui.dialogs.profile import PMXProfileDialog
-from prymatex.gui.dialogs.settings import PMXSettingsDialog
-from prymatex.gui.dialogs.bundles.editor import BundleEditorDialog
-
 # The basic managers
 from prymatex.managers.profile import ProfileManager
 from prymatex.managers.plugins import PluginManager
@@ -110,27 +105,14 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         self.options = options
 
         # Prepare profile
-        profileName = self.options.profile
         self.extendComponent(ProfileManager)
         self.profileManager = ProfileManager(self)
-        
-        if profileName is None or (profileName == "" and not self.profileManager.dontask):
-            #Select profile
-            profileName = PMXProfileDialog.selectProfile(self.profileManager.profilesFile)
-        elif profileName == "":
-            #Find default profile in config
-            profileName = self.profileManager.default
-
-        self.currentProfile = self.profileManager.createProfile(profileName)
+        self.currentProfile = self.profileManager.currentProfile(self.options.profile)
 
         self.checkSingleInstance()
         
         if self.options.reset_settings:
             self.currentProfile.clear()
-
-        # Create the settings dialog
-        self.extendComponent(PMXSettingsDialog)
-        self.settingsDialog = PMXSettingsDialog(self)
 
         # Prepare settings for application
         self.registerConfigurable(self.__class__)
@@ -221,8 +203,8 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             showMessage = splash.showMessage if not self.options.no_splash else (lambda message: message)
             
             self.supportManager.loadSupport(showMessage)
-            self.settingsDialog.loadSettings()
-
+            self.profileManager.loadSettings()
+            
             # Creates the Main Window
             self.createMainWindow()
 
@@ -242,11 +224,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         self.mainWindow.close()
         del self.mainWindow
 
-
-    def switchProfile(self):
-        profile = PMXProfileDialog.switchProfile(self.profileManager.profilesFile)
-        if profile is not None and profile != self.currentProfile.PMX_PROFILE_NAME:
-            self.restart()
 
     def restart(self):
         self.exit(self.RESTART_CODE)
@@ -306,11 +283,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             'PMX_LOG_PATH': self.currentProfile.value('PMX_LOG_PATH')
         })
 
-
-        # Create bundle editor dialog
-        self.extendComponent(BundleEditorDialog)
-        self.bundleEditorDialog = BundleEditorDialog(self, manager)
-
         return manager
 
     def setupFileManager(self):
@@ -364,7 +336,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             self.extendComponent(settingClass)
             settingWidget = settingClass(componentClass.settings, profile = self.currentProfile)
             componentClass.settings.addDialog(settingWidget)
-            self.settingsDialog.register(settingWidget)
+            self.profileManager.registerSettingsWidget(settingWidget)
 
 
     def populateComponentClass(self, componentClass):

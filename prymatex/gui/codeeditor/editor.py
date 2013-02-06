@@ -162,8 +162,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         #Cursor history
         #self._cursorHistory, self._cursorHistoryIndex = [], 0
 
-    # Connect Signals
-    def connectSignals(self):
+
+    def initialize(self, mainWindow):
+        PMXBaseEditor.initialize(self, mainWindow)
+        self.selectorDialog = self.mainWindow.findChild(QtGui.QDialog, "SelectorDialog")
+        
         self.rightBar.updateRequest.connect(self.updateViewportMargins)
         self.leftBar.updateRequest.connect(self.updateViewportMargins)
         
@@ -175,10 +178,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.themeChanged.connect(self.highlightEditor)
         
         self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)
-
-    def initialize(self, mainWindow):
-        PMXBaseEditor.initialize(self, mainWindow)
-        self.connectSignals()
         
     # ----------- Override from PMXBaseComponent
     def addComponentAddon(self, addon):
@@ -1449,8 +1448,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
 
     def on_actionSelectBundleItem_triggered(self):
-        selector = self.mainWindow.componentByName("selectordialog")
-        item = selector.select(self.bundleItemSelectableModel, title=_("Select Bundle Item"))
+        item = self.selectorDialog.select(self.bundleItemSelectableModel, title=_("Select Bundle Item"))
 
         # Select one?
         if item is not None:
@@ -1458,15 +1456,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     
     def on_actionGoToSymbol_triggered(self):
-        selector = self.mainWindow.componentByName("selectordialog")
-        item = selector.select(self.symbolSelectableModel, title = _("Select Symbol"))
+        item = self.selectorDialog.select(self.symbolSelectableModel, title = _("Select Symbol"))
         if item is not None:
             self.goToBlock(item['data'])
 
 
     def on_actionGoToBookmark_triggered(self):
-        selector = self.mainWindow.componentByName("selectordialog")
-        item = selector.select(self.bookmarkSelectableModel, title=_("Select Bookmark"))
+        item = self.selectorDialog.select(self.bookmarkSelectableModel, title=_("Select Bookmark"))
         if item is not None:
             self.goToBlock(item['data'])
 

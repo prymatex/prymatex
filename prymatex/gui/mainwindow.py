@@ -143,7 +143,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             component.initialize(self)
         self.selectorDialog = self.findChild(QtGui.QDialog, "SelectorDialog")
         self.aboutDialog = self.findChild(QtGui.QDialog, "AboutDialog")
-
+        self.settingsDialog = self.findChild(QtGui.QDialog, "SettingsDialog")
+        self.bundleEditorDialog = self.findChild(QtGui.QDialog, "BundleEditorDialog")
+        self.profileDialog = self.findChild(QtGui.QDialog, "ProfileDialog")
+        
     def environmentVariables(self):
         env = {}
         for docker in self.dockers:

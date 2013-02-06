@@ -115,7 +115,10 @@ class MainWindowActions(object):
     
     @QtCore.pyqtSlot()
     def on_actionSwitchProfile_triggered(self):
-        self.application.switchProfile()
+        profile = self.profileDialog.switchProfile()
+        if profile is not None and profile != self.application.currentProfile.PMX_PROFILE_NAME:
+            self.application.restart()
+
 
     # ------------ Edit Actions
     @QtCore.pyqtSlot()
@@ -214,23 +217,23 @@ class MainWindowActions(object):
     # ------------ Bundles Actions
     @QtCore.pyqtSlot()
     def on_actionShowBundleEditor_triggered(self):
-        self.application.bundleEditorDialog.execEditor()
+        self.bundleEditorDialog.execEditor()
 
     @QtCore.pyqtSlot()
     def on_actionEditCommands_triggered(self):
-        self.application.bundleEditorDialog.execCommand()
+        self.bundleEditorDialog.execCommand()
     
     @QtCore.pyqtSlot()
     def on_actionEditLanguages_triggered(self):
-        self.application.bundleEditorDialog.execLanguage()
+        self.bundleEditorDialog.execLanguage()
     
     @QtCore.pyqtSlot()
     def on_actionEditSnippets_triggered(self):
-        self.application.bundleEditorDialog.execSnippet()
+        self.bundleEditorDialog.execSnippet()
         
     @QtCore.pyqtSlot()
     def on_actionReloadBundles_triggered(self):
-        self.application.supportManager.reloadSupport(self.showMessage)
+        self.supportManager.reloadSupport(self.showMessage)
 
     # ------------ Preferences Actions
     @QtCore.pyqtSlot(bool)
@@ -251,7 +254,7 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionSettings_triggered(self):
-        self.application.settingsDialog.exec_()
+        self.settingsDialog.exec_()
             
     # ------------ Help Actions
     @QtCore.pyqtSlot()

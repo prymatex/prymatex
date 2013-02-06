@@ -108,7 +108,7 @@ p, li { white-space: pre-wrap; }
         <number>2</number>
        </property>
        <item>
-        <widget class="QListWidget" name="listProfiles"/>
+        <widget class="QListView" name="listViewProfiles"/>
        </item>
        <item>
         <widget class="QCheckBox" name="checkDontAsk">

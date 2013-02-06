@@ -14,23 +14,23 @@ class SettingsTreeNode(ConfigureTreeNode):
 
 
     def loadSettings(self):
-        pass
+        for node in self.childNodes():
+            node.loadSettings()
 
-
-    @property
-    def childrenNodes(self):
-        return []
 
 
 # Proxy for namespaced models
 class ProxySettingsTreeNode(ProxyConfigureTreeNode):
     def loadSettings(self):
-        pass
+        for node in self.childNodes():
+            node.loadSettings()
 
 
 class SettingsTreeModel(ConfigureTreeModelBase):
-    proxySettingsCreated = QtCore.pyqtSignal(object)
     def treeNodeFactory(self, nodeName, nodeParent = None):
-        proxy = ProxySettingsTreeNode(nodeName, nodeParent)
-        self.proxySettingsCreated.emit(proxy)
-        return proxy
+        return ProxySettingsTreeNode(nodeName, nodeParent)
+
+    def loadSettings(self):
+        self.rootNode.loadSettings()
+
+    

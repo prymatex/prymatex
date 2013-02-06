@@ -19,6 +19,7 @@ class PMXTerminalSettings(QtGui.QWidget, SettingsTreeNode, Ui_Terminal):
         
         
     def loadSettings(self):
+        SettingsTreeNode.loadSettings(self)
         #colorScheme = self.settingGroup.value('colorScheme')
         #self.comboColorScheme.setCurrentIndex(self.comboColorScheme.findData(colorScheme))    
         font = self.settingGroup.value('font')

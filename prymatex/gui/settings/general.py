@@ -20,6 +20,7 @@ class GeneralSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_General):
 
 
     def loadSettings(self):
+        SettingsTreeNode.loadSettings(self)
         currentStyleName = self.settingGroup.value('qtStyle')
         currentStyleSheetName = self.settingGroup.value('qtStyleSheet')
         for index, styleName in enumerate(QtGui.QStyleFactory.keys()):

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/support/editor.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/support/editor.ui'
 #
-# Created: Sun Dec  9 16:08:32 2012
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Wed Feb  6 11:06:59 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -15,19 +15,19 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class Ui_BundleEditor(object):
-    def setupUi(self, BundleEditor):
-        BundleEditor.setObjectName(_fromUtf8("BundleEditor"))
-        BundleEditor.resize(708, 575)
-        BundleEditor.setMinimumSize(QtCore.QSize(700, 575))
+class Ui_BundleEditorDialog(object):
+    def setupUi(self, BundleEditorDialog):
+        BundleEditorDialog.setObjectName(_fromUtf8("BundleEditorDialog"))
+        BundleEditorDialog.resize(708, 575)
+        BundleEditorDialog.setMinimumSize(QtCore.QSize(700, 575))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        BundleEditor.setWindowIcon(icon)
-        self.verticalLayout = QtGui.QVBoxLayout(BundleEditor)
+        BundleEditorDialog.setWindowIcon(icon)
+        self.verticalLayout = QtGui.QVBoxLayout(BundleEditorDialog)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.splitter = QtGui.QSplitter(BundleEditor)
+        self.splitter = QtGui.QSplitter(BundleEditorDialog)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.splitter.setObjectName(_fromUtf8("splitter"))
         self.verticalLayoutWidget = QtGui.QWidget(self.splitter)
@@ -102,11 +102,11 @@ class Ui_BundleEditor(object):
         self.editorsLayout.addLayout(self.basicFormLayout)
         self.verticalLayout.addWidget(self.splitter)
 
-        self.retranslateUi(BundleEditor)
-        QtCore.QMetaObject.connectSlotsByName(BundleEditor)
+        self.retranslateUi(BundleEditorDialog)
+        QtCore.QMetaObject.connectSlotsByName(BundleEditorDialog)
 
-    def retranslateUi(self, BundleEditor):
-        BundleEditor.setWindowTitle(_('Bundle Editor'))
+    def retranslateUi(self, BundleEditorDialog):
+        BundleEditorDialog.setWindowTitle(_('Bundle Editor'))
         self.pushButtonFilter.setText(_('Filter'))
         self.labelTitle.setText(_('No item selected'))
         self.labelActivation.setText(_('Activation:'))

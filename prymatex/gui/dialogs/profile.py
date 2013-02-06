@@ -4,7 +4,8 @@
 import os
 from ConfigParser import ConfigParser
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
+from prymatex.core.components import PMXBaseDialog
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.profile import PMXProfile
@@ -18,28 +19,20 @@ RENAME_MESSAGE = """Rename the profile %s to:"""
 
 CREATE_MESSAGE = """Enter new profile name:"""
 
-class PMXProfileDialog(QtGui.QDialog, Ui_ProfileDialog):
+class ProfileDialog(QtGui.QDialog, Ui_ProfileDialog, PMXBaseDialog):
     
-    def __init__(self, profilesFilePath, parent = None):
+    def __init__(self, parent = None):
         QtGui.QDialog.__init__(self, parent)
+        PMXBaseDialog.__init__(self)
         self.setupUi(self)
-        self.application = QtGui.QApplication.instance()
-        self.profilesFilePath = profilesFilePath
-        self.config = ConfigParser()
-        self.config.read(self.profilesFilePath)
-        self.setupDialogProfiles()
+
+    def setProfileManager(self, manager):
+        self.manager = manager
+        self.listViewProfiles.setModel(self.manager.profilesListModel)
         
-    def setupDialogProfiles(self):
-        self.listProfiles.clear()
-        defaultProfile = None
-        defaultIndex = 0
-        for index, profileName in enumerate(PMXProfile.PMX_PROFILES):
-            self.listProfiles.addItem(QtGui.QListWidgetItem(QtGui.QIcon.fromTheme("user-identity"), profileName))
-            if PMXProfile.PMX_PROFILE_DEFAULT == profileName:
-                defaultIndex = index
-        self.checkDontAsk.setChecked(PMXProfile.PMX_PROFILES_DONTASK)
-        self.listProfiles.setCurrentRow(defaultIndex)
-        
+    def initialize(self, mainWindow):
+        self.setProfileManager(self.application.profileManager)
+    
     def on_checkDontAsk_clicked(self):
         PMXProfile.PMX_PROFILES_DONTASK = self.checkDontAsk.isChecked()
         PMXProfile.saveProfiles()
@@ -54,42 +47,41 @@ class PMXProfileDialog(QtGui.QDialog, Ui_ProfileDialog):
     
     def on_buttonCreate_pressed(self):
         profileName, ok = QtGui.QInputDialog.getText(self, _("Create profile"), _(CREATE_MESSAGE))
-        while profileName in PMXProfile.PMX_PROFILES.keys():
+        while profileName in self.manager.profileNames():
             profileName, ok = QtGui.QInputDialog.getText(self, _("Create profile"), _(CREATE_MESSAGE))
         if ok:
-            profileName = PMXProfile.createProfile(profileName)
-            self.listProfiles.addItem(QtGui.QListWidgetItem(QtGui.QIcon.fromTheme("user-identity"), profileName))
+            self.manager.createProfile(profileName)
+
 
     def on_buttonRename_pressed(self):
-        profileOldName = self.listProfiles.item(self.listProfiles.currentRow()).data(QtCore.Qt.DisplayRole)
-        profileNewName, ok = QtGui.QInputDialog.getText(self, _("Rename profile"), _(RENAME_MESSAGE) % profileOldName, text=profileOldName)
-        while profileNewName in PMXProfile.PMX_PROFILES.keys():
-            profileNewName, ok = QtGui.QInputDialog.getText(self, _("Rename profile"), _(RENAME_MESSAGE) % profileOldName, text=profileNewName)
+        profile = self.manager.profilesListModel.profile(self.listViewProfiles.currentIndex())
+        profileNewName, ok = QtGui.QInputDialog.getText(self, _("Rename profile"), _(RENAME_MESSAGE) % profile.PMX_PROFILE_NAME, text=profile.PMX_PROFILE_NAME)
+        while profileNewName in self.manager.profileNames():
+            profileNewName, ok = QtGui.QInputDialog.getText(self, _("Rename profile"), _(RENAME_MESSAGE) % profile.PMX_PROFILE_NAME, text=profileNewName)
         if ok:
-            newName = PMXProfile.renameProfile(profileOldName, profileNewName)
-            self.listProfiles.item(self.listProfiles.currentRow()).setData(QtCore.Qt.DisplayRole, newName)
+            self.manager.renameProfile(profile, profileNewName)
+
 
     def on_buttonDelete_pressed(self):
-        item = self.listProfiles.item(self.listProfiles.currentRow())
-        profileOldName = item.data(QtCore.Qt.DisplayRole)
+        profile = self.manager.profilesListModel.profile(self.listViewProfiles.currentIndex())
         result = QtGui.QMessageBox.question(self, _("Delete Profile"),
-            _(DELETE_MESSAGE) % profileOldName,
+            _(DELETE_MESSAGE) % profile.PMX_PROFILE_NAME,
             buttons = QtGui.QMessageBox.Yes | QtGui.QMessageBox.Ok | QtGui.QMessageBox.Discard,
             defaultButton = QtGui.QMessageBox.Ok)
         if result != QtGui.QMessageBox.Discard:
-            PMXProfile.deleteProfile(profileOldName, result == QtGui.QMessageBox.Yes)
-            self.listProfiles.removeItemWidget(item)
+            self.manager.deleteProfile(profile, result == QtGui.QMessageBox.Yes)
+
             
-    @classmethod
-    def switchProfile(cls, profilesFilePath, parent = None):
-        dlg = cls(profilesFilePath, parent = parent)
-        dlg.buttonStartPrymatex.setText("Restart Prymatex")
-        dlg.buttonExit.setVisible(False)
-        if dlg.exec_() == cls.Accepted:
+    def switchProfile(self, title="Switch profile"):
+        self.setWindowTitle(title)
+        self.buttonStartPrymatex.setText("Restart Prymatex")
+        self.buttonExit.setVisible(False)
+        if self.exec_() == self.Accepted:
             return PMXProfile.PMX_PROFILE_DEFAULT
 
     @classmethod
-    def selectProfile(cls, profilesFilePath, parent = None):
-        dlg = cls(profilesFilePath, parent = parent)
+    def selectStartupProfile(cls, profileManager):
+        dlg = cls()
+        dlg.setProfileManager(profileManager)
         if dlg.exec_() == cls.Accepted:
             return PMXProfile.PMX_PROFILE_DEFAULT

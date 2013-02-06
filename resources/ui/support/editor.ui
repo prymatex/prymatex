@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>BundleEditor</class>
- <widget class="QWidget" name="BundleEditor">
+ <class>BundleEditorDialog</class>
+ <widget class="QWidget" name="BundleEditorDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
