@@ -5,6 +5,8 @@
 Application configuration based on Qt's QSettings module.
 """
 import sys, os, plistlib
+
+import prymatex
 from prymatex.utils.misc import get_home_dir
 
 #==============================================================================
@@ -22,9 +24,6 @@ PRYMATEX_HOME_NAME = ".prymatex"
 TEXTMATE_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
 TEXTMATE_PREFERENCE_NAMES = ["Library", "Preferences"]
 
-def get_prymatex_app_path():
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-
 def get_prymatex_home_path():
     path = os.path.join(USER_HOME_PATH, PRYMATEX_HOME_NAME)
     if not os.path.exists(path):
@@ -35,6 +34,11 @@ def get_prymatex_home_path():
         if not os.path.exists(extraPath):
             os.makedirs(extraPath, 0700)
     return path
+
+PMX_APP_PATH = os.path.dirname(prymatex.__file__)
+PMX_SHARE_PATH = os.path.join(PMX_APP_PATH, 'share')
+PMX_HOME_PATH = get_prymatex_home_path()
+PMX_PLUGINS_PATH = os.path.join(PMX_HOME_PATH, 'Plugins')
 
 def get_textmate_preferences_user_path():
     path = os.path.join(USER_HOME_PATH, *TEXTMATE_PREFERENCE_NAMES)

@@ -64,7 +64,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         self.statusBars = []
         self.keyHelpers = {}
         self.addons = {}
-        self.instances = {}
+
 
     @classmethod
     def contributeToSettings(cls):
@@ -74,28 +74,30 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
     def addPluginDirectory(self, directory):
         self.directories.append(directory)
 
-    #==================================================
-    # Cargando clases
-    #==================================================
+    # ------------- Cargando clases
     def registerEditor(self, editorClass):
-        self.application.populateComponent(editorClass)
+        self.application.populateComponentClass(editorClass)
         editorClass.plugin = self.currentPluginDescriptor
         self.editors.append(editorClass)
 
+
     def registerDocker(self, dockerClass):
-        self.application.populateComponent(dockerClass)
+        self.application.populateComponentClass(dockerClass)
         dockerClass.plugin = self.currentPluginDescriptor
         self.dockers.append(dockerClass)
 
+
     def registerStatusBar(self, statusBarClass):
-        self.application.populateComponent(statusBarClass)
+        self.application.populateComponentClass(statusBarClass)
         statusBarClass.plugin = self.currentPluginDescriptor
         self.statusBars.append(statusBarClass)
 
+
     def registerDialog(self, dialogClass):
-        self.application.populateComponent(dialogClass)
+        self.application.populateComponentClass(dialogClass)
         dialogClass.plugin = self.currentPluginDescriptor
         self.dialogs.append(dialogClass)
+
 
     def registerKeyHelper(self, widgetClass, helperClass):
         self.application.extendComponent(helperClass)
@@ -103,89 +105,14 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         keyHelperClasses = self.keyHelpers.setdefault(widgetClass, [])
         keyHelperClasses.append(helperClass)
 
+
     def registerAddon(self, widgetClass, addonClass):
-        self.application.populateComponent(addonClass)
+        self.application.populateComponentClass(addonClass)
         addonClass.plugin = self.currentPluginDescriptor
         addonClasses = self.addons.setdefault(widgetClass, [])
         addonClasses.append(addonClass)
 
-    # -------------- Creando instancias
-    def createWidgetInstance(self, widgetClass, parent):
-        instance = widgetClass(parent)
-        
-        for addonClass in self.addons.get(widgetClass, []):
-            addon = addonClass(instance)
-            instance.addComponentAddon(addon)
-        
-        for keyHelperClass in self.keyHelpers.get(widgetClass, []):
-            keyHelper = keyHelperClass(instance)
-            instance.addKeyHelper(keyHelper)
-            
-        instances = self.instances.setdefault(widgetClass, [])
-        instances.append(instance)
-        return instance
 
-
-    def createCustomActions(self, mainWindow):
-        for editorClass in self.editors:
-            addonClasses = self.addons.get(editorClass, [])
-            menus = editorClass.contributeToMainMenu(addonClasses)
-            if menus is not None:
-                customEditorActions = []
-                for name, settings in menus.iteritems():
-                    actions = mainWindow.contributeToMainMenu(name, settings)
-                    customEditorActions.extend(actions)
-            mainWindow.registerEditorClassActions(editorClass, customEditorActions)
-
-        for dockClass in self.dockers:
-            addonClasses = self.addons.get(dockClass, [])
-            menus = dockClass.contributeToMainMenu(addonClasses)
-            if menus is not None:
-                customDockActions = []
-                for name, settings in menus.iteritems():
-                    actions = mainWindow.contributeToMainMenu(name, settings)
-                    customDockActions.extend(actions)
-            mainWindow.registerDockClassActions(dockClass, customDockActions)
-
-        for dialogClass in self.dialogs:
-            addonClasses = self.addons.get(dialogClass, [])
-            menus = dialogClass.contributeToMainMenu(addonClasses)
-            if menus is not None:
-                customStatusActions = []
-                for name, settings in menus.iteritems():
-                    actions = mainWindow.contributeToMainMenu(name, settings)
-                    customStatusActions.extend(actions)
-            mainWindow.registerDialogClassActions(dialogClass, customStatusActions)
-            
-        for statusClass in self.statusBars:
-            addonClasses = self.addons.get(statusClass, [])
-            menus = statusClass.contributeToMainMenu(addonClasses)
-            if menus is not None:
-                customStatusActions = []
-                for name, settings in menus.iteritems():
-                    actions = mainWindow.contributeToMainMenu(name, settings)
-                    customStatusActions.extend(actions)
-            mainWindow.registerStatusClassActions(statusClass, customStatusActions)
-
-    def populateMainWindow(self, mainWindow):
-        self.createCustomActions(mainWindow)
-            
-        mainWindow.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
-        
-        # TODO: Ver esto de llamar a la application para crear que por otro lado llama nuevamente a esta instancia
-        for dockClass in self.dockers:
-            dock = self.application.createWidgetComponentInstance(dockClass, mainWindow)
-            mainWindow.addDock(dock, dock.PREFERED_AREA)
-
-        for dialogClass in self.dialogs:
-            dialog = self.application.createWidgetComponentInstance(dialogClass, mainWindow)
-            mainWindow.addDialog(dialog)
-            
-        for statusBarClass in self.statusBars:
-            status = self.application.createWidgetComponentInstance(statusBarClass, mainWindow)
-            mainWindow.addStatusBar(status)
-    
-    
     # ------------ Handle editor classes
     def findEditorClassForFile(self, filePath):
         mimetype = self.application.fileManager.mimeType(filePath)

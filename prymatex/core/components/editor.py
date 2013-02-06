@@ -166,12 +166,12 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
                 break
         return runHelper
         
-    #======================================================================
-    # For Plugin Manager administrator
-    #======================================================================    
+
+    # ---------- For Plugin Manager administrator
     @classmethod
     def acceptFile(cls, filePath, mimetype):
         return True
+
 
 #======================================================================
 # Base Helper
@@ -181,11 +181,14 @@ class PMXBaseEditorKeyHelper(PMXBaseKeyHelper):
         PMXBaseKeyHelper.initialize(self, editor)
         self.editor = editor
 
+
     def accept(self, event):
         return PMXBaseKeyHelper.accept(self, event.key())
+
     
     def execute(self, event):
         PMXBaseKeyHelper.accept(self, event.key())
+
 
 #======================================================================
 # Base Addon
@@ -194,6 +197,7 @@ class PMXBaseEditorAddon(PMXBaseAddon):
     def initialize(self, editor):
         PMXBaseAddon.initialize(self, editor)
         self.editor = editor
+
 
     def finalize(self):
         pass

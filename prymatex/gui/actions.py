@@ -51,7 +51,8 @@ class MainWindowActions(object):
     
     @QtCore.pyqtSlot()
     def on_actionNewProject_triggered(self):
-        self.componentByName("projectdialog").createProject()
+        projectDialog = self.findChild(QtGui.QDialog, "ProjectDialog")
+        projectDialog.createProject()
 
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
@@ -172,8 +173,7 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionSelectTab_triggered(self):
-        selector = self.componentByName("selectordialog")
-        item = selector.select(self.tabSelectableModel, title=_("Select tab"))
+        item = self.selectorDialog.select(self.tabSelectableModel, title=_("Select tab"))
         
         if item is not None:
             self.splitTabWidget.setCurrentWidget(item['data'])
@@ -260,7 +260,7 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionAbout_triggered(self):
-        self.componentByName("aboutdialog").exec_()
+        self.aboutDialog.exec_()
         
     @QtCore.pyqtSlot()
     def on_actionProjectHomepage_triggered(self):

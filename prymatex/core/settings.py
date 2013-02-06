@@ -125,8 +125,7 @@ class SettingsGroup(object):
 
 
 class pmxConfigPorperty(object):
-    """Configuration descriptor
-    """
+    """Configuration descriptor"""
     def __init__(self, valueType = None, default = None, fset = None, tm_name = None):
         assert valueType is not None or default is not None, "Not type and not default value"
         self.default = default

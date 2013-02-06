@@ -17,6 +17,7 @@ class PMXBaseDock(PMXBaseWidgetComponent):
         self.toggleViewAction().setShortcut(QtGui.QKeySequence(self.SHORTCUT))
         self.toggleViewAction().setIcon(self.ICON)
 
+
     def runKeyHelper(self, event):
         runHelper = False
         for helper in self.findHelpers(event.key()):
@@ -26,6 +27,7 @@ class PMXBaseDock(PMXBaseWidgetComponent):
                 break
         return runHelper
 
+
 #======================================================================
 # Base Helper
 #======================================================================    
@@ -34,11 +36,14 @@ class PMXBaseDockKeyHelper(PMXBaseKeyHelper):
         PMXBaseKeyHelper.initialize(self, dock)
         self.dock = dock
 
+
     def accept(self, event):
         return PMXBaseKeyHelper.accept(self, event.key())
+
     
     def execute(self, event):
         PMXBaseKeyHelper.accept(self, event.key())
+
 
 #========================================
 # BASE ADDON
@@ -47,6 +52,7 @@ class PMXBaseDockAddon(PMXBaseAddon):
     def initialize(self, dock):
         PMXBaseAddon.initialize(self, dock)
         self.dock = dock
+
 
     def finalize(self):
         pass

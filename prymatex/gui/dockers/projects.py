@@ -63,8 +63,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
-        #TODO: ver el tema de proveer servicios esta instalacion en la main window es pedorra
-        mainWindow.projects = self
+        self.projectDialog = self.mainWindow.findChild(QtGui.QDialog, "ProjectDialog")
     
     @classmethod
     def contributeToSettings(cls):
@@ -134,8 +133,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         from prymatex.gui.properties.environment import EnvironmentPropertiesWidget
         from prymatex.gui.properties.resource import ResoucePropertiesWidget
         
-        self.application.populateComponent(PMXPropertiesDialog)
-        self.propertiesDialog = PMXPropertiesDialog(self)
+        self.propertiesDialog = self.application.createComponentInstance(PMXPropertiesDialog, self)
         
         self.application.extendComponent(ProjectPropertiesWidget)
         self.application.extendComponent(EnvironmentPropertiesWidget)
@@ -333,7 +331,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
     @QtCore.pyqtSlot()
     def on_actionNewProject_triggered(self):
-        self.mainWindow.componentByName("projectdialog").createProject()
+        self.projectDialog.createProject()
 
     @QtCore.pyqtSlot()
     def on_actionDelete_triggered(self):

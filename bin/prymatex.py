@@ -30,10 +30,10 @@ def runPrymatexApplication(options, files):
             prymatexAppInstance.unloadGraphicalUserInterface()
             del prymatexAppInstance
         prymatexAppInstance = PrymatexApplication()
-        prymatexAppInstance.buildProfile(instanceOptions.profile)
-        prymatexAppInstance.setupLogging(instanceOptions.verbose, instanceOptions.log_pattern)
-        prymatexAppInstance.options = instanceOptions
-        return prymatexAppInstance.execWithArgs(instanceFiles)
+        prymatexAppInstance.applyOptions(instanceOptions)
+        prymatexAppInstance.loadGraphicalUserInterface()
+        prymatexAppInstance.openArgumentFiles(files)
+        return prymatexAppInstance.exec_()
 
     returnCode = PrymatexApplication.RESTART_CODE
     try:

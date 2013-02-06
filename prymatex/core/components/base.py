@@ -2,12 +2,25 @@
 # -*- coding: utf-8 -*-
 
 # TODO: No son Mixin?
+# TODO: Simplificar un poco
 
 class PMXBaseComponent(object):
-    NAME = None
     def __init__(self):
         self.__componentAddons = []
-        self.__componentName = self.NAME or self.__class__.__name__.lower()
+
+
+    def populate(self, manager):
+        for addonClass in manager.addons.get(self.__class__, []):
+            addon = addonClass(self)
+            self.addComponentAddon(addon)
+
+
+    def configure(self, profile):
+        settings = profile.groupByClass(self.__class__)
+        settings.addListener(self)
+        settings.configure(self)
+        for addon in self.__componentAddons:
+            addon.configure(profile)
 
 
     def initialize(self, parent = None):
@@ -18,10 +31,6 @@ class PMXBaseComponent(object):
     # ---------------- Addons api
     def componentAddons(self):
         return self.__componentAddons
-
-
-    def componentName(self):
-        return self.__componentName
 
 
     def addComponentAddon(self, addon):
@@ -65,7 +74,13 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
     def __init__(self):
         PMXBaseComponent.__init__(self)
         self.keyHelpers = {}
-            
+
+    def populate(self, manager):
+        PMXBaseComponent.populate(self, manager)
+        for keyHelperClass in manager.keyHelpers.get(self.__class__, []):
+            keyHelper = keyHelperClass(self)
+            self.addKeyHelper(keyHelper)
+
     def initialize(self, mainWindow):
         PMXBaseComponent.initialize(self, mainWindow)
         self.mainWindow = mainWindow
@@ -111,7 +126,12 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
 class PMXBaseAddon(object):
     def __init__(self, widget):
         pass
-        
+    
+    def configure(self, profile):
+        settings = profile.groupByClass(self.__class__)
+        settings.addListener(self)
+        settings.configure(self)
+
     def initialize(self, widget):
         pass
     

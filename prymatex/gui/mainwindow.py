@@ -96,6 +96,54 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
 
     # ---------- Implements PMXBaseComponent's interface
+    def populate(self, manager):
+    
+        # TODO No violar al manager
+        # Create custom actions and build MainMenu
+        classActions = [
+            (self.registerEditorClassActions, manager.editors),
+            (self.registerDockClassActions, manager.dockers),
+            (self.registerDialogClassActions, manager.dialogs),
+            (self.registerStatusClassActions, manager.statusBars),
+
+        ]
+        for registerFunction, componentClases in classActions:
+            for componentClass in componentClases:
+                addonClasses = manager.addons.get(componentClass, [])
+                menus = componentClass.contributeToMainMenu(addonClasses)
+                if menus is not None:
+                    customActions = []
+                    for name, settings in menus.iteritems():
+                        actions = self.contributeToMainMenu(name, settings)
+                        customActions.extend(actions)
+                registerFunction(componentClass, customActions)
+
+        self.setDockOptions(
+            QtGui.QMainWindow.AllowTabbedDocks | 
+            QtGui.QMainWindow.AllowNestedDocks | 
+            QtGui.QMainWindow.AnimatedDocks)
+
+        for dockClass in manager.dockers:
+            self.addDock(dockClass(self), dockClass.PREFERED_AREA)
+
+        for dialogClass in manager.dialogs:
+            self.addDialog(dialogClass(self))
+            
+        for statusBarClass in manager.statusBars:
+            self.addStatusBar(statusBarClass(self))
+
+    def configure(self, profile):
+        PMXBaseComponent.configure(self, profile)
+        for component in self.dockers + self.dialogs + self.statusBar().statusBars:
+            component.configure(profile)
+
+    def initialize(self, application):
+        PMXBaseComponent.initialize(self, application)
+        for component in self.dockers + self.dialogs + self.statusBar().statusBars:
+            component.initialize(self)
+        self.selectorDialog = self.findChild(QtGui.QDialog, "SelectorDialog")
+        self.aboutDialog = self.findChild(QtGui.QDialog, "AboutDialog")
+
     def environmentVariables(self):
         env = {}
         for docker in self.dockers:
@@ -186,12 +234,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
     def addDialog(self, dialog):
         self.dialogs.append(dialog)
-
-
-    def componentByName(self, name):
-        for component in self.dockers + self.dialogs:
-            if component.componentName() == name:
-                return component
 
 
     def on_dockWidgetTitleBar_collpaseAreaRequest(self, dock):
