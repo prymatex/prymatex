@@ -146,6 +146,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         self.settingsDialog = self.findChild(QtGui.QDialog, "SettingsDialog")
         self.bundleEditorDialog = self.findChild(QtGui.QDialog, "BundleEditorDialog")
         self.profileDialog = self.findChild(QtGui.QDialog, "ProfileDialog")
+        self.templateDialog = self.findChild(QtGui.QDialog, "TemplateDialog")
         
     def environmentVariables(self):
         env = {}

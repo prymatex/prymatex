@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/project.ui'
 #
-# Created: Wed Feb  6 11:06:59 2013
+# Created: Thu Feb  7 11:45:59 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,6 +19,7 @@ class Ui_ProjectDialog(object):
     def setupUi(self, ProjectDialog):
         ProjectDialog.setObjectName(_fromUtf8("ProjectDialog"))
         ProjectDialog.setWindowModality(QtCore.Qt.WindowModal)
+        ProjectDialog.resize(600, 443)
         ProjectDialog.setMinimumSize(QtCore.QSize(600, 400))
         self.verticalLayout = QtGui.QVBoxLayout(ProjectDialog)
         self.verticalLayout.setSpacing(2)

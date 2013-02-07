@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>NewFromTemplateDialog</class>
- <widget class="QDialog" name="NewFromTemplateDialog">
+ <class>TemplateDialog</class>
+ <widget class="QDialog" name="TemplateDialog">
   <property name="windowModality">
    <enum>Qt::WindowModal</enum>
   </property>
@@ -9,16 +9,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>469</width>
+    <width>600</width>
     <height>130</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>New From Template</string>
-  </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>:/images/prymatex/logo.png</normaloff>:/images/prymatex/logo.png</iconset>
+  <property name="minimumSize">
+   <size>
+    <width>600</width>
+    <height>0</height>
+   </size>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -172,7 +171,7 @@
   <connection>
    <sender>buttonCancel</sender>
    <signal>clicked()</signal>
-   <receiver>NewFromTemplateDialog</receiver>
+   <receiver>TemplateDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

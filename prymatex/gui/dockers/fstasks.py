@@ -7,7 +7,6 @@ from prymatex.qt import QtGui, QtCore
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core import exceptions
-from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
 
 class PMXFileSystemTasks(object):
     """Groups FileSystem and Project actions, it's a facade of the PMXFileManager
@@ -54,9 +53,6 @@ class PMXFileSystemTasks(object):
                 # TODO: Show some info about the reason
                 QtGui.QMessageBox.warning(self, _("Error creating file"), 
                                           _("An error occured while creating %s") % absNewFileName)
-    
-    def createFileFromTemplate(self, directory):
-        return PMXNewFromTemplateDialog.newFileFromTemplate(fileDirectory = directory,  parent = self)
     
     def deletePath(self, path):
         basePath, pathTail = os.path.split(path)

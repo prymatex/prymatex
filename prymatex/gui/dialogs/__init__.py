@@ -7,6 +7,7 @@ from prymatex.gui.dialogs.selector import SelectorDialog
 from prymatex.gui.dialogs.settings import SettingsDialog
 from prymatex.gui.dialogs.bundles import BundleEditorDialog
 from prymatex.gui.dialogs.profile import ProfileDialog
+from prymatex.gui.dialogs.template import TemplateDialog
 
 
 def registerPlugin(manager):
@@ -16,6 +17,7 @@ def registerPlugin(manager):
     manager.registerDialog(SettingsDialog)
     manager.registerDialog(BundleEditorDialog)
     manager.registerDialog(ProfileDialog)
+    manager.registerDialog(TemplateDialog)
 
 
     

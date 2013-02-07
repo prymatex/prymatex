@@ -13,7 +13,6 @@ from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.settings import pmxConfigPorperty
 
-from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
 from prymatex.gui.dialogs.messages import CheckableMessageBox
 from prymatex.gui.dialogs.input import ReplaceRenameInputDialog
 from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
@@ -64,6 +63,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
         self.projectDialog = self.mainWindow.findChild(QtGui.QDialog, "ProjectDialog")
+        self.templateDialog = self.mainWindow.findChild(QtGui.QDialog, "TemplateDialog")
     
     @classmethod
     def contributeToSettings(cls):
@@ -315,7 +315,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     @QtCore.pyqtSlot()
     def on_actionNewFromTemplate_triggered(self):
         currentDirectory = self.currentDirectory()
-        filePath = self.createFileFromTemplate(currentDirectory)
+        filePath = self.templateDialog.createFile(fileDirectory = self.currentDirectory())
         if filePath is not None:
             self.application.openFile(filePath)
             #TODO: si esta en auto update ver como hacer los refresh

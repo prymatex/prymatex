@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/profile.ui'
 #
-# Created: Wed Feb  6 11:56:43 2013
+# Created: Thu Feb  7 11:45:59 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!

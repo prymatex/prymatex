@@ -13,7 +13,6 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.models.filesystem import SortFilterFileSystemProxyModel
 from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
-from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 
 
@@ -115,7 +114,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
-        mainWindow.fileSystem = self
+        self.templateDialog = self.mainWindow.findChild(QtGui.QDialog, "TemplateDialog")
         
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
@@ -280,6 +279,9 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
     def currentPath(self):
         return self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
 
+    def currentDirectory(self):
+        return self.application.fileManager.directory(self.currentPath())
+
     def currentRootPath(self):
         ''' Returns current root path '''
         proxyIndex = self.treeViewFileSystem.rootIndex()
@@ -360,8 +362,11 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
 
     @QtCore.pyqtSlot()
     def on_actionNewFromTemplate_triggered(self):
-        basePath = self.currentPath()
-        self.createFileFromTemplate(basePath)    
+        currentDirectory = self.currentDirectory()
+        filePath = self.templateDialog.createFile(fileDirectory = self.currentDirectory())
+        if filePath is not None:
+            self.application.openFile(filePath)
+        
 
     @QtCore.pyqtSlot()
     def on_actionDelete_triggered(self):

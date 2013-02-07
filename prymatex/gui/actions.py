@@ -7,7 +7,6 @@ from prymatex import resources
 from prymatex.core import exceptions
 from prymatex.models.selectable import selectableModelFactory
 from prymatex.gui import dialogs
-from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
 
 from prymatex.utils.i18n import ugettext as _
 
@@ -44,7 +43,7 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionNewFromTemplate_triggered(self):
-        filePath = PMXNewFromTemplateDialog.newFileFromTemplate(parent = self)
+        filePath = self.templateDialog.createFile()
 
         if filePath:
             self.application.openFile(filePath)
