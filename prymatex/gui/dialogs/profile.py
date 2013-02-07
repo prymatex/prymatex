@@ -29,28 +29,26 @@ class ProfileDialog(QtGui.QDialog, Ui_ProfileDialog, PMXBaseDialog):
     def setProfileManager(self, manager):
         self.manager = manager
         self.listViewProfiles.setModel(self.manager.profilesListModel)
+        self.checkDontAsk.setChecked(self.manager.dontAsk())
         
     def initialize(self, mainWindow):
         self.setProfileManager(self.application.profileManager)
     
     def on_checkDontAsk_clicked(self):
-        PMXProfile.PMX_PROFILES_DONTASK = self.checkDontAsk.isChecked()
-        PMXProfile.saveProfiles()
+        self.manager.setDontAsk(self.checkDontAsk.isChecked())
         
     def on_buttonExit_pressed(self):
         QtGui.QApplication.exit(0)
         
     def on_buttonStartPrymatex_pressed(self):
-        PMXProfile.PMX_PROFILE_DEFAULT = self.listProfiles.item(self.listProfiles.currentRow()).data(QtCore.Qt.DisplayRole)
-        PMXProfile.saveProfiles()
         self.accept()
-    
+
     def on_buttonCreate_pressed(self):
         profileName, ok = QtGui.QInputDialog.getText(self, _("Create profile"), _(CREATE_MESSAGE))
         while profileName in self.manager.profileNames():
             profileName, ok = QtGui.QInputDialog.getText(self, _("Create profile"), _(CREATE_MESSAGE))
         if ok:
-            self.manager.createProfile(profileName)
+            self.manager.createProfile(profileName, default = True)
 
 
     def on_buttonRename_pressed(self):
@@ -73,15 +71,16 @@ class ProfileDialog(QtGui.QDialog, Ui_ProfileDialog, PMXBaseDialog):
 
             
     def switchProfile(self, title="Switch profile"):
+        currentProfileName = self.manager.defaultProfile().PMX_PROFILE_NAME
         self.setWindowTitle(title)
         self.buttonStartPrymatex.setText("Restart Prymatex")
         self.buttonExit.setVisible(False)
-        if self.exec_() == self.Accepted:
-            return PMXProfile.PMX_PROFILE_DEFAULT
+        return self.exec_()
+
 
     @classmethod
     def selectStartupProfile(cls, profileManager):
         dlg = cls()
         dlg.setProfileManager(profileManager)
         if dlg.exec_() == cls.Accepted:
-            return PMXProfile.PMX_PROFILE_DEFAULT
+            return dlg.manager.defaultProfile()

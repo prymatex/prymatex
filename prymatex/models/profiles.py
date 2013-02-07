@@ -35,9 +35,7 @@ class ProfilesListModel(QtCore.QAbstractListModel):
     def setData(self, index, data, role):
         profile = self.__profiles[index.row()]
         if role == QtCore.Qt.CheckStateRole and profile.PMX_PROFILE_DEFAULT == False:
-            for p in self.__profiles:
-                p.PMX_PROFILE_DEFAULT = False
-            profile.PMX_PROFILE_DEFAULT = True
+            self.profileManager.setDefaultProfile(profile)
             self.layoutChanged.emit()
             return True
 
@@ -69,9 +67,6 @@ class ProfilesListModel(QtCore.QAbstractListModel):
 
     # ------------------ Add remove keywords
     def addProfile(self, profile):
-        profile.PMX_PROFILE_DEFAULT = True
-        for p in self.__profiles:
-            p.PMX_PROFILE_DEFAULT = False
         self.__profiles.append(profile)
         self.layoutChanged.emit()
         

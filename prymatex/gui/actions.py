@@ -115,8 +115,8 @@ class MainWindowActions(object):
     
     @QtCore.pyqtSlot()
     def on_actionSwitchProfile_triggered(self):
-        profile = self.profileDialog.switchProfile()
-        if profile is not None and profile != self.application.currentProfile.PMX_PROFILE_NAME:
+        if self.profileDialog.switchProfile() == self.profileDialog.Accepted and\
+            self.application.profileManager.defaultProfile() != self.application.currentProfile:
             self.application.restart()
 
 
