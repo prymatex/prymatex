@@ -64,6 +64,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         PMXBaseDock.initialize(self, mainWindow)
         self.projectDialog = self.mainWindow.findChild(QtGui.QDialog, "ProjectDialog")
         self.templateDialog = self.mainWindow.findChild(QtGui.QDialog, "TemplateDialog")
+        self.bundleEditorDialog = self.mainWindow.findChild(QtGui.QDialog, "BundleEditorDialog")
     
     @classmethod
     def contributeToSettings(cls):
@@ -428,7 +429,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     @QtCore.pyqtSlot()
     def on_actionProjectBundles_triggered(self):
         project = self.currentNode()
-        self.application.bundleEditorDialog.execEditor(namespaceFilter = project.namespace)
+        self.bundleEditorDialog.execEditor(namespaceFilter = project.namespace)
     
     @QtCore.pyqtSlot()
     def on_actionSelectRelatedBundles_triggered(self):

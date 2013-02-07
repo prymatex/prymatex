@@ -41,6 +41,8 @@ class ProfileManager(QtCore.QObject):
                     profile = PrymatexProfile(name, path, default)
                     self.profilesListModel.addProfile(profile)
             self.__dontAsk = config.getboolean("General", "dontAsk")
+        else:
+            self.createProfile(self.DEFAULT_PROFILE_NAME, default = True)
 
         # Setting models        
         self.settingsTreeModel = SettingsTreeModel(self)
@@ -57,20 +59,6 @@ class ProfileManager(QtCore.QObject):
         os.makedirs(os.path.join(path, 'screenshot'), 0700)
 
 
-    def get_or_create_profile(self, name, path = None):
-        name = name.lower()
-        profile = self.profilesListModel.findProfileByName(name)
-        if profile is not None:
-            return profile, False
-        path = path if path is not None else os.path.abspath(os.path.join(PMX_HOME_PATH, name))
-        if not os.path.exists(path):
-            self.build_prymatex_profile(path)
-        profile = PrymatexProfile(name, path)
-        self.profilesListModel.addProfile(profile)
-        self.saveProfiles()
-        return profile, True
-
-        
     def saveProfiles(self):
         config = ConfigParser()
         config.add_section("General")
@@ -86,18 +74,28 @@ class ProfileManager(QtCore.QObject):
         f.close()
 
 
-    def createProfile(self, name, default = False):
-        profile, created = self.get_or_create_profile(name)
-        if default:
+    def createProfile(self, name, path = None, default = False):
+        name = name.lower()
+        profile = self.profilesListModel.findProfileByName(name)
+        if profile is None:
+            path = path if path is not None else os.path.abspath(os.path.join(PMX_HOME_PATH, name))
+            if not os.path.exists(path):
+                self.build_prymatex_profile(path)
+            profile = PrymatexProfile(name, path)
+            self.profilesListModel.addProfile(profile)
             self.setDefaultProfile(profile)
-        return profile
+            self.saveProfiles()
+            return profile
 
-
-    def currentProfile(self, name = None):
-        if name is None or (name == "" and not self.__dontAsk):
-            #Select profile
+    def currentProfile(self, value = None):
+        if value is None or not self.__dontAsk:
             return ProfileDialog.selectStartupProfile(self)
-        return self.createProfile(name or self.DEFAULT_PROFILE_NAME)
+        elif value == "":
+            return self.defaultProfile()
+        profile = self.profilesListModel.findProfileByName(value)
+        if profile is None:
+            profile = self.createProfile(value, default = True)
+        return profile
 
 
     def renameProfile(self, profile, newName):
@@ -119,6 +117,7 @@ class ProfileManager(QtCore.QObject):
 
     def profileNames(self):
         return map(lambda p: p.PMX_PROFILE_NAME, self.profilesListModel.profiles())
+
 
     def setDontAsk(self, value):
         self.__dontAsk = value

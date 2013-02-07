@@ -30,7 +30,8 @@ def runPrymatexApplication(options, files):
             prymatexAppInstance.unloadGraphicalUserInterface()
             del prymatexAppInstance
         prymatexAppInstance = PrymatexApplication()
-        prymatexAppInstance.applyOptions(instanceOptions)
+        if not prymatexAppInstance.applyOptions(instanceOptions):
+            return 0
         prymatexAppInstance.loadGraphicalUserInterface()
         prymatexAppInstance.openArgumentFiles(files)
         return prymatexAppInstance.exec_()

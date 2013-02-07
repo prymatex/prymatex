@@ -34,10 +34,11 @@ class ProfilesListModel(QtCore.QAbstractListModel):
 
     def setData(self, index, data, role):
         profile = self.__profiles[index.row()]
-        if role == QtCore.Qt.CheckStateRole and profile.PMX_PROFILE_DEFAULT == False:
+        if role == QtCore.Qt.CheckStateRole:
             self.profileManager.setDefaultProfile(profile)
             self.layoutChanged.emit()
             return True
+        return False
 
 
     def flags(self, index):

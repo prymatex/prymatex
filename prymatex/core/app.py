@@ -3,10 +3,7 @@
 
 import os
 import sys
-import logging
 import inspect
-import logging
-from datetime import datetime
 
 import prymatex
 from prymatex import resources
@@ -15,9 +12,7 @@ from prymatex.qt import QtGui, QtCore
 
 from prymatex.core import config
 from prymatex.core.components import PMXBaseComponent
-from prymatex.core import exceptions
-from prymatex.core.logger import NameFilter
-from prymatex.core.profile import PMXProfile
+from prymatex.core import logger, exceptions
 from prymatex.core.settings import pmxConfigPorperty
 
 from prymatex.utils.decorators import deprecated
@@ -74,8 +69,14 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         
         # Route Qt output
         QtCore.qInstallMsgHandler(self.qtMessageHandler)
+        
+        # Root logger
+        self.logger = logger.getLogger()
 
     # ------ exception and logger handlers
+    def getLogger(self, *largs, **kwargs):
+        return logger.getLogger(*largs, **kwargs)
+
     def replaceSysExceptHook(self):
         def displayExceptionDialog(exctype, value, traceback):
             ''' Display a nice dialog showing the python traceback'''
@@ -103,12 +104,16 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     # ------- prymatex's micro kernel
     def applyOptions(self, options):
         self.options = options
-
+        
         # Prepare profile
         self.extendComponent(ProfileManager)
         self.profileManager = ProfileManager(self)
         self.currentProfile = self.profileManager.currentProfile(self.options.profile)
+        if self.currentProfile is None:
+            return False
 
+        logger.config(self.options.verbose, self.currentProfile.PMX_LOG_PATH, self.options.log_pattern)
+        
         self.checkSingleInstance()
         
         if self.options.reset_settings:
@@ -122,29 +127,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         
         verbose = self.options.verbose
         namePattern = self.options.log_pattern
-        
-        # Prepara logging
-        level = [logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG][verbose % 5]
-
-        # File name
-        filename = os.path.join(self.currentProfile.PMX_LOG_PATH, '%s-%s.log' % (logging.getLevelName(level), datetime.now().strftime('%d-%m-%Y')))
-        logging.basicConfig(filename=filename, level=level)
-
-        # Console handler
-        ch = logging.StreamHandler()
-        formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
-        ch.setFormatter(formatter)
-        ch.setLevel(level)
-
-        if namePattern:
-            #Solo al de consola
-            ch.addFilter(NameFilter(namePattern))
-
-        logging.root.addHandler(ch)
-        logging.root.info("Application startup")
-        logging.root.debug("Application startup debug")
-
-        self.logger = logging.root
 
         # Prepare Plugins
         self.extendComponent(PluginManager)
@@ -155,7 +137,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         self.pluginManager.addPluginDirectory(config.PMX_PLUGINS_PATH)
 
         self.pluginManager.loadPlugins()
-
+        return True
 
     def installTranslator(self):
         pass
@@ -243,11 +225,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             f = open(self.fileLock, 'w')
             f.write('%s' % self.applicationPid())
             f.close()
-
-    # --------------------- Logging system and loggers
-    def getLogger(self, name):
-        """ return logger, for filter by name in future """
-        return logging.getLogger(name)
 
 
     # -------------------- Managers
