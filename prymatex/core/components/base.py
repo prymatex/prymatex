@@ -149,6 +149,7 @@ class PMXBaseAddon(object):
     def contributeToContextMenu(self):
         return []
 
+# Los keyElpers van a ser solo de los editores, el resto que se busque su modo
 Key_Any = 0
 class PMXBaseKeyHelper(object):
     KEY = Key_Any
