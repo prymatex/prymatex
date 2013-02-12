@@ -18,6 +18,3 @@ def registerPlugin(manager):
     manager.registerDialog(BundleEditorDialog)
     manager.registerDialog(ProfileDialog)
     manager.registerDialog(TemplateDialog)
-
-
-    
