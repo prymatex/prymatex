@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui
+from prymatex.qt.compat import getOpenFileNames
 
 from prymatex import resources
 from prymatex.core import exceptions
 from prymatex.models.selectable import selectableModelFactory
-from prymatex.gui import dialogs
 
 from prymatex.utils.i18n import ugettext as _
 
@@ -56,9 +56,13 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
         filePath = self.currentEditor().filePath if self.currentEditor() is not None else None
-        files = dialogs.getOpenFiles(directory = self.application.fileManager.directory(filePath))
-        focus = len(files) == 1
-        for filePath in files:
+        filePaths, selectedfilter = getOpenFileNames(
+            self, 
+            caption = "Open files", 
+            basedir = self.application.fileManager.directory(filePath)
+            )
+        focus = len(filePaths) == 1
+        for filePath in filePaths:
             editor = self.application.openFile(filePath, focus = focus)
     
     @QtCore.pyqtSlot()
