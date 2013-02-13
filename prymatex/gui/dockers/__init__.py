@@ -3,12 +3,12 @@
 
 import sys
 
-from prymatex.gui.dockers.filesystem import PMXFileSystemDock
-from prymatex.gui.dockers.browser import BrowserDock
-from prymatex.gui.dockers.projects import ProjectDock
-from prymatex.gui.dockers.terminal import TerminalDock
-from prymatex.gui.dockers.search import PMXSearchDock
-from prymatex.gui.dockers.process import PMXProcessDock
+from .filesystem import PMXFileSystemDock
+from .browser import BrowserDock
+from .projects import ProjectDock
+from .terminal import TerminalDock
+from .search import PMXSearchDock
+from .process import PMXProcessDock
 
 def registerPlugin(manager):
     manager.registerDocker(ProjectDock)

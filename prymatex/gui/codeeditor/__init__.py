@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore
-
 from prymatex.gui.codeeditor.dockers import PMXCodeBookmarksDock, PMXCodeSymbolsDock
 from prymatex.gui.codeeditor.editor import CodeEditor
 from prymatex.gui.codeeditor import helpers, addons, sidebar, minimap
@@ -31,8 +29,8 @@ def registerPlugin(manager):
     manager.registerKeyHelper(CodeEditor, helpers.MultiCursorHelper)
 
     manager.registerKeyHelper(CodeEditor, helpers.PrintEditorStatusHelper)
-    
-    #manager.registerAddon(CodeEditor, addons.CompleterAddon)
+
+    manager.registerAddon(CodeEditor, addons.CompleterAddon)
     manager.registerAddon(CodeEditor, addons.SmartUnindentAddon)
     manager.registerAddon(CodeEditor, addons.SpellCheckerAddon)
     manager.registerAddon(CodeEditor, addons.HighlightCurrentSelectionAddon)

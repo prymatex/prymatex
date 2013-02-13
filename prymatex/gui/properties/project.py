@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
-from prymatex.models.projects import PropertyTreeNode
+from prymatex.models.properties import PropertyTreeNode
 from prymatex.ui.configure.project import Ui_Project
 
 class ProjectPropertiesWidget(QtGui.QWidget, PropertyTreeNode, Ui_Project):

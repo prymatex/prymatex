@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-from ConfigParser import ConfigParser
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.core.components import PMXBaseDialog

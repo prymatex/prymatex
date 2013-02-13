@@ -36,7 +36,6 @@ class ProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXDoc
     SETTINGS_GROUP = 'Projects'
     @pmxConfigPorperty(default = '')
     def customFilters(self, filters):
-        print filters
         filters = map(lambda p: p.strip(), filters.split(","))
         self.selectableProjectFileModel.setBaseFilters(filters)
         self.projectTreeProxyModel.setFilterRegExp(",".join(filters))
@@ -49,7 +48,6 @@ class ProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXDoc
         self.fileManager = self.application.fileManager
         self.projectTreeProxyModel = self.projectManager.projectTreeProxyModel
     
-        self.setupPropertiesDialog()
         self.setupTreeViewProjects()
         
         # Model for selector dialog
@@ -61,11 +59,15 @@ class ProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXDoc
         self.bundleFilterDialog.setModel(self.projectManager.projectMenuProxyModel)
         self.bundleFilterDialog.setHelpVisible(False)
         
+        
     def initialize(self, mainWindow):
         PMXDockMixin.initialize(self, mainWindow)
         self.projectDialog = self.mainWindow.findChild(QtGui.QDialog, "ProjectDialog")
         self.templateDialog = self.mainWindow.findChild(QtGui.QDialog, "TemplateDialog")
         self.bundleEditorDialog = self.mainWindow.findChild(QtGui.QDialog, "BundleEditorDialog")
+        self.propertiesDialog = self.mainWindow.findChild(QtGui.QDialog, "PropertiesDialog")
+        self.setupPropertiesWidgets()
+
     
     @classmethod
     def contributeToSettings(cls):
@@ -128,22 +130,14 @@ class ProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXDoc
         if not self.runKeyHelper(event):
             return QtGui.QDockWidget.keyPressEvent(self, event)
 
-    def setupPropertiesDialog(self):
-        from prymatex.gui.dialogs.properties import PMXPropertiesDialog
-        
+    def setupPropertiesWidgets(self):
         from prymatex.gui.properties.project import ProjectPropertiesWidget
         from prymatex.gui.properties.environment import EnvironmentPropertiesWidget
         from prymatex.gui.properties.resource import ResoucePropertiesWidget
         
-        self.propertiesDialog = self.application.createComponentInstance(PMXPropertiesDialog, self)
-        
-        self.application.extendComponent(ProjectPropertiesWidget)
-        self.application.extendComponent(EnvironmentPropertiesWidget)
-        self.application.extendComponent(ResoucePropertiesWidget)
-        self.propertiesDialog.register(ProjectPropertiesWidget(self))
-        self.propertiesDialog.register(EnvironmentPropertiesWidget(self))
-        self.propertiesDialog.register(ResoucePropertiesWidget(self))
-        #TODO: Para cada add-on registrar los correspondientes properties
+        for propertyClass in [ProjectPropertiesWidget, EnvironmentPropertiesWidget, ResoucePropertiesWidget]:
+            self.application.extendComponent(propertyClass)
+            self.application.projectManager.registerPropertyWidget(propertyClass(self.propertiesDialog))
 
     def setupTreeViewProjects(self):
         self.treeViewProjects.setModel(self.projectTreeProxyModel)
@@ -390,6 +384,7 @@ class ProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXDoc
     
     @QtCore.pyqtSlot()
     def on_actionProperties_triggered(self):
+        self.propertiesDialog.setModel(self.application.projectManager.propertiesProxyModel)
         self.propertiesDialog.exec_(self.currentNode())
 
     @QtCore.pyqtSlot()

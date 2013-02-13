@@ -64,12 +64,12 @@ class ConfigureTreeModelBase(AbstractNamespaceTreeModel):
     def addConfigNode(self, node):
         self.insertNamespaceNode(node.NAMESPACE, node)
        
-class ConfigureTreeModel(ConfigureTreeModelBase):
-    proxyConfigureCreated = QtCore.pyqtSignal(object)
-    def treeNodeFactory(self, nodeName, nodeParent = None):
-        proxy = ProxyConfigureTreeNode(nodeName, nodeParent)
-        self.proxyConfigureCreated.emit(proxy)
-        return proxy
+#class ConfigureTreeModel(ConfigureTreeModelBase):
+#    proxyConfigureCreated = QtCore.pyqtSignal(object)
+#    def treeNodeFactory(self, nodeName, nodeParent = None):
+#        proxy = ProxyConfigureTreeNode(nodeName, nodeParent)
+#        self.proxyConfigureCreated.emit(proxy)
+#        return proxy
         
 #=========================================
 # Proxies

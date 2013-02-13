@@ -58,6 +58,8 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             
     def highlightAllDocument(self):
         block = self.document().begin()
+        #post = block.position()
+        #length = 0
         self.processor.startParsing(self.syntax.scopeName)
         stack = [[self.syntax.grammar, None]]
         while block.isValid():
@@ -76,9 +78,22 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState
             block.setUserState(blockState)
             
+            #length += block.length()
+            
+            #formats = []
+            #for (start, end), scope in userData.scopeRanges():
+            #    frange = QtGui.QTextLayout.FormatRange()
+            #    frange.start = start
+            #    frange.length = end-start
+            #    frange.format = self.highlightFormat(self.editor.scope(scopeHash = scope, attribute = 'name'))
+            #    formats.append(frange)
+
+            #block.layout().setAdditionalFormats(formats)
+
             self.rehighlightBlock(block)
             block = block.next()
             yield
+        #self.document().markContentsDirty(block.position(), length)
         self.processor.endParsing(self.syntax.scopeName)
         
     def setupBlockUserData(self, text, block, userData):

@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.gui.dialogs.project import ProjectDialog
-from prymatex.gui.dialogs.about import AboutDialog
-from prymatex.gui.dialogs.selector import SelectorDialog
-from prymatex.gui.dialogs.settings import SettingsDialog
-from prymatex.gui.dialogs.bundles import BundleEditorDialog
-from prymatex.gui.dialogs.profile import ProfileDialog
-from prymatex.gui.dialogs.template import TemplateDialog
-
+from .project import ProjectDialog
+from .about import AboutDialog
+from .selector import SelectorDialog
+from .settings import SettingsDialog
+from .bundles import BundleEditorDialog
+from .profile import ProfileDialog
+from .template import TemplateDialog
+from .properties import PropertiesDialog
 
 def registerPlugin(manager):
     manager.registerDialog(ProjectDialog)
@@ -18,3 +18,4 @@ def registerPlugin(manager):
     manager.registerDialog(BundleEditorDialog)
     manager.registerDialog(ProfileDialog)
     manager.registerDialog(TemplateDialog)
+    manager.registerDialog(PropertiesDialog)

@@ -24,12 +24,8 @@ class CodeEditorAddon(QtCore.QObject, PMXBaseEditorAddon):
         return PMXBaseEditorAddon.contributeToContextMenu(self)
 
 class CompleterAddon(CodeEditorAddon):
-    def __init__(self, parent):
-        CodeEditorAddon.__init__(self, parent)
-
     def initialize(self, editor):
         CodeEditorAddon.initialize(self, editor)
-        # TODO No usar esta señal porque el user data no esta listo
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):

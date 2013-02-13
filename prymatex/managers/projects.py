@@ -12,6 +12,7 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.utils.misc import get_home_dir
 from prymatex.models.projects import (ProjectTreeNode, ProjectTreeModel, 
     ProjectTreeProxyModel, ProjectMenuProxyModel, KeywordsListModel)
+from prymatex.models.properties import PropertiesProxyModel, PropertiesTreeModel
 from prymatex.core.exceptions import ProjectExistsException, FileException
 
 from prymatex.utils.i18n import ugettext as _
@@ -39,17 +40,22 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
         
         self.projectTreeModel = ProjectTreeModel(self)
         self.keywordsListModel = KeywordsListModel(self)
-
+        self.propertiesTreeModel = PropertiesTreeModel(self)
+        
         self.projectTreeProxyModel = ProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
 
         self.projectMenuProxyModel = ProjectMenuProxyModel(self)
         self.projectMenuProxyModel.setSourceModel(self.application.supportManager.bundleProxyModel)
 
+        self.propertiesProxyModel = PropertiesProxyModel(self)
+        self.propertiesProxyModel.setSourceModel(self.propertiesTreeModel)
+
         self.supportManager.bundleAdded.connect(self.on_supportManager_bundleAdded)
         self.supportManager.bundleRemoved.connect(self.on_supportManager_bundleRemoved)
         self.supportManager.bundleItemAdded.connect(self.on_supportManager_bundleItemAdded)
         self.supportManager.bundleItemRemoved.connect(self.on_supportManager_bundleItemRemoved)
+
 
     @classmethod
     def contributeToSettings(cls):
@@ -107,6 +113,11 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
     def removeFromKnowProjects(self, project):
         self.knownProjects.remove(project.path())
         self.settings.setValue('knownProjects', self.knownProjects)
+
+
+    # ------------------- Properties
+    def registerPropertyWidget(self, propertyWidget):
+        self.propertiesTreeModel.addConfigNode(propertyWidget)
 
 
     #---------------------------------------------------

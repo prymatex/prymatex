@@ -82,7 +82,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     @pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
     def defaultSyntax(self, uuid):
         syntax = self.application.supportManager.getBundleItem(uuid)
-        self.syntaxHighlighter.setSyntax(syntax)
+        self.setSyntax(syntax)
     
     
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
@@ -167,16 +167,19 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         PMXBaseEditor.initialize(self, mainWindow)
         self.selectorDialog = self.mainWindow.findChild(QtGui.QDialog, "SelectorDialog")
         
+        # Sidebars signals
         self.rightBar.updateRequest.connect(self.updateViewportMargins)
         self.leftBar.updateRequest.connect(self.updateViewportMargins)
         
+        # Editor signals
         self.blockCountChanged.connect(self.on_blockCountChanged)
         self.updateRequest.connect(self.updateSideBars)
         self.cursorPositionChanged.connect(self.on_cursorPositionChanged)
         self.modificationChanged.connect(self.on_modificationChanged)
-        self.syntaxChanged.connect(self.showSyntaxMessage)
+        self.syntaxChanged.connect(self.on_syntaxChanged)
         self.themeChanged.connect(self.highlightEditor)
         
+        # Document signals
         self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)
         
     # ----------- Override from PMXBaseComponent
@@ -191,7 +194,14 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         else:
             self.leftBar.addWidget(widget)
         
-    def showSyntaxMessage(self, syntax):
+    def on_syntaxChanged(self, syntax):
+        # Build basic scope
+        scopeHash = self.flyweightScopeFactory([syntax.scopeName])
+        
+        # Set braces
+        settings = self.scope(scopeHash = scopeHash, attribute='settings')
+        self.braces = settings.smartTypingPairs
+        
         self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
     
     def showMessage(self, *largs, **kwargs):
@@ -408,16 +418,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if self.syntaxHighlighter.syntax != syntax:
             self.syntaxHighlighter.stop()
             self.aboutToHighlightChange.emit()
-            
-            # TODO que esto lo haga solo el editor cuando cambia la syntax
-            # Change braces
-            self.flyweightScopeFactory([syntax.scopeName])
-            settings = self.scope(attribute='settings')
-            self.braces = settings.smartTypingPairs
-            
-            # TODO que esto lo haga solo el folding cuando cambia la syntax
-            # Set folding type
-            self.folding.indentSensitive = syntax.indentSensitive
             
             # Set syntax
             self.syntaxHighlighter.setSyntax(syntax)
@@ -701,10 +701,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return False
 
     def keyPressEvent(self, event):
-        """
-        This method is called whenever a key is pressed. The key code is stored in event.key()
-        http://manual.macromates.com/en/working_with_text
-        """
+        """This method is called whenever a key is pressed.
+        The key code is stored in event.key()"""
         
         #Primero ver si tengo un modo activo,
         for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:

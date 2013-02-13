@@ -14,7 +14,7 @@ class CodeEditorFolding(QtCore.QObject):
         self.logger = editor.application.getLogger('.'.join([self.__class__.__module__, self.__class__.__name__]))
         self.indentSensitive = False
         self.foldingUpdated = True
-        #self.editor.textChanged.connect(self.on_editor_textChanged)
+        self.editor.syntaxChanged.connect(self.on_editor_syntaxChanged)
         #self.editor.beforeOpen.connect(self.on_editor_beforeOpen)
         #self.editor.syntaxReady.connect(self.on_editor_syntaxReady)
         self.blocks = []
@@ -35,6 +35,9 @@ class CodeEditorFolding(QtCore.QObject):
             else:
                 self.addFoldingBlock(block)
             userData.foldingMark = newFoldingMark
+    
+    def on_editor_syntaxChanged(self, syntax):
+        self.indentSensitive = syntax.indentSensitive
     
     def on_editor_textChanged(self):
         if not self.foldingUpdated:

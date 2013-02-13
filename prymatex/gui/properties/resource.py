@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
-from prymatex.models.projects import PropertyTreeNode
+from prymatex.models.properties import PropertyTreeNode
 from prymatex.ui.configure.resource import Ui_ResouceWidget
 
 class ResoucePropertiesWidget(QtGui.QWidget, PropertyTreeNode, Ui_ResouceWidget):

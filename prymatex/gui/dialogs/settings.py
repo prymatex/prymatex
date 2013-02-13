@@ -14,8 +14,6 @@ class SettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseDialog):
         self.setupUi(self)
         self.setObjectName("SettingsDialog")
         
-        self.baseWindowTitle = self.windowTitle()
-        
         self.treeView.setModel(self.application.profileManager.sortFilterSettingsProxyModel)
 
         self.stackedWidget = QtGui.QStackedWidget(self.splitter)
@@ -57,4 +55,4 @@ class SettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseDialog):
         self.stackedWidget.setCurrentIndex(index)
         self.textLabelTitle.setText(widget.title())
         self.textLabelPixmap.setPixmap(widget.icon().pixmap(20, 20))
-        self.setWindowTitle("%s - %s" % (self.baseWindowTitle, widget.title()))
+        self.setWindowTitle("Settings - %s" % widget.title())

@@ -12,7 +12,7 @@ from prymatex.models.configure import SortFilterConfigureProxyModel
 from prymatex.models.projects.nodes import FileSystemTreeNode
 
 
-__all__ = [ 'ProjectTreeModel', 'ProjectTreeProxyModel', 'FileSystemProxyModel', 'PropertiesProxyModel', 'ProjectMenuProxyModel' ]
+__all__ = [ 'ProjectTreeModel', 'ProjectTreeProxyModel', 'FileSystemProxyModel', 'ProjectMenuProxyModel' ]
 
 #=========================================
 # Models
@@ -313,26 +313,6 @@ class FileSystemProxyModel(FlatTreeProxyModel):
             items.append(self.sourceModel().node(index))
         return items
 
-class PropertiesProxyModel(SortFilterConfigureProxyModel):
-    def __init__(self, parent = None):
-        SortFilterConfigureProxyModel.__init__(self, parent)
-        self.fileSystemItem = None
-    
-    def filterAcceptsRow(self, sourceRow, sourceParent):
-        if self.fileSystemItem is None:
-            return False
-        sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
-        node = self.sourceModel().node(sIndex)
-        if not node.acceptFileSystemItem(self.fileSystemItem):
-            return False
-        regexp = self.filterRegExp()
-        if not regexp.isEmpty():
-            return regexp.indexIn(node.filterString()) != -1
-        return True
-    
-    def setFilterFileSystem(self, fileSystemItem):
-        self.fileSystemItem = fileSystemItem
-        self.setFilterRegExp("")
 
 #=========================================
 # Project Bundle Menu

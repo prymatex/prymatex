@@ -14,7 +14,7 @@ from prymatex.core import exceptions
 from prymatex.utils import plist
 import shutil
 
-__all__ = [ 'FileSystemTreeNode', 'ProjectTreeNode', 'PropertyTreeNode' ]
+__all__ = [ 'FileSystemTreeNode', 'ProjectTreeNode' ]
 
 #=========================================
 # Nodes
@@ -171,16 +171,3 @@ class ProjectTreeNode(FileSystemTreeNode):
     def hasBundleMenu(self, bundle):
         if self.bundleMenu is None: return False
         return bundle.uuidAsUnicode() in self.bundleMenu
-
-#=========================================
-# Properties Tree Node
-#=========================================
-class PropertyTreeNode(ConfigureTreeNode):
-    def __init__(self, name, parent = None):
-        ConfigureTreeNode.__init__(self, name, parent)
-
-    def acceptFileSystemItem(self, fileSystemItem):
-        return True
-        
-    def edit(self, fileSystemItem):
-        pass
