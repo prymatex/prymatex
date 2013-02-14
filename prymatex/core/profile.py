@@ -38,7 +38,7 @@ class PMXProfile(object):
     # ------------------------ Setting Groups
     def __group_name(self, configurableClass):
         if hasattr(configurableClass, 'settings'):
-            return configurableClass.settings.name
+            return configurableClass.settings.groupName()
         return configurableClass.__dict__['SETTINGS_GROUP'] if 'SETTINGS_GROUP' in configurableClass.__dict__ else configurableClass.__name__
 
     def groupByName(self, name):

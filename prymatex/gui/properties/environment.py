@@ -4,18 +4,17 @@
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.models.properties import PropertyTreeNode
-from prymatex.ui.configure.environment import Ui_Environment
+from prymatex.widgets.multidicteditor import MultiDictTableEditorWidget
 from prymatex.models.environment import EnvironmentTableModel
 
-class EnvironmentPropertiesWidget(QtGui.QWidget, PropertyTreeNode, Ui_Environment):
+class EnvironmentPropertiesWidget(MultiDictTableEditorWidget, PropertyTreeNode):
     """Environment variables"""
     NAMESPACE = ""
     TITLE = "Enviroment Variables"
     def __init__(self, parent = None):
-        QtGui.QWidget.__init__(self, parent)
+        MultiDictTableEditorWidget.__init__(self, parent)
         PropertyTreeNode.__init__(self, "environment")
         self.setupUi(self)
-        self.setupVariablesTableModel()
         self.project = None
 
     def acceptFileSystemItem(self, fileSystemItem):
@@ -23,41 +22,11 @@ class EnvironmentPropertiesWidget(QtGui.QWidget, PropertyTreeNode, Ui_Environmen
     
     def edit(self, project):
         self.project = project
-        self.model.clear()
-        self.model.addGroup('user', self.project.shellVariables, editable = True, checkable=True, foreground=QtCore.Qt.blue)
-        self.model.addGroup('project', self.project.environment())
-        self.model.addGroup('prymatex', self.application.supportManager.environmentVariables(), visible = False)
+        self.clear()
+        self.addDictionary('user', self.project.shellVariables, editable = True, selectable=True)
+        self.addDictionary('project', self.project.environment())
+        self.addDictionary('prymatex', self.application.supportManager.environmentVariables(), visible = False)
 
-    def setupVariablesTableModel(self):
-        self.model = EnvironmentTableModel(self)
-        self.model.variablesChanged.connect(self.on_variablesModel_variablesChanged)
-        self.tableViewVariables.setModel(self.model)
-        
-        self.tableViewVariables.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
-        self.tableViewVariables.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
-        self.tableViewVariables.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
-        self.model.rowsInserted.connect(self.tableViewVariables.resizeRowsToContents)
-        self.model.rowsRemoved.connect(self.tableViewVariables.resizeRowsToContents)
-        self.tableViewVariables.resizeRowsToContents()
-        
-        self.checkBox1.setText("User")
-        self.checkBox1.setChecked(True)
-        self.checkBox2.setText("Project")
-        self.checkBox2.setChecked(True)
-        self.checkBox3.setText("Prymatex")
-        
-    @QtCore.pyqtSlot(bool)
-    def on_checkBox1_clicked(self, checked):
-        self.model.setVisibility('user', checked)
-
-    @QtCore.pyqtSlot(bool)        
-    def on_checkBox2_clicked(self, checked):
-        self.model.setVisibility('project', checked)
-    
-    @QtCore.pyqtSlot(bool)        
-    def on_checkBox3_clicked(self, checked):
-        self.model.setVisibility('prymatex', checked)
-        
     def on_variablesModel_variablesChanged(self, group, variables):
         self.application.projectManager.updateProject(self.project, shellVariables = variables)
 

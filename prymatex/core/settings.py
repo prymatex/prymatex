@@ -46,33 +46,41 @@ class TextMateSettings(object):
 
 class SettingsGroup(object):
     def __init__(self, name, qsettings, tmsettings):
-        self.name = name
+        self.__groupName = name
         self.qsettings = qsettings
         self.tmsettings = tmsettings
         # Listener classes
         self.listeners = []
         # Setting attrs
         self.settings = {}
+        # Hooks
+        self.hooks = {}
         # Dialogs
         self.dialogs = []
+
+
+    def groupName(self):
+        return self.__groupName
 
 
     def setValue(self, name, value):
         setting = self.settings.get(name)
         if setting:
-            self.qsettings.beginGroup(self.name)
+            self.qsettings.beginGroup(self.__groupName)
             self.qsettings.setValue(name, value)
             self.qsettings.endGroup()
             if setting.tm_name != None:
                 self.tmsettings.setValue(setting.tm_name, value)
             for listener in self.listeners:
                 setattr(listener, name, value)
+            for hookFunction in self.hooks.get(name, []):
+                hookFunction(value)
 
 
     def value(self, name, default = None):
         setting = self.settings.get(name)
         if setting:
-            self.qsettings.beginGroup(self.name)
+            self.qsettings.beginGroup(self.__groupName)
             value = self.qsettings.value(name, default)
             self.qsettings.endGroup()
             if value is None:
@@ -81,7 +89,7 @@ class SettingsGroup(object):
 
 
     def hasValue(self, name):
-        self.qsettings.beginGroup(self.name)
+        self.qsettings.beginGroup(self.__groupName)
         value = self.qsettings.value(name)
         self.qsettings.endGroup()
         return name in self.settings and value is not None
@@ -96,6 +104,11 @@ class SettingsGroup(object):
     def addListener(self, listener):
         self.listeners.append(listener)
 
+    
+    def addHook(self, name, hookFunction):
+        hooks = self.hooks.setdefault(name, [])
+        hooks.append(hookFunction)
+        hookFunction(self.value(name))
 
     def removeListener(self, listener):
         self.listeners.remove(listener)
@@ -119,7 +132,7 @@ class SettingsGroup(object):
     def sync(self):
         for key, setting in self.settings.iteritems():
             if setting.default == None and self.listeners:
-                self.qsettings.beginGroup(self.name)
+                self.qsettings.beginGroup(self.__groupName)
                 self.qsettings.setValue(key, setting.getDefault())
                 self.qsettings.endGroup()
 
@@ -133,7 +146,6 @@ class pmxConfigPorperty(object):
         self.fset = fset
         self.tm_name = tm_name
 
-
     def getDefault(self):
         return self.default
 
@@ -143,18 +155,18 @@ class pmxConfigPorperty(object):
             return value.lower() not in ('false', '0')
         else:
             return self.valueType(value)
-
-
+    
     def __call__(self, function):
         self.fset = function
         return self
 
 
-    def __get__(self, instance, instance_type = None):
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
         return self.value if hasattr(self, 'value') else self.default
 
-
-    def __set__(self, instance, value):
+    def __set__(self, obj, value):
         self.value = value
         if self.fset is not None:
-            self.fset(instance, value)
+            self.fset(obj, value)

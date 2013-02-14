@@ -14,7 +14,6 @@ from prymatex.widgets.pmxterm import BackendManager, TerminalWidget
 
 
 class TabbedTerminal(QtGui.QTabWidget):
-
     
     def __init__(self, parent=None):
         super(TabbedTerminal, self).__init__(parent)
@@ -94,10 +93,9 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "F4"
     ICON = resources.getIcon("utilities-terminal")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
+
     
-    #=======================================================================
-    # Settings
-    #=======================================================================
+    # ------------------ Settings
     SETTINGS_GROUP = 'Terminal'
 
     @pmxConfigPorperty(default = "linux")
@@ -123,16 +121,27 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.application.aboutToQuit.connect(self.backendManager.closeAll)
         
         self.localBackend = self.backendManager.localBackend(workingDirectory = get_home_dir())
-        
-        
+
+    def configure(self, profile):
+        PMXBaseDock.configure(self, profile)
+        try:
+            from prymatex.gui.codeeditor.editor import CodeEditor
+            profile.groupByClass(CodeEditor).addHook("defaultTheme", self.on_defaultTheme_changed)
+        except:
+            pass
+
+
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
         mainWindow.terminal = self
         self.tabTerminals.newTerminal()
-        
-    #========================================================
-    # Commands
-    #========================================================
+
+
+    # ---------------- Settings hooks
+    def on_defaultTheme_changed(self, theme):
+        print theme
+    
+    # ---------------- Commands
     def runCommand(self, command):
         self.sendCommand(command)
     

@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-"""
-OLD TREE MODULE, USE TREES
-"""
-
 from prymatex.qt import QtCore
 
 from prymatex.utils.lists import bisect_key

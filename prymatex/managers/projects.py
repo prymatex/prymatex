@@ -10,8 +10,10 @@ from prymatex.core import PMXBaseComponent
 from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.utils.misc import get_home_dir
+from prymatex.models.lists import CheckableListModel
 from prymatex.models.projects import (ProjectTreeNode, ProjectTreeModel, 
-    ProjectTreeProxyModel, ProjectMenuProxyModel, KeywordsListModel)
+    ProjectTreeProxyModel, ProjectMenuProxyModel)
+
 from prymatex.models.properties import PropertiesProxyModel, PropertiesTreeModel
 from prymatex.core.exceptions import ProjectExistsException, FileException
 
@@ -39,7 +41,7 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
         self.supportManager = application.supportManager
         
         self.projectTreeModel = ProjectTreeModel(self)
-        self.keywordsListModel = KeywordsListModel(self)
+        self.keywordsListModel = CheckableListModel(self)
         self.propertiesTreeModel = PropertiesTreeModel(self)
         
         self.projectTreeProxyModel = ProjectTreeProxyModel(self)
@@ -82,12 +84,12 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
 
     def on_supportManager_bundleItemAdded(self, bundleItem):
         if bundleItem.TYPE == "syntax":
-            self.keywordsListModel.addKeywords(bundleItem.scopeName.split('.'))
+            self.keywordsListModel.addItems(bundleItem.scopeName.split('.'))
 
 
     def on_supportManager_bundleItemRemoved(self, bundleItem):
         if bundleItem.TYPE == "syntax":
-            self.keywordsListModel.removeKeywords(bundleItem.scopeName.split('.'))
+            self.keywordsListModel.removeItems(bundleItem.scopeName.split('.'))
 
 
     # -------------------- Load projects

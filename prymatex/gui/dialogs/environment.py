@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
-from prymatex.ui.configure.environment import Ui_Environment
+from prymatex.widgets.multidicteditor import MultiDictTableEditorWidget
 from prymatex.models.environment import EnvironmentTableModel
 
-class EnvironmentWidget(QtGui.QWidget, Ui_Environment):
+class EnvironmentWidget(MultiDictTableEditorWidget):
     """Environment variables"""
     def __init__(self, parent = None):
-        QtGui.QWidget.__init__(self, parent)
-        self.setupUi(self)
+        MultiDictTableEditorWidget.__init__(self, parent)
         self.setupVariablesTableModel()
 
     def setupVariablesTableModel(self):
