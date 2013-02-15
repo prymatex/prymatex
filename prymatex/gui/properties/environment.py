@@ -14,7 +14,6 @@ class EnvironmentPropertiesWidget(MultiDictTableEditorWidget, PropertyTreeNode):
     def __init__(self, parent = None):
         MultiDictTableEditorWidget.__init__(self, parent)
         PropertyTreeNode.__init__(self, "environment")
-        self.setupUi(self)
         self.project = None
 
     def acceptFileSystemItem(self, fileSystemItem):

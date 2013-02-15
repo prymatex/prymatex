@@ -31,8 +31,9 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
         self.checkableListModel.dataChanged.connect(
             self.on_checkableListModel_dataChanged
         )
+        self.insertActions = []
 
-        
+
     def setupUi(self, MultiDictTableEditorWidget):
         MultiDictTableEditorWidget.setObjectName("MultiDictTableEditorWidget")
         self._2 = QtGui.QVBoxLayout(MultiDictTableEditorWidget)
@@ -43,7 +44,12 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
         self._2.addWidget(self.tableViewDictionaries)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
+        self.label = QtGui.QLabel(MultiDictTableEditorWidget)
+        self.label.setObjectName("label")
+        self.label.setText('Namespaces:')
+        self.horizontalLayout.addWidget(self.label)
         self.comboBoxNamespaces = QtGui.QComboBox(MultiDictTableEditorWidget)
+        self.comboBoxNamespaces.setMinimumSize(QtCore.QSize(200, 0))
         self.comboBoxNamespaces.setObjectName("comboBoxNamespaces")
         self.horizontalLayout.addWidget(self.comboBoxNamespaces)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -59,7 +65,10 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
         self.pushButtonRemove.setObjectName("pushButtonRemove")
         self.horizontalLayout.addWidget(self.pushButtonRemove)
         self._2.addLayout(self.horizontalLayout)
-
+        
+        self.menuAdd = QtGui.QMenu(MultiDictTableEditorWidget)
+        self.pushButtonAdd.setMenu(self.menuAdd)
+        
         QtCore.QMetaObject.connectSlotsByName(MultiDictTableEditorWidget)
 
     # ----------------------- Signals
@@ -68,21 +77,41 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
         for name in self.selectableMultiDictTableModel.dictionaryNames():
             self.selectableMultiDictTableModel.setVisibility(name, name in selected)
 
+
     def addDictionary(self, name, dictionary, editable = False, selectable = False, visible = True):
         self.selectableMultiDictTableModel.addDictionary(name, dictionary, editable = editable,
             selectable = selectable, visible = visible)
         self.checkableListModel.addItem(name, visible)
+        action = QtGui.QAction(name, self)
+        action.triggered.connect(lambda checked, name = name: self.on_actionInsertItem_triggered(name))
+        action.setEnabled(editable)
+        self.menuAdd.addAction(action)
 
 
     def resize_to_contents(self):
         self.tableViewDictionaries.resizeColumnsToContents()
         self.tableViewDictionaries.resizeRowsToContents()
+        self.tableViewDictionaries.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
+
+
+    def on_actionInsertItem_triggered(self, dictionaryName):
+        itemName, ok = QtGui.QInputDialog.getText(self, "Title", "Item name:")
+        while ok and self.selectableMultiDictTableModel.hasItem(dictionaryName, itemName):
+            itemName, ok = QtGui.QInputDialog.getText(self, "Title", "Item name:", text = itemName)
+        if ok:
+            self.selectableMultiDictTableModel.insertItem(dictionaryName, itemName)
+
+        
+    def on_pushButtonRemove_pressed(self):
+        index = self.tableViewDictionaries.currentIndex()
+        self.selectableMultiDictTableModel.removeRows(index.row() , 1)
 
 
     def accept_changes(self):
         """Accept changes"""
         for (i, j), value in self.model.changes.iteritems():
             self.data[i][j] = value
+
 
     def clear(self):
         pass

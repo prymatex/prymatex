@@ -241,14 +241,14 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         # Update environment
         manager.updateEnvironment({  
             # TextMate Compatible :P
-            'TM_APP_PATH': self.currentProfile.value('PMX_APP_PATH'),
+            'TM_APP_PATH': config.PMX_APP_PATH,
             'TM_SUPPORT_PATH': manager.environment['PMX_SUPPORT_PATH'],
             'TM_BUNDLES_PATH': manager.environment['PMX_BUNDLES_PATH'],
             'TM_THEMES_PATH': manager.environment['PMX_THEMES_PATH'],
             'TM_PID': self.applicationPid(),
             #Prymatex
             'PMX_APP_NAME': self.applicationName().title(),
-            'PMX_APP_PATH': self.currentProfile.value('PMX_APP_PATH'),
+            'PMX_APP_PATH': config.PMX_APP_PATH,
             'PMX_PREFERENCES_PATH': self.currentProfile.value('PMX_PREFERENCES_PATH'),
             'PMX_VERSION': self.applicationVersion(),
             'PMX_PID': self.applicationPid(),

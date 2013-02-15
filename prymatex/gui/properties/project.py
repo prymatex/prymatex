@@ -23,6 +23,5 @@ class ProjectPropertiesWidget(QtGui.QWidget, PropertyTreeNode, Ui_Project):
     def edit(self, projectNode):
         self.lineProjectName.setText(projectNode.name)
         self.textDescription.setText(projectNode.description)
-        self.comboBoxKeywords.setText(projectNode.keywords)
-        self.comboBoxLicence.setText(projectNode.licence)
+        #self.comboBoxLicence.setText(projectNode.licence)
         self.textLabelLocation.setText(projectNode.path())

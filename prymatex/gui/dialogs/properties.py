@@ -21,6 +21,9 @@ class PropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseDialog):
         self.widgetsLayout.addWidget(self.stackedWidget)
     
     def setModel(self, propertiesModel):
+        for widget in propertiesModel.configNodes():
+            if isinstance(widget, QtGui.QWidget) and self.stackedWidget.indexOf(widget) == -1:
+                self.stackedWidget.addWidget(widget)
         self.treeView.setModel(propertiesModel)
         
     def selectFirstIndex(self):
@@ -44,8 +47,6 @@ class PropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseDialog):
     
     def setCurrentPropertyWidget(self, widget):
         index = self.stackedWidget.indexOf(widget)
-        if index == -1:
-            index = self.stackedWidget.addWidget(widget)
         widget.edit(self.treeView.model().fileSystemItem)
         self.stackedWidget.setCurrentIndex(index)
         self.stackedWidget.setCurrentWidget(widget)

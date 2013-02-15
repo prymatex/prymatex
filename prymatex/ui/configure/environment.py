@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/environment.ui'
 #
-# Created: Thu Feb 14 10:35:13 2013
+# Created: Fri Feb 15 08:22:44 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,6 +18,7 @@ except AttributeError:
 class Ui_MultiDictTableEditorWidget(object):
     def setupUi(self, MultiDictTableEditorWidget):
         MultiDictTableEditorWidget.setObjectName(_fromUtf8("MultiDictTableEditorWidget"))
+        MultiDictTableEditorWidget.resize(549, 431)
         self._2 = QtGui.QVBoxLayout(MultiDictTableEditorWidget)
         self._2.setObjectName(_fromUtf8("_2"))
         self.tableViewVariables = QtGui.QTableView(MultiDictTableEditorWidget)
@@ -27,7 +28,11 @@ class Ui_MultiDictTableEditorWidget(object):
         self._2.addWidget(self.tableViewVariables)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.label = QtGui.QLabel(MultiDictTableEditorWidget)
+        self.label.setObjectName(_fromUtf8("label"))
+        self.horizontalLayout.addWidget(self.label)
         self.comboBoxNamespaces = QtGui.QComboBox(MultiDictTableEditorWidget)
+        self.comboBoxNamespaces.setMinimumSize(QtCore.QSize(200, 0))
         self.comboBoxNamespaces.setObjectName(_fromUtf8("comboBoxNamespaces"))
         self.horizontalLayout.addWidget(self.comboBoxNamespaces)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -48,5 +53,5 @@ class Ui_MultiDictTableEditorWidget(object):
         QtCore.QMetaObject.connectSlotsByName(MultiDictTableEditorWidget)
 
     def retranslateUi(self, MultiDictTableEditorWidget):
-        pass
+        self.label.setText(_('Namespaces:'))
 
