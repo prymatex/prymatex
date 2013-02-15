@@ -4,6 +4,7 @@
 from prymatex.qt import QtGui, QtCore
 
 class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
+    dictionaryChanged = QtCore.pyqtSignal(str)
     COLUMN_NAMES = 0
     COLUMN_VALUES = 1
     def __init__(self, parent = None):
@@ -22,7 +23,7 @@ class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
 
     def addDictionary(self, name, data, editable = False, selectable = False, visible = True):
         if hasattr(data, "iteritems") and callable(data.iteritems):
-            data = map(lambda (name, value): {'name': name, 'value': value, 'selected': False}, data.iteritems())
+            data = map(lambda (name, value): {'name': name, 'value': value, 'selected': True}, data.iteritems())
             selectable = False
         dictionary = {
             'name': name,
@@ -42,13 +43,18 @@ class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
         self.layoutChanged.emit()
 
 
-    def setVisibility(self, name, visible):
+    def isVisible(self, name):
+        dictionary = self.dictionaryByName(name)
+        return dictionary and dictionary['visible']
+
+
+    def setVisible(self, name, visible):
         dictionary = self.dictionaryByName(name)
         dictionary['visible'] = visible
         self.layoutChanged.emit()
 
         
-    def mapToDictionary(self, index):
+    def __mapToDictionary(self, index):
         currentDict = None
         for currentDict in self.dictionaries:
             if currentDict["visible"]:
@@ -59,7 +65,7 @@ class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
         return index, currentDict
 
 
-    def variableGroupTablePosition(self, dictionary, top = True):
+    def __mapToPosition(self, dictionary, top = True):
         position = 0
         for currentDict in self.dictionaries:
             if currentDict["visible"]:
@@ -71,12 +77,18 @@ class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
         return position
 
 
-    def allEditableVariables(self):
-        return reduce(lambda l, dictionary: l + (dictionary['editable'] and dictionary['data'] or []), self.dictionaries, [])
+    def dictionaryData(self, name, raw = False):
+        dictionary = self.dictionaryByName(name)
+        if dictionary:
+            data = dictionary["data"]
+            if raw:
+                return data[:]
+            return dict(map(lambda value: (value["name"], value["value"]),
+                filter(lambda value: value["selected"], dictionary["data"])))
 
     
     def get_value(self, index):
-        row, dictionary = self.mapToDictionary(index.row())
+        row, dictionary = self.__mapToDictionary(index.row())
         value = dictionary["data"][row][index.column() == self.COLUMN_NAMES and "name" or "value"]
         selected = dictionary["data"][row]["selected"]
         return value, selected, dictionary
@@ -106,15 +118,17 @@ class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
         """Retornar verdadero si se puedo hacer el cambio, falso en caso contrario"""
 
         if not index.isValid(): return False
-        row, dictionary = self.mapToDictionary(index.row())
+        row, dictionary = self.__mapToDictionary(index.row())
 
         if role == QtCore.Qt.EditRole:
             dictionary["data"][row]["value"] = value
             self.dataChanged.emit(index, index)
+            self.dictionaryChanged.emit(dictionary["name"])
             return True
         elif role == QtCore.Qt.CheckStateRole:
-            dictionary["data"][row]["selected"] = value is QtCore.Qt.Checked
+            dictionary["data"][row]["selected"] = value == QtCore.Qt.Checked
             self.dataChanged.emit(index, index)
+            self.dictionaryChanged.emit(dictionary["name"])
             return True
         return False
 
@@ -136,25 +150,27 @@ class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
     def insertItem(self, dictionaryName, itemName):
         dictionary = self.dictionaryByName(dictionaryName)
         if dictionary is not None and dictionary['editable']:
-            position = self.variableGroupTablePosition(dictionary)
+            position = self.__mapToPosition(dictionary)
             self.beginInsertRows(QtCore.QModelIndex(), position, position)
             dictionary['data'].insert(0, {'name': itemName, 'value': "", 'selected': dictionary['selectable']})
             self.endInsertRows()
+            self.dictionaryChanged.emit(dictionaryName)
 
 
     def removeRows(self, position, rows, parent = QtCore.QModelIndex()):
         self.beginRemoveRows(parent, position, position + rows - 1)
-        row, dictionary = self.mapToDictionary(position)
+        row, dictionary = self.__mapToDictionary(position)
         if not dictionary["editable"]:
             return False
         for _ in range(rows):
             dictionary['data'].pop(row)
         self.endRemoveRows()
+        self.dictionaryChanged.emit(dictionary["name"])
         return True
 
 
     def flags(self, index):
-        row, dictionary = self.mapToDictionary(index.row())
+        row, dictionary = self.__mapToDictionary(index.row())
         flags = QtCore.QAbstractTableModel.flags(self, index)
         if dictionary['selectable']:
             flags |= QtCore.Qt.ItemIsUserCheckable

@@ -55,10 +55,13 @@ class CheckableListModel(QtCore.QAbstractListModel):
 
 
     def setSelected(self, item, selected = True):
-        index = self.__items.index(item)
-        self.__items[index]["selected"] = selected and 2 or 0
-        index = self.index(index)
-        self.dataChanged.emit(index, index)
+        value = filter(lambda k: k["name"] == item, self.__items)
+        if value:
+            value = value.pop()
+            index = self.__items.index(value)
+            value["selected"] = selected and 2 or 0
+            index = self.index(index)
+            self.dataChanged.emit(index, index)
     
 
     def selectedItems(self):

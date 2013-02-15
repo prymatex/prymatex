@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/environment.ui'
 #
-# Created: Fri Feb 15 08:22:44 2013
+# Created: Fri Feb 15 10:36:30 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -22,6 +22,8 @@ class Ui_MultiDictTableEditorWidget(object):
         self._2 = QtGui.QVBoxLayout(MultiDictTableEditorWidget)
         self._2.setObjectName(_fromUtf8("_2"))
         self.tableViewVariables = QtGui.QTableView(MultiDictTableEditorWidget)
+        self.tableViewVariables.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.tableViewVariables.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.tableViewVariables.setShowGrid(False)
         self.tableViewVariables.setSortingEnabled(True)
         self.tableViewVariables.setObjectName(_fromUtf8("tableViewVariables"))

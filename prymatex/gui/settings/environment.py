@@ -19,11 +19,20 @@ class PMXEnvVariablesWidget(MultiDictTableEditorWidget, SettingsTreeNode):
     def __init__(self, settingGroup, profile = None, parent = None):
         MultiDictTableEditorWidget.__init__(self, parent)
         SettingsTreeNode.__init__(self, "environment", settingGroup, profile)
-    
+        self.model().dictionaryChanged.connect(self.on_model_dictionaryChanged)
+        
     def loadSettings(self):
-        self.addDictionary('user', self.application.supportManager.shellVariables, editable = True, selectable=True)
+        values = map(lambda value: {"name": value["variable"],
+            "value": value["value"],
+            "selected": value["enabled"]
+        }, self.settingGroup.value("shellVariables"))
+        self.addDictionary('user', values, editable = True, selectable=True)
         self.addDictionary('prymatex', self.application.supportManager.environment)
         self.addDictionary('system', os.environ, visible = False)
-    
-    def on_variablesModel_userVariablesChanged(self, group, variables):
-        self.settingGroup.setValue('shellVariables', variables)
+
+    def on_model_dictionaryChanged(self, dictionaryName):
+        data = self.model().dictionaryData(dictionaryName, raw = True)
+        data = map(lambda item: {"variable": item["name"], 
+            "value": item["value"], 
+            "enabled": item["selected"]}, data)
+        self.settingGroup.setValue("shellVariables", data)

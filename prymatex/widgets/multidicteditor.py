@@ -28,17 +28,23 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
         self.comboBoxNamespaces.setModel(self.checkableListModel)
         
         self.selectableMultiDictTableModel.layoutChanged.connect(self.resize_to_contents)
+        self.selectableMultiDictTableModel.dictionaryChanged.connect(self.resize_to_contents)
         self.checkableListModel.dataChanged.connect(
             self.on_checkableListModel_dataChanged
         )
         self.insertActions = []
 
 
+    def model(self):
+        return self.selectableMultiDictTableModel
+
     def setupUi(self, MultiDictTableEditorWidget):
         MultiDictTableEditorWidget.setObjectName("MultiDictTableEditorWidget")
         self._2 = QtGui.QVBoxLayout(MultiDictTableEditorWidget)
         self._2.setObjectName("_2")
         self.tableViewDictionaries = QtGui.QTableView(MultiDictTableEditorWidget)
+        self.tableViewDictionaries.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.tableViewDictionaries.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.tableViewDictionaries.setSortingEnabled(True)
         self.tableViewDictionaries.setObjectName("tableViewDictionaries")
         self._2.addWidget(self.tableViewDictionaries)
@@ -75,7 +81,7 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
     def on_checkableListModel_dataChanged(self, topLeft, bottomRight):
         selected = self.checkableListModel.selectedItems()
         for name in self.selectableMultiDictTableModel.dictionaryNames():
-            self.selectableMultiDictTableModel.setVisibility(name, name in selected)
+            self.selectableMultiDictTableModel.setVisible(name, name in selected)
 
 
     def addDictionary(self, name, dictionary, editable = False, selectable = False, visible = True):
@@ -88,13 +94,15 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
         self.menuAdd.addAction(action)
 
 
-    def resize_to_contents(self):
+    def resize_to_contents(self, dictionaryName = None):
         self.tableViewDictionaries.resizeColumnsToContents()
         self.tableViewDictionaries.resizeRowsToContents()
         self.tableViewDictionaries.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
 
 
     def on_actionInsertItem_triggered(self, dictionaryName):
+        if not self.selectableMultiDictTableModel.isVisible(dictionaryName):
+            self.checkableListModel.setSelected(dictionaryName, True)
         itemName, ok = QtGui.QInputDialog.getText(self, "Title", "Item name:")
         while ok and self.selectableMultiDictTableModel.hasItem(dictionaryName, itemName):
             itemName, ok = QtGui.QInputDialog.getText(self, "Title", "Item name:", text = itemName)
