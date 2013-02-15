@@ -9,6 +9,7 @@ from .bundles import BundleEditorDialog
 from .profile import ProfileDialog
 from .template import TemplateDialog
 from .properties import PropertiesDialog
+from .environment import EnvironmentDialog
 
 def registerPlugin(manager):
     manager.registerDialog(ProjectDialog)
@@ -19,3 +20,4 @@ def registerPlugin(manager):
     manager.registerDialog(ProfileDialog)
     manager.registerDialog(TemplateDialog)
     manager.registerDialog(PropertiesDialog)
+    manager.registerDialog(EnvironmentDialog)

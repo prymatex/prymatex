@@ -2,19 +2,11 @@
 # -*- coding: utf-8 -*-
 
 
-import StringIO
-
-if __name__ == "__main__":
-    import sys, os
-    sys.path.append(os.path.abspath("../.."))
-
 from prymatex.qt import QtGui, QtCore
-from prymatex.qt.helpers import create_action, add_actions, keybinding
 from prymatex.utils.i18n import ugettext as _
 
 from prymatex.models.tables import SelectableMultiDictTableModel
 from prymatex.models.lists import CheckableListModel
-from prymatex import resources
 
 class MultiDictTableEditorWidget(QtGui.QWidget):
     def __init__(self, parent = None):
@@ -35,8 +27,13 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
         self.insertActions = []
 
 
+    def dictionaryData(self, name):
+        return self.selectableMultiDictTableModel.dictionaryData(name)
+
+
     def model(self):
         return self.selectableMultiDictTableModel
+
 
     def setupUi(self, MultiDictTableEditorWidget):
         MultiDictTableEditorWidget.setObjectName("MultiDictTableEditorWidget")
@@ -114,118 +111,6 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
         index = self.tableViewDictionaries.currentIndex()
         self.selectableMultiDictTableModel.removeRows(index.row() , 1)
 
-
-    def accept_changes(self):
-        """Accept changes"""
-        for (i, j), value in self.model.changes.iteritems():
-            self.data[i][j] = value
-
-
     def clear(self):
-        pass
-
-class MultiDictTableEditorDialog(QtGui.QDialog):
-    """Array Editor Dialog"""    
-    def __init__(self, parent = None):
-        QtGui.QDialog.__init__(self, parent)
-        
-        # Destroying the C++ object right after closing the dialog box,
-        # otherwise it may be garbage-collected in another QThread
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-
-        self.data = None
-
-    def setup_and_check(self, data, title='', editable = False):
-        """
-        Setup ListEditor:
-        return False if data is not supported, True otherwise
-        """
-        self.data = data
-        if len(data) == 0:
-            self.error(_("Data is empty"))
-            return False
-        
-        self.layout = QtGui.QGridLayout()
-        self.setLayout(self.layout)
-        if title:
-            title = unicode(title) # in case title is not a string
-        else:
-            title = _("List editor")
-        if editable:
-            title += ' (' + _('read only') + ')'
-        self.setWindowTitle(title)
-        self.resize(600, 500)
-        
-        # Stack widget
-        self.stack = QtGui.QStackedWidget(self)
-        self.tablewidget = MultiDictTableEditorWidget(self)
-        self.stack.addWidget(self.tablewidget)
-        self.connect(self.stack, QtCore.SIGNAL('currentChanged(int)'),
-                     self.current_widget_changed)
-        self.layout.addWidget(self.stack, 1, 0)
-
-        # Buttons configuration
-        btn_layout = QtGui.QHBoxLayout()
-        bbox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
-        self.connect(bbox, QtCore.SIGNAL("accepted()"), QtCore.SLOT("accept()"))
-        self.connect(bbox, QtCore.SIGNAL("rejected()"), QtCore.SLOT("reject()"))
-        btn_layout.addWidget(bbox)
-        self.layout.addLayout(btn_layout, 2, 0)
-        
-        self.setMinimumSize(400, 300)
-        
-        # Make the dialog act as a window
-        self.setWindowFlags(QtCore.Qt.Window)
-        
-        for key, value in self.data.iteritems():
-            self.tablewidget.addDictionary(key, value, editable = editable)
-        
-        return True
-        
-    def current_widget_changed(self, index):
-        self.tablewidget = self.stack.widget(index)
-        
-    def accept(self):
-        """Reimplement Qt method"""
-        for index in range(self.stack.count()):
-            self.stack.widget(index).accept_changes()
-        QtGui.QDialog.accept(self)
-        
-    def get_value(self):
-        """Return modified array -- this is *not* a copy"""
-        # It is import to avoid accessing Qt C++ object as it has probably
-        # already been destroyed, due to the QtCore.Qt.WA_DeleteOnClose attribute
-        return self.data
-
-    def error(self, message):
-        """An error occured, closing the dialog box"""
-        QtGui.QMessageBox.critical(self, _("Array editor"), message)
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self.reject()
-
-
-def test_edit(data, title="", editable = False):
-    """Test subroutine"""
-    dlg = MultiDictTableEditorDialog()
-    if dlg.setup_and_check(data, title, editable = editable) and dlg.exec_():
-        return dlg.get_value()
-    else:
-        import sys
-        sys.exit()
-
-
-def test():
-    """Array editor test"""
-    _app = QtGui.QApplication([])
-    
-    data = {"uno": {"uno": 1, "dos": 2},
-            "dos": {"uno": 1, "dos": 2},
-            "tres": {"uno": 1, "dos": 2}}
-    arr_out = test_edit(data, "bool array", editable = True)
-    print "out:", arr_out
-    
-if __name__ == "__main__":
-    import sys, os
-    sys.path.append(os.path.abspath("../.."))
-    print sys.path
-    test()
+        self.selectableMultiDictTableModel.clear()
+        self.checkableListModel.clear()

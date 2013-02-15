@@ -7,8 +7,6 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.core.components import PMXBaseDialog
 
 from prymatex.utils.i18n import ugettext as _
-from prymatex.gui.dialogs.environment import EnvironmentDialog
-
 
 from prymatex.ui.dialogs.project import Ui_ProjectDialog
 
@@ -28,9 +26,14 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
         self.setupComboTemplates()
         self.buttonCreate.setDefault(True)
         self.projectCreated = None
-        self.userEnvironment = []
+        self.userEnvironment = {}
 
 
+    def initialize(self, mainWindow):
+        PMXBaseDialog.initialize(self, mainWindow)
+        self.environmentDialog = self.mainWindow.findChild(QtGui.QDialog, "EnvironmentDialog")
+
+        
     def setupComboKeywords(self):
         # Build project keywords
         self.application.projectManager.keywordsListModel.clear()
@@ -125,7 +128,7 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
         if index.isValid():
             template = self.projectProxyModel.node(index)
             tEnv = template.buildEnvironment(projectName = name, projectLocation = location, localVars = True)
-        self.userEnvironment = EnvironmentDialog.editEnvironment(self, self.userEnvironment, tEnv)
+        self.userEnvironment = self.environmentDialog.editEnvironment(self.userEnvironment, template = tEnv)
 
 
     def runCreateProject(self, name, location):
@@ -152,10 +155,7 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
 
             #Build environment for template
             environment = template.buildEnvironment(projectName = name, projectLocation = location)
-            for var in self.userEnvironment:
-                if var['enabled']:
-                    environment[var['variable']] = var['value']
-
+            environment.update(self.userEnvironment)
             template.execute(environment, self.afterRunTemplate)
 
     

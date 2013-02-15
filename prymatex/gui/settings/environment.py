@@ -10,7 +10,7 @@ from prymatex.models.settings import SettingsTreeNode
 from prymatex.widgets.multidicteditor import MultiDictTableEditorWidget
 from prymatex.models.environment import EnvironmentTableModel
 
-class PMXEnvVariablesWidget(MultiDictTableEditorWidget, SettingsTreeNode):
+class VariablesSettingsWidget(MultiDictTableEditorWidget, SettingsTreeNode):
     """Environment variables"""
     NAMESPACE = "general"
     TITLE = "Variables"

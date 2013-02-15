@@ -229,8 +229,8 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
 
     @classmethod
     def contributeToSettings(cls):
-        from prymatex.gui.settings.environment import PMXEnvVariablesWidget
-        return [ PMXEnvVariablesWidget ]
+        from prymatex.gui.settings.environment import VariablesSettingsWidget
+        return [ VariablesSettingsWidget ]
 
     def setEditorAvailable(self, available):
         self.editorAvailable = available

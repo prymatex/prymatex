@@ -50,8 +50,8 @@ class CheckableListModel(QtCore.QAbstractListModel):
 
     # ------------------ Custom functions
     def clear(self):
-        for item in self.__items:
-            item["selected"] = 0
+        self.__items = []
+        self.layoutChanged.emit()
 
 
     def setSelected(self, item, selected = True):
