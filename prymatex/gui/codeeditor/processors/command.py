@@ -179,8 +179,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
             
     def showAsHTML(self, context):
-        browser = self.editor.mainWindow.componentByName("browserdock")
-        browser.setRunningContext(context)
+        self.editor.browserDock.setRunningContext(context)
 
     def showAsTooltip(self, context):
         message = context.outputValue.strip()

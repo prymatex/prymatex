@@ -166,6 +166,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
         self.selectorDialog = self.mainWindow.findChild(QtGui.QDialog, "SelectorDialog")
+        self.browserDock = self.mainWindow.findChild(QtGui.QDockWidget, "BrowserDock")
         
         # Sidebars signals
         self.rightBar.updateRequest.connect(self.updateViewportMargins)

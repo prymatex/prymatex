@@ -60,8 +60,7 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
             )
         
     def showAsHTML(self, context):
-        browser = self.mainWindow.componentByName("browserdock")
-        browser.setRunningContext(context)
+        self.browserDock.setRunningContext(context)
 
     def showAsTooltip(self, context):
         message = context.outputValue.strip()
