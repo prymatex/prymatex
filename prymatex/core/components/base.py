@@ -28,6 +28,9 @@ class PMXBaseComponent(object):
             addon.initialize(self)
 
     
+    def addComponent(self, component):
+        pass
+
     # ---------------- Addons api
     def componentAddons(self):
         return self.__componentAddons
@@ -70,6 +73,15 @@ class PMXBaseComponent(object):
         return {}
 
 
+    def saveState(self):
+        """Returns a Python dictionary containing the state of the editor."""
+        return {}
+
+
+    def restoreState(self, state):
+        """Restore the state from the given state (returned by a previous call to saveState())."""
+        pass
+
 class PMXBaseWidgetComponent(PMXBaseComponent):
     def __init__(self):
         PMXBaseComponent.__init__(self)
@@ -110,14 +122,6 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
 
     def runKeyHelper(self, *largs, **kwargs):
         raise NotImplemented
-            
-    def saveState(self):
-        """Returns a Python dictionary containing the state of the editor."""
-        return {}
-    
-    def restoreState(self, state):
-        """Restore the state from the given state (returned by a previous call to saveState())."""
-        pass
 
     def showMessage(self, message, timeout = 0):
         """Show message in main window's"""
@@ -127,6 +131,8 @@ class PMXBaseAddon(object):
     def __init__(self, widget):
         pass
     
+    def populate(self, manager):
+        pass
     def configure(self, profile):
         settings = profile.groupByClass(self.__class__)
         settings.addListener(self)
@@ -158,7 +164,11 @@ class PMXBaseKeyHelper(object):
         
     def initialize(self, widget):
         pass
-    
+    def configure(self, profile):
+        pass
+    def populate(self, manager):
+        pass
+      
     def finalize(self):
         pass
 

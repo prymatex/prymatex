@@ -17,6 +17,8 @@ from prymatex.utils import osextra
 from prymatex.core import PMXBaseComponent
 from prymatex.utils.importlib import import_module, import_from_directory
 
+from prymatex.gui.mainwindow import PMXMainWindow as MainWindow
+
 PLUGIN_EXTENSION = 'pmxplugin'
 PLUGIN_DESCRIPTOR_FILE = 'info.json'
 
@@ -113,6 +115,12 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         addonClasses.append(addonClass)
 
 
+    def findComponentsForClass(self, klass):
+        if klass == MainWindow:
+            return self.dialogs + self.dockers + self.statusBars
+        else:
+            return self.addons.get(klass, []) + self.keyHelpers.get(klass, [])
+        
     # ------------ Handle editor classes
     def findEditorClassForFile(self, filePath):
         mimetype = self.application.fileManager.mimeType(filePath)

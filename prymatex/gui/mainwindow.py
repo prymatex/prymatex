@@ -14,7 +14,7 @@ from prymatex import resources
 
 from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core.components import PMXBaseComponent
+from prymatex.core import PMXBaseComponent, PMXBaseDock, PMXBaseDialog, PMXBaseStatusBar
 
 from prymatex.utils.i18n import ugettext as _
 
@@ -96,6 +96,15 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
 
     # ---------- Implements PMXBaseComponent's interface
+    def addComponent(self, component):
+        if isinstance(component, PMXBaseDock):
+            self.addDock(component, component.PREFERED_AREA)
+        elif isinstance(component, PMXBaseDialog):
+            self.addDialog(component)
+        elif isinstance(component, PMXBaseStatusBar):
+            self.addStatusBar(component)
+
+
     def populate(self, manager):
     
         # TODO No violar al manager
@@ -118,29 +127,15 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
                         customActions.extend(actions)
                 registerFunction(componentClass, customActions)
 
+    def configure(self, profile):
         self.setDockOptions(
             QtGui.QMainWindow.AllowTabbedDocks | 
             QtGui.QMainWindow.AllowNestedDocks | 
             QtGui.QMainWindow.AnimatedDocks)
-
-        for dockClass in manager.dockers:
-            self.addDock(dockClass(self), dockClass.PREFERED_AREA)
-
-        for dialogClass in manager.dialogs:
-            self.addDialog(dialogClass(self))
-            
-        for statusBarClass in manager.statusBars:
-            self.addStatusBar(statusBarClass(self))
-
-    def configure(self, profile):
         PMXBaseComponent.configure(self, profile)
-        for component in self.dockers + self.dialogs + self.statusBar().statusBars:
-            component.configure(profile)
 
     def initialize(self, application):
         PMXBaseComponent.initialize(self, application)
-        for component in self.dockers + self.dialogs + self.statusBar().statusBars:
-            component.initialize(self)
         self.selectorDialog = self.findChild(QtGui.QDialog, "SelectorDialog")
         self.aboutDialog = self.findChild(QtGui.QDialog, "AboutDialog")
         self.settingsDialog = self.findChild(QtGui.QDialog, "SettingsDialog")

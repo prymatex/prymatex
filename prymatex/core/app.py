@@ -322,17 +322,38 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
 
     # ------------------- Create components
-    def createComponentInstance(self, componentClass, parent = None):
-        parent = parent or self
+    def createComponentInstance(self, componentClass, componentParent = None):
+        componentParent = componentParent or self
         if not hasattr(componentClass, 'application') or componentClass.application != self:
             self.populateComponentClass(componentClass)
 
-        instance = componentClass(parent)
-
-        instance.populate(self.pluginManager)
-        instance.configure(self.currentProfile)
-        instance.initialize(parent)
+        buildedObjects = []
+        def buildComponentInstance(klass, parent):
+            componentClasses = self.pluginManager.findComponentsForClass(klass)
+            instance = klass(parent)
+            components = []
+            for componentClass in componentClasses:
+                componentInstance = buildComponentInstance(componentClass, instance)
+                instance.addComponent(componentInstance)
+                components.append(componentInstance)
+            buildedObjects.append((instance, parent, components))
+            return instance
         
+        populatedObjects = []
+        def populateComponentInstance(instance, parent):
+            if instance not in populatedObjects:
+                instance.populate(self.pluginManager)
+                instance.configure(self.currentProfile)
+                instance.initialize(parent)
+                populatedObjects.append(instance)
+            
+        instance = buildComponentInstance(componentClass, componentParent)
+        buildedObjects.reverse()
+        for ni, np, ncs in buildedObjects:
+            populateComponentInstance(ni, np)
+            for nc in ncs:
+                populateComponentInstance(nc, ni)
+
         instances = self.componentInstances.setdefault(componentClass, [])
         instances.append(instance)
 
