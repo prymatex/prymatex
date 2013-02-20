@@ -3,10 +3,10 @@
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex.core.components.base import PMXBaseWidgetComponent
+from prymatex.core.components.base import PMXBaseComponent
 
 __all__ = ["PMXBaseStatusBar"]
 
-class PMXBaseStatusBar(PMXBaseWidgetComponent):    
+class PMXBaseStatusBar(PMXBaseComponent):    
     def acceptEditor(self, editor):
         return False

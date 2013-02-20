@@ -5,24 +5,31 @@ from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers.icons import combine_icons
 
 from prymatex.core import exceptions
-from prymatex.core.components.base import PMXBaseWidgetComponent, PMXBaseKeyHelper, PMXBaseAddon
+from prymatex.core.components.base import PMXBaseComponent
+from prymatex.core.components.keyhelper import PMXBaseKeyHelper, PMXKeyHelperMixin
+from prymatex.core.components.addon import PMXBaseAddon
 
 from prymatex import resources
 
 __all__ = ["PMXBaseEditor", "PMXBaseEditorKeyHelper", "PMXBaseEditorAddon"]
 
-class PMXBaseEditor(PMXBaseWidgetComponent):
+class PMXBaseEditor(PMXBaseComponent, PMXKeyHelperMixin):
     """Every editor should extend this class in order to guarantee it'll be able to be place in tab.
     """
     #tabStatusChanged
     CREATION_COUNTER = 0
     UNTITLED_FILE_TEMPLATE = "Untitled {CREATION_COUNTER}"
     
-    def __init__(self):
-        PMXBaseWidgetComponent.__init__(self)
+    def initialize(self, mainWindow):
+        self.mainWindow = mainWindow
         self.filePath = None
         self.project = None
         self.externalAction = None
+    
+    def addComponent(self, component):
+        PMXBaseComponent.addComponent(self, component)
+        if isinstance(component, PMXBaseKeyHelper):
+            self.addKeyHelper(component)
     
     @property
     def creationCounter(self):

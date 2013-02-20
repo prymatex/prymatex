@@ -118,8 +118,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         ]
         for registerFunction, componentClases in classActions:
             for componentClass in componentClases:
-                addonClasses = manager.addons.get(componentClass, [])
-                menus = componentClass.contributeToMainMenu(addonClasses)
+                print componentClass
+                menus = componentClass.contributeToMainMenu()
                 if menus is not None:
                     customActions = []
                     for name, settings in menus.iteritems():

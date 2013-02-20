@@ -77,7 +77,7 @@ class ProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXDoc
     
     # Contributes to Main Menu
     @classmethod
-    def contributeToMainMenu(cls, addonClasses):
+    def contributeToMainMenu(cls):
         navigation = {
             'text': 'Navigation',
             'items': [
@@ -88,8 +88,6 @@ class ProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXDoc
                  }
             ]}
         menuContributions = { "Navigation": navigation}
-        for addon in addonClasses:
-            update_menu(menuContributions, addon.contributeToMainMenu())
         return menuContributions
     
     # ------------------ Menu Actions

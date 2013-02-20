@@ -3,20 +3,21 @@
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex.core.components.base import PMXBaseWidgetComponent, PMXBaseAddon, PMXBaseKeyHelper
+from prymatex.core.components.base import PMXBaseComponent
+from prymatex.core.components.keyhelper import PMXBaseKeyHelper, PMXKeyHelperMixin
+from prymatex.core.components.addon import PMXBaseAddon
 
 __all__ = ["PMXBaseDock", "PMXBaseDockKeyHelper", "PMXBaseDockAddon"]
 
-class PMXBaseDock(PMXBaseWidgetComponent):
+class PMXBaseDock(PMXBaseComponent):
     SHORTCUT = ""
     ICON = QtGui.QIcon()
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
-    def __init__(self):
-        PMXBaseWidgetComponent.__init__(self)
+    def initialize(self, mainWindow):
+        self.mainWindow = mainWindow
         self.toggleViewAction().setShortcut(QtGui.QKeySequence(self.SHORTCUT))
         self.toggleViewAction().setIcon(self.ICON)
-
 
     def runKeyHelper(self, event):
         runHelper = False

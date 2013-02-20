@@ -3,14 +3,14 @@
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex.core.components.base import PMXBaseWidgetComponent
+from prymatex.core.components.base import PMXBaseComponent
 
 __all__ = ["PMXBaseDialog"]
 
 # TODO: separar estos dialogos de los que se pueden generar desde el servidor remoto?
-class PMXBaseDialog(PMXBaseWidgetComponent):
-    def __init__(self):
-        PMXBaseWidgetComponent.__init__(self)
+class PMXBaseDialog(PMXBaseComponent):
+    def initialize(self, mainWindow):
+        self.mainWindow = mainWindow
         
     def setParameters(self, parameters):
         pass

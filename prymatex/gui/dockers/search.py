@@ -33,7 +33,7 @@ class PMXSearchDock(QtGui.QDockWidget, Ui_SearchDock, PMXBaseDock):
         #TODO: Si no se encontro nada o se cancelo cerrarlo
     
     @classmethod
-    def contributeToMainMenu(cls, addonClasses):
+    def contributeToMainMenu(cls):
         edit = {
             'items': [
                 "-",

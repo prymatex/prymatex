@@ -392,7 +392,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     #===========================================================================
     # Contributes to Main Menu
     @classmethod
-    def contributeToMainMenu(cls, addonClasses):
+    def contributeToMainMenu(cls):
         edit = {
             'items': [
                 '-',

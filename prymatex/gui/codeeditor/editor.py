@@ -1206,7 +1206,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     
     # Contributes to Main Menu
     @classmethod
-    def contributeToMainMenu(cls, addonClasses):
+    def contributeToMainMenu(cls):
         edit = {
             'text': 'Edit',
             'items': [
@@ -1384,8 +1384,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  }
             ]}
         menuContributions = { "Edit": edit, "View": view , "Text": text, "Navigation": navigation}
-        for addon in addonClasses:
-            update_menu(menuContributions, addon.contributeToMainMenu())
+        #for addon in addonClasses:
+        #    update_menu(menuContributions, addon.contributeToMainMenu())
         return menuContributions
     
     @classmethod
