@@ -107,6 +107,14 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
         for index in range(self.tabTerminals.count()):
             self.tabTerminals.widget(index).setFont(font)
 
+    @pmxConfigPorperty(default = False)
+    def editorTheme(self, value):
+        if value:
+            self.application.addSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
+        else:
+            self.application.removeSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
+            
+            
     terminalAvailable = True
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)

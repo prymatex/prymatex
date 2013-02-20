@@ -9,7 +9,7 @@ from prymatex.core.components.addon import PMXBaseAddon
 
 __all__ = ["PMXBaseDock", "PMXBaseDockKeyHelper", "PMXBaseDockAddon"]
 
-class PMXBaseDock(PMXBaseComponent):
+class PMXBaseDock(PMXBaseComponent, PMXKeyHelperMixin):
     SHORTCUT = ""
     ICON = QtGui.QIcon()
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea

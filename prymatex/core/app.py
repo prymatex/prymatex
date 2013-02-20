@@ -378,6 +378,12 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         self.supportManager.addToEnvironment("PMX_" + name.upper() + "_PORT", port)
         return socket
 
+    # ------------- Settings
+    def addSettingHook(self, settingPath, handler):
+        pass
+
+    def removeSettingHook(self, settingPath, handler):
+        pass
     # ------------- Editors and mainWindow handle
     def createEditorInstance(self, filePath=None, parent=None):
         editorClass = filePath is not None and self.pluginManager.findEditorClassForFile(filePath) or self.pluginManager.defaultEditor()

@@ -13,22 +13,30 @@ class PMXBaseKeyHelper(PMXBaseComponent):
         pass
 
 class PMXKeyHelperMixin(object):
+    @property
+    def keyHelpers(self):
+        try:
+            return self._keyHelpers
+        except AttributeError:
+            self._keyHelpers = {}
+            return self._keyHelpers
+            
     def addKeyHelper(self, helper):
         try:
-            self._keyHelpers.setdefault(helper.KEY, []).append(helper)
+            self.keyHelpers.setdefault(helper.KEY, []).append(helper)
         except:
-            self._keyHelpers = { helper.KEY: [ helper ]}
+            self.keyHelpers = { helper.KEY: [ helper ]}
 
     def keyHelperByClass(self, klass):
-        keyHelper = filter(lambda keyHelper: isinstance(keyHelper, klass), self._keyHelpers)
+        keyHelper = filter(lambda keyHelper: isinstance(keyHelper, klass), self.keyHelpers)
         #TODO: Solo uno
         return keyHelper[0]
         
     def findHelpers(self, key):
         helpers = []
-        if Key_Any in self._keyHelpers:
-            helpers += self._keyHelpers[Key_Any]
-        helpers += self._keyHelpers.get(key, [])
+        if Key_Any in self.keyHelpers:
+            helpers += self.keyHelpers[Key_Any]
+        helpers += self.keyHelpers.get(key, [])
         return helpers
 
     def runKeyHelper(self, *largs, **kwargs):

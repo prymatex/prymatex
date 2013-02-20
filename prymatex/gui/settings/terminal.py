@@ -25,6 +25,10 @@ class PMXTerminalSettings(QtGui.QWidget, SettingsTreeNode, Ui_Terminal):
         font = self.settingGroup.value('font')
         self.comboBoxFontName.setCurrentFont(font)
         self.spinBoxFontSize.setValue(font.pointSize())
+        
+        self.checkBoxEditorTheme.blockSignals(True)
+        self.checkBoxEditorTheme.setChecked(self.settingGroup.value('editorTheme'))
+        self.checkBoxEditorTheme.blockSignals(False)
 
 
     @QtCore.pyqtSlot(int)
@@ -41,3 +45,8 @@ class PMXTerminalSettings(QtGui.QWidget, SettingsTreeNode, Ui_Terminal):
             self.settingGroup.setValue('font', font)
             self.comboBoxFontName.setCurrentFont(font)
             self.spinBoxFontSize.setValue(font.pointSize())
+    
+    @QtCore.pyqtSlot(int)
+    def on_checkBoxEditorTheme_stateChanged(self, state):
+        self.settingGroup.setValue('editorTheme', state == QtCore.Qt.Checked)
+    
