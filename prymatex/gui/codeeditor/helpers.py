@@ -5,7 +5,10 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import PMXBaseEditorKeyHelper
 
-class CodeEditorKeyHelper(PMXBaseEditorKeyHelper):
+class CodeEditorKeyHelper(QtCore.QObject, PMXBaseEditorKeyHelper):
+    def __init__(self, parent = None):
+        QtCore.QObject.__init__(self, parent)
+        
     def accept(self, event, cursor):
         return PMXBaseEditorKeyHelper.accept(self, event)
     

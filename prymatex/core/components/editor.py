@@ -127,15 +127,11 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
         # FIXME: Rename or move files make produces bogus behavior 
         return self.externalAction == self.application.fileManager.DELETED    
 
-    #============================================================
-    # Bundle Item Handler
-    #============================================================
+    #------------ Bundle Item Handler
     def bundleItemHandler(self):
         return None
         
-    #============================================================
-    # Global navigation api
-    #============================================================
+    #------------ Global navigation api
     def saveLocationMemento(self, memento):
         # TODO Ver que va a pasar con esto de emitir señales y no heredar de qobject
         self.emit(QtCore.SIGNAL("newLocationMemento"), memento)
@@ -143,9 +139,7 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
     def restoreLocationMemento(self, memento):
         pass
     
-    #============================================================
-    # Cursor positions as tuple
-    #============================================================
+    #------------ Cursor positions as tuple
     def setCursorPosition(self, cursorPosition):
         pass
 

@@ -106,7 +106,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
 
     def populate(self, manager):
-    
+        # TODO Sacar esto mejorar el tema de las actions
         # TODO No violar al manager
         # Create custom actions and build MainMenu
         classActions = [
@@ -126,13 +126,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
                         actions = self.contributeToMainMenu(name, settings)
                         customActions.extend(actions)
                 registerFunction(componentClass, customActions)
-
-    def configure(self, profile):
-        self.setDockOptions(
-            QtGui.QMainWindow.AllowTabbedDocks | 
-            QtGui.QMainWindow.AllowNestedDocks | 
-            QtGui.QMainWindow.AnimatedDocks)
-        PMXBaseComponent.configure(self, profile)
 
     def initialize(self, application):
         PMXBaseComponent.initialize(self, application)

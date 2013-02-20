@@ -5,50 +5,17 @@
 # TODO: Simplificar un poco
 
 class PMXBaseComponent(object):
-    def __init__(self):
-        self.__componentAddons = []
-
-
-    def populate(self, manager):
-        for addonClass in manager.addons.get(self.__class__, []):
-            addon = addonClass(self)
-            self.addComponentAddon(addon)
-
-
-    def configure(self, profile):
-        settings = profile.groupByClass(self.__class__)
-        settings.addListener(self)
-        settings.configure(self)
-        for addon in self.__componentAddons:
-            addon.configure(profile)
-
-
     def initialize(self, parent = None):
-        for addon in self.__componentAddons:
-            addon.initialize(self)
-
-    
-    def addComponent(self, component):
         pass
-
-    # ---------------- Addons api
-    def componentAddons(self):
-        return self.__componentAddons
-
-
-    def addComponentAddon(self, addon):
-        self.__componentAddons.append(addon)
-
-
-    def componentAddonByClass(self, klass):
-        addons = filter(lambda addon: isinstance(addon, klass), self.__componentAddons)
-        #TODO: Solo uno
-        return addons[0]
-
-
+    
     def finalize(self):
         pass
 
+    def components(self):
+        return []
+ 
+    def addComponent(self, component):
+        pass
 
     @classmethod
     def contributeToSettings(cls):
@@ -127,51 +94,13 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
         """Show message in main window's"""
         self.mainWindow.showMessage(message, timeout)
         
-class PMXBaseAddon(object):
-    def __init__(self, widget):
-        pass
-    
-    def populate(self, manager):
-        pass
-    def configure(self, profile):
-        settings = profile.groupByClass(self.__class__)
-        settings.addListener(self)
-        settings.configure(self)
-
-    def initialize(self, widget):
-        pass
-    
-    def finalize(self):
-        pass
-
-    @classmethod
-    def contributeToSettings(cls):
-        return []
-
-    @classmethod
-    def contributeToMainMenu(cls):
-        return {}
-
-    def contributeToContextMenu(self):
-        return []
+class PMXBaseAddon(PMXBaseComponent):
+    pass
 
 # Los keyHelpers van a ser solo de los editores, el resto que se busque su modo
 Key_Any = 0
-class PMXBaseKeyHelper(object):
+class PMXBaseKeyHelper(PMXBaseComponent):
     KEY = Key_Any
-    def __init__(self, widget):
-        pass
-        
-    def initialize(self, widget):
-        pass
-    def configure(self, profile):
-        pass
-    def populate(self, manager):
-        pass
-      
-    def finalize(self):
-        pass
-
     def accept(self, key):
         return self.KEY == key
     

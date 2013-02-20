@@ -125,7 +125,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     def __init__(self, editor):
         PMXBaseEditorMode.__init__(self, editor)
         # TODO: Buscar una forma mejor de obtener o trabajar con este helper en el modo, quiza filtarndo por clase en el evento
-        self.helper = helpers.MultiCursorHelper(editor)
+        self.helper = helpers.MultiCursorHelper()
         self.helper.initialize(editor)
         self.cursors = []
         self.selectedCursors = []

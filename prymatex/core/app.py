@@ -120,18 +120,23 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             self.currentProfile.clear()
 
         # Prepare settings for application
-        self.registerConfigurable(self.__class__)
+        self.registerConfigurable(PrymatexApplication)
 
         # Configure application
-        self.configure(self.currentProfile)
+        settings = self.currentProfile.groupByClass(PrymatexApplication)
+        settings.addListener(self)
+        settings.configure(self)
         
         verbose = self.options.verbose
         namePattern = self.options.log_pattern
 
         # Prepare Plugins
-        self.extendComponent(PluginManager)
+        self.populateComponentClass(PluginManager)
         self.pluginManager = PluginManager(self)
-        self.pluginManager.configure(self.currentProfile)
+        settings = self.currentProfile.groupByClass(PluginManager)
+        settings.addListener(self.pluginManager)
+        settings.configure(self.pluginManager)
+        
         self.pluginManager.initialize(self)
 
         self.pluginManager.addPluginDirectory(config.PMX_PLUGINS_PATH)
@@ -329,31 +334,34 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
         buildedObjects = []
         def buildComponentInstance(klass, parent):
-            componentClasses = self.pluginManager.findComponentsForClass(klass)
             instance = klass(parent)
-            components = []
+
+            # Configure
+            settings = self.currentProfile.groupByClass(klass)
+            settings.addListener(instance)
+            settings.configure(instance)
+
+            # Add components
+            componentClasses = self.pluginManager.findComponentsForClass(klass)
             for componentClass in componentClasses:
                 componentInstance = buildComponentInstance(componentClass, instance)
                 instance.addComponent(componentInstance)
-                components.append(componentInstance)
-            buildedObjects.append((instance, parent, components))
+            buildedObjects.append((instance, parent))
             return instance
         
-        populatedObjects = []
-        def populateComponentInstance(instance, parent):
-            if instance not in populatedObjects:
-                instance.populate(self.pluginManager)
-                instance.configure(self.currentProfile)
-                instance.initialize(parent)
-                populatedObjects.append(instance)
-            
+        def initializeComponentInstance(instance, parent):
+            instance.populate(self.pluginManager)
+            #instance.configure(self.currentProfile)
+            instance.initialize(parent)
+    
+        from pprint import pprint
         instance = buildComponentInstance(componentClass, componentParent)
         buildedObjects.reverse()
-        for ni, np, ncs in buildedObjects:
-            populateComponentInstance(ni, np)
-            for nc in ncs:
-                populateComponentInstance(nc, ni)
+        pprint(buildedObjects)
 
+        for ni, np in buildedObjects:
+            ni.initialize(np)
+            
         instances = self.componentInstances.setdefault(componentClass, [])
         instances.append(instance)
 
@@ -385,6 +393,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         #TODO: Testeame con mas de una
         for _ in range(1):
             self.mainWindow = self.createComponentInstance(PMXMainWindow)
+            self.mainWindow.populate(self.pluginManager)
 
             self.mainWindow.show()
             self.currentProfile.restoreState(self.mainWindow)

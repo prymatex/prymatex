@@ -120,12 +120,15 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     @classmethod
     def contributeToMainMenu(cls):
         def on_actionShowLineNumbers_toggled(editor, checked):
-            instance = editor.componentAddonByClass(cls)
-            instance.setVisible(checked)
+            instance = editor.findChild(cls, "Nombre")
+            if instance is not None:
+                instance.setVisible(checked)
 
         def on_actionShowLineNumbers_testChecked(editor):
-            instance = editor.componentAddonByClass(cls)
-            return instance.isVisible()
+            instance = editor.findChild(cls, "Nombre")
+            if instance is not None:
+                return instance.isVisible()
+	    return False
         
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
         menuEntry = {'text': "Line Numbers",
@@ -201,13 +204,16 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     @classmethod
     def contributeToMainMenu(cls):
         def on_actionShowBookmarks_toggled(editor, checked):
-            instance = editor.componentAddonByClass(cls)
-            instance.setVisible(checked)
+            instance = editor.findChild(cls, "Nombre")
+            if instance is not None:
+                instance.setVisible(checked)
 
         def on_actionShowBookmarks_testChecked(editor):
-            instance = editor.componentAddonByClass(cls)
-            return instance.isVisible()
-        
+            instance = editor.findChild(cls, "Nombre")
+            if instance is not None:
+                return instance.isVisible()
+            return False
+            
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
         menuEntry = {'text': "Bookmarks",
             'callback': on_actionShowBookmarks_toggled,
@@ -276,13 +282,16 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     @classmethod
     def contributeToMainMenu(cls):
         def on_actionShowFoldings_toggled(editor, checked):
-            instance = editor.componentAddonByClass(cls)
-            instance.setVisible(checked)
+            instance = editor.findChild(cls, "Nombre")
+            if instance is not None:
+                instance.setVisible(checked)
 
         def on_actionShowFoldings_testChecked(editor):
-            instance = editor.componentAddonByClass(cls)
-            return instance.isVisible()
-        
+            instance = editor.findChild(cls, "Nombre")
+            if instance is not None:
+                return instance.isVisible()
+            return False
+            
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
         menuEntry = {'text': 'Foldings',
             'callback': on_actionShowFoldings_toggled,
@@ -367,13 +376,16 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     @classmethod
     def contributeToMainMenu(cls):
         def on_actionShowSelection_toggled(editor, checked):
-            instance = editor.componentAddonByClass(cls)
-            instance.setVisible(checked)
+            instance = editor.findChild(cls, "Nombre")
+            if instance is not None:
+                instance.setVisible(checked)
 
         def on_actionShowSelection_testChecked(editor):
-            instance = editor.componentAddonByClass(cls)
-            return instance.isVisible()
-        
+            instance = editor.findChild(cls, "Nombre")
+            if instance is not None:
+                return instance.isVisible()
+            return False
+            
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
         menuEntry = {'text': 'Selection',
             'callback': on_actionShowSelection_toggled,

@@ -80,12 +80,13 @@ class SpellCheckerAddon(CodeEditorAddon):
     @classmethod
     def contributeToMainMenu(cls):
         def on_actionSpellingOnType_toggled(editor, checked):
-            instance = editor.componentAddonByClass(cls)
-            instance.spellingOnType = checked
+            instance = editor.findChild(cls, "Nombre")
+            #instance.spellingOnType = checked
 
         def on_actionSpellingOnType_testChecked(editor):
-            instance = editor.componentAddonByClass(cls)
-            return instance.spellingOnType
+            instance = editor.findChild(cls, "Nombre")
+            return False
+            #return instance.spellingOnType
 
         baseMenu = "Edit"
         menuEntry = {'text': 'Spelling',

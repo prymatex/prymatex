@@ -184,10 +184,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)
         
     # ----------- Override from PMXBaseComponent
-    def addComponentAddon(self, addon):
-        PMXBaseEditor.addComponentAddon(self, addon)
-        if isinstance(addon, SideBarWidgetAddon):
-            self.addSideBarWidget(addon)
+    def addComponent(self, component):
+        PMXBaseEditor.addComponent(self, component)
+        if isinstance(component, SideBarWidgetAddon):
+            self.addSideBarWidget(component)
 
     def addSideBarWidget(self, widget):
         if widget.ALIGNMENT == QtCore.Qt.AlignRight:
@@ -552,9 +552,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         else:
             self.clearExtraSelectionCursors("line")
         self.setExtraSelectionCursors("brace", filter(lambda cursor: cursor is not None, list(self._currentBraces)))
-        for addon in self.componentAddons():
-            if isinstance(addon, CodeEditorAddon):
-                self.updateExtraSelectionCursors(addon.extraSelectionCursors())
+        for component in self.components():
+            if isinstance(component, CodeEditorAddon):
+                self.updateExtraSelectionCursors(component.extraSelectionCursors())
         self.updateExtraSelections()
 
         
@@ -1171,9 +1171,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         #Se lo pasamos a los addons
         cursor = self.cursorForPosition(point)
         items = ["-"]
-        for addon in self.componentAddons():
-            if isinstance(addon, CodeEditorAddon):
-                items += addon.contributeToContextMenu(cursor)
+        for component in self.components():
+            if isinstance(component, CodeEditorAddon):
+                items += component.contributeToContextMenu(cursor)
         
         if len(items) > 1:
             actions = extend_menu(menu, items)

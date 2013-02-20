@@ -66,6 +66,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             text = block.text()
             self.syntax.parseLine(stack, text, self.processor)
             userData = block.userData()
+            
             if userData is None:
                 userData = self.editor.blockUserDataFactory(block)
                 block.setUserData(userData)
