@@ -1,6 +1,7 @@
 #-*- encoding: utf-8 -*-
 
 import os, sys
+import random
 
 from prymatex.qt import QtCore, QtGui
 
@@ -12,6 +13,13 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.misc import get_home_dir
 from prymatex.widgets.pmxterm import BackendManager, TerminalWidget
 
+
+SHEME_SCOPES = [ 'comment', 'string', 'constant.numeric', 'constant.language', 
+    'constant.character, constant.other', 'variable.language, variable.other',
+    'keyword', 'storage', 'entity.name.class', 'entity.other.inherited-class',
+    'entity.name.function', 'variable.parameter', 'entity.name.tag',
+    'entity.other.attribute-name', 'support.function', 'support.constant',
+    'support.type, support.class', 'support.other.variable', 'invalid' ]
 
 class TabbedTerminal(QtGui.QTabWidget):
     
@@ -110,11 +118,11 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
     @pmxConfigPorperty(default = False)
     def editorTheme(self, value):
         if value:
-            self.application.addSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
+            self.application.registerSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
         else:
-            self.application.removeSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
+            self.application.unregisterSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
             
-            
+
     terminalAvailable = True
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
@@ -146,9 +154,27 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
 
 
     # ---------------- Settings hooks
-    def on_defaultTheme_changed(self, theme):
-        print theme
-    
+    def on_defaultTheme_changed(self, themeUUID):
+        theme = self.application.supportManager.getTheme(themeUUID)
+        #scheme = ColorScheme(theme.name)
+        
+        # Foreground and background
+        #scheme.setBackground(theme.settings["background"])
+        #scheme.setBackground(theme.settings["selection"], intense = True)
+        #scheme.setForeground(theme.settings["foreground"])
+        #scheme.setForeground(theme.settings["lineHighlight"], intense = True)
+        
+        # Mapping scopes :)
+        #scopes = SHEME_SCOPES[:]
+        #random.shuffle(scopes)
+        #scopes = scopes[:16]
+        #for index, scope in enumerate(scopes[:8]):
+        #    scheme.setColor(index, theme.getStyle(scope)["foreground"])
+        #for index, scope in enumerate(scopes[8:]):
+        #    scheme.setColor(index, theme.getStyle(scope)["foreground"], intense = True)
+        
+        # Set scheme :)
+        
     # ---------------- Commands
     def runCommand(self, command):
         self.sendCommand(command)

@@ -105,14 +105,19 @@ class SettingsGroup(object):
         self.listeners.append(listener)
 
     
-    def addHook(self, name, hookFunction):
-        hooks = self.hooks.setdefault(name, [])
-        hooks.append(hookFunction)
-        hookFunction(self.value(name))
-
     def removeListener(self, listener):
         self.listeners.remove(listener)
 
+    def addHook(self, name, handler):
+        hooks = self.hooks.setdefault(name, [])
+        if handler not in hooks:
+            hooks.append(handler)
+        handler(self.value(name))
+
+    def removeHook(self, name, handler):
+        hooks = self.hooks.setdefault(name, [])
+        if handler in hooks:
+            hooks.remove(handler)
 
     def addDialog(self, dialog):
         self.dialogs.append(dialog)

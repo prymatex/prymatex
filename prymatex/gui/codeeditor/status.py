@@ -143,7 +143,6 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
             self.disconnectEditor(self.currentEditor)
         #Change currentEditor
         self.currentEditor = editor
-        self.hideAllWidgets()
         if self.currentEditor is not None:
             self.connectEditor(self.currentEditor)
             self.comboBoxSymbols.setModel(self.currentEditor.symbolListModel)

@@ -29,7 +29,7 @@ class CompleterAddon(CodeEditorAddon):
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
-        if event.text() and self.editor.currentWord(direction = "left", search = False)[0]:
+        if event.text() and event.modifiers() == 0 and self.editor.currentWord(direction = "left", search = False)[0]:
             self.editor.showCachedCompleter()
         
 class SmartUnindentAddon(CodeEditorAddon):

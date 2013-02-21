@@ -179,14 +179,19 @@ def update_menu(menuBase, menuUpdates):
         items = menu["items"] if isinstance(menu, dict) and "items" in menu else menu.values()
         for item in items:
             if isinstance(item, dict) and "text" in item and item["text"] == name:
-                return item
+                return item, False
         newMenu = { "text": name, "items": [] }
         items.append(newMenu)
-        return newMenu
+        return newMenu, True
 
     for names, update in menuUpdates.iteritems():
         names = names if isinstance(names, (list, tuple)) else [ names ]
-        menu = reduce(lambda menu, name: find_or_create_submenu(menu, name), names, menuBase)
+        menu = menuBase
+        for name in names:
+            menu, created = find_or_create_submenu(menu, name)
+            if created:
+                menuBase[menu["text"]] = menu
+                menuBase = menu
         position = update.pop('position', None)
         section = update.pop('section', 0)
         extend_menu_section(menu, update, section = section, position = position)

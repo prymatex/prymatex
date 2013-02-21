@@ -349,16 +349,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             buildedObjects.append((instance, parent))
             return instance
         
-        def initializeComponentInstance(instance, parent):
-            instance.populate(self.pluginManager)
-            #instance.configure(self.currentProfile)
-            instance.initialize(parent)
-    
-        from pprint import pprint
         instance = buildComponentInstance(componentClass, componentParent)
         buildedObjects.reverse()
-        pprint(buildedObjects)
-
+        
         for ni, np in buildedObjects:
             ni.initialize(np)
             
@@ -379,11 +372,16 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         return socket
 
     # ------------- Settings
-    def addSettingHook(self, settingPath, handler):
-        pass
+    def registerSettingHook(self, settingPath, handler):
+        groupName, settingName = settingPath.split(".")
+        group = self.currentProfile.groupByName(groupName)
+        group.addHook(settingName, handler)
 
-    def removeSettingHook(self, settingPath, handler):
-        pass
+    def unregisterSettingHook(self, settingPath, handler):
+        groupName, settingName = settingPath.split(".")
+        group = self.currentProfile.groupByName(groupName)
+        group.removeHook(settingName, handler)
+        
     # ------------- Editors and mainWindow handle
     def createEditorInstance(self, filePath=None, parent=None):
         editorClass = filePath is not None and self.pluginManager.findEditorClassForFile(filePath) or self.pluginManager.defaultEditor()

@@ -8,7 +8,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.qt.compat import getSaveFileName
 from prymatex.qt.helpers import text2objectname
 from prymatex.qt.helpers.widgets import center_widget
-from prymatex.qt.helpers.menus import create_menu, extend_menu
+from prymatex.qt.helpers.menus import create_menu, extend_menu, update_menu
 
 from prymatex import resources
 
@@ -106,26 +106,31 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
 
     def populate(self, manager):
-        # TODO Sacar esto mejorar el tema de las actions
-        # TODO No violar al manager
-        # Create custom actions and build MainMenu
-        classActions = [
-            (self.registerEditorClassActions, manager.editors),
-            (self.registerDockClassActions, manager.dockers),
-            (self.registerDialogClassActions, manager.dialogs),
-            (self.registerStatusClassActions, manager.statusBars),
 
-        ]
-        for registerFunction, componentClases in classActions:
-            for componentClass in componentClases:
-                print componentClass
-                menus = componentClass.contributeToMainMenu()
-                if menus is not None:
-                    customActions = []
-                    for name, settings in menus.iteritems():
-                        actions = self.contributeToMainMenu(name, settings)
-                        customActions.extend(actions)
-                registerFunction(componentClass, customActions)
+        def extendMenuDictionary(menu, klass):
+            componentClasses = manager.findComponentsForClass(klass)
+            for componentClass in componentClasses:
+                extendMenuDictionary(menu, componentClass)
+        
+        for componentClass in manager.dockers + manager.dialogs + manager.statusBars:
+            menuExtensions = componentClass.contributeToMainMenu()
+            extendMenuDictionary(menuExtensions, componentClass)
+            print menuExtensions
+            customComponentsActions = []
+            for name, settings in menuExtensions.iteritems():
+                actions = self.contributeToMainMenu(name, settings)
+                customComponentsActions.extend(actions)
+            self.registerComponentClassActions(componentClass, customComponentsActions)
+        
+        for componentClass in manager.editors:
+            menuExtensions = componentClass.contributeToMainMenu()
+            extendMenuDictionary(menuExtensions, componentClass)
+            customEditorsActions = []
+            for name, settings in menuExtensions.iteritems():
+                actions = self.contributeToMainMenu(name, settings)
+                customEditorsActions.extend(actions)
+            self.registerEditorClassActions(componentClass, customEditorsActions)
+
 
     def initialize(self, application):
         PMXBaseComponent.initialize(self, application)
@@ -259,69 +264,30 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
                 self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
         self.customEditorActions[editorClass] = actions
 
-
-    def registerDockClassActions(self, dockClass, actions):
-        self.logger.debug("%s, actions: %d" % (str(dockClass), len(actions)))
+    def registerComponentClassActions(self, componentClass, actions):
+        self.logger.debug("%s, actions: %d" % (str(componentClass), len(actions)))
         #Conect Actions
         for action in actions:
             if hasattr(action, 'callback'):
-                receiver = lambda checked, action = action: self.dockActionDispatcher(checked, action)
+                receiver = lambda checked, componentClass = componentClass, \
+                    action = action: self.componentActionDispatcher(checked, componentClass, action)
                 self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
-        self.customDockActions[dockClass] = actions
-
-    
-    def registerDialogClassActions(self, dialogClass, actions):
-        self.logger.debug("%s, actions: %d" % (str(dialogClass), len(actions)))
-        #Conect Actions
-        for action in actions:
-            if hasattr(action, 'callback'):
-                receiver = lambda checked, action = action: self.dialogActionDispatcher(checked, action)
-                self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
-        self.customDialogActions[dialogClass] = actions
-
-
-    def registerStatusClassActions(self, statusClass, actions):
-        self.statusBar().registerStatusClassActions(statusClass, actions)
-
-
-    def dockActionDispatcher(self, checked, action):
-        #Find class for action
-        dockClasses = filter(lambda (cls, actions): action in actions, self.customDockActions.items())
-        assert len(dockClasses) == 1, "More than one dock class for action %s" % action
-        dockClass = dockClasses[0][0]
-        #Find instance
-        dockInstance = filter(lambda status: status.__class__ == dockClass, self.dockers)
-        assert len(dockInstance) == 1, "More than one instance for class %s" % dockClass
-        dockInstance = dockInstance[0]
+        #self.customDockActions[dockClass] = actions
         
-        callbackArgs = [ dockInstance ]
-        if action.isCheckable():
-            callbackArgs.append(checked)
-        action.callback(*callbackArgs)
-
-
-    def dialogActionDispatcher(self, checked, action):
-        #Find class for action
-        dialogClasses = filter(lambda (cls, actions): action in actions, self.customDialogActions.items())
-        assert len(dialogClasses) == 1, "More than one dock class for action %s" % action
-        dialogClass = dialogClasses[0][0]
-        #Find instance
-        dockInstance = filter(lambda status: status.__class__ == dialogClass, self.dialogs)
-        assert len(dialogInstance) == 1, "More than one instance for class %s" % dialogClass
-        dialogInstance = dialogInstance[0]
-        
-        callbackArgs = [ dialogInstance ]
-        if action.isCheckable():
-            callbackArgs.append(checked)
-        action.callback(*callbackArgs)
-
-    
     def currentEditorActionDispatcher(self, checked, action):
         callbackArgs = [self.currentEditor()]
         if action.isCheckable():
             callbackArgs.append(checked)
         action.callback(*callbackArgs)
 
+    def componentActionDispatcher(self, checked, componentClass, action):
+        componentInstances = self.findChildren(componentClass)
+        # Si tengo mas de una busco la que tiene foco
+        componentInstance = componentInstances.pop()
+        callbackArgs = [ componentInstance ]
+        if action.isCheckable():
+            callbackArgs.append(checked)
+        action.callback(*callbackArgs)
 
     def updateMenuForEditor(self, editor):
         if editor is None:
