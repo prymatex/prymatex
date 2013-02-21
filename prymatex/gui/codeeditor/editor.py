@@ -1384,8 +1384,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  }
             ]}
         menuContributions = { "Edit": edit, "View": view , "Text": text, "Navigation": navigation}
-        #for addon in addonClasses:
-        #    update_menu(menuContributions, addon.contributeToMainMenu())
         return menuContributions
     
     @classmethod

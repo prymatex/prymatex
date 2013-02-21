@@ -174,24 +174,24 @@ def extend_menu_section(menu, newItems, section = 0, position = None):
     menu["items"] = menuItems[:begin] + newSection + menuItems[end:]
 
 def update_menu(menuBase, menuUpdates):
-    # TODO Quiza sea mejor que en lugar de usar las tuplas sobreponer un dicionario con otro
-    def find_or_create_submenu(menu, name):
-        items = menu["items"] if isinstance(menu, dict) and "items" in menu else menu.values()
-        for item in items:
-            if isinstance(item, dict) and "text" in item and item["text"] == name:
-                return item, False
-        newMenu = { "text": name, "items": [] }
-        items.append(newMenu)
-        return newMenu, True
-
-    for names, update in menuUpdates.iteritems():
-        names = names if isinstance(names, (list, tuple)) else [ names ]
-        menu = menuBase
-        for name in names:
-            menu, created = find_or_create_submenu(menu, name)
-            if created:
-                menuBase[menu["text"]] = menu
-                menuBase = menu
-        position = update.pop('position', None)
-        section = update.pop('section', 0)
-        extend_menu_section(menu, update, section = section, position = position)
+    for name, update in menuUpdates.iteritems():
+        if isinstance(name, (list, tuple)):
+            #Navegate
+            menu = { "items": menuBase.values() }
+            for n in name:
+                if not isinstance(menu, dict) or "items" not in menu:
+                    return
+                items = filter(lambda item: isinstance(item, dict) and item["text"] == n, menu["items"])
+                if not items:
+                    return
+                menu = items.pop()
+            position = update.pop('position', None)
+            section = update.pop('section', 0)
+            extend_menu_section(menu, update, section = section, position = position)
+        else:
+            if name not in menuBase:
+                menuBase[name] = update
+            else:    
+                position = update.pop('position', None)
+                section = update.pop('section', 0)
+                extend_menu_section(menuBase.get(name), update, section = section, position = position)

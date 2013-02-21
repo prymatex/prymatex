@@ -35,6 +35,7 @@ class PMXSearchDock(QtGui.QDockWidget, Ui_SearchDock, PMXBaseDock):
     @classmethod
     def contributeToMainMenu(cls):
         edit = {
+            'text':'Edit',
             'items': [
                 "-",
                 {'text': "File Search",

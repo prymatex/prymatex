@@ -108,14 +108,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
     def populate(self, manager):
 
         def extendMenuDictionary(menu, klass):
+            update_menu(menu, klass.contributeToMainMenu())
             componentClasses = manager.findComponentsForClass(klass)
             for componentClass in componentClasses:
                 extendMenuDictionary(menu, componentClass)
         
         for componentClass in manager.dockers + manager.dialogs + manager.statusBars:
-            menuExtensions = componentClass.contributeToMainMenu()
+            menuExtensions = {}
             extendMenuDictionary(menuExtensions, componentClass)
-            print menuExtensions
             customComponentsActions = []
             for name, settings in menuExtensions.iteritems():
                 actions = self.contributeToMainMenu(name, settings)
@@ -123,7 +123,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             self.registerComponentClassActions(componentClass, customComponentsActions)
         
         for componentClass in manager.editors:
-            menuExtensions = componentClass.contributeToMainMenu()
+            menuExtensions = {}
             extendMenuDictionary(menuExtensions, componentClass)
             customEditorsActions = []
             for name, settings in menuExtensions.iteritems():

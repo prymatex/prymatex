@@ -393,6 +393,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     @classmethod
     def contributeToMainMenu(cls):
         edit = {
+            'text': 'Edit', 
             'items': [
                 '-',
                 {'text': "Find",
@@ -405,12 +406,14 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
                 }
             ]}
         text = {
+            'text': 'Text', 
             'items': [
                 {'text': 'Filter Through Command',
                  'callback': cls.showCommand
                  }
             ]}
         navigation = {
+            'text': 'Navigation', 
             'items': [
                 "-",
                 {'text': 'Go To &Line',

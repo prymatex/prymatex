@@ -215,14 +215,12 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     def readFile(self, filePath):
         """Read from file"""
         content, encode = encoding.read(filePath)
-        print encode
         return content
 
     def writeFile(self, filePath, content):
         """Function that actually save the content of a file."""
         self.unwatchPath(filePath)
         encode = encoding.write(content, filePath, self.defaultEncoding)
-        print encode
         self.watchPath(filePath)
 
     def closeFile(self, filePath):
