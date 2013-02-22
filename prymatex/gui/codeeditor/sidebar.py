@@ -77,6 +77,7 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
+        self.setObjectName(self.__class__.__name__)
 
     def initialize(self, editor):
         SideBarWidgetAddon.initialize(self, editor)
@@ -120,15 +121,13 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     @classmethod
     def contributeToMainMenu(cls):
         def on_actionShowLineNumbers_toggled(editor, checked):
-            instance = editor.findChild(cls, "Nombre")
+            instance = editor.findChild(cls, cls.__name__)
             if instance is not None:
                 instance.setVisible(checked)
 
         def on_actionShowLineNumbers_testChecked(editor):
-            instance = editor.findChild(cls, "Nombre")
-            if instance is not None:
-                return instance.isVisible()
-	    return False
+            instance = editor.findChild(cls, cls.__name__)
+            return instance is not None and instance.isVisible()
         
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
         menuEntry = {'text': "Line Numbers",
@@ -189,6 +188,7 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         QtGui.QWidget.__init__(self, parent)
         self.bookmarkflagImage = resources.getImage("bookmarkflag")
         self.setFixedWidth(self.bookmarkflagImage.width())
+        self.setObjectName(self.__class__.__name__)
         
     def initialize(self, editor):
         SideBarWidgetAddon.initialize(self, editor)
@@ -204,15 +204,13 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     @classmethod
     def contributeToMainMenu(cls):
         def on_actionShowBookmarks_toggled(editor, checked):
-            instance = editor.findChild(cls, "Nombre")
+            instance = editor.findChild(cls, cls.__name__)
             if instance is not None:
                 instance.setVisible(checked)
 
         def on_actionShowBookmarks_testChecked(editor):
-            instance = editor.findChild(cls, "Nombre")
-            if instance is not None:
-                return instance.isVisible()
-            return False
+            instance = editor.findChild(cls, cls.__name__)
+            return instance is not None and instance.isVisible()
             
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
         menuEntry = {'text': "Bookmarks",
@@ -269,7 +267,8 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         self.foldingtopImage = resources.getImage("foldingtop")
         self.foldingbottomImage = resources.getImage("foldingbottom")
         self.setFixedWidth(self.foldingbottomImage.width())
-        
+        self.setObjectName(self.__class__.__name__)
+
     def initialize(self, editor):
         SideBarWidgetAddon.initialize(self, editor)
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
@@ -282,15 +281,13 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     @classmethod
     def contributeToMainMenu(cls):
         def on_actionShowFoldings_toggled(editor, checked):
-            instance = editor.findChild(cls, "Nombre")
+            instance = editor.findChild(cls, cls.__name__)
             if instance is not None:
                 instance.setVisible(checked)
 
         def on_actionShowFoldings_testChecked(editor):
-            instance = editor.findChild(cls, "Nombre")
-            if instance is not None:
-                return instance.isVisible()
-            return False
+            instance = editor.findChild(cls, cls.__name__)
+            return instance is not None and instance.isVisible()
             
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
         menuEntry = {'text': 'Foldings',
@@ -359,6 +356,7 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
         self.setFixedWidth(10)
+        self.setObjectName(self.__class__.__name__)
         
     def initialize(self, editor):
         SideBarWidgetAddon.initialize(self, editor)
@@ -376,15 +374,13 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     @classmethod
     def contributeToMainMenu(cls):
         def on_actionShowSelection_toggled(editor, checked):
-            instance = editor.findChild(cls, "Nombre")
+            instance = editor.findChild(cls, cls.__name__)
             if instance is not None:
                 instance.setVisible(checked)
 
         def on_actionShowSelection_testChecked(editor):
-            instance = editor.findChild(cls, "Nombre")
-            if instance is not None:
-                return instance.isVisible()
-            return False
+            instance = editor.findChild(cls, cls.__name__)
+            return instance is not None and instance.isVisible()
             
         baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
         menuEntry = {'text': 'Selection',
