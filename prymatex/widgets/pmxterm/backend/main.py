@@ -28,13 +28,15 @@ def worker_multiplexer(queue_multiplexer, queue_notifier, addr):
         zrep.bind(addr[0])
         queue_multiplexer.put(addr[0])
     
-    while True:
+    should_continue = True
+    while should_continue:
         pycmd = zrep.recv_pyobj()
         method = getattr(multiplexer, pycmd["command"], None)
         if method is not None:
             zrep.send_pyobj(method(*pycmd["args"]))
         else:
             zrep.send_pyobj(None)
+        should_continue = pycmd["command"] != "proc_buryall"
 
 
 def worker_notifier(queue_notifier, addr):
@@ -48,7 +50,8 @@ def worker_notifier(queue_notifier, addr):
         zpub.bind(addr[0])
         queue_notifier.put(addr[0])
         
-    while True:
+    should_continue = True
+    while should_continue:
         data = queue_notifier.get()
         if not isinstance(data, (tuple, list)):
             data =  ( data, '' )
@@ -135,9 +138,11 @@ if __name__ == "__main__":
     def signal_handler(signal, frame):
         nproc.terminate()
         mproc.terminate()
+        nproc.join()
+        mproc.join()
         sys.exit(0)
     
-    if sys.platform.startswith("linux"):
-        signal.signal(signal.SIGINT, signal_handler)
-    elif sys.platform == "win32":
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    if sys.platform == "win32":
         signal.signal(signal.SIGBREAK, signal_handler)

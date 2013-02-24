@@ -319,9 +319,9 @@ class Multiplexer(base.Multiplexer):
                 sid = fd2sid[fd]
                 if self.proc_read(sid) and sid in self.session:
                     self.session[sid]["changed"] = time.time()
-                    self.queue.put([ sid, str(self.session[sid]["term"].dump()) ])
-            if len(i):
-                time.sleep(0.002)
+                    self.queue.put([ sid, str(self.proc_dump(sid)) ])
+            #if len(i):
+            #    time.sleep(0.002)
         self.proc_buryall()
 
     def is_session_alive(self, sid):

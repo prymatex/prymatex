@@ -11,7 +11,7 @@ from prymatex import resources
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.misc import get_home_dir
-from prymatex.widgets.pmxterm import BackendManager, TerminalWidget
+from prymatex.widgets.pmxterm import BackendManager, TerminalWidget, ColorScheme
 
 
 SHEME_SCOPES = [ 'comment', 'string', 'constant.numeric', 'constant.language', 
@@ -34,14 +34,8 @@ class TabbedTerminal(QtGui.QTabWidget):
         self.setCornerWidget(self._new_button)
         self.setTabsClosable(True)
         self.setMovable(True)
-        self._terms = []
         self.tabCloseRequested[int].connect(self._on_close_request)
         self.currentChanged[int].connect(self._on_current_changed)
-        self.connection_address = self.connection_file = None
-        
-    def setBackendConnections(self, filePath, address):
-        self.connection_file = filePath
-        self.connection_address = address
         
     def _on_close_request(self, idx):
         term = self.widget(idx)
@@ -58,11 +52,10 @@ class TabbedTerminal(QtGui.QTabWidget):
     
     def newTerminal(self):
         # Create session
-        session = self.parent().localBackend.session()
+        session = self.parent().backend.session()
         term = TerminalWidget(session, parent = self)
         term.sessionClosed.connect(self._on_session_closed)
         self.addTab(term, "Terminal")
-        self._terms.append(term)
         self.setCurrentWidget(term)
         session.start()
         term.setFocus()
@@ -77,7 +70,6 @@ class TabbedTerminal(QtGui.QTabWidget):
             self.setWindowTitle("Terminal")
             return
         idx = self.indexOf(term)
-        print term.info()
         title = "Terminal"
         self.setTabText(idx, title)
         self.setWindowTitle(title)
@@ -85,10 +77,6 @@ class TabbedTerminal(QtGui.QTabWidget):
     
     def _on_session_closed(self):
         term = self.sender()
-        try:
-            self._terms.remove(term)
-        except:
-            pass
         self.removeTab(self.indexOf(term))
         widget = self.currentWidget()
         if widget:
@@ -96,6 +84,9 @@ class TabbedTerminal(QtGui.QTabWidget):
         if self.count() == 0:
             self.newTerminal()
 
+    def setColorScheme(self, scheme):
+        for index in range(self.count()):
+            self.widget(index).setColorScheme(scheme)
 
 class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "F4"
@@ -132,48 +123,46 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.tabTerminals = TabbedTerminal(self)
         self.setWidget(self.tabTerminals)
         
-        # Backend Manager
+        # Manager
         self.backendManager = BackendManager(parent = self)
         self.application.aboutToQuit.connect(self.backendManager.closeAll)
         
-        self.localBackend = self.backendManager.localBackend(workingDirectory = get_home_dir())
-
-    def configure(self, profile):
-        PMXBaseDock.configure(self, profile)
-        try:
-            from prymatex.gui.codeeditor.editor import CodeEditor
-            profile.groupByClass(CodeEditor).addHook("defaultTheme", self.on_defaultTheme_changed)
-        except:
-            pass
+        # Local Backend
+        self.backend = self.backendManager.localBackend()
+        self.backend.started.connect(self.tabTerminals.newTerminal)
+        self.backend.finished.connect(self.on_backend_finished)
+        self.backend.start()
 
 
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
         mainWindow.terminal = self
-        self.tabTerminals.newTerminal()
 
-
+    # ---------------- Backend Signals
+    def on_backend_finished(self, status):
+        self.backend = None
+        
     # ---------------- Settings hooks
     def on_defaultTheme_changed(self, themeUUID):
         theme = self.application.supportManager.getTheme(themeUUID)
-        #scheme = ColorScheme(theme.name)
+        scheme = ColorScheme(theme.name)
         
         # Foreground and background
-        #scheme.setBackground(theme.settings["background"])
-        #scheme.setBackground(theme.settings["selection"], intense = True)
-        #scheme.setForeground(theme.settings["foreground"])
-        #scheme.setForeground(theme.settings["lineHighlight"], intense = True)
+        scheme.setBackground(theme.settings["background"])
+        scheme.setBackground(theme.settings["selection"], intense = True)
+        scheme.setForeground(theme.settings["foreground"])
+        scheme.setForeground(theme.settings["lineHighlight"], intense = True)
         
         # Mapping scopes :)
-        #scopes = SHEME_SCOPES[:]
-        #random.shuffle(scopes)
-        #scopes = scopes[:16]
-        #for index, scope in enumerate(scopes[:8]):
-        #    scheme.setColor(index, theme.getStyle(scope)["foreground"])
-        #for index, scope in enumerate(scopes[8:]):
-        #    scheme.setColor(index, theme.getStyle(scope)["foreground"], intense = True)
+        scopes = SHEME_SCOPES[:]
+        random.shuffle(scopes)
+        scopes = scopes[:16]
+        for index, scope in enumerate(scopes[:8]):
+            scheme.setColor(index, theme.getStyle(scope)["foreground"])
+        for index, scope in enumerate(scopes[8:]):
+            scheme.setColor(index, theme.getStyle(scope)["foreground"], intense = True)
         
-        # Set scheme :)
+        self.tabTerminals.setColorScheme(scheme)
         
     # ---------------- Commands
     def runCommand(self, command):
