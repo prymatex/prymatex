@@ -9,7 +9,7 @@ import json
 import ast
 import signal
 
-from prymatex.qt import QtCore
+from PyQt4 import QtCore
 
 class Session(QtCore.QObject):
     readyRead = QtCore.pyqtSignal()

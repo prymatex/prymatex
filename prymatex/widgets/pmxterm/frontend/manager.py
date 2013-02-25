@@ -18,14 +18,35 @@ LOCAL_BACKEND_SCRIPT = os.path.abspath(os.path.join(os.path.dirname(__file__), "
 
 
 class Backend(QtCore.QObject):
+    # Errors of Backend
+    FailedToStart = 0
+    Crashed = 1
+    Timedout = 2
+    WriteError = 4
+    ReadError = 3
+    UnknownError = 5
+    # ------------- States of Backend
+    NotRunning = 0
+    Starting = 1
+    Running = 2
+    # ------------- Signals
+    error = QtCore.pyqtSignal(int)
     started = QtCore.pyqtSignal()
     finished = QtCore.pyqtSignal(int)
+    stateChanged = QtCore.pyqtSignal(int)
     
     def __init__(self, name, parent = None):
         QtCore.QObject.__init__(self, parent)
         self.name = name
         self.sessions = {}
-        
+        self._state = self.NotRunning
+
+    def _set_state(self, state):
+        self._state = state
+        self.stateChanged.emit(state)
+
+    def state(self):
+        return self._state
 
     #------------ Sockets
     def startMultiplexer(self, address):
@@ -54,19 +75,21 @@ class Backend(QtCore.QObject):
                     except:
                         self.sessions[sid].readyRead.emit()
         else:
-            print "algo esta mal con", data
-        
+            raise Exception("Session data error")
+
             
     def start(self):
+        self._set_state(self.Running)
         self.started.emit()
         
     def close(self):
         self.execute("proc_buryall")
+        self._set_state(self.NotRunning)
         self.finished.emit(0)
 
     def platform(self):
         return self.execute("platform")
-        
+
     def session(self):
         session = Session(self)
         self.sessions[session.sid()] = session
@@ -79,10 +102,10 @@ class LocalBackend(Backend):
         self.process = QtCore.QProcess(self)
         self.protocol = 'ipc' if sys.platform.startswith('linux') else 'tcp'
         self.address = None
-        self.ready = False
 
 
     def start(self):
+        self._set_state(self.Starting)
         args = [LOCAL_BACKEND_SCRIPT, "-t", self.protocol]
         if self.address is not None:
             args.extend(["-a", self.address])
@@ -109,13 +132,15 @@ class LocalBackend(Backend):
         self.process.readyReadStandardError.connect(self.backend_readyReadStandardError)
         self.process.readyReadStandardOutput.connect(self.backend_readyReadStandardOutput)
         self.process.finished.connect(self.backend_finished)
+        self.process.error.connect(self.backend_error)
+        self._set_state(self.Running)
         self.started.emit()
 
 
     def backend_start_readyReadStandardError(self):
-        print str(self.process.readAllStandardError()).decode("utf-8")
         self.process.readyReadStandardError.disconnect(self.backend_start_readyReadStandardError)
         self.process.readyReadStandardOutput.disconnect(self.backend_start_readyReadStandardOutput)
+        self.error.emit(self.ReadError)
         self.finished.emit(-1)
 
 
@@ -123,6 +148,9 @@ class LocalBackend(Backend):
     def backend_finished(self):
         self.finished.emit(0)
 
+
+    def backend_error(self, error):
+        self.error.emit(error)
 
     def backend_readyReadStandardError(self):
         print str(self.process.readAllStandardError()).decode("utf-8")

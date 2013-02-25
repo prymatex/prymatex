@@ -11,7 +11,7 @@ from prymatex import resources
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.misc import get_home_dir
-from prymatex.widgets.pmxterm import BackendManager, TerminalWidget, ColorScheme
+from prymatex.widgets.pmxterm import Backend, BackendManager, TerminalWidget, ColorScheme
 
 
 SHEME_SCOPES = [ 'comment', 'string', 'constant.numeric', 'constant.language', 
@@ -25,12 +25,10 @@ class TabbedTerminal(QtGui.QTabWidget):
     
     def __init__(self, parent=None):
         super(TabbedTerminal, self).__init__(parent)
-        #Solo si no es windows
-        #self.proc_info = ProcessInfo()
         self.setTabPosition(QtGui.QTabWidget.South)
         self._new_button = QtGui.QPushButton(self)
         self._new_button.setText("New")
-        self._new_button.clicked.connect(self.newTerminal)
+        self._new_button.clicked.connect(lambda checked: self.newTerminal())
         self.setCornerWidget(self._new_button)
         self.setTabsClosable(True)
         self.setMovable(True)
@@ -50,15 +48,17 @@ class TabbedTerminal(QtGui.QTabWidget):
     def currentTerminal(self):
         return self.currentWidget()
     
-    def newTerminal(self):
+    def newTerminal(self, session = None):
         # Create session
-        session = self.parent().backend.session()
-        term = TerminalWidget(session, parent = self)
-        term.sessionClosed.connect(self._on_session_closed)
-        self.addTab(term, "Terminal")
-        self.setCurrentWidget(term)
-        session.start()
-        term.setFocus()
+        if session is None and self.parent().backend.state() == Backend.Running:
+            session = self.parent().backend.session()
+        if session is not None:
+            term = TerminalWidget(session, parent = self)
+            term.sessionClosed.connect(self._on_session_closed)
+            self.addTab(term, "Terminal")
+            self.setCurrentWidget(term)
+            session.start()
+            term.setFocus()
         
         
     def timerEvent(self, event):
@@ -88,6 +88,7 @@ class TabbedTerminal(QtGui.QTabWidget):
         for index in range(self.count()):
             self.widget(index).setColorScheme(scheme)
 
+
 class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "F4"
     ICON = resources.getIcon("utilities-terminal")
@@ -114,7 +115,6 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
             self.application.unregisterSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
             
 
-    terminalAvailable = True
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
         PMXBaseDock.__init__(self)
@@ -130,17 +130,12 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
         # Local Backend
         self.backend = self.backendManager.localBackend()
         self.backend.started.connect(self.tabTerminals.newTerminal)
-        self.backend.finished.connect(self.on_backend_finished)
         self.backend.start()
 
 
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
         mainWindow.terminal = self
-
-    # ---------------- Backend Signals
-    def on_backend_finished(self, status):
-        self.backend = None
         
     # ---------------- Settings hooks
     def on_defaultTheme_changed(self, themeUUID):

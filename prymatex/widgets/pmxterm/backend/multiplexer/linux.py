@@ -15,6 +15,7 @@ import signal
 import struct
 import select
 import subprocess
+import constants
 
 from multiplexer import base
 from vt100 import Terminal
@@ -214,7 +215,7 @@ class Multiplexer(base.Multiplexer):
         self.proc_waitfordeath(sid)
         if sid in self.session:
             del self.session[sid]
-        self.queue.put(sid)
+        self.queue.put([sid, str(constants.BURIED) ])
         return True
 
 
@@ -222,6 +223,7 @@ class Multiplexer(base.Multiplexer):
     def proc_buryall(self):
         for sid in self.session.keys():
             self.proc_bury(sid)
+        self.queue.put(constants.BURIEDALL)
 
 
     @synchronized

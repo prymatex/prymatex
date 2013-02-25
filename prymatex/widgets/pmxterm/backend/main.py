@@ -8,6 +8,7 @@ import argparse
 import stat
 import signal
 import tempfile
+import constants
 
 from multiprocessing import Process, Queue
 from multiplexer import Multiplexer
@@ -53,10 +54,12 @@ def worker_notifier(queue_notifier, addr):
     should_continue = True
     while should_continue:
         data = queue_notifier.get()
-        if not isinstance(data, (tuple, list)):
-            data =  ( data, '' )
-        zpub.send_multipart(data)
-
+        if isinstance(data, (tuple, list)):
+            zpub.send_multipart(data)
+        elif isinstance(data, int) and data == constants.BURIEDALL:
+            should_continue = False
+            
+            
 
 # ==============
 # = Parse args =
