@@ -158,20 +158,14 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.registerTextCharFormatBuilder("line", self.textCharFormat_line_builder)
         self.registerTextCharFormatBuilder("selection", self.textCharFormat_selection_builder)
         self.registerTextCharFormatBuilder("brace", self.textCharFormat_brace_builder)
-        
-        #Cursor history
-        #self._cursorHistory, self._cursorHistoryIndex = [], 0
 
-
-    def initialize(self, mainWindow):
-        PMXBaseEditor.initialize(self, mainWindow)
-        self.selectorDialog = self.mainWindow.findChild(QtGui.QDialog, "SelectorDialog")
-        self.browserDock = self.mainWindow.findChild(QtGui.QDockWidget, "BrowserDock")
-        
         # Sidebars signals
         self.rightBar.updateRequest.connect(self.updateViewportMargins)
         self.leftBar.updateRequest.connect(self.updateViewportMargins)
         
+        # Document signals
+        self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)        
+
         # Editor signals
         self.blockCountChanged.connect(self.on_blockCountChanged)
         self.updateRequest.connect(self.updateSideBars)
@@ -179,9 +173,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.modificationChanged.connect(self.on_modificationChanged)
         self.syntaxChanged.connect(self.on_syntaxChanged)
         self.themeChanged.connect(self.highlightEditor)
-        
-        # Document signals
-        self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)
+
+    def initialize(self, mainWindow):
+        PMXBaseEditor.initialize(self, mainWindow)
+        self.selectorDialog = self.mainWindow.findChild(QtGui.QDialog, "SelectorDialog")
+        self.browserDock = self.mainWindow.findChild(QtGui.QDockWidget, "BrowserDock")
         
     # ----------- Override from PMXBaseComponent
     def addComponent(self, component):
@@ -206,7 +202,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
     
     def showMessage(self, *largs, **kwargs):
-        self.mainWindow.showMessage(*largs, **kwargs)
+        self.application.showMessage(*largs, **kwargs)
 
     def setPlainText(self, text):
         self.syntaxHighlighter.stop()

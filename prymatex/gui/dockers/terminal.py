@@ -5,12 +5,14 @@ import random
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.core import PMXBaseDock
-
 from prymatex import resources
+
+from prymatex.core import config
+from prymatex.core import PMXBaseDock
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.misc import get_home_dir
+
 from prymatex.widgets.pmxterm import Backend, BackendManager, TerminalWidget, ColorScheme
 
 
@@ -20,6 +22,9 @@ SHEME_SCOPES = [ 'comment', 'string', 'constant.numeric', 'constant.language',
     'entity.name.function', 'variable.parameter', 'entity.name.tag',
     'entity.other.attribute-name', 'support.function', 'support.constant',
     'support.type, support.class', 'support.other.variable', 'invalid' ]
+
+# Load color schemes
+ColorScheme.loadSchemes(os.path.join(config.PMX_SHARE_PATH, "Schemes"))
 
 class TabbedTerminal(QtGui.QTabWidget):
     
@@ -53,7 +58,7 @@ class TabbedTerminal(QtGui.QTabWidget):
         if session is None and self.parent().backend.state() == Backend.Running:
             session = self.parent().backend.session()
         if session is not None:
-            term = TerminalWidget(session, parent = self)
+            term = TerminalWidget(session, scheme = self.parent().colorScheme(), parent = self)
             term.sessionClosed.connect(self._on_session_closed)
             self.addTab(term, "Terminal")
             self.setCurrentWidget(term)
@@ -98,12 +103,14 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
     # ------------------ Settings
     SETTINGS_GROUP = 'Terminal'
 
-    @pmxConfigPorperty(default = "linux")
-    def colorScheme(self, scheme):
-        pass
+    @pmxConfigPorperty(default = "default")
+    def defaultScheme(self, name):
+        scheme = ColorScheme.scheme(name)
+        for index in range(self.tabTerminals.count()):
+            self.tabTerminals.widget(index).setColorScheme(scheme)
     
     @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
-    def font(self, font):
+    def defaultFont(self, font):
         for index in range(self.tabTerminals.count()):
             self.tabTerminals.widget(index).setFont(font)
 
@@ -131,33 +138,40 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.backend = self.backendManager.localBackend()
         self.backend.started.connect(self.tabTerminals.newTerminal)
         self.backend.start()
-
+        
+        # Color scheme
+        self.__editorColorScheme = None
+        
 
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
         mainWindow.terminal = self
-        
+
+    # ---------------- Scheme
+    def colorScheme(self):
+        return self.__editorColorScheme if self.editorTheme else ColorScheme.scheme(self.defaultScheme)
+
     # ---------------- Settings hooks
     def on_defaultTheme_changed(self, themeUUID):
         theme = self.application.supportManager.getTheme(themeUUID)
-        scheme = ColorScheme(theme.name)
+        self.__editorColorScheme = ColorScheme(theme.name)
         
         # Foreground and background
-        scheme.setBackground(theme.settings["background"])
-        scheme.setBackground(theme.settings["selection"], intense = True)
-        scheme.setForeground(theme.settings["foreground"])
-        scheme.setForeground(theme.settings["lineHighlight"], intense = True)
+        self.__editorColorScheme.setBackground(theme.settings["background"])
+        self.__editorColorScheme.setBackground(theme.settings["selection"], intense = True)
+        self.__editorColorScheme.setForeground(theme.settings["foreground"])
+        self.__editorColorScheme.setForeground(theme.settings["lineHighlight"], intense = True)
         
         # Mapping scopes :)
         scopes = SHEME_SCOPES[:]
         random.shuffle(scopes)
         scopes = scopes[:16]
         for index, scope in enumerate(scopes[:8]):
-            scheme.setColor(index, theme.getStyle(scope)["foreground"])
+            self.__editorColorScheme.setColor(index, theme.getStyle(scope)["foreground"])
         for index, scope in enumerate(scopes[8:]):
-            scheme.setColor(index, theme.getStyle(scope)["foreground"], intense = True)
+            self.__editorColorScheme.setColor(index, theme.getStyle(scope)["foreground"], intense = True)
         
-        self.tabTerminals.setColorScheme(scheme)
+        self.tabTerminals.setColorScheme(self.__editorColorScheme)
         
     # ---------------- Commands
     def runCommand(self, command):

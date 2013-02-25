@@ -3,10 +3,12 @@ import os
 
 from prymatex.qt import QtGui, QtCore
 
+from prymatex import resources
+
 from prymatex.ui.configure.terminal import Ui_Terminal
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.utils.i18n import ugettext as _
-from prymatex import resources
+from prymatex.widgets.pmxterm.schemes import ColorScheme
 
 class PMXTerminalSettings(QtGui.QWidget, SettingsTreeNode, Ui_Terminal):
     TITLE = "Terminal"
@@ -20,9 +22,14 @@ class PMXTerminalSettings(QtGui.QWidget, SettingsTreeNode, Ui_Terminal):
         
     def loadSettings(self):
         SettingsTreeNode.loadSettings(self)
-        #colorScheme = self.settingGroup.value('colorScheme')
-        #self.comboColorScheme.setCurrentIndex(self.comboColorScheme.findData(colorScheme))    
-        font = self.settingGroup.value('font')
+        defaultScheme = self.settingGroup.value('defaultScheme')
+        
+        for index, scheme in enumerate(ColorScheme.SCHEMES):
+            self.comboBoxScheme.addItem(scheme.name)
+            if defaultScheme == scheme.name:
+                self.comboBoxScheme.setCurrentIndex(index)
+                
+        font = self.settingGroup.value('defaultFont')
         self.comboBoxFontName.setCurrentFont(font)
         self.spinBoxFontSize.setValue(font.pointSize())
         
@@ -31,10 +38,9 @@ class PMXTerminalSettings(QtGui.QWidget, SettingsTreeNode, Ui_Terminal):
         self.checkBoxEditorTheme.blockSignals(False)
 
 
-    @QtCore.pyqtSlot(int)
-    def on_comboColorScheme_activated(self, index):
-        scheme = self.comboColorScheme.itemData(index)
-        self.settingGroup.setValue('colorScheme', scheme)
+    @QtCore.pyqtSlot(str)
+    def on_comboBoxScheme_activated(self, name):
+        self.settingGroup.setValue('defaultScheme', name)
 
 
     @QtCore.pyqtSlot()
