@@ -9,7 +9,7 @@ from prymatex import resources
 from prymatex.gui.codeeditor.editor import CodeEditor
 from prymatex.ui.codeeditor.status import Ui_CodeEditorStatus
 
-class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
+class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
         PMXBaseStatusBar.__init__(self)
@@ -24,12 +24,15 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.setupWidgetFindReplace()
         self.setupEvents()
     
+    def initialize(self, mainWindow):
+        PMXBaseStatusBar.initialize(self, mainWindow)
+        self.hideAllWidgets()
+
+
     def hideAllWidgets(self):
         map(lambda widget: widget.setVisible(False), [self.widgetGoToLine, self.widgetFindReplace, self.widgetCommand, self.widgetIFind])
 
-    #============================================================
-    # Setup Events
-    #============================================================    
+    # --------------- Setup Events
     def setupEvents(self):
         self.lineEditIFind.installEventFilter(self)
         self.comboBoxCommand.installEventFilter(self)
@@ -71,9 +74,8 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
                     return True
         return QtGui.QWidget.eventFilter(self, obj, event)
 
-    #============================================================
-    # Setup Widgets
-    #============================================================
+
+    # -------------- Setup Widgets
     def setupWidgetStatus(self):
         tableView = QtGui.QTableView(self)
         tableView.setModel(self.application.supportManager.syntaxProxyModel)
@@ -122,9 +124,8 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.comboBoxFindMode.addItem("Escape sequences", 2)
         self.comboBoxFindMode.addItem("Regular expressions", 3)
         
-    #============================================================
-    # Handle editors
-    #============================================================
+
+    # --------------- Handle editors
     def acceptEditor(self, editor):
         return isinstance(editor, CodeEditor)
     
@@ -151,10 +152,8 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
             self.on_modeChanged(self.currentEditor)
             self.setTabSizeLabel(self.currentEditor)
         
-    #============================================================
-    # Status Widget
-    #============================================================
-    # AutoConnect signals----------------------------------------
+
+    # ---------------- AutoConnect Status Widget signals
     @QtCore.pyqtSlot(int)
     def on_comboBoxSyntaxes_activated(self, index):
         if self.currentEditor is not None:
@@ -232,9 +231,8 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         #Tab Size
         self.labelTabSize.setText("Soft Tab: %d" % editor.tabStopSize if editor.tabStopSoft else "Hard Tab: %d" % editor.tabStopSize)
         
-    #============================================================
-    # AutoConnect Command widget signals
-    #============================================================
+
+    # -------------- AutoConnect Command widget signals
     @QtCore.pyqtSlot()
     def on_pushButtonCommandClose_pressed(self):
         self.widgetCommand.setVisible(False)
@@ -252,9 +250,8 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.widgetCommand.setVisible(True)
         self.comboBoxCommand.setFocus()
     
-    #============================================================
-    # AutoConnect GoToLine widget signals
-    #============================================================
+    
+    # ------------ AutoConnect GoToLine widget signals
     @QtCore.pyqtSlot()
     def on_pushButtonGoToLineClose_pressed(self):
         self.widgetGoToLine.setVisible(False)
@@ -268,10 +265,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.widgetGoToLine.setVisible(True)
         self.spinBoxGoToLine.setFocus()
         
-    #============================================================
-    # FindReplace widget
-    #============================================================
-    # AutoConnect Signals ---------------------------------------
+    # --------- AutoConnect FindReplace widget Signals
     @QtCore.pyqtSlot()
     def on_pushButtonFindReplaceClose_pressed(self):
         self.widgetFindReplace.setVisible(False)
@@ -330,10 +324,8 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.widgetFindReplace.setVisible(True)
         self.lineEditFind.setFocus()
         
-    #============================================================
-    # IFind widget
-    #============================================================
-    # AutoConnect Signals ---------------------------------------
+    
+    # -------------- AutoConnect IFind widget Signals
     @QtCore.pyqtSlot()
     def on_pushButtonIFindClose_pressed(self):
         self.widgetIFind.setVisible(False)
@@ -386,10 +378,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.lineEditIFind.selectAll()
         self.lineEditIFind.setFocus()
 
-    #===========================================================================
-    # Menus
-    #===========================================================================
-    # Contributes to Main Menu
+    # ------------- Contributes to Main Menu
     @classmethod
     def contributeToMainMenu(cls):
         edit = {

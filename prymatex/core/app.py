@@ -371,7 +371,11 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         self.supportManager.addToEnvironment("PMX_" + name.upper() + "_PORT", port)
         return socket
 
-    # ------------- Settings
+    # ------------- Settings access
+    def settingValue(self, settingPath):
+        groupName, settingName = settingPath.split(".")
+        return self.currentProfile.groupByName(groupName).value(settingName)
+        
     def registerSettingHook(self, settingPath, handler):
         groupName, settingName = settingPath.split(".")
         group = self.currentProfile.groupByName(groupName)

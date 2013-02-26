@@ -33,7 +33,7 @@
        <number>6</number>
       </property>
       <item>
-       <widget class="QFontComboBox" name="comboBoxFontName">
+       <widget class="QFontComboBox" name="fontComboBoxName">
         <property name="fontFilters">
          <set>QFontComboBox::MonospacedFonts</set>
         </property>
@@ -53,7 +53,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkBoxFontAntialias">
+       <widget class="QCheckBox" name="checkBoxAntialias">
         <property name="maximumSize">
          <size>
           <width>80</width>
@@ -144,6 +144,15 @@
           <width>100</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="minimum">
+         <number>10</number>
+        </property>
+        <property name="maximum">
+         <number>1000</number>
+        </property>
+        <property name="singleStep">
+         <number>10</number>
         </property>
        </widget>
       </item>

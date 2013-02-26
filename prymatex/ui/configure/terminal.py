@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/terminal.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/terminal.ui'
 #
-# Created: Thu Jan 24 13:52:49 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Tue Feb 26 08:19:05 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -29,19 +29,19 @@ class Ui_Terminal(object):
         self.horizontalLayout_3.setSpacing(2)
         self.horizontalLayout_3.setMargin(6)
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
-        self.comboBoxFontName = QtGui.QFontComboBox(self.groupBoxFont)
-        self.comboBoxFontName.setFontFilters(QtGui.QFontComboBox.MonospacedFonts)
-        self.comboBoxFontName.setObjectName(_fromUtf8("comboBoxFontName"))
-        self.horizontalLayout_3.addWidget(self.comboBoxFontName)
+        self.fontComboBoxName = QtGui.QFontComboBox(self.groupBoxFont)
+        self.fontComboBoxName.setFontFilters(QtGui.QFontComboBox.MonospacedFonts)
+        self.fontComboBoxName.setObjectName(_fromUtf8("fontComboBoxName"))
+        self.horizontalLayout_3.addWidget(self.fontComboBoxName)
         self.spinBoxFontSize = QtGui.QSpinBox(self.groupBoxFont)
         self.spinBoxFontSize.setMaximumSize(QtCore.QSize(50, 16777215))
         self.spinBoxFontSize.setMinimum(7)
         self.spinBoxFontSize.setObjectName(_fromUtf8("spinBoxFontSize"))
         self.horizontalLayout_3.addWidget(self.spinBoxFontSize)
-        self.checkBoxFontAntialias = QtGui.QCheckBox(self.groupBoxFont)
-        self.checkBoxFontAntialias.setMaximumSize(QtCore.QSize(80, 16777215))
-        self.checkBoxFontAntialias.setObjectName(_fromUtf8("checkBoxFontAntialias"))
-        self.horizontalLayout_3.addWidget(self.checkBoxFontAntialias)
+        self.checkBoxAntialias = QtGui.QCheckBox(self.groupBoxFont)
+        self.checkBoxAntialias.setMaximumSize(QtCore.QSize(80, 16777215))
+        self.checkBoxAntialias.setObjectName(_fromUtf8("checkBoxAntialias"))
+        self.horizontalLayout_3.addWidget(self.checkBoxAntialias)
         self.verticalLayout_2.addWidget(self.groupBoxFont)
         self.groupBox = QtGui.QGroupBox(Terminal)
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
@@ -74,6 +74,9 @@ class Ui_Terminal(object):
         self.formLayout_2.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_3)
         self.spinBoxBufferSize = QtGui.QSpinBox(self.groupBox_2)
         self.spinBoxBufferSize.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.spinBoxBufferSize.setMinimum(10)
+        self.spinBoxBufferSize.setMaximum(1000)
+        self.spinBoxBufferSize.setSingleStep(10)
         self.spinBoxBufferSize.setObjectName(_fromUtf8("spinBoxBufferSize"))
         self.formLayout_2.setWidget(2, QtGui.QFormLayout.FieldRole, self.spinBoxBufferSize)
         self.checkBoxSynchronize = QtGui.QCheckBox(self.groupBox_2)
@@ -89,7 +92,7 @@ class Ui_Terminal(object):
     def retranslateUi(self, Terminal):
         Terminal.setWindowTitle(_('Terminal'))
         self.groupBoxFont.setTitle(_('Font'))
-        self.checkBoxFontAntialias.setText(_('Anti alias'))
+        self.checkBoxAntialias.setText(_('Anti alias'))
         self.groupBox.setTitle(_('Appearance'))
         self.label.setText(_('Color scheme:'))
         self.checkBoxEditorTheme.setText(_('Use editor theme when possible'))

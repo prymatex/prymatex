@@ -112,7 +112,6 @@ class SettingsGroup(object):
         hooks = self.hooks.setdefault(name, [])
         if handler not in hooks:
             hooks.append(handler)
-        handler(self.value(name))
 
     def removeHook(self, name, handler):
         hooks = self.hooks.setdefault(name, [])

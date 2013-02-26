@@ -4,12 +4,12 @@
 from prymatex.gui.codeeditor.dockers import PMXCodeBookmarksDock, PMXCodeSymbolsDock
 from prymatex.gui.codeeditor.editor import CodeEditor
 from prymatex.gui.codeeditor import helpers, addons, sidebar, minimap
-from prymatex.gui.codeeditor.status import PMXCodeEditorStatus
+from prymatex.gui.codeeditor.status import CodeEditorStatus
 #from prymatex.gui.codeeditor.overlay import EditorMessageOverlay, MiniMapOverlay
 
 def registerPlugin(manager):
     manager.registerEditor(CodeEditor)
-    manager.registerStatusBar(PMXCodeEditorStatus)
+    manager.registerStatusBar(CodeEditorStatus)
     manager.registerDocker(PMXCodeSymbolsDock)
     manager.registerDocker(PMXCodeBookmarksDock)
     
