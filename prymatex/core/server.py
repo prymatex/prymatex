@@ -195,7 +195,7 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
         
     def terminal(self, **kwargs):
         for command in kwargs["commands"]:
-            self.application.mainWindow.terminal.runCommand(command)
+            self.application.mainWindow.terminalDock.runCommand(command)
         self.sendResult()
 
     def debug(self, **kwargs):

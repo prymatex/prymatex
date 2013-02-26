@@ -141,6 +141,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         self.profileDialog = self.findChild(QtGui.QDialog, "ProfileDialog")
         self.templateDialog = self.findChild(QtGui.QDialog, "TemplateDialog")
         self.browserDock = self.findChild(QtGui.QDockWidget, "BrowserDock")
+        self.terminalDock = self.findChild(QtGui.QDockWidget, "TerminalDock")
         
     def environmentVariables(self):
         env = {}
