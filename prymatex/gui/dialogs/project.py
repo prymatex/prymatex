@@ -4,6 +4,8 @@
 import os
 
 from prymatex.qt import QtCore, QtGui
+from prymatex import resources
+
 from prymatex.core.components import PMXBaseDialog
 
 from prymatex.utils.i18n import ugettext as _
@@ -22,6 +24,7 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
         self.completerFileSystem = QtGui.QCompleter(model, self)
         self.lineLocation.setCompleter(self.completerFileSystem)
 
+        self.setupComboLicences()
         self.setupComboKeywords()        
         self.setupComboTemplates()
         self.buttonCreate.setDefault(True)
@@ -34,6 +37,11 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
         self.environmentDialog = self.mainWindow.findChild(QtGui.QDialog, "EnvironmentDialog")
 
         
+    def setupComboLicences(self):
+        for licence in resources.LICENSES:
+            self.comboBoxLicence.addItem(licence)
+
+
     def setupComboKeywords(self):
         # Build project keywords
         self.application.projectManager.keywordsListModel.clear()

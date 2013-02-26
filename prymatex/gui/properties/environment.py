@@ -15,23 +15,26 @@ class EnvironmentPropertiesWidget(MultiDictTableEditorWidget, PropertyTreeNode):
         MultiDictTableEditorWidget.__init__(self, parent)
         PropertyTreeNode.__init__(self, "environment")
         self.project = None
-
+        self.model().dictionaryChanged.connect(self.on_model_dictionaryChanged)
+        
     def acceptFileSystemItem(self, fileSystemItem):
         return fileSystemItem.isproject
     
     def edit(self, project):
         self.project = project
         self.clear()
-        self.addDictionary('user', self.project.shellVariables, editable = True, selectable=True)
+        variables = map(lambda value: {"name": value["variable"],
+            "value": value["value"],
+            "selected": value["enabled"]
+        }, self.project.shellVariables or [])
+        
+        self.addDictionary('user', variables, editable = True, selectable=True)
         self.addDictionary('project', self.project.environment())
         self.addDictionary('prymatex', self.application.supportManager.environmentVariables(), visible = False)
 
-    def on_variablesModel_variablesChanged(self, group, variables):
-        self.application.projectManager.updateProject(self.project, shellVariables = variables)
-
-    def on_pushAdd_pressed(self):
-        self.model.insertVariable()
-        
-    def on_pushRemove_pressed(self):
-        index = self.tableView.currentIndex()
-        self.model.removeRows(index.row() , 1)
+    def on_model_dictionaryChanged(self, dictionaryName):
+        variables = self.model().dictionaryData(dictionaryName, raw = True)
+        variables = map(lambda item: {"variable": item["name"], 
+            "value": item["value"], 
+            "enabled": item["selected"]}, variables)
+        self.project.shellVariables = variables

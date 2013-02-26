@@ -114,3 +114,4 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
     def clear(self):
         self.selectableMultiDictTableModel.clear()
         self.checkableListModel.clear()
+        self.menuAdd.clear()
