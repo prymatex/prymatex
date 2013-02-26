@@ -322,7 +322,7 @@ def tabSelectableModelFactory(mainWindow):
     def dataFunction():
         return map(lambda tab: 
             dict(data = tab, 
-                template = "<table><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(file)s</small></td></tr></table>", 
+                template = "<table width='100%%'><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(file)s</small></td></tr></table>", 
                 display = { "name": tab.tabTitle(), "file": tab.filePath }, 
                 image = tab.tabIcon()) 
             ,mainWindow.splitTabWidget.allWidgets())
