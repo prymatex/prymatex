@@ -44,11 +44,11 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
         # module = import_from_directory(directory, moduleName) if directory is not None else import_module(moduleName)
         module = import_from_directory(directory, moduleName)
         dialogClass = getattr(module, 'dialogClass')
-        self.application.populateComponent(dialogClass)
+        self.application.populateComponentClass(dialogClass)
         return dialogClass
         
     def createDialogInstance(self, dialogClass, mainWindow, async = False):
-        instance = self.application.createWidgetInstance(dialogClass, mainWindow)
+        instance = self.application.createComponentInstance(dialogClass, mainWindow)
         if async:
             instanceId = id(instance)
             self.instances[instanceId] = instance
