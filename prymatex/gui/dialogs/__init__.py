@@ -12,12 +12,12 @@ from .properties import PropertiesDialog
 from .environment import EnvironmentDialog
 
 def registerPlugin(manager):
-    manager.registerDialog(ProjectDialog)
-    manager.registerDialog(AboutDialog)
-    manager.registerDialog(SelectorDialog)
-    manager.registerDialog(SettingsDialog)
-    manager.registerDialog(BundleEditorDialog)
-    manager.registerDialog(ProfileDialog)
-    manager.registerDialog(TemplateDialog)
-    manager.registerDialog(PropertiesDialog)
-    manager.registerDialog(EnvironmentDialog)
+    manager.registerComponent(ProjectDialog)
+    manager.registerComponent(AboutDialog)
+    manager.registerComponent(SelectorDialog)
+    manager.registerComponent(SettingsDialog)
+    manager.registerComponent(BundleEditorDialog)
+    manager.registerComponent(ProfileDialog)
+    manager.registerComponent(TemplateDialog)
+    manager.registerComponent(PropertiesDialog)
+    manager.registerComponent(EnvironmentDialog)

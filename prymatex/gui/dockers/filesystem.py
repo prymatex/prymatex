@@ -6,80 +6,23 @@ import os, sys, shutil
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers.menus import create_menu
 
+# FileSystem docker parents
 from prymatex.core import PMXBaseDock
+from prymatex.gui.dockers.fstasks import FileSystemTasks
+from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
 
 from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.models.filesystem import SortFilterFileSystemProxyModel
-from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
-from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 
 
-#==============================================================
-# TODO: Migrar esta validacion para el rename al filemanager
-#==============================================================
-class PMXSafeFilesytemLineEdit(QtGui.QLineEdit):
-    def __init__(self, parent):
-        QtGui.QLineEdit.__init__(self, parent)
-        
-    def event(self, event):
-        if isinstance(event, QtGui.QKeyEvent):
-            key = event.key()
-            if not self.isValidPlatformPathKey(key):
-                return False
-            elif key == QtCore.Qt.Key_Return:
-                if not self.currentTextIsValidPath():
-                    return False
-        return super(PMXSafeFilesytemLineEdit, self).event(event)
-    
-    
-    def isValidPlatformPathKey(self, key):
-        k = QtCore.Qt
-        if key in [k.Key_Asterisk,
-                   k.Key_Backslash,
-                   k.Key_Less,
-                   k.Key_Greater,
-                   k.Key_Question,
-                   k.Key_Colon,
-                   ]:
-            return False
-        return True
-
-    DOS_NAMES = 'CON PRN AUX NUL COM1 COM2 COM3 COM4 COM5 COM6 COM7 COM8 COM9 LPT1 LPT2 LPT3 LPT4 LPT5 LPT6 LPT7 LPT8 LPT9'.split()
-    
-    def currentTextIsValidPath(self):
-        ''' Check if name is valid '''
-        text = self.text()
-        if not text:
-            return False
-        if sys.platform.count('win'):
-            if text.upper() in self.DOS_NAMES:
-                return False
-        return False
-    
-class PMXFileSystemItemDelegate(QtGui.QItemDelegate):
-    def createEditor(self, parent, option, index):
-        """Create a new editor"""
-        
-        editor = PMXSafeFilesytemLineEdit(parent)
-        editor.setText(index.data())
-        return editor
-    
-    def setEditorData(self, editor, index):
-        return QtGui.QItemDelegate.setEditorData(self, editor, index)
-        
-    def setModelData(self, editor, model, index):
-        return QtGui.QItemDelegate.setModelData(self, editor, model, index)
-
-class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks, PMXBaseDock):
+class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSystemDock):
     SHORTCUT = "Shift+F8"
     ICON = resources.getIcon("system-file-manager")
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
     
-    #=======================================================================
-    # Settings
-    #=======================================================================
+    # ----------- Settings
     SETTINGS_GROUP = 'FileSystem'
     @pmxConfigPorperty(default = '')
     def customFilters(self, filters):
@@ -218,9 +161,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         self.treeViewFileSystem.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeViewFileSystem.customContextMenuRequested.connect(self.showTreeViewFileSystemContextMenu)
     
-        #=======================================================================
         # Drag and Drop (see the proxy model)
-        #=======================================================================
         self.treeViewFileSystem.setDragEnabled(True)
         self.treeViewFileSystem.setAcceptDrops(True)
         self.treeViewFileSystem.setDefaultDropAction(QtCore.Qt.MoveAction)
@@ -259,9 +200,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         else:
             self.logger.debug("Not a directory %s" % path)
 
-    #================================================
-    # Tree View File System
-    #================================================
+    # -------------- Tree View File System
     def showTreeViewFileSystemContextMenu(self, point):
         self.fileSystemMenu.popup(self.treeViewFileSystem.mapToGlobal(point))
                 
@@ -272,10 +211,8 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         elif os.path.isdir(path):
             self.setPathAsRoot(path)
     
-    #===========================================================================
-    # Insted of using indexes, it's easier for history handling
+    # --- Insted of using indexes, it's easier for history handling
     # to manage paths 
-    #===========================================================================
     def currentPath(self):
         return self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
 
@@ -325,9 +262,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         if not len(self._pushButtonHistoryForward):
             self.pushButtonFoward.setEnabled(False)
 
-    #================================================
-    # Actions cut, copy, paste
-    #================================================
+    # ------------- Actions cut, copy, paste
     def on_actionCut_triggered(self):
         pass
         
@@ -347,9 +282,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
                 else:
                     self.application.fileManager.copy(srcPath, dstPath)
 
-    #================================================
-    # Actions Create and Delete objects
-    #================================================
+    # ------ Actions Create and Delete objects
     @QtCore.pyqtSlot()
     def on_actionNewFolder_triggered(self):
         basePath = self.currentPath()
@@ -378,10 +311,8 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         basePath = self.currentPath()
         self.renamePath(basePath)
     
-    #======================================================
     # Tree View Context Menu Actions
     # Some of them are in fstask's PMXFileSystemTasks mixin
-    #======================================================
     def pathToClipboard(self, checked = False):
         basePath = self.currentPath()
         QtGui.QApplication.clipboard().setText(basePath)
@@ -403,9 +334,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         if os.path.isfile(path):
             self.application.openFile(path)
     
-    #================================================
-    # Custom filters
-    #================================================      
+    # ------ Custom filters
     @QtCore.pyqtSlot()
     def on_pushButtonCustomFilters_pressed(self):
         filters, accepted = QtGui.QInputDialog.getText(self, _("Custom Filter"), 
@@ -436,9 +365,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         directory = self.application.fileManager.getDirectory(path)
         self.mainWindow.terminal.chdir(directory)
             
-    #================================================
-    # Sort and order Actions
-    #================================================        
+    # ----- Sort and order Actions
     @QtCore.pyqtSlot()
     def on_actionOrderByName_triggered(self):
         self.fileSystemProxyModel.sortBy("name", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())

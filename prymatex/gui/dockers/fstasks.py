@@ -8,7 +8,7 @@ from prymatex.qt import QtGui, QtCore
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core import exceptions
 
-class PMXFileSystemTasks(object):
+class FileSystemTasks(object):
     """Groups FileSystem and Project actions, it's a facade of the PMXFileManager
     that displays dialogs and handle common exceptions.
     

@@ -4,9 +4,10 @@
 import os
 import codecs
 
-# Build Docker
-from prymatex.core import PMXBaseDock as PMXDockMixin
+# Project Docker parents
+from prymatex.core import PMXBaseDock
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
+from prymatex.gui.dockers.fstasks import FileSystemTasks
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.helpers import create_menu, extend_menu_section
@@ -20,12 +21,11 @@ from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
 
 from prymatex import resources
 
-from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 
 from prymatex.models.projects import ProjectTreeNode
 from prymatex.models.projects.lists import SelectableProjectFileModel
 
-class ProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXDockMixin):
+class ProjectDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsDock):
     SHORTCUT = "F8"
     ICON = resources.getIcon("project-development")
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
@@ -42,7 +42,7 @@ class ProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXDoc
     
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
-        PMXDockMixin.__init__(self)
+        PMXBaseDock.__init__(self)
         self.setupUi(self)
         self.projectManager = self.application.projectManager
         self.fileManager = self.application.fileManager
@@ -61,7 +61,7 @@ class ProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXDoc
         
         
     def initialize(self, mainWindow):
-        PMXDockMixin.initialize(self, mainWindow)
+        PMXBaseDock.initialize(self, mainWindow)
         self.projectDialog = self.mainWindow.findChild(QtGui.QDialog, "ProjectDialog")
         self.templateDialog = self.mainWindow.findChild(QtGui.QDialog, "TemplateDialog")
         self.bundleEditorDialog = self.mainWindow.findChild(QtGui.QDialog, "BundleEditorDialog")
@@ -112,7 +112,7 @@ class ProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXDoc
             map(lambda path: self.projectTreeProxyModel.indexForPath(path), state["expanded"]))
 
     def environmentVariables(self):
-        environment = PMXDockMixin.environmentVariables(self)
+        environment = PMXBaseDock.environmentVariables(self)
         indexes = self.treeViewProjects.selectedIndexes()
         if indexes:
             node = self.currentNode()

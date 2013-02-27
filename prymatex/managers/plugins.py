@@ -61,6 +61,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         self.plugins = {}
         
         self.editors = []
+        self.components = {}
         self.dockers = []
         self.dialogs = []
         self.statusBars = []
@@ -82,7 +83,11 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         editorClass.plugin = self.currentPluginDescriptor
         self.editors.append(editorClass)
 
-
+    def registerComponent(self, componentClass, componentBase = MainWindow):
+        self.application.populateComponentClass(componentClass)
+        componentClass.plugin = self.currentPluginDescriptor
+        self.components.setdefault(componentBase, []).append(componentClass)
+        
     def registerDocker(self, dockerClass):
         self.application.populateComponentClass(dockerClass)
         dockerClass.plugin = self.currentPluginDescriptor
@@ -114,12 +119,13 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         addonClasses = self.addons.setdefault(widgetClass, [])
         addonClasses.append(addonClass)
 
-
+    # ------------ Handle component classes
     def findComponentsForClass(self, klass):
+        components = self.components.get(klass, [])
         if klass == MainWindow:
-            return self.dialogs + self.dockers + self.statusBars
+            return components + self.dialogs + self.dockers + self.statusBars
         else:
-            return self.addons.get(klass, []) + self.keyHelpers.get(klass, [])
+            return components + self.addons.get(klass, []) + self.keyHelpers.get(klass, [])
         
     # ------------ Handle editor classes
     def findEditorClassForFile(self, filePath):
@@ -133,9 +139,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         return self.editors[0]
 
 
-    #==================================================
-    # Load plugins
-    #==================================================
+    # ---------- Load plugins
     def loadResources(self, pluginDirectory, pluginEntry):
         if "icon" in pluginEntry:
             iconPath = os.path.join(pluginDirectory, pluginEntry["icon"])

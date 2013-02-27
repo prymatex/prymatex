@@ -1,42 +1,42 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.gui.codeeditor.dockers import PMXCodeBookmarksDock, PMXCodeSymbolsDock
-from prymatex.gui.codeeditor.editor import CodeEditor
-from prymatex.gui.codeeditor import helpers, addons, sidebar, minimap
-from prymatex.gui.codeeditor.status import CodeEditorStatus
-#from prymatex.gui.codeeditor.overlay import EditorMessageOverlay, MiniMapOverlay
+from .dockers import CodeEditorBookmarksDock, CodeEditorSymbolsDock
+from .editor import CodeEditor
+from . import helpers, addons, sidebar, minimap
+from .status import CodeEditorStatus
+#from .overlay import EditorMessageOverlay, MiniMapOverlay
 
 def registerPlugin(manager):
     manager.registerEditor(CodeEditor)
-    manager.registerStatusBar(CodeEditorStatus)
-    manager.registerDocker(PMXCodeSymbolsDock)
-    manager.registerDocker(PMXCodeBookmarksDock)
+    manager.registerComponent(CodeEditorStatus)
+    manager.registerComponent(CodeEditorSymbolsDock)
+    manager.registerComponent(CodeEditorBookmarksDock)
     
-    manager.registerKeyHelper(CodeEditor, helpers.KeyEquivalentHelper)
-    manager.registerKeyHelper(CodeEditor, helpers.SmartTypingPairsHelper)
-    manager.registerKeyHelper(CodeEditor, helpers.TabTriggerHelper)
-    manager.registerKeyHelper(CodeEditor, helpers.TabIndentHelper)
-    manager.registerKeyHelper(CodeEditor, helpers.CompleterHelper)
-    manager.registerKeyHelper(CodeEditor, helpers.BacktabUnindentHelper)
-    manager.registerKeyHelper(CodeEditor, helpers.BackspaceUnindentHelper)
-    manager.registerKeyHelper(CodeEditor, helpers.BackspaceRemoveBracesHelper)
-    manager.registerKeyHelper(CodeEditor, helpers.DeleteRemoveBracesHelper)
-    manager.registerKeyHelper(CodeEditor, helpers.DeleteUnindentHelper)
-    manager.registerKeyHelper(CodeEditor, helpers.MoveCursorToHomeHelper)
-    manager.registerKeyHelper(CodeEditor, helpers.SmartIndentHelper)
-    manager.registerKeyHelper(CodeEditor, helpers.OverwriteHelper)
-    manager.registerKeyHelper(CodeEditor, helpers.MultiCursorHelper)
+    manager.registerComponent(helpers.KeyEquivalentHelper, CodeEditor)
+    manager.registerComponent(helpers.SmartTypingPairsHelper, CodeEditor)
+    manager.registerComponent(helpers.TabTriggerHelper, CodeEditor)
+    manager.registerComponent(helpers.TabIndentHelper, CodeEditor)
+    manager.registerComponent(helpers.CompleterHelper, CodeEditor)
+    manager.registerComponent(helpers.BacktabUnindentHelper, CodeEditor)
+    manager.registerComponent(helpers.BackspaceUnindentHelper, CodeEditor)
+    manager.registerComponent(helpers.BackspaceRemoveBracesHelper, CodeEditor)
+    manager.registerComponent(helpers.DeleteRemoveBracesHelper, CodeEditor)
+    manager.registerComponent(helpers.DeleteUnindentHelper, CodeEditor)
+    manager.registerComponent(helpers.MoveCursorToHomeHelper, CodeEditor)
+    manager.registerComponent(helpers.SmartIndentHelper, CodeEditor)
+    manager.registerComponent(helpers.OverwriteHelper, CodeEditor)
+    manager.registerComponent(helpers.MultiCursorHelper, CodeEditor)
 
-    manager.registerKeyHelper(CodeEditor, helpers.PrintEditorStatusHelper)
+    manager.registerComponent(helpers.PrintEditorStatusHelper, CodeEditor)
 
-    manager.registerAddon(CodeEditor, addons.CompleterAddon)
-    manager.registerAddon(CodeEditor, addons.SmartUnindentAddon)
-    manager.registerAddon(CodeEditor, addons.SpellCheckerAddon)
-    manager.registerAddon(CodeEditor, addons.HighlightCurrentSelectionAddon)
+    manager.registerComponent(addons.CompleterAddon, CodeEditor)
+    manager.registerComponent(addons.SmartUnindentAddon, CodeEditor)
+    manager.registerComponent(addons.SpellCheckerAddon, CodeEditor)
+    manager.registerComponent(addons.HighlightCurrentSelectionAddon, CodeEditor)
 
-    #manager.registerAddon(CodeEditor, minimap.MiniMapAddon)
-    manager.registerAddon(CodeEditor, sidebar.BookmarkSideBarAddon)
-    manager.registerAddon(CodeEditor, sidebar.LineNumberSideBarAddon)
-    manager.registerAddon(CodeEditor, sidebar.FoldingSideBarAddon)
-    manager.registerAddon(CodeEditor, sidebar.SelectionSideBarAddon)
+    #manager.registerComponent(minimap.MiniMapAddon, CodeEditor)
+    manager.registerComponent(sidebar.BookmarkSideBarAddon, CodeEditor)
+    manager.registerComponent(sidebar.LineNumberSideBarAddon, CodeEditor)
+    manager.registerComponent(sidebar.FoldingSideBarAddon, CodeEditor)
+    manager.registerComponent(sidebar.SelectionSideBarAddon, CodeEditor)
