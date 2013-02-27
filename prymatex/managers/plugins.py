@@ -62,13 +62,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         
         self.editors = []
         self.components = {}
-        self.dockers = []
-        self.dialogs = []
-        self.statusBars = []
-        self.keyHelpers = {}
-        self.addons = {}
-
-
+        
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.plugins import PluginsSettingsWidget
@@ -87,45 +81,10 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         self.application.populateComponentClass(componentClass)
         componentClass.plugin = self.currentPluginDescriptor
         self.components.setdefault(componentBase, []).append(componentClass)
-        
-    def registerDocker(self, dockerClass):
-        self.application.populateComponentClass(dockerClass)
-        dockerClass.plugin = self.currentPluginDescriptor
-        self.dockers.append(dockerClass)
-
-
-    def registerStatusBar(self, statusBarClass):
-        self.application.populateComponentClass(statusBarClass)
-        statusBarClass.plugin = self.currentPluginDescriptor
-        self.statusBars.append(statusBarClass)
-
-
-    def registerDialog(self, dialogClass):
-        self.application.populateComponentClass(dialogClass)
-        dialogClass.plugin = self.currentPluginDescriptor
-        self.dialogs.append(dialogClass)
-
-
-    def registerKeyHelper(self, widgetClass, helperClass):
-        self.application.extendComponent(helperClass)
-        helperClass.plugin = self.currentPluginDescriptor
-        keyHelperClasses = self.keyHelpers.setdefault(widgetClass, [])
-        keyHelperClasses.append(helperClass)
-
-
-    def registerAddon(self, widgetClass, addonClass):
-        self.application.populateComponentClass(addonClass)
-        addonClass.plugin = self.currentPluginDescriptor
-        addonClasses = self.addons.setdefault(widgetClass, [])
-        addonClasses.append(addonClass)
-
+    
     # ------------ Handle component classes
     def findComponentsForClass(self, klass):
-        components = self.components.get(klass, [])
-        if klass == MainWindow:
-            return components + self.dialogs + self.dockers + self.statusBars
-        else:
-            return components + self.addons.get(klass, []) + self.keyHelpers.get(klass, [])
+        return self.components.get(klass, [])
         
     # ------------ Handle editor classes
     def findEditorClassForFile(self, filePath):

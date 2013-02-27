@@ -113,7 +113,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             for componentClass in componentClasses:
                 extendMenuDictionary(menu, componentClass)
         
-        for componentClass in manager.dockers + manager.dialogs + manager.statusBars:
+        for componentClass in manager.findComponentsForClass(self.__class__):
             menuExtensions = {}
             extendMenuDictionary(menuExtensions, componentClass)
             customComponentsActions = []
