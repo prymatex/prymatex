@@ -142,6 +142,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         self.templateDialog = self.findChild(QtGui.QDialog, "TemplateDialog")
         self.browserDock = self.findChild(QtGui.QDockWidget, "BrowserDock")
         self.terminalDock = self.findChild(QtGui.QDockWidget, "TerminalDock")
+        self.projectsDock = self.findChild(QtGui.QDockWidget, "ProjectsDock")
         
     def environmentVariables(self):
         env = {}
@@ -384,7 +385,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             if result == QtGui.QMessageBox.Yes:
                 saveAs = True
         if editor.isNew() or saveAs:
-            fileDirectory = self.application.fileManager.directory(self.projects.currentPath()) if editor.isNew() else editor.fileDirectory()
+            fileDirectory = self.application.fileManager.directory(self.projectsDock.currentPath()) if editor.isNew() else editor.fileDirectory()
             fileName = editor.fileName()
             fileFilters = editor.fileFilters()
             # TODO Armar el archivo destino y no solo el basedir

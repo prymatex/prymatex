@@ -25,7 +25,7 @@ from prymatex import resources
 from prymatex.models.projects import ProjectTreeNode
 from prymatex.models.projects.lists import SelectableProjectFileModel
 
-class ProjectDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsDock):
+class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsDock):
     SHORTCUT = "F8"
     ICON = resources.getIcon("project-development")
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
