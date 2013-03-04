@@ -301,8 +301,15 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             for editorClass, actions in self.customEditorActions.iteritems():
                 for action in actions:
                     action.setVisible(editorClass == currentEditorClass)
-                    if editorClass == currentEditorClass and action.isCheckable() and hasattr(action, 'testChecked'):
-                        action.setChecked(action.testChecked(editor))
+                    action.setChecked(
+                        editorClass == currentEditorClass and \
+                        action.isCheckable() and \
+                        hasattr(action, 'testChecked') and \
+                        action.testChecked(editor))
+                    action.setEnabled(
+                        editorClass == currentEditorClass and \
+                        not hasattr(action, 'testEnabled') or \
+                        (hasattr(action, 'testEnabled') and action.testEnabled(editor)))
 
 
     def showMessage(self, *largs, **kwargs):

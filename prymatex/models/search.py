@@ -8,6 +8,8 @@ from prymatex.qt import QtCore, QtGui
 from prymatex import resources
 from prymatex.models.trees import AbstractNamespaceTreeModel, TreeNodeBase
 
+from prymatex.utils import osextra
+
 class GroupTreeNode(TreeNodeBase):
     def __init__(self, name, directory, parent = None):
         self.title = name
@@ -16,7 +18,7 @@ class GroupTreeNode(TreeNodeBase):
         TreeNodeBase.__init__(self, self.identifier, parent)
 
     def acceptPath(self, path):
-        return os.path.commonprefix([self.directory, path]) == self.directory
+        return osextra.path.issubpath(path, self.directory)
 
     def splitToNamespace(self, path):
         dirName, fileName = os.path.dirname(path), os.path.basename(path)
@@ -81,15 +83,16 @@ class SearchTreeModel(AbstractNamespaceTreeModel):
     def addGroup(self, name, directory):
         #Estos son los roots, agregar un default group para cuando se busque en otros lugares o el por defecto
         groupNode = GroupTreeNode(name, directory)
-        self.addNode(groupNode)
+        self.insertNode(groupNode)
         
     def addFileFound(self, filePath, lines):
         #Buscar coincidencia con grupo para manejar el nombre
-        for group in self.rootNode.childrenNodes:
+        for group in self.rootNode.childNodes():
             if group.acceptPath(filePath):
                 namespace, fileName = group.splitToNamespace(filePath)
                 foundNode = FileFoundTreeNode(fileName, filePath)
                 for line in lines:
                     lineNode = LineTreeNode(*line)
                     foundNode.appendChild(lineNode)
-                self.addNamespaceNode(namespace, foundNode)
+                print namespace
+                self.insertNamespaceNode(namespace, foundNode)

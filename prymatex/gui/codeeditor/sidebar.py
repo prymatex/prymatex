@@ -129,8 +129,10 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             instance = editor.findChild(cls, cls.__name__)
             return instance is not None and instance.isVisible()
         
-        baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
-        menuEntry = {'text': "Line Numbers",
+        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
+        menuEntry = {
+            'name': 'lineNumbers',
+            'text': "Line Numbers",
             'callback': on_actionShowLineNumbers_toggled,
             'shortcut': 'F10',
             'checkable': True,
@@ -212,8 +214,10 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             instance = editor.findChild(cls, cls.__name__)
             return instance is not None and instance.isVisible()
             
-        baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
-        menuEntry = {'text': "Bookmarks",
+        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
+        menuEntry = {
+            'name': 'bookmarks',
+            'text': "Bookmarks",
             'callback': on_actionShowBookmarks_toggled,
             'shortcut': 'Alt+F10',
             'checkable': True,
@@ -289,8 +293,10 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             instance = editor.findChild(cls, cls.__name__)
             return instance is not None and instance.isVisible()
             
-        baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
-        menuEntry = {'text': 'Foldings',
+        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
+        menuEntry = {
+            'name': 'foldings',
+            'text': 'Foldings',
             'callback': on_actionShowFoldings_toggled,
             'shortcut': 'Shift+F10',
             'checkable': True,
@@ -382,8 +388,10 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             instance = editor.findChild(cls, cls.__name__)
             return instance is not None and instance.isVisible()
             
-        baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
-        menuEntry = {'text': 'Selection',
+        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
+        menuEntry = {
+            'name': 'selection',
+            'text': 'Selection',
             'callback': on_actionShowSelection_toggled,
             'shortcut': 'Shift+F10',
             'checkable': True,

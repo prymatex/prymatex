@@ -79,6 +79,7 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
     @classmethod
     def contributeToMainMenu(cls):
         navigation = {
+            'name': 'navigation',
             'text': 'Navigation',
             'items': [
                 "-",
@@ -87,7 +88,7 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
                  'shortcut': 'Meta+Ctrl+Shift+F',
                  }
             ]}
-        menuContributions = { "Navigation": navigation}
+        menuContributions = { "navigation": navigation}
         return menuContributions
     
     # ------------------ Menu Actions

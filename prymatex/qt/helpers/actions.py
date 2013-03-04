@@ -17,9 +17,12 @@ def toggle_actions(actions, enable):
 
 def create_action(parent, settings):
     """Create a QAction"""
-    text = settings.get("text", "Action")
+    if not settings.has_key("text"):
+        print settings
+    text = settings.get("text")
     action = QtGui.QAction(text, parent)
-    action.setObjectName(text2objectname(text, prefix = "action"))
+    name = settings.get("name", text)
+    action.setObjectName(text2objectname(name, prefix = "action"))
     
     # attrs
     if settings.has_key("icon"):
@@ -41,6 +44,8 @@ def create_action(parent, settings):
         action.callback = settings["callback"]
     if settings.has_key("testChecked"):
         action.testChecked = settings["testChecked"]
+    if settings.has_key("testEnabled"):
+        action.testEnabled = settings["testEnabled"]
     
     if settings.has_key("triggered") and callable(settings["triggered"]):
         parent.connect(action, QtCore.SIGNAL("triggered()"), settings["triggered"])
@@ -53,7 +58,6 @@ def create_action(parent, settings):
     #  since the context thing doesn't work quite well with these widgets)
     action.setShortcutContext(settings.get("context", QtCore.Qt.WindowShortcut))
     return action
-
 
 
 def create_bookmark_action(parent, url, text, icon=None, shortcut=None):

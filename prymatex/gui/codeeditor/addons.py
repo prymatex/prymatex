@@ -88,9 +88,10 @@ class SpellCheckerAddon(CodeEditorAddon):
             return False
             #return instance.spellingOnType
 
-        baseMenu = "Edit"
-        menuEntry = {'text': 'Spelling',
-                 'items': [
+        menuEntry = {
+                'name': 'spelling',
+                'text': 'Spelling',
+                'items': [
                     {'text': 'Show Spelling'},
                     {'text': 'Check Spelling'},
                     {'text': 'Check Spelling as You Type',
@@ -99,7 +100,7 @@ class SpellCheckerAddon(CodeEditorAddon):
                       'testChecked': on_actionSpellingOnType_testChecked
                     }
                 ]}
-        return { baseMenu: menuEntry }
+        return { 'edit': menuEntry }
 
     def contributeToContextMenu(self, cursor):
         items = []

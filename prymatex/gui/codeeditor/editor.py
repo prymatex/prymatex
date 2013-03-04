@@ -1204,6 +1204,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     @classmethod
     def contributeToMainMenu(cls):
         edit = {
+            'name': 'edit',
             'text': 'Edit',
             'items': [
                 '-',
@@ -1216,6 +1217,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             ]
         }
         view = {
+            'name': 'view',
             'text': 'View',
             'items': [
                 {'text': 'Font',
@@ -1259,6 +1261,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.IndentGuide) },
             ]}
         text = {
+            'name': 'text',
             'text': '&Text',
             'items': [ 
                 {'text': 'Select',
@@ -1350,6 +1353,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  }
             ]}
         navigation = {
+            'name': 'navigation',
             'text': 'Navigation',
             'items': [
                 "-",
@@ -1379,7 +1383,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'shortcut': 'Meta+Ctrl+Shift+B',
                  }
             ]}
-        menuContributions = { "Edit": edit, "View": view , "Text": text, "Navigation": navigation}
+        # TODO Hacerlo una lista
+        menuContributions = { "edit": edit, "view": view , "text": text, "navigation": navigation}
         return menuContributions
     
     @classmethod

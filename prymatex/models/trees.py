@@ -154,7 +154,7 @@ class AbstractNamespaceTreeModel(AbstractTreeModel):
     
     def insertNode(self, node):
         # TODO esto es como un appendNode asi que no estaria mal que se use ese metodo
-        return self.addNamespaceNode("", node)
+        return self.insertNamespaceNode("", node)
 
     def insertNamespaceNode(self, namespace, node):
         parentNode = self.nodeForNamespace(namespace, True)

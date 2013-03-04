@@ -382,7 +382,8 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     @classmethod
     def contributeToMainMenu(cls):
         edit = {
-            'text': 'Edit', 
+            'name': 'edit',
+            'text': '&Edit', 
             'items': [
                 '-',
                 {'text': "Find",
@@ -395,14 +396,16 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
                 }
             ]}
         text = {
-            'text': 'Text', 
+            'name': 'text',
+            'text': '&Text', 
             'items': [
                 {'text': 'Filter Through Command',
                  'callback': cls.showCommand
                  }
             ]}
         navigation = {
-            'text': 'Navigation', 
+            'name': 'navigation',
+            'text': '&Navigation', 
             'items': [
                 "-",
                 {'text': 'Go To &Line',
@@ -410,4 +413,4 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
                  'shortcut': 'Meta+Ctrl+Shift+L',
                  }
             ]}
-        return { "Edit": edit, "Navigation": navigation, "Text": text }
+        return { "edit": edit, "navigation": navigation, "text": text }
