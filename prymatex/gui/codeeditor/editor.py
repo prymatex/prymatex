@@ -169,7 +169,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         # Editor signals
         self.blockCountChanged.connect(self.on_blockCountChanged)
         self.updateRequest.connect(self.updateSideBars)
-        self.cursorPositionChanged.connect(self.on_cursorPositionChanged)
         self.modificationChanged.connect(self.on_modificationChanged)
         self.syntaxChanged.connect(self.on_syntaxChanged)
         self.themeChanged.connect(self.highlightEditor)
@@ -178,7 +177,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         PMXBaseEditor.initialize(self, mainWindow)
         self.selectorDialog = self.mainWindow.findChild(QtGui.QDialog, "SelectorDialog")
         self.browserDock = self.mainWindow.findChild(QtGui.QDockWidget, "BrowserDock")
-        
+
+        # Ultimo en conectar esta señal, para poder hacer el update
+        self.cursorPositionChanged.connect(self.setCurrentBraces)
+        self.cursorPositionChanged.connect(self.highlightEditor)
+
     # ----------- Override from PMXBaseComponent
     def addComponent(self, component):
         PMXBaseEditor.addComponent(self, component)
@@ -190,7 +193,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.rightBar.addWidget(widget)
         else:
             self.leftBar.addWidget(widget)
-        
+
     def on_syntaxChanged(self, syntax):
         # Build basic scope
         scopeHash = self.flyweightScopeFactory([syntax.scopeName])
@@ -238,11 +241,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         else:
             self.blocksAdded.emit(block, newBlockCount - self.lastBlockCount)
         self.lastBlockCount = self.document().blockCount()
-    
-    def on_cursorPositionChanged(self):
-        #El cursor se movio es hora de:
-        self.setCurrentBraces()
-        self.highlightEditor()
 
     # ------------- Base Editor Api
     @classmethod
@@ -548,9 +546,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         else:
             self.clearExtraSelectionCursors("line")
         self.setExtraSelectionCursors("brace", filter(lambda cursor: cursor is not None, list(self._currentBraces)))
-        for component in self.components():
-            if isinstance(component, CodeEditorAddon):
-                self.updateExtraSelectionCursors(component.extraSelectionCursors())
         self.updateExtraSelections()
 
         

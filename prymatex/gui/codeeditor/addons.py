@@ -17,9 +17,6 @@ class CodeEditorAddon(QtCore.QObject, PMXBaseEditorAddon):
     def initialize(self, editor):
         PMXBaseEditorAddon.initialize(self, editor)
 
-    def extraSelectionCursors(self):
-        return {}
-
     def contributeToContextMenu(self, cursor):
         return PMXBaseEditorAddon.contributeToContextMenu(self)
 
@@ -111,9 +108,6 @@ class SpellCheckerAddon(CodeEditorAddon):
                 items.append({'text': word,
                 'callback': lambda word = word, cursor = cursor: cursor.insertText(word) })
         return items
-
-    def extraSelectionCursors(self):
-        return { "spell": self.wordCursors[:] }
 
     def textCharFormat_spell_builder(self):
         format = QtGui.QTextCharFormat()

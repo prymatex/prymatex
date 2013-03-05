@@ -350,8 +350,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             return instance
         
         instance = buildComponentInstance(componentClass, componentParent)
-        buildedObjects.reverse()
-        
+        # buildedObjects.reverse()
+        # Initialize order is important, fist goes the internal components
+        # then the main component
         for ni, np in buildedObjects:
             ni.initialize(np)
             
