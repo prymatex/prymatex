@@ -580,9 +580,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             # Check if the position of the block is out side of the visible area
             if blockGeometry.top() > page_bottom:
                 break
-            positionY = round(blockGeometry.top())
             if block.isVisible():
-                
+                positionY = round(blockGeometry.top()) + offset.y()
                 user_data = block.userData()
                 if self.folding.isStart(self.folding.getFoldingMark(block)) and user_data.folded:
                     painter.drawPixmap(font_metrics.width(block.text()) + offset.x() + 5,
