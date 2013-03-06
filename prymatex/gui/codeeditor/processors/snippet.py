@@ -87,7 +87,6 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
 
 
     def setSnippetHolderOption(self, holder, index):
-        print index
         if index >= 0:
             holder.setOptionIndex(index)
             # Wrap snippet
