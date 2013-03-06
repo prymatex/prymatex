@@ -79,8 +79,28 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
     
     def selectHolder(self, holder):
         self.editor.setTextCursor(self.editor.newCursorAtPosition(holder.start, holder.end))
+        if hasattr(holder, 'options'):
+            self.editor.showFlatPopupMenu(
+                holder.options, 
+                lambda index, holder = holder: self.setSnippetHolderOption(holder, index), 
+                cursorPosition = True)
 
 
+    def setSnippetHolderOption(self, holder, index):
+        print index
+        if index >= 0:
+            holder.setOptionIndex(index)
+            # Wrap snippet
+            wrapCursor = self.editor.newCursorAtPosition(
+                self.startPosition(), self.endPosition()
+            )
+            
+            #Insert snippet
+            self.render(wrapCursor)
+            holder = self.nextHolder(holder)
+            if holder is not None:
+                self.selectHolder(holder)
+    
     def getHolder(self, start, end = None):
         return self.snippet.getHolder(start, end)
 

@@ -41,6 +41,12 @@ SNIPPET_SYNTAX = {
                'name': 'structure.transformation.snippet',
                'patterns': [{'include': '#escaped_char'},
                             {'include': '#substitution'}]},
+              #Menu
+              {'begin': '\\$\\{(\\d+)\\|',
+               'beginCaptures': {'1': {'name': 'keyword.menu.snippet'}},
+               'contentName': 'string.options',
+               'end': '\\|\\}',
+               'name': 'structure.menu.snippet'},
               # Variables
               #TabStop
               {'match': '\\$([a-zA-Z_][a-zA-Z0-9_]*)|\\${([a-zA-Z_][a-zA-Z0-9_]*)}',
@@ -153,6 +159,10 @@ class NodeList(list):
         elif scope == 'structure.transformation.snippet':
             self.append(text)
             node = StructureTransformation(scope, self)
+            self.append(node)
+        elif scope == 'structure.menu.snippet':
+            self.append(text)
+            node = StructureMenu(scope, self)
             self.append(node)
         elif scope == 'variable.tabstop.snippet':
             self.append(text)
@@ -349,6 +359,52 @@ class StructureTransformation(Node):
         else:
             self.placeholder = container
         return container
+
+class StructureMenu(Node):
+    def __init__(self, scope, parent = None):
+        super(StructureMenu, self).__init__(scope, parent)
+        self.index = None
+        self.placeholder = None
+        self.options = None
+        self.optionIndex = 0
+    
+    def close(self, scope, text):
+        node = self
+        if scope == 'keyword.menu.snippet':
+            self.index = int(text)
+        elif scope == 'string.options':
+            self.options = text.split(",")
+        else:
+            return super(StructureMenu, self).close(scope, text)
+        return node
+    
+    def render(self, processor, mirror = False):
+        self.start = processor.caretPosition()
+        if self.placeholder != None:
+            self.placeholder.render(processor, mirror = True)
+        else:
+            if hasattr(self, 'content'):
+                processor.insertText(self.content)
+            else:
+                processor.insertText(self.options[self.optionIndex])
+        self.end = processor.caretPosition()
+    
+    def reset(self):
+        self.optionIndex = 0
+        super(StructureMenu, self).reset()
+    
+    def taborder(self, container):
+        if type(container) == list:
+            container.append(self)
+        else:
+            self.placeholder = container
+        return container
+        
+    def setContent(self, content):
+        self.content = content
+
+    def setOptionIndex(self, index):
+        self.optionIndex = index
 
 #Snippet variables
 class VariableTabstop(Node):
