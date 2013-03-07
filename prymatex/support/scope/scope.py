@@ -80,17 +80,22 @@ class Selector(object):
 
     # ------- Matching 
     def does_match(self, context, rank = None):
+        #assert isinstance(rank, list)
         if not self.selector:
             if rank is not None:
                 rank.append(0)
             return True
         if isinstance(context, (basestring, Scope)):
             context = Context.get(context)
-        # TODO: Testing cache
-        if context in self.previousMatch:
-            rank.append(self.previousMatch[context][1])
-            return self.previousMatch[context][0]
-        if isinstance(context, Context):
-            match = context.left == wildcard or context.right == wildcard or self.selector.does_match(context.left.path, context.right.path, rank)
-            self.previousMatch[context] = (match, sum(rank))
-            return match
+
+        #assert isinstance(context, Context)
+        # Search in cache
+        matchKey = (context, isinstance(rank, list))
+        if matchKey in self.previousMatch:
+            if matchKey[1]:
+                rank.append(self.previousMatch[matchKey][1])
+            return self.previousMatch[matchKey][0]
+        
+        match = context.left == wildcard or context.right == wildcard or self.selector.does_match(context.left.path, context.right.path, rank)
+        self.previousMatch[matchKey] = (match, matchKey[1] and sum(rank) or None)
+        return match

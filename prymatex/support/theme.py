@@ -4,8 +4,8 @@
 import os
 
 from prymatex.support.bundle import PMXManagedObject
+from prymatex.support import scope
 from prymatex.utils import plist
-from prymatex.utils import scope
 
 """foreground, background, selection, invisibles, lineHighlight, caret, gutter
 prymatex add gutterForeground

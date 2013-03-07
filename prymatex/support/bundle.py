@@ -5,8 +5,7 @@ import os, re, shutil
 from copy import copy
 
 from prymatex.utils import plist
-from prymatex.utils import scope
-from prymatex.support import utils
+from prymatex.support import scope, utils
 
 """
 Este es el unico camino -> http://manual.macromates.com/en/

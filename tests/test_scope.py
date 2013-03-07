@@ -61,9 +61,10 @@ class ScopeSelectorTests(unittest.TestCase):
             self.assertTrue(selector.does_match(textScope, rank))
             self.assertLessEqual(sum(rank), lastRank)
             lastRank = sum(rank)
-
+        
+        print Selector("source.python.django").does_match("source.python")
+        
     def test_context(self):
         selector = Selector("source & ((L:punctuation.section.*.begin & R:punctuation.section.*.end) | (L:punctuation.definition.*.begin & R:punctuation.definition.*.end)) - string")
         rank = []
         self.assertTrue(selector.does_match(Context("source.python punctuation.definition.list.begin.python", "source.python punctuation.definition.list.end.python"), rank))
-    

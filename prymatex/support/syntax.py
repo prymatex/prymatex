@@ -10,7 +10,8 @@ import re
 
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import compileRegexp
-    
+from prymatex.support import scope
+
 SPLITLINES = re.compile('\n')
 
 class PMXSyntaxNode(object):
@@ -179,11 +180,11 @@ class PMXSyntax(PMXBundleItem):
         super(PMXSyntax, self).load(dataHash)
         for key in PMXSyntax.KEYS:
             value = dataHash.get(key, None)
-            if value != None and key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
-                try:
+            if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
+                if value is not None:
                     value = compileRegexp( value )
-                except TypeError, e:
-                    value = None
+            elif key == 'scopeName':
+                self.selector = scope.Selector(value)
             setattr(self, key, value)
     
     @property
@@ -191,7 +192,7 @@ class PMXSyntax(PMXBundleItem):
         dataHash = super(PMXSyntax, self).hash
         for key in PMXSyntax.KEYS:
             value = getattr(self, key)
-            if value != None:
+            if value is not None:
                 if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
                     value = value.pattern
                 dataHash[key] = value

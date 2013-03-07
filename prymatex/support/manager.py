@@ -19,8 +19,8 @@ from prymatex.support.template import PMXTemplate, PMXTemplateFile
 from prymatex.support.project import PMXProject
 from prymatex.support.theme import PMXTheme, PMXThemeStyle
 from prymatex.support.utils import ensurePath
+from prymatex.support import scope
 
-from prymatex.utils import scope
 from prymatex.utils.decorators.deprecated import deprecated
 from prymatex.utils.decorators.memoize import dynamic_memoized, remove_memoized_argument, remove_memoized_function
 
@@ -233,6 +233,10 @@ class PMXSupportBaseManager(object):
         snippet.setManager(self)
         return snippet
 
+    #--------------- Scopes and selectors --------------
+    def createScopeSelector(self, scopeSelector):
+        return scope.Selector(scopeSelector)
+        
     def __sort_filter_items(self, items, leftScope, rightScope=None):
         context = scope.Context.get(leftScope, rightScope)
         rank = []
