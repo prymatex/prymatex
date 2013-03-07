@@ -5,7 +5,7 @@ from bisect import bisect
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.support import PMXSyntax
+from prymatex.support import PMXPreferenceSettings
 
 class CodeEditorFolding(QtCore.QObject):
     def __init__(self, editor):
@@ -23,14 +23,14 @@ class CodeEditorFolding(QtCore.QObject):
         self.editor.registerBlockUserDataHandler(self)
 
     def contributeToBlockUserData(self, userData):
-        userData.foldingMark = PMXSyntax.FOLDING_NONE
+        userData.foldingMark = PMXPreferenceSettings.FOLDING_NONE
         userData.foldedLevel = 0
         userData.folded = False
         
     def processBlockUserData(self, text, block, userData):
-        newFoldingMark = self.editor.syntax().folding(text)
+        newFoldingMark = self.editor.scope(block = block, blockPosition = 0, attribute="settings").folding(text)
         if userData.foldingMark != newFoldingMark:
-            if newFoldingMark == PMXSyntax.FOLDING_NONE:
+            if newFoldingMark == PMXPreferenceSettings.FOLDING_NONE:
                 self.removeFoldingBlock(block)
             else:
                 self.addFoldingBlock(block)
@@ -148,7 +148,7 @@ class CodeEditorFolding(QtCore.QObject):
         index = self.folding.index(block)
         for block in self.folding[index:]:
             userData = block.userData()
-            if userData.foldingMark >= PMXSyntax.FOLDING_START or userData.foldingMark <= PMXSyntax.FOLDING_STOP:
+            if userData.foldingMark >= PMXPreferenceSettings.FOLDING_START or userData.foldingMark <= PMXPreferenceSettings.FOLDING_STOP:
                 nest += userData.foldingMark
             if nest <= 0:
                 return block
@@ -161,7 +161,7 @@ class CodeEditorFolding(QtCore.QObject):
         folding.reverse()
         for block in folding:
             userData = block.userData()
-            if userData.foldingMark >= PMXSyntax.FOLDING_START or userData.foldingMark <= PMXSyntax.FOLDING_STOP:
+            if userData.foldingMark >= PMXPreferenceSettings.FOLDING_START or userData.foldingMark <= PMXPreferenceSettings.FOLDING_STOP:
                 nest += userData.foldingMark
             if nest >= 0:
                 return block
@@ -172,11 +172,11 @@ class CodeEditorFolding(QtCore.QObject):
 
     def isStart(self, mark):
         if mark is None: return False
-        return mark >= PMXSyntax.FOLDING_START
+        return mark >= PMXPreferenceSettings.FOLDING_START
 
     def isStop(self, mark):
         if mark is None: return False
-        return mark <= PMXSyntax.FOLDING_STOP
+        return mark <= PMXPreferenceSettings.FOLDING_STOP
 
     def isFolded(self, block):
         return self.isFoldingMark(block) and block.userData().folded

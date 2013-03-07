@@ -3,14 +3,12 @@
 
 """Syntax's module
 http://manual.macromates.com/en/language_grammars.html
-http://manual.macromates.com/en/navigation_overview#customizing_foldings.html
 """
 
 import re
 
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import compileRegexp
-from prymatex.support import scope
 
 SPLITLINES = re.compile('\n')
 
@@ -89,7 +87,7 @@ class PMXSyntaxNode(object):
                     # TODO 0 es igual a lo capturado no hace falta hacer el match.groups() seria directemente el pattern
                     index = int(key)
                     if index <= len(match.groups()):
-                        #Problemas entre pytgon y ruby, al pones un span del match, en un None oniguruma me retorna (-1, -1),
+                        #Problemas entre python y ruby, al pones un span del match, en un None oniguruma me retorna (-1, -1),
                         #esto es importante para el filtro del llamador
                         matches.append([index, match.span(index), value['name']])
                 else:
@@ -165,14 +163,11 @@ class PMXSyntaxProxy(object):
                 return PMXSyntaxNode({}, self.syntax)
 
 class PMXSyntax(PMXBundleItem):
-    KEYS = [ 'comment', 'firstLineMatch', 'foldingStartMarker', 'scopeName', 'repository', 'foldingStopMarker', 'fileTypes', 'patterns']
+    KEYS = [ 'comment', 'firstLineMatch', 'scopeName', 'repository', 'fileTypes', 'patterns']
     TYPE = 'syntax'
     FOLDER = 'Syntaxes'
     EXTENSION = 'tmLanguage'
     PATTERNS = ['*.tmLanguage', '*.plist']
-    FOLDING_NONE = 0
-    FOLDING_START = 1
-    FOLDING_STOP = -1
     ROOT_GROUPS = [ "comment", "constant", "entity", "invalid",
                     "keyword", "markup", "meta", "storage",
                     "string", "support", "variable" ]
@@ -180,11 +175,9 @@ class PMXSyntax(PMXBundleItem):
         super(PMXSyntax, self).load(dataHash)
         for key in PMXSyntax.KEYS:
             value = dataHash.get(key, None)
-            if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
+            if key in ['firstLineMatch']:
                 if value is not None:
                     value = compileRegexp( value )
-            elif key == 'scopeName':
-                self.selector = scope.Selector(value)
             setattr(self, key, value)
     
     @property
@@ -193,7 +186,7 @@ class PMXSyntax(PMXBundleItem):
         for key in PMXSyntax.KEYS:
             value = getattr(self, key)
             if value is not None:
-                if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
+                if key in ['firstLineMatch']:
                     value = value.pattern
                 dataHash[key] = value
         return dataHash
@@ -201,8 +194,9 @@ class PMXSyntax(PMXBundleItem):
     @property
     def indentSensitive(self):
         #If stop marker match with "" the grammar is indent sensitive
-        match = self.foldingStopMarker.search("") if self.foldingStopMarker != None else None
-        return match != None
+        #match = self.foldingStopMarker.search("") if self.foldingStopMarker != None else None
+        #return match != None
+        return False
 
     @property
     def syntaxes(self):
@@ -300,15 +294,6 @@ class PMXSyntax(PMXBundleItem):
         if processor:
             processor.endLine(line)
         return position
-    
-    def folding(self, line):
-        start_match = self.foldingStartMarker.search(line) if self.foldingStartMarker != None else None
-        stop_match = self.foldingStopMarker.search(line) if self.foldingStopMarker != None else None
-        if start_match != None and stop_match == None:
-            return self.FOLDING_START
-        elif stop_match != None and start_match == None:
-            return self.FOLDING_STOP
-        return self.FOLDING_NONE
 
     def __str__(self):
         return u"<PMXSyntax %s>" % self.name

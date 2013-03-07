@@ -326,13 +326,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return scopeHash
     
     
-    def scope(self, cursor = None, blockPosition = None, documentPosition = None,
+    def scope(self, cursor = None, block = None, blockPosition = None, documentPosition = None,
                 scopeHash = None, direction = "right", attribute = "name"):
         if scopeHash is not None:
             return self.SCOPES[scopeHash][attribute]
-        cursor = cursor or (documentPosition is not None and self.cursorAtPosition(documentPosition)) or self.textCursor()
-        userData = cursor.block().userData()
-        positionInBlock = blockPosition or cursor.positionInBlock()
+        if block is None:
+            cursor = cursor or (documentPosition is not None and self.cursorAtPosition(documentPosition)) or self.textCursor()
+            block = cursor.block()
+        userData = block.userData()
+        positionInBlock = blockPosition or (cursor is not None and cursor.positionInBlock()) or 0
         if direction == "right":
             # TODO: Cuando el syntax processor funcione bien sacar este or
             rightScope = userData is not None and userData.scopeAtPosition(positionInBlock) or hash(self.syntax().scopeName)

@@ -195,9 +195,9 @@ class PMXBundle(PMXManagedObject):
         info_file = os.path.join(path, cls.FILE)
         data = plist.readPlist(info_file)
         bundle.load(data)
-            
+
 class PMXBundleItem(PMXManagedObject):
-    KEYS = [ 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]
+    KEYS = [ 'name', 'tabTrigger', 'keyEquivalent', 'scope', 'semanticClass' ]
     TYPE = ''
     FOLDER = ''
     EXTENSION = ''

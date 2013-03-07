@@ -52,7 +52,7 @@ def tm_excepthook(e_type, e, tb):
         if not offset: offset = 0
         io.write("<pre>%s\n%s</pre>\n" % (escape(e.text).rstrip(), "&nbsp;" * (offset-1) + "↑"))
         io.write("<blockquote><table border='0' cellspacing='0' cellpadding='0'>\n")
-        if filename and path.exists(filename) and "TM_SCRIPT_IS_UNTITLED" not in environ:
+        if filename and path.exists(filename):
             url = "&url=file://%s" % quote(filename)
             display_name = path.basename(filename)
         if filename == '<string>': # exception in exec'd string.
@@ -82,10 +82,10 @@ def tm_excepthook(e_type, e, tb):
                                     (e_type.__name__, escape(message)))
     if tb: # now we write out the stack trace if we have a traceback
         io.write("<blockquote><table border='0' cellspacing='0' cellpadding='0'>\n")
-        for trace in extract_tb(tb)[1:]: # skip the first one, to avoid showing pymate's execfile call.
+        for trace in extract_tb(tb):
             filename, line_number, function_name, text = trace
             url, display_name = '', 'untitled'
-            if filename and path.exists(filename) and "TM_SCRIPT_IS_UNTITLED" not in environ:
+            if filename and path.exists(filename):
                 url = "&url=file://%s" % quote(path.abspath(filename))
                 display_name = path.basename(filename)
             io.write("<tr><td><a class='near' href='txmt://open?line=%i%s'>" %

@@ -10,11 +10,27 @@ from collections import namedtuple
 from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
 from prymatex.support.utils import compileRegexp
 
+# New commands
+#input [ selection ]
+#inputFormat [ text ]
+#outputCaret [ afterOutput ]
+#outputFormat [ html ]
+#outputLocation [ newWindow ]
+#requiredCommands [ 
+#    {'command': git,
+#     'locations': [ "/usr/local/git/bin/git", "/opt/local/bin/git", "/usr/local/bin/git" ] },
+#     'variable': TM_GIT
+#]
+#version: 2
+
 class PMXCommand(PMXBundleItem):
-    KEYS = [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
+    KEYS = [    'input', 'fallbackInput', 'standardInput', 'inputFormat',               #Input
+                'output', 'standardOutput', 'outputFormat', 'outputLocation',           #Output
                 'command', 'winCommand', 'linuxCommand',                                #System based Command
-                'inputFormat',                                                          #Formato requerido en la entrada
+                'outputCaret'
                 'beforeRunningCommand',                                                 #Antes de correr el command
+                'version',                                                              #Command version
+                'requiredCommands',
                 'capturePattern', 'fileCaptureRegister',
                 'columnCaptureRegister', 'disableOutputAutoIndent',
                 'lineCaptureRegister', 'dontFollowNewOutput',
@@ -24,15 +40,15 @@ class PMXCommand(PMXBundleItem):
     EXTENSION = 'tmCommand'
     PATTERNS = ['*.tmCommand', '*.plist']
     EXIT_CODES = {
-                  200: 'discard',
-                  201: 'replaceSelectedText',
-                  202: 'replaceDocument',
-                  203: 'insertText',
-                  204: 'insertAsSnippet',
-                  205: 'showAsHTML',
-                  206: 'showAsTooltip',
-                  207: 'createNewDocument'
-                  }
+        200: 'discard',
+        201: 'replaceSelectedText',
+        202: 'replaceDocument',
+        203: 'insertText',
+        204: 'insertAsSnippet',
+        205: 'showAsHTML',
+        206: 'showAsTooltip',
+        207: 'createNewDocument'
+    }
     def load(self, dataHash):
         PMXBundleItem.load(self, dataHash)
         for key in PMXCommand.KEYS:
