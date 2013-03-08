@@ -22,12 +22,47 @@ from prymatex.support.utils import compileRegexp
 #     'variable': TM_GIT
 #]
 #version: 2
+#{ @"OakSaveStringListTransformer", @[ @"nop", @"saveActiveFile", @"saveModifiedFiles" ] },
+#{ @"OakInputStringListTransformer", @[ @"selection", @"document", @"scope", @"line", @"word", @"character", @"none" ] },
+#{ @"OakInputFormatStringListTransformer", @[ @"text", @"xml" ] },
+#{ @"OakOutputLocationStringListTransformer", @[ @"replaceInput", @"replaceDocument", @"atCaret", @"afterInput", @"newWindow", @"toolTip", @"discard", @"replaceSelection" ] },
+#{ @"OakOutputFormatStringListTransformer", @[ @"text", @"snippet", @"html", @"completionList" ] },
+#{ @"OakOutputCaretStringListTransformer", @[ @"afterOutput", @"selectOutput", @"interpolateByChar", @"interpolateByLine", @"heuristic" ] },
+#};
+# static std::string const BindingKeys[] = { 
+# bundles::kFieldIsDisabled, 
+# bundles::kFieldName, 
+# bundles::kFieldKeyEquivalent, 
+# bundles::kFieldTabTrigger, 
+# bundles::kFieldScopeSelector, 
+# bundles::kFieldSemanticClass, 
+# bundles::kFieldContentMatch, 
+# bundles::kFieldHideFromUser, 
+# bundles::kFieldDropExtension, 
+# bundles::kFieldGrammarExtension, 
+# bundles::kFieldGrammarFirstLineMatch, 
+# bundles::kFieldGrammarScope, 
+# bundles::kFieldGrammarInjectionSelector, 
+# "beforeRunningCommand", 
+# "input", 
+# "inputFormat", 
+# "outputLocation", 
+# "outputFormat", 
+# "outputCaret", 
+# "autoScrollOutput", 
+# "contactName", 
+# "contactEmailRot13", 
+# "description", 
+# "disableAutoIndent", 
+# "useGlobalClipboard", 
+# "author", 
+# "comment" \;}
 
 class PMXCommand(PMXBundleItem):
     KEYS = [    'input', 'fallbackInput', 'standardInput', 'inputFormat',               #Input
                 'output', 'standardOutput', 'outputFormat', 'outputLocation',           #Output
                 'command', 'winCommand', 'linuxCommand',                                #System based Command
-                'outputCaret'
+                'outputCaret',
                 'beforeRunningCommand',                                                 #Antes de correr el command
                 'version',                                                              #Command version
                 'requiredCommands',

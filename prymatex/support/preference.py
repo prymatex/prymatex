@@ -256,12 +256,13 @@ class PMXPreferenceMasterSettings(object):
     
     def folding(self, line):
         settings = self.__findFoldingSettings()
-        start_match = settings.foldingStartMarker.search(line) if settings.foldingStartMarker != None else None
-        stop_match = settings.foldingStopMarker.search(line) if settings.foldingStopMarker != None else None
-        if start_match != None and stop_match == None:
-            return PMXPreferenceSettings.FOLDING_START
-        elif stop_match != None and start_match == None:
-            return PMXPreferenceSettings.FOLDING_STOP
+        if settings is not None:
+            start_match = settings.foldingStartMarker.search(line) if settings.foldingStartMarker != None else None
+            stop_match = settings.foldingStopMarker.search(line) if settings.foldingStopMarker != None else None
+            if start_match != None and stop_match == None:
+                return PMXPreferenceSettings.FOLDING_START
+            elif stop_match != None and start_match == None:
+                return PMXPreferenceSettings.FOLDING_STOP
         return PMXPreferenceSettings.FOLDING_NONE
     
 class PMXPreference(PMXBundleItem):
