@@ -19,7 +19,12 @@ class PropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseDialog):
         
         self.stackedWidget = QtGui.QStackedWidget(self.splitter)
         self.widgetsLayout.addWidget(self.stackedWidget)
+
+        self.finished.connect(self.on_propertiesDialog_finished)
     
+    def on_propertiesDialog_finished(self, code):
+        self.saveChanges()
+
     def setModel(self, propertiesModel):
         for widget in propertiesModel.configNodes():
             if isinstance(widget, QtGui.QWidget) and self.stackedWidget.indexOf(widget) == -1:
@@ -46,6 +51,7 @@ class PropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseDialog):
         self.setCurrentPropertyWidget(treeNode)
     
     def setCurrentPropertyWidget(self, widget):
+        self.saveChanges()
         index = self.stackedWidget.indexOf(widget)
         widget.edit(self.treeView.model().fileSystemItem)
         self.stackedWidget.setCurrentIndex(index)
@@ -54,7 +60,9 @@ class PropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseDialog):
         self.textLabelPixmap.setPixmap(widget.icon().pixmap(20, 20))
         self.setWindowTitle("Properties - %s" % widget.title())
 
-    
+    def saveChanges(self):
+        self.stackedWidget.currentWidget().saveChanges()
+
     def exec_(self, fileSystemItem):
         self.treeView.model().setFilterFileSystem(fileSystemItem)
         self.selectFirstIndex()

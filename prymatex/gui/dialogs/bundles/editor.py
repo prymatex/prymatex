@@ -97,7 +97,6 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         for editor in self.editors:
             self.indexes[editor.TYPE] = self.stackedWidget.addWidget(editor)
 
-
     # ----------------- Toolbar create and delete bundle items
     def getBundleForIndex(self, index):
         if not index.isValid():
@@ -106,7 +105,7 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         while bundle.TYPE != 'bundle':
             bundle = bundle.parentNode()
         return bundle
-    
+
     def createBundleItem(self, itemName, itemType):
         index = self.treeView.currentIndex()
         bundle = self.getBundleForIndex(index)

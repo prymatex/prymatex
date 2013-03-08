@@ -136,41 +136,19 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
     #---------------------------------------------------
     # PROJECT CRUD
     #---------------------------------------------------
-    def createProject(self, name, directory, description = None, reuseDirectory = True):
-        """
-        Crea un proyecto nuevo lo agrega en los existentes y lo retorna,
-        """
-        #TODO: dejar este trabajo al file manager
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        elif not reuseDirectory:
-            raise Exception()
-        project = ProjectTreeNode(directory, { "name": name, "description": description })
-        try:
-            project.save()
-        except ProjectExistsException:
-            rslt = QtGui.QMessageBox.information(None, _("Project already created on %s") % name,
-                                          _("Directory %s already contains .pmxproject directory structure. "
-                                            "Unless you know what you are doing, Cancel and import project,"
-                                            " if it still fails, choose overwirte. Overwrite?") % directory,
-                                          QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Ok, QtGui.QMessageBox.Cancel) 
-            if rslt == QtGui.QMessageBox.Cancel:
-                return
-            try:
-                project.save(overwirte = True)
-            except FileException as excp:
-                QtGui.QMessageBox.critical(None, _("Project creation failed"), 
-                                           _("<p>Project %s could not be created<p><pre>%s</pre>") % (name, excp))
+    def createProject(self, name, directory, overwrite = False):
+        """Crea un proyecto nuevo y lo retorna"""
+        project = ProjectTreeNode(directory, { "name": name })
+        if not overwrite and os.path.exists(project.projectPath):
+            raise exceptions.ProjectExistsException()
+
+        project.save()
         self.addProject(project)
         self.appendToKnowProjects(project)
         return project
     
     def updateProject(self, project, **attrs):
         """Actualiza un proyecto"""
-        if len(attrs) == 1 and "name" in attrs and attrs["name"] == item.name:
-            #Updates que no son updates
-            return item
-
         project.update(attrs)
         project.save()
         return project

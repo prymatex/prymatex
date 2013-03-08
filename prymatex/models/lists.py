@@ -14,6 +14,8 @@ from prymatex.models.selectable import SelectableModelMixin
 # Checkable List
 #====================================================
 class CheckableListModel(QtCore.QAbstractListModel):
+    selectionChanged = QtCore.pyqtSignal()
+    
     def __init__(self, parent = None): 
         QtCore.QAbstractListModel.__init__(self, parent)
         self.__items = []
@@ -31,7 +33,7 @@ class CheckableListModel(QtCore.QAbstractListModel):
         if role == QtCore.Qt.DisplayRole:
             return item["name"]
         elif role == QtCore.Qt.CheckStateRole:
-            return item["selected"]
+            return item["selected"] and 2 or 0
         elif role == QtCore.Qt.ToolTipRole:
             return item
 
@@ -40,40 +42,41 @@ class CheckableListModel(QtCore.QAbstractListModel):
         item = self.__items[index.row()]
         if role == QtCore.Qt.CheckStateRole:
             item["selected"] = data
-            self.dataChanged.emit(index, index)
+            self.selectionChanged.emit()
             return True
-
 
     def flags(self, index):
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
 
-
     # ------------------ Custom functions
     def clear(self):
         self.__items = []
-        self.layoutChanged.emit()
+        self.selectionChanged.emit()
 
-
-    def setSelected(self, item, selected = True):
+    def setSelected(self, item, selected=True):
         value = filter(lambda k: k["name"] == item, self.__items)
         if value:
             value = value.pop()
-            index = self.__items.index(value)
-            value["selected"] = selected and 2 or 0
-            index = self.index(index)
-            self.dataChanged.emit(index, index)
+            value["selected"] = selected
+            self.selectionChanged.emit()
     
-
     def selectedItems(self):
-        return map(lambda item: item["name"], filter(lambda item: item["selected"] == 2, self.__items))
+        return map(lambda item: item["name"], filter(lambda item: item["selected"], self.__items))
 
+    def selectItems(self, names):
+        for item in self.__items:
+            item["selected"] = item["name"] in names
+        self.selectionChanged.emit()
+
+    def unselectAllItems(self):
+        self.selectItems([])
 
     # ------------------ Add remove keywords
-    def addItem(self, item, selected = False):
+    def addItem(self, item, selected=False):
         value = filter(lambda k: k["name"] == item, self.__items)
         if not value:
             self.beginInsertRows(QtCore.QModelIndex(), len(self.__items), len(self.__items))
-            self.__items.append({"name": item, "selected": selected and 2 or 0})
+            self.__items.append({"name": item, "selected": selected})
             self.endInsertRows()
         
     def addItems(self, items):

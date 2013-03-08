@@ -19,6 +19,8 @@ class PropertyTreeNode(ConfigureTreeNode):
     def edit(self, fileSystemItem):
         pass
 
+    def saveChanges(self):
+        pass
 
 class ProxyPropertyTreeNode(ProxyConfigureTreeNode):
     def acceptFileSystemItem(self, fileSystemItem):
@@ -27,6 +29,8 @@ class ProxyPropertyTreeNode(ProxyConfigureTreeNode):
     def edit(self, fileSystemItem):
         pass
 
+    def saveChanges(self):
+        pass
 
 class PropertiesTreeModel(ConfigureTreeModelBase):
     def treeNodeFactory(self, nodeName, nodeParent = None):

@@ -7,6 +7,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex import resources
 
 from prymatex.core.components import PMXBaseDialog
+from prymatex.core import exceptions
 
 from prymatex.utils.i18n import ugettext as _
 
@@ -17,7 +18,7 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
         QtGui.QDialog.__init__(self, parent)
         PMXBaseDialog.__init__(self)
         self.setupUi(self)
-        
+
         model = QtGui.QFileSystemModel(self)
         model.setRootPath(QtCore.QDir.rootPath())
         model.setFilter(QtCore.QDir.Dirs)
@@ -31,12 +32,10 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
         self.projectCreated = None
         self.userEnvironment = {}
 
-
     def initialize(self, mainWindow):
         PMXBaseDialog.initialize(self, mainWindow)
         self.environmentDialog = self.mainWindow.findChild(QtGui.QDialog, "EnvironmentDialog")
 
-        
     def setupComboLicences(self):
         for licence in resources.LICENSES:
             self.comboBoxLicence.addItem(licence)
@@ -44,20 +43,18 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
 
     def setupComboKeywords(self):
         # Build project keywords
-        self.application.projectManager.keywordsListModel.clear()
         self.comboBoxKeywords.setModel(
             self.application.projectManager.keywordsListModel
         )
-        self.comboBoxKeywords.lineEdit().setText("")
         self.comboBoxKeywords.lineEdit().setReadOnly(True)
-        self.application.projectManager.keywordsListModel.dataChanged.connect(
-            self.on_keywordsListModel_dataChanged
+        self.application.projectManager.keywordsListModel.selectionChanged.connect(
+            self.on_keywordsListModel_selectionChanged
         )
 
 
-    def on_keywordsListModel_dataChanged(self, topLeft, bottomRight):
-        current = self.application.projectManager.keywordsListModel.selectedKeywords()
-        self.comboBoxKeywords.lineEdit().setText(", ".join(current))
+    def on_keywordsListModel_selectionChanged(self):
+        currents = self.comboBoxKeywords.model().selectedItems()
+        self.comboBoxKeywords.lineEdit().setText(", ".join(currents))
         
 
     def setupComboTemplates(self):
@@ -124,10 +121,8 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
         self.comboBoxTemplate.setEnabled(checked)
         self.buttonEnvironment.setEnabled(checked)
 
-
     def on_buttonClose_pressed(self):
         self.reject()
-
 
     def on_buttonEnvironment_pressed(self):
         name = self.lineProjectName.text()
@@ -138,10 +133,24 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
             tEnv = template.buildEnvironment(projectName = name, projectLocation = location, localVars = True)
         self.userEnvironment = self.environmentDialog.editEnvironment(self.userEnvironment, template = tEnv)
 
-
     def runCreateProject(self, name, location):
-        description = self.textDescription.toPlainText()
-        self.projectCreated = self.application.projectManager.createProject(name, location, description)
+        try:
+            self.projectCreated = self.application.projectManager.createProject(name, location)
+        except exceptions.ProjectExistsException:
+            rslt = QtGui.QMessageBox.information(None, 
+                _("Project already created on %s") % name,
+                _("Directory %s already contains .pmxproject directory structure. "
+                "Unless you know what you are doing, Cancel and import project,"
+                " if it still fails, choose overwirte. Overwrite?") % location,
+                QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Ok, QtGui.QMessageBox.Cancel) 
+            if rslt == QtGui.QMessageBox.Cancel:
+                self.cancel()
+            self.projectCreated = self.application.projectManager.createProject(name, location, overwrite = True)
+
+        self.application.projectManager.updateProject(self.projectCreated,
+            description = self.textDescription.toPlainText(),
+            licence = self.comboBoxLicence.currentText(),
+            keywords = self.comboBoxKeywords.model().selectedItems())
 
         #Set template's bundle for project
         if self.checkBoxUseTemplate.isChecked():
@@ -151,10 +160,8 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
 
         self.accept()
 
-
     def afterRunTemplate(self, name, location):
         self.runCreateProject(name, location)
-
 
     def runTemplateForProject(self, name, location):
         index = self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0)
@@ -166,9 +173,10 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
             environment.update(self.userEnvironment)
             template.execute(environment, self.afterRunTemplate)
 
-    
     def createProject(self, title = "Create new project", directory = None, name = None):
         self.lineProjectName.setText(name or '')
+        self.comboBoxKeywords.lineEdit().setText("")
+        self.application.projectManager.keywordsListModel.unselectAllItems()
         self.buttonCreate.setEnabled(not directory is None and not name is None)
         self.lineLocation.setText(directory or self.application.projectManager.workspaceDirectory)
         self.checkBoxUseTemplate.setChecked(False)
