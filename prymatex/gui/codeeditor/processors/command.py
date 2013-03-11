@@ -138,7 +138,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.document().clear()
        
     # ------------------- Outpus function
-    def error(self, context):
+    def error(self, context, format = None):
         if self.errorCommand:
             raise Exception(context.errorValue)
         else:
@@ -152,7 +152,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def discard(self, context, format = None):
         pass
         
-    def replaceSelectedText(self, context):
+    def replaceSelectedText(self, context, format = None):
         cursor = self.editor.textCursor()
         if cursor.hasSelection():
             position = cursor.selectionStart()
@@ -171,7 +171,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def replaceInput(self, context, format = None):
         print "replaceInput"
 
-    def insertText(self, context):
+    def insertText(self, context, format = None):
         cursor = self.editor.textCursor()
         cursor.insertText(context.outputValue)
     
@@ -181,19 +181,19 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def afterInput(self, context, format = None):
         print "afterInput"
 
-    def afterSelectedText(self, context):
+    def afterSelectedText(self, context, format = None):
         cursor = self.editor.textCursor()
         cursor.setPosition(cursor.selectionEnd())
         cursor.insertText(context.outputValue)
         
-    def insertAsSnippet(self, context):
+    def insertAsSnippet(self, context, format = None):
         snippet = self.editor.application.supportManager.buildAdHocSnippet(context.outputValue, context.bundleItem.bundle, tabTrigger = context.bundleItem.tabTrigger)
         self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
             
-    def showAsHTML(self, context):
+    def showAsHTML(self, context, format = None):
         self.editor.browserDock.setRunningContext(context)
 
-    def showAsTooltip(self, context):
+    def showAsTooltip(self, context, format = None):
         message = context.outputValue.strip()
         timeout = len(message) * 20
         if timeout > 2000:
@@ -215,13 +215,13 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def toolTip(self, context, format = None):
         print "toolTip"
 
-    def createNewDocument(self, context):
+    def createNewDocument(self, context, format = None):
         editor= self.editor.mainWindow.addEmptyEditor()
         editor.setPlainText(context.outputValue)
         
     def newWindow(self, context, format = None):
         print "newWindow"
 
-    def openAsNewDocument(self, context):
+    def openAsNewDocument(self, context, format = None):
         editor= self.editor.mainWindow.addEmptyEditor()
         editor.setPlainText(context.outputValue)

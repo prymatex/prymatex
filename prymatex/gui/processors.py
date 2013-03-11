@@ -29,7 +29,7 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
         self.baseEnvironment = settings.get("environment", {})
         self.errorCommand = settings.get("errorCommand", False)
 
-    #beforeRunningCommand
+    # ------------ Before Running Command
     def saveModifiedFiles(self):
         ret = True
         for editor in self.mainWindow.editors():
@@ -47,8 +47,8 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
             return not (editor.isModified() or editor.isNew())
         return True
     
-    # Outpus function
-    def error(self, context):
+    # --------------- Outpus function
+    def error(self, context, format = None):
         if self.errorCommand:
             raise Exception(context.errorValue)
         else:
@@ -58,20 +58,26 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
                 context.outputType,
                 errorCommand = True
             )
-        
-    def showAsHTML(self, context):
+
+    def showAsHTML(self, context, format = None):
         self.mainWindow.browserDock.setRunningContext(context)
 
-    def showAsTooltip(self, context):
+    def showAsTooltip(self, context, format = None):
         message = context.outputValue.strip()
         timeout = len(message) * 20
 
         self.mainWindow.showMessage(context.outputValue, timeout = timeout)
-        
-    def createNewDocument(self, context):
+    
+    def toolTip(self, context, format = None):
+        print "toolTip"
+
+    def createNewDocument(self, context, format = None):
         editor = self.mainWindow.addEmptyEditor()
         editor.setPlainText(context.outputValue)
         
-    def openAsNewDocument(self, context):
+    def newWindow(self, context, format = None):
+        print "newWindow"
+
+    def openAsNewDocument(self, context, format = None):
         editor = self.mainWindow.addEmptyEditor()
         editor.setPlainText(context.outputValue)
