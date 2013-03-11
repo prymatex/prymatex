@@ -45,6 +45,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
             else:
                 scopes = block.userData().scopeRanges()
             lineXML = ""
+            print scopes
             for (start, end), scope in scopes:
                 ss = scope.split()
                 token = "".join(map(lambda scope: "<" + scope + ">", ss))
@@ -77,14 +78,14 @@ class PMXCommandProcessor(PMXCommandProcessor):
         return cursor.document().characterAt(cursor.position())
         
     def scope(self, format = None):
-        return self.editor.getCurrentScope()
+        return self.editor.scope()
     
     def selection(self, format = None):
         cursor = self.editor.textCursor()
         if cursor.hasSelection():
             text = cursor.selectedText().replace(u"\u2029", '\n').replace(u"\u2028", '\n')
             if format == "xml":
-                firstBlock, lastBlock = self.editor.getSelectionBlockStartEnd()
+                firstBlock, lastBlock = self.editor.selectionBlockStartEnd()
                 return self.formatAsXml(text, firstBlock, lastBlock, cursor.selectionStart() - firstBlock.position(), cursor.selectionEnd() - lastBlock.position())
             else:
                 return text
