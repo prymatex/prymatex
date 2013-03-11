@@ -122,11 +122,7 @@ class TextMate(QtCore.QObject):
     @QtCore.pyqtSlot(str)
     def _system(self, command):
         self.parent().runCommand(command)
-        
-    @QtCore.pyqtSlot(str)
-    def system(self, command):
-        self.parent().runCommand(command)
-        
+            
     def isBusy(self):
         return True
     isBusy = QtCore.pyqtProperty("bool", isBusy)
@@ -238,7 +234,11 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.raise_()
         if url is not None:
             self.lineUrl.setText(url.toString())
-        self.webView.setHtml(string, url)
+        page = QtWebKit.QWebPage(self.webView)
+        page.mainFrame().javaScriptWindowObjectCleared.connect(self.on_mainFrame_javaScriptWindowObjectCleared)
+        self.webView.setPage(page)
+        page.mainFrame().setUrl(url)
+        page.mainFrame().setHtml(string)
         self.runningContext = None
     
     def setRunningContext(self, context):
@@ -252,9 +252,16 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         process = Popen(command, stdout = PIPE, stdin = PIPE, stderr = PIPE, env = environment)
         self.webView.page().mainFrame().addToJavaScriptWindowObject("_systemWrapper", SystemWrapper(process, command))
     
-    #=======================================================================
-    # Browser Signals handlers
-    #=======================================================================
+    # ------------ Browser Signals handlers
+    def on_mainFrame_javaScriptWindowObjectCleared(self):
+        self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self))
+        environment = ""
+        if self.runningContext is not None:
+            environment = "\n".join(
+                map(lambda (key, value): 'window["{0}"]="{1}";'.format(key, value), self.runningContext.environment.iteritems())
+            )
+        self.webView.page().mainFrame().evaluateJavaScript(BASE_JS % environment)
+        
     def on_manager_commandUrlRequested(self, url):
         self.application.handleUrlCommand(url)
 
@@ -309,14 +316,6 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     def on_webView_loadFinished(self, ok):
         if not ok:
             return
-        self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self))
-        environment = ""
-        if self.runningContext is not None:
-            environment = "\n".join(
-                map(lambda (key, value): 'window["{0}"]="{1}";'.format(key, value), self.runningContext.environment.iteritems())
-            )
-        self.webView.page().mainFrame().evaluateJavaScript(BASE_JS % environment)
-        
         #Restore scroll
         if self.scrollValues[0]:
             self.webView.page().mainFrame().setScrollBarValue(QtCore.Qt.Horizontal, self.scrollValues[1])
