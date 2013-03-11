@@ -3,6 +3,7 @@
 
 import os
 import codecs
+import mimetypes
 from subprocess import Popen, PIPE, STDOUT
 
 from prymatex.qt import QtCore, QtGui, QtWebKit
@@ -23,8 +24,9 @@ class TmFileReply(QNetworkReply):
         fp = open(url.path(), 'r')
         self.content = fp.read()
         self.offset = 0
-        
-        self.setHeader(QNetworkRequest.ContentTypeHeader, "text/html; charset=utf-8")
+
+        mimetype = mimetypes.guess_type(url.path())[0]
+        self.setHeader(QNetworkRequest.ContentTypeHeader, mimetype)
         self.setHeader(QNetworkRequest.ContentLengthHeader, len(self.content))
         QtCore.QTimer.singleShot(0, self, QtCore.SIGNAL("readyRead()"))
         QtCore.QTimer.singleShot(0, self, QtCore.SIGNAL("finished()"))
@@ -177,7 +179,6 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         
         #New manager
         self.networkAccessManager = NetworkAccessManager(self, self.webView.page().networkAccessManager())
-        self.webView.page().setNetworkAccessManager(self.networkAccessManager)
         self.networkAccessManager.commandUrlRequested.connect(self.on_manager_commandUrlRequested)
 
         # Set the default home page
@@ -235,6 +236,7 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         if url is not None:
             self.lineUrl.setText(url.toString())
         page = QtWebKit.QWebPage(self.webView)
+        page.setNetworkAccessManager(self.networkAccessManager)
         page.mainFrame().javaScriptWindowObjectCleared.connect(self.on_mainFrame_javaScriptWindowObjectCleared)
         self.webView.setPage(page)
         page.mainFrame().setUrl(url)
