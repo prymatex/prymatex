@@ -20,19 +20,19 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
         self.instances = {}
 
         #Create socket
-        self.socket = self.application.zmqSocket(zmq.REP, "Server")
+        self.socket = self.application.zmqSocket(zmq.REP, "Dialog", addressType='ipc')
         self.socket.readyRead.connect(self.socketReadyRead)
     
     def socketReadyRead(self):
         command = self.socket.recv_pyobj()
         name = command.get("name")
         kwargs = command.get("kwargs", {})
-        
+
         #TODO: Filtro todo lo que sea None asumo que las signaturas de los metodos ponene los valores por defecto
         # esto tendria que ser controlado de una mejor forma
         kwargs = dict(filter(lambda (key, value): value != None, kwargs.iteritems()))
         
-        self.logger.debug("Server Recv --> Method: %s, Arguments: %s" % (name, kwargs))
+        self.logger.debug("Dialog Recv --> Method: %s, Arguments: %s" % (name, kwargs))
         method = getattr(self, name)
         try:
             method(**kwargs)
@@ -68,7 +68,7 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}  
         #Ensure Unicode encode
         result = unicode(value).encode("utf-8")
-        self.logger.debug("Server Send --> Result: %s" % (result))
+        self.logger.debug("Dialog Send --> Result: %s" % (result))
         self.socket.send(result)
         
     def async_window(self, **kwargs):

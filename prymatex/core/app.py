@@ -4,6 +4,7 @@
 import os
 import sys
 import inspect
+import tempfile
 
 import prymatex
 from prymatex import resources
@@ -19,6 +20,7 @@ from prymatex.utils.decorators import deprecated
 from prymatex.utils import coroutines
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime, logtime
+from prymatex.utils.zeromqt import ZmqSocket
 
 # The basic managers
 from prymatex.managers.profile import ProfileManager
@@ -86,7 +88,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
         sys.excepthook = displayExceptionDialog
 
-
     def qtMessageHandler(self, msgType, msgString):
         ''' Route Qt messaging system into Prymatex/Python one'''
         if msgType == QtCore.QtDebugMsg:
@@ -99,7 +100,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             self.logger.fatal(msgString)
         elif msgType == QtCore.QtSystemMsg:
             self.logger.debug("System: %s" % msgString)
-
 
     # ------- prymatex's micro kernel
     def applyOptions(self, options):
@@ -211,10 +211,8 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         self.mainWindow.close()
         del self.mainWindow
 
-
     def restart(self):
         self.exit(self.RESTART_CODE)
-
 
     def checkSingleInstance(self):
         """
@@ -230,7 +228,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             f = open(self.fileLock, 'w')
             f.write('%s' % self.applicationPid())
             f.close()
-
 
     # -------------------- Managers
     def setupSupportManager(self):
@@ -283,7 +280,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         from prymatex.managers.cache import CacheManager
         return self.createComponentInstance(CacheManager)
 
-
     def setupCoroutines(self):
         self.scheduler = coroutines.Scheduler(self)
 
@@ -311,7 +307,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         componentClass.application = self
         componentClass.logger = self.getLogger('.'.join([componentClass.__module__, componentClass.__name__]))
 
-
     def registerConfigurable(self, componentClass):
         self.currentProfile.registerConfigurable(componentClass)
         for settingClass in componentClass.contributeToSettings():
@@ -320,11 +315,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             componentClass.settings.addDialog(settingWidget)
             self.profileManager.registerSettingsWidget(settingWidget)
 
-
     def populateComponentClass(self, componentClass):
         self.extendComponent(componentClass)
         self.registerConfigurable(componentClass)
-
 
     # ------------------- Create components
     def createComponentInstance(self, componentClass, componentParent = None):
@@ -361,15 +354,23 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
         return instance
 
-
     # ------------ Create Zmq Sockets
-    def zmqSocket(self, socketType, name, addr='tcp://127.0.0.1'):
+    def zmqSocket(self, socketType, name, address='127.0.0.1', addressType='tcp', port = None):
         # TODO ver la variable aca, creo que merjor seria que la app genere environ pregunatando a los components
         # que esta genera
-        from prymatex.utils.zeromqt import ZmqSocket
         socket = ZmqSocket(socketType)
-        port = socket.bind_to_random_port(addr)
-        self.supportManager.addToEnvironment("PMX_" + name.upper() + "_PORT", port)
+        if addressType == "ipc":
+            addr = "ipc://%s" % tempfile.mkstemp(prefix="pmx")[1]
+            socket.bind(addr)
+        elif addressType == "tcp":
+            addr = "tcp://%s" % address
+            if isinstance(port, int):
+                addr += ":%d" % port
+                socket.bind(addr)
+            else:
+                port = socket.bind_to_random_port(addr)
+                addr += ":%d" % port
+        self.supportManager.addToEnvironment("PMX_" + name.upper() + "_ADDRESS", addr)
         return socket
 
     # ------------- Settings access
@@ -394,7 +395,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         if editorClass is not None:
             return self.createComponentInstance(editorClass, parent)
 
-
     def createMainWindow(self):
         """Creates the windows"""
         from prymatex.gui.mainwindow import PMXMainWindow
@@ -409,7 +409,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
             if not self.mainWindow.editors():
                 self.mainWindow.addEmptyEditor()
-
 
     def showMessage(self, message):
         #Si tengo mainwindow vamos por este camino, sino hacerlo llegar de otra forma

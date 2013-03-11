@@ -12,11 +12,11 @@ except ImportError, reason:
 
 from optparse import OptionParser, OptionGroup
 
-if 'PMX_SERVER_PORT' in os.environ:
-    PMX_SERVER_PORT = os.environ['PMX_SERVER_PORT']
+if 'PMX_DIALOG_ADDRESS' in os.environ:
+    PMX_DIALOG_ADDRESS = os.environ['PMX_DIALOG_ADDRESS']
 else:
-    #raise Exception("PMX_SERVER_PORT is not in environ")
-    PMX_SERVER_PORT = 10
+    #raise Exception("PMX_DIALOG_ADDRESS is not in environ")
+    PMX_DIALOG_ADDRESS = 'ipc://tmp/pmxYhv2Je'
 
 '''
 # create and show the dialog
@@ -399,7 +399,7 @@ class CommandHandler(object):
     def __init__(self):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
-        self.socket.connect('tcp://127.0.0.1:%s' % PMX_SERVER_PORT)
+        self.socket.connect(PMX_DIALOG_ADDRESS)
         
     # ======================
     # = New dialog methods =
