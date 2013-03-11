@@ -58,7 +58,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
             block = block.next()
         return "\n".join(result)
 
-    #Inputs
+    # --------------------- Inputs
     def document(self, format = None):
         #TODO: ver si pone los \n
         text = unicode(self.editor.document().toPlainText())
@@ -90,13 +90,13 @@ class PMXCommandProcessor(PMXCommandProcessor):
                 return text
         
     def selectedText(self, format = None):
-        return self.selection
+        return self.selection(format)
     
     def word(self, format = None):
         word, start, end = self.editor.currentWord()
         return word
     
-    #beforeRunningCommand
+    # ----------------- Before Running Command
     def saveModifiedFiles(self):
         ret = True
         for editor in self.editor.mainWindow.editors():
@@ -111,7 +111,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.mainWindow.saveEditor(editor = self.editor)
         return not (self.editor.isModified() or self.editor.isNew())
     
-    # deleteFromEditor
+    # ----------------- Delete From Editor
     def deleteWord(self):
         _, start, end = self.editor.currentWord()
         cursor = self.editor.textCursor()
@@ -137,7 +137,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def deleteDocument(self):
         self.editor.document().clear()
        
-    # Outpus function
+    # ------------------- Outpus function
     def error(self, context):
         if self.errorCommand:
             raise Exception(context.errorValue)
@@ -149,7 +149,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
                 errorCommand = True
             )
 
-    def discard(self, context):
+    def discard(self, context, format = None):
         pass
         
     def replaceSelectedText(self, context):
@@ -162,13 +162,25 @@ class PMXCommandProcessor(PMXCommandProcessor):
             cursor.insertText(context.outputValue)
         self.editor.setTextCursor(cursor)
         
-    def replaceDocument(self, context):
+    def replaceDocument(self, context, format = None):
         self.editor.updatePlainText(context.outputValue)
         
+    def replaceSelection(self, context, format = None):
+        print "replaceSelection"
+
+    def replaceInput(self, context, format = None):
+        print "replaceInput"
+
     def insertText(self, context):
         cursor = self.editor.textCursor()
         cursor.insertText(context.outputValue)
-        
+    
+    def atCaret(self, context, format = None):
+        print "atCaret"
+
+    def afterInput(self, context, format = None):
+        print "afterInput"
+
     def afterSelectedText(self, context):
         cursor = self.editor.textCursor()
         cursor.setPosition(cursor.selectionEnd())
@@ -200,10 +212,16 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
         self.editor.mainWindow.showMessage(message, timeout = timeout, point = point, linkMap = callbacks)
         
+    def toolTip(self, context, format = None):
+        print "toolTip"
+
     def createNewDocument(self, context):
         editor= self.editor.mainWindow.addEmptyEditor()
         editor.setPlainText(context.outputValue)
         
+    def newWindow(self, context, format = None):
+        print "newWindow"
+
     def openAsNewDocument(self, context):
         editor= self.editor.mainWindow.addEmptyEditor()
         editor.setPlainText(context.outputValue)

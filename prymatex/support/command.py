@@ -21,55 +21,26 @@ from prymatex.support.utils import compileRegexp
 #     'locations': [ "/usr/local/git/bin/git", "/opt/local/bin/git", "/usr/local/bin/git" ] },
 #     'variable': TM_GIT
 #]
-#version: 2
-#{ @"OakSaveStringListTransformer", @[ @"nop", @"saveActiveFile", @"saveModifiedFiles" ] },
-#{ @"OakInputStringListTransformer", @[ @"selection", @"document", @"scope", @"line", @"word", @"character", @"none" ] },
-#{ @"OakInputFormatStringListTransformer", @[ @"text", @"xml" ] },
-#{ @"OakOutputLocationStringListTransformer", @[ @"replaceInput", @"replaceDocument", @"atCaret", @"afterInput", @"newWindow", @"toolTip", @"discard", @"replaceSelection" ] },
-#{ @"OakOutputFormatStringListTransformer", @[ @"text", @"snippet", @"html", @"completionList" ] },
-#{ @"OakOutputCaretStringListTransformer", @[ @"afterOutput", @"selectOutput", @"interpolateByChar", @"interpolateByLine", @"heuristic" ] },
-#};
-# static std::string const BindingKeys[] = { 
-# bundles::kFieldIsDisabled, 
-# bundles::kFieldName, 
-# bundles::kFieldKeyEquivalent, 
-# bundles::kFieldTabTrigger, 
-# bundles::kFieldScopeSelector, 
-# bundles::kFieldSemanticClass, 
-# bundles::kFieldContentMatch, 
-# bundles::kFieldHideFromUser, 
-# bundles::kFieldDropExtension, 
-# bundles::kFieldGrammarExtension, 
-# bundles::kFieldGrammarFirstLineMatch, 
-# bundles::kFieldGrammarScope, 
-# bundles::kFieldGrammarInjectionSelector, 
-# "beforeRunningCommand", 
-# "input", 
-# "inputFormat", 
-# "outputLocation", 
-# "outputFormat", 
-# "outputCaret", 
-# "autoScrollOutput", 
-# "contactName", 
-# "contactEmailRot13", 
-# "description", 
-# "disableAutoIndent", 
-# "useGlobalClipboard", 
-# "author", 
-# "comment" \;}
 
 class PMXCommand(PMXBundleItem):
-    KEYS = [    'input', 'fallbackInput', 'standardInput', 'inputFormat',               #Input
-                'output', 'standardOutput', 'outputFormat', 'outputLocation',           #Output
-                'command', 'winCommand', 'linuxCommand',                                #System based Command
-                'outputCaret',
-                'beforeRunningCommand',                                                 #Antes de correr el command
-                'version',                                                              #Command version
-                'requiredCommands',
-                'capturePattern', 'fileCaptureRegister',
-                'columnCaptureRegister', 'disableOutputAutoIndent',
-                'lineCaptureRegister', 'dontFollowNewOutput',
-                'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' ]
+    KEYS = [    
+        'input', 'fallbackInput', 'standardInput', 'inputFormat',               #Input
+        #input [ "selection", "document", "scope", "line", "word", "character", "none" ]
+        #inputFormat [ "text", "xml" ]
+        'output', 'standardOutput', 'outputFormat', 'outputLocation',           #Output
+        #outputLocation [ "replaceInput", "replaceDocument", "atCaret", "afterInput", "newWindow", "toolTip", "discard", "replaceSelection" ]
+        #outputFormat [ "text", "snippet", "html", "completionList" ]
+        'command', 'winCommand', 'linuxCommand',                                #System based Command
+        'outputCaret',
+        #[ "afterOutput", "selectOutput", "interpolateByChar", "interpolateByLine", "heuristic" ] },
+        'beforeRunningCommand',                                                 #Antes de correr el command
+        #[ "nop", "saveActiveFile", "saveModifiedFiles" ]
+        'version',                                                              #Command version
+        'requiredCommands',
+        'capturePattern', 'fileCaptureRegister',
+        'columnCaptureRegister', 'disableOutputAutoIndent',
+        'lineCaptureRegister', 'dontFollowNewOutput',
+        'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' ]
     TYPE = 'command'
     FOLDER = 'Commands'
     EXTENSION = 'tmCommand'
@@ -118,7 +89,7 @@ class PMXCommand(PMXBundleItem):
         elif value is None:
             inputType = None
         return inputType, value
-    
+
     def systemCommand(self):
         if self.winCommand != None and 'Window' in os.environ['OS']:
             return self.winCommand
@@ -133,7 +104,7 @@ class PMXCommand(PMXBundleItem):
         elif code != 0:
             return "error"
         else:
-            return self.output
+            return self.output or self.outputLocation
     
     def beforeExecute(self, processor):
         beforeMethod = None
@@ -163,8 +134,8 @@ class PMXCommand(PMXBundleItem):
 
         handlerFunction = getattr(processor, outputHandler, None)
         if handlerFunction is not None:
-            handlerFunction(context)
-        
+            handlerFunction(context, self.outputFormat)
+        # TODO: Ver que pasa con el outputCaret
         #Delete temp file
         context.removeTempFile()
         processor.endCommand(self)

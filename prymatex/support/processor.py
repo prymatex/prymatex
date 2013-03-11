@@ -29,7 +29,7 @@ PMXCommandProcessor = type("PMXCommandProcessor", (object, ), {
     "character": nop,
     "scope": nop,
     "selection": nop,
-    "selectedText": nop,
+    #"selectedText": nop,
     "word": nop,
     # beforeRunningCommand
     "saveActiveFile": return_true,
@@ -40,16 +40,22 @@ PMXCommandProcessor = type("PMXCommandProcessor", (object, ), {
     "deleteSelection": nop,
     "deleteCharacter": nop,
     # Outpu functions
+    "replaceInput": nop,
+    "atCaret": nop,
+    "afterInput": nop,
     "error": nop,
     "discard": nop,
     "replaceSelectedText": nop,
+    "replaceSelection": nop,
     "replaceDocument": nop,
     "insertText": nop,
     "afterSelectedText": nop,
     "insertAsSnippet": nop,
     "showAsHTML": nop,
     "showAsTooltip": nop,
-    "createNewDocument": nop
+    "toolTip": nop,
+    "createNewDocument": nop,
+    "newWindow": nop,
 })
 
 ######################### Snipper Processor #########################
