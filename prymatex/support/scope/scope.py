@@ -98,4 +98,5 @@ class Selector(object):
         
         match = context.left == wildcard or context.right == wildcard or self.selector.does_match(context.left.path, context.right.path, rank)
         self.previousMatch[matchKey] = (match, matchKey[1] and sum(rank) or None)
+        #print self.previousMatch[matchKey], rank
         return match

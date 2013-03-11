@@ -11,6 +11,7 @@ from prymatex.core import PMXBaseComponent
 from prymatex import resources
 from prymatex.utils.importlib import import_from_directory
 
+# TODO Esto va a ser un manager de dialogos
 class PrymatexServer(QtCore.QObject, PMXBaseComponent):
     def __init__(self, application):
         QtCore.QObject.__init__(self)
