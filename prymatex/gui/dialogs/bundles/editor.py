@@ -292,34 +292,28 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
 
     # -------------------- Activation
     def eventFilter(self, obj, event):
-        if event.type() == QtCore.QEvent.KeyPress and obj == self.lineKeyEquivalentActivation:
+        if event.type() == QtCore.QEvent.KeyPress and obj == self.lineEditKeyEquivalentActivation:
             keyseq = int(event.modifiers()) + event.key()
             self.stackedWidget.currentWidget().setKeyEquivalent(keyseq)
-            self.lineKeyEquivalentActivation.setText(QtGui.QKeySequence(keyseq).toString())
+            self.lineEditKeyEquivalentActivation.setText(QtGui.QKeySequence(keyseq).toString())
             return True
         return QtGui.QDialog.eventFilter(self, obj, event)
 
-
-    @QtCore.pyqtSlot(int)
-    def on_comboBoxActivation_currentIndexChanged(self, index):
-        self.lineKeyEquivalentActivation.setVisible(index == 0)
-        self.lineTabTriggerActivation.setVisible(index == 1)
-
-
     @QtCore.pyqtSlot(str)
-    def on_lineEditScope_textEdited(self, text):
+    def on_lineEditScopeSelector_textEdited(self, text):
         self.stackedWidget.currentWidget().setScope(text)
 
 
     @QtCore.pyqtSlot(str)
-    def on_lineTabTriggerActivation_textEdited(self, text):
+    def on_lineEditTabTriggerActivation_textEdited(self, text):
         self.stackedWidget.currentWidget().setTabTrigger(text)
 
+    @QtCore.pyqtSlot(str)
+    def on_lineEditName_textEdited(self, text):
+        self.stackedWidget.currentWidget().setName(text)
 
     def configActivation(self):
-        self.comboBoxActivation.addItem("Key Equivalent")
-        self.comboBoxActivation.addItem("Tab Trigger")
-        self.lineKeyEquivalentActivation.installEventFilter(self)
+        self.lineEditKeyEquivalentActivation.installEventFilter(self)
 
 
     def saveChanges(self):
@@ -346,26 +340,23 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
     def setCurrentEditor(self, editor):
         self.stackedWidget.setCurrentWidget(editor)
         self.labelTitle.setText(editor.title)
+        self.lineEditName.setText(editor.getName())
         scope = editor.getScope()
         tabTrigger = editor.getTabTrigger()
         keyEquivalent = editor.getKeyEquivalent()
-        self.lineEditScope.setEnabled(scope is not None)
-        self.lineKeyEquivalentActivation.setEnabled(keyEquivalent is not None)
-        self.lineTabTriggerActivation.setEnabled(tabTrigger is not None)
-        self.comboBoxActivation.setEnabled(tabTrigger is not None or keyEquivalent is not None)
+        self.lineEditScopeSelector.setEnabled(scope is not None)
+        self.lineEditKeyEquivalentActivation.setEnabled(keyEquivalent is not None)
+        self.lineEditTabTriggerActivation.setEnabled(tabTrigger is not None)
         if scope is not None:
-            self.lineEditScope.setText(scope)
+            self.lineEditScopeSelector.setText(scope)
         else:
-            self.lineEditScope.clear()
+            self.lineEditScopeSelector.clear()
         if not keyEquivalent and not tabTrigger:
-            self.lineKeyEquivalentActivation.clear()
-            self.lineTabTriggerActivation.clear()
-            self.comboBoxActivation.setCurrentIndex(0)
-            self.lineTabTriggerActivation.setVisible(False)
+            self.lineEditKeyEquivalentActivation.clear()
+            self.lineEditTabTriggerActivation.clear()
         else:
             if keyEquivalent is not None:
-                self.lineKeyEquivalentActivation.setText(QtGui.QKeySequence(keyEquivalent).toString())
+                self.lineEditKeyEquivalentActivation.setText(QtGui.QKeySequence(keyEquivalent).toString())
             if tabTrigger is not None:
-                self.lineTabTriggerActivation.setText(tabTrigger)
+                self.lineEditTabTriggerActivation.setText(tabTrigger)
             index = 0 if keyEquivalent else 1
-            self.comboBoxActivation.setCurrentIndex(index)

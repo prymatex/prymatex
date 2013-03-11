@@ -55,6 +55,23 @@ class BundleItemEditorBaseWidget(QtGui.QWidget):
     def title(self):
         return 'No item selected'
     
+    def getName(self):
+        if self.bundleItem is None:
+            return None
+        return self.bundleItem.name
+    
+    def setName(self, value):
+        current = self.getName()
+        if value is not None and current is not None:
+            if value != current:
+                self.changes['name'] = value
+            else:
+                self.changes.pop('name', None)
+        elif value is None and current is not None:
+            self.changes['name'] = value
+        else:
+            self.changes.pop('name', None)
+    
     def getScope(self):
         if self.bundleItem is None:
             return None
