@@ -173,7 +173,9 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     relpath = lambda self, path: os.path.relpath(path)
     samefile = lambda self, path1, path2: os.path.samefile(path1, path2)
     fnmatch = lambda self, filename, pattern: fnmatch.fnmatch(filename, pattern)
-    
+    getmtime = lambda self, path: os.path.getmtime(path)
+    getctime = lambda self, path: os.path.getctime(path)
+
     def expandVars(self, text):
         context = self.application.supportManager.environmentVariables()
         path = osextra.path.expand_shell_var(text, context = context)

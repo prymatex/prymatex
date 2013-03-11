@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dialogs/treewidget.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/treewidget.ui'
 #
-# Created: Thu Jan 17 19:51:02 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Mon Mar 11 11:40:15 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,8 +18,8 @@ except AttributeError:
 class Ui_TreeWidgetDialog(object):
     def setupUi(self, TreeWidgetDialog):
         TreeWidgetDialog.setObjectName(_fromUtf8("TreeWidgetDialog"))
-        TreeWidgetDialog.resize(700, 433)
-        TreeWidgetDialog.setMinimumSize(QtCore.QSize(700, 433))
+        TreeWidgetDialog.resize(900, 600)
+        TreeWidgetDialog.setMinimumSize(QtCore.QSize(900, 600))
         self.verticalLayout_3 = QtGui.QVBoxLayout(TreeWidgetDialog)
         self.verticalLayout_3.setSpacing(6)
         self.verticalLayout_3.setContentsMargins(6, 6, 3, 3)

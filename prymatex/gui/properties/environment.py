@@ -10,7 +10,7 @@ from prymatex.models.environment import EnvironmentTableModel
 class EnvironmentPropertiesWidget(MultiDictTableEditorWidget, PropertyTreeNode):
     """Environment variables"""
     NAMESPACE = ""
-    TITLE = "Enviroment Variables"
+    TITLE = "Variables"
     def __init__(self, parent = None):
         MultiDictTableEditorWidget.__init__(self, parent)
         PropertyTreeNode.__init__(self, "environment")

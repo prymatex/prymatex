@@ -3,6 +3,8 @@
 
 import os
 import stat
+import time
+
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.models.properties import PropertyTreeNode
@@ -12,6 +14,11 @@ class ResoucePropertiesWidget(QtGui.QWidget, PropertyTreeNode, Ui_ResouceWidget)
     """Resouce"""
     NAMESPACE = ""
     TITLE = "Resouce"
+    PERMISSIONS = (
+        ( stat.S_IRUSR, stat.S_IWUSR, stat.S_IXUSR ), 
+        ( stat.S_IRGRP, stat.S_IWGRP, stat.S_IXGRP ),
+        ( stat.S_IROTH, stat.S_IWOTH, stat.S_IXOTH ),
+        )
 
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
@@ -28,7 +35,8 @@ class ResoucePropertiesWidget(QtGui.QWidget, PropertyTreeNode, Ui_ResouceWidget)
         self.textLabelType.setText(self.fileSystemItem.type())
         self.textLabelLocation.setText(self.fileSystemItem.path())
         self.textLabelSize.setText("%d bytes" % self.fileSystemItem.size())
-        self.textLabelLastModified.setText(self.fileSystemItem.path())
+        mtime = self.application.fileManager.getmtime(self.fileSystemItem.path())
+        self.textLabelLastModified.setText(time.ctime(mtime))
         self.updatePermissions(self.fileSystemItem.path())
 
     def updatePermissions(self, path):
@@ -46,8 +54,8 @@ class ResoucePropertiesWidget(QtGui.QWidget, PropertyTreeNode, Ui_ResouceWidget)
         # S_IWOTH 00002   others have write permission
         # S_IXOTH 00001   others have execute permission
         st = os.stat(path)
-        bool(st.st_mode & stat.S_IRGRP)
-        os.access(path, os.F_OK)
-        os.access(path, os.R_OK)
-        os.access(path, os.W_OK)
-        os.access(path, os.X_OK)
+        for row, permissions in enumerate(self.PERMISSIONS):
+            for column, permission in enumerate(permissions):
+                self.tableWidgetPermissions.item(row, column).setCheckState(
+                    st.st_mode & permission and QtCore.Qt.Checked or QtCore.Qt.Unchecked
+                )
