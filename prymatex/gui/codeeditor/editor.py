@@ -1225,9 +1225,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                       'shortcut': "Ctrl+-",
                       'callback': cls.zoomOut}
                 ]},
-                {'text': 'Left Gutter',
+                {'name': 'leftGutter',
+                 'text': 'Left Gutter',
                  'items': []},
-                 {'text': 'Right Gutter',
+                {'name': 'rightGutter',
+                 'text': 'Right Gutter',
                  'items': []},
                 '-',
                 {'text': "Show Tabs And Spaces",

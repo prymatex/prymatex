@@ -129,7 +129,7 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             instance = editor.findChild(cls, cls.__name__)
             return instance is not None and instance.isVisible()
         
-        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
+        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter")
         menuEntry = {
             'name': 'lineNumbers',
             'text': "Line Numbers",
@@ -214,7 +214,7 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             instance = editor.findChild(cls, cls.__name__)
             return instance is not None and instance.isVisible()
             
-        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
+        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter")
         menuEntry = {
             'name': 'bookmarks',
             'text': "Bookmarks",
@@ -293,7 +293,7 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             instance = editor.findChild(cls, cls.__name__)
             return instance is not None and instance.isVisible()
             
-        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
+        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter")
         menuEntry = {
             'name': 'foldings',
             'text': 'Foldings',
@@ -388,7 +388,7 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             instance = editor.findChild(cls, cls.__name__)
             return instance is not None and instance.isVisible()
             
-        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
+        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter")
         menuEntry = {
             'name': 'selection',
             'text': 'Selection',
@@ -396,7 +396,7 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             'shortcut': 'Shift+F10',
             'checkable': True,
             'testChecked': on_actionShowSelection_testChecked }
-        return {baseMenu: menuEntry} 
+        return { baseMenu: menuEntry }
 
     def paintEvent(self, event):
         font_metrics = QtGui.QFontMetrics(self.editor.font())

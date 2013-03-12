@@ -59,23 +59,23 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
         self.application = application
         self.setupUi(self)
-        
+
         self.setWindowIcon(resources.getIcon("prymatex"))
-        
+
         self.tabSelectableModel = tabSelectableModelFactory(self)
-        
+
         self.setupDockToolBars()
         self.setupMenu()
-        
+
         self.setStatusBar(PMXStatusBar(self))
-        
+
         # Connect Signals
         self.splitTabWidget.currentWidgetChanged.connect(self.on_currentWidgetChanged)
         self.splitTabWidget.currentWidgetChanged.connect(self.setWindowTitleForEditor)
         self.splitTabWidget.tabCloseRequest.connect(self.closeEditor)
         self.splitTabWidget.tabCreateRequest.connect(self.addEmptyEditor)
         self.application.supportManager.bundleItemTriggered.connect(self.on_bundleItemTriggered)
-        
+
         center_widget(self, scale = (0.9, 0.8))
         self.dockers = []
         self.dialogs = []
@@ -84,12 +84,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         self.customDialogActions = {}
 
         self.setAcceptDrops(True)
-        
+
         #self.setMainWindowAsActionParent()
         self.setupHelpMenuMiscConnections()
-        
+
         self.popupMessage = PopupMessageWidget(self)
-        
+
         #Processor de comandos local a la main window
         self.commandProcessor = MainWindowCommandProcessor(self)
         self.bundleItem_handler = self.insertBundleItem
@@ -119,6 +119,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             customComponentsActions = []
             for name, settings in menuExtensions.iteritems():
                 actions = self.contributeToMainMenu(name, settings)
+                print componentClass, actions
                 customComponentsActions.extend(actions)
             self.registerComponentClassActions(componentClass, customComponentsActions)
         
@@ -128,6 +129,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             customEditorsActions = []
             for name, settings in menuExtensions.iteritems():
                 actions = self.contributeToMainMenu(name, settings)
+                print componentClass, actions
                 customEditorsActions.extend(actions)
             self.registerEditorClassActions(componentClass, customEditorsActions)
 

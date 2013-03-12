@@ -181,7 +181,7 @@ def update_menu(menuBase, menuUpdates):
             for n in name:
                 if not isinstance(menu, dict) or "items" not in menu:
                     return
-                items = filter(lambda item: isinstance(item, dict) and item["text"] == n, menu["items"])
+                items = filter(lambda item: isinstance(item, dict) and "name" in item and item["name"] == n, menu["items"])
                 if not items:
                     return
                 menu = items.pop()
