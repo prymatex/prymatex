@@ -2,18 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>commands</key>
-	<array>
-		<dict>
-			<key>command</key>
-			<string>deleteToBeginningOfLine:</string>
-		</dict>
-	</array>
+	<key>content</key>
+	<string>\n</string>
 	<key>keyEquivalent</key>
-	<string>@</string>
+	<string>^</string>
 	<key>name</key>
-	<string>Delete to Beginning of Line</string>
+	<string>Newline — \n</string>
+	<key>scope</key>
+	<string>source</string>
 	<key>uuid</key>
-	<string>F22BEB71-2DE3-4183-BB10-0199CC328169</string>
+	<string>DB79A3E7-ED7C-433E-AA0E-40B2EF7FB4AD</string>
 </dict>
 </plist>

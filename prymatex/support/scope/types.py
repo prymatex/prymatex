@@ -134,7 +134,7 @@ class FilterType(object):
         if self.fltr == 'B' and rank is not None:
             r1 = []
             r2 = []
-            if selector.does_match(lhs, lhs, r1) and selector.does_match(rhs, rhs, r2):
+            if self.selector.does_match(lhs, lhs, r1) and self.selector.does_match(rhs, rhs, r2):
                 rank.append(max(r1.pop(), r2.pop()))
                 return True
             return False

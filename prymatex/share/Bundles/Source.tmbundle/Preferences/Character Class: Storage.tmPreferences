@@ -3,15 +3,15 @@
 <plist version="1.0">
 <dict>
 	<key>name</key>
-	<string>Spell Checking: Enable for Strings</string>
+	<string>Character Class: Storage</string>
 	<key>scope</key>
-	<string>^ source string.quoted - punctuation</string>
+	<string>storage</string>
 	<key>settings</key>
 	<dict>
-		<key>spellChecking</key>
-		<integer>1</integer>
+		<key>characterClass</key>
+		<string>storage</string>
 	</dict>
 	<key>uuid</key>
-	<string>CF9BE765-81D0-4644-9684-4F310C94A3AD</string>
+	<string>43832F61-AC35-4C9D-AAC2-1FF3E2D3ECB3</string>
 </dict>
 </plist>

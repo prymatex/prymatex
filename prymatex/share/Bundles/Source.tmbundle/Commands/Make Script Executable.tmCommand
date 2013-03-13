@@ -5,36 +5,32 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>#!/usr/bin/env ruby -wKU
+	<string>#!/bin/bash
 
-link = STDIN.read
-
-if link =~ %r{ra?dar://(?:problem/)?([0-9]+)}
-  %x{ open "http://openradar.appspot.com/#{$1}" }
-else
-  puts "Error parsing issue number: #{link}"
-end
-</string>
+if [[ ! -x "$TM_FILEPATH" &amp;&amp; $(head -c2 "$TM_FILEPATH") == '#!' ]]; then
+	chmod a+x "$TM_FILEPATH"
+	echo "‘${TM_DISPLAYNAME}’ is now executable."
+fi</string>
 	<key>hideFromUser</key>
-	<string>1</string>
+	<true/>
 	<key>input</key>
-	<string>scope</string>
+	<string>document</string>
 	<key>inputFormat</key>
 	<string>text</string>
-	<key>keyEquivalent</key>
-	<string></string>
 	<key>name</key>
-	<string>Open Radar</string>
+	<string>Make Script Executable (ruby)</string>
 	<key>outputCaret</key>
 	<string>afterOutput</string>
 	<key>outputFormat</key>
-	<string>html</string>
+	<string>text</string>
 	<key>outputLocation</key>
 	<string>toolTip</string>
 	<key>scope</key>
-	<string>L:markup.underline.link.radar | R:markup.underline.link.radar</string>
+	<string>source.ruby, source.perl, source.python</string>
+	<key>semanticClass</key>
+	<string>callback.document.did-save</string>
 	<key>uuid</key>
-	<string>0711A4CE-3C0C-42B6-AA44-3CA3038DC391</string>
+	<string>0D7C6CA2-5A3A-4FBE-9CE6-9C23BA87CCA0</string>
 	<key>version</key>
 	<integer>2</integer>
 </dict>
