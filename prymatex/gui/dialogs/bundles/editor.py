@@ -341,6 +341,7 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         self.stackedWidget.setCurrentWidget(editor)
         self.labelTitle.setText(editor.title)
         self.lineEditName.setText(editor.getName())
+        self.lineEditSemanticClass.setText(editor.getSemanticClass())
         scope = editor.getScope()
         tabTrigger = editor.getTabTrigger()
         keyEquivalent = editor.getKeyEquivalent()

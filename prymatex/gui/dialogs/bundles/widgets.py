@@ -123,6 +123,23 @@ class BundleItemEditorBaseWidget(QtGui.QWidget):
         else:
             self.changes.pop('keyEquivalent', None)
     
+    def getSemanticClass(self):
+        if self.bundleItem is None:
+            return None
+        return self.bundleItem.semanticClass
+    
+    def setSemanticClass(self, value):
+        current = self.getSemanticClass()
+        if value is not None and current is not None:
+            if value != current:
+                self.changes['semanticClass'] = value
+            else:
+                self.changes.pop('semanticClass', None)
+        elif value is None and current is not None:
+            self.changes['semanticClass'] = value
+        else:
+            self.changes.pop('semanticClass', None)
+    
     def edit(self, bundleItem):
         self.changes = {}
         self.bundleItem = bundleItem
@@ -666,6 +683,9 @@ class BundleEditorWidget(BundleItemEditorBaseWidget, Ui_Menu):
         return None
     
     def getKeyEquivalent(self):
+        return None
+    
+    def getSemanticClass(self):
         return None
     
     def edit(self, bundle):

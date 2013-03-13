@@ -170,7 +170,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         print "replaceSelection"
 
     def replaceInput(self, context, format = None):
-        print "replaceInput"
+        self.editor.textCursor().insertText(context.outputValue)
 
     def insertText(self, context, format = None):
         cursor = self.editor.textCursor()

@@ -127,7 +127,7 @@ class PMXCommand(PMXBundleItem):
     def afterExecute(self, processor, context):
         outputHandler = self.getOutputHandler(context.outputType)
         # Remove old
-        if context.inputType != None and outputHandler in [ "insertText", "insertAsSnippet", "replaceSelectedText" ]:
+        if context.inputType != None and outputHandler in [ "insertText", "insertAsSnippet", "replaceSelectedText", "replaceInput" ]:
             deleteMethod = getattr(processor, 'delete' + context.inputType.title(), None)
             if deleteMethod != None:
                 deleteMethod()
