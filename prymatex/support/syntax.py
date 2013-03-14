@@ -54,7 +54,7 @@ class PMXSyntaxNode(object):
     def parse_captures(self, name, pattern, match, processor):
         captures = pattern.match_captures( name, match )
         #Aca tengo que comparar con -1, Ver nota en match_captures
-        captures = filter(lambda (group, range, name): range != -1 and range[0] != range[-1], captures)
+        captures = filter(lambda (group, range, name): range[0] != -1 and range[0] != range[-1], captures)
         starts = []
         ends = []
         for group, range, name in captures:
@@ -106,7 +106,7 @@ class PMXSyntaxNode(object):
                 return (self, match)
         elif self.end:
             pass
-        else:
+        elif self.patterns:
             return self.match_first_son( string, position )
         return (None, None)
     
@@ -121,18 +121,18 @@ class PMXSyntaxNode(object):
             return match.groupdict[index]
         regstring = compileRegexp(u'\\\\([1-9])').sub(g_match, regstring)
         regstring = compileRegexp(u'\\\\k<(.*?)>').sub(d_match, regstring)
+        #print string, regstring, match.groupdict(0), compileRegexp( regstring ).match( string, position ).span()
         return compileRegexp( regstring ).search( string, position )
     
     def match_first_son(self, string, position):
         match = (None, None)
-        if self.patterns:
-            for p in self.patterns:
-                tmatch = p.match_first(string, position)
-                if tmatch[1]:
-                    if not match[1] or match[1].start() > tmatch[1].start():
-                        match = tmatch
-                    #if tmatch[1].start() == position:
-                    #    break
+        for p in self.patterns:
+            tmatch = p.match_first(string, position)
+            if tmatch[1]:
+                if not match[1] or match[1].start() > tmatch[1].start():
+                    match = tmatch
+                #if tmatch[1].start() == position:
+                #    break
         return match
 
 class PMXSyntaxProxy(object):
@@ -248,20 +248,20 @@ class PMXSyntax(PMXBundleItem):
                 pattern, pattern_match = top.match_first_son(line, position)
             else:
                 pattern, pattern_match = None, None
-            end_match = None
             if top.end:
                 end_match = top.match_end( line, match, position )
+            else:
+                end_match = None
             
             if end_match and ( not pattern_match or pattern_match.start() >= end_match.start() ):
-                pattern_match = end_match
-                start_pos = pattern_match.start()
-                end_pos = pattern_match.end()
+                start_pos = end_match.start()
+                end_pos = end_match.end()
                 if top.contentName and processor:
                     processor.closeTag(top.contentName, start_pos)
                 if processor:
-                    grammar.parse_captures('captures', top, pattern_match, processor)
+                    grammar.parse_captures('captures', top, end_match, processor)
                 if processor:
-                    grammar.parse_captures('endCaptures', top, pattern_match, processor)
+                    grammar.parse_captures('endCaptures', top, end_match, processor)
                 if top.name and processor:
                     processor.closeTag( top.name, end_pos)
                 stack.pop()

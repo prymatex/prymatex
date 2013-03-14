@@ -15,8 +15,9 @@ class TestSupportFunctions(unittest.TestCase):
 
     def setUp(self):
         self.manager = PMXSupportPythonManager()
-        self.manager.addNamespace('prymatex', os.path.abspath('./prymatex/share'))
-        self.manager.addNamespace('user', os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex')))
+        #self.manager.addNamespace('prymatex', os.path.abspath('./prymatex/share'))
+        #self.manager.addNamespace('user', os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex')))
+        self.manager.addNamespace('textmate', os.path.abspath('./textmate'))
         def loadCallback(message):
             pass
             #print message
@@ -35,8 +36,8 @@ class TestSupportFunctions(unittest.TestCase):
         file = open(os.path.abspath('./prymatex/gui/codeeditor/editor.py'), 'r')
         start = time()
         processor = PMXDebugSyntaxProcessor()
-        #syntax.parse(text, processor)
-        syntax.parse(file.read(), processor)
+        syntax.parse("  #!/usr/bin/env python", processor)
+        #syntax.parse(file.read(), processor)
         file.close()
         tiempo = time() - start
         print "Tiempo: ", tiempo
