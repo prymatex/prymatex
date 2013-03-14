@@ -802,7 +802,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 'TM_LINE_NUMBER': block.blockNumber() + 1,
                 'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
                 'TM_SCOPE': rightScope,
-                'TM_SCOPE_LEFT': leftScope,
+                'TM_LEFT_SCOPE': leftScope,
                 'TM_MODE': self.syntax().name,
                 'TM_SOFT_TABS': self.tabStopSoft and unicode('YES') or unicode('NO'),
                 'TM_TAB_SIZE': self.tabStopSize,

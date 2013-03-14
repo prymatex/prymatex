@@ -244,14 +244,11 @@ class PMXSyntax(PMXBundleItem):
         grammar = self.grammar
         
         while True:
+            end_match = pattern = pattern_match = None
             if top.patterns:
                 pattern, pattern_match = top.match_first_son(line, position)
-            else:
-                pattern, pattern_match = None, None
             if top.end:
                 end_match = top.match_end( line, match, position )
-            else:
-                end_match = None
             
             if end_match and ( not pattern_match or pattern_match.start() >= end_match.start() ):
                 start_pos = end_match.start()
