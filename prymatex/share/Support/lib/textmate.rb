@@ -104,10 +104,6 @@ module TextMate
     end
 
     def rescan_project
-      `osascript &>/dev/null \
-    	   -e 'tell app "SystemUIServer" to activate'; \
-    	 osascript &>/dev/null \
-    	   -e 'tell app "TextMate" to activate' &`
     end
   end
 
@@ -123,7 +119,7 @@ module TextMate
     end
 
     def prefs_for_key (key)
-      prefs_file = "#{ENV['HOME']}/Library/Preferences/com.macromates.textmate.plist"
+      prefs_file = "#{ENV['HOME']}/Library/Preferences/#{ENV['TM_APP_IDENTIFIER'] || 'com.macromates.textmate'}.plist"
       File.open(prefs_file) do |f|
         return OSX::PropertyList::load(f)[key]
       end

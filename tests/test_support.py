@@ -36,7 +36,7 @@ class TestSupportFunctions(unittest.TestCase):
         file = open(os.path.abspath('./prymatex/gui/codeeditor/editor.py'), 'r')
         start = time()
         processor = PMXDebugSyntaxProcessor()
-        syntax.parse("    #!/usr/bin/env python\nimport pepe", processor)
+        syntax.parse("#!/usr/bin/env python\nimport pepe", processor)
         #syntax.parse(file.read(), processor)
         file.close()
         tiempo = time() - start

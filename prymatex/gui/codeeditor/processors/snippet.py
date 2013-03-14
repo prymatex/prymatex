@@ -111,7 +111,6 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.snippet.setCurrentHolder(holder)
         return holder
 
-
     def nextHolder(self, holder):
         self.snippet.setCurrentHolder(holder)
         return self.snippet.next()

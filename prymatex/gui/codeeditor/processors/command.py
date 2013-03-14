@@ -221,6 +221,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         editor.setPlainText(context.outputValue)
         
     def newWindow(self, context, format = None):
+        print context.outputValue, format
         print "newWindow"
 
     def openAsNewDocument(self, context, format = None):

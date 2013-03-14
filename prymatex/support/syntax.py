@@ -118,7 +118,6 @@ class PMXSyntaxNode(object):
             return match.groupdict[index]
         regstring = compileRegexp(u'\\\\([1-9])').sub(g_match, regstring)
         regstring = compileRegexp(u'\\\\k<(.*?)>').sub(d_match, regstring)
-        #print string, regstring, match.groupdict(0), compileRegexp( regstring ).match( string, position ).span()
         return compileRegexp( regstring ).search( string, position )
     
     def match_first_son(self, string, position):
