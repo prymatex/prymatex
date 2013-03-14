@@ -58,12 +58,12 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             
     def highlightAllDocument(self):
         block = self.document().begin()
-        #post = block.position()
-        #length = 0
+        last = self.document().end()
+        
         self.processor.startParsing(self.syntax.scopeName)
         stack = [[self.syntax.grammar, None]]
         while block.isValid():
-            text = block.text()
+            text = "%s\n" % block.text() if block != last else block.text()
             self.syntax.parseLine(stack, text, self.processor)
             userData = block.userData()
             

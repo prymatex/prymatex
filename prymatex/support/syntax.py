@@ -10,8 +10,6 @@ import re
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import compileRegexp
 
-SPLITLINES = re.compile('\n')
-
 class PMXSyntaxNode(object):
     def __init__(self, dataHash, syntax):
         for k in [  'syntax', 'match', 'begin', 'content', 'name', 'contentName', 'end',
@@ -32,7 +30,6 @@ class PMXSyntaxNode(object):
                 elif key in ['patterns']:
                     self.create_children(value)
             except TypeError, e:
-                #an encoding can only be given for non-unicode patterns
                 print e, value
     
     def parse_repository(self, repository):
@@ -231,7 +228,7 @@ class PMXSyntax(PMXBundleItem):
         if processor:
             processor.startParsing(self.scopeName)
         stack = [[self.grammar, None]]
-        for line in SPLITLINES.split(string):
+        for line in string.splitlines(True):
             self.parseLine(stack, line, processor)
         if processor:
             processor.endParsing(self.scopeName)

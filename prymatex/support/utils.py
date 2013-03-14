@@ -281,7 +281,8 @@ def compileRegexp(string, flags = []):
     elif flags and OPTION_MULTILINE in flags:
         reflags = [ re.MULTILINE ]
     try:
-        #return sre.compile(unicode(string), reduce(lambda x, y: x | y, flags, 0))
+        if string.find("\G") != -1:
+            raise Exception()
         restring = string.replace('?i:', '(?i)')
         return re.compile(unicode(restring), reduce(lambda x, y: x | y, reflags, 0))
     except:

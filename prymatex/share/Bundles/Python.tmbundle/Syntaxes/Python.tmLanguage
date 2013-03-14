@@ -21,6 +21,7 @@
 		<string>sconstruct</string>
 		<string>SConscript</string>
 		<string>gyp</string>
+		<string>gypi</string>
 	</array>
 	<key>firstLineMatch</key>
 	<string>^#!/.*\bpython\b</string>
@@ -31,18 +32,37 @@
 	<key>patterns</key>
 	<array>
 		<dict>
-			<key>captures</key>
+			<key>begin</key>
+			<string>(^[ \t]+)?(?=#)</string>
+			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.definition.comment.python</string>
+					<string>punctuation.whitespace.comment.leading.python</string>
 				</dict>
 			</dict>
-			<key>match</key>
-			<string>(#).*$\n?</string>
-			<key>name</key>
-			<string>comment.line.number-sign.python</string>
+			<key>end</key>
+			<string>(?!\G)</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>begin</key>
+					<string>#</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.definition.comment.python</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>\n</string>
+					<key>name</key>
+					<string>comment.line.number-sign.python</string>
+				</dict>
+			</array>
 		</dict>
 		<dict>
 			<key>match</key>
@@ -332,7 +352,7 @@
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>(\()|\s*($\n?|#.*$\n?)</string>
+			<string>(\()|(\s*$\n?|#.*$\n?)</string>
 			<key>endCaptures</key>
 			<dict>
 				<key>1</key>
