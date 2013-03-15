@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtGui
+from prymatex.qt import QtGui
 
 from prymatex.support import PMXMacroProcessor
 from prymatex.support.command import PMXCommand

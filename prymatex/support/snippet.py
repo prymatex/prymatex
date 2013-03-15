@@ -66,28 +66,13 @@ SNIPPET_SYNTAX = {
                'end': '`',
                'contentName': 'string.script',
                'name': 'string.interpolated.shell.snippet'}],
- 'repository': {'condition': {'begin': '\\(\\?(\\d):',
-                              'beginCaptures': {'1': {'name': 'string.regexp.condition'}},
-                              'contentName': 'text.condition',
-                              'end': '\\)',
-                              'name': 'meta.structure.condition.regexp',
-                              'patterns': [{'include': '#escaped_cond'},
-                                           {'begin': ':',
-                                            'end': '(?=\\))',
-                                            'contentName': 'otherwise.condition',
-                                            'patterns': [{'include': '#escaped_cond'}]
-                                            }]},
-                'escaped_cond': {'captures': {'1': {'name': 'keyword.escape.condition'}},
-                                 'match': '\\\\([/\\)])',
-                                 'name': 'constant.character.escape.condition'},
-                'escaped_char': {'match': '\\\\[/\\\\\\}\\{]',
+ 'repository': {'escaped_char': {'match': '\\\\[/\\\\\\}\\{]',
                                  'name': 'constant.character.escape.regexp'},
                 'substitution': {'begin': '/',
                                  'contentName': 'string.regexp.format',
                                  'end': '/([mg]?)/?',
                                  'endCaptures': {'1': {'name': 'string.regexp.options'}},
-                                 'patterns': [{'include': '#escaped_char'},
-                                              {'include': '#condition'}]}},
+                                 'patterns': [{'include': '#escaped_char'}]}},
 }
 
 #Snippet Node Bases
@@ -531,7 +516,6 @@ class PMXSnippetSyntaxProcessor(PMXSyntaxProcessor):
         if self.current != None:
             if self.index != len(self.current):
                 self.node.append(self.current[self.index:len(self.current)])
-            self.node.append("\n")
         self.current = line
         self.index = 0
         

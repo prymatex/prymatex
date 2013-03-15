@@ -145,21 +145,19 @@ class PMXDebugSnippetProcessor(PMXSnippetProcessor):
         self.transformation = None
         self.tabreplacement = "\t"
         self.indentation = ""
+        self.env = {}
 
     @property
     def hasSnippet(self):
         return self.snippet is not None
     
-    @property
-    def environment(self, format = None):
-        return self.__env
+    def environmentVariables(self, format = None):
+        return self.env
     
     def startSnippet(self, snippet):
         self.snippet = snippet
         self.text = ""
         self.position = 0
-        #env = snippet.buildEnvironment()
-        self.__env = {}
     
     def endSnippet(self):
         self.snippet = None

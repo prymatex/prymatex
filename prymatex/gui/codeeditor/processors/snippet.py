@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import Qt
-
+from prymatex.qt import QtGui
 from prymatex.support.processor import PMXSnippetProcessor
 
 class PMXSnippetProcessor(PMXSnippetProcessor):
@@ -56,14 +54,13 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.disableIndent = settings.get("disableIndent", False)
         self.baseEnvironment = settings.get("environment", {})
 
-        
     def startTransformation(self, transformation):
         self.captures.append("")
-
 
     def endTransformation(self, transformation):
         captured = self.captures.pop()
         text = transformation.transform(captured)
+        text = text.replace('\n', '\n' + self.indentation).replace('\t', self.tabreplacement)
         self.insertText(text)
 
 

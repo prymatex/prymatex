@@ -6,10 +6,9 @@ from pprint import pprint
 
 try:
     from ponyguruma import sre
-    from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_MULTILINE
+    from ponyguruma.constants import OPTION_MULTILINE
 except Exception, e:
     sre = re
-    OPTION_CAPTURE_GROUP = re.MULTILINE
     OPTION_MULTILINE = re.MULTILINE
     
 RE_SHEBANG = re.compile("^#!(.*)$")
@@ -274,11 +273,8 @@ def makeHyperlinks(text):
 
 
 def compileRegexp(string, flags = []):
-    #Muejejejeje
     reflags = []
-    if flags and OPTION_CAPTURE_GROUP in flags:
-        reflags = [ re.MULTILINE ]
-    elif flags and OPTION_MULTILINE in flags:
+    if flags and OPTION_MULTILINE in flags:
         reflags = [ re.MULTILINE ]
     try:
         if string.find("\G") != -1:

@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import re
-
 from prymatex.support import processor
 
 class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
