@@ -63,7 +63,8 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
 
     def endTransformation(self, transformation):
         captured = self.captures.pop()
-        self.insertText(transformation.transform(captured, self))
+        text = transformation.transform(captured)
+        self.insertText(text)
 
 
     def caretPosition(self):

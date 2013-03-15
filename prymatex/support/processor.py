@@ -170,7 +170,8 @@ class PMXDebugSnippetProcessor(PMXSnippetProcessor):
         
     def endTransformation(self, transformation):
         self.transformation = False
-        self.insertText(transformation.transform(self.capture, self))
+        text = transformation.transform(self.capture)
+        self.insertText(text)
         
     def cursorPosition(self):
         return self.position

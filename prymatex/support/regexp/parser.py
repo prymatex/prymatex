@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import _types
+import types
 
 class Parser(object):
     def __init__(self, source):
@@ -73,7 +73,7 @@ class Parser(object):
         backtrack = self.it
         captureRegister = []
         if self.parse_char("(") and self.parse_char("?") and self.parse_int(captureRegister) and self.parse_char(":"):
-            res = _types.ConditionType(captureRegister.pop())
+            res = types.ConditionType(captureRegister.pop())
             if self.parse_format_string(":)", res.if_set) \
                 and (self.source[self.it - 1] == ')' or \
                     self.source[self.it - 1] == ':' and \
@@ -103,15 +103,15 @@ class Parser(object):
         if(self.parse_char("\\") and self.parse_char("ULEul")):
             case = self.source[self.it - 1]
             if case == 'U':
-                nodes.append(_types.CASE_UPPER)
+                nodes.append(types.CASE_UPPER)
             elif case == 'L':
-                nodes.append(_types.CASE_LOWER)
+                nodes.append(types.CASE_LOWER)
             elif case == 'E':
-                nodes.append(_types.CASE_NONE)
+                nodes.append(types.CASE_NONE)
             elif case == 'u':
-                nodes.append(_types.CASE_UPPER_NEXT)
+                nodes.append(types.CASE_UPPER_NEXT)
             elif case == 'l':
-                nodes.append(_types.CASE_LOWER_NEXT)
+                nodes.append(types.CASE_LOWER_NEXT)
             return True
         self.it = backtrack
         return False
@@ -139,6 +139,6 @@ class Parser(object):
     # = API =
     @staticmethod
     def format(source):
-        frmt = _types.FormatType()
+        frmt = types.FormatType()
         if Parser(source).parse_format_string("", frmt.composites):
             return frmt

@@ -1,16 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Snippte's module
-"""
-import re, logging
+"""Snippte's module"""
 import uuid as uuidmodule
 
-if __name__ == '__main__':
-    import os, sys
-    sys.path.append(os.path.abspath("."))
-    
-from prymatex.support.utils import compileRegexp, OPTION_CAPTURE_GROUP, OPTION_MULTILINE
+from prymatex.support.regexp import Transformation
 
 from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
 from prymatex.support.processor import PMXSyntaxProcessor
@@ -88,8 +82,6 @@ SNIPPET_SYNTAX = {
                                  'name': 'constant.character.escape.condition'},
                 'escaped_char': {'match': '\\\\[/\\\\\\}\\{]',
                                  'name': 'constant.character.escape.regexp'},
-                #'replacements': {'match': '\\$\\d|\\\\[uUILE]',
-                #                 'name': 'string.regexp.replacement'},
                 'substitution': {'begin': '/',
                                  'contentName': 'string.regexp.format',
                                  'end': '/([mg]?)/?',
@@ -329,12 +321,12 @@ class StructureTransformation(Node):
         super(StructureTransformation, self).__init__(scope, parent)
         self.placeholder = None
         self.index = None
-        self.regexp = None
+        self.transformation = Transformation()
     
     def open(self, scope, text):
         node = self
-        if scope == 'string.regexp':
-            node = self.regexp = Regexp(scope, self)
+        if scope == 'string.regexp.format':
+            self.transformation.setPattern(text[:-1])
         else:
             return super(StructureTransformation, self).open(scope, text)
         return node
@@ -343,15 +335,19 @@ class StructureTransformation(Node):
         node = self
         if scope == 'keyword.transformation.snippet':
             self.index = int(text)
+        if scope == 'string.regexp.format':
+            self.transformation.setFormat(text)
+        elif scope == 'string.regexp.options':
+            self.transformation.setOptions(text)
         else:
             return super(StructureTransformation, self).close(scope, text)
         return node
     
     def render(self, processor):
-        processor.startTransformation(self.regexp)
+        processor.startTransformation(self.transformation)
         if self.placeholder != None:
             self.placeholder.render(processor, mirror = True)
-        processor.endTransformation(self.regexp)
+        processor.endTransformation(self.transformation)
     
     def taborder(self, container):
         if type(container) == list:
@@ -451,12 +447,12 @@ class VariableTransformation(Node):
     def __init__(self, scope, parent = None):
         super(VariableTransformation, self).__init__(scope, parent)
         self.name = None
-        self.regexp = None
+        self.transformation = Transformation()
 
     def open(self, scope, text):
         node = self
-        if scope == 'string.regexp':
-            node = self.regexp = Regexp(scope, self)
+        if scope == 'string.regexp.format':
+            self.transformation.setPattern(text[:-1])
         else:
             return super(VariableTransformation, self).open(scope, text)
         return node
@@ -465,6 +461,10 @@ class VariableTransformation(Node):
         node = self
         if scope == 'string.env.snippet':
             self.name = text
+        if scope == 'string.regexp.format':
+            self.transformation.setFormat(text)
+        elif scope == 'string.regexp.options':
+            self.transformation.setOptions(text)
         else:
             return super(VariableTransformation, self).close(scope, text)
         return node
@@ -472,115 +472,9 @@ class VariableTransformation(Node):
     def render(self, processor):
         environment = processor.environmentVariables()
         if self.name in environment:
-            text = self.regexp.transform(environment[self.name], processor)
+            text = self.transformation.transform(environment[self.name])
+            text = text.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
             processor.insertText(text)
-
-class Regexp(NodeList):
-    _repl_re = compileRegexp(u"\$(?:(\d+)|g<(.+?)>)")
-    
-    def __init__(self, scope, parent = None):
-        super(Regexp, self).__init__(scope, parent)
-        self.pattern = ""
-        self.options = None
-
-    def open(self, scope, text):
-        node = self
-        if scope == 'string.regexp.format':
-            self.pattern += text[:-1]
-        elif scope == 'meta.structure.condition.regexp':
-            self.append(text.replace('\\n', '\n').replace('\\t', '\t'))
-            node = Condition(scope, self)
-            self.append(node)
-        elif scope == 'constant.character.escape.regexp':
-            #Escape in pattern
-            if isinstance(self.pattern, basestring):
-                self.pattern += text
-            else:
-                self.append(text.replace('\\n', '\n').replace('\\t', '\t'))
-        else:
-            return super(Regexp, self).open(scope, text)
-        return node
-
-    def close(self, scope, text):
-        node = self
-        if scope == 'string.regexp.format':
-            self.append(text)
-        elif scope == 'string.regexp.options':
-            self.options = text
-        elif scope == 'constant.character.escape.regexp':
-            #Escape in pattern
-            if isinstance(self.pattern, basestring):
-                self.pattern += text
-            else:
-                self.append(text)
-        else:
-            return super(Regexp, self).close(scope, text)
-        return node
-    
-    @staticmethod
-    def uppercase(text):
-        titles = text.split('\u')
-        if len(titles) > 1:
-            text = "".join([titles[0]] + map(lambda txt: txt[0].upper() + txt[1:], titles[1:]))
-        uppers = text.split('\U')
-        if len(uppers) > 1:
-            text = "".join([uppers[0]] + map(lambda txt: txt.find('\E') != -1 and txt[:txt.find('\E')].upper() + txt[txt.find('\E') + 2:] or txt.upper(), uppers ))
-        return text
-
-    @staticmethod
-    def lowercase(text):
-        lowers = text.split('\L')
-        if len(lowers) > 1:
-            text = "".join([lowers[0]] + map(lambda txt: txt.find('\E') != -1 and txt[:txt.find('\E')].lower() + txt[txt.find('\E') + 2:] or txt.lower(), lowers ))
-        return text
-    
-    @staticmethod
-    def prepare_replacement(text):
-        repl = None
-        def expand(m, template):
-            def handle(match):
-                numeric, named = match.groups()
-                if numeric:
-                    return m.group(int(numeric)) or ""
-                return m.group(named) or ""
-            return Regexp._repl_re.sub(handle, template)
-        if '$' in text:
-            repl = lambda m, r = text: expand(m, r)
-        else:
-            repl = lambda m, r = text: r
-        return repl
-
-    def transform(self, text, processor):
-        flags = [OPTION_CAPTURE_GROUP]
-        if self.option_multiline:
-            flags.append(OPTION_MULTILINE)
-        pattern = compileRegexp(unicode(self.pattern), flags)
-        result = ""
-        for child in self:
-            if isinstance(child, TextNode):
-                repl = self.prepare_replacement(unicode(child))
-                result += pattern.sub(repl, text)
-            elif isinstance(child, Condition):
-                for match in pattern.finditer(text):
-                    repl = child.index <= len(match.groups()) != None and child.insertion or child.otherwise
-                    if repl != None:
-                        repl = self.prepare_replacement(repl)
-                        result += pattern.sub(repl, match.group(0))
-                    if not self.option_global:
-                        break
-        if any(map(lambda r: result.find(r) != -1, ['\u', '\U'])):
-            result = Regexp.uppercase(result)
-        if any(map(lambda r: result.find(r) != -1, ['\L'])):
-            result = Regexp.lowercase(result)
-        return result.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
-    
-    @property
-    def option_global(self):
-        return self.options != None and 'g' in self.options or False
-    
-    @property
-    def option_multiline(self):
-        return self.options != None and 'm' in self.options or False
     
 class Shell(NodeList):    
     def close(self, scope, text):
@@ -612,46 +506,6 @@ class Shell(NodeList):
         if not hasattr(self, 'content'):
             self.execute(processor)
         processor.insertText(self.content)
-
-class Condition(Node):
-    def __init__(self, scope, parent = None):
-        super(Condition, self).__init__(scope, parent)
-        self.index = None
-        self.insertion = None
-        self.otherwise = None
-        self.current = ""
-        
-    def open(self, scope, text):
-        node = self
-        if scope == 'otherwise.condition':
-            self.current += text[:-1].replace('\\n', '\n').replace('\\t', '\t')
-            self.insertion = self.current
-            self.current = ""
-        elif scope == 'constant.character.escape.condition':
-            self.current += text.replace('\\n', '\n').replace('\\t', '\t')
-        else:
-            return super(Condition, self).open(scope, text)
-        return node
-    
-    def close(self, scope, text):
-        node = self
-        if scope == 'string.regexp.condition':
-            self.index = int(text)
-        elif scope == 'text.condition' and self.insertion == None:
-            self.current += text.replace('\\n', '\n').replace('\\t', '\t')
-            self.insertion = self.current
-        elif scope == 'keyword.escape.condition':
-            self.current += text.replace('\\n', '\n').replace('\\t', '\t')
-        elif scope == 'otherwise.condition':
-            self.current += text.replace('\\n', '\n').replace('\\t', '\t')
-            self.otherwise = self.current
-            self.current = ""
-        else:
-            return super(Condition, self).close(scope, text)
-        return node
-    
-    def append(self, element):
-        self.current += element.replace('\\n', '\n').replace('\\t', '\t')
 
 class PMXSnippetSyntaxProcessor(PMXSyntaxProcessor):
     def __init__(self, snippetItem):
@@ -832,19 +686,3 @@ class PMXSnippet(PMXBundleItem):
     
     def __len__(self):
         return len(self.taborder)
-        
-if __name__ == '__main__':
-    content = """<div><ul>
-    <li><a href="${1001}">${1002}</a></li>
-    <li><a href="${1003}">${1004}</a></li>
-    <li><a href="${1005}">${1006}</a></li>
-    <li><a href="$1007">$1008</a></li>
-    <li><a href="$1009">$1010</a></li>
-    </ul></div>"""
-    snippetHash = {    'content': content, 
-                       'name': "MySnippet",
-                 'tabTrigger': "MyTrigger",
-              'keyEquivalent': None }
-    snippet = PMXSnippet(uuidmodule.uuid1(), dataHash = snippetHash)
-    snippet.compile()
-    print snippet.snippet

@@ -15,15 +15,14 @@ class TestSupportFunctions(unittest.TestCase):
 
     def setUp(self):
         self.manager = PMXSupportPythonManager()
-        #self.manager.addNamespace('prymatex', os.path.abspath('./prymatex/share'))
-        #self.manager.addNamespace('user', os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex')))
-        self.manager.addNamespace('textmate', os.path.abspath('./textmate'))
+        self.manager.addNamespace('prymatex', os.path.abspath('./prymatex/share'))
+        self.manager.addNamespace('user', os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex')))
         def loadCallback(message):
             pass
             #print message
         self.manager.loadSupport(loadCallback)
 
-    def ttest_snippet(self):
+    def test_snippet(self):
         snippet = self.manager.getBundleItem('659D189C-EC3E-4C4E-9377-B7F5F5216CBD')
         start = time()
         processor = PMXDebugSnippetProcessor()
