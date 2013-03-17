@@ -27,7 +27,7 @@ from copy import copy
 import uuid as uuidmodule
 
 from prymatex.support.bundle import PMXBundleItem
-from prymatex.support.utils import compileRegexp
+from prymatex.support.regexp import compileRegexp
 from prymatex.support.snippet import PMXSnippet
 from prymatex.support.processor import PMXDebugSnippetProcessor
 

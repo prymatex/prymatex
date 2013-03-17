@@ -188,7 +188,9 @@ class PMXBundle(PMXManagedObject):
                 bundle.addSource(namespace, path)
             return bundle
         except Exception, e:
+            import traceback
             print "Error in laod bundle %s (%s)" % (info_file, e)
+            traceback.print_exc()
 
     @classmethod
     def reloadBundle(cls, bundle, path, namespace, manager):
@@ -280,7 +282,9 @@ class PMXBundleItem(PMXManagedObject):
                 item.addSource(namespace, path)
             return item
         except Exception, e:
+            import traceback
             print "Error in bundle item %s (%s)" % (path, e)
+            traceback.print_exc()
     
     @classmethod
     def reloadBundleItem(cls, bundleItem, path, namespace, manager):

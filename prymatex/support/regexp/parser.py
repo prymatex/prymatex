@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 import types
+from base import compileRegexp
 
 class Parser(object):
     def __init__(self, source):
@@ -47,9 +48,25 @@ class Parser(object):
             self.it += 1
         if self.parse_char(stopChars):
             res.append(chrs)
-            return true
+            return True
         self.it = backtrack
         return false
+
+    def parse_regexp_options(self, options):
+        while self.parse_char("giems"):
+            options.append(self.source[self.it - 1])
+        return True
+
+    def parse_transformation(self, nodes):
+        res = types.TransformationType()
+        regexp = []
+        if self.parse_until("/", regexp) \
+            and self.parse_format_string("/", res.format.composites) \
+            and self.parse_regexp_options(res.options):
+            res.pattern = compileRegexp(regexp.pop(), res.options)
+            nodes.append(res)
+            return True
+        return False
 
     def parse_format_string(self, stopChars, nodes):
         backtrack = self.it
@@ -94,7 +111,7 @@ class Parser(object):
                 self.text_node(nodes, '\r')
             elif code == 'n': 
                 self.text_node(nodes, '\n')
-            return True;
+            return True
         self.it = backtrack
         return False
         
@@ -142,3 +159,10 @@ class Parser(object):
         frmt = types.FormatType()
         if Parser(source).parse_format_string("", frmt.composites):
             return frmt
+    
+    @staticmethod
+    def transformation(source):
+        nodes = []
+        if Parser(source).parse_transformation(nodes):
+            return nodes.pop()
+            

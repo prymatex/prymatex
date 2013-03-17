@@ -8,7 +8,7 @@ http://manual.macromates.com/en/language_grammars.html
 import re
 
 from prymatex.support.bundle import PMXBundleItem
-from prymatex.support.utils import compileRegexp
+from prymatex.support.regexp import compileRegexp
 
 class PMXSyntaxNode(object):
     def __init__(self, dataHash, syntax):

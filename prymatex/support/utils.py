@@ -2,14 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import re, sys, os, stat, tempfile
-from pprint import pprint
-
-try:
-    from ponyguruma import sre
-    from ponyguruma.constants import OPTION_MULTILINE
-except Exception, e:
-    sre = re
-    OPTION_MULTILINE = re.MULTILINE
     
 RE_SHEBANG = re.compile("^#!(.*)$")
 RE_SHEBANG_ENVKEY = re.compile("(\w+)_SHEBANG")
@@ -270,23 +262,6 @@ def pathToLink(match):
 
 def makeHyperlinks(text):
     return re.sub(RE_ABSPATH_LINENO, pathToLink, text)
-
-
-def compileRegexp(string, flags = []):
-    reflags = []
-    if flags and OPTION_MULTILINE in flags:
-        reflags = [ re.MULTILINE ]
-    try:
-        if string.find("\G") != -1:
-            raise Exception()
-        restring = string.replace('?i:', '(?i)')
-        return re.compile(unicode(restring), reduce(lambda x, y: x | y, reflags, 0))
-    except:
-        try:
-            return sre.compile(unicode(string), reduce(lambda x, y: x | y, flags, 0))
-        except:
-            #Mala leche
-            pass
 
 
 if __name__ == '__main__':

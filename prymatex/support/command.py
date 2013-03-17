@@ -5,10 +5,9 @@
 
 import os
 import functools
-from collections import namedtuple
 
 from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
-from prymatex.support.utils import compileRegexp
+from prymatex.support.regexp import compileRegexp
 
 # New commands
 #input [ selection ]

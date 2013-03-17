@@ -30,11 +30,9 @@ SNIPPET_SYNTAX = {
               #Transformation
               {'begin': '\\$\\{(\\d+)/',
                'beginCaptures': {'1': {'name': 'keyword.transformation.snippet'}},
-               'contentName': 'string.regexp',
+               'contentName': 'string.transformation',
                'end': '\\}',
-               'name': 'structure.transformation.snippet',
-               'patterns': [{'include': '#escaped_char'},
-                            {'include': '#substitution'}]},
+               'name': 'structure.transformation.snippet'},
               #Menu
               {'begin': '\\$\\{(\\d+)\\|',
                'beginCaptures': {'1': {'name': 'keyword.menu.snippet'}},
@@ -56,11 +54,9 @@ SNIPPET_SYNTAX = {
               #Transformation
               {'begin': '\\$\\{([a-zA-Z_][a-zA-Z0-9_]*)/',
                'beginCaptures': {'1': {'name': 'string.env.snippet'}},
-               'contentName': 'string.regexp',
+               'contentName': 'string.transformation',
                'end': '\\}',
-               'name': 'variable.transformation.snippet',
-               'patterns': [{'include': '#escaped_char'},
-                            {'include': '#substitution'}]},
+               'name': 'variable.transformation.snippet'},
                #Shell
               {'begin': '`',
                'end': '`',
@@ -306,24 +302,14 @@ class StructureTransformation(Node):
         super(StructureTransformation, self).__init__(scope, parent)
         self.placeholder = None
         self.index = None
-        self.transformation = Transformation()
+        self.transformation = None
     
-    def open(self, scope, text):
-        node = self
-        if scope == 'string.regexp.format':
-            self.transformation.setPattern(text[:-1])
-        else:
-            return super(StructureTransformation, self).open(scope, text)
-        return node
-        
     def close(self, scope, text):
         node = self
         if scope == 'keyword.transformation.snippet':
             self.index = int(text)
-        if scope == 'string.regexp.format':
-            self.transformation.setFormat(text)
-        elif scope == 'string.regexp.options':
-            self.transformation.setOptions(text)
+        elif scope == 'string.transformation':
+            self.transformation = Transformation(text)
         else:
             return super(StructureTransformation, self).close(scope, text)
         return node
@@ -434,22 +420,12 @@ class VariableTransformation(Node):
         self.name = None
         self.transformation = Transformation()
 
-    def open(self, scope, text):
-        node = self
-        if scope == 'string.regexp.format':
-            self.transformation.setPattern(text[:-1])
-        else:
-            return super(VariableTransformation, self).open(scope, text)
-        return node
-        
     def close(self, scope, text):
         node = self
         if scope == 'string.env.snippet':
             self.name = text
-        if scope == 'string.regexp.format':
-            self.transformation.setFormat(text)
-        elif scope == 'string.regexp.options':
-            self.transformation.setOptions(text)
+        elif scope == 'string.transformation':
+            self.transformation = Transformation(text)
         else:
             return super(VariableTransformation, self).close(scope, text)
         return node

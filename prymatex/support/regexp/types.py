@@ -47,7 +47,6 @@ class FormatType(object):
             return lambda m, r = text: r
 
     def apply(self, pattern, text, flags):
-        print flags
         nodes = []
         match = pattern.search(text) if 'g' in flags else pattern.match(text)
         if match:
@@ -68,3 +67,12 @@ class FormatType(object):
             if case in [CASE_LOWER_NEXT, CASE_UPPER_NEXT]:
                 case = CASE_NONE
         return "".join(result)
+        
+class TransformationType(object):
+    def __init__(self):
+        self.pattern = None
+        self.format = FormatType()
+        self.options = []
+        
+    def transform(self, text):
+        return self.format.apply(self.pattern, text, self.options)
