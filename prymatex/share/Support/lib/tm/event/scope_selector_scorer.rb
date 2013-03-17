@@ -71,13 +71,3 @@ module TextMate
     
   end
 end
-
-# test
-if __FILE__ == $0
-    selectorScorer = TextMate::Event::ScopeSelectorScorer.new()
-    reference = "source.python string.quoted.double.single-line.python punctuation.definition.string.end.python meta.empty-string.double.python"
-    scope = "source.python string.quoted.double.single-line punctuation.definition.string.end.python"
-    puts(selectorScorer.score(scope, reference))
-    scope = "source.python string.quoted.double.single-line meta.empty-string.double"
-    puts(selectorScorer.score(scope, reference))
-end

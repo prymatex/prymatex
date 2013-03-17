@@ -19,7 +19,7 @@ module LaTeX
       File.open(filepath, "r") do |file|
         1.upto(20) do
           line = file.readline
-          if line =~ /^%!TEX (\S*) =\s*(.*)\s*$/
+          if line =~ /^%!TEX (\S*) =\s*([^\r]*)\s*$/
             opts[$1] = $2
           end
         end
@@ -189,7 +189,7 @@ module LaTeX
     # Default values for the +includes+ hash.
     def set_defaults
       @includes = Hash.new
-      @includes[/^[^%]*(?:\\include|\\input)\s*\{([^\}]*)\}/] = Proc.new {|m|
+      @includes[/^[^%]*(?:\\include|\\input)\s*\{([^}\\]*)\}/] = Proc.new {|m|
         m[0].split(",").map do |it|
           LaTeX.find_file( it.strip, "tex", File.dirname(@root) ) || raise("Could not locate any file named '#{it}'")
         end
@@ -241,10 +241,19 @@ module LaTeX
       scanner = FileScanner.new(root)
       bibitem_regexp = /^[^%]*\\bibitem(?:\[[^\]]*\])?\{([^\}]*)\}(.*)/
       biblio_regexp = /^[^%]*\\bibliography\s*\{([^\}]*)\}/
+      addbib_regexp = /^[^%]*\\addbibresource\s*\{([^\}]*)\}/
       scanner.extractors[bibitem_regexp] = Proc.new do |filename, line, groups, text|
       citationsList << Citation.new( "citekey" => groups[0], "cite_data" => groups[1])
       end
       scanner.extractors[biblio_regexp] = Proc.new do |filename, line, groups, text|
+        groups[0].split(",").each do |it|
+          file = LaTeX.find_file( it.strip, "bib", File.dirname(root) )
+          raise "Could not locate any file named '#{it}'" if file.nil?
+          citationsList += LaTeX.parse_bibfile(file)
+          citationsList += LaTeX.parse_bibfile(ENV["TM_LATEX_BIB"]) unless ENV["TM_LATEX_BIB"].nil?
+        end
+      end
+      scanner.extractors[addbib_regexp] = Proc.new do |filename, line, groups, text|
         groups[0].split(",").each do |it|
           file = LaTeX.find_file( it.strip, "bib", File.dirname(root) )
           raise "Could not locate any file named '#{it}'" if file.nil?

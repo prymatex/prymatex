@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>comment</key>
@@ -11,10 +11,6 @@
 	<array>
 		<string>bib</string>
 	</array>
-	<key>foldingStartMarker</key>
-	<string>\@[a-zA-Z]+\s*[{(].+,</string>
-	<key>foldingStopMarker</key>
-	<string>^\s*[)}]\s*$</string>
 	<key>name</key>
 	<string>BibTeX</string>
 	<key>patterns</key>
@@ -169,7 +165,7 @@
 			<array>
 				<dict>
 					<key>begin</key>
-					<string>([a-zA-Z]+)\s*(\=)</string>
+					<string>([a-zA-Z0-9\!\$\&amp;\*\+\-\.\/\:\;\&lt;\&gt;\?\[\]\^\_\`\|]+)\s*(\=)</string>
 					<key>beginCaptures</key>
 					<dict>
 						<key>1</key>
@@ -243,7 +239,7 @@
 			<array>
 				<dict>
 					<key>begin</key>
-					<string>([a-zA-Z]+)\s*(\=)</string>
+					<string>([a-zA-Z0-9\!\$\&amp;\*\+\-\.\/\:\;\&lt;\&gt;\?\[\]\^\_\`\|]+)\s*(\=)</string>
 					<key>beginCaptures</key>
 					<dict>
 						<key>1</key>

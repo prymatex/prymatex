@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python -u
 # encoding: utf-8
 
 # This is a rewrite of latexErrWarn.py
@@ -102,6 +102,19 @@ def run_bibtex(bibfile=None,verbose=False,texfile=None):
         warn+=w
         stat = runObj.wait()
     return stat,fatal,err,warn
+
+def run_biber(bibfile=None,verbose=False,texfile=None):
+    """Determine Targets and run biber"""
+    # call biber without extension.
+    fatal,err,warn = 0,0,0
+    runObj = Popen('biber'+" "+fileNoSuffix,shell=True,stdout=PIPE,stdin=PIPE,stderr=STDOUT,close_fds=True)
+    bp = BiberParser(runObj.stdout,verbose)
+    f,e,w = bp.parseStream()
+    fatal|=f
+    err+=e
+    warn+=w
+    stat = runObj.wait()
+    return stat,fatal,err,warn
         
 def run_latex(ltxcmd,texfile,verbose=False):
     """Run the flavor of latex specified by ltxcmd on texfile"""
@@ -147,12 +160,13 @@ def findViewerPath(viewer,pdfFile,fileName):
     runObj = Popen(TM_SUPPORT_PATH + '/bin/find_app ' + viewer + '.app',stdout=PIPE,shell=True)
     vp = shell_quote(runObj.stdout.read())
     syncPath = None
+    lineNumber = os.getenv('TM_SELECTION').split(':')[0]
     if viewer == 'Skim' and vp:
-        syncPath = vp + '/Contents/SharedSupport/displayline ' + os.getenv('TM_LINE_NUMBER') + ' ' + pdfFile + ' ' + shell_quote(os.getenv('TM_FILEPATH'))
+        syncPath = vp + '/Contents/SharedSupport/displayline ' + lineNumber + ' ' + pdfFile + ' ' + shell_quote(os.getenv('TM_FILEPATH'))
     elif viewer == 'TeXniscope' and vp:
-        syncPath = vp + '/Contents/Resources/forward-search.sh ' + os.getenv('TM_LINE_NUMBER') + ' ' + shell_quote(os.getenv('TM_FILEPATH')) + ' ' + pdfFile
+        syncPath = vp + '/Contents/Resources/forward-search.sh ' + lineNumber + ' ' + shell_quote(os.getenv('TM_FILEPATH')) + ' ' + pdfFile
     elif viewer == 'PDFView' and vp:
-        syncPath = vp + '/Contents/MacOS/gotoline.sh ' + os.getenv('TM_LINE_NUMBER') + ' ' + pdfFile
+        syncPath = vp + '/Contents/MacOS/gotoline.sh ' + lineNumber + ' ' + pdfFile
     if DEBUG:
         print "VP = ", vp
         print "syncPath = ", syncPath
@@ -208,10 +222,10 @@ def run_viewer(viewer,fileName,filePath,force,usePdfSync=True):
 
     else:
         pdfFile = fileNoSuffix+'.pdf'
-        tmHref = '<p><a href="tm-file://'+quote(filePath+'/'+pdfFile)+'">Click Here to View</a></p>'
+        tmHref = '<p><a href="file://'+quote(filePath+'/'+pdfFile)+'">Click Here to View</a></p>'
         if (numErrs < 1 and numWarns < 1) or (numErrs < 1 and numWarns > 0 and not force):
             print '<script type="text/javascript">'
-            print 'window.location="tm-file://'+quote(filePath+'/'+pdfFile)+'"'
+            print 'window.location="file://'+quote(filePath+'/'+pdfFile)+'"'
             print '</script>'
     return stat
 
@@ -456,10 +470,8 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         texCommand = sys.argv[1]
     else:
-        texCommand = "latex"
-        
-        #sys.stderr.write("Usage: "+sys.argv[0]+" tex-command firstRun\n")
-        #sys.exit(255)
+        sys.stderr.write("Usage: "+sys.argv[0]+" tex-command firstRun\n")
+        sys.exit(255)
 
 #
 # Get preferences from TextMate or local directives
@@ -569,7 +581,10 @@ if __name__ == '__main__':
         numRuns = commandParser.numRuns
         
     elif texCommand == 'bibtex':
-        texStatus, isFatal, numErrs, numWarns = run_bibtex(texfile=fileName)
+        if os.path.exists(fileNoSuffix+'.bcf'):
+            texStatus, isFatal, numErrs, numWarns = run_biber(texfile=fileName)
+        else:
+            texStatus, isFatal, numErrs, numWarns = run_bibtex(texfile=fileName)
         
     elif texCommand == 'index':
         texStatus, isFatal, numErrs, numWarns = run_makeindex(fileName)
@@ -583,7 +598,10 @@ if __name__ == '__main__':
         # the latex, bibtex, index, latex, latex sequence should cover 80% of the cases that latexmk does
         texCommand =  engine + " " + constructEngineOptions(tsDirs,tmPrefs)
         texStatus,isFatal,numErrs,numWarns = run_latex(texCommand,fileName,verbose)
-        texStatus, isFatal, numErrs, numWarns = run_bibtex(texfile=fileName)
+        if os.path.exists(fileNoSuffix+'.bcf'):
+            texStatus, isFatal, numErrs, numWarns = run_biber(texfile=fileName)
+        else:
+            texStatus, isFatal, numErrs, numWarns = run_bibtex(texfile=fileName)
         if os.path.exists(fileNoSuffix+'.idx'):
             texStatus, isFatal, numErrs, numWarns = run_makeindex(fileName)
         texStatus,isFatal,numErrs,numWarns = run_latex(texCommand,fileName,verbose)
@@ -661,12 +679,12 @@ if __name__ == '__main__':
 
         print '<div id="texActions">'
         print '<input type="button" value="Re-Run %s" onclick="runLatex(); return false" />' % engine
-        print '<input type="button" value="Run BibTeX" onclick="runBibtex(); return false" />'
+        print '<input type="button" value="Run Bib" onclick="runBibtex(); return false" />'
         print '<input type="button" value="Run Makeindex" onclick="runMakeIndex(); return false" />'
         print '<input type="button" value="Clean up" onclick="runClean(); return false" />'        
         if viewer == 'TextMate':
             pdfFile = fileNoSuffix+'.pdf'
-            print """<input type="button" value="view in TextMate" onclick="window.location='""" + 'tm-file://' + quote(filePath+'/'+pdfFile) +"""'"/>"""
+            print """<input type="button" value="view in TextMate" onclick="window.location='""" + 'file://' + quote(filePath+'/'+pdfFile) +"""'"/>"""
         else:
             print '<input type="button" value="View in %s" onclick="runView(); return false" />' % viewer
         print '<input type="button" value="Preferences…" onclick="runConfig(); return false" />'

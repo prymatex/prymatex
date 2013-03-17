@@ -5,12 +5,14 @@ import os
 import tmprefs
 from struct import *
 
+import urllib
 
 def percent_escape(str):
 	return re.sub('[\x80-\xff /&]', lambda x: '%%%02X' % unpack('B', x.group(0))[0], str)
 
+# Swapped call to percent_escape with urllib.quote.  Was causing links to fail in TM2
 def make_link(file, line):
-	return 'txmt://open?url=file:%2F%2F' + percent_escape(file) + '&amp;line=' + line
+	return 'txmt://open/?url=file://' + urllib.quote(file) + '&amp;line=' + line
 
 def shell_quote(string):
 	return '"' + re.sub(r'([`$\\"])', r'\\\1', string) + '"'
@@ -112,15 +114,43 @@ class BibTexParser(TexParser):
             (re.compile("Warning--I didn't find a database entry") , self.warning),
             (re.compile(r'I found no \\\w+ command') , self.error),
             (re.compile(r"I couldn't open style file"), self.error),
+            (re.compile(r"You're missing a field name---line (\d+)"), self.error),
+            (re.compile(r'Too many commas in name \d+ of'), self.error),
+            (re.compile(r'I was expecting a'),self.error),
             (re.compile('This is BibTeX') , self.info),
-            (re.compile('The style') , self.info),            
-            (re.compile('Database') , self.info),                        
+            (re.compile('The style') , self.info),
+            (re.compile('Database') , self.info),
             (re.compile('---') , self.finishRun)
         ]
     
     def finishRun(self,m,line):
         self.done = True
         print '</div>'
+
+class BiberParser(TexParser):
+    """Parse and format Error Messages from biber"""
+    def __init__(self, btex, verbose):
+        super(BiberParser, self).__init__(btex,verbose)
+        self.patterns += [ 
+            (re.compile('^.*WARN') , self.warning),
+            (re.compile('^.*ERROR') , self.error),
+            (re.compile('^.*FATAL'), self.fatal),
+            (re.compile('^.*Output to (.*)$') , self.finishRun),
+        ]
+        
+    def warning(self,m,line):
+        """Using one print command works more reliably 
+           than using several lines"""
+        print '<p class="warning">' + line + '</p>'
+        self.numWarns += 1
+
+    def finishRun(self,m,line):
+      logFile = m.group(1)[:-3] + 'blg'
+      print '<p>  Complete transcript is in '
+      print '<a href="' + make_link(os.path.join(os.getcwd(),logFile),'1') +  '">' + logFile + '</a>'
+      print '</p>'
+      self.done = True
+      print '</div>'
 
 class LaTexParser(TexParser):
     """Parse Output From Latex"""
@@ -225,6 +255,7 @@ class ParseLatexMk(TexParser):
         self.patterns += [
             (re.compile('This is (pdfTeX|latex2e|latex|XeTeX)') , self.startLatex),
             (re.compile('This is BibTeX') , self.startBibtex),
+            (re.compile('^.*This is biber') , self.startBiber),
             (re.compile('^Latexmk: All targets \(.*?\) are up-to-date') , self.finishRun),
             (re.compile('This is makeindex') , self.startBibtex),
             (re.compile('^Latexmk') , self.ltxmk),
@@ -236,6 +267,14 @@ class ParseLatexMk(TexParser):
         print '<div class="bibtex">'
         print '<h3>' + line[:-1] + '</h3>'
         bp = BibTexParser(self.input_stream,self.verbose)
+        f,e,w = bp.parseStream()
+        self.numErrs += e
+        self.numWarns += w
+
+    def startBiber(self,m,line):
+        print '<div class="biber">'
+        print '<h3>' + line + '</h3>'
+        bp = BiberParser(self.input_stream,self.verbose)
         f,e,w = bp.parseStream()
         self.numErrs += e
         self.numWarns += w
@@ -296,6 +335,7 @@ if __name__ == '__main__':
     # test
     stream = open('../tex/test.log')
     lp = LaTexParser(stream,False,"test.tex")
+    lp = BiberParser(stream, False)
     f,e,w = lp.parseStream()
     
 
