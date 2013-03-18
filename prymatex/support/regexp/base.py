@@ -11,10 +11,6 @@ ONIG_OPTION_EXTEND = ponyguruma.OPTION_EXTEND
 
 RE_OPTION_MULTILINE = re.MULTILINE
 
-RE_REPLACES = (
-    ('?i:', '(?i)')
-)
-
 def convertOnig(options):
     res = ONIG_OPTION_NONE
     if 'i' in options:
@@ -38,8 +34,8 @@ def convertRe(options):
 def compileRe(string, flags):
     # Test oniguruma chars
     if not any(map(lambda tests : string.find(tests) != -1, ["\G"])):
-        for repl in RE_REPLACES:
-            string = string.replace(repl[0], repl[1])
+        for o, r in (('?i:', '(?i)'), ):
+            string = string.replace(o, r)
         try:
             return re.compile(string, convertRe(flags))
         except:

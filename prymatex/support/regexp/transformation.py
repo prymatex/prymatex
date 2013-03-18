@@ -9,6 +9,9 @@ class Transformation(object):
 
     def __str__(self):
         return str(self.transformation)
-
+    
+    def __unicode__(self):
+        return unicode(self.transformation)
+    
     def transform(self, text):
         return self.transformation.transform(text)

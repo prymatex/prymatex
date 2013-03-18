@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import unittest
-from prymatex.utils.scope import Scope, Context, Selector
+from prymatex.support.scope import Scope, Context, Selector
 
 class ScopeSelectorTests(unittest.TestCase):
     def setUp(self):

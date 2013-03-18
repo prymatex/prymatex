@@ -8,12 +8,42 @@ CASE_LOWER = 1
 CASE_NONE = 2
 CASE_UPPER_NEXT = 3
 CASE_LOWER_NEXT = 4
-        
+
+CASE_CHARS = {
+    CASE_UPPER: '\U',
+    CASE_LOWER: '\L',
+    CASE_NONE: '\E',
+    CASE_UPPER_NEXT: '\u',
+    CASE_LOWER_NEXT: '\l'
+}
+
+def escapeCharacters(text, esc):
+    for e in esc:
+        text = text.replace(e, '\\' + e)            
+    return text
+
 class ConditionType(object):
     def __init__(self, name):
         self.name = name
         self.if_set = []
         self.if_not_set = []
+
+    def __unicode__(self):
+        cnd = u"(?%d:" % self.name
+        for cmps in self.if_set:
+            if isinstance(cmps, int):
+                cnd += CASE_CHARS[cmps]
+            else:
+                cnd += escapeCharacters(unicode(cmps), "(:)")
+        if self.if_not_set:
+            cnd += u":"
+            for cmps in self.if_not_set:
+                if isinstance(cmps, int):
+                    cnd += CASE_CHARS[cmps]
+                else:
+                    cnd += escapeCharacters(unicode(cmps), "(:)")
+        cnd += u")"
+        return cnd
 
     def apply(self, match):
         return len(match.groups()) >= self.name and self.if_set or self.if_not_set
@@ -22,6 +52,15 @@ class FormatType(object):
     _repl_re = re.compile(u"\$(?:(\d+)|g<(.+?)>)")
     def __init__(self):
         self.composites = []
+    
+    def __unicode__(self):
+        frmt = ""
+        for cmps in self.composites:
+            if isinstance(cmps, int):
+                frmt += CASE_CHARS[cmps]
+            else:
+                frmt += unicode(cmps)
+        return frmt
     
     def case_function(self, case):
         return {
@@ -73,6 +112,12 @@ class TransformationType(object):
         self.pattern = None
         self.format = FormatType()
         self.options = []
+        
+    def __unicode__(self):
+        trns = u"%s/%s/" % (self.pattern.pattern, unicode(self.format))
+        if self.options:
+            trns += u"%s" % u"".join(self.options)
+        return trns
         
     def transform(self, text):
         return self.format.apply(self.pattern, text, self.options)
