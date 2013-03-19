@@ -5,13 +5,16 @@ from parser import Parser
 
 class Transformation(object):
     def __init__(self, transformation):
+        self.soruce = transformation
         self.transformation = transformation and Parser.transformation(transformation)
 
     def __str__(self):
-        return str(self.transformation)
+        #Por ahora algo de trampa, lo que entra es lo que se ve
+        return str(self.soruce)
     
     def __unicode__(self):
-        return unicode(self.transformation)
+        #Por ahora algo de trampa, lo que entra es lo que se ve
+        return unicode(self.soruce)
     
     def transform(self, text):
         return self.transformation.transform(text)

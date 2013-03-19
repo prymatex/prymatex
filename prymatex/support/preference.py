@@ -34,10 +34,11 @@ from prymatex.support.processor import PMXDebugSnippetProcessor
 class PMXPreferenceSettings(object):
     KEYS = [    'completions', 'completionCommand', 'disableDefaultCompletion', 'showInSymbolList', 'symbolTransformation', 
                 'highlightPairs', 'smartTypingPairs', 'shellVariables', 'spellChecking', 
-                'foldingIndentedBlockStart', 'foldingStartMarker', 'foldingStopMarker',
+                'indentedSoftWrap', 'softWrap',
+                'foldingIndentedBlockStart', 'foldingIndentedBlockIgnore', 'foldingStartMarker', 'foldingStopMarker',
                 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
     INDENT_KEYS = [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
-    FOLDING_KEYS = [ 'foldingIndentedBlockStart', 'foldingStartMarker', 'foldingStopMarker' ]
+    FOLDING_KEYS = [ 'foldingIndentedBlockStart', 'foldingIndentedBlockIgnore', 'foldingStartMarker', 'foldingStopMarker' ]
     INDENT_INCREASE = 0
     INDENT_DECREASE = 1
     INDENT_NEXTLINE = 2
