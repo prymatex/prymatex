@@ -3,23 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>name</key>
-	<string>Indentation</string>
+	<string>Folding</string>
 	<key>scope</key>
 	<string>source.js</string>
 	<key>settings</key>
 	<dict>
-		<key>decreaseIndentPattern</key>
-		<string>^(.*\*/)?\s*(\}|\))</string>
-		<key>increaseIndentPattern</key>
-		<string>(?x)
-		(
-			\{ [^}"']*
-		|	\( [^)"']*
-		)
-		$
-	</string>
+		<key>foldingStartMarker</key>
+		<string>\{\s*(//.*)?$|\[\s*(//.*)?$|\(\s*(//.*)?$</string>
+		<key>foldingStopMarker</key>
+		<string>^\s*\}|^\s*\]|^\s*\)</string>
 	</dict>
 	<key>uuid</key>
-	<string>BC062860-3346-4D3B-8421-C5543F83D11F</string>
+	<string>1E044101-68F8-410B-8FF5-E9553AD14B7C</string>
 </dict>
 </plist>
