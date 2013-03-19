@@ -6,7 +6,7 @@ from parser import Parser
 class Transformation(object):
     def __init__(self, transformation):
         self.soruce = transformation
-        self.transformation = transformation and Parser.transformation(transformation)
+        self.transformation = Parser.transformation(transformation)
 
     def __str__(self):
         #Por ahora algo de trampa, lo que entra es lo que se ve

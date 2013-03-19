@@ -94,18 +94,18 @@ class FormatType(object):
                     nodes.extend(composite.apply(match))
                 else:
                     nodes.append(composite)
-        result = []
-        case = CASE_NONE
-        for value in nodes:
-            if isinstance(value, basestring):
-                value = pattern.sub(self.prepare_replacement(value), text)
-            elif isinstance(value, int):
-                case = value
-                continue
-            result.append(self.case_function(case)(value))
-            if case in [CASE_LOWER_NEXT, CASE_UPPER_NEXT]:
-                case = CASE_NONE
-        return "".join(result)
+            result = []
+            case = CASE_NONE
+            for value in nodes:
+                if isinstance(value, basestring):
+                    value = pattern.sub(self.prepare_replacement(value), text)
+                elif isinstance(value, int):
+                    case = value
+                    continue
+                result.append(self.case_function(case)(value))
+                if case in [CASE_LOWER_NEXT, CASE_UPPER_NEXT]:
+                    case = CASE_NONE
+            return "".join(result)
         
 class TransformationType(object):
     def __init__(self):

@@ -23,13 +23,9 @@
     shellVariables, an array of key/value pairs. See context dependent variables.
     spellChecking, set to 0/1 to disable/enable spell checking.
 '''
-from copy import copy
-import uuid as uuidmodule
-
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.regexp import compileRegexp
-from prymatex.support.snippet import PMXSnippet
-from prymatex.support.processor import PMXDebugSnippetProcessor
+from regexp import Transformation
 
 class PMXPreferenceSettings(object):
     KEYS = [    'completions', 'completionCommand', 'disableDefaultCompletion', 'showInSymbolList', 'symbolTransformation', 
@@ -235,25 +231,16 @@ class PMXPreferenceMasterSettings(object):
     
     def compileSymbolTransformation(self):
         self._snippetsTransformation = []
-        for symbol in self.symbolTransformation:
-            symbol = "${SYMBOL" + symbol[1:] + "}"
-            dataHash = {    'content': symbol, 
-                            'name': symbol }
-            snippet = PMXSnippet(uuidmodule.uuid1(), "internal", dataHash = dataHash)
-            self._snippetsTransformation.append(snippet)
+        for trans in self.symbolTransformation:
+            if trans: self._snippetsTransformation.append(Transformation(trans[2:]))
     
     def transformSymbol(self, text):
-        #TODO: Hacer la transformacion de los simbolos
-        return text
         if not hasattr(self, '_snippetsTransformation'):
             self.compileSymbolTransformation()
-        pro = PMXDebugSnippetProcessor()
-        for snippet in self._snippetsTransformation:
-            snippet.execute(pro)
-            text = pro.text
-            if text:
-                return text
-        return text
+        for trans in self._snippetsTransformation:
+            tt = trans.transform(text)
+            if tt is not None:
+                return tt
     
     def folding(self, line):
         settings = self.__findFoldingSettings()
