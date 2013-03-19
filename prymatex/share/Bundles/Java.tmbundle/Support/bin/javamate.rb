@@ -17,10 +17,9 @@ class JavaMatePrefs
   end
 end
 
-TextMate.save_current_document
 TextMate::Executor.make_project_master_current_document
 
-cmd = ["java_compile_and_run.sh"]
+cmd = ["#{ENV['TM_BUNDLE_SUPPORT']}/bin/java_compile_and_run.sh"]
 cmd << ENV['TM_FILEPATH']
 script_args = []
 if ENV.include? 'TM_JAVAMATE_GET_ARGS'
@@ -44,19 +43,4 @@ end
 #cmd << package if package
 ENV["TM_JAVA_PACKAGE"] = package
 
-TextMate::Executor.run(cmd, :version_args => ["--version"], :script_args => script_args) do |line, type|
-  case type
-  when :err
-    line.chomp!
-    if line =~ /(.+\.java):(\d+):(.*)$/ 
-      path = Pathname.new($1)
-      line_no = $2
-      error = $3
-      abs_path = Pathname.new(path.realpath)
-      line = "<a href='txmt://open?url=file://#{abs_path}&line=#{line_no}'>#{htmlize((path.to_s =~ /^\.\//) ? path : abs_path.relative_path_from(cwd))}:#{line_no}</a>:#{htmlize(error)}";
-    else
-      line = htmlize(line)
-    end
-    line = "<span style='color: red'>#{line}</span><br>"
-  end
-end
+TextMate::Executor.run(cmd, :version_args => ["--version"], :script_args => script_args)
