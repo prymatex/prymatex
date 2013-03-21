@@ -418,7 +418,6 @@ class VariableTransformation(Node):
     def __init__(self, scope, parent = None):
         super(VariableTransformation, self).__init__(scope, parent)
         self.name = None
-        self.transformation = Transformation()
 
     def close(self, scope, text):
         node = self

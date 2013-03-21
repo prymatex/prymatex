@@ -117,6 +117,7 @@ class PMXPreferenceMasterSettings(object):
         for settings in self.settings:
             if settings.symbolTransformation is not None:
                 return settings.symbolTransformation
+        return []
                 
     @property
     def highlightPairs(self):
@@ -174,6 +175,12 @@ class PMXPreferenceMasterSettings(object):
         settings = self.__findFoldingSettings()
         if settings is not None:
             return settings.foldingIndentedBlockStart
+            
+    @property
+    def foldingIndentedBlockIgnore(self):
+        settings = self.__findFoldingSettings()
+        if settings is not None:
+            return settings.foldingIndentedBlockIgnore
             
     @property
     def foldingStartMarker(self):
