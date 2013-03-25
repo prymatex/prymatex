@@ -237,11 +237,11 @@ class PMXSupportBaseManager(object):
     def createScopeSelector(self, scopeSelector):
         return scope.Selector(scopeSelector)
         
-    def __sort_filter_items(self, items, leftScope, rightScope=None):
+    def __sort_filter_items(self, items, leftScope, rightScope = None):
         context = scope.Context.get(leftScope, rightScope)
-        rank = []
         sortFilterItems = []
         for item in items:
+            rank = []
             if item.selector.does_match(context, rank):
                 sortFilterItems.append((rank.pop(), item))
         sortFilterItems.sort(key=lambda t: t[0], reverse=True)

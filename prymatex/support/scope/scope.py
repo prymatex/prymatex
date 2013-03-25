@@ -8,10 +8,8 @@ class Scope(object):
     def __init__(self, scope):
         self.path = scope and Parser.path(scope) or Parser.path("")
 
-
     def __str__(self):
         return str(self.path)
-
 
     def has_prefix(self, rhs):
         lhsScopes = self.path.scopes
@@ -36,7 +34,6 @@ class Scope(object):
 
 wildcard = Scope("x-any")
 
-
 class Context(object):
     CONTEXTS = {}
     def __init__(self, left, right):
@@ -57,7 +54,7 @@ class Context(object):
         if self.left == self.right:
             return "(l/r '%s')" % str(self.left)
         else:
-            "(left '%s', right '%s')" % (str(self.left), str(self.right))
+            return "(left '%s', right '%s')" % (str(self.left), str(self.right))
             
     def __eq__(self, rhs):
         return self.left == rhs.left and self.right == rhs.right
@@ -88,7 +85,6 @@ class Selector(object):
         if isinstance(context, (basestring, Scope)):
             context = Context.get(context)
 
-        #assert isinstance(context, Context)
         # Search in cache
         matchKey = (context, isinstance(rank, list))
         if matchKey in self.previousMatch:
@@ -98,5 +94,4 @@ class Selector(object):
         
         match = context.left == wildcard or context.right == wildcard or self.selector.does_match(context.left.path, context.right.path, rank)
         self.previousMatch[matchKey] = (match, matchKey[1] and sum(rank) or None)
-        #print self.previousMatch[matchKey], rank
         return match

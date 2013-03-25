@@ -119,7 +119,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             customComponentsActions = []
             for name, settings in menuExtensions.iteritems():
                 actions = self.contributeToMainMenu(name, settings)
-                print componentClass, actions
+                #print componentClass, actions
                 customComponentsActions.extend(actions)
             self.registerComponentClassActions(componentClass, customComponentsActions)
         
@@ -129,7 +129,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             customEditorsActions = []
             for name, settings in menuExtensions.iteritems():
                 actions = self.contributeToMainMenu(name, settings)
-                print componentClass, actions
+                #print componentClass, actions
                 customEditorsActions.extend(actions)
             self.registerEditorClassActions(componentClass, customEditorsActions)
 
