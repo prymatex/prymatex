@@ -158,4 +158,3 @@ class PMXDragCommand(PMXCommand):
             value = getattr(self, key)
             dataHash[key] = value
         return dataHash
-        

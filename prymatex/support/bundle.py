@@ -293,7 +293,7 @@ class PMXBundleItem(PMXManagedObject):
 
     def execute(self, processor):
         pass
-        
+      
 class PMXRunningContext(object):
     TEMPLATE = u"""Item Name: {itemName}
     Asynchronous: {asynchronous}
@@ -304,13 +304,21 @@ class PMXRunningContext(object):
     """
     def __init__(self, bundleItem, shellCommand, environment):
         self.bundleItem = bundleItem
-        self.inputType, self.inputValue = None, None
+        self.inputType = self.inputValue = None
         self.shellCommand = shellCommand
+        self.process = None
         self.environment = environment
         self.asynchronous = False
         self.outputValue = self.outputType = None
         self.workingDirectory = None
-        
+
+    def setShellCommand(self, shellCommand):
+        # Set new shell command clean old values
+        self.removeTempFile()
+        self.inputType = self.inputValue = None
+        self.outputValue = self.outputType = None
+        self.shellCommand = shellCommand
+
     def __enter__(self):
         #Build the full las environment with gui environment and support environment
         self.shellCommand, self.environment, self.tempFile = utils.prepareShellScript(self.shellCommand, self.environment)
@@ -350,3 +358,4 @@ class PMXRunningContext(object):
     def removeTempFile(self):
         if os.path.exists(self.tempFile):
             utils.deleteFile(self.tempFile)
+

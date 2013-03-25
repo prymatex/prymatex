@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dockers/browser.ui'
 #
-# Created: Fri Jan 11 10:55:13 2013
+# Created: Mon Mar 25 09:14:34 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,7 @@ except AttributeError:
 class Ui_BrowserDock(object):
     def setupUi(self, BrowserDock):
         BrowserDock.setObjectName(_fromUtf8("BrowserDock"))
-        BrowserDock.resize(520, 301)
+        BrowserDock.resize(520, 54)
         self.dockWidgetContents = QtGui.QWidget()
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.verticalLayout = QtGui.QVBoxLayout(self.dockWidgetContents)
@@ -80,10 +80,6 @@ class Ui_BrowserDock(object):
         self.toolButtonOptions.setObjectName(_fromUtf8("toolButtonOptions"))
         self.horizontalLayout.addWidget(self.toolButtonOptions)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        self.webView = QtWebKit.QWebView(self.dockWidgetContents)
-        self.webView.setUrl(QtCore.QUrl(_fromUtf8("about:blank")))
-        self.webView.setObjectName(_fromUtf8("webView"))
-        self.verticalLayout.addWidget(self.webView)
         BrowserDock.setWidget(self.dockWidgetContents)
         self.actionSyncEditor = QtGui.QAction(BrowserDock)
         self.actionSyncEditor.setCheckable(True)
@@ -112,4 +108,3 @@ class Ui_BrowserDock(object):
         self.actionConnectEditor.setText(_('Connect Editor'))
         self.actionConnectEditor.setToolTip(_('Connect browser with current editor'))
 
-from PyQt4 import QtWebKit

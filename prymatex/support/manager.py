@@ -194,19 +194,21 @@ class PMXSupportBaseManager(object):
         if context.workingDirectory is not None:
             os.chdir(context.workingDirectory)
 
-        process = subprocess.Popen(context.shellCommand, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=context.environment)
+        context.process = subprocess.Popen(context.shellCommand, 
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE, env=context.environment)
 
         if context.inputType is not None:
-            process.stdin.write(unicode(context.inputValue).encode("utf-8"))
-        process.stdin.close()
+            context.process.stdin.write(unicode(context.inputValue).encode("utf-8"))
+        context.process.stdin.close()
         try:
-            context.outputValue = process.stdout.read()
-            context.errorValue = process.stderr.read()
+            context.outputValue = context.process.stdout.read()
+            context.errorValue = context.process.stderr.read()
         except IOError, e:
             context.errorValue = str(e).decode("utf-8")
-        process.stdout.close()
-        process.stderr.close()
-        context.outputType = process.wait()
+        context.process.stdout.close()
+        context.process.stderr.close()
+        context.outputType = context.process.wait()
 
         if context.workingDirectory is not None:
             os.chdir(origWD)
