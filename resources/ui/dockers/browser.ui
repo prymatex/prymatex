@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>520</width>
-    <height>301</height>
+    <height>54</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -141,7 +141,9 @@
       <item>
        <widget class="QToolButton" name="toolButtonOptions">
         <property name="icon">
-         <iconset theme="configure"/>
+         <iconset theme="configure">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="popupMode">
          <enum>QToolButton::MenuButtonPopup</enum>
@@ -158,15 +160,6 @@
        </widget>
       </item>
      </layout>
-    </item>
-    <item>
-     <widget class="QWebView" name="webView">
-      <property name="url">
-       <url>
-        <string>about:blank</string>
-       </url>
-      </property>
-     </widget>
     </item>
    </layout>
   </widget>
@@ -201,13 +194,6 @@
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QWebView</class>
-   <extends>QWidget</extends>
-   <header>QtWebKit/QWebView</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

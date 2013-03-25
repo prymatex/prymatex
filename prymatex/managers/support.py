@@ -266,17 +266,17 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
             
     #Interface
     def runQProcess(self, context, callback):
-        process = QtCore.QProcess(self)
+        context.process = QtCore.QProcess(self)
         if context.workingDirectory is not None:
-            process.setWorkingDirectory(context.workingDirectory)
+            context.process.setWorkingDirectory(context.workingDirectory)
             
-        self.processTableModel.appendProcess(process, description = context.description())
+        self.processTableModel.appendProcess(context.process, description = context.description())
 
         environment = QtCore.QProcessEnvironment()
         for key, value in context.environment.iteritems():
             environment.insert(key, value)
 
-        process.setProcessEnvironment(environment)
+        context.process.setProcessEnvironment(environment)
 
         def onQProcessFinished(process, context, callback):
             def runCallback(exitCode):
@@ -287,16 +287,16 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
                 callback(context)
             return runCallback
 
-        process.finished[int].connect(onQProcessFinished(process, context, callback))
+        context.process.finished[int].connect(onQProcessFinished(context.process, context, callback))
 
         if context.inputType is not None:
-            process.start(context.shellCommand, QtCore.QIODevice.ReadWrite)
-            if not process.waitForStarted():
+            context.process.start(context.shellCommand, QtCore.QIODevice.ReadWrite)
+            if not context.process.waitForStarted():
                 raise Exception("No puedo correr")
-            process.write(unicode(context.inputValue).encode("utf-8"))
-            process.closeWriteChannel()
+            context.process.write(unicode(context.inputValue).encode("utf-8"))
+            context.process.closeWriteChannel()
         else:
-            process.start(context.shellCommand, QtCore.QIODevice.ReadOnly)
+            context.process.start(context.shellCommand, QtCore.QIODevice.ReadOnly)
 
     def buildAdHocCommand(self, *largs, **kwargs):
         return BundleItemTreeNode(PMXSupportBaseManager.buildAdHocCommand(self, *largs, **kwargs))
