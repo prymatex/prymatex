@@ -351,9 +351,13 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             
         instances = self.componentInstances.setdefault(componentClass, [])
         instances.append(instance)
-
+        
         return instance
 
+    # ------------ Find Component
+    def componentHierarchy(componentClass):
+        return self.pluginManager.componentHierarchy(componentClass)
+        
     # ------------ Create Zmq Sockets
     def zmqSocket(self, socketType, name, address='127.0.0.1', addressType='tcp', port = None):
         # TODO ver la variable aca, creo que merjor seria que la app genere environ pregunatando a los components

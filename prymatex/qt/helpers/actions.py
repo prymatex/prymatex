@@ -17,8 +17,6 @@ def toggle_actions(actions, enable):
 
 def create_action(parent, settings):
     """Create a QAction"""
-    if not settings.has_key("text"):
-        print settings
     text = settings.get("text")
     action = QtGui.QAction(text, parent)
     name = settings.get("name", text)
@@ -39,7 +37,7 @@ def create_action(parent, settings):
     if settings.has_key("checkable"):
         action.setCheckable(settings["checkable"])
     
-    # callables
+    # Callables
     if settings.has_key("callback"):
         action.callback = settings["callback"]
     if settings.has_key("testChecked"):
@@ -57,6 +55,9 @@ def create_action(parent, settings):
     # (this will avoid calling shortcuts from another dockwidget
     #  since the context thing doesn't work quite well with these widgets)
     action.setShortcutContext(settings.get("context", QtCore.Qt.WindowShortcut))
+    
+    # Store settings
+    action.settings = settings
     return action
 
 
