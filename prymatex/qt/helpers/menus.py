@@ -52,6 +52,9 @@ def create_menu(parent, settings, useSeparatorName = False, connectActions = Fal
                     parent.connect(action, QtCore.SIGNAL('triggered(bool)'), action.callback)
                 else:
                     parent.connect(action, QtCore.SIGNAL('triggered()'), action.callback)
+                    
+    # Store settings
+    menu.settings = settings
     return menu, actions
 
 def extend_menu(menu, items, useSeparatorName = False):

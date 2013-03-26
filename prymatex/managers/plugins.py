@@ -76,6 +76,9 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         self.application.populateComponentClass(editorClass)
         editorClass.plugin = self.currentPluginDescriptor
         self.editors.append(editorClass)
+        #self.application.populateComponentClass(editorClass)
+        #editorClass.plugin = self.currentPluginDescriptor
+        #self.components.setdefault(MainWindow, []).append(editorClass)
 
     def registerComponent(self, componentClass, componentBase = MainWindow):
         self.application.populateComponentClass(componentClass)
@@ -85,6 +88,10 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
     # ------------ Handle component classes
     def findComponentsForClass(self, klass):
         return self.components.get(klass, [])
+    
+    def findComponentHierarchy(self, klass):
+        parentClasses = []
+        currentClass = klass
         
     # ------------ Handle editor classes
     def findEditorClassForFile(self, filePath):

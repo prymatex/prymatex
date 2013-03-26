@@ -1378,7 +1378,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'shortcut': 'Meta+Ctrl+Shift+B',
                  }
             ]}
-        # TODO Hacerlo una lista
         menuContributions = { "edit": edit, "view": view , "text": text, "navigation": navigation}
         return menuContributions
     
