@@ -74,7 +74,9 @@ class PMXPreferenceSettings(object):
                 elif key in [ 'shellVariables' ]:
                     value = dict(map(lambda d: (d['name'], d['value']), value))
                 elif key in [ 'symbolTransformation' ]:
-                    value = map(lambda value: value.strip(), value.split(";"))
+                    value = filter(lambda value: bool(value), 
+                                map(lambda value: value.strip(), 
+                                    value.split(";")))
                 elif key in [ 'showInSymbolList' ]:
                     value = bool(int(value))
                 elif key in [ 'spellChecking' ]:
@@ -239,7 +241,8 @@ class PMXPreferenceMasterSettings(object):
     def compileSymbolTransformation(self):
         self._snippetsTransformation = []
         for trans in self.symbolTransformation:
-            if trans: self._snippetsTransformation.append(Transformation(trans[2:]))
+            if trans: 
+                self._snippetsTransformation.append(Transformation(trans[2:]))
     
     def transformSymbol(self, text):
         if not hasattr(self, '_snippetsTransformation'):

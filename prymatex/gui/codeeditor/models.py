@@ -144,6 +144,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
     def processBlockUserData(self, text, block, userData):
         symbolRange = self.editor.scopes(block = block, attribute = 'settings', scope_filter = lambda attr: attr.showInSymbolList)
         if symbolRange:
+            print userData.scopeRanges()
             startStop, preference = symbolRange[0]
             symbol = text[slice(*startStop)]
             symbol = preference.transformSymbol(symbol)

@@ -7,9 +7,6 @@ import mimetypes
 from subprocess import Popen, PIPE, STDOUT
 
 from prymatex.qt import QtCore, QtGui, QtWebKit
-from prymatex.qt.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
-from prymatex.qt.QtNetwork import QNetworkProxy
-
 from prymatex.core import PMXBaseDock
 
 from prymatex import resources
@@ -68,6 +65,7 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.updateTimer.timeout.connect(self.updateHtmlCurrentEditorContent)
     
     def initialize(self, mainWindow):
+        PMXBaseDock.initialize(self, mainWindow)
         webView = self.tabWebView.createWebView()
         #Connect signals
         webView.urlChanged.connect(self.on_webView_urlChanged)

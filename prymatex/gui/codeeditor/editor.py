@@ -324,8 +324,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 "group": PMXSyntax.findGroup(scopeStack[::-1])
             })
         return scopeHash
-    
-    
+
     def scope(self, cursor = None, block = None, blockPosition = None, documentPosition = None,
                 scopeHash = None, direction = "right", attribute = "name"):
         if scopeHash is not None:
@@ -348,8 +347,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             leftScope = userData is not None and userData.scopeAtPosition(positionInBlock - 1) or hash(self.syntax().scopeName)
             rightScope = userData is not None and userData.scopeAtPosition(positionInBlock) or hash(self.syntax().scopeName)
             return self.SCOPES[leftScope][attribute], self.SCOPES[rightScope][attribute]
-        
-        
+            
     def scopes(self, block = None, attribute = "name", scope_filter = lambda attr: True):
         block = block or self.textCursor().block()
         userData = block.userData()
@@ -361,7 +359,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                         userData.scopeRanges()
                         )
                     )
-    
 
     # ------------ Obteniendo datos del editor
     def tabKeyBehavior(self):
