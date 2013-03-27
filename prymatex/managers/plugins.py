@@ -14,7 +14,7 @@ from prymatex.qt import QtGui, QtCore
 
 from prymatex import resources
 from prymatex.utils import osextra
-from prymatex.core import PMXBaseComponent
+from prymatex.core import PMXBaseComponent, PMXBaseEditor
 from prymatex.utils.importlib import import_module, import_from_directory
 
 from prymatex.gui.mainwindow import PMXMainWindow as MainWindow
@@ -60,7 +60,6 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         self.currentPluginDescriptor = None
         self.plugins = {}
         
-        self.editors = []
         self.components = {}
         
     @classmethod
@@ -72,14 +71,6 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         self.directories.append(directory)
 
     # ------------- Cargando clases
-    def registerEditor(self, editorClass):
-        self.application.populateComponentClass(editorClass)
-        editorClass.plugin = self.currentPluginDescriptor
-        self.editors.append(editorClass)
-        #self.application.populateComponentClass(editorClass)
-        #editorClass.plugin = self.currentPluginDescriptor
-        #self.components.setdefault(MainWindow, []).append(editorClass)
-
     def registerComponent(self, componentClass, componentBase = MainWindow):
         self.application.populateComponentClass(componentClass)
         componentClass.plugin = self.currentPluginDescriptor
@@ -89,20 +80,29 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
     def findComponentsForClass(self, klass):
         return self.components.get(klass, [])
     
-    def findComponentHierarchy(self, klass):
-        parentClasses = []
-        currentClass = klass
+    def componentHierarchyForClass(self, klass):
+        hierarchy = [ klass ]
+        while True:
+            for parentCmp, chilrenCmps in self.components.iteritems():
+                if hierarchy[-1] in chilrenCmps:
+                    hierarchy.append(parentCmp)
+                    continue
+            break
+        hierarchy.reverse()
+        return hierarchy
         
     # ------------ Handle editor classes
     def findEditorClassForFile(self, filePath):
         mimetype = self.application.fileManager.mimeType(filePath)
-        for Klass in self.editors:
+        editors = filter(lambda cmp: issubclass(cmp, PMXBaseEditor), self.components.get(MainWindow, []))
+        for Klass in editors:
             if Klass.acceptFile(filePath, mimetype):
                 return Klass
     
     
     def defaultEditor(self):
-        return self.editors[0]
+        editors = filter(lambda cmp: issubclass(cmp, PMXBaseEditor), self.components.get(MainWindow, []))
+        return editors[0]
 
 
     # ---------- Load plugins

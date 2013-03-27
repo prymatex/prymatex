@@ -120,24 +120,21 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         
     @classmethod
     def contributeToMainMenu(cls):
-        def on_actionShowLineNumbers_toggled(editor, checked):
-            instance = editor.findChild(cls, cls.__name__)
-            if instance is not None:
-                instance.setVisible(checked)
-
-        def on_actionShowLineNumbers_testChecked(editor):
-            instance = editor.findChild(cls, cls.__name__)
-            return instance is not None and instance.isVisible()
-        
         baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter")
         menuEntry = {
             'name': 'lineNumbers',
             'text': "Line Numbers",
-            'callback': on_actionShowLineNumbers_toggled,
+            'callback': cls.on_actionShowLineNumbers_toggled,
             'shortcut': 'F10',
             'checkable': True,
-            'testChecked': on_actionShowLineNumbers_testChecked }
+            'testChecked': cls.on_actionShowLineNumbers_testChecked }
         return { baseMenu: menuEntry }
+
+    def on_actionShowLineNumbers_toggled(self, checked):
+        self.setVisible(checked)
+
+    def on_actionShowLineNumbers_testChecked(self):
+        return self.isVisible()
 
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
@@ -205,25 +202,22 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
 
     @classmethod
     def contributeToMainMenu(cls):
-        def on_actionShowBookmarks_toggled(editor, checked):
-            instance = editor.findChild(cls, cls.__name__)
-            if instance is not None:
-                instance.setVisible(checked)
-
-        def on_actionShowBookmarks_testChecked(editor):
-            instance = editor.findChild(cls, cls.__name__)
-            return instance is not None and instance.isVisible()
-            
         baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter")
         menuEntry = {
             'name': 'bookmarks',
             'text': "Bookmarks",
-            'callback': on_actionShowBookmarks_toggled,
+            'callback': cls.on_actionShowBookmarks_toggled,
             'shortcut': 'Alt+F10',
             'checkable': True,
-            'testChecked': on_actionShowBookmarks_testChecked }
+            'testChecked': cls.on_actionShowBookmarks_testChecked }
         return { baseMenu: menuEntry} 
 
+    def on_actionShowBookmarks_toggled(self, checked):
+        self.setVisible(checked)
+            
+    def on_actionShowBookmarks_testChecked(self):
+        return self.isVisible()
+            
     def paintEvent(self, event):
         font_metrics = QtGui.QFontMetrics(self.editor.font())
         page_bottom = self.editor.viewport().height()
@@ -284,25 +278,22 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     
     @classmethod
     def contributeToMainMenu(cls):
-        def on_actionShowFoldings_toggled(editor, checked):
-            instance = editor.findChild(cls, cls.__name__)
-            if instance is not None:
-                instance.setVisible(checked)
-
-        def on_actionShowFoldings_testChecked(editor):
-            instance = editor.findChild(cls, cls.__name__)
-            return instance is not None and instance.isVisible()
-            
         baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter")
         menuEntry = {
             'name': 'foldings',
             'text': 'Foldings',
-            'callback': on_actionShowFoldings_toggled,
+            'callback': cls.on_actionShowFoldings_toggled,
             'shortcut': 'Shift+F10',
             'checkable': True,
-            'testChecked': on_actionShowFoldings_testChecked }
+            'testChecked': cls.on_actionShowFoldings_testChecked }
         return {baseMenu: menuEntry} 
 
+    def on_actionShowFoldings_toggled(self, checked):
+        self.setVisible(checked)
+
+    def on_actionShowFoldings_testChecked(editor):
+        return self.isVisible()
+        
     def paintEvent(self, event):
         font_metrics = QtGui.QFontMetrics(self.editor.font())
         page_bottom = self.editor.viewport().height()
@@ -379,25 +370,22 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
 
     @classmethod
     def contributeToMainMenu(cls):
-        def on_actionShowSelection_toggled(editor, checked):
-            instance = editor.findChild(cls, cls.__name__)
-            if instance is not None:
-                instance.setVisible(checked)
-
-        def on_actionShowSelection_testChecked(editor):
-            instance = editor.findChild(cls, cls.__name__)
-            return instance is not None and instance.isVisible()
-            
         baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter")
         menuEntry = {
             'name': 'selection',
             'text': 'Selection',
-            'callback': on_actionShowSelection_toggled,
+            'callback': cls.on_actionShowSelection_toggled,
             'shortcut': 'Shift+F10',
             'checkable': True,
-            'testChecked': on_actionShowSelection_testChecked }
+            'testChecked': cls.on_actionShowSelection_testChecked }
         return { baseMenu: menuEntry }
 
+    def on_actionShowSelection_toggled(self, checked):
+        self.setVisible(checked)
+
+    def on_actionShowSelection_testChecked(self):
+        return self.isVisible()
+        
     def paintEvent(self, event):
         font_metrics = QtGui.QFontMetrics(self.editor.font())
         page_bottom = self.editor.viewport().height()

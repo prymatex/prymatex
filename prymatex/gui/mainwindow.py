@@ -79,6 +79,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         center_widget(self, scale = (0.9, 0.8))
         self.dockers = []
         self.dialogs = []
+        self.customComponentActions = {}
         
 
         self.setAcceptDrops(True)
@@ -120,23 +121,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             for componentClass in componentClasses:
                 extendMenuDictionary(mainMenu, componentClass)
 
-        for componentClass in manager.findComponentsForClass(self.__class__) + manager.editors:
+        for componentClass in manager.findComponentsForClass(self.__class__):
             menuExtensions = {}
             extendMenuDictionary(menuExtensions, componentClass)
             customComponentsActions = []
             for name, settings in menuExtensions.iteritems():
                 actions = self.contributeToMainMenu(name, settings)
                 customComponentsActions.extend(actions)
-            self.registerComponentClassActions(componentClass, customComponentsActions)
-
-        #for componentClass in manager.editors:
-        #    menuExtensions = {}
-        #    hierarchy.append((componentClass, extendMenuDictionary(menuExtensions, componentClass)))
-        #    customEditorsActions = []
-        #    for name, settings in menuExtensions.iteritems():
-        #        actions = self.contributeToMainMenu(name, settings)
-        #        customEditorsActions.extend(actions)
-        #    self.registerEditorClassActions(componentClass, customEditorsActions)
+            self.registerComponentActions(componentClass, customComponentsActions)
 
     def initialize(self, application):
         PMXBaseComponent.initialize(self, application)
@@ -220,11 +212,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             else:
                 toolBar.show()
 
-
     # ---------- Componer la mainWindow
     def addStatusBar(self, statusBar):
         self.statusBar().addPermanentWidget(statusBar)
-
 
     def addDock(self, dock, area):
         self.addDockWidget(area, dock)
@@ -237,16 +227,13 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         dock.hide()
         self.dockers.append(dock)
 
-
     def addDialog(self, dialog):
         self.dialogs.append(dialog)
-
 
     def on_dockWidgetTitleBar_collpaseAreaRequest(self, dock):
         if not dock.isFloating():
             area = self.dockWidgetArea(dock)
             self.dockToolBars[area].show()
-
 
     def contributeToMainMenu(self, name, settings):
         actions = []
@@ -262,66 +249,59 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             actions = extend_menu(menu, settings['items'])
         return actions
 
-
-    def registerEditorClassActions(self, editorClass, actions):
-        self.logger.debug("%s, actions: %d" % (str(editorClass), len(actions)))
+    def registerComponentActions(self, componentClass, actions):
+        self.logger.debug("%s actions: %d" % (componentClass.__name__, len(actions)))
         #Conect Actions
         for action in actions:
             if hasattr(action, 'callback'):
-                receiver = lambda checked, action = action: self.currentEditorActionDispatcher(checked, action)
+                receiver = lambda checked, action = action: self.componentActionDispatcher(checked, action)
                 self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
-        print map(lambda action: hasattr(action, 'settings') and action.settings or action.objectName(), actions)
-        self.customEditorActions[editorClass] = actions
+        self.customComponentActions[componentClass] = actions
 
-    def registerComponentClassActions(self, componentClass, actions):
-        self.logger.debug("%s, actions: %d" % (str(componentClass), len(actions)))
-        #Conect Actions
-        for action in actions:
-            if hasattr(action, 'callback'):
-                receiver = lambda checked, componentClass = componentClass, \
-                    action = action: self.componentActionDispatcher(checked, componentClass, action)
-                self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
-        
-    def currentEditorActionDispatcher(self, checked, action):
-        callbackArgs = [ self.currentEditor() ]
-        if action.isCheckable():
-            callbackArgs.append(checked)
-        action.callback(*callbackArgs)
-
-    def componentActionDispatcher(self, checked, componentClass, action):
-        print self.findChildren(action.settings["componentClass"])
-        componentInstances = self.findChildren(componentClass)
-        # Si tengo mas de una busco la que tiene foco
-        componentInstance = componentInstances.pop()
+    def componentActionDispatcher(self, checked, action):
+        hierarchy = self.application.componentHierarchyForClass(action.settings["componentClass"])
+        componentInstance = self
+        for componentClass in hierarchy:
+            if componentClass == self.__class__:
+                continue
+            componentInstance = componentInstance.findChildren(componentClass).pop()
         callbackArgs = [ componentInstance ]
         if action.isCheckable():
             callbackArgs.append(checked)
         action.callback(*callbackArgs)
 
     def updateMenuForEditor(self, editor):
-        if editor is None:
-            for editorClass, actions in self.customEditorActions.iteritems():
-                map(lambda action: action.setVisible(False), actions)
-        else:
-            currentEditorClass = editor.__class__
-            
-            for editorClass, actions in self.customEditorActions.iteritems():
-                for action in actions:
-                    action.setVisible(editorClass == currentEditorClass)
-                    action.setChecked(
-                        editorClass == currentEditorClass and \
-                        action.isCheckable() and \
-                        hasattr(action, 'testChecked') and \
-                        action.testChecked(editor))
-                    action.setEnabled(
-                        editorClass == currentEditorClass and \
-                        not hasattr(action, 'testEnabled') or \
-                        (hasattr(action, 'testEnabled') and action.testEnabled(editor)))
-
+        editorClass = editor.__class__
+        componentClasses = self.application.findComponentsForClass(editorClass)
+        componentActions = self.customComponentActions.copy()
+        for componentClass in [ editorClass ] + componentClasses:
+            actions = componentActions.pop(componentClass, [])
+            for action in actions:
+                componentInstance = editor if componentClass == editorClass else editor.findChildren(componentClass).pop()
+                if not hasattr(action, "settings"):
+                    action.setVisible(True)
+                    continue
+                if "testVisible" in action.settings:
+                    visible = action.settings["testVisible"](componentInstance)
+                else:
+                    visible = True
+                action.setVisible(visible)
+                if "testEnabled" in action.settings:
+                    enabled = action.settings["testEnabled"](componentInstance)
+                else:
+                    enabled = True
+                action.setEnabled(enabled)
+                if action.isCheckable():
+                    if "testChecked" in action.settings:
+                        checked = action.settings["testChecked"](componentInstance)
+                    else:
+                        checked = False
+                    action.setChecked(checked)
+        for componentClass, actions in componentActions.iteritems():
+            map(lambda action: action.setVisible(False), actions)
 
     def showMessage(self, *largs, **kwargs):
         self.popupMessage.showMessage(*largs, **kwargs)
-
 
     # ---------------- Create and manage editors
     def addEmptyEditor(self):
@@ -336,13 +316,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         # TODO Ver si el remove borra el editor y como acomoda el historial
         del editor
 
-
     def addEditor(self, editor, focus = True):
         self.splitTabWidget.addTab(editor)
         self.connect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_editor_newLocationMemento)
         if focus:
             self.setCurrentEditor(editor)
-
 
     def findEditorForFile(self, filePath):
         # Find open editor for fileInfo
@@ -350,18 +328,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             if editor.filePath == filePath:
                 return editor
 
-
     def editors(self):
         return self.splitTabWidget.allWidgets()
-
 
     def setCurrentEditor(self, editor):
         self.splitTabWidget.setCurrentWidget(editor)
 
-
     def currentEditor(self):
         return self.splitTabWidget.currentWidget()
-
 
     def on_currentWidgetChanged(self, editor):
         #Update Menu
@@ -379,14 +353,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             editor.setFocus()
             self.application.checkExternalAction(self, editor)
 
-
     def setWindowTitleForEditor(self, editor):
         #Set Window Title for editor, editor can be None
         titleChunks = [ self.titleTemplate.safe_substitute(**self.application.supportManager.environmentVariables()) ]
         if editor is not None:
             titleChunks.insert(0, editor.tabTitle())
         self.setWindowTitle(" - ".join(titleChunks))
-
 
     def saveEditor(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor()

@@ -12,7 +12,7 @@ from prymatex import resources
 from prymatex.qt import QtGui, QtCore
 
 from prymatex.core import config
-from prymatex.core.components import PMXBaseComponent
+from prymatex.core.components import PMXBaseComponent, PMXBaseEditor
 from prymatex.core import logger, exceptions
 from prymatex.core.settings import pmxConfigPorperty
 
@@ -337,6 +337,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             # Add components
             componentClasses = self.pluginManager.findComponentsForClass(klass)
             for componentClass in componentClasses:
+                # Filter editors, editors create explicit
+                if issubclass(componentClass, PMXBaseEditor):
+                    continue
                 componentInstance = buildComponentInstance(componentClass, instance)
                 instance.addComponent(componentInstance)
             buildedObjects.append((instance, parent))
@@ -351,13 +354,16 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             
         instances = self.componentInstances.setdefault(componentClass, [])
         instances.append(instance)
-        
+
         return instance
 
     # ------------ Find Component
-    def componentHierarchy(componentClass):
-        return self.pluginManager.componentHierarchy(componentClass)
-        
+    def componentHierarchyForClass(self, componentClass):
+        return self.pluginManager.componentHierarchyForClass(componentClass)
+    
+    def findComponentsForClass(self, componentClass):
+        return self.pluginManager.findComponentsForClass(componentClass)
+    
     # ------------ Create Zmq Sockets
     def zmqSocket(self, socketType, name, address='127.0.0.1', addressType='tcp', port = None):
         # TODO ver la variable aca, creo que merjor seria que la app genere environ pregunatando a los components

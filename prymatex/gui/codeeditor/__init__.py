@@ -8,7 +8,7 @@ from .status import CodeEditorStatus
 #from .overlay import EditorMessageOverlay, MiniMapOverlay
 
 def registerPlugin(manager):
-    manager.registerEditor(CodeEditor)
+    manager.registerComponent(CodeEditor)
     manager.registerComponent(CodeEditorStatus)
     manager.registerComponent(CodeEditorSymbolsDock)
     manager.registerComponent(CodeEditorBookmarksDock)
