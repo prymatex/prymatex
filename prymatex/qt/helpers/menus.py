@@ -34,6 +34,8 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.qt.helpers.base import text2objectname
 from prymatex.qt.helpers.actions import create_action
 
+DEFAULT_ACTIONS_GROUP = None
+
 def create_menu(parent, settings, useSeparatorName = False, connectActions = False):
     text = settings.get("text", "Menu")
     menu = QtGui.QMenu(text, parent)
@@ -46,7 +48,7 @@ def create_menu(parent, settings, useSeparatorName = False, connectActions = Fal
     # actions
     actions = extend_menu(menu, settings.get("items", []), useSeparatorName)
     if connectActions:
-        for action in actions:
+        for action in reduce(lambda a, b: a + b, actions.values(), []):
             if hasattr(action, 'callback'):
                 if action.isCheckable():
                     parent.connect(action, QtCore.SIGNAL('triggered(bool)'), action.callback)
@@ -58,8 +60,11 @@ def create_menu(parent, settings, useSeparatorName = False, connectActions = Fal
     return menu, actions
 
 def extend_menu(menu, items, useSeparatorName = False):
-    actions = []
+    actionsGroups = {DEFAULT_ACTIONS_GROUP: []}
+    actions = actionsGroups[DEFAULT_ACTIONS_GROUP]
     for item in items:
+        if isinstance(item, dict) and "actionGroup" in item:
+            actions = actionsGroups.setdefault(item["actionGroup"], [])
         if item == "-":
             action = menu.addSeparator()
             actions.append(action)
@@ -74,7 +79,9 @@ def extend_menu(menu, items, useSeparatorName = False):
             submenu, subactions = create_menu(menu, item)
             subaction = menu.addMenu(submenu)
             actions.append(subaction)
-            actions.extend(subactions)
+            # Update actionsGroups
+            for grp, sas in subactions.iteritems():
+                actionsGroups.setdefault(grp, []).extend(sas)
         elif isinstance(item, dict):
             action = create_action(menu, item)
             actions.append(action)
@@ -97,7 +104,7 @@ def extend_menu(menu, items, useSeparatorName = False):
             map(lambda action: action.setActionGroup(actionGroup), item)
         else:
             raise Exception("%s" % item)
-    return actions
+    return actionsGroups
 
 def add_actions(target, actions, insert_before=None):
     """Add actions to a menu"""
