@@ -291,7 +291,7 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     def on_actionShowFoldings_toggled(self, checked):
         self.setVisible(checked)
 
-    def on_actionShowFoldings_testChecked(editor):
+    def on_actionShowFoldings_testChecked(self):
         return self.isVisible()
         
     def paintEvent(self, event):

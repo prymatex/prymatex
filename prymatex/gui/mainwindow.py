@@ -106,17 +106,15 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
     def populate(self, manager):
 
-        def applyComponentClass(menu, klass):
-            if isinstance(menu, dict):
-                for item in menu.get("items", []):
-                    applyComponentClass(item, klass)
-                menu["componentClass"] = klass
+        def componentClassMenu(klass):
+            menu = klass.contributeToMainMenu()
+            assert isinstance(menu, dict)
+            for name, submenu in menu.iteritems():
+                submenu["group"] = klass
+            return menu
 
         def extendMenuDictionary(mainMenu, klass):
-            componentMenus = klass.contributeToMainMenu()
-            for _, submenu in componentMenus.iteritems():
-                applyComponentClass(submenu, klass)
-            update_menu(mainMenu, componentMenus)
+            update_menu(mainMenu, componentClassMenu(klass))
             componentClasses = manager.findComponentsForClass(klass)
             for componentClass in componentClasses:
                 extendMenuDictionary(mainMenu, componentClass)
@@ -124,11 +122,18 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         for componentClass in manager.findComponentsForClass(self.__class__):
             menuExtensions = {}
             extendMenuDictionary(menuExtensions, componentClass)
-            customComponentsActions = []
             for name, settings in menuExtensions.iteritems():
-                actions = self.contributeToMainMenu(name, settings)
-                customComponentsActions.extend(actions)
-            self.registerComponentActions(componentClass, customComponentsActions)
+                actions = self.contributeToMainMenu(name, settings, baseGroup = componentClass)
+                for grp, acts in actions.iteritems():
+                    self.customComponentActions.setdefault(grp, []).extend(acts)
+        
+        #Conect Actions
+        for action in reduce(lambda a1, a2: a1 + a2, self.customComponentActions.values(), []):
+            if hasattr(action, 'callback'):
+                self.connect(action, QtCore.SIGNAL('triggered(bool)'), self.componentActionDispatcher)
+        
+        print self.customComponentActions
+        #self.registerComponentActions(componentClass, customComponentsActions)
 
     def initialize(self, application):
         PMXBaseComponent.initialize(self, application)
@@ -235,31 +240,28 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             area = self.dockWidgetArea(dock)
             self.dockToolBars[area].show()
 
-    def contributeToMainMenu(self, name, settings):
+    def contributeToMainMenu(self, name, settings, baseGroup = None):
         actions = []
         menuAttr = text2objectname(name, prefix = "menu")
         menu = getattr(self, menuAttr, None)
         if menu is None:
             if "text" not in settings:
                 settings["text"] = name
-            menu, actions = create_menu(self.menubar, settings)
+            menu, actions = create_menu(self.menubar, settings, baseGroup = baseGroup)
             setattr(self, menuAttr, menu)
-            actions.insert(0, self.menubar.insertMenu(self.menuNavigation.children()[0], menu))
+            actions[baseGroup].insert(0, self.menubar.insertMenu(self.menuNavigation.children()[0], menu))
         elif 'items' in settings:
-            actions = extend_menu(menu, settings['items'])
+            actions = extend_menu(menu, settings['items'], baseGroup = baseGroup)
         return actions
 
-    def registerComponentActions(self, componentClass, actions):
-        self.logger.debug("%s actions: %d" % (componentClass.__name__, len(actions)))
-        #Conect Actions
-        for action in actions:
-            if hasattr(action, 'callback'):
-                receiver = lambda checked, action = action: self.componentActionDispatcher(checked, action)
-                self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
-        self.customComponentActions[componentClass] = actions
-
-    def componentActionDispatcher(self, checked, action):
-        hierarchy = self.application.componentHierarchyForClass(action.settings["componentClass"])
+    def componentActionDispatcher(self, checked):
+        action = self.sender()
+        componentClass = None
+        for cmpClass, actions in self.customComponentActions.iteritems():
+            if action in actions:
+                componentClass = cmpClass
+                break
+        hierarchy = self.application.componentHierarchyForClass(componentClass)
         componentInstance = self
         for componentClass in hierarchy:
             if componentClass == self.__class__:
@@ -278,22 +280,19 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             actions = componentActions.pop(componentClass, [])
             for action in actions:
                 componentInstance = editor if componentClass == editorClass else editor.findChildren(componentClass).pop()
-                if not hasattr(action, "settings"):
-                    action.setVisible(True)
-                    continue
-                if "testVisible" in action.settings:
-                    visible = action.settings["testVisible"](componentInstance)
+                if hasattr(action, "testVisible"):
+                    visible = action.testVisible(componentInstance)
                 else:
                     visible = True
                 action.setVisible(visible)
-                if "testEnabled" in action.settings:
-                    enabled = action.settings["testEnabled"](componentInstance)
+                if hasattr(action, "testEnabled"):
+                    enabled = action.testEnabled(componentInstance)
                 else:
                     enabled = True
                 action.setEnabled(enabled)
                 if action.isCheckable():
-                    if "testChecked" in action.settings:
-                        checked = action.settings["testChecked"](componentInstance)
+                    if hasattr(action, "testChecked"):
+                        checked = action.testChecked(componentInstance)
                     else:
                         checked = False
                     action.setChecked(checked)
