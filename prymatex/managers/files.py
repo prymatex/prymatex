@@ -55,7 +55,7 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     CHANGED = 1<<4
 
     def __init__(self, application):
-        QtCore.QObject.__init__(self)
+        QtCore.QObject.__init__(self, application)
         PMXBaseComponent.__init__(self)
         
         self.last_directory = get_home_dir()

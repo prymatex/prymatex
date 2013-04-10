@@ -17,7 +17,6 @@ from prymatex.core import logger, exceptions
 from prymatex.core.settings import pmxConfigPorperty
 
 from prymatex.utils.decorators import deprecated
-from prymatex.utils import coroutines
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime, logtime
 from prymatex.utils.zeromqt import ZmqSocket
@@ -174,15 +173,13 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             splash.setMask(splash_image.mask())
             splash.show()
         try:
-            self.cacheManager = self.setupCacheManager()  # Cache system Manager
-
-            #TODO: Cambiar los setup por build, que retornen los manager
-            # Loads
-            self.supportManager = self.setupSupportManager()  # Support Manager
-            self.fileManager = self.setupFileManager()  # File Manager
-            self.projectManager = self.setupProjectManager()  # Project Manager
-            self.setupCoroutines()
-            self.server = self.buildPrymatexServer()
+            # Build Managers
+            self.cacheManager = self.buildCacheManager()  # Cache system Manager
+            self.supportManager = self.buildSupportManager()  # Support Manager
+            self.fileManager = self.buildFileManager()  # File Manager
+            self.projectManager = self.buildProjectManager()  # Project Manager
+            self.schedulerManager =  self.buildSchedulerManager()
+            self.serverManager = self.buildServerManager()
 
             #Connect all loads
             self.projectManager.loadProjects()
@@ -230,7 +227,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             f.close()
 
     # -------------------- Managers
-    def setupSupportManager(self):
+    def buildSupportManager(self):
         from prymatex.managers.support import SupportManager
         manager = self.createComponentInstance(SupportManager)
 
@@ -264,28 +261,28 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
         return manager
 
-    def setupFileManager(self):
+    def buildFileManager(self):
         from prymatex.managers.files import FileManager
         manager = self.createComponentInstance(FileManager)
 
         manager.fileSytemChanged.connect(self.on_fileManager_fileSytemChanged)
         return manager
 
-    def setupProjectManager(self):
+    def buildProjectManager(self):
         from prymatex.managers.projects import ProjectManager
-        manager = self.createComponentInstance(ProjectManager)
-        return manager
+        return self.createComponentInstance(ProjectManager)
 
-    def setupCacheManager(self):
+    def buildCacheManager(self):
         from prymatex.managers.cache import CacheManager
         return self.createComponentInstance(CacheManager)
 
-    def setupCoroutines(self):
-        self.scheduler = coroutines.Scheduler(self)
+    def buildSchedulerManager(self):
+        from prymatex.utils import coroutines
+        return coroutines.Scheduler(self)
 
-    def buildPrymatexServer(self):
-        from prymatex.core.server import PrymatexServer
-        return self.createComponentInstance(PrymatexServer, self)
+    def buildServerManager(self):
+        from prymatex.managers.server import ServerManager
+        return self.createComponentInstance(ServerManager, self)
 
     # --------------------- Application events
     def closePrymatex(self):
@@ -471,7 +468,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
                     mainWindow.addEditor(editor, focus)
                 return editorReady
             if useTasks and inspect.isgeneratorfunction(editor.open):
-                task = self.scheduler.newTask(editor.open(filePath))
+                task = self.schedulerManager.newTask(editor.open(filePath))
                 task.done.connect(on_editorReady(mainWindow, editor, cursorPosition, focus))
             elif inspect.isgeneratorfunction(editor.open):
                 on_editorReady(mainWindow, editor, cursorPosition, focus)(list(editor.open(filePath)))
@@ -516,7 +513,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
                                                 defaultButton=QtGui.QMessageBox.Yes) if self.askAboutExternalChanges else QtGui.QMessageBox.Yes
             if result == QtGui.QMessageBox.Yes:
                 if inspect.isgeneratorfunction(editor.reload):
-                    task = self.scheduler.newTask(editor.reload())
+                    task = self.schedulerManager.newTask(editor.reload())
                 else:
                     editor.reload()
             elif result == QtGui.QMessageBox.No:
