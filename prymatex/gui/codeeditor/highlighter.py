@@ -25,7 +25,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         
         #Highlight Function
         self.highlight_function = self.realtime_highlight
-        self.highlightTask = self.editor.application.scheduler.idleTask()
+        self.highlightTask = self.editor.application.schedulerManager.idleTask()
 
     def stop(self):
         self.__running = False
@@ -37,7 +37,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         if not self.highlightTask.isRunning():
             self.highlight_function = self.async_highlight
             self.__running = True
-            self.highlightTask = self.editor.application.scheduler.newTask(self.highlightAllDocument())
+            self.highlightTask = self.editor.application.schedulerManager.newTask(self.highlightAllDocument())
             def on_highlightReady():
                 #Restore realitme function
                 self.highlight_function = self.realtime_highlight

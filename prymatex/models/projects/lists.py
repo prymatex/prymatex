@@ -18,7 +18,7 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
         QtCore.QAbstractListModel.__init__(self, parent)
         self.fileManager = fileManager
         self.projectManager = projectManager
-        self.projectFileTask = self.projectManager.application.scheduler.idleTask()
+        self.projectFileTask = self.projectManager.application.schedulerManager.idleTask()
         self.__files = []
         self.__baseFilters = []
 

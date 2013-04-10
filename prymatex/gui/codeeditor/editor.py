@@ -152,7 +152,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
 
-        self.completerTask = self.application.scheduler.idleTask()
+        self.completerTask = self.application.schedulerManager.idleTask()
         
         #Register text formaters
         self.registerTextCharFormatBuilder("line", self.textCharFormat_line_builder)
