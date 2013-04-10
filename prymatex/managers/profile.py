@@ -9,6 +9,7 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.core.profile import PMXProfile as PrymatexProfile
 from prymatex.core.config import PMX_HOME_PATH
+from prymatex.core import PMXBaseComponent
 
 from prymatex.models.profiles import ProfilesListModel
 from prymatex.models.settings import SettingsTreeModel
@@ -17,13 +18,13 @@ from prymatex.models.settings import SortFilterSettingsProxyModel
 from prymatex.gui.dialogs.profile import ProfileDialog
 
 # The very very first manager
-class ProfileManager(QtCore.QObject):
+class ProfileManager(QtCore.QObject, PMXBaseComponent):
     PRYMATEX_PROFILES_NAME = "profiles.ini"
     DEFAULT_PROFILE_NAME = "default"
 
     def __init__(self, application):
-        QtCore.QObject.__init__(self)
-        self.application = application
+        QtCore.QObject.__init__(self, application)
+        PMXBaseComponent.__init__(self)
         
         self.profilesListModel = ProfilesListModel(self)
         

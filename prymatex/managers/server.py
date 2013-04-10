@@ -11,10 +11,10 @@ from prymatex.core import PMXBaseComponent
 from prymatex import resources
 from prymatex.utils.importlib import import_from_directory
 
-# TODO Esto va a ser un manager de dialogos
-class PrymatexServer(QtCore.QObject, PMXBaseComponent):
+# TODO: por ahora este nombre esta bien, pero algo mas orientado a Prymatex server taria bueno
+class ServerManager(QtCore.QObject, PMXBaseComponent):
     def __init__(self, application):
-        QtCore.QObject.__init__(self)
+        QtCore.QObject.__init__(self, application)
         PMXBaseComponent.__init__(self)
 
         self.dialogs = {}

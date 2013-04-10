@@ -9,7 +9,7 @@ from prymatex.core import PMXBaseComponent
 
 class CacheManager(QtCore.QObject, PMXBaseComponent):
     def __init__(self, application):
-        QtCore.QObject.__init__(self)
+        QtCore.QObject.__init__(self, application)
         PMXBaseComponent.__init__(self)
         self.memoize = {}
 

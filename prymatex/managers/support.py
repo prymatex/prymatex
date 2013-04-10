@@ -178,7 +178,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
     SETTINGS_GROUP = 'SupportManager'
     
     def __init__(self, application):
-        QtCore.QObject.__init__(self)
+        QtCore.QObject.__init__(self, application)
         PMXSupportBaseManager.__init__(self)
         PMXBaseComponent.__init__(self)
 
