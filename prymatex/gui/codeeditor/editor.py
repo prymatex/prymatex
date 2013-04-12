@@ -876,7 +876,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def defaultCompletion(self, settings, callback):
         if not self.completerTask.isRunning():
-            self.completerTask = self.application.scheduler.newTask(self.runCompletionSuggestions(settings = settings))
+            self.completerTask = self.application.schedulerManager.newTask(self.runCompletionSuggestions(settings = settings))
             def on_completerTaskReady(callback):
                 def completerTaskReady(result):
                     callback(result.value)
