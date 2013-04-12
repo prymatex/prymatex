@@ -8,7 +8,6 @@ from prymatex.qt import QtCore, QtGui
 from prymatex import resources
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.widgets.multidicteditor import MultiDictTableEditorWidget
-from prymatex.models.environment import EnvironmentTableModel
 
 class VariablesSettingsWidget(MultiDictTableEditorWidget, SettingsTreeNode):
     """Environment variables"""

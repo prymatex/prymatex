@@ -5,7 +5,6 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.models.properties import PropertyTreeNode
 from prymatex.widgets.multidicteditor import MultiDictTableEditorWidget
-from prymatex.models.environment import EnvironmentTableModel
 
 class EnvironmentPropertiesWidget(MultiDictTableEditorWidget, PropertyTreeNode):
     """Environment variables"""
