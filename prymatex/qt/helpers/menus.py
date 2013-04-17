@@ -34,19 +34,20 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.qt.helpers.base import text2objectname
 from prymatex.qt.helpers.actions import create_action
 
-def create_menu(parent, settings, useSeparatorName = False, connectActions = False, baseGroup = None):
+def create_menu(parent, settings, useSeparatorName = False, connectActions = False):
     text = settings.get("text", "Menu")
+    menuName = text2objectname(settings.get("name", text2objectname(text)), prefix="menu")
     menu = QtGui.QMenu(text, parent)
-    menu.setObjectName(text2objectname(text, prefix = "menu"))
+    menu.setObjectName(menuName)
 
     # attrs
     if settings.has_key("icon"):
         menu.setIcon(settings["icon"])
 
     # actions
-    actions = extend_menu(menu, settings.get("items", []), useSeparatorName = useSeparatorName, baseGroup = baseGroup)
+    actions = extend_menu(menu, settings.get("items", []), useSeparatorName = useSeparatorName)
     if connectActions:
-        for action in reduce(lambda a, b: a + b, actions.values(), []):
+        for action in actions:
             if hasattr(action, 'callback'):
                 if action.isCheckable():
                     parent.connect(action, QtCore.SIGNAL('triggered(bool)'), action.callback)
@@ -57,13 +58,9 @@ def create_menu(parent, settings, useSeparatorName = False, connectActions = Fal
     menu.settings = settings
     return menu, actions
 
-def extend_menu(menu, items, useSeparatorName = False, baseGroup = None):
-    groups = {}
-    actions = groups.setdefault(baseGroup, [])
+def extend_menu(menu, items, useSeparatorName = False):
+    actions = []
     for item in items:
-        if isinstance(item, dict) and "group" in item:
-            baseGroup = item["group"]
-            actions = groups.setdefault(baseGroup, [])
         if item == "-":
             action = menu.addSeparator()
             actions.append(action)
@@ -75,12 +72,9 @@ def extend_menu(menu, items, useSeparatorName = False, baseGroup = None):
                 action.setText(name)
             actions.append(action)
         elif isinstance(item, dict) and 'items' in item:
-            submenu, subactions = create_menu(menu, item, baseGroup = baseGroup)
+            submenu, subactions = create_menu(menu, item)
             subaction = menu.addMenu(submenu)
             actions.append(subaction)
-            # Update groups
-            for grp, sas in subactions.iteritems():
-                groups.setdefault(grp, []).extend(sas)
         elif isinstance(item, dict):
             action = create_action(menu, item)
             actions.append(action)
@@ -103,7 +97,7 @@ def extend_menu(menu, items, useSeparatorName = False, baseGroup = None):
             map(lambda action: action.setActionGroup(actionGroup), item)
         else:
             raise Exception("%s" % item)
-    return groups
+    return actions
 
 def add_actions(target, actions, insert_before=None):
     """Add actions to a menu"""

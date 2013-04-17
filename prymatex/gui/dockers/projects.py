@@ -78,18 +78,14 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
     # Contributes to Main Menu
     @classmethod
     def contributeToMainMenu(cls):
-        navigation = {
-            'name': 'navigation',
-            'text': 'Navigation',
-            'items': [
+        navigation = [
                 "-",
                 {'text': 'Go To Project File',
                  'callback': cls.on_actionGoToProjectFile_triggered,
                  'shortcut': 'Meta+Ctrl+Shift+F',
                  }
-            ]}
-        menuContributions = { "navigation": navigation}
-        return menuContributions
+            ]
+        return { "navigation": navigation}
     
     # ------------------ Menu Actions
     def on_actionGoToProjectFile_triggered(self):

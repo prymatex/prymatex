@@ -7,7 +7,7 @@ import mimetypes
 from prymatex.qt import QtCore, QtWebKit
 
 from .network import NetworkAccessManager
-from .scripts import TextMate, WINDOW_JAVASCRIPT
+from .scripts import TextMate, SystemWrapper, WINDOW_JAVASCRIPT
 
 class WebView(QtWebKit.QWebView):
     def __init__(self, parent = None):

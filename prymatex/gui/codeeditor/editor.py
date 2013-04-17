@@ -1196,10 +1196,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # Contributes to Main Menu
     @classmethod
     def contributeToMainMenu(cls):
-        edit = {
-            'name': 'edit',
-            'text': 'Edit',
-            'items': [
+        edit = [
                 '-',
                 {'text': 'Mode',
                  'items': [
@@ -1208,11 +1205,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                     {'text': 'Multi Edit Mode', 'shortcut': 'Meta+Alt+M'}
                  ]}
             ]
-        }
-        view = {
-            'name': 'view',
-            'text': 'View',
-            'items': [
+        view = [
                 {'text': 'Font',
                  'items': [
                      {'text': "Zoom In",
@@ -1254,7 +1247,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'callback': cls.on_actionIndentGuide_toggled,
                  'checkable': True,
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.IndentGuide) },
-            ]}
+            ]
         text = {
             'name': 'text',
             'text': '&Text',
@@ -1347,10 +1340,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'callback': lambda editor: editor.executeCommand(),
                  }
             ]}
-        navigation = {
-            'name': 'navigation',
-            'text': 'Navigation',
-            'items': [
+        navigation = [
                 "-",
                 {'text': 'Toggle Bookmark',
                  'callback': cls.toggleBookmark,
@@ -1377,7 +1367,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'callback': cls.on_actionGoToBookmark_triggered,
                  'shortcut': 'Meta+Ctrl+Shift+B',
                  }
-            ]}
+            ]
         menuContributions = { "edit": edit, "view": view , "text": text, "navigation": navigation}
         return menuContributions
     

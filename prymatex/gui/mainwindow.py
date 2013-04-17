@@ -49,7 +49,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
     _editorHistoryIndex = 0
     
     # Constructor
-    def __init__(self, application):
+    def __init__(self, parent = None):
         """The main window
         @param parent: The QObject parent, in this case it should be the QApp
         @param files_to_open: The set of files to be opened when the window is shown in the screen.
@@ -57,7 +57,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         QtGui.QMainWindow.__init__(self)
         PMXBaseComponent.__init__(self)
 
-        self.application = application
         self.setupUi(self)
 
         self.setWindowIcon(resources.getIcon("prymatex"))
@@ -105,35 +104,22 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
 
     def populate(self, manager):
-
-        def componentClassMenu(klass):
-            menu = klass.contributeToMainMenu()
-            assert isinstance(menu, dict)
-            for name, submenu in menu.iteritems():
-                submenu["group"] = klass
-            return menu
-
-        def extendMenuDictionary(mainMenu, klass):
-            update_menu(mainMenu, componentClassMenu(klass))
+        def extendMainMenu(klass):
+            menuExtensions = klass.contributeToMainMenu()
+            for name, settings in menuExtensions.iteritems():
+                actions = self.contributeToMainMenu(name, settings)
+                self.customComponentActions.setdefault(klass, []).extend(actions)
             componentClasses = manager.findComponentsForClass(klass)
             for componentClass in componentClasses:
-                extendMenuDictionary(mainMenu, componentClass)
+                extendMainMenu(componentClass)
 
         for componentClass in manager.findComponentsForClass(self.__class__):
-            menuExtensions = {}
-            extendMenuDictionary(menuExtensions, componentClass)
-            for name, settings in menuExtensions.iteritems():
-                actions = self.contributeToMainMenu(name, settings, baseGroup = componentClass)
-                for grp, acts in actions.iteritems():
-                    self.customComponentActions.setdefault(grp, []).extend(acts)
+            extendMainMenu(componentClass)
         
         #Conect Actions
         for action in reduce(lambda a1, a2: a1 + a2, self.customComponentActions.values(), []):
             if hasattr(action, 'callback'):
                 self.connect(action, QtCore.SIGNAL('triggered(bool)'), self.componentActionDispatcher)
-        
-        print self.customComponentActions
-        #self.registerComponentActions(componentClass, customComponentsActions)
 
     def initialize(self, application):
         PMXBaseComponent.initialize(self, application)
@@ -240,18 +226,24 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             area = self.dockWidgetArea(dock)
             self.dockToolBars[area].show()
 
-    def contributeToMainMenu(self, name, settings, baseGroup = None):
+    def contributeToMainMenu(self, name, settings):
         actions = []
-        menuAttr = text2objectname(name, prefix = "menu")
-        menu = getattr(self, menuAttr, None)
-        if menu is None:
-            if "text" not in settings:
-                settings["text"] = name
-            menu, actions = create_menu(self.menubar, settings, baseGroup = baseGroup)
-            setattr(self, menuAttr, menu)
-            actions[baseGroup].insert(0, self.menubar.insertMenu(self.menuNavigation.children()[0], menu))
-        elif 'items' in settings:
-            actions = extend_menu(menu, settings['items'], baseGroup = baseGroup)
+        names = list(name) if isinstance(name, (tuple, list)) else [ name ]
+        parentMenu = self.menubar
+        while names and parentMenu is not None:
+            parentMenu = parentMenu.findChild(QtGui.QMenu, text2objectname(names.pop(0), prefix = "menu"))
+        if parentMenu is None and isinstance(settings, dict) and 'items' in settings and not names:
+            # Es un nuevo menu
+            menu, actions = create_menu(self.menubar, settings)
+            actions.append(self.menubar.addMenu(menu))
+        elif parentMenu is not None:
+            if isinstance(settings, list):
+                actions = extend_menu(parentMenu, settings)
+            elif isinstance(settings, dict) and 'items' in settings:
+                menu, actions = create_menu(parentMenu, settings)
+                actions.append(parentMenu.addMenu(menu))
+            elif isinstance(settings, dict):
+                actions = extend_menu(parentMenu, [ settings ])
         return actions
 
     def componentActionDispatcher(self, checked):
@@ -263,6 +255,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
                 break
         hierarchy = self.application.componentHierarchyForClass(componentClass)
         componentInstance = self
+        # TODO Quiza sacar la devolucion de la mainwindow en el hierarchy de application
         for componentClass in hierarchy:
             if componentClass == self.__class__:
                 continue
@@ -273,31 +266,34 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         action.callback(*callbackArgs)
 
     def updateMenuForEditor(self, editor):
-        editorClass = editor.__class__
-        componentClasses = self.application.findComponentsForClass(editorClass)
-        componentActions = self.customComponentActions.copy()
-        for componentClass in [ editorClass ] + componentClasses:
-            actions = componentActions.pop(componentClass, [])
+        def set_actions(instance, actions):
             for action in actions:
-                componentInstance = editor if componentClass == editorClass else editor.findChildren(componentClass).pop()
                 if hasattr(action, "testVisible"):
-                    visible = action.testVisible(componentInstance)
+                    visible = action.testVisible(instance)
                 else:
                     visible = True
                 action.setVisible(visible)
                 if hasattr(action, "testEnabled"):
-                    enabled = action.testEnabled(componentInstance)
+                    enabled = action.testEnabled(instance)
                 else:
                     enabled = True
                 action.setEnabled(enabled)
                 if action.isCheckable():
                     if hasattr(action, "testChecked"):
-                        checked = action.testChecked(componentInstance)
+                        checked = action.testChecked(instance)
                     else:
                         checked = False
                     action.setChecked(checked)
-        for componentClass, actions in componentActions.iteritems():
-            map(lambda action: action.setVisible(False), actions)
+        # Primero las del editor
+        set_actions(editor, self.customComponentActions.get(editor.__class__, []))
+        
+        # Ahora sus children
+        componentClass = self.application.findComponentsForClass(editor.__class__)
+        for klass in componentClass:
+            componentInstance = editor.findChildren(klass).pop()
+            set_actions(componentInstance, self.customComponentActions.get(klass, []))
+        #for componentClass, actions in componentActions.iteritems():
+        #    map(lambda action: action.setVisible(False), actions)
 
     def showMessage(self, *largs, **kwargs):
         self.popupMessage.showMessage(*largs, **kwargs)
