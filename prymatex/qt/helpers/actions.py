@@ -56,8 +56,6 @@ def create_action(parent, settings):
     #  since the context thing doesn't work quite well with these widgets)
     action.setShortcutContext(settings.get("context", QtCore.Qt.WindowShortcut))
     
-    # Store settings
-    action.settings = settings
     return action
 
 

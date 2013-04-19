@@ -36,10 +36,10 @@ from prymatex.qt.helpers.actions import create_action
 
 def create_menu(parent, settings, useSeparatorName = False, connectActions = False):
     text = settings.get("text", "Menu")
-    menuName = text2objectname(settings.get("name", text2objectname(text)), prefix="menu")
     menu = QtGui.QMenu(text, parent)
-    menu.setObjectName(menuName)
-
+    name = settings.get("name", text)
+    menu.setObjectName(text2objectname(name, prefix = "menu"))
+    
     # attrs
     if settings.has_key("icon"):
         menu.setIcon(settings["icon"])
@@ -54,8 +54,6 @@ def create_menu(parent, settings, useSeparatorName = False, connectActions = Fal
                 else:
                     parent.connect(action, QtCore.SIGNAL('triggered()'), action.callback)
                     
-    # Store settings
-    menu.settings = settings
     return menu, actions
 
 def extend_menu(menu, items, useSeparatorName = False):
@@ -73,8 +71,8 @@ def extend_menu(menu, items, useSeparatorName = False):
             actions.append(action)
         elif isinstance(item, dict) and 'items' in item:
             submenu, subactions = create_menu(menu, item)
-            subaction = menu.addMenu(submenu)
-            actions.append(subaction)
+            actions.extend(subactions)
+            actions.append(menu.addMenu(submenu))
         elif isinstance(item, dict):
             action = create_action(menu, item)
             actions.append(action)

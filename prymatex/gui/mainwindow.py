@@ -108,6 +108,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             menuExtensions = klass.contributeToMainMenu()
             for name, settings in menuExtensions.iteritems():
                 actions = self.contributeToMainMenu(name, settings)
+                # TODO: Pasarle las acciones generadas a la clase
                 self.customComponentActions.setdefault(klass, []).extend(actions)
             componentClasses = manager.findComponentsForClass(klass)
             for componentClass in componentClasses:
@@ -235,7 +236,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         if parentMenu is None and isinstance(settings, dict) and 'items' in settings and not names:
             # Es un nuevo menu
             menu, actions = create_menu(self.menubar, settings)
-            actions.append(self.menubar.addMenu(menu))
+            actions.insert(0, self.menubar.insertMenu(self.menuNavigation.children()[0], menu))
         elif parentMenu is not None:
             if isinstance(settings, list):
                 actions = extend_menu(parentMenu, settings)
@@ -255,10 +256,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
                 break
         hierarchy = self.application.componentHierarchyForClass(componentClass)
         componentInstance = self
-        # TODO Quiza sacar la devolucion de la mainwindow en el hierarchy de application
         for componentClass in hierarchy:
-            if componentClass == self.__class__:
-                continue
             componentInstance = componentInstance.findChildren(componentClass).pop()
         callbackArgs = [ componentInstance ]
         if action.isCheckable():
@@ -268,22 +266,17 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
     def updateMenuForEditor(self, editor):
         def set_actions(instance, actions):
             for action in actions:
-                if hasattr(action, "testVisible"):
-                    visible = action.testVisible(instance)
-                else:
-                    visible = True
-                action.setVisible(visible)
-                if hasattr(action, "testEnabled"):
-                    enabled = action.testEnabled(instance)
-                else:
-                    enabled = True
-                action.setEnabled(enabled)
+                action.setVisible(hasattr(action, "testVisible") and \
+                    action.testVisible(instance) or \
+                    True)
+                action.setEnabled(hasattr(action, "testEnabled") and \
+                    action.testEnabled(instance) or \
+                    True)
                 if action.isCheckable():
-                    if hasattr(action, "testChecked"):
-                        checked = action.testChecked(instance)
-                    else:
-                        checked = False
-                    action.setChecked(checked)
+                    action.setChecked(hasattr(action, "testChecked") and \
+                        action.testChecked(instance) or \
+                        False)
+        
         # Primero las del editor
         set_actions(editor, self.customComponentActions.get(editor.__class__, []))
         

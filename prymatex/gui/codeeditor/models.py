@@ -33,9 +33,8 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         self.layoutChanged.emit()
 
     def on_document_contentsChange(self, position, removed, added):
-        print position, removed, added
-
-
+        pass
+        
     # --------- List Model api
     def index(self, row, column = 0, parent = None):
         if 0 <= row < len(self.blocks):
@@ -144,7 +143,6 @@ class SymbolListModel(QtCore.QAbstractListModel):
     def processBlockUserData(self, text, block, userData):
         symbolRange = self.editor.scopes(block = block, attribute = 'settings', scope_filter = lambda attr: attr.showInSymbolList)
         if symbolRange:
-            print userData.scopeRanges()
             startStop, preference = symbolRange[0]
             symbol = text[slice(*startStop)]
             symbol = preference.transformSymbol(symbol)

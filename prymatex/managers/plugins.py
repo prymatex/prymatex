@@ -81,13 +81,13 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         return self.components.get(klass, [])
     
     def componentHierarchyForClass(self, klass):
-        hierarchy = [ klass ]
-        while True:
-            for parentCmp, chilrenCmps in self.components.iteritems():
-                if hierarchy[-1] in chilrenCmps:
-                    hierarchy.append(parentCmp)
-                    continue
-            break
+        hierarchy = [ ]
+        while klass != MainWindow:
+            hierarchy.append(klass)
+            parent = filter(lambda (p, children): klass in children, self.components.iteritems())
+            if len(parent) != 1:
+                break
+            klass = parent.pop()[0]
         hierarchy.reverse()
         return hierarchy
         
