@@ -229,6 +229,7 @@ class PMXSyntax(PMXBundleItem):
         stack = [[self.grammar, None]]
         for line in string.splitlines(True):
             self.parseLine(stack, line, processor)
+            #print stack
         if processor:
             processor.endParsing(self.scopeName)
     
@@ -245,7 +246,6 @@ class PMXSyntax(PMXBundleItem):
                 pattern, pattern_match = top.match_first_son(line, position)
             if top.end:
                 end_match = top.match_end( line, match, position )
-            
             if end_match and ( not pattern_match or pattern_match.start() >= end_match.start() ):
                 start_pos = end_match.start()
                 end_pos = end_match.end()
@@ -259,9 +259,7 @@ class PMXSyntax(PMXBundleItem):
                     processor.closeTag( top.name, end_pos)
                 stack.pop()
                 top, match = stack[-1]
-            else:
-                if not pattern:
-                    break 
+            elif pattern:
                 start_pos = pattern_match.start()
                 end_pos = pattern_match.end()
                 if pattern.begin:
@@ -283,6 +281,11 @@ class PMXSyntax(PMXBundleItem):
                         grammar.parse_captures('captures', pattern, pattern_match, processor)
                     if pattern.name and processor:
                         processor.closeTag(pattern.name, end_pos)
+            else:
+                # FIXME: Custom pop from stack for regexp
+                if not end_match and not pattern and top.end == "(?!\G)":
+                    stack.pop()
+                break
             position = end_pos
         if processor:
             processor.endLine(line)

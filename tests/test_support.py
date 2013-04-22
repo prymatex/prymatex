@@ -10,6 +10,14 @@ from prymatex.support.manager import PMXSupportPythonManager
 from prymatex.support.processor import PMXDebugSnippetProcessor, PMXDebugSyntaxProcessor
 from prymatex.support.syntax import PMXSyntax
 
+TEXT = """#!/usr/bin/env python
+
+import pepe
+#Comment
+class Persona(object):
+    pass
+"""
+
 #https://github.com/textmate/textmate/blob/master/Applications/TextMate/about/Changes.md
 class TestSupportFunctions(unittest.TestCase):
 
@@ -22,7 +30,7 @@ class TestSupportFunctions(unittest.TestCase):
             #print message
         self.manager.loadSupport(loadCallback)
 
-    def test_snippet(self):
+    def _test_snippet(self):
         pythonClassSnippet = self.manager.getBundleItem('659D189C-EC3E-4C4E-9377-B7F5F5216CBD')
         htmlInputSnippet = self.manager.getBundleItem('D8DCCC81-749A-4E2A-B4BC-D109D5799CAA')
         htmlBodySnippet = self.manager.getBundleItem('4905D47B-A08B-11D9-A5A2-000D93C8BE28')
@@ -40,7 +48,7 @@ class TestSupportFunctions(unittest.TestCase):
         file = open(os.path.abspath('./prymatex/gui/codeeditor/editor.py'), 'r')
         start = time()
         processor = PMXDebugSyntaxProcessor()
-        syntax.parse("#!/usr/bin/env python\nimport pepe", processor)
+        syntax.parse(TEXT, processor)
         #syntax.parse(file.read(), processor)
         file.close()
         tiempo = time() - start
