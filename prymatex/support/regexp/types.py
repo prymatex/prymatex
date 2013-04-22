@@ -46,7 +46,11 @@ class ConditionType(object):
         return cnd
 
     def apply(self, match):
-        return len(match.groups()) >= self.name and self.if_set or self.if_not_set
+        grps = match.groups()
+        index = self.name - 1
+        if len(grps) > index and grps[index] is not None:
+            return self.if_set
+        return self.if_not_set
 
 class FormatType(object):
     _repl_re = re.compile(u"\$(?:(\d+)|g<(.+?)>)")
@@ -89,23 +93,30 @@ class FormatType(object):
         nodes = []
         match = pattern.search(text) if 'g' in flags else pattern.match(text)
         if match:
+            # Split text in search parts
+            beginText = text[:match.start()]
+            sourceText = text[match.start():match.end()]
+            endText = text[match.end():]
+            # Translate to conditions
             for composite in self.composites:
                 if isinstance(composite, ConditionType):
                     nodes.extend(composite.apply(match))
                 else:
                     nodes.append(composite)
+            # Transform
             result = []
             case = CASE_NONE
             for value in nodes:
                 if isinstance(value, basestring):
-                    value = pattern.sub(self.prepare_replacement(value), text)
+                    value = pattern.sub(self.prepare_replacement(value), sourceText)
                 elif isinstance(value, int):
                     case = value
                     continue
+                # Apply case and append to result
                 result.append(self.case_function(case)(value))
                 if case in [CASE_LOWER_NEXT, CASE_UPPER_NEXT]:
                     case = CASE_NONE
-            return "".join(result)
+            return "%s%s%s" % (beginText, "".join(result), endText)
         
 class TransformationType(object):
     def __init__(self):
