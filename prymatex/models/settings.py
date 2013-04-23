@@ -18,7 +18,6 @@ class SettingsTreeNode(ConfigureTreeNode):
             node.loadSettings()
 
 
-
 # Proxy for namespaced models
 class ProxySettingsTreeNode(ProxyConfigureTreeNode):
     def loadSettings(self):

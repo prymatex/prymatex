@@ -137,23 +137,24 @@ class AbstractNamespaceTreeModel(AbstractTreeModel):
         self.separator = separator
         
     def nodeForNamespace(self, namespace, createProxy = False):
+        if not namespace:
+            return self.rootNode
         node = self.rootNode
-        names = namespace.split(self.separator)
-        for name in names:
-            if name != "":
-                nextNode = node.findChildByName(name)
-                if nextNode is None and createProxy:
-                    nextNode = self.treeNodeFactory(name, node)
-                    nextNode._isproxy = True
-                    node.appendChild(nextNode)
-                    self.layoutChanged.emit()
-                elif nextNode is None:
-                    return None
-                node = nextNode
+        for name in namespace.split(self.separator):
+            if not name:
+                raise Exception("No path for" % namespace)
+            childNode = node.findChildByName(name)
+            if childNode is None and createProxy:
+                childNode = self.treeNodeFactory(name, node)
+                childNode._isproxy = True
+                node.appendChild(childNode)
+                self.layoutChanged.emit()
+            elif childNode is None:
+                return None
+            node = childNode
         return node
     
-    def insertNode(self, node):
-        # TODO esto es como un appendNode asi que no estaria mal que se use ese metodo
+    def appendNamespaceNode(self, node):
         return self.insertNamespaceNode("", node)
 
     def insertNamespaceNode(self, namespace, node):
@@ -167,13 +168,11 @@ class AbstractNamespaceTreeModel(AbstractTreeModel):
                 for child in proxy.childNodes():
                     node.appendChild(child)
                 parentNode.removeChild(proxy)
-                self.layoutChanged.emit()
             else:
                 raise Exception("Node Already Exists" % node.nodeName())
-        self.beginInsertRows(parentIndex, node.childCount(), node.childCount())
         parentNode.appendChild(node)
         node._isproxy = False
-        self.endInsertRows()
+        self.layoutChanged.emit()
      
 #=========================================
 # Proxies
