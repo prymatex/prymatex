@@ -143,7 +143,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         if self.errorCommand:
             raise Exception(context.errorValue)
         else:
-            print context
+            print context.workingDirectory
             self.editor.mainWindow.showErrorInBrowser(
                 context.description(),
                 context.errorValue,

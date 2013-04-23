@@ -165,10 +165,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
     def showErrorInBrowser(self, title, summary, exitcode = -1, **settings):
         from prymatex.support.utils import makeHyperlinks
         from prymatex.utils import html
+        print summary
         commandScript = '''
             source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
             
-            html_header "An error has occurred while executing command %(name)s"
+            html_header "%(name)s error"
             echo -e "<pre>%(output)s</pre>"
             echo -e "<p>Exit code was: %(exitcode)d</p>"
             html_footer
@@ -179,7 +180,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         bundle = self.application.supportManager.getBundle(self.application.supportManager.defaultBundleForNewBundleItems)
         command = self.application.supportManager.buildAdHocCommand(commandScript,
             bundle,
-            name = "Error runing %s" % title,
+            name = "%s error" % title,
             commandOutput = 'showAsHTML')
         self.bundleItem_handler(command, **settings)
 

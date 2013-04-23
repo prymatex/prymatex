@@ -42,6 +42,7 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         # Tab web view
         self.tabWebView = TabbedWebView(self)
         self.tabWebView.currentWebViewChanged.connect(self.on_tabWebView_currentWebViewChanged)
+        self.tabWebView.empty.connect(self.on_tabWebView_empty)
         self.verticalLayout.addWidget(self.tabWebView)
         
         #Settings mover a un lugar de configuracion :)
@@ -66,14 +67,8 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
-        webView = self.tabWebView.createWebView()
-        #Connect signals
-        webView.urlChanged.connect(self.on_webView_urlChanged)
+        self.on_tabWebView_empty()
 
-        # Set the default home page
-        self.lineUrl.setText(self.homePage)
-        webView.setUrl(QtCore.QUrl(self.homePage))
-        
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.browser import NetworkSettingsWidget
@@ -120,6 +115,15 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.raise_()
         self.tabWebView.currentWebView().setRunningContext(context)
     
+    
+    def on_tabWebView_empty(self):
+        webView = self.tabWebView.createWebView()
+        #Connect signals
+        webView.urlChanged.connect(self.on_webView_urlChanged)
+
+        # Set the default home page
+        #self.lineUrl.setText(self.homePage)
+        webView.setUrl(QtCore.QUrl(self.homePage))
     
     # TabbedWebView signals
     def on_tabWebView_currentWebViewChanged(self, webView):

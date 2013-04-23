@@ -7,37 +7,41 @@ from .webview import WebView
 
 class TabbedWebView(QtGui.QTabWidget):
     currentWebViewChanged = QtCore.pyqtSignal(WebView)
+    empty = QtCore.pyqtSignal()
     
     def __init__(self, parent=None):
-        super(TabbedWebView, self).__init__(parent)
-        self._new_button = QtGui.QPushButton(self)
-        self._new_button.setText("New")
-        self._new_button.clicked.connect(lambda checked: self.createWebView())
-        self.setCornerWidget(self._new_button)
+        QtGui.QTabWidget.__init__(self, parent)
+
+        # Corner widget
+        self.buttonNew = QtGui.QPushButton(self)
+        self.buttonNew.setText("")
+        self.buttonNew.setIcon(QtGui.QIcon.fromTheme("tab-new-background"))
+        self.buttonNew.setMaximumSize(QtCore.QSize(28, 28))
+        self.buttonNew.clicked.connect(lambda checked: self.createWebView())
+        self.setCornerWidget(self.buttonNew)
+        
         self.setTabsClosable(True)
         self.setMovable(True)
-        self.tabCloseRequested[int].connect(self._on_tabCloseRequested)
+        self.tabCloseRequested[int].connect(self.removeTab)
         self.currentChanged[int].connect(self._on_currentChanged)
-        
-    # Signals
-    def _on_tabCloseRequested(self, index):
-        webView = self.widget(index)
-        print "cerrar", webView
-
+    
     def _on_currentChanged(self, index):
         webView = self.widget(index)
-        self.currentWebViewChanged.emit(webView)
+        if webView is not None:
+            self.currentWebViewChanged.emit(webView)
+        elif self.count() == 0:
+            self.empty.emit()
 
     def createWebView(self):
         webView = WebView(self)
         webView.titleChanged.connect(self.on_webView_titleChanged)
         webView.iconChanged.connect(self.on_webView_iconChanged)
-        self.addTab(webView, webView.title())
+        index = self.addTab(webView, "New")
         return webView
 
     def currentWebView(self):
         return self.currentWidget()
-        
+
     # Signals
     def on_webView_titleChanged(self, title):
         webView = self.sender()
