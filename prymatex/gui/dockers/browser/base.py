@@ -15,6 +15,7 @@ from prymatex.ui.dockers.browser import Ui_BrowserDock
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.support.utils import prepareShellScript, deleteFile
 from .tabwebview import TabbedWebView
+from .webview import WebView
 from .network import setGlobalApplicationProxy
 
 #=======================================================================
@@ -86,14 +87,13 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         # Tab web view
         self.tabWebView = TabbedWebView(self)
         self.tabWebView.currentWebViewChanged.connect(self.on_tabWebView_currentWebViewChanged)
-        self.tabWebView.empty.connect(self.on_tabWebView_empty)
+        self.tabWebView.webViewNewRequested.connect(self.on_tabWebView_webViewNewRequested)
+        self.tabWebView.webViewCloseRequested.connect(self.on_tabWebView_webViewCloseRequested)
         self.verticalLayout.addWidget(self.tabWebView)
         
         #Settings mover a un lugar de configuracion :)
         QtWebKit.QWebSettings.globalSettings().setIconDatabasePath(self.application.currentProfile.value('PMX_TMP_PATH'))
 
-        self.scrollValues = (False, 0, 0)   #(<restore scroll values>, <horizontalValue>, <verticalValue>)
-        
         #Capturar editor y webView
         self.currentEditor = None
         
@@ -103,7 +103,7 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
-        self.on_tabWebView_empty()
+        self.on_tabWebView_webViewNewRequested()
 
     @classmethod
     def contributeToSettings(cls):
@@ -121,11 +121,6 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.browserOptionsMenu, _ = create_menu(self, optionsMenu)
         self.toolButtonOptions.setMenu(self.browserOptionsMenu)
 
-
-    def showEvent(self, event):
-        self.setFocus()
-
-
     def event(self, event):
         if event.type() == QtCore.QEvent.KeyPress:
             if event.key() == QtCore.Qt.Key_Escape:
@@ -137,6 +132,15 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
                 self.lineUrl.selectAll()
                 return True
         return QtGui.QDockWidget.event(self, event)
+
+    def createWebView(self, windowType = QtWebKit.QWebPage.WebBrowserWindow):
+        webView = WebView(self)
+        #Connect signals
+        webView.urlChanged.connect(self.on_webView_urlChanged)
+        webView.loadProgress.connect(self.on_webView_loadProgress)
+        if windowType == QtWebKit.QWebPage.WebBrowserWindow:
+            self.tabWebView.addWebView(webView)
+        return webView
 
     # -------------------- Browser main methods
     def setHtml(self, string, url = None):
@@ -151,24 +155,25 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.raise_()
         self.tabWebView.currentWebView().setRunningContext(context)
     
-    
-    def on_tabWebView_empty(self):
-        webView = self.tabWebView.createWebView()
-        #Connect signals
-        webView.urlChanged.connect(self.on_webView_urlChanged)
-        webView.loadProgress.connect(self.on_webView_loadProgress)
-        
-        # Set the default home page
-        #self.lineUrl.setText(self.homePage)
-        webView.setUrl(QtCore.QUrl(self.homePage))
-    
-    # TabbedWebView signals
+    # ------------ TabbedWebView signals
     def on_tabWebView_currentWebViewChanged(self, webView):
         history = webView.page().history()
         self.buttonBack.setEnabled(history.canGoBack())
         self.buttonNext.setEnabled(history.canGoForward())
         self.lineUrl.setText(webView.url().toString())
     
+    def on_tabWebView_webViewNewRequested(self):
+        webView = self.createWebView()
+        webView.setUrl(QtCore.QUrl(self.homePage))
+    
+    def on_tabWebView_webViewCloseRequested(self, webView):
+        if self.tabWebView.count() > 1:
+            webView.urlChanged.disconnect(self.on_webView_urlChanged)
+            webView.loadProgress.disconnect(self.on_webView_loadProgress)
+            self.tabWebView.removeWebView(webView)
+        elif self.tabWebView.count() == 1:
+            webView.setUrl(QtCore.QUrl(self.homePage))
+
     # ------------ Browser Signals handlers
     def on_manager_commandUrlRequested(self, url):
         self.application.handleUrlCommand(url)

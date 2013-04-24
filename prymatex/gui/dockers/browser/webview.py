@@ -10,8 +10,10 @@ from .network import NetworkAccessManager
 from .scripts import TextMate, SystemWrapper, WINDOW_JAVASCRIPT
 
 class WebView(QtWebKit.QWebView):
-    def __init__(self, parent = None):
-        QtWebKit.QWebView.__init__(self, parent)
+    def __init__(self, browserDock):
+        QtWebKit.QWebView.__init__(self, browserDock)
+        self.browserDock = browserDock
+        
         self.networkAccessManager = self.buildNetworkAccessManager()
         self.runningContext = None
 
@@ -46,6 +48,9 @@ class WebView(QtWebKit.QWebView):
         if not title and self.runningContext is not None:
             return self.runningContext.description()
         return title
+
+    def createWindow(self, windowType):
+        return self.browserDock.createWebView(windowType)
 
     # ------------ Page Signals handlers
     def on_mainFrame_javaScriptWindowObjectCleared(self):
