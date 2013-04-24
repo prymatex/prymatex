@@ -39,7 +39,14 @@ class WebView(QtWebKit.QWebView):
         self.setPage(page)
         page.mainFrame().setUrl(url)
         page.mainFrame().setHtml(content)
-        
+
+    # ------------ Override
+    def title(self):
+        title = QtWebKit.QWebView.title(self)
+        if not title and self.runningContext is not None:
+            return self.runningContext.description()
+        return title
+
     # ------------ Page Signals handlers
     def on_mainFrame_javaScriptWindowObjectCleared(self):
         self.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self))
@@ -56,7 +63,6 @@ class WebView(QtWebKit.QWebView):
             print url
             self.page().mainFrame().load(url)
 
-    
     def runCommand(self, command):
         self.runningContext.removeTempFile()
         self.runningContext.setShellCommand(command)
