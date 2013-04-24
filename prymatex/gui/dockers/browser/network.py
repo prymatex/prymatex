@@ -53,10 +53,10 @@ class NetworkAccessManager(QtNetwork.QNetworkAccessManager):
             return FileReply(self, request.url(), self.GetOperation)
         return QtNetwork.QNetworkAccessManager.createRequest(self, operation, request, data)
         
-def setGlobalApplicationProxy(proxyString = ""):
+def setGlobalApplicationProxy(proxyAddress = None):
     networkProxy = QtNetwork.QNetworkProxy(QNetworkProxy.NoProxy)
-    if proxyString:
-        proxyUrl = QtCore.QUrl(proxyString)
+    if proxyAddress is not None:
+        proxyUrl = QtCore.QUrl(proxyAddress)
         protocol = QtNetwork.QNetworkProxy.NoProxy
         if proxyUrl.scheme().startswith('http'):
             protocol = QtNetwork.QNetworkProxy.HttpProxy

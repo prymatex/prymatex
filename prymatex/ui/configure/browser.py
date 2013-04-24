@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/browser.ui'
 #
-# Created: Tue Apr 23 10:10:27 2013
+# Created: Wed Apr 24 10:12:25 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -75,9 +75,9 @@ class Ui_Browser(object):
         self.labelProxy = QtGui.QLabel(self.groupBox)
         self.labelProxy.setObjectName(_fromUtf8("labelProxy"))
         self.formLayout.setWidget(4, QtGui.QFormLayout.LabelRole, self.labelProxy)
-        self.lineEditProxy = QtGui.QLineEdit(self.groupBox)
-        self.lineEditProxy.setObjectName(_fromUtf8("lineEditProxy"))
-        self.formLayout.setWidget(4, QtGui.QFormLayout.FieldRole, self.lineEditProxy)
+        self.lineEditProxyAddress = QtGui.QLineEdit(self.groupBox)
+        self.lineEditProxyAddress.setObjectName(_fromUtf8("lineEditProxyAddress"))
+        self.formLayout.setWidget(4, QtGui.QFormLayout.FieldRole, self.lineEditProxyAddress)
         self.radioButtonNoProxy = QtGui.QRadioButton(self.groupBox)
         self.radioButtonNoProxy.setObjectName(_fromUtf8("radioButtonNoProxy"))
         self.formLayout.setWidget(0, QtGui.QFormLayout.SpanningRole, self.radioButtonNoProxy)
@@ -106,7 +106,7 @@ class Ui_Browser(object):
         self.checkBoxJavascriptEnabled.setText(_('Javascript enabled'))
         self.checkBoxPluginsEnabled.setText(_('Plugins enabled'))
         self.groupBox.setTitle(_('Connection'))
-        self.labelProxy.setText(_('Proxy:'))
+        self.labelProxy.setText(_('Proxy address:'))
         self.radioButtonNoProxy.setText(_('No proxy'))
         self.radioButtonSystemProxy.setText(_('Use system proxy settings'))
         self.radioButtonManualProxy.setText(_('Manual proxy configuration'))

@@ -141,12 +141,12 @@
       <item row="4" column="0">
        <widget class="QLabel" name="labelProxy">
         <property name="text">
-         <string>Proxy:</string>
+         <string>Proxy address:</string>
         </property>
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="QLineEdit" name="lineEditProxy"/>
+       <widget class="QLineEdit" name="lineEditProxyAddress"/>
       </item>
       <item row="0" column="0" colspan="2">
        <widget class="QRadioButton" name="radioButtonNoProxy">

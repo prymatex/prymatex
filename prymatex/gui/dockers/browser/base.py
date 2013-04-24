@@ -33,15 +33,28 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     AutoLoadImages = 1<<4
     JavascriptEnabled = 1<<5
     
+    # ----------------- Proxy type
+    NoProxy = 1<<0
+    SystemProxy = 1<<1
+    ManualProxy = 1<<2
+    
     # -------------- Settings
     SETTINGS_GROUP = "Browser"
     
     updateInterval = pmxConfigPorperty(default = 3000)
     homePage = pmxConfigPorperty(default = "http://www.prymatex.org")
     
+    @pmxConfigPorperty(default = NoProxy)
+    def proxyType(self, value):
+        if value == self.NoProxy:
+            setGlobalApplicationProxy()
+        elif value == self.SystemProxy:
+            setGlobalApplicationProxy(os.environ.get('http_proxy'))
+    
     @pmxConfigPorperty(default = os.environ.get('http_proxy', ''))
-    def proxy(self, value):
-        setGlobalApplicationProxy(value)
+    def proxyAddress(self, value):
+        if self.proxyType == self.ManualProxy:
+            setGlobalApplicationProxy(value)
 
     @pmxConfigPorperty(default = DeveloperExtrasEnabled | PluginsEnabled | JavascriptEnabled | AutoLoadImages)
     def defaultWebSettings(self, flags):

@@ -31,6 +31,11 @@ class NetworkSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Browser):
         for check, flag in self.checks:
             check.toggled.connect(self.on_browserWebSettings_toggled)
         
+        self.radios = [(self.radioButtonNoProxy, BrowserDock.NoProxy),
+            (self.radioButtonSystemProxy, BrowserDock.SystemProxy),
+            (self.radioButtonManualProxy, BrowserDock.ManualProxy)
+        ]
+
     def loadSettings(self):
         SettingsTreeNode.loadSettings(self)
         
@@ -39,21 +44,36 @@ class NetworkSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Browser):
         for check, flag in self.checks:
             check.setChecked(bool(flags & flag))
         
-    def on_lineEditProxy_textEdited(self, text):
-        self.settingGroup.setValue("proxy", text)
+        self.lineEditHomePage.setText(self.settingGroup.value('homePage'))
+        self.lineEditProxyAddress.setText(self.settingGroup.value('proxyAddress'))
         
+        proxyType = self.settingGroup.value('proxyType')
+        for radio in self.radios:
+            radio[0].setChecked(proxyType == radio[1])
+        self.lineEditProxyAddress.setEnabled(proxyType == BrowserDock.ManualProxy)
+        
+    def on_lineEditHomePage_textEdited(self, text):
+        self.settingGroup.setValue("homePage", text)
+
+    def on_lineEditProxyAddress_textEdited(self, text):
+        self.settingGroup.setValue("proxyAddress", text)
+
     def on_radioButtonNoProxy_toggled(self, checked):
-        print "radioButtonNoProxy", checked
+        self.settingGroup.setValue('proxyType', BrowserDock.NoProxy)
     
     def on_radioButtonSystemProxy_toggled(self, checked):
-        print os.environ.get('http_proxy', '')
-        print "radioButtonSystemProxy", checked
+        if checked:
+            self.settingGroup.setValue('proxyType', BrowserDock.SystemProxy)
+        
+    def on_radioButtonSystemProxy_toggled(self, checked):
+        if checked:
+            self.settingGroup.setValue('proxyType', BrowserDock.SystemProxy)
         
     def on_radioButtonManualProxy_toggled(self, checked):
-        self.lineEditProxy.setEnabled(checked)
-        self.settingGroup.setValue("proxy", "")
-        self.lineEditProxy.clear()
-        
+        self.lineEditProxyAddress.setEnabled(checked)
+        if checked:
+            self.settingGroup.setValue('proxyType', BrowserDock.ManualProxy)
+    
     def on_browserWebSettings_toggled(self, checked):
         flags = 0
         for check, flag in self.checks:
