@@ -25,14 +25,45 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     ICON = resources.getIcon("internet-web-browser")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
+    # ------------------ Web Settings
+    DeveloperExtrasEnabled = 1<<0
+    PluginsEnabled = 1<<1
+    PrivateBrowsingEnabled = 1<<2
+    JavaEnabled = 1<<3
+    AutoLoadImages = 1<<4
+    JavascriptEnabled = 1<<5
+    
+    # -------------- Settings
     SETTINGS_GROUP = "Browser"
     
     updateInterval = pmxConfigPorperty(default = 3000)
     homePage = pmxConfigPorperty(default = "http://www.prymatex.org")
+    
     @pmxConfigPorperty(default = os.environ.get('http_proxy', ''))
     def proxy(self, value):
         setGlobalApplicationProxy(value)
-        
+
+    @pmxConfigPorperty(default = DeveloperExtrasEnabled | PluginsEnabled | JavascriptEnabled | AutoLoadImages)
+    def defaultWebSettings(self, flags):
+        QtWebKit.QWebSettings.globalSettings().setAttribute(
+            QtWebKit.QWebSettings.DeveloperExtrasEnabled,
+            flags & self.DeveloperExtrasEnabled)
+        QtWebKit.QWebSettings.globalSettings().setAttribute(
+            QtWebKit.QWebSettings.PluginsEnabled,
+            flags & self.PluginsEnabled)
+        QtWebKit.QWebSettings.globalSettings().setAttribute(
+            QtWebKit.QWebSettings.PrivateBrowsingEnabled,
+            flags & self.PrivateBrowsingEnabled)
+        QtWebKit.QWebSettings.globalSettings().setAttribute(
+            QtWebKit.QWebSettings.JavaEnabled,
+            flags & self.JavaEnabled)
+        QtWebKit.QWebSettings.globalSettings().setAttribute(
+            QtWebKit.QWebSettings.AutoLoadImages,
+            flags & self.AutoLoadImages)
+        QtWebKit.QWebSettings.globalSettings().setAttribute(
+            QtWebKit.QWebSettings.JavascriptEnabled,
+            flags & self.JavascriptEnabled)
+
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
         PMXBaseDock.__init__(self)
@@ -47,15 +78,7 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         
         #Settings mover a un lugar de configuracion :)
         QtWebKit.QWebSettings.globalSettings().setIconDatabasePath(self.application.currentProfile.value('PMX_TMP_PATH'))
-        QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.DeveloperExtrasEnabled, True)
-        QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.PluginsEnabled, True)
-        #QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.PrivateBrowsingEnabled, True)
-        #QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.JavaEnabled, True)
-        #QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.AutoLoadImages, True)
-        #QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.JavascriptEnabled, True)
-        #QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.PluginsEnabled, True)
-        #QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.DeveloperExtrasEnabled, True)
-        
+
         self.scrollValues = (False, 0, 0)   #(<restore scroll values>, <horizontalValue>, <verticalValue>)
         
         #Capturar editor y webView

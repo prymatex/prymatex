@@ -65,12 +65,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     
     # ------------------- Settings
     SETTINGS_GROUP = 'CodeEditor'
-    
-    
+        
     tabStopSoft = pmxConfigPorperty(default = True)
     marginLineSpaces = pmxConfigPorperty(default = 80)
-    
-    
+     
     @pmxConfigPorperty(default = 4)
     def tabStopSize(self, size):
         self.setTabStopWidth(size * 9)

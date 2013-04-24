@@ -31,10 +31,15 @@ class TabbedTerminal(QtGui.QTabWidget):
     def __init__(self, parent=None):
         super(TabbedTerminal, self).__init__(parent)
         self.setTabPosition(QtGui.QTabWidget.South)
-        self._new_button = QtGui.QPushButton(self)
-        self._new_button.setText("New")
-        self._new_button.clicked.connect(lambda checked: self.newTerminal())
-        self.setCornerWidget(self._new_button)
+        
+        # Corner widget
+        self.buttonNew = QtGui.QPushButton(self)
+        self.buttonNew.setText("")
+        self.buttonNew.setIcon(QtGui.QIcon.fromTheme("tab-new"))
+        self.buttonNew.setMaximumSize(QtCore.QSize(28, 28))
+        self.buttonNew.clicked.connect(lambda checked: self.newTerminal())
+        self.setCornerWidget(self.buttonNew)
+        
         self.setTabsClosable(True)
         self.setMovable(True)
         self.tabCloseRequested[int].connect(self._on_close_request)
