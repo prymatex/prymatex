@@ -135,11 +135,16 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
 
     def createWebView(self, windowType = QtWebKit.QWebPage.WebBrowserWindow):
         webView = WebView(self)
-        #Connect signals
-        webView.urlChanged.connect(self.on_webView_urlChanged)
-        webView.loadProgress.connect(self.on_webView_loadProgress)
         if windowType == QtWebKit.QWebPage.WebBrowserWindow:
+            #Connect signals
+            webView.urlChanged.connect(self.on_webView_urlChanged)
+            webView.loadProgress.connect(self.on_webView_loadProgress)
             self.tabWebView.addWebView(webView)
+        elif mode == QtWebKit.QWebPage.WebModalDialog:
+            # TODO Aca va dentro de un dialogo que tenga sus propias cosas de navegacion
+            # webDialog = QtGui.QDialog(self)
+            webView.setWindowModality(QtCore.Qt.ApplicationModal)
+            webView.show()
         return webView
 
     # -------------------- Browser main methods
