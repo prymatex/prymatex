@@ -64,5 +64,3 @@ def setGlobalApplicationProxy(proxyAddress = None):
             protocol = QtNetwork.QNetworkProxy.Socks5Proxy
         networkProxy = QtNetwork.QNetworkProxy(protocol, proxyUrl.host(), proxyUrl.port(), proxyUrl.userName(), proxyUrl.password())
     QtNetwork.QNetworkProxy.setApplicationProxy( networkProxy )
-
-# TODO: El NetworkAccessManager que deje el trabajo de abirar el tm-file a la base pero le haga trampa :)

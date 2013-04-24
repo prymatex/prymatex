@@ -156,7 +156,8 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         webView = self.tabWebView.createWebView()
         #Connect signals
         webView.urlChanged.connect(self.on_webView_urlChanged)
-
+        webView.loadProgress.connect(self.on_webView_loadProgress)
+        
         # Set the default home page
         #self.lineUrl.setText(self.homePage)
         webView.setUrl(QtCore.QUrl(self.homePage))
@@ -188,8 +189,7 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
 
     def on_buttonReload_clicked(self):
         """Reload the web page"""
-        url = QtCore.QUrl.fromUserInput(self.lineUrl.text())
-        self.tabWebView.currentWebView().setUrl(url)
+        self.tabWebView.currentWebView().reload()
 
     def on_buttonBack_clicked(self):
         """Back button clicked, go one page back"""
@@ -213,14 +213,6 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         map(lambda action: action.setChecked(False), [ self.actionSyncEditor, self.actionConnectEditor ])
         self.tabWebView.currentWebView().load(link)
 
-    def on_webView_loadFinished(self, ok):
-        if not ok:
-            return
-        #Restore scroll
-        if self.scrollValues[0]:
-            self.tabWebView.currentWebView().page().mainFrame().setScrollBarValue(QtCore.Qt.Horizontal, self.scrollValues[1])
-            self.tabWebView.currentWebView().page().mainFrame().setScrollBarValue(QtCore.Qt.Vertical, self.scrollValues[2])
-
     def on_webView_urlChanged(self, url):
         """Update the URL if a link on a web page is clicked"""
         #History
@@ -229,27 +221,12 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.buttonBack.setEnabled(history.canGoBack())
         self.buttonNext.setEnabled(history.canGoForward())
         
-        #Scroll Values
-        self.scrollValues = (url.toString() == webView.url().toString(), self.scrollValues[1], self.scrollValues[2])
-
         #Line Location
         self.lineUrl.setText(url.toString())
-
-    def on_webView_loadStarted(self):
-        self.scrollValues = ( False,    self.tabWebView.currentWebView().page().mainFrame().scrollBarValue(QtCore.Qt.Horizontal),
-                                               self.tabWebView.currentWebView().page().mainFrame().scrollBarValue(QtCore.Qt.Vertical))
         
     def on_webView_loadProgress(self, load):
         """Page load progress"""
         self.buttonStop.setEnabled(load != 100)
-    
-    def on_webView_selectionChanged(self):
-        # print "selectionChanged"
-        pass
-
-    def on_webView_statusBarMessage(self, message):
-        # print "statusBarMessage", message
-        pass
     
     #=======================================================================
     # Browser Auto update for current Editor
