@@ -90,11 +90,12 @@ class FormatType(object):
             return lambda m, r = text: r
 
     def apply(self, pattern, text, flags):
-        nodes = []
-        match = pattern.search(text) if 'g' in flags else pattern.match(text)
-        if match:
-            # Split text in search parts
-            beginText = text[:match.start()]
+        result = []
+        match = pattern.search(text)
+        if not match: return ""
+        beginText = text[:match.start()]
+        while match:
+            nodes = []
             sourceText = text[match.start():match.end()]
             endText = text[match.end():]
             # Translate to conditions
@@ -104,7 +105,6 @@ class FormatType(object):
                 else:
                     nodes.append(composite)
             # Transform
-            result = []
             case = CASE_NONE
             for value in nodes:
                 if isinstance(value, basestring):
@@ -116,7 +116,10 @@ class FormatType(object):
                 result.append(self.case_function(case)(value))
                 if case in [CASE_LOWER_NEXT, CASE_UPPER_NEXT]:
                     case = CASE_NONE
-            return "%s%s%s" % (beginText, "".join(result), endText)
+            if 'g' not in flags:
+                break
+            match = pattern.search(text, match.end())
+        return "%s%s%s" % (beginText, "".join(result), endText)
         
 class TransformationType(object):
     def __init__(self):

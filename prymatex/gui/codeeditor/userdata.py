@@ -6,6 +6,7 @@ from prymatex.qt import QtGui
 from prymatex.support.syntax import PMXSyntax
 
 class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
+
     def __init__(self):
         QtGui.QTextBlockUserData.__init__(self)
         # Indent and content

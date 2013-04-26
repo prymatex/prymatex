@@ -1491,4 +1491,4 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                     self.application.openFile(file)
         elif event.mimeData().hasText():
             self.textCursor().insertText(event.mimeData().text())
-        
+            

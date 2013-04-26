@@ -28,4 +28,8 @@ class ScopeSelectorTests(unittest.TestCase):
         for s in sources:
             trans = Transformation(s)
             print trans.transform("    def pepe(self, uno):")
+            
+    def test_transformation(self):
+        trans = Transformation("(\A\s*,\s*\Z)|,?\s*([A-Za-z_][a-zA-Z0-9_]*)\s*(=[^,]*)?(,\s*|$)/(?2:\t\tself.$2 = $2\n)/g")
+        print trans.transform("uno, dos, tres")
         

@@ -12,7 +12,7 @@ class TabbedWebView(QtGui.QTabWidget):
     def __init__(self, browserDock):
         QtGui.QTabWidget.__init__(self, browserDock)
         self.browserDock = browserDock
-        
+
         # Corner widget
         self.buttonNew = QtGui.QPushButton(self)
         self.buttonNew.setText("")

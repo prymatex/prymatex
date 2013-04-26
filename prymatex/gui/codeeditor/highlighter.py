@@ -62,7 +62,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.processor.startParsing(self.syntax.scopeName)
         stack = [[self.syntax.grammar, None]]
         while block.isValid():
-            text = "%s\n" % block.text() if block != self.document().end() else block.text()
+            text = unicode(block.text()) + "\n"
             self.syntax.parseLine(stack, text, self.processor)
             userData = block.userData()
             
@@ -114,8 +114,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.applyFormat(userData)
     
     def realtime_highlight(self, text):
-        if self.currentBlock() != self.document().end():
-            text += "\n"
+        text = unicode(text) + "\n"
         userData = self.currentBlock().userData()
         if userData is not None and userData.textHash == hash(text) + hash(self.syntax.scopeName) + self.previousBlockState():
             self.applyFormat(userData)

@@ -14,6 +14,7 @@ class WebView(QtWebKit.QWebView):
         QtWebKit.QWebView.__init__(self, browserDock)
         self.browserDock = browserDock
         
+        #self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
         self.networkAccessManager = self.buildNetworkAccessManager()
         self.runningContext = None
 

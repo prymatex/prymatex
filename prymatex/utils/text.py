@@ -122,4 +122,4 @@ def matching_blocks(text1, text2, ratio = 1.0, ignoreCase = False):
         for matches in matcher.get_grouped_opcodes():
             for match in filter(lambda m: m[0] == 'equal', matches):
                 yield match[1:]
-        
+                
