@@ -1,4 +1,3 @@
 pygments
 -e git+https://github.com/prymatex/ponyguruma.git#egg=ponyguruma
 pyzmq==2.1.4
-ipython>=0.11

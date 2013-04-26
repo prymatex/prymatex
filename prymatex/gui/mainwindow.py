@@ -170,7 +170,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
             
             html_header "%(name)s error"
-            echo -e "<pre>%(output)s</pre>"
+            echo -e "<pre><code>%(output)s</code></pre>"
             echo -e "<p>Exit code was: %(exitcode)d</p>"
             html_footer
         ''' % {

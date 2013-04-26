@@ -46,13 +46,15 @@ class TestSupportFunctions(unittest.TestCase):
     def test_syntax(self):
         syntax = self.manager.getSyntaxByScopeName('source.python')
         file = open(os.path.abspath('./prymatex/gui/codeeditor/editor.py'), 'r')
-        start = time()
-        processor = PMXDebugSyntaxProcessor()
-        syntax.parse(TEXT, processor)
-        #syntax.parse(file.read(), processor)
+        processor = PMXDebugSyntaxProcessor(showOutput = False)
+        #syntax.parse(TEXT, processor)
+        text = file.read().decode('utf-8')
         file.close()
-        tiempo = time() - start
-        print "Tiempo: ", tiempo
+        for _ in range(10):
+            start = time()
+            syntax.parse(text, processor)
+            tiempo = time() - start
+            print "Tiempo: ", tiempo
             
     def ttest_preferences(self):
         settings = self.manager.getPreferenceSettings('text.html.textile markup.heading.textile')
