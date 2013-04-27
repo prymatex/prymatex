@@ -83,20 +83,9 @@
 					<key>comment</key>
 					<string>inline literal</string>
 					<key>end</key>
-<<<<<<< HEAD
-					<string>^(?!\2[ \t]</string>
-					<key>patterns</key>
-					<array>
-						<dict>
-							<key>include</key>
-							<string>text.html.basic</string>
-						</dict>
-					</array>
-=======
 					<string>``((?=[^`\w\d])|$)</string>
 					<key>name</key>
 					<string>markup.raw.restructuredtext</string>
->>>>>>> f86f6254820b3f110725870e611e4ae5826912fa
 				</dict>
 				<dict>
 					<key>captures</key>
@@ -115,54 +104,18 @@
 					<key>comment</key>
 					<string>intepreted text - single line</string>
 					<key>match</key>
-<<<<<<< HEAD
-					<string>(\.\.)\s[A-z][A-z0-9-_]+(::)(\s|$)</string>
-=======
 					<string>(`)[^`]+(`)(?!_)</string>
->>>>>>> f86f6254820b3f110725870e611e4ae5826912fa
 					<key>name</key>
 					<string>markup.other.command.restructuredtext</string>
 				</dict>
 				<dict>
-<<<<<<< HEAD
-					<key>begin</key>
-					<string>^\*([ \t]*).*?(::)\s*$</string>
-=======
->>>>>>> f86f6254820b3f110725870e611e4ae5826912fa
 					<key>captures</key>
 					<dict>
 						<key>1</key>
 						<dict>
 							<key>name</key>
-<<<<<<< HEAD
-							<string>punctuation.definition.raw.restructuredtext</string>
-						</dict>
-					</dict>
-					<key>comment</key>
-					<string>verbatim blocks</string>
-					<key>end</key>
-					<string>^(?!(\1\s\s)|(\s*$))</string>
-					<key>name</key>
-					<string>meta.raw.block.restructuredtext</string>
-					<key>patterns</key>
-					<array>
-						<dict>
-							<key>match</key>
-							<string>.+</string>
-							<key>name</key>
-							<string>markup.raw.restructuredtext</string>
-						</dict>
-					</array>
-				</dict>
-				<dict>
-					<key>begin</key>
-					<string>^[#1-9](\.)?([ \t]*).*?(::)\s*$</string>
-					<key>captures</key>
-					<dict>
-=======
 							<string>punctuation.definition.link.restructuredtext</string>
 						</dict>
->>>>>>> f86f6254820b3f110725870e611e4ae5826912fa
 						<key>2</key>
 						<dict>
 							<key>name</key>
@@ -170,42 +123,9 @@
 						</dict>
 					</dict>
 					<key>comment</key>
-<<<<<<< HEAD
-					<string>verbatim blocks</string>
-					<key>end</key>
-					<string>^(?!(\2\s\s\s)|(\s*$))</string>
-					<key>name</key>
-					<string>meta.raw.block.restructuredtext</string>
-					<key>patterns</key>
-					<array>
-						<dict>
-							<key>match</key>
-							<string>.+</string>
-							<key>name</key>
-							<string>markup.raw.restructuredtext</string>
-						</dict>
-					</array>
-				</dict>
-				<dict>
-					<key>begin</key>
-					<string>^([ \t]*).*?(::)\s*$</string>
-					<key>captures</key>
-					<dict>
-						<key>2</key>
-						<dict>
-							<key>name</key>
-							<string>punctuation.definition.raw.restructuredtext</string>
-						</dict>
-					</dict>
-					<key>comment</key>
-					<string>verbatim blocks</string>
-					<key>end</key>
-					<string>^(?!(\1\s)|(\s*$))</string>
-=======
 					<string>anonymous links __ url</string>
 					<key>match</key>
 					<string>\s*(__)\s+(.+)</string>
->>>>>>> f86f6254820b3f110725870e611e4ae5826912fa
 					<key>name</key>
 					<string>meta.link.restructuredtext</string>
 				</dict>
@@ -221,18 +141,11 @@
 						<key>1</key>
 						<dict>
 							<key>name</key>
-<<<<<<< HEAD
-							<string>punctuation.definition.bold.restructuredtext</string>
-=======
 							<string>punctuation.definition.intepreted.restructuredtext</string>
->>>>>>> f86f6254820b3f110725870e611e4ae5826912fa
 						</dict>
 						<key>2</key>
 						<dict>
 							<key>name</key>
-<<<<<<< HEAD
-							<string>punctuation.definition.bold.restructuredtext</string>
-=======
 							<string>entity.name.role.restructuredtext</string>
 						</dict>
 						<key>3</key>
@@ -244,7 +157,6 @@
 						<dict>
 							<key>name</key>
 							<string>punctuation.definition.intepreted.restructuredtext</string>
->>>>>>> f86f6254820b3f110725870e611e4ae5826912fa
 						</dict>
 					</dict>
 					<key>comment</key>
@@ -372,11 +284,7 @@
 					<key>comment</key>
 					<string>replacement</string>
 					<key>match</key>
-<<<<<<< HEAD
-					<string>(\.\.)\s+(_)([\w\s\-_]+)(:)\s+(.*)</string>
-=======
 					<string>^(\.\.)\s+((\[)[A-z][A-z0-9]*(\]))(_)\s+(.*)</string>
->>>>>>> f86f6254820b3f110725870e611e4ae5826912fa
 					<key>name</key>
 					<string>meta.link.citation.def.restructuredtext</string>
 				</dict>
@@ -550,11 +458,7 @@
 						</dict>
 					</dict>
 					<key>match</key>
-<<<<<<< HEAD
-					<string>(`)([^&lt;`]+)\s+(&lt;)(.*?)(&gt;)(`_)</string>
-=======
 					<string>(\*\*)[^*]+(\*\*)</string>
->>>>>>> f86f6254820b3f110725870e611e4ae5826912fa
 					<key>name</key>
 					<string>markup.bold.restructuredtext</string>
 				</dict>
@@ -964,37 +868,16 @@
 							<key>name</key>
 							<string>punctuation.definition.field.restructuredtext</string>
 						</dict>
-<<<<<<< HEAD
-					</dict>
-					<key>match</key>
-					<string>(^(=|-|~|`|#|"|\^|\+|\*){3,}$){1,1}?</string>
-					<key>name</key>
-					<string>markup.heading.restructuredtext</string>
-				</dict>
-				<dict>
-					<key>begin</key>
-					<string>^(\.\.)\s</string>
-					<key>beginCaptures</key>
-					<dict>
-						<key>1</key>
-=======
 						<key>2</key>
->>>>>>> f86f6254820b3f110725870e611e4ae5826912fa
 						<dict>
 							<key>name</key>
 							<string>punctuation.definition.field.restructuredtext</string>
 						</dict>
 					</dict>
 					<key>comment</key>
-<<<<<<< HEAD
-					<string>comment</string>
-					<key>end</key>
-					<string>^[\s]*$\n?</string>
-=======
 					<string>tags (and field lists</string>
 					<key>match</key>
 					<string>(:)[A-z][A-z0-9  =\s\t_]*(:)</string>
->>>>>>> f86f6254820b3f110725870e611e4ae5826912fa
 					<key>name</key>
 					<string>entity.name.tag.restructuredtext</string>
 				</dict>
