@@ -3,14 +3,14 @@
 <plist version="1.0">
 <dict>
 	<key>content</key>
-	<string>typedef std::shared_ptr&lt;${2:${1:my_type}_t}&gt; ${3:${2/_t$/_ptr/}};</string>
+	<string>std::string</string>
 	<key>name</key>
-	<string>Shared Pointer</string>
+	<string>std::string</string>
 	<key>scope</key>
-	<string>source.c, source.objc, source.c++, source.objc++</string>
+	<string>source.c++, source.objc++</string>
 	<key>tabTrigger</key>
-	<string>sp</string>
+	<string>str</string>
 	<key>uuid</key>
-	<string>986C0149-7802-4385-A237-90074D9D5ACD</string>
+	<string>A5F0BA15-A173-47B4-8C3D-3C128A1316CA</string>
 </dict>
 </plist>
