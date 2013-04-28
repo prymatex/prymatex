@@ -49,12 +49,10 @@ def has_mixed_eol_chars(text):
 
 
 # ----------------- White Space tool --------------------
-RE_WHITESPACE = re.compile(r'^(\s+)', re.UNICODE)
+# Match whitespace but not newlines
+RE_WHITESPACE = re.compile(r'([^\S\n]*)', re.UNICODE)
 def whiteSpace(text):
-    match = RE_WHITESPACE.match(text)
-    if match:
-        return match.group(0)
-    return ''
+    return RE_WHITESPACE.match(text).group(1)
 
 
 # ----------------- Python Source tests --------------------
