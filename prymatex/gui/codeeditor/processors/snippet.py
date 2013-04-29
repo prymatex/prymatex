@@ -43,7 +43,6 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
 
 
     def endRender(self):
-        print self.snippet.content, self.output
         self.editor.updatePlainText(self.output, self.snippetCursorWrapper)
 
     def environmentVariables(self):

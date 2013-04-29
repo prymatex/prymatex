@@ -346,10 +346,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             rightScope = userData is not None and userData.scopeAtPosition(positionInBlock) or hash(self.syntax().scopeName)
             return self.SCOPES[leftScope][attribute], self.SCOPES[rightScope][attribute]
             
-    def scopes(self, block = None, attribute = "name", scope_filter = lambda attr: True):
+    def _scopes(self, block = None, attribute = "name", scope_filter = lambda attr: True):
         block = block or self.textCursor().block()
         userData = block.userData()
-        if userData is None: return []
         return filter(
                     lambda ((start, end), attr): scope_filter(attr), 
                     map(
@@ -357,6 +356,22 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                         userData.scopeRanges()
                         )
                     )
+
+    def findScopes(self, block = None, attribute = "name", scope_filter = lambda attr: True, firstOnly = False):
+        userData = block.userData() if block is not None else self.textCursor().block()
+        # TODO: Se podra optimizar esto?
+        scopes = filter(
+            lambda ((start, end), attr): scope_filter(attr), 
+            map(
+                lambda ((start, end), scope): ((start, end), self.SCOPES[scope][attribute]),
+                userData.scopeRanges()
+                )
+            )
+        if not firstOnly:
+            return scopes
+        if scopes:
+            return scopes[0]
+        return ((-1, -1), None)
 
     # ------------ Obteniendo datos del editor
     def tabKeyBehavior(self):

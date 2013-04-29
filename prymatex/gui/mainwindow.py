@@ -165,7 +165,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
     def showErrorInBrowser(self, title, summary, exitcode = -1, **settings):
         from prymatex.support.utils import makeHyperlinks
         from prymatex.utils import html
-        print summary
         commandScript = '''
             source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
             

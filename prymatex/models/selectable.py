@@ -79,7 +79,6 @@ class SelectableModel(QtCore.QAbstractListModel, SelectableModelMixin):
         elif role == QtCore.Qt.ToolTipRole and 'tooltip' in item:
             return item['tooltip']
 
-
 class SelectableProxyModel(QtGui.QSortFilterProxyModel, SelectableModelMixin):
     def __init__(self, parent = None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)

@@ -61,7 +61,6 @@ class BookmarkListModel(QtCore.QAbstractListModel):
     def lineNumbers(self):
         return map(lambda block: block.lineNumber(), self.blocks)
 
-
     def toggleBookmark(self, block):
         try:
             index = self.blocks.index(block)
@@ -75,12 +74,10 @@ class BookmarkListModel(QtCore.QAbstractListModel):
             self.blocks.insert(index, block)
             self.endInsertRows()
 
-
     def removeAllBookmarks(self):
         self.beginRemoveRows(QtCore.QModelIndex(), 0, len(self.blocks))
         self.blocks = []
         self.endRemoveRows()
-    
     
     def nextBookmark(self, block):
         if not len(self.blocks): return None
@@ -89,7 +86,6 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         if index == len(self.blocks):
             index = 0
         return self.blocks[index]
-
 
     def previousBookmark(self, block):
         if not len(self.blocks): return None
@@ -141,13 +137,13 @@ class SymbolListModel(QtCore.QAbstractListModel):
 
 
     def processBlockUserData(self, text, block, userData):
-        symbolRange = self.editor.scopes(block = block, attribute = 'settings', scope_filter = lambda attr: attr.showInSymbolList)
-        if symbolRange:
-            startStop, preference = symbolRange[0]
-            symbol = text[slice(*startStop)]
-            symbol = preference.transformSymbol(symbol)
-        else:
-            symbol = None
+        startStop, settings = self.editor.findScopes(
+            block = block,
+            attribute = 'settings',
+            scope_filter = lambda attr: attr.showInSymbolList,
+            firstOnly = True)
+
+        symbol = settings.transformSymbol(text[slice(*startStop)]) if settings else None
 
         if userData.symbol != symbol:
             userData.symbol = symbol
@@ -195,7 +191,6 @@ class SymbolListModel(QtCore.QAbstractListModel):
 
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
-        # TODO No funciona con los snippets
         if not index.isValid() or index.row() >= len(self.blocks):
             return None
         userData = self.blocks[index.row()].userData()
@@ -221,9 +216,8 @@ class SymbolListModel(QtCore.QAbstractListModel):
 def symbolSelectableModelFactory(editor):
     # Data function    
     def symbolData():
-        leftScope, rightScope = editor.scope(direction = "both")
         return map(lambda block: 
-            dict(data = block, display = block.userData().symbol, image = resources.getIcon('bulletblue')),
+            dict(data = block, display = block.userData().symbol, image = resources.getIcon("symbol-class")),
             editor.symbolListModel.blocks)
 
     return selectableModelFactory(editor, symbolData, 

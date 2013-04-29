@@ -132,7 +132,7 @@ class PMXPreferenceMasterSettings(object):
         for settings in self.settings:
             if settings.smartTypingPairs is not None:
                 return settings.smartTypingPairs[:]
-        
+
     @property
     def shellVariables(self):
         shellVariables = {}
@@ -239,15 +239,15 @@ class PMXPreferenceMasterSettings(object):
         return indent
     
     def compileSymbolTransformation(self):
-        self._snippetsTransformation = []
+        self._symbolTransformation = []
         for trans in self.symbolTransformation:
-            if trans: 
-                self._snippetsTransformation.append(Transformation(trans[2:]))
+            if trans:
+                self._symbolTransformation.append(Transformation(trans[2:]))
     
     def transformSymbol(self, text):
-        if not hasattr(self, '_snippetsTransformation'):
+        if not hasattr(self, '_symbolTransformation'):
             self.compileSymbolTransformation()
-        for trans in self._snippetsTransformation:
+        for trans in self._symbolTransformation:
             tt = trans.transform(text)
             if tt is not None:
                 return tt
