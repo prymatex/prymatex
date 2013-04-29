@@ -210,7 +210,7 @@ class TextNode(Node):
         return self.text
     
     def render(self, processor):
-        processor.insertText(self.text.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement))
+        processor.insertText(self.text)
     
 #Snippet root
 class Snippet(NodeList):
@@ -302,6 +302,7 @@ class StructureTransformation(Node):
         super(StructureTransformation, self).__init__(scope, parent)
         self.placeholder = None
         self.index = None
+        self.text = ""
         self.transformation = None
     
     def close(self, scope, text):
@@ -309,7 +310,8 @@ class StructureTransformation(Node):
         if scope == 'keyword.transformation.snippet':
             self.index = int(text)
         elif scope == 'string.transformation':
-            self.transformation = Transformation(text)
+            self.text += text
+            self.transformation = Transformation(self.text)
         else:
             return super(StructureTransformation, self).close(scope, text)
         return node
@@ -327,6 +329,9 @@ class StructureTransformation(Node):
             self.placeholder = container
         return container
 
+    def append(self, text):
+        self.text += text
+        
 class StructureMenu(Node):
     def __init__(self, scope, parent = None):
         super(StructureMenu, self).__init__(scope, parent)
@@ -418,13 +423,15 @@ class VariableTransformation(Node):
     def __init__(self, scope, parent = None):
         super(VariableTransformation, self).__init__(scope, parent)
         self.name = None
+        self.transformationSource = ""
 
     def close(self, scope, text):
         node = self
         if scope == 'string.env.snippet':
             self.name = text
         elif scope == 'string.transformation':
-            self.transformation = Transformation(text)
+            self.transformationSource += text
+            self.transformation = Transformation(self.transformationSource)
         else:
             return super(VariableTransformation, self).close(scope, text)
         return node
@@ -433,9 +440,11 @@ class VariableTransformation(Node):
         environment = processor.environmentVariables()
         if self.name in environment:
             text = self.transformation.transform(environment[self.name])
-            text = text.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
             processor.insertText(text)
     
+    def append(self, transformationChunk):
+        self.transformationSource += transformationChunk
+
 class Shell(NodeList):    
     def close(self, scope, text):
         node = self
@@ -456,7 +465,7 @@ class Shell(NodeList):
     
     def execute(self, processor):
         def afterExecute(context):
-            self.content = context.outputValue.strip().replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
+            self.content = context.outputValue.strip()
         with PMXRunningContext(self, unicode(self), processor.environmentVariables()) as context:
             context.asynchronous = False
             self.manager.runProcess(context, afterExecute)

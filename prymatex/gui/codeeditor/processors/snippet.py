@@ -43,6 +43,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
 
 
     def endRender(self):
+        print self.snippet.content, self.output
         self.editor.updatePlainText(self.output, self.snippetCursorWrapper)
 
     def environmentVariables(self):
@@ -60,7 +61,6 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
     def endTransformation(self, transformation):
         captured = self.captures.pop()
         text = transformation.transform(captured)
-        text = text.replace('\n', '\n' + self.indentation).replace('\t', self.tabreplacement)
         self.insertText(text)
 
 
@@ -72,7 +72,9 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         if self.captures:
             self.captures[-1] = self.captures[-1] + text
         else:
-            self.output += text
+            # Replace new lines and tabs
+            text = text.replace('\n', '\n' + self.indentation)
+            self.output += text.replace('\t', self.tabreplacement)
 
     
     def selectHolder(self, holder):

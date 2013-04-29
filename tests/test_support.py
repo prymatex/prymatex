@@ -9,6 +9,7 @@ from pprint import pprint
 from prymatex.support.manager import PMXSupportPythonManager
 from prymatex.support.processor import PMXDebugSnippetProcessor, PMXDebugSyntaxProcessor
 from prymatex.support.syntax import PMXSyntax
+from prymatex.support.snippet import PMXSnippet
 
 TEXT = """#!/usr/bin/env python
 
@@ -43,7 +44,7 @@ class TestSupportFunctions(unittest.TestCase):
         print processor.text
         print "Time:", time() - start
         
-    def test_syntax(self):
+    def _test_syntax(self):
         syntax = self.manager.getSyntaxByScopeName('source.python')
         file = open(os.path.abspath('./prymatex/gui/codeeditor/editor.py'), 'r')
         processor = PMXDebugSyntaxProcessor(showOutput = False)
@@ -56,12 +57,19 @@ class TestSupportFunctions(unittest.TestCase):
             tiempo = time() - start
             print "Tiempo: ", tiempo
             
-    def ttest_preferences(self):
+    def _test_preferences(self):
         settings = self.manager.getPreferenceSettings('text.html.textile markup.heading.textile')
         for attr in dir(settings):
             print attr, getattr(settings, attr, None)
 
-
+    def test_adhoc_snippet(self):
+        snippet = 'def pepe(${3:self${2/([^,])?.*/(?1:, )/}${2:arg}}):\n\t${4/.+/"""/}${4:docstring for pepe}${4/.+/"""\n/}${4/.+/\t/}${0:pass}'
+        bundle = self.manager.getBundleItem('659D189C-EC3E-4C4E-9377-B7F5F5216CBD').bundle
+        snippet = self.manager.buildAdHocSnippet(snippet, bundle = bundle)
+        processor = PMXDebugSnippetProcessor()
+        snippet.execute(processor)
+        print processor.text
+        
 def test_creationAndDeleteBundle(manager):
     bundle = manager.createBundle('Diego')
     bundle.save()
