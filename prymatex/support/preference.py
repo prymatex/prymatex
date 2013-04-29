@@ -41,7 +41,9 @@ class PMXPreferenceSettings(object):
     UNINDENT = 3
     FOLDING_NONE = 0
     FOLDING_START = 1
-    FOLDING_STOP = -1
+    FOLDING_STOP = 2
+    FOLDING_INDENTED_START = 3
+    FOLDING_INDENTED_IGNORE = 4
     def __init__(self, dataHash = {}, preference = None):
         self.preference = preference
         self.update(dataHash)
@@ -255,12 +257,18 @@ class PMXPreferenceMasterSettings(object):
     def folding(self, line):
         settings = self.__findFoldingSettings()
         if settings is not None:
+            # Estos van juntos porque se pueden anular uno con otro { } <-- ejemplo
             start_match = settings.foldingStartMarker.search(line) if settings.foldingStartMarker != None else None
             stop_match = settings.foldingStopMarker.search(line) if settings.foldingStopMarker != None else None
             if start_match != None and stop_match == None:
                 return PMXPreferenceSettings.FOLDING_START
-            elif stop_match != None and start_match == None:
+            elif start_match == None and stop_match != None:
                 return PMXPreferenceSettings.FOLDING_STOP
+            # Ahora probamos los de indented
+            if settings.foldingIndentedBlockStart.search(line):
+                return PMXPreferenceSettings.FOLDING_INDENTED_START
+            if settings.foldingIndentedBlockIgnore.search(line):
+                return PMXPreferenceSettings.FOLDING_INDENTED_IGNORE
         return PMXPreferenceSettings.FOLDING_NONE
     
 class PMXPreference(PMXBundleItem):

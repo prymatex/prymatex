@@ -15,8 +15,6 @@ class CodeEditorFolding(QtCore.QObject):
         self.indentSensitive = False
         self.foldingUpdated = True
         self.editor.syntaxChanged.connect(self.on_editor_syntaxChanged)
-        #self.editor.beforeOpen.connect(self.on_editor_beforeOpen)
-        #self.editor.syntaxReady.connect(self.on_editor_syntaxReady)
         self.blocks = []
         self.folding = []
         
