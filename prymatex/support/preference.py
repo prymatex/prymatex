@@ -265,9 +265,9 @@ class PMXPreferenceMasterSettings(object):
             elif start_match == None and stop_match != None:
                 return PMXPreferenceSettings.FOLDING_STOP
             # Ahora probamos los de indented
-            if settings.foldingIndentedBlockStart.search(line):
+            if settings.foldingIndentedBlockStart is not None and settings.foldingIndentedBlockStart.search(line):
                 return PMXPreferenceSettings.FOLDING_INDENTED_START
-            if settings.foldingIndentedBlockIgnore.search(line):
+            if settings.foldingIndentedBlockIgnore is not None and settings.foldingIndentedBlockIgnore.search(line):
                 return PMXPreferenceSettings.FOLDING_INDENTED_IGNORE
         return PMXPreferenceSettings.FOLDING_NONE
     

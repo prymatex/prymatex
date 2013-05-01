@@ -12,7 +12,6 @@ class CodeEditorFolding(QtCore.QObject):
         QtCore.QObject.__init__(self, editor)
         self.editor = editor
         self.logger = editor.application.getLogger('.'.join([self.__class__.__module__, self.__class__.__name__]))
-        self.indentSensitive = False
         self.foldingUpdated = True
         self.editor.syntaxChanged.connect(self.on_editor_syntaxChanged)
         self.blocks = []
@@ -34,21 +33,11 @@ class CodeEditorFolding(QtCore.QObject):
                 self.addFoldingBlock(block)
             userData.foldingMark = newFoldingMark
     
-    def on_editor_syntaxChanged(self, syntax):
-        self.indentSensitive = syntax.indentSensitive
-    
     def on_editor_textChanged(self):
         if not self.foldingUpdated:
             self.logger.debug("Purgar y actualizar folding")
             self._purge_blocks()
             self.updateFolding()
-
-    def on_editor_beforeOpen(self):
-        self.editor.textChanged.disconnect(self.on_editor_textChanged)
-
-    def on_editor_syntaxReady(self):
-        self.editor.textChanged.connect(self.on_editor_textChanged)
-        self.updateFolding()
 
     def _purge_blocks(self):
         def validFoldingBlock(block):
@@ -67,15 +56,6 @@ class CodeEditorFolding(QtCore.QObject):
             index = self.blocks.index(block)
             self.blocks.remove(block)
             self.foldingUpdated = False
-
-    def updateFolding(self):
-        # TODO Update en una tarea aparte para no molestar
-        self.folding = []
-        if self.indentSensitive:
-            self.updateIndentFoldingBlocks()
-        else:
-            self.updateFoldingBlocks()
-        self.foldingUpdated = True
 
     def updateFoldingBlocks(self):
         nest = 0
@@ -164,15 +144,13 @@ class CodeEditorFolding(QtCore.QObject):
             if nest >= 0:
                 return block
 
-    def getNestedLevel(self, block):
-        blocks = filter(lambda fblock: fblock.userData() is not None and fblock.blockNumber() < block.blockNumber(), self.folding)
-        return reduce(lambda x, y: x + y, map(lambda block: block.userData().foldingMark, blocks), 0)
-
-    def isStart(self, mark):
+    def isFoldingStartMarker(self, block):
+        mark = self.getFoldingMark(block)
         if mark is None: return False
         return mark >= PMXPreferenceSettings.FOLDING_START
 
-    def isStop(self, mark):
+    def isFoldingStopMarker(self, block):
+        mark = self.getFoldingMark(block)
         if mark is None: return False
         return mark <= PMXPreferenceSettings.FOLDING_STOP
 

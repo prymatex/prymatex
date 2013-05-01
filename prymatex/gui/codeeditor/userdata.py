@@ -3,7 +3,7 @@
 
 from prymatex.qt import QtGui
 
-from prymatex.support.syntax import PMXSyntax
+from prymatex.support import PMXPreferenceSettings
 
 class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
 
@@ -11,6 +11,11 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
         QtGui.QTextBlockUserData.__init__(self)
         # Indent and content
         self.indent = ""
+        
+        # Folding
+        self.foldingMark = PMXPreferenceSettings.FOLDING_NONE
+        self.foldedLevel = 0
+        self.folded = False
         
         self.textHash = None
         
@@ -53,7 +58,7 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
         return self.__blank
         
         
-    def getLastScope(self):
+    def lastScope(self):
         return self.__scopeRanges[-1][1]
         
     def scopeAtPosition(self, pos):

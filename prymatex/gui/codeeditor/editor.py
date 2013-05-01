@@ -20,7 +20,6 @@ from prymatex.gui.codeeditor.sidebar import CodeEditorSideBar, SideBarWidgetAddo
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
-from prymatex.gui.codeeditor.folding import CodeEditorFolding
 from prymatex.gui.codeeditor.models import (SymbolListModel, BookmarkListModel, 
                                             AlreadyTypedWords, 
                                             bundleItemSelectableModelFactory,
@@ -127,7 +126,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.bookmarkSelectableModel = bookmarkSelectableModelFactory(self)
         
         #Folding
-        self.folding = CodeEditorFolding(self)
+        #self.folding = CodeEditorFolding(self)
         
         #Processors
         self.commandProcessor = PMXCommandProcessor(self)
@@ -225,6 +224,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         indent = texttools.whiteSpace(text)
         if indent != userData.indent:
             userData.indent = indent
+        # Folding
+        foldingMark = self.scope(scopeHash = userData.lastScope(), attribute="settings").folding(text)
+        if foldingMark != userData.foldingMark:
+            userData.foldingMark = foldingMark
         # Handlers
         map(lambda handler: handler.processBlockUserData(text, block, userData), self.__blockUserDataHandlers)
         
@@ -594,8 +597,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 break
             if block.isVisible():
                 positionY = round(blockGeometry.top()) + offset.y()
-                user_data = block.userData()
-                if self.folding.isStart(self.folding.getFoldingMark(block)) and user_data.folded:
+                if self.isFoldingStartMarker(block) and self.isFolded(block):
                     painter.drawPixmap(font_metrics.width(block.text()) + offset.x() + 5,
                         positionY + font_metrics.ascent() + font_metrics.descent() - resources.getImage("foldingellipsis").height(),
                         resources.getImage("foldingellipsis"))
@@ -815,8 +817,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 'TM_LEFT_SCOPE': leftScope,
                 'TM_MODE': self.syntax().name,
                 'TM_SOFT_TABS': self.tabStopSoft and unicode('YES') or unicode('NO'),
-                'TM_TAB_SIZE': self.tabStopSize,
-                'TM_NESTEDLEVEL': self.folding.getNestedLevel(block)
+                'TM_TAB_SIZE': self.tabStopSize
         })
 
         if current_word:
@@ -939,16 +940,58 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
 
     # ---------- Folding
+    def _get_folding_mark(self, block):
+        userData = block.userData()
+        return userData is not None and userData.foldingMark or PMXPreferenceSettings.FOLDING_NONE
+    
+    # Estos find no hacen falta si en el bucle controlo el nest
+    def _find_block_fold_close(self, block):
+        nest = 0
+        assert block in self.folding, "The block is not in folding"
+        index = self.folding.index(block)
+        for block in self.folding[index:]:
+            userData = block.userData()
+            if userData.foldingMark >= PMXPreferenceSettings.FOLDING_START or userData.foldingMark <= PMXPreferenceSettings.FOLDING_STOP:
+                nest += userData.foldingMark
+            if nest <= 0:
+                return block
+
+    def _find_block_fold_open(self, block):
+        nest = 0
+        assert block in self.folding, "The block is not in folding"
+        index = self.folding.index(block)
+        folding = self.folding[:index + 1]
+        folding.reverse()
+        for block in folding:
+            userData = block.userData()
+            if userData.foldingMark >= PMXPreferenceSettings.FOLDING_START or userData.foldingMark <= PMXPreferenceSettings.FOLDING_STOP:
+                nest += userData.foldingMark
+            if nest >= 0:
+                return block
+        
+    def isFoldingStartMarker(self, block):
+        return self._get_folding_mark(block) == PMXPreferenceSettings.FOLDING_START
+
+    def isFoldingStopMarker(self, block):
+        return self._get_folding_mark(block) == PMXPreferenceSettings.FOLDING_STOP
+    
+    def isFoldingMark(self, block):
+        # TODO el resto con indented
+        return self.isFoldingStartMarker(block)
+    
+    def isFolded(self, block):
+        return self.isFoldingMark(block) and block.userData().folded
+    
     def codeFoldingFold(self, block):
         milestone = block
-        if self.folding.isStart(self.folding.getFoldingMark(milestone)):
+        if self.isFoldingStartMarker(milestone):
             startBlock = milestone.next()
-            endBlock = self.folding.findBlockFoldClose(milestone)
+            endBlock = self._find_block_fold_close(milestone)
             if endBlock is None:
                 return
         else:
             endBlock = milestone
-            milestone = self.folding.findBlockFoldOpen(endBlock)
+            milestone = self._find_block_fold_open(endBlock)
             if milestone is None:
                 return
             startBlock = milestone.next()
@@ -967,7 +1010,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def codeFoldingUnfold(self, block):
         milestone = block
         startBlock = milestone.next()
-        endBlock = self.folding.findBlockFoldClose(milestone)
+        endBlock = self._find_block_fold_close(milestone)
         if endBlock == None:
             return
         
