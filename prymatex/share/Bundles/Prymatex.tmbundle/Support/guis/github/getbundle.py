@@ -4,44 +4,48 @@
 import os
 import json
 import sys
-from logging import getLogger
+import urllib2
+
 from urlparse import urlsplit
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore, QtNetwork
 from prymatex.core import PMXBaseDialog
 from ui_githubclient import Ui_GitHubClientDialog
-import requests
 from model import RepositoryTableModel, RepositoryProxyTableModel
 
 GITHUB_API_SEARCH_URL = 'https://api.github.com/legacy/repos/search/%s+tmbundle'
-
-logger = getLogger(__name__)
 
 class GithubBundleSearchThread(QtCore.QThread):
     # Signals
     dataUpdate = QtCore.pyqtSignal(object)
     # Term to search for
     term = None
-    # Proxy configuration (http://docs.python-requests.org/en/latest/user/advanced/#proxies)
-    proxy = {}
-
-    def __init__(self, parent=None):
-        QtCore.QThread.__init__(self, parent)
 
     def run(self):
         if not self.term or self.term < self.parent().MINIMUM_QUERY_LENGTH:
             return
-        response = requests.get(GITHUB_API_SEARCH_URL % self.term)
+        response = urllib2.urlopen(GITHUB_API_SEARCH_URL % self.term).read()
         data = json.loads(response.content)
         self.dataUpdate.emit(data) # Thread safety
 
+    def setProxy(self):
+        print self.parent().application.settingValue("Browser.proxyAddress")
+        networkProxy = QtNetwork.QNetworkProxy.applicationProxy()
+        opener = urllib2.build_opener(
+            urllib2.HTTPHandler(),
+            urllib2.HTTPSHandler(),
+            urllib2.ProxyHandler({
+                'http': 'http://localhost:3128',
+                'https': 'http://localhost:3128'
+            }))
+        urllib2.install_opener(opener)
 
     def search(self, term):
         '''Performs a lookup in Github REST API based on term'''
         if self.isRunning():
             raise RuntimeError("A search is alredy being made")
+        self.setProxy()
         self.term = term
         self.start()
-
 
 class GithubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
     MINIMUM_QUERY_LENGTH = 1
