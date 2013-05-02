@@ -86,9 +86,9 @@ class PMXPreferenceSettings(object):
             setattr(self, key, value)
     
 class PMXPreferenceMasterSettings(object):
-    def __init__(self):
+    def __init__(self, settings):
         """docstring for __init__"""
-        self.settings = []
+        self.settings = settings
     
     @property
     def completions(self):
@@ -176,41 +176,44 @@ class PMXPreferenceMasterSettings(object):
 
     @property
     def foldingIndentedBlockStart(self):
-        settings = self.__findFoldingSettings()
-        if settings is not None:
-            return settings.foldingIndentedBlockStart
+        if not hasattr(self, "_folding_indented_block_start"):
+            for settings in self.settings:
+                self._folding_indented_block_start = settings.foldingIndentedBlockStart
+                if self._folding_indented_block_start is not None:
+                    break
+        return self._folding_indented_block_start
             
     @property
     def foldingIndentedBlockIgnore(self):
-        settings = self.__findFoldingSettings()
-        if settings is not None:
-            return settings.foldingIndentedBlockIgnore
-            
+        if not hasattr(self, "_folding_indented_block_ignore"):
+            for settings in self.settings:
+                self._folding_indented_block_ignore = settings.foldingIndentedBlockIgnore
+                if self._folding_indented_block_ignore is not None:
+                    break
+        return self._folding_indented_block_ignore
+        
     @property
     def foldingStartMarker(self):
-        settings = self.__findFoldingSettings()
-        if settings is not None:
-            return settings.foldingStartMarker
+        if not hasattr(self, "_folding_start_marker"):
+            for settings in self.settings:
+                self._folding_start_marker = settings.foldingStartMarker
+                if self._folding_start_marker is not None:
+                    break
+        return self._folding_start_marker
     
     @property
     def foldingStopMarker(self):
-        settings = self.__findFoldingSettings()
-        if settings is not None:
-            return settings.foldingStopMarker
-            
-    def append(self, otherSettings):
-        self.settings.append(otherSettings)
-
+        if not hasattr(self, "_folding_stop_marker"):
+            for settings in self.settings:
+                self._folding_stop_marker = settings.foldingStopMarker
+                if self._folding_stop_marker is not None:
+                    break
+        return self._folding_stop_marker
+        
     def __findIndentSettings(self):
         #TODO: Algo de cache?
         for settings in self.settings:
             if any(map(lambda indentKey: getattr(settings, indentKey) is not None, PMXPreferenceSettings.INDENT_KEYS)):
-                return settings
-
-    def __findFoldingSettings(self):
-        #TODO: Algo de cache?
-        for settings in self.settings:
-            if any(map(lambda foldingKey: getattr(settings, foldingKey) is not None, PMXPreferenceSettings.FOLDING_KEYS)):
                 return settings
 
     def getBundle(self, attrKey):
@@ -255,20 +258,17 @@ class PMXPreferenceMasterSettings(object):
                 return tt
     
     def folding(self, line):
-        settings = self.__findFoldingSettings()
-        if settings is not None:
-            # Estos van juntos porque se pueden anular uno con otro { } <-- ejemplo
-            start_match = settings.foldingStartMarker.search(line) if settings.foldingStartMarker != None else None
-            stop_match = settings.foldingStopMarker.search(line) if settings.foldingStopMarker != None else None
-            if start_match != None and stop_match == None:
-                return PMXPreferenceSettings.FOLDING_START
-            elif start_match == None and stop_match != None:
-                return PMXPreferenceSettings.FOLDING_STOP
-            # Ahora probamos los de indented
-            if settings.foldingIndentedBlockStart is not None and settings.foldingIndentedBlockStart.search(line):
-                return PMXPreferenceSettings.FOLDING_INDENTED_START
-            if settings.foldingIndentedBlockIgnore is not None and settings.foldingIndentedBlockIgnore.search(line):
-                return PMXPreferenceSettings.FOLDING_INDENTED_IGNORE
+        start_match = self.foldingStartMarker.search(line) if self.foldingStartMarker is not None else None
+        stop_match = self.foldingStopMarker.search(line) if self.foldingStopMarker is not None else None
+        if start_match != None and stop_match == None:
+            return PMXPreferenceSettings.FOLDING_START
+        elif start_match == None and stop_match != None:
+            return PMXPreferenceSettings.FOLDING_STOP
+        # Ahora probamos los de indented
+        if self.foldingIndentedBlockStart is not None and self.foldingIndentedBlockStart.search(line):
+            return PMXPreferenceSettings.FOLDING_INDENTED_START
+        if self.foldingIndentedBlockIgnore is not None and self.foldingIndentedBlockIgnore.search(line):
+            return PMXPreferenceSettings.FOLDING_INDENTED_IGNORE
         return PMXPreferenceSettings.FOLDING_NONE
     
 class PMXPreference(PMXBundleItem):
@@ -306,8 +306,5 @@ class PMXPreference(PMXBundleItem):
             
     @staticmethod
     def buildSettings(preferences):
-        settings = PMXPreferenceMasterSettings()
-        if preferences:
-            for p in preferences:
-                settings.append(p.settings)
-        return settings
+        """El orden si importa, las preferences vienen ordenadas por score"""
+        return PMXPreferenceMasterSettings(map(lambda p: p.settings, preferences))
