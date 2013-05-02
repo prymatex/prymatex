@@ -939,7 +939,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
         yield coroutines.Return(suggestions)
 
-
     # ---------- Folding
     def _folding_mark(self, block):
         userData = block.userData()
@@ -1001,41 +1000,39 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             startBlock = block = milestone.next()
             endBlock = self._find_indented_block_fold_close(milestone)
 
-        if block is None or endBlock is None or milestone is None:
-            return
-
-        # Go!
-        while block.isValid():
-            userData = block.userData()
-            userData.foldedLevel += 1
-            block.setVisible(userData.foldedLevel == 0)
-            if block == endBlock:
-                break
-            block = block.next()
-        
-        milestone.userData().folded = True
-        self.document().markContentsDirty(startBlock.position(), endBlock.position())
+        if block and endBlock and milestone:
+            # Go!
+            while block.isValid():
+                userData = block.userData()
+                userData.foldedLevel += 1
+                block.setVisible(userData.foldedLevel == 0)
+                if block == endBlock:
+                    break
+                block = block.next()
+            
+            milestone.userData().folded = True
+            self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     def codeFoldingUnfold(self, milestone):
+        endBlock = None
         startBlock = block = milestone.next()
         if self.isFoldingStartMarker(milestone):
             endBlock = self._find_block_fold_peer(milestone, "down")
         elif self.isFoldingIndentedBlockStart(milestone):
             endBlock = self._find_indented_block_fold_close(milestone)
-        if endBlock == None:
-            return
-        # Go!
-        while block.isValid():
-            userData = block.userData()
-            userData.foldedLevel -= 1
-            block.setVisible(userData.foldedLevel == 0)
-            if block == endBlock:
-                break
-            block = block.next()
 
-        milestone.userData().folded = False
-        self.document().markContentsDirty(startBlock.position(), endBlock.position())
-
+        if endBlock:
+            # Go!
+            while block.isValid():
+                userData = block.userData()
+                userData.foldedLevel -= 1
+                block.setVisible(userData.foldedLevel == 0)
+                if block == endBlock:
+                    break
+                block = block.next()
+    
+            milestone.userData().folded = False
+            self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     # ---------- Override convert tabs <---> spaces
     def convertTabsToSpaces(self):
@@ -1045,7 +1042,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def convertSpacesToTabs(self):
         match = " " * self.tabStopSize
         self.replaceMatch(match, "\t", QtGui.QTextDocument.FindFlags(), True)
-
         
     # -------------- Add select text functions
     def selectEnclosingBrackets(self, cursor = None):
