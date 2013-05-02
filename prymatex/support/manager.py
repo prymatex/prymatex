@@ -246,8 +246,7 @@ class PMXSupportBaseManager(object):
             rank = []
             if item.selector.does_match(context, rank):
                 sortFilterItems.append((rank.pop(), item))
-        sortFilterItems.sort(key=lambda t: t[0], reverse=True)
-        #print leftScope, rightScope, map(lambda i: i.name, items), map(lambda i: (i[0], i[1].name), sortFilterItems)
+        sortFilterItems.sort(key=lambda t: t[0], reverse = True)
         return map(lambda (score, item): item, sortFilterItems)
 
     #---------------- Message Handler ----------------
