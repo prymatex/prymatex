@@ -313,7 +313,7 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
 
             # Draw the line number right justified at the y position of the line.
             if block.isVisible():
-                if self.editor.isFoldingStartMarker(block):
+                if self.editor.isFoldingStartMarker(block) or self.editor.isFoldingIndentedBlockStart(block):
                     if self.editor.isFolded(block):
                         painter.drawPixmap(0,
                             round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingcollapsedImage.height(),
@@ -334,11 +334,10 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         
     def mousePressEvent(self, event):
         block = self.translatePosition(event.pos())
-        if self.editor.isFoldingMark(block):
-            if self.editor.isFolded(block):
-                self.editor.codeFoldingUnfold(block)
-            else:
-                self.editor.codeFoldingFold(block)
+        if self.editor.isFolded(block):
+            self.editor.codeFoldingUnfold(block)
+        else:
+            self.editor.codeFoldingFold(block)
 
 class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignRight

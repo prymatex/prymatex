@@ -2,6 +2,7 @@
 # -*- encoding: utf-8 -*-
 
 import re
+import operator
 
 from prymatex.qt import QtCore, QtGui
 
@@ -597,7 +598,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 break
             if block.isVisible():
                 positionY = round(blockGeometry.top()) + offset.y()
-                if self.isFoldingStartMarker(block) and self.isFolded(block):
+                if self.isFolded(block):
                     painter.drawPixmap(font_metrics.width(block.text()) + offset.x() + 5,
                         positionY + font_metrics.ascent() + font_metrics.descent() - resources.getImage("foldingellipsis").height(),
                         resources.getImage("foldingellipsis"))
@@ -940,62 +941,70 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
 
     # ---------- Folding
-    def _get_folding_mark(self, block):
+    def _folding_mark(self, block):
         userData = block.userData()
         return userData is not None and userData.foldingMark or PMXPreferenceSettings.FOLDING_NONE
     
-    # Estos find no hacen falta si en el bucle controlo el nest
-    def _find_block_fold_close(self, block):
+    def _find_block_fold_peer(self, block, direction = "down"):
+        """ Direction are 'down' or up"""
+        if direction == "down":
+            assert self.isFoldingStartMarker(block), "Block isn't folding start"
+        else:
+            assert self.isFoldingStopMarker(block), "Block isn't folding stop"
         nest = 0
-        assert block in self.folding, "The block is not in folding"
-        index = self.folding.index(block)
-        for block in self.folding[index:]:
+        while block.isValid():
             userData = block.userData()
-            if userData.foldingMark >= PMXPreferenceSettings.FOLDING_START or userData.foldingMark <= PMXPreferenceSettings.FOLDING_STOP:
-                nest += userData.foldingMark
-            if nest <= 0:
+            if userData.foldingMark == PMXPreferenceSettings.FOLDING_START:
+                nest += 1
+            elif userData.foldingMark == PMXPreferenceSettings.FOLDING_STOP:
+                nest -= 1
+            if nest == 0:
                 return block
-
-    def _find_block_fold_open(self, block):
-        nest = 0
-        assert block in self.folding, "The block is not in folding"
-        index = self.folding.index(block)
-        folding = self.folding[:index + 1]
-        folding.reverse()
-        for block in folding:
-            userData = block.userData()
-            if userData.foldingMark >= PMXPreferenceSettings.FOLDING_START or userData.foldingMark <= PMXPreferenceSettings.FOLDING_STOP:
-                nest += userData.foldingMark
-            if nest >= 0:
-                return block
+            block = block.next() if direction == "down" else block.previous()
+    
+    def _find_indented_block_fold_close(self, block):
+        assert self.isFoldingIndentedBlockStart(block), "Block isn't folding indented start"
+        indentedBlock = self.findIndentedBlock(block, comparison = operator.le)
+        if indentedBlock.isValid():
+            return self.findNoBlankBlock(indentedBlock, "up")
+        else:
+            return self.document().lastBlock()
         
     def isFoldingStartMarker(self, block):
-        return self._get_folding_mark(block) == PMXPreferenceSettings.FOLDING_START
+        return self._folding_mark(block) == PMXPreferenceSettings.FOLDING_START
 
     def isFoldingStopMarker(self, block):
-        return self._get_folding_mark(block) == PMXPreferenceSettings.FOLDING_STOP
+        return self._folding_mark(block) == PMXPreferenceSettings.FOLDING_STOP
+    
+    def isFoldingIndentedBlockStart(self, block):
+        return self._folding_mark(block) == PMXPreferenceSettings.FOLDING_INDENTED_START
+    
+    def isFoldingIndentedBlockIgnore(self, block):
+        return self._folding_mark(block) == PMXPreferenceSettings.FOLDING_INDENTED_IGNORE
     
     def isFoldingMark(self, block):
-        # TODO el resto con indented
-        return self.isFoldingStartMarker(block)
+        return self.isFoldingStartMarker(block) or self.isFoldingStopMarker(block) or self.isFoldingIndentedBlockStart(block)
     
     def isFolded(self, block):
         return self.isFoldingMark(block) and block.userData().folded
     
-    def codeFoldingFold(self, block):
-        milestone = block
+    def codeFoldingFold(self, milestone):
+        block = endBlock = None
         if self.isFoldingStartMarker(milestone):
-            startBlock = milestone.next()
-            endBlock = self._find_block_fold_close(milestone)
-            if endBlock is None:
-                return
-        else:
+            startBlock = block = milestone.next()
+            endBlock = self._find_block_fold_peer(milestone, "down")
+        elif self.isFoldingStopMarker(milestone):
             endBlock = milestone
-            milestone = self._find_block_fold_open(endBlock)
-            if milestone is None:
-                return
-            startBlock = milestone.next()
-        block = startBlock
+            milestone = self._find_block_fold_peer(endBlock, "up")
+            startBlock = block = milestone.next()
+        elif self.isFoldingIndentedBlockStart(milestone):
+            startBlock = block = milestone.next()
+            endBlock = self._find_indented_block_fold_close(milestone)
+
+        if block is None or endBlock is None or milestone is None:
+            return
+
+        # Go!
         while block.isValid():
             userData = block.userData()
             userData.foldedLevel += 1
@@ -1007,14 +1016,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         milestone.userData().folded = True
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
-    def codeFoldingUnfold(self, block):
-        milestone = block
-        startBlock = milestone.next()
-        endBlock = self._find_block_fold_close(milestone)
+    def codeFoldingUnfold(self, milestone):
+        startBlock = block = milestone.next()
+        if self.isFoldingStartMarker(milestone):
+            endBlock = self._find_block_fold_peer(milestone, "down")
+        elif self.isFoldingIndentedBlockStart(milestone):
+            endBlock = self._find_indented_block_fold_close(milestone)
         if endBlock == None:
             return
-        
-        block = startBlock
+        # Go!
         while block.isValid():
             userData = block.userData()
             userData.foldedLevel -= 1
@@ -1112,41 +1122,21 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
 
     # ------------------- Text Indentation
-    def findPreviousNoBlankBlock(self, block):
-        """ Return previous no blank indent block """
-        block = block.previous()
+    def findNoBlankBlock(self, block, direction = "down"):
+        """ Return no blank block """
+        block = block.next() if direction == "down" else block.previous()
         while block.isValid() and block.userData() and block.userData().blank():
-            block = block.previous()
-        if block.isValid():
-            return block
-        
-    def findPreviousEqualIndentBlock(self, block, indent = None):
-        """ Return previous equal indent block """
-        indent = indent if indent != None else block.userData().indent
-        block = self.findPreviousNoBlankBlock(block)
-        while block and block.userData() and block.userData().indent > indent:
-            block = self.findPreviousNoBlankBlock(block)
-        if block and block.userData() and block.userData().indent == indent:
-            return block
-            
-    def findPreviousMoreIndentBlock(self, block, indent = None):
-        """ Return previous more indent block """
-        indent = indent if indent != None else block.userData().indent
-        block = self.findPreviousNoBlankBlock(block)
-        while block and block.userData() and block.userData().indent <= indent:
-            block = self.findPreviousNoBlankBlock(block)
-        if block and block.userData():
-            return block
+            block = block.next() if direction == "down" else block.previous()
+        return block
     
-    def findPreviousLessIndentBlock(self, block, indent = None):
-        """ Return previous less indent block """
-        indent = indent if indent != None else block.userData().indent
-        block = self.findPreviousNoBlankBlock(block)
-        while block and block.userData() and block.userData().indent >= indent:
-            block = self.findPreviousNoBlankBlock(block)
-        if block and block.userData():
-            return block
-
+    def findIndentedBlock(self, block, direction = "down", comparison = operator.eq):
+        """ Return equal indent block """
+        indent = block.userData().indent
+        block = self.findNoBlankBlock(block, direction)
+        while block.isValid() and block.userData() and not comparison(block.userData().indent, indent):
+            block = self.findNoBlankBlock(block, direction)
+        return block
+    
     def indentBlocks(self, cursor = None):
         """Indents text, block selections."""
         cursor = QtGui.QTextCursor(cursor or self.textCursor())
@@ -1178,7 +1168,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 break
             start = start.next()
         cursor.endEditBlock()
-    
 
     # --------------- Menus
     # Flat Popup Menu
