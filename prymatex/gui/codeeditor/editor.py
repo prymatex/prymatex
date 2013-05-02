@@ -126,9 +126,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.symbolSelectableModel = symbolSelectableModelFactory(self)
         self.bookmarkSelectableModel = bookmarkSelectableModelFactory(self)
         
-        #Folding
-        #self.folding = CodeEditorFolding(self)
-        
         #Processors
         self.commandProcessor = PMXCommandProcessor(self)
         self.macroProcessor = PMXMacroProcessor(self)
