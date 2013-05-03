@@ -960,7 +960,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     
     def _find_indented_block_fold_close(self, block):
         assert self.isFoldingIndentedBlockStart(block), "Block isn't folding indented start"
-        indentedBlock = self.findIndentedBlock(block, comparison = operator.le)
+        indent = block.userData().indent
+        indentedBlock = self.findIndentedBlock(block, indent = indent, comparison = operator.le)
+        while self.isFoldingIndentedBlockIgnore(indentedBlock):
+            indentedBlock = self.findIndentedBlock(indentedBlock, indent = indent, comparison = operator.le)
         if indentedBlock.isValid():
             return self.findNoBlankBlock(indentedBlock, "up")
         else:
@@ -1122,9 +1125,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             block = block.next() if direction == "down" else block.previous()
         return block
     
-    def findIndentedBlock(self, block, direction = "down", comparison = operator.eq):
+    def findIndentedBlock(self, block, indent = None, direction = "down", comparison = operator.eq):
         """ Return equal indent block """
-        indent = block.userData().indent
+        indent = indent if indent is not None else block.userData().indent
         block = self.findNoBlankBlock(block, direction)
         while block.isValid() and block.userData() and not comparison(block.userData().indent, indent):
             block = self.findNoBlankBlock(block, direction)
