@@ -45,24 +45,24 @@ class PMXCommandProcessor(PMXCommandProcessor):
             else:
                 scopes = block.userData().scopeRanges()
             lineXML = ""
-            print scopes
+            print(scopes)
             for (start, end), scope in scopes:
                 ss = scope.split()
-                token = "".join(map(lambda scope: "<" + scope + ">", ss))
+                token = "".join(["<" + scope + ">" for scope in ss])
                 token += line[start:end]
                 ss.reverse()
-                token += "".join(map(lambda scope: "</" + scope + ">", ss))
+                token += "".join(["</" + scope + ">" for scope in ss])
                 lineXML += token
             result.append(lineXML)
             if block == lastBlock:
                 break
-            block = block.next()
+            block = next(block)
         return "\n".join(result)
 
     # --------------------- Inputs
     def document(self, format = None):
         #TODO: ver si pone los \n
-        text = unicode(self.editor.document().toPlainText())
+        text = str(self.editor.document().toPlainText())
         if format == "xml":
             firstBlock = self.editor.document().firstBlock()
             lastBlock = self.editor.document().lastBlock()
@@ -83,7 +83,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def selection(self, format = None):
         cursor = self.editor.textCursor()
         if cursor.hasSelection():
-            text = cursor.selectedText().replace(u"\u2029", '\n').replace(u"\u2028", '\n')
+            text = cursor.selectedText().replace("\u2029", '\n').replace("\u2028", '\n')
             if format == "xml":
                 firstBlock, lastBlock = self.editor.selectionBlockStartEnd()
                 return self.formatAsXml(text, firstBlock, lastBlock, cursor.selectionStart() - firstBlock.position(), cursor.selectionEnd() - lastBlock.position())
@@ -143,7 +143,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         if self.errorCommand:
             raise Exception(context.errorValue)
         else:
-            print context.workingDirectory
+            print(context.workingDirectory)
             self.editor.mainWindow.showErrorInBrowser(
                 context.description(),
                 context.errorValue,
@@ -168,7 +168,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.updatePlainText(context.outputValue)
         
     def replaceSelection(self, context, format = None):
-        print "replaceSelection"
+        print("replaceSelection")
 
     def replaceInput(self, context, format = None):
         self.editor.textCursor().insertText(context.outputValue)
@@ -178,10 +178,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor.insertText(context.outputValue)
     
     def atCaret(self, context, format = None):
-        print "atCaret"
+        print("atCaret")
 
     def afterInput(self, context, format = None):
-        print "afterInput"
+        print("afterInput")
 
     def afterSelectedText(self, context, format = None):
         cursor = self.editor.textCursor()
@@ -215,15 +215,15 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.mainWindow.showMessage(message, timeout = timeout, point = point, linkMap = callbacks)
         
     def toolTip(self, context, format = None):
-        print "toolTip"
+        print("toolTip")
 
     def createNewDocument(self, context, format = None):
         editor= self.editor.mainWindow.addEmptyEditor()
         editor.setPlainText(context.outputValue)
         
     def newWindow(self, context, format = None):
-        print context.outputValue, format
-        print "newWindow"
+        print(context.outputValue, format)
+        print("newWindow")
 
     def openAsNewDocument(self, context, format = None):
         editor= self.editor.mainWindow.addEmptyEditor()

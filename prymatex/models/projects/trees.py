@@ -81,8 +81,8 @@ class ProjectTreeModel(AbstractTreeModel):
 	
     def _update_directory(self, parentNode, parentIndex, notify = False):
         names = self.fileManager.listDirectory(parentNode.path())
-        addNames = filter(lambda name: parentNode.findChildByName(name) is None, names)
-        removeNodes = filter(lambda node: node.nodeName() not in names, parentNode.childNodes())
+        addNames = [name for name in names if parentNode.findChildByName(name) is None]
+        removeNodes = [node for node in parentNode.childNodes() if node.nodeName() not in names]
                 
         #Quitamos elementos eliminados
         for node in removeNodes:
@@ -103,7 +103,7 @@ class ProjectTreeModel(AbstractTreeModel):
             self.endInsertRows()
 
     def _collect_expanded_subdirs(self, parentNode):
-        return filter(lambda node: node.isdir and node._populated, parentNode.childNodes())
+        return [node for node in parentNode.childNodes() if node.isdir and node._populated]
 
     def refresh(self, updateIndex):
         updateNode = self.node(updateIndex)
@@ -268,14 +268,14 @@ class ProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
             elif action == QtCore.Qt.LinkAction:
                 self.fileManager.link(srcPath, dstPath)
 
-        map(lambda index: self.refresh(index), updateIndexes)
+        list(map(lambda index: self.refresh(index), updateIndexes))
         return True
     
     def mimeTypes(self):
         return ["text/uri-list"]
         
     def mimeData(self, indexes):
-        urls = map(lambda index: QtCore.QUrl.fromLocalFile(self.filePath(index)), indexes)
+        urls = [QtCore.QUrl.fromLocalFile(self.filePath(index)) for index in indexes]
         mimeData = QtCore.QMimeData()
         mimeData.setUrls(urls)
         return mimeData

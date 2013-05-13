@@ -1,1 +1,1 @@
-from base import BrowserDock
+from .base import BrowserDock

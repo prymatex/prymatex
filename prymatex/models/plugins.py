@@ -12,7 +12,7 @@ class PluginsTableModel(QtCore.QAbstractTableModel):
     def __init__(self, manager, parent = None): 
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.pluginManager = manager
-        self.pluginDescriptors = self.pluginManager.plugins.values()
+        self.pluginDescriptors = list(self.pluginManager.plugins.values())
 
     def index(self, row, column, parent = None):
         return self.createIndex(row, column, self.pluginDescriptors[row])

@@ -25,7 +25,7 @@ class FilesSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Files):
 
 
     def loadSettings(self):
-        print self.settingGroup.value('defaultEncoding')
+        print(self.settingGroup.value('defaultEncoding'))
 
 
     def setupLineEndings(self):

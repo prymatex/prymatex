@@ -24,7 +24,7 @@
 import re
 import string
 
-import convert
+from . import convert
 
 # Need to have a checksum on the cache and source file to update at object creation
 # Could use circle safe_pickle (see speed performance impact)
@@ -126,8 +126,8 @@ class Magic:
 	def __offset (self,text):
 		direct = self.__direct_offset(text)
 		offset_type = 'l'
-		offset_delta = 0L
-		offset_relatif = 0L
+		offset_delta = 0
+		offset_relatif = 0
 
 		# Get the offset information
 		if direct:
@@ -150,7 +150,7 @@ class Magic:
 					offset_type = match_add.group(2)[1]
 
 				if match_add.group(3) == '-':
-					offset_delta = 0L - match_add.group(4)
+					offset_delta = 0 - match_add.group(4)
 				else:
 					offset_delta = convert.convert(match_add.group(4))
 
@@ -172,7 +172,7 @@ class Magic:
 			rest = type_mask_or[0]
 			return (oper,mask,rest)
 		else:
-			return ('',0L,text)
+			return ('',0,text)
 
 
 	def __endian (self,full_type):
@@ -243,19 +243,19 @@ class Magic:
 				# \0 is not a number it is the null string
 				if result[pos+1] == '0':
 					data.append(result[pos])
-					data.append(0L)
+					data.append(0)
 				# \rnt are special
 				else:
 					data.append(result[pos:pos+2])
 				pos +=2
 			elif kind == "string" and (result[pos] in string.ascii_letters or result[pos] in string.digits):
-				data.append(ord(result[pos])*1L)
+				data.append(ord(result[pos])*1)
 				pos +=1
 			else:
 				base = convert.which_base(result[pos:])
 
 				if base == 0:
-					data.append(ord(result[pos])*1L)
+					data.append(ord(result[pos])*1)
 					pos += 1
 				else:
 					size_base = convert.size_base(base)
@@ -264,7 +264,7 @@ class Magic:
 					end = pos + size_number
 					nb = convert.base10(result[start:end],base)
 					pos += size_number
-					data.append(nb*1L)
+					data.append(nb*1)
 						
 		return data
 		
@@ -316,7 +316,7 @@ class Magic:
 		try:
 			f = open(magic_file,'rb')
 		except:
-			raise StandardError, "No valid magic file called \"" + str(magic_file) + "\""
+			raise Exception("No valid magic file called \"" + str(magic_file) + "\"")
 	
 		index = 0
 		for line in f.readlines():
@@ -383,21 +383,21 @@ class Magic:
 	def write_cache (self,name):
 		f = open (name,'wb')
 
-		import cPickle
+		import pickle
 		
-		cPickle.dump(self._level,f,1)
-		cPickle.dump(self._direct,f,1)
-		cPickle.dump(self._offset_relatif,f,1)
-		cPickle.dump(self._offset_type,f,1)
-		cPickle.dump(self._offset_delta,f,1)
-		cPickle.dump(self._endian,f,1)
-		cPickle.dump(self._kind,f,1)
-		cPickle.dump(self._oper,f,1)
-		cPickle.dump(self._mask,f,1)
-		cPickle.dump(self._test,f,1)
-		cPickle.dump(self._data,f,1)
-		cPickle.dump(self._length,f,1)
-		cPickle.dump(self._mime,f,1)
+		pickle.dump(self._level,f,1)
+		pickle.dump(self._direct,f,1)
+		pickle.dump(self._offset_relatif,f,1)
+		pickle.dump(self._offset_type,f,1)
+		pickle.dump(self._offset_delta,f,1)
+		pickle.dump(self._endian,f,1)
+		pickle.dump(self._kind,f,1)
+		pickle.dump(self._oper,f,1)
+		pickle.dump(self._mask,f,1)
+		pickle.dump(self._test,f,1)
+		pickle.dump(self._data,f,1)
+		pickle.dump(self._length,f,1)
+		pickle.dump(self._mime,f,1)
 
 		f.close()
 
@@ -405,21 +405,21 @@ class Magic:
 	def read_cache (self,name):
 		f = open (name,'rb')
 
-		import cPickle
+		import pickle
 		
-		self._level = cPickle.load(f)
-		self._direct = cPickle.load(f)
-		self._offset_relatif = cPickle.load(f)
-		self._offset_type = cPickle.load(f)
-		self._offset_delta = cPickle.load(f)
-		self._endian = cPickle.load(f)
-		self._kind = cPickle.load(f)
-		self._oper = cPickle.load(f)
-		self._mask = cPickle.load(f)
-		self._test = cPickle.load(f)
-		self._data = cPickle.load(f)
-		self._length = cPickle.load(f)
-		self._mime = cPickle.load(f)
+		self._level = pickle.load(f)
+		self._direct = pickle.load(f)
+		self._offset_relatif = pickle.load(f)
+		self._offset_type = pickle.load(f)
+		self._offset_delta = pickle.load(f)
+		self._endian = pickle.load(f)
+		self._kind = pickle.load(f)
+		self._oper = pickle.load(f)
+		self._mask = pickle.load(f)
+		self._test = pickle.load(f)
+		self._data = pickle.load(f)
+		self._length = pickle.load(f)
+		self._mime = pickle.load(f)
 
 		self.entries = len(self._level)
 
@@ -450,7 +450,7 @@ class Magic:
 		# This may retun IOError
 		data = file.read(number)
 		if not data:
-			raise IOError, "out of file access"
+			raise IOError("out of file access")
 		return data
 
 
@@ -461,12 +461,12 @@ class Magic:
 		# Convert the data from the file
 		if kind == 'byte':
 			if len(data) < 1:
-				raise StandardError, "Should never happen, not enough data"
+				raise Exception("Should never happen, not enough data")
 			value= ord(data[0])
 		
 		elif kind == 'short':
 			if len(data) < 2:
-				raise StandardError, "Should never happen, not enough data"
+				raise Exception("Should never happen, not enough data")
 			if endian == 'local':
 				value= convert.local2(data)
 			elif endian == 'little':
@@ -474,11 +474,11 @@ class Magic:
 			elif endian == 'big':
 				value= convert.big2(data)
 			else:
-				raise StandardError, "Endian type unknown"
+				raise Exception("Endian type unknown")
 			
 		elif kind == 'long':
 			if len(data) < 4:
-				raise StandardError, "Should never happen, not enough data"
+				raise Exception("Should never happen, not enough data")
 			if endian == 'local':
 				value= convert.local4(data)
 			elif endian == 'little':
@@ -486,7 +486,7 @@ class Magic:
 			elif endian == 'big':
 				value= convert.big4(data)
 			else:
-				raise StandardError, "Endian type unknown"
+				raise Exception("Endian type unknown")
 			
 		elif kind == 'date':
 			# XXX: Not done yet
@@ -508,7 +508,7 @@ class Magic:
 			#		leng = size
 			#		kind = "string"
 		else:
-			raise StandardError, "Type " + str(kind) + " not recognised"
+			raise Exception("Type " + str(kind) + " not recognised")
 
 		return value
 
@@ -522,7 +522,7 @@ class Magic:
 		elif oper == '':
 			pass
 		else:
-			raise StandardError, "Binary operator unknown " + str(oper) 
+			raise Exception("Binary operator unknown " + str(oper)) 
 
 		return value
 
@@ -547,14 +547,14 @@ class Magic:
 
 
 	def __is_null_string(self,data):
-		return len(data) == 2 and data[0] == '\\' and data[1] == 0L
+		return len(data) == 2 and data[0] == '\\' and data[1] == 0
 		
 
 	
 	def classify(self,name):
 
 		if not self.entries:
-			raise StandardError, "Not initialised properly"
+			raise Exception("Not initialised properly")
 		
 		# Are we still looking for the ruleset to apply or are we in a rule
 		found_rule = 0
@@ -655,7 +655,7 @@ class Magic:
 								if ord(extract[index]) != data[index]:
 									success = 0
 					elif kind == 'pstring':
-						raise Failed, "pstring not implemented"
+						raise Failed("pstring not implemented")
 					else:
 						success = (data[0] == value)
 						replace = value
@@ -668,9 +668,9 @@ class Magic:
 								replace = extract + self.__read_string(f)
 								success = 1
 						else:
-							raise Failed, ">[^0] Not implemented"
+							raise Failed(">[^0] Not implemented")
 					elif kind == 'pstring':
-						raise Failed, "pstring not implemented"
+						raise Failed("pstring not implemented")
 					else:
 						success = (value > data[0])
 						replace = value
@@ -688,7 +688,7 @@ class Magic:
 									success = 0
 									break
 					elif kind == 'pstring':
-						raise Failed, "pstring not implemented"
+						raise Failed("pstring not implemented")
 					else:
 						success = (value < data[0])
 						replace = value
@@ -722,13 +722,13 @@ class Magic:
 						if limit <= 100:
 							success = 1
 					elif kind == 'pstring':
-						raise Failed, "pstring not implemented"
+						raise Failed("pstring not implemented")
 					else:
 						success = 1
 						replace = value
 						
 				else:
-					raise StandardError, "test used '"+test+"' is not defined"
+					raise Exception("test used '"+test+"' is not defined")
 			
 				
 				if success:
@@ -747,7 +747,7 @@ class Magic:
 						result += ' '
 				else:
 					raise Failed()
-			except Failed, IOError:
+			except Failed as IOError:
 				allow_next = level
 			except:
 				# The code must not raise any exception when it fails.
@@ -779,6 +779,6 @@ if __name__ == '__main__':
 	classify = magic.classify(binname)
 
 	if classify:
-		print binname + ": " + classify
+		print(binname + ": " + classify)
 	else:
-		print binname + ": Can not recognise file type"
+		print(binname + ": Can not recognise file type")

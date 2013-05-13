@@ -24,11 +24,10 @@ Prerequisites
 
 In order to install Prymatex you need to make sure you have:
 
-	* Python 2.7
-	
-	* PyQt4 4.7
-	
-	* sip 4.12.4
+	* PyQt4
+	* pyzmq
+	* ponyguruma
+	* xmodmap
 
 Additionally you should install pip requirements::
 

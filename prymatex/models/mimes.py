@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import cPickle
-import StringIO
+import pickle
+import io
 
 from prymatex.qt import QtCore
 
@@ -25,14 +25,14 @@ class PyMimeData(QtCore.QMimeData):
         if data is not None:
             # We may not be able to pickle the data.
             try:
-                pdata = cPickle.dumps(data)
-            except Exception, e:
+                pdata = pickle.dumps(data)
+            except Exception as e:
                 pdata = ""
                 #return
     
             # This format (as opposed to using a single sequence) allows the
             # type to be extracted without unpickling the data itself.
-            self.setData(self.MIME_TYPE, cPickle.dumps(data.__class__) + pdata)
+            self.setData(self.MIME_TYPE, pickle.dumps(data.__class__) + pdata)
 
     @classmethod
     def coerce(cls, md):
@@ -59,14 +59,14 @@ class PyMimeData(QtCore.QMimeData):
         if self._local_instance is not None:
             return self._local_instance
 
-        io = StringIO.StringIO(str(self.data(self.MIME_TYPE)))
+        io = io.StringIO(str(self.data(self.MIME_TYPE)))
 
         try:
             # Skip the type.
-            cPickle.load(io)
+            pickle.load(io)
 
             # Recreate the instance.
-            return cPickle.load(io)
+            return pickle.load(io)
         except:
             pass
 
@@ -80,7 +80,7 @@ class PyMimeData(QtCore.QMimeData):
             return self._local_instance.__class__
 
         try:
-            return cPickle.loads(str(self.data(self.MIME_TYPE)))
+            return pickle.loads(str(self.data(self.MIME_TYPE)))
         except:
             pass
         return None

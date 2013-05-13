@@ -4,6 +4,7 @@
 import traceback
 import os, sys
 from glob import glob
+import collections
 
 try:
     import json
@@ -41,7 +42,7 @@ class PluginDescriptor(object):
     description = ""
     icon = None
     def __init__(self, entry):
-        for key, value in entry.iteritems():
+        for key, value in entry.items():
             setattr(self, key, value)
         
 class PluginManager(QtCore.QObject, PMXBaseComponent):
@@ -84,7 +85,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         hierarchy = [ ]
         while klass != MainWindow:
             hierarchy.append(klass)
-            parent = filter(lambda (p, children): klass in children, self.components.iteritems())
+            parent = [p_children for p_children in iter(self.components.items()) if klass in p_children[1]]
             if len(parent) != 1:
                 break
             klass = parent.pop()[0]
@@ -94,14 +95,14 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
     # ------------ Handle editor classes
     def findEditorClassForFile(self, filePath):
         mimetype = self.application.fileManager.mimeType(filePath)
-        editors = filter(lambda cmp: issubclass(cmp, PMXBaseEditor), self.components.get(MainWindow, []))
+        editors = [cmp for cmp in self.components.get(MainWindow, []) if issubclass(cmp, PMXBaseEditor)]
         for Klass in editors:
             if Klass.acceptFile(filePath, mimetype):
                 return Klass
     
     
     def defaultEditor(self):
-        editors = filter(lambda cmp: issubclass(cmp, PMXBaseEditor), self.components.get(MainWindow, []))
+        editors = [cmp for cmp in self.components.get(MainWindow, []) if issubclass(cmp, PMXBaseEditor)]
         return editors[0]
 
 
@@ -127,7 +128,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         try:
             pluginEntry["module"] = import_from_directory(pluginDirectory, packageName)
             registerPluginFunction = getattr(pluginEntry["module"], registerFunction)
-            if callable(registerPluginFunction):
+            if isinstance(registerPluginFunction, collections.Callable):
                 self.currentPluginDescriptor = self.plugins[pluginId] = PluginDescriptor(pluginEntry)
                 registerPluginFunction(self)
         except Exception as reason:
@@ -143,10 +144,10 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         try:
             pluginEntry["module"] = import_module(moduleName)
             registerPluginFunction = getattr(pluginEntry["module"], "registerPlugin")
-            if callable(registerPluginFunction):
+            if isinstance(registerPluginFunction, collections.Callable):
                 self.currentPluginDescriptor = self.plugins[pluginId] = PluginDescriptor(pluginEntry)
                 registerPluginFunction(self)
-        except (ImportError, AttributeError), reason:
+        except (ImportError, AttributeError) as reason:
             # On exception remove entry
             if pluginId in self.plugins:
                 del self.plugins[pluginId]
@@ -155,7 +156,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         self.currentPluginDescriptor = None
         
     def hasDependenciesResolved(self, pluginEntry):
-        return all(map(lambda dep: dep in self.plugins, pluginEntry.get("depends", [])))
+        return all([dep in self.plugins for dep in pluginEntry.get("depends", [])])
     
     def loadPlugins(self):
         self.loadCoreModule('prymatex.gui.codeeditor', 'org.prymatex.codeeditor')

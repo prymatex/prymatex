@@ -62,17 +62,17 @@ class PMXThemeStyle(object):
         if self.scope is not None:
             dataHash['scope'] = self.scope
         dataHash['settings'] = {}
-        for name, setting in self.settings.iteritems():
+        for name, setting in self.settings.items():
             if setting != None:
                 dataHash['settings'][name] = setting
         return dataHash
         
     def update(self, dataHash):
-        for key in dataHash.keys():
+        for key in list(dataHash.keys()):
             value = dataHash[key]
             if key == 'settings':
                 self.settings.update(value)
-                self.settings = dict(filter(lambda tupla: tupla[1] != None, self.settings.iteritems()))
+                self.settings = dict([tupla for tupla in iter(self.settings.items()) if tupla[1] != None])
                 continue
             elif key == 'scope':
                 self.selector = scope.Selector(value)
@@ -94,10 +94,10 @@ class PMXTheme(PMXManagedObject):
         self.settings = settings
         
     def update(self, dataHash):
-        for key in dataHash.keys():
+        for key in list(dataHash.keys()):
             if key == 'settings':
                 self.settings.update(dataHash[key])
-                self.settings = dict(filter(lambda tupla: tupla[1] != None, self.settings.iteritems()))
+                self.settings = dict([tupla for tupla in iter(self.settings.items()) if tupla[1] != None])
             else:
                 setattr(self, key, dataHash[key])
     
@@ -141,13 +141,13 @@ class PMXTheme(PMXManagedObject):
             elif theme is not None:
                 theme.addSource(namespace, path)
             return theme
-        except Exception, e:
-            print "Error en theme %s (%s)" % (path, e)
+        except Exception as e:
+            print("Error en theme %s (%s)" % (path, e))
 
     @classmethod
     def reloadTheme(cls, theme, path, namespace, manager):
         #Remove all styles
-        map(lambda style: manager.removeThemeStyle(style), theme.styles)
+        list(map(lambda style: manager.removeThemeStyle(style), theme.styles))
         data = plist.readPlist(path)
         theme.load(data)
         settings = data.pop('settings', [])

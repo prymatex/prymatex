@@ -15,8 +15,8 @@ import pickle
 import os
 
 def sanitize_data(data):
-    if isinstance(data, (QString, QByteArray, )):
-        return unicode(data)
+    if isinstance(data, (QString, QByteArray )):
+        return str(data)
     return data
 
 class MiTablaDeBundles(PMXTableBase):
@@ -26,7 +26,7 @@ class MiTablaDeBundles(PMXTableBase):
     
     def get_list(self):
         lista_de_cosas = []
-        for i in xrange(self.rowCount()):
+        for i in range(self.rowCount()):
             
             diccionario_fila = {}
             for n, field in enumerate(self._meta.fields):
@@ -41,7 +41,7 @@ class MiTablaDeBundles(PMXTableBase):
         try:
             pickle.dump(self.get_list(), file(self.MY_FILE, 'w'))
         except IOError:
-            print "Sin cache!"
+            print("Sin cache!")
     
     def unpickle(self):
         '''
@@ -50,12 +50,12 @@ class MiTablaDeBundles(PMXTableBase):
         if os.path.isfile(self.MY_FILE):
             try:
                 lista = pickle.load(file(self.MY_FILE))
-                print lista
+                print(lista)
                 for diccionario in lista:
                     self.addRowFromKwargs(**diccionario)
                 return True
-            except Exception, e:
-                print "Error de depickleado", e
+            except Exception as e:
+                print("Error de depickleado", e)
         return False
                 
 if __name__ == "__main__":
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     model.setColumnDelegatesFromFields(win)
     
     if not win.model().unpickle():
-        print "No despickleo nada"
+        print("No despickleo nada")
         model.addRowFromKwargs(uuid = '000-2--3-3-4-4', name = "Python")
         model.addRowFromKwargs(uuid = '000-2--3-3-4-5', name = "Ruby")
         model.addRowFromKwargs(uuid = '000-2--3-3-4-6', name = "Perl")
@@ -79,9 +79,9 @@ if __name__ == "__main__":
     
     QApplication.instance().aboutToQuit.connect(model.pickle)
     
-    win.setWindowTitle(unicode(model.__class__.__name__))
+    win.setWindowTitle(str(model.__class__.__name__))
     win.setGeometry(400,200, 400, 400)
-    print model._meta
+    print(model._meta)
     win.show()
     sys.exit(app.exec_())
     

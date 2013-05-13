@@ -411,4 +411,4 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         
     def mousePressEvent(self, event):
         block = self.translatePosition(event.pos())
-        print block
+        print(block)

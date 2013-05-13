@@ -41,7 +41,7 @@ def create_menu(parent, settings, useSeparatorName = False, connectActions = Fal
     menu.setObjectName(text2objectname(name, prefix = "menu"))
     
     # attrs
-    if settings.has_key("icon"):
+    if "icon" in settings:
         menu.setIcon(settings["icon"])
 
     # actions
@@ -62,7 +62,7 @@ def extend_menu(menu, items, useSeparatorName = False):
         if item == "-":
             action = menu.addSeparator()
             actions.append(action)
-        elif isinstance(item, basestring) and item.startswith("--"):
+        elif isinstance(item, str) and item.startswith("--"):
             name = item[item.rfind("-") + 1:]
             action = menu.addSeparator()
             action.setObjectName(text2objectname(name, prefix = "section"))
@@ -85,14 +85,14 @@ def extend_menu(menu, items, useSeparatorName = False):
             actionGroup = QtGui.QActionGroup(menu)
             actions.append(actionGroup)
             actionGroup.setExclusive(False)
-            map(menu.addAction, item)
-            map(lambda action: action.setActionGroup(actionGroup), item)
+            list(map(menu.addAction, item))
+            list(map(lambda action: action.setActionGroup(actionGroup), item))
         elif isinstance(item, tuple):
             actionGroup = QtGui.QActionGroup(menu)
             actions.append(actionGroup)
             actionGroup.setExclusive(True)
-            map(menu.addAction, item)
-            map(lambda action: action.setActionGroup(actionGroup), item)
+            list(map(menu.addAction, item))
+            list(map(lambda action: action.setActionGroup(actionGroup), item))
         else:
             raise Exception("%s" % item)
     return actions
@@ -127,8 +127,8 @@ def add_actions(target, actions, insert_before=None):
 def _chunk_sections(items):
     sections = []
     start = 0
-    for i in xrange(0, len(items)):
-        if isinstance(items[i], basestring) and items[i].startswith('-') and start != i:
+    for i in range(0, len(items)):
+        if isinstance(items[i], str) and items[i].startswith('-') and start != i:
             sections.append(items[start:i])
             start = i
     sections.append(items[start:len(items)])
@@ -137,7 +137,7 @@ def _chunk_sections(items):
 def _section_name_range(items, name):
     begin, end = -1, -1
     for index, item in enumerate(items):
-        if isinstance(item, basestring):
+        if isinstance(item, str):
             if begin == -1 and item.startswith('-') and item.endswith(name):
                 begin = index
             elif begin != -1 and item.startswith('-'):
@@ -160,7 +160,7 @@ def extend_menu_section(menu, newItems, section = 0, position = None):
         newItems = [ newItems ]
     menuItems = menu.setdefault('items', [])
     #Ver si es un QMenu o una lista de items
-    if isinstance(section, basestring):
+    if isinstance(section, str):
         #Buscar en la lista la seccion correspondiente
         begin, end = _section_name_range(menuItems, section)
     elif isinstance(section, int):
@@ -169,20 +169,20 @@ def extend_menu_section(menu, newItems, section = 0, position = None):
     if position is None:
         newSection += newItems
     else:
-        if newSection and isinstance(newSection[0], basestring) and newSection[0].startswith("-"):
+        if newSection and isinstance(newSection[0], str) and newSection[0].startswith("-"):
             position += 1
         newSection = newSection[:position] + newItems + newSection[position:]
     menu["items"] = menuItems[:begin] + newSection + menuItems[end:]
 
 def update_menu(menuBase, menuUpdates):
-    for name, update in menuUpdates.iteritems():
+    for name, update in menuUpdates.items():
         if isinstance(name, (list, tuple)):
             #Navegate
-            menu = { "items": menuBase.values() }
+            menu = { "items": list(menuBase.values()) }
             for n in name:
                 if not isinstance(menu, dict) or "items" not in menu:
                     return
-                items = filter(lambda item: isinstance(item, dict) and "name" in item and item["name"] == n, menu["items"])
+                items = [item for item in menu["items"] if isinstance(item, dict) and "name" in item and item["name"] == n]
                 if not items:
                     return
                 menu = items.pop()

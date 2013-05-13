@@ -45,8 +45,8 @@ tended to hang below 10% processor utilization.
 There exists a live host running this web server: nada.ics.uci.edu
 """
 
-import asynchat, asyncore, socket, SimpleHTTPServer
-import sys, cgi, cStringIO, os, traceback, zlib, optparse
+import asynchat, asyncore, socket, http.server
+import sys, cgi, io, os, traceback, zlib, optparse
 
 __version__ = ".4"
 
@@ -106,7 +106,7 @@ reserved_names = dict.fromkeys(('com1 com2 com3 com4 com5 com6 com7 com8 com9 '
 def popall(self):
     #Preallocate the list to save memory resizing.
     r = len(self)*[None]
-    for i in xrange(len(r)):
+    for i in range(len(r)):
         r[i] = self.popleft()
     return r        
 
@@ -123,7 +123,7 @@ class writewrapper(object):
             if len(data)%BS:
                 xtra = len(data)%BS + BS
             buf = self.d
-            for i in xrange(0, len(data)-xtra, BS):
+            for i in range(0, len(data)-xtra, BS):
                 buf.append(data[i:i+BS])
             if xtra:
                 buf.append(data[-xtra:])
@@ -139,7 +139,7 @@ class ParseHeaders(dict):
         for line in lines:
             k,v=line.split(":",1)
             self._ci_dict[k.lower()] = self[k] = v.strip()
-        self.headers = self.keys()
+        self.headers = list(self.keys())
     
     def getheader(self,key,default=""):
         return self._ci_dict.get(key.lower(),default)
@@ -147,7 +147,7 @@ class ParseHeaders(dict):
     def get(self,key,default=""):
         return self._ci_dict.get(key.lower(),default)
 #
-class RequestHandler(asynchat.async_chat, SimpleHTTPServer.SimpleHTTPRequestHandler):
+class RequestHandler(asynchat.async_chat, http.server.SimpleHTTPRequestHandler):
     if 1:
         server_version = "SimpleAsyncHTTPServer/"+__version__
         protocol_version = "HTTP/1.1"
@@ -201,7 +201,7 @@ class RequestHandler(asynchat.async_chat, SimpleHTTPServer.SimpleHTTPRequestHand
     
     def handle_post_data(self):
         """Called when a POST request body has been read"""
-        self.rfile = cStringIO.StringIO(''.join(popall(self.incoming)))
+        self.rfile = io.StringIO(''.join(popall(self.incoming)))
         self.rfile.seek(0)
         self.do_POST()
             
@@ -265,7 +265,7 @@ class RequestHandler(asynchat.async_chat, SimpleHTTPServer.SimpleHTTPRequestHand
     def handle_request_line(self):
         """Called when the http request line and headers have been received"""
         # prepare attributes needed in parse_request()
-        self.rfile = cStringIO.StringIO(''.join(popall(self.incoming)))
+        self.rfile = io.StringIO(''.join(popall(self.incoming)))
         self.rfile.seek(0)
         self.raw_requestline = self.rfile.readline()
         self.parse_request()
@@ -339,10 +339,10 @@ class RequestHandler(asynchat.async_chat, SimpleHTTPServer.SimpleHTTPRequestHand
                 else:
                     O.appendleft(a[num_sent:])
 
-        except socket.error, why:
-            if isinstance(why, (str, unicode)):
+        except socket.error as why:
+            if isinstance(why, str):
                 self.log_error(why)
-            elif isinstance(why, tuple) and isinstance(why[-1], (str, unicode)):
+            elif isinstance(why, tuple) and isinstance(why[-1], str):
                 self.log_error(why[-1])
             else:
                 self.log_error(str(why))
@@ -363,7 +363,7 @@ class RequestHandler(asynchat.async_chat, SimpleHTTPServer.SimpleHTTPRequestHand
                 self.end_headers()
                 self.wfile.write(x)
                 return None
-        return SimpleHTTPServer.SimpleHTTPRequestHandler.send_head(self)
+        return http.server.SimpleHTTPRequestHandler.send_head(self)
     
     def send_response(self, code, message=None):
         if self.code:
@@ -503,5 +503,5 @@ if __name__=="__main__":
     
     req_handler = which[options.server]
     s=Server('',options.port,req_handler)
-    print req_handler.__name__, "running on port", options.port, "with root path", options.root
+    print(req_handler.__name__, "running on port", options.port, "with root path", options.root)
     asyncore.loop()

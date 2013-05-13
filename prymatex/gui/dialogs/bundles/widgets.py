@@ -180,17 +180,7 @@ class SnippetEditorWidget(BundleItemEditorBaseWidget, Ui_Snippet):
     DEFAULTS = {'content': '''Syntax Summary:
 
   Variables        $TM_FILENAME, $TM_SELECTED_TEXT
-  Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}
-  Substitutions    ${TM_FILENAME/.*/\U$0/}
-
-  Tab Stops        $1, $2, $3, ... $0 (optional)
-  Placeholders     ${1:default value}
-  Mirrors          <${2:tag}>...</$2>
-  Transformations  <${3:tag}>...</${3/(\w*).*/\U$1/}>
-
-  Shell Code       `date`, `pwd`
-
-  Escape Codes     \$ \` \\'''}
+  Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''}
 
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
@@ -296,7 +286,7 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
         self.command.setTabStopWidth(TABWIDTH)
         self.menuCommandTemplates = QtGui.QMenu()
         
-        for name, templateText in self.COMMAND_TEMPLATES.iteritems():
+        for name, templateText in self.COMMAND_TEMPLATES.items():
             action = self.menuCommandTemplates.addAction(name)
             receiver = lambda template = templateText: self.command.setPlainText(template)
             self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
@@ -314,14 +304,14 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
     def on_comboBoxBeforeRunning_changed(self, index):
         value = self.comboBoxBeforeRunning.itemData(index)
         if value != self.bundleItem.beforeRunningCommand:
-            self.changes['beforeRunningCommand'] = unicode(value)
+            self.changes['beforeRunningCommand'] = str(value)
         else:
             self.changes.pop('beforeRunningCommand', None)
             
     def on_comboBoxInput_changed(self, index):
         value = self.comboBoxInput.itemData(index)
         if value != self.bundleItem.input:
-            self.changes['input'] = unicode(value)
+            self.changes['input'] = str(value)
         else:
             self.changes.pop('input', None)
         if value == 'selection':
@@ -341,14 +331,14 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
     def on_comboBoxFallbackInput_changed(self, index):
         value = self.comboBoxFallbackInput.itemData(index)
         if value != self.bundleItem.fallbackInput and value != self.DEFAULTS['fallbackInput']:
-            self.changes['fallbackInput'] = unicode(value)
+            self.changes['fallbackInput'] = str(value)
         else:
             self.changes.pop('fallbackInput', None)
         
     def on_comboBoxOutput_changed(self, index):
         value = self.comboBoxOutput.itemData(index)
         if value != self.bundleItem.output:
-            self.changes['output'] = unicode(value)
+            self.changes['output'] = str(value)
         else:
             self.changes.pop('output', None)
     
@@ -512,7 +502,7 @@ class DragCommandEditorWidget(BundleItemEditorBaseWidget, Ui_DragCommand):
     
     @QtCore.pyqtSlot(str)
     def on_lineEditExtensions_textEdited(self, text):
-        value = map(lambda item: item.strip(), unicode(text).split(","))
+        value = [item.strip() for item in str(text).split(",")]
         if value != self.bundleItem.draggedFileExtensions:
             self.changes['draggedFileExtensions'] = value
         else:
@@ -543,11 +533,11 @@ class LanguageEditorWidget(BundleItemEditorBaseWidget, Ui_Language):
     TYPE = 'syntax'
     DEFAULTS = {'content': {       'scopeName': 'source.untitled',
        'fileTypes': [],
-       'foldingStartMarker': u'/\*\*|\{\s*$',
-       'foldingStopMarker': u'\*\*/|^\s*\}',
+       'foldingStartMarker': '/\*\*|\{\s*$',
+       'foldingStopMarker': '\*\*/|^\s*\}',
        'patterns': [
                {       'name': 'keyword.control.untitled',
-                       'match': u'\b(if|while|for|return)\b' },
+                       'match': '\b(if|while|for|return)\b' },
                {       'name': 'string.quoted.double.untitled',
                        'begin': '"',
                        'end': '"',

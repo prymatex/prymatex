@@ -23,7 +23,7 @@ def main(argv = sys.argv):
     from prymatex.mvc.delegates import PMXFontStyleDelegate
 
     for i in range(model.columnCount()):
-        print "Setting delegate for column: %d" % i
+        print("Setting delegate for column: %d" % i)
         
         delegate = PMXFontStyleDelegate(tableView)
         tableView.setItemDelegateForColumn(i, delegate)

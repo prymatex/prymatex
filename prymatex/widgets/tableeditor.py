@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-import StringIO
+import io
 
 if __name__ == "__main__":
     import sys, os
@@ -27,7 +27,7 @@ class TableModel(QtCore.QAbstractTableModel):
 
         if self._data:        
             firstItem = self._data[0]
-            types = types or map(lambda e: type(e), firstItem)
+            types = types or [type(e) for e in firstItem]
             formats = formats or [ "%s" for _ in firstItem ]
         
         assert types is not None and formats is not None, "Type, format error"
@@ -140,7 +140,7 @@ class TableDelegate(QtGui.QItemDelegate):
         else:
             editor = QtGui.QLineEdit(parent)
             editor.setAlignment(QtCore.Qt.AlignCenter)
-            if ctype in [ int, long ]:
+            if ctype in [ int, int ]:
                 editor.setValidator(QtGui.QDoubleValidator(editor))
             self.connect(editor, QtCore.SIGNAL("returnPressed()"),
                          self.commitAndCloseEditor)
@@ -187,7 +187,7 @@ class TableEditorWidget(QtGui.QWidget):
 
     def accept_changes(self):
         """Accept changes"""
-        for (i, j), value in self.model.changes.iteritems():
+        for (i, j), value in self.model.changes.items():
             self.data[i][j] = value
 
 
@@ -216,7 +216,7 @@ class TableEditorDialog(QtGui.QDialog):
         self.layout = QtGui.QGridLayout()
         self.setLayout(self.layout)
         if title:
-            title = unicode(title) # in case title is not a string
+            title = str(title) # in case title is not a string
         else:
             title = _("List editor")
         if editable:
@@ -294,16 +294,16 @@ def test():
     #arr = [[0, 0.0], [0, 0.0], [0, 0.0]]
     #print "out:", test_edit(arr, "record array with titles")
     arr_in = [True, False, True]
-    print "in:", arr_in
+    print("in:", arr_in)
     arr_out = test_edit(arr_in, "bool array", editable= True)
-    print "out:", arr_out
-    print arr_in is arr_out
+    print("out:", arr_out)
+    print(arr_in is arr_out)
     arr = [1, 2, 3]
-    print "out:", test_edit(arr, "int array")
+    print("out:", test_edit(arr, "int array"))
 
 
 if __name__ == "__main__":
     import sys, os
     sys.path.append(os.path.abspath("../.."))
-    print sys.path
+    print(sys.path)
     test()

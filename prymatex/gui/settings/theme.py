@@ -62,7 +62,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
 
 
     def setDefaultThemeSetting(self, theme):
-        self.settingGroup.setValue('defaultTheme', unicode(theme.uuid))
+        self.settingGroup.setValue('defaultTheme', str(theme.uuid))
         # TODO: Ver si el mensage esta bien aca
         message = "<b>%s</b> theme set " % theme.name
         if theme.author is not None:
@@ -89,7 +89,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         self.pushButtonCaret.setStyleSheet("background-color: " + color2rgba(settings['caret'])[:7])
         self.pushButtonGutterBackground.setStyleSheet("background-color: " + color2rgba(settings['gutter'])[:7])
         self.pushButtonGutterForeground.setStyleSheet("background-color: " + color2rgba(settings['gutterForeground'])[:7])
-        self.application.supportManager.themeStyleProxyModel.setFilterRegExp(unicode(theme.uuid))
+        self.application.supportManager.themeStyleProxyModel.setFilterRegExp(str(theme.uuid))
 
         #Set color for table view
         tableStyle = """QTableView {background-color: %s;
@@ -133,7 +133,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
 
     def on_pushButtonAdd_pressed(self):
         theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
-        self.application.supportManager.createThemeStyle('untitled', unicode(self.comboBoxScope.currentText()), theme)
+        self.application.supportManager.createThemeStyle('untitled', str(self.comboBoxScope.currentText()), theme)
 
 
     def on_pushButtonRemove_pressed(self):

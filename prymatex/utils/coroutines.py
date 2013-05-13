@@ -197,13 +197,13 @@ class CoException( Exception ):
         if preformatted:
             self.tb.appendleft( preformatted )
         else:
-            formattedList = traceback.format_tb( sys.exc_traceback )
+            formattedList = traceback.format_tb( sys.exc_info()[2] )
             if len(formattedList) > 1:
                 formattedList.reverse()
                 for e in formattedList[:-1]:
                     self.tb.appendleft( e )
             else:
-                self.tb.appendleft( traceback.format_tb( sys.exc_traceback )[0] )
+                self.tb.appendleft( traceback.format_tb( sys.exc_info()[2] )[0] )
 
 
     def __repr__( self ):
@@ -291,7 +291,7 @@ class Task( QObject ):
 
     # Run a task until it hits the next yield statement
     def run( self ):
-        for i in xrange( MAX_TASK_ITERATIONS ):
+        for i in range( MAX_TASK_ITERATIONS ):
             try:
                 if self.exception:
                     self.result = self.coroutine.throw( self.exception.orig )
@@ -350,7 +350,7 @@ class Task( QObject ):
                 del self.coroutine
                 self.coroutine = self.stack.pop()
 
-            except Exception, e:
+            except Exception as e:
                 if self.exception is None:
                     self.exception = CoException( e )
 
@@ -469,7 +469,7 @@ class Scheduler( QObject ):
         self.startIterationTime = datetime.datetime.now()
         self.lastIterationTime = self.startIterationTime
         timeout = False
-        for i in xrange( MAX_SCHEDULER_ITERATIONS ):
+        for i in range( MAX_SCHEDULER_ITERATIONS ):
             if timeout or not self.ready:
                 break
 
@@ -484,7 +484,7 @@ class Scheduler( QObject ):
                     # AsynchronousCall will resume execution later
                     continue
                      
-            except Exception, e:
+            except Exception as e:
                 self.task.deleteLater()
 
                 if isinstance( e, StopIteration ):
@@ -567,14 +567,14 @@ if __name__ == '__main__':
 
 
     def valueReturner( name ):
-        print '%s valueReturner()' % name
+        print('%s valueReturner()' % name)
         v = 'valueReturner!'
         yield Return( v )
-        print 'never print it'
+        print('never print it')
 
 
     def multipleValueReturner( name ):
-        print '%s multipleValueReturner()' % name
+        print('%s multipleValueReturner()' % name)
         v1 = 'multipleValueReturner!'
         v2 = 2
 
@@ -589,20 +589,20 @@ if __name__ == '__main__':
 
         # Sleep system call example
         ms = random.randint( 1000, 2000 )
-        print '%s Sleep( %d )' % (name, ms)
+        print('%s Sleep( %d )' % (name, ms))
         yield Sleep( ms )
 
         # exception test
         try:
-            print '%s subcoroutinesTest()' % name
+            print('%s subcoroutinesTest()' % name)
 
             # return values and subcoroutines test
             v1, v2 = yield multipleValueReturner( name )
             v = yield valueReturner( name )
-        except Exception, e:
-            print "%s exception '%s' handled!" % (name, e )
+        except Exception as e:
+            print("%s exception '%s' handled!" % (name, e ))
         else:
-            print '%s v = %s, v1 = %s, v2 = %s' % (name, v, v1, v2)
+            print('%s v = %s, v1 = %s, v2 = %s' % (name, v, v1, v2))
 
             # signal done test
             yield Return( name, v, v1, v2 )
@@ -610,7 +610,7 @@ if __name__ == '__main__':
 
     class TaskReturnValueTest( QObject ):
         def slotDone( self, res ):
-            print 'slotDone():', res.value
+            print('slotDone():', res.value)
 
 
     a = QApplication( sys.argv )

@@ -62,7 +62,7 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
     def accept(self, event, cursor = None):
         settings = self.editor.scope(cursor = cursor, attribute = 'settings')
         character = event.text()
-        pairs = filter(lambda pair: character in pair, settings.smartTypingPairs)
+        pairs = [pair for pair in settings.smartTypingPairs if character in pair]
         
         #Si no tengo nada retorno
         if not pairs: return False
@@ -75,7 +75,7 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
         if isOpen and cursor.hasSelection():
             #El cursor tiene seleccion, veamos si es un brace de apertura y tiene seleccionado un brace de apertura 
             selectedText = cursor.selectedText()
-            if any(map(lambda pair: selectedText == pair[0], settings.smartTypingPairs)):
+            if any([selectedText == pair[0] for pair in settings.smartTypingPairs]):
                 self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor)
             return True
         
@@ -268,9 +268,9 @@ class PrintEditorStatusHelper(CodeEditorKeyHelper):
     def execute(self, event, cursor = None):
         #Aca lo que queramos hacer
         userData = cursor.block().userData()
-        print self.editor.currentWord()
-        print self.editor.scopes()
-        print self.editor.wordUnderCursor(), cursor.position()
+        print(self.editor.currentWord())
+        print(self.editor.scopes())
+        print(self.editor.wordUnderCursor(), cursor.position())
         for group in [ "comment", "constant", "entity", "invalid", "keyword", "markup", "meta", "storage", "string", "support", "variable" ]:
-            print "%s: %s" % (group, cursor.block().userData().wordsByGroup(group))
-        print "sin comentarios, sin cadenas", cursor.block().userData().wordsByGroup("-string -comment")
+            print("%s: %s" % (group, cursor.block().userData().wordsByGroup(group)))
+        print("sin comentarios, sin cadenas", cursor.block().userData().wordsByGroup("-string -comment"))

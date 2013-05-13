@@ -6,6 +6,7 @@ Created on 31/12/2011
 from PyQt4 import QtCore, QtGui
 import re
 from logging import getLogger
+import collections
 logger = getLogger(__name__)
 
 
@@ -63,10 +64,10 @@ class PMXMessageOverlay(object):
         self.messageOverlay.updatePosition()
         self.messageOverlay.adjustSize()
         self.messageOverlay.linkMap = hrefCallbacks
-        if unicode(message):
+        if str(message):
             self.messageOverlay.fadeIn()
             if timeout:
-                print "Launching fadeout timer"
+                print("Launching fadeout timer")
                 self.fadeOutTimer.start(timeout)
         else:
             self.fadeOutTimer.stop()
@@ -165,7 +166,7 @@ class LabelOverlayWidget(QtGui.QLabel):
         if callback is None:
             logger.warn("No callback for %s" % link)
             return
-        if not callable(callback):
+        if not isinstance(callback, collections.Callable):
             logger.warn("Callback for %s is not callable: %s" % (link, callback))
             return
         
@@ -224,9 +225,9 @@ class LabelOverlayWidget(QtGui.QLabel):
     
     @linkMap.setter       
     def linkMap(self, value):
-        for href, callback in value.iteritems():
-            assert isinstance(href, basestring), "%s is not valid map"
-            assert callable(callback), "%s is not valid callback (under %s)" % (callback, value)
+        for href, callback in value.items():
+            assert isinstance(href, str), "%s is not valid map"
+            assert isinstance(callback, collections.Callable), "%s is not valid callback (under %s)" % (callback, value)
         self.__linkMap = value
     
     #===========================================================================
@@ -322,7 +323,7 @@ class LabelOverlayWidget(QtGui.QLabel):
     BORDER_COLOR_PATTERN = re.compile(r"border-color:\s*rgba?\([\d\,\s\%\w]*\);?", re.MULTILINE | re.UNICODE)
     
     def _updateStylesheetAlpha(self):
-        styleSheet = unicode(self.styleSheet())
+        styleSheet = str(self.styleSheet())
         #re.sub(pattern, repl, string, count, flags)
         
         for regex, name, col in ((self.COLOR_PATTERN, 'color', self.color),

@@ -7,5 +7,5 @@ spyderlib site:
 http://code.google.com/p/spyderlib
 """
 
-from inputs import *
-from messages import *
+from .inputs import *
+from .messages import *

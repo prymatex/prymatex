@@ -4,6 +4,7 @@ resources/icon/*
 dict.*
 *.swp
 .*
+*.bak
 *.log
 *.egg-info
 *.pot

@@ -101,7 +101,7 @@ class SpellCheckerAddon(CodeEditorAddon):
 
     def contributeToContextMenu(self, cursor):
         items = []
-        cursors = filter(lambda c: c.selectionStart() <= cursor.selectionStart() <= cursor.selectionEnd() <= c.selectionEnd(), self.wordCursors)
+        cursors = [c for c in self.wordCursors if c.selectionStart() <= cursor.selectionStart() <= cursor.selectionEnd() <= c.selectionEnd()]
         if cursors:
             cursor = cursors[0]
             for word in self.dictionary.suggest(cursor.selectedText()):
@@ -125,7 +125,7 @@ class SpellCheckerAddon(CodeEditorAddon):
                 yield (start, end), word
 
     def cleanCursorsForBlock(self, block):
-        self.wordCursors = filter(lambda cursor: cursor.block() != block, self.wordCursors)
+        self.wordCursors = [cursor for cursor in self.wordCursors if cursor.block() != block]
 
     def spellCheckWord(self, word, block, start, end):
         if not self.dictionary.check(word):
@@ -139,12 +139,12 @@ class SpellCheckerAddon(CodeEditorAddon):
         while block.isValid():
             for (start, end), word in self.spellWordsForBlock(block):
                 self.spellCheckWord(word, block, start, end)
-            block = block.next()
+            block = next(block)
             yield
         self.editor.highlightEditor()
     
     def on_actionSpell_toggled(self, cursor):
-        print cursor.selectedText()
+        print(cursor.selectedText())
         
     def on_editor_syntaxReady(self):
         self.currentSpellTask = self.application.scheduler.newTask(self.spellCheckAllDocument())

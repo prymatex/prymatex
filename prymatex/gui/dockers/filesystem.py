@@ -192,7 +192,7 @@ class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSys
         Adds an entry to the File Manager 
         @param path: Adds parameter to path
         """
-        if os.path.isdir(unicode(path)):
+        if os.path.isdir(str(path)):
             root, dirname_part = path.rsplit(os.sep, 1)
             self.comboFavourites.addItem(dirname_part, {
                                                     'path': path,

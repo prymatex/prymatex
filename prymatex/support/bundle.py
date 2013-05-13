@@ -36,7 +36,7 @@ class PMXManagedObject(object):
         raise NotImplemented
 
     def uuidAsUnicode(self):
-        return unicode(self.uuid).upper()
+        return str(self.uuid).upper()
 
     @property
     def enabled(self):
@@ -136,7 +136,7 @@ class PMXBundle(PMXManagedObject):
             setattr(self, key, dataHash.get(key, None))
 
     def update(self, dataHash):
-        for key in dataHash.keys():
+        for key in list(dataHash.keys()):
             setattr(self, key, dataHash[key])
     
     @property
@@ -187,9 +187,9 @@ class PMXBundle(PMXManagedObject):
             elif bundle is not None:
                 bundle.addSource(namespace, path)
             return bundle
-        except Exception, e:
+        except Exception as e:
             import traceback
-            print "Error in laod bundle %s (%s)" % (info_file, e)
+            print("Error in laod bundle %s (%s)" % (info_file, e))
             traceback.print_exc()
 
     @classmethod
@@ -224,14 +224,14 @@ class PMXBundleItem(PMXManagedObject):
             setattr(self, key, value)
     
     def update(self, dataHash):
-        for key in dataHash.keys():
+        for key in list(dataHash.keys()):
             value = dataHash[key]
             if key == "scope":
                 self.selector = scope.Selector(value)
             setattr(self, key, value)
     
     def isChanged(self, dataHash):
-        for key in dataHash.keys():
+        for key in list(dataHash.keys()):
             if getattr(self, key) != dataHash[key]:
                 return True
         return False
@@ -281,9 +281,9 @@ class PMXBundleItem(PMXManagedObject):
             elif item is not None:
                 item.addSource(namespace, path)
             return item
-        except Exception, e:
+        except Exception as e:
             import traceback
-            print "Error in bundle item %s (%s)" % (path, e)
+            print("Error in bundle item %s (%s)" % (path, e))
             traceback.print_exc()
     
     @classmethod
@@ -295,7 +295,7 @@ class PMXBundleItem(PMXManagedObject):
         pass
       
 class PMXRunningContext(object):
-    TEMPLATE = u"""Item Name: {itemName}
+    TEMPLATE = """Item Name: {itemName}
     Asynchronous: {asynchronous}
     Working Directory: {workingDirectory}
     Input:  Type {inputType}, Value {inputValue}

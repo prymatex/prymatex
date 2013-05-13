@@ -17,7 +17,7 @@ def main(argv = sys.argv):
     model.setHeaderData(0, Qt.Horizontal, "Foreground")
     tableView.setModel(model)
     for i in range(model.columnCount()):
-        print "Setting delegate for column: %d" % i
+        print("Setting delegate for column: %d" % i)
         delegate = PMXColorDelegate()
         delegate.setParent(tableView)
         tableView.setItemDelegateForColumn(i, delegate)

@@ -23,7 +23,7 @@ pattern = c_char_p("a(.*)b|[e-f]+")
 string = c_char_p("zzzzaffffffffb")
 reg = oniguruma.regex_t()
 einfo = oniguruma.OnigErrorInfo()
-print oniguruma.onig_copyright()
+print(oniguruma.onig_copyright())
 r = oniguruma.onig_new(pointer(reg), 
                        cast(pattern, POINTER(c_ubyte)), 
                        cast(byref(pattern, len(py_pattern)), POINTER(c_ubyte)),
@@ -34,11 +34,11 @@ r = oniguruma.onig_new(pointer(reg),
     
 if (r != ONIG_NORMAL):
     #char s[ONIG_MAX_ERROR_MESSAGE_LEN];
-    print r
+    print(r)
     t = POINTER(c_ubyte)
     s = c_ubyte()
     oniguruma.onig_error_code_to_str(byref(s), r, byref(einfo))
-    print s
+    print(s)
     sys.exit()
     
 region = oniguruma.onig_region_new()

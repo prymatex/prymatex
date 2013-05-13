@@ -3,15 +3,15 @@
 
 import re
 import string
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 
 # Configuration for urlize() function.
 TRAILING_PUNCTUATION = ['.', ',', ':', ';']
 WRAPPING_PUNCTUATION = [('(', ')'), ('<', '>'), ('&lt;', '&gt;')]
 
 # List of possible strings used for bullets in bulleted lists.
-DOTS = [u'&middot;', u'*', u'\u2022', u'&#149;', u'&bull;', u'&#8226;']
+DOTS = ['&middot;', '*', '\u2022', '&#149;', '&bull;', '&#8226;']
 
 unencoded_ampersands_re = re.compile(r'&(?!(\w+|#\d+);)')
 unquoted_percents_re = re.compile(r'%(?![0-9A-Fa-f]{2})')
@@ -92,7 +92,7 @@ def urlize(text, trim_url_limit = None, nofollow = False, autoescape = False):
                     words[i] = escape(word)
         elif autoescape:
             words[i] = escape(word)
-    return u''.join(words)
+    return ''.join(words)
 
 def clean_html(text):
     """
@@ -115,15 +115,15 @@ def clean_html(text):
     text = html_gunk_re.sub('', text)
     # Convert hard-coded bullets into HTML unordered lists.
     def replace_p_tags(match):
-        s = match.group().replace(u'</p>', u'</li>')
+        s = match.group().replace('</p>', '</li>')
         for d in DOTS:
-            s = s.replace(u'<p>%s' % d, u'<li>')
-        return u'<ul>\n%s\n</ul>' % s
+            s = s.replace('<p>%s' % d, '<li>')
+        return '<ul>\n%s\n</ul>' % s
     text = hard_coded_bullets_re.sub(replace_p_tags, text)
     # Remove stuff like "<p>&nbsp;&nbsp;</p>", but only if it's at the bottom
     # of the text.
-    text = trailing_empty_content_re.sub(u'', text)
+    text = trailing_empty_content_re.sub('', text)
     return text
     
 if __name__ == '__main__':
-    print urlize("holaMunDSos <a href='http://www.google.com'>http://www.google.com</a> 452 3jhds f as12315sdf")
+    print(urlize("holaMunDSos <a href='http://www.google.com'>http://www.google.com</a> 452 3jhds f as12315sdf"))

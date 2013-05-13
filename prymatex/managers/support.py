@@ -38,10 +38,10 @@ class BundleItemMenuGroup(QtCore.QObject):
         self.manager.bundleRemoved.connect(self.on_manager_bundleRemoved)
         
     def appendMenu(self, menu, offset = None):
-        if menu not in map(lambda (menu, offset): menu, self.containers):
+        if menu not in [menu_offset[0] for menu_offset in self.containers]:
             self.containers.append((menu, offset is not None and offset or len(menu.actions())))
         #Append all bundle menus in order
-        for bundle, bundleMenu in iter(sorted(self.menus.iteritems(), key=lambda (bundle, bundleMenu): bundleMenu.title().replace("&","").lower())):
+        for bundle, bundleMenu in iter(sorted(iter(self.menus.items()), key=lambda bundle_bundleMenu: bundle_bundleMenu[1].title().replace("&","").lower())):
             menu.addMenu(bundleMenu)
         
     def buildMenu(self, items, menu, submenus, parent = None):
@@ -84,7 +84,7 @@ class BundleItemMenuGroup(QtCore.QObject):
         return self.menus.get(bundle)
 
     def addToContainers(self, menu):
-        currentTitles = sorted(map(lambda menu: menu.title().replace("&","").lower(), self.menus.values()))
+        currentTitles = sorted([menu.title().replace("&","").lower() for menu in list(self.menus.values())])
         index = bisect(currentTitles, menu.title().replace("&","").lower())
         for container, offset in self.containers:
             currentActions = container.actions()
@@ -161,19 +161,19 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
     themeChanged = QtCore.pyqtSignal(object)
     
     #Settings
-    shellVariables = pmxConfigPorperty(default = [], tm_name = u'OakShelVariables')
+    shellVariables = pmxConfigPorperty(default = [], tm_name = 'OakShelVariables')
     
-    @pmxConfigPorperty(default = [], tm_name = u'OakBundleManagerDeletedBundles')
+    @pmxConfigPorperty(default = [], tm_name = 'OakBundleManagerDeletedBundles')
     def deleted(self, deleted):
-        self.deletedObjects = map(lambda uuid: uuidmodule.UUID(uuid), deleted)
+        self.deletedObjects = [uuidmodule.UUID(uuid) for uuid in deleted]
         
-    @pmxConfigPorperty(default = [], tm_name = u'OakBundleManagerDeletedBundles')
+    @pmxConfigPorperty(default = [], tm_name = 'OakBundleManagerDeletedBundles')
     def disabled(self, disabled):
-        self.disabledObjects = map(lambda uuid: uuidmodule.UUID(uuid), disabled)
+        self.disabledObjects = [uuidmodule.UUID(uuid) for uuid in disabled]
     
     #http://manual.macromates.com/en/expert_preferences.html
     #When you create a new item in the bundle editor without having selected a bundle first, then the bundle with the UUID held by this defaults key is used as the target
-    defaultBundleForNewBundleItems = pmxConfigPorperty(default = u'B7BC3FFD-6E4B-11D9-91AF-000D93589AF6', tm_name = u'OakDefaultBundleForNewBundleItems')
+    defaultBundleForNewBundleItems = pmxConfigPorperty(default = 'B7BC3FFD-6E4B-11D9-91AF-000D93589AF6', tm_name = 'OakDefaultBundleForNewBundleItems')
         
     SETTINGS_GROUP = 'SupportManager'
     
@@ -273,7 +273,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
         self.processTableModel.appendProcess(context.process, description = context.description())
 
         environment = QtCore.QProcessEnvironment()
-        for key, value in context.environment.iteritems():
+        for key, value in context.environment.items():
             environment.insert(key, value)
 
         context.process.setProcessEnvironment(environment)
@@ -293,7 +293,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
             context.process.start(context.shellCommand, QtCore.QIODevice.ReadWrite)
             if not context.process.waitForStarted():
                 raise Exception("No puedo correr")
-            context.process.write(unicode(context.inputValue).encode("utf-8"))
+            context.process.write(str(context.inputValue).encode("utf-8"))
             context.process.closeWriteChannel()
         else:
             context.process.start(context.shellCommand, QtCore.QIODevice.ReadOnly)
@@ -312,7 +312,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
         Marcar un managed object como eliminado
         """
         self.deletedObjects.append(uuid)
-        deleted = map(lambda uuid: unicode(uuid).upper(), self.deletedObjects)
+        deleted = [str(uuid).upper() for uuid in self.deletedObjects]
         self.settings.setValue('deleted', deleted)
 
     def isDeleted(self, uuid):
@@ -323,12 +323,12 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
     
     def setDisabled(self, uuid):
         self.disabledObjects.append(uuid)
-        disabled = map(lambda uuid: unicode(uuid).upper(), self.disabledObjects)
+        disabled = [str(uuid).upper() for uuid in self.disabledObjects]
         self.settings.setValue('disabled', disabled)
         
     def setEnabled(self, uuid):
         self.disabledObjects.remove(uuid)
-        disabled = map(lambda uuid: unicode(uuid).upper(), self.disabledObjects)
+        disabled = [str(uuid).upper() for uuid in self.disabledObjects]
         self.settings.setValue('disabled', disabled)
     
     #---------------------------------------------------
@@ -471,7 +471,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
     def getAllBundleItemsByFileExtension(self, path):
         items = []
         for item in self.dragcommandProxyModel.getAllItems():
-            if any(map(lambda extension: fnmatch.fnmatch(path, "*.%s" % extension), item.draggedFileExtensions)):
+            if any([fnmatch.fnmatch(path, "*.%s" % extension) for extension in item.draggedFileExtensions]):
                 items.append(item)
         return items
     

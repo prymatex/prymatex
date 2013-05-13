@@ -28,7 +28,7 @@ except:
             return stat
 
 # The preference file for textmate to retrieve the prefs from
-if os.environ.has_key('TM_APP_IDENTIFIER'):
+if 'TM_APP_IDENTIFIER' in os.environ:
     TM_PREFERENCE_FILE = os.environ['TM_APP_IDENTIFIER'] + '.plist'
 else:
     TM_PREFERENCE_FILE = 'com.macromates.textmate.plist'
@@ -80,11 +80,11 @@ class Preferences(object):
             try:
                 plDict = plistlib.readPlistFromString(plist_str)
             except:
-                print '<p class="error">There was a problem reading the preferences file, continuing with defaults</p>'
+                print('<p class="error">There was a problem reading the preferences file, continuing with defaults</p>')
             try:
                 os.remove("/tmp/tmltxprefs1.plist")
             except:
-                print '<p class="error">Problem removing temporary prefs file</p>'
+                print('<p class="error">Problem removing temporary prefs file</p>')
         return plDict
         
     def toDefString(self):
@@ -98,10 +98,10 @@ class Preferences(object):
 
 if __name__ == '__main__':
     test = Preferences()
-    print test.toDefString()
-    print test['latexUselatexmk']
-    print test['Foo']
+    print(test.toDefString())
+    print(test['latexUselatexmk'])
+    print(test['Foo'])
     useLatexMk = test['latexUselatexmk']
-    print useLatexMk
+    print(useLatexMk)
     
     

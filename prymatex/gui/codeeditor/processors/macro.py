@@ -110,7 +110,7 @@ class PMXMacroProcessor(PMXMacroProcessor):
         self.editor.insertBundleItem(command, asynchronous = False)
 
     def findWithOptions(self, options):
-        print options
+        print(options)
         """{'action': 'findNext',
         'findInProjectIgnoreCase': False,
         'findInProjectRegularExpression': False,

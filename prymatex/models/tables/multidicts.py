@@ -2,29 +2,28 @@
 #-*- encoding: utf-8 -*-
 
 from prymatex.qt import QtGui, QtCore
+import collections
+from functools import reduce
 
 class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
     dictionaryChanged = QtCore.pyqtSignal(str)
-    COLUMN_NAMES = 0
-    COLUMN_VALUES = 1
+    COLUMN_NAME = 0
+    COLUMN_VALUE = 1
+    COLUMN_SELECTED = 2
     def __init__(self, parent = None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.dictionaries = []
 
     def dictionaryNames(self):
-        return map(lambda d: d["name"], self.dictionaries)
-
+        return [d["name"] for d in self.dictionaries]
 
     def dictionaryByName(self, name):
         for dictionary in self.dictionaries:
             if dictionary['name'] == name:
                 return dictionary
 
-
     def addDictionary(self, name, data, editable = False, selectable = False, visible = True):
-        if hasattr(data, "iteritems") and callable(data.iteritems):
-            data = map(lambda (name, value): {'name': name, 'value': value, 'selected': True}, data.iteritems())
-            selectable = False
+        data = [(name_value[0], name_value[1], True) for name_value in dict(data).items()]
         dictionary = {
             'name': name,
             'data': data,
@@ -34,8 +33,11 @@ class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
         }
         self.dictionaries.append(dictionary)
         self.layoutChanged.emit()
-
     
+    # TODO: Separar en agregar diccionarios y agregar valores
+    def addValues(self, name, values, editable = False, selectable = False, visible = True):
+        pass
+        
     def clear(self):
         self.changes = {}
         self.selected = {}
@@ -55,14 +57,13 @@ class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
 
         
     def __mapToDictionary(self, index):
-        currentDict = None
         for currentDict in self.dictionaries:
             if currentDict["visible"]:
                 varCount = len(currentDict['data'])
                 if index < varCount:
-                    break
+                    return index, currentDict
                 index -= varCount
-        return index, currentDict
+        return -1, None
 
 
     def __mapToPosition(self, dictionary, top = True):
@@ -83,14 +84,13 @@ class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
             data = dictionary["data"]
             if raw:
                 return data[:]
-            return dict(map(lambda value: (value["name"], value["value"]),
-                filter(lambda value: value["selected"], dictionary["data"])))
+            return dict([(value[self.COLUMN_NAME], value[self.COLUMN_VALUE]) for value in [value for value in dictionary["data"] if value[self.COLUMN_SELECTED]]])
 
     
     def get_value(self, index):
         row, dictionary = self.__mapToDictionary(index.row())
-        value = dictionary["data"][row][index.column() == self.COLUMN_NAMES and "name" or "value"]
-        selected = dictionary["data"][row]["selected"]
+        value = dictionary["data"][row][index.column()]
+        selected = dictionary["data"][row][self.COLUMN_SELECTED]
         return value, selected, dictionary
 
         
@@ -144,7 +144,7 @@ class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
 
     def hasItem(self, dictionaryName, itemName):
         dictionary = self.dictionaryByName(dictionaryName)
-        return any(map(lambda item: item["name"] == itemName, dictionary["data"]))
+        return any([item["name"] == itemName for item in dictionary["data"]])
 
 
     def insertItem(self, dictionaryName, itemName):

@@ -118,27 +118,27 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         
     @QtCore.pyqtSlot()
     def on_actionCommand_triggered(self):
-        self.createBundleItem(u"untitled", "command")
+        self.createBundleItem("untitled", "command")
 
     @QtCore.pyqtSlot()        
     def on_actionDragCommand_triggered(self):
-        self.createBundleItem(u"untitled", "dragcommand")
+        self.createBundleItem("untitled", "dragcommand")
 
     @QtCore.pyqtSlot()        
     def on_actionLanguage_triggered(self):
-        self.createBundleItem(u"untitled", "syntax")
+        self.createBundleItem("untitled", "syntax")
 
     @QtCore.pyqtSlot()        
     def on_actionSnippet_triggered(self):
-        self.createBundleItem(u"untitled", "snippet")
+        self.createBundleItem("untitled", "snippet")
 
     @QtCore.pyqtSlot()        
     def on_actionTemplate_triggered(self):
-        self.createBundleItem(u"untitled", "template")
+        self.createBundleItem("untitled", "template")
 
     @QtCore.pyqtSlot()        
     def on_actionProject_triggered(self):
-        self.createBundleItem(u"untitled", "project")
+        self.createBundleItem("untitled", "project")
 
     @QtCore.pyqtSlot()        
     def on_actionTemplateFile_triggered(self):
@@ -147,11 +147,11 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
             template = self.proxyTreeModel.node(index)
             if template.TYPE == 'templatefile':
                 template = template.parentNode()
-        self.manager.createTemplateFile(u"untitled", template, self.namespace)
+        self.manager.createTemplateFile("untitled", template, self.namespace)
 
     @QtCore.pyqtSlot()
     def on_actionPreferences_triggered(self):
-        self.createBundleItem(u"untitled", "preference")
+        self.createBundleItem("untitled", "preference")
 
     @QtCore.pyqtSlot()
     def on_actionBundle_triggered(self):

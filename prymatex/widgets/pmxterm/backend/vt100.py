@@ -9,7 +9,7 @@
 # http://shallowsky.com/blog/2011/Jan/18/
 
 import array
-import constants
+from . import constants
 
 class Terminal(object):
     CHARACTERS = 0
@@ -221,7 +221,7 @@ class Terminal(object):
         self.cx = 0
         self.cy = 0
         # Tab stops
-        self.tab_stops = range(0, self.w, 8)
+        self.tab_stops = list(range(0, self.w, 8))
 
 
     # UTF-8 functions
@@ -235,7 +235,7 @@ class Terminal(object):
                     self.utf8_char = (self.utf8_char << 6) | (char & 0x3f)
                     if self.utf8_units_count == self.utf8_units_received:
                         if self.utf8_char<0x10000:
-                            o += unichr(self.utf8_char)
+                            o += chr(self.utf8_char)
                         self.utf8_units_count = self.utf8_units_received = 0
                 else:
                     o += '?'
@@ -1095,13 +1095,13 @@ class Terminal(object):
                         char_msb = char & 0xf0
                         if char_msb == 0x20:
                             # Intermediate bytes (added to function)
-                            self.vt100_parse_func += unichr(char)
+                            self.vt100_parse_func += chr(char)
                         elif char_msb == 0x30 and self.vt100_parse_state == 'csi':
                             # Parameter byte
-                            self.vt100_parse_param += unichr(char)
+                            self.vt100_parse_param += chr(char)
                         else:
                             # Function byte
-                            self.vt100_parse_func += unichr(char)
+                            self.vt100_parse_func += chr(char)
                             self.vt100_parse_process()
                         return True
         self.vt100_lastchar = char
@@ -1202,7 +1202,7 @@ class Terminal(object):
                     attr_ = attr
                 wx += self.utf8_charwidth(char)
                 if wx <= self.w:
-                    line[-1] += unichr(char)
+                    line[-1] += chr(char)
             screen.append(line)
 
         # Scroll values

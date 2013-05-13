@@ -42,7 +42,7 @@ class PMXChoiceItemDelegate(QItemDelegate):
         
         for display_text, data in self.CHOICES:
             editor.addItem(display_text, data)
-        print "Editor"
+        print("Editor")
         return editor
 
     def setEditorData(self, editor, index):
@@ -54,7 +54,7 @@ class PMXChoiceItemDelegate(QItemDelegate):
     def setModelData(self, editor, model, index):
         #return PyQt4.Qt.QItemDelegate.setModelData(self, *args, **kwargs)
         data = editor.itemData(editor.currentIndex())
-        print "Setting data to model %s" % data
+        print("Setting data to model %s" % data)
         model.setData(index, data)
 
 class PMXDecoupledDialog(QWidget):
@@ -98,7 +98,7 @@ class PMXDecoupledEditorDelegate(QItemDelegate):
     ''' Edit a long text '''
     def createEditor(self, parent, option, index):
         column_title = index.model()._meta.fields[index.column()].title
-        window = PMXDecoupledDialog(unicode(self.trUtf8("Edit %s")) % column_title,
+        window = PMXDecoupledDialog(str(self.trUtf8("Edit %s")) % column_title,
                                     editor = QTextEdit())
         #window.editor.setFocus()
         #window.exec_()
@@ -126,7 +126,7 @@ class PMXTableTest(PMXTableBase):
     # Order matters
     nombre = PMXTableField(required = False)
     apellido = PMXTableField(required = True)
-    direccion = PMXTableField(required = True, title = u"Dirección")
+    direccion = PMXTableField(required = True, title = "Dirección")
     type_ = PMXTableField(required = True, default = 1, title = "Bundle Type", 
                          delegate_class=SexoItemDelegate)
     descripcion = PMXTableField(required = False, 
@@ -145,7 +145,7 @@ class PMXTableTest(PMXTableBase):
     def fillNombreApellido(self, row):
         ''' Rellenar una columna a partir de otras dos '''
         values = self.index(row, 'nombre' ).data(), self.index(row, 'apellido' ).data()
-        values = map(lambda x: unicode(x.toPyObject()), values)
+        values = [str(x.toPyObject()) for x in values]
         data = " ".join(values)
         self.setData(self.index(row, 'nombre_apelido'), data)
     
@@ -171,8 +171,8 @@ class PMXTableTest(PMXTableBase):
 
 def setupModel():
     model = PMXTableTest()
-    model.addRowFromKwargs(nombre = "Pepe", apellido = u"Grillo", direccion = u"Caja de 222 fósforos Patito")
-    model.addRowFromKwargs(nombre = "Pinocho", apellido = u"Pérez", direccion = "Lata de concentrado de ballena")
+    model.addRowFromKwargs(nombre = "Pepe", apellido = "Grillo", direccion = "Caja de 222 fósforos Patito")
+    model.addRowFromKwargs(nombre = "Pinocho", apellido = "Pérez", direccion = "Lata de concentrado de ballena")
     model.addRowFromKwargs(nombre = "Froddo", apellido = "Baggins", direccion = "The fellowship of the ring")
     return model
 
@@ -241,8 +241,8 @@ if __name__ == "__main__":
     
     
     model.sort('nombre_apelido')
-    test_win.setWindowTitle(unicode(model.__class__.__name__))
+    test_win.setWindowTitle(str(model.__class__.__name__))
     test_win.setGeometry(400,200, 600, 560)
-    print model._meta
+    print(model._meta)
     test_win.show()
     sys.exit(app.exec_())

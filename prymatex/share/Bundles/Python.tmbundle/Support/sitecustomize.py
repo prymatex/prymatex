@@ -28,7 +28,7 @@ import codecs
 from os import environ, path, fdopen, popen
 from traceback import extract_tb
 from cgi import escape
-from urllib import quote
+from urllib.parse import quote
 
 # add utf-8 support to stdout/stderr
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout);
@@ -74,7 +74,7 @@ def tm_excepthook(e_type, e, tb):
             if len(e.args) > 1:
                 for arg in e.args[1:]:
                     message += ", %s" % repr(arg)
-        if isinstance(message, unicode):
+        if isinstance(message, str):
             io.write("<p id='exception'><strong>%s:</strong> %s</p>\n" %
                                     (e_type.__name__, escape(message).encode("utf-8")))
         else:

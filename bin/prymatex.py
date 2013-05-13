@@ -42,8 +42,9 @@ def runPrymatexApplication(options, files):
             returnCode = runPrymatexInstance(options, files)
             # Clean in case of restart
             options.profile, files = "", []
-    except exceptions.EnviromentNotSuitable:
-        print "Prymatex can't run. Basic imports can't be found. Running in virtualenv?"
+    except exceptions.EnviromentNotSuitable as ex:
+        print(ex)
+        print("Prymatex can't run. Basic imports can't be found. Running in virtualenv?")
         returnCode = -1
 
     except exceptions.AlreadyRunningError as ex:

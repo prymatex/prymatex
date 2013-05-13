@@ -1,1 +1,1 @@
-from manager import Backend, BackendManager
+from .manager import Backend, BackendManager

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 by Vinay Sajip. All rights reserved. See accompanying LICENSE.txt for details.
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 import logging
@@ -44,7 +44,7 @@ class BaseServer(object):   # mixin for common functionality
 # TCP receiver
 #
 
-from SocketServer import ThreadingTCPServer, StreamRequestHandler
+from socketserver import ThreadingTCPServer, StreamRequestHandler
 
 class LogRecordStreamHandler(StreamRequestHandler):
     """
@@ -70,8 +70,8 @@ class LogRecordStreamHandler(StreamRequestHandler):
                 obj = pickle.loads(chunk)
                 record = logging.makeLogRecord(obj)
                 self.server.handle_record(record)
-            except socket.error, e:
-                if type(e.args) != types.TupleType:
+            except socket.error as e:
+                if type(e.args) != tuple:
                     raise
                 else:
                     errcode = e.args[0]
@@ -93,7 +93,7 @@ class LoggingTCPServer(ThreadingTCPServer, BaseServer):
 # UDP receiver
 #
 
-from SocketServer import ThreadingUDPServer, DatagramRequestHandler
+from socketserver import ThreadingUDPServer, DatagramRequestHandler
 
 class LogRecordDatagramHandler(DatagramRequestHandler):
     """

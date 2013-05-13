@@ -38,15 +38,15 @@ def km_from_string(s = PMX_IPYTHON_CONNECTION):
                 fullpath = find_connection_file(k,p)
             else:
                 fullpath = find_connection_file(s.lstrip().rstrip())
-        except IOError,e:
-            print ":IPython " + s + " failed", "Info"
-            print "^-- failed '" + s + "' not found", "Error"
+        except IOError as e:
+            print(":IPython " + s + " failed", "Info")
+            print("^-- failed '" + s + "' not found", "Error")
             return
         km = BlockingKernelManager(connection_file = fullpath)
         km.load_connection_file()
     else:
         if s == '':
-            print ":IPython 0.11 requires the full connection string"
+            print(":IPython 0.11 requires the full connection string")
             return
         loader = KeyValueConfigLoader(s.split(), aliases=kernel_aliases)
         cfg = loader.load_config()['KernelApp']
@@ -56,9 +56,9 @@ def km_from_string(s = PMX_IPYTHON_CONNECTION):
                 sub_address=(ip, cfg['iopub_port']),
                 stdin_address=(ip, cfg['stdin_port']),
                 hb_address=(ip, cfg['hb_port']))
-        except KeyError,e:
-            print ":IPython " +s + " failed", "Info"
-            print "^-- failed --"+e.message.replace('_port','')+" not specified", "Error"
+        except KeyError as e:
+            print(":IPython " +s + " failed", "Info")
+            print("^-- failed --"+e.message.replace('_port','')+" not specified", "Error")
             return
     km.start_channels()
     return km
@@ -74,7 +74,7 @@ def get_child_msg(msg_id):
             break
         else:
             #got a message, but not the one we were looking for
-            print 'skipping a message on shell_channel','WarningMsg'
+            print('skipping a message on shell_channel','WarningMsg')
     return m
 
 def execute(command):
@@ -86,7 +86,7 @@ def execute(command):
         message = "In[%d]: %s\n" % (count, command)
         if child['content']['status'] == "ok":
             if child['content']['payload']:
-                message += "\n".join(map(lambda payload: payload['text'], child['content']['payload']))    
+                message += "\n".join([payload['text'] for payload in child['content']['payload']])    
         return message
-    except Exception, e:
+    except Exception as e:
         return "In[]: %s\n(no reply from IPython kernel)\n%s" % (command, e)

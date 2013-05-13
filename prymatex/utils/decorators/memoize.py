@@ -28,17 +28,17 @@ def dynamic_memoized(function):
 
 def remove_memoized_argument(key, function = None, condition = lambda f, key, mkey: key in mkey):
     def remove_memento_items(function, memento):
-        for mkey, mvalue in memento.items():
+        for mkey, mvalue in list(memento.items()):
             if condition(function, key, mkey):
                 del memento[mkey]
     if function is None:
-        for function, memento in DYNAMIC_MEMOIZED_CACHE.iteritems():
+        for function, memento in DYNAMIC_MEMOIZED_CACHE.items():
             remove_memento_items(function, memento)
     elif function in DYNAMIC_MEMOIZED_CACHE:
         remove_memento_items(function, DYNAMIC_MEMOIZED_CACHE[function])
         
 def remove_memoized_function(function):
-    for mfunction in DYNAMIC_MEMOIZED_CACHE.keys():
-        if mfunction.func_name == function.func_name:
-            print "limpiando", mfunction
+    for mfunction in list(DYNAMIC_MEMOIZED_CACHE.keys()):
+        if mfunction.__name__ == function.__name__:
+            print("limpiando", mfunction)
             DYNAMIC_MEMOIZED_CACHE[mfunction].clear()

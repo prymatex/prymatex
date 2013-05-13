@@ -67,7 +67,7 @@ def show_std_icons():
     """
     app = QtGui.QApplication([])
     dialog = ShowStdIcons(None)
-    print get_std_icon("cacho")
+    print(get_std_icon("cacho"))
     dialog.show()
     import sys
     sys.exit(app.exec_())

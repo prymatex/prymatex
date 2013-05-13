@@ -36,7 +36,7 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
     SETTINGS_GROUP = 'Projects'
     @pmxConfigPorperty(default = '')
     def customFilters(self, filters):
-        filters = map(lambda p: p.strip(), filters.split(","))
+        filters = [p.strip() for p in filters.split(",")]
         self.selectableProjectFileModel.setBaseFilters(filters)
         self.projectTreeProxyModel.setFilterRegExp(",".join(filters))
     
@@ -99,22 +99,21 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
         self.projectTreeProxyModel.addNodeFormater(formater)
     
     def saveState(self):
-        expandedIndexes = filter(lambda index: self.treeViewProjects.isExpanded(index), self.projectTreeProxyModel.persistentIndexList())
-        expandedPaths = map(lambda index: self.projectTreeProxyModel.node(index).path(), expandedIndexes)
+        expandedIndexes = [index for index in self.projectTreeProxyModel.persistentIndexList() if self.treeViewProjects.isExpanded(index)]
+        expandedPaths = [self.projectTreeProxyModel.node(index).path() for index in expandedIndexes]
         return { "expanded": expandedPaths }
 
     def restoreState(self, state):
         #Expanded Nodes
-        map(lambda index: index.isValid() and self.treeViewProjects.setExpanded(index, True), 
-            map(lambda path: self.projectTreeProxyModel.indexForPath(path), state["expanded"]))
+        list(map(lambda index: index.isValid() and self.treeViewProjects.setExpanded(index, True), 
+            [self.projectTreeProxyModel.indexForPath(path) for path in state["expanded"]]))
 
     def environmentVariables(self):
         environment = PMXBaseDock.environmentVariables(self)
         indexes = self.treeViewProjects.selectedIndexes()
         if indexes:
             node = self.currentNode()
-            paths = map(lambda node: self.application.fileManager.normcase(node.path()),
-                        [ self.projectTreeProxyModel.node(index) for index in indexes ])
+            paths = [self.application.fileManager.normcase(node.path()) for node in [ self.projectTreeProxyModel.node(index) for index in indexes ]]
             environment.update({
                 'TM_SELECTED_FILE': node.path(), 
                 'TM_SELECTED_FILES': " ".join(["'%s'" % path for path in paths ])
@@ -261,13 +260,13 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
     def extendProjectBundleItemMenu(self, menu, node):
         #Menu de los bundles relacionados al proyecto
         #Try get all bundles for project bundle definition
-        bundles = map(lambda uuid: self.application.supportManager.getManagedObject(uuid), node.project().bundleMenu or [])
+        bundles = [self.application.supportManager.getManagedObject(uuid) for uuid in node.project().bundleMenu or []]
         #Filter None bundles
-        bundles = filter(lambda bundle: bundle is not None, bundles)
+        bundles = [bundle for bundle in bundles if bundle is not None]
         #Sort by name
         bundles = sorted(bundles, key=lambda bundle: bundle.name)
         if bundles:
-            bundleMenues = map(lambda bundle: self.application.supportManager.menuForBundle(bundle), bundles)
+            bundleMenues = [self.application.supportManager.menuForBundle(bundle) for bundle in bundles]
             extend_menu_section(menu, bundleMenues, section = "bundles", position = 0)
 
     #================================================

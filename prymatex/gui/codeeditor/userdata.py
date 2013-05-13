@@ -4,6 +4,7 @@
 from prymatex.qt import QtGui
 
 from prymatex.support import PMXPreferenceSettings
+from functools import reduce
 
 class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
 
@@ -25,7 +26,7 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
         self.__cache = {}
 
     
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.__scopeRanges)
     
     
@@ -36,9 +37,9 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
     def scopeRanges(self, start = None, end = None):
         ranges = self.__scopeRanges[:]
         if start is not None:
-            ranges = filter(lambda range: range[0][0] >= start, ranges)
+            ranges = [range for range in ranges if range[0][0] >= start]
         if end is not None:
-            ranges = filter(lambda range: range[0][1] <= end, ranges)
+            ranges = [range for range in ranges if range[0][1] <= end]
         return ranges
     
     
@@ -65,7 +66,7 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
         return self.scopeRange(pos)[1]
     
     def scopeRange(self, pos):
-        sr = filter(lambda ((start, end), scope): start <= pos < end, self.__scopeRanges)
+        sr = [start_end_scope for start_end_scope in self.__scopeRanges if start_end_scope[0][0] <= pos < start_end_scope[0][1]]
         return sr and sr.pop() or ((-1,-1), None)
     
     def isWordInScopes(self, word):
@@ -80,22 +81,22 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
             for name in names:
                 if name[0] == "-":
                     name = name[1:]
-                    accepted = accepted and all(map(lambda s: not s.startswith(name), scope.split()))
+                    accepted = accepted and all([not s.startswith(name) for s in scope.split()])
                 else:
-                    accepted = accepted and any(map(lambda s: s.startswith(name), scope.split()))
+                    accepted = accepted and any([s.startswith(name) for s in scope.split()])
             return accepted
-        return map(lambda scopeRange: scopeRange[0], filter(lambda scopeRange: groupFilter(scopeRange[1]), self.__scopeRanges))
+        return [scopeRange[0] for scopeRange in [scopeRange for scopeRange in self.__scopeRanges if groupFilter(scopeRange[1])]]
 
     def wordsByGroup(self, nameFilter):
         groups = self.groups(nameFilter)
-        return filter(lambda word: any(map(lambda group: group[0] <= word[0][0] and group[1] >= word[0][1], groups)), self.words)
+        return [word for word in self.words if any([group[0] <= word[0][0] and group[1] >= word[0][1] for group in groups])]
 
     def wordsRanges(self, start = None, end = None):
         words = self.words[:]
         if start is not None:
-            words = filter(lambda ran: ran[0][0] >= start, words)
+            words = [ran for ran in words if ran[0][0] >= start]
         if end is not None:
-            words = filter(lambda ran: ran[0][1] <= end, words)
+            words = [ran for ran in words if ran[0][1] <= end]
         return words
 
     #================================================

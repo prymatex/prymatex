@@ -14,7 +14,7 @@ class GroupTreeNode(TreeNodeBase):
     def __init__(self, name, directory, parent = None):
         self.title = name
         self.directory = directory
-        self.identifier = unicode(hash(self.title))
+        self.identifier = str(hash(self.title))
         TreeNodeBase.__init__(self, self.identifier, parent)
 
     def acceptPath(self, path):
@@ -57,7 +57,7 @@ class LineTreeNode(TreeNodeBase):
     def __init__(self, lineNumber, lineContent, parent = None):
         self.title = "%s - %s" % (lineNumber, lineContent.strip())
         self.lineNumber = lineNumber
-        self.identifier = unicode(hash(self.title))
+        self.identifier = str(hash(self.title))
         TreeNodeBase.__init__(self, self.identifier, parent)
         
     def path(self):
@@ -94,5 +94,5 @@ class SearchTreeModel(AbstractNamespaceTreeModel):
                 for line in lines:
                     lineNode = LineTreeNode(*line)
                     foundNode.appendChild(lineNode)
-                print namespace
+                print(namespace)
                 self.insertNamespaceNode(namespace, foundNode)

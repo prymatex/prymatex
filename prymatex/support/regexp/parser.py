@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import types
-from base import compileRegexp
+from . import types
+from .base import compileRegexp
 
 class Parser(object):
     def __init__(self, source):
@@ -149,7 +149,7 @@ class Parser(object):
         return False
 
     def text_node(self, nodes, char):
-        if not nodes or not isinstance(nodes[-1], basestring):
+        if not nodes or not isinstance(nodes[-1], str):
             nodes.append("")
         nodes[-1] = nodes[-1] + char
     

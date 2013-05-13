@@ -8,6 +8,7 @@ from prymatex.utils import text
 
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import textcursor2tuple
+from functools import reduce
 
 class TextEditWidget(QtGui.QPlainTextEdit):
     #------ Signals
@@ -221,7 +222,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         self.__scopedExtraSelections[scope] = self.__build_extra_selections(scope, cursors)
     
     def updateExtraSelectionCursors(self, cursorsDict):
-        map(lambda (scope, cursors): self.setExtraSelectionCursors(scope, cursors), cursorsDict.iteritems())
+        list(map(lambda scope_cursors: self.setExtraSelectionCursors(scope_cursors[0], scope_cursors[1]), iter(cursorsDict.items())))
     
     def updateExtraSelections(self):
         extraSelections = []
@@ -232,8 +233,9 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         self.extraSelectionChanged.emit()
         
     def searchExtraSelections(self, scope):
-        cursors = filter(lambda (s, _): s.startswith(scope), self.__scopedExtraSelections.iteritems())
-        return reduce(lambda c1, (_, c2): c1 + c2, cursors, [])    
+        # TODO: Mejorar esta forma de obtener los cursores en un scope
+        filterCursors = [scopedCursors[1] for scopedCursors in iter(self.__scopedExtraSelections.items()) if scopedCursors[0].startswith(scope)]
+        return reduce(lambda allCursors, cursors: allCursors + cursors, filterCursors, [])    
     
     def clearExtraSelectionCursors(self, scope):
         if scope in self.__scopedExtraSelections:
@@ -263,7 +265,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         cursor.select(QtGui.QTextCursor.LineUnderCursor)
         text1 = cursor.selectedText()
         cursor2 = QtGui.QTextCursor(cursor)
-        otherBlock = cursor.block().next() if moveType == QtGui.QTextCursor.Down else cursor.block().previous()
+        otherBlock = next(cursor.block()) if moveType == QtGui.QTextCursor.Down else cursor.block().previous()
         cursor2 = self.newCursorAtPosition(otherBlock.position())
         cursor2.select(QtGui.QTextCursor.LineUnderCursor)
         text2 = cursor2.selectedText()
@@ -389,17 +391,15 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         sequenceMatcher = difflib.SequenceMatcher(None, sourceText, text)
         opcodes = sequenceMatcher.get_opcodes()
         
-        actions = map(
-            lambda code: perform_action(
+        actions = [perform_action(
                 code[0], 
                 self.newCursorAtPosition(code[1] + sourceOffset, code[2] + sourceOffset), text[code[3]:code[4]]
-            ),
-        opcodes)
+            ) for code in opcodes]
         
         cursor = self.textCursor()
         
         cursor.beginEditBlock()
-        map(lambda action: action(), actions)
+        list(map(lambda action: action(), actions))
         cursor.endEditBlock()
         
         self.ensureCursorVisible()

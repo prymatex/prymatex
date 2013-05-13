@@ -41,7 +41,7 @@ import re
 from os.path import basename
 import os
 import tmprefs
-from urllib import quote
+from urllib.parse import quote
 from struct import *
 from texparser import *
 
@@ -51,7 +51,7 @@ try:
     from subprocess import *
 except:
     if DEBUG:
-        print "Using Tiger Compatibility version of Popen class"
+        print("Using Tiger Compatibility version of Popen class")
     PIPE = 1
     STDOUT=1
     class Popen(object):
@@ -93,7 +93,7 @@ def run_bibtex(bibfile=None,verbose=False,texfile=None):
     else:
         auxfiles = [bibfile]
     for bib in auxfiles:
-        print '<h4>Processing: %s </h4>' % bib
+        print('<h4>Processing: %s </h4>' % bib)
         runObj = Popen('bibtex'+" "+shell_quote(bib),shell=True,stdout=PIPE,stdin=PIPE,stderr=STDOUT,close_fds=True)
         bp = BibTexParser(runObj.stdout,verbose)
         f,e,w = bp.parseStream()
@@ -120,7 +120,7 @@ def run_latex(ltxcmd,texfile,verbose=False):
     """Run the flavor of latex specified by ltxcmd on texfile"""
     global numRuns
     if DEBUG:
-        print "<pre>in run_latex: ", ltxcmd+" "+shell_quote(texfile), "</pre>"
+        print("<pre>in run_latex: ", ltxcmd+" "+shell_quote(texfile), "</pre>")
     runObj = Popen(ltxcmd+" "+shell_quote(texfile),shell=True,stdout=PIPE,stdin=PIPE,stderr=STDOUT,close_fds=True)
     lp = LaTexParser(runObj.stdout,verbose,texfile)
     f,e,w = lp.parseStream()
@@ -134,8 +134,8 @@ def run_makeindex(fileName,idxfile=None):
     try:
         texString = open(fileName).read()
     except:
-        print '<p class="error">Error: Could not open %s to check for makeindex</p>' % fileName
-        print '<p class="error">This is most likely a problem with TM_LATEX_MASTER</p>'
+        print('<p class="error">Error: Could not open %s to check for makeindex</p>' % fileName)
+        print('<p class="error">This is most likely a problem with TM_LATEX_MASTER</p>')
         sys.exit(1)
     myList = [x[2] for x in re.findall(r'([^%]|^)\\makeindex(\[([\w]+)\])?',texString) if x[2] ]
     
@@ -168,13 +168,13 @@ def findViewerPath(viewer,pdfFile,fileName):
     elif viewer == 'PDFView' and vp:
         syncPath = vp + '/Contents/MacOS/gotoline.sh ' + lineNumber + ' ' + pdfFile
     if DEBUG:
-        print "VP = ", vp
-        print "syncPath = ", syncPath
+        print("VP = ", vp)
+        print("syncPath = ", syncPath)
     return vp, syncPath
 
 def refreshViewer(viewer,pdfPath):
     """Use Applescript to tell the viewer to reload"""
-    print '<p class="info">Telling %s to Refresh %s...</p>'%(viewer,pdfPath)
+    print('<p class="info">Telling %s to Refresh %s...</p>'%(viewer,pdfPath))
     if viewer == 'Skim':
         os.system("/usr/bin/osascript -e " + """'tell application "Skim" to revert (documents whose path is %s)' """%pdfPath)
     elif viewer == 'TeXniscope':
@@ -190,7 +190,7 @@ def sync_viewer(viewer,fileName,filePath):
     if syncPath:
         stat = os.system(syncPath)
     else:
-        print 'pdfsync is not supported for this viewer'
+        print('pdfsync is not supported for this viewer')
     return stat
     
 def run_viewer(viewer,fileName,filePath,force,usePdfSync=True):
@@ -213,20 +213,20 @@ def run_viewer(viewer,fileName,filePath,force,usePdfSync=True):
             else:
                 refreshViewer(viewer,pdfPath)            
         else:
-            print '<strong class="error">', viewer, ' does not appear to be installed on your system.</strong>'
+            print('<strong class="error">', viewer, ' does not appear to be installed on your system.</strong>')
         if syncPath and usePdfSync:
             os.system(syncPath)
         elif not syncPath and usePdfSync:
-            print 'pdfsync is not supported for this viewer'
+            print('pdfsync is not supported for this viewer')
 
 
     else:
         pdfFile = fileNoSuffix+'.pdf'
         tmHref = '<p><a href="file://'+quote(filePath+'/'+pdfFile)+'">Click Here to View</a></p>'
         if (numErrs < 1 and numWarns < 1) or (numErrs < 1 and numWarns > 0 and not force):
-            print '<script type="text/javascript">'
-            print 'window.location="file://'+quote(filePath+'/'+pdfFile)+'"'
-            print '</script>'
+            print('<script type="text/javascript">')
+            print('window.location="file://'+quote(filePath+'/'+pdfFile)+'"')
+            print('</script>')
     return stat
 
 def determine_ts_directory(tsDirectives):
@@ -245,7 +245,7 @@ def determine_ts_directory(tsDirectives):
     else:
         masterPath = startDir
     if DEBUG:
-        print '<pre>Typesetting Directory = ', masterPath, '</pre>'
+        print('<pre>Typesetting Directory = ', masterPath, '</pre>')
     return masterPath
 
 def findTexPackages(fileName):
@@ -257,8 +257,8 @@ def findTexPackages(fileName):
         realfn = expandName(fileName)
         texString = open(realfn)
     except:
-        print '<p class="error">Error: Could not open %s to check for packages</p>' % realfn
-        print '<p class="error">This is most likely a problem with TM_LATEX_MASTER</p>'
+        print('<p class="error">Error: Could not open %s to check for packages</p>' % realfn)
+        print('<p class="error">This is most likely a problem with TM_LATEX_MASTER</p>')
         sys.exit(1)
 
         
@@ -294,7 +294,7 @@ def findTexPackages(fileName):
 #            incmatches = [re.search(usepkgre,line) for line in file(realif)] 
             myList += [x.group(4) for x in incmatches if x]
         except:
-            print '<p class="warning">Warning: Could not open %s to check for packages</p>' % ifile
+            print('<p class="warning">Warning: Could not open %s to check for packages</p>' % ifile)
         if beginFound:
             break
     newList = []
@@ -305,7 +305,7 @@ def findTexPackages(fileName):
         else:
             newList.append(pkg.strip())
     if DEBUG:
-        print '<pre>TEX package list = ', newList, '</pre>'
+        print('<pre>TEX package list = ', newList, '</pre>')
     return newList
 
 def find_TEX_directives():
@@ -335,9 +335,9 @@ def find_TEX_directives():
                     else:                           # new root is relative or in same directory
                         newtf = os.path.realpath(os.path.join(startDir,m.group(2).rstrip()))
                     if newtf in rootChain:
-                        print "<p class='error'> There is a loop in your '%!TEX root =' directives.</p>"
-                        print "<p class='error'> chain = ",rootChain, "</p>"
-                        print "<p class='error'> exiting.</p>"                        
+                        print("<p class='error'> There is a loop in your '%!TEX root =' directives.</p>")
+                        print("<p class='error'> chain = ",rootChain, "</p>")
+                        print("<p class='error'> exiting.</p>")                        
                         sys.exit(-1)
                     else:
                         texfile = newtf
@@ -350,7 +350,7 @@ def find_TEX_directives():
         if foundNewRoot == False:
             done = True
     if DEBUG:
-        print '<pre>%!TEX Directives: ', tsDirectives, '</pre>'
+        print('<pre>%!TEX Directives: ', tsDirectives, '</pre>')
     return tsDirectives
 
 def findFileToTypeset(tsDirectives):
@@ -369,7 +369,7 @@ def findFileToTypeset(tsDirectives):
         f = os.getenv('TM_FILEPATH')
     master = os.path.basename(f)
     if DEBUG:
-        print '<pre>master file = ', master, '</pre>'
+        print('<pre>master file = ', master, '</pre>')
     return master,determine_ts_directory(tsDirectives)
 
 def constructEngineOptions(tsDirectives,tmPrefs):
@@ -387,7 +387,7 @@ def constructEngineOptions(tsDirectives,tmPrefs):
     else:
         opts += " " + tmPrefs['latexEngineOptions']
     if DEBUG:
-        print '<pre>Engine options = ', opts, '</pre>'
+        print('<pre>Engine options = ', opts, '</pre>')
     return opts
 
 def usesOnePackage(testPack, allPackages):
@@ -422,7 +422,7 @@ def constructEngineCommand(tsDirectives,tmPrefs,packages):
         engine = tmPrefs['latexEngine']
     stat = os.system('type '+engine+' > /dev/null')
     if stat != 0:
-        print '<p class="error">Error: %s is not found, you need to install LaTeX or be sure that your PATH is setup properly.</p>' % engine
+        print('<p class="error">Error: %s is not found, you need to install LaTeX or be sure that your PATH is setup properly.</p>' % engine)
         sys.exit(1)
     return engine
 
@@ -480,7 +480,7 @@ if __name__ == '__main__':
 
     if int(tmPrefs['latexDebug']) == 1:
         DEBUG = True
-        print '<pre>turning on debug</pre>'
+        print('<pre>turning on debug</pre>')
 
     tsDirs = find_TEX_directives()
     os.chdir(determine_ts_directory(tsDirs))
@@ -523,21 +523,21 @@ if __name__ == '__main__':
     os.putenv('TEXINPUTS',texinputs)
 
     if DEBUG:
-        print '<pre>'
-        print 'texMateVersion = ', texMateVersion
-        print 'engine = ', engine
-        print 'texCommand = ', texCommand
-        print 'viewer = ', viewer
-        print 'texinputs = ', texinputs
-        print 'fileName = ', fileName
-        print 'useLatexMk = ', useLatexMk
-        print 'synctex = ', synctex
-        print '</pre>'
+        print('<pre>')
+        print('texMateVersion = ', texMateVersion)
+        print('engine = ', engine)
+        print('texCommand = ', texCommand)
+        print('viewer = ', viewer)
+        print('texinputs = ', texinputs)
+        print('fileName = ', fileName)
+        print('useLatexMk = ', useLatexMk)
+        print('synctex = ', synctex)
+        print('</pre>')
 
 
     if texCommand == "version":
       runObj = Popen(engine + " --version",stdout=PIPE,shell=True)
-      print runObj.stdout.read().split("\n")[0]
+      print(runObj.stdout.read().split("\n")[0])
       sys.exit(0)
 
 
@@ -545,15 +545,15 @@ if __name__ == '__main__':
 # print out header information to begin the run
 #
     if not firstRun:
-        print '<hr>'
+        print('<hr>')
     #print '<h2>Running %s on %s</h2>' % (texCommand,fileName)
-    print '<div id="commandOutput"><div id="preText">'
+    print('<div id="commandOutput"><div id="preText">')
     
     if fileName == fileNoSuffix:
-        print "<h2 class='warning'>Warning:  Latex file has no extension.  See log for errors/warnings</h2>"
+        print("<h2 class='warning'>Warning:  Latex file has no extension.  See log for errors/warnings</h2>")
         
     if synctex and 'pdfsync' in ltxPackages:
-        print "<p class='warning'>Warning:  %s supports synctex but you have included pdfsync. You can safely remove \usepackage{pdfsync}</p>" % engine
+        print("<p class='warning'>Warning:  %s supports synctex but you have included pdfsync. You can safely remove \usepackage{pdfsync}</p>" % engine)
 
 
 #
@@ -570,7 +570,7 @@ if __name__ == '__main__':
 #        else:
         texCommand += shell_quote(fileName)
         if DEBUG:
-            print 'latexmk command = ', texCommand
+            print('latexmk command = ', texCommand)
         runObj = Popen(texCommand,shell=True,stdout=PIPE,stdin=PIPE,stderr=STDOUT,close_fds=True)
         commandParser = ParseLatexMk(runObj.stdout,verbose,fileName)
         isFatal,numErrs,numWarns = commandParser.parseStream()
@@ -624,8 +624,8 @@ if __name__ == '__main__':
         if 'pdfsync' in ltxPackages or synctex:
             stat = sync_viewer(viewer,fileName,filePath)
         else:
-            print "pdfsync.sty must be included to use this command"
-            print "or use a typesetter that supports synctex (such as TexLive 2008)"
+            print("pdfsync.sty must be included to use this command")
+            print("or use a typesetter that supports synctex (such as TexLive 2008)")
             sys.exit(206)
             
     elif texCommand == 'chktex':
@@ -640,19 +640,19 @@ if __name__ == '__main__':
 # Check status of running the viewer
 #
     if stat != 0:
-        print '<p class="error"><strong>error number %d opening viewer</strong></p>' % stat
+        print('<p class="error"><strong>error number %d opening viewer</strong></p>' % stat)
 
 #
 # Check the status of any runs...
 #
     eCode = 0
     if texStatus != 0 or numWarns > 0 or numErrs > 0:
-        print "<p class='info'>Found " + str(numErrs) + " errors, and " + str(numWarns) + " warnings in " + str(numRuns) + " runs</p>"
+        print("<p class='info'>Found " + str(numErrs) + " errors, and " + str(numWarns) + " warnings in " + str(numRuns) + " runs</p>")
         if texStatus:
             if texStatus > 0:
-                print "<p class='info'>%s exited with status %d</p>" % (texCommand,texStatus )
+                print("<p class='info'>%s exited with status %d</p>" % (texCommand,texStatus ))
             else:
-                print "<p class='error'>%s exited with error code %d</p> " % (texCommand,texStatus)
+                print("<p class='error'>%s exited with error code %d</p> " % (texCommand,texStatus))
 #
 # Decide what to do with the Latex & View log window   
 #
@@ -664,7 +664,7 @@ if __name__ == '__main__':
     else:
         eCode = 0
 
-    print '</div></div>'  # closes <pre> and <div id="commandOutput"> 
+    print('</div></div>')  # closes <pre> and <div id="commandOutput"> 
 
 #
 # Output buttons at the bottom of the window
@@ -673,28 +673,28 @@ if __name__ == '__main__':
         # only need to include the javascript library once
         js = os.getenv('TM_BUNDLE_SUPPORT') + '/bin/texlib.js'
         js = quote(js)
-        print """
+        print("""
          <script src="file://%s"    type="text/javascript" charset="utf-8"></script>
-         """ % js
+         """ % js)
 
-        print '<div id="texActions">'
-        print '<input type="button" value="Re-Run %s" onclick="runLatex(); return false" />' % engine
-        print '<input type="button" value="Run Bib" onclick="runBibtex(); return false" />'
-        print '<input type="button" value="Run Makeindex" onclick="runMakeIndex(); return false" />'
-        print '<input type="button" value="Clean up" onclick="runClean(); return false" />'        
+        print('<div id="texActions">')
+        print('<input type="button" value="Re-Run %s" onclick="runLatex(); return false" />' % engine)
+        print('<input type="button" value="Run Bib" onclick="runBibtex(); return false" />')
+        print('<input type="button" value="Run Makeindex" onclick="runMakeIndex(); return false" />')
+        print('<input type="button" value="Clean up" onclick="runClean(); return false" />')        
         if viewer == 'TextMate':
             pdfFile = fileNoSuffix+'.pdf'
-            print """<input type="button" value="view in TextMate" onclick="window.location='""" + 'file://' + quote(filePath+'/'+pdfFile) +"""'"/>"""
+            print("""<input type="button" value="view in TextMate" onclick="window.location='""" + 'file://' + quote(filePath+'/'+pdfFile) +"""'"/>""")
         else:
-            print '<input type="button" value="View in %s" onclick="runView(); return false" />' % viewer
-        print '<input type="button" value="Preferences…" onclick="runConfig(); return false" />'
-        print '<p>'
-        print '<input type="checkbox" id="hv_warn" name="fmtWarnings" onclick="makeFmtWarnVisible(); return false" />'
-        print '<label for="hv_warn">Show hbox,vbox Warnings </label>'     
+            print('<input type="button" value="View in %s" onclick="runView(); return false" />' % viewer)
+        print('<input type="button" value="Preferences…" onclick="runConfig(); return false" />')
+        print('<p>')
+        print('<input type="checkbox" id="hv_warn" name="fmtWarnings" onclick="makeFmtWarnVisible(); return false" />')
+        print('<label for="hv_warn">Show hbox,vbox Warnings </label>')     
         if useLatexMk:
-            print '<input type="checkbox" id="ltxmk_warn" name="ltxmkWarnings" onclick="makeLatexmkVisible(); return false" />'
-            print '<label for="ltxmk_warn">Show Latexmk.pl Messages </label>'
-        print '</p>'
-        print '</div>'
+            print('<input type="checkbox" id="ltxmk_warn" name="ltxmkWarnings" onclick="makeLatexmkVisible(); return false" />')
+            print('<label for="ltxmk_warn">Show Latexmk.pl Messages </label>')
+        print('</p>')
+        print('</div>')
 
     sys.exit(eCode)

@@ -46,10 +46,10 @@ def to_unicode_from_fs(string):
     """
     Return a unicode version of string decoded using the file system encoding.
     """
-    if not isinstance(string, basestring): # string is a QString
-        string = unicode(string.toUtf8(), 'utf-8')
+    if not isinstance(string, str): # string is a QString
+        string = str(string.toUtf8(), 'utf-8')
     else:
-        if not isinstance(string, unicode):
+        if not isinstance(string, str):
             try:
                 unic = string.decode(FS_ENCODING)
             except (UnicodeError, TypeError):
@@ -63,7 +63,7 @@ def to_fs_from_unicode(unic):
     Return a byte string version of unic encoded using the file 
     system encoding.
     """
-    if isinstance(unic, unicode):
+    if isinstance(unic, str):
         try:
             string = unic.encode(FS_ENCODING)
         except (UnicodeError, TypeError):
@@ -105,25 +105,25 @@ def decode(text):
     try:
         if text.startswith(BOM_UTF8):
             # UTF-8 with BOM
-            return unicode(text[len(BOM_UTF8):], 'utf-8'), 'utf-8-bom'
+            return str(text[len(BOM_UTF8):], 'utf-8'), 'utf-8-bom'
         elif text.startswith(BOM_UTF16):
             # UTF-16 with BOM
-            return unicode(text[len(BOM_UTF16):], 'utf-16'), 'utf-16'
+            return str(text[len(BOM_UTF16):], 'utf-16'), 'utf-16'
         elif text.startswith(BOM_UTF32):
             # UTF-32 with BOM
-            return unicode(text[len(BOM_UTF32):], 'utf-32'), 'utf-32'
+            return str(text[len(BOM_UTF32):], 'utf-32'), 'utf-32'
         coding = get_coding(text)
         if coding:
-            return unicode(text, coding), coding
+            return str(text, coding), coding
     except (UnicodeError, LookupError):
         pass
     # Assume UTF-8
     try:
-        return unicode(text, 'utf-8'), 'utf-8-guessed'
+        return str(text, 'utf-8'), 'utf-8-guessed'
     except (UnicodeError, LookupError):
         pass
     # Assume Latin-1 (behaviour before 3.7.1)
-    return unicode(text, "latin-1"), 'latin-1-guessed'
+    return str(text, "latin-1"), 'latin-1-guessed'
 
 def encode(text, orig_coding):
     """
@@ -162,10 +162,10 @@ def encode(text, orig_coding):
     
 def to_unicode(string):
     """Convert a string to unicode"""
-    if not isinstance(string, unicode):
+    if not isinstance(string, str):
         for codec, aliases, language in CODECS:
             try:
-                unic = unicode(string, codec)
+                unic = str(string, codec)
             except UnicodeError:
                 pass
             except TypeError:

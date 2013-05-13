@@ -13,7 +13,7 @@ if API == 'pyqt':
     # Force QString, QVariant, ... API to #2 
     import sip
     try:
-        map(lambda obj: sip.setapi(obj, 2), ['QDate', 'QTime', 'QDateTime', 'QUrl', 'QTextStream', 'QVariant', 'QString'])
+        list(map(lambda obj: sip.setapi(obj, 2), ['QDate', 'QTime', 'QDateTime', 'QUrl', 'QTextStream', 'QVariant', 'QString']))
     except AttributeError:
         # PyQt < v4.6: in future version, we should warn the user 
         # that PyQt is outdated and won't be supported by Prymatex

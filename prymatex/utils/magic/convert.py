@@ -67,7 +67,7 @@ def __is_number_start(text):
 
 def base10 (text,base):
 	number = str(text).lower()
-	result=0L
+	result=0
 	for digit in number:
 		result*=base
 		pos = __hex.index(digit)
@@ -161,8 +161,8 @@ def little2 (number):
 	return (high << 8) + low
 	
 def little4 (number):
-	low = long(little2(number))
-	high = long(little2(number[2:]))
+	low = int(little2(number))
+	high = int(little2(number[2:]))
 
 	return (high << 16) + low
 
@@ -173,8 +173,8 @@ def big2 (number):
 	return (high << 8) + low
 
 def big4 (number):
-	low = long(big2(number[2:]))
-	high = long(big2(number))
+	low = int(big2(number[2:]))
+	high = int(big2(number))
 
 	return (high << 16) + low
 
@@ -190,29 +190,29 @@ def local4 (number):
 
 
 if __name__ == '__main__':
-	print "---"
-	print "base10(\"FF\",16) = ", 255, "\tgot ", base10("FF",16)
-	print "base10(\"77\", 8) = ",  63, "\tgot ", base10("77",8)
+	print("---")
+	print("base10(\"FF\",16) = ", 255, "\tgot ", base10("FF",16))
+	print("base10(\"77\", 8) = ",  63, "\tgot ", base10("77",8))
 
-	print "---"
-	print "convert(\"0xFF\"  ) = ",  255, "\tgot ", convert("0xFF")
-	print "convert(\"\\xFF\"  ) = ", 255, "\tgot ", convert("\\xFF")
-	print "convert(\"077\"   ) = ",   63, "\tgot ", convert("077")
-	print "convert(\"\\77\"   ) = ",  63, "\tgot ", convert("\\77")
-	print "convert(\"\\177E\"   ) = ",  127, "\tgot ", convert("\\177E"), "The E is not used"
+	print("---")
+	print("convert(\"0xFF\"  ) = ",  255, "\tgot ", convert("0xFF"))
+	print("convert(\"\\xFF\"  ) = ", 255, "\tgot ", convert("\\xFF"))
+	print("convert(\"077\"   ) = ",   63, "\tgot ", convert("077"))
+	print("convert(\"\\77\"   ) = ",  63, "\tgot ", convert("\\77"))
+	print("convert(\"\\177E\"   ) = ",  127, "\tgot ", convert("\\177E"), "The E is not used")
 
-	print "---"
-	print "size_number(\"100FFF\") = ",   3, "\tgot", size_number("100qwerty")
-	print "size_number(\"\\7799\" ) = ",  3, "\tgot", size_number("\\77FF")
-	print "size_number(\"\\XFFG\" ) = ",  3, "\tgot", size_number("\\XFFG")
+	print("---")
+	print("size_number(\"100FFF\") = ",   3, "\tgot", size_number("100qwerty"))
+	print("size_number(\"\\7799\" ) = ",  3, "\tgot", size_number("\\77FF"))
+	print("size_number(\"\\XFFG\" ) = ",  3, "\tgot", size_number("\\XFFG"))
 
-	print "---"
-	print "index_number(\"0XF\"       ) = ",   0, "\tgot", index_number("0XF")
-	print "index_number(\"\\XF\"       ) = ",   0, "\tgot", index_number("\\XF")
-	print "index_number(\"FF\\FFGG\"   ) = ",  -1, "\tgot", index_number("FF\\FFGG")
-	print "index_number(\"FF\\7\"      ) = ",   2, "\tgot", index_number("FF\\7")
-	print "index_number(\"FFF\\XFFGG\" ) = ",   3, "\tgot", index_number("FFF\\XFFGG")
-	print "index_number(\"\\\\\\XFFGG\"  ) = ",   2, "\tgot", index_number("FF\\XFFGG")
+	print("---")
+	print("index_number(\"0XF\"       ) = ",   0, "\tgot", index_number("0XF"))
+	print("index_number(\"\\XF\"       ) = ",   0, "\tgot", index_number("\\XF"))
+	print("index_number(\"FF\\FFGG\"   ) = ",  -1, "\tgot", index_number("FF\\FFGG"))
+	print("index_number(\"FF\\7\"      ) = ",   2, "\tgot", index_number("FF\\7"))
+	print("index_number(\"FFF\\XFFGG\" ) = ",   3, "\tgot", index_number("FFF\\XFFGG"))
+	print("index_number(\"\\\\\\XFFGG\"  ) = ",   2, "\tgot", index_number("FF\\XFFGG"))
 
 
 	# 0000 0001 -->     1
@@ -226,16 +226,16 @@ if __name__ == '__main__':
 	# 1000 0000 0000 0000 0000 0000 0000 0001 --> 2147483649
 
 
-	print "---"
-	print "little2   ","1    ",little2(chr( 1)+chr(0))
-	print "little2   ","16   ",little2(chr(16)+chr(0))
+	print("---")
+	print("little2   ","1    ",little2(chr( 1)+chr(0)))
+	print("little2   ","16   ",little2(chr(16)+chr(0)))
 
-	print "---"
-	print "big2","1    ",big2(chr(0)+chr(1))
-	print "big2","16   ",big2(chr(0)+chr(16))
+	print("---")
+	print("big2","1    ",big2(chr(0)+chr(1)))
+	print("big2","16   ",big2(chr(0)+chr(16)))
 
-	print "---"
-	print "little4","2147483649",little4(chr(1)+chr(0)+chr(0)+chr(128))
-	print "big4   ","2147483649",big4(chr(128)+chr(0)+chr(0)+chr(1))
+	print("---")
+	print("little4","2147483649",little4(chr(1)+chr(0)+chr(0)+chr(128)))
+	print("big4   ","2147483649",big4(chr(128)+chr(0)+chr(0)+chr(1)))
 
 

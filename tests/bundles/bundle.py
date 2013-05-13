@@ -3,7 +3,7 @@
 
 import os, glob
 import plistlib
-import syntax, snippet, macro, command, template, theme
+from . import syntax, snippet, macro, command, template, theme
 from xml.parsers.expat import ExpatError
 
 TM_BUNDLES = {}
@@ -17,18 +17,18 @@ class MenuNode(object):
         self.name = name
         self.items = items
         self.excludedItems = excludedItems
-        self.main = dict(map(lambda i: (i, None), filter(lambda x: x != '-' * 36, self.items)))
-        for uuid, submenu in submenus.iteritems():
+        self.main = dict([(i, None) for i in [x for x in self.items if x != '-' * 36]])
+        for uuid, submenu in submenus.items():
             self[uuid] = MenuNode(**submenu)
 
     def __contains__(self, key):
-        return key in self.main or any(map(lambda submenu: key in submenu, filter(lambda x: isinstance(x, MenuNode), self.main.values())))
+        return key in self.main or any([key in submenu for submenu in [x for x in list(self.main.values()) if isinstance(x, MenuNode)]])
 
     def __getitem__(self, key):
         try:
             return self.main[key]
         except KeyError:
-            for submenu in filter(lambda x: isinstance(x, MenuNode), self.main.values()):
+            for submenu in [x for x in list(self.main.values()) if isinstance(x, MenuNode)]:
                 if key in submenu:
                     return submenu[key]
         raise Exception();
@@ -37,7 +37,7 @@ class MenuNode(object):
         if key in self.main:
             self.main[key] = menu
         else:
-            for submenu in filter(lambda x: isinstance(x, MenuNode), self.main.values()):
+            for submenu in [x for x in list(self.main.values()) if isinstance(x, MenuNode)]:
                 if key in submenu:
                     submenu[key] = menu
         

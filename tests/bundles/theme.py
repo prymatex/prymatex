@@ -38,8 +38,8 @@ class TMTheme(object):
             self.formats[setting['scope']] = setting
     
     def get_format(self, scope):
-        print scope
-        print self.formats
+        print(scope)
+        print(self.formats)
         return self.formats[0]['format']
         
 def load_textmate_themes():

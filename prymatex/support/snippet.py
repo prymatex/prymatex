@@ -9,6 +9,7 @@ from prymatex.support.regexp import Transformation
 from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
 from prymatex.support.processor import PMXSyntaxProcessor
 from prymatex.support.syntax import PMXSyntax
+import collections
 
 SNIPPET_SYNTAX = { 
  'patterns': [{'captures': {'1': {'name': 'keyword.escape.snippet'}},
@@ -178,7 +179,7 @@ class NodeList(list):
         return 0
         
     def __unicode__(self):
-        return u"".join([unicode(node) for node in self])
+        return "".join([str(node) for node in self])
     
     def render(self, processor):
         for child in self:
@@ -193,7 +194,7 @@ class NodeList(list):
         return False
     
     def append(self, element):
-        if isinstance(element, (str, unicode)):
+        if isinstance(element, str):
             element = TextNode(element, self)
         super(NodeList, self).append(element)
 
@@ -466,7 +467,7 @@ class Shell(NodeList):
     def execute(self, processor):
         def afterExecute(context):
             self.content = context.outputValue.strip()
-        with PMXRunningContext(self, unicode(self), processor.environmentVariables()) as context:
+        with PMXRunningContext(self, str(self), processor.environmentVariables()) as context:
             context.asynchronous = False
             self.manager.runProcess(context, afterExecute)
         
@@ -489,7 +490,7 @@ class PMXSnippetSyntaxProcessor(PMXSyntaxProcessor):
     def closeTag(self, name, end):
         token = self.current[self.index:end]
         self.node = self.node.close(name, token)
-        if hasattr(self.node, 'index') and callable(getattr(self.node, 'taborder', None)):
+        if hasattr(self.node, 'index') and isinstance(getattr(self.node, 'taborder', None), collections.Callable):
             container = self.taborder.setdefault(self.node.index, [])
             if (self.node != container and self.node not in container):
                 self.taborder[self.node.index] = self.node.taborder(container)
@@ -555,7 +556,7 @@ class PMXSnippet(PMXBundleItem):
         self.reset()
         processor.startSnippet(self)
         self.render(processor)
-        holder = self.next()
+        holder = next(self)
         if holder != None:
             processor.selectHolder(holder)
         else:
@@ -589,7 +590,7 @@ class PMXSnippet(PMXBundleItem):
         #TODO: ver si se puede sacar este "if pop" porque tendria que venir bien
         if type(lastHolder) == list:
             lastHolder = lastHolder.pop()
-        keys = taborder.keys()
+        keys = list(taborder.keys())
         keys.sort()
         for key in keys:
             holder = taborder.pop(key)
@@ -599,7 +600,7 @@ class PMXSnippet(PMXBundleItem):
                 else:
                     #Esto puede dar un error pero me interesa ver si hay casos asi
                     tabstop = filter(lambda node: isinstance(node, StructureTabstop), holder).pop()
-                    transformations = filter(lambda node: isinstance(node, StructureTransformation), holder)
+                    transformations = [node for node in holder if isinstance(node, StructureTransformation)]
                     for transformation in transformations:
                         transformation.placeholder = tabstop
                     holder = tabstop
@@ -631,7 +632,7 @@ class PMXSnippet(PMXBundleItem):
             self.index = 0
         return self.taborder[self.index]
 
-    def next(self):
+    def __next__(self):
         if self.index < len(self.taborder) - 1:
             self.index += 1
         #Fix disabled holders and None (last position in snippet)

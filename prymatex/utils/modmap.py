@@ -51,7 +51,7 @@ def get_keymap_table():
                     unicode_char = chr(int(keysyms[0], 16))
                 except:
                     unicode_char = ''
-                if unicode_char == '\x00':
+                if unicode_char == b'\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
 
@@ -61,7 +61,7 @@ def get_keymap_table():
                     unicode_char = chr(int(keysyms[1], 16))
                 except:
                     unicode_char = ''
-                if unicode_char == '\x00':
+                if unicode_char == b'\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
 
@@ -71,7 +71,7 @@ def get_keymap_table():
                     unicode_char = chr(int(keysyms[4], 16))
                 except:
                     unicode_char = ''
-                if unicode_char == '\x00':
+                if unicode_char == b'\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
 
@@ -81,13 +81,10 @@ def get_keymap_table():
                     unicode_char = chr(int(keysyms[5], 16))
                 except:
                     unicode_char = ''
-                if unicode_char == '\x00':
+                if unicode_char == b'\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
-
-                #keymap[keycode-8] = new_keysyms
-                keymap[keycode] = new_keysyms
-
+                keymap[keycode] = str(new_keysyms)
     return keymap
 
 def get_modifier_map():
@@ -104,7 +101,7 @@ def get_modifier_map():
                 keycodes = re_line.findall(line)
                 # Convert key codes from hex to dec for use them
                 # with the keymap table
-                keycodes =[ int(kc, 16) for kc in keycodes]
+                keycodes = [ int(kc, 16) for kc in keycodes]
                 
                 modifiers[mod_name] = keycodes
 

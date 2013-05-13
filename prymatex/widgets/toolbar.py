@@ -85,7 +85,7 @@ class DockWidgetToolBar(QtGui.QToolBar):
         
         for action in actions:
             self.removeAction(action)
-            map(lambda dock: dock.show(), filter(lambda dock: dock.toggleViewAction() == action, dockers))
+            list(map(lambda dock: dock.show(), [dock for dock in dockers if dock.toggleViewAction() == action]))
         
     def hideDockWidgets(self, excludeAction = None):
         for dockWidget in self.dockWidgets():

@@ -293,10 +293,10 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             os.unlink(self.fileLock)
 
     def commitData(self, manager):
-        print "Commit data"
+        print("Commit data")
 
     def saveState(self, manager):
-        print "saveState"
+        print("saveState")
         pass
 
     # --------------------- Exend and populate components
@@ -485,7 +485,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         raise NotImplementedError("Directory contents should be opened as files here")
 
     def handleUrlCommand(self, url):
-        if isinstance(url, basestring):
+        if isinstance(url, str):
             url = QtCore.QUrl(url)
         if url.scheme() == "txmt":
             #TODO: Controlar que sea un open
@@ -504,7 +504,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
                 self.currentEditor().setCursorPosition(position)
 
     def openArgumentFiles(self, args):
-        for filePath in filter(lambda f: os.path.exists(f), args):
+        for filePath in [f for f in args if os.path.exists(f)]:
             if os.path.isfile(filePath):
                 self.openFile(filePath)
             else:

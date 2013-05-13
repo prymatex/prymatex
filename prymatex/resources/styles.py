@@ -16,6 +16,6 @@ STYLESHEETS = {}
 stylesPath = os.path.join(os.path.dirname(prymatex.__file__), "share", "Styles")
 for styleFileName in os.listdir(stylesPath):
     stylePath = os.path.join(stylesPath, styleFileName)
-    with file(stylePath) as styleFile:
+    with open(stylePath) as styleFile:
         STYLESHEETS[os.path.splitext(styleFileName)[0]] = styleFile.read()
 

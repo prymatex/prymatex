@@ -68,7 +68,7 @@ class Backend(QtCore.QObject):
     def notifier_readyRead(self):
         message = self.notifier.recv_multipart()
         if len(message) % 2 == 0:
-            for sid, payload in [message[x: x + 2] for x in xrange(0, len(message), 2)]:
+            for sid, payload in [message[x: x + 2] for x in range(0, len(message), 2)]:
                 if sid in self.sessions:
                     try:
                         self.sessions[sid].screenReady.emit(ast.literal_eval(payload))
@@ -153,11 +153,11 @@ class LocalBackend(Backend):
         self.error.emit(error)
 
     def backend_readyReadStandardError(self):
-        print str(self.process.readAllStandardError()).decode("utf-8")
+        print(str(self.process.readAllStandardError()).decode("utf-8"))
 
         
     def backend_readyReadStandardOutput(self):
-        print str(self.process.readAllStandardOutput()).decode("utf-8")
+        print(str(self.process.readAllStandardOutput()).decode("utf-8"))
         
     
     # -------------- set backend process attrs and settings

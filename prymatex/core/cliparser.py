@@ -26,9 +26,9 @@ parser = argparse.ArgumentParser(usage=usage,
     version=version,
     epilog=epilog)
 
-parser.add_argument('file', metavar='file', type=unicode,
+parser.add_argument('file', metavar='file', type=str,
     nargs='*', help='A file/s to edit', default=[])
-parser.add_argument('-f', '--files', metavar='file', type=unicode,
+parser.add_argument('-f', '--files', metavar='file', type=str,
     nargs='+', help='A file/s to edit', default=[])
 
 # Reverts custom options
@@ -66,7 +66,7 @@ def parse():
         filenames += opts.files \
             if hasattr(opts, 'files') \
             else []
-    except Exception, reason:
-        print "Arguments couldn't be parsed."
-        print reason
+    except Exception as reason:
+        print("Arguments couldn't be parsed.")
+        print(reason)
     return opts, filenames

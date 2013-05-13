@@ -41,8 +41,8 @@ class TestSupportFunctions(unittest.TestCase):
         pythonClassSnippet.execute(processor)
         htmlInputSnippet.execute(processor)
         htmlBodySnippet.execute(processor)
-        print processor.text
-        print "Time:", time() - start
+        print(processor.text)
+        print("Time:", time() - start)
         
     def _test_syntax(self):
         syntax = self.manager.getSyntaxByScopeName('source.python')
@@ -55,12 +55,12 @@ class TestSupportFunctions(unittest.TestCase):
             start = time()
             syntax.parse(text, processor)
             tiempo = time() - start
-            print "Tiempo: ", tiempo
+            print("Tiempo: ", tiempo)
             
     def _test_preferences(self):
         settings = self.manager.getPreferenceSettings('text.html.textile markup.heading.textile')
         for attr in dir(settings):
-            print attr, getattr(settings, attr, None)
+            print(attr, getattr(settings, attr, None))
 
     def test_adhoc_snippet(self):
         snippet = 'def pepe(${3:self${2/([^,])?.*/(?1:, )/}${2:arg}}):\n\t${4/.+/"""/}${4:docstring for pepe}${4/.+/"""\n/}${4/.+/\t/}${0:pass}'
@@ -68,7 +68,7 @@ class TestSupportFunctions(unittest.TestCase):
         snippet = self.manager.buildAdHocSnippet(snippet, bundle = bundle)
         processor = PMXDebugSnippetProcessor()
         snippet.execute(processor)
-        print processor.text
+        print(processor.text)
         
 def test_creationAndDeleteBundle(manager):
     bundle = manager.createBundle('Diego')
@@ -81,14 +81,14 @@ def test_bundleItemsCRUD(manager):
     items = manager.findBundleItems(name = "thon")
     for item in items:
         item = manager.updateBundleItem(item, tabTrigger = "cacho")
-        print item.tabTrigger
+        print(item.tabTrigger)
 
 def test_bundleItemsTemplates(manager):
     items = manager.findBundleItems(TYPE = "template")
     for item in items:
         for name in item.getFileNames():
             data = item.getFileContent(name)
-            print name, data
+            print(name, data)
 
 def test_template(manager):
     for template in manager.TEMPLATES:
@@ -96,7 +96,7 @@ def test_template(manager):
 
 def test_themes(manager):
     for theme in manager.getAllThemes():
-        print theme.namespaces
+        print(theme.namespaces)
     themes = manager.findThemes( name = 'Diego')
     theme = themes.pop()
     manager.updateTheme(theme, name = "Cacho")

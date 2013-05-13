@@ -146,7 +146,7 @@ class SymbolModel(QStandardItemModel):
         if self.currentSymbol == self or to == self.currentSymbol:
             return
         while self.currentSymbol != to:
-            print self.currentSymbol
+            print(self.currentSymbol)
             self.closeSymbol()
 
     def goRoot(self):
@@ -176,7 +176,7 @@ class SymbolModel(QStandardItemModel):
         if n == self:
             return "Root"
         while n != self:
-            l.append(unicode(n.text()))
+            l.append(str(n.text()))
             n = n.parentSymbol
         return '->'.join(l)
         
@@ -210,18 +210,18 @@ def main(argv = sys.argv):
     model.feedLine()
     model.openSymbol('self.args')
     model.feedLine()
-    print(model.currentNodeStr())
+    print((model.currentNodeStr()))
     model.goRoot()
     model.openSymbol('class Pepe(object):')
     model.feedLine()
     model.openSymbol('class Pepa:')
     model.feedLine()
     model.goRoot()
-    print model.currentNodeStr()
+    print(model.currentNodeStr())
     # API alternativa?
     r = model.openSymbol('<html>')
     model.feedLine()
-    print r
+    print(r)
     model.openSymbol('<head>')
     model.feedLine()
     model.openSymbol('<title>')
@@ -236,7 +236,7 @@ def main(argv = sys.argv):
     splitter.addWidget(symbolTree)
     splitter.addWidget(editor)
     combo = QComboBox()
-    combo.setToolTip(u"Solo aparecen los del nivel raíz, falta un proxymodel, pero la idea está :)")
+    combo.setToolTip("Solo aparecen los del nivel raíz, falta un proxymodel, pero la idea está :)")
     combo.setModel(model)
     win.layout().addWidget(combo)
     win.setGeometry(60,60,500,460)

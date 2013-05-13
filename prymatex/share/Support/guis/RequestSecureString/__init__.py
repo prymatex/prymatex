@@ -14,6 +14,6 @@ class RequestSecureStringDialog(QtGui.QDialog, Ui_RequestSecureStringDialog, PMX
         self.setupUi(self)
         
     def setParameters(self, parameters):
-        print parameters
+        print(parameters)
         
 dialogClass = RequestSecureStringDialog

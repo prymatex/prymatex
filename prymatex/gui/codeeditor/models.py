@@ -29,7 +29,7 @@ class BookmarkListModel(QtCore.QAbstractListModel):
 
     # -------- Signals
     def on_editor_blocksRemoved(self):
-        self.blocks = filter(lambda block: block.userData() is not None, self.blocks)
+        self.blocks = [block for block in self.blocks if block.userData() is not None]
         self.layoutChanged.emit()
 
     def on_document_contentsChange(self, position, removed, added):
@@ -59,7 +59,7 @@ class BookmarkListModel(QtCore.QAbstractListModel):
 
     # ----------- Public api
     def lineNumbers(self):
-        return map(lambda block: block.lineNumber(), self.blocks)
+        return [block.lineNumber() for block in self.blocks]
 
     def toggleBookmark(self, block):
         try:
@@ -68,7 +68,7 @@ class BookmarkListModel(QtCore.QAbstractListModel):
             self.blocks.remove(block)
             self.endRemoveRows()
         except ValueError:
-            indexes = map(lambda block: block.blockNumber(), self.blocks)
+            indexes = [block.blockNumber() for block in self.blocks]
             index = bisect(indexes, block.blockNumber())
             self.beginInsertRows(QtCore.QModelIndex(), index, index)
             self.blocks.insert(index, block)
@@ -81,7 +81,7 @@ class BookmarkListModel(QtCore.QAbstractListModel):
     
     def nextBookmark(self, block):
         if not len(self.blocks): return None
-        indexes = map(lambda block: block.blockNumber(), self.blocks)
+        indexes = [block.blockNumber() for block in self.blocks]
         index = bisect(indexes, block.blockNumber())
         if index == len(self.blocks):
             index = 0
@@ -89,7 +89,7 @@ class BookmarkListModel(QtCore.QAbstractListModel):
 
     def previousBookmark(self, block):
         if not len(self.blocks): return None
-        indexes = map(lambda block: block.blockNumber(), self.blocks)
+        indexes = [block.blockNumber() for block in self.blocks]
         index = bisect(indexes, block.blockNumber()) if block not in self.blocks else bisect(indexes, block.blockNumber() - 1)
         if index == 0:
             index = len(self.blocks)
@@ -102,9 +102,7 @@ def bookmarkSelectableModelFactory(editor):
     # Data function    
     def bookmarkData():
         leftScope, rightScope = editor.scope(direction = "both")
-        return map(lambda block: 
-            dict(display = block.text(), image = resources.getIcon('bookmarkflag')),
-            editor.bookmarkListModel.blocks)
+        return [dict(display = block.text(), image = resources.getIcon('bookmarkflag')) for block in editor.bookmarkListModel.blocks]
 
     return selectableModelFactory(editor, bookmarkData, 
         filterFunction = lambda text, item: item["display"].find(text) != -1)
@@ -156,7 +154,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
                 else:
                     self.dataChanged.emit(self.index(index), self.index(index))
             else:
-                indexes = map(lambda block: block.blockNumber(), self.blocks)
+                indexes = [block.blockNumber() for block in self.blocks]
                 index = bisect(indexes, block.blockNumber())
                 self.beginInsertRows(QtCore.QModelIndex(), index, index)
                 self.blocks.insert(index, block)
@@ -167,7 +165,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
     def on_editor_blocksRemoved(self):
         def validSymbolBlock(block):
             return block.userData() is not None and block.userData().symbol is not None
-        self.blocks = filter(validSymbolBlock, self.blocks)
+        self.blocks = list(filter(validSymbolBlock, self.blocks))
         self.layoutChanged.emit()
 
 
@@ -204,7 +202,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
 
     # ------------- Public api
     def findBlockIndex(self, block):
-        indexes = map(lambda block: block.blockNumber(), self.blocks)
+        indexes = [block.blockNumber() for block in self.blocks]
         blockIndex = bisect(indexes, block.blockNumber()) - 1
         if blockIndex == -1:
             blockIndex = 0
@@ -216,9 +214,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
 def symbolSelectableModelFactory(editor):
     # Data function    
     def symbolData():
-        return map(lambda block: 
-            dict(data = block, display = block.userData().symbol, image = resources.getIcon("symbol-class")),
-            editor.symbolListModel.blocks)
+        return [dict(data = block, display = block.userData().symbol, image = resources.getIcon("symbol-class")) for block in editor.symbolListModel.blocks]
 
     return selectableModelFactory(editor, symbolData, 
         filterFunction = lambda text, item: item["display"].find(text) != -1)
@@ -234,7 +230,7 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
 
     def setSuggestions(self, suggestions):
         self.suggestions = suggestions
-        self.columns = 2 if any(map(lambda s: isinstance(s, BundleItemTreeNode), suggestions)) else 1
+        self.columns = 2 if any([isinstance(s, BundleItemTreeNode) for s in suggestions]) else 1
         self.layoutChanged.emit()
         
     def index(self, row, column, parent = QtCore.QModelIndex()):
@@ -280,7 +276,7 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
         elif role == QtCore.Qt.ToolTipRole:
             if isinstance(suggestion, dict) and 'tool_tip' in suggestion:
                 if 'tool_tip_format' in suggestion:
-                    print suggestion["tool_tip_format"]
+                    print(suggestion["tool_tip_format"])
                 return suggestion['tool_tip']
             elif isinstance(suggestion, BundleItemTreeNode):
                 return suggestion.name
@@ -308,30 +304,28 @@ class AlreadyTypedWords(object):
         words = []
         for chunk in userData.lineChunks():
             scopeGroup = self.editor.scope(blockPosition = chunk[0][0])
-            words += map(
-                lambda match: ((chunk[0][0] + match.span()[0], chunk[0][0] + match.span()[1]), match.group(), scopeGroup), 
-                self.editor.RE_WORD.finditer(chunk[1]))
+            words += [((chunk[0][0] + match.span()[0], chunk[0][0] + match.span()[1]), match.group(), scopeGroup) for match in self.editor.RE_WORD.finditer(chunk[1])]
         if userData.words != words:
             #Quitar el block de las palabras anteriores
-            self.removeWordsBlock(block, filter(lambda word: word not in words, userData.words))
+            self.removeWordsBlock(block, [word for word in userData.words if word not in words])
             
             #Agregar las palabras nuevas
-            self.addWordsBlock(block, filter(lambda word: word not in userData.words, words))
+            self.addWordsBlock(block, [word for word in words if word not in userData.words])
             userData.words = words
 
 
     def _purge_words(self):
         """ Limpiar palabras """
-        self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))
-        self.groups = dict(map(lambda (group, words): (group, filter(lambda word: word in self.words, words)), self.groups.iteritems()))
+        self.words = dict([word_blocks for word_blocks in iter(self.words.items()) if bool(word_blocks[1])])
+        self.groups = dict([(group_words[0], [word for word in group_words[1] if word in self.group_words[1]]) for group_words in iter(self.groups.items())])
 
     def __purge_blocks(self):
         """ Quitar bloques que no van mas """
         def validWordBlock(block):
             return block.userData() is not None and bool(block.userData().words)
         words = {}
-        for word, blocks in self.words.iteritems():
-            words[word] = filter(validWordBlock, blocks)
+        for word, blocks in self.words.items():
+            words[word] = list(filter(validWordBlock, blocks))
         self.words = words
 
     def on_editor_blocksRemoved(self):
@@ -342,7 +336,7 @@ class AlreadyTypedWords(object):
             #Blocks
             blocks = self.words.setdefault(word, [])
             if block not in blocks:
-                indexes = map(lambda block: block.blockNumber(), blocks)
+                indexes = [block.blockNumber() for block in blocks]
                 index = bisect(indexes, block.blockNumber())
                 blocks.insert(index, block)
             #Words
@@ -370,8 +364,7 @@ def bundleItemSelectableModelFactory(editor):
     # Data function    
     def bundleItemData():
         leftScope, rightScope = editor.scope(direction = "both")
-        return map(lambda bundleItem: 
-            dict(data = bundleItem, 
+        return [dict(data = bundleItem, 
                 template = "<table width='100%%'><tr><td>%(name)s - %(bundle)s</td><td align='right'>%(trigger)s</td></tr></table>",
                 ratio = 1.0,
                 display = { 
@@ -379,8 +372,7 @@ def bundleItemSelectableModelFactory(editor):
                     "bundle": bundleItem.bundle.name, 
                     "trigger": bundleItem.trigger
                 }, 
-                image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE)),
-            editor.application.supportManager.getActionItems(leftScope, rightScope))
+                image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE)) for bundleItem in editor.application.supportManager.getActionItems(leftScope, rightScope)]
 
 
     # Filter function        

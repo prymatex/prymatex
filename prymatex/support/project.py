@@ -104,12 +104,12 @@ class PMXProject(PMXBundleItem):
             elif project is not None:
                 project.addSource(namespace, path)
             return project
-        except Exception, e:
-            print "Error in project %s (%s)" % (info, e)
+        except Exception as e:
+            print("Error in project %s (%s)" % (info, e))
 
     @classmethod
     def reloadBundleItem(cls, bundleItem, path, namespace, manager):
-        map(lambda style: manager.removeTemplateFile(style), bundleItem.files)
+        list(map(lambda style: manager.removeTemplateFile(style), bundleItem.files))
         info = os.path.join(path, cls.FILE)
         projectFilePaths = glob(os.path.join(path, '*'))
         projectFilePaths.remove(info)

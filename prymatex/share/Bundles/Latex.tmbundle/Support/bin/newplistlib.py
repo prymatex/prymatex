@@ -60,7 +60,7 @@ __all__ = [
 
 import binascii
 import datetime
-from cStringIO import StringIO
+from io import StringIO
 import re
 
 
@@ -70,7 +70,7 @@ def readPlist(pathOrFile):
     usually is a dictionary).
     """
     didOpen = 0
-    if isinstance(pathOrFile, (str, unicode)):
+    if isinstance(pathOrFile, str):
         pathOrFile = open(pathOrFile)
         didOpen = 1
     p = PlistParser()
@@ -85,7 +85,7 @@ def writePlist(rootObject, pathOrFile):
     file name or a (writable) file object.
     """
     didOpen = 0
-    if isinstance(pathOrFile, (str, unicode)):
+    if isinstance(pathOrFile, str):
         pathOrFile = open(pathOrFile, "w")
         didOpen = 1
     writer = PlistWriter(pathOrFile)
@@ -235,7 +235,7 @@ class PlistWriter(DumbXMLWriter):
         DumbXMLWriter.__init__(self, file, indentLevel, indent)
 
     def writeValue(self, value):
-        if isinstance(value, (str, unicode)):
+        if isinstance(value, str):
             self.simpleElement("string", value)
         elif isinstance(value, bool):
             # must switch for bool before int, as bool is a
@@ -272,10 +272,10 @@ class PlistWriter(DumbXMLWriter):
 
     def writeDict(self, d):
         self.beginElement("dict")
-        items = d.items()
+        items = list(d.items())
         items.sort()
         for key, value in items:
-            if not isinstance(key, (str, unicode)):
+            if not isinstance(key, str):
                 raise TypeError("keys must be strings")
             self.simpleElement("key", key)
             self.writeValue(value)
@@ -298,7 +298,7 @@ class _InternalDict(dict):
         try:
             value = self[attr]
         except KeyError:
-            raise AttributeError, attr
+            raise AttributeError(attr)
         from warnings import warn
         warn("Attribute access from plist dicts is deprecated, use d[key] "
              "notation instead", PendingDeprecationWarning)
@@ -314,7 +314,7 @@ class _InternalDict(dict):
         try:
             del self[attr]
         except KeyError:
-            raise AttributeError, attr
+            raise AttributeError(attr)
         from warnings import warn
         warn("Attribute access from plist dicts is deprecated, use d[key] "
              "notation instead", PendingDeprecationWarning)

@@ -3,10 +3,17 @@
 
 from prymatex.support import processor
 
-class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
+class CodeEditorSyntaxProcessor(processor.PMXSyntaxProcessor):
     def __init__(self, editor):
         self.editor = editor
 
+      # Public api
+    def scopeRanges(self):
+        return self.__scopeRanges
+        
+    def lineChunks(self):
+        return self.__lineChunks
+        
     #START
     def startParsing(self, scope):
         self.setScopes([ scope ])
@@ -15,22 +22,22 @@ class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
     def beginLine(self, line):
         self.line = line
         self.lineIndex = 0
-        self.scopeRanges = []       #[ ((start, end), scopeHash) ... ]
-        self.lineChunks = []        #[ ((start, end), chunk) ... ]
+        self.__scopeRanges = []       #[ ((start, end), scopeHash) ... ]
+        self.__lineChunks = []        #[ ((start, end), chunk) ... ]
         
     def endLine(self, line):
-        print "end", self.lineIndex, self.stackScopes
+        print("end", self.lineIndex, self.stackScopes)
         self.addToken(len(self.line) + 1)
 
     #OPEN
     def openTag(self, scope, position):
-        print "open", self.lineIndex, position, self.stackScopes, scope
+        print("open", self.lineIndex, position, self.stackScopes, scope)
         self.addToken(position)
         self.stackScopes.append(scope)
 
     #CLOSE
     def closeTag(self, scope, position):
-        print "close", self.lineIndex, position, self.stackScopes, scope
+        print("close", self.lineIndex, position, self.stackScopes, scope)
         self.addToken(position)
         self.stackScopes.pop()
     
@@ -49,11 +56,11 @@ class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
         # Solo si tengo realmente algo que agregar
         if begin != end:
             scopeHash = self.editor.flyweightScopeFactory(self.stackScopes)
-            self.scopeRanges.append( ((begin, end), scopeHash) )
-            self.lineChunks.append( ((begin, end), self.line[begin:end]) )
+            self.__scopeRanges.append( ((begin, end), scopeHash) )
+            self.__lineChunks.append( ((begin, end), self.line[begin:end]) )
         self.lineIndex = end
 
-class CodeEditorSyntaxProcessor(processor.PMXSyntaxProcessor):
+class _CodeEditorSyntaxProcessor(processor.PMXSyntaxProcessor):
     def __init__(self, editor):
         self.editor = editor
         self.__scopePath = []
@@ -72,11 +79,12 @@ class CodeEditorSyntaxProcessor(processor.PMXSyntaxProcessor):
     # Public api
     def scopeRanges(self):
         # Return [ ((start, end), scopeHash) ... ]
-        keys = self.__scopeRanges.keys()
+        print(self.__scopeRanges)
+        keys = list(self.__scopeRanges.keys())
         keys.sort(cmp = self.cmp)
         #print map(lambda key: (key, self.__scopeRanges[key]), keys)
         # TODO Analizar mejor la utilidad de esto, quiza dejar los nombres en listas sea mejor
-        return map(lambda key: (key, self.editor.flyweightScopeFactory(self.__scopeRanges[key])), keys)
+        return [(key, self.editor.flyweightScopeFactory(self.__scopeRanges[key])) for key in keys]
         
     def lineChunks(self):
         return self.__lineChunks

@@ -16,25 +16,25 @@ class PMXSyntaxNode(object):
                     'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns']:
             setattr(self, k, None)
         self.syntax = syntax
-        for key, value in dataHash.iteritems():
+        for key, value in dataHash.items():
             try:
                 if key in ['match', 'begin']:
                     setattr(self, key, compileRegexp( value ))
                 elif key in ['content', 'name', 'contentName', 'end']:
                     setattr(self, key, value )
                 elif key in ['captures', 'beginCaptures', 'endCaptures']:
-                    value = sorted(value.items(), key=lambda v: int(v[0]))
+                    value = sorted(list(value.items()), key=lambda v: int(v[0]))
                     setattr(self, key, value)
                 elif key == 'repository':
                     self.parse_repository(value)
                 elif key in ['patterns']:
                     self.create_children(value)
-            except TypeError, e:
-                print e, value
+            except TypeError as e:
+                print(e, value)
     
     def parse_repository(self, repository):
         self.repository = {}
-        for key, value in repository.iteritems():
+        for key, value in repository.items():
             if 'include' in value:
                 self.repository[key] = PMXSyntaxProxy( value, self.syntax )
             else:
@@ -51,7 +51,7 @@ class PMXSyntaxNode(object):
     def parse_captures(self, name, pattern, match, processor):
         captures = pattern.match_captures( name, match )
         #Aca tengo que comparar con -1, Ver nota en match_captures
-        captures = filter(lambda (group, range, name): range[0] != -1 and range[0] != range[-1], captures)
+        captures = [group_range_name for group_range_name in captures if group_range_name[1][0] != -1 and group_range_name[1][0] != group_range_name[1][-1]]
         starts = []
         ends = []
         for group, range, name in captures:
@@ -113,11 +113,11 @@ class PMXSyntaxNode(object):
             index = int(mobj.group(0)[1:])
             return match.group(index)
         def d_match(mobj):
-            print "d_match"
+            print("d_match")
             index = mobj.group(0)
             return match.groupdict[index]
-        regstring = compileRegexp(u'\\\\([1-9])').sub(g_match, regstring)
-        regstring = compileRegexp(u'\\\\k<(.*?)>').sub(d_match, regstring)
+        regstring = compileRegexp('\\\\([1-9])').sub(g_match, regstring)
+        regstring = compileRegexp('\\\\k<(.*?)>').sub(d_match, regstring)
         return compileRegexp( regstring ).search( string, position )
     
     def match_first_son(self, string, position):
@@ -145,7 +145,7 @@ class PMXSyntaxProxy(object):
     def __proxy(self):
         if re.compile('^#').search(self.proxy):
             grammar = self.syntax.grammar
-            if hasattr(grammar, 'repository') and grammar.repository.has_key(self.proxy[1:]):  
+            if hasattr(grammar, 'repository') and self.proxy[1:] in grammar.repository:  
                 return grammar.repository[self.proxy[1:]]
         elif self.proxy == '$self':
             return self.syntax.grammar
@@ -292,7 +292,7 @@ class PMXSyntax(PMXBundleItem):
         return position
 
     def __str__(self):
-        return u"<PMXSyntax %s>" % self.name
+        return "<PMXSyntax %s>" % self.name
 
     @classmethod
     def findGroup(cls, scopes):

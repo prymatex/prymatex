@@ -221,7 +221,7 @@ class Multiplexer(base.Multiplexer):
 
     @synchronized
     def proc_buryall(self):
-        for sid in self.session.keys():
+        for sid in list(self.session.keys()):
             self.proc_bury(sid)
         self.queue.put(constants.BURIEDALL)
 
@@ -295,7 +295,7 @@ class Multiplexer(base.Multiplexer):
         fds = []
         fd2sid = {}
         now = time.time()
-        for sid in self.session.keys():
+        for sid in list(self.session.keys()):
             then = self.session[sid]['time']
             if (now - then) > self.timeout:
                 self.proc_bury(sid)

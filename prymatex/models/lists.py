@@ -54,14 +54,14 @@ class CheckableListModel(QtCore.QAbstractListModel):
         self.selectionChanged.emit()
 
     def setSelected(self, item, selected=True):
-        value = filter(lambda k: k["name"] == item, self.__items)
+        value = [k for k in self.__items if k["name"] == item]
         if value:
             value = value.pop()
             value["selected"] = selected
             self.selectionChanged.emit()
     
     def selectedItems(self):
-        return map(lambda item: item["name"], filter(lambda item: item["selected"], self.__items))
+        return [item["name"] for item in [item for item in self.__items if item["selected"]]]
 
     def selectItems(self, names):
         for item in self.__items:
@@ -73,7 +73,7 @@ class CheckableListModel(QtCore.QAbstractListModel):
 
     # ------------------ Add remove keywords
     def addItem(self, item, selected=False):
-        value = filter(lambda k: k["name"] == item, self.__items)
+        value = [k for k in self.__items if k["name"] == item]
         if not value:
             self.beginInsertRows(QtCore.QModelIndex(), len(self.__items), len(self.__items))
             self.__items.append({"name": item, "selected": selected})
@@ -85,7 +85,7 @@ class CheckableListModel(QtCore.QAbstractListModel):
 
 
     def removeItem(self, item):
-        value = filter(lambda k: k["name"] == item, self.__items)
+        value = [k for k in self.__items if k["name"] == item]
         if value:
             self.beginRemoveRows(QtCore.QModelIndex(), self.__items.index(value), self.__items.index(value))
             self.__items.remove(value)

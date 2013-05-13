@@ -127,7 +127,7 @@ class ObexDirectoryView(QAbstractItemModel):
         #print "index child name",  child.name()
         #print "index parent name",  parentItem.name()
         index = self.createIndex(row, column, child)
-        print "create index",  index,  index.row(),  index.column(),  "for",  child.name()
+        print("create index",  index,  index.row(),  index.column(),  "for",  child.name())
         if index.column() == 0:
             child.setModelIndex(index)
         return index
@@ -158,7 +158,7 @@ class ObexDirectoryView(QAbstractItemModel):
             parent = self.__rootItem
         
         index = parent.modelIndex() or QModelIndex()
-        print "append to",  index,  index.row(),  index.column(),  "for",  parent.name()
+        print("append to",  index,  index.row(),  index.column(),  "for",  parent.name())
         self.insertRow(-1,  index)
 
         parent.appendChild(child)

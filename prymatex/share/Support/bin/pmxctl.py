@@ -6,7 +6,7 @@ import sys, tempfile
 
 try:
     import zmq
-except ImportError, reason:
+except ImportError as reason:
     raise Exception("In order to use pmxctl you must install zmq in your python path\nor if you are runining inside virtualenv please activate the global site-package with toggleglobalsitepackages")
     #raise reason
 

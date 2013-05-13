@@ -94,7 +94,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             #Capture Text
             cursor.setPosition(currentHolder.start)
             cursor.setPosition(currentHolder.end - length, QtGui.QTextCursor.KeepAnchor)
-            selectedText = cursor.selectedText().replace(u"\u2029", '\n').replace(u"\u2028", '\n')
+            selectedText = cursor.selectedText().replace("\u2029", '\n').replace("\u2028", '\n')
             currentHolder.setContent(selectedText)
             
             # Wrap snippet
@@ -142,10 +142,10 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
 
     def highlightEditor(self):
         cursors = {}
-        self.editor.setExtraSelectionCursors("selection", filter(lambda c: c.hasSelection(), map(lambda c: QtGui.QTextCursor(c), self.cursors)))
+        self.editor.setExtraSelectionCursors("selection", [c for c in [QtGui.QTextCursor(c) for c in self.cursors] if c.hasSelection()])
         cursorLines = []
-        for cursorLine in map(lambda c: QtGui.QTextCursor(c), self.cursors):
-            if all(map(lambda c: c.block() != cursorLine.block(), cursorLines)):
+        for cursorLine in [QtGui.QTextCursor(c) for c in self.cursors]:
+            if all([c.block() != cursorLine.block() for c in cursorLines]):
                 cursorLine.clearSelection()
                 cursorLines.append(cursorLine)
         self.editor.setExtraSelectionCursors("line", cursorLines)

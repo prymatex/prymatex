@@ -5,7 +5,7 @@ def prefix_match(lhs, rhs):
     if len(lhs) > len(rhs):
         return False
     
-    for i in xrange(len(lhs)):
+    for i in range(len(lhs)):
         assert i < len(lhs); assert i < len(rhs)
         if lhs[i] != rhs[i] and lhs[i] != "*":
             return False
@@ -40,7 +40,7 @@ class PathType(object):
 
     def __str__(self):
         ret = self.anchor_to_bol and "^ " or ""
-        ret += " ".join(map(lambda s: str(s), self.scopes))
+        ret += " ".join([str(s) for s in self.scopes])
         ret += self.anchor_to_eol and " $" or ""
         return ret
 
@@ -80,7 +80,7 @@ class PathType(object):
                 
             power += len(path.scopes[i-1].atoms)
             if prefix_match(self.scopes[j-1].atoms, path.scopes[i-1].atoms):
-                for k in xrange(len(self.scopes[j-1].atoms)):
+                for k in range(len(self.scopes[j-1].atoms)):
                     score += 1 / pow(2, power - k)
                 j -= 1
                 check_next = anchor_to_previous
@@ -167,7 +167,7 @@ class CompositeType(object):
         self.expressions = []
     
     def __str__(self):
-        return " ".join(map(lambda c: str(c), self.expressions))
+        return " ".join([str(c) for c in self.expressions])
     
     def __repr__(self):
         return "%s\n[%s]" % (self.__class__.__name__, "\n".join([repr(e) for e in self.expressions]))
@@ -225,7 +225,7 @@ class SelectorType(object):
         self.composites = []
         
     def __str__(self):
-        return  ", ".join(map(lambda c: str(c), self.composites))
+        return  ", ".join([str(c) for c in self.composites])
 
 
     def __repr__(self):

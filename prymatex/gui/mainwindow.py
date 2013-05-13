@@ -27,6 +27,7 @@ from prymatex.widgets.toolbar import DockWidgetToolBar
 from prymatex.widgets.message import PopupMessageWidget
 
 from prymatex.ui.mainwindow import Ui_MainWindow
+from functools import reduce
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBaseComponent):
     """Prymatex main window"""
@@ -106,7 +107,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
     def populate(self, manager):
         def extendMainMenu(klass):
             menuExtensions = klass.contributeToMainMenu()
-            for name, settings in menuExtensions.iteritems():
+            for name, settings in menuExtensions.items():
                 actions = self.contributeToMainMenu(name, settings)
                 # TODO: Pasarle las acciones generadas a la clase
                 self.customComponentActions.setdefault(klass, []).extend(actions)
@@ -118,7 +119,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             extendMainMenu(componentClass)
         
         #Conect Actions
-        for action in reduce(lambda a1, a2: a1 + a2, self.customComponentActions.values(), []):
+        for action in reduce(lambda a1, a2: a1 + a2, list(self.customComponentActions.values()), []):
             if hasattr(action, 'callback'):
                 self.connect(action, QtCore.SIGNAL('triggered(bool)'), self.componentActionDispatcher)
 
@@ -192,13 +193,13 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             QtCore.Qt.TopDockWidgetArea: DockWidgetToolBar("Top Dockers", QtCore.Qt.TopDockWidgetArea, self),
             QtCore.Qt.BottomDockWidgetArea: DockWidgetToolBar("Bottom Dockers", QtCore.Qt.BottomDockWidgetArea, self),
         }
-        for dockArea, toolBar in self.dockToolBars.iteritems():
+        for dockArea, toolBar in self.dockToolBars.items():
             self.addToolBar(DockWidgetToolBar.DOCK_AREA_TO_TB[dockArea], toolBar)
             toolBar.hide()
 
 
     def toggleDockToolBarVisibility(self):
-        for toolBar in self.dockToolBars.values():
+        for toolBar in list(self.dockToolBars.values()):
             if toolBar.isVisible():
                 toolBar.hide()
             else:
@@ -250,7 +251,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
     def componentActionDispatcher(self, checked):
         action = self.sender()
         componentClass = None
-        for cmpClass, actions in self.customComponentActions.iteritems():
+        for cmpClass, actions in self.customComponentActions.items():
             if action in actions:
                 componentClass = cmpClass
                 break
@@ -445,7 +446,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
                 openDocumentsOnQuit.append((editor.filePath, editor.cursorPosition()))
         state = {
             "self": QtGui.QMainWindow.saveState(self),
-            "dockers": dict(map(lambda dock: (dock.objectName(), dock.saveState()), self.dockers)),
+            "dockers": dict([(dock.objectName(), dock.saveState()) for dock in self.dockers]),
             "documents": openDocumentsOnQuit,
             "geometry": self.saveGeometry(),
         }
@@ -484,7 +485,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
                     for entry in collectFiles(dirSubEntries):
                         yield entry
                         
-        urls = map(lambda url: url.toLocalFile(), event.mimeData().urls())
+        urls = [url.toLocalFile() for url in event.mimeData().urls()]
         
         for path in collectFiles(urls):
             # TODO: Take this code somewhere else, this should change as more editor are added

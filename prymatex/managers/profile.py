@@ -3,7 +3,10 @@
 
 import os
 import shutil
-from ConfigParser import ConfigParser
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 
 from prymatex.qt import QtCore, QtGui
 
@@ -31,7 +34,7 @@ class ProfileManager(QtCore.QObject, PMXBaseComponent):
         self.__dontAsk = True
         
         self.profilesFile = os.path.join(PMX_HOME_PATH, self.PRYMATEX_PROFILES_NAME)
-        config = ConfigParser()
+        config = configparser.RawConfigParser()
         if os.path.exists(self.profilesFile):
             config.read(self.profilesFile)
             for section in config.sections():
@@ -54,14 +57,14 @@ class ProfileManager(QtCore.QObject, PMXBaseComponent):
     # --------------- Profile
     def build_prymatex_profile(self, path):
         os.makedirs(path)
-        os.makedirs(os.path.join(path, 'tmp'), 0700)
-        os.makedirs(os.path.join(path, 'log'), 0700)
-        os.makedirs(os.path.join(path, 'cache'), 0700)
-        os.makedirs(os.path.join(path, 'screenshot'), 0700)
+        os.makedirs(os.path.join(path, 'tmp'), mode = 0o0700)
+        os.makedirs(os.path.join(path, 'log'), mode = 0o0700)
+        os.makedirs(os.path.join(path, 'cache'), mode = 0o0700)
+        os.makedirs(os.path.join(path, 'screenshot'), mode = 0o0700)
 
 
     def saveProfiles(self):
-        config = ConfigParser()
+        config = configparser.RawConfigParser()
         config.add_section("General")
         config.set("General", "dontask", str(self.__dontAsk))
         for index, profile in enumerate(self.profilesListModel.profiles()):
@@ -117,7 +120,7 @@ class ProfileManager(QtCore.QObject, PMXBaseComponent):
 
 
     def profileNames(self):
-        return map(lambda p: p.PMX_PROFILE_NAME, self.profilesListModel.profiles())
+        return [ p.PMX_PROFILE_NAME for p in self.profilesListModel.profiles() ]
 
 
     def setDontAsk(self, value):

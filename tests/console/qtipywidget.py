@@ -7,10 +7,11 @@ from PyQt4 import QtGui
 from PyQt4.QtCore import QObject,  pyqtRemoveInputHook,  QEvent,  Qt
 from PyQt4 import Qsci
 from qt_ipython import Ui_IPyForm
-from StringIO import StringIO
+from io import StringIO
 import IPython.Shell
 import IPython
 from PyQt4.Qsci import *
+from functools import reduce
   
 ANSI_STYLES = {'0;30': [0, 'BLACK'],            '0;31': [1, 'RED'],
                      '0;32': [2, 'GREEN'],            '0;33': [3, 'BROWN'],
@@ -29,7 +30,7 @@ title_pat = re.compile('\x1b]0;(.*?)\x07')
 
 __orig_out = sys.stdout
 def pr(s):
-    print >> __orig_out, s
+    print(s, file=__orig_out)
     __orig_out.flush()
 
 def ansi_escapes_to_html(text):
@@ -41,13 +42,13 @@ def ansi_escapes_to_html(text):
     #    self.title = title[-2]
     text = cgi.escape(text)
     #text=text.replace('\n', '<br/>')
-    pr(`text`)
+    pr(repr(text))
     out = []
     text = title_pat.sub('', text)
     segments = color_pat.split(text)
     segment = segments.pop(0)
     out.append(segment)
-    pr("segs=" + `segments`)
+    pr("segs=" + repr(segments))
     #self.GotoPos(self.GetLength())
     #s#elf.StartStyling(self.GetLength(), 0xFF)
     #try:
@@ -66,7 +67,7 @@ def ansi_escapes_to_html(text):
                 #pr("add font")
                 style = ANSI_STYLES[ansi_tag][1]
                 out.append('<font color="%s">%s</font>' % (style, text))
-    pr("Out = " + `out`)
+    pr("Out = " + repr(out))
     return ''.join(out)
 
 
@@ -128,15 +129,15 @@ class IPythonWidget(QWidget, Ui_IPyForm):
 
     def editor_complete(self):
         line, index = self.editor.getCursorPosition()
-        text = unicode(self.editor.text(line))
+        text = str(self.editor.text(line))
         # indent if no text
         if not text.strip():
             raise IPython.ipapi.TryNext
         ctext = text[:index]
         
-        print "Complete!", line, index,  text,  ctext
+        print("Complete!", line, index,  text,  ctext)
         newtext,  possibilities = self.complete(ctext)
-        print newtext,":", possibilities
+        print(newtext,":", possibilities)
         if len(newtext) > len(ctext):
             addtext = newtext[len(ctext):]
             self.editor.insertAt(addtext,  line,  index)
@@ -148,7 +149,7 @@ class IPythonWidget(QWidget, Ui_IPyForm):
     def editor_clear(self):
         self.editor.setText("")
     def editor_return_pressed(self):
-        t = unicode(self.editor.text())
+        t = str(self.editor.text())
         rs = t.rstrip()
         # more than one line
         if rs.endswith(':'):
@@ -164,13 +165,13 @@ class IPythonWidget(QWidget, Ui_IPyForm):
         
         
     def editor_exec(self):
-        text = unicode(self.editor.text())
+        text = str(self.editor.text())
         self.history.append(text)
         self.exec_code(text)
         self.editor_clear()
         
 
-        print "exec"
+        print("exec")
     def setup_editor(self):
         #self.editor = QsciScintilla()
         lexer = QsciLexerPython()
@@ -291,7 +292,7 @@ class IPythonWidget(QWidget, Ui_IPyForm):
         #we use print command because the shell command is called
         #inside IPython instance and thus is redirected to thread cout
         #"\x01\x1b[1;36m\x02" <-- add colour to the text...
-        print "\x01\x1b[1;36m\x02"+result
+        print("\x01\x1b[1;36m\x02"+result)
         stdout.close()
         stdin.close()
 
@@ -324,7 +325,7 @@ class IpyEventFilter(QObject):
         try:
             char = chr(keynum)
         except ValueError:
-            print keys,keynum
+            print(keys,keynum)
             char = keys.get(keynum, '<unknown>')
      
         mods = []

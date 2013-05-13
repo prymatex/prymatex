@@ -52,7 +52,7 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
         if self.errorCommand:
             raise Exception(context.errorValue)
         else:
-            print context.workingDirectory
+            print(context.workingDirectory)
             self.mainWindow.showErrorInBrowser(
                 context.description(),
                 context.errorValue,
@@ -70,14 +70,14 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
         self.mainWindow.showMessage(context.outputValue, timeout = timeout)
     
     def toolTip(self, context, format = None):
-        print "toolTip"
+        print("toolTip")
 
     def createNewDocument(self, context, format = None):
         editor = self.mainWindow.addEmptyEditor()
         editor.setPlainText(context.outputValue)
         
     def newWindow(self, context, format = None):
-        print "newWindow"
+        print("newWindow")
 
     def openAsNewDocument(self, context, format = None):
         editor = self.mainWindow.addEmptyEditor()

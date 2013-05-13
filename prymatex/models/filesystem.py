@@ -22,7 +22,7 @@ class SortFilterFileSystemProxyModel(QtGui.QSortFilterProxyModel):
         regexp = self.filterRegExp()
         if not regexp.isEmpty():
             pattern = regexp.pattern()
-            match = any(map(lambda p: fnmatch.fnmatch(path, p), map(lambda p: p.strip(), pattern.split(","))))
+            match = any([fnmatch.fnmatch(path, p) for p in [p.strip() for p in pattern.split(",")]])
             return not match
         return True
       

@@ -18,7 +18,7 @@ class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
         if node.isRootNode() or not node.enabled:
             return False
         if self.namespacesFilter:
-            if not any(map(lambda ns: node.hasNamespace(ns), self.namespacesFilter)):
+            if not any([node.hasNamespace(ns) for ns in self.namespacesFilter]):
                 return False
         if self.bundleItemTypesFilter:
             if node.TYPE not in self.bundleItemTypesFilter:
@@ -84,8 +84,8 @@ class BundleItemTypeProxyModel(FlatTreeProxyModel):
         #Esto es para rastrear un error
         try:
             return node.name.lower()
-        except Exception, e:
-            print node, self.sourceModel(), index
+        except Exception as e:
+            print(node, self.sourceModel(), index)
     
     def compareIndex(self, xindex, yindex):
         xnode = xindex.internalPointer()
@@ -206,7 +206,7 @@ class ThemeStyleProxyTableModel(QtGui.QSortFilterProxyModel):
             return True
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = index.internalPointer()
-        return regexp.exactMatch(unicode(node.styleItem().theme.uuid))
+        return regexp.exactMatch(str(node.styleItem().theme.uuid))
 
 
     def lessThan(self, left, right):

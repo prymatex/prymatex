@@ -2,6 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 from prymatex.qt import QtGui, QtCore
+from functools import reduce
 
 class DictTableModel(QtCore.QAbstractTableModel):
     variablesChanged = QtCore.pyqtSignal(str, list)
@@ -16,7 +17,7 @@ class DictTableModel(QtCore.QAbstractTableModel):
         if variables is None:
             return []
         elif hasattr(variables, 'iteritems'):
-            return map(lambda (name, value): {'variable': name, 'value': value, 'enabled': True}, variables.iteritems())
+            return [{'variable': name_value[0], 'value': name_value[1], 'enabled': True} for name_value in iter(variables.items())]
         return variables
         
     def groupByName(self, name):
@@ -108,7 +109,7 @@ class DictTableModel(QtCore.QAbstractTableModel):
         
         if role == QtCore.Qt.EditRole:
             new_value = value
-            if index.column() == 0 and any(map(lambda value: value['variable'] == new_value, group['variables'])):
+            if index.column() == 0 and any([value['variable'] == new_value for value in group['variables']]):
                 return False
             elif index.column() == 0:
                 group['variables'][row]['variable'] = new_value

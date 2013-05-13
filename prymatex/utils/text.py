@@ -11,7 +11,7 @@ import re
 import string
 import difflib
 
-to_ascii = lambda s: filter(lambda c: c in string.ascii_letters, s)
+to_ascii = lambda s: "".join([c for c in s if c in string.ascii_letters])
 to_ascii_cap = lambda s: to_ascii(s).capitalize()
 
 # Order is important:
@@ -58,7 +58,7 @@ def whiteSpace(text):
 # ----------------- Python Source tests --------------------
 def is_builtin(text):
     """Test if passed string is the name of a Python builtin object"""
-    import __builtin__
+    import builtins
     return text in [str(name) for name in dir(__builtin__)
                     if not name.startswith('_')]
 
@@ -70,8 +70,8 @@ def is_keyword(text):
 
 
 # ----------------- Text convert tools --------------------
-lower_case = string.lower
-upper_case = string.upper
+lower_case = lambda text: text.lower()
+upper_case = lambda text: text.upper()
 title_case = lambda text: text.title()
 transpose = lambda text: text[::-1]
 
@@ -116,8 +116,8 @@ def matching_blocks(text1, text2, ratio = 1.0, ignoreCase = False):
     else:
         matcher = difflib.SequenceMatcher(None, text1, text2)
     if matcher.ratio() >= ratio:
-        print text1, text2, list(matcher.get_grouped_opcodes())
+        print(text1, text2, list(matcher.get_grouped_opcodes()))
         for matches in matcher.get_grouped_opcodes():
-            for match in filter(lambda m: m[0] == 'equal', matches):
+            for match in [m for m in matches if m[0] == 'equal']:
                 yield match[1:]
                 

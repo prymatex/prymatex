@@ -4,13 +4,13 @@
 import os
 import json
 import sys
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
-from urlparse import urlsplit
+from urllib.parse import urlsplit
 from prymatex.qt import QtGui, QtCore, QtNetwork
 from prymatex.core import PMXBaseDialog
-from ui_githubclient import Ui_GitHubClientDialog
-from model import RepositoryTableModel, RepositoryProxyTableModel
+from .ui_githubclient import Ui_GitHubClientDialog
+from .model import RepositoryTableModel, RepositoryProxyTableModel
 
 GITHUB_API_SEARCH_URL = 'https://api.github.com/legacy/repos/search/%s+tmbundle'
 
@@ -23,21 +23,21 @@ class GithubBundleSearchThread(QtCore.QThread):
     def run(self):
         if not self.term or self.term < self.parent().MINIMUM_QUERY_LENGTH:
             return
-        response = urllib2.urlopen(GITHUB_API_SEARCH_URL % self.term).read()
+        response = urllib.request.urlopen(GITHUB_API_SEARCH_URL % self.term).read()
         data = json.loads(response.content)
         self.dataUpdate.emit(data) # Thread safety
 
     def setProxy(self):
-        print self.parent().application.settingValue("Browser.proxyAddress")
+        print(self.parent().application.settingValue("Browser.proxyAddress"))
         networkProxy = QtNetwork.QNetworkProxy.applicationProxy()
-        opener = urllib2.build_opener(
-            urllib2.HTTPHandler(),
-            urllib2.HTTPSHandler(),
-            urllib2.ProxyHandler({
+        opener = urllib.request.build_opener(
+            urllib.request.HTTPHandler(),
+            urllib.request.HTTPSHandler(),
+            urllib.request.ProxyHandler({
                 'http': 'http://localhost:3128',
                 'https': 'http://localhost:3128'
             }))
-        urllib2.install_opener(opener)
+        urllib.request.install_opener(opener)
 
     def search(self, term):
         '''Performs a lookup in Github REST API based on term'''
@@ -90,9 +90,9 @@ class GithubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         self.labelHomepage.setText(repo["homepage"])
         self.labelCreated.setText(repo["created"])
         self.labelPushed.setText(repo["pushed"])
-        self.labelWatchers.setText(unicode(repo["watchers"]))
-        self.labelFollowers.setText(unicode(repo["followers"]))
-        self.labelForks.setText(unicode(repo["forks"]))
+        self.labelWatchers.setText(str(repo["watchers"]))
+        self.labelFollowers.setText(str(repo["followers"]))
+        self.labelForks.setText(str(repo["forks"]))
         self.lineEditFolder.setText(repo["folder"])
         if repo["namespace"]:
             namespaceBundlePath, _ = self.application.supportManager.namespaceElementPath(repo["namespace"], "Bundles")
@@ -103,7 +103,7 @@ class GithubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
 
     def reloadSupport(self):
         def showMessages(text):
-            print text
+            print(text)
         self.application.supportManager.reloadSupport(showMessages)
 
     # =======================

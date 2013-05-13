@@ -86,7 +86,7 @@ def loadResources(resourcesPath, staticMapping = []):
         for dirpath, dirnames, filenames in os.walk(sourcePath):
             for filename in filenames:
                 iconPath = os.path.join(dirpath, filename)
-                staticNames = filter(lambda (path, names): iconPath.endswith(path), staticMapping)
+                staticNames = [path_names for path_names in staticMapping if iconPath.endswith(path_names[0])]
                 if staticNames:
                     for name in staticNames:
                         sources[name[1]] = iconPath
@@ -110,7 +110,7 @@ def loadPrymatexResources(resourcesPath, preferedThemeName = "oxygen"):
             themePaths.append(os.path.join(resourcesPath, "IconThemes"))
             themeNames = [ preferedThemeName ]
             for themePath in themePaths:
-	    	if os.path.exists(themePath):
+                if os.path.exists(themePath):
                     themeNames.extend(os.listdir(themePath))
             # Set and test
             QtGui.QIcon.setThemeSearchPaths( themePaths )
@@ -138,7 +138,7 @@ def getResourcePath(name, sources = None):
     if sources is not None:
         sources = sources if isinstance(sources, (list, tuple)) else (sources, )
     else:
-        sources = RESOURCES.keys()
+        sources = list(RESOURCES.keys())
     for source in sources:
         if source in RESOURCES and name in RESOURCES[source]:
             return RESOURCES[source].get(name)

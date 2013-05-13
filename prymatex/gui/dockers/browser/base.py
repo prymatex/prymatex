@@ -220,7 +220,7 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         #Terminar el timer y navegar hasta esa Url
         #TODO: validar que el link este bien
         self.stopTimer()
-        map(lambda action: action.setChecked(False), [ self.actionSyncEditor, self.actionConnectEditor ])
+        list(map(lambda action: action.setChecked(False), [ self.actionSyncEditor, self.actionConnectEditor ]))
         self.tabWebView.currentWebView().load(link)
 
     def on_webView_urlChanged(self, url):

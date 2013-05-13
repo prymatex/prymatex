@@ -3,11 +3,14 @@
 
 import os
 import glob
-from ConfigParser import ConfigParser
-
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
+    
 from PyQt4 import QtGui
 
-from colortrans import SHORT2RGB_DICT
+from .colortrans import SHORT2RGB_DICT
 
 
 class ColorScheme(object):
@@ -25,7 +28,7 @@ class ColorScheme(object):
     
     def __init__(self, name, settings = {}):
         self.name = name
-        self.colormap = dict(map(lambda (key, rgb): (key, QtGui.QColor(rgb)), settings.iteritems()))
+        self.colormap = dict([(key_rgb[0], QtGui.QColor(key_rgb[1])) for key_rgb in iter(settings.items())])
 
 
     def mapIndex(self, index, intense):
@@ -75,7 +78,7 @@ class ColorScheme(object):
 
     @classmethod
     def scheme(cls, name):
-        schemes = filter(lambda scheme: scheme.name == name, cls.SCHEMES)
+        schemes = [scheme for scheme in cls.SCHEMES if scheme.name == name]
         if schemes:
             return schemes.pop()
         return cls.SCHEMES[0]
@@ -85,7 +88,7 @@ class ColorScheme(object):
     def loadSchemes(cls, schemesPath):
         cls.SCHEMES.append(cls.default())
         for fileName in glob.glob(pathname=os.path.join(schemesPath, "*.colorscheme")):
-            config = ConfigParser()
+            config = configparser.RawConfigParser()
             config.read(fileName)
             general = dict(config.items("General"))
             scheme = ColorScheme(general["description"])
@@ -95,7 +98,7 @@ class ColorScheme(object):
                 if color.startswith("#"):
                     color = QtGui.QColor(color)
                 elif color.index(",") != -1:
-                    rgb = "".join(map(lambda v: "%02x" % int(v), color.split(",")))
+                    rgb = "".join(["%02x" % int(v) for v in color.split(",")])
                     color = QtGui.QColor("#" + rgb)
                 elif len(color) in [6, 8]:
                     color = QtGui.QColor("#" + color)

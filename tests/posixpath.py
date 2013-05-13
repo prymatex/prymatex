@@ -6,7 +6,7 @@ from glob import glob
 os.chdir("..")
 prymatex_dir = 'prymatex'
 
-replaces = [(u'…', u'...'), (u'—', u'-'), (u'‘', u"'"), (u'’', u"'"), (u"“", u'"'), (u"”", u'"')]
+replaces = [('…', '...'), ('—', '-'), ('‘', "'"), ('’', "'"), ("“", '"'), ("”", '"')]
 
 def main():
     for dirpath, dirnames, filenames in os.walk(prymatex_dir):
@@ -19,7 +19,7 @@ def main():
             if file != nfile:
                 old = os.path.join(dirpath, file.replace('"', '\"').replace("?", "\?").replace(">", "\>").replace("<", "\<").replace("$", "\$"))
                 new = os.path.join(dirpath, nfile.replace('"', '\"').replace("?", "\?").replace(">", "\>").replace("<", "\<").replace("$", "\$"))
-                print old, new
+                print(old, new)
                 os.system('git mv "%s" "%s"' % (old, new))
     
 if __name__ == "__main__":

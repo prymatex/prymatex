@@ -283,7 +283,7 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
             #self.dataChanged.emit(self.mapFromSource(topLeft), self.mapFromSource(topLeft))
     
     def on_sourceModel_rowsInserted(self, parent, start, end):
-        for i in xrange(start, end + 1):
+        for i in range(start, end + 1):
             sIndex = self.__sourceModel.index(i, 0, parent)
             if self.filterAcceptsRow(i, parent):
                 position = bisect_key(self.__indexMap, sIndex, lambda index: self.comparableValue(index))
@@ -293,7 +293,7 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
     
     def on_sourceModel_rowsAboutToBeRemoved(self, parent, start, end):
         #Remove indexes
-        for i in xrange(start, end + 1):
+        for i in range(start, end + 1):
             sIndex = self.sourceModel().index(i, 0, parent)
             if sIndex in self.__indexMap:
                 self.beginRemoveRows(QtCore.QModelIndex(), self.__indexMap.index(sIndex), self.__indexMap.index(sIndex))
@@ -301,4 +301,4 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
                 self.endRemoveRows()
 
     def on_sourceModel_layoutChanged(self):
-        print "cambio el layout"
+        print("cambio el layout")

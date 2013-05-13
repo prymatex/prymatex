@@ -11,8 +11,8 @@ sip.setapi('QString', 2)
 
 from PyQt4 import QtCore, QtGui
 
-import cPickle
-import StringIO
+import pickle
+import io
 from copy import deepcopy
 
 sys.path.append(os.path.abspath('..'))
@@ -56,14 +56,14 @@ class PMXBundleWidget(QtGui.QWidget, Ui_Menu):
         self.treeMenuView.collapsed.connect(self.nodeCollapsed) 
 
     def socketReadyWrite(self):
-        print "puedo mandar"
+        print("puedo mandar")
         self.socket.send("oka")
         
     def socketReadyRead(self):
-        print self.socket.recv()
+        print(self.socket.recv())
     
     def nodeCollapsed(self, index):
-        print "send"
+        print("send")
         self.publisher.send_pyobj({"Node": index.data(), "Row": index.row(), "Column": index.column()})
     
     def edit(self, bundleItem):
@@ -75,11 +75,11 @@ class PMXBundleWidget(QtGui.QWidget, Ui_Menu):
 def loadManager():
     from prymatex.support.manager import PMXSupportPythonManager
     def loadCallback(message):
-        print message
+        print(message)
     manager = PMXSupportPythonManager()
     manager.addNamespace('prymatex', os.path.abspath('../prymatex/share'))
     userPath = os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex'))
-    print userPath
+    print(userPath)
     manager.addNamespace('user', userPath)
     manager.loadSupport(loadCallback)
     return manager

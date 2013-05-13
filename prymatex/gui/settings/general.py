@@ -23,21 +23,21 @@ class GeneralSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_General):
         SettingsTreeNode.loadSettings(self)
         currentStyleName = self.settingGroup.value('qtStyle')
         currentStyleSheetName = self.settingGroup.value('qtStyleSheet')
-        for index, styleName in enumerate(QtGui.QStyleFactory.keys()):
+        for index, styleName in enumerate(list(QtGui.QStyleFactory.keys())):
             self.comboBoxQtStyle.addItem(styleName, styleName)
             if currentStyleName and styleName == currentStyleName:
                 self.comboBoxQtStyle.setCurrentIndex(index)
 
-        for index, styleSheetName in enumerate(resources.STYLESHEETS.keys()):
+        for index, styleSheetName in enumerate(list(resources.STYLESHEETS.keys())):
             self.comboBoxQtStyleSheet.addItem(styleSheetName, styleSheetName)
             if currentStyleSheetName and styleSheetName == currentStyleSheetName:
                 self.comboBoxQtStyleSheet.setCurrentIndex(index)
 
         checks = ( self.checkBoxAskAboutExternalDeletions, self.checkBoxAskAboutExternalChanges )
-        map(lambda check: check.blockSignals(True), checks)
+        list(map(lambda check: check.blockSignals(True), checks))
         self.checkBoxAskAboutExternalDeletions.setChecked(self.settingGroup.value('askAboutExternalDeletions'))
         self.checkBoxAskAboutExternalChanges.setChecked(self.settingGroup.value('askAboutExternalChanges'))
-        map(lambda check: check.blockSignals(False), checks)
+        list(map(lambda check: check.blockSignals(False), checks))
         
 
     @QtCore.pyqtSlot(int)

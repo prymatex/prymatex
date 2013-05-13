@@ -50,7 +50,7 @@ class SomeQtWidget(QtGui.QWidget):
         cursor.insertText(cadena)
 
     def log(self, text):
-        self.text.appendPlainText(":%s" % unicode(text))
+        self.text.appendPlainText(":%s" % str(text))
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

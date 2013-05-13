@@ -43,7 +43,7 @@ class PMXTemplateFile(object):
     content = property(getFileContent, setFileContent)
 
     def update(self, dataHash):
-        for key in dataHash.keys():
+        for key in list(dataHash.keys()):
             setattr(self, key, dataHash[key])
     
     def relocate(self, path):
@@ -151,12 +151,12 @@ class PMXTemplate(PMXBundleItem):
             elif template is not None:
                 template.addSource(namespace, path)
             return template
-        except Exception, e:
-            print "Error in template %s (%s)" % (info, e)
+        except Exception as e:
+            print("Error in template %s (%s)" % (info, e))
 
     @classmethod
     def reloadBundleItem(cls, bundleItem, path, namespace, manager):
-        map(lambda style: manager.removeTemplateFile(style), bundleItem.files)
+        list(map(lambda style: manager.removeTemplateFile(style), bundleItem.files))
         info = os.path.join(path, cls.FILE)
         templateFilePaths = glob(os.path.join(path, '*'))
         templateFilePaths.remove(info)

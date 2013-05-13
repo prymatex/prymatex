@@ -8,10 +8,10 @@ import argparse
 import stat
 import signal
 import tempfile
-import constants
+from . import constants
 
 from multiprocessing import Process, Queue
-from multiplexer import Multiplexer
+from .multiplexer import Multiplexer
     
 # ===========
 # = Workers =
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     rep_addr, pub_addr = get_addresses(parse_arguments())
 
     if not rep_addr or not pub_addr:
-        print "Address error, please read help"
+        print("Address error, please read help")
         sys.exit(-1)
 
     queue_multiplexer = Queue()
@@ -134,8 +134,8 @@ if __name__ == "__main__":
         
     info = { "multiplexer": maddress, "notifier": naddress }
     
-    print "To connect another client to this backend, use:"
-    print info
+    print("To connect another client to this backend, use:")
+    print(info)
     sys.stdout.flush()
     
     def signal_handler(signal, frame):

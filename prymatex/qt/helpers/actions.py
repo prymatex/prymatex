@@ -6,6 +6,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.qt.helpers.base import text2objectname
 
 from prymatex.utils import programs
+import collections
 
 def toggle_actions(actions, enable):
     """Enable/disable actions"""
@@ -23,31 +24,31 @@ def create_action(parent, settings):
     action.setObjectName(text2objectname(name, prefix = "action"))
     
     # attrs
-    if settings.has_key("icon"):
+    if "icon" in settings:
         action.setIcon(settings["icon"])
-    if settings.has_key("shortcut"):
+    if "shortcut" in settings:
         action.setShortcut(settings["shortcut"])
-    if settings.has_key("tip"):
+    if "tip" in settings:
         action.setToolTip(settings["tip"])
         action.setStatusTip(settings["tip"])
-    if settings.has_key("data"):
+    if "data" in settings:
         action.setData(settings["data"])
-    if settings.has_key("menurole"):
+    if "menurole" in settings:
         action.setMenuRole(settings["menurole"])
-    if settings.has_key("checkable"):
+    if "checkable" in settings:
         action.setCheckable(settings["checkable"])
     
     # Callables
-    if settings.has_key("callback"):
+    if "callback" in settings:
         action.callback = settings["callback"]
-    if settings.has_key("testChecked"):
+    if "testChecked" in settings:
         action.testChecked = settings["testChecked"]
-    if settings.has_key("testEnabled"):
+    if "testEnabled" in settings:
         action.testEnabled = settings["testEnabled"]
     
-    if settings.has_key("triggered") and callable(settings["triggered"]):
+    if "triggered" in settings and isinstance(settings["triggered"], collections.Callable):
         parent.connect(action, QtCore.SIGNAL("triggered()"), settings["triggered"])
-    if settings.has_key("toggled") and callable(settings["toggled"]):
+    if "toggled" in settings and isinstance(settings["toggled"], collections.Callable):
         parent.connect(action, QtCore.SIGNAL("toggled(bool)"), settings["toggled"])
         action.setCheckable(True)
         

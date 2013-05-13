@@ -312,7 +312,7 @@ class MainWindowActions(object):
                           self.actionTranslatePrymatex: 'https://prymatex.com/translate',
                           self.actionProjectHomepage: prymatex.__url__
         }
-        for action, url in ACTION_MAPPING.iteritems():
+        for action, url in ACTION_MAPPING.items():
             action.triggered.connect(partial(open, url))
             
 def tabSelectableModelFactory(mainWindow):
@@ -320,12 +320,10 @@ def tabSelectableModelFactory(mainWindow):
     Shows select tab, and change to selected 
     """
     def dataFunction():
-        return map(lambda tab: 
-            dict(data = tab, 
+        return [dict(data = tab, 
                 template = "<table width='100%%'><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(file)s</small></td></tr></table>", 
                 display = { "name": tab.tabTitle(), "file": tab.filePath }, 
-                image = tab.tabIcon()) 
-            ,mainWindow.splitTabWidget.allWidgets())
+                image = tab.tabIcon()) for tab in mainWindow.splitTabWidget.allWidgets()]
 
     return selectableModelFactory(mainWindow,
         dataFunction, filterFunction = lambda text, item: item["display"]["name"].find(text) != -1)

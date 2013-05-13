@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import sha
+import hashlib
 
 from prymatex.qt import QtCore, QtGui
 
@@ -15,4 +15,4 @@ class CacheManager(QtCore.QObject, PMXBaseComponent):
 
     def buildKey(self, content):
         """docstring for buildKey"""
-        return sha.sha(content).hexdigest()
+        return hashlib.sha1(content.encode("utf-8")).hexdigest()

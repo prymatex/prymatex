@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import keyequivalent2keysequence, keysequence2keyequivalent, rgba2color, color2rgba
@@ -41,13 +42,13 @@ class BundleItemTreeNode(TreeNodeBase):
     def trigger(self):
         trigger = []
         if self.tabTrigger != None:
-            trigger.append(u"%s⇥" % (self.tabTrigger))
+            trigger.append("%s⇥" % (self.tabTrigger))
         if self.keyEquivalent != None:
-            trigger.append(u"%s" % QtGui.QKeySequence(self.keyEquivalent).toString())
+            trigger.append("%s" % QtGui.QKeySequence(self.keyEquivalent).toString())
         return ", ".join(trigger)
     
     def buildBundleAccelerator(self):
-        name = unicode(self.name)
+        name = self.name
         for index, char in enumerate(name):
             if char in self.BANNED_ACCEL:
                 continue
@@ -58,9 +59,9 @@ class BundleItemTreeNode(TreeNodeBase):
         return name
     
     def buildMenuTextEntry(self, mnemonic = True):
-        text = unicode(self.name)
+        text = self.name
         if mnemonic:
-            text += u"\t%s" % (self.trigger)
+            text += "\t%s" % (self.trigger)
         return text.replace('&', '&&')
     
     def triggerItemAction(self, parent = None):
@@ -133,7 +134,7 @@ class ThemeTableRow(object):
     # ----------- Theme decoration -----------
     @property
     def settings(self):
-        settings = dict(map(lambda (key, value): (key, rgba2color(value)), filter(lambda (key, value): value.startswith('#'), self.__themeItem.settings.iteritems())))
+        settings = dict([(key_value4[0], rgba2color(key_value4[1])) for key_value4 in [key_value for key_value in iter(self.__themeItem.settings.items()) if key_value[1].startswith('#')]])
         
         # Fix some color keys
         settings.setdefault('gutter', settings['background'])
@@ -146,7 +147,7 @@ class ThemeTableRow(object):
     
     def update(self, dataHash):
         if 'settings' in dataHash:
-            settings = dict(map(lambda (key, value): (key, color2rgba(value)), dataHash['settings'].iteritems()))
+            settings = dict([(key_value2[0], color2rgba(key_value2[1])) for key_value2 in iter(dataHash['settings'].items())])
             if 'fontStyle' in dataHash['settings']:
                 settings['fontStyle'] = " ".join(dataHash['settings']['fontStyle'])
             dataHash['settings'] = settings
@@ -170,7 +171,7 @@ class ThemeTableRow(object):
             if style.selector.does_match(scope, rank):
                 styles.append((rank.pop(), style))
         styles.sort(key = lambda t: t[0])
-        map(lambda style: base.update(style[1].settings), styles)
+        list(map(lambda style: base.update(style[1].settings), styles))
         self.STYLES_CACHE[scope] = base
         return base
 
@@ -196,7 +197,7 @@ class ThemeStyleTableRow(object):
     # ----------- Item decoration -----------
     @property
     def settings(self):
-        settings = dict(map(lambda (key, value): (key, rgba2color(value)), filter(lambda (key, value): value.startswith('#'), self.__styleItem.settings.iteritems())))
+        settings = dict([(key_value5[0], rgba2color(key_value5[1])) for key_value5 in [key_value1 for key_value1 in iter(self.__styleItem.settings.items()) if key_value1[1].startswith('#')]])
         
         # Fonts
         settings['fontStyle'] = self.__styleItem.settings['fontStyle'].split() if 'fontStyle' in self.__styleItem.settings else []
@@ -205,7 +206,7 @@ class ThemeStyleTableRow(object):
     
     def update(self, dataHash):
         if 'settings' in dataHash:
-            settings = dict(map(lambda (key, value): (key, color2rgba(value)), dataHash['settings'].iteritems()))
+            settings = dict([(key_value3[0], color2rgba(key_value3[1])) for key_value3 in iter(dataHash['settings'].items())])
             if 'fontStyle' in dataHash['settings']:
                 settings['fontStyle'] = " ".join(dataHash['settings']['fontStyle'])
             dataHash['settings'] = settings

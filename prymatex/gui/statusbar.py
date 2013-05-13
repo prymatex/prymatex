@@ -24,7 +24,7 @@ class PMXStatusBar(QtGui.QStatusBar):
         self.activeBars = []
         if editor is None:
             #Propagate and hide
-            map(lambda bar: bar.setCurrentEditor(editor), self.activeBars)
+            list(map(lambda bar: bar.setCurrentEditor(editor), self.activeBars))
             self.hide()
         else:
             for bar in self.statusBars:

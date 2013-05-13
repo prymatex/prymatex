@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from parser import Parser
+from .parser import Parser
 
 
 class Scope(object):
@@ -15,11 +15,14 @@ class Scope(object):
         lhsScopes = self.path.scopes
         rhsScopes = rhs.path.scopes
         i = 0
-        for i in xrange(min(len(lhsScopes), len(rhsScopes))):
+        for i in range(min(len(lhsScopes), len(rhsScopes))):
             if lhsScopes[i] != rhsScopes[i]:
                 break
         return i == len(rhsScopes)
 
+    def __hash__(self):
+        return hash(str(self.path))
+      
     def __eq__(self, rhs):
         return self.path == rhs.path
     
@@ -55,7 +58,10 @@ class Context(object):
             return "(l/r '%s')" % str(self.left)
         else:
             return "(left '%s', right '%s')" % (str(self.left), str(self.right))
-            
+    
+    def __hash__(self):
+        return hash(str(self.left) + str(self.right))
+
     def __eq__(self, rhs):
         return self.left == rhs.left and self.right == rhs.right
     
@@ -82,7 +88,7 @@ class Selector(object):
             if rank is not None:
                 rank.append(0)
             return True
-        if isinstance(context, (basestring, Scope)):
+        if isinstance(context, (str, Scope)):
             context = Context.get(context)
 
         # Search in cache

@@ -33,6 +33,7 @@ from prymatex.utils import coroutines
 from prymatex.utils import text as texttools
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime
+from functools import reduce
 
 WIDTH_CHARACTER = "#"
 
@@ -214,7 +215,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     
     def blockUserDataFactory(self, block):
         userData = CodeEditorBlockUserData()
-        map(lambda handler: handler.contributeToBlockUserData(userData), self.__blockUserDataHandlers)
+        list(map(lambda handler: handler.contributeToBlockUserData(userData), self.__blockUserDataHandlers))
         return userData
 
     def processBlockUserData(self, text, block, userData):
@@ -227,7 +228,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if foldingMark != userData.foldingMark:
             userData.foldingMark = foldingMark
         # Handlers
-        map(lambda handler: handler.processBlockUserData(text, block, userData), self.__blockUserDataHandlers)
+        list(map(lambda handler: handler.processBlockUserData(text, block, userData), self.__blockUserDataHandlers))
         
     def on_modificationChanged(self, value):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
@@ -297,7 +298,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return PMXBaseEditor.tabTitle(self)
     
     def fileFilters(self):
-        return [ "%s (%s)" % (self.syntax().bundle.name, " ".join(map(lambda ft: "*." + ft, self.syntax().fileTypes))) ]
+        return [ "%s (%s)" % (self.syntax().bundle.name, " ".join(["*." + ft for ft in self.syntax().fileTypes])) ]
         #return PMXBaseEditor.fileFilters(self)
     
     def setCursorPosition(self, position):
@@ -350,24 +351,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def _scopes(self, block = None, attribute = "name", scope_filter = lambda attr: True):
         block = block or self.textCursor().block()
         userData = block.userData()
-        return filter(
-                    lambda ((start, end), attr): scope_filter(attr), 
-                    map(
-                        lambda ((start, end), scope): ((start, end), self.SCOPES[scope][attribute]),
-                        userData.scopeRanges()
-                        )
-                    )
+        return [start_end_attr for start_end_attr in [((start_end_scope[0][0], start_end_scope[0][1]), self.SCOPES[start_end_scope[1]][attribute]) for start_end_scope in userData.scopeRanges()] if scope_filter(start_end_attr[1])]
 
     def findScopes(self, block = None, attribute = "name", scope_filter = lambda attr: True, firstOnly = False):
         userData = block.userData() if block is not None else self.textCursor().block()
         # TODO: Se podra optimizar esto?
-        scopes = filter(
-            lambda ((start, end), attr): scope_filter(attr), 
-            map(
-                lambda ((start, end), scope): ((start, end), self.SCOPES[scope][attribute]),
-                userData.scopeRanges()
-                )
-            )
+        scopes = [start_end_attr2 for start_end_attr2 in [((start_end_scope1[0][0], start_end_scope1[0][1]), self.SCOPES[start_end_scope1[1]][attribute]) for start_end_scope1 in userData.scopeRanges()] if scope_filter(start_end_attr2[1])]
         if not firstOnly:
             return scopes
         if scopes:
@@ -376,7 +365,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     # ------------ Obteniendo datos del editor
     def tabKeyBehavior(self):
-        return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('	')
+        return self.tabStopSoft and str(' ') * self.tabStopSize or str('	')
 
 
     # Flags
@@ -460,8 +449,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def setCurrentBraces(self, cursor = None):
         cursor = QtGui.QTextCursor(cursor) if cursor is not None else QtGui.QTextCursor(self.textCursor())
         cursor.clearSelection()
-        openBraces = map(lambda pair: pair[0], self.braces)
-        closeBraces = map(lambda pair: pair[1], self.braces)
+        openBraces = [pair[0] for pair in self.braces]
+        closeBraces = [pair[1] for pair in self.braces]
         
         leftChar = cursor.document().characterAt(cursor.position() - 1)
         rightChar = cursor.document().characterAt(cursor.position())
@@ -558,7 +547,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.setExtraSelectionCursors("line", [ cursor ])
         else:
             self.clearExtraSelectionCursors("line")
-        self.setExtraSelectionCursors("brace", filter(lambda cursor: cursor is not None, list(self._currentBraces)))
+        self.setExtraSelectionCursors("brace", [cursor for cursor in list(self._currentBraces) if cursor is not None])
         self.updateExtraSelections()
 
         
@@ -680,10 +669,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 cursor.beginEditBlock()
                 while not self.cursorRect(cursor).top() <= event.pos().y() <= self.cursorRect(cursor).bottom():
                     cursor.insertText("\n")
-                    print cursor.position(), self.cursorRect(cursor)
+                    print(cursor.position(), self.cursorRect(cursor))
                 while self.cursorRect(cursor).x() <= event.pos().x():
                     cursor.insertText(" ")
-                    print cursor.position(), self.cursorRect(cursor)
+                    print(cursor.position(), self.cursorRect(cursor))
                 cursor.endEditBlock()
                 self.setTextCursor(cursor)
             else:
@@ -783,7 +772,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def selectBundleItem(self, items, tabTriggered = False):
         #Tengo mas de uno que hago?, muestro un menu
-        syntax = any(map(lambda item: item.TYPE == 'syntax', items))
+        syntax = any([item.TYPE == 'syntax' for item in items])
         
         def insertBundleItem(index):
             if index >= 0:
@@ -814,7 +803,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 'TM_SCOPE': rightScope,
                 'TM_LEFT_SCOPE': leftScope,
                 'TM_MODE': self.syntax().name,
-                'TM_SOFT_TABS': self.tabStopSoft and unicode('YES') or unicode('NO'),
+                'TM_SOFT_TABS': self.tabStopSoft and str('YES') or str('NO'),
                 'TM_TAB_SIZE': self.tabStopSize
         })
 
@@ -831,7 +820,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             environment.update(self.project.environmentVariables())
         if cursor.hasSelection():
             self.logger.debug("Add selection to environment")
-            environment['TM_SELECTED_TEXT'] = cursor.selectedText().replace(u"\u2029", '\n').replace(u"\u2028", '\n')
+            environment['TM_SELECTED_TEXT'] = cursor.selectedText().replace("\u2029", '\n').replace("\u2028", '\n')
             start, end = self.selectionBlockStartEnd()
             environment['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
             environment['TM_INPUT_START_LINE'] = start.blockNumber() + 1
@@ -909,7 +898,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         #A shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
         if settings.completionCommand:
             def commandCallback(context):
-                print unicode(context)
+                print(str(context))
             command = self.application.supportManager.buildAdHocCommand(settings.completionCommand, self.syntax().bundle, commandInput="document")
             self.commandProcessor.configure({ "asynchronous": False })
             command.executeCallback(self.commandProcessor, commandCallback)
@@ -920,17 +909,17 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         typedWords = self.alreadyTypedWords.typedWords()
         
         #Lo ponemos en la mezcladora por grupos
-        suggestions = tabTriggers + map(lambda word: { "display": word, "image": "scope-root-keyword" }, completions)
+        suggestions = tabTriggers + [{ "display": word, "image": "scope-root-keyword" } for word in completions]
         for group in CodeEditor.SORTED_GROUPS:
-            newWords = filter(lambda word: word not in completions and word != currentAlreadyTyped, typedWords.pop(group, []))
-            suggestions += map(lambda word: { "display": word, "image": "scope-root-%s" % group }, newWords)
+            newWords = [word for word in typedWords.pop(group, []) if word not in completions and word != currentAlreadyTyped]
+            suggestions += [{ "display": word, "image": "scope-root-%s" % group } for word in newWords]
             completions += newWords
             yield
         
         #Finalizamos con las que quedaron guachas
-        for words in typedWords.values():
-            newWords = filter(lambda word: word not in completions and word != currentAlreadyTyped, words)
-            suggestions += map(lambda word: { "display": word, "image": "scope-root-invalid" }, newWords)
+        for words in list(typedWords.values()):
+            newWords = [word for word in words if word not in completions and word != currentAlreadyTyped]
+            suggestions += [{ "display": word, "image": "scope-root-invalid" } for word in newWords]
             completions += newWords
             yield
 
@@ -1048,7 +1037,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         cursor = cursor or self.textCursor()
         flags = QtGui.QTextDocument.FindFlags()
         flags |= QtGui.QTextDocument.FindBackward
-        foundCursors = map(lambda (openBrace, closeBrace): (self.document().find(openBrace, cursor.selectionStart(), flags), closeBrace), self.braces)
+        foundCursors = [(self.document().find(openBrace_closeBrace[0], cursor.selectionStart(), flags), openBrace_closeBrace[1]) for openBrace_closeBrace in self.braces]
         openCursor = reduce(lambda c1, c2: (not c1[0].isNull() and c1[0].selectionEnd() > c2[0].selectionEnd()) and c1 or c2, foundCursors)
         if not openCursor[0].isNull():
             closeCursor = self.findTypingPair(openCursor[0].selectedText(), openCursor[1], openCursor[0])
@@ -1173,7 +1162,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             if isinstance(item, dict):
                 title = "%s 	&%d" % (item["title"], index)
                 icon = resources.getIcon(item["image"]) if "image" in item else QtGui.QIcon()
-            elif isinstance(item,  basestring):
+            elif isinstance(item,  str):
                 title = "%s 	&%d" % (item, index)
                 icon = QtGui.QIcon()
             elif isinstance(item,  BundleItemTreeNode):
@@ -1515,7 +1504,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         """When a url or text is dropped"""
         #mimeData = event.mimeData()
         if event.mimeData().hasUrls():
-            files = map(lambda url: url.toLocalFile(), event.mimeData().urls())
+            files = [url.toLocalFile() for url in event.mimeData().urls()]
             for file in files:                
                 items = self.application.supportManager.getFileExtensionItem(file, self.scope())
                 if items:

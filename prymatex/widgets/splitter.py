@@ -17,11 +17,11 @@ def createDisambiguatedTitles(addedTitles, newTitle):
     titleFormat = newTitle[0] + " (%s)"
     usedSubtitles = [ newTitle[1] ]
     for addedTitle in addedTitles:
-        for index in xrange(1, len(addedTitle)):
+        for index in range(1, len(addedTitle)):
             if addedTitle[index] not in usedSubtitles:
                 usedSubtitles.append(addedTitle[index])
                 break
-    return (map(lambda subTitle: titleFormat % subTitle, usedSubtitles[1:]), titleFormat % usedSubtitles[0])
+    return ([titleFormat % subTitle for subTitle in usedSubtitles[1:]], titleFormat % usedSubtitles[0])
 
 class SplitTabWidget(QtGui.QSplitter):
     """ The SplitTabWidget class is a hierarchy of QSplitters the leaves of
@@ -103,8 +103,8 @@ class SplitTabWidget(QtGui.QSplitter):
                 for t in range(ch.count()):
                     # A tab state is a tuple of the widget's object name and
                     # the title.
-                    name = unicode(ch.widget(t).objectName())
-                    title = unicode(ch.tabText(t))
+                    name = str(ch.widget(t).objectName())
+                    title = str(ch.tabText(t))
 
                     tab_states.append((name, title))
 
@@ -224,7 +224,7 @@ class SplitTabWidget(QtGui.QSplitter):
     def allWidgets(self):
         widgets = []
         for tw in self.findChildren(_TabWidget):
-            for index in xrange(tw.count()):
+            for index in range(tw.count()):
                 widgets.append(tw.widget(index))
         return widgets
 
@@ -322,7 +322,7 @@ class SplitTabWidget(QtGui.QSplitter):
         newWidgetTitle = widget.tabTitle()
         addedWidgets = self.widgetsByTitle(newWidgetTitle)
         if addedWidgets:
-            addedTitles, newWidgetTitle = createDisambiguatedTitles(map(lambda widget: widget.tabTitles(), addedWidgets), widget.tabTitles())
+            addedTitles, newWidgetTitle = createDisambiguatedTitles([widget.tabTitles() for widget in addedWidgets], widget.tabTitles())
             for widget, title in zip(addedWidgets, addedTitles):
                 self.setWidgetTitle(widget, title)
         return newWidgetTitle
@@ -330,7 +330,7 @@ class SplitTabWidget(QtGui.QSplitter):
     def widgetsByTitle(self, title):
         widgets = []
         for tw in self.findChildren(_TabWidget):
-            for index in xrange(tw.count()):
+            for index in range(tw.count()):
                 widget = tw.widget(index)
                 if widget.tabTitle() == title:
                     widgets.append(widget)

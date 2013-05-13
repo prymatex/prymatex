@@ -10,7 +10,7 @@ class PMBBundleTreeModel(QtCore.QAbstractItemModel):
         super(PMBBundleTreeModel, self).__init__(parent)  
         self.parents = []
         self.manager = manager
-        self.rootItem = PMBBundleTreeItem("", u"Bundles", "root")
+        self.rootItem = PMBBundleTreeItem("", "Bundles", "root")
         for bundle in self.manager.getAllBundles():
             bti = PMBBundleTreeItem(bundle.uuid, bundle.name, "bundle", self.rootItem)
             self.rootItem.appendChild(bti)
@@ -22,7 +22,7 @@ class PMBBundleTreeModel(QtCore.QAbstractItemModel):
             return False
         elif role == QtCore.Qt.EditRole:  
             item = index.internalPointer()  
-            item.name = unicode(value.toString())
+            item.name = str(value.toString())
             return True
         return False  
      
@@ -181,7 +181,7 @@ class ColumnView(QTreeView):
                 # Ver si cambio algo de los valores
                 bitem = self.manager.getBundleItem(uuid = olditem.uuid)
                 hash = bitem.hash
-                print bitem.isChanged(hash)
+                print(bitem.isChanged(hash))
         indexes = newindex.indexes()
         if indexes:
             for index in indexes:

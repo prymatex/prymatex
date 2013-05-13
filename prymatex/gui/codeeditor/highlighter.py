@@ -6,7 +6,7 @@ from copy import copy
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex.gui.codeeditor.processors import PMXSyntaxProcessor, CodeEditorSyntaxProcessor
+from prymatex.gui.codeeditor.processors import CodeEditorSyntaxProcessor
 from prymatex.support.syntax import PMXSyntax
 from prymatex.utils.decorators.helpers import printtime
 
@@ -62,7 +62,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.processor.startParsing(self.syntax.scopeName)
         stack = [[self.syntax.grammar, None]]
         while block.isValid():
-            text = unicode(block.text()) + "\n"
+            text = str(block.text()) + "\n"
             self.syntax.parseLine(stack, text, self.processor)
             userData = block.userData()
             
@@ -114,7 +114,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.applyFormat(userData)
     
     def realtime_highlight(self, text):
-        text = unicode(text) + "\n"
+        text = str(text) + "\n"
         userData = self.currentBlock().userData()
         if userData is not None and userData.textHash == hash(text) + hash(self.syntax.scopeName) + self.previousBlockState():
             self.applyFormat(userData)

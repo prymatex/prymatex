@@ -52,7 +52,7 @@ class Popen(subprocess.Popen):
             (errCode, written) = WriteFile(x, input)
         except ValueError:
             return self._close('stdin')
-        except (subprocess.pywintypes.error, Exception), why:
+        except (subprocess.pywintypes.error, Exception) as why:
             if why[0] in (109, errno.ESHUTDOWN):
                 return self._close('stdin')
             raise
@@ -73,7 +73,7 @@ class Popen(subprocess.Popen):
                 (errCode, read) = ReadFile(x, nAvail, None)
         except ValueError:
             return self._close(which)
-        except (subprocess.pywintypes.error, Exception), why:
+        except (subprocess.pywintypes.error, Exception) as why:
             if why[0] in (109, errno.ESHUTDOWN):
                 return self._close(which)
             raise
@@ -105,7 +105,7 @@ class Multiplexer(base.Multiplexer):
 
     def proc_keepalive(self, sid, w, h, command = None):
         if not sid in self.session:
-            print "creando", sid, self.session
+            print("creando", sid, self.session)
             # Start a new session
             self.session[sid] = {
                 'state':'unborn',

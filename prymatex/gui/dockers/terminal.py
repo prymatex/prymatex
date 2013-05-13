@@ -98,7 +98,7 @@ class TabbedTerminal(QtGui.QTabWidget):
             self.newTerminal()
 
     def setColorScheme(self, schemeName):
-        self.__colorScheme = ColorScheme.scheme(schemeName) if isinstance(schemeName, basestring) else schemeName
+        self.__colorScheme = ColorScheme.scheme(schemeName) if isinstance(schemeName, str) else schemeName
         for index in range(self.count()):
             self.widget(index).setColorScheme(self.__colorScheme)
 

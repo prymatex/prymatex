@@ -72,7 +72,7 @@ class myTree(QTreeView):
         
     def ocultar(self):
         '''slot'''
-        print self.modelo.filePath(self.currentIndex())
+        print(self.modelo.filePath(self.currentIndex()))
         
     def setRootPath(self):
         '''slot'''
@@ -89,12 +89,12 @@ class myTree(QTreeView):
             path = self.modelo.rootPath()
         dialogo = NewFileDialog()
         salida = dialogo.exec_()
-        print salida
+        print(salida)
         
             
     def goUp(self):
         
-        current_top = unicode(self.model().filePath(self.rootIndex()))
+        current_top = str(self.model().filePath(self.rootIndex()))
         #self.tree.setRootIndex(self.tree.model().index(QDir.currentPath()))
         upper = abspath(join(current_top, '..'))
         
@@ -219,7 +219,7 @@ class NewFileDialog(QDialog):
             if not self.btn_accept.isEnabled():
                 self.btn_accept.setEnabled(True)
         else:
-            print texto
+            print(texto)
             self.btn_accept.setEnabled(False);
         
     def cancelar(self):

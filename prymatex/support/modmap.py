@@ -47,40 +47,40 @@ def get_keymap_table():
                 # When you press only one key
                 unicode_char = ''
                 try:
-                    unicode_char = unichr(int(keysyms[0], 16))
+                    unicode_char = chr(int(keysyms[0], 16))
                 except:
                     unicode_char = ''
-                if unicode_char == u'\x00':
+                if unicode_char == '\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
 
                 # When you press a key plus Shift key
                 unicode_char = ''
                 try:
-                    unicode_char = unichr(int(keysyms[1], 16))
+                    unicode_char = chr(int(keysyms[1], 16))
                 except:
                     unicode_char = ''
-                if unicode_char == u'\x00':
+                if unicode_char == '\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
 
                 # When you press a key plus meta (dead keys)
                 unicode_char = ''
                 try:
-                    unicode_char = unichr(int(keysyms[4], 16))
+                    unicode_char = chr(int(keysyms[4], 16))
                 except:
                     unicode_char = ''
-                if unicode_char == u'\x00':
+                if unicode_char == '\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
 
                 # When you press a key plus meta plus Shift key
                 unicode_char = ''
                 try:
-                    unicode_char = unichr(int(keysyms[5], 16))
+                    unicode_char = chr(int(keysyms[5], 16))
                 except:
                     unicode_char = ''
-                if unicode_char == u'\x00':
+                if unicode_char == '\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
 

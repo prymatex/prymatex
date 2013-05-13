@@ -46,21 +46,21 @@ class TMDebugSyntaxProcessor(TMSyntaxProcessor):
         return line
 
     def open_tag(self, name, position):
-        print self.pprint( '', '{ %s' % name, position + len(self.line_marks))
+        print(self.pprint( '', '{ %s' % name, position + len(self.line_marks)))
 
     def close_tag(self, name, position):
-        print self.pprint( '', '} %s' % name, position + len(self.line_marks))
+        print(self.pprint( '', '} %s' % name, position + len(self.line_marks)))
 
     def new_line(self, line):
         self.line_number += 1
         self.line_marks = '[%04s] ' % self.line_number
-        print '%s%s' % (self.line_marks, line)
+        print('%s%s' % (self.line_marks, line))
 
     def start_parsing(self, name, position):
-        print '{%s' % name
+        print('{%s' % name)
 
     def end_parsing(self, name, position):
-        print '}%s' % name
+        print('}%s' % name)
 
 ################################## ScoreManager ###################################
 
@@ -92,7 +92,7 @@ class TMScoreManager(object):
         return maxi
     
     def score_term(self, search_scope, reference_scope):
-        if not (self.scores.has_key(reference_scope) and self.scores[reference_scope].has_key(search_scope)):
+        if not (reference_scope in self.scores and search_scope in self.scores[reference_scope]):
             self.scores.setdefault(reference_scope, {})
             self.scores[reference_scope][search_scope] = self.score_array( search_scope.split(' '), reference_scope.split( ' ' ) )
         return self.scores[reference_scope][search_scope]
@@ -134,7 +134,7 @@ class TMSyntaxProxy(object):
     
     def __proxy(self):
         if re.compile('^#').match(self.proxy):
-            if hasattr(self.syntax, 'repository') and self.syntax.repository.has_key(self.proxy[1:]):  
+            if hasattr(self.syntax, 'repository') and self.proxy[1:] in self.syntax.repository:  
                 return self.syntax.repository[self.proxy[1:]]
         elif self.proxy == '$self':
             return self.syntax
@@ -157,7 +157,7 @@ class TMSyntaxNode(object):
         if 'scopeName' in hash:
             TM_SYNTAXES[self.name_space][hash['scopeName']] = self 
         self.syntax = syntax or self
-        for key, value in hash.iteritems():
+        for key, value in hash.items():
             if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker', 'match', 'begin']:
                 try:
                     # TODO: Estos replace hay que sacarlos si usamos el motor de expreciones de la dll
@@ -171,8 +171,8 @@ class TMSyntaxNode(object):
             elif key in ['content', 'fileTypes', 'name', 'contentName', 'end', 'scopeName', 'keyEquivalent']:
                 setattr(self, key, value )
             elif key in ['captures', 'beginCaptures', 'endCaptures']:
-                keys = map(lambda v: int(v), value.keys())
-                value = map(lambda v: value['%s' % (v)], keys)
+                keys = [int(v) for v in list(value.keys())]
+                value = [value['%s' % (v)] for v in keys]
                 setattr(self, key, value.sort() )
             elif key == 'repository':
                 self.parse_repository(value)
@@ -201,7 +201,7 @@ class TMSyntaxNode(object):
     
     def parse_repository(self, repository):
         self.repository = {}
-        for key, value in repository.iteritems():
+        for key, value in repository.items():
             if 'include' in value:
                 self.repository[key] = TMSyntaxProxy( value, self.syntax )
             else:
@@ -218,7 +218,7 @@ class TMSyntaxNode(object):
     def parse_captures(self, name, pattern, match, processor):
         captures = pattern.match_captures( name, match )
         
-        captures = filter(lambda group, range, name: range[0] and range[0] != range[-1], captures)
+        captures = list(filter(lambda group, range, name: range[0] and range[0] != range[-1], captures))
         starts = []
         ends = []
         for group, range, name in captures:
@@ -354,31 +354,31 @@ def test_score():
     reference_scope = 'text.html.basic source.php.embedded.html string.quoted.double.php'
    
     ipdb.set_trace()
-    print 0 != sp.score( 'source.php string', reference_scope )
+    print(0 != sp.score( 'source.php string', reference_scope ))
     ipdb.set_trace()
-    print 0 != sp.score( 'text.html source.php', reference_scope )
+    print(0 != sp.score( 'text.html source.php', reference_scope ))
     ipdb.set_trace()
-    print 0 == sp.score( 'string source.php', reference_scope )
+    print(0 == sp.score( 'string source.php', reference_scope ))
     ipdb.set_trace() 
-    print 0 == sp.score( 'source.php text.html', reference_scope ) 
+    print(0 == sp.score( 'source.php text.html', reference_scope )) 
     
     ipdb.set_trace()
-    print 0 == sp.score( 'text.html source.php - string', reference_scope )
+    print(0 == sp.score( 'text.html source.php - string', reference_scope ))
     ipdb.set_trace() 
-    print 0 != sp.score( 'text.html source.php - ruby', reference_scope ) 
+    print(0 != sp.score( 'text.html source.php - ruby', reference_scope )) 
     
     ipdb.set_trace()
-    print  sp.score( 'string', reference_scope ) > sp.score( 'source.php', reference_scope )
+    print(sp.score( 'string', reference_scope ) > sp.score( 'source.php', reference_scope ))
     ipdb.set_trace() 
-    print sp.score( 'string.quoted', reference_scope ) > sp.score( 'source.php', reference_scope )
+    print(sp.score( 'string.quoted', reference_scope ) > sp.score( 'source.php', reference_scope ))
     ipdb.set_trace() 
-    print sp.score( 'text source string', reference_scope ) > sp.score( 'source string', reference_scope )
+    print(sp.score( 'text source string', reference_scope ) > sp.score( 'source string', reference_scope ))
 
 if __name__ == '__main__':
     import ipdb
 
     python = parse_file('../../prymatex/resources/Bundles/Python.tmbundle/Syntaxes/Python.tmLanguage', 'python')
     p = TMDebugSyntaxProcessor()
-    print python.parse(open('./syntax.py', 'r').read(), p)
+    print(python.parse(open('./syntax.py', 'r').read(), p))
     ipdb.set_trace()
     

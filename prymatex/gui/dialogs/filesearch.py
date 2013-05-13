@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 #Based on Ninja IDE https://github.com/ninja-ide/ninja-ide/blob/master/ninja_ide/gui/misc/find_in_files.py
 import os
-import Queue
+try:
+    import queue
+except ImportError:
+    import Queue as queue
 
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.ui.dialogs.search import Ui_SearchDialog
+from functools import reduce
 
 class FileSearchThread(QtCore.QThread):
     foundPattern = QtCore.pyqtSignal(str, list)
@@ -21,7 +25,7 @@ class FileSearchThread(QtCore.QThread):
         self.searchPattern = searchPattern
         self.filePatterns = filePattern.split(";")
         self.by_phrase = by_phrase
-        self.queue = Queue.Queue()
+        self.queue = queue.Queue()
         for directory in directories:
             self.queue.put(directory)
         #Start!

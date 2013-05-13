@@ -37,7 +37,7 @@ def __get_icon(index):
     Index can be a path, a Qt resource path, an integer.
     @return: QIcon instance or None if no icon could be retrieved
     '''
-    if isinstance(index, basestring):
+    if isinstance(index, str):
         if os.path.exists(index) and os.path.isabs(index):
             #File path Icon
             return __fileIconProvider.icon(QtCore.QFileInfo(index))

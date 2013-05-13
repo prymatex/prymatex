@@ -11,9 +11,9 @@ def main(argv = sys.argv):
     folding.setStart(15)
     folding.setStop(18)
     folding.setStop(20)
-    print folding.getNestedLevel(16)
-    print folding.start
-    print folding.stop
+    print(folding.getNestedLevel(16))
+    print(folding.start)
+    print(folding.stop)
     return 0
 
 if __name__ == "__main__":

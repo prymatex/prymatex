@@ -7,7 +7,7 @@ class MyThread(QtCore.QThread):
         
     def run(self):
         while True:
-            print "Ping"
+            print("Ping")
             QtCore.QThread.sleep(1)
 
 class Window(QtGui.QWidget):

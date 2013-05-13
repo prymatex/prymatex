@@ -6,10 +6,10 @@ if __name__ == "__main__":
     from prymatex.gui.support.qtadapter import RGBA2QColor, QColor2RGBA
     try:
         color = RGBA2QColor('#ee5533ff')
-        print color.rgba()
+        print(color.rgba())
         rgba = QColor2RGBA(color.rgba())
-        print rgba
-    except Exception, e:
-        print e
-    raw_input()
+        print(rgba)
+    except Exception as e:
+        print(e)
+    input()
     

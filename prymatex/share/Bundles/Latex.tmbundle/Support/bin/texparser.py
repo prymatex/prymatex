@@ -5,14 +5,14 @@ import os
 import tmprefs
 from struct import *
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 def percent_escape(str):
 	return re.sub('[\x80-\xff /&]', lambda x: '%%%02X' % unpack('B', x.group(0))[0], str)
 
 # Swapped call to percent_escape with urllib.quote.  Was causing links to fail in TM2
 def make_link(file, line):
-	return 'txmt://open/?url=file://' + urllib.quote(file) + '&amp;line=' + line
+	return 'txmt://open/?url=file://' + urllib.parse.quote(file) + '&amp;line=' + line
 
 def shell_quote(string):
 	return '"' + re.sub(r'([`$\\"])', r'\\\1', string) + '"'
@@ -67,7 +67,7 @@ class TexParser(object):
                     foundMatch = True
                     break
             if self.verbose and not foundMatch:
-                print line
+                print(line)
             
             line = self.getRewrappedLine()
         if self.done == False:
@@ -75,31 +75,31 @@ class TexParser(object):
         return self.isFatal, self.numErrs, self.numWarns
 
     def info(self,m,line):
-        print '<p class="info">'
-        print line
-        print '</p>'
+        print('<p class="info">')
+        print(line)
+        print('</p>')
 
     def error(self,m,line):
-        print '<p class="error">'
-        print line
-        print '</p>'
+        print('<p class="error">')
+        print(line)
+        print('</p>')
         self.numErrs += 1
         
     def warning(self,m,line):
-        print '<p class="warning">'
-        print line
-        print '</p>'
+        print('<p class="warning">')
+        print(line)
+        print('</p>')
         self.numWarns += 1
 
     def warn2(self,m,line):
-        print '<p class="fmtWarning">'
-        print line
-        print '</p>'
+        print('<p class="fmtWarning">')
+        print(line)
+        print('</p>')
         
     def fatal(self,m,line):
-        print '<p class="error">'
-        print line
-        print '</p>'
+        print('<p class="error">')
+        print(line)
+        print('</p>')
         self.isFatal = True
 
     def badRun(self):
@@ -125,7 +125,7 @@ class BibTexParser(TexParser):
     
     def finishRun(self,m,line):
         self.done = True
-        print '</div>'
+        print('</div>')
 
 class BiberParser(TexParser):
     """Parse and format Error Messages from biber"""
@@ -141,16 +141,16 @@ class BiberParser(TexParser):
     def warning(self,m,line):
         """Using one print command works more reliably 
            than using several lines"""
-        print '<p class="warning">' + line + '</p>'
+        print('<p class="warning">' + line + '</p>')
         self.numWarns += 1
 
     def finishRun(self,m,line):
       logFile = m.group(1)[:-3] + 'blg'
-      print '<p>  Complete transcript is in '
-      print '<a href="' + make_link(os.path.join(os.getcwd(),logFile),'1') +  '">' + logFile + '</a>'
-      print '</p>'
+      print('<p>  Complete transcript is in ')
+      print('<a href="' + make_link(os.path.join(os.getcwd(),logFile),'1') +  '">' + logFile + '</a>')
+      print('</p>')
       self.done = True
-      print '</div>'
+      print('</div>')
 
 class LaTexParser(TexParser):
     """Parse Output From Latex"""
@@ -184,68 +184,68 @@ class LaTexParser(TexParser):
 
     def detectNewFile(self,m,line):
         self.currentFile = m.group(1).rstrip()
-        print "<h4>Processing: " + self.currentFile + "</h4>"
+        print("<h4>Processing: " + self.currentFile + "</h4>")
 
     def detectInclude(self,m,line):
-        print "<ul><li>Including: " + m.group(1)
-        print "</li></ul>"
+        print("<ul><li>Including: " + m.group(1))
+        print("</li></ul>")
 
     def handleWarning(self,m,line):
-        print '<p class="warning"><a href="' + make_link(os.path.join(os.getcwd(),self.currentFile), m.group(1)) + '">'+line+"</a></p>"
+        print('<p class="warning"><a href="' + make_link(os.path.join(os.getcwd(),self.currentFile), m.group(1)) + '">'+line+"</a></p>")
         self.numWarns += 1
     
     def handleFileLineWarning(self,m,line):
         """Display warning. match m should contain file, line, warning message"""
-        print '<p class="warning"><a href="' + make_link(os.path.join(os.getcwd(), m.group(1)),m.group(2)) + '">' + m.group(3) + "</a></p>"
+        print('<p class="warning"><a href="' + make_link(os.path.join(os.getcwd(), m.group(1)),m.group(2)) + '">' + m.group(3) + "</a></p>")
         self.numWarns += 1
     
     def handleError(self,m,line):
-        print '<p class="error">'
-        print 'Latex Error: <a  href="' + make_link(os.path.join(os.getcwd(),m.group(1)),m.group(2)) +  '">' + m.group(1)+":"+m.group(2) + '</a> '+m.group(3)+'</p>'
+        print('<p class="error">')
+        print('Latex Error: <a  href="' + make_link(os.path.join(os.getcwd(),m.group(1)),m.group(2)) +  '">' + m.group(1)+":"+m.group(2) + '</a> '+m.group(3)+'</p>')
         self.numErrs += 1
         
     def finishRun(self,m,line):
         logFile = m.group(1).strip('"')
-        print '<p>  Complete transcript is in '
-        print '<a href="' + make_link(os.path.join(os.getcwd(),logFile),'1') +  '">' + logFile + '</a>'
-        print '</p>'
+        print('<p>  Complete transcript is in ')
+        print('<a href="' + make_link(os.path.join(os.getcwd(),logFile),'1') +  '">' + logFile + '</a>')
+        print('</p>')
         self.done = True
         
     def handleOldStyleErrors(self,m,line):
         if re.search('[Ee]rror', line):
-            print '<p class="error">'
-            print line
-            print '</p>'
+            print('<p class="error">')
+            print(line)
+            print('</p>')
             self.numErrs += 1
         else:
-            print '<p class="warning">'
-            print line
-            print '</p>'
+            print('<p class="warning">')
+            print(line)
+            print('</p>')
             self.numWarns += 1
         
     def pdfLatexError(self,m,line):
         """docstring for pdfLatexError"""
         self.numErrs += 1
-        print '<p class="error">'
-        print line
+        print('<p class="error">')
+        print(line)
         line = self.input_stream.readline()
         if line and re.match('^ ==> Fatal error occurred', line):  
-            print line.rstrip("\n")
-            print '</p>'
+            print(line.rstrip("\n"))
+            print('</p>')
             self.isFatal = True
         else:
             if line:
-                print '<pre>    '+ line.rstrip("\n") + '</pre>'
-            print '</p>'
+                print('<pre>    '+ line.rstrip("\n") + '</pre>')
+            print('</p>')
         sys.stdout.flush()
     
     def badRun(self):
         """docstring for finishRun"""
-        print '<p class="error">A fatal error occured, log file is in '
+        print('<p class="error">A fatal error occured, log file is in ')
         logFile = os.path.basename(os.getenv('TM_FILEPATH'))
         logFile = logFile.replace(self.suffix,'log')
-        print '<a href="' + make_link(os.path.join(os.getcwd(),logFile),'1') +  '">' + logFile + '</a>'        
-        print '</p>'
+        print('<a href="' + make_link(os.path.join(os.getcwd(),logFile),'1') +  '">' + logFile + '</a>')        
+        print('</p>')
 
 class ParseLatexMk(TexParser):
     """docstring for ParseLatexMk"""
@@ -264,25 +264,25 @@ class ParseLatexMk(TexParser):
         self.numRuns = 0
     
     def startBibtex(self,m,line):
-        print '<div class="bibtex">'
-        print '<h3>' + line[:-1] + '</h3>'
+        print('<div class="bibtex">')
+        print('<h3>' + line[:-1] + '</h3>')
         bp = BibTexParser(self.input_stream,self.verbose)
         f,e,w = bp.parseStream()
         self.numErrs += e
         self.numWarns += w
 
     def startBiber(self,m,line):
-        print '<div class="biber">'
-        print '<h3>' + line + '</h3>'
+        print('<div class="biber">')
+        print('<h3>' + line + '</h3>')
         bp = BiberParser(self.input_stream,self.verbose)
         f,e,w = bp.parseStream()
         self.numErrs += e
         self.numWarns += w
 
     def startLatex(self,m,line):
-        print '<div class="latex">'
-        print '<hr>'
-        print '<h3>' + line[:-1] + '</h3>'
+        print('<div class="latex">')
+        print('<hr>')
+        print('<h3>' + line[:-1] + '</h3>')
         bp = LaTexParser(self.input_stream,self.verbose,self.fileName)
         f,e,w = bp.parseStream()
         self.numErrs += e
@@ -290,8 +290,8 @@ class ParseLatexMk(TexParser):
 
     def newRun(self,m,line):
         if self.numRuns > 0:
-            print '<hr />'
-            print '<p>', self.numErrs, 'Errors', self.numWarns, 'Warnings', 'in this run.', '</p>'
+            print('<hr />')
+            print('<p>', self.numErrs, 'Errors', self.numWarns, 'Warnings', 'in this run.', '</p>')
         self.numWarns = 0
         self.numErrs = 0
         self.numRuns += 1
@@ -301,7 +301,7 @@ class ParseLatexMk(TexParser):
         self.done = True
 
     def ltxmk(self,m,line):
-        print '<p class="ltxmk">%s</p>'%line
+        print('<p class="ltxmk">%s</p>'%line)
 
 class ChkTeXParser(TexParser):
     """Parse the output from chktex"""
@@ -317,18 +317,18 @@ class ChkTeXParser(TexParser):
 
     def handleWarning(self,m,line):
         """Display warning. match m should contain file, line, warning message"""
-        print '<p class="warning">Warning: <a href="' + make_link(os.path.join(os.getcwd(), m.group(1)),m.group(2)) + '">' + m.group(1)+ ": "+m.group(2)+":</a>"+m.group(3)+"</p>"
+        print('<p class="warning">Warning: <a href="' + make_link(os.path.join(os.getcwd(), m.group(1)),m.group(2)) + '">' + m.group(1)+ ": "+m.group(2)+":</a>"+m.group(3)+"</p>")
         warnDetail = self.input_stream.readline()
         if len(warnDetail) > 2:
-            print '<pre>',warnDetail[:-1]
-            print self.input_stream.readline()[:-1], '</pre>'
+            print('<pre>',warnDetail[:-1])
+            print(self.input_stream.readline()[:-1], '</pre>')
         self.numWarns += 1
 
     def handleError(self,m,line):
-        print '<p class="error">'
-        print 'Error: <a  href="' + make_link(os.path.join(os.getcwd(),m.group(1)),m.group(2)) +  '">' + m.group(1)+":"+m.group(2) + ':</a> '+m.group(3)+'</p>'
-        print '<pre>', self.input_stream.readline()[:-1]
-        print self.input_stream.readline()[:-1], '</pre>'
+        print('<p class="error">')
+        print('Error: <a  href="' + make_link(os.path.join(os.getcwd(),m.group(1)),m.group(2)) +  '">' + m.group(1)+":"+m.group(2) + ':</a> '+m.group(3)+'</p>')
+        print('<pre>', self.input_stream.readline()[:-1])
+        print(self.input_stream.readline()[:-1], '</pre>')
         self.numErrs += 1
 
 if __name__ == '__main__':

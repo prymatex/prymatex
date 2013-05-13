@@ -69,7 +69,7 @@ class PMXCommand(PMXBundleItem):
             value = getattr(self, key)
             if value != None:
                 if key in ['capturePattern']:
-                    value = unicode(value)
+                    value = str(value)
                 dataHash[key] = value
         return dataHash
 

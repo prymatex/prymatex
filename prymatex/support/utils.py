@@ -71,7 +71,7 @@ def shebang_patch(shebang, environment):
             shebang = "%s %s %s" % ("#!/usr/bin/env", patchValue, " ".join(shebangParts[2:]))
     else:
         #No portable shebang
-        for key, value in environment.iteritems():
+        for key, value in environment.items():
             match = RE_SHEBANG_ENVKEY.match(key)
             if match:
                 shebangKey = match.group(1).lower()
@@ -91,7 +91,7 @@ def shebang_command(shebang, environment):
             return "%s %s" % (patchValue, " ".join(shebangParts[2:]))
     else:
         #No portable shebang
-        for key, value in environment.iteritems():
+        for key, value in environment.items():
             for prefix in [ "TM_", "PMX_" ]:
                 if key.startswith(prefix) and key[len(prefix):].lower() in shebang:
                     return ("%s %s") % (value, " ".join(shebangParts[1:]))
@@ -119,12 +119,12 @@ def ensureShellScript(script, environment):
 #============================
 def ensureUnixEnvironment(environment):
     codingenv = {}
-    for key, value in environment.iteritems():
+    for key, value in environment.items():
         try:
-            key = unicode(key).encode('utf-8')
-            value = unicode(value).encode('utf-8')
+            key = str(key).encode('utf-8')
+            value = str(value).encode('utf-8')
             codingenv[key] = value
-        except UnicodeDecodeError, e:
+        except UnicodeDecodeError as e:
             pass
     return codingenv
 
@@ -141,12 +141,12 @@ def prepareUnixShellScript(script, environment):
 #============================
 def ensureWindowsEnvironment(environment):
     codingenv = {}
-    for key, value in environment.iteritems():
+    for key, value in environment.items():
         try:
-            key = unicode(key).encode('utf-8')
-            value = unicode(value).encode('utf-8')
+            key = str(key).encode('utf-8')
+            value = str(value).encode('utf-8')
             codingenv[key] = value
-        except UnicodeDecodeError, e:
+        except UnicodeDecodeError as e:
             pass
     return codingenv
 
@@ -171,12 +171,12 @@ def ensureCygwinPath(path):
 
 def ensureCygwinEnvironment(environment):
     codingenv = {}
-    for key, value in environment.iteritems():
+    for key, value in environment.items():
         try:
-            key = unicode(key).encode('utf-8')
-            value = unicode(value).encode('utf-8')
+            key = str(key).encode('utf-8')
+            value = str(value).encode('utf-8')
             codingenv[key] = ensureCygwinPath(value)
-        except UnicodeDecodeError, e:
+        except UnicodeDecodeError as e:
             pass
     return codingenv
 
@@ -238,7 +238,7 @@ def ensurePath(path, name, suffix = 0):
     if suffix == 0 and not os.path.exists(path % name):
         return path % name
     else:
-        newPath = path % (name + "_" + unicode(suffix))
+        newPath = path % (name + "_" + str(suffix))
         if not os.path.exists(newPath):
             return newPath
         else:
@@ -252,7 +252,7 @@ def pathToLink(match):
     attrs['line'] = match.group('line')
     #attrs['column'] = match.group('column')
     
-    final_attrs = '?%s' % '?'.join(['%s=%s' % (k, v) for k, v in attrs.iteritems() if v ])
+    final_attrs = '?%s' % '?'.join(['%s=%s' % (k, v) for k, v in attrs.items() if v ])
     text = match.group('text')
     
     data = dict(attrs= final_attrs, text= text)
@@ -275,19 +275,19 @@ if __name__ == '__main__':
         "RUBY_SHEBANG": "#!/usr/local/bin/ruby1.8",
         "BASH_SHEBANG": "#!/bin/sh"
     }
-    print shebang_patch("#!/usr/bin/env python", environment)
-    print shebang_patch("#!/usr/bin/env python -s", environment)
-    print shebang_patch("#!/usr/bin/env ruby -w -u", environment)
-    print shebang_patch("#!/bin/ruby -uw --other", environment)
-    print shebang_patch("#!/usr/bin/python", environment)
-    print shebang_patch("#!/usr/bin/env bash", environment)
-    print shebang_patch("#!/usr/bin/bash", environment)
-    print shebang_command("#!/usr/bin/env python", environment)
-    print shebang_command("#!/usr/bin/env python -s", environment)
-    print shebang_command("#!/usr/bin/env ruby -w -u", environment)
-    print shebang_command("#!/bin/ruby -uw --other", environment)
-    print shebang_command("#!/bin/php -uw --other", environment)
-    print shebang_command("#!/usr/bin/python", environment)
-    print shebang_command("#!/usr/bin/env bash", environment)
-    print shebang_command("#!/usr/bin/env php", environment)
-    print shebang_command("#!/usr/bin/bash", environment)
+    print(shebang_patch("#!/usr/bin/env python", environment))
+    print(shebang_patch("#!/usr/bin/env python -s", environment))
+    print(shebang_patch("#!/usr/bin/env ruby -w -u", environment))
+    print(shebang_patch("#!/bin/ruby -uw --other", environment))
+    print(shebang_patch("#!/usr/bin/python", environment))
+    print(shebang_patch("#!/usr/bin/env bash", environment))
+    print(shebang_patch("#!/usr/bin/bash", environment))
+    print(shebang_command("#!/usr/bin/env python", environment))
+    print(shebang_command("#!/usr/bin/env python -s", environment))
+    print(shebang_command("#!/usr/bin/env ruby -w -u", environment))
+    print(shebang_command("#!/bin/ruby -uw --other", environment))
+    print(shebang_command("#!/bin/php -uw --other", environment))
+    print(shebang_command("#!/usr/bin/python", environment))
+    print(shebang_command("#!/usr/bin/env bash", environment))
+    print(shebang_command("#!/usr/bin/env php", environment))
+    print(shebang_command("#!/usr/bin/bash", environment))

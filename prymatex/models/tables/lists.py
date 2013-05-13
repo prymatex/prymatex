@@ -16,7 +16,7 @@ class ListTableModel(QtCore.QAbstractTableModel):
 
         if self._data:
             firstItem = self._data[0]
-            types = types or map(lambda e: type(e), firstItem)
+            types = types or [type(e) for e in firstItem]
             formats = formats or [ "%s" for _ in firstItem ]
         
         assert types is not None and formats is not None, "Type, format error"

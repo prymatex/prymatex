@@ -23,6 +23,7 @@ from prymatex.support import scope
 
 from prymatex.utils.decorators.deprecated import deprecated
 from prymatex.utils.decorators.memoize import dynamic_memoized, remove_memoized_argument, remove_memoized_function
+from functools import reduce
 
 BUNDLEITEM_CLASSES = [PMXSyntax, PMXSnippet, PMXMacro,
     PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand, PMXProject]
@@ -39,7 +40,7 @@ def compare(obj, keys, tests):
     value = getattr(obj, key, None)
     if value == None or key not in tests:
         return False
-    elif isinstance(value, (str, unicode)):
+    elif isinstance(value, str):
         return value.find(tests[key]) != -1 and compare(obj, keys[1:], tests)
     elif isinstance(value, (int)):
         return value == tests[key] and compare(obj, keys[1:], tests)
@@ -183,7 +184,7 @@ class PMXSupportBaseManager(object):
 
     def convertToValidPath(self, name):
         validPath = []
-        for char in unicodedata.normalize('NFKD', unicode(name)).encode('ASCII', 'ignore'):
+        for char in unicodedata.normalize('NFKD', str(name)).encode('ASCII', 'ignore'):
             char = char if char in self.VALID_PATH_CARACTERS else '-'
             validPath.append(char)
         return ''.join(validPath)
@@ -199,12 +200,12 @@ class PMXSupportBaseManager(object):
             stderr=subprocess.PIPE, env=context.environment)
 
         if context.inputType is not None:
-            context.process.stdin.write(unicode(context.inputValue).encode("utf-8"))
+            context.process.stdin.write(str(context.inputValue).encode("utf-8"))
         context.process.stdin.close()
         try:
             context.outputValue = context.process.stdout.read()
             context.errorValue = context.process.stderr.read()
-        except IOError, e:
+        except IOError as e:
             context.errorValue = str(e).decode("utf-8")
         context.process.stdout.close()
         context.process.stderr.close()
@@ -247,7 +248,7 @@ class PMXSupportBaseManager(object):
             if item.selector.does_match(context, rank):
                 sortFilterItems.append((rank.pop(), item))
         sortFilterItems.sort(key=lambda t: t[0], reverse = True)
-        return map(lambda (score, item): item, sortFilterItems)
+        return [score_item[1] for score_item in sortFilterItems]
 
     #---------------- Message Handler ----------------
     def showMessage(self, message):
@@ -329,7 +330,7 @@ class PMXSupportBaseManager(object):
     # ------------------ RELOAD THEMES
     def reloadThemes(self, namespace):
         if self.THEMES_NAME in self.namespaces[namespace]:
-            installedThemes = filter(lambda theme: theme.hasNamespace(namespace), self.getAllThemes())
+            installedThemes = [theme for theme in self.getAllThemes() if theme.hasNamespace(namespace)]
             themePaths = glob(os.path.join(self.namespaces[namespace][self.THEMES_NAME], '*.tmTheme'))
             for theme in installedThemes:
                 themePath = theme.path(namespace)
@@ -355,7 +356,7 @@ class PMXSupportBaseManager(object):
     # ---------------- RELOAD BUNDLES
     def reloadBundles(self, namespace):
         if self.BUNDLES_NAME in self.namespaces[namespace]:
-            installedBundles = filter(lambda theme: theme.hasNamespace(namespace), self.getAllBundles())
+            installedBundles = [theme for theme in self.getAllBundles() if theme.hasNamespace(namespace)]
             bundlePaths = glob(os.path.join(self.namespaces[namespace][self.BUNDLES_NAME], '*.tmbundle'))
             for bundle in installedBundles:
                 bundlePath = bundle.path(namespace)
@@ -368,16 +369,16 @@ class PMXSupportBaseManager(object):
                     bundlePaths.remove(bundlePath)
                 else:
                     bundleItems = self.findBundleItems(bundle=bundle)
-                    map(lambda item: item.removeSource(namespace), bundleItems)
+                    list(map(lambda item: item.removeSource(namespace), bundleItems))
                     bundle.removeSource(namespace)
                     if not bundle.hasSources():
                         self.logger.debug("Bundle %s removed." % bundle.name)
-                        map(lambda item: self.removeManagedObject(item), bundleItems)
-                        map(lambda item: self.removeBundleItem(item), bundleItems)
+                        list(map(lambda item: self.removeManagedObject(item), bundleItems))
+                        list(map(lambda item: self.removeBundleItem(item), bundleItems))
                         self.removeManagedObject(bundle)
                         self.removeBundle(bundle)
                     else:
-                        map(lambda item: item.setDirty(), bundleItems)
+                        list(map(lambda item: item.setDirty(), bundleItems))
                         bundle.support = None
                         bundle.setDirty()
             for path in bundlePaths:
@@ -398,7 +399,7 @@ class PMXSupportBaseManager(object):
             bundleItemPaths = {}
             for klass in BUNDLEITEM_CLASSES:
                 klassPaths = reduce(lambda x, y: x + glob(y), [os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS], [])
-                bundleItemPaths.update(dict(map(lambda path: (path, klass), klassPaths)))
+                bundleItemPaths.update(dict([(path, klass) for path in klassPaths]))
             for bundleItem in bundleItems:
                 if not bundleItem.hasNamespace(namespace):
                     continue
@@ -418,7 +419,7 @@ class PMXSupportBaseManager(object):
                         self.removeBundleItem(bundleItem)
                     else:
                         bundleItem.setDirty()
-            for path, klass in bundleItemPaths.iteritems():
+            for path, klass in bundleItemPaths.items():
                 self.logger.debug("New bundle item %s." % path)
                 klass.loadBundleItem(path, namespace, bundle, self)
         self.populatedBundle(bundle)
@@ -444,9 +445,9 @@ class PMXSupportBaseManager(object):
         def test_scope_bundleItem(itemType):
             def test_scope(f, key, fkey):
                 reference = ""
-                if itemType == PMXPreference.TYPE and f.func_name == "getPreferenceSettings":
+                if itemType == PMXPreference.TYPE and f.__name__ == "getPreferenceSettings":
                     reference = fkey[1]
-                elif f.func_name in ["getTabTriggerItem", "getKeyEquivalentItem"]:
+                elif f.__name__ in ["getTabTriggerItem", "getKeyEquivalentItem"]:
                     reference = fkey[2]
                     # TODO Hacelo con soporte para left and right scope
                 return scope.Selector(key).does_match(reference)
@@ -517,7 +518,7 @@ class PMXSupportBaseManager(object):
         """Retorna todos los bundles que cumplan con attrs"""
         bundles = []
         for bundle in self.getAllBundles():
-            if compare(bundle, attrs.keys(), attrs):
+            if compare(bundle, list(attrs.keys()), attrs):
                 bundles.append(bundle)
         return bundles
 
@@ -622,7 +623,7 @@ class PMXSupportBaseManager(object):
         """
         items = []
         for item in self.getAllBundleItems():
-            if compare(item, attrs.keys(), attrs):
+            if compare(item, list(attrs.keys()), attrs):
                 items.append(item)
         return items
 
@@ -637,7 +638,7 @@ class PMXSupportBaseManager(object):
         namespace = namespace or self.defaultNamespace
         if bundle.isProtected and not bundle.isSafe:
             self.updateBundle(bundle, namespace)
-        klass = filter(lambda c: c.TYPE == tipo, BUNDLEITEM_CLASSES)
+        klass = [c for c in BUNDLEITEM_CLASSES if c.TYPE == tipo]
         if len(klass) != 1:
             raise Exception("No class type for %s" % tipo)
         klass = klass.pop()
@@ -766,7 +767,7 @@ class PMXSupportBaseManager(object):
         """
         items = []
         for item in self.getAllThemes():
-            if compare(item, attrs.keys(), attrs):
+            if compare(item, list(attrs.keys()), attrs):
                 items.append(item)
         return items
 
@@ -893,13 +894,13 @@ class PMXSupportBaseManager(object):
     # --------------- TABTRIGGERS
     @dynamic_memoized
     def getAllTabTriggerSymbols(self):
-        return map(lambda item: item.tabTrigger, self.getAllTabTriggerItems())
+        return [item.tabTrigger for item in self.getAllTabTriggerItems()]
 
     @dynamic_memoized
     def getTabTriggerSymbol(self, line, index):
         line = line[:index][::-1]
-        search = map(lambda tabTrigger: (tabTrigger, line.find(tabTrigger[::-1]), len(tabTrigger)), self.getAllTabTriggerSymbols())
-        search = filter(lambda (trigger, value, length): value == 0, search)
+        search = [(tabTrigger, line.find(tabTrigger[::-1]), len(tabTrigger)) for tabTrigger in self.getAllTabTriggerSymbols()]
+        search = [trigger_value_length for trigger_value_length in search if trigger_value_length[1] == 0]
         if search:
             best = ("", 0)
             for trigger, value, length in search:
@@ -929,7 +930,7 @@ class PMXSupportBaseManager(object):
     #-------------- KEYEQUIVALENT ------------------------
     @dynamic_memoized
     def getAllKeyEquivalentCodes(self):
-        return map(lambda item: item.keyEquivalent, self.getAllKeyEquivalentItems())
+        return [item.keyEquivalent for item in self.getAllKeyEquivalentItems()]
 
     @dynamic_memoized
     def getKeyEquivalentItem(self, code, leftScope, rightScope):
@@ -964,7 +965,7 @@ class PMXSupportBaseManager(object):
 
     # ------------------ SYNTAXES
     def getSyntaxesAsDictionary(self):
-        return dict(map(lambda syntax: (syntax.scopeName, syntax), self.getAllSyntaxes()))
+        return dict([(syntax.scopeName, syntax) for syntax in self.getAllSyntaxes()])
 
     def getSyntaxes(self, sort=False):
         stxs = []
@@ -987,7 +988,7 @@ class PMXSupportBaseManager(object):
 
     def findSyntaxByFileType(self, fileType):
         for syntax in self.getAllSyntaxes():
-            if syntax.fileTypes is not None and any(map(lambda ft: fileType == "%s" % ft, syntax.fileTypes)):
+            if syntax.fileTypes is not None and any([fileType == "%s" % ft for ft in syntax.fileTypes]):
                 return syntax
 
 #===================================================
@@ -1030,7 +1031,7 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
         '''
         @return: list of PMXBundle instances
         '''
-        return self.BUNDLES.values()
+        return list(self.BUNDLES.values())
 
     # ----------------- BUNDLEITEM INTERFACE
     def addBundleItem(self, item):
@@ -1056,7 +1057,7 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
         self.BUNDLE_ITEMS.pop(item.uuid)
 
     def getAllBundleItems(self):
-        return self.BUNDLE_ITEMS.values()
+        return list(self.BUNDLE_ITEMS.values())
 
     # -------------- THEME INTERFACE
     def addTheme(self, theme):
@@ -1070,7 +1071,7 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
         self.THEMES.pop(theme.uuid)
 
     def getAllThemes(self):
-        return self.THEMES.values()
+        return list(self.THEMES.values())
 
     # ------------ PREFERENCES INTERFACE
     def getAllPreferences(self):
@@ -1085,7 +1086,7 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
         Return a list of tab triggers
         ['class', 'def', ...]
         """
-        return self.TAB_TRIGGERS.keys()
+        return list(self.TAB_TRIGGERS.keys())
 
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
         """
@@ -1110,7 +1111,7 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
 
     def getSyntaxes(self, sort=False):
         stxs = []
-        for syntax in self.SYNTAXES.values():
+        for syntax in list(self.SYNTAXES.values()):
             stxs.append(syntax)
         if sort:
             return sorted(stxs, key=lambda s: s.name)
@@ -1122,6 +1123,6 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
         return None
 
     def findSyntaxByFirstLine(self, line):
-        for syntax in self.SYNTAXES.values():
+        for syntax in list(self.SYNTAXES.values()):
             if syntax.firstLineMatch != None and syntax.firstLineMatch.search(line):
                 return syntax

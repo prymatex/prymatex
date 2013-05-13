@@ -5,6 +5,7 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.models.trees import TreeNodeBase
 from prymatex.models.trees import AbstractNamespaceTreeModel
+import collections
 
 #=========================================
 # Nodes and Models
@@ -25,7 +26,7 @@ class ConfigureTreeNode(TreeNodeBase):
         for child in self.childNodes():
             if child.filterAcceptsNode(string):
                 return True
-        textItems = filter(lambda value: callable(getattr(value, "text", None)), map(lambda key: getattr(self, key), dir(self)))
+        textItems = [value for value in [getattr(self, key) for key in dir(self)] if isinstance(getattr(value, "text", None), collections.Callable)]
         for item in textItems:
             if string in item.text().lower():
                 return True

@@ -25,7 +25,7 @@ except:
         return True
 
 def item(val):
-    if isinstance(val, basestring):
+    if isinstance(val, str):
         return {"title": val}
     if isinstance(val, tuple):
         return {"title": val[0]}
@@ -78,11 +78,11 @@ def get_string(**options):
     """
     
     # Set defaults and get options:
-    if not options.has_key('title'):
+    if 'title' not in options:
         options['title']='Enter String'
-    if not options.has_key('prompt'):
+    if 'prompt' not in options:
         options['prompt']='String:'
-    if not options.has_key('string'):
+    if 'string' not in options:
         options['string']=''
     plist = to_plist(options)
     

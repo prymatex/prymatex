@@ -57,8 +57,7 @@ class WebView(QtWebKit.QWebView):
     def on_mainFrame_javaScriptWindowObjectCleared(self):
         self.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self))
         environment = "\n".join(
-            map(lambda (key, value): 'window["{0}"]="{1}";'.format(key, value),
-            self.runningContext is not None and self.runningContext.environment.iteritems() or {})
+            ['window["{0}"]="{1}";'.format(key_value[0], key_value[1]) for key_value in self.runningContext is not None and iter(self.runningContext.environment.items()) or {}]
         )
         self.page().mainFrame().evaluateJavaScript(WINDOW_JAVASCRIPT % environment)
 
@@ -66,7 +65,7 @@ class WebView(QtWebKit.QWebView):
         url = reply.url()
         if url.scheme() == "file":
             #mimetype = mimetypes.guess_type(filePath)[0]
-            print url
+            print(url)
             self.page().mainFrame().load(url)
 
     def runCommand(self, command):

@@ -53,10 +53,10 @@ class RepositoryTableModel(QtCore.QAbstractTableModel):
         return bool(self.allSelected())
         
     def allSelected(self):
-        return filter(lambda repo: repo["checked"], self.repositories)
+        return [repo for repo in self.repositories if repo["checked"]]
         
     def clearUnselected(self):
-        self.repositories = filter(lambda repo: repo["checked"], self.repositories)
+        self.repositories = [repo for repo in self.repositories if repo["checked"]]
         self.layoutChanged.emit()
         
     def addRepositories(self, repositories):

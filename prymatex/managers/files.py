@@ -183,7 +183,7 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
             return path
     
     def fnmatchany(self, filename, patterns):
-        return any(map(lambda pattern: fnmatch.fnmatch(filename, pattern), patterns))
+        return any([fnmatch.fnmatch(filename, pattern) for pattern in patterns])
 
     # -------------- Open file control
     def isOpen(self, filePath):
@@ -245,11 +245,10 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
             raise exceptions.DirectoryException("%s not exists" % directory)
         filenames = os.listdir(directory)
         if filePatterns:
-            filenames = filter(
-                lambda filename: os.path.isdir(os.path.join(directory, filename)) or\
-                    self.fnmatchany(filename, filePatterns), filenames)
+            filenames = [filename for filename in filenames if os.path.isdir(os.path.join(directory, filename)) or\
+                    self.fnmatchany(filename, filePatterns)]
         if absolute:
-            return map(lambda name: os.path.join(directory, name), filenames)
+            return [os.path.join(directory, name) for name in filenames]
         return filenames
 
     def lastModification(self, filePath):
@@ -264,4 +263,4 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
         elif compareBy == "type":
             _, value1 = os.path.splitext(filePath1)
             _, value2 = os.path.splitext(filePath2)
-        return cmp(value1, value2)
+        return (value1 > value2) - (value1 < value2)

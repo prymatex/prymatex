@@ -94,7 +94,7 @@ class ProjectTreeNode(FileSystemTreeNode):
         return dataHash
         
     def update(self, dataHash):
-        for key in dataHash.keys():
+        for key in list(dataHash.keys()):
             setattr(self, key, dataHash[key])
 
     def save(self):
@@ -133,10 +133,10 @@ class ProjectTreeNode(FileSystemTreeNode):
             project = cls(path, data)
             manager.addProject(project)
             return project
-        except Exception, e:
+        except Exception as e:
             import traceback
             traceback.print_exc()
-            print "Error in project %s (%s)" % (path, e)
+            print("Error in project %s (%s)" % (path, e))
     
     def setManager(self, manager):
         self.manager = manager

@@ -53,10 +53,10 @@ class QtUiBuild(object):
         
         if has_been_updated(ui_file, py_file) or self.force:
             if self.verbose:
-                print("Compiling %s -> %s" % (ui_file, py_file))
+                print(("Compiling %s -> %s" % (ui_file, py_file)))
             self._ui2py(ui_file, py_file)
         elif self.verbose > 1:
-            print("%s has not been modified" % ui_file) 
+            print(("%s has not been modified" % ui_file)) 
     
     def _rc2py(self, rc_file, py_file):
         try:
@@ -76,10 +76,10 @@ class QtUiBuild(object):
             
         if has_been_updated(rc_file, py_file) or self.force:
             if self.verbose:
-                print("Building resource %s -> %s" % (rc_file,py_file))
+                print(("Building resource %s -> %s" % (rc_file,py_file)))
             self._rc2py(rc_file, py_file)
         elif self.verbose > 1:
-            print("%s has not been modified" % rc_file )
+            print(("%s has not been modified" % rc_file ))
 
     def create_package(self, dirpath):
         projectIndex = len(utils.fullsplit(PROJECT_PATH))
@@ -106,7 +106,7 @@ class QtUiBuild(object):
     _wrappeduic = False
     
     def warn(self, message, *largs):
-        print(message % largs)
+        print((message % largs))
     
     @classmethod
     def _wrapuic(cls):

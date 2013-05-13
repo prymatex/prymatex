@@ -28,7 +28,7 @@ class PMXKeyHelperMixin(object):
             self.keyHelpers = { helper.KEY: [ helper ]}
 
     def keyHelperByClass(self, klass):
-        keyHelper = filter(lambda keyHelper: isinstance(keyHelper, klass), self.keyHelpers)
+        keyHelper = [keyHelper for keyHelper in self.keyHelpers if isinstance(keyHelper, klass)]
         #TODO: Solo uno
         return keyHelper[0]
         

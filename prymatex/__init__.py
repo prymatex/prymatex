@@ -17,8 +17,8 @@ def get_git_revision(path=None):
     finally:
         if pipe: pipe.close()
     if rev:
-        return u'GIT-%s' % rev.strip()
-    return u'GIT-unknown'
+        return 'GIT-%s' % rev.strip()
+    return 'GIT-unknown'
 
 def get_version():
     version = '%s.%s' % (VERSION[0], VERSION[1])
@@ -30,7 +30,7 @@ def get_version():
         if VERSION[3] != 'final':
             version = '%s %s %s' % (version, VERSION[3], VERSION[4])
     git_rev = get_git_revision()
-    if git_rev != u'GIT-unknown':
+    if git_rev != 'GIT-unknown':
         version = "%s %s" % (version, git_rev)
     return version
 
@@ -44,7 +44,7 @@ __url__ = "http://www.prymatex.org"
 __source__ = "http://github.com/prymatex/prymatex"
 __license__ = "GPL2"
 __version__ = get_version() # Dynamically calculate the version
-if u'GIT' in __version__:
+if 'GIT' in __version__:
     __version__ = ' '.join(__version__.split(' ')[:-1])
     
 #-----------------------------------

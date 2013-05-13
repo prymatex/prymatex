@@ -31,13 +31,13 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
 
         #TODO: Filtro todo lo que sea None asumo que las signaturas de los metodos ponene los valores por defecto
         # esto tendria que ser controlado de una mejor forma
-        kwargs = dict(filter(lambda (key, value): value != None, kwargs.iteritems()))
+        kwargs = dict([key_value for key_value in iter(kwargs.items()) if key_value[1] != None])
         
         self.logger.debug("Dialog Recv --> Method: %s, Arguments: %s" % (name, kwargs))
         method = getattr(self, name)
         try:
             method(**kwargs)
-        except Exception, reason:
+        except Exception as reason:
             self.sendResult({"error": {"code": -1, "message": reason.message}})
             raise reason
 
@@ -68,7 +68,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
             value = plistlib.writePlistToString(value)
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}  
         #Ensure Unicode encode
-        result = unicode(value).encode("utf-8")
+        result = str(value).encode("utf-8")
         self.logger.debug("Dialog Send --> Result: %s" % (result))
         self.socket.send(result)
         
@@ -126,7 +126,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
             data = plistlib.readPlistFromString(message)
             if data is not None:
                 message = data[format]
-        except ExpatError, reason:
+        except ExpatError as reason:
             pass
         message = message.strip()
         if message:
@@ -173,7 +173,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
     
     def images(self, parameters = ""):
         data = plistlib.readPlistFromString(parameters)
-        for name, path in data["register"].iteritems():
+        for name, path in data["register"].items():
             resources.registerImagePath(name, path)
         self.sendResult()
     
@@ -200,5 +200,5 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
         self.sendResult()
 
     def debug(self, **kwargs):
-        print kwargs
+        print(kwargs)
         self.sendResult()

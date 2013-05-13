@@ -3,6 +3,7 @@
 
 import re, os
 from functools import partial
+import collections
 
 RE_SHELL_VAR = re.compile('\$([\w\d]+)')
 
@@ -17,7 +18,7 @@ def callback(match, context = None, sensitive = True, default = ''):
 # Expand $exp taking os.environ as context
 #===============================================================================
 def expand_shell_var(path, context = None, sensitive = True):
-    if context is not None and callable(context):
+    if context is not None and isinstance(context, collections.Callable):
         context = context()
     elif context is None:
         context = os.environ
@@ -46,6 +47,6 @@ def issubpath(childPath, parentPath, normpath = True, realpath = False):
     return fixpath(childPath).startswith(fixpath(parentPath))
 
 if __name__ == "__main__":
-    print issubpath("\cygwin\home\dvanhaaster\workspace\prymatex\prymatex\utils\osextra\path.py", "/cygwin/home/dvanhaaster/workspace/prymatex")
-    print issubpath("/home/diego/workspace/Prymatex/prymatex/setup.py", "/mnt/datos/workspace/Prymatex/prymatex", realpath=True)
-    print expand_shell_var("$PATH/alfa")
+    print(issubpath("\\cygwin\\home\\dvanhaaster\\workspace\\prymatex\\prymatex\\utils\\osextra\\path.py", "/cygwin/home/dvanhaaster/workspace/prymatex"))
+    print(issubpath("/home/diego/workspace/Prymatex/prymatex/setup.py", "/mnt/datos/workspace/Prymatex/prymatex", realpath=True))
+    print(expand_shell_var("$PATH/alfa"))

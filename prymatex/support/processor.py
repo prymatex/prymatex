@@ -125,25 +125,25 @@ class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
 
     def openTag(self, name, position):
         if self.showOutput:
-            print self.pprint( '', '{ %d - %s' % (position, name), position + len(self.line_marks))
+            print(self.pprint( '', '{ %d - %s' % (position, name), position + len(self.line_marks)))
 
     def closeTag(self, name, position):
         if self.showOutput:
-            print self.pprint( '', '} %d - %s' % (position, name), position + len(self.line_marks))
+            print(self.pprint( '', '} %d - %s' % (position, name), position + len(self.line_marks)))
 
     def beginLine(self, line):
         self.line_number += 1
         self.line_marks = '[%04s] ' % self.line_number
         if self.showOutput:
-            print '%s%s' % (self.line_marks, line)
+            print('%s%s' % (self.line_marks, line))
 
     def startParsing(self, name):
         if self.showOutput:
-            print '{%s' % name
+            print('{%s' % name)
 
     def endParsing(self, name):
         if self.showOutput:
-            print '}%s' % name
+            print('}%s' % name)
 
 class PMXDebugSnippetProcessor(PMXSnippetProcessor):
     def __init__(self):

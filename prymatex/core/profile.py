@@ -54,7 +54,7 @@ class PMXProfile(object):
         # Prepare class group
         configurableClass.settings = self.groupByClass(configurableClass)
         # Prepare configurable attributes
-        for key, value in configurableClass.__dict__.iteritems():
+        for key, value in configurableClass.__dict__.items():
             if isinstance(value, pmxConfigPorperty):
                 # TODO: Migrar a un sistema de nombres explicito
                 value.name = key
@@ -82,6 +82,6 @@ class PMXProfile(object):
         
     def sync(self):
         #Save capture values from qt
-        for group in self.GROUPS.values():
+        for group in list(self.GROUPS.values()):
             group.sync()
         self.qsettings.sync()

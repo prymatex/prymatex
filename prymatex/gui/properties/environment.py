@@ -22,10 +22,10 @@ class EnvironmentPropertiesWidget(MultiDictTableEditorWidget, PropertyTreeNode):
     def edit(self, project):
         self.project = project
         self.clear()
-        variables = map(lambda value: {"name": value["variable"],
+        variables = [{"name": value["variable"],
             "value": value["value"],
             "selected": value["enabled"]
-        }, self.project.shellVariables or [])
+        } for value in self.project.shellVariables or []]
         
         self.addDictionary('user', variables, editable = True, selectable=True)
         self.addDictionary('project', self.project.environment())
@@ -33,7 +33,7 @@ class EnvironmentPropertiesWidget(MultiDictTableEditorWidget, PropertyTreeNode):
 
     def on_model_dictionaryChanged(self, dictionaryName):
         variables = self.model().dictionaryData(dictionaryName, raw = True)
-        variables = map(lambda item: {"variable": item["name"], 
+        variables = [{"variable": item["name"], 
             "value": item["value"], 
-            "enabled": item["selected"]}, variables)
+            "enabled": item["selected"]} for item in variables]
         self.project.shellVariables = variables

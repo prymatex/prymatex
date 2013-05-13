@@ -30,7 +30,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
 
 
     def hideAllWidgets(self):
-        map(lambda widget: widget.setVisible(False), [self.widgetGoToLine, self.widgetFindReplace, self.widgetCommand, self.widgetIFind])
+        list(map(lambda widget: widget.setVisible(False), [self.widgetGoToLine, self.widgetFindReplace, self.widgetCommand, self.widgetIFind]))
 
     # --------------- Setup Events
     def setupEvents(self):

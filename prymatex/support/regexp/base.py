@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
-
-import re, ponyguruma
+import re, sys
+import ponyguruma
 from ponyguruma import sre
 ONIG_OPTION_NONE = ponyguruma.OPTION_NONE
 ONIG_OPTION_IGNORECASE = ponyguruma.OPTION_IGNORECASE
@@ -33,7 +33,7 @@ def convertRe(options):
 
 def compileRe(string, flags):
     # Test oniguruma chars
-    if not any(map(lambda tests : string.find(tests) != -1, ["\G"])):
+    if not any([string.find(tests) != -1 for tests in ["\G"]]):
         for o, r in (('?i:', '(?i)'), ):
             string = string.replace(o, r)
         try:
@@ -45,7 +45,6 @@ def compileOnig(string, flags):
     return sre.compile(string, convertOnig(flags))
 
 def compileRegexp(string, flags = []):
-    string = unicode(string)
     pattern = compileRe(string, flags)
     if pattern is None:
         pattern = compileOnig(string, flags)

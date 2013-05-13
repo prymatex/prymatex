@@ -2,7 +2,7 @@
 
 import asyncore, asynchat
 import os, socket, string, sys
-import StringIO, mimetools
+import io, mimetools
 
 ROOT = "."
 
@@ -27,7 +27,7 @@ class HTTPChannel(asynchat.async_chat):
     def found_terminator(self):
         if not self.header:
             # parse http header
-            fp = StringIO.StringIO(self.data)
+            fp = io.StringIO(self.data)
             request = string.split(fp.readline(), None, 2)
             if len(request) != 3:
                 # badly formed request; just shut down
@@ -86,7 +86,7 @@ class HTTPServer(asyncore.dispatcher):
             while path[:1] == "/":
                 path = path[1:]
             filename = os.path.join(ROOT, path)
-            print path, "=>", filename
+            print(path, "=>", filename)
             file = open(filename, "r")
         except IOError:
             channel.pushstatus(404, "Not found")
@@ -103,6 +103,6 @@ class HTTPServer(asyncore.dispatcher):
 # try it out
 
 s = HTTPServer(PORT)
-print "serving at port", PORT
+print("serving at port", PORT)
 asyncore.loop()
 

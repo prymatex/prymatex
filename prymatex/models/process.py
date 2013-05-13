@@ -45,7 +45,7 @@ class ExternalProcessTableModel(QtCore.QAbstractTableModel):
             return self.STATES_ICONS[item["process"].state()]
             
     def findRowIndex(self, process):
-        items = filter(lambda item: item["process"] == process, self.processItems)
+        items = [item for item in self.processItems if item["process"] == process]
         assert len(items) == 1, "No puede tener mas de uno"
         return self.processItems.index(items[0])
         
@@ -64,4 +64,4 @@ class ExternalProcessTableModel(QtCore.QAbstractTableModel):
         self.endRemoveRows()
         
     def getAllItems(self):
-        return map(lambda item: item["process"], self.processItems)
+        return [item["process"] for item in self.processItems]

@@ -15,7 +15,7 @@ class PMXFlatBaseProxyModel(QtGui.QAbstractProxyModel):
         return self.mModelIndexMap[proxyIndex.row()]
         
     def mapFromSource(self, sourceIndex):
-        return self.mModelIndexMap.values().index(sourceIndex)
+        return list(self.mModelIndexMap.values()).index(sourceIndex)
         
     def columnCount(self, parent):
         return 1
@@ -91,7 +91,7 @@ class PMXFlatBaseProxyModel(QtGui.QAbstractProxyModel):
 
     def mapModel(self, pos, parent):
         childCount = self.mModel.rowCount(parent)
-        for i in xrange(childCount):
+        for i in range(childCount):
             #First, map this one
             index = self.mModel.index(i, 0, parent)
             self.mModelIndexMap[pos] = index;

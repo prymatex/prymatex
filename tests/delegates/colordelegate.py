@@ -9,7 +9,7 @@ def HTML2QColor(htmlColor):
     @param htmlColor: A html formated color string i.e.: #RRGGBB or #RRGGBBAA
     @return: If htmlColor is a valid color, a QColor isntance
     ''' 
-    htmlColor = unicode(htmlColor).strip('#')
+    htmlColor = str(htmlColor).strip('#')
     if len(htmlColor) == 3:
         red, green, blue = htmlColor
     elif len(htmlColor) == 6:
@@ -36,12 +36,12 @@ class QWebColorDelegate(QItemDelegate):
         try:
             color = HTML2QColor( index.data().toString() )
             colorDialog.setCurrentColor(color)
-        except ValueError, e:
-            print e
+        except ValueError as e:
+            print(e)
     
     def _paint(self, painter, style, index):
         # TODO: Paint it somewere?
-        print painter, style, index
+        print(painter, style, index)
         QItemDelegate.paint(self, painter, style, index)
         
 
@@ -58,7 +58,7 @@ def main(argv):
     model.setHeaderData(0, Qt.Horizontal, "Foreground")
     tableView.setModel(model)
     for i in range(model.columnCount()):
-        print "Setting delegate for column: %d" % i
+        print("Setting delegate for column: %d" % i)
         delegate = QWebColorDelegate()
         delegate.setParent(tableView)
         tableView.setItemDelegateForColumn(i, delegate)

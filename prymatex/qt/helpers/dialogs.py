@@ -15,8 +15,8 @@ class DialogManager(QtCore.QObject):
     def show(self, dialog):
         """Generic method to show a non-modal dialog and keep reference
         to the QtCore.Qt C++ object"""
-        for dlg in self.dialogs.values():
-            if unicode(dlg.windowTitle()) == unicode(dialog.windowTitle()):
+        for dlg in list(self.dialogs.values()):
+            if str(dlg.windowTitle()) == str(dialog.windowTitle()):
                 dlg.show()
                 dlg.raise_()
                 break
@@ -34,5 +34,5 @@ class DialogManager(QtCore.QObject):
 
     def close_all(self):
         """Close all opened dialog boxes"""
-        for dlg in self.dialogs.values():
+        for dlg in list(self.dialogs.values()):
             dlg.reject()

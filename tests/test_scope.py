@@ -62,7 +62,7 @@ class ScopeSelectorTests(unittest.TestCase):
             self.assertLessEqual(sum(rank), lastRank)
             lastRank = sum(rank)
         
-        print Selector("source.python.django").does_match("source.python")
+        print(Selector("source.python.django").does_match("source.python"))
         
     def test_context(self):
         selector = Selector("source & ((L:punctuation.section.*.begin & R:punctuation.section.*.end) | (L:punctuation.definition.*.begin & R:punctuation.definition.*.end)) - string")

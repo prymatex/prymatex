@@ -13,7 +13,7 @@ class LogicRule(object):
         return self._rule_string == other._rule_string
         
     def _build_rule(self, rule_string):
-        assert isinstance(rule_string, basestring)
+        assert isinstance(rule_string, str)
         sub_rules = rule_string.split(',')
         self.rule = None
         
@@ -32,7 +32,7 @@ class PMXLogicDict(object):
         self.rules.append()
     
     def __getitem__(self, name):
-        for logic, obj in self.__logic_mapping.iteritems():
+        for logic, obj in self.__logic_mapping.items():
             if logic.match(name):
                 return obj
                 

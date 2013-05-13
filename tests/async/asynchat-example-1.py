@@ -52,6 +52,6 @@ class HTTPServer(asyncore.dispatcher):
 # try it out
 
 s = HTTPServer(PORT)
-print "serving at port", PORT, "..."
+print("serving at port", PORT, "...")
 asyncore.loop()
 

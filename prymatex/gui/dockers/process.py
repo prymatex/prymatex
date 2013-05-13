@@ -50,10 +50,9 @@ class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
                   "callback": self.on_actionTerminate_triggered },
                 "-",
                 { "text": "Send Signal",
-                  "items": map(lambda (key, value):
-                        { "text": "%s (%s)" % (key, value),
-                          "callback": lambda _, signal = value: self.on_actionSendSignal_triggered(signal)
-                        }, sorted(osextra.SIGNALS.iteritems(), key = lambda (k, v): v))
+                  "items": [{ "text": "%s (%s)" % (key_value[0], key_value[1]),
+                          "callback": lambda _, signal = key_value[1]: self.on_actionSendSignal_triggered(signal)
+                        } for key_value in sorted(iter(osextra.SIGNALS.items()), key = lambda k_v: k_v[1])]
                 }
             ]
         }

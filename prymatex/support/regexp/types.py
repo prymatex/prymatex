@@ -10,11 +10,11 @@ CASE_UPPER_NEXT = 3
 CASE_LOWER_NEXT = 4
 
 CASE_CHARS = {
-    CASE_UPPER: '\U',
-    CASE_LOWER: '\L',
-    CASE_NONE: '\E',
-    CASE_UPPER_NEXT: '\u',
-    CASE_LOWER_NEXT: '\l'
+    CASE_UPPER: '\\U',
+    CASE_LOWER: '\\L',
+    CASE_NONE: '\\E',
+    CASE_UPPER_NEXT: '\\u',
+    CASE_LOWER_NEXT: '\\l'
 }
 
 def escapeCharacters(text, esc):
@@ -29,20 +29,20 @@ class ConditionType(object):
         self.if_not_set = []
 
     def __unicode__(self):
-        cnd = u"(?%d:" % self.name
+        cnd = "(?%d:" % self.name
         for cmps in self.if_set:
             if isinstance(cmps, int):
                 cnd += CASE_CHARS[cmps]
             else:
-                cnd += escapeCharacters(unicode(cmps), "(:)")
+                cnd += escapeCharacters(str(cmps), "(:)")
         if self.if_not_set:
-            cnd += u":"
+            cnd += ":"
             for cmps in self.if_not_set:
                 if isinstance(cmps, int):
                     cnd += CASE_CHARS[cmps]
                 else:
-                    cnd += escapeCharacters(unicode(cmps), "(:)")
-        cnd += u")"
+                    cnd += escapeCharacters(str(cmps), "(:)")
+        cnd += ")"
         return cnd
 
     def apply(self, match):
@@ -53,7 +53,7 @@ class ConditionType(object):
         return self.if_not_set
 
 class FormatType(object):
-    _repl_re = re.compile(u"\$(?:(\d+)|g<(.+?)>)")
+    _repl_re = re.compile("\$(?:(\d+)|g<(.+?)>)")
     def __init__(self):
         self.composites = []
     
@@ -63,7 +63,7 @@ class FormatType(object):
             if isinstance(cmps, int):
                 frmt += CASE_CHARS[cmps]
             else:
-                frmt += unicode(cmps)
+                frmt += str(cmps)
         return frmt
     
     def case_function(self, case):
@@ -107,7 +107,7 @@ class FormatType(object):
             # Transform
             case = CASE_NONE
             for value in nodes:
-                if isinstance(value, basestring):
+                if isinstance(value, str):
                     value = pattern.sub(self.prepare_replacement(value), sourceText)
                 elif isinstance(value, int):
                     case = value
@@ -128,9 +128,9 @@ class TransformationType(object):
         self.options = []
         
     def __unicode__(self):
-        trns = u"%s/%s/" % (self.pattern.pattern, unicode(self.format))
+        trns = "%s/%s/" % (self.pattern.pattern, str(self.format))
         if self.options:
-            trns += u"%s" % u"".join(self.options)
+            trns += "%s" % "".join(self.options)
         return trns
         
     def transform(self, text):

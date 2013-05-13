@@ -25,7 +25,7 @@
 '''
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.regexp import compileRegexp
-from regexp import Transformation
+from .regexp import Transformation
 
 class PMXPreferenceSettings(object):
     KEYS = [    'completions', 'completionCommand', 'disableDefaultCompletion', 'showInSymbolList', 'symbolTransformation', 
@@ -57,7 +57,7 @@ class PMXPreferenceSettings(object):
                 if key in self.INDENT_KEYS or key in self.FOLDING_KEYS:
                     value = value.pattern
                 elif key in [ 'shellVariables' ]:
-                    value = [ {'name': t[0], 'value': t[1] } for t in  value.iteritems() ]
+                    value = [ {'name': t[0], 'value': t[1] } for t in  value.items() ]
                 elif key in [ 'symbolTransformation' ]:
                     value = ";".join(value) + ";"
                 elif key in [ 'showInSymbolList' ]:
@@ -74,11 +74,9 @@ class PMXPreferenceSettings(object):
                 if key in self.INDENT_KEYS or key in self.FOLDING_KEYS:
                     value = compileRegexp( value )
                 elif key in [ 'shellVariables' ]:
-                    value = dict(map(lambda d: (d['name'], d['value']), value))
+                    value = dict([(d['name'], d['value']) for d in value])
                 elif key in [ 'symbolTransformation' ]:
-                    value = filter(lambda value: bool(value), 
-                                map(lambda value: value.strip(), 
-                                    value.split(";")))
+                    value = [value for value in [value.strip() for value in value.split(";")] if bool(value)]
                 elif key in [ 'showInSymbolList' ]:
                     value = bool(int(value))
                 elif key in [ 'spellChecking' ]:
@@ -139,7 +137,7 @@ class PMXPreferenceMasterSettings(object):
     def shellVariables(self):
         shellVariables = {}
         for settings in self.settings:
-            if isinstance(settings.shellVariables, dict) and all(map(lambda shellKey: shellKey not in shellVariables, settings.shellVariables.keys())):
+            if isinstance(settings.shellVariables, dict) and all([shellKey not in shellVariables for shellKey in list(settings.shellVariables.keys())]):
                 shellVariables.update(settings.shellVariables)
         return shellVariables
         
@@ -213,7 +211,7 @@ class PMXPreferenceMasterSettings(object):
     def __findIndentSettings(self):
         #TODO: Algo de cache?
         for settings in self.settings:
-            if any(map(lambda indentKey: getattr(settings, indentKey) is not None, PMXPreferenceSettings.INDENT_KEYS)):
+            if any([getattr(settings, indentKey) is not None for indentKey in PMXPreferenceSettings.INDENT_KEYS]):
                 return settings
 
     def getBundle(self, attrKey):
@@ -297,7 +295,7 @@ class PMXPreference(PMXBundleItem):
         return dataHash
 
     def update(self, dataHash):
-        for key in dataHash.keys():
+        for key in list(dataHash.keys()):
             value = dataHash.get(key, None)
             if key == 'settings':
                 self.settings.update(value)
@@ -307,4 +305,4 @@ class PMXPreference(PMXBundleItem):
     @staticmethod
     def buildSettings(preferences):
         """El orden si importa, las preferences vienen ordenadas por score"""
-        return PMXPreferenceMasterSettings(map(lambda p: p.settings, preferences))
+        return PMXPreferenceMasterSettings([p.settings for p in preferences])

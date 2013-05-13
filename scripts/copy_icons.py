@@ -12,7 +12,7 @@ DESTINITY = os.path.abspath(os.path.join(__file__, '..', '..', 'prymatex', 'shar
 if __name__ == '__main__':
     copyNames = set(ICON_NAMES)
     for dirpath, _, filenames in os.walk(SOURCE):
-        sourceNames = set(map(lambda f: os.path.splitext(f)[0], filenames))
+        sourceNames = set([os.path.splitext(f)[0] for f in filenames])
         names = sourceNames.intersection(copyNames)
         if names:
             destpath = os.path.join(DESTINITY, dirpath[len(SOURCE) + 1:])

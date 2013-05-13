@@ -10,7 +10,7 @@
 #composite:    «expression» ([|&-] «expression»)*
 #selector:     «composite» (',' «composite»)*
 
-import types
+from . import types
 
 class Parser(object):
     def __init__(self, source):
