@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import unicode_literals
+
 # Copyright (c) 2010 Pablo Seminario <pabluk@gmail.com>
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import re
 import subprocess
 
@@ -27,7 +28,7 @@ def cmd_keymap_table():
 def cmd_modifier_map():
     try:
         return subprocess.Popen(
-                ['xmodmap','-pm'], stdout=subprocess.PIPE).communicate()[0]
+               ['xmodmap','-pm'], stdout=subprocess.PIPE).communicate()[0]
     except:
         return ""
 
@@ -36,10 +37,10 @@ def get_keymap_table():
 
     keymap_table = cmd_keymap_table()
 
-    re_line = re.compile(r'0x\w+')
-    for line in keymap_table.split('\n')[1:]:
+    re_line = re.compile(b'0x\w+')
+    for line in keymap_table.splitlines()[1:]:
         if len(line) > 0:
-            keycode = re.search(r'\s+(\d+).*', line)
+            keycode = re.search(b'\s+(\d+).*', line)
             if keycode:
                 new_keysyms = []
                 keycode = int(keycode.group(1))
@@ -47,45 +48,45 @@ def get_keymap_table():
                 # When you press only one key
                 unicode_char = ''
                 try:
-                    unicode_char = unichr(int(keysyms[0], 16))
+                    unicode_char = chr(int(keysyms[0], 16))
                 except:
                     unicode_char = ''
-                if unicode_char == u'\x00':
+                if unicode_char == '\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
 
                 # When you press a key plus Shift key
                 unicode_char = ''
                 try:
-                    unicode_char = unichr(int(keysyms[1], 16))
+                    unicode_char = chr(int(keysyms[1], 16))
                 except:
                     unicode_char = ''
-                if unicode_char == u'\x00':
+                if unicode_char == '\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
 
                 # When you press a key plus meta (dead keys)
                 unicode_char = ''
                 try:
-                    unicode_char = unichr(int(keysyms[4], 16))
+                    unicode_char = chr(int(keysyms[4], 16))
                 except:
                     unicode_char = ''
-                if unicode_char == u'\x00':
+                if unicode_char == '\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
 
                 # When you press a key plus meta plus Shift key
                 unicode_char = ''
                 try:
-                    unicode_char = unichr(int(keysyms[5], 16))
+                    unicode_char = chr(int(keysyms[5], 16))
                 except:
                     unicode_char = ''
-                if unicode_char == u'\x00':
+                if unicode_char == '\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
 
-    		#keymap[keycode-8] = new_keysyms
-    		keymap[keycode] = new_keysyms
+                #keymap[keycode-8] = new_keysyms
+                keymap[keycode] = new_keysyms
 
     return keymap
 
@@ -94,10 +95,10 @@ def get_modifier_map():
 
     modifier_map = cmd_modifier_map()
 
-    re_line = re.compile(r'(0x\w+)')
-    for line in modifier_map.split('\n')[1:]:
+    re_line = re.compile(b'(0x\w+)')
+    for line in modifier_map.splitlines()[1:]:
         if len(line) > 0:
-            mod_name = re.match(r'(\w+).*', line)
+            mod_name = re.match(b'(\w+).*', line)
             if mod_name:
                 mod_name = mod_name.group(1)
                 keycodes = re_line.findall(line)
