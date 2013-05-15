@@ -1,42 +1,92 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
+import re
 import sys
 import re, plistlib
+from string import printable
 
-RE_XML_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
-                 u'|' + \
-                 u'([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
-                  (unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-                   unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-                   unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))
+XMLPATTERN = re.compile("<(\w+)>(.*)<\/\w+>");
 
-RE_XML_ILLEGAL = re.compile(RE_XML_ILLEGAL)
+if sys.version_info.major < 3:
+    str = unicode
 
-REPLACES = {
-    '': " ",    #Este caracter es usado en el autocompletado pongo un espacio
-    '': "*",    #Conitnue bullet del bundle text
-    '': "-"     #El backspace en una macro de latex
-}
+# FIX, FIX, FIX
+def __fixItems(dictionary, applyFunction):
+    return dict(map(lambda item: (applyFunction(item[0]), applyFunction(item[1])), dictionary.items()))
+
+def __fixWriteItem(item):
+    if isinstance(item, dict):
+        # Fix all the items in the dictionary
+        item = __fixItems(item, __fixWriteItem)
+    elif isinstance(item, list):
+        # Fix all items in the list
+        item = list(map(__fixWriteItem, item))
+    elif isinstance(item, str):
+        # Fix any unicode or non-printable strings
+        item = __wrapItem(item)
+    return item
+
+def __fixReadItem(item):
+    if isinstance(item, dict):
+        # Fix all the items in the dictionary
+        item = __fixItems(item, __fixReadItem)
+    elif isinstance(item, list):
+        # Fix all items in the list
+        item = list(map(__fixReadItem, item))
+    elif isinstance(item, plistlib.Data):
+        item = item.data.decode("utf-8")
+    return item
+
+def __wrapItem(item):
+    if __shouldWrap(item):
+        return plistlib.Data(bytes(item, "utf-8"))
+    else:
+        return item
+
+def __shouldWrap(string):
+    return not set(string).issubset(set(printable)) \
+        or __containsUnicode(string)
+
+def __containsUnicode(string):
+    try:
+        string.encode('ascii')
+        return False
+    except:
+        return True
 
 if sys.version_info.major >= 3:
     # Monkey patch
     plistlib.readPlistFromString = lambda data: \
         plistlib.readPlistFromBytes(bytes(data, "utf-8"))
-
-
+  
 def readPlist(filePath):
     try:
         data = plistlib.readPlist(filePath)
     except Exception as e:
+        result = []
+        start = 0
         data = open(filePath).read()
-        for match in RE_XML_ILLEGAL.finditer(data):
-            char = data[match.start():match.end()]
-            if char in REPLACES:
-                char = REPLACES[char]
-            data = data[:match.start()] + char + data[match.end():]
-        data = plistlib.readPlistFromString(data)
-    return data
+        if sys.version_info.major < 3:
+            data = data.decode("utf-8")
+        for match in XMLPATTERN.finditer(data):
+            if __shouldWrap(match.group(2)):
+                result.append(data[start:match.start()])
+                item = b'<data>' + plistlib.Data(match.group(2).encode("utf-8")).asBase64() + b'</data>'
+                result.append(item.decode("utf-8"))
+                start = match.end()
+        result.append(data[start:])
+        result = "".join(result)
+        if sys.version_info.major < 3:
+            result = result.encode("utf-8")
+        data = plistlib.readPlistFromString(result)
+    return __fixItems(data, __fixReadItem)
     
 def writePlist(dictionary, filePath):
-    plistlib.writePlist(dictionary, filePath)
+    plistlib.writePlist(__fixItems(dictionary, __fixWriteItem), filePath)
+    
+if __name__ == "__main__":
+    testFile = "/mnt/datos/workspace/Prymatex/prymatex/prymatex/share/Bundles/ShellScript.tmbundle/Commands/man.plist"
+    datos = readPlist(testFile)
+    print(datos)
