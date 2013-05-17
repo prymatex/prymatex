@@ -13,6 +13,7 @@ from prymatex.qt.helpers import get_std_icon
 
 from prymatex.resources.loader import getResourcePath
 from prymatex.utils.decorators.memoize import memoized
+from prymatex.utils import six
 
 __fileIconProvider = QtGui.QFileIconProvider()
 
@@ -37,7 +38,7 @@ def __get_icon(index):
     Index can be a path, a Qt resource path, an integer.
     @return: QIcon instance or None if no icon could be retrieved
     '''
-    if isinstance(index, str):
+    if isinstance(index, six.string_types):
         if os.path.exists(index) and os.path.isabs(index):
             #File path Icon
             return __fileIconProvider.icon(QtCore.QFileInfo(index))
@@ -51,7 +52,7 @@ def __get_icon(index):
                 return QtGui.QIcon(path)
         #Standard Icon
         return get_std_icon(index)
-    elif isinstance(index, int):
+    elif isinstance(index, six.integer_types):
         #Icon by int index in fileicon provider
         return __fileIconProvider.icon(index)
     
