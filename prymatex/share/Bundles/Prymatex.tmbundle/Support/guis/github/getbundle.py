@@ -16,7 +16,7 @@ GITHUB_API_SEARCH_URL = 'https://api.github.com/legacy/repos/search/%s+tmbundle'
 
 class GithubBundleSearchThread(QtCore.QThread):
     # Signals
-    dataUpdate = QtCore.pyqtSignal(object)
+    dataUpdate = QtCore.Signal(object)
     # Term to search for
     term = None
 
@@ -129,7 +129,7 @@ class GithubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
     # ================================
     # = Señales que arman el destiny =
     # ================================
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def on_comboBoxNamespace_activated(self, namespace):
         self.currentRepository["namespace"] = namespace
         self.setCurrentRepository(self.currentRepository)

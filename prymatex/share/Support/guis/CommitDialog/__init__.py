@@ -60,7 +60,7 @@ class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
         for summary in self.lastCommitSummary:
             self.comboBoxSummary.addItem("%s ..." % " ".join(summary.split()[:8]))
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def on_comboBoxSummary_activated(self, index):
         index -= 1
         if index < len(self.lastCommitSummary):
