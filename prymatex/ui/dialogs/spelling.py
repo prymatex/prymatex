@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/spelling.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dialogs/spelling.ui'
 #
-# Created: Fri Jan 11 10:55:13 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Tue May 14 21:59:10 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_SpellingDialog(object):
     def setupUi(self, SpellingDialog):
@@ -67,10 +75,10 @@ class Ui_SpellingDialog(object):
         QtCore.QMetaObject.connectSlotsByName(SpellingDialog)
 
     def retranslateUi(self, SpellingDialog):
-        SpellingDialog.setWindowTitle(_('Spelling'))
-        self.label.setText(_('This word was not found in the spelling dictionary.'))
-        self.pushButtonChange.setText(_('Change'))
-        self.pushButtonFindNext.setText(_('Find Next'))
-        self.pushButtonIgnore.setText(_('Ignore'))
-        self.pushButtonLearn.setText(_('Learn'))
+        SpellingDialog.setWindowTitle(_translate("SpellingDialog", "Spelling", None))
+        self.label.setText(_translate("SpellingDialog", "This word was not found in the spelling dictionary.", None))
+        self.pushButtonChange.setText(_translate("SpellingDialog", "Change", None))
+        self.pushButtonFindNext.setText(_translate("SpellingDialog", "Find Next", None))
+        self.pushButtonIgnore.setText(_translate("SpellingDialog", "Ignore", None))
+        self.pushButtonLearn.setText(_translate("SpellingDialog", "Learn", None))
 

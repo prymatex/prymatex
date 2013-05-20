@@ -2,18 +2,26 @@
 
 # Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/support.ui'
 #
-# Created: Thu Jan 17 19:51:02 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Tue May 14 21:59:08 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Shebang(object):
     def setupUi(self, Shebang):
@@ -46,5 +54,5 @@ class Ui_Shebang(object):
         QtCore.QMetaObject.connectSlotsByName(Shebang)
 
     def retranslateUi(self, Shebang):
-        Shebang.setWindowTitle(_('Support Settings'))
+        Shebang.setWindowTitle(_translate("Shebang", "Support Settings", None))
 

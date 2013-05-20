@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/browser.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/browser.ui'
 #
-# Created: Wed Apr 24 10:12:25 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Tue May 14 21:59:08 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Browser(object):
     def setupUi(self, Browser):
@@ -95,19 +103,19 @@ class Ui_Browser(object):
         QtCore.QMetaObject.connectSlotsByName(Browser)
 
     def retranslateUi(self, Browser):
-        Browser.setWindowTitle(_('Browser'))
-        self.groupBox_3.setTitle(_('Behavior'))
-        self.label_3.setText(_('Home page:'))
-        self.groupBox_2.setTitle(_('Source'))
-        self.checkBoxDeveloperExtrasEnabled.setText(_('Developer extras enabled'))
-        self.checkBoxAutoLoadImages.setText(_('Auto load images'))
-        self.checkBoxJavaEnabled.setText(_('Java enabled'))
-        self.checkBoxPrivateBrowsingEnabled.setText(_('Private browsing enabled'))
-        self.checkBoxJavascriptEnabled.setText(_('Javascript enabled'))
-        self.checkBoxPluginsEnabled.setText(_('Plugins enabled'))
-        self.groupBox.setTitle(_('Connection'))
-        self.labelProxy.setText(_('Proxy address:'))
-        self.radioButtonNoProxy.setText(_('No proxy'))
-        self.radioButtonSystemProxy.setText(_('Use system proxy settings'))
-        self.radioButtonManualProxy.setText(_('Manual proxy configuration'))
+        Browser.setWindowTitle(_translate("Browser", "Browser", None))
+        self.groupBox_3.setTitle(_translate("Browser", "Behavior", None))
+        self.label_3.setText(_translate("Browser", "Home page:", None))
+        self.groupBox_2.setTitle(_translate("Browser", "Source", None))
+        self.checkBoxDeveloperExtrasEnabled.setText(_translate("Browser", "Developer extras enabled", None))
+        self.checkBoxAutoLoadImages.setText(_translate("Browser", "Auto load images", None))
+        self.checkBoxJavaEnabled.setText(_translate("Browser", "Java enabled", None))
+        self.checkBoxPrivateBrowsingEnabled.setText(_translate("Browser", "Private browsing enabled", None))
+        self.checkBoxJavascriptEnabled.setText(_translate("Browser", "Javascript enabled", None))
+        self.checkBoxPluginsEnabled.setText(_translate("Browser", "Plugins enabled", None))
+        self.groupBox.setTitle(_translate("Browser", "Connection", None))
+        self.labelProxy.setText(_translate("Browser", "Proxy address:", None))
+        self.radioButtonNoProxy.setText(_translate("Browser", "No proxy", None))
+        self.radioButtonSystemProxy.setText(_translate("Browser", "Use system proxy settings", None))
+        self.radioButtonManualProxy.setText(_translate("Browser", "Manual proxy configuration", None))
 

@@ -2,18 +2,26 @@
 
 # Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/codeeditor/status.ui'
 #
-# Created: Thu Dec 13 10:07:22 2012
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Tue May 14 21:59:10 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_CodeEditorStatus(object):
     def setupUi(self, CodeEditorStatus):
@@ -27,7 +35,6 @@ class Ui_CodeEditorStatus(object):
         self.widgetCommand.setObjectName(_fromUtf8("widgetCommand"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.widgetCommand)
         self.horizontalLayout.setSpacing(2)
-        self.horizontalLayout.setMargin(0)
         self.horizontalLayout.setMargin(0)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.pushButtonCommandClose = QtGui.QPushButton(self.widgetCommand)
@@ -69,7 +76,6 @@ class Ui_CodeEditorStatus(object):
         self.horizontalLayout_3 = QtGui.QHBoxLayout(self.widgetGoToLine)
         self.horizontalLayout_3.setSpacing(2)
         self.horizontalLayout_3.setMargin(0)
-        self.horizontalLayout_3.setMargin(0)
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
         self.pushButtonGoToLineClose = QtGui.QPushButton(self.widgetGoToLine)
         self.pushButtonGoToLineClose.setText(_fromUtf8(""))
@@ -93,7 +99,6 @@ class Ui_CodeEditorStatus(object):
         self.widgetIFind.setObjectName(_fromUtf8("widgetIFind"))
         self.horizontalLayout_5 = QtGui.QHBoxLayout(self.widgetIFind)
         self.horizontalLayout_5.setSpacing(2)
-        self.horizontalLayout_5.setMargin(0)
         self.horizontalLayout_5.setMargin(0)
         self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
         self.pushButtonIFindClose = QtGui.QPushButton(self.widgetIFind)
@@ -130,7 +135,6 @@ class Ui_CodeEditorStatus(object):
         self.gridLayout = QtGui.QGridLayout(self.widgetFindReplace)
         self.gridLayout.setMargin(0)
         self.gridLayout.setSpacing(2)
-        self.gridLayout.setMargin(0)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.pushButtonFindReplaceClose = QtGui.QPushButton(self.widgetFindReplace)
         self.pushButtonFindReplaceClose.setText(_fromUtf8(""))
@@ -202,7 +206,6 @@ class Ui_CodeEditorStatus(object):
         self.horizontalLayout_2 = QtGui.QHBoxLayout(self.widgetStatus)
         self.horizontalLayout_2.setSpacing(2)
         self.horizontalLayout_2.setMargin(0)
-        self.horizontalLayout_2.setMargin(0)
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.labelLineColumn = QtGui.QLabel(self.widgetStatus)
         self.labelLineColumn.setMaximumSize(QtCore.QSize(250, 16777215))
@@ -256,31 +259,43 @@ class Ui_CodeEditorStatus(object):
         QtCore.QMetaObject.connectSlotsByName(CodeEditorStatus)
 
     def retranslateUi(self, CodeEditorStatus):
-        CodeEditorStatus.setWindowTitle(_('Form'))
-        self.label.setText(_('Command:'))
-        self.label_2.setText(_('Input:'))
-        self.label_3.setText(_('Output:'))
-        self.labelGoToLine.setText(_('Go to line:'))
-        self.labelIFind.setText(_('Find:'))
-        self.pushButtonIFindNext.setToolTip(_('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">\n<html><head><meta name="qrichtext" content="1" /><style type="text/css">\np, li { white-space: pre-wrap; }\n</style></head><body style=" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;">\n<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Find Previous</p></body></html>'))
-        self.pushButtonIFindNext.setText(_('Next'))
-        self.pushButtonIFindPrevious.setText(_('Previous'))
-        self.checkBoxIFindCaseSensitively.setText(_('Case Sensitively'))
-        self.labelFind.setText(_('Find:'))
-        self.labelReplace.setText(_('Replace:'))
-        self.pushButtonReplace.setToolTip(_('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">\n<html><head><meta name="qrichtext" content="1" /><style type="text/css">\np, li { white-space: pre-wrap; }\n</style></head><body style=" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;">\n<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Replace &amp; Find Previous</p></body></html>'))
-        self.pushButtonReplace.setText(_('Replace'))
-        self.pushButtonReplaceAll.setText(_('Replace &All'))
-        self.pushButtonFindPrevious.setText(_('Previous'))
-        self.pushButtonFindNext.setToolTip(_('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">\n<html><head><meta name="qrichtext" content="1" /><style type="text/css">\np, li { white-space: pre-wrap; }\n</style></head><body style=" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;">\n<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Find Previous</p></body></html>'))
-        self.pushButtonFindNext.setText(_('Next'))
-        self.labelFindMode.setText(_('Mode:'))
-        self.checkBoxFindCaseSensitively.setText(_('Case Sensitively'))
-        self.checkBox.setText(_('Selection Only'))
-        self.pushButtonFindAll.setText(_('Find All'))
-        self.labelLineColumn.setText(_('Line: 0 Column: 0 Selection: 0'))
-        self.pushButtonMultiCursor.setToolTip(_('Multicursor Mode'))
-        self.pushButtonSnippet.setToolTip(_('Snippet Mode'))
-        self.pushButtonOverwrite.setToolTip(_('Overwrite Mode'))
-        self.labelTabSize.setText(_('Tab Size'))
+        CodeEditorStatus.setWindowTitle(_translate("CodeEditorStatus", "Form", None))
+        self.label.setText(_translate("CodeEditorStatus", "Command:", None))
+        self.label_2.setText(_translate("CodeEditorStatus", "Input:", None))
+        self.label_3.setText(_translate("CodeEditorStatus", "Output:", None))
+        self.labelGoToLine.setText(_translate("CodeEditorStatus", "Go to line:", None))
+        self.labelIFind.setText(_translate("CodeEditorStatus", "Find:", None))
+        self.pushButtonIFindNext.setToolTip(_translate("CodeEditorStatus", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Find Previous</p></body></html>", None))
+        self.pushButtonIFindNext.setText(_translate("CodeEditorStatus", "Next", None))
+        self.pushButtonIFindPrevious.setText(_translate("CodeEditorStatus", "Previous", None))
+        self.checkBoxIFindCaseSensitively.setText(_translate("CodeEditorStatus", "Case Sensitively", None))
+        self.labelFind.setText(_translate("CodeEditorStatus", "Find:", None))
+        self.labelReplace.setText(_translate("CodeEditorStatus", "Replace:", None))
+        self.pushButtonReplace.setToolTip(_translate("CodeEditorStatus", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Replace &amp; Find Previous</p></body></html>", None))
+        self.pushButtonReplace.setText(_translate("CodeEditorStatus", "Replace", None))
+        self.pushButtonReplaceAll.setText(_translate("CodeEditorStatus", "Replace &All", None))
+        self.pushButtonFindPrevious.setText(_translate("CodeEditorStatus", "Previous", None))
+        self.pushButtonFindNext.setToolTip(_translate("CodeEditorStatus", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Find Previous</p></body></html>", None))
+        self.pushButtonFindNext.setText(_translate("CodeEditorStatus", "Next", None))
+        self.labelFindMode.setText(_translate("CodeEditorStatus", "Mode:", None))
+        self.checkBoxFindCaseSensitively.setText(_translate("CodeEditorStatus", "Case Sensitively", None))
+        self.checkBox.setText(_translate("CodeEditorStatus", "Selection Only", None))
+        self.pushButtonFindAll.setText(_translate("CodeEditorStatus", "Find All", None))
+        self.labelLineColumn.setText(_translate("CodeEditorStatus", "Line: 0 Column: 0 Selection: 0", None))
+        self.pushButtonMultiCursor.setToolTip(_translate("CodeEditorStatus", "Multicursor Mode", None))
+        self.pushButtonSnippet.setToolTip(_translate("CodeEditorStatus", "Snippet Mode", None))
+        self.pushButtonOverwrite.setToolTip(_translate("CodeEditorStatus", "Overwrite Mode", None))
+        self.labelTabSize.setText(_translate("CodeEditorStatus", "Tab Size", None))
 

@@ -2,18 +2,26 @@
 
 # Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/project.ui'
 #
-# Created: Fri Jan 25 14:29:11 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Tue May 14 21:59:09 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Project(object):
     def setupUi(self, Project):
@@ -65,10 +73,10 @@ class Ui_Project(object):
         QtCore.QMetaObject.connectSlotsByName(Project)
 
     def retranslateUi(self, Project):
-        Project.setWindowTitle(_('Form'))
-        self.label1.setText(_('Name:'))
-        self.label.setText(_('Description:'))
-        self.label3.setText(_('Keywords:'))
-        self.label_3.setText(_('Licence:'))
-        self.label2.setText(_('Location:'))
+        Project.setWindowTitle(_translate("Project", "Form", None))
+        self.label1.setText(_translate("Project", "Name:", None))
+        self.label.setText(_translate("Project", "Description:", None))
+        self.label3.setText(_translate("Project", "Keywords:", None))
+        self.label_3.setText(_translate("Project", "Licence:", None))
+        self.label2.setText(_translate("Project", "Location:", None))
 

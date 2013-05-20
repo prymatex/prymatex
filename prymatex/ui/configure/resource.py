@@ -2,18 +2,26 @@
 
 # Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/resource.ui'
 #
-# Created: Fri Jan 25 16:02:11 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Tue May 14 21:59:09 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_ResouceWidget(object):
     def setupUi(self, ResouceWidget):
@@ -166,33 +174,33 @@ class Ui_ResouceWidget(object):
         QtCore.QMetaObject.connectSlotsByName(ResouceWidget)
 
     def retranslateUi(self, ResouceWidget):
-        ResouceWidget.setWindowTitle(_('Resource'))
-        self.labelPath.setText(_('Path:'))
-        self.labelType.setText(_('Type:'))
-        self.labelLocation.setText(_('Location:'))
-        self.labelLastModified.setText(_('Last modified:'))
-        self.labelSize.setText(_('Size:'))
-        self.groupBox_3.setTitle(_('Permissions'))
+        ResouceWidget.setWindowTitle(_translate("ResouceWidget", "Resource", None))
+        self.labelPath.setText(_translate("ResouceWidget", "Path:", None))
+        self.labelType.setText(_translate("ResouceWidget", "Type:", None))
+        self.labelLocation.setText(_translate("ResouceWidget", "Location:", None))
+        self.labelLastModified.setText(_translate("ResouceWidget", "Last modified:", None))
+        self.labelSize.setText(_translate("ResouceWidget", "Size:", None))
+        self.groupBox_3.setTitle(_translate("ResouceWidget", "Permissions", None))
         item = self.tableWidgetPermissions.verticalHeaderItem(0)
-        item.setText(_('Owner'))
+        item.setText(_translate("ResouceWidget", "Owner", None))
         item = self.tableWidgetPermissions.verticalHeaderItem(1)
-        item.setText(_('Group'))
+        item.setText(_translate("ResouceWidget", "Group", None))
         item = self.tableWidgetPermissions.verticalHeaderItem(2)
-        item.setText(_('Other'))
+        item.setText(_translate("ResouceWidget", "Other", None))
         item = self.tableWidgetPermissions.horizontalHeaderItem(0)
-        item.setText(_('Read'))
+        item.setText(_translate("ResouceWidget", "Read", None))
         item = self.tableWidgetPermissions.horizontalHeaderItem(1)
-        item.setText(_('Write'))
+        item.setText(_translate("ResouceWidget", "Write", None))
         item = self.tableWidgetPermissions.horizontalHeaderItem(2)
-        item.setText(_('Execute'))
+        item.setText(_translate("ResouceWidget", "Execute", None))
         __sortingEnabled = self.tableWidgetPermissions.isSortingEnabled()
         self.tableWidgetPermissions.setSortingEnabled(False)
         self.tableWidgetPermissions.setSortingEnabled(__sortingEnabled)
-        self.label.setText(_('<html><head/><body><p><span style=" font-weight:600;">Note:</span> Removing de executable flag on a folder will cause its children to become unreadable</p></body></html>'))
-        self.groupBox.setTitle(_('Text file encoding'))
-        self.radioButton.setText(_('Inherited'))
-        self.radioButton_2.setText(_('Other:'))
-        self.groupBox_2.setTitle(_('Text file end of line'))
-        self.radioButton_4.setText(_('Other'))
-        self.radioButton_3.setText(_('Inherited'))
+        self.label.setText(_translate("ResouceWidget", "<html><head/><body><p><span style=\" font-weight:600;\">Note:</span> Removing de executable flag on a folder will cause its children to become unreadable</p></body></html>", None))
+        self.groupBox.setTitle(_translate("ResouceWidget", "Text file encoding", None))
+        self.radioButton.setText(_translate("ResouceWidget", "Inherited", None))
+        self.radioButton_2.setText(_translate("ResouceWidget", "Other:", None))
+        self.groupBox_2.setTitle(_translate("ResouceWidget", "Text file end of line", None))
+        self.radioButton_4.setText(_translate("ResouceWidget", "Other", None))
+        self.radioButton_3.setText(_translate("ResouceWidget", "Inherited", None))
 

@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/template.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dialogs/template.ui'
 #
-# Created: Thu Feb  7 11:45:59 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Tue May 14 21:59:11 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_TemplateDialog(object):
     def setupUi(self, TemplateDialog):
@@ -96,10 +104,10 @@ class Ui_TemplateDialog(object):
         TemplateDialog.setTabOrder(self.buttonChoose, self.buttonCreate)
 
     def retranslateUi(self, TemplateDialog):
-        self.label1.setText(_('File Name:'))
-        self.label2.setText(_('Location:'))
-        self.buttonChoose.setText(_('Ch&oose'))
-        self.label3.setText(_('Template:'))
-        self.buttonCreate.setText(_('&Create'))
-        self.buttonCancel.setText(_('C&ancel'))
+        self.label1.setText(_translate("TemplateDialog", "File Name:", None))
+        self.label2.setText(_translate("TemplateDialog", "Location:", None))
+        self.buttonChoose.setText(_translate("TemplateDialog", "Ch&oose", None))
+        self.label3.setText(_translate("TemplateDialog", "Template:", None))
+        self.buttonCreate.setText(_translate("TemplateDialog", "&Create", None))
+        self.buttonCancel.setText(_translate("TemplateDialog", "C&ancel", None))
 

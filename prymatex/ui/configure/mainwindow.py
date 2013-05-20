@@ -2,18 +2,26 @@
 
 # Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/mainwindow.ui'
 #
-# Created: Fri Jan 25 14:29:11 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Tue May 14 21:59:08 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -51,8 +59,8 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(_('General'))
-        self.groupBox_2.setTitle(_('Interface'))
-        self.label_2.setText(_('Title template:'))
-        self.labelTabVisibility.setText(_('Tab visibilty:'))
+        MainWindow.setWindowTitle(_translate("MainWindow", "General", None))
+        self.groupBox_2.setTitle(_translate("MainWindow", "Interface", None))
+        self.label_2.setText(_translate("MainWindow", "Title template:", None))
+        self.labelTabVisibility.setText(_translate("MainWindow", "Tab visibilty:", None))
 

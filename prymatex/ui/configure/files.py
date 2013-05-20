@@ -2,18 +2,26 @@
 
 # Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/files.ui'
 #
-# Created: Fri Jan 25 14:29:11 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Tue May 14 21:59:07 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Files(object):
     def setupUi(self, Files):
@@ -83,14 +91,14 @@ class Ui_Files(object):
         QtCore.QMetaObject.connectSlotsByName(Files)
 
     def retranslateUi(self, Files):
-        Files.setWindowTitle(_('Files'))
-        self.groupBox_3.setTitle(_('Source'))
-        self.label.setText(_('File history:'))
-        self.groupBox.setTitle(_('File format'))
-        self.labelEncoding.setText(_('Encoding:'))
-        self.labelEndOfLine.setText(_('End of line:'))
-        self.checkBox.setText(_('Automatic end of line detection'))
-        self.groupBox_2.setTitle(_('Automatic cleanups'))
-        self.checkBox_2.setText(_('Remove trailing spaces'))
-        self.checkBox_3.setText(_('Append newline at end of file on save'))
+        Files.setWindowTitle(_translate("Files", "Files", None))
+        self.groupBox_3.setTitle(_translate("Files", "Source", None))
+        self.label.setText(_translate("Files", "File history:", None))
+        self.groupBox.setTitle(_translate("Files", "File format", None))
+        self.labelEncoding.setText(_translate("Files", "Encoding:", None))
+        self.labelEndOfLine.setText(_translate("Files", "End of line:", None))
+        self.checkBox.setText(_translate("Files", "Automatic end of line detection", None))
+        self.groupBox_2.setTitle(_translate("Files", "Automatic cleanups", None))
+        self.checkBox_2.setText(_translate("Files", "Remove trailing spaces", None))
+        self.checkBox_3.setText(_translate("Files", "Append newline at end of file on save", None))
 

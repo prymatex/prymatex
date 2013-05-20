@@ -2,18 +2,26 @@
 
 # Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/general.ui'
 #
-# Created: Fri Jan 25 14:29:11 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Tue May 14 21:59:07 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_General(object):
     def setupUi(self, General):
@@ -64,11 +72,11 @@ class Ui_General(object):
         QtCore.QMetaObject.connectSlotsByName(General)
 
     def retranslateUi(self, General):
-        General.setWindowTitle(_('General'))
-        self.groupBox_2.setTitle(_('Interface'))
-        self.label_2.setText(_('Qt style:'))
-        self.label_3.setText(_('Qt style sheet:'))
-        self.groupBox_3.setTitle(_('External actions'))
-        self.checkBoxAskAboutExternalDeletions.setText(_('Ask about external file deletions? or remove editor'))
-        self.checkBoxAskAboutExternalChanges.setText(_('Ask about external file changes? or replace editor content'))
+        General.setWindowTitle(_translate("General", "General", None))
+        self.groupBox_2.setTitle(_translate("General", "Interface", None))
+        self.label_2.setText(_translate("General", "Qt style:", None))
+        self.label_3.setText(_translate("General", "Qt style sheet:", None))
+        self.groupBox_3.setTitle(_translate("General", "External actions", None))
+        self.checkBoxAskAboutExternalDeletions.setText(_translate("General", "Ask about external file deletions? or remove editor", None))
+        self.checkBoxAskAboutExternalChanges.setText(_translate("General", "Ask about external file changes? or replace editor content", None))
 

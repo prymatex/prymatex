@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dockers/browser.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dockers/browser.ui'
 #
-# Created: Mon Mar 25 09:14:34 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Tue May 14 21:59:13 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_BrowserDock(object):
     def setupUi(self, BrowserDock):
@@ -98,13 +106,13 @@ class Ui_BrowserDock(object):
         QtCore.QMetaObject.connectSlotsByName(BrowserDock)
 
     def retranslateUi(self, BrowserDock):
-        BrowserDock.setWindowTitle(_('Web Browser'))
-        self.buttonBack.setToolTip(_('Back'))
-        self.buttonNext.setToolTip(_('Next'))
-        self.buttonReload.setToolTip(_('Reload'))
-        self.buttonStop.setToolTip(_('Stop'))
-        self.actionSyncEditor.setText(_('Sync Editor'))
-        self.actionSyncEditor.setToolTip(_('Sync browser with current editor content'))
-        self.actionConnectEditor.setText(_('Connect Editor'))
-        self.actionConnectEditor.setToolTip(_('Connect browser with current editor'))
+        BrowserDock.setWindowTitle(_translate("BrowserDock", "Web Browser", None))
+        self.buttonBack.setToolTip(_translate("BrowserDock", "Back", None))
+        self.buttonNext.setToolTip(_translate("BrowserDock", "Next", None))
+        self.buttonReload.setToolTip(_translate("BrowserDock", "Reload", None))
+        self.buttonStop.setToolTip(_translate("BrowserDock", "Stop", None))
+        self.actionSyncEditor.setText(_translate("BrowserDock", "Sync Editor", None))
+        self.actionSyncEditor.setToolTip(_translate("BrowserDock", "Sync browser with current editor content", None))
+        self.actionConnectEditor.setText(_translate("BrowserDock", "Connect Editor", None))
+        self.actionConnectEditor.setToolTip(_translate("BrowserDock", "Connect browser with current editor", None))
 

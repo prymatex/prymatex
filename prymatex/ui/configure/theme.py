@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/theme.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/theme.ui'
 #
-# Created: Wed Jan 23 09:31:01 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Tue May 14 21:59:06 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_FontTheme(object):
     def setupUi(self, FontTheme):
@@ -162,17 +170,17 @@ class Ui_FontTheme(object):
         QtCore.QMetaObject.connectSlotsByName(FontTheme)
 
     def retranslateUi(self, FontTheme):
-        FontTheme.setWindowTitle(_('Form'))
-        self.groupBoxFont_2.setTitle(_('Font'))
-        self.checkBoxAntialias.setText(_('Anti alias'))
-        self.groupBoxTheme.setTitle(_('Theme'))
-        self.label_6.setText(_('Invisibles:'))
-        self.label_4.setText(_('Background:'))
-        self.label_10.setText(_('Gutter background:'))
-        self.label_5.setText(_('Selection:'))
-        self.label_3.setText(_('Foreground:'))
-        self.label_7.setText(_('Caret:'))
-        self.label_8.setText(_('Line highlight:'))
-        self.label_11.setText(_('Gutter foreground:'))
-        self.label_9.setText(_('Scope selector:'))
+        FontTheme.setWindowTitle(_translate("FontTheme", "Form", None))
+        self.groupBoxFont_2.setTitle(_translate("FontTheme", "Font", None))
+        self.checkBoxAntialias.setText(_translate("FontTheme", "Anti alias", None))
+        self.groupBoxTheme.setTitle(_translate("FontTheme", "Theme", None))
+        self.label_6.setText(_translate("FontTheme", "Invisibles:", None))
+        self.label_4.setText(_translate("FontTheme", "Background:", None))
+        self.label_10.setText(_translate("FontTheme", "Gutter background:", None))
+        self.label_5.setText(_translate("FontTheme", "Selection:", None))
+        self.label_3.setText(_translate("FontTheme", "Foreground:", None))
+        self.label_7.setText(_translate("FontTheme", "Caret:", None))
+        self.label_8.setText(_translate("FontTheme", "Line highlight:", None))
+        self.label_11.setText(_translate("FontTheme", "Gutter foreground:", None))
+        self.label_9.setText(_translate("FontTheme", "Scope selector:", None))
 

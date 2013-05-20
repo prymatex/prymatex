@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/search.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dialogs/search.ui'
 #
-# Created: Fri Jan 11 10:55:13 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Tue May 14 21:59:12 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_SearchDialog(object):
     def setupUi(self, SearchDialog):
@@ -149,19 +157,19 @@ class Ui_SearchDialog(object):
         QtCore.QMetaObject.connectSlotsByName(SearchDialog)
 
     def retranslateUi(self, SearchDialog):
-        SearchDialog.setWindowTitle(_('Search'))
-        self.groupBox.setTitle(_('Search'))
-        self.label.setText(_('Containing text'))
-        self.label_3.setText(_('File name patterns'))
-        self.comboBoxFilePatterns.setItemText(0, _('*.*'))
-        self.checkBoxRecursive.setText(_('Recursive'))
-        self.checkBoxHidden.setText(_('Hidden'))
-        self.checkBoxFollowLinks.setText(_('Follow links'))
-        self.groupBox_2.setTitle(_('Scope'))
-        self.radioButtonWorkspace.setText(_('Workspace'))
-        self.radioButtonWorkingSet.setText(_('Working set'))
-        self.radioButton.setText(_('Location'))
-        self.buttonChoose.setText(_('Ch&oose'))
-        self.buttonSearch.setText(_('&Search'))
-        self.buttonCancel.setText(_('C&ancel'))
+        SearchDialog.setWindowTitle(_translate("SearchDialog", "Search", None))
+        self.groupBox.setTitle(_translate("SearchDialog", "Search", None))
+        self.label.setText(_translate("SearchDialog", "Containing text", None))
+        self.label_3.setText(_translate("SearchDialog", "File name patterns", None))
+        self.comboBoxFilePatterns.setItemText(0, _translate("SearchDialog", "*.*", None))
+        self.checkBoxRecursive.setText(_translate("SearchDialog", "Recursive", None))
+        self.checkBoxHidden.setText(_translate("SearchDialog", "Hidden", None))
+        self.checkBoxFollowLinks.setText(_translate("SearchDialog", "Follow links", None))
+        self.groupBox_2.setTitle(_translate("SearchDialog", "Scope", None))
+        self.radioButtonWorkspace.setText(_translate("SearchDialog", "Workspace", None))
+        self.radioButtonWorkingSet.setText(_translate("SearchDialog", "Working set", None))
+        self.radioButton.setText(_translate("SearchDialog", "Location", None))
+        self.buttonChoose.setText(_translate("SearchDialog", "Ch&oose", None))
+        self.buttonSearch.setText(_translate("SearchDialog", "&Search", None))
+        self.buttonCancel.setText(_translate("SearchDialog", "C&ancel", None))
 

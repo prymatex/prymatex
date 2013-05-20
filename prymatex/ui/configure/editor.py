@@ -2,18 +2,26 @@
 
 # Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/editor.ui'
 #
-# Created: Mon Feb  4 16:04:44 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Tue May 14 21:59:06 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Editor(object):
     def setupUi(self, Editor):
@@ -101,18 +109,18 @@ class Ui_Editor(object):
         QtCore.QMetaObject.connectSlotsByName(Editor)
 
     def retranslateUi(self, Editor):
-        Editor.setWindowTitle(_('Editor'))
-        self.groupBox_2.setTitle(_('Source'))
-        self.labelDefaultSyntax.setText(_('Default syntax:'))
-        self.checkBoxHighlightCurrenLine.setText(_('Highlight current line'))
-        self.checkBoxShowMarginLine.setText(_('Show margin line after'))
-        self.checkBoxShowIndentGuide.setText(_('Show indent guides'))
-        self.checkBoxShowTabSpaces.setText(_('Show tabs and spaces'))
-        self.checkBoxShowLineParagraph.setText(_('Show line and paragraph'))
-        self.checkBoxWrapLines.setText(_('Wrap lines'))
-        self.groupBox.setTitle(_('Gutters'))
-        self.checkBoxLineNumbers.setText(_('Show line numbers'))
-        self.checkBoxBookmarks.setText(_('Show bookmarks'))
-        self.checkBoxFolding.setText(_('Show folding'))
-        self.checkBoxSelection.setText(_('Show selected text'))
+        Editor.setWindowTitle(_translate("Editor", "Editor", None))
+        self.groupBox_2.setTitle(_translate("Editor", "Source", None))
+        self.labelDefaultSyntax.setText(_translate("Editor", "Default syntax:", None))
+        self.checkBoxHighlightCurrenLine.setText(_translate("Editor", "Highlight current line", None))
+        self.checkBoxShowMarginLine.setText(_translate("Editor", "Show margin line after", None))
+        self.checkBoxShowIndentGuide.setText(_translate("Editor", "Show indent guides", None))
+        self.checkBoxShowTabSpaces.setText(_translate("Editor", "Show tabs and spaces", None))
+        self.checkBoxShowLineParagraph.setText(_translate("Editor", "Show line and paragraph", None))
+        self.checkBoxWrapLines.setText(_translate("Editor", "Wrap lines", None))
+        self.groupBox.setTitle(_translate("Editor", "Gutters", None))
+        self.checkBoxLineNumbers.setText(_translate("Editor", "Show line numbers", None))
+        self.checkBoxBookmarks.setText(_translate("Editor", "Show bookmarks", None))
+        self.checkBoxFolding.setText(_translate("Editor", "Show folding", None))
+        self.checkBoxSelection.setText(_translate("Editor", "Show selected text", None))
 

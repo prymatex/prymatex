@@ -2,18 +2,26 @@
 
 # Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/edit.ui'
 #
-# Created: Fri Jan 25 14:29:11 2013
-#      by: PyQt4 UI code generator 4.9.4
+# Created: Tue May 14 21:59:10 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Edit(object):
     def setupUi(self, Edit):
@@ -73,13 +81,13 @@ class Ui_Edit(object):
         QtCore.QMetaObject.connectSlotsByName(Edit)
 
     def retranslateUi(self, Edit):
-        Edit.setWindowTitle(_('Edit'))
-        self.groupBox_2.setTitle(_('Misc'))
-        self.checkBox_3.setText(_('Auto brackets'))
-        self.checkBox_2.setText(_('Remove trailing spaces while editing'))
-        self.groupBox_3.setTitle(_('Text Cursor'))
-        self.checkBox_5.setText(_('Smart home and smart end'))
-        self.groupBox_4.setTitle(_('Auto Completion'))
-        self.checkBox_6.setText(_('Enable auto completion'))
-        self.label.setText(_('Minimal word length to complete:'))
+        Edit.setWindowTitle(_translate("Edit", "Edit", None))
+        self.groupBox_2.setTitle(_translate("Edit", "Misc", None))
+        self.checkBox_3.setText(_translate("Edit", "Auto brackets", None))
+        self.checkBox_2.setText(_translate("Edit", "Remove trailing spaces while editing", None))
+        self.groupBox_3.setTitle(_translate("Edit", "Text Cursor", None))
+        self.checkBox_5.setText(_translate("Edit", "Smart home and smart end", None))
+        self.groupBox_4.setTitle(_translate("Edit", "Auto Completion", None))
+        self.checkBox_6.setText(_translate("Edit", "Enable auto completion", None))
+        self.label.setText(_translate("Edit", "Minimal word length to complete:", None))
 

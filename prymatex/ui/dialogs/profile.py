@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/profile.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dialogs/profile.ui'
 #
-# Created: Thu Feb  7 11:45:59 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Tue May 14 21:59:12 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_ProfileDialog(object):
     def setupUi(self, ProfileDialog):
@@ -86,12 +94,16 @@ class Ui_ProfileDialog(object):
         QtCore.QMetaObject.connectSlotsByName(ProfileDialog)
 
     def retranslateUi(self, ProfileDialog):
-        ProfileDialog.setWindowTitle(_('Prymatex Choose User Profile'))
-        self.label.setText(_('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">\n<html><head><meta name="qrichtext" content="1" /><style type="text/css">\np, li { white-space: pre-wrap; }\n</style></head><body style=" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal;">\n<p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Prymatex stores information about your settings, preferences and other items in your user profile.</p></body></html>'))
-        self.buttonCreate.setText(_('&Create Profile'))
-        self.buttonRename.setText(_('&Rename Profile'))
-        self.buttonDelete.setText(_('&Delete Profile'))
-        self.checkDontAsk.setText(_('Don\'t a&sk at startup'))
-        self.buttonExit.setText(_('Exit'))
-        self.buttonStartPrymatex.setText(_('Start Prymatex'))
+        ProfileDialog.setWindowTitle(_translate("ProfileDialog", "Prymatex Choose User Profile", None))
+        self.label.setText(_translate("ProfileDialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Prymatex stores information about your settings, preferences and other items in your user profile.</p></body></html>", None))
+        self.buttonCreate.setText(_translate("ProfileDialog", "&Create Profile", None))
+        self.buttonRename.setText(_translate("ProfileDialog", "&Rename Profile", None))
+        self.buttonDelete.setText(_translate("ProfileDialog", "&Delete Profile", None))
+        self.checkDontAsk.setText(_translate("ProfileDialog", "Don\'t a&sk at startup", None))
+        self.buttonExit.setText(_translate("ProfileDialog", "Exit", None))
+        self.buttonStartPrymatex.setText(_translate("ProfileDialog", "Start Prymatex", None))
 

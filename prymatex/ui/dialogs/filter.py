@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/filter.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dialogs/filter.ui'
 #
-# Created: Wed Feb  6 11:06:59 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Tue May 14 21:59:11 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_FilterDialog(object):
     def setupUi(self, FilterDialog):
@@ -67,21 +75,21 @@ class Ui_FilterDialog(object):
         QtCore.QMetaObject.connectSlotsByName(FilterDialog)
 
     def retranslateUi(self, FilterDialog):
-        FilterDialog.setWindowTitle(_('Dialog'))
-        self.groupBox.setTitle(_('Filter type'))
-        self.radioButton.setText(_('Include only'))
-        self.radioButton_2.setText(_('Exclude all'))
-        self.groupBox_2.setTitle(_('Applies to'))
-        self.radioButton_3.setText(_('Files'))
-        self.radioButton_4.setText(_('Folders'))
-        self.radioButton_5.setText(_('Files and folders'))
-        self.checkBox.setText(_('All children (recursive)'))
-        self.groupBox_3.setTitle(_('File and folders attributes'))
-        self.comboBox.setItemText(0, _('Name'))
-        self.comboBox.setItemText(1, _('Project relative path'))
-        self.comboBox.setItemText(2, _('Location'))
-        self.comboBox.setItemText(3, _('Last modified'))
-        self.comboBox.setItemText(4, _('File length'))
-        self.comboBox.setItemText(5, _('Read only'))
-        self.comboBox.setItemText(6, _('Symbolic link'))
+        FilterDialog.setWindowTitle(_translate("FilterDialog", "Dialog", None))
+        self.groupBox.setTitle(_translate("FilterDialog", "Filter type", None))
+        self.radioButton.setText(_translate("FilterDialog", "Include only", None))
+        self.radioButton_2.setText(_translate("FilterDialog", "Exclude all", None))
+        self.groupBox_2.setTitle(_translate("FilterDialog", "Applies to", None))
+        self.radioButton_3.setText(_translate("FilterDialog", "Files", None))
+        self.radioButton_4.setText(_translate("FilterDialog", "Folders", None))
+        self.radioButton_5.setText(_translate("FilterDialog", "Files and folders", None))
+        self.checkBox.setText(_translate("FilterDialog", "All children (recursive)", None))
+        self.groupBox_3.setTitle(_translate("FilterDialog", "File and folders attributes", None))
+        self.comboBox.setItemText(0, _translate("FilterDialog", "Name", None))
+        self.comboBox.setItemText(1, _translate("FilterDialog", "Project relative path", None))
+        self.comboBox.setItemText(2, _translate("FilterDialog", "Location", None))
+        self.comboBox.setItemText(3, _translate("FilterDialog", "Last modified", None))
+        self.comboBox.setItemText(4, _translate("FilterDialog", "File length", None))
+        self.comboBox.setItemText(5, _translate("FilterDialog", "Read only", None))
+        self.comboBox.setItemText(6, _translate("FilterDialog", "Symbolic link", None))
 

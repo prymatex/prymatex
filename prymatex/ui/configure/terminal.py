@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/terminal.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/terminal.ui'
 #
-# Created: Tue Feb 26 08:19:05 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Tue May 14 21:59:07 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Terminal(object):
     def setupUi(self, Terminal):
@@ -90,13 +98,13 @@ class Ui_Terminal(object):
         QtCore.QMetaObject.connectSlotsByName(Terminal)
 
     def retranslateUi(self, Terminal):
-        Terminal.setWindowTitle(_('Terminal'))
-        self.groupBoxFont.setTitle(_('Font'))
-        self.checkBoxAntialias.setText(_('Anti alias'))
-        self.groupBox.setTitle(_('Appearance'))
-        self.label.setText(_('Color scheme:'))
-        self.checkBoxEditorTheme.setText(_('Use editor theme when possible'))
-        self.groupBox_2.setTitle(_('Behavior'))
-        self.label_3.setText(_('Buffer:'))
-        self.checkBoxSynchronize.setText(_('Automatically synchronize the terminal with the current editor when possible'))
+        Terminal.setWindowTitle(_translate("Terminal", "Terminal", None))
+        self.groupBoxFont.setTitle(_translate("Terminal", "Font", None))
+        self.checkBoxAntialias.setText(_translate("Terminal", "Anti alias", None))
+        self.groupBox.setTitle(_translate("Terminal", "Appearance", None))
+        self.label.setText(_translate("Terminal", "Color scheme:", None))
+        self.checkBoxEditorTheme.setText(_translate("Terminal", "Use editor theme when possible", None))
+        self.groupBox_2.setTitle(_translate("Terminal", "Behavior", None))
+        self.label_3.setText(_translate("Terminal", "Buffer:", None))
+        self.checkBoxSynchronize.setText(_translate("Terminal", "Automatically synchronize the terminal with the current editor when possible", None))
 
