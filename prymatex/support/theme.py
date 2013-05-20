@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 import os
 
@@ -90,7 +91,7 @@ class PMXTheme(PMXManagedObject):
         for key in PMXTheme.KEYS:
             setattr(self, key, dataHash.get(key, None))
 
-    def setSettings(self, settings):
+    def setDefaultSettings(self, settings):
         self.settings = settings
         
     def update(self, dataHash):
@@ -132,8 +133,8 @@ class PMXTheme(PMXManagedObject):
                 theme = manager.addTheme(theme)
                 settings = data.pop('settings', [])
                 if settings:
-                    theme.setSettings(settings[0].settings)
-                for setting in settings[1:]:
+                    theme.setDefaultSettings(settings.pop(0)["settings"])
+                for setting in settings:
                     style = PMXThemeStyle(setting, theme)
                     style = manager.addThemeStyle(style)
                     theme.styles.append(style)
@@ -142,7 +143,10 @@ class PMXTheme(PMXManagedObject):
                 theme.addSource(namespace, path)
             return theme
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             print("Error en theme %s (%s)" % (path, e))
+            
 
     @classmethod
     def reloadTheme(cls, theme, path, namespace, manager):
@@ -152,8 +156,8 @@ class PMXTheme(PMXManagedObject):
         theme.load(data)
         settings = data.pop('settings', [])
         if settings:
-            self.setSettings(settings[0].settings)
-        for setting in settings[1:]:
+            self.setDefaultSettings(settings.pop(0)["settings"])
+        for setting in settings:
             style = PMXThemeStyle(setting, theme)
             style = manager.addThemeStyle(style)
             self.styles.append(style)
