@@ -35,8 +35,8 @@ class ZmqContext(object):
         return ZmqContext.self_
         
 class ZmqSocket(QtCore.QObject):
-    readyRead = QtCore.pyqtSignal()
-    readyWrite = QtCore.pyqtSignal()
+    readyRead = QtCore.Signal()
+    readyWrite = QtCore.Signal()
     def __init__(self, _type, parent=None):
         QtCore.QObject.__init__(self, parent)
 
