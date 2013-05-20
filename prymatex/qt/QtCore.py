@@ -14,3 +14,4 @@ else:
     import PySide.QtCore
     __version__ = PySide.QtCore.__version__
     from PySide.QtCore import *
+    

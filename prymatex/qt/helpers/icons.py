@@ -4,7 +4,7 @@
 try:
     from prymatex.qt import QtCore, QtGui
 except:
-    from PyQt4 import QtCore, QtGui
+    from prymatex.qt import QtCore, QtGui
 
 __all__ = [ "combine_icons", "get_std_icon" ]
 

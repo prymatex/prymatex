@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import string
 
 from prymatex.qt import QtGui
+
+
+if sys.version_info.major >= 3:
+    long = int
 
 """ caret, foreground, selection, invisibles, lineHighlight, gutter, background """
 

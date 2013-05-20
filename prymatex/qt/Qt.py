@@ -5,5 +5,3 @@ import os
 
 if os.environ['QT_API'] == 'pyqt':
     from PyQt4.Qt import *
-else:
-    from PySide.Qt import *
