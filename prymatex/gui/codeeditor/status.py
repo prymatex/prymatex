@@ -154,18 +154,18 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         
 
     # ---------------- AutoConnect Status Widget signals
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def on_comboBoxSyntaxes_activated(self, index):
         if self.currentEditor is not None:
             model = self.comboBoxSyntaxes.model()
             node = model.node(model.createIndex(index, 0))
             self.currentEditor.setSyntax(node)
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def on_comboBoxTabSize_activated(self, index):
         data = self.comboBoxTabSize.itemData(index)
     
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def on_comboBoxSymbols_activated(self, pos):
         model = self.comboBoxSymbols.model()
         index = model.index(pos)
@@ -233,11 +233,11 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         
 
     # -------------- AutoConnect Command widget signals
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonCommandClose_pressed(self):
         self.widgetCommand.setVisible(False)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_comboBoxCommand_returnPressed(self):
         command = self.comboBoxCommand.lineEdit().text()
         input = self.comboBoxInput.itemData(self.comboBoxInput.currentIndex())
@@ -252,11 +252,11 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     
     
     # ------------ AutoConnect GoToLine widget signals
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonGoToLineClose_pressed(self):
         self.widgetGoToLine.setVisible(False)
     
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def on_spinBoxGoToLine_valueChanged(self, lineNumber):
         self.currentEditor.goToLine(lineNumber)
 
@@ -266,22 +266,22 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.spinBoxGoToLine.setFocus()
         
     # --------- AutoConnect FindReplace widget Signals
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonFindReplaceClose_pressed(self):
         self.widgetFindReplace.setVisible(False)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonFindNext_pressed(self):
         match, flags = self.getFindMatchAndFlags()
         self.currentEditor.findMatch(match, flags, True)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonFindPrevious_pressed(self):
         match, flags = self.getFindMatchAndFlags()
         flags |= QtGui.QTextDocument.FindBackward
         self.currentEditor.findMatch(match, flags)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonReplace_pressed(self):
         match, flags = self.getFindMatchAndFlags()
         replace = self.lineEditReplace.text()
@@ -289,7 +289,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
             self.currentEditor.replaceMatch(match, replace, flags)
             self.currentEditor.findMatch(match, flags)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonReplaceAll_pressed(self):
         match, flags = self.getFindMatchAndFlags()
         replace = self.lineEditReplace.text()
@@ -297,7 +297,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
             self.currentEditor.replaceMatch(match, replace, flags, allText = True)
         # TODO: mensaje de cuantos remplazo
         
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonFindAll_pressed(self):
         match, flags = self.getFindMatchAndFlags()
         cursors = self.currentEditor.findAll(match, flags)
@@ -326,12 +326,12 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         
     
     # -------------- AutoConnect IFind widget Signals
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonIFindClose_pressed(self):
         self.widgetIFind.setVisible(False)
         self.currentEditor.setFocus()
     
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def on_lineEditIFind_textChanged(self, text):
         if text:
             _, flags = self.getIFindMatchAndFlags()
@@ -341,18 +341,18 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
             #TODO: Buscar un clean style
             self.lineEditIFind.setStyleSheet('')
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonIFindNext_pressed(self):
         match, flags = self.getIFindMatchAndFlags()
         self.currentEditor.findMatch(match, flags, findNext = True)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonIFindPrevious_pressed(self):
         match, flags = self.getIFindMatchAndFlags()
         flags |= QtGui.QTextDocument.FindBackward
         self.currentEditor.findMatch(match, flags)
     
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def on_checkBoxIFindCaseSensitively_stateChanged(self, value):
         match, flags = self.getIFindMatchAndFlags()
         if self.currentEditor.findMatch(match, flags):

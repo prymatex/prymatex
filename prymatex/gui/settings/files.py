@@ -34,13 +34,13 @@ class FilesSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Files):
             self.comboBoxEndOfLine.addItem(description, os_name)
 
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def on_comboBoxLineEnding_activated(self, index):
         data = self.comboBoxLineEnding.itemData(index)
         self.settingGroup.setValue('defaultEndOfLine', data)
 
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def on_comboBoxEncoding_activated(self, index):
         data = self.comboBoxEncoding.itemData(index)
         self.settingGroup.setValue('defaultEncoding', data)

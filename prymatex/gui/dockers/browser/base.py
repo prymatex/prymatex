@@ -268,7 +268,7 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
             self.disconnect(self.currentEditor, QtCore.SIGNAL("close()"), self.disconnectCurrentEditor)
             self.currentEditor = None
 
-    @QtCore.pyqtSlot(bool)
+    @QtCore.Slot(bool)
     def on_actionSyncEditor_toggled(self, checked):
         if checked:
             #Quitar otro check
@@ -279,7 +279,7 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         else:
             self.stopTimer()
 
-    @QtCore.pyqtSlot(bool)
+    @QtCore.Slot(bool)
     def on_actionConnectEditor_toggled(self, checked):
         # TODO Capturar el current editor y usarlo para el update
         if checked:

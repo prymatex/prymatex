@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import traceback
-from PyQt4 import QtGui
+from prymatex.qt import QtGui
 from prymatex.ui.emergencytrace import Ui_TracebackDialog
 from traceback import format_exception
 from .beautify import beautifyTraceback

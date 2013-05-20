@@ -170,7 +170,7 @@ class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSys
         self.treeViewFileSystem.setAlternatingRowColors(True)
         self.treeViewFileSystem.setAnimated(True)
 
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def on_comboBoxLocation_currentIndexChanged(self, text):
         path = self.fileManager.expandVars(text)
         #TODO: Mostrar un error cuando sea None
@@ -178,7 +178,7 @@ class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSys
             path = self.fileManager.normpath(path)
             self.setPathAsRoot(path)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonUp_pressed(self):
         index = self.treeViewFileSystem.rootIndex()
         sIndex = self.fileSystemProxyModel.mapToSource(index)
@@ -283,17 +283,17 @@ class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSys
                     self.application.fileManager.copy(srcPath, dstPath)
 
     # ------ Actions Create and Delete objects
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionNewFolder_triggered(self):
         basePath = self.currentPath()
         self.createDirectory(basePath)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionNewFile_triggered(self):
         basePath = self.currentPath()
         self.createFile(basePath)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionNewFromTemplate_triggered(self):
         currentDirectory = self.currentDirectory()
         filePath = self.templateDialog.createFile(fileDirectory = self.currentDirectory())
@@ -301,12 +301,12 @@ class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSys
             self.application.openFile(filePath)
         
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionDelete_triggered(self):
         basePath = self.currentPath()
         self.deletePath(basePath)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionRename_triggered(self):
         basePath = self.currentPath()
         self.renamePath(basePath)
@@ -317,25 +317,25 @@ class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSys
         basePath = self.currentPath()
         QtGui.QApplication.clipboard().setText(basePath)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOpen_triggered(self):
         path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         if os.path.isfile(path):
             self.application.openFile(path)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOpenSystemEditor_triggered(self):
         path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % path, QtCore.QUrl.TolerantMode))
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOpenDefaultEditor_triggered(self):
         path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         if os.path.isfile(path):
             self.application.openFile(path)
     
     # ------ Custom filters
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonCustomFilters_pressed(self):
         filters, accepted = QtGui.QInputDialog.getText(self, _("Custom Filter"), 
                                                         _("Enter the filters (separated by comma)\nOnly * and ? may be used for custom matching"), 
@@ -345,11 +345,11 @@ class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSys
             self.settings.setValue('customFilters', filters)
             self.fileSystemProxyModel.setFilterRegExp(filters)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonCollapseAll_pressed(self):
         self.treeViewFileSystem.collapseAll()
         
-    @QtCore.pyqtSlot(bool)
+    @QtCore.Slot(bool)
     def on_pushButtonSync_toggled(self, checked):
         if checked:
             #Conectar señal
@@ -359,38 +359,38 @@ class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSys
             #Desconectar señal
             self.mainWindow.currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionSetInTerminal_triggered(self):
         path = self.currentPath()
         directory = self.application.fileManager.getDirectory(path)
         self.mainWindow.terminal.chdir(directory)
             
     # ----- Sort and order Actions
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderByName_triggered(self):
         self.fileSystemProxyModel.sortBy("name", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderBySize_triggered(self):
         self.fileSystemProxyModel.sortBy("size", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderByDate_triggered(self):
         self.fileSystemProxyModel.sortBy("date", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderByType_triggered(self):
         self.fileSystemProxyModel.sortBy("type", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderDescending_triggered(self):
         self.fileSystemProxyModel.sortBy(self.fileSystemProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderFoldersFirst_triggered(self):
         self.fileSystemProxyModel.sortBy(self.fileSystemProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
         
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionConvertIntoProject_triggered(self):
         _base, name = os.path.split(self.currentPath())
         self.mainWindow.componentByName("projectdialog").createProject(directory = self.currentPath(), name = name)

@@ -9,7 +9,7 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core import PMXBaseEditorAddon
 
 class CodeEditorSideBar(QtGui.QWidget):
-    updateRequest = QtCore.pyqtSignal()
+    updateRequest = QtCore.Signal()
     
     def __init__(self, editor):
         QtGui.QWidget.__init__(self, editor)

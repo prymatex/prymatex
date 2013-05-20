@@ -3,7 +3,7 @@
 
 import sys
 
-from PyQt4 import QtCore
+from prymatex.qt import QtCore
 
 from prymatex.ui.emergencycrash import Ui_CrashDialog
 from prymatex.gui.emergency.beautify import beautifyTraceback

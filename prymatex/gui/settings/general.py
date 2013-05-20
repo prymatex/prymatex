@@ -40,19 +40,19 @@ class GeneralSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_General):
         list(map(lambda check: check.blockSignals(False), checks))
         
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def on_checkBoxAskAboutExternalDeletions_stateChanged(self, state):
         self.settingGroup.setValue('askAboutExternalDeletions', state == QtCore.Qt.Checked)
         
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def on_checkBoxAskAboutExternalChanges_stateChanged(self, state):
         self.settingGroup.setValue('askAboutExternalChanges', state == QtCore.Qt.Checked)
         
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def on_comboBoxQtStyle_activated(self, styleName):
         self.settingGroup.setValue('qtStyle', styleName)
 
 
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def on_comboBoxQtStyleSheet_activated(self, styleSheetName):
         self.settingGroup.setValue('qtStyleSheet', styleSheetName)

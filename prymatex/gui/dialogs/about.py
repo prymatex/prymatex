@@ -4,11 +4,25 @@
 import sys
 import prymatex
 
-from prymatex.qt import QtCore, QtGui, Qt
+from prymatex.qt import QtCore, QtGui
+from prymatex.qt import API, qt_version_str, pyqt_version_str, sip_version_str, pyside_version_str
 from prymatex import resources
 from prymatex.core.components import PMXBaseDialog
 
 from prymatex.ui.about import Ui_AboutDialog
+
+informationHtml = '''<style>dt {{ font-weight: bold; }}</style><dl>
+<dt>Home Page</dt><dd><a href="{pmx_url}">{pmx_url}</a></dd>
+<dt>Source</dt><dd><a href="{pmx_url}">{pmx_source}</a></dd>
+<dt>Version</dt><dd>{pmx_version}</dd>
+<dt>Command Line</dt><dd>{commandline}</dd>
+<dt>Qt</dt><dd>{qt_version}</dd>'''
+
+if API == "pyqt":
+    informationHtml += '<dt>Sip</dt><dd>{sip_version}</dd><dt>PyQt4</dt><dd>{pyqt_version}</dd>'
+else:
+    informationHtml += '<dt>PySide</dt><dd>{pyside_version}</dd>'
+informationHtml += '<dt>Ponyguruma Regex Library</dt><dd>{pony_version}</dd><dt>ZMQ Version</dt><dd>{zmq_version}</dd></dl>'
 
 class AboutDialog(QtGui.QDialog, Ui_AboutDialog, PMXBaseDialog):
     def __init__(self, parent = None):
@@ -20,28 +34,18 @@ class AboutDialog(QtGui.QDialog, Ui_AboutDialog, PMXBaseDialog):
         self.fillVersionInfo()
         
     def fillVersionInfo(self):
-        pmx_url = prymatex.__url__
-        pmx_source = prymatex.__source__
-        commandline = ' '.join(sys.argv) 
-        pmx_version = "%s (%s)" % ('.'.join(map(str, prymatex.VERSION)), self.getGitVersion())
-        zmq_version = self.getZMQVersion()
-        pony_version = self.getPonygurumaVersion()
-        pyqt_version = Qt.qVersion()
-        self.textInformation.setHtml('''
-            <style>
-                dt {{ font-weight: bold; }}
-                
-            </style>
-            <dl>
-                <dt>Home Page</dt><dd><a href="{pmx_url}">{pmx_url}</a></dd>
-                <dt>Source</dt><dd><a href="{pmx_url}">{pmx_source}</a></dd>
-                <dt>Version</dt><dd>{pmx_version}</dd>
-                <dt>Command Line</dt><dd>{commandline}</dd>
-                <dt>PyQt4</dt><dd>{pyqt_version}</dd>
-                <dt>Ponyguruma Regex Library</dt><dd>{pony_version}</dd>
-                <dt>ZMQ Version</dt><dd>{zmq_version}</dd>
-           </dl>
-        '''.format(**locals()))
+        self.textInformation.setHtml(informationHtml.format(**{
+            'pmx_url': prymatex.__url__,
+            'pmx_source': prymatex.__source__,
+            'commandline': ' '.join(sys.argv) ,
+            'pmx_version': "%s (%s)" % ('.'.join(map(str, prymatex.VERSION)), self.getGitVersion()),
+            'zmq_version': self.getZMQVersion(),
+            'pony_version': self.getPonygurumaVersion(),
+            'qt_version': qt_version_str,
+            'sip_version': sip_version_str,
+            'pyqt_version': pyqt_version_str,
+            'pyside_version': pyside_version_str
+        }))
 
     def getGitVersion(self):
         try:

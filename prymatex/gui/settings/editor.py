@@ -73,12 +73,12 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
         self.selectionBarGroup.setValue('showSelection', self.checkBoxSelection.isChecked())
 
     
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def on_spinBoxMarginLineSpace_valueChanged(self, value):
         self.settingGroup.setValue('marginLineSpaces', value)
 
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def on_comboBoxDefaultSyntax_activated(self, index):
         model = self.comboBoxDefaultSyntax.model()
         node = model.mapToSource(model.createIndex(index, 0))

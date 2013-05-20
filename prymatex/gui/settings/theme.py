@@ -71,7 +71,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
 
 
     # ---------------------- Themes
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def on_comboBoxThemes_activated(self, index):
         theme = self.comboBoxThemes.model().themeForIndex(index)
         self.updateUi(theme)

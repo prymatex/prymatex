@@ -22,7 +22,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
             self.snippetCursorWrapper.setPosition(self.snippetCursorWrapper.position() - len(snippet.tabTrigger), QtGui.QTextCursor.KeepAnchor)
         
         self.tabreplacement = self.editor.tabKeyBehavior()
-        self.indentation = "" if self.disableIndent else self.snippetCursorWrapper.block().userData().indent
+        self.indentation = "" if self.disableIndent else self.editor.blockUserData(self.snippetCursorWrapper.block()).indent
         
         self.__env = snippet.environmentVariables()
         self.__env.update(self.editor.mainWindow.environmentVariables())

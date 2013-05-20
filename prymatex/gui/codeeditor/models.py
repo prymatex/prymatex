@@ -29,7 +29,7 @@ class BookmarkListModel(QtCore.QAbstractListModel):
 
     # -------- Signals
     def on_editor_blocksRemoved(self):
-        self.blocks = [block for block in self.blocks if block.userData() is not None]
+        self.blocks = [ block for block in self.blocks if block.userData() is not None ]
         self.layoutChanged.emit()
 
     def on_document_contentsChange(self, position, removed, added):
@@ -164,14 +164,14 @@ class SymbolListModel(QtCore.QAbstractListModel):
     # ----------- Signals
     def on_editor_blocksRemoved(self):
         def validSymbolBlock(block):
-            return block.userData() is not None and block.userData().symbol is not None
+            return self.editor.blockUserData(block).symbol is not None
         self.blocks = list(filter(validSymbolBlock, self.blocks))
         self.layoutChanged.emit()
 
 
     def on_editor_aboutToHighlightChange(self):
         for block in self.blocks:
-            block.userData().symbol = None
+            self.editor.blockUserData(block).symbol = None
         self.blocks = []
         self.layoutChanged.emit()
 
@@ -214,7 +214,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
 def symbolSelectableModelFactory(editor):
     # Data function    
     def symbolData():
-        return [dict(data = block, display = block.userData().symbol, image = resources.getIcon("symbol-class")) for block in editor.symbolListModel.blocks]
+        return [dict(data = block, display = editor.blockUserData(block).symbol, image = resources.getIcon("symbol-class")) for block in editor.symbolListModel.blocks]
 
     return selectableModelFactory(editor, symbolData, 
         filterFunction = lambda text, item: item["display"].find(text) != -1)
@@ -322,7 +322,7 @@ class AlreadyTypedWords(object):
     def __purge_blocks(self):
         """ Quitar bloques que no van mas """
         def validWordBlock(block):
-            return block.userData() is not None and bool(block.userData().words)
+            return bool(self.editor.blockUserData(block).words)
         words = {}
         for word, blocks in self.words.items():
             words[word] = list(filter(validWordBlock, blocks))

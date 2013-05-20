@@ -5,9 +5,9 @@ from prymatex.qt import QtGui, QtCore
 from .webview import WebView
 
 class TabbedWebView(QtGui.QTabWidget):
-    currentWebViewChanged = QtCore.pyqtSignal(WebView)
-    webViewNewRequested = QtCore.pyqtSignal()
-    webViewCloseRequested = QtCore.pyqtSignal(WebView)
+    currentWebViewChanged = QtCore.Signal(WebView)
+    webViewNewRequested = QtCore.Signal()
+    webViewCloseRequested = QtCore.Signal(WebView)
     
     def __init__(self, browserDock):
         QtGui.QTabWidget.__init__(self, browserDock)

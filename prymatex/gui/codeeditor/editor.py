@@ -47,14 +47,14 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     SCOPES = {}
         
     # -------------------- Signals
-    syntaxChanged = QtCore.pyqtSignal(object)
-    themeChanged = QtCore.pyqtSignal()
-    modeChanged = QtCore.pyqtSignal()
-    blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
-    blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
+    syntaxChanged = QtCore.Signal(object)
+    themeChanged = QtCore.Signal()
+    modeChanged = QtCore.Signal()
+    blocksRemoved = QtCore.Signal(QtGui.QTextBlock, int)
+    blocksAdded = QtCore.Signal(QtGui.QTextBlock, int)
     
-    aboutToHighlightChange = QtCore.pyqtSignal()
-    highlightChanged = QtCore.pyqtSignal()
+    aboutToHighlightChange = QtCore.Signal()
+    highlightChanged = QtCore.Signal()
     
     # ------------------ Flags
     ShowTabsAndSpaces     = 1<<0
@@ -107,7 +107,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def __init__(self, parent = None):
         TextEditWidget.__init__(self, parent)
         PMXBaseEditor.__init__(self)
-
+        
         self.__blockUserDataHandlers = []
         
         self.braces = []
@@ -143,7 +143,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
         #Block Count
         self.lastBlockCount = self.document().blockCount()
-
+        print("init", self.document())
         #Connect context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
@@ -170,6 +170,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.themeChanged.connect(self.highlightEditor)
 
     def initialize(self, mainWindow):
+        print("initalize", self.document())
         PMXBaseEditor.initialize(self, mainWindow)
         self.selectorDialog = self.mainWindow.findChild(QtGui.QDialog, "SelectorDialog")
         self.browserDock = self.mainWindow.findChild(QtGui.QDockWidget, "BrowserDock")
@@ -213,9 +214,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def registerBlockUserDataHandler(self, handler):
         self.__blockUserDataHandlers.append(handler)
     
-    def blockUserDataFactory(self, block):
-        userData = CodeEditorBlockUserData()
-        list(map(lambda handler: handler.contributeToBlockUserData(userData), self.__blockUserDataHandlers))
+    def blockUserData(self, block):
+        userData = block.userData()
+        print("blockUserData", self.document())
+        #or not isinstance(userData, CodeEditorBlockUserData)
+        if not userData:
+            userData = CodeEditorBlockUserData()
+            for handler in self.__blockUserDataHandlers:
+                handler.contributeToBlockUserData(userData)
+            block.setUserData(userData)
         return userData
 
     def processBlockUserData(self, text, block, userData):
@@ -228,7 +235,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if foldingMark != userData.foldingMark:
             userData.foldingMark = foldingMark
         # Handlers
-        list(map(lambda handler: handler.processBlockUserData(text, block, userData), self.__blockUserDataHandlers))
+        for handler in self.__blockUserDataHandlers:
+            handler.processBlockUserData(text, block, userData)
+            print(block.document())
         
     def on_modificationChanged(self, value):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
@@ -332,7 +341,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if block is None:
             cursor = cursor or (documentPosition is not None and self.cursorAtPosition(documentPosition)) or self.textCursor()
             block = cursor.block()
-        userData = block.userData()
+        userData = self.blockUserData(block)
         positionInBlock = blockPosition or (cursor is not None and cursor.positionInBlock()) or 0
         if direction == "right":
             # TODO: Cuando el syntax processor funcione bien sacar este or
@@ -350,11 +359,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             
     def _scopes(self, block = None, attribute = "name", scope_filter = lambda attr: True):
         block = block or self.textCursor().block()
-        userData = block.userData()
+        userData = self.blockUserData(block)
         return [start_end_attr for start_end_attr in [((start_end_scope[0][0], start_end_scope[0][1]), self.SCOPES[start_end_scope[1]][attribute]) for start_end_scope in userData.scopeRanges()] if scope_filter(start_end_attr[1])]
 
     def findScopes(self, block = None, attribute = "name", scope_filter = lambda attr: True, firstOnly = False):
-        userData = block.userData() if block is not None else self.textCursor().block()
+        userData = self.blockUserData(block) if block is not None else self.textCursor().block()
         # TODO: Se podra optimizar esto?
         scopes = [start_end_attr2 for start_end_attr2 in [((start_end_scope1[0][0], start_end_scope1[0][1]), self.SCOPES[start_end_scope1[1]][attribute]) for start_end_scope1 in userData.scopeRanges()] if scope_filter(start_end_attr2[1])]
         if not firstOnly:
@@ -575,7 +584,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         painter.setPen(self.colours['selection'])
         block = self.firstVisibleBlock()
         offset = self.contentOffset()
-        while block.isValid() and block.userData():
+        while block.isValid() and self.blockUserData(block):
             # The top left position of the block in the document
             # position = self.blockBoundingGeometry(block).topLeft() + offset
             blockGeometry = self.blockBoundingGeometry(block)
@@ -590,11 +599,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                         resources.getImage("foldingellipsis"))
                 if self.showIndentGuide:
                     blockPattern = block
-                    while blockPattern.isValid() and blockPattern.userData() and blockPattern.userData().blank():
+                    while blockPattern.isValid() and self.blockUserData(blockPattern).blank():
                         blockPattern = blockPattern.next()
                     if blockPattern.isValid() and blockPattern.userData():
                         indentPattern = blockPattern.userData().indent
-                        for s in range(0, (len(indentPattern) / len(self.tabKeyBehavior()))):
+                        # TODO: Obtener este valor mas decoroso
+                        for s in range(0, (len(indentPattern) // len(self.tabKeyBehavior()))):
                             positionX = (font_metrics.width(WIDTH_CHARACTER) * self.tabStopSize * s) + font_metrics.width(WIDTH_CHARACTER) + offset.x()
                             painter.drawLine(positionX, positionY, positionX, positionY + font_metrics.height())
                 
@@ -720,7 +730,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         cursor = cursor or self.textCursor()
         block = cursor.block()
         positionInBlock = cursor.positionInBlock()
-        userData = cursor.block().userData()
+        userData = self.blockUserData(block)
         settings = self.scope(attribute='settings')
         indentMarks = settings.indent(block.text()[:positionInBlock])
         if PMXPreferenceSettings.INDENT_INCREASE in indentMarks:
@@ -738,7 +748,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             indent = userData.indent[:-len(self.tabKeyBehavior())]
         else:
             self.logger.debug("Preserve indent")
-            indent = block.userData().indent[:positionInBlock]
+            indent = userData.indent[:positionInBlock]
         cursor.insertText("\n%s" % indent)
         self.ensureCursorVisible()
 
@@ -927,8 +937,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     # ---------- Folding
     def _folding_mark(self, block):
-        userData = block.userData()
-        return userData is not None and userData.foldingMark or PMXPreferenceSettings.FOLDING_NONE
+        userData = self.blockUserData(block)
+        return userData.foldingMark or PMXPreferenceSettings.FOLDING_NONE
     
     def _find_block_fold_peer(self, block, direction = "down"):
         """ Direction are 'down' or up"""
@@ -938,7 +948,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             assert self.isFoldingStopMarker(block), "Block isn't folding stop"
         nest = 0
         while block.isValid():
-            userData = block.userData()
+            userData = self.blockUserData(block)
             if userData.foldingMark == PMXPreferenceSettings.FOLDING_START:
                 nest += 1
             elif userData.foldingMark == PMXPreferenceSettings.FOLDING_STOP:
@@ -949,7 +959,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     
     def _find_indented_block_fold_close(self, block):
         assert self.isFoldingIndentedBlockStart(block), "Block isn't folding indented start"
-        indent = block.userData().indent
+        indent = self.blockUserData(block).indent
         indentedBlock = self.findIndentedBlock(block, indent = indent, comparison = operator.le)
         while self.isFoldingIndentedBlockIgnore(indentedBlock):
             indentedBlock = self.findIndentedBlock(indentedBlock, indent = indent, comparison = operator.le)
@@ -974,7 +984,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return self.isFoldingStartMarker(block) or self.isFoldingStopMarker(block) or self.isFoldingIndentedBlockStart(block)
     
     def isFolded(self, block):
-        return self.isFoldingMark(block) and block.userData().folded
+        return self.isFoldingMark(block) and self.blockUserData(block).folded
     
     def codeFoldingFold(self, milestone):
         block = endBlock = None
@@ -992,7 +1002,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if block and endBlock and milestone:
             # Go!
             while block.isValid():
-                userData = block.userData()
+                userData = self.blockUserData(block)
                 userData.foldedLevel += 1
                 block.setVisible(userData.foldedLevel == 0)
                 if block == endBlock:
@@ -1013,7 +1023,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if endBlock:
             # Go!
             while block.isValid():
-                userData = block.userData()
+                userData = self.blockUserData(block)
                 userData.foldedLevel -= 1
                 block.setVisible(userData.foldedLevel == 0)
                 if block == endBlock:
@@ -1051,7 +1061,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         block = cursor.block()
         beginPosition = block.position()
         # TODO Todo lo que implique userData centrarlo en una API en la instancia de cada editor
-        (start, end), scope = block.userData().scopeRange(cursor.positionInBlock())
+        (start, end), scope = self.blockUserData(block).scopeRange(cursor.positionInBlock())
         if scope is not None:
             cursor.setPosition(beginPosition + start)
             cursor.setPosition(beginPosition + end, QtGui.QTextCursor.KeepAnchor)
@@ -1110,15 +1120,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def findNoBlankBlock(self, block, direction = "down"):
         """ Return no blank block """
         block = block.next() if direction == "down" else block.previous()
-        while block.isValid() and block.userData() and block.userData().blank():
+        while block.isValid() and self.blockUserData(block).blank():
             block = block.next() if direction == "down" else block.previous()
         return block
     
     def findIndentedBlock(self, block, indent = None, direction = "down", comparison = operator.eq):
         """ Return equal indent block """
-        indent = indent if indent is not None else block.userData().indent
+        indent = indent if indent is not None else self.blockUserData(block).indent
         block = self.findNoBlankBlock(block, direction)
-        while block.isValid() and block.userData() and not comparison(block.userData().indent, indent):
+        while block.isValid() and not comparison(self.blockUserData(block).indent, indent):
             block = self.findNoBlankBlock(block, direction)
         return block
     

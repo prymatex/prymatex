@@ -65,12 +65,12 @@ class TerminalSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Terminal):
         self.comboBoxScheme.setDisabled(state == QtCore.Qt.Checked)
         self.settingGroup.setValue('editorTheme', state == QtCore.Qt.Checked)
 
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def on_comboBoxScheme_activated(self, name):
         self.settingGroup.setValue('defaultScheme', name)
 
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonChangeFont_pressed(self):
         font = self.settingGroup.value('font')
         font, ok = QtGui.QFontDialog.getFont(font, self, _("Select terminal font"))

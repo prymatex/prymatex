@@ -13,7 +13,7 @@ from prymatex.ui.dialogs.search import Ui_SearchDialog
 from functools import reduce
 
 class FileSearchThread(QtCore.QThread):
-    foundPattern = QtCore.pyqtSignal(str, list)
+    foundPattern = QtCore.Signal(str, list)
     
     def __init__(self, application, parent = None):
         QtCore.QThread.__init__(self, parent)

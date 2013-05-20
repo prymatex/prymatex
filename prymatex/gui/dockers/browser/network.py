@@ -41,7 +41,7 @@ class FileReply(QtNetwork.QNetworkReply):
             return data
 
 class NetworkAccessManager(QtNetwork.QNetworkAccessManager):
-    commandUrlRequested = QtCore.pyqtSignal(QtCore.QUrl)
+    commandUrlRequested = QtCore.Signal(QtCore.QUrl)
     
     def createRequest(self, operation, request, data):
         if request.url().scheme() == "txmt":

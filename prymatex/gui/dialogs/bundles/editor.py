@@ -116,31 +116,31 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         self.editTreeItem(bundleItemNode)
         self.treeView.edit(index)
         
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionCommand_triggered(self):
         self.createBundleItem("untitled", "command")
 
-    @QtCore.pyqtSlot()        
+    @QtCore.Slot()        
     def on_actionDragCommand_triggered(self):
         self.createBundleItem("untitled", "dragcommand")
 
-    @QtCore.pyqtSlot()        
+    @QtCore.Slot()        
     def on_actionLanguage_triggered(self):
         self.createBundleItem("untitled", "syntax")
 
-    @QtCore.pyqtSlot()        
+    @QtCore.Slot()        
     def on_actionSnippet_triggered(self):
         self.createBundleItem("untitled", "snippet")
 
-    @QtCore.pyqtSlot()        
+    @QtCore.Slot()        
     def on_actionTemplate_triggered(self):
         self.createBundleItem("untitled", "template")
 
-    @QtCore.pyqtSlot()        
+    @QtCore.Slot()        
     def on_actionProject_triggered(self):
         self.createBundleItem("untitled", "project")
 
-    @QtCore.pyqtSlot()        
+    @QtCore.Slot()        
     def on_actionTemplateFile_triggered(self):
         index = self.treeView.currentIndex()
         if index.isValid():
@@ -149,11 +149,11 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
                 template = template.parentNode()
         self.manager.createTemplateFile("untitled", template, self.namespace)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionPreferences_triggered(self):
         self.createBundleItem("untitled", "preference")
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionBundle_triggered(self):
         bundleNode = self.manager.createBundle("untitled", self.namespace)
         sIndex = self.manager.bundleTreeModel.createIndex(bundleNode.row(), 0, bundleNode)
@@ -162,7 +162,7 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         self.editTreeItem(bundleNode)
         self.treeView.edit(index)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonRemove_pressed(self):
         index = self.treeView.currentIndex()
         if index.isValid():
@@ -174,7 +174,7 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
             else:
                 self.manager.deleteBundleItem(item)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonFilter_pressed(self):
         self.bundleFilterDialog.show()
 
@@ -227,7 +227,7 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         self.proxyTreeModel.setFilterRegExp(".*%s.*" % self.comboBoxItemFilter.currentText())
 
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def on_comboBoxItemFilter_activated(self, index):
         value = self.comboBoxItemFilter.itemData(index)
         self.proxyTreeModel.setFilterBundleItemType(value)
@@ -299,16 +299,16 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
             return True
         return QtGui.QDialog.eventFilter(self, obj, event)
 
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def on_lineEditScopeSelector_textEdited(self, text):
         self.stackedWidget.currentWidget().setScope(text)
 
 
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def on_lineEditTabTriggerActivation_textEdited(self, text):
         self.stackedWidget.currentWidget().setTabTrigger(text)
 
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def on_lineEditName_textEdited(self, text):
         self.stackedWidget.currentWidget().setName(text)
 

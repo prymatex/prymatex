@@ -293,7 +293,7 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
     #================================================
     # Actions Create, Delete, Rename objects
     #================================================      
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionNewFile_triggered(self):
         currentDirectory = self.currentDirectory()
         filePath = self.createFile(currentDirectory)
@@ -302,7 +302,7 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
             #TODO: si esta en auto update ver como hacer los refresh
             self.projectTreeProxyModel.refreshPath(currentDirectory)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionNewFromTemplate_triggered(self):
         currentDirectory = self.currentDirectory()
         filePath = self.templateDialog.createFile(fileDirectory = self.currentDirectory())
@@ -311,7 +311,7 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
             #TODO: si esta en auto update ver como hacer los refresh
             self.projectTreeProxyModel.refreshPath(currentDirectory)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionNewFolder_triggered(self):
         currentDirectory = self.currentDirectory()
         dirPath = self.createDirectory(currentDirectory)
@@ -319,11 +319,11 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
             #TODO: si esta en auto update ver como hacer los refresh
             self.projectTreeProxyModel.refreshPath(currentDirectory)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionNewProject_triggered(self):
         self.projectDialog.createProject()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionDelete_triggered(self):
         # TODO: Cuidado porque si van cambiando los index puede ser que esto no se comporte como se espera
         # es mejor unos maps antes para pasarlos a path
@@ -346,7 +346,7 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
                 self.deletePath(treeNode.path())
             self.projectTreeProxyModel.refresh(index.parent())
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionRemove_triggered(self):
         treeNode = self.currentNode()
         if treeNode.isproject:
@@ -359,49 +359,49 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
             if ret == QtGui.QMessageBox.Ok:
                 self.application.projectManager.removeProject(treeNode)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionRename_triggered(self):
         self.renamePath(self.currentPath())
         self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionCloseProject_triggered(self):
         treeNode = self.currentNode()
         if treeNode.isproject:
             self.application.projectManager.closeProject(treeNode)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOpenProject_triggered(self):
         treeNode = self.currentNode()
         if treeNode.isproject:
             self.application.projectManager.openProject(treeNode)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionProperties_triggered(self):
         self.propertiesDialog.setModel(self.application.projectManager.propertiesProxyModel)
         self.propertiesDialog.exec_(self.currentNode())
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionRefresh_triggered(self):
         indexes = self.treeViewProjects.selectedIndexes()
         for index in indexes:
             self.projectTreeProxyModel.refresh(index)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOpen_triggered(self):
         node = self.currentNode()
         if node.isfile:
             self.application.openFile(node.path())
         
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOpenSystemEditor_triggered(self):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % self.currentPath(), QtCore.QUrl.TolerantMode))
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonCollapseAll_pressed(self):
         self.treeViewProjects.collapseAll()
 
-    @QtCore.pyqtSlot(bool)
+    @QtCore.Slot(bool)
     def on_pushButtonSync_toggled(self, checked):
         if checked:
             #Conectar señal
@@ -416,28 +416,28 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
             index = self.projectTreeProxyModel.indexForPath(editor.filePath)
             self.treeViewProjects.setCurrentIndex(index)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionProjectBundles_triggered(self):
         project = self.currentNode()
         self.bundleEditorDialog.execEditor(namespaceFilter = project.namespace)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionSelectRelatedBundles_triggered(self):
         project = self.currentNode()
         self.projectManager.projectMenuProxyModel.setCurrentProject(project)
         self.bundleFilterDialog.exec_()
         
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionCopy_triggered(self):
         mimeData = self.projectTreeProxyModel.mimeData( self.treeViewProjects.selectedIndexes() )
         self.application.clipboard().setMimeData(mimeData)
         
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionCut_triggered(self):
         mimeData = self.projectTreeProxyModel.mimeData( self.treeViewProjects.selectedIndexes() )
         self.application.clipboard().setMimeData(mimeData)
         
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionPaste_triggered(self):
         parentPath = self.currentPath()
         mimeData = self.application.clipboard().mimeData()
@@ -461,7 +461,7 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
     #================================================
     # Custom filters
     #================================================
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonCustomFilters_pressed(self):
         filters, accepted = QtGui.QInputDialog.getText(self, _("Custom Filter"), 
                                 _("Enter the filters (separated by comma)\nOnly * and ? may be used for custom matching"), 
@@ -474,27 +474,27 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
     #================================================
     # Sort and order Actions
     #================================================      
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderByName_triggered(self):
         self.projectTreeProxyModel.sortBy("name", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderBySize_triggered(self):
         self.projectTreeProxyModel.sortBy("size", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderByDate_triggered(self):
         self.projectTreeProxyModel.sortBy("date", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderByType_triggered(self):
         self.projectTreeProxyModel.sortBy("type", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderDescending_triggered(self):
         self.projectTreeProxyModel.sortBy(self.projectTreeProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderFoldersFirst_triggered(self):
         self.projectTreeProxyModel.sortBy(self.projectTreeProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
 

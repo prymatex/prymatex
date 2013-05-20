@@ -32,7 +32,7 @@ from functools import reduce
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBaseComponent):
     """Prymatex main window"""
     # --------------------- Signals
-    currentEditorChanged = QtCore.pyqtSignal(object)
+    currentEditorChanged = QtCore.Signal(object)
 
     # --------------------- Settings
     SETTINGS_GROUP = 'MainWindow'

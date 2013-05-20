@@ -187,7 +187,7 @@ class SnippetEditorWidget(BundleItemEditorBaseWidget, Ui_Snippet):
         self.setupUi(self)
         self.content.setTabStopWidth(TABWIDTH)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_content_textChanged(self):
         text = self.content.toPlainText()
         if self.bundleItem.content != text:
@@ -293,7 +293,7 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
             
         self.pushButtonOptions.setMenu(self.menuCommandTemplates)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_command_textChanged(self):
         text = self.command.toPlainText()
         if self.bundleItem.command != text:
@@ -407,7 +407,7 @@ fi"'''}
         self.comboBoxOutput.addItem("Insert as Text", "insertText")
         self.command.setTabStopWidth(TABWIDTH)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_command_textChanged(self):
         text = self.command.toPlainText()
         if self.bundleItem.command != text:
@@ -415,7 +415,7 @@ fi"'''}
         else:
             self.changes.pop('command', None)
     
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def on_lineEditExtension_textEdited(self, text):
         if text != self.bundleItem.extension:
             self.changes['extension'] = text
@@ -452,7 +452,7 @@ class TemplateFileEditorWidget(BundleItemEditorBaseWidget, Ui_TemplateFile):
         self.setupUi(self)
         self.content.setTabStopWidth(TABWIDTH)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_content_textChanged(self):
         text = self.content.toPlainText()
         if self.bundleItem.content != text:
@@ -492,7 +492,7 @@ class DragCommandEditorWidget(BundleItemEditorBaseWidget, Ui_DragCommand):
         self.comboBoxOutput.addItem("Insert as Snippet", "insertAsSnippet")
         self.command.setTabStopWidth(TABWIDTH)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_command_textChanged(self):
         text = self.command.toPlainText()
         if self.bundleItem.command != text:
@@ -500,7 +500,7 @@ class DragCommandEditorWidget(BundleItemEditorBaseWidget, Ui_DragCommand):
         else:
             self.changes.pop('command', None)
     
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def on_lineEditExtensions_textEdited(self, text):
         value = [item.strip() for item in str(text).split(",")]
         if value != self.bundleItem.draggedFileExtensions:
@@ -552,7 +552,7 @@ class LanguageEditorWidget(BundleItemEditorBaseWidget, Ui_Language):
         self.setupUi(self)
         self.content.setTabStopWidth(TABWIDTH)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_content_textChanged(self):
         #Convertir a dict
         try:
@@ -586,7 +586,7 @@ class PreferenceEditorWidget(BundleItemEditorBaseWidget, Ui_Preference):
         self.setupUi(self)
         self.settings.setTabStopWidth(TABWIDTH)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_settings_textChanged(self):
         #Convertir a dict
         try:
@@ -696,7 +696,7 @@ fi"'''}
         self.setupUi(self)
         self.command.setTabStopWidth(TABWIDTH)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_command_textChanged(self):
         text = self.command.toPlainText()
         if self.bundleItem.command != text:

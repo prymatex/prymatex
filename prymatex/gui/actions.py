@@ -37,23 +37,23 @@ class MainWindowActions(object):
         self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
 
     # ------------ File Actions
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionNewEditor_triggered(self):
         self.addEmptyEditor()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionNewFromTemplate_triggered(self):
         filePath = self.templateDialog.createFile()
 
         if filePath:
             self.application.openFile(filePath)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionNewProject_triggered(self):
         projectDialog = self.findChild(QtGui.QDialog, "ProjectDialog")
         projectDialog.createProject()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOpen_triggered(self):
         filePath = self.currentEditor().filePath if self.currentEditor() is not None else None
         filePaths, selectedfilter = getOpenFileNames(
@@ -65,16 +65,16 @@ class MainWindowActions(object):
         for filePath in filePaths:
             editor = self.application.openFile(filePath, focus = focus)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOpenAllRecentFiles_triggered(self):
         for filePath in self.application.fileManager.fileHistory:
             self.application.openFile(filePath)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionRemoveAllRecentFiles_triggered(self):
         self.application.fileManager.clearFileHistory()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionImportProject_triggered(self):
         directory = QtGui.QFileDialog.getExistingDirectory(self, "Choose project location", self.application.fileManager.directory())
         if directory:
@@ -83,40 +83,40 @@ class MainWindowActions(object):
             except exceptions.LocationIsNotProject:
                 QtGui.QMessageBox.critical(self, "Critical", "A error has occurred.\n%s is not a valid project location." % directory)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionSave_triggered(self):
         self.saveEditor()
         
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionSaveAs_triggered(self):
         self.saveEditor(saveAs = True)
         
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionSaveAll_triggered(self):
         for w in self.editors():
             self.saveEditor(editor = w)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionClose_triggered(self):
         self.closeEditor()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionCloseAll_triggered(self):
         for w in self.splitTabWidget.allWidgets():
             self.closeEditor(editor = w)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionCloseOthers_triggered(self):
         current = self.currentEditor()
         for w in self.splitTabWidget.allWidgets():
             if w is not current:
                 self.closeEditor(editor = w)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionQuit_triggered(self):
         QtGui.QApplication.quit()
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionSwitchProfile_triggered(self):
         if self.profileDialog.switchProfile() == self.profileDialog.Accepted and\
             self.application.profileManager.defaultProfile() != self.application.currentProfile:
@@ -124,73 +124,73 @@ class MainWindowActions(object):
 
 
     # ------------ Edit Actions
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionUndo_triggered(self):
         if self.currentEditor() is not None:
             self.currentEditor().undo()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionRedo_triggered(self):
         if self.currentEditor() is not None:
             self.currentEditor().redo()
         
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionCopy_triggered(self):
         if self.currentEditor() is not None:
             self.currentEditor().copy()
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionCut_triggered(self):
         if self.currentEditor() is not None:
             self.currentEditor().cut()
         
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionPaste_triggered(self):
         if self.currentEditor() is not None:
             self.currentEditor().paste()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionFind_triggered(self):
         self.statusBar().showIFind()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionFindReplace_triggered(self):
         self.statusBar().showFindReplace()
         
     # ------------ View Actions
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionZoomIn_triggered(self):
         if self.currentEditor() is not None:
             self.currentEditor().zoomIn()
             
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionZoomOut_triggered(self):
         if self.currentEditor() is not None:
             self.currentEditor().zoomOut()
 
     # ------------ Navigation Actions
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionNextTab_triggered(self):
         self.splitTabWidget.focusNextTab()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionPreviousTab_triggered(self):
         self.splitTabWidget.focusPreviousTab()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionSelectTab_triggered(self):
         item = self.selectorDialog.select(self.tabSelectableModel, title=_("Select tab"))
         
         if item is not None:
             self.splitTabWidget.setCurrentWidget(item['data'])
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionJumpToTabWindow_triggered(self):
         if self.currentEditor() is not None:
             self.currentEditor().setFocus()
     
     # ------------ Global navigation
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionLocationBack_triggered(self):
         if self._editorHistory and self._editorHistoryIndex < len(self._editorHistory) - 1:
             self._editorHistoryIndex += 1
@@ -199,7 +199,7 @@ class MainWindowActions(object):
                 entry["editor"].restoreLocationMemento(entry["memento"])
             self.setCurrentEditor(entry["editor"])
         
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionLocationForward_triggered(self):
         if self._editorHistoryIndex != 0:
             self._editorHistoryIndex -= 1
@@ -208,7 +208,7 @@ class MainWindowActions(object):
                 entry["editor"].restoreLocationMemento(entry["memento"])
             self.setCurrentEditor(entry["editor"])
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionLastEditLocation_triggered(self):
         for index, entry in enumerate(self._editorHistory):
             if "memento" in entry:
@@ -218,36 +218,36 @@ class MainWindowActions(object):
                 break
 
     # ------------ Bundles Actions
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionShowBundleEditor_triggered(self):
         self.bundleEditorDialog.execEditor()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionEditCommands_triggered(self):
         self.bundleEditorDialog.execCommand()
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionEditLanguages_triggered(self):
         self.bundleEditorDialog.execLanguage()
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionEditSnippets_triggered(self):
         self.bundleEditorDialog.execSnippet()
         
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionReloadBundles_triggered(self):
         self.supportManager.reloadSupport(self.showMessage)
 
     # ------------ Preferences Actions
-    @QtCore.pyqtSlot(bool)
+    @QtCore.Slot(bool)
     def on_actionShowMenus_toggled(self, checked):
         self.menuBar().setVisible(checked)
         
-    @QtCore.pyqtSlot(bool)
+    @QtCore.Slot(bool)
     def on_actionShowStatus_toggled(self, checked):
         self.statusBar().setVisible(checked)
     
-    @QtCore.pyqtSlot(bool)
+    @QtCore.Slot(bool)
     def on_actionFullscreen_toggled(self, checked):
         self.toggleDockToolBarVisibility()
         if checked:
@@ -255,20 +255,20 @@ class MainWindowActions(object):
         else:
             self.showNormal()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionSettings_triggered(self):
         self.settingsDialog.exec_()
             
     # ------------ Help Actions
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionAboutQt_triggered(self):
         QtGui.qApp.aboutQt()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionAbout_triggered(self):
         self.aboutDialog.exec_()
         
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionProjectHomepage_triggered(self):
         import webbrowser
         import prymatex
@@ -276,7 +276,7 @@ class MainWindowActions(object):
     
     SCREENSHOT_FORMAT = 'png'
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionTakeScreenshot_triggered(self):
         pxm = QtGui.QPixmap.grabWindow(self.winId())
         import os

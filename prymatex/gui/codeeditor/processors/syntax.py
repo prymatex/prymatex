@@ -3,6 +3,8 @@
 
 from prymatex.support import processor
 
+
+
 class CodeEditorSyntaxProcessor(processor.PMXSyntaxProcessor):
     def __init__(self, editor):
         self.editor = editor
