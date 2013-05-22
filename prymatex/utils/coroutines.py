@@ -11,7 +11,8 @@ import datetime
 import traceback
 from collections import deque
 from types import GeneratorType
-from PyQt4.QtCore import QObject, QTimer, pyqtSignal, QCoreApplication
+
+from prymatex.qt import QtCore
 
 
 # Reduce scheduler overhead
@@ -50,7 +51,7 @@ class Return( object ):
 
 # Inherit your asynchronous calls,
 # like Sleep below.
-class AsynchronousCall( QObject ):
+class AsynchronousCall( QtCore.QObject ):
     def handle( self ):
         raise Exception( 'Not Implemented' )
     
@@ -91,15 +92,15 @@ class Sleep( AsynchronousCall ):
 
 
     def handle( self ):
-        # QObject is the QT library class. SytemCall inherits QObject.
-        # QObject.timerEvent will be called after self.ms milliseconds
-        self.timerId = QObject.startTimer( self, self.ms )
+        # QtCore.QObject is the QT library class. SytemCall inherits QtCore.QObject.
+        # QtCore.QObject.timerEvent will be called after self.ms milliseconds
+        self.timerId = QtCore.QObject.startTimer( self, self.ms )
 
 
-    # This is overloaded QObject.timerEvent
+    # This is overloaded QtCore.QObject.timerEvent
     # and will be called by the Qt event loop.
     def timerEvent( self, e ):
-        QObject.killTimer( self, self.timerId )
+        QtCore.QObject.killTimer( self, self.timerId )
         self.wakeup( None )
 
 
@@ -163,7 +164,7 @@ class WaitFirstTask( AsynchronousCall ):
 
         # timoeut passed?
         if self.timeoutMs:
-            self.timerId = QObject.startTimer( self, self.timeoutMs )
+            self.timerId = QtCore.QObject.startTimer( self, self.timeoutMs )
 
 
     # tasks done signal
@@ -179,7 +180,7 @@ class WaitFirstTask( AsynchronousCall ):
         for t in self.tasks:
             t.done.disconnect( self.passParam )
 
-        QObject.killTimer( self, self.timerId )
+        QtCore.QObject.killTimer( self, self.timerId )
         self.wakeup( None )
 
 
@@ -220,11 +221,11 @@ class CoException( Exception ):
 
     
 # Coroutine based task
-class Task( QObject ):
+class Task( QtCore.QObject ):
     # Return.value is task result, if no unhandled Exceptions occured.
     # Emmited on Exception with Exception as Return.value, if emitUnhandled set.
     # Do not emmited with exception, if emitUnhandled is False. Pass exceptions to main loop.
-    done = pyqtSignal( Return )
+    done = QtCore.Signal( Return )
     
     # States
     NEW = 0
@@ -249,7 +250,7 @@ class Task( QObject ):
 
 
     def __init__( self, parent, coroutine ):
-        QObject.__init__( self, parent )
+        QtCore.QObject.__init__( self, parent )
 
         self.state = Task.NEW
         self.stack = deque()          # stack for subcoroutines
@@ -375,9 +376,9 @@ class Task( QObject ):
     def cancel(self):
         self.state = Task.CANCELED
 
-class IdleTask( QObject ):
+class IdleTask( QtCore.QObject ):
     def __init__( self, parent):
-        QObject.__init__( self, parent )
+        QtCore.QObject.__init__( self, parent )
     
     def isReady(self):
         return True
@@ -388,12 +389,12 @@ class IdleTask( QObject ):
     def cancel(self):
         pass
 
-class Scheduler( QObject ):
-    longIteration = pyqtSignal( datetime.timedelta, Task )
-    done = pyqtSignal()
+class Scheduler( QtCore.QObject ):
+    longIteration = QtCore.Signal( datetime.timedelta, Task )
+    done = QtCore.Signal()
 
     def __init__( self, parent = None ):
-        QObject.__init__( self, parent )
+        QtCore.QObject.__init__( self, parent )
 
         self.task = None
         self.tasks = 0
@@ -546,7 +547,7 @@ def coWaitTasks( tasks, maxTimeoutMs, breakFunc = lambda tasks, t: False ):
 # paramsList - list( *argv1, *argv2, ... )
 # will start coTask( *argv1 ), coTask( *argv2 )... and returns tasks set
 def coMassiveStart( coTask, tasksParams, serialTimeoutMs = 0, emitUnhandled = True ):
-    scheduler = QCoreApplication.instance().scheduler
+    scheduler = QtCore.QCoreApplication.instance().scheduler
     tasks = set()
     for argv in tasksParams:
         t = scheduler.newTask( coTask(*argv) )
@@ -563,7 +564,7 @@ def coMassiveStart( coTask, tasksParams, serialTimeoutMs = 0, emitUnhandled = Tr
 if __name__ == '__main__':
     import sys
     import random
-    from PyQt4.QtGui import QApplication
+    from prymatex.qt.QtGui import QApplication
 
 
     def valueReturner( name ):
@@ -608,7 +609,7 @@ if __name__ == '__main__':
             yield Return( name, v, v1, v2 )
 
 
-    class TaskReturnValueTest( QObject ):
+    class TaskReturnValueTest( QtCore.QObject ):
         def slotDone( self, res ):
             print('slotDone():', res.value)
 

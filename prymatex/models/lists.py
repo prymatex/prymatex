@@ -14,7 +14,7 @@ from prymatex.models.selectable import SelectableModelMixin
 # Checkable List
 #====================================================
 class CheckableListModel(QtCore.QAbstractListModel):
-    selectionChanged = QtCore.pyqtSignal()
+    selectionChanged = QtCore.Signal()
     
     def __init__(self, parent = None): 
         QtCore.QAbstractListModel.__init__(self, parent)

@@ -9,12 +9,12 @@ import json
 import ast
 import signal
 
-from PyQt4 import QtCore
+from prymatex.qt import QtCore
 
 class Session(QtCore.QObject):
-    readyRead = QtCore.pyqtSignal()
-    screenReady = QtCore.pyqtSignal(tuple)
-    finished = QtCore.pyqtSignal(int)
+    readyRead = QtCore.Signal()
+    screenReady = QtCore.Signal(tuple)
+    finished = QtCore.Signal(int)
     
     def __init__(self, backend, width=80, height=24):
         QtCore.QObject.__init__(self, backend)

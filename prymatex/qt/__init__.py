@@ -3,7 +3,7 @@
 
 import os
 
-os.environ.setdefault('QT_API', 'pyqt')
+os.environ.setdefault('QT_API', 'pyside')
 assert os.environ['QT_API'] in ('pyqt', 'pyside')
 
 API = os.environ['QT_API']

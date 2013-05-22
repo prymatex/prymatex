@@ -6,7 +6,7 @@ import collections
 from functools import reduce
 
 class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
-    dictionaryChanged = QtCore.pyqtSignal(str)
+    dictionaryChanged = QtCore.Signal(str)
     COLUMN_NAME = 0
     COLUMN_VALUE = 1
     COLUMN_SELECTED = 2

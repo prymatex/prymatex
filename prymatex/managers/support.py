@@ -13,6 +13,7 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.support.manager import PMXSupportBaseManager
 
 from prymatex.utils.decorators.memoize import dynamic_memoized
+from prymatex.utils import encoding
 
 from prymatex.models.process import ExternalProcessTableModel
 from prymatex.models.support import (BundleItemTreeModel, BundleItemTreeNode,
@@ -144,21 +145,21 @@ class BundleItemMenuGroup(QtCore.QObject):
 
 class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
     #Signals for bundle
-    bundleAdded = QtCore.pyqtSignal(object)
-    bundleRemoved = QtCore.pyqtSignal(object)
-    bundleChanged = QtCore.pyqtSignal(object)
-    bundlePopulated = QtCore.pyqtSignal(object)
+    bundleAdded = QtCore.Signal(object)
+    bundleRemoved = QtCore.Signal(object)
+    bundleChanged = QtCore.Signal(object)
+    bundlePopulated = QtCore.Signal(object)
 
     #Signals for bundle items
-    bundleItemAdded = QtCore.pyqtSignal(object)
-    bundleItemRemoved = QtCore.pyqtSignal(object)
-    bundleItemChanged = QtCore.pyqtSignal(object)
-    bundleItemTriggered = QtCore.pyqtSignal(object)
+    bundleItemAdded = QtCore.Signal(object)
+    bundleItemRemoved = QtCore.Signal(object)
+    bundleItemChanged = QtCore.Signal(object)
+    bundleItemTriggered = QtCore.Signal(object)
     
     #Signals for themes
-    themeAdded = QtCore.pyqtSignal(object)
-    themeRemoved = QtCore.pyqtSignal(object)
-    themeChanged = QtCore.pyqtSignal(object)
+    themeAdded = QtCore.Signal(object)
+    themeRemoved = QtCore.Signal(object)
+    themeChanged = QtCore.Signal(object)
     
     #Settings
     shellVariables = pmxConfigPorperty(default = [], tm_name = 'OakShelVariables')
@@ -273,6 +274,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
         self.processTableModel.appendProcess(context.process, description = context.description())
 
         environment = QtCore.QProcessEnvironment()
+        print(context.environment)
         for key, value in context.environment.items():
             environment.insert(key, value)
 
@@ -281,8 +283,8 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
         def onQProcessFinished(process, context, callback):
             def runCallback(exitCode):
                 self.processTableModel.removeProcess(process)
-                context.errorValue = str(process.readAllStandardError()).decode("utf-8")
-                context.outputValue = str(process.readAllStandardOutput()).decode("utf-8")
+                context.errorValue = encoding.from_fs(process.readAllStandardError())
+                context.outputValue = encoding.from_fs(process.readAllStandardOutput())
                 context.outputType = exitCode
                 callback(context)
             return runCallback
@@ -293,7 +295,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
             context.process.start(context.shellCommand, QtCore.QIODevice.ReadWrite)
             if not context.process.waitForStarted():
                 raise Exception("No puedo correr")
-            context.process.write(str(context.inputValue).encode("utf-8"))
+            context.process.write(encoding.to_fs(context.inputValue))
             context.process.closeWriteChannel()
         else:
             context.process.start(context.shellCommand, QtCore.QIODevice.ReadOnly)

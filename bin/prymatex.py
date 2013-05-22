@@ -4,7 +4,6 @@ from os.path import (abspath, dirname, realpath, exists)
 import sys
 import importlib
 
-
 # this will be replaced at install time
 INSTALLED_BASE_DIR = "@ INSTALLED_BASE_DIR @"
 
@@ -23,7 +22,7 @@ prymatexAppInstance = None
 def runPrymatexApplication(options, files):
     from prymatex.core.app import PrymatexApplication
     from prymatex.core import exceptions
-
+    
     def runPrymatexInstance(instanceOptions, instanceFiles = []):
         global prymatexAppInstance
         if prymatexAppInstance is not None:
@@ -48,7 +47,7 @@ def runPrymatexApplication(options, files):
         returnCode = -1
 
     except exceptions.AlreadyRunningError as ex:
-        from PyQt4 import QtGui
+        from prymatex.qt import QtGui
         QtGui.QMessageBox.critical(None, ex.title, ex.message, QtGui.QMessageBox.Ok)
         returnCode = -2
 

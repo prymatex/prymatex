@@ -1,8 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import re, sys, os, stat, tempfile
-    
+import re
+import sys
+import os
+import stat
+import tempfile
+import codecs
+
+from prymatex.utils import six
+from prymatex.utils import encoding
+
 RE_SHEBANG = re.compile("^#!(.*)$")
 RE_SHEBANG_ENVKEY = re.compile("(\w+)_SHEBANG")
 RE_ABSPATH_LINENO = re.compile('''
@@ -118,38 +126,19 @@ def ensureShellScript(script, environment):
 # UINX
 #============================
 def ensureUnixEnvironment(environment):
-    codingenv = {}
-    for key, value in environment.items():
-        try:
-            key = str(key).encode('utf-8')
-            value = str(value).encode('utf-8')
-            codingenv[key] = value
-        except UnicodeDecodeError as e:
-            pass
-    return codingenv
-
+    return dict(map(lambda item: (six.text_type(item[0]), six.text_type(item[1])), environment.items()))
 
 def prepareUnixShellScript(script, environment):
-    environment = ensureUnixEnvironment(environment)
     script = ensureShellScript(script, environment)
     tmpFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
-    return tmpFile, environment, tmpFile
+    return tmpFile, ensureUnixEnvironment(environment), tmpFile
 
     
 #============================
 # WINDOWS
 #============================
 def ensureWindowsEnvironment(environment):
-    codingenv = {}
-    for key, value in environment.items():
-        try:
-            key = str(key).encode('utf-8')
-            value = str(value).encode('utf-8')
-            codingenv[key] = value
-        except UnicodeDecodeError as e:
-            pass
-    return codingenv
-
+    return dict(map(lambda item: (six.text_type(item[0]), six.text_type(item[1])), environment.items()))
 
 def prepareWindowsShellScript(script, environment):
     environment = ensureWindowsEnvironment(environment)
@@ -170,15 +159,7 @@ def ensureCygwinPath(path):
 
 
 def ensureCygwinEnvironment(environment):
-    codingenv = {}
-    for key, value in environment.items():
-        try:
-            key = str(key).encode('utf-8')
-            value = str(value).encode('utf-8')
-            codingenv[key] = ensureCygwinPath(value)
-        except UnicodeDecodeError as e:
-            pass
-    return codingenv
+    return dict(map(lambda item: (six.text_type(item[0]), ensureCygwinPath(six.text_type(item[1]))), environment.items()))
 
 
 def prepareCygwinShellScript(script, environment):
@@ -207,13 +188,14 @@ def prepareShellScript(script, variables):
 
 
 def makeExecutableTempFile(content, directory):
+    # TODO: Mejorara la generacion de temp, se borra no se borra que onda
+    #tempFile = tempfile.NamedTemporaryFile(prefix='pmx', dir = directory)
     descriptor, name = tempfile.mkstemp(prefix='pmx', dir = directory)
     tempFile = os.fdopen(descriptor, 'w+')
-    tempFile.write(content.encode('utf-8'))
+    tempFile.write(six.PY3 and content or encoding.to_fs(content))
     tempFile.close()
     os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
     return name
-
 
 def deleteFile(filePath):
     os.unlink(filePath)
@@ -238,7 +220,7 @@ def ensurePath(path, name, suffix = 0):
     if suffix == 0 and not os.path.exists(path % name):
         return path % name
     else:
-        newPath = path % (name + "_" + str(suffix))
+        newPath = path % (name + "_" + six.u(suffix))
         if not os.path.exists(newPath):
             return newPath
         else:

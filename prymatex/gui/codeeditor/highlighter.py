@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import re
-from copy import copy
 
 from prymatex.qt import QtGui, QtCore
 
@@ -13,6 +12,7 @@ from prymatex.utils.decorators.helpers import printtime
 class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     NO_STATE = -1
     SINGLE_LINE = 1
+    MULTI_LINE = 2
     FORMAT_CACHE = {}
     
     def __init__(self, editor, syntax = None, theme = None):
@@ -21,79 +21,74 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.processor = CodeEditorSyntaxProcessor(editor)
         self.syntax = syntax
         self.theme = theme
-        self.__running = True
         
-        #Highlight Function
-        self.highlight_function = self.realtime_highlight
         self.highlightTask = self.editor.application.schedulerManager.idleTask()
 
     def stop(self):
-        self.__running = False
+        self.stopAsyncHighlight()
+        self.stopSyncHighlight()
+
+    def stopSyncHighlight(self):
+        self.highlightBlock = lambda text: None
+    
+    def startSyncHighlight(self):
+        self.highlightBlock = self.syncHighlightFunction
+        
+    def stopAsyncHighlight(self):
         if self.highlightTask.isRunning():
             self.highlightTask.cancel()
         
     def runAsyncHighlight(self, callback):
         #Cuidado si estoy corriendo la tarea no correrla nuevamente
         if not self.highlightTask.isRunning():
-            self.highlight_function = self.async_highlight
-            self.__running = True
-            self.highlightTask = self.editor.application.schedulerManager.newTask(self.highlightAllDocument())
+            self.stopSyncHighlight()
+            self.highlightTask = self.editor.application.schedulerManager.newTask(self.asyncHighlightFunction())
             def on_highlightReady():
-                #Restore realitme function
-                self.highlight_function = self.realtime_highlight
+                self.startSyncHighlight()
                 callback()
             self.highlightTask.done.connect(on_highlightReady)
 
-    def ready(self):
-        return self.__running and self.theme is not None and self.syntax is not None
-
     def setSyntax(self, syntax):
         self.syntax = syntax
-        self.rehighlight()
         
     def setTheme(self, theme):
         PMXSyntaxHighlighter.FORMAT_CACHE = {}
         self.theme = theme
-        self.rehighlight()
             
-    def highlightAllDocument(self):
-        block = self.document().begin()
+    def asyncHighlightFunction(self):
+        block = self.editor.document().begin()
         
         self.processor.startParsing(self.syntax.scopeName)
-        stack = [[self.syntax.grammar, None]]
+        stack = [[ self.syntax.grammar, None ]]
+        length = 0
         while block.isValid():
-            text = str(block.text()) + "\n"
+            text = block.text() + "\n"
             self.syntax.parseLine(stack, text, self.processor)
-            userData = block.userData()
-            
-            if userData is None:
-                userData = self.editor.blockUserDataFactory(block)
-                block.setUserData(userData)
+            userData = self.editor.blockUserData(block)
             
             self.setupBlockUserData(text, block, userData)
             
-            blockState = len(stack)
-            if blockState != self.SINGLE_LINE:
-                userData.setProcessorState((copy(stack), copy(self.processor.scopes())))
+            # Store stack and state
+            blockState = len(stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
+            if blockState == self.MULTI_LINE:
+                userData.setProcessorState((stack[:], self.processor.scopes()[:])) #Store copy
             userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState
             block.setUserState(blockState)
             
-            #length += block.length()
+            length += block.length()
             
-            #formats = []
-            #for (start, end), scope in userData.scopeRanges():
-            #    frange = QtGui.QTextLayout.FormatRange()
-            #    frange.start = start
-            #    frange.length = end-start
-            #    frange.format = self.highlightFormat(self.editor.scope(scopeHash = scope, attribute = 'name'))
-            #    formats.append(frange)
+            formats = []
+            for (start, end), scope in userData.scopeRanges():
+                frange = QtGui.QTextLayout.FormatRange()
+                frange.start = start
+                frange.length = end - start
+                frange.format = self.highlightFormat(self.editor.scope(scopeHash = scope, attribute = 'name'))
+                formats.append(frange)
 
-            #block.layout().setAdditionalFormats(formats)
-
-            self.rehighlightBlock(block)
+            block.layout().setAdditionalFormats(formats)
             block = block.next()
             yield
-        #self.document().markContentsDirty(block.position(), length)
+        self.document().markContentsDirty(block.position(), length)
         self.processor.endParsing(self.syntax.scopeName)
         
     def setupBlockUserData(self, text, block, userData):
@@ -102,51 +97,42 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         userData.setBlank(text.strip() == "")
         
         self.editor.processBlockUserData(text, block, userData)
-        
     
-    def highlightBlock(self, text):
-        if self.ready():
-            self.highlight_function(text)
-        
-    def async_highlight(self, text):
-        userData = self.currentBlock().userData()
-        if userData:
-            self.applyFormat(userData)
-    
-    def realtime_highlight(self, text):
-        text = str(text) + "\n"
-        userData = self.currentBlock().userData()
-        if userData is not None and userData.textHash == hash(text) + hash(self.syntax.scopeName) + self.previousBlockState():
+    def syncHighlightFunction(self, text):
+        text += "\n"
+        block = self.currentBlock()
+        userData = self.editor.blockUserData(block)
+        if userData.textHash == hash(text) + hash(self.syntax.scopeName) + self.previousBlockState():
             self.applyFormat(userData)
         else:
             self.processor.startParsing(self.syntax.scopeName)
-            if self.previousBlockState() not in [self.SINGLE_LINE, self.NO_STATE]:
+            if self.previousBlockState() == self.MULTI_LINE:
                 #Recupero una copia del stack y los scopes del user data
-                stack, scopes = self.currentBlock().previous().userData().processorState()
-                #Set copy, not original
-                stack = stack[:]
-                self.processor.setScopes(scopes[:])
+                stack, scopes = self.editor.blockUserData(block.previous()).processorState()
+                #Parche hasta que se solucione lo del puto UserData
+                if not stack:
+                    stack = [[ self.syntax.grammar, None ]]
+                else:
+                    #Set copy, not original
+                    stack = stack[:]
+                    self.processor.setScopes(scopes[:])
             else:
                 #Creo un stack y scopes nuevos
-                stack = [[self.syntax.grammar, None]]
+                stack = [[ self.syntax.grammar, None ]]
 
             # A parserar mi amor, vamos a parsear mi amor
             self.syntax.parseLine(stack, text, self.processor)
             self.processor.endParsing(self.syntax.scopeName)
-
-            if userData is None:
-                userData = self.editor.blockUserDataFactory(self.currentBlock())
-                self.setCurrentBlockUserData(userData)
-
-            self.setupBlockUserData(text, self.currentBlock(), userData)
-
-            blockState = len(stack)
             
-            if blockState != self.SINGLE_LINE:
-                userData.setProcessorState((copy(stack), copy(self.processor.scopes())))
+            self.setupBlockUserData(text, block, userData)
+
+            # Store stack and state
+            blockState = len(stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
+            if blockState == self.MULTI_LINE:
+                userData.setProcessorState((stack[:], self.processor.scopes()[:])) #Store copy
             userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState
-            
             self.setCurrentBlockState(blockState)
+            
             self.applyFormat(userData)
 
     def applyFormat(self, userData):

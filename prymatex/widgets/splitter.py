@@ -7,8 +7,6 @@
 
 #------------------------------------------------------------------------------
 
-import sip
-
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.widgets.tabwidget import _TabWidget, _DragableTabBar
@@ -30,9 +28,9 @@ class SplitTabWidget(QtGui.QSplitter):
     """
 
     # Signals for WorkbenchWindowLayout to handle
-    tabCloseRequest = QtCore.pyqtSignal(QtGui.QWidget)
-    tabCreateRequest = QtCore.pyqtSignal()
-    currentWidgetChanged = QtCore.pyqtSignal(QtGui.QWidget)
+    tabCloseRequest = QtCore.Signal(QtGui.QWidget)
+    tabCreateRequest = QtCore.Signal()
+    currentWidgetChanged = QtCore.Signal(QtGui.QWidget)
     
     # The different hotspots of a QTabWidget.  An non-negative value is a tab
     # index and the hotspot is to the left of it.
@@ -404,12 +402,6 @@ class SplitTabWidget(QtGui.QSplitter):
 
     def _focus_changed(self, old, new):
         """ Handle a change in focus that affects the current tab. """
-
-        # It is possible for the C++ layer of this object to be deleted between
-        # the time when the focus change signal is emitted and time when the
-        # slots are dispatched by the Qt event loop. This may be a bug in PyQt4.
-        if sip.isdeleted(self):
-            return
 
         if self._repeat_focus_changes:
             self.emit(QtCore.SIGNAL('focusChanged(QWidget *,QWidget *)'), old, new)

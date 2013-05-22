@@ -21,10 +21,10 @@ from prymatex.utils.i18n import ugettext as _
 
 class ProjectManager(QtCore.QObject, PMXBaseComponent):
     #Signals
-    projectAdded = QtCore.pyqtSignal(object)
-    projectRemoved = QtCore.pyqtSignal(object)
-    projectClose = QtCore.pyqtSignal(object)
-    projectOpen = QtCore.pyqtSignal(object)
+    projectAdded = QtCore.Signal(object)
+    projectRemoved = QtCore.Signal(object)
+    projectClose = QtCore.Signal(object)
+    projectOpen = QtCore.Signal(object)
     
     #Settings
     SETTINGS_GROUP = 'ProjectManager'

@@ -12,8 +12,8 @@ from functools import reduce
 
 class TextEditWidget(QtGui.QPlainTextEdit):
     #------ Signals
-    extraSelectionChanged = QtCore.pyqtSignal()
-    fontChanged = QtCore.pyqtSignal()
+    extraSelectionChanged = QtCore.Signal()
+    fontChanged = QtCore.Signal()
     
     #------ Regular expresions
     RE_WORD = re.compile(r"([A-Za-z_]\w+\b)", re.UNICODE)
@@ -205,7 +205,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
             if not allText: break
         cursor.endEditBlock()
         return replaced
-
+        
     #------ Extra selections
     def registerTextCharFormatBuilder(self, scope, formatBuilder):
         # TODO Un poco mejor esto para soportar subscopes con puntos

@@ -1,9 +1,9 @@
 import os, sys
 sys.path.append(os.path.abspath('..'))
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from prymatex.qt import QtCore, QtGui
+from prymatex.qt.QtCore import *
+from prymatex.qt.QtGui import *
 
 class PMBBundleTreeModel(QtCore.QAbstractItemModel):  
     def __init__(self, manager, parent = None):  

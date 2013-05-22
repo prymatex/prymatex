@@ -57,7 +57,7 @@ class DockWidgetTitleBarButton(QtGui.QAbstractButton):
         self.style().drawComplexControl(QtGui.QStyle.CC_ToolButton, opt, p, self)
 
 class DockWidgetTitleBar(QtGui.QWidget):
-    collpaseAreaRequest = QtCore.pyqtSignal(QtGui.QDockWidget)
+    collpaseAreaRequest = QtCore.Signal(QtGui.QDockWidget)
     
     def __init__(self, dockWidget):
         QtGui.QWidget.__init__(self, dockWidget)

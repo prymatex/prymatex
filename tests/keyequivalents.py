@@ -1,6 +1,6 @@
 import os, sys
 sys.path.append(os.path.abspath('..'))
-from PyQt4 import QtGui
+from prymatex.qt import QtGui
 if __name__ == "__main__":
     from prymatex.support.manager import PMXSupportManager
     from prymatex.gui.support.qtadapter import buildKeySequence, buildKeyEquivalent

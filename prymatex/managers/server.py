@@ -24,6 +24,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
         self.socket = self.application.zmqSocket(zmq.REP, "Dialog", addressType='ipc')
         self.socket.readyRead.connect(self.socketReadyRead)
     
+    @QtCore.Slot()
     def socketReadyRead(self):
         command = self.socket.recv_pyobj()
         name = command.get("name")

@@ -30,10 +30,10 @@ class Backend(QtCore.QObject):
     Starting = 1
     Running = 2
     # ------------- Signals
-    error = QtCore.pyqtSignal(int)
-    started = QtCore.pyqtSignal()
-    finished = QtCore.pyqtSignal(int)
-    stateChanged = QtCore.pyqtSignal(int)
+    error = QtCore.Signal(int)
+    started = QtCore.Signal()
+    finished = QtCore.Signal(int)
+    stateChanged = QtCore.Signal(int)
     
     def __init__(self, name, parent = None):
         QtCore.QObject.__init__(self, parent)

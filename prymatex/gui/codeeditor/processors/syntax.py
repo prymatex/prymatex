@@ -28,18 +28,18 @@ class CodeEditorSyntaxProcessor(processor.PMXSyntaxProcessor):
         self.__lineChunks = []        #[ ((start, end), chunk) ... ]
         
     def endLine(self, line):
-        print("end", self.lineIndex, self.stackScopes)
+        #print("end", self.lineIndex, self.stackScopes)
         self.addToken(len(self.line) + 1)
 
     #OPEN
     def openTag(self, scope, position):
-        print("open", self.lineIndex, position, self.stackScopes, scope)
+        #print("open", self.lineIndex, position, self.stackScopes, scope)
         self.addToken(position)
         self.stackScopes.append(scope)
 
     #CLOSE
     def closeTag(self, scope, position):
-        print("close", self.lineIndex, position, self.stackScopes, scope)
+        #print("close", self.lineIndex, position, self.stackScopes, scope)
         self.addToken(position)
         self.stackScopes.pop()
     

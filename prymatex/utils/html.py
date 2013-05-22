@@ -3,8 +3,6 @@
 
 import re
 import string
-import urllib.request, urllib.parse, urllib.error
-import urllib.parse
 
 # Configuration for urlize() function.
 TRAILING_PUNCTUATION = ['.', ',', ':', ';']

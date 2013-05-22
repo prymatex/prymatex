@@ -1,7 +1,7 @@
 import os, sys
 sys.path.append(os.path.abspath('..'))
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 from prymatex.gui.editor.codehelper import PMXCursorsHelper
 
 class PMXCodeEdit(QtGui.QPlainTextEdit):

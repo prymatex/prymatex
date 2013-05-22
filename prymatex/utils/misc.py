@@ -172,7 +172,7 @@ def get_home_dir():
     try:
         # expanduser() returns a raw byte string which needs to be
         # decoded with the codec that the OS is using to represent file paths.
-        path = encoding.to_unicode_from_fs(os.path.expanduser('~'))
+        path = encoding.from_fs(os.path.expanduser('~'))
     except:
         path = ''
     for env_var in ('HOME', 'USERPROFILE', 'TMP'):
@@ -181,7 +181,7 @@ def get_home_dir():
         # os.environ.get() returns a raw byte string which needs to be
         # decoded with the codec that the OS is using to represent environment
         # variables.
-        path = encoding.to_unicode_from_fs(os.environ.get(env_var, ''))
+        path = encoding.from_fs(os.environ.get(env_var, ''))
     if path:
         return path
     else:

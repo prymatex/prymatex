@@ -214,11 +214,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def registerBlockUserDataHandler(self, handler):
         self.__blockUserDataHandlers.append(handler)
     
+    user_counter = 0
     def blockUserData(self, block):
         userData = block.userData()
-        print("blockUserData", self.document())
-        #or not isinstance(userData, CodeEditorBlockUserData)
-        if not userData:
+        if not userData or not isinstance(userData, CodeEditorBlockUserData):
+            print("instanciando %d" % self.user_counter)
+            self.user_counter += 1
             userData = CodeEditorBlockUserData()
             for handler in self.__blockUserDataHandlers:
                 handler.contributeToBlockUserData(userData)
@@ -237,7 +238,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         # Handlers
         for handler in self.__blockUserDataHandlers:
             handler.processBlockUserData(text, block, userData)
-            print(block.document())
         
     def on_modificationChanged(self, value):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))

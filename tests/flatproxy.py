@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 class PMXFlatBaseProxyModel(QtGui.QAbstractProxyModel):
     '''

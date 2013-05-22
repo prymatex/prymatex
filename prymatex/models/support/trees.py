@@ -81,7 +81,7 @@ class BundleItemTreeModel(AbstractTreeModel):
 # Bundle Menu Tree Model
 #===============================================
 class BundleItemMenuTreeModel(AbstractTreeModel):
-    menuChanged = QtCore.pyqtSignal()
+    menuChanged = QtCore.Signal()
     
     def __init__(self, manager, parent = None):
         AbstractTreeModel.__init__(self, parent)

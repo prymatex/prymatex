@@ -6,7 +6,7 @@ import shelve
 import sys
 import os
 
-from PyQt4 import QtCore
+from prymatex.qt import QtCore
 
 from prymatex.utils.decorator import available_attrs, printparams, printtime
 

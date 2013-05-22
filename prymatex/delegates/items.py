@@ -39,8 +39,8 @@ class HtmlItemDelegate(QtGui.QItemDelegate):
         return QtCore.QSize(self.document.idealWidth(), self.document.size().height())
 
 class HtmlLinkItemDelegate(QtGui.QItemDelegate):
-    linkActivated = QtCore.pyqtSignal(str)
-    linkHovered = QtCore.pyqtSignal(str)  # to connect to a QStatusBar.showMessage slot
+    linkActivated = QtCore.Signal(str)
+    linkHovered = QtCore.Signal(str)  # to connect to a QStatusBar.showMessage slot
 
     def __init__(self, parentView):
         QtGui.QItemDelegate.__init__(self, parentView)

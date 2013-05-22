@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dialogs/spelling.ui'
 #
-# Created: Tue May 14 21:59:10 2013
+# Created: Wed May 22 20:00:35 2013
 #      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!

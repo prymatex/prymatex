@@ -25,17 +25,17 @@ from prymatex.core import exceptions
 class FileManager(QtCore.QObject, PMXBaseComponent):
     """A File Manager"""
     # ------------ Signals
-    fileCreated = QtCore.pyqtSignal(str)
-    fileDeleted = QtCore.pyqtSignal(str)
-    fileChanged = QtCore.pyqtSignal(str)
-    fileRenamed = QtCore.pyqtSignal(str, str)
-    directoryCreated = QtCore.pyqtSignal(str)
-    directoryDeleted = QtCore.pyqtSignal(str)
-    directoryChanged = QtCore.pyqtSignal(str)
-    directoryRenamed = QtCore.pyqtSignal(str, str)
+    fileCreated = QtCore.Signal(str)
+    fileDeleted = QtCore.Signal(str)
+    fileChanged = QtCore.Signal(str)
+    fileRenamed = QtCore.Signal(str, str)
+    directoryCreated = QtCore.Signal(str)
+    directoryDeleted = QtCore.Signal(str)
+    directoryChanged = QtCore.Signal(str)
+    directoryRenamed = QtCore.Signal(str, str)
 
     # Generic Signal 
-    fileSytemChanged = QtCore.pyqtSignal(str, int)
+    fileSytemChanged = QtCore.Signal(str, int)
 
     # ------------- Settings
     SETTINGS_GROUP = 'FileManager'

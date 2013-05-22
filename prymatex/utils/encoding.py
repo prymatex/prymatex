@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 """Source code text utilities
 This code was adapted from spyderlib original developed by Pierre Raybaut
@@ -10,9 +11,11 @@ http://code.google.com/p/spyderlib
 import re, os, locale, sys
 from codecs import BOM_UTF8, BOM_UTF16, BOM_UTF32
 
+from prymatex.utils import six
+
 PREFERRED_ENCODING = locale.getpreferredencoding()
 
-def transcode(text, input=PREFERRED_ENCODING, output=PREFERRED_ENCODING):
+def transcode(text, input = PREFERRED_ENCODING, output = PREFERRED_ENCODING):
     """Transcode a text string"""
     try:
         return text.decode("cp437").encode("cp1252")
@@ -42,14 +45,14 @@ def getfilesystemencoding():
 
 FS_ENCODING = getfilesystemencoding()
 
-def to_unicode_from_fs(string):
+def from_fs(string):
     """
     Return a unicode version of string decoded using the file system encoding.
     """
-    if not isinstance(string, str): # string is a QString
-        string = str(string.toUtf8(), 'utf-8')
+    if not isinstance(string, six.string_types): # string is a QString
+        string = six.text_type(string, 'utf-8')
     else:
-        if not isinstance(string, str):
+        if not isinstance(string, six.text_type):
             try:
                 unic = string.decode(FS_ENCODING)
             except (UnicodeError, TypeError):
@@ -58,18 +61,15 @@ def to_unicode_from_fs(string):
                 return unic
     return string
     
-def to_fs_from_unicode(unic):
+def to_fs(unic):
     """
     Return a byte string version of unic encoded using the file 
     system encoding.
     """
-    if isinstance(unic, str):
-        try:
-            string = unic.encode(FS_ENCODING)
-        except (UnicodeError, TypeError):
-            pass
-        else:
-            return string
+    try:
+        return six.text_type(unic).encode(FS_ENCODING)
+    except (UnicodeError, TypeError):
+        pass
     return unic
 
 #------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ def to_fs_from_unicode(unic):
 #------------------------------------------------------------------------------
 
 # Codecs for working with files and text.
-CODING_RE = re.compile(r"coding[:=]\s*([-\w_.]+)")
+CODING_RE = re.compile("coding[:=]\s*([-\w_.]+)")
 CODECS = []
 with open(os.path.join(os.path.dirname(__file__), "codecs")) as openFile:
     for line in openFile.read().splitlines():
@@ -91,7 +91,7 @@ def get_coding(text):
     @return coding string
     """
     for line in text.splitlines()[:2]:
-        result = CODING_RE.search(line)
+        result = CODING_RE.search(str(line))
         if result:
             return result.group(1)
     return None
@@ -105,25 +105,25 @@ def decode(text):
     try:
         if text.startswith(BOM_UTF8):
             # UTF-8 with BOM
-            return str(text[len(BOM_UTF8):], 'utf-8'), 'utf-8-bom'
+            return six.text_type(text[len(BOM_UTF8):], 'utf-8'), 'utf-8-bom'
         elif text.startswith(BOM_UTF16):
             # UTF-16 with BOM
-            return str(text[len(BOM_UTF16):], 'utf-16'), 'utf-16'
+            return six.text_type(text[len(BOM_UTF16):], 'utf-16'), 'utf-16'
         elif text.startswith(BOM_UTF32):
             # UTF-32 with BOM
-            return str(text[len(BOM_UTF32):], 'utf-32'), 'utf-32'
+            return six.text_type(text[len(BOM_UTF32):], 'utf-32'), 'utf-32'
         coding = get_coding(text)
         if coding:
-            return str(text, coding), coding
+            return six.text_type(text, coding), coding
     except (UnicodeError, LookupError):
         pass
     # Assume UTF-8
     try:
-        return str(text, 'utf-8'), 'utf-8-guessed'
+        return six.text_type(text, 'utf-8'), 'utf-8-guessed'
     except (UnicodeError, LookupError):
         pass
     # Assume Latin-1 (behaviour before 3.7.1)
-    return str(text, "latin-1"), 'latin-1-guessed'
+    return six.text_type(text, "latin-1"), 'latin-1-guessed'
 
 def encode(text, orig_coding):
     """
@@ -160,20 +160,17 @@ def encode(text, orig_coding):
     # Save as UTF-8 without BOM
     return text.encode('utf-8'), 'utf-8'
     
-def to_unicode(string):
-    """Convert a string to unicode"""
-    if not isinstance(string, str):
-        for codec, aliases, language in CODECS:
-            try:
-                unic = str(string, codec)
-            except UnicodeError:
-                pass
-            except TypeError:
-                break
-            else:
-                return unic
-    return string
-    
+def to_text(value):
+    """Convert a value to text"""
+    value = six.text_type(value)
+    for codec, aliases, language in CODECS:
+        try:
+            return value.decode(codec)
+        except UnicodeError:
+            pass
+        except TypeError:
+            break
+    return value
 
 def write(text, filename, encoding='utf-8', mode='wb'):
     """
@@ -197,7 +194,7 @@ def read(filename, encoding='utf-8'):
     Read text from file ('filename')
     Return text and encoding
     """
-    text, encoding = decode( file(filename, 'rb').read() )
+    text, encoding = decode( open(filename, 'rb').read() )
     return text, encoding
 
 def readlines(filename, encoding='utf-8'):

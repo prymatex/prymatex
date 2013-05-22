@@ -10,7 +10,7 @@
 import sys
 import time
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 from .backend import constants
 from .schemes import ColorScheme
@@ -48,7 +48,7 @@ class TerminalWidget(QtGui.QWidget):
     }
 
 
-    sessionClosed = QtCore.pyqtSignal()
+    sessionClosed = QtCore.Signal()
 
 
     def __init__(self, session, scheme = None, parent=None):
@@ -359,7 +359,7 @@ class TerminalWidget(QtGui.QWidget):
         self._reset()
         
 
-    return_pressed = QtCore.pyqtSignal()
+    return_pressed = QtCore.Signal()
 
     def keyPressEvent(self, event):
         text = str(event.text())

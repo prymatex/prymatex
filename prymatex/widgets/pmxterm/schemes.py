@@ -8,7 +8,7 @@ try:
 except ImportError:
     import ConfigParser as configparser
     
-from PyQt4 import QtGui
+from prymatex.qt import QtGui
 
 from .colortrans import SHORT2RGB_DICT
 

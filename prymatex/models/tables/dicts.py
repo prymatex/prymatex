@@ -5,7 +5,7 @@ from prymatex.qt import QtGui, QtCore
 from functools import reduce
 
 class DictTableModel(QtCore.QAbstractTableModel):
-    variablesChanged = QtCore.pyqtSignal(str, list)
+    variablesChanged = QtCore.Signal(str, list)
     
     def __init__(self, parent = None):
         super(EnvironmentTableModel, self).__init__(parent)
