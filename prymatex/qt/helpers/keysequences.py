@@ -120,9 +120,3 @@ def keyequivalent2keysequence(nemonic):
             keys.remove(QtCore.Qt.SHIFT)
         sequence.extend(keys)
     return sum(sequence)
-
-if __name__ == '__main__':
-    tests = ['@r', '^~P', '@&', '@~)']
-    for test in tests:
-        code = keyequivalent2keysequence(test)
-        print("Code %d is sequence %s and nemonic is %s" % (code, QtGui.QKeySequence(code).toString(), buildKeyEquivalent(code)))

@@ -18,6 +18,8 @@ from __future__ import unicode_literals
 import re
 import subprocess
 
+import six
+
 #install xmodmap 
 def cmd_keymap_table():
     try:
@@ -25,6 +27,7 @@ def cmd_keymap_table():
                ['xmodmap','-pk'], stdout=subprocess.PIPE).communicate()[0]
     except:
         return ""
+
 def cmd_modifier_map():
     try:
         return subprocess.Popen(
@@ -37,54 +40,54 @@ def get_keymap_table():
 
     keymap_table = cmd_keymap_table()
 
-    re_line = re.compile(b'0x\w+')
+    re_line = re.compile('0x\w+')
     for line in keymap_table.splitlines()[1:]:
         if len(line) > 0:
-            keycode = re.search(b'\s+(\d+).*', line)
+            keycode = re.search('\s+(\d+).*', line)
             if keycode:
                 new_keysyms = []
-                keycode = int(keycode.group(1))
+                keycode = int( keycode.group(1) )
                 keysyms = re_line.findall(line)
                 # When you press only one key
                 unicode_char = ''
                 try:
-                    unicode_char = chr(int(keysyms[0], 16))
+                    unicode_char = six.text_type(chr(int(keysyms[0], 16)))
                 except:
                     unicode_char = ''
-                if unicode_char == b'\x00':
+                if unicode_char == '\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
 
                 # When you press a key plus Shift key
                 unicode_char = ''
                 try:
-                    unicode_char = chr(int(keysyms[1], 16))
+                    unicode_char = six.text_type(chr(int(keysyms[1], 16)))
                 except:
                     unicode_char = ''
-                if unicode_char == b'\x00':
+                if unicode_char == '\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
 
                 # When you press a key plus meta (dead keys)
                 unicode_char = ''
                 try:
-                    unicode_char = chr(int(keysyms[4], 16))
+                    unicode_char = six.text_type(chr(int(keysyms[4], 16)))
                 except:
                     unicode_char = ''
-                if unicode_char == b'\x00':
+                if unicode_char == '\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
 
                 # When you press a key plus meta plus Shift key
                 unicode_char = ''
                 try:
-                    unicode_char = chr(int(keysyms[5], 16))
+                    unicode_char = six.text_type(chr(int(keysyms[5], 16)))
                 except:
                     unicode_char = ''
-                if unicode_char == b'\x00':
+                if unicode_char == '\x00':
                     unicode_char = ''
                 new_keysyms.append(unicode_char)
-                keymap[keycode] = str(new_keysyms)
+                keymap[keycode] = new_keysyms
     return keymap
 
 def get_modifier_map():
