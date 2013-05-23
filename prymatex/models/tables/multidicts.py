@@ -22,8 +22,8 @@ class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
             if dictionary['name'] == name:
                 return dictionary
 
-    def addDictionary(self, name, data, editable = False, selectable = False, visible = True):
-        data = [(name_value[0], name_value[1], True) for name_value in dict(data).items()]
+    def addDictionary(self, name, dictionary, editable = False, selectable = False, visible = True):
+        data = [(name_value[0], name_value[1], True) for name_value in dict(dictionary).items()]
         dictionary = {
             'name': name,
             'data': data,
@@ -34,9 +34,8 @@ class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
         self.dictionaries.append(dictionary)
         self.layoutChanged.emit()
     
-    # TODO: Separar en agregar diccionarios y agregar valores
     def addValues(self, name, values, editable = False, selectable = False, visible = True):
-        pass
+        print values
         
     def clear(self):
         self.changes = {}

@@ -3,7 +3,7 @@
 
 import os
 
-os.environ.setdefault('QT_API', 'pyside')
+os.environ.setdefault('QT_API', 'pyqt')
 assert os.environ['QT_API'] in ('pyqt', 'pyside')
 
 API = os.environ['QT_API']
@@ -18,7 +18,7 @@ if API == 'pyqt':
         for obj in ['QDate', 'QTime', 'QDateTime', 'QUrl', 'QTextStream', 'QVariant', 'QString']:
             sip.setapi(obj, 2)
     except AttributeError:
-        # PyQt < v4.6: in future version, we should warn the user 
+        # PyQt < v4.6: in future version, we should warn the user
         # that PyQt is outdated and won't be supported by Prymatex
         pass
     try:

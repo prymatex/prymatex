@@ -91,6 +91,15 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
         self.menuAdd.addAction(action)
 
 
+    def addValues(self, name, values, editable = False, selectable = False, visible = True):
+        self.selectableMultiDictTableModel.addValues(name, values, editable = editable,
+            selectable = selectable, visible = visible)
+        self.checkableListModel.addItem(name, visible)
+        action = QtGui.QAction(name, self)
+        action.triggered.connect(lambda checked, name = name: self.on_actionInsertItem_triggered(name))
+        action.setEnabled(editable)
+        self.menuAdd.addAction(action)
+
     def resize_to_contents(self, dictionaryName = None):
         self.tableViewDictionaries.resizeColumnsToContents()
         self.tableViewDictionaries.resizeRowsToContents()
