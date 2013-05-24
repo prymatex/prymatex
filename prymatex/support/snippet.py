@@ -556,7 +556,7 @@ class PMXSnippet(PMXBundleItem):
         self.reset()
         processor.startSnippet(self)
         self.render(processor)
-        holder = next(self)
+        holder = self.nextHolder()
         if holder != None:
             processor.selectHolder(holder)
         else:
@@ -627,12 +627,12 @@ class PMXSnippet(PMXBundleItem):
     def setCurrentHolder(self, holder):
         self.index = self.taborder.index(holder)
     
-    def current(self):
+    def currentHolder(self):
         if self.index == -1:
             self.index = 0
         return self.taborder[self.index]
 
-    def __next__(self):
+    def nextHolder(self):
         if self.index < len(self.taborder) - 1:
             self.index += 1
         #Fix disabled holders and None (last position in snippet)
@@ -640,12 +640,15 @@ class PMXSnippet(PMXBundleItem):
             self.index += 1
         return self.taborder[self.index]
 
-    def previous(self):
+    def previousHolder(self):
         if self.index > 0:
             self.index -= 1
         while self.index != 0 and self.taborder[self.index].disable:
             self.index -= 1
         return self.taborder[self.index]
+    
+    def writeInHolder(self, index, text):
+        self.write(index, text)
     
     def write(self, index, text):
         if index < len(self.taborder) and self.taborder[index] is not None and hasattr(self.taborder[index], "insert"):
