@@ -3,9 +3,8 @@
 
 from prymatex.support import processor
 
-
-
-class CodeEditorSyntaxProcessor(processor.PMXSyntaxProcessor):
+# Primera prueba 
+class CodeEditorSyntaxProcessor1(processor.PMXSyntaxProcessor):
     def __init__(self, editor):
         self.editor = editor
 
@@ -62,7 +61,8 @@ class CodeEditorSyntaxProcessor(processor.PMXSyntaxProcessor):
             self.__lineChunks.append( ((begin, end), self.line[begin:end]) )
         self.lineIndex = end
 
-class _CodeEditorSyntaxProcessor(processor.PMXSyntaxProcessor):
+# No me gusta la comparacion es poco performante y molesta en python3
+class CodeEditorSyntaxProcessor2(processor.PMXSyntaxProcessor):
     def __init__(self, editor):
         self.editor = editor
         self.__scopePath = []
@@ -138,3 +138,65 @@ class _CodeEditorSyntaxProcessor(processor.PMXSyntaxProcessor):
     #END
     def endParsing(self, scope):
         pass
+
+class CodeEditorTokenSyntaxProcessor(processor.PMXSyntaxProcessor):
+    def __init__(self, editor):
+        self.editor = editor
+
+    # Public api
+    def scopeRanges(self):
+        print(self.tokens)
+        return map(lambda t: ((t["start"], t["end"]), t["hash"]), self.tokens)
+        
+    def lineChunks(self):
+        return map(lambda t: ((t["start"], t["end"]), t["chunk"]), self.tokens)
+        
+    #START
+    def startParsing(self, scope):
+        self.setScopes([ scope ])
+    
+    #BEGIN NEW LINE
+    def beginLine(self, line):
+        self.line = line
+        self.tokens = []
+        self.tokenIndexes = []
+        self.openToken(0)
+        
+    def endLine(self, line):
+        self.closeToken(len(self.line))
+
+    #OPEN
+    def openTag(self, scope, position):
+        #Open token
+        self.openToken(position)
+        self.stackScopes.append(scope)
+
+    #CLOSE
+    def closeTag(self, scope, position):
+        self.closeToken(position)
+        self.stackScopes.pop()
+    
+    #END
+    def endParsing(self, scope):
+        pass
+    
+    def setScopes(self, scopes):
+        self.stackScopes = scopes
+
+    def scopes(self):
+        return self.stackScopes
+        
+    def openToken(self, position):
+        self.tokens.append({
+            "start": position
+        })
+        self.tokenIndexes.append(len(self.tokens) - 1)
+
+    def closeToken(self, position):
+        scopeHash = self.editor.flyweightScopeFactory(self.stackScopes)
+        token = self.tokens[self.tokenIndexes.pop()]
+        token["end"] = position
+        token["hash"] = scopeHash
+        token["chunk"] = self.line[token["start"] : token["end"]]
+        
+CodeEditorSyntaxProcessor = CodeEditorTokenSyntaxProcessor

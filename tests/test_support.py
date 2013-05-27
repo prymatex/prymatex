@@ -19,6 +19,8 @@ class Persona(object):
     pass
 """
 
+CLASS_TEXT = """class Persona(object):\n"""
+
 #https://github.com/textmate/textmate/blob/master/Applications/TextMate/about/Changes.md
 class TestSupportFunctions(unittest.TestCase):
 
@@ -31,7 +33,7 @@ class TestSupportFunctions(unittest.TestCase):
             #print message
         self.manager.loadSupport(loadCallback)
 
-    def _test_snippet(self):
+    def test_snippet(self):
         pythonClassSnippet = self.manager.getBundleItem('659D189C-EC3E-4C4E-9377-B7F5F5216CBD')
         htmlInputSnippet = self.manager.getBundleItem('D8DCCC81-749A-4E2A-B4BC-D109D5799CAA')
         htmlBodySnippet = self.manager.getBundleItem('4905D47B-A08B-11D9-A5A2-000D93C8BE28')
@@ -44,20 +46,15 @@ class TestSupportFunctions(unittest.TestCase):
         print(processor.text)
         print("Time:", time() - start)
         
-    def _test_syntax(self):
+    def test_syntax(self):
         syntax = self.manager.getSyntaxByScopeName('source.python')
-        file = open(os.path.abspath('./prymatex/gui/codeeditor/editor.py'), 'r')
-        processor = PMXDebugSyntaxProcessor(showOutput = False)
-        #syntax.parse(TEXT, processor)
-        text = file.read().decode('utf-8')
-        file.close()
-        for _ in range(10):
-            start = time()
-            syntax.parse(text, processor)
-            tiempo = time() - start
-            print("Tiempo: ", tiempo)
+        #file = open(os.path.abspath('./prymatex/gui/codeeditor/editor.py'), 'r')
+        processor = PMXDebugSyntaxProcessor(showOutput = True)
+        syntax.parse(CLASS_TEXT, processor)
+        #text = file.read().decode('utf-8')
+        #file.close()
             
-    def _test_preferences(self):
+    def test_preferences(self):
         settings = self.manager.getPreferenceSettings('text.html.textile markup.heading.textile')
         for attr in dir(settings):
             print(attr, getattr(settings, attr, None))
