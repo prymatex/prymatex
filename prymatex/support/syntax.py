@@ -61,12 +61,12 @@ class PMXSyntaxNode(object):
         ends = ends[::-1]
         
         while starts or ends:
-            if starts:
-                pos, _, name = starts.pop()
-                processor.openTag(name, pos)
-            elif ends:
+            if not starts:
                 pos, _, name = ends.pop()
                 processor.closeTag(name, pos)
+            elif not ends:
+                pos, _, name = starts.pop()
+                processor.openTag(name, pos)
             elif abs(ends[-1][1]) < starts[-1][1]:
                 pos, _, name = ends.pop()
                 processor.closeTag(name, pos)
