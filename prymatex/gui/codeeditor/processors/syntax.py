@@ -163,7 +163,7 @@ class CodeEditorTokenSyntaxProcessor(processor.PMXSyntaxProcessor):
         self.openToken(0)
         
     def endLine(self, line):
-        self.closeToken(len(self.line))
+        self.closeToken(len(self.line), closeAll = True)
 
     #OPEN
     def openTag(self, scope, position):
@@ -192,11 +192,15 @@ class CodeEditorTokenSyntaxProcessor(processor.PMXSyntaxProcessor):
         })
         self.tokenIndexes.append(len(self.tokens) - 1)
 
-    def closeToken(self, position):
-        scopeHash = self.editor.flyweightScopeFactory(self.stackScopes)
-        token = self.tokens[self.tokenIndexes.pop()]
-        token["end"] = position
-        token["hash"] = scopeHash
-        token["chunk"] = self.line[token["start"] : token["end"]]
+    def closeToken(self, position, closeAll = False):
+        while len(self.tokenIndexes):
+            token = self.tokens[self.tokenIndexes.pop()]
+            scopeHash = self.editor.flyweightScopeFactory(self.stackScopes)
+            token["end"] = position
+            token["hash"] = scopeHash
+            token["chunk"] = self.line[token["start"] : token["end"]]
+            if not closeAll:
+                break
+            
         
 CodeEditorSyntaxProcessor = CodeEditorTokenSyntaxProcessor
