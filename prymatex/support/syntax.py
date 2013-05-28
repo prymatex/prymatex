@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 """Syntax's module
 http://manual.macromates.com/en/language_grammars.html
@@ -23,7 +24,7 @@ class PMXSyntaxNode(object):
                 elif key in ['content', 'name', 'contentName', 'end']:
                     setattr(self, key, value )
                 elif key in ['captures', 'beginCaptures', 'endCaptures']:
-                    value = sorted(list(value.items()), key=lambda v: int(v[0]))
+                    value = sorted(list(value.items()), key = lambda v: int(v[0]))
                     setattr(self, key, value)
                 elif key == 'repository':
                     self.parse_repository(value)
@@ -118,7 +119,13 @@ class PMXSyntaxNode(object):
             return match.groupdict[index]
         regstring = compileRegexp('\\\\([1-9])').sub(g_match, regstring)
         regstring = compileRegexp('\\\\k<(.*?)>').sub(d_match, regstring)
-        return compileRegexp( regstring ).search( string, position )
+        try:
+            return compileRegexp( regstring ).search( string, position )
+        except:
+            print type(regstring), regstring
+            print type(string), string
+            print type(position), position
+            return compileRegexp( regstring ).search( string, position )
     
     def match_first_son(self, string, position):
         match = (None, None)

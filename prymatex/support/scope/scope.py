@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 # encoding: utf-8
+from __future__ import unicode_literals
+
+from prymatex.utils import six
 
 from .parser import Parser
-
 
 class Scope(object):
     def __init__(self, scope):
         self.path = scope and Parser.path(scope) or Parser.path("")
 
     def __str__(self):
-        return str(self.path)
+        return six.text_type(self.path)
 
     def has_prefix(self, rhs):
         lhsScopes = self.path.scopes
@@ -21,7 +23,7 @@ class Scope(object):
         return i == len(rhsScopes)
 
     def __hash__(self):
-        return hash(str(self.path))
+        return hash(six.text_type(self.path))
       
     def __eq__(self, rhs):
         return self.path == rhs.path
@@ -55,12 +57,12 @@ class Context(object):
         
     def __str__(self):
         if self.left == self.right:
-            return "(l/r '%s')" % str(self.left)
+            return "(l/r '%s')" % six.text_type(self.left)
         else:
-            return "(left '%s', right '%s')" % (str(self.left), str(self.right))
+            return "(left '%s', right '%s')" % (six.text_type(self.left), six.text_type(self.right))
     
     def __hash__(self):
-        return hash(str(self.left) + str(self.right))
+        return hash(six.text_type(self.left) + six.text_type(self.right))
 
     def __eq__(self, rhs):
         return self.left == rhs.left and self.right == rhs.right
@@ -78,7 +80,7 @@ class Selector(object):
         self.previousMatch = {}
 
     def __str__(self):
-        return str(self.selector)
+        return six.text_type(self.selector)
 
 
     # ------- Matching 
@@ -88,7 +90,7 @@ class Selector(object):
             if rank is not None:
                 rank.append(0)
             return True
-        if isinstance(context, (str, Scope)):
+        if isinstance(context, six.string_types) or isinstance(context, Scope):
             context = Context.get(context)
 
         # Search in cache
