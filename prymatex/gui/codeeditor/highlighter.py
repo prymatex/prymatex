@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 import re
 
@@ -57,12 +58,14 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             
     def asyncHighlightFunction(self):
         block = self.editor.document().begin()
+        lastBlock = self.editor.document().lastBlock()
         
         self.processor.startParsing(self.syntax.scopeName)
         stack = [[ self.syntax.grammar, None ]]
         length = 0
         while block.isValid():
-            text = block.text() + "\n"
+            text = block != lastBlock and block.text() + "\n" or block.text()
+
             self.syntax.parseLine(stack, text, self.processor)
             userData = self.editor.blockUserData(block)
             
