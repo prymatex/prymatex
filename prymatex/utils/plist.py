@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import re
 import sys
+import six
 import re, plistlib
 from string import printable
 
@@ -19,25 +20,25 @@ def __fixItems(dictionary, applyFunction):
 def __fixWriteItem(item):
     if isinstance(item, dict):
         # Fix all the items in the dictionary
-        item = __fixItems(item, __fixWriteItem)
+        return __fixItems(item, __fixWriteItem)
     elif isinstance(item, list):
         # Fix all items in the list
-        item = list(map(__fixWriteItem, item))
-    elif isinstance(item, str):
+        return list(map(__fixWriteItem, item))
+    elif isinstance(item, six.string_types):
         # Fix any unicode or non-printable strings
-        item = __wrapItem(item)
+        return __wrapItem(item)
     return item
 
 def __fixReadItem(item):
     if isinstance(item, dict):
         # Fix all the items in the dictionary
-        item = __fixItems(item, __fixReadItem)
+        return __fixItems(item, __fixReadItem)
     elif isinstance(item, list):
         # Fix all items in the list
-        item = list(map(__fixReadItem, item))
+        return list(map(__fixReadItem, item))
     elif isinstance(item, plistlib.Data):
-        item = item.data.decode("utf-8")
-    return item
+        return item.data.decode("utf-8")
+    return six.text_type(item)
 
 def __wrapItem(item):
     if __shouldWrap(item):
