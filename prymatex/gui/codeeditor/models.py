@@ -133,7 +133,6 @@ class SymbolListModel(QtCore.QAbstractListModel):
     def contributeToBlockUserData(self, userData):
         userData.symbol = None
 
-
     def processBlockUserData(self, text, block, userData):
         startStop, settings = self.editor.findScopes(
             block = block,
@@ -142,7 +141,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
             firstOnly = True)
 
         symbol = settings.transformSymbol(text[slice(*startStop)]) if settings else None
-
+        
         if userData.symbol != symbol:
             userData.symbol = symbol
             if block in self.blocks:
@@ -160,7 +159,6 @@ class SymbolListModel(QtCore.QAbstractListModel):
                 self.blocks.insert(index, block)
                 self.endInsertRows()
 
-
     # ----------- Signals
     def on_editor_blocksRemoved(self):
         def validSymbolBlock(block):
@@ -168,13 +166,11 @@ class SymbolListModel(QtCore.QAbstractListModel):
         self.blocks = list(filter(validSymbolBlock, self.blocks))
         self.layoutChanged.emit()
 
-
     def on_editor_aboutToHighlightChange(self):
         for block in self.blocks:
             self.editor.blockUserData(block).symbol = None
         self.blocks = []
         self.layoutChanged.emit()
-
 
     # ----------- Model api
     def index(self, row, column = 0, parent = None):
@@ -183,14 +179,13 @@ class SymbolListModel(QtCore.QAbstractListModel):
         else:
             return QtCore.QModelIndex()
 
-
     def rowCount(self, parent = None):
         return len(self.blocks)
-
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid() or index.row() >= len(self.blocks):
             return None
+        print(index.row(), self.blocks[index.row()])
         userData = self.blocks[index.row()].userData()
         if userData:
             if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
