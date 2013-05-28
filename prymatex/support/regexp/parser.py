@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
+from __future__ import unicode_literals
 
 from . import types
 from .base import compileRegexp
+
+from prymatex.utils import six
 
 class Parser(object):
     def __init__(self, source):
@@ -149,7 +152,7 @@ class Parser(object):
         return False
 
     def text_node(self, nodes, char):
-        if not nodes or not isinstance(nodes[-1], str):
+        if not nodes or not isinstance(nodes[-1], six.string_types):
             nodes.append("")
         nodes[-1] = nodes[-1] + char
     

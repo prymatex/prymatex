@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
+from __future__ import unicode_literals
 
 import re
+from prymatex.utils import six
 
 CASE_UPPER = 0
 CASE_LOWER = 1
@@ -28,23 +30,6 @@ class ConditionType(object):
         self.if_set = []
         self.if_not_set = []
 
-    def __unicode__(self):
-        cnd = "(?%d:" % self.name
-        for cmps in self.if_set:
-            if isinstance(cmps, int):
-                cnd += CASE_CHARS[cmps]
-            else:
-                cnd += escapeCharacters(str(cmps), "(:)")
-        if self.if_not_set:
-            cnd += ":"
-            for cmps in self.if_not_set:
-                if isinstance(cmps, int):
-                    cnd += CASE_CHARS[cmps]
-                else:
-                    cnd += escapeCharacters(str(cmps), "(:)")
-        cnd += ")"
-        return cnd
-
     def apply(self, match):
         grps = match.groups()
         index = self.name - 1
@@ -52,19 +37,30 @@ class ConditionType(object):
             return self.if_set
         return self.if_not_set
 
+    def __str__(self):
+        cnd = "(?%d:" % self.name
+        for cmps in self.if_set:
+            if isinstance(cmps, six.integer_types):
+                cnd += CASE_CHARS[cmps]
+            else:
+                cnd += escapeCharacters(six.text_type(cmps), "(:)")
+        if self.if_not_set:
+            cnd += ":"
+            for cmps in self.if_not_set:
+                if isinstance(cmps, six.integer_types):
+                    cnd += CASE_CHARS[cmps]
+                else:
+                    cnd += escapeCharacters(six.text_type(cmps), "(:)")
+        cnd += ")"
+        return cnd
+    
+    __unicode__ = __str__
+
+
 class FormatType(object):
     _repl_re = re.compile("\$(?:(\d+)|g<(.+?)>)")
     def __init__(self):
         self.composites = []
-    
-    def __unicode__(self):
-        frmt = ""
-        for cmps in self.composites:
-            if isinstance(cmps, int):
-                frmt += CASE_CHARS[cmps]
-            else:
-                frmt += str(cmps)
-        return frmt
     
     def case_function(self, case):
         return {
@@ -107,9 +103,9 @@ class FormatType(object):
             # Transform
             case = CASE_NONE
             for value in nodes:
-                if isinstance(value, str):
+                if isinstance(value, six.string_types):
                     value = pattern.sub(self.prepare_replacement(value), sourceText)
-                elif isinstance(value, int):
+                elif isinstance(value, six.integer_types):
                     case = value
                     continue
                 # Apply case and append to result
@@ -120,6 +116,17 @@ class FormatType(object):
                 break
             match = pattern.search(text, match.end())
         return "%s%s%s" % (beginText, "".join(result), endText)
+
+    def __str__(self):
+        frmt = ""
+        for cmps in self.composites:
+            if isinstance(cmps, six.integer_types):
+                frmt += CASE_CHARS[cmps]
+            else:
+                frmt += six.text_type(cmps)
+        return frmt
+    
+    __unicode__ = __str__
         
 class TransformationType(object):
     def __init__(self):
@@ -127,11 +134,13 @@ class TransformationType(object):
         self.format = FormatType()
         self.options = []
         
-    def __unicode__(self):
-        trns = "%s/%s/" % (self.pattern.pattern, str(self.format))
+    def transform(self, text):
+        return self.format.apply(self.pattern, text, self.options)
+
+    def __str__(self):
+        trns = "%s/%s/" % (self.pattern.pattern, six.text_type(self.format))
         if self.options:
             trns += "%s" % "".join(self.options)
         return trns
-        
-    def transform(self, text):
-        return self.format.apply(self.pattern, text, self.options)
+    
+    __unicode__ = __str__
