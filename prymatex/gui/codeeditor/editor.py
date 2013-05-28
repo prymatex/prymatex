@@ -143,7 +143,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
         #Block Count
         self.lastBlockCount = self.document().blockCount()
-        print("init", self.document())
         #Connect context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
@@ -170,7 +169,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.themeChanged.connect(self.highlightEditor)
 
     def initialize(self, mainWindow):
-        print("initalize", self.document())
         PMXBaseEditor.initialize(self, mainWindow)
         self.selectorDialog = self.mainWindow.findChild(QtGui.QDialog, "SelectorDialog")
         self.browserDock = self.mainWindow.findChild(QtGui.QDockWidget, "BrowserDock")
@@ -218,7 +216,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def blockUserData(self, block):
         userData = block.userData()
         if not userData or not isinstance(userData, CodeEditorBlockUserData):
-            print("instanciando %d" % self.user_counter)
             self.user_counter += 1
             userData = CodeEditorBlockUserData()
             for handler in self.__blockUserDataHandlers:
