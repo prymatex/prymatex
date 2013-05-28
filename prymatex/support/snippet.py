@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 """Snippte's module"""
 import uuid as uuidmodule
 
-from prymatex.support.regexp import Transformation
+from prymatex.utils import six
 
+from prymatex.support.regexp import Transformation
 from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
 from prymatex.support.processor import PMXSyntaxProcessor
 from prymatex.support.syntax import PMXSyntax
-import collections
 
 SNIPPET_SYNTAX = { 
  'patterns': [{'captures': {'1': {'name': 'keyword.escape.snippet'}},
@@ -178,9 +179,11 @@ class NodeList(list):
             return self.end - self.start
         return 0
         
-    def __unicode__(self):
-        return "".join([str(node) for node in self])
+    def __str__(self):
+        return "".join([six.text_type(node) for node in self])
     
+    __unicode__ = __str__
+
     def render(self, processor):
         for child in self:
             child.render(processor)
@@ -194,7 +197,7 @@ class NodeList(list):
         return False
     
     def append(self, element):
-        if isinstance(element, str):
+        if isinstance(element, six.string_types):
             element = TextNode(element, self)
         super(NodeList, self).append(element)
 
@@ -207,8 +210,10 @@ class TextNode(Node):
     def __len__(self):
         return len(self.text)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.text
+    
+    __unicode__ = __str__
     
     def render(self, processor):
         processor.insertText(self.text)
@@ -467,7 +472,7 @@ class Shell(NodeList):
     def execute(self, processor):
         def afterExecute(context):
             self.content = context.outputValue.strip()
-        with PMXRunningContext(self, str(self), processor.environmentVariables()) as context:
+        with PMXRunningContext(self, six.text_type(self), processor.environmentVariables()) as context:
             context.asynchronous = False
             self.manager.runProcess(context, afterExecute)
         
@@ -490,7 +495,7 @@ class PMXSnippetSyntaxProcessor(PMXSyntaxProcessor):
     def closeTag(self, name, end):
         token = self.current[self.index:end]
         self.node = self.node.close(name, token)
-        if hasattr(self.node, 'index') and isinstance(getattr(self.node, 'taborder', None), collections.Callable):
+        if hasattr(self.node, 'index') and six.callable(getattr(self.node, 'taborder', None)):
             container = self.taborder.setdefault(self.node.index, [])
             if (self.node != container and self.node not in container):
                 self.taborder[self.node.index] = self.node.taborder(container)
