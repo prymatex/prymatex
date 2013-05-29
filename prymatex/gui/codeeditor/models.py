@@ -22,14 +22,13 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         # Connect
         self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
 
-
     def __contains__(self, block):
         return block in self.blocks
 
-
     # -------- Signals
     def on_editor_blocksRemoved(self):
-        self.blocks = [ block for block in self.blocks if block.userData() is not None ]
+        # FIXME: Nunca es None el userdata
+        #self.blocks = [ block for block in self.blocks if self.editor.blockUserData(block) is not None ]
         self.layoutChanged.emit()
 
     def on_document_contentsChange(self, position, removed, added):
@@ -42,10 +41,8 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         else:
             return QtCore.QModelIndex()
 
-
     def rowCount(self, parent = None):
         return len(self.blocks)
-
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
@@ -55,7 +52,6 @@ class BookmarkListModel(QtCore.QAbstractListModel):
             return "%d - %s" % (block.blockNumber() + 1, block.text().strip())
         elif role == QtCore.Qt.DecorationRole:
             return resources.getIcon('bookmarkflag')
-
 
     # ----------- Public api
     def lineNumbers(self):
@@ -186,7 +182,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
         if not index.isValid() or index.row() >= len(self.blocks):
             return None
         print(index.row(), self.blocks[index.row()])
-        userData = self.blocks[index.row()].userData()
+        userData = self.editor.blockUserData(self.blocks[index.row()])
         if userData:
             if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
                 return userData.symbol
