@@ -235,7 +235,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         # Handlers
         for handler in self.__blockUserDataHandlers:
             handler.processBlockUserData(text, block, userData)
-        
+
     def on_modificationChanged(self, value):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
     
@@ -373,7 +373,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def tabKeyBehavior(self):
         return self.tabStopSoft and str(' ') * self.tabStopSize or str('	')
 
-
     # Flags
     def getFlags(self):
         flags = 0
@@ -428,7 +427,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             
             # Run
             self.syntaxHighlighter.runAsyncHighlight(lambda editor = self: editor.highlightChanged.emit())
-
 
     # -------------------- SideBars
     def updateViewportMargins(self):

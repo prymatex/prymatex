@@ -57,8 +57,8 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.theme = theme
             
     def asyncHighlightFunction(self):
-        block = self.editor.document().begin()
-        lastBlock = self.editor.document().lastBlock()
+        block = self.document().begin()
+        lastBlock = self.document().lastBlock()
         
         self.processor.startParsing(self.syntax.scopeName)
         stack = [[ self.syntax.grammar, None ]]
@@ -91,7 +91,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             block.layout().setAdditionalFormats(formats)
             block = block.next()
             yield
-        self.document().markContentsDirty(block.position(), length)
+        self.document().markContentsDirty(0, length)
         self.processor.endParsing(self.syntax.scopeName)
         
     def setupBlockUserData(self, text, block, userData):
@@ -102,7 +102,8 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.editor.processBlockUserData(text, block, userData)
     
     def syncHighlightFunction(self, text):
-        text += "\n"
+        if self.currentBlock() != self.document().lastBlock():
+            text += "\n"
         block = self.currentBlock()
         userData = self.editor.blockUserData(block)
         if userData.textHash == hash(text) + hash(self.syntax.scopeName) + self.previousBlockState():

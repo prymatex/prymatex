@@ -135,7 +135,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
             attribute = 'settings',
             scope_filter = lambda attr: attr.showInSymbolList,
             firstOnly = True)
-
+        
         symbol = settings.transformSymbol(text[slice(*startStop)]) if settings else None
         
         if userData.symbol != symbol:
@@ -149,7 +149,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
                 else:
                     self.dataChanged.emit(self.index(index), self.index(index))
             else:
-                indexes = [block.blockNumber() for block in self.blocks]
+                indexes = map(lambda b: b.blockNumber(), self.blocks )
                 index = bisect(indexes, block.blockNumber())
                 self.beginInsertRows(QtCore.QModelIndex(), index, index)
                 self.blocks.insert(index, block)
@@ -181,7 +181,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid() or index.row() >= len(self.blocks):
             return None
-        print(index.row(), self.blocks[index.row()])
+        
         userData = self.editor.blockUserData(self.blocks[index.row()])
         if userData:
             if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
