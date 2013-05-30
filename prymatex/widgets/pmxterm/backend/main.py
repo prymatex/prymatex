@@ -8,10 +8,10 @@ import argparse
 import stat
 import signal
 import tempfile
-from . import constants
+import constants
 
 from multiprocessing import Process, Queue
-from .multiplexer import Multiplexer
+from multiplexer import Multiplexer
     
 # ===========
 # = Workers =

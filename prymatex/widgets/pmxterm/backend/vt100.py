@@ -9,7 +9,7 @@
 # http://shallowsky.com/blog/2011/Jan/18/
 
 import array
-from . import constants
+import constants
 
 class Terminal(object):
     CHARACTERS = 0

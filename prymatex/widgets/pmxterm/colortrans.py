@@ -302,7 +302,7 @@ def _strip_hash(rgb):
 
 def _create_dicts():
     short2rgb_dict = dict(CLUT)
-    rgb2short_dict = dict([(short_rgb[1], short_rgb[0]) for short_rgb in CLUT])
+    rgb2short_dict = dict(map(lambda item: (item[1], item[0]), CLUT))
     return rgb2short_dict, short2rgb_dict
 
 def short2rgb(short):

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 import os
 import sys
@@ -56,7 +57,7 @@ class Backend(QtCore.QObject):
     def startNotifier(self, address):
         self.notifier = ZmqSocket(zmq.SUB, self)
         self.notifier.readyRead.connect(self.notifier_readyRead)
-        self.notifier.subscribe("") #All
+        self.notifier.subscribe(b"") #All
         self.notifier.connect(address)
         
     def execute(self, command, args = None):
@@ -123,7 +124,7 @@ class LocalBackend(Backend):
         
     #------------ Process Start Signal
     def backend_start_readyReadStandardOutput(self):
-        connectionString = str(self.process.readAllStandardOutput()).decode("utf-8").splitlines()[-1]
+        connectionString = str(self.process.readAllStandardOutput(), "utf8").splitlines()[-1]
         data = ast.literal_eval(connectionString)
         self.startMultiplexer(data["multiplexer"])
         self.startNotifier(data["notifier"])
@@ -138,6 +139,7 @@ class LocalBackend(Backend):
 
 
     def backend_start_readyReadStandardError(self):
+        print(str(self.process.readAllStandardError()))
         self.process.readyReadStandardError.disconnect(self.backend_start_readyReadStandardError)
         self.process.readyReadStandardOutput.disconnect(self.backend_start_readyReadStandardOutput)
         self.error.emit(self.ReadError)
@@ -153,11 +155,11 @@ class LocalBackend(Backend):
         self.error.emit(error)
 
     def backend_readyReadStandardError(self):
-        print(str(self.process.readAllStandardError()).decode("utf-8"))
+        print(str(self.process.readAllStandardError(), "utf-8"))
 
         
     def backend_readyReadStandardOutput(self):
-        print(str(self.process.readAllStandardOutput()).decode("utf-8"))
+        print(str(self.process.readAllStandardOutput(), "utf-8"))
         
     
     # -------------- set backend process attrs and settings
