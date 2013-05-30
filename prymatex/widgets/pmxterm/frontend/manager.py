@@ -11,12 +11,12 @@ import ast
 import signal
 
 from prymatex.qt import QtCore
-
 from prymatex.utils.zeromqt import ZmqSocket
+from prymatex.utils import encoding
+
 from .session import Session
 
 LOCAL_BACKEND_SCRIPT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend", "main.py"))
-
 
 class Backend(QtCore.QObject):
     # Errors of Backend
@@ -124,7 +124,7 @@ class LocalBackend(Backend):
         
     #------------ Process Start Signal
     def backend_start_readyReadStandardOutput(self):
-        connectionString = str(self.process.readAllStandardOutput(), "utf8").splitlines()[-1]
+        connectionString = encoding.from_fs(self.process.readAllStandardOutput()).splitlines()[-1]
         data = ast.literal_eval(connectionString)
         self.startMultiplexer(data["multiplexer"])
         self.startNotifier(data["notifier"])
@@ -139,7 +139,7 @@ class LocalBackend(Backend):
 
 
     def backend_start_readyReadStandardError(self):
-        print(str(self.process.readAllStandardError()))
+        print(encoding.from_fs(self.process.readAllStandardError()))
         self.process.readyReadStandardError.disconnect(self.backend_start_readyReadStandardError)
         self.process.readyReadStandardOutput.disconnect(self.backend_start_readyReadStandardOutput)
         self.error.emit(self.ReadError)
@@ -155,11 +155,11 @@ class LocalBackend(Backend):
         self.error.emit(error)
 
     def backend_readyReadStandardError(self):
-        print(str(self.process.readAllStandardError(), "utf-8"))
+        print(encoding.from_fs(self.process.readAllStandardError()))
 
         
     def backend_readyReadStandardOutput(self):
-        print(str(self.process.readAllStandardOutput(), "utf-8"))
+        print(encoding.from_fs(self.process.readAllStandardOutput()))
         
     
     # -------------- set backend process attrs and settings
