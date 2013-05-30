@@ -18,20 +18,21 @@ from __future__ import unicode_literals
 import re
 import subprocess
 
-import six
+from . import six
+from . import encoding
 
 #install xmodmap 
 def cmd_keymap_table():
     try:
-        return subprocess.Popen(
-               ['xmodmap','-pk'], stdout=subprocess.PIPE).communicate()[0]
+        return encoding.from_fs(subprocess.Popen(
+               ['xmodmap','-pk'], stdout = subprocess.PIPE).communicate()[0])
     except:
         return ""
 
 def cmd_modifier_map():
     try:
-        return subprocess.Popen(
-               ['xmodmap','-pm'], stdout=subprocess.PIPE).communicate()[0]
+        return encoding.from_fs(subprocess.Popen(
+               ['xmodmap','-pm'], stdout=subprocess.PIPE).communicate()[0])
     except:
         return ""
 

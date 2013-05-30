@@ -170,6 +170,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
+        self.syntaxHighlighter.setDocument(self.document())
+        
+        # Get dialogs
         self.selectorDialog = self.mainWindow.findChild(QtGui.QDialog, "SelectorDialog")
         self.browserDock = self.mainWindow.findChild(QtGui.QDockWidget, "BrowserDock")
 
@@ -215,8 +218,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     user_counter = 0
     def blockUserData(self, block):
         userData = block.userData()
-        if not userData or not isinstance(userData, CodeEditorBlockUserData):
-            self.user_counter += 1
+        if not userData:
             userData = CodeEditorBlockUserData()
             for handler in self.__blockUserDataHandlers:
                 handler.contributeToBlockUserData(userData)

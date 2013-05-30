@@ -17,7 +17,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     FORMAT_CACHE = {}
     
     def __init__(self, editor, syntax = None, theme = None):
-        QtGui.QSyntaxHighlighter.__init__(self, editor.document())
+        QtGui.QSyntaxHighlighter.__init__(self, editor)
         self.editor = editor
         self.processor = CodeEditorSyntaxProcessor(editor)
         self.syntax = syntax

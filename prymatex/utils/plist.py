@@ -4,9 +4,10 @@ from __future__ import unicode_literals
 
 import re
 import sys
-import six
 import re, plistlib
 from string import printable
+
+from . import six
 
 XMLPATTERN = re.compile("<(\w+)>(.*)<\/\w+>");
 

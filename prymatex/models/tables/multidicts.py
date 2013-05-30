@@ -35,7 +35,7 @@ class SelectableMultiDictTableModel(QtCore.QAbstractTableModel):
         self.layoutChanged.emit()
     
     def addValues(self, name, values, editable = False, selectable = False, visible = True):
-        print values
+        print(values)
         
     def clear(self):
         self.changes = {}

@@ -145,10 +145,10 @@ class CodeEditorTokenSyntaxProcessor(processor.PMXSyntaxProcessor):
 
     # Public api
     def scopeRanges(self):
-        return map(lambda t: ((t["start"], t["end"]), t["hash"]), self.tokens)
+        return [ ((token["start"], token["end"]), token["hash"]) for token in self.tokens ]
         
     def lineChunks(self):
-        return map(lambda t: ((t["start"], t["end"]), t["chunk"]), self.tokens)
+        return [ ((token["start"], token["end"]), token["chunk"]) for token in self.tokens ]
         
     #START
     def startParsing(self, scope):

@@ -149,7 +149,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
                 else:
                     self.dataChanged.emit(self.index(index), self.index(index))
             else:
-                indexes = map(lambda b: b.blockNumber(), self.blocks )
+                indexes = [ b.blockNumber() for b in self.blocks ]
                 index = bisect(indexes, block.blockNumber())
                 self.beginInsertRows(QtCore.QModelIndex(), index, index)
                 self.blocks.insert(index, block)
