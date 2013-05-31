@@ -293,7 +293,7 @@ class AlreadyTypedWords(object):
         
     def processBlockUserData(self, text, block, userData):
         words = []
-        print(userData.lineChunks())
+
         for chunk in userData.lineChunks():
             scopeGroup = self.editor.scope(blockPosition = chunk[0][0])
             words += [((chunk[0][0] + match.span()[0], chunk[0][0] + match.span()[1]), match.group(), scopeGroup) for match in self.editor.RE_WORD.finditer(chunk[1])]

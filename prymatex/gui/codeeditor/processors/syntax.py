@@ -143,63 +143,61 @@ class CodeEditorTokenSyntaxProcessor(processor.PMXSyntaxProcessor):
     def __init__(self, editor):
         self.editor = editor
 
-    # Public api
-    def scopeRanges(self):
-        return [ ((token["start"], token["end"]), token["hash"]) for token in self.tokens ]
-        
-    def lineChunks(self):
-        return [ ((token["start"], token["end"]), token["chunk"]) for token in self.tokens ]
-        
-    #START
-    def startParsing(self, scope):
-        self.setScopes([ scope ])
-    
-    #BEGIN NEW LINE
-    def beginLine(self, line):
-        self.line = line
-        self.tokens = []
-        self.tokenIndexes = []
-        self.openToken(0)
-        
-    def endLine(self, line):
-        self.closeToken(len(self.line), closeAll = True)
-
-    #OPEN
-    def openTag(self, scope, position):
-        #Open token
-        self.openToken(position)
-        self.stackScopes.append(scope)
-
-    #CLOSE
-    def closeTag(self, scope, position):
-        self.closeToken(position)
-        self.stackScopes.pop()
-    
-    #END
-    def endParsing(self, scope):
-        pass
+    # -------- Public api
+    def tokens(self):
+        return self.__tokens
     
     def setScopes(self, scopes):
         self.stackScopes = scopes
 
     def scopes(self):
         return self.stackScopes
-        
+    
+    # -------- START PARSING
+    def startParsing(self, scope):
+        self.setScopes([ scope ])
+    
+    # -------- BEGIN NEW LINE
+    def beginLine(self, line):
+        self.line = line
+        self.__tokens = []
+        self.__indexes = []
+        self.openToken(0)
+    
+    # -------- OPEN TAG
+    def openTag(self, scope, position):
+        #Open token
+        self.openToken(position)
+        self.stackScopes.append(scope)
+
+    # -------- CLOSE TAG
+    def closeTag(self, scope, position):
+        self.closeToken(position)
+        self.stackScopes.pop()
+    
+    # --------  END LINE
+    def endLine(self, line):
+        self.closeToken(len(self.line), closeAll = True)
+
+    # -------- END PARSING
+    def endParsing(self, scope):
+        pass
+
+    # --------- Create tokens
     def openToken(self, position):
-        self.tokens.append({
+        self.__tokens.append({
             "start": position
         })
-        self.tokenIndexes.append(len(self.tokens) - 1)
+        self.__indexes.append(len(self.__tokens) - 1)
 
     def closeToken(self, position, closeAll = False):
-        while len(self.tokenIndexes):
-            token = self.tokens[self.tokenIndexes.pop()]
+        while len(self.__indexes):
+            token = self.__tokens[self.__indexes.pop()]
             scopeHash = self.editor.flyweightScopeFactory(self.stackScopes)
             token["end"] = position
             token["hash"] = scopeHash
             token["chunk"] = self.line[token["start"] : token["end"]]
             if not closeAll:
                 break
-            
         
 CodeEditorSyntaxProcessor = CodeEditorTokenSyntaxProcessor

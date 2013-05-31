@@ -96,10 +96,9 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.processor.endParsing(self.syntax.scopeName)
         
     def setupBlockUserData(self, text, block, userData):
-        userData.setScopeRanges(self.processor.scopeRanges())
-        userData.setLineChunks(self.processor.lineChunks())
+        userData.setTokens(self.processor.tokens())
         userData.setBlank(text.strip() == "")
-        
+        # Process by handlers
         self.editor.processBlockUserData(text, block, userData)
     
     def syncHighlightFunction(self, text):
