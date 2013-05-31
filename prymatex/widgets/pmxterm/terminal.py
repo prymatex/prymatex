@@ -17,7 +17,6 @@ from .schemes import ColorScheme
 
 DEBUG = False
 
-
 class TerminalWidget(QtGui.QWidget):
     keymap = {
        QtCore.Qt.Key_Backspace: chr(127),
@@ -47,9 +46,7 @@ class TerminalWidget(QtGui.QWidget):
        QtCore.Qt.Key_F12:  "~l", 
     }
 
-
     sessionClosed = QtCore.Signal()
-
 
     def __init__(self, session, scheme = None, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -94,19 +91,16 @@ class TerminalWidget(QtGui.QWidget):
         self._selection = None
         self._clipboard = QtGui.QApplication.clipboard()
 
-
     # ---------------- Signals
     def on_session_finished(self, status):
         self.session = None
         self.sessionClosed.emit()
-
 
     def on_session_readyRead(self):
         if not self.is_alive():
             self.sessionClosed.emit()
         else:
             self.on_session_screenReady(self.session.dump())
-
 
     def on_session_screenReady(self, data):
         (self._cursor_col, self._cursor_row, scroll_up, scroll_down), screen = data
@@ -116,17 +110,14 @@ class TerminalWidget(QtGui.QWidget):
         self._update_cursor_rect()
         self.update()
         
-        
     def on_scrollBar_valueChanged(self, value):
         self._history_index = value
         self.update()
-
 
     # ------------------ Colors
     def setColorScheme(self, scheme):
         self.scheme = scheme
         self.update()
-
 
     def backgroundColor(self, index = None, attrs = constants.DEFAULTSGR):
         if index is None:
@@ -135,14 +126,12 @@ class TerminalWidget(QtGui.QWidget):
             return self.scheme.background()
         return self.scheme.color(index)
         
-        
     def foregroundColor(self, index = None, attrs = constants.DEFAULTSGR):
         if index is None:
              return self.scheme.foreground()
         if attrs & constants.SGR39:
             return self.scheme.foreground(intense = bool(attrs & constants.SGR1))
         return self.scheme.color(index, intense = bool(attrs & constants.SGR1))
-
 
     def mapToStyle(self, foregroundIndex, backgroundIndex, attrs = constants.DEFAULTSGR):
         foregroundColor = self.foregroundColor(foregroundIndex, attrs)
@@ -156,38 +145,30 @@ class TerminalWidget(QtGui.QWidget):
             font.setBold(True)
         return (foregroundColor, backgroundColor, font)
 
-
     def send(self, s):
         self.session.write(s)
-
 
     def stop(self):
         self.session.stop()
 
-
     def pid(self):
         return self.session.pid()
-
 
     def info(self):
         if self.is_alive():
             return self.session.info()
 
-
     def setFont(self, font):
         QtGui.QWidget.setFont(self, font)
         self._update_metrics()
-
         
     def focusNextPrevChild(self, next):
         if not self.is_alive():
             return True
         return False
 
-
     def focusInEvent(self, event):
         self.update()
-
 
     def resizeEvent(self, event):
         self._columns, self._rows = self._pixel2pos(self.width() - self.scrollBar.width(), self.height())
@@ -195,12 +176,10 @@ class TerminalWidget(QtGui.QWidget):
             self.session.resize(self._columns, self._rows)
         self.scrollBar.setGeometry(QtCore.QRect(self.width() - 16, 0, 16, self.height()))
 
-
     def closeEvent(self, event):
         if not self.is_alive():
             return
         self.session.close()
-
 
     def store_history(self, lines, screen):
         self._screen_history.extend(screen[:lines])
@@ -213,7 +192,6 @@ class TerminalWidget(QtGui.QWidget):
 
         self.scrollBar.setMaximum(self._history_index)
         self.scrollBar.setValue(self._history_index)
-
 
     def _update_metrics(self):
         fm = self.fontMetrics()
@@ -258,7 +236,6 @@ class TerminalWidget(QtGui.QWidget):
             painter.fillRect(self._cursor_rect, QtGui.QBrush(self.foregroundColor()))
         else:
             painter.drawRect(self._cursor_rect)
-
 
     def _paint_screen(self, painter):
         # Speed hacks: local name lookups are faster
@@ -319,7 +296,6 @@ class TerminalWidget(QtGui.QWidget):
         brush = QtGui.QBrush(self.backgroundColor())
         painter_fillRect(rect, brush)
 
-
     def _paint_selection(self, painter):
         pcol = QtGui.QColor(200, 200, 200, 50)
         pen = QtGui.QPen(pcol)
@@ -334,7 +310,6 @@ class TerminalWidget(QtGui.QWidget):
             #painter.drawRect(rect)
             painter.fillRect(rect, brush)
 
-
     FONT_MAX_SIZE = 32
     FONT_MIN_SIZE = 6
     def zoom_in(self):
@@ -346,7 +321,6 @@ class TerminalWidget(QtGui.QWidget):
         font.setPointSize(size)
         self.setFont(font)
         self._reset()
-
         
     def zoom_out(self):
         font = self.font()
@@ -357,7 +331,6 @@ class TerminalWidget(QtGui.QWidget):
         font.setPointSize(size)
         self.setFont(font)
         self._reset()
-        
 
     return_pressed = QtCore.Signal()
 
@@ -394,7 +367,6 @@ class TerminalWidget(QtGui.QWidget):
         if key in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return):
             self.return_pressed.emit()
 
-
     def wheelEvent(self, event):
         if event.modifiers() == QtCore.Qt.ControlModifier:
             if event.delta() == 120:
@@ -422,10 +394,8 @@ class TerminalWidget(QtGui.QWidget):
             self.send(text.encode("utf-8"))
             #self.update()
 
-
     def mouseReleaseEvent(self, QMouseEvent):
         self.update()
-
 
     def _selection_rects(self, start_pos, end_pos):
         sx, sy = start_pos.x(), start_pos.y()
@@ -454,7 +424,6 @@ class TerminalWidget(QtGui.QWidget):
              (0, start_row + 1, self._columns, end_row - 1),
              (0, end_row - 1, end_col, end_row)
              ]
-
              
     def text(self, rect=None):
         if rect is None:
@@ -465,7 +434,6 @@ class TerminalWidget(QtGui.QWidget):
             for row in range(start_row, end_row):
                 text.append(self._text[row][start_col:end_col])
             return text
-
         
     def text_selection(self):
         text = []
@@ -473,15 +441,12 @@ class TerminalWidget(QtGui.QWidget):
             for row in range(start_row, end_row):
                 text.append(self._text[row][start_col:end_col])
         return "\n".join(text)
-
     
     def column_count(self):
         return self._columns
     
-    
     def row_count(self):
         return self._rows
-    
 
     def mouseMoveEvent(self, event):
         if self._press_pos:
@@ -494,8 +459,6 @@ class TerminalWidget(QtGui.QWidget):
             self._clipboard.setText(sel, QtGui.QClipboard.Selection)
             
             self.update()
-
-
         
     def mouseDoubleClickEvent(self, event):
         self._press_pos = None
@@ -530,7 +493,6 @@ class TerminalWidget(QtGui.QWidget):
         self._clipboard.setText(sel, QtGui.QClipboard.Selection)
 
         self.update()
-
         
     def is_alive(self):
         return self.session and self.session.is_alive()

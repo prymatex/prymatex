@@ -1,4 +1,5 @@
 #-*- encoding: utf-8 -*-
+from __future__ import unicode_literals
 
 import os, sys
 import random
@@ -12,9 +13,9 @@ from prymatex.core import PMXBaseDock
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.misc import get_home_dir
+from prymatex.utils import six
 
 from prymatex.widgets.pmxterm import Backend, BackendManager, TerminalWidget, ColorScheme
-
 
 SHEME_SCOPES = [ 'comment', 'string', 'constant.numeric', 'constant.language', 
     'constant.character, constant.other', 'variable.language, variable.other',
@@ -51,12 +52,10 @@ class TabbedTerminal(QtGui.QTabWidget):
     def _on_close_request(self, idx):
         term = self.widget(idx)
         term.stop()
-        
             
     def _on_current_changed(self, idx):
         term = self.widget(idx)
         self._update_title(term)
-
     
     def currentTerminal(self):
         return self.currentWidget()
@@ -73,10 +72,8 @@ class TabbedTerminal(QtGui.QTabWidget):
             session.start()
             term.setFocus()
         
-        
     def timerEvent(self, event):
         self._update_title(self.currentWidget())
-
 
     def _update_title(self, term):
         if term is None:
@@ -86,7 +83,6 @@ class TabbedTerminal(QtGui.QTabWidget):
         title = "Terminal"
         self.setTabText(idx, title)
         self.setWindowTitle(title)
-
     
     def _on_session_closed(self):
         term = self.sender()
@@ -98,7 +94,7 @@ class TabbedTerminal(QtGui.QTabWidget):
             self.newTerminal()
 
     def setColorScheme(self, schemeName):
-        self.__colorScheme = ColorScheme.scheme(schemeName) if isinstance(schemeName, str) else schemeName
+        self.__colorScheme = ColorScheme.scheme(schemeName) if isinstance(schemeName, six.string_types) else schemeName
         for index in range(self.count()):
             self.widget(index).setColorScheme(self.__colorScheme)
 
@@ -110,7 +106,6 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "F4"
     ICON = resources.getIcon("utilities-terminal")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
-
     
     # ------------------ Settings
     SETTINGS_GROUP = 'Terminal'

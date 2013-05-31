@@ -64,7 +64,8 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         stack = [[ self.syntax.grammar, None ]]
         length = 0
         while block.isValid():
-            text = block != lastBlock and block.text() + "\n" or block.text()
+            #text = block != lastBlock and block.text() + "\n" or block.text()
+            text = block.text() + "\n"
 
             self.syntax.parseLine(stack, text, self.processor)
             userData = self.editor.blockUserData(block)
@@ -102,8 +103,9 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.editor.processBlockUserData(text, block, userData)
     
     def syncHighlightFunction(self, text):
-        if self.currentBlock() != self.document().lastBlock():
-            text += "\n"
+        #if self.currentBlock() != self.document().lastBlock():
+        #    text += "\n"
+        text += "\n"
         block = self.currentBlock()
         userData = self.editor.blockUserData(block)
         if userData.textHash == hash(text) + hash(self.syntax.scopeName) + self.previousBlockState():
