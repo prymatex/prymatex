@@ -106,9 +106,7 @@ def get_modifier_map():
                 # Convert key codes from hex to dec for use them
                 # with the keymap table
                 keycodes = [ int(kc, 16) for kc in keycodes]
-                
                 modifiers[mod_name] = keycodes
-
     return modifiers
 
 if __name__ == '__main__':
