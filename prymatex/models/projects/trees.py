@@ -24,7 +24,6 @@ class ProjectTreeModel(AbstractTreeModel):
         self.projectManager = projectManager
         self.fileManager = projectManager.fileManager
 
-
     def treeNodeFactory(self, nodeName, nodeParent):
         if nodeParent is not None:
             return FileSystemTreeNode(nodeName, nodeParent)
@@ -32,13 +31,11 @@ class ProjectTreeModel(AbstractTreeModel):
             # TODO: Quiza sea mejor hacer un custom root node
             return AbstractTreeModel.treeNodeFactory(self, nodeName, nodeParent)
 
-
     def rowCount(self, parent):
         parentNode = self.node(parent)
         if not parentNode.isRootNode() and parentNode.isdir and not parentNode._populated:
             self._load_directory(parentNode, parent)
         return parentNode.childCount()
-
 
     def data(self, index, role):
         if not index.isValid():
@@ -152,7 +149,7 @@ class ProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, projectManager):
         QtGui.QSortFilterProxyModel.__init__(self, projectManager)
         self.projectManager = projectManager
-        self.fileManager = self.projectManager.fileManager
+        self.fileManager = projectManager.fileManager
         self.orderBy = "name"
         self.folderFirst = True
         self.descending = False
@@ -193,7 +190,7 @@ class ProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         elif self.folderFirst and not leftNode.isdir and rightNode.isdir:
             return self.descending
         elif self.orderBy == "name" and rightNode.isproject and leftNode.isproject:
-            return cmp(leftNode.name, rightNode.name) < 0
+            return leftNode.name < rightNode.name
         else:
             return self.fileManager.compareFiles(leftNode.path(), rightNode.path(), self.orderBy) < 0
 
@@ -300,7 +297,7 @@ class FileSystemProxyModel(FlatTreeProxyModel):
     def compareIndex(self, xindex, yindex):
         xnode = self.sourceModel().node(xindex)
         ynode = self.sourceModel().node(yindex)
-        return cmp(xnode.name, ynode.name)
+        return (xnode.name > ynode.name) - (xnode.name < ynode.name)
     
     def findItemIndex(self, item):
         for num, index in enumerate(self.indexMap()):
