@@ -19,17 +19,15 @@ class VariablesSettingsWidget(MultiDictTableEditorWidget, SettingsTreeNode):
         self.model().dictionaryChanged.connect(self.on_model_dictionaryChanged)
 
     def loadSettings(self):
-        values = [{"name": value["variable"],
-            "value": value["value"],
-            "selected": value["enabled"]
-        } for value in self.settingGroup.value("shellVariables")]
-        self.addValues('user', values, editable = True, selectable=True)
+        values = [ (value["variable"], value["value"], value["enabled"]) 
+            for value in self.settingGroup.value("shellVariables")]
+        self.addTuples('user', values, editable = True, selectable=True)
         self.addDictionary('prymatex', self.application.supportManager.environment)
         self.addDictionary('system', os.environ, visible = False)
 
     def on_model_dictionaryChanged(self, dictionaryName):
-        data = self.model().dictionaryData(dictionaryName, raw = True)
-        data = [{"variable": item["name"],
-            "value": item["value"],
-            "enabled": item["selected"]} for item in data]
+        data = self.model().dumpData(dictionaryName)
+        data = [{"variable": item[0],
+            "value": item[1],
+            "enabled": item[2]} for item in data]
         self.settingGroup.setValue("shellVariables", data)

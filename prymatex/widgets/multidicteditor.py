@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 from prymatex.qt import QtGui, QtCore
 from prymatex.utils.i18n import ugettext as _
 
@@ -26,14 +25,11 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
         )
         self.insertActions = []
 
-
-    def dictionaryData(self, name):
-        return self.selectableMultiDictTableModel.dictionaryData(name)
-
+    def dumpData(self, name):
+        return self.selectableMultiDictTableModel.dumpData(name)
 
     def model(self):
         return self.selectableMultiDictTableModel
-
 
     def setupUi(self, MultiDictTableEditorWidget):
         MultiDictTableEditorWidget.setObjectName("MultiDictTableEditorWidget")
@@ -80,7 +76,6 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
         for name in self.selectableMultiDictTableModel.dictionaryNames():
             self.selectableMultiDictTableModel.setVisible(name, name in selected)
 
-
     def addDictionary(self, name, dictionary, editable = False, selectable = False, visible = True):
         self.selectableMultiDictTableModel.addDictionary(name, dictionary, editable = editable,
             selectable = selectable, visible = visible)
@@ -90,9 +85,8 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
         action.setEnabled(editable)
         self.menuAdd.addAction(action)
 
-
-    def addValues(self, name, values, editable = False, selectable = False, visible = True):
-        self.selectableMultiDictTableModel.addValues(name, values, editable = editable,
+    def addTuples(self, name, values, editable = False, selectable = False, visible = True):
+        self.selectableMultiDictTableModel.addTuples(name, values, editable = editable,
             selectable = selectable, visible = visible)
         self.checkableListModel.addItem(name, visible)
         action = QtGui.QAction(name, self)
@@ -105,7 +99,6 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
         self.tableViewDictionaries.resizeRowsToContents()
         self.tableViewDictionaries.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
 
-
     def on_actionInsertItem_triggered(self, dictionaryName):
         if not self.selectableMultiDictTableModel.isVisible(dictionaryName):
             self.checkableListModel.setSelected(dictionaryName, True)
@@ -114,7 +107,6 @@ class MultiDictTableEditorWidget(QtGui.QWidget):
             itemName, ok = QtGui.QInputDialog.getText(self, "Title", "Item name:", text = itemName)
         if ok:
             self.selectableMultiDictTableModel.insertItem(dictionaryName, itemName)
-
         
     def on_pushButtonRemove_pressed(self):
         index = self.tableViewDictionaries.currentIndex()

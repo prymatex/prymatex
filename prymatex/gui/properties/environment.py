@@ -22,18 +22,15 @@ class EnvironmentPropertiesWidget(MultiDictTableEditorWidget, PropertyTreeNode):
     def edit(self, project):
         self.project = project
         self.clear()
-        variables = [{"name": value["variable"],
-            "value": value["value"],
-            "selected": value["enabled"]
-        } for value in self.project.shellVariables or []]
-        
-        self.addDictionary('user', variables, editable = True, selectable=True)
+        variables = [ (value["variable"], value["value"], value["enabled"])
+            for value in self.project.shellVariables or []]
+        self.addTuples('user', variables, editable = True, selectable=True)
         self.addDictionary('project', self.project.environment())
         self.addDictionary('prymatex', self.application.supportManager.environmentVariables(), visible = False)
 
     def on_model_dictionaryChanged(self, dictionaryName):
-        variables = self.model().dictionaryData(dictionaryName, raw = True)
-        variables = [{"variable": item["name"], 
-            "value": item["value"], 
-            "enabled": item["selected"]} for item in variables]
+        variables = self.model().dumpData(dictionaryName)
+        variables = [{"variable": item[0], 
+            "value": item[1], 
+            "enabled": item[2]} for item in variables]
         self.project.shellVariables = variables

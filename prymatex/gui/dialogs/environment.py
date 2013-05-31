@@ -26,6 +26,6 @@ class EnvironmentDialog(QtGui.QDialog, PMXBaseDialog):
         self.multiDictTableEditorWidget.addDictionary('environment', environment, editable = True)
         # Add extra dicts
         for name, value in kwargs.items():
-            self.multiDictTableEditorWidget.addDictionary(name, value, editable=False)
+            self.multiDictTableEditorWidget.addDictionary(name, value, editable = False)
         self.exec_()
-        return self.multiDictTableEditorWidget.dictionaryData("environment")
+        return self.multiDictTableEditorWidget.dumpData("environment")

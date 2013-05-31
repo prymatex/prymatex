@@ -30,6 +30,10 @@ class TemplateDialog(QtGui.QDialog, Ui_TemplateDialog, PMXBaseDialog):
         self.fileCreated = None
         self.userEnvironment = {}
     
+    def initialize(self, mainWindow):
+        PMXBaseDialog.initialize(self, mainWindow)
+        self.environmentDialog = self.mainWindow.findChild(QtGui.QDialog, "EnvironmentDialog")
+    
     def setupComboTemplates(self):
         tableView = QtGui.QTableView(self)
         tableView.setModel(self.application.supportManager.templateProxyModel)
@@ -91,7 +95,7 @@ class TemplateDialog(QtGui.QDialog, Ui_TemplateDialog, PMXBaseDialog):
         template = templateModel.node(templateModel.createIndex(self.comboTemplates.currentIndex(), 0))
         
         tEnv = template.buildEnvironment(fileName = name, fileDirectory = location, localVars = True)
-        self.userEnvironment = EnvironmentDialog.editEnvironment(self, self.userEnvironment, tEnv)
+        self.userEnvironment = self.environmentDialog.editEnvironment(self.userEnvironment, template = tEnv)
              
     def createFile(self, title="Create file from template", fileDirectory = "", fileName = "", parent = None):
         self.setWindowTitle(title)
