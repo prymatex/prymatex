@@ -3,6 +3,7 @@
 
 import re
 import operator
+from collections import namedtuple
 
 from prymatex.qt import QtCore, QtGui
 
@@ -36,6 +37,10 @@ from prymatex.utils.decorators.helpers import printtime
 from functools import reduce
 
 WIDTH_CHARACTER = "#"
+
+CodeEditorScope = namedtuple("CodeEditorScope", [
+    "name", "path", "settings", "group"
+])
 
 class CodeEditor(TextEditWidget, PMXBaseEditor):
     # -------------------- Scope groups
@@ -82,8 +87,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def defaultSyntax(self, uuid):
         syntax = self.application.supportManager.getBundleItem(uuid)
         self.setSyntax(syntax)
-    
-    
+
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
     def defaultTheme(self, uuid):
         theme = self.application.supportManager.getTheme(uuid)
@@ -101,7 +105,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     @pmxConfigPorperty(default = MarginLine | IndentGuide | HighlightCurrentLine)
     def defaultFlags(self, flags):
         self.setFlags(flags)
-
 
     # --------------------- init
     def __init__(self, parent = None):
@@ -194,7 +197,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def on_syntaxChanged(self, syntax):
         # Build basic scope
-        scopeHash = self.flyweightScopeFactory([syntax.scopeName])
+        scopeHash = self.flyweightScopeFactory(( syntax.scopeName, ))
         
         # Set braces
         settings = self.scope(scopeHash = scopeHash, attribute='settings')
@@ -206,20 +209,36 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.application.showMessage(*largs, **kwargs)
 
     def setPlainText(self, text):
+        from time import time
         self.syntaxHighlighter.stop()
         self.aboutToHighlightChange.emit()
         QtGui.QPlainTextEdit.setPlainText(self, text)
-        self.syntaxHighlighter.runAsyncHighlight(lambda editor = self: editor.highlightChanged.emit())
+        self.highlightTime = time()
+        def highlightReady(editor):
+            def _ready():
+                editor.highlightChanged.emit()
+                print("Tiempo", time() - self.highlightTime)
+            return _ready
+        self.syntaxHighlighter.runAsyncHighlight(highlightReady(self))
+        #self.syntaxHighlighter.runAsyncHighlight(lambda editor = self: editor.highlightChanged.emit())
             
     # --------------- Block User Data
     def registerBlockUserDataHandler(self, handler):
         self.__blockUserDataHandlers.append(handler)
-    
-    user_counter = 0
+
     def blockUserData(self, block):
         userData = block.userData()
         if not userData:
             userData = CodeEditorBlockUserData()
+            # Indent and content
+            userData.indent = ""
+            
+            # Folding
+            userData.foldingMark = PMXPreferenceSettings.FOLDING_NONE
+            userData.foldedLevel = 0
+            userData.folded = False
+            
+            # Now the handlers
             for handler in self.__blockUserDataHandlers:
                 handler.contributeToBlockUserData(userData)
             block.setUserData(userData)
@@ -322,21 +341,23 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # ---------------------- Scopes
     @classmethod
     def flyweightScopeFactory(cls, scopeStack):
-        # TODO Analizar mejor la utilidad de esto, quiza dejar los nombres en listas sea mejor
-        scopeName = " ".join(scopeStack)
-        scopeHash = hash(scopeName)
+        scopeHash = hash(scopeStack)
         if scopeHash not in cls.SCOPES:
-            scopeData = cls.SCOPES.setdefault(scopeHash, {
-                "name": scopeName,
-                "settings": cls.application.supportManager.getPreferenceSettings(scopeName),
-                "group": PMXSyntax.findGroup(scopeStack[::-1])
-            })
+            print(scopeStack)
+            scopeName = " ".join(scopeStack)
+            cls.SCOPES[scopeHash] = CodeEditorScope(
+                name = scopeName,
+                path = scopeStack,
+                settings = cls.application.supportManager.getPreferenceSettings(scopeName),
+                group = PMXSyntax.findGroup(scopeStack[::-1])
+            )
         return scopeHash
 
     def scope(self, cursor = None, block = None, blockPosition = None, documentPosition = None,
                 scopeHash = None, direction = "right", attribute = "name"):
+        # TODO: Que retorne un code editor scope y no el attr
         if scopeHash is not None:
-            return self.SCOPES[scopeHash][attribute]
+            return getattr(self.SCOPES[scopeHash], attribute)
         if block is None:
             cursor = cursor or (documentPosition is not None and self.cursorAtPosition(documentPosition)) or self.textCursor()
             block = cursor.block()
@@ -345,26 +366,21 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if direction == "right":
             # TODO: Cuando el syntax processor funcione bien sacar este or
             rightScope = userData is not None and userData.scopeAtPosition(positionInBlock) or hash(self.syntax().scopeName)
-            return self.SCOPES[rightScope][attribute]
+            return getattr(self.SCOPES[rightScope], attribute)
         elif direction == "left":
             # TODO: Cuando el syntax processor funcione bien sacar este or
             leftScope = userData is not None and userData.scopeAtPosition(positionInBlock - 1) or hash(self.syntax().scopeName)
-            return self.SCOPES[leftScope][attribute]
+            return getattr(self.SCOPES[leftScope], attribute)
         elif direction == "both":
             # TODO: Cuando el syntax processor funcione bien sacar este or
             leftScope = userData is not None and userData.scopeAtPosition(positionInBlock - 1) or hash(self.syntax().scopeName)
             rightScope = userData is not None and userData.scopeAtPosition(positionInBlock) or hash(self.syntax().scopeName)
-            return self.SCOPES[leftScope][attribute], self.SCOPES[rightScope][attribute]
+            return getattr(self.SCOPES[leftScope], attribute), getattr(self.SCOPES[rightScope], attribute)
             
-    def _scopes(self, block = None, attribute = "name", scope_filter = lambda attr: True):
-        block = block or self.textCursor().block()
-        userData = self.blockUserData(block)
-        return [start_end_attr for start_end_attr in [((start_end_scope[0][0], start_end_scope[0][1]), self.SCOPES[start_end_scope[1]][attribute]) for start_end_scope in userData.scopeRanges()] if scope_filter(start_end_attr[1])]
-
     def findScopes(self, block = None, attribute = "name", scope_filter = lambda attr: True, firstOnly = False):
         userData = self.blockUserData(block) if block is not None else self.textCursor().block()
         # TODO: Se podra optimizar esto?
-        scopes = [start_end_attr2 for start_end_attr2 in [((start_end_scope1[0][0], start_end_scope1[0][1]), self.SCOPES[start_end_scope1[1]][attribute]) for start_end_scope1 in userData.scopeRanges()] if scope_filter(start_end_attr2[1])]
+        scopes = [start_end_attr2 for start_end_attr2 in [((start_end_scope1[0][0], start_end_scope1[0][1]), getattr(self.SCOPES[start_end_scope1[1]], attribute)) for start_end_scope1 in userData.scopeRanges()] if scope_filter(start_end_attr2[1])]
         if not firstOnly:
             return scopes
         if scopes:

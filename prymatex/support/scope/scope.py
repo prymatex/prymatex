@@ -44,7 +44,7 @@ class Context(object):
     def __init__(self, left, right):
         self.left = isinstance(left, Scope) and left or Scope(left)
         self.right = isinstance(right, Scope) and right or Scope(right)
-
+        #print(repr(self.left.path))
     @classmethod
     def get(cls, left, right = None):
         # TODO: Testing cache

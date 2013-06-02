@@ -1,23 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from collections import namedtuple
+
 from prymatex.qt import QtGui
 
-from prymatex.support import PMXPreferenceSettings
 from functools import reduce
+
+CodeEditorBlockUserDataToken = namedtuple("CodeEditorBlockUserDataToken", [
+    "start", "end", "scopeHash", "chunk"
+])
 
 class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
 
     def __init__(self):
         QtGui.QTextBlockUserData.__init__(self)
-        # Indent and content
-        self.indent = ""
-        
-        # Folding
-        self.foldingMark = PMXPreferenceSettings.FOLDING_NONE
-        self.foldedLevel = 0
-        self.folded = False
-        
         self.textHash = None
         
         self.__blank = True
@@ -28,8 +25,8 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
 
     def setTokens(self, tokens):
         self.__tokens = tokens
-        self.__scopeRanges = [ ((token["start"], token["end"]), token["hash"]) for token in tokens ]
-        self.__lineChunks = [ ((token["start"], token["end"]), token["chunk"]) for token in tokens ]
+        self.__scopeRanges = [ ((token.start, token.end), token.scopeHash) for token in tokens ]
+        self.__lineChunks = [ ((token.start, token.end), token.chunk) for token in tokens ]
 
     def scopeRanges(self, start = None, end = None):
         ranges = self.__scopeRanges[:]

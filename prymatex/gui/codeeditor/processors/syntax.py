@@ -3,6 +3,8 @@
 
 from prymatex.support import processor
 
+from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserDataToken
+
 # Primera prueba 
 class CodeEditorSyntaxProcessor1(processor.PMXSyntaxProcessor):
     def __init__(self, editor):
@@ -139,6 +141,7 @@ class CodeEditorSyntaxProcessor2(processor.PMXSyntaxProcessor):
     def endParsing(self, scope):
         pass
 
+# Esta es la posta!
 class CodeEditorTokenSyntaxProcessor(processor.PMXSyntaxProcessor):
     def __init__(self, editor):
         self.editor = editor
@@ -184,19 +187,20 @@ class CodeEditorTokenSyntaxProcessor(processor.PMXSyntaxProcessor):
         pass
 
     # --------- Create tokens
-    def openToken(self, position):
-        self.__tokens.append({
-            "start": position
-        })
-        self.__indexes.append(len(self.__tokens) - 1)
+    def openToken(self, start):
+        self.__tokens.append(None)
+        self.__indexes.append((start, len(self.__tokens) -1 ))
 
-    def closeToken(self, position, closeAll = False):
-        while len(self.__indexes):
-            token = self.__tokens[self.__indexes.pop()]
-            scopeHash = self.editor.flyweightScopeFactory(self.stackScopes)
-            token["end"] = position
-            token["hash"] = scopeHash
-            token["chunk"] = self.line[token["start"] : token["end"]]
+    def closeToken(self, end, closeAll = False):
+        while self.__indexes:
+            start, index = self.__indexes.pop()
+            scopeHash = self.editor.flyweightScopeFactory(tuple(self.stackScopes))
+            self.__tokens[index] = CodeEditorBlockUserDataToken(
+                start = start,
+                end = end,
+                scopeHash = scopeHash,
+                chunk = self.line[start : end]
+            )
             if not closeAll:
                 break
         
