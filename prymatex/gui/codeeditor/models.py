@@ -130,13 +130,12 @@ class SymbolListModel(QtCore.QAbstractListModel):
         userData.symbol = None
 
     def processBlockUserData(self, text, block, userData):
-        startStop, settings = self.editor.findScopes(
+        startStop, scope = self.editor.findScopes(
             block = block,
-            attribute = 'settings',
-            scope_filter = lambda attr: attr.showInSymbolList,
+            scope_filter = lambda scope: scope.settings.showInSymbolList,
             firstOnly = True)
         
-        symbol = settings.transformSymbol(text[slice(*startStop)]) if settings else None
+        symbol = scope.settings.transformSymbol(text[slice(*startStop)]) if scope else None
         
         if userData.symbol != symbol:
             userData.symbol = symbol

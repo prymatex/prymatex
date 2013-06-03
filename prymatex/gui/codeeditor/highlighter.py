@@ -86,7 +86,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 frange = QtGui.QTextLayout.FormatRange()
                 frange.start = start
                 frange.length = end - start
-                frange.format = self.highlightFormat(self.editor.scope(scopeHash = scope, attribute = 'name'))
+                frange.format = self.highlightFormat(self.editor.scope(scopeHash = scope).name)
                 formats.append(frange)
 
             block.layout().setAdditionalFormats(formats)
@@ -142,7 +142,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def applyFormat(self, userData):
         for (start, end), scope in userData.scopeRanges():
-            format = self.highlightFormat(self.editor.scope(scopeHash = scope, attribute = 'name'))
+            format = self.highlightFormat(self.editor.scope(scopeHash = scope).name)
             if format is not None:
                 self.setFormat(start, end - start, format)
 

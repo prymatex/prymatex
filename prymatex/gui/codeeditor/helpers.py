@@ -22,7 +22,7 @@ class KeyEquivalentHelper(CodeEditorKeyHelper):
             return False
 
         leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both')
-        self.items = self.application.supportManager.getKeyEquivalentItem(keyseq, leftScope, rightScope)
+        self.items = self.application.supportManager.getKeyEquivalentItem(keyseq, leftScope.name, rightScope.name)
         return bool(self.items)
 
     def execute(self, event, cursor = None):
@@ -38,7 +38,7 @@ class TabTriggerHelper(CodeEditorKeyHelper):
 
         leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both')
         trigger = self.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
-        self.items = self.application.supportManager.getTabTriggerItem(trigger, leftScope, rightScope) if trigger is not None else []
+        self.items = self.application.supportManager.getTabTriggerItem(trigger, leftScope.name, rightScope.name) if trigger is not None else []
         return bool(self.items)
 
     def execute(self, event, cursor = None):
@@ -60,7 +60,7 @@ class CompleterHelper(CodeEditorKeyHelper):
 class SmartTypingPairsHelper(CodeEditorKeyHelper):
     #TODO: Mas amor para la inteligencia de los cursores balanceados
     def accept(self, event, cursor = None):
-        settings = self.editor.scope(cursor = cursor, attribute = 'settings')
+        settings = self.editor.scope(cursor = cursor).settings
         character = event.text()
         pairs = [pair for pair in settings.smartTypingPairs if character in pair]
         

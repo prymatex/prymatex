@@ -196,12 +196,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.leftBar.addWidget(widget)
 
     def on_syntaxChanged(self, syntax):
-        # Build basic scope
-        scopeHash = self.flyweightScopeFactory(( syntax.scopeName, ))
+        # Set the basic scope
+        self.setBasicScope(( syntax.scopeName, ))
         
         # Set braces
-        settings = self.scope(scopeHash = scopeHash, attribute='settings')
-        self.braces = settings.smartTypingPairs
+        self.braces = self.basicScope().settings.smartTypingPairs
         
         self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
     
@@ -250,7 +249,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if indent != userData.indent:
             userData.indent = indent
         # Folding
-        foldingMark = self.scope(scopeHash = userData.lastScope(), attribute="settings").folding(text)
+        foldingMark = self.scope(scopeHash = userData.lastScope()).settings.folding(text)
         if foldingMark != userData.foldingMark:
             userData.foldingMark = foldingMark
         # Handlers
@@ -339,11 +338,16 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return (cursor.block().blockNumber(), cursor.positionInBlock())
 
     # ---------------------- Scopes
+    def setBasicScope(self, scopeStack):
+        self.basicScopeHash = self.flyweightScopeFactory(scopeStack)
+
+    def basicScope(self):
+        return self.scope(scopeHash = self.basicScopeHash)
+
     @classmethod
     def flyweightScopeFactory(cls, scopeStack):
         scopeHash = hash(scopeStack)
         if scopeHash not in cls.SCOPES:
-            print(scopeStack)
             scopeName = " ".join(scopeStack)
             cls.SCOPES[scopeHash] = CodeEditorScope(
                 name = scopeName,
@@ -354,10 +358,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return scopeHash
 
     def scope(self, cursor = None, block = None, blockPosition = None, documentPosition = None,
-                scopeHash = None, direction = "right", attribute = "name"):
-        # TODO: Que retorne un code editor scope y no el attr
+                scopeHash = None, direction = "right"):
         if scopeHash is not None:
-            return getattr(self.SCOPES[scopeHash], attribute)
+            return self.SCOPES[scopeHash]
         if block is None:
             cursor = cursor or (documentPosition is not None and self.cursorAtPosition(documentPosition)) or self.textCursor()
             block = cursor.block()
@@ -365,22 +368,23 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         positionInBlock = blockPosition or (cursor is not None and cursor.positionInBlock()) or 0
         if direction == "right":
             # TODO: Cuando el syntax processor funcione bien sacar este or
-            rightScope = userData is not None and userData.scopeAtPosition(positionInBlock) or hash(self.syntax().scopeName)
-            return getattr(self.SCOPES[rightScope], attribute)
+            rightScope = userData is not None and userData.scopeAtPosition(positionInBlock) or self.basicScopeHash
+            return self.SCOPES[rightScope]
         elif direction == "left":
             # TODO: Cuando el syntax processor funcione bien sacar este or
-            leftScope = userData is not None and userData.scopeAtPosition(positionInBlock - 1) or hash(self.syntax().scopeName)
-            return getattr(self.SCOPES[leftScope], attribute)
+            leftScope = userData is not None and userData.scopeAtPosition(positionInBlock - 1) or self.basicScopeHash
+            return self.SCOPES[leftScope]
         elif direction == "both":
             # TODO: Cuando el syntax processor funcione bien sacar este or
-            leftScope = userData is not None and userData.scopeAtPosition(positionInBlock - 1) or hash(self.syntax().scopeName)
-            rightScope = userData is not None and userData.scopeAtPosition(positionInBlock) or hash(self.syntax().scopeName)
-            return getattr(self.SCOPES[leftScope], attribute), getattr(self.SCOPES[rightScope], attribute)
+            leftScope = userData is not None and userData.scopeAtPosition(positionInBlock - 1) or self.basicScopeHash
+            rightScope = userData is not None and userData.scopeAtPosition(positionInBlock) or self.basicScopeHash
+            return self.SCOPES[leftScope], self.SCOPES[rightScope]
             
-    def findScopes(self, block = None, attribute = "name", scope_filter = lambda attr: True, firstOnly = False):
+    def findScopes(self, block = None, scope_filter = lambda attr: True, firstOnly = False):
         userData = self.blockUserData(block) if block is not None else self.textCursor().block()
-        # TODO: Se podra optimizar esto?
-        scopes = [start_end_attr2 for start_end_attr2 in [((start_end_scope1[0][0], start_end_scope1[0][1]), getattr(self.SCOPES[start_end_scope1[1]], attribute)) for start_end_scope1 in userData.scopeRanges()] if scope_filter(start_end_attr2[1])]
+        # TODO: Pasar a al uso tokens
+        # TODO: ver una forma mejor de pasar las posiciones
+        scopes = [((start_end_scope1[0][0], start_end_scope1[0][1]), self.SCOPES[start_end_scope1[1]]) for start_end_scope1 in userData.scopeRanges() if scope_filter(self.SCOPES[start_end_scope1[1]])]
         if not firstOnly:
             return scopes
         if scopes:
@@ -544,23 +548,23 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
     #-------------------- Highlight Editor
     def textCharFormat_line_builder(self):
-        format = QtGui.QTextCharFormat()
-        format.setBackground(self.colours['lineHighlight'])
-        format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
-        return format
+        fmt = QtGui.QTextCharFormat()
+        fmt.setBackground(self.colours['lineHighlight'])
+        fmt.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
+        return fmt
         
     def textCharFormat_brace_builder(self):
-        format = QtGui.QTextCharFormat()
-        format.setForeground(self.colours['caret'])
-        format.setFontUnderline(True)
-        format.setUnderlineColor(self.colours['foreground']) 
-        format.setBackground(QtCore.Qt.transparent)
-        return format
+        fmt = QtGui.QTextCharFormat()
+        fmt.setForeground(self.colours['caret'])
+        fmt.setFontUnderline(True)
+        fmt.setUnderlineColor(self.colours['foreground']) 
+        fmt.setBackground(QtCore.Qt.transparent)
+        return fmt
 
     def textCharFormat_selection_builder(self):
-        format = QtGui.QTextCharFormat()
-        format.setBackground(self.colours['selection'])
-        return format
+        fmt = QtGui.QTextCharFormat()
+        fmt.setBackground(self.colours['selection'])
+        return fmt
         
     def highlightEditor(self):
         cursor = self.textCursor()
@@ -653,7 +657,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             painter.drawRect(self.multiCursorMode.getDragCursorRect())
         painter.end()
 
-
     # ----------------- Mouse Events
     def wheelEvent(self, event):
         if event.modifiers() == QtCore.Qt.ControlModifier:
@@ -703,7 +706,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         else:
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
 
-
     # -------------------- Keyboard Events
     def runKeyHelper(self, event):
         #No tengo modo activo, intento con los helpers
@@ -737,14 +739,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 return mode.keyReleaseEvent(event)
         QtGui.QPlainTextEdit.keyReleaseEvent(self, event)
 
-
     # ------------ Insert API
     def insertNewLine(self, cursor = None):
         cursor = cursor or self.textCursor()
         block = cursor.block()
         positionInBlock = cursor.positionInBlock()
         userData = self.blockUserData(block)
-        settings = self.scope(attribute='settings')
+        settings = self.scope().settings
         indentMarks = settings.indent(block.text()[:positionInBlock])
         if PMXPreferenceSettings.INDENT_INCREASE in indentMarks:
             self.logger.debug("Increase indent")
@@ -765,11 +766,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         cursor.insertText("\n%s" % indent)
         self.ensureCursorVisible()
 
-
     # ------------ Bundle Items
     def bundleItemHandler(self):
         return self.insertBundleItem
-
 
     def insertBundleItem(self, item, **processorSettings):
         """Inserta un bundle item"""
@@ -803,13 +802,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
         self.showFlatPopupMenu(items, insertBundleItem, cursorPosition = not syntax)
 
-
     def executeCommand(self, commandScript = None, commandInput = "none", commandOutput = "insertText"):
         if commandScript is None:
             commandScript = self.textCursor().selectedText() if self.textCursor().hasSelection() else self.textCursor().block().text()
         command = self.application.supportManager.buildAdHocCommand(commandScript, self.syntax().bundle, commandInput, commandOutput)
         self.insertBundleItem(command)
-
 
     def environmentVariables(self):
         environment = PMXBaseEditor.environmentVariables(self)
@@ -823,8 +820,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 'TM_LINE_INDEX': cursor.positionInBlock(),
                 'TM_LINE_NUMBER': block.blockNumber() + 1,
                 'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
-                'TM_SCOPE': rightScope,
-                'TM_LEFT_SCOPE': leftScope,
+                'TM_SCOPE': rightScope.name,
+                'TM_LEFT_SCOPE': leftScope.name,
                 'TM_MODE': self.syntax().name,
                 'TM_SOFT_TABS': self.tabStopSoft and str('YES') or str('NO'),
                 'TM_TAB_SIZE': self.tabStopSize
@@ -849,10 +846,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             environment['TM_INPUT_START_LINE'] = start.blockNumber() + 1
             environment['TM_INPUT_START_LINE_INDEX'] = cursor.selectionStart() - start.position()
         
-        settings = self.scope(attribute = 'settings')
+        settings = self.scope().settings
         environment.update(settings.shellVariables)
         return environment
-        
 
     # ---------- Completer
     def showCompleter(self, suggestions, source = "default", alreadyTyped = None, caseInsensitive = True, callback = None):
@@ -865,7 +861,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.completerMode.setSuggestions(suggestions, source)
             self.completerMode.setCompletionPrefix(currentAlreadyTyped)
             self.completerMode.complete(self.cursorRect())
-
     
     def showCachedCompleter(self):
         if not self.completerMode.hasSource("default"):
@@ -878,9 +873,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.completerMode.setCompletionPrefix(currentAlreadyTyped)
             self.completerMode.complete(self.cursorRect())
 
-
     def switchCompleter(self):
-        settings = self.scope(attribute='settings')
+        settings = self.scope().settings
         if not self.completerMode.hasSource("default"):
             def on_suggestionsReady(suggestions):
                 if bool(suggestions):
@@ -889,14 +883,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         else:
             self.completerMode.switch()
 
-
     def runCompleter(self):
-        settings = self.scope(attribute='settings')
+        settings = self.scope().settings
         def on_suggestionsReady(suggestions):
              if bool(suggestions):
                 self.showCompleter(suggestions)
         self.defaultCompletion(settings, on_suggestionsReady)
-
 
     def defaultCompletion(self, settings, callback):
         if not self.completerTask.isRunning():
@@ -908,10 +900,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             #En una clausura
             self.completerTask.done.connect(on_completerTaskReady(callback))
 
-
     def runCompletionSuggestions(self, cursor = None, scope = None, settings = None):
         cursor = cursor or self.textCursor()
-        settings = settings or self.scope(cursor = cursor, attribute = 'settings')
+        settings = settings or self.scope(cursor = cursor).settings
         scope = scope or self.scope(cursor = cursor)
         currentAlreadyTyped = self.currentWord(direction = "left", search = False)[0]
         
@@ -927,7 +918,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             command.executeCallback(self.commandProcessor, commandCallback)
             
         #A tab tigger completion
-        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
+        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope.name)
         
         typedWords = self.alreadyTypedWords.typedWords()
         
@@ -1127,7 +1118,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.verticalScrollBar().setValue(scrollIndex)
         else:
             QtGui.QPlainTextEdit.centerCursor(self)
-
 
     # ------------------- Text Indentation
     def findNoBlankBlock(self, block, direction = "down"):
@@ -1432,7 +1422,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
         return [ EditorSettingsWidget, ThemeSettingsWidget, EditSettingsWidget, AddonsSettingsWidgetFactory("editor") ]
 
-
     # ------------------ Menu Actions
     def on_actionShowTabsAndSpaces_toggled(self, checked):
         if checked:
@@ -1441,14 +1430,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             flags = self.getFlags() & ~self.ShowTabsAndSpaces
         self.setFlags(flags)
 
-
     def on_actionShowLineAndParagraphs_toggled(self, checked):
         if checked:
             flags = self.getFlags() | self.ShowLineAndParagraphs
         else:
             flags = self.getFlags() & ~self.ShowLineAndParagraphs
         self.setFlags(flags)
-
 
     def on_actionWordWrap_toggled(self, checked):
         if checked:
@@ -1457,14 +1444,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             flags = self.getFlags() & ~self.WordWrap
         self.setFlags(flags)
 
-
     def on_actionHighlightCurrentLine_toggled(self, checked):
         if checked:
             flags = self.getFlags() | self.HighlightCurrentLine
         else:
             flags = self.getFlags() & ~self.HighlightCurrentLine
         self.setFlags(flags)
-
 
     def on_actionMarginLine_toggled(self, checked):
         if checked:
@@ -1473,14 +1458,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             flags = self.getFlags() & ~self.MarginLine
         self.setFlags(flags)
 
-
     def on_actionIndentGuide_toggled(self, checked):
         if checked:
             flags = self.getFlags() | self.IndentGuide
         else:
             flags = self.getFlags() & ~self.IndentGuide
         self.setFlags(flags)
-
 
     def on_actionSelectBundleItem_triggered(self):
         item = self.selectorDialog.select(self.bundleItemSelectableModel, title=_("Select Bundle Item"))
@@ -1495,12 +1478,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if item is not None:
             self.goToBlock(item['data'])
 
-
     def on_actionGoToBookmark_triggered(self):
         item = self.selectorDialog.select(self.bookmarkSelectableModel, title=_("Select Bookmark"))
         if item is not None:
             self.goToBlock(item['data'])
-
 
     # ---------------------- Navigation API
     def restoreLocationMemento(self, memento):
@@ -1510,7 +1491,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         cursor = self.textCursor()
         if not (cursor.atEnd() or cursor.atStart()):
             self.saveLocationMemento(self.newCursorAtPosition(cursor.position() - 1))
-    
 
     # ----------------- Drag and Drop
     def dragEnterEvent(self, event):
@@ -1528,22 +1508,22 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         #mimeData = event.mimeData()
         if event.mimeData().hasUrls():
             files = [url.toLocalFile() for url in event.mimeData().urls()]
-            for file in files:                
-                items = self.application.supportManager.getFileExtensionItem(file, self.scope())
+            for filePath in files:                
+                items = self.application.supportManager.getFileExtensionItem(filePath, self.scope())
                 if items:
                     item = items[0]
                     env = { 
                             #relative path of the file dropped (relative to the document directory, which is also set as the current directory).
-                            'TM_DROPPED_FILE': file,
+                            'TM_DROPPED_FILE': filePath,
                             #the absolute path of the file dropped.
-                            'TM_DROPPED_FILEPATH': file,
+                            'TM_DROPPED_FILEPATH': filePath,
                             #the modifier keys which were held down when the file got dropped.
                             #This is a bitwise OR in the form: SHIFT|CONTROL|OPTION|COMMAND (in case all modifiers were down).
-                            'TM_MODIFIER_FLAGS': file
+                            'TM_MODIFIER_FLAGS': filePath
                     }
                     self.insertBundleItem(item, environment = env)
                 else:
-                    self.application.openFile(file)
+                    self.application.openFile(filePath)
         elif event.mimeData().hasText():
             self.textCursor().insertText(event.mimeData().text())
             
