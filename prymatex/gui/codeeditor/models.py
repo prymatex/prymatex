@@ -97,8 +97,8 @@ class BookmarkListModel(QtCore.QAbstractListModel):
 def bookmarkSelectableModelFactory(editor):
     # Data function    
     def bookmarkData():
-        leftScope, rightScope = editor.scope(direction = "both")
-        return [dict(display = block.text(), image = resources.getIcon('bookmarkflag')) for block in editor.bookmarkListModel.blocks]
+        return [dict(display = block.text(), image = resources.getIcon('bookmarkflag')) 
+            for block in editor.bookmarkListModel.blocks]
 
     return selectableModelFactory(editor, bookmarkData, 
         filterFunction = lambda text, item: item["display"].find(text) != -1)
@@ -363,7 +363,7 @@ def bundleItemSelectableModelFactory(editor):
                     "bundle": bundleItem.bundle.name, 
                     "trigger": bundleItem.trigger
                 }, 
-                image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE)) for bundleItem in editor.application.supportManager.getActionItems(leftScope, rightScope)]
+                image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE)) for bundleItem in editor.application.supportManager.getActionItems(leftScope.name, rightScope.name)]
 
 
     # Filter function        

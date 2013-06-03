@@ -94,6 +94,10 @@ class PMXManagedObject(object):
             self.sources[namespace] = (path, os.path.getmtime(path))
         else:
             self.sources[namespace] = (path, 0)
+
+    @classmethod
+    def dataFilePath(cls, path):
+        return path
     
     def updateMtime(self, namespace):
         path = self.sources[namespace][self._PATH]
@@ -105,16 +109,15 @@ class PMXManagedObject(object):
 
     def setManager(self, manager):
         self.manager = manager
-
+        
 class PMXBundle(PMXManagedObject):
     KEYS = [    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'
     TYPE = 'bundle'
-    def __init__(self, uuid, dataHash):
+    def __init__(self, uuid):
         PMXManagedObject.__init__(self, uuid)
         self.populated = False
         self.support = None    #supportPath
-        self.load(dataHash)
 
     def hasSupport(self):
         return self.support is not None
@@ -149,15 +152,16 @@ class PMXBundle(PMXManagedObject):
         return dataHash
 
     def save(self, namespace):
+        # TODO: todo esto mandarlo al manager
         if not os.path.exists(self.path(namespace)):
             os.makedirs(self.path(namespace))
-        file = os.path.join(self.path(namespace), self.FILE)
-        plist.writePlist(self.hash, file)
+        dataFile = self.dataFilePath(self.path(namespace))
+        plist.writePlist(self.hash, dataFile)
         self.updateMtime(namespace)
 
     def delete(self, namespace):
         #No se puede borrar si tiene items, sub archivos o subdirectorios
-        os.unlink(os.path.join(self.path(namespace), self.FILE))
+        os.unlink(self.dataFilePath(self.path(namespace)))
         try:
             #Este a diferencia de los items borra todo el directorio
             shutil.rmtree(self.path(namespace))
@@ -170,33 +174,10 @@ class PMXBundle(PMXManagedObject):
         if self.support != None:
             environment['TM_BUNDLE_SUPPORT'] = self.support
         return environment
-        
-    @classmethod
-    def loadBundle(cls, path, namespace, manager):
-        info_file = os.path.join(path, cls.FILE)
-        try:
-            data = plist.readPlist(info_file)
-            uuid = manager.uuidgen(data.pop('uuid', None))
-            bundle = manager.getManagedObject(uuid)
-            if bundle is None and not manager.isDeleted(uuid):
-                bundle = cls(uuid, data)
-                bundle.setManager(manager)
-                bundle.addSource(namespace, path)
-                bundle = manager.addBundle(bundle)
-                manager.addManagedObject(bundle)
-            elif bundle is not None:
-                bundle.addSource(namespace, path)
-            return bundle
-        except Exception as e:
-            import traceback
-            print("Error in laod bundle %s (%s)" % (info_file, e))
-            traceback.print_exc()
 
     @classmethod
-    def reloadBundle(cls, bundle, path, namespace, manager):
-        info_file = os.path.join(path, cls.FILE)
-        data = plist.readPlist(info_file)
-        bundle.load(data)
+    def dataFilePath(cls, path):
+        return os.path.join(path, cls.FILE)
 
 class PMXBundleItem(PMXManagedObject):
     KEYS = [ 'name', 'tabTrigger', 'keyEquivalent', 'scope', 'semanticClass' ]
@@ -204,10 +185,9 @@ class PMXBundleItem(PMXManagedObject):
     FOLDER = ''
     EXTENSION = ''
     PATTERNS = []
-    def __init__(self, uuid, dataHash):
+    def __init__(self, uuid):
         PMXManagedObject.__init__(self, uuid)
         self.bundle = None
-        self.load(dataHash)
 
     def setBundle(self, bundle):
         self.bundle = bundle
@@ -264,33 +244,7 @@ class PMXBundleItem(PMXManagedObject):
     
     def environmentVariables(self):
         return self.bundle.environmentVariables()
-        
-    @classmethod
-    def loadBundleItem(cls, path, namespace, bundle, manager):
-        try:
-            data = plist.readPlist(path)
-            uuid = manager.uuidgen(data.pop('uuid', None))
-            item = manager.getManagedObject(uuid)
-            if item is None and not manager.isDeleted(uuid):
-                item = cls(uuid, data)
-                item.setBundle(bundle)
-                item.setManager(manager)
-                item.addSource(namespace, path)
-                item = manager.addBundleItem(item)
-                manager.addManagedObject(item)
-            elif item is not None:
-                item.addSource(namespace, path)
-            return item
-        except Exception as e:
-            import traceback
-            print("Error in bundle item %s (%s)" % (path, e))
-            traceback.print_exc()
     
-    @classmethod
-    def reloadBundleItem(cls, bundleItem, path, namespace, manager):
-        data = plist.readPlist(path)
-        bundleItem.load(data)
-
     def execute(self, processor):
         pass
       

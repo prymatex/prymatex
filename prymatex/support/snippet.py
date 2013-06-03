@@ -12,7 +12,8 @@ from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
 from prymatex.support.processor import PMXSyntaxProcessor
 from prymatex.support.syntax import PMXSyntax
 
-SNIPPET_SYNTAX = { 
+SNIPPET_PARSER = PMXSyntax(uuidmodule.uuid1())
+SNIPPET_PARSER.load({ 
  'patterns': [{'captures': {'1': {'name': 'keyword.escape.snippet'}},
                'match': '\\\\(\\\\|\\$|`)',
                'name': 'constant.character.escape.snippet'},
@@ -71,7 +72,7 @@ SNIPPET_SYNTAX = {
                                  'end': '/([mg]?)/?',
                                  'endCaptures': {'1': {'name': 'string.regexp.options'}},
                                  'patterns': [{'include': '#escaped_char'}]}},
-}
+})
 
 #Snippet Node Bases
 class Node(object):
@@ -521,10 +522,9 @@ class PMXSnippet(PMXBundleItem):
     FOLDER = 'Snippets'
     EXTENSION = 'tmSnippet'
     PATTERNS = ['*.tmSnippet', '*.plist']
-    parser = PMXSyntax(uuidmodule.uuid1(), dataHash = SNIPPET_SYNTAX)
     
-    def __init__(self, uuid, dataHash):
-        PMXBundleItem.__init__(self, uuid, dataHash)
+    def __init__(self, uuid):
+        PMXBundleItem.__init__(self, uuid)
         self.snippet = None                     #TODO: Poner un mejor nombre, este es el snippet compilado
     
     def load(self, dataHash):
@@ -551,7 +551,7 @@ class PMXSnippet(PMXBundleItem):
     
     def compile(self):
         processor = PMXSnippetSyntaxProcessor(self)
-        self.parser.parse(self.content, processor)
+        SNIPPET_PARSER.parse(self.content, processor)
         self.snippet = processor.node
         self.addTaborder(processor.taborder)
 

@@ -65,15 +65,16 @@ class PMXTemplate(PMXBundleItem):
     FOLDER = 'Templates'
     PATTERNS = [ '*' ]
     
-    def __init__(self, uuid, dataHash):
-        PMXBundleItem.__init__(self, uuid, dataHash)
+    def __init__(self, uuid):
+        PMXBundleItem.__init__(self, uuid)
         self.files = []                    #Estos son los template files
     
     def load(self, dataHash):
         PMXBundleItem.load(self, dataHash)
         for key in PMXTemplate.KEYS:
             setattr(self, key, dataHash.get(key, None))
-    
+        # TODO: Aca cargar los archivos
+
     @property
     def hash(self):
         dataHash = super(PMXTemplate, self).hash
@@ -128,7 +129,12 @@ class PMXTemplate(PMXBundleItem):
         callback(filePath)
 
     @classmethod
+    def dataFilePath(cls, path):
+        return os.path.join(path, cls.FILE)
+
+    @classmethod
     def loadBundleItem(cls, path, namespace, bundle, manager):
+        # TODO: Usar el del manager y cargar los archivos en el load :)
         info = os.path.join(path, cls.FILE)
         templateFilePaths = glob(os.path.join(path, '*'))
         templateFilePaths.remove(info)

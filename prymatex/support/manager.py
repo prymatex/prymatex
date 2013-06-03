@@ -21,6 +21,7 @@ from prymatex.support.theme import PMXTheme, PMXThemeStyle
 from prymatex.support.utils import ensurePath
 from prymatex.support import scope
 
+from prymatex.utils import plist
 from prymatex.utils.decorators.deprecated import deprecated
 from prymatex.utils.decorators.memoize import dynamic_memoized, remove_memoized_argument, remove_memoized_function
 from functools import reduce
@@ -28,11 +29,7 @@ from functools import reduce
 BUNDLEITEM_CLASSES = [PMXSyntax, PMXSnippet, PMXMacro,
     PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand, PMXProject]
 
-# ======================================================
-# Tool function for compare bundle items by attributes
-# ======================================================
-
-
+# ------- Tool function for compare bundle items by attributes
 def compare(obj, keys, tests):
     if not len(keys):
         return True
@@ -58,7 +55,7 @@ class PMXSupportBaseManager(object):
     BUNDLES_NAME = 'Bundles'
     SUPPORT_NAME = 'Support'
     THEMES_NAME = 'Themes'
-    ELEMENTS = [BUNDLES_NAME, SUPPORT_NAME, THEMES_NAME]
+    ELEMENTS = [ BUNDLES_NAME, SUPPORT_NAME, THEMES_NAME ]
     VAR_PREFIX = 'PMX'
     PROTECTEDNS = 0  # El primero es el protected
     DEFAULTNS = 1  # El segundo es el default
@@ -170,6 +167,13 @@ class PMXSupportBaseManager(object):
             os.makedirs(path)
             self.addNamespaceElement(namespace, element, path)
             return self.namespaces[namespace][element]
+
+    #--------------- Plist --------------------
+    def readPlist(self, path):
+        return plist.readPlist(path)
+        
+    def writePlist(self, hashData, path):
+        return plist.writePlist(hashData, path)
 
     #--------------- Tools --------------------
     def uuidgen(self, uuid=None):
@@ -285,13 +289,31 @@ class PMXSupportBaseManager(object):
     def loadBundles(self, namespace):
         loadedBundles = set()
         if self.BUNDLES_NAME in self.namespaces[namespace]:
-            paths = glob(os.path.join(self.namespaces[namespace][self.BUNDLES_NAME], '*.tmbundle'))
-            for path in paths:
-                bundle = PMXBundle.loadBundle(path, namespace, self)
-                if bundle is not None:
-                    self.showMessage("Loading bundle\n%s" % bundle.name)
+            bundle_directories = glob(os.path.join(self.namespaces[namespace][self.BUNDLES_NAME], '*.tmbundle'))
+            for bundle_dir in bundle_directories:
+                try:
+                    bundle = self.loadBundle(bundle_dir, namespace)
                     loadedBundles.add(bundle)
+                except Exception as ex:
+                    import traceback
+                    print("Error in laod bundle %s (%s)" % (bundle_dir, ex))
+                    traceback.print_exc()
         return loadedBundles
+
+    def loadBundle(self, bundle_dir, namespace):
+        data = self.readPlist(PMXBundle.dataFilePath(bundle_dir))
+        uuid = self.uuidgen(data.pop('uuid', None))
+        bundle = self.getManagedObject(uuid)
+        if bundle is None and not self.isDeleted(uuid):
+            bundle = PMXBundle(uuid)
+            bundle.load(data)
+            bundle.setManager(self)
+            bundle.addSource(namespace, bundle_dir)
+            bundle = self.addBundle(bundle)
+            self.addManagedObject(bundle)
+        elif bundle is not None:
+            bundle.addSource(namespace, bundle_dir)
+        return bundle
 
     # ----------- POPULATE BUNDLE AND LOAD BUNDLE ITEMS
     def populateBundle(self, bundle):
@@ -304,11 +326,32 @@ class PMXSupportBaseManager(object):
                 bundle.setSupport(supportPath)
             self.showMessage("Populating\n%s" % bundle.name)
             for klass in BUNDLEITEM_CLASSES:
-                files = reduce(lambda x, y: x + glob(y), [os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS], [])
-                for path in files:
-                    klass.loadBundleItem(path, namespace, bundle, self)
+                bundle_item_files = reduce(lambda x, y: x + glob(y), [os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS], [])
+                for bundle_item_file in bundle_item_files:
+                    try:
+                        self.loadBundleItem(klass, bundle_item_file, namespace, bundle)
+                    except Exception as e:
+                        import traceback
+                        print("Error in bundle item %s (%s)" % (bundle_item_file, e))
+                        traceback.print_exc()
         bundle.populated = True
         self.populatedBundle(bundle)
+
+    def loadBundleItem(self, klass, file_path, namespace, bundle):
+        data = self.readPlist(klass.dataFilePath(file_path))
+        uuid = self.uuidgen(data.pop('uuid', None))
+        item = self.getManagedObject(uuid)
+        if item is None and not self.isDeleted(uuid):
+            item = klass(uuid)
+            item.load(data)
+            item.setBundle(bundle)
+            item.setManager(self)
+            item.addSource(namespace, file_path)
+            item = self.addBundleItem(item)
+            self.addManagedObject(item)
+        elif item is not None:
+            item.addSource(namespace, file_path)
+        return item
 
     # -------------------- RELOAD SUPPORT
     def reloadSupport(self, callback=None):
@@ -363,7 +406,8 @@ class PMXSupportBaseManager(object):
                 if bundlePath in bundlePaths:
                     if namespace == bundle.currentNamespace and bundle.sourceChanged(namespace):
                         self.logger.debug("Bundle %s changed, reload from %s." % (bundle.name, bundlePath))
-                        bundle.reloadBundle(bundle, bundlePath, namespace, self)
+                        data = self.readPlist(PMXBundle.dataFilePath(bundlePath))
+                        bundle.load(data)
                         bundle.updateMtime(namespace)
                         self.modifyBundle(bundle)
                     bundlePaths.remove(bundlePath)
@@ -381,9 +425,15 @@ class PMXSupportBaseManager(object):
                         list(map(lambda item: item.setDirty(), bundleItems))
                         bundle.support = None
                         bundle.setDirty()
-            for path in bundlePaths:
+            for bundle_dir in bundlePaths:
                 self.logger.debug("New bundle %s." % path)
-                PMXBundle.loadBundle(path, namespace, self)
+                try:
+                    # TODO: Que pasa con los nuevos
+                    bundle = self.loadBundle(bundle_dir, namespace)
+                except Exception as ex:
+                    import traceback
+                    print("Error in laod bundle %s (%s)" % (bundle_dir, ex))
+                    traceback.print_exc()
 
     # ----- REPOPULATED BUNDLE AND RELOAD BUNDLE ITEMS
     def repopulateBundle(self, bundle):
@@ -407,7 +457,8 @@ class PMXSupportBaseManager(object):
                 if bundleItemPath in bundleItemPaths:
                     if namespace == bundleItem.currentNamespace and bundleItem.sourceChanged(namespace):
                         self.logger.debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, bundleItemPath))
-                        bundleItem.reloadBundleItem(bundleItem, bundleItemPath, namespace, self)
+                        data = self.readPlist(self.dataFilePath(bundleItemPath))
+                        bundleItem.load(data)
                         bundleItem.updateMtime(namespace)
                         self.modifyBundleItem(bundleItem)
                     bundleItemPaths.pop(bundleItemPath)
@@ -419,9 +470,14 @@ class PMXSupportBaseManager(object):
                         self.removeBundleItem(bundleItem)
                     else:
                         bundleItem.setDirty()
-            for path, klass in bundleItemPaths.items():
+            for bundle_item_file, klass in bundleItemPaths.items():
                 self.logger.debug("New bundle item %s." % path)
-                klass.loadBundleItem(path, namespace, bundle, self)
+                try:
+                    self.loadBundleItem(klass, bundle_item_file, namespace, bundle)
+                except Exception as e:
+                    import traceback
+                    print("Error in bundle item %s (%s)" % (path, e))
+                    traceback.print_exc()
         self.populatedBundle(bundle)
 
     # --------------- CACHE COHERENCE

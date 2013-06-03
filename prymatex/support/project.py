@@ -17,8 +17,8 @@ class PMXProject(PMXBundleItem):
     FOLDER = 'Projects'
     PATTERNS = [ '*' ]
     
-    def __init__(self, uuid, dataHash):
-        PMXBundleItem.__init__(self, uuid, dataHash)
+    def __init__(self, uuid):
+        PMXBundleItem.__init__(self, uuid)
         self.files = []                    #Estos son los project files
     
     def load(self, dataHash):
@@ -79,6 +79,10 @@ class PMXProject(PMXBundleItem):
         name = context.environment['TM_NEW_PROJECT_NAME']
         location = context.environment['TM_NEW_PROJECT_LOCATION']
         callback(name, location)
+
+    @classmethod
+    def dataFilePath(cls, path):
+        return os.path.join(path, cls.FILE)
 
     @classmethod
     def loadBundleItem(cls, path, namespace, bundle, manager):
