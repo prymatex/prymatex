@@ -5,10 +5,20 @@ from __future__ import unicode_literals
 from prymatex.utils import six
 
 from .parser import Parser
+from .types import PathType, ScopeType
 
 class Scope(object):
-    def __init__(self, scope):
-        self.path = scope and Parser.path(scope) or Parser.path("")
+    def __init__(self, scope = None):
+        self.path = scope and Parser.path(scope) or PathType()
+
+    @classmethod
+    def fast_build(cls, scope):
+        so = cls()
+        for s in scope.split():
+            st = ScopeType()
+            st.atoms = s.split(".")
+            so.path.scopes.append(st)
+        return so
 
     def __str__(self):
         return six.text_type(self.path)
@@ -42,9 +52,9 @@ wildcard = Scope("x-any")
 class Context(object):
     CONTEXTS = {}
     def __init__(self, left, right):
-        self.left = isinstance(left, Scope) and left or Scope(left)
-        self.right = isinstance(right, Scope) and right or Scope(right)
-        #print(repr(self.left.path))
+        self.left = isinstance(left, Scope) and left or Scope.fast_build(left)
+        self.right = isinstance(right, Scope) and right or Scope.fast_build(right)
+
     @classmethod
     def get(cls, left, right = None):
         # TODO: Testing cache
@@ -53,7 +63,6 @@ class Context(object):
             leftCache = cls.CONTEXTS.setdefault(left, {})
             leftCache[right] = cls(left, right)
         return cls.CONTEXTS[left][right]
-            
         
     def __str__(self):
         if self.left == self.right:
@@ -81,7 +90,6 @@ class Selector(object):
 
     def __str__(self):
         return six.text_type(self.selector)
-
 
     # ------- Matching 
     def does_match(self, context, rank = None):
