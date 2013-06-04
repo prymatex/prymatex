@@ -26,8 +26,8 @@ from prymatex.utils.decorators.deprecated import deprecated
 from prymatex.utils.decorators.memoize import dynamic_memoized, remove_memoized_argument, remove_memoized_function
 from functools import reduce
 
-BUNDLEITEM_CLASSES = [PMXSyntax, PMXSnippet, PMXMacro,
-    PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand, PMXProject]
+BUNDLEITEM_CLASSES = [PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, 
+                        PMXPreference, PMXTemplate, PMXDragCommand, PMXProject]
 
 # ------- Tool function for compare bundle items by attributes
 def compare(obj, keys, tests):
@@ -49,8 +49,6 @@ def compare(obj, keys, tests):
 # This objects contains the basic functions for items handling
 # Every set of items lives inside a namespace
 # ======================================================
-
-
 class PMXSupportBaseManager(object):
     BUNDLES_NAME = 'Bundles'
     SUPPORT_NAME = 'Support'
@@ -226,7 +224,8 @@ class PMXSupportBaseManager(object):
                        'output': commandOutput}
         commandHash['name'] = name if name is not None else "Ad-Hoc command %s" % commandScript
 
-        command = PMXCommand(self.uuidgen(), dataHash=commandHash)
+        command = PMXCommand(self.uuidgen())
+        command.load(commandHash)
         command.setBundle(bundle)
         command.setManager(self)
         return command
@@ -235,7 +234,8 @@ class PMXSupportBaseManager(object):
         snippetHash = {'content': snippetContent,
                        'tabTrigger': tabTrigger}
         snippetHash['name'] = name if name is not None else "Ad-Hoc snippet"
-        snippet = PMXSnippet(self.uuidgen(), dataHash=snippetHash)
+        snippet = PMXSnippet(self.uuidgen())
+        snippet.load(snippetHash)
         snippet.setBundle(bundle)
         snippet.setManager(self)
         return snippet
@@ -329,12 +329,13 @@ class PMXSupportBaseManager(object):
                 bundle_item_files = reduce(lambda x, y: x + glob(y), [os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS], [])
                 for bundle_item_file in bundle_item_files:
                     try:
-                        self.loadBundleItem(klass, bundle_item_file, namespace, bundle)
+                        item = self.loadBundleItem(klass, bundle_item_file, namespace, bundle)
+                        item.populate()
                     except Exception as e:
                         import traceback
                         print("Error in bundle item %s (%s)" % (bundle_item_file, e))
                         traceback.print_exc()
-        bundle.populated = True
+        bundle.populate()
         self.populatedBundle(bundle)
 
     def loadBundleItem(self, klass, file_path, namespace, bundle):
@@ -349,6 +350,7 @@ class PMXSupportBaseManager(object):
             item.addSource(namespace, file_path)
             item = self.addBundleItem(item)
             self.addManagedObject(item)
+            # TODO: los static files
         elif item is not None:
             item.addSource(namespace, file_path)
         return item
@@ -473,7 +475,8 @@ class PMXSupportBaseManager(object):
             for bundle_item_file, klass in bundleItemPaths.items():
                 self.logger.debug("New bundle item %s." % path)
                 try:
-                    self.loadBundleItem(klass, bundle_item_file, namespace, bundle)
+                    item = self.loadBundleItem(klass, bundle_item_file, namespace, bundle)
+                    item.populate()
                 except Exception as e:
                     import traceback
                     print("Error in bundle item %s (%s)" % (path, e))

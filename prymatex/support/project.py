@@ -16,16 +16,19 @@ class PMXProject(PMXBundleItem):
     TYPE = 'project'
     FOLDER = 'Projects'
     PATTERNS = [ '*' ]
-    
-    def __init__(self, uuid):
-        PMXBundleItem.__init__(self, uuid)
-        self.files = []                    #Estos son los project files
-    
+        
     def load(self, dataHash):
         PMXBundleItem.load(self, dataHash)
         for key in PMXProject.KEYS:
             setattr(self, key, dataHash.get(key, None))
     
+    def populate(self):
+        PMXBundleItem.populate(self)
+        projectFilePaths = glob(os.path.join(self.currentPath, '*'))
+        projectFilePaths.remove(self.dataFilePath(self.currentPath))
+        self.files = [ self.manager.addTemplateFile(PMXTemplateFile(pp, self)) for 
+            tp in projectFilePaths]
+
     @property
     def hash(self):
         dataHash = super(PMXProject, self).hash
@@ -83,33 +86,6 @@ class PMXProject(PMXBundleItem):
     @classmethod
     def dataFilePath(cls, path):
         return os.path.join(path, cls.FILE)
-
-    @classmethod
-    def loadBundleItem(cls, path, namespace, bundle, manager):
-        info = os.path.join(path, cls.FILE)
-        projectFilePaths = glob(os.path.join(path, '*'))
-        projectFilePaths.remove(info)
-        try:
-            data = plist.readPlist(info)
-            uuid = manager.uuidgen(data.pop('uuid', None))
-            project = manager.getManagedObject(uuid)
-            if project is None and not manager.isDeleted(uuid):
-                project = cls(uuid, data)
-                project.setBundle(bundle)
-                project.setManager(manager)
-                project.addSource(namespace, path)
-                project = manager.addBundleItem(project)
-                manager.addManagedObject(project)
-                #Add files
-                for projectFilePath in projectFilePaths:
-                    projectFile = PMXTemplateFile(projectFilePath, project)
-                    projectFile = manager.addTemplateFile(projectFile)
-                    project.files.append(projectFile)
-            elif project is not None:
-                project.addSource(namespace, path)
-            return project
-        except Exception as e:
-            print("Error in project %s (%s)" % (info, e))
 
     @classmethod
     def reloadBundleItem(cls, bundleItem, path, namespace, manager):

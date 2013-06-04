@@ -384,8 +384,8 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
     #---------------------------------------------------
     # TEMPLATEFILE OVERRIDE INTERFACE
     #---------------------------------------------------
-    def addTemplateFile(self, file):
-        bundleTemplateFileNode = BundleItemTreeNode(file)
+    def addTemplateFile(self, templateFile):
+        bundleTemplateFileNode = BundleItemTreeNode(templateFile)
         self.bundleTreeModel.appendTemplateFile(bundleTemplateFileNode)
         return bundleTemplateFileNode
     

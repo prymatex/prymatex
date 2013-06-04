@@ -65,15 +65,17 @@ class PMXTemplate(PMXBundleItem):
     FOLDER = 'Templates'
     PATTERNS = [ '*' ]
     
-    def __init__(self, uuid):
-        PMXBundleItem.__init__(self, uuid)
-        self.files = []                    #Estos son los template files
-    
     def load(self, dataHash):
         PMXBundleItem.load(self, dataHash)
         for key in PMXTemplate.KEYS:
             setattr(self, key, dataHash.get(key, None))
-        # TODO: Aca cargar los archivos
+    
+    def populate(self):
+        PMXBundleItem.populate(self)
+        templateFilePaths = glob(os.path.join(self.currentPath, '*'))
+        templateFilePaths.remove(self.dataFilePath(self.currentPath))
+        self.files = [ self.manager.addTemplateFile(PMXTemplateFile(tp, self)) for 
+            tp in templateFilePaths]
 
     @property
     def hash(self):
@@ -131,34 +133,6 @@ class PMXTemplate(PMXBundleItem):
     @classmethod
     def dataFilePath(cls, path):
         return os.path.join(path, cls.FILE)
-
-    @classmethod
-    def loadBundleItem(cls, path, namespace, bundle, manager):
-        # TODO: Usar el del manager y cargar los archivos en el load :)
-        info = os.path.join(path, cls.FILE)
-        templateFilePaths = glob(os.path.join(path, '*'))
-        templateFilePaths.remove(info)
-        try:
-            data = plist.readPlist(info)
-            uuid = manager.uuidgen(data.pop('uuid', None))
-            template = manager.getManagedObject(uuid)
-            if template is None and not manager.isDeleted(uuid):
-                template = cls(uuid, data)
-                template.setBundle(bundle)
-                template.setManager(manager)
-                template.addSource(namespace, path)
-                template = manager.addBundleItem(template)
-                manager.addManagedObject(template)
-                #Add files
-                for templateFilePath in templateFilePaths:
-                    templateFile = PMXTemplateFile(templateFilePath, template)
-                    templateFile = manager.addTemplateFile(templateFile)
-                    template.files.append(templateFile)
-            elif template is not None:
-                template.addSource(namespace, path)
-            return template
-        except Exception as e:
-            print("Error in template %s (%s)" % (info, e))
 
     @classmethod
     def reloadBundleItem(cls, bundleItem, path, namespace, manager):

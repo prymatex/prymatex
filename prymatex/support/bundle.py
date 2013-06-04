@@ -22,6 +22,7 @@ class PMXManagedObject(object):
         self.namespaces = []
         self.sources = {}
         self.manager = None
+        self.populated = False
 
     def load(self, dataHash):
         raise NotImplemented
@@ -38,6 +39,9 @@ class PMXManagedObject(object):
     def uuidAsUnicode(self):
         return str(self.uuid).upper()
 
+    def populate(self):
+        self.populated = True
+    
     @property
     def enabled(self):
         return self.manager.isEnabled(self.uuid)
@@ -95,6 +99,9 @@ class PMXManagedObject(object):
         else:
             self.sources[namespace] = (path, 0)
 
+    def staticFiles(self):
+        return []
+
     @classmethod
     def dataFilePath(cls, path):
         return path
@@ -114,13 +121,8 @@ class PMXBundle(PMXManagedObject):
     KEYS = [    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'
     TYPE = 'bundle'
-    def __init__(self, uuid):
-        PMXManagedObject.__init__(self, uuid)
-        self.populated = False
-        self.support = None    #supportPath
-
     def hasSupport(self):
-        return self.support is not None
+        return hasattr(self, "support")
         
     def setSupport(self, support):
         self.support = support
@@ -133,7 +135,7 @@ class PMXBundle(PMXManagedObject):
             self.support = path
         except:
             pass
-        
+    
     def load(self, dataHash):
         for key in PMXBundle.KEYS:
             setattr(self, key, dataHash.get(key, None))
@@ -247,7 +249,53 @@ class PMXBundleItem(PMXManagedObject):
     
     def execute(self, processor):
         pass
-      
+
+class PMXStaticFile(object):
+    TYPE = 'staticfile'
+    def __init__(self, path, parent):
+        self.path = path
+        self.name = os.path.basename(path)
+        self.parent = parent
+
+    def hasNamespace(self, namespace):
+        return self.parent.hasNamespace(namespace)
+        
+    @property
+    def enabled(self):
+        return self.parent.enabled
+        
+    def getFileContent(self):
+        # TODO: Usar utils.encoding
+        if os.path.exists(self.path):
+            f = codecs.open(self.path, 'r', 'utf-8')
+            content = f.read()
+            f.close()
+            return content
+    
+    def setFileContent(self, content):
+        # TODO: Usar utils.encoding
+        if os.path.exists(self.path):
+            f = codecs.open(self.path, 'w', 'utf-8')
+            f.write(content)
+            f.close()
+    content = property(getFileContent, setFileContent)
+
+    def update(self, dataHash):
+        for key in list(dataHash.keys()):
+            setattr(self, key, dataHash[key])
+    
+    def relocate(self, path):
+        if os.path.exists(self.path):
+            shutil.move(self.path, path)
+        self.name = os.path.basename(path)
+    
+    def save(self, basePath = None):
+        path = os.path.join(basePath, self.name) if basePath is not None else self.path
+        f = codecs.open(path, 'w', 'utf-8')
+        f.write(self.content)
+        f.close()
+        self.path = path
+
 class PMXRunningContext(object):
     TEMPLATE = """Item Name: {itemName}
     Asynchronous: {asynchronous}

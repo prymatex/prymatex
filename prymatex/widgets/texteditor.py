@@ -265,7 +265,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         cursor.select(QtGui.QTextCursor.LineUnderCursor)
         text1 = cursor.selectedText()
         cursor2 = QtGui.QTextCursor(cursor)
-        otherBlock = next(cursor.block()) if moveType == QtGui.QTextCursor.Down else cursor.block().previous()
+        otherBlock = cursor.block().next() if moveType == QtGui.QTextCursor.Down else cursor.block().previous()
         cursor2 = self.newCursorAtPosition(otherBlock.position())
         cursor2.select(QtGui.QTextCursor.LineUnderCursor)
         text2 = cursor2.selectedText()
