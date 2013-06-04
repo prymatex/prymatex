@@ -8,7 +8,7 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import PMXBaseComponent
 
-class ShelveCache(shelve):
+class PythonObjectsCache(object):
     pass
 
 class PersistenceManager(QtCore.QObject, PMXBaseComponent):

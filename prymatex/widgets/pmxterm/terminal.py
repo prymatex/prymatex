@@ -336,7 +336,7 @@ class TerminalWidget(QtGui.QWidget):
     return_pressed = QtCore.Signal()
 
     def keyPressEvent(self, event):
-        text = str(event.text())
+        text = encoding.to_fs(event.text())
         key = event.key()
         modifiers = event.modifiers()
         ctrl = modifiers == QtCore.Qt.ControlModifier
@@ -348,11 +348,11 @@ class TerminalWidget(QtGui.QWidget):
             if self.scrollBar.maximum() != self._history_index:
                 self.scrollBar.setValue(self.scrollBar.maximum())
             if text and key != QtCore.Qt.Key_Backspace:
-                self.send(text.encode("utf-8"))
+                self.send(text)
             else:
                 s = self.keymap.get(key)
                 if s:
-                    self.send(s.encode("utf-8"))
+                    self.send(s)
                 elif DEBUG:
                     print("Unkonwn key combination")
                     print("Modifiers:", modifiers)

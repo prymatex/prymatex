@@ -342,19 +342,17 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         scope = editor.getScope()
         tabTrigger = editor.getTabTrigger()
         keyEquivalent = editor.getKeyEquivalent()
+        semanticClass = editor.getSemanticClass()
+        # Scope
         self.lineEditScopeSelector.setEnabled(scope is not None)
+        self.lineEditScopeSelector.setText(scope is not None and scope or "")
+        # KeyEquivalent
         self.lineEditKeyEquivalentActivation.setEnabled(keyEquivalent is not None)
+        self.lineEditKeyEquivalentActivation.setText(keyEquivalent and\
+            QtGui.QKeySequence(keyEquivalent).toString() or "")
+        # TabTrigger
         self.lineEditTabTriggerActivation.setEnabled(tabTrigger is not None)
-        if scope is not None:
-            self.lineEditScopeSelector.setText(scope)
-        else:
-            self.lineEditScopeSelector.clear()
-        if not keyEquivalent and not tabTrigger:
-            self.lineEditKeyEquivalentActivation.clear()
-            self.lineEditTabTriggerActivation.clear()
-        else:
-            if keyEquivalent is not None:
-                self.lineEditKeyEquivalentActivation.setText(QtGui.QKeySequence(keyEquivalent).toString())
-            if tabTrigger is not None:
-                self.lineEditTabTriggerActivation.setText(tabTrigger)
-            index = 0 if keyEquivalent else 1
+        self.lineEditTabTriggerActivation.setText(tabTrigger or "")
+        # SemanticClass
+        self.lineEditSemanticClass.setEnabled(semanticClass is not None)
+        self.lineEditSemanticClass.setText(semanticClass or "")
