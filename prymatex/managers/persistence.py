@@ -7,7 +7,7 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import PMXBaseComponent
 
-class CacheManager(QtCore.QObject, PMXBaseComponent):
+class PersistenceManager(QtCore.QObject, PMXBaseComponent):
     def __init__(self, application):
         QtCore.QObject.__init__(self, application)
         PMXBaseComponent.__init__(self)
