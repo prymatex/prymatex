@@ -61,13 +61,13 @@ class PMXProfile(object):
                 configurableClass.settings.addSetting(value)
 
     def saveState(self, component):
-        self.state.setValue(component.objectName(), component.saveState())
+        self.state.setValue(component.objectName(), component.componentState())
         self.state.sync()
 
     def restoreState(self, component):
         state = self.state.value(component.objectName())
         if state:
-            component.restoreState(state)
+            component.setComponentState(state)
 
     def setValue(self, name, value):
         self.qsettings.setValue(name, value)

@@ -438,7 +438,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
 
     # ---------- MainWindow State
-    def saveState(self):
+    def componentState(self):
         #Documentos abiertos
         openDocumentsOnQuit = []
         for editor in self.editors():
@@ -446,19 +446,19 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
                 openDocumentsOnQuit.append((editor.filePath, editor.cursorPosition()))
         state = {
             "self": QtGui.QMainWindow.saveState(self),
-            "dockers": dict([(dock.objectName(), dock.saveState()) for dock in self.dockers]),
+            "dockers": dict([(dock.objectName(), dock.componentState()) for dock in self.dockers]),
             "documents": openDocumentsOnQuit,
             "geometry": self.saveGeometry(),
         }
         return state
 
 
-    def restoreState(self, state):
+    def setComponentState(self, state):
         # Restore dockers
         for dock in self.dockers:
             dockName = dock.objectName()
             if dockName in state["dockers"]:
-                dock.restoreState(state["dockers"][dockName])
+                dock.setComponentState(state["dockers"][dockName])
         
         # Restore Main window
         self.restoreGeometry(state["geometry"])

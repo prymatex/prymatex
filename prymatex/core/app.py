@@ -292,13 +292,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         if os.path.exists(self.fileLock):
             os.unlink(self.fileLock)
 
-    def commitData(self, manager):
-        print("Commit data")
-
-    def saveState(self, manager):
-        print("saveState")
-        pass
-
     # --------------------- Exend and populate components
     def extendComponent(self, componentClass):
         componentClass.application = self

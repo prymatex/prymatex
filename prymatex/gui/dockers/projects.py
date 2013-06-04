@@ -98,12 +98,12 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
     def addFileSystemNodeFormater(self, formater):
         self.projectTreeProxyModel.addNodeFormater(formater)
     
-    def saveState(self):
+    def componentState(self):
         expandedIndexes = [index for index in self.projectTreeProxyModel.persistentIndexList() if self.treeViewProjects.isExpanded(index)]
         expandedPaths = [self.projectTreeProxyModel.node(index).path() for index in expandedIndexes]
         return { "expanded": expandedPaths }
 
-    def restoreState(self, state):
+    def setComponentState(self, state):
         #Expanded Nodes
         list(map(lambda index: index.isValid() and self.treeViewProjects.setExpanded(index, True), 
             [self.projectTreeProxyModel.indexForPath(path) for path in state["expanded"]]))

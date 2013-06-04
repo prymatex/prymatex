@@ -288,7 +288,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         content = self.application.fileManager.readFile(self.filePath)
         self.updatePlainText(content)
 
-    def saveState(self):
+    def componentState(self):
         """Returns a Python dictionary containing the state of the editor."""
         state = {}
         #Bookmarks
@@ -299,7 +299,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
         return state
     
-    def restoreState(self, state):
+    def setComponentState(self, state):
         """Restore the state from the given state (returned by a previous call to state())."""
         pass
 

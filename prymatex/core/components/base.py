@@ -40,11 +40,11 @@ class PMXBaseComponent(object):
         return {}
 
 
-    def saveState(self):
-        """Returns a Python dictionary containing the state of the editor."""
+    def componentState(self):
+        """Returns a Python dictionary containing the state of the component."""
         return {}
 
 
-    def restoreState(self, state):
+    def setComponentState(self, state):
         """Restore the state from the given state (returned by a previous call to saveState())."""
         pass
