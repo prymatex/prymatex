@@ -45,7 +45,6 @@ class PMXProfile(object):
         if name not in self.GROUPS:
             self.GROUPS[name] = SettingsGroup(name, self.qsettings, self.tmsettings)
         return self.GROUPS[name]
-
     
     def groupByClass(self, configurableClass):
         return self.groupByName(self.__group_name(configurableClass))
