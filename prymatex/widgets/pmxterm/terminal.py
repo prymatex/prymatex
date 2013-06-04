@@ -11,6 +11,7 @@ import sys
 import time
 
 from prymatex.qt import QtCore, QtGui
+from prymatex.utils import encoding
 
 from .backend import constants
 from .schemes import ColorScheme
@@ -261,15 +262,7 @@ class TerminalWidget(QtGui.QWidget):
             col = 0
             text_line = ""
             for item in line:
-                if isinstance(item, str):
-                    x = col * char_width
-                    length = len(item)
-                    rect = QtCore.QRect(x, y, x + char_width * length, y + char_height)
-                    painter_fillRect(rect, brush)
-                    painter_drawText(rect, align, item)
-                    col += length
-                    text_line += item
-                else:
+                if isinstance(item, tuple):
                     foreground_color_idx, background_color_idx, flags = item
                     foregroundColor, backgroundColor, font = self.mapToStyle(
                         foreground_color_idx, 
@@ -279,7 +272,15 @@ class TerminalWidget(QtGui.QWidget):
                     brush = QtGui.QBrush(backgroundColor)
                     painter_setFont(font)
                     painter_setPen(pen)
-
+                else:
+                    item = encoding.from_fs(item)
+                    x = col * char_width
+                    length = len(item)
+                    rect = QtCore.QRect(x, y, x + char_width * length, y + char_height)
+                    painter_fillRect(rect, brush)
+                    painter_drawText(rect, align, item)
+                    col += length
+                    text_line += item
             # Clear last column            
             rect = QtCore.QRect(col * char_width, y, self.width(), y + char_height)
             brush = QtGui.QBrush(self.backgroundColor())

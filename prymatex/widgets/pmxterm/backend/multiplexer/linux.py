@@ -20,6 +20,8 @@ import constants
 from multiplexer import base
 from vt100 import Terminal
 
+FS_ENCODING = sys.getfilesystemencoding()
+
 def synchronized(func):
     def wrapper(self, *args, **kwargs):
         try:
@@ -33,7 +35,6 @@ def synchronized(func):
             self.lock.release()
         return result
     return wrapper
-
 
 class ProcessInfo(object):
     def update(self):
@@ -247,7 +248,7 @@ class Multiplexer(base.Multiplexer):
             self.proc_waitfordeath(sid)
             return False
         term = self.session[sid]['term']
-        term.write(d)
+        term.write(d.decode(FS_ENCODING))
         # Read terminal response
         d = term.read()
         if d:
@@ -256,7 +257,6 @@ class Multiplexer(base.Multiplexer):
             except (IOError, OSError):
                 return False
         return True
-
 
     @synchronized
     def proc_write(self, sid, d):

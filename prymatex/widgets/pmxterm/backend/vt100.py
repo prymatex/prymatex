@@ -8,8 +8,14 @@
 # http://vim.wikia.com/wiki/Xterm256_color_names_for_console_Vim
 # http://shallowsky.com/blog/2011/Jan/18/
 
+import sys
 import array
 import constants
+
+if sys.version_info.major < 3:
+    chr = unichr
+
+FS_ENCODING = sys.getfilesystemencoding()
 
 class Terminal(object):
     CHARACTERS = 0
@@ -23,7 +29,7 @@ class Terminal(object):
             0x25ca, 0x2026, 0x2022, 0x3f,
             0xb6, 0x3f, 0xb0, 0xb1,
             0x3f, 0x3f, 0x2b, 0x2b,
-            0x2b, 0x2b, 0x2b, 0xaf,
+            0x2b, 0x2b, 0x2b, 0XAF,
             0x2014, 0x2014, 0x2014, 0x5f,
             0x2b, 0x2b, 0x2b, 0x2b,
             0x7c, 0x2264, 0x2265, 0xb6,
@@ -234,7 +240,7 @@ class Terminal(object):
                 if (char & 0xc0) == 0x80:
                     self.utf8_char = (self.utf8_char << 6) | (char & 0x3f)
                     if self.utf8_units_count == self.utf8_units_received:
-                        if self.utf8_char<0x10000:
+                        if self.utf8_char < 0x10000:
                             o += chr(self.utf8_char)
                         self.utf8_units_count = self.utf8_units_received = 0
                 else:
@@ -1202,7 +1208,7 @@ class Terminal(object):
                     attr_ = attr
                 wx += self.utf8_charwidth(char)
                 if wx <= self.w:
-                    line[-1] += chr(char)
+                    line[-1] += chr(char).encode(FS_ENCODING)
             screen.append(line)
 
         # Scroll values
