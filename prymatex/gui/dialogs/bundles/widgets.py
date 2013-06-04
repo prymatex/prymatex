@@ -439,8 +439,9 @@ fi"'''}
             extension = self.changes['extension'] = self.DEFAULTS['extension']
         self.lineEditExtension.setText(extension)
 
-class TemplateFileEditorWidget(BundleItemEditorBaseWidget, Ui_TemplateFile):
-    TYPE = 'templatefile'
+#TODO: Ui_TemplateFile --> Ui_StaticFile
+class StaticFileEditorWidget(BundleItemEditorBaseWidget, Ui_TemplateFile):
+    TYPE = 'staticfile'
     DEFAULTS = {'content': '''//
 //  ${TM_NEW_FILE_BASENAME}
 //
@@ -464,7 +465,7 @@ class TemplateFileEditorWidget(BundleItemEditorBaseWidget, Ui_TemplateFile):
     def title(self):
         if self.bundleItem != None:
             return 'Edit Template File: "%s"' % self.bundleItem.name
-        return super(TemplateFileEditorWidget, self).title
+        return super(StaticFileEditorWidget, self).title
 
     def getScope(self):
         return None
@@ -475,8 +476,11 @@ class TemplateFileEditorWidget(BundleItemEditorBaseWidget, Ui_TemplateFile):
     def getKeyEquivalent(self):
         return None
     
+    def getSemanticClass(self):
+        return None
+    
     def edit(self, bundleItem):
-        super(TemplateFileEditorWidget, self).edit(bundleItem)
+        super(StaticFileEditorWidget, self).edit(bundleItem)
         content = bundleItem.content
         if content is None:
             content = self.DEFAULTS['content']

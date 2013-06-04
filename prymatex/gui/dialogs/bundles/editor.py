@@ -87,7 +87,7 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
                          widgets.CommandEditorWidget(self),
                          widgets.DragCommandEditorWidget(self),
                          widgets.BundleEditorWidget(self),
-                         widgets.TemplateFileEditorWidget(self),
+                         widgets.StaticFileEditorWidget(self),
                          widgets.TemplateEditorWidget(self),
                          widgets.PreferenceEditorWidget(self),
                          widgets.LanguageEditorWidget(self),
@@ -141,13 +141,13 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         self.createBundleItem("untitled", "project")
 
     @QtCore.Slot()        
-    def on_actionTemplateFile_triggered(self):
+    def on_actionStaticFile_triggered(self):
         index = self.treeView.currentIndex()
         if index.isValid():
             template = self.proxyTreeModel.node(index)
-            if template.TYPE == 'templatefile':
+            if template.TYPE == 'staticfile':
                 template = template.parentNode()
-        self.manager.createTemplateFile("untitled", template, self.namespace)
+        self.manager.createStaticFile("untitled", template, self.namespace)
 
     @QtCore.Slot()
     def on_actionPreferences_triggered(self):
@@ -169,8 +169,8 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
             item = self.proxyTreeModel.node(index)
             if item.TYPE == 'bundle':
                 self.manager.deleteBundle(item)
-            elif item.TYPE == 'templatefile':
-                self.manager.deleteTemplateFile(item)
+            elif item.TYPE == 'staticfile':
+                self.manager.deleteStaticFile(item)
             else:
                 self.manager.deleteBundleItem(item)
 
@@ -198,9 +198,9 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         action = QtGui.QAction("New Project", self)
         action.triggered.connect(self.on_actionProject_triggered)
         self.toolbarMenu.addAction(action)
-        self.templateFileAction = QtGui.QAction("New Template File", self)
-        self.templateFileAction.triggered.connect(self.on_actionTemplateFile_triggered)
-        self.toolbarMenu.addAction(self.templateFileAction)
+        self.staticFileAction = QtGui.QAction("New Static File", self)
+        self.staticFileAction.triggered.connect(self.on_actionStaticFile_triggered)
+        self.toolbarMenu.addAction(self.staticFileAction)
         action = QtGui.QAction("New Preferences", self)
         action.triggered.connect(self.on_actionPreferences_triggered)
         self.toolbarMenu.addAction(action)
@@ -209,10 +209,10 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         action.triggered.connect(self.on_actionBundle_triggered)
         self.toolbarMenu.addAction(action)
         
-        def conditionalEnabledTemplateFile():
+        def conditionalEnabledStaticFile():
             node = self.proxyTreeModel.node(self.treeView.currentIndex())
-            self.templateFileAction.setEnabled(not node.isRootNode() and (node.TYPE in ["template", "templatefile", "project"]))
-        self.toolbarMenu.aboutToShow.connect(conditionalEnabledTemplateFile)
+            self.staticFileAction.setEnabled(not node.isRootNode() and (node.TYPE in ["template", "staticfile", "project"]))
+        self.toolbarMenu.aboutToShow.connect(conditionalEnabledStaticFile)
         
         self.pushButtonAdd.setMenu(self.toolbarMenu)
         
@@ -220,18 +220,15 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         self.bundleFilterDialog = BundleFilterDialog(self)
         self.bundleFilterDialog.setModel(self.manager.bundleProxyModel)
 
-
     # ------------------- Filter bundle items
     def on_comboBoxItemFilter_returnPressed(self):
         self.proxyTreeModel.setFilterBundleItemType(None)
         self.proxyTreeModel.setFilterRegExp(".*%s.*" % self.comboBoxItemFilter.currentText())
 
-
     @QtCore.Slot(int)
     def on_comboBoxItemFilter_activated(self, index):
         value = self.comboBoxItemFilter.itemData(index)
         self.proxyTreeModel.setFilterBundleItemType(value)
-
 
     def configSelectTop(self):
         self.comboBoxItemFilter.addItem("Show all")
@@ -241,8 +238,8 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-command"), "Commands", "command")
         self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-dragcommand"), "DragCommands", "dragcommand")
         self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-preference"), "Preferences", "preference")
-        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-template"), "Templates", "template templatefile")
-        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-project"), "Projects", "project templatefile")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-template"), "Templates", "template staticfile")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-project"), "Projects", "project staticfile")
         self.comboBoxItemFilter.setInsertPolicy(QtGui.QComboBox.NoInsert)
         self.comboBoxItemFilter.lineEdit().returnPressed.connect(self.on_comboBoxItemFilter_returnPressed)
         
@@ -323,8 +320,8 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
             if current.TYPE != "":
                 if current.TYPE == "bundle":
                     self.manager.updateBundle(current.bundleItem, self.namespace, **current.changes)
-                elif current.TYPE == "templatefile":
-                    self.manager.updateTemplateFile(current.bundleItem, self.namespace, **current.changes)
+                elif current.TYPE == "staticfile":
+                    self.manager.updateStaticFile(current.bundleItem, self.namespace, **current.changes)
                 else:
                     self.manager.updateBundleItem(current.bundleItem, self.namespace, **current.changes)
 

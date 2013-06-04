@@ -5,6 +5,7 @@ import os, re, shutil
 from copy import copy
 
 from prymatex.utils import plist
+from prymatex.utils import encoding
 from prymatex.support import scope, utils
 
 """
@@ -23,6 +24,7 @@ class PMXManagedObject(object):
         self.sources = {}
         self.manager = None
         self.populated = False
+        self.statics = []
 
     def load(self, dataHash):
         raise NotImplemented
@@ -99,7 +101,7 @@ class PMXManagedObject(object):
         else:
             self.sources[namespace] = (path, 0)
 
-    def staticFiles(self):
+    def staticPaths(self):
         return []
 
     @classmethod
@@ -252,32 +254,29 @@ class PMXBundleItem(PMXManagedObject):
 
 class PMXStaticFile(object):
     TYPE = 'staticfile'
-    def __init__(self, path, parent):
+    def __init__(self, path, parentItem):
         self.path = path
         self.name = os.path.basename(path)
-        self.parent = parent
+        self.parentItem = parentItem
 
     def hasNamespace(self, namespace):
-        return self.parent.hasNamespace(namespace)
+        return self.parentItem.hasNamespace(namespace)
         
     @property
     def enabled(self):
-        return self.parent.enabled
+        return self.parentItem.enabled
         
     def getFileContent(self):
-        # TODO: Usar utils.encoding
+        content = ""
         if os.path.exists(self.path):
-            f = codecs.open(self.path, 'r', 'utf-8')
-            content = f.read()
-            f.close()
-            return content
+            with open(self.path, 'r') as f:
+                content = encoding.from_fs(f.read())
+        return content
     
     def setFileContent(self, content):
-        # TODO: Usar utils.encoding
         if os.path.exists(self.path):
-            f = codecs.open(self.path, 'w', 'utf-8')
-            f.write(content)
-            f.close()
+            with open(self.path, 'w') as f:
+                f.write(encoding.to_fs(content))
     content = property(getFileContent, setFileContent)
 
     def update(self, dataHash):
@@ -291,9 +290,8 @@ class PMXStaticFile(object):
     
     def save(self, basePath = None):
         path = os.path.join(basePath, self.name) if basePath is not None else self.path
-        f = codecs.open(path, 'w', 'utf-8')
-        f.write(self.content)
-        f.close()
+        with open(path, 'w') as f:
+            f.write(encoding.to_fs(self.content))
         self.path = path
 
 class PMXRunningContext(object):

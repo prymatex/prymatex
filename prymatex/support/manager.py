@@ -9,13 +9,13 @@ import uuid as uuidmodule
 import subprocess
 from glob import glob
 
-from prymatex.support.bundle import PMXBundle
+from prymatex.support.bundle import PMXBundle, PMXStaticFile
 from prymatex.support.macro import PMXMacro
 from prymatex.support.syntax import PMXSyntax
 from prymatex.support.snippet import PMXSnippet
 from prymatex.support.preference import PMXPreference
 from prymatex.support.command import PMXCommand, PMXDragCommand
-from prymatex.support.template import PMXTemplate, PMXTemplateFile
+from prymatex.support.template import PMXTemplate
 from prymatex.support.project import PMXProject
 from prymatex.support.theme import PMXTheme, PMXThemeStyle
 from prymatex.support.utils import ensurePath
@@ -329,8 +329,8 @@ class PMXSupportBaseManager(object):
                 bundle_item_files = reduce(lambda x, y: x + glob(y), [os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS], [])
                 for bundle_item_file in bundle_item_files:
                     try:
-                        item = self.loadBundleItem(klass, bundle_item_file, namespace, bundle)
-                        item.populate()
+                        bundleItem = self.loadBundleItem(klass, bundle_item_file, namespace, bundle)
+                        bundleItem.populate()
                     except Exception as e:
                         import traceback
                         print("Error in bundle item %s (%s)" % (bundle_item_file, e))
@@ -341,19 +341,23 @@ class PMXSupportBaseManager(object):
     def loadBundleItem(self, klass, file_path, namespace, bundle):
         data = self.readPlist(klass.dataFilePath(file_path))
         uuid = self.uuidgen(data.pop('uuid', None))
-        item = self.getManagedObject(uuid)
-        if item is None and not self.isDeleted(uuid):
-            item = klass(uuid)
-            item.load(data)
-            item.setBundle(bundle)
-            item.setManager(self)
-            item.addSource(namespace, file_path)
-            item = self.addBundleItem(item)
-            self.addManagedObject(item)
-            # TODO: los static files
-        elif item is not None:
-            item.addSource(namespace, file_path)
-        return item
+        bundleItem = self.getManagedObject(uuid)
+        if bundleItem is None and not self.isDeleted(uuid):
+            bundleItem = klass(uuid)
+            bundleItem.load(data)
+            bundleItem.setBundle(bundle)
+            bundleItem.setManager(self)
+            bundleItem.addSource(namespace, file_path)
+            bundleItem = self.addBundleItem(bundleItem)
+            for staticPath in bundleItem.staticPaths():
+                # TODO: Ver que hacer con directorios
+                staticFile = PMXStaticFile(staticPath, bundleItem)
+                staticFile = self.addStaticFile(staticFile)
+                bundleItem.statics.append(staticFile)
+            self.addManagedObject(bundleItem)
+        elif bundleItem is not None:
+            bundleItem.addSource(namespace, file_path)
+        return bundleItem
 
     # -------------------- RELOAD SUPPORT
     def reloadSupport(self, callback=None):
@@ -768,43 +772,43 @@ class PMXSupportBaseManager(object):
         self.removeManagedObject(item)
         self.removeBundleItem(item)
 
-    # ------------- TEMPLATEFILE INTERFACE
-    def addTemplateFile(self, file):
+    # ------------- STATICFILE INTERFACE
+    def addStaticFile(self, file):
         return file
 
-    def removeTemplateFile(self, file):
+    def removeStaticFile(self, file):
         pass
 
-    # -------------- TEMPLATEFILE CRUD
-    def createTemplateFile(self, name, template, namespace=None):
+    # -------------- STATICFILE CRUD
+    def createStaticFile(self, name, parentItem, namespace=None):
         namespace = namespace or self.defaultNamespace
-        if template.isProtected and not template.isSafe:
-            self.updateBundleItem(template, namespace)
-        path = ensurePath(os.path.join(template.path(namespace), "%s"), self.convertToValidPath(name))
-        file = PMXTemplateFile(path, template)
+        if parentItem.isProtected and not parentItem.isSafe:
+            self.updateBundleItem(parentItem, namespace)
+        path = ensurePath(os.path.join(parentItem.path(namespace), "%s"), self.convertToValidPath(name))
+        staticFile = PMXStaticFile(path, parentItem)
         #No es la mejor forma pero es la forma de guardar el archivo
-        file = self.addTemplateFile(file)
-        template.files.append(file)
-        file.save()
-        return file
+        staticFile = self.addStaticFile(staticFile)
+        parentItem.files.append(staticFile)
+        staticFile.save()
+        return staticFile
 
-    def updateTemplateFile(self, templateFile, namespace=None, **attrs):
+    def updateStaticFile(self, staticFile, namespace=None, **attrs):
         namespace = namespace or self.defaultNamespace
-        template = templateFile.template
-        if template.isProtected and not template.isSafe:
-            self.updateBundleItem(template, namespace)
+        parentItem = staticFile.parentItem
+        if parentItem.isProtected and not parentItem.isSafe:
+            self.updateBundleItem(parentItem, namespace)
         if "name" in attrs:
-            path = ensurePath(os.path.join(template.path(namespace), "%s"), self.convertToValidPath(attrs["name"]))
-            templateFile.relocate(path)
-        templateFile.update(attrs)
-        self.modifyBundleItem(templateFile)
-        return templateFile
+            path = ensurePath(os.path.join(parentItem.path(namespace), "%s"), self.convertToValidPath(attrs["name"]))
+            staticFile.relocate(path)
+        staticFile.update(attrs)
+        self.modifyBundleItem(staticFile)
+        return staticFile
 
-    def deleteTemplateFile(self, templateFile):
-        template = templateFile.template
-        if template.isProtected and not template.isSafe:
-            self.deleteBundleItem(template)
-        self.removeTemplateFile(templateFile)
+    def deleteStaticFile(self, staticFile):
+        parentItem = staticFile.parentItem
+        if parentItem.isProtected and not parentItem.isSafe:
+            self.deleteBundleItem(parentItem)
+        self.removeStaticFile(staticFile)
 
     # ------------- THEME INTERFACE
     def addTheme(self, theme):

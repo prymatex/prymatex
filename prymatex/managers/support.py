@@ -382,12 +382,15 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
         return nodes
         
     #---------------------------------------------------
-    # TEMPLATEFILE OVERRIDE INTERFACE
+    # STATICFILE OVERRIDE INTERFACE
     #---------------------------------------------------
-    def addTemplateFile(self, templateFile):
-        bundleTemplateFileNode = BundleItemTreeNode(templateFile)
-        self.bundleTreeModel.appendTemplateFile(bundleTemplateFileNode)
-        return bundleTemplateFileNode
+    def addStaticFile(self, staticFile):
+        bundleStaticFileNode = BundleItemTreeNode(staticFile)
+        self.bundleTreeModel.appendStaticFile(bundleStaticFileNode)
+        return bundleStaticFileNode
+    
+    def removeStaticFile(self, file):
+        pass
     
     #---------------------------------------------------
     # THEME OVERRIDE INTERFACE

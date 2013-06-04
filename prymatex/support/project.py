@@ -5,9 +5,9 @@ import os, shutil, codecs
 import functools
 from glob import glob
 
-from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
+from prymatex.support.bundle import (PMXBundleItem, PMXStaticFile, 
+    PMXRunningContext)
 from prymatex.support.utils import prepareShellScript
-from prymatex.support.template import PMXTemplateFile
 from prymatex.utils import plist
    
 class PMXProject(PMXBundleItem):
@@ -22,13 +22,6 @@ class PMXProject(PMXBundleItem):
         for key in PMXProject.KEYS:
             setattr(self, key, dataHash.get(key, None))
     
-    def populate(self):
-        PMXBundleItem.populate(self)
-        projectFilePaths = glob(os.path.join(self.currentPath, '*'))
-        projectFilePaths.remove(self.dataFilePath(self.currentPath))
-        self.files = [ self.manager.addTemplateFile(PMXTemplateFile(pp, self)) for 
-            tp in projectFilePaths]
-
     @property
     def hash(self):
         dataHash = super(PMXProject, self).hash
@@ -87,6 +80,11 @@ class PMXProject(PMXBundleItem):
     def dataFilePath(cls, path):
         return os.path.join(path, cls.FILE)
 
+    def staticPaths(self):
+        projectFilePaths = glob(os.path.join(self.currentPath, '*'))
+        projectFilePaths.remove(self.dataFilePath(self.currentPath))
+        return projectFilePaths
+
     @classmethod
     def reloadBundleItem(cls, bundleItem, path, namespace, manager):
         list(map(lambda style: manager.removeTemplateFile(style), bundleItem.files))
@@ -97,6 +95,6 @@ class PMXProject(PMXBundleItem):
         bundleItem.load(data)
         #Add files
         for projectFilePath in projectFilePaths:
-            projectFile = PMXTemplateFile(projectFilePath, bundleItem)
-            projectFile = manager.addTemplateFile(projectFile)
+            projectFile = PMXStaticFile(projectFilePath, bundleItem)
+            projectFile = manager.addStaticFile(projectFile)
             project.files.append(projectFile)

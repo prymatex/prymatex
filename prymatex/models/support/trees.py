@@ -71,11 +71,11 @@ class BundleItemTreeModel(AbstractTreeModel):
     def removeBundleItem(self, bundleItem):
         self.removeNode(bundleItem, bundleItem.bundle)
     
-    def appendTemplateFile(self, templateFile):
-        self.appendNode(templateFile, templateFile.template)
+    def appendStaticFile(self, staticFile):
+        self.appendNode(staticFile, staticFile.parentItem)
 
-    def removeTemplateFile(self, templateFile):
-        self.removeNode(templateFile, templateFile.template)
+    def removeStaticFile(self, staticFile):
+        self.removeNode(staticFile, staticFile.parentItem)
 
 #===============================================
 # Bundle Menu Tree Model

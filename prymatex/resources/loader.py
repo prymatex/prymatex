@@ -57,7 +57,7 @@ STATICMAPPING = (
     (os.path.normcase("/bundles/drag-commands.png"), "bundle-item-dragcommand"),
     (os.path.normcase("/bundles/snippets.png"), "bundle-item-snippet"),
     (os.path.normcase("/bundles/macros.png"), "bundle-item-macro"),
-    (os.path.normcase("/bundles/template-files.png"), "bundle-item-templatefile"),
+    (os.path.normcase("/bundles/template-files.png"), "bundle-item-staticfile"),
     
     #Editor Sidebar
     (os.path.normcase("/modes/cursors.png"), "modes-cursors"),

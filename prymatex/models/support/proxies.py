@@ -8,7 +8,7 @@ class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
     def __init__(self, manager, parent = None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)
         self.manager = manager
-        self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "templatefile", "syntax", "project"]
+        self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "staticfile", "syntax", "project"]
         self.namespacesFilter = [ "prymatex", "user" ]
         self.bundleItemTypesFilter = self.bundleItemTypeOrder[:]
     
@@ -44,8 +44,8 @@ class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
             node = self.node(index)
             if node.TYPE == "bundle":
                 self.manager.updateBundle(node, self.namespacesFilter[-1], name = value)
-            elif node.TYPE == "templatefile":
-                self.manager.updateTemplateFile(node, self.namespacesFilter[-1], name = value)
+            elif node.TYPE == "staticfile":
+                self.manager.updateStaticFile(node, self.namespacesFilter[-1], name = value)
             else:
                 self.manager.updateBundleItem(node, self.namespacesFilter[-1], name = value)
             return True
