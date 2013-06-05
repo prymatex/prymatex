@@ -68,8 +68,10 @@ def to_fs(unic):
     """
     try:
         return six.text_type(unic).encode(FS_ENCODING)
-    except (UnicodeError, TypeError):
+    except (UnicodeError, TypeError) as ex:
         pass
+    except Exception as ex:
+        print(ex)
     return unic
 
 #------------------------------------------------------------------------------
