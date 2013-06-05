@@ -114,10 +114,14 @@ class ZmqSocket(QtCore.QObject):
         return _return
     
     def recv_pyobj(self): return self._socket.recv_pyobj()
-
+    
+    def recv_json(self): return self._socket.recv_json()
+    
     def send(self, _msg): return self._socket.send(_msg)
     
     def send_pyobj(self, _msg): return self._socket.send_pyobj(_msg)
+    
+    def send_json(self, _msg): return self._socket.send_json()
     
     def send_multipart(self, _msg): return self._socket.send_multipart(_msg)
     

@@ -412,7 +412,7 @@ class CommandHandler(object):
         kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
         
         command = {"name": "async_window", "kwargs": kwargs}
-        self.socket.send_pyobj(command)
+        self.socket.send_json(command)
         value = self.socket.recv()
         sys.stdout.write(value)
         
@@ -423,7 +423,7 @@ class CommandHandler(object):
         kwargs["token"] = options.update_window
 
         command = {"name": "update_window", "kwargs": kwargs}
-        self.socket.send_pyobj(command)
+        self.socket.send_json(command)
         value = self.socket.recv()
         sys.stdout.write(value)
 
@@ -433,7 +433,7 @@ class CommandHandler(object):
         kwargs["token"] = options.close_window
 
         command = {"name": "close_window", "kwargs": kwargs}
-        self.socket.send_pyobj(command)
+        self.socket.send_json(command)
         value = self.socket.recv()
         sys.stdout.write(value)
     
@@ -443,7 +443,7 @@ class CommandHandler(object):
         kwargs["token"] = options.wait_for_input
 
         command = {"name": "wait_for_input", "kwargs": kwargs}
-        self.socket.send_pyobj(command)
+        self.socket.send_json(command)
         value = self.socket.recv()
         sys.stdout.write(value)
         
@@ -455,7 +455,7 @@ class CommandHandler(object):
         kwargs["center"] = options.center
         
         command = {"name": "modal_window", "kwargs": kwargs}
-        self.socket.send_pyobj(command)
+        self.socket.send_json(command)
         value = self.socket.recv()
         sys.stdout.write(value)
     
@@ -469,7 +469,7 @@ class CommandHandler(object):
         kwargs["transparent"] = options.transparent
         
         command = {"name": "tooltip", "kwargs": kwargs}
-        self.socket.send_pyobj(command)
+        self.socket.send_json(command)
         value = self.socket.recv()
         sys.stdout.write(value)
 
@@ -477,7 +477,7 @@ class CommandHandler(object):
         kwargs = {}
         kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
         command = {"name": "menu", "kwargs": kwargs}
-        self.socket.send_pyobj(command)
+        self.socket.send_json(command)
         value = self.socket.recv()
         sys.stdout.write(value)
         
@@ -493,13 +493,13 @@ class CommandHandler(object):
         
         command = {"name": "popup", "kwargs": kwargs}
         
-        self.socket.send_pyobj(command)
+        self.socket.send_json(command)
         value = self.socket.recv()
         sys.stdout.write(value)
         
     def defaults(self, options, args):
         command = {"name": "defaults", "kwargs": {}}
-        self.socket.send_pyobj(command)
+        self.socket.send_json(command)
         value = self.socket.recv()
         sys.stdout.write(value)
 
@@ -508,14 +508,14 @@ class CommandHandler(object):
         kwargs["parameters"] = options.plist if options.plist is not None else "".join(sys.stdin.readlines())
         
         command = {"name": "images", "kwargs": kwargs}
-        self.socket.send_pyobj(command)
+        self.socket.send_json(command)
         value = self.socket.recv()
         sys.stdout.write(value)
         
     def alert(self, options, args):
         kwargs = {}
         command = {"name": "alert", "kwargs": kwargs}
-        self.socket.send_pyobj(command)
+        self.socket.send_json(command)
         value = self.socket.recv()
         sys.stdout.write(value)
 
@@ -523,7 +523,7 @@ class CommandHandler(object):
         for url in urls:
             if url.startswith("txmt"):   # or "pmtx" :)
                 command = {"name": "open", "kwargs": { "url": url}}
-                self.socket.send_pyobj(command)
+                self.socket.send_json(command)
                 _ = self.socket.recv()
             else:
                 os.popen("xdg-open %s" % url)
@@ -531,14 +531,14 @@ class CommandHandler(object):
     def completer(self, options, urls):
         kwargs = {}
         command = {"name": "completer", "kwargs": kwargs}
-        self.socket.send_pyobj(command)
+        self.socket.send_json(command)
         value = self.socket.recv()
         sys.stdout.write(value)
     
     def mate(self, options, args):
         kwargs = {"paths": args}
         command = {"name": "mate", "kwargs": kwargs }
-        self.socket.send_pyobj(command)
+        self.socket.send_json(command)
         value = self.socket.recv()
         sys.stdout.write(value)
         
@@ -546,7 +546,7 @@ class CommandHandler(object):
         kwargs = {}
         kwargs["commands"] = args
         command = {"name": "terminal", "kwargs": kwargs}
-        self.socket.send_pyobj(command)
+        self.socket.send_json(command)
         value = self.socket.recv()
         sys.stdout.write(value)
 
@@ -555,7 +555,7 @@ class CommandHandler(object):
         kwargs["args"] = args
         kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
         command = {"name": "debug", "kwargs": kwargs}
-        self.socket.send_pyobj(command)
+        self.socket.send_json(command)
         value = self.socket.recv()
         sys.stdout.write(value)
     

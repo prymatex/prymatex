@@ -26,7 +26,8 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
     
     @QtCore.Slot()
     def socketReadyRead(self):
-        command = self.socket.recv_pyobj()
+        command = self.socket.recv_json()
+        print(command)
         name = command.get("name")
         kwargs = command.get("kwargs", {})
 
