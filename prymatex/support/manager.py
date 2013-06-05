@@ -322,8 +322,8 @@ class PMXSupportBaseManager(object):
             bpath = bundle.path(namespace)
             # Search for support
             supportPath = os.path.join(bpath, self.SUPPORT_NAME)
-            if not bundle.hasSupport() and os.path.exists(supportPath):
-                bundle.setSupport(supportPath)
+            if not bundle.hasSupportPath() and os.path.exists(supportPath):
+                bundle.setSupportPath(supportPath)
             self.showMessage("Populating\n%s" % bundle.name)
             for klass in BUNDLEITEM_CLASSES:
                 bundle_item_files = reduce(lambda x, y: x + glob(y), [os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS], [])
@@ -429,7 +429,7 @@ class PMXSupportBaseManager(object):
                         self.removeBundle(bundle)
                     else:
                         list(map(lambda item: item.setDirty(), bundleItems))
-                        bundle.support = None
+                        bundle.setSupportPath(None)
                         bundle.setDirty()
             for bundle_dir in bundlePaths:
                 self.logger.debug("New bundle %s." % path)
@@ -450,7 +450,7 @@ class PMXSupportBaseManager(object):
             bpath = bundle.path(namespace)
             # Search for support
             supportPath = os.path.join(bpath, self.SUPPORT_NAME)
-            if not bundle.hasSupport() and os.path.exists(supportPath):
+            if not bundle.hasSupportPath() and os.path.exists(supportPath):
                 bundle.setSupport(supportPath)
             bundleItemPaths = {}
             for klass in BUNDLEITEM_CLASSES:
@@ -627,7 +627,7 @@ class PMXSupportBaseManager(object):
             basePath, _ = self.namespaceElementPath(namespace, self.BUNDLES_NAME, create = True)
             path = os.path.join(basePath, os.path.basename(bundle.path(self.protectedNamespace)))
             bundle.addSource(namespace, path)
-            if bundle.hasSupport():
+            if bundle.hasSupportPath():
                 bundle.relocateSupport(os.path.join(path, self.SUPPORT_NAME))
             self.logger.debug("Add namespace '%s' in source %s for bundle." % (namespace, path))
         elif not bundle.isProtected and "name" in attrs:

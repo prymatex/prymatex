@@ -123,18 +123,24 @@ class PMXBundle(PMXManagedObject):
     KEYS = [    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'
     TYPE = 'bundle'
-    def hasSupport(self):
-        return hasattr(self, "support")
+    def __init__(self, uuid):
+        PMXManagedObject.__init__(self, uuid)
+        self.__supportPath = None
+
+    def hasSupportPath(self):
+        return self.__supportPath is not None
         
-    def setSupport(self, support):
-        self.support = support
-            
+    def setSupportPath(self, supportPath):
+        self.__supportPath = supportPath
+    
+    def supportPath(self):
+        return self.__supportPath
+    
     def relocateSupport(self, path):
-        assert self.hasSupport(), "bundle has not support"
         try:
             # TODO Ver que pasa si ya existe support
-            shutil.copytree(self.support, path, symlinks = True)
-            self.support = path
+            shutil.copytree(self.supportPath(), path, symlinks = True)
+            self.setSupportPath(path)
         except:
             pass
     
@@ -175,8 +181,8 @@ class PMXBundle(PMXManagedObject):
     def environmentVariables(self):
         environment = self.manager.environmentVariables()
         environment['TM_BUNDLE_PATH'] = self.currentPath
-        if self.support != None:
-            environment['TM_BUNDLE_SUPPORT'] = self.support
+        if self.hasSupportPath():
+            environment['TM_BUNDLE_SUPPORT'] = self.supportPath()
         return environment
 
     @classmethod
