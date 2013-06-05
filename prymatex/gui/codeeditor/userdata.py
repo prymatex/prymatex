@@ -28,12 +28,20 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
         self.__scopeRanges = [ ((token.start, token.end), token.scopeHash) for token in tokens ]
         self.__lineChunks = [ ((token.start, token.end), token.chunk) for token in tokens ]
 
+    def tokens(self, start = None, end = None):
+        tokens = self.__tokens
+        if start is not None:
+            tokens = [ token for token in tokens if token.start >= start ]
+        if end is not None:
+            tokens = [ token for token in tokens if token.end <= end ]
+        return tokens
+
     def scopeRanges(self, start = None, end = None):
         ranges = self.__scopeRanges[:]
         if start is not None:
-            ranges = [range for range in ranges if range[0][0] >= start]
+            ranges = [ range for range in ranges if range[0][0] >= start ]
         if end is not None:
-            ranges = [range for range in ranges if range[0][1] <= end]
+            ranges = [ range for range in ranges if range[0][1] <= end ]
         return ranges
 
     def lineChunks(self):
@@ -45,9 +53,17 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
     def blank(self):
         return self.__blank
         
+    def lastToken(self):
+        return self.__tokens[-1]
+        
     def lastScope(self):
         return self.__scopeRanges[-1][1]
-        
+
+    def tokenAtPosition(self, pos):
+        for token in self.__tokens[::-1]:
+            if token.start <= pos <= token.end:
+                return token
+
     def scopeAtPosition(self, pos):
         return self.scopeRange(pos)[1]
     

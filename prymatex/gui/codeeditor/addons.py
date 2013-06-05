@@ -57,7 +57,7 @@ class SpellCheckerAddon(CodeEditorAddon):
         self.wordCursors = []
         self.currentSpellTask = None
         self.setupSpellChecker()
-        
+
     def setupSpellChecker(self):
         try:
             import enchant
@@ -65,7 +65,7 @@ class SpellCheckerAddon(CodeEditorAddon):
             self.dictionary = enchant.Dict()
         except Exception as e:
             self.dictionary = None
-            
+
     def initialize(self, editor):
         CodeEditorAddon.initialize(self, editor)
         if self.dictionary is not None:
@@ -110,12 +110,12 @@ class SpellCheckerAddon(CodeEditorAddon):
         return items
 
     def textCharFormat_spell_builder(self):
-        format = QtGui.QTextCharFormat()
-        format.setFontUnderline(True)
-        format.setUnderlineColor(QtCore.Qt.red) 
-        format.setUnderlineStyle(QtGui.QTextCharFormat.SpellCheckUnderline)
-        format.setBackground(QtCore.Qt.transparent)
-        return format
+        fmt = QtGui.QTextCharFormat()
+        fmt.setFontUnderline(True)
+        fmt.setUnderlineColor(QtCore.Qt.red) 
+        fmt.setUnderlineStyle(QtGui.QTextCharFormat.SpellCheckUnderline)
+        fmt.setBackground(QtCore.Qt.transparent)
+        return fmt
 
     def spellWordsForBlock(self, block):
         spellRange = self.editor.scopes(attribute = 'settings', scope_filter = lambda attr: attr.spellChecking)
@@ -139,7 +139,7 @@ class SpellCheckerAddon(CodeEditorAddon):
         while block.isValid():
             for (start, end), word in self.spellWordsForBlock(block):
                 self.spellCheckWord(word, block, start, end)
-            block = next(block)
+            block = block.next()
             yield
         self.editor.highlightEditor()
     

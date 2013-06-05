@@ -130,12 +130,12 @@ class SymbolListModel(QtCore.QAbstractListModel):
         userData.symbol = None
 
     def processBlockUserData(self, text, block, userData):
-        startStop, scope = self.editor.findScopes(
+        token, scope = self.editor.findScopes(
             block = block,
             scope_filter = lambda scope: scope.settings.showInSymbolList,
             firstOnly = True)
         
-        symbol = scope.settings.transformSymbol(text[slice(*startStop)]) if scope else None
+        symbol = scope.settings.transformSymbol(text[token.start:token.end]) if scope else None
         
         if userData.symbol != symbol:
             userData.symbol = symbol
@@ -192,7 +192,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
 
     # ------------- Public api
     def findBlockIndex(self, block):
-        indexes = [block.blockNumber() for block in self.blocks]
+        indexes = [b.blockNumber() for b in self.blocks]
         blockIndex = bisect(indexes, block.blockNumber()) - 1
         if blockIndex == -1:
             blockIndex = 0
@@ -288,14 +288,15 @@ class AlreadyTypedWords(object):
         self.editor.registerBlockUserDataHandler(self)
 
     def contributeToBlockUserData(self, userData):
-        userData.words = []
-        
-    def processBlockUserData(self, text, block, userData):
-        words = []
+        userData.words = set()
 
-        for chunk in userData.lineChunks():
-            scopeGroup = self.editor.scope(blockPosition = chunk[0][0])
-            words += [((chunk[0][0] + match.span()[0], chunk[0][0] + match.span()[1]), match.group(), scopeGroup) for match in self.editor.RE_WORD.finditer(chunk[1])]
+    def processBlockUserData(self, text, block, userData):
+        words = set()
+        
+        for token in userData.tokens()[::-1]:
+            group = self.editor.scope(scopeHash = token.scopeHash).group
+            words.update([ (word, group) for word in self.editor.RE_WORD.findall(token.chunk) ])
+        
         if userData.words != words:
             #Quitar el block de las palabras anteriores
             self.removeWordsBlock(block, [word for word in userData.words if word not in words])
@@ -304,11 +305,11 @@ class AlreadyTypedWords(object):
             self.addWordsBlock(block, [word for word in words if word not in userData.words])
             userData.words = words
 
-
     def _purge_words(self):
         """ Limpiar palabras """
-        self.words = dict([word_blocks for word_blocks in iter(self.words.items()) if bool(word_blocks[1])])
-        self.groups = dict([(group_words[0], [word for word in group_words[1] if word in self.group_words[1]]) for group_words in iter(self.groups.items())])
+        #TODO: Hacer python3 compatible
+        self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))
+        self.groups = dict(map(lambda (group, words): (group, filter(lambda word: word in self.words, words)), self.groups.iteritems()))
 
     def __purge_blocks(self):
         """ Quitar bloques que no van mas """
@@ -323,11 +324,11 @@ class AlreadyTypedWords(object):
         self.__purge_blocks()
 
     def addWordsBlock(self, block, words):
-        for index, word, group in words:
+        for word, group in words:
             #Blocks
             blocks = self.words.setdefault(word, [])
             if block not in blocks:
-                indexes = [block.blockNumber() for block in blocks]
+                indexes = [b.blockNumber() for b in blocks]
                 index = bisect(indexes, block.blockNumber())
                 blocks.insert(index, block)
             #Words
@@ -335,15 +336,14 @@ class AlreadyTypedWords(object):
             if word not in words:
                 position = bisect(words, word)
                 words.insert(position, word)
-
+                
     def removeWordsBlock(self, block, words):
-        for index, word, group in words:
-            #Blocks
+        for word, group in words:
             if block in self.words[word]:
                 self.words[word].remove(block)
             if word in self.groups[group]:
                 self.groups[group].remove(word)
-
+                
     def typedWords(self):
         self._purge_words()
         return self.groups.copy()
@@ -364,7 +364,6 @@ def bundleItemSelectableModelFactory(editor):
                     "trigger": bundleItem.trigger
                 }, 
                 image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE)) for bundleItem in editor.application.supportManager.getActionItems(leftScope.name, rightScope.name)]
-
 
     # Filter function        
     def bundleItemFilter(text, item):

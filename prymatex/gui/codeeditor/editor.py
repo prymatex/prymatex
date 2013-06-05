@@ -32,6 +32,7 @@ from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, P
 
 from prymatex.utils import coroutines
 from prymatex.utils import text as texttools
+from prymatex.utils import six
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime
 from functools import reduce
@@ -367,29 +368,27 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         userData = self.blockUserData(block)
         positionInBlock = blockPosition or (cursor is not None and cursor.positionInBlock()) or 0
         if direction == "right":
-            # TODO: Cuando el syntax processor funcione bien sacar este or
-            rightScope = userData is not None and userData.scopeAtPosition(positionInBlock) or self.basicScopeHash
-            return self.SCOPES[rightScope]
+            rightToken = userData.tokenAtPosition(positionInBlock)
+            return self.SCOPES[rightToken and rightToken.scopeHash or self.basicScopeHash]
         elif direction == "left":
-            # TODO: Cuando el syntax processor funcione bien sacar este or
-            leftScope = userData is not None and userData.scopeAtPosition(positionInBlock - 1) or self.basicScopeHash
-            return self.SCOPES[leftScope]
+            leftToken = userData.tokenAtPosition(positionInBlock - 1)
+            return self.SCOPES[leftToken and leftToken.scopeHash or self.basicScopeHash]
         elif direction == "both":
-            # TODO: Cuando el syntax processor funcione bien sacar este or
-            leftScope = userData is not None and userData.scopeAtPosition(positionInBlock - 1) or self.basicScopeHash
-            rightScope = userData is not None and userData.scopeAtPosition(positionInBlock) or self.basicScopeHash
-            return self.SCOPES[leftScope], self.SCOPES[rightScope]
-            
+            leftToken = userData.tokenAtPosition(positionInBlock - 1)
+            rightToken = userData.tokenAtPosition(positionInBlock)
+            return (self.SCOPES[leftToken and leftToken.scopeHash or self.basicScopeHash],
+                self.SCOPES[rightToken and rightToken.scopeHash or self.basicScopeHash])
+
     def findScopes(self, block = None, scope_filter = lambda attr: True, firstOnly = False):
         userData = self.blockUserData(block) if block is not None else self.textCursor().block()
-        # TODO: Pasar a al uso tokens
-        # TODO: ver una forma mejor de pasar las posiciones
-        scopes = [((start_end_scope1[0][0], start_end_scope1[0][1]), self.SCOPES[start_end_scope1[1]]) for start_end_scope1 in userData.scopeRanges() if scope_filter(self.SCOPES[start_end_scope1[1]])]
-        if not firstOnly:
-            return scopes
-        if scopes:
-            return scopes[0]
-        return ((-1, -1), None)
+        scopes = iter(filter(lambda item: scope_filter(item[1]), 
+            map( lambda token: (token, self.SCOPES[token.scopeHash]), userData.tokens() ) ))
+        if firstOnly:
+            try:
+                return six.next(scopes)
+            except StopIteration as ex:
+                return (None, None)
+        return scopes
 
     # ------------ Obteniendo datos del editor
     def tabKeyBehavior(self):

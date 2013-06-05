@@ -28,9 +28,9 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         PMXBaseStatusBar.initialize(self, mainWindow)
         self.hideAllWidgets()
 
-
     def hideAllWidgets(self):
-        list(map(lambda widget: widget.setVisible(False), [self.widgetGoToLine, self.widgetFindReplace, self.widgetCommand, self.widgetIFind]))
+        for widget in [self.widgetGoToLine, self.widgetFindReplace, self.widgetCommand, self.widgetIFind]:
+            widget.setVisible(False)
 
     # --------------- Setup Events
     def setupEvents(self):
@@ -73,7 +73,6 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
                     self.pushButtonReplace.click()
                     return True
         return QtGui.QWidget.eventFilter(self, obj, event)
-
 
     # -------------- Setup Widgets
     def setupWidgetStatus(self):
@@ -123,22 +122,21 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.comboBoxFindMode.addItem("Whole word only", 1)
         self.comboBoxFindMode.addItem("Escape sequences", 2)
         self.comboBoxFindMode.addItem("Regular expressions", 3)
-        
 
     # --------------- Handle editors
     def acceptEditor(self, editor):
         return isinstance(editor, CodeEditor)
-    
+
     def disconnectEditor(self, editor):
         editor.cursorPositionChanged.disconnect(self.on_cursorPositionChanged)
         editor.syntaxChanged.disconnect(self.on_syntaxChanged)
         editor.modeChanged.disconnect(self.on_modeChanged)
-        
+
     def connectEditor(self, editor):
         editor.cursorPositionChanged.connect(self.on_cursorPositionChanged)
         editor.syntaxChanged.connect(self.on_syntaxChanged)
         editor.modeChanged.connect(self.on_modeChanged)
-        
+
     def setCurrentEditor(self, editor):
         if self.currentEditor is not None:
             self.disconnectEditor(self.currentEditor)
@@ -151,7 +149,6 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
             self.on_syntaxChanged(self.currentEditor.syntax())
             self.on_modeChanged(self.currentEditor)
             self.setTabSizeLabel(self.currentEditor)
-        
 
     # ---------------- AutoConnect Status Widget signals
     @QtCore.Slot(int)
@@ -164,7 +161,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     @QtCore.Slot(int)
     def on_comboBoxTabSize_activated(self, index):
         data = self.comboBoxTabSize.itemData(index)
-    
+
     @QtCore.Slot(int)
     def on_comboBoxSymbols_activated(self, pos):
         model = self.comboBoxSymbols.model()
@@ -183,7 +180,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.labelLineColumn.setText("Line: %5d Column: %5d Selection: %5d" % (line, column, selection))
         #Set index of current symbol
         self.comboBoxSymbols.setCurrentIndex(self.comboBoxSymbols.model().findBlockIndex(cursor.block()))
-        
+
     def on_syntaxChanged(self, syntax):
         model = self.comboBoxSyntaxes.model()
         index = model.findItemIndex(syntax)
@@ -194,7 +191,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.pushButtonMultiCursor.setEnabled(editor.multiCursorMode.isActive())
         self.pushButtonSnippet.setEnabled(editor.snippetMode.isActive())
         self.pushButtonOverwrite.setEnabled(editor.overwriteMode())
-        
+
     def showTabSizeContextMenu(self, point):
         editor = self.currentEditor
         #Setup Context Menu
@@ -219,24 +216,23 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         action.setCheckable(True)        
         action.setChecked(editor.tabStopSoft == True)
         menu.popup(self.labelTabSize.mapToGlobal(point))
-    
+
     def setCurrentEditorTabSoft(self, soft):
         self.currentEditor.tabStopSoft = soft
-        
+
     def setCurrentEditorTabSize(self, size):
         self.currentEditor.tabStopSize = size
         self.setTabSizeLabel(self.currentEditor)
-        
+
     def setTabSizeLabel(self, editor):
         #Tab Size
         self.labelTabSize.setText("Soft Tab: %d" % editor.tabStopSize if editor.tabStopSoft else "Hard Tab: %d" % editor.tabStopSize)
-        
 
     # -------------- AutoConnect Command widget signals
     @QtCore.Slot()
     def on_pushButtonCommandClose_pressed(self):
         self.widgetCommand.setVisible(False)
-    
+
     @QtCore.Slot()
     def on_comboBoxCommand_returnPressed(self):
         command = self.comboBoxCommand.lineEdit().text()
@@ -244,18 +240,17 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         output = self.comboBoxOutput.itemData(self.comboBoxOutput.currentIndex())
         self.currentEditor.executeCommand(command, input, output)
         self.comboBoxCommand.lineEdit().clear()
-    
+
     def showCommand(self):
         self.hideAllWidgets()
         self.widgetCommand.setVisible(True)
         self.comboBoxCommand.setFocus()
-    
-    
+
     # ------------ AutoConnect GoToLine widget signals
     @QtCore.Slot()
     def on_pushButtonGoToLineClose_pressed(self):
         self.widgetGoToLine.setVisible(False)
-    
+
     @QtCore.Slot(int)
     def on_spinBoxGoToLine_valueChanged(self, lineNumber):
         self.currentEditor.goToLine(lineNumber)
@@ -264,12 +259,12 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.hideAllWidgets()
         self.widgetGoToLine.setVisible(True)
         self.spinBoxGoToLine.setFocus()
-        
+
     # --------- AutoConnect FindReplace widget Signals
     @QtCore.Slot()
     def on_pushButtonFindReplaceClose_pressed(self):
         self.widgetFindReplace.setVisible(False)
-    
+
     @QtCore.Slot()
     def on_pushButtonFindNext_pressed(self):
         match, flags = self.getFindMatchAndFlags()
@@ -280,7 +275,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         match, flags = self.getFindMatchAndFlags()
         flags |= QtGui.QTextDocument.FindBackward
         self.currentEditor.findMatch(match, flags)
-    
+
     @QtCore.Slot()
     def on_pushButtonReplace_pressed(self):
         match, flags = self.getFindMatchAndFlags()
@@ -288,7 +283,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         if match and replace:
             self.currentEditor.replaceMatch(match, replace, flags)
             self.currentEditor.findMatch(match, flags)
-    
+
     @QtCore.Slot()
     def on_pushButtonReplaceAll_pressed(self):
         match, flags = self.getFindMatchAndFlags()
@@ -296,7 +291,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         if match and replace:
             self.currentEditor.replaceMatch(match, replace, flags, allText = True)
         # TODO: mensaje de cuantos remplazo
-        
+
     @QtCore.Slot()
     def on_pushButtonFindAll_pressed(self):
         match, flags = self.getFindMatchAndFlags()
@@ -304,7 +299,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.currentEditor.setExtraSelectionCursors("selection", cursors)
         self.currentEditor.updateExtraSelections()
         # TODO: mensaje de cuantos encontro y ver que queremos hacer con ellos
-        
+
     def getFindMatchAndFlags(self):
         flags = QtGui.QTextDocument.FindFlags()
         if self.checkBoxFindCaseSensitively.isChecked():
@@ -318,19 +313,18 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         elif mode == 3:
             match = QtCore.QRegExp(match)
         return match, flags
-    
+
     def showFindReplace(self):
         self.hideAllWidgets()
         self.widgetFindReplace.setVisible(True)
         self.lineEditFind.setFocus()
-        
-    
+
     # -------------- AutoConnect IFind widget Signals
     @QtCore.Slot()
     def on_pushButtonIFindClose_pressed(self):
         self.widgetIFind.setVisible(False)
         self.currentEditor.setFocus()
-    
+
     @QtCore.Slot(str)
     def on_lineEditIFind_textChanged(self, text):
         if text:
@@ -340,7 +334,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         else:
             #TODO: Buscar un clean style
             self.lineEditIFind.setStyleSheet('')
-    
+
     @QtCore.Slot()
     def on_pushButtonIFindNext_pressed(self):
         match, flags = self.getIFindMatchAndFlags()
@@ -351,7 +345,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         match, flags = self.getIFindMatchAndFlags()
         flags |= QtGui.QTextDocument.FindBackward
         self.currentEditor.findMatch(match, flags)
-    
+
     @QtCore.Slot(int)
     def on_checkBoxIFindCaseSensitively_stateChanged(self, value):
         match, flags = self.getIFindMatchAndFlags()
@@ -359,13 +353,13 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
             self.lineEditIFind.setStyleSheet(resources.FIND_MATCH_STYLE)
         else:
             self.lineEditIFind.setStyleSheet(resources.FIND_NO_MATCH_STYLE)
-    
+
     def getIFindMatchAndFlags(self):
         flags = QtGui.QTextDocument.FindFlags()
         if self.checkBoxIFindCaseSensitively.isChecked():
             flags |= QtGui.QTextDocument.FindCaseSensitively
         return self.lineEditIFind.text(), flags
-    
+
     def showIFind(self):
         self.hideAllWidgets()
         cursor = self.currentEditor.textCursor()
