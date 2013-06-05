@@ -62,7 +62,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
     # --------------------- Inputs
     def document(self, format = None):
         #TODO: ver si pone los \n
-        text = str(self.editor.document().toPlainText())
+        text = self.editor.document().toPlainText()
+        print(text)
         if format == "xml":
             firstBlock = self.editor.document().firstBlock()
             lastBlock = self.editor.document().lastBlock()
@@ -83,6 +84,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def selection(self, format = None):
         cursor = self.editor.textCursor()
         if cursor.hasSelection():
+            # TODO Buscar otra forma que no sea estos replace
             text = cursor.selectedText().replace("\u2029", '\n').replace("\u2028", '\n')
             if format == "xml":
                 firstBlock, lastBlock = self.editor.selectionBlockStartEnd()
