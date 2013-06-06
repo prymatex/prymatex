@@ -271,6 +271,7 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''}
         
         self.comboBoxInputFormat.addItem("Text", "text")
         self.comboBoxInputFormat.addItem("XML", "xml")
+        self.comboBoxInputFormat.currentIndexChanged[int].connect(self.on_comboBoxInputFormat_changed)
         
         self.comboBoxOutput.addItem("Discard", "discard")
         self.comboBoxOutput.addItem("Replace Selected Text", "replaceSelectedText")
@@ -286,6 +287,7 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''}
         
         self.comboBoxOutputFormat.addItem("Text", "text")
         self.comboBoxOutputFormat.addItem("Html", "html")
+        self.comboBoxOutputFormat.currentIndexChanged[int].connect(self.on_comboBoxOutputFormat_changed)
         
         self.labelInputOption.setVisible(False)
         self.comboBoxFallbackInput.setVisible(False)
@@ -312,14 +314,14 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''}
     def on_comboBoxBeforeRunning_changed(self, index):
         value = self.comboBoxBeforeRunning.itemData(index)
         if value != self.bundleItem.beforeRunningCommand:
-            self.changes['beforeRunningCommand'] = str(value)
+            self.changes['beforeRunningCommand'] = value
         else:
             self.changes.pop('beforeRunningCommand', None)
             
     def on_comboBoxInput_changed(self, index):
         value = self.comboBoxInput.itemData(index)
         if value != self.bundleItem.input:
-            self.changes['input'] = str(value)
+            self.changes['input'] = value
         else:
             self.changes.pop('input', None)
         if value == 'selection':
@@ -335,20 +337,35 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''}
             self.changes.pop('fallbackInput', None)
             self.labelInputOption.setVisible(False)
             self.comboBoxFallbackInput.setVisible(False)
-        
+    
     def on_comboBoxFallbackInput_changed(self, index):
         value = self.comboBoxFallbackInput.itemData(index)
         if value != self.bundleItem.fallbackInput and value != self.DEFAULTS['fallbackInput']:
-            self.changes['fallbackInput'] = str(value)
+            self.changes['fallbackInput'] = value
         else:
             self.changes.pop('fallbackInput', None)
-        
+    
+    def on_comboBoxInputFormat_changed(self, index):
+        value = self.comboBoxInputFormat.itemData(index)
+        if value != self.bundleItem.inputFormat:
+            self.changes['inputFormat'] = value
+        else:
+            self.changes.pop('inputFormat', None)
+
     def on_comboBoxOutput_changed(self, index):
         value = self.comboBoxOutput.itemData(index)
-        if value != self.bundleItem.output:
-            self.changes['output'] = str(value)
+        outputKey = "outputLocation" if self.bundleItem.version == 2 else "output"
+        if value != getattr(self.bundleItem, outputKey):
+            self.changes[outputKey] = value
         else:
-            self.changes.pop('output', None)
+            self.changes.pop(outputKey, None)
+    
+    def on_comboBoxOutputFormat_changed(self, index):
+        value = self.comboBoxOutputFormat.itemData(index)
+        if value != self.bundleItem.outputFormat:
+            self.changes['outputFormat'] = value
+        else:
+            self.changes.pop('outputFormat', None)
     
     @property
     def title(self):
@@ -395,15 +412,7 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''}
         index = self.comboBoxInput.findData(commandInput)
         if index != -1:
             self.comboBoxInput.setCurrentIndex(index)
-
-        #Input Format
-        commandInputFormat = bundleItem.inputFormat
-        if commandInputFormat is None:
-            commandInputFormat = self.changes['inputFormat'] = self.DEFAULTS['inputFormat']
-        index = self.comboBoxInputFormat.findData(commandInputFormat)
-        if index != -1:
-            self.comboBoxInputFormat.setCurrentIndex(index)
-            
+    
         #Output
         output = bundleItem.output or bundleItem.outputLocation
         if output is None:
@@ -412,13 +421,22 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''}
         if index != -1:
             self.comboBoxOutput.setCurrentIndex(index)
     
-        #Output Format
-        commandOutputFormat = bundleItem.inputFormat
-        if commandOutputFormat is None:
-            commandOutputFormat = self.changes['outputFormat'] = self.DEFAULTS['outputFormat']
-        index = self.comboBoxInputFormat.findData(commandOutputFormat)
-        if index != -1:
-            self.comboBoxInputFormat.setCurrentIndex(index)
+        if bundleItem.version == 2:
+            #Input Format
+            commandInputFormat = bundleItem.inputFormat
+            if commandInputFormat is None:
+                commandInputFormat = self.changes['inputFormat'] = self.DEFAULTS['inputFormat']
+            index = self.comboBoxInputFormat.findData(commandInputFormat)
+            if index != -1:
+                self.comboBoxInputFormat.setCurrentIndex(index)
+            
+            #Output Format
+            commandOutputFormat = bundleItem.outputFormat
+            if commandOutputFormat is None:
+                commandOutputFormat = self.changes['outputFormat'] = self.DEFAULTS['outputFormat']
+            index = self.comboBoxOutputFormat.findData(commandOutputFormat)
+            if index != -1:
+                self.comboBoxOutputFormat.setCurrentIndex(index)
             
 class TemplateEditorWidget(BundleItemEditorBaseWidget, Ui_Template):
     TYPE = 'template'
@@ -534,7 +552,7 @@ class DragCommandEditorWidget(BundleItemEditorBaseWidget, Ui_DragCommand):
     
     @QtCore.Slot(str)
     def on_lineEditExtensions_textEdited(self, text):
-        value = [item.strip() for item in str(text).split(",")]
+        value = [item.strip() for item in text.split(",")]
         if value != self.bundleItem.draggedFileExtensions:
             self.changes['draggedFileExtensions'] = value
         else:
