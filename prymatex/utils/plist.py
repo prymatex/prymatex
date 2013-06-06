@@ -3,16 +3,12 @@
 from __future__ import unicode_literals
 
 import re
-import sys
 import re, plistlib
 from string import printable
 
 from . import six
 
 XMLPATTERN = re.compile("<(\w+)>(.*)<\/\w+>");
-
-if sys.version_info.major < 3:
-    str = unicode
 
 # FIX, FIX, FIX
 def __fixItems(dictionary, applyFunction):
@@ -43,9 +39,9 @@ def __fixReadItem(item):
 
 def __wrapItem(item):
     if __shouldWrap(item):
-        return plistlib.Data(bytes(item, "utf-8"))
+        return plistlib.Data(item.encode("utf-8"))
     else:
-        return item
+        return item.encode("utf-8")
 
 def __shouldWrap(string):
     return not set(string).issubset(set(printable)) \
@@ -58,10 +54,10 @@ def __containsUnicode(string):
     except:
         return True
 
-if sys.version_info.major >= 3:
+if six.PY3:
     # Monkey patch
     plistlib.readPlistFromString = lambda data: \
-        plistlib.readPlistFromBytes(bytes(data, "utf-8"))
+        plistlib.readPlistFromBytes(data.encode("utf-8"))
   
 def readPlist(filePath):
     try:
@@ -70,7 +66,7 @@ def readPlist(filePath):
         result = []
         start = 0
         data = open(filePath).read()
-        if sys.version_info.major < 3:
+        if not six.PY3:
             data = data.decode("utf-8")
         for match in XMLPATTERN.finditer(data):
             if __shouldWrap(match.group(2)):
@@ -80,7 +76,7 @@ def readPlist(filePath):
                 start = match.end()
         result.append(data[start:])
         result = "".join(result)
-        if sys.version_info.major < 3:
+        if not six.PY3:
             result = result.encode("utf-8")
         data = plistlib.readPlistFromString(result)
     return __fixItems(data, __fixReadItem)
