@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/edit.ui'
 #
-# Created: Wed May 22 20:00:33 2013
+# Created: Wed Jun  5 22:34:42 2013
 #      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!

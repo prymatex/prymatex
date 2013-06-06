@@ -229,8 +229,10 @@ echo File: "$TM_FILEPATH"
 echo Word: "$TM_CURRENT_WORD"
 echo Selection: "$TM_SELECTED_TEXT"''',
                 'input': 'selection',
+                'inputFormat': 'text',
                 'fallbackInput': 'document',
-                'output': 'replaceSelectedText'}
+                'output': 'replaceSelectedText',
+                'outputFormat': 'text'}
     
     COMMAND_TEMPLATES = {
                          'Default': '''# just to remind you of some useful environment variables
@@ -244,9 +246,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
 import os
 print "File:",  os.environ("TM_FILEPATH")
 print "Word:",  os.environ("TM_CURRENT_WORD")
-print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
-                         
-    }
+print "Selection:",  os.environ("TM_SELECTED_TEXT")'''}
     
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
@@ -269,6 +269,9 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
         self.comboBoxFallbackInput.addItem("Nothing", "none")
         self.comboBoxFallbackInput.currentIndexChanged[int].connect(self.on_comboBoxFallbackInput_changed)
         
+        self.comboBoxInputFormat.addItem("Text", "text")
+        self.comboBoxInputFormat.addItem("XML", "xml")
+        
         self.comboBoxOutput.addItem("Discard", "discard")
         self.comboBoxOutput.addItem("Replace Selected Text", "replaceSelectedText")
         self.comboBoxOutput.addItem("Replace Document", "replaceDocument")
@@ -278,20 +281,25 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
         self.comboBoxOutput.addItem("Show as Tool Tip", "showAsTooltip")
         self.comboBoxOutput.addItem("Create New Document", "createNewDocument")
         self.comboBoxOutput.addItem("Open as New Document", "openAsNewDocument")
+        self.comboBoxOutput.addItem("Open as New Window", "newWindow")
         self.comboBoxOutput.currentIndexChanged[int].connect(self.on_comboBoxOutput_changed)
+        
+        self.comboBoxOutputFormat.addItem("Text", "text")
+        self.comboBoxOutputFormat.addItem("Html", "html")
         
         self.labelInputOption.setVisible(False)
         self.comboBoxFallbackInput.setVisible(False)
         
         self.command.setTabStopWidth(TABWIDTH)
+        
         self.menuCommandTemplates = QtGui.QMenu()
         
         for name, templateText in self.COMMAND_TEMPLATES.items():
             action = self.menuCommandTemplates.addAction(name)
             receiver = lambda template = templateText: self.command.setPlainText(template)
             self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
-            
-        self.pushButtonOptions.setMenu(self.menuCommandTemplates)
+        # TODO Este menu ponerlo como menu contextual    
+        # self.pushButtonOptions.setMenu(self.menuCommandTemplates)
 
     @QtCore.Slot()
     def on_command_textChanged(self):
@@ -384,14 +392,30 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
         if index != -1:
             self.comboBoxInput.setCurrentIndex(index)
 
+        #Input Format
+        commandInputFormat = bundleItem.inputFormat
+        if commandInputFormat is None:
+            commandInputFormat = self.changes['inputFormat'] = self.DEFAULTS['inputFormat']
+        index = self.comboBoxInputFormat.findData(commandInputFormat)
+        if index != -1:
+            self.comboBoxInputFormat.setCurrentIndex(index)
+            
         #Output
-        output = bundleItem.output
+        output = bundleItem.output or bundleItem.outputLocation
         if output is None:
             output = self.changes['output'] = self.DEFAULTS['output']
         index = self.comboBoxOutput.findData(output)
         if index != -1:
             self.comboBoxOutput.setCurrentIndex(index)
     
+        #Output Format
+        commandOutputFormat = bundleItem.inputFormat
+        if commandOutputFormat is None:
+            commandOutputFormat = self.changes['outputFormat'] = self.DEFAULTS['outputFormat']
+        index = self.comboBoxInputFormat.findData(commandOutputFormat)
+        if index != -1:
+            self.comboBoxInputFormat.setCurrentIndex(index)
+            
 class TemplateEditorWidget(BundleItemEditorBaseWidget, Ui_Template):
     TYPE = 'template'
     DEFAULTS = {'extension': 'txt',

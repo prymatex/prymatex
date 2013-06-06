@@ -299,10 +299,10 @@ class AlreadyTypedWords(object):
         
         if userData.words != words:
             #Quitar el block de las palabras anteriores
-            self.removeWordsBlock(block, [word for word in userData.words if word not in words])
+            #self.removeWordsBlock(block, [word for word in userData.words if word not in words])
             
             #Agregar las palabras nuevas
-            self.addWordsBlock(block, [word for word in words if word not in userData.words])
+            #self.addWordsBlock(block, [word for word in words if word not in userData.words])
             userData.words = words
 
     def _purge_words(self):

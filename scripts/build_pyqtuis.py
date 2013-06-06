@@ -151,5 +151,5 @@ if __name__ == '__main__':
     verbose = 0
     if len(sys.argv) > 1:
         verbose = int(sys.argv[1])
-    sys.exit(QtUiBuild(verbose, force = True).run())
+    sys.exit(QtUiBuild(verbose, force = False).run())
     
