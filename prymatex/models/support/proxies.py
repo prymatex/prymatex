@@ -42,13 +42,14 @@ class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
     def setData(self, index, value, role):
         if role == QtCore.Qt.EditRole:  
             node = self.node(index)
-            if node.TYPE == "bundle":
-                self.manager.updateBundle(node, self.namespacesFilter[-1], name = value)
-            elif node.TYPE == "staticfile":
-                self.manager.updateStaticFile(node, self.namespacesFilter[-1], name = value)
-            else:
-                self.manager.updateBundleItem(node, self.namespacesFilter[-1], name = value)
-            return True
+            if node.name != value:
+                if node.TYPE == "bundle":
+                    self.manager.updateBundle(node, self.namespacesFilter[-1], name = value)
+                elif node.TYPE == "staticfile":
+                    self.manager.updateStaticFile(node, self.namespacesFilter[-1], name = value)
+                else:
+                    self.manager.updateBundleItem(node, self.namespacesFilter[-1], name = value)
+                return True
         return False
         
     def node(self, index):
