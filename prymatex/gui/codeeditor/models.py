@@ -308,8 +308,8 @@ class AlreadyTypedWords(object):
     def _purge_words(self):
         """ Limpiar palabras """
         #TODO: Hacer python3 compatible
-        self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))
-        self.groups = dict(map(lambda (group, words): (group, filter(lambda word: word in self.words, words)), self.groups.iteritems()))
+        self.words = dict(filter(lambda word_blocks: bool(word_blocks[1]), self.words.iteritems()))
+        self.groups = dict(map(lambda group_words: (group_words[0], filter(lambda word: word in self.words, group_words[1])), self.groups.iteritems()))
 
     def __purge_blocks(self):
         """ Quitar bloques que no van mas """
