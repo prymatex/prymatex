@@ -731,6 +731,8 @@ class PMXSupportBaseManager(object):
         """
         Actualiza un bundle item
         """
+        print(item, namespace, attrs)
+        # TODO Sacar esta porqueria
         if len(attrs) == 1 and "name" in attrs and attrs["name"] == item.name:
             #Updates que no son updates
             return item
