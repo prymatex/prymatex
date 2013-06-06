@@ -368,6 +368,10 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''}
         keyEquivalent = super(CommandEditorWidget, self).getKeyEquivalent()
         return keyEquivalent is not None and keyEquivalent or ""
     
+    def getSemanticClass(self):
+        semanticClass = super(CommandEditorWidget, self).getSemanticClass()
+        return semanticClass is not None and semanticClass or ""
+    
     def edit(self, bundleItem):
         super(CommandEditorWidget, self).edit(bundleItem)
         #Command
