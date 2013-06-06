@@ -622,7 +622,11 @@ class PreferenceEditorWidget(BundleItemEditorBaseWidget, Ui_Preference):
     def on_settings_textChanged(self):
         #Convertir a dict
         try:
-            self.changes['settings'] = ast.literal_eval(self.settings.toPlainText())
+            settings = ast.literal_eval(self.settings.toPlainText())
+            if self.bundleItem.hash["settings"] != settings:
+                self.changes['settings'] = settings
+            else:
+                self.changes.pop("settings", None)
         except:
             pass
 
