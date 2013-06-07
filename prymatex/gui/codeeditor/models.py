@@ -7,7 +7,7 @@ from bisect import bisect
 from prymatex.qt import QtCore, QtGui
 
 from prymatex import resources
-from prymatex.utils import text as texttools
+from prymatex.utils import sourcecode
 from prymatex.models.selectable import selectableModelFactory
 from prymatex.models.support import BundleItemTreeNode
 
@@ -388,7 +388,7 @@ def bundleItemSelectableModelFactory(editor):
             slices = []
             item["ratio"] = difflib.SequenceMatcher(None, text.lower(), name.lower()).quick_ratio()
             if len(text) > 4 and item["ratio"] < 0.4: return False
-            for m in texttools.subsearch(text, name, ignoreCase = True):
+            for m in sourcecode.subsearch(text, name, ignoreCase = True):
                 slices.append(name[index:m[2]])
                 slices.append("<strong>" + name[m[2]:m[3]] + "</strong>")
                 index = m[3]

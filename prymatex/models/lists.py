@@ -7,7 +7,6 @@ import os
 from prymatex.qt import QtCore, QtGui
 from prymatex import resources
 
-from prymatex.utils import text as texttools
 from prymatex.models.selectable import SelectableModelMixin
 
 #====================================================
@@ -20,11 +19,9 @@ class CheckableListModel(QtCore.QAbstractListModel):
         QtCore.QAbstractListModel.__init__(self, parent)
         self.__items = []
 
-
     # ------------------ QtCore.QAbstractListModel methods
     def rowCount(self, parent = None):
         return len(self.__items)
-
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
@@ -36,7 +33,6 @@ class CheckableListModel(QtCore.QAbstractListModel):
             return item["selected"] and 2 or 0
         elif role == QtCore.Qt.ToolTipRole:
             return item
-
 
     def setData(self, index, data, role):
         item = self.__items[index.row()]
@@ -82,7 +78,6 @@ class CheckableListModel(QtCore.QAbstractListModel):
     def addItems(self, items):
         for item in items:
             self.addItem(item)
-
 
     def removeItem(self, item):
         value = [k for k in self.__items if k["name"] == item]

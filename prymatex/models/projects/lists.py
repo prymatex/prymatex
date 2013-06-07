@@ -7,7 +7,6 @@ import os
 from prymatex.qt import QtCore, QtGui
 from prymatex import resources
 
-from prymatex.utils import text as texttools
 from prymatex.models.selectable import SelectableModelMixin
 
 #====================================================

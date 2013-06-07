@@ -31,7 +31,7 @@ from prymatex.gui.codeeditor.models import (SymbolListModel, BookmarkListModel,
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 
 from prymatex.utils import coroutines
-from prymatex.utils import text as texttools
+from prymatex.utils import sourcecode
 from prymatex.utils import six
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime
@@ -212,7 +212,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         from time import time
         self.syntaxHighlighter.stop()
         self.aboutToHighlightChange.emit()
-        QtGui.QPlainTextEdit.setPlainText(self, text)
+        TextEditWidget.setPlainText(self, text)
         self.highlightTime = time()
         def highlightReady(editor):
             def _ready():
@@ -246,7 +246,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def processBlockUserData(self, text, block, userData):
         # Indent
-        indent = texttools.whiteSpace(text)
+        indent = sourcecode.whiteSpace(text)
         if indent != userData.indent:
             userData.indent = indent
         # Folding
@@ -282,7 +282,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     
     def close(self):
         PMXBaseEditor.close(self)
-        QtGui.QPlainTextEdit.close(self)
+        TextEditWidget.close(self)
         
     def reload(self):
         PMXBaseEditor.reload(self)
@@ -547,23 +547,23 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
     #-------------------- Highlight Editor
     def textCharFormat_line_builder(self):
-        fmt = QtGui.QTextCharFormat()
-        fmt.setBackground(self.colours['lineHighlight'])
-        fmt.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
-        return fmt
+        textCharFormat = QtGui.QTextCharFormat()
+        textCharFormat.setBackground(self.colours['lineHighlight'])
+        textCharFormat.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
+        return textCharFormat
         
     def textCharFormat_brace_builder(self):
-        fmt = QtGui.QTextCharFormat()
-        fmt.setForeground(self.colours['caret'])
-        fmt.setFontUnderline(True)
-        fmt.setUnderlineColor(self.colours['foreground']) 
-        fmt.setBackground(QtCore.Qt.transparent)
-        return fmt
+        textCharFormat = QtGui.QTextCharFormat()
+        textCharFormat.setForeground(self.colours['caret'])
+        textCharFormat.setFontUnderline(True)
+        textCharFormat.setUnderlineColor(self.colours['foreground']) 
+        textCharFormat.setBackground(QtCore.Qt.transparent)
+        return textCharFormat
 
     def textCharFormat_selection_builder(self):
-        fmt = QtGui.QTextCharFormat()
-        fmt.setBackground(self.colours['selection'])
-        return fmt
+        textCharFormat = QtGui.QTextCharFormat()
+        textCharFormat.setBackground(self.colours['selection'])
+        return textCharFormat
         
     def highlightEditor(self):
         cursor = self.textCursor()
@@ -579,15 +579,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # ------------ QPlainTextEdit Events
     def focusInEvent(self, event):
         # TODO No es para este evento pero hay que poner en alugn lugar el update de las side bars
-        QtGui.QPlainTextEdit.focusInEvent(self, event)
+        TextEditWidget.focusInEvent(self, event)
         self.updateSideBarsGeometry()
         
     def resizeEvent(self, event):
-        QtGui.QPlainTextEdit.resizeEvent(self, event)
+        TextEditWidget.resizeEvent(self, event)
         self.updateSideBarsGeometry()
 
     def paintEvent(self, event):
-        QtGui.QPlainTextEdit.paintEvent(self, event)
+        TextEditWidget.paintEvent(self, event)
         page_bottom = self.viewport().height()
         # TODO: los widgets se pueden hacer del fontMetric, que tal poner algo que me retorne directamente el ancho de un caracter?
         font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
@@ -665,13 +665,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 self.zoomOut()
             event.ignore()
         else:
-            QtGui.QPlainTextEdit.wheelEvent(self, event)
+            TextEditWidget.wheelEvent(self, event)
 
     def mousePressEvent(self, event):
         if event.modifiers() & QtCore.Qt.ControlModifier or self.multiCursorMode.isActive():
             self.multiCursorMode.mousePressPoint(event.pos())
         else:
-            QtGui.QPlainTextEdit.mousePressEvent(self, event)
+            TextEditWidget.mousePressEvent(self, event)
 
     def mouseMoveEvent(self, event):
         if event.modifiers() & QtCore.Qt.ControlModifier or self.multiCursorMode.isActive():
@@ -680,7 +680,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.viewport().repaint(self.viewport().visibleRegion())
         else:
             self.ensureCursorVisible()
-            QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
+            TextEditWidget.mouseReleaseEvent(self, event)
  
     def mouseReleaseEvent(self, event):
         freehanded = False
@@ -701,9 +701,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 cursor.endEditBlock()
                 self.setTextCursor(cursor)
             else:
-                QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
+                TextEditWidget.mouseReleaseEvent(self, event)
         else:
-            QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
+            TextEditWidget.mouseReleaseEvent(self, event)
 
     # -------------------- Keyboard Events
     def runKeyHelper(self, event):
@@ -727,7 +727,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
         if not self.runKeyHelper(event):
             #No tengo helper paso el evento a la base
-            QtGui.QPlainTextEdit.keyPressEvent(self, event)
+            TextEditWidget.keyPressEvent(self, event)
             
             self.emit(QtCore.SIGNAL("keyPressEvent(QEvent)"), event)
 
@@ -736,7 +736,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:
             if mode.isActive():
                 return mode.keyReleaseEvent(event)
-        QtGui.QPlainTextEdit.keyReleaseEvent(self, event)
+        TextEditWidget.keyReleaseEvent(self, event)
 
     # ------------ Insert API
     def insertNewLine(self, cursor = None):
@@ -1116,7 +1116,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             scrollIndex = 0 if pageStep > blockNumber else blockNumber - (pageStep / 2)
             self.verticalScrollBar().setValue(scrollIndex)
         else:
-            QtGui.QPlainTextEdit.centerCursor(self)
+            TextEditWidget.centerCursor(self)
 
     # ------------------- Text Indentation
     def findNoBlankBlock(self, block, direction = "down"):

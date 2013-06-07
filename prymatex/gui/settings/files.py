@@ -4,8 +4,7 @@
 from prymatex.qt import QtGui, QtCore
 from prymatex import resources
 
-from prymatex.utils.text import EOLS
-from prymatex.utils.encoding import CODECS
+from prymatex.utils import sourcecode, encoding
 
 from prymatex.ui.configure.files import Ui_Files
 from prymatex.models.settings import SettingsTreeNode
@@ -30,7 +29,7 @@ class FilesSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Files):
 
     def setupLineEndings(self):
         """Populate line endings"""
-        for _, os_name, description in EOLS:
+        for _, os_name, description in sourcecode.EOLS:
             self.comboBoxEndOfLine.addItem(description, os_name)
 
 
@@ -48,5 +47,5 @@ class FilesSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Files):
 
     def loadEncodings(self):
         """Populate ComboBoxEncoding"""
-        for codec, aliases, language in CODECS:
+        for codec, aliases, language in encoding.CODECS:
             self.comboBoxEncoding.addItem("%s (%s)" % (language.split(",")[0].title(), codec), codec)

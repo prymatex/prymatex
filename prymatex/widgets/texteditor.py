@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
+from __future__ import unicode_literals
 
 import re
+import os
 import difflib
 
-from prymatex.utils import text
+from prymatex.utils import sourcecode
 
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import textcursor2tuple
@@ -27,6 +29,23 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         self.__scopedExtraSelections = {}
         self.__updateExtraSelectionsOrder = []
         self.__textCharFormatBuilders = {}
+        self.eol_chars = None
+        
+    #------ EOL characters
+    def setEolChars(self, text):
+        """Set widget end-of-line (EOL) characters from text (analyzes text)"""
+        eol_chars = sourcecode.get_eol_chars(text)
+        if eol_chars is not None and self.eol_chars is not None:
+            self.document().setModified(True)
+        print("eol: ", eol_chars)
+        self.eol_chars = eol_chars
+        
+    def lineSeparator(self):
+        """Return line separator based on current EOL mode"""
+        if self.eol_chars is not None:
+            return self.eol_chars
+        else:
+            return os.linesep
 
     #------ Overrides
     def setFont(self, font):
@@ -352,26 +371,51 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         self.setTextCursor(self.newCursorAtPosition(*tupleCursor))
 
     def convertToUppercase(self, cursor = None):
-        self.__convert_text(cursor, text.upper_case)
+        self.__convert_text(cursor, sourcecode.upper_case)
         
     def convertToLowercase(self, cursor = None):
-        self.__convert_text(cursor, text.lower_case)
+        self.__convert_text(cursor, sourcecode.lower_case)
         
     def convertToTitlecase(self, cursor = None):
-        self.__convert_text(cursor, text.title_case)
+        self.__convert_text(cursor, sourcecode.title_case)
         
     def convertToOppositeCase(self, cursor = None):
-        self.__convert_text(cursor, text.opposite_case)
+        self.__convert_text(cursor, sourcecode.opposite_case)
     
     def convertSpacesToTabs(self, cursor = None):
-        self.__convert_text(cursor, text.spaces_to_tabs)
+        self.__convert_text(cursor, sourcecode.spaces_to_tabs)
         
     def convertTabsToSpaces(self, cursor = None):
-        self.__convert_text(cursor, text.tabs_to_spaces)
+        self.__convert_text(cursor, sourcecode.tabs_to_spaces)
         
     def convertTranspose(self, cursor = None):
-        self.__convert_text(cursor, text.transpose)
+        self.__convert_text(cursor, sourcecode.transpose)
 
+    #------ Set and Get Text
+    def setPlainText(self, text):
+        """Set the text of the editor"""
+        QtGui.QPlainTextEdit.setPlainText(self, text)
+        self.setEolChars(text)
+
+    def toPlainText(self):
+        """Same as 'toPlainText', replace '\n' by correct end-of-line characters"""
+        plainText = QtGui.QPlainTextEdit.toPlainText(self)
+        return plainText.replace("\n", self.lineSeparator())
+
+    def hasSelection(self, cursor = None):
+        """Returns True if some text is selected"""
+        cursor = cursor or self.textCursor()
+        return cursor.hasSelection()
+
+    def selectedText(self, cursor = None):
+        """
+        Return text selected by current text cursor, converted in unicode
+        Replace the unicode line separator character \u2029 by
+        the line separator characters returned by lineSeparator
+        """
+        cursor = cursor or self.textCursor()
+        return cursor.selectedText().replace("\u2029", self.lineSeparator())
+                    
     #------ Update Text
     def updatePlainText(self, text, cursor = None):
         if cursor:
