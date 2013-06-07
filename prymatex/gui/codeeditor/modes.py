@@ -94,7 +94,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             #Capture Text
             cursor.setPosition(currentHolder.start)
             cursor.setPosition(currentHolder.end - length, QtGui.QTextCursor.KeepAnchor)
-            selectedText = cursor.selectedText().replace("\u2029", '\n').replace("\u2028", '\n')
+            selectedText = self.editor.selectedTextWithEol(cursor)
             currentHolder.setContent(selectedText)
             
             # Wrap snippet

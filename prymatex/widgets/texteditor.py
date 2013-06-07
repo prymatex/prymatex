@@ -397,25 +397,28 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         QtGui.QPlainTextEdit.setPlainText(self, text)
         self.setEolChars(text)
 
-    def toPlainText(self):
+    def toPlainTextWithEol(self):
         """Same as 'toPlainText', replace '\n' by correct end-of-line characters"""
         plainText = QtGui.QPlainTextEdit.toPlainText(self)
         return plainText.replace("\n", self.lineSeparator())
 
-    def hasSelection(self, cursor = None):
-        """Returns True if some text is selected"""
-        cursor = cursor or self.textCursor()
-        return cursor.hasSelection()
-
-    def selectedText(self, cursor = None):
+    def selectedTextWithEol(self, cursor = None):
         """
-        Return text selected by current text cursor, converted in unicode
+        Return text selected text cursor
         Replace the unicode line separator character \u2029 by
         the line separator characters returned by lineSeparator
         """
         cursor = cursor or self.textCursor()
         return cursor.selectedText().replace("\u2029", self.lineSeparator())
-                    
+    
+    def selectedText(self, cursor = None):
+        """
+        Return text selected text cursor
+        Replace the unicode line separator character \u2029 by \n
+        """
+        cursor = cursor or self.textCursor()
+        return cursor.selectedText().replace("\u2029", '\n')
+    
     #------ Update Text
     def updatePlainText(self, text, cursor = None):
         if cursor:

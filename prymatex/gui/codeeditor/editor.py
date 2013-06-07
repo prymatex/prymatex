@@ -839,7 +839,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             environment.update(self.project.environmentVariables())
         if cursor.hasSelection():
             self.logger.debug("Add selection to environment")
-            environment['TM_SELECTED_TEXT'] = cursor.selectedText().replace("\u2029", '\n').replace("\u2028", '\n')
+            environment['TM_SELECTED_TEXT'] = self.selectedTextWithEol(cursor)
             start, end = self.selectionBlockStartEnd()
             environment['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
             environment['TM_INPUT_START_LINE'] = start.blockNumber() + 1

@@ -83,8 +83,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def selection(self, inputFormat = None):
         cursor = self.editor.textCursor()
         if cursor.hasSelection():
-            # TODO Buscar otra forma que no sea estos replace
-            text = cursor.selectedText().replace("\u2029", '\n').replace("\u2028", '\n')
+            text = self.editor.selectedTextWithEol(cursor)
             if inputFormat == "xml":
                 firstBlock, lastBlock = self.editor.selectionBlockStartEnd()
                 return self.formatAsXml(text, firstBlock, lastBlock, cursor.selectionStart() - firstBlock.position(), cursor.selectionEnd() - lastBlock.position())

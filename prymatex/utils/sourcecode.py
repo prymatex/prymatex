@@ -39,7 +39,7 @@ def has_mixed_eol_chars(text):
     eol_chars = get_eol_chars(text)
     if eol_chars is None:
         return False
-    correct_text = eol_chars.join((text+eol_chars).splitlines())
+    correct_text = eol_chars.join((text + eol_chars).splitlines())
     return repr(correct_text) != repr(text)
 
 
