@@ -604,11 +604,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             # The top left position of the block in the document
             # position = self.blockBoundingGeometry(block).topLeft() + offset
             blockGeometry = self.blockBoundingGeometry(block)
+            blockGeometry.translate(offset)
             # Check if the position of the block is out side of the visible area
             if blockGeometry.top() > page_bottom:
                 break
             if block.isVisible():
-                positionY = round(blockGeometry.top()) + offset.y()
+                positionY = blockGeometry.top()
                 if self.isFolded(block):
                     painter.drawPixmap(font_metrics.width(block.text()) + offset.x() + 5,
                         positionY + font_metrics.ascent() + font_metrics.descent() - resources.getImage("foldingellipsis").height(),

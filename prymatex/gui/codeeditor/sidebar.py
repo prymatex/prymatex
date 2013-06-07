@@ -93,6 +93,7 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     def __update_colours(self):
         self.background = self.editor.colours['gutter']
         self.foreground = self.editor.colours['gutterForeground']
+        self.invisibles = self.editor.colours['invisibles']
         
     def __update_fonts(self):
         self.normalFont = QtGui.QFont(self.editor.font())
@@ -138,36 +139,39 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
 
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
-        current_block = self.editor.document().findBlock(self.editor.textCursor().position())
+        current_block = self.editor.textCursor().block()
         
         painter = QtGui.QPainter(self)
         painter.setPen(self.foreground)
         painter.fillRect(self.rect(), self.background)
-
+        painter.setFont(self.normalFont)
+        
         block = self.editor.firstVisibleBlock()
-        viewport_offset = self.editor.contentOffset()
+        offset = self.editor.contentOffset()
         line_count = block.blockNumber()
         
         while block.isValid():
             line_count += 1
             # The top left position of the block in the document
-            position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
+            blockGeometry = self.editor.blockBoundingGeometry(block)
+            blockGeometry.translate(offset)
             # Check if the position of the block is out side of the visible area
-            if position.y() > page_bottom:
+            if blockGeometry.top() > page_bottom:
                 break
 
             # Draw the line number right justified at the y position of the line.
             if block.isVisible():
                 numberText = str(line_count)
                 if block == current_block:
+                    painter.fillRect(blockGeometry, self.invisibles)
                     painter.setFont(self.boldFont)
                     leftPosition = self.width() - (self.boldMetrics.width(numberText) + self.MARGIN)
-                    topPosition = position.y() + self.boldMetrics.ascent() + self.boldMetrics.descent() - 2
+                    topPosition = blockGeometry.y() + self.boldMetrics.ascent() + self.boldMetrics.descent() - 2
                     painter.drawText(leftPosition, topPosition, numberText)
-                else:
                     painter.setFont(self.normalFont)
+                else:
                     leftPosition = self.width() - (self.normalMetrics.width(numberText) + self.MARGIN)
-                    topPosition = position.y() + self.normalMetrics.ascent() + self.normalMetrics.descent() - 2
+                    topPosition = blockGeometry.y() + self.normalMetrics.ascent() + self.normalMetrics.descent() - 2
                     painter.drawText(leftPosition, topPosition, numberText)
             
             block = block.next()
@@ -186,6 +190,7 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
         self.bookmarkflagImage = resources.getImage("bookmarkflag")
+        self.imagesHeight = self.bookmarkflagImage.height()
         self.setFixedWidth(self.bookmarkflagImage.width())
         self.setObjectName(self.__class__.__name__)
         
@@ -193,11 +198,13 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         SideBarWidgetAddon.initialize(self, editor)
         self.background = self.editor.colours['gutter']
         self.foreground = self.editor.colours['gutterForeground']
+        self.invisibles = self.editor.colours['invisibles']
         self.editor.themeChanged.connect(self.updateColours)
         
     def updateColours(self):
         self.background = self.editor.colours['gutter']
         self.foreground = self.editor.colours['gutterForeground']
+        self.invisibles = self.editor.colours['invisibles']
         self.repaint(self.rect())
 
     @classmethod
@@ -221,25 +228,28 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     def paintEvent(self, event):
         font_metrics = QtGui.QFontMetrics(self.editor.font())
         page_bottom = self.editor.viewport().height()
-       
+        current_block = self.editor.textCursor().block()
+        
         painter = QtGui.QPainter(self)
         painter.fillRect(self.rect(), self.background)
 
         block = self.editor.firstVisibleBlock()
-        viewport_offset = self.editor.contentOffset()
+        offset = self.editor.contentOffset()
         
         while block.isValid():
-            # The top left position of the block in the document
-            position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
+            blockGeometry = self.editor.blockBoundingGeometry(block)
+            blockGeometry.translate(offset)
             # Check if the position of the block is out side of the visible area
-            if position.y() > page_bottom:
+            if blockGeometry.top() > page_bottom:
                 break
+            
+            if block == current_block:
+                painter.fillRect(blockGeometry, self.invisibles)
 
             # Draw the line number right justified at the y position of the line.
             if block.isVisible() and block in self.editor.bookmarkListModel:
-                painter.drawPixmap(0,
-                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.bookmarkflagImage.height(),
-                    self.bookmarkflagImage)
+                positionY = blockGeometry.top() + ((blockGeometry.height() - self.imagesHeight) / 2)
+                painter.drawPixmap(0, positionY, self.bookmarkflagImage)
 
             block = block.next()
 
@@ -264,16 +274,19 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         self.foldingcollapsedImage = resources.getImage("foldingcollapsed")
         self.foldingtopImage = resources.getImage("foldingtop")
         self.foldingbottomImage = resources.getImage("foldingbottom")
+        self.imagesHeight = self.foldingcollapsedImage.height()
         self.setFixedWidth(self.foldingbottomImage.width())
         self.setObjectName(self.__class__.__name__)
 
     def initialize(self, editor):
         SideBarWidgetAddon.initialize(self, editor)
-        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
+        self.background = self.editor.colours['gutter']
+        self.invisibles = self.editor.colours['invisibles']
         self.editor.themeChanged.connect(self.updateColours)
         
     def updateColours(self):
-        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
+        self.background = self.editor.colours['gutter']
+        self.invisibles = self.editor.colours['invisibles']
         self.repaint(self.rect())
     
     @classmethod
@@ -297,35 +310,35 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     def paintEvent(self, event):
         font_metrics = QtGui.QFontMetrics(self.editor.font())
         page_bottom = self.editor.viewport().height()
-       
+        current_block = self.editor.textCursor().block()
+        
         painter = QtGui.QPainter(self)
         painter.fillRect(self.rect(), self.background)
 
         block = self.editor.firstVisibleBlock()
-        viewport_offset = self.editor.contentOffset()
+        offset = self.editor.contentOffset()
         
         while block.isValid():
-            # The top left position of the block in the document
-            position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
+            blockGeometry = self.editor.blockBoundingGeometry(block)
+            blockGeometry.translate(offset)
+            
             # Check if the position of the block is out side of the visible area
-            if position.y() > page_bottom:
+            if blockGeometry.top() > page_bottom:
                 break
+
+            if block == current_block:
+                painter.fillRect(blockGeometry, self.invisibles)
 
             # Draw the line number right justified at the y position of the line.
             if block.isVisible():
+                positionY = blockGeometry.top() + ((blockGeometry.height() - self.imagesHeight) / 2)
                 if self.editor.isFoldingStartMarker(block) or self.editor.isFoldingIndentedBlockStart(block):
                     if self.editor.isFolded(block):
-                        painter.drawPixmap(0,
-                            round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingcollapsedImage.height(),
-                            self.foldingcollapsedImage)
+                        painter.drawPixmap(0, positionY, self.foldingcollapsedImage)
                     else:
-                        painter.drawPixmap(0,
-                            round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingtopImage.height(),
-                            self.foldingtopImage)
+                        painter.drawPixmap(0, positionY, self.foldingtopImage)
                 elif self.editor.isFoldingStopMarker(block):
-                    painter.drawPixmap(0,
-                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingbottomImage.height(),
-                        self.foldingbottomImage)
+                    painter.drawPixmap(0, positionY, self.foldingbottomImage)
 
             block = block.next()
 
@@ -398,12 +411,12 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         painter = QtGui.QPainter(self)
         painter.fillRect(self.rect(), self.background)
 
-        viewport_offset = self.editor.contentOffset()
+        offset = self.editor.contentOffset()
 
         for extra in self.editor.searchExtraSelections("selection"):
             y = round(extra.cursor.block().blockNumber() * rectRelation)
             if rectRelation == lineHeight:
-                y += viewport_offset.y()
+                y += offset.y()
             painter.fillRect(0, y, 10, rectHeight, self.editor.colours['selection'])
 
         painter.end()
