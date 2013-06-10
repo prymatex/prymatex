@@ -82,10 +82,9 @@ class PMXThemeStyle(object):
 class PMXTheme(PMXManagedObject):
     KEYS = [    'name', 'comment', 'author', 'settings']
     
-    def __init__(self, uuid, dataHash):
+    def __init__(self, uuid):
         super(PMXTheme, self).__init__(uuid)
         self.styles = []
-        self.load(dataHash)
 
     def load(self, dataHash):
         for key in PMXTheme.KEYS:
@@ -119,45 +118,6 @@ class PMXTheme(PMXManagedObject):
         if not os.path.exists(folder):
             os.makedirs(folder)
         plist.writePlist(self.hash, self.path(namespace))
-
-    @classmethod
-    def loadTheme(cls, path, namespace, manager):
-        try:
-            data = plist.readPlist(path)
-            uuid = manager.uuidgen(data.pop('uuid', None))
-            theme = manager.getManagedObject(uuid)
-            if theme is None and not manager.isDeleted(uuid):
-                theme = PMXTheme(uuid, data)
-                theme.setManager(manager)
-                theme.addSource(namespace, path)
-                theme = manager.addTheme(theme)
-                settings = data.pop('settings', [])
-                if settings:
-                    theme.setDefaultSettings(settings.pop(0)["settings"])
-                for setting in settings:
-                    style = PMXThemeStyle(setting, theme)
-                    style = manager.addThemeStyle(style)
-                    theme.styles.append(style)
-                manager.addManagedObject(theme)
-            elif theme is not None:
-                theme.addSource(namespace, path)
-            return theme
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            print("Error en theme %s (%s)" % (path, e))
-            
-
-    @classmethod
-    def reloadTheme(cls, theme, path, namespace, manager):
-        #Remove all styles
-        list(map(lambda style: manager.removeThemeStyle(style), theme.styles))
-        data = plist.readPlist(path)
-        theme.load(data)
-        settings = data.pop('settings', [])
-        if settings:
-            self.setDefaultSettings(settings.pop(0)["settings"])
-        for setting in settings:
-            style = PMXThemeStyle(setting, theme)
-            style = manager.addThemeStyle(style)
-            self.styles.append(style)
+    
+    def removeThemeStyle(self, style):
+        self.styles.remove(style)

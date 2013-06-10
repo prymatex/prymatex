@@ -24,6 +24,7 @@ class PMXManagedObject(object):
         self.sources = {}
         self.manager = None
         self.populated = False
+        # TODO: mover esto a los bundle item
         self.statics = []
 
     def load(self, dataHash):
@@ -104,6 +105,12 @@ class PMXManagedObject(object):
     def staticPaths(self):
         return []
 
+    def addStaticFile(self, staticPath):
+        self.statics.append(staticPath)
+
+    def removeStaticFile(self, staticPath):
+        self.statics.remove(staticPath)
+        
     @classmethod
     def dataFilePath(cls, path):
         return path

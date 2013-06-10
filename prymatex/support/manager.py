@@ -277,13 +277,39 @@ class PMXSupportBaseManager(object):
     def loadThemes(self, namespace):
         loadedThemes = set()
         if self.THEMES_NAME in self.namespaces[namespace]:
-            paths = glob(os.path.join(self.namespaces[namespace][self.THEMES_NAME], '*.tmTheme'))
-            for path in paths:
-                theme = PMXTheme.loadTheme(path, namespace, self)
-                if theme is not None:
+            themePaths = glob(os.path.join(self.namespaces[namespace][self.THEMES_NAME], '*.tmTheme'))
+            for themePath in themePaths:
+                try:
+                    theme = self.loadTheme(themePath, namespace)
                     self.showMessage("Loading theme\n%s" % theme.name)
                     loadedThemes.add(theme)
+                except Exception as ex:
+                    import traceback
+                    print("Error in laod theme %s (%s)" % (themePath, ex))
+                    traceback.print_exc()
         return loadedThemes
+
+    def loadTheme(self, themePath, namespace):
+        data = self.readPlist(PMXTheme.dataFilePath(themePath))
+        uuid = self.uuidgen(data.pop('uuid', None))
+        theme = self.getManagedObject(uuid)
+        if not (theme or self.isDeleted(uuid)):
+            theme = PMXTheme(uuid)
+            theme.load(data)
+            theme.setManager(self)
+            theme.addSource(namespace, themePath)
+            theme = self.addTheme(theme)
+            settings = data.pop('settings', [])
+            if settings:
+                theme.setDefaultSettings(settings.pop(0)["settings"])
+            for setting in settings:
+                style = PMXThemeStyle(setting, theme)
+                style = self.addThemeStyle(style)
+                theme.styles.append(style)
+            self.addManagedObject(theme)
+        elif theme:
+            theme.addSource(namespace, themePath)
+        return theme
 
     #------------- LOAD BUNDLES ------------------
     def loadBundles(self, namespace):
@@ -353,14 +379,14 @@ class PMXSupportBaseManager(object):
                 # TODO: Ver que hacer con directorios
                 staticFile = PMXStaticFile(staticPath, bundleItem)
                 staticFile = self.addStaticFile(staticFile)
-                bundleItem.statics.append(staticFile)
+                bundleItem.addStaticFile(staticFile)
             self.addManagedObject(bundleItem)
         elif bundleItem is not None:
             bundleItem.addSource(namespace, file_path)
         return bundleItem
 
     # -------------------- RELOAD SUPPORT
-    def reloadSupport(self, callback=None):
+    def reloadSupport(self, callback = None):
         #Reload Implica ver en todos los espacios de nombre instalados por cambios en los items
         # Install message handler
         self.messageHandler = callback
@@ -385,8 +411,19 @@ class PMXSupportBaseManager(object):
                 themePath = theme.path(namespace)
                 if themePath in themePaths:
                     if namespace == theme.currentNamespace and theme.sourceChanged(namespace):
+                        # Remove all styles
+                        for style in theme.styles:
+                            theme.removeThemeStyle(style)
                         self.logger.debug("Theme %s changed, reload from %s." % (theme.name, themePath))
-                        theme.reloadTheme(theme, themePath, namespace, self)
+                        data = self.readPlist(PMXBundle.dataFilePath(themePath))
+                        bundle.load(data)
+                        settings = data.pop('settings', [])
+                        if settings:
+                            theme.setDefaultSettings(settings.pop(0)["settings"])
+                        for setting in settings:
+                            style = PMXThemeStyle(setting, theme)
+                            style = self.addThemeStyle(style)
+                            theme.styles.append(style)
                         theme.updateMtime(namespace)
                         self.modifyTheme(theme)
                     themePaths.remove(themePath)
@@ -400,7 +437,7 @@ class PMXSupportBaseManager(object):
                         theme.setDirty()
             for path in themePaths:
                 self.logger.debug("New theme %s." % path)
-                PMXTheme.loadTheme(path, namespace, self)
+                self.loadTheme(path, namespace)
 
     # ---------------- RELOAD BUNDLES
     def reloadBundles(self, namespace):
@@ -462,6 +499,8 @@ class PMXSupportBaseManager(object):
                 bundleItemPath = bundleItem.path(namespace)
                 if bundleItemPath in bundleItemPaths:
                     if namespace == bundleItem.currentNamespace and bundleItem.sourceChanged(namespace):
+                        for staticFile in bundleItem.statics:
+                            bundleItem.removeStaticFile(staticFile)
                         self.logger.debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, bundleItemPath))
                         data = self.readPlist(self.dataFilePath(bundleItemPath))
                         bundleItem.load(data)
