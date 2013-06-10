@@ -22,7 +22,7 @@ from prymatex.support.utils import ensurePath
 from prymatex.support import scope
 
 from prymatex.utils import plist
-from prymatex.utils.decorators.deprecated import deprecated
+
 from prymatex.utils.decorators.memoize import dynamic_memoized, remove_memoized_argument, remove_memoized_function
 from functools import reduce
 
@@ -152,19 +152,6 @@ class PMXSupportBaseManager(object):
             os.makedirs(path)
             self.addNamespaceElement(namespace, element, path)
         return path, os.path.exists(path)
-
-    @deprecated
-    def basePath(self, element, namespace, create=False):
-        if namespace not in self.namespaces:
-            raise Exception("The %s namespace is not registered" % namespace)
-        if element in self.namespaces[namespace]:
-            return self.namespaces[namespace][element]
-        elif create and element in self.ELEMENTS:
-            path = os.path.join(self.namespaces[namespace], element)
-            # TODO Usar el del fileManager
-            os.makedirs(path)
-            self.addNamespaceElement(namespace, element, path)
-            return self.namespaces[namespace][element]
 
     #--------------- Plist --------------------
     def readPlist(self, path):
