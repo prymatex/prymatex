@@ -174,7 +174,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             splash.show()
         try:
             # Build Managers
-            self.persistenceManager = self.buildPersistenceManager()  # Persistence system Manager
+            self.cacheManager = self.buildCacheManager()  # Persistence system Manager
             self.supportManager = self.buildSupportManager()  # Support Manager
             self.fileManager = self.buildFileManager()  # File Manager
             self.projectManager = self.buildProjectManager()  # Project Manager
@@ -272,9 +272,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         from prymatex.managers.projects import ProjectManager
         return self.createComponentInstance(ProjectManager)
 
-    def buildPersistenceManager(self):
-        from prymatex.managers.persistence import PersistenceManager
-        return self.createComponentInstance(PersistenceManager)
+    def buildCacheManager(self):
+        from prymatex.managers.cache import CacheManager
+        return self.createComponentInstance(CacheManager)
 
     def buildSchedulerManager(self):
         from prymatex.utils import coroutines

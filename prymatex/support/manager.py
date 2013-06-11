@@ -1023,7 +1023,7 @@ class PMXSupportBaseManager(object):
                     best = (trigger, length)
             return best[0]
 
-    def getAllTabTiggerItemsByScope(self, leftScope, rightScope):
+    def getAllTabTiggerItemsByScope(self, leftScope, rightScope = None):
         memoizedKey = ("getAllTabTiggerItemsByScope", None, leftScope, rightScope)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
