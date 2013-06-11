@@ -287,7 +287,8 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     # --------------------- Application events
     def closePrymatex(self):
         self.logger.debug("Close")
-
+        
+        self.cacheManager.close()
         self.currentProfile.saveState(self.mainWindow)
         if os.path.exists(self.fileLock):
             os.unlink(self.fileLock)

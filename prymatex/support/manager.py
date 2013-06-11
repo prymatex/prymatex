@@ -159,7 +159,7 @@ class PMXSupportBaseManager(object):
     #--------------- Plist --------------------
     def readPlist(self, path):
         if path in self.plistFileCache:
-            return self.plistFileCache[path]
+            return self.plistFileCache.get(path)
         return self.plistFileCache.setdefault(path, plist.readPlist(path))
         
     def writePlist(self, hashData, path):
