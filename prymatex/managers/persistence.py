@@ -8,18 +8,19 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import PMXBaseComponent
 
-class SingleFileCache(object):
-    def __init__(self, manager, path):
+class ManagedCacheMixin(object):
+    def setManager(self, manager):
         self.manager = manager
+
+    def sync(self):
+        pass
+        
+class SingleFileCache(ManagedCacheMixin):
+    def __init__(self, path):
         self.path = path
 
-class MemoryCache(object):
-    def __init__(self, manager):
-        self.manager = manager
-        self.objects = {}
-    
-    def set(self, key, values):
-        self.objects[key] = value
+class MemoryCache(dict, ManagedCacheMixin):
+    pass
 
 class PersistenceManager(QtCore.QObject, PMXBaseComponent):
     def __init__(self, application):
@@ -35,6 +36,12 @@ class PersistenceManager(QtCore.QObject, PMXBaseComponent):
     def singleFileCache(self, value):
         fileName = self.buildFileName(value)
         print os.path.join(self.cacheDirectory, fileName)
+    
+    def memoryCache(self, value):
+        cache = MemoryCache()
+        cache.setManager(self)
+        self.caches.append(cache)
+        return cache
 
     def sync(self):
         for cache in self.caches:
