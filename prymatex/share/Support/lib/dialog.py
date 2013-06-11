@@ -25,7 +25,7 @@ except:
         return True
 
 def item(val):
-    if isinstance(val, basestring):
+    if isinstance(val, str):
         return {"title": val}
     if isinstance(val, tuple):
         return {"title": val[0]}
@@ -68,15 +68,22 @@ def menu(options):
 def get_string(**options):
     """Get a string using dialog
     
-    Accepts `title` and `prompt` strings, and returns the string entered by
-    the user.
+    Accepts:
+     - `title` - The string to show in the title bar
+     - `prompt` - The label for the text field
+     - `string` - The default value inside the text field
+    
+    Returns:
+     - The string entered by the user.
     """
     
     # Set defaults and get options:
-    if not options.has_key('title'):
+    if 'title' not in options:
         options['title']='Enter String'
-    if not options.has_key('prompt'):
+    if 'prompt' not in options:
         options['prompt']='String:'
+    if 'string' not in options:
+        options['string']=''
     plist = to_plist(options)
     
     # Run dialog, piping our plist in, and reading the output:

@@ -2,7 +2,8 @@
 # -*- encoding: utf-8 -*-
 
 import re
-from bisect import bisect
+import operator
+from collections import namedtuple
 
 from prymatex.qt import QtCore, QtGui
 
@@ -14,25 +15,36 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core import exceptions
 from prymatex.qt.helpers.menus import extend_menu, update_menu
 from prymatex.models.support import BundleItemTreeNode
+
+from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserData
 from prymatex.gui.codeeditor.addons import CodeEditorAddon
 from prymatex.gui.codeeditor.sidebar import CodeEditorSideBar, SideBarWidgetAddon
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
-from prymatex.gui.codeeditor.folding import PMXEditorFolding
-from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXAlreadyTypedWords
+from prymatex.gui.codeeditor.models import (SymbolListModel, BookmarkListModel, 
+                                            AlreadyTypedWords, 
+                                            bundleItemSelectableModelFactory,
+                                            bookmarkSelectableModelFactory,
+                                            symbolSelectableModelFactory)
 
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 
 from prymatex.utils import coroutines
-from prymatex.utils import text
+from prymatex.utils import sourcecode
+from prymatex.utils import six
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime
+from functools import reduce
+
+WIDTH_CHARACTER = "#"
+
+CodeEditorScope = namedtuple("CodeEditorScope", [
+    "name", "path", "settings", "group"
+])
 
 class CodeEditor(TextEditWidget, PMXBaseEditor):
-    #=======================================================================
-    # Scope groups
-    #=======================================================================
+    # -------------------- Scope groups
     SORTED_GROUPS = [   "keyword", "entity", "meta", "variable", "markup", 
                         "support", "storage", "constant", "string", "comment", "invalid" ]
 
@@ -40,108 +52,45 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # por ahora la fabricacion la hace el editor en el factory method flyweightScopeFactory
     SCOPES = {}
         
-    #=======================================================================
-    # Signals
-    #=======================================================================
-    syntaxChanged = QtCore.pyqtSignal(object)
-    syntaxReady = QtCore.pyqtSignal(object)
-    themeChanged = QtCore.pyqtSignal()
-    fontChanged = QtCore.pyqtSignal()
-    modeChanged = QtCore.pyqtSignal()
-    blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
-    blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
-    extraSelectionChanged = QtCore.pyqtSignal()
+    # -------------------- Signals
+    syntaxChanged = QtCore.Signal(object)
+    themeChanged = QtCore.Signal()
+    modeChanged = QtCore.Signal()
+    blocksRemoved = QtCore.Signal(QtGui.QTextBlock, int)
+    blocksAdded = QtCore.Signal(QtGui.QTextBlock, int)
     
-    afterOpen = QtCore.pyqtSignal()
-    afterSave = QtCore.pyqtSignal()
-    afterClose = QtCore.pyqtSignal()
-    afterReload = QtCore.pyqtSignal()
-    beforeOpen = QtCore.pyqtSignal()
-    beforeSave = QtCore.pyqtSignal()
-    beforeClose = QtCore.pyqtSignal()
-    beforeReload = QtCore.pyqtSignal()
-
-    #================================================================
-    # Regular expresions
-    #================================================================
-    #TODO: Ver que pasa con [A-Za-z_]+ en lugar de [A-Za-z_]*
-    RE_WORD = re.compile(r"[A-Za-z_]*")
+    aboutToHighlightChange = QtCore.Signal()
+    highlightChanged = QtCore.Signal()
     
-    #================================================================
-    # Selection types
-    #================================================================
-    SelectWord = QtGui.QTextCursor.WordUnderCursor #0
-    SelectLine = QtGui.QTextCursor.LineUnderCursor #1
-    SelectParagraph = QtGui.QTextCursor.BlockUnderCursor #2 este no es un paragraph pero no importa
-    SelectAll = QtGui.QTextCursor.Document #3
-    SelectEnclosingBrackets = 4
-    SelectCurrentScope = 5
-    
-    #================================================================
-    # Move types
-    #================================================================
-    MoveLineUp = QtGui.QTextCursor.Up
-    MoveLineDown = QtGui.QTextCursor.Down
-    MoveColumnLeft = QtGui.QTextCursor.Left
-    MoveColumnRight = QtGui.QTextCursor.Right
-    
-    #================================================================
-    # Convert types
-    #================================================================
-    CONVERTERS = [  text.upper_case, 
-                    text.lower_case, 
-                    text.title_case,
-                    text.opposite_case,
-                    text.spaces_to_tabs,
-                    text.tabs_to_spaces,
-                    text.transpose
-    ]
-    ConvertToUppercase = 0
-    ConvertToLowercase = 1
-    ConvertToTitlecase = 2
-    ConvertToOppositeCase = 3
-    ConvertSpacesToTabs = 4
-    ConvertTabsToSpaces = 5
-    ConvertTranspose = 6
-
-    #================================================================
-    # Editor Flags
-    #================================================================
+    # ------------------ Flags
     ShowTabsAndSpaces     = 1<<0
     ShowLineAndParagraphs = 1<<1
-    ShowBookmarks         = 1<<2
-    ShowLineNumbers       = 1<<3
-    ShowFolding           = 1<<4
-    WordWrap              = 1<<5
-    MarginLine            = 1<<6
-    IndentGuide           = 1<<7
+    WordWrap              = 1<<2
+    MarginLine            = 1<<3
+    IndentGuide           = 1<<4
+    HighlightCurrentLine  = 1<<5
     
-    #=======================================================================
-    # Settings
-    #=======================================================================
+    # ------------------- Settings
     SETTINGS_GROUP = 'CodeEditor'
-    
-    defaultSyntax = pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
+        
     tabStopSoft = pmxConfigPorperty(default = True)
-    
+    marginLineSpaces = pmxConfigPorperty(default = 80)
+     
     @pmxConfigPorperty(default = 4)
     def tabStopSize(self, size):
         self.setTabStopWidth(size * 9)
     
     @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
-    def font(self, font):
-        font.setStyleHint(QtGui.QFont.Monospace)
-        font.setStyleStrategy(QtGui.QFont.ForceIntegerMetrics)
-        font.setStyleStrategy(QtGui.QFont.PreferAntialias)
-        self.document().setDefaultFont(font)
-        #print QtGui.QFontMetrics(self.document().defaultFont()).width(" ")
-        #print QtGui.QFontMetrics(self.document().defaultFont()).width("i")
-        #print QtGui.QFontMetrics(self.document().defaultFont()).width("w")
-        #print QtGui.QFontMetrics(self.document().defaultFont()).width("#")
-        self.fontChanged.emit()
-    
+    def defaultFont(self, font):
+        self.setFont(font)
+
+    @pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
+    def defaultSyntax(self, uuid):
+        syntax = self.application.supportManager.getBundleItem(uuid)
+        self.setSyntax(syntax)
+
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
-    def theme(self, uuid):
+    def defaultTheme(self, uuid):
         theme = self.application.supportManager.getTheme(uuid)
 
         self.syntaxHighlighter.setTheme(theme)
@@ -154,29 +103,33 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setStyleSheet(appStyle)
         self.themeChanged.emit()
 
-    @pmxConfigPorperty(default = ShowLineNumbers)
+    @pmxConfigPorperty(default = MarginLine | IndentGuide | HighlightCurrentLine)
     def defaultFlags(self, flags):
         self.setFlags(flags)
 
-    #================================================================
-    # INIT
-    #================================================================
+    # --------------------- init
     def __init__(self, parent = None):
         TextEditWidget.__init__(self, parent)
         PMXBaseEditor.__init__(self)
-
+        
+        self.__blockUserDataHandlers = []
+        
+        self.braces = []
+        #Current braces for cursor position (leftBrace <|> rightBrace, oppositeLeftBrace, oppositeRightBrace) 
+        # <|> the cursor is allways here
+        self._currentBraces = (None, None, None, None)
+        
         #Sidebars
         self.leftBar = CodeEditorSideBar(self)
         self.rightBar = CodeEditorSideBar(self)
-        #self.updateViewportMargins()
 
         #Models
-        self.bookmarkListModel = PMXBookmarkListModel(self)
-        self.symbolListModel = PMXSymbolListModel(self)
-        self.alreadyTypedWords = PMXAlreadyTypedWords(self)
-        
-        #Folding
-        self.folding = PMXEditorFolding(self)
+        self.bookmarkListModel = BookmarkListModel(self)
+        self.symbolListModel = SymbolListModel(self)
+        self.alreadyTypedWords = AlreadyTypedWords(self)
+        self.bundleItemSelectableModel = bundleItemSelectableModelFactory(self)
+        self.symbolSelectableModel = symbolSelectableModelFactory(self)
+        self.bookmarkSelectableModel = bookmarkSelectableModelFactory(self)
         
         #Processors
         self.commandProcessor = PMXCommandProcessor(self)
@@ -185,103 +138,125 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
         #Highlighter
         self.syntaxHighlighter = PMXSyntaxHighlighter(self)
-        #self.extraSelectionCursors = MultiListsDict()
         
+        # TODO Quiza algo como que los modos se registren solos?
         #Modes
         self.multiCursorMode = PMXMultiCursorEditorMode(self)
         self.completerMode = PMXCompleterEditorMode(self)
         self.snippetMode = PMXSnippetEditorMode(self)
         
-        self.braces = []
-        #Current braces for cursor position (leftBrace * rightBrace, oppositeLeftBrace, oppositeRightBrace) 
-        # * the cursor is allways here>
-        self._currentBraces = (None, None, None, None)
-        
         #Block Count
         self.lastBlockCount = self.document().blockCount()
-
         #Connect context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
 
-        self.completerTask = self.application.scheduler.idleTask()
+        self.completerTask = self.application.schedulerManager.idleTask()
         
-        #Cursor history
-        #self._cursorHistory, self._cursorHistoryIndex = [], 0
-        
-        #Esta señal es especial porque es emitida en el setFont por los settings
-        self.fontChanged.connect(self.on_fontChanged)
-        #Basic setup
-        #self.setCenterOnScroll(True)
-    
-    # Connect Signals
-    def connectSignals(self):
+        #Register text formaters
+        self.registerTextCharFormatBuilder("line", self.textCharFormat_line_builder)
+        self.registerTextCharFormatBuilder("selection", self.textCharFormat_selection_builder)
+        self.registerTextCharFormatBuilder("brace", self.textCharFormat_brace_builder)
+
+        # Sidebars signals
         self.rightBar.updateRequest.connect(self.updateViewportMargins)
         self.leftBar.updateRequest.connect(self.updateViewportMargins)
         
-        self.syntaxHighlighter.highlightReady.connect(self.on_highlightReady)
+        # Document signals
+        self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)        
+
+        # Editor signals
         self.blockCountChanged.connect(self.on_blockCountChanged)
         self.updateRequest.connect(self.updateSideBars)
-        self.cursorPositionChanged.connect(self.on_cursorPositionChanged)
         self.modificationChanged.connect(self.on_modificationChanged)
-        self.syntaxChanged.connect(self.showSyntaxMessage)
+        self.syntaxChanged.connect(self.on_syntaxChanged)
         self.themeChanged.connect(self.highlightEditor)
-        
-        self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)
 
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
-        self.connectSignals()
-        #Load Default Syntax
-        syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
-        self.setSyntax(syntax)
-    
-    def addAddon(self, addon):
-        PMXBaseEditor.addAddon(self, addon)
-        if isinstance(addon, SideBarWidgetAddon):
-            self.addSideBarWidget(addon)
+        self.syntaxHighlighter.setDocument(self.document())
+        
+        # Get dialogs
+        self.selectorDialog = self.mainWindow.findChild(QtGui.QDialog, "SelectorDialog")
+        self.browserDock = self.mainWindow.findChild(QtGui.QDockWidget, "BrowserDock")
+
+        # Ultimo en conectar esta señal, para poder hacer el update
+        self.cursorPositionChanged.connect(self.setCurrentBraces)
+        self.cursorPositionChanged.connect(self.highlightEditor)
+
+    # ----------- Override from PMXBaseComponent
+    def addComponent(self, component):
+        PMXBaseEditor.addComponent(self, component)
+        if isinstance(component, SideBarWidgetAddon):
+            self.addSideBarWidget(component)
 
     def addSideBarWidget(self, widget):
         if widget.ALIGNMENT == QtCore.Qt.AlignRight:
             self.rightBar.addWidget(widget)
         else:
             self.leftBar.addWidget(widget)
+
+    def on_syntaxChanged(self, syntax):
+        # Set the basic scope
+        self.setBasicScope(( syntax.scopeName, ))
         
-    def showSyntaxMessage(self, syntax):
+        # Set braces
+        self.braces = self.basicScope().settings.smartTypingPairs
+        
         self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
     
     def showMessage(self, *largs, **kwargs):
-        self.mainWindow.showMessage(*largs, **kwargs)
-        
-    #================================================================
-    # Update editor status, called from Highlighter
-    #================================================================
-    def updateIndent(self, block, userData, indent):
-        self.logger.debug("Update Block Indent")
-    
-    def updateFolding(self, block, userData, foldingMark):
-        self.logger.debug("Update Block Folding")
-        if block.userData().foldingMark == None:
-            self.folding.removeFoldingBlock(block)
-        else:
-            self.folding.addFoldingBlock(block)
-        
-    def updateSymbol(self, block, userData, symbol):
-        self.logger.debug("Update Block Symbol")
-        if block.userData().symbol is None:
-            self.symbolListModel.removeSymbolBlock(block)
-        else:
-            self.symbolListModel.addSymbolBlock(block)
-        
-    def updateWords(self, block, userData, words):
-        self.logger.debug("Update Words")
-        #Quitar el block de las palabras anteriores
-        self.alreadyTypedWords.removeWordsBlock(block, filter(lambda word: word not in words, userData.words))
-        
-        #Agregar las palabras nuevas
-        self.alreadyTypedWords.addWordsBlock(block, filter(lambda word: word not in userData.words, words))
-        userData.words = words
-        
+        self.application.showMessage(*largs, **kwargs)
+
+    def setPlainText(self, text):
+        from time import time
+        self.syntaxHighlighter.stop()
+        self.aboutToHighlightChange.emit()
+        TextEditWidget.setPlainText(self, text)
+        self.highlightTime = time()
+        def highlightReady(editor):
+            def _ready():
+                editor.highlightChanged.emit()
+                print("Tiempo", time() - self.highlightTime)
+            return _ready
+        self.syntaxHighlighter.runAsyncHighlight(highlightReady(self))
+        #self.syntaxHighlighter.runAsyncHighlight(lambda editor = self: editor.highlightChanged.emit())
+            
+    # --------------- Block User Data
+    def registerBlockUserDataHandler(self, handler):
+        self.__blockUserDataHandlers.append(handler)
+
+    def blockUserData(self, block):
+        userData = block.userData()
+        if not userData:
+            userData = CodeEditorBlockUserData()
+            # Indent and content
+            userData.indent = ""
+            
+            # Folding
+            userData.foldingMark = PMXPreferenceSettings.FOLDING_NONE
+            userData.foldedLevel = 0
+            userData.folded = False
+            
+            # Now the handlers
+            for handler in self.__blockUserDataHandlers:
+                handler.contributeToBlockUserData(userData)
+            block.setUserData(userData)
+        return userData
+
+    def processBlockUserData(self, text, block, userData):
+        # Indent
+        indent = sourcecode.whiteSpace(text)
+        if indent != userData.indent:
+            userData.indent = indent
+        # Folding
+        foldingMark = self.scope(scopeHash = userData.lastScope()).settings.folding(text)
+        if foldingMark != userData.foldingMark:
+            userData.foldingMark = foldingMark
+        # Handlers
+        for handler in self.__blockUserDataHandlers:
+            handler.processBlockUserData(text, block, userData)
+
     def on_modificationChanged(self, value):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
     
@@ -293,56 +268,28 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         else:
             self.blocksAdded.emit(block, newBlockCount - self.lastBlockCount)
         self.lastBlockCount = self.document().blockCount()
-    
-    def on_cursorPositionChanged(self):
-        #El cursor se movio es hora de:
-        self.setCurrentBraces()
-        self.highlightEditor()
 
-    def on_highlightReady(self):
-        self.folding.indentSensitive = self.syntax().indentSensitive
-        self.setBraces(self.syntax().scopeName)
-        self.syntaxReady.emit(self.syntax())
-        
-    def on_fontChanged(self):
-        font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
-        self.pos_margin = font_metrics.width("#") * 80
-        self.setTabStopWidth(self.tabStopSize * font_metrics.width("#"))
-
-    #=======================================================================
-    # Base Editor Interface
-    #=======================================================================
+    # ------------- Base Editor Api
     @classmethod
     def acceptFile(cls, filePath, mimetype):
         return re.compile("text/.*").match(mimetype) is not None
 
     def open(self, filePath):
-        """ Custom open for large files, use coroutines """
-        self.application.fileManager.openFile(filePath)
+        """ Custom open for large files """
+        PMXBaseEditor.open(self, filePath)
         content = self.application.fileManager.readFile(filePath)
-        self.setFilePath(filePath)
-        self.beforeOpen.emit()
         self.setPlainText(content)
-        self.afterOpen.emit()
-        
-    def save(self, filePath):
-        self.beforeSave.emit()
-        PMXBaseEditor.save(self, filePath)
-        self.afterSave.emit()
-
-    def close(self):
-        self.beforeClose.emit()
-        PMXBaseEditor.close(self)
-        self.afterClose.emit()
     
+    def close(self):
+        PMXBaseEditor.close(self)
+        TextEditWidget.close(self)
+        
     def reload(self):
-        self.beforeReload.emit()
+        PMXBaseEditor.reload(self)
         content = self.application.fileManager.readFile(self.filePath)
         self.updatePlainText(content)
-        PMXBaseEditor.reload(self)
-        self.afterReload.emit()
 
-    def saveState(self):
+    def componentState(self):
         """Returns a Python dictionary containing the state of the editor."""
         state = {}
         #Bookmarks
@@ -353,7 +300,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
         return state
     
-    def restoreState(self, state):
+    def setComponentState(self, state):
         """Restore the state from the given state (returned by a previous call to state())."""
         pass
 
@@ -378,9 +325,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return PMXBaseEditor.tabTitle(self)
     
     def fileFilters(self):
-        if self.getSyntax() is not None:
-            return [ "%s (%s)" % (self.getSyntax().bundle.name, " ".join(map(lambda ft: "*." + ft, self.getSyntax().fileTypes))) ]
-        return PMXBaseEditor.fileFilters(self)
+        return [ "%s (%s)" % (self.syntax().bundle.name, " ".join(["*." + ft for ft in self.syntax().fileTypes])) ]
+        #return PMXBaseEditor.fileFilters(self)
     
     def setCursorPosition(self, position):
         cursor = self.textCursor()
@@ -390,109 +336,63 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def cursorPosition(self):
         cursor = self.textCursor()
-        return (cursor.block().blockNumber(), cursor.columnNumber())
+        return (cursor.block().blockNumber(), cursor.positionInBlock())
 
-    #=======================================================================
-    # Scopes
-    #=======================================================================
+    # ---------------------- Scopes
+    def setBasicScope(self, scopeStack):
+        self.basicScopeHash = self.flyweightScopeFactory(scopeStack)
+
+    def basicScope(self):
+        return self.scope(scopeHash = self.basicScopeHash)
+
     @classmethod
     def flyweightScopeFactory(cls, scopeStack):
-        scopeName = " ".join(scopeStack)
-        scopeHash = hash(scopeName)
+        scopeHash = hash(scopeStack)
         if scopeHash not in cls.SCOPES:
-            scopeData = cls.SCOPES.setdefault(scopeHash, {
-                "name": scopeName,
-                "settings": cls.application.supportManager.getPreferenceSettings(scopeName),
-                "group": PMXSyntax.findGroup(scopeStack[::-1])
-            })
-            return scopeHash, scopeData["group"]
-        else:
-            return scopeHash, cls.SCOPES[scopeHash]["group"]
-    
-    #=======================================================================
-    # Obteniendo datos del editor
-    #=======================================================================
+            scopeName = " ".join(scopeStack)
+            cls.SCOPES[scopeHash] = CodeEditorScope(
+                name = scopeName,
+                path = scopeStack,
+                settings = cls.application.supportManager.getPreferenceSettings(scopeName),
+                group = PMXSyntax.findGroup(scopeStack[::-1])
+            )
+        return scopeHash
+
+    def scope(self, cursor = None, block = None, blockPosition = None, documentPosition = None,
+                scopeHash = None, direction = "right"):
+        if scopeHash is not None:
+            return self.SCOPES[scopeHash]
+        if block is None:
+            cursor = cursor or (documentPosition is not None and self.cursorAtPosition(documentPosition)) or self.textCursor()
+            block = cursor.block()
+        userData = self.blockUserData(block)
+        positionInBlock = blockPosition or (cursor is not None and cursor.positionInBlock()) or 0
+        if direction == "right":
+            rightToken = userData.tokenAtPosition(positionInBlock)
+            return self.SCOPES[rightToken and rightToken.scopeHash or self.basicScopeHash]
+        elif direction == "left":
+            leftToken = userData.tokenAtPosition(positionInBlock - 1)
+            return self.SCOPES[leftToken and leftToken.scopeHash or self.basicScopeHash]
+        elif direction == "both":
+            leftToken = userData.tokenAtPosition(positionInBlock - 1)
+            rightToken = userData.tokenAtPosition(positionInBlock)
+            return (self.SCOPES[leftToken and leftToken.scopeHash or self.basicScopeHash],
+                self.SCOPES[rightToken and rightToken.scopeHash or self.basicScopeHash])
+
+    def findScopes(self, block = None, scope_filter = lambda attr: True, firstOnly = False):
+        userData = self.blockUserData(block) if block is not None else self.textCursor().block()
+        scopes = iter(filter(lambda item: scope_filter(item[1]), 
+            map( lambda token: (token, self.SCOPES[token.scopeHash]), userData.tokens() ) ))
+        if firstOnly:
+            try:
+                return six.next(scopes)
+            except StopIteration as ex:
+                return (None, None)
+        return scopes
+
+    # ------------ Obteniendo datos del editor
     def tabKeyBehavior(self):
-        return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('	')
-
-    def preferenceSettings(self, scopeOrHash):
-        scopeHash = scopeOrHash if isinstance(scopeOrHash, int) else hash(scopeOrHash)
-        if scopeHash in self.SCOPES:
-            return self.SCOPES[scopeHash]["settings"]
-    
-    def wordUnderCursor(self):
-        """ Esto 'no' es lo mismo que currentWord """
-        cursor = self.textCursor()
-        cursor.select(QtGui.QTextCursor.WordUnderCursor)
-        return cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
-
-    def scopeName(self, scopeHash):
-        return self.SCOPES[scopeHash]["name"]
-
-    def scope(self, cursor):
-        userData = cursor.block().userData()
-        return self.syntax().scopeName if userData is None else self.scopeName(userData.scopeAtPosition(cursor.columnNumber()))
-
-    def currentPreferenceSettings(self):
-        return self.preferenceSettings(self.currentScope())
-        
-    def currentScope(self):
-        return self.scope(self.textCursor())
-
-    def currentWord(self, direction = "both", search = True):
-        return self.word(cursor = self.textCursor(), direction = direction, search = search)
-        
-    def word(self, cursor = None, pattern = RE_WORD, direction = "both", search = True):
-        cursor = cursor or self.textCursor()
-        line = cursor.block().text()
-        position = cursor.position()
-        columnNumber = cursor.columnNumber()
-        #Get text before and after the cursor position.
-        first_part, last_part = line[:columnNumber][::-1], line[columnNumber:]
-        
-        #Try left word
-        lword = rword = ""
-        m = pattern.match(first_part)
-        if m and direction in ("left", "both"):
-            lword = m.group(0)[::-1]
-        #Try right word
-        m = pattern.match(last_part)
-        if m and direction in ("right", "both"):
-            rword = m.group(0)
-        
-        if lword or rword:
-            return lword + rword, position - len(lword), position + len(rword)
-        
-        if not search: 
-            return "", position, position
-
-        lword = rword = ""
-        #Search left word
-        for i in range(len(first_part)):
-            lword += first_part[i]
-            m = pattern.search(first_part[i + 1:])
-            if m.group(0):
-                lword += m.group(0)
-                break
-        lword = lword[::-1]
-        #Search right word
-        for i in range(len(last_part)):
-            rword += last_part[i]
-            m = pattern.search(last_part[i:])
-            if m.group(0):
-                rword += m.group(0)
-                break
-        lword = lword.lstrip()
-        rword = rword.rstrip()
-        return lword + rword, position - len(lword), position + len(rword)
-    
-    def getSelectionBlockStartEnd(self, cursor = None):
-        cursor = cursor or self.textCursor()
-        start, end = cursor.selectionStart(), cursor.selectionEnd()
-        if start > end:
-            return self.document().findBlock(end), self.document().findBlock(start)
-        else:
-            return self.document().findBlock(start), self.document().findBlock(end)
+        return self.tabStopSoft and str(' ') * self.tabStopSize or str('	')
 
     # Flags
     def getFlags(self):
@@ -506,6 +406,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             flags |= self.MarginLine
         if self.showIndentGuide:
             flags |= self.IndentGuide
+        if self.showHighlightCurrentLine:
+            flags |= self.HighlightCurrentLine
         if options.wrapMode() & QtGui.QTextOption.WordWrap:
             flags |= self.WordWrap
         return flags
@@ -529,89 +431,25 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.document().setDefaultTextOption(options)
         self.showMarginLine = bool(flags & self.MarginLine)
         self.showIndentGuide = bool(flags & self.IndentGuide)
+        self.showHighlightCurrentLine = bool(flags & self.HighlightCurrentLine)
 
-    # Syntax
-    def getSyntax(self):
-        return self.syntaxHighlighter.syntax
-        
+    # ------------------- Syntax
     def syntax(self):
         return self.syntaxHighlighter.syntax
         
     def setSyntax(self, syntax):
         if self.syntaxHighlighter.syntax != syntax:
+            self.syntaxHighlighter.stop()
+            self.aboutToHighlightChange.emit()
+            
+            # Set syntax
             self.syntaxHighlighter.setSyntax(syntax)
-            self.flyweightScopeFactory([ syntax.scopeName ])
             self.syntaxChanged.emit(syntax)
+            
+            # Run
+            self.syntaxHighlighter.runAsyncHighlight(lambda editor = self: editor.highlightChanged.emit())
 
-    # Move text
-    def moveText(self, moveType):
-        #Solo si tiene seleccion puede mover derecha y izquierda
-        cursor = self.textCursor()
-        cursor.beginEditBlock()
-        if cursor.hasSelection():
-            if (moveType == QtGui.QTextCursor.Left and cursor.selectionStart() == 0) or (moveType == QtGui.QTextCursor.Right and cursor.selectionEnd() == self.document().characterCount()):
-                return
-            openRight = cursor.position() == cursor.selectionEnd()
-            text = cursor.selectedText()
-            cursor.removeSelectedText()
-            cursor.movePosition(moveType)
-            start = cursor.position()
-            cursor.insertText(text)
-            end = cursor.position()
-            if openRight:
-                cursor.setPosition(start)
-                cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-            else:
-                cursor.setPosition(end)
-                cursor.setPosition(start, QtGui.QTextCursor.KeepAnchor)
-        elif moveType in [QtGui.QTextCursor.Up, QtGui.QTextCursor.Down]:
-            if (moveType == QtGui.QTextCursor.Up and cursor.block() == cursor.document().firstBlock()) or (moveType == QtGui.QTextCursor.Down and cursor.block() == cursor.document().lastBlock()):
-                return
-            column = cursor.columnNumber()
-            cursor.select(QtGui.QTextCursor.LineUnderCursor)
-            text1 = cursor.selectedText()
-            cursor2 = QtGui.QTextCursor(cursor)
-            otherBlock = cursor.block().next() if moveType == QtGui.QTextCursor.Down else cursor.block().previous()
-            cursor2.setPosition(otherBlock.position())
-            cursor2.select(QtGui.QTextCursor.LineUnderCursor)
-            text2 = cursor2.selectedText()
-            cursor.insertText(text2)
-            cursor2.insertText(text1)
-            cursor.setPosition(otherBlock.position() + column)
-        cursor.endEditBlock()
-        self.setTextCursor(cursor)
-    
-    # Convert Text
-    def convertText(self, convertType):
-        cursor = self.textCursor()
-        convertFunction = self.CONVERTERS[convertType]
-        if convertType == self.ConvertSpacesToTabs:
-            self.replaceSpacesForTabs()
-        elif convertType == self.ConvertTabsToSpaces:
-            self.replaceTabsForSpaces()
-        else:
-            if not cursor.hasSelection():
-                word, start, end = self.currentWord()
-                position = cursor.position()
-                cursor.setPosition(start)
-                cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-                cursor.insertText(convertFunction(word))
-                cursor.setPosition(position)
-            else:
-                openRight = cursor.position() == cursor.selectionEnd()
-                start, end = cursor.selectionStart(), cursor.selectionEnd()
-                cursor.insertText(convertFunction(cursor.selectedText()))
-                if openRight:
-                    cursor.setPosition(start)
-                    cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-                else:
-                    cursor.setPosition(end)
-                    cursor.setPosition(start, QtGui.QTextCursor.KeepAnchor)
-            self.setTextCursor(cursor)
-        
-    #=======================================================================
-    # SideBars
-    #=======================================================================
+    # -------------------- SideBars
     def updateViewportMargins(self):
         self.setViewportMargins(self.leftBar.width(), 0, self.rightBar.width(), 0)
     
@@ -631,19 +469,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             rightBarPosition -= self.verticalScrollBar().width()
         self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
     
-    #=======================================================================
-    # Braces
-    #=======================================================================
-    def setBraces(self, scope):
-        settings = self.preferenceSettings(scope)
-        self.braces = settings.smartTypingPairs
-        #self.braces = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
-        
+
+    # -------------- Braces
     def setCurrentBraces(self, cursor = None):
         cursor = QtGui.QTextCursor(cursor) if cursor is not None else QtGui.QTextCursor(self.textCursor())
         cursor.clearSelection()
-        openBraces = map(lambda pair: pair[0], self.braces)
-        closeBraces = map(lambda pair: pair[1], self.braces)
+        openBraces = [pair[0] for pair in self.braces]
+        closeBraces = [pair[1] for pair in self.braces]
         
         leftChar = cursor.document().characterAt(cursor.position() - 1)
         rightChar = cursor.document().characterAt(cursor.position())
@@ -713,82 +545,51 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         #TODO: Esto esta mal
         return self.beforeBrace(cursor) and self.afterBrace(cursor)
         
-    # -------------------- Highlight Editor
+    #-------------------- Highlight Editor
     def textCharFormat_line_builder(self):
-        format = QtGui.QTextCharFormat()
-        format.setBackground(self.colours['lineHighlight'])
-        format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
-        return format
+        textCharFormat = QtGui.QTextCharFormat()
+        textCharFormat.setBackground(self.colours['lineHighlight'])
+        textCharFormat.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
+        return textCharFormat
         
     def textCharFormat_brace_builder(self):
-        format = QtGui.QTextCharFormat()
-        format.setForeground(self.colours['caret'])
-        format.setFontUnderline(True)
-        format.setUnderlineColor(self.colours['foreground']) 
-        format.setBackground(QtCore.Qt.transparent)
-        return format
+        textCharFormat = QtGui.QTextCharFormat()
+        textCharFormat.setForeground(self.colours['caret'])
+        textCharFormat.setFontUnderline(True)
+        textCharFormat.setUnderlineColor(self.colours['foreground']) 
+        textCharFormat.setBackground(QtCore.Qt.transparent)
+        return textCharFormat
 
     def textCharFormat_selection_builder(self):
-        format = QtGui.QTextCharFormat()
-        format.setBackground(self.colours['selection'])
-        return format
+        textCharFormat = QtGui.QTextCharFormat()
+        textCharFormat.setBackground(self.colours['selection'])
+        return textCharFormat
         
     def highlightEditor(self):
         cursor = self.textCursor()
         cursor.clearSelection()
-        self.setExtraSelectionCursors("line", [ cursor ])
-        self.setExtraSelectionCursors("brace", filter(lambda cursor: cursor is not None, list(self._currentBraces)))
-        for addon in self.addons:
-            if isinstance(addon, CodeEditorAddon):
-                self.updateExtraSelectionCursors(addon.extraSelectionCursors())
+        if self.showHighlightCurrentLine:
+            self.setExtraSelectionCursors("line", [ cursor ])
+        else:
+            self.clearExtraSelectionCursors("line")
+        self.setExtraSelectionCursors("brace", [cursor for cursor in list(self._currentBraces) if cursor is not None])
         self.updateExtraSelections()
-        # Todo esta señal mandarla desde el updateExtraSelections
-        self.extraSelectionChanged.emit()
 
-    def select(self, selection):
-        cursor = self.textCursor()
-        if selection in [self.SelectLine, self.SelectParagraph, self.SelectAll]:
-            #Handle by editor
-            cursor.select(selection)
-        elif selection == self.SelectWord:
-            word, start, end = self.currentWord()
-            cursor.setPosition(start)
-            cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-        elif selection == self.SelectEnclosingBrackets:
-            flags = QtGui.QTextDocument.FindFlags()
-            flags |= QtGui.QTextDocument.FindBackward
-            foundCursors = map(lambda (openBrace, closeBrace): (self.document().find(openBrace, cursor.selectionStart(), flags), closeBrace), self.braces)
-            openCursor = reduce(lambda c1, c2: (not c1[0].isNull() and c1[0].selectionEnd() > c2[0].selectionEnd()) and c1 or c2, foundCursors)
-            if not openCursor[0].isNull():
-                closeCursor = self.findTypingPair(openCursor[0].selectedText(), openCursor[1], openCursor[0])
-                if openCursor[0].selectionEnd() <= cursor.selectionStart() <= closeCursor.selectionStart():
-                    cursor.setPosition(openCursor[0].selectionEnd())
-                    cursor.setPosition(closeCursor.selectionStart(), QtGui.QTextCursor.KeepAnchor)
-        elif selection == self.SelectCurrentScope:
-            block = cursor.block()
-            beginPosition = block.position()
-            # TODO Todo lo que implique userData centrarlo en una API en la instancia de cada editor
-            (start, end), scope = block.userData().scopeRange(cursor.columnNumber())
-            if scope is not None:
-                cursor.setPosition(beginPosition + start)
-                cursor.setPosition(beginPosition + end, QtGui.QTextCursor.KeepAnchor)
-        self.setTextCursor(cursor)
-
-    #=======================================================================
-    # QPlainTextEdit Events
-    #=======================================================================
+        
+    # ------------ QPlainTextEdit Events
     def focusInEvent(self, event):
         # TODO No es para este evento pero hay que poner en alugn lugar el update de las side bars
-        QtGui.QPlainTextEdit.focusInEvent(self, event)
+        TextEditWidget.focusInEvent(self, event)
         self.updateSideBarsGeometry()
         
     def resizeEvent(self, event):
-        QtGui.QPlainTextEdit.resizeEvent(self, event)
+        TextEditWidget.resizeEvent(self, event)
         self.updateSideBarsGeometry()
 
     def paintEvent(self, event):
-        QtGui.QPlainTextEdit.paintEvent(self, event)
+        TextEditWidget.paintEvent(self, event)
         page_bottom = self.viewport().height()
+        # TODO: los widgets se pueden hacer del fontMetric, que tal poner algo que me retorne directamente el ancho de un caracter?
         font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
 
         painter = QtGui.QPainter(self.viewport())
@@ -799,35 +600,36 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         painter.setPen(self.colours['selection'])
         block = self.firstVisibleBlock()
         offset = self.contentOffset()
-        while block.isValid() and block.userData():
+        while block.isValid() and self.blockUserData(block):
             # The top left position of the block in the document
             # position = self.blockBoundingGeometry(block).topLeft() + offset
             blockGeometry = self.blockBoundingGeometry(block)
+            blockGeometry.translate(offset)
             # Check if the position of the block is out side of the visible area
             if blockGeometry.top() > page_bottom:
                 break
-            positionY = round(blockGeometry.top())
             if block.isVisible():
-                
-                user_data = block.userData()
-                if self.folding.isStart(self.folding.getFoldingMark(block)) and user_data.folded:
+                positionY = blockGeometry.top()
+                if self.isFolded(block):
                     painter.drawPixmap(font_metrics.width(block.text()) + offset.x() + 5,
                         positionY + font_metrics.ascent() + font_metrics.descent() - resources.getImage("foldingellipsis").height(),
                         resources.getImage("foldingellipsis"))
                 if self.showIndentGuide:
                     blockPattern = block
-                    while blockPattern.isValid() and blockPattern.userData() and blockPattern.userData().blank:
+                    while blockPattern.isValid() and self.blockUserData(blockPattern).blank():
                         blockPattern = blockPattern.next()
                     if blockPattern.isValid() and blockPattern.userData():
                         indentPattern = blockPattern.userData().indent
-                        for s in range(0, (len(indentPattern) / len(self.tabKeyBehavior()))):
-                            positionX = (font_metrics.width("#") * self.tabStopSize * s) + font_metrics.width("#") + offset.x()
+                        # TODO: Obtener este valor mas decoroso
+                        for s in range(0, (len(indentPattern) // len(self.tabKeyBehavior()))):
+                            positionX = (font_metrics.width(WIDTH_CHARACTER) * self.tabStopSize * s) + font_metrics.width(WIDTH_CHARACTER) + offset.x()
                             painter.drawLine(positionX, positionY, positionX, positionY + font_metrics.height())
                 
             block = block.next()
 
         if self.showMarginLine:
-            painter.drawLine(self.pos_margin + offset.x(), 0, self.pos_margin + offset.x(), self.viewport().height())
+            pos_margin = self.fontMetrics().width(WIDTH_CHARACTER) * self.marginLineSpaces
+            painter.drawLine(pos_margin + offset.x(), 0, pos_margin + offset.x(), self.viewport().height())
 
         if self.multiCursorMode.isActive():
             ctrl_down = bool(self.application.keyboardModifiers() & QtCore.Qt.ControlModifier)
@@ -855,9 +657,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             painter.drawRect(self.multiCursorMode.getDragCursorRect())
         painter.end()
 
-    #=======================================================================
-    # Mouse Events
-    #=======================================================================
+    # ----------------- Mouse Events
     def wheelEvent(self, event):
         if event.modifiers() == QtCore.Qt.ControlModifier:
             if event.delta() == 120:
@@ -866,13 +666,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 self.zoomOut()
             event.ignore()
         else:
-            QtGui.QPlainTextEdit.wheelEvent(self, event)
+            TextEditWidget.wheelEvent(self, event)
 
     def mousePressEvent(self, event):
         if event.modifiers() & QtCore.Qt.ControlModifier or self.multiCursorMode.isActive():
             self.multiCursorMode.mousePressPoint(event.pos())
         else:
-            QtGui.QPlainTextEdit.mousePressEvent(self, event)
+            TextEditWidget.mousePressEvent(self, event)
 
     def mouseMoveEvent(self, event):
         if event.modifiers() & QtCore.Qt.ControlModifier or self.multiCursorMode.isActive():
@@ -881,7 +681,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.viewport().repaint(self.viewport().visibleRegion())
         else:
             self.ensureCursorVisible()
-            QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
+            TextEditWidget.mouseReleaseEvent(self, event)
  
     def mouseReleaseEvent(self, event):
         freehanded = False
@@ -895,37 +695,31 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 cursor.beginEditBlock()
                 while not self.cursorRect(cursor).top() <= event.pos().y() <= self.cursorRect(cursor).bottom():
                     cursor.insertText("\n")
-                    print cursor.position(), self.cursorRect(cursor)
+                    print(cursor.position(), self.cursorRect(cursor))
                 while self.cursorRect(cursor).x() <= event.pos().x():
                     cursor.insertText(" ")
-                    print cursor.position(), self.cursorRect(cursor)
+                    print(cursor.position(), self.cursorRect(cursor))
                 cursor.endEditBlock()
                 self.setTextCursor(cursor)
             else:
-                QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
+                TextEditWidget.mouseReleaseEvent(self, event)
         else:
-            QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
+            TextEditWidget.mouseReleaseEvent(self, event)
 
-    #=======================================================================
-    # Keyboard Events
-    #=======================================================================
+    # -------------------- Keyboard Events
     def runKeyHelper(self, event):
         #No tengo modo activo, intento con los helpers
-        #Obtener key, scope y cursor
-        scope = self.currentScope()
         cursor = self.textCursor()
         for helper in self.findHelpers(event.key()):
             #Buscar Entre los helpers
-            if helper.accept(event, cursor, scope):
-                helper.execute(event, cursor, scope)
+            if helper.accept(event, cursor):
+                helper.execute(event, cursor)
                 return True
         return False
 
     def keyPressEvent(self, event):
-        """
-        This method is called whenever a key is pressed. The key code is stored in event.key()
-        http://manual.macromates.com/en/working_with_text
-        """
+        """This method is called whenever a key is pressed.
+        The key code is stored in event.key()"""
         
         #Primero ver si tengo un modo activo,
         for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:
@@ -934,7 +728,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
         if not self.runKeyHelper(event):
             #No tengo helper paso el evento a la base
-            QtGui.QPlainTextEdit.keyPressEvent(self, event)
+            TextEditWidget.keyPressEvent(self, event)
             
             self.emit(QtCore.SIGNAL("keyPressEvent(QEvent)"), event)
 
@@ -943,41 +737,16 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:
             if mode.isActive():
                 return mode.keyReleaseEvent(event)
-        QtGui.QPlainTextEdit.keyReleaseEvent(self, event)
+        TextEditWidget.keyReleaseEvent(self, event)
 
-    #==========================================================================
-    # Insert API
-    #==========================================================================
-    def updatePlainText(self, text):
-        # delta update Muejejejejejejejejej
-        import difflib
-        
-        def perform_action(code, cursor, text=""):
-            def _nop():
-                pass
-            def _action():
-                cursor.insertText(text)
-            return _action if code in ["insert", "replace", "delete"] else _nop
-        
-        sequenceMatcher = difflib.SequenceMatcher(None, self.toPlainText(), text)
-        opcodes = sequenceMatcher.get_opcodes()
-        
-        actions = map(lambda code: perform_action(code[0], self.newCursorAtPosition(code[1], code[2]), text[code[3]:code[4]]), opcodes)
-        
-        cursor = self.textCursor()
-        
-        cursor.beginEditBlock()
-        map(lambda action: action(), actions)
-        cursor.endEditBlock()
-        
-        self.ensureCursorVisible()
-
+    # ------------ Insert API
     def insertNewLine(self, cursor = None):
         cursor = cursor or self.textCursor()
         block = cursor.block()
-        userData = cursor.block().userData()
-        settings = self.preferenceSettings(self.scope(cursor))
-        indentMarks = settings.indent(block.text()[:cursor.columnNumber()])
+        positionInBlock = cursor.positionInBlock()
+        userData = self.blockUserData(block)
+        settings = self.scope().settings
+        indentMarks = settings.indent(block.text()[:positionInBlock])
         if PMXPreferenceSettings.INDENT_INCREASE in indentMarks:
             self.logger.debug("Increase indent")
             indent = userData.indent + self.tabKeyBehavior()
@@ -989,19 +758,18 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.logger.debug("Unindent")
             indent = ""
         elif PMXPreferenceSettings.INDENT_DECREASE in indentMarks:
-            indent = userData.indent[:len(self.tabKeyBehavior())]
+            self.logger.debug("Decrease indent")
+            indent = userData.indent[:-len(self.tabKeyBehavior())]
         else:
             self.logger.debug("Preserve indent")
-            indent = block.userData().indent[:cursor.columnNumber()]
+            indent = userData.indent[:positionInBlock]
         cursor.insertText("\n%s" % indent)
         self.ensureCursorVisible()
 
-    #==========================================================================
-    # Bundle Items
-    #==========================================================================
+    # ------------ Bundle Items
     def bundleItemHandler(self):
         return self.insertBundleItem
-        
+
     def insertBundleItem(self, item, **processorSettings):
         """Inserta un bundle item"""
         
@@ -1023,40 +791,40 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         elif item.TYPE == PMXSyntax.TYPE:
             self.setSyntax(item)
 
+
     def selectBundleItem(self, items, tabTriggered = False):
         #Tengo mas de uno que hago?, muestro un menu
-        syntax = any(map(lambda item: item.TYPE == 'syntax', items))
+        syntax = any([item.TYPE == 'syntax' for item in items])
         
         def insertBundleItem(index):
             if index >= 0:
                 self.insertBundleItem(items[index], tabTriggered = tabTriggered)
         
         self.showFlatPopupMenu(items, insertBundleItem, cursorPosition = not syntax)
-    
+
     def executeCommand(self, commandScript = None, commandInput = "none", commandOutput = "insertText"):
         if commandScript is None:
             commandScript = self.textCursor().selectedText() if self.textCursor().hasSelection() else self.textCursor().block().text()
-        command = self.application.supportManager.buildAdHocCommand(commandScript, self.getSyntax().bundle, commandInput, commandOutput)
+        command = self.application.supportManager.buildAdHocCommand(commandScript, self.syntax().bundle, commandInput, commandOutput)
         self.insertBundleItem(command)
-    
+
     def environmentVariables(self):
         environment = PMXBaseEditor.environmentVariables(self)
         cursor = self.textCursor()
         block = cursor.block()
         line = block.text()
-        scope = self.currentScope()
-        preferences = self.preferenceSettings(scope)
+        leftScope, rightScope = self.scope(direction = "both")
         current_word, start, end = self.currentWord()
         environment.update({
                 'TM_CURRENT_LINE': line,
-                'TM_LINE_INDEX': cursor.columnNumber(),
+                'TM_LINE_INDEX': cursor.positionInBlock(),
                 'TM_LINE_NUMBER': block.blockNumber() + 1,
-                'TM_COLUMN_NUMBER': cursor.columnNumber() + 1,
-                'TM_SCOPE': scope,
-                'TM_MODE': self.getSyntax().name,
-                'TM_SOFT_TABS': self.tabStopSoft and unicode('YES') or unicode('NO'),
-                'TM_TAB_SIZE': self.tabStopSize,
-                'TM_NESTEDLEVEL': self.folding.getNestedLevel(block)
+                'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
+                'TM_SCOPE': rightScope.name,
+                'TM_LEFT_SCOPE': leftScope.name,
+                'TM_MODE': self.syntax().name,
+                'TM_SOFT_TABS': self.tabStopSoft and str('YES') or str('NO'),
+                'TM_TAB_SIZE': self.tabStopSize
         })
 
         if current_word:
@@ -1072,18 +840,17 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             environment.update(self.project.environmentVariables())
         if cursor.hasSelection():
             self.logger.debug("Add selection to environment")
-            environment['TM_SELECTED_TEXT'] = cursor.selectedText().replace(u"\u2029", '\n').replace(u"\u2028", '\n')
-            start, end = self.getSelectionBlockStartEnd()
+            environment['TM_SELECTED_TEXT'] = self.selectedTextWithEol(cursor)
+            start, end = self.selectionBlockStartEnd()
             environment['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
             environment['TM_INPUT_START_LINE'] = start.blockNumber() + 1
             environment['TM_INPUT_START_LINE_INDEX'] = cursor.selectionStart() - start.position()
-
-        environment.update(preferences.shellVariables)
-        return environment
         
-    #==========================================================================
-    # Completer
-    #==========================================================================
+        settings = self.scope().settings
+        environment.update(settings.shellVariables)
+        return environment
+
+    # ---------- Completer
     def showCompleter(self, suggestions, source = "default", alreadyTyped = None, caseInsensitive = True, callback = None):
         currentAlreadyTyped = self.currentWord(direction = "left", search = False)[0]
         if alreadyTyped is None or currentAlreadyTyped.startswith(alreadyTyped) or callback is not None:
@@ -1105,9 +872,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.completerMode.setSource("default")
             self.completerMode.setCompletionPrefix(currentAlreadyTyped)
             self.completerMode.complete(self.cursorRect())
-    
+
     def switchCompleter(self):
-        settings = self.currentPreferenceSettings()
+        settings = self.scope().settings
         if not self.completerMode.hasSource("default"):
             def on_suggestionsReady(suggestions):
                 if bool(suggestions):
@@ -1117,7 +884,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.completerMode.switch()
 
     def runCompleter(self):
-        settings = self.currentPreferenceSettings()
+        settings = self.scope().settings
         def on_suggestionsReady(suggestions):
              if bool(suggestions):
                 self.showCompleter(suggestions)
@@ -1125,7 +892,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def defaultCompletion(self, settings, callback):
         if not self.completerTask.isRunning():
-            self.completerTask = self.application.scheduler.newTask(self.completionSuggestions(settings = settings))
+            self.completerTask = self.application.schedulerManager.newTask(self.runCompletionSuggestions(settings = settings))
             def on_completerTaskReady(callback):
                 def completerTaskReady(result):
                     callback(result.value)
@@ -1133,213 +900,178 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             #En una clausura
             self.completerTask.done.connect(on_completerTaskReady(callback))
 
-    def completionSuggestions(self, cursor = None, scope = None, settings = None):
+    def runCompletionSuggestions(self, cursor = None, scope = None, settings = None):
         cursor = cursor or self.textCursor()
-        scope = scope or self.scope(cursor)
-        settings = settings or self.preferenceSettings(scope)
+        settings = settings or self.scope(cursor = cursor).settings
+        scope = scope or self.scope(cursor = cursor)
+        currentAlreadyTyped = self.currentWord(direction = "left", search = False)[0]
         
         #An array of additional candidates when cycling through completion candidates from the current document.
         completions = settings.completions[:]
-
+        
         #A shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
         if settings.completionCommand:
             def commandCallback(context):
-                print unicode(context)
-            command = self.application.supportManager.buildAdHocCommand(settings.completionCommand, self.getSyntax().bundle, commandInput="document")
+                print(str(context))
+            command = self.application.supportManager.buildAdHocCommand(settings.completionCommand, self.syntax().bundle, commandInput="document")
             self.commandProcessor.configure({ "asynchronous": False })
             command.executeCallback(self.commandProcessor, commandCallback)
             
         #A tab tigger completion
-        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
+        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope.name)
         
-        typedWords = self.alreadyTypedWords.typedWords(cursor.block())
+        typedWords = self.alreadyTypedWords.typedWords()
         
-        #Lo ponemos en la mezcladora
-        suggestions = tabTriggers + map(lambda word: { "display": word, "image": "scope-root-keyword" }, completions)
+        #Lo ponemos en la mezcladora por grupos
+        suggestions = tabTriggers + [{ "display": word, "image": "scope-root-keyword" } for word in completions]
         for group in CodeEditor.SORTED_GROUPS:
-            newWords = filter(lambda word: word not in completions, typedWords.pop(group, []))
-            suggestions += map(lambda word: { "display": word, "image": "scope-root-%s" % group }, newWords)
+            newWords = [word for word in typedWords.pop(group, []) if word not in completions and word != currentAlreadyTyped]
+            suggestions += [{ "display": word, "image": "scope-root-%s" % group } for word in newWords]
             completions += newWords
             yield
         
-        for words in typedWords.values():
-            newWords = filter(lambda word: word not in completions, words)
-            suggestions += map(lambda word: { "display": word, "image": "scope-root-invalid" }, newWords)
+        #Finalizamos con las que quedaron guachas
+        for words in list(typedWords.values()):
+            newWords = [word for word in words if word not in completions and word != currentAlreadyTyped]
+            suggestions += [{ "display": word, "image": "scope-root-invalid" } for word in newWords]
             completions += newWords
             yield
 
         yield coroutines.Return(suggestions)
 
-    #==========================================================================
-    # Folding
-    #==========================================================================
-    def codeFoldingFold(self, block):
-        self._fold(block)
-        # self.update()
-        # self.sidebar.update()
-
-    def codeFoldingUnfold(self, block):
-        self._unfold(block)
-        # self.update()
-        # self.sidebar.update()
-        
-    def _fold(self, block):
-        milestone = block
-        if self.folding.isStart(self.folding.getFoldingMark(milestone)):
-            startBlock = milestone.next()
-            endBlock = self.folding.findBlockFoldClose(milestone)
-            if endBlock is None:
-                return
+    # ---------- Folding
+    def _folding_mark(self, block):
+        userData = self.blockUserData(block)
+        return userData.foldingMark or PMXPreferenceSettings.FOLDING_NONE
+    
+    def _find_block_fold_peer(self, block, direction = "down"):
+        """ Direction are 'down' or up"""
+        if direction == "down":
+            assert self.isFoldingStartMarker(block), "Block isn't folding start"
         else:
+            assert self.isFoldingStopMarker(block), "Block isn't folding stop"
+        nest = 0
+        while block.isValid():
+            userData = self.blockUserData(block)
+            if userData.foldingMark == PMXPreferenceSettings.FOLDING_START:
+                nest += 1
+            elif userData.foldingMark == PMXPreferenceSettings.FOLDING_STOP:
+                nest -= 1
+            if nest == 0:
+                return block
+            block = block.next() if direction == "down" else block.previous()
+    
+    def _find_indented_block_fold_close(self, block):
+        assert self.isFoldingIndentedBlockStart(block), "Block isn't folding indented start"
+        indent = self.blockUserData(block).indent
+        indentedBlock = self.findIndentedBlock(block, indent = indent, comparison = operator.le)
+        while self.isFoldingIndentedBlockIgnore(indentedBlock):
+            indentedBlock = self.findIndentedBlock(indentedBlock, indent = indent, comparison = operator.le)
+        if indentedBlock.isValid():
+            return self.findNoBlankBlock(indentedBlock, "up")
+        else:
+            return self.document().lastBlock()
+        
+    def isFoldingStartMarker(self, block):
+        return self._folding_mark(block) == PMXPreferenceSettings.FOLDING_START
+
+    def isFoldingStopMarker(self, block):
+        return self._folding_mark(block) == PMXPreferenceSettings.FOLDING_STOP
+    
+    def isFoldingIndentedBlockStart(self, block):
+        return self._folding_mark(block) == PMXPreferenceSettings.FOLDING_INDENTED_START
+    
+    def isFoldingIndentedBlockIgnore(self, block):
+        return self._folding_mark(block) == PMXPreferenceSettings.FOLDING_INDENTED_IGNORE
+    
+    def isFoldingMark(self, block):
+        return self.isFoldingStartMarker(block) or self.isFoldingStopMarker(block) or self.isFoldingIndentedBlockStart(block)
+    
+    def isFolded(self, block):
+        return self.isFoldingMark(block) and self.blockUserData(block).folded
+    
+    def codeFoldingFold(self, milestone):
+        block = endBlock = None
+        if self.isFoldingStartMarker(milestone):
+            startBlock = block = milestone.next()
+            endBlock = self._find_block_fold_peer(milestone, "down")
+        elif self.isFoldingStopMarker(milestone):
             endBlock = milestone
-            milestone = self.folding.findBlockFoldOpen(endBlock)
-            if milestone is None:
-                return
-            startBlock = milestone.next()
-        block = startBlock
-        while block.isValid():
-            userData = block.userData()
-            userData.foldedLevel += 1
-            block.setVisible(userData.foldedLevel == 0)
-            if block == endBlock:
-                break
-            block = block.next()
-        
-        milestone.userData().folded = True
-        self.document().markContentsDirty(startBlock.position(), endBlock.position())
+            milestone = self._find_block_fold_peer(endBlock, "up")
+            startBlock = block = milestone.next()
+        elif self.isFoldingIndentedBlockStart(milestone):
+            startBlock = block = milestone.next()
+            endBlock = self._find_indented_block_fold_close(milestone)
 
-    def _unfold(self, block):
-        milestone = block
-        startBlock = milestone.next()
-        endBlock = self.folding.findBlockFoldClose(milestone)
-        if endBlock == None:
-            return
-        
-        block = startBlock
-        while block.isValid():
-            userData = block.userData()
-            userData.foldedLevel -= 1
-            block.setVisible(userData.foldedLevel == 0)
-            if block == endBlock:
-                break
-            block = block.next()
-
-        milestone.userData().folded = False
-        self.document().markContentsDirty(startBlock.position(), endBlock.position())
-
-    #==========================================================================
-    # Find and Replace
-    #==========================================================================    
-    def findTypingPair(self, b1, b2, cursor, backward = False):
-        """
-        Busca b2 asumiendo que b1 es su antitesis de ese modo controla el balanceo.
-        b1 antitesis de b2
-        b2 texto a buscar
-        cursor representando la posicion a partir de la cual se busca
-        backward buscar para atras
-        Si b1 es igual a b2 no se controla el balanceo y se retorna la primera ocurrencia que se encuentre dentro del bloque actual
-        """
-        flags = QtGui.QTextDocument.FindFlags()
-        if backward:
-            flags |= QtGui.QTextDocument.FindBackward
-        if cursor.hasSelection():
-            if b1 == b2:
-                startPosition = cursor.selectionStart() if backward else cursor.selectionEnd()
-            else:
-                startPosition = cursor.selectionEnd() if backward else cursor.selectionStart()
-        else:
-            startPosition = cursor.position()
-        c1 = self.document().find(b1, startPosition, flags)
-        c2 = self.document().find(b2, startPosition, flags)
-        if b1 != b2:
-            #Balanceo solo si son distintos
-            if backward:
-                while c1 > c2:
-                    c1 = self.document().find(b1, c1.selectionStart(), flags)
-                    if c1 > c2:
-                        c2 = self.document().find(b2, c2.selectionStart(), flags)
-            else:
-                while not c1.isNull() and c1.position() != -1 and c1 < c2:
-                    c1 = self.document().find(b1, c1.selectionEnd(), flags)
-                    if c1.isNull():
-                        break
-                    if c1 < c2:
-                        c2 = self.document().find(b2, c2.selectionEnd(), flags)
-            if not c2.isNull():
-                return c2
-        else:
-            if not c2.isNull() and c2.block() == cursor.block():
-                #Ahora balanceamos usando el texto del block
-                block = cursor.block()
-                text = block.text()
-                positionStart = cursor.selectionEnd() if backward else cursor.selectionStart()
-                positionStart -= block.position()
-                positionEnd = c2.selectionEnd() if c2 > cursor else c2.selectionStart()
-                positionEnd -= block.position()
-                if text[:positionStart].count(b2) % 2 == 0 and text[positionEnd:].count(b2) % 2 == 0:
-                    return c2
-
-    def findMatchCursor(self, match, flags, findNext = False, cursor = None, cyclicFind = True):
-        cursor = cursor or self.textCursor()
-        if not findNext and cursor.hasSelection():
-            cursor.setPosition(cursor.selectionStart())
-        cursor = self.document().find(match, cursor, flags)
-        if cursor.isNull() and cyclicFind:
-            cursor = self.textCursor()
-            if flags & QtGui.QTextDocument.FindBackward:
-                cursor.movePosition(QtGui.QTextCursor.End)
-            else:
-                cursor.movePosition(QtGui.QTextCursor.Start)
-            cursor = self.document().find(match, cursor, flags)
-        if not cursor.isNull():
-            return cursor
-
-    def findMatch(self, match, flags, findNext = False):
-        cursor = self.findMatchCursor(match, flags, findNext)
-        if cursor is not None:
-            self.setTextCursor(cursor)
-            return True
-        return False
-    
-    def findAll(self, match, flags):
-        cursors = []
-        cursor = self.textCursor()
-        cursor.movePosition(QtGui.QTextCursor.Start)
-        cursor = self.findMatchCursor(match, flags, cursor = cursor, cyclicFind = False)
-        while cursor is not None:
-            cursors.append(cursor)
-            cursor = QtGui.QTextCursor(cursor)
-            cursor.setPosition(cursor.selectionEnd())
-            cursor = self.findMatchCursor(match, flags, cursor = cursor, cyclicFind = False)
-        return cursors
+        if block and endBlock and milestone:
+            # Go!
+            while block.isValid():
+                userData = self.blockUserData(block)
+                userData.foldedLevel += 1
+                block.setVisible(userData.foldedLevel == 0)
+                if block == endBlock:
+                    break
+                block = block.next()
             
-    def replaceMatch(self, match, text, flags, all = False):
-        cursor = self.textCursor()
-        cursor.beginEditBlock()
-        replaced = 0
-        while True:
-            findCursor = self.findMatchCursor(match, flags)
-            if not findCursor: break
-            if isinstance(match, QtCore.QRegExp):
-                findCursor.insertText(re.sub(match.pattern(), text, cursor.selectedText()))
-            else:
-                findCursor.insertText(text)
-            replaced += 1
-            if not all: break
-        cursor.endEditBlock()
-        return replaced
+            milestone.userData().folded = True
+            self.document().markContentsDirty(startBlock.position(), endBlock.position())
+
+    def codeFoldingUnfold(self, milestone):
+        endBlock = None
+        startBlock = block = milestone.next()
+        if self.isFoldingStartMarker(milestone):
+            endBlock = self._find_block_fold_peer(milestone, "down")
+        elif self.isFoldingIndentedBlockStart(milestone):
+            endBlock = self._find_indented_block_fold_close(milestone)
+
+        if endBlock:
+            # Go!
+            while block.isValid():
+                userData = self.blockUserData(block)
+                userData.foldedLevel -= 1
+                block.setVisible(userData.foldedLevel == 0)
+                if block == endBlock:
+                    break
+                block = block.next()
     
-    def replaceTabsForSpaces(self):
-        match = QtCore.QRegExp("	")
+            milestone.userData().folded = False
+            self.document().markContentsDirty(startBlock.position(), endBlock.position())
+
+    # ---------- Override convert tabs <---> spaces
+    def convertTabsToSpaces(self):
+        match = "\t"
         self.replaceMatch(match, " " * self.tabStopSize, QtGui.QTextDocument.FindFlags(), True)
         
-    def replaceSpacesForTabs(self):
-        match = QtCore.QRegExp(" " * self.tabStopSize)
-        self.replaceMatch(match, "	", QtGui.QTextDocument.FindFlags(), True)
+    def convertSpacesToTabs(self):
+        match = " " * self.tabStopSize
+        self.replaceMatch(match, "\t", QtGui.QTextDocument.FindFlags(), True)
         
-    #==========================================================================
-    # Bookmarks and gotos
-    #==========================================================================    
+    # -------------- Add select text functions
+    def selectEnclosingBrackets(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        flags = QtGui.QTextDocument.FindFlags()
+        flags |= QtGui.QTextDocument.FindBackward
+        foundCursors = [(self.document().find(openBrace_closeBrace[0], cursor.selectionStart(), flags), openBrace_closeBrace[1]) for openBrace_closeBrace in self.braces]
+        openCursor = reduce(lambda c1, c2: (not c1[0].isNull() and c1[0].selectionEnd() > c2[0].selectionEnd()) and c1 or c2, foundCursors)
+        if not openCursor[0].isNull():
+            closeCursor = self.findTypingPair(openCursor[0].selectedText(), openCursor[1], openCursor[0])
+            if openCursor[0].selectionEnd() <= cursor.selectionStart() <= closeCursor.selectionStart():
+                cursor.setPosition(openCursor[0].selectionEnd())
+                cursor.setPosition(closeCursor.selectionStart(), QtGui.QTextCursor.KeepAnchor)
+                self.setTextCursor(cursor)
+    
+    def selectCurrentScope(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        block = cursor.block()
+        beginPosition = block.position()
+        # TODO Todo lo que implique userData centrarlo en una API en la instancia de cada editor
+        (start, end), scope = self.blockUserData(block).scopeRange(cursor.positionInBlock())
+        if scope is not None:
+            cursor.setPosition(beginPosition + start)
+            cursor.setPosition(beginPosition + end, QtGui.QTextCursor.KeepAnchor)
+            self.setTextCursor(cursor)
+    
+    # ---------- Bookmarks and gotos
     def toggleBookmark(self, block = None):
         block = block or self.textCursor().block()
         self.bookmarkListModel.toggleBookmark(block)
@@ -1385,71 +1117,28 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             scrollIndex = 0 if pageStep > blockNumber else blockNumber - (pageStep / 2)
             self.verticalScrollBar().setValue(scrollIndex)
         else:
-            QtGui.QPlainTextEdit.centerCursor(self)
+            TextEditWidget.centerCursor(self)
 
-    #===========================================================================
-    # Zoom
-    #===========================================================================
-    FONT_MAX_SIZE = 32
-    FONT_MIN_SIZE = 6
-    def zoomIn(self):
-        font = self.font
-        size = self.font.pointSize()
-        if size < self.FONT_MAX_SIZE:
-            size += 1
-            font.setPointSize(size)
-        self.font = font
-
-    def zoomOut(self):
-        font = self.font
-        size = font.pointSize()
-        if size > self.FONT_MIN_SIZE:
-            size -= 1
-            font.setPointSize(size)
-        self.font = font
-
-    #===========================================================================
-    # Text Indentation
-    #===========================================================================
-    def findPreviousNoBlankBlock(self, block):
-        """ Return previous no blank indent block """
-        block = block.previous()
-        while block.isValid() and block.text().strip() == "":
-            block = block.previous()
-        if block.isValid():
-            return block
-        
-    def findPreviousEqualIndentBlock(self, block, indent = None):
-        """ Return previous equal indent block """
-        indent = indent if indent != None else block.userData().indent
-        block = self.findPreviousNoBlankBlock(block)
-        while block is not None and block.userData().indent > indent:
-            block = self.findPreviousNoBlankBlock(block)
-        if block is not None and block.userData().indent == indent:
-            return block
+    # ------------------- Text Indentation
+    def findNoBlankBlock(self, block, direction = "down"):
+        """ Return no blank block """
+        block = block.next() if direction == "down" else block.previous()
+        while block.isValid() and self.blockUserData(block).blank():
+            block = block.next() if direction == "down" else block.previous()
+        return block
     
-    def findPreviousMoreIndentBlock(self, block, indent = None):
-        """ Return previous more indent block """
-        indent = indent if indent != None else block.userData().indent
-        block = self.findPreviousNoBlankBlock(block)
-        while block is not None and block.userData().indent <= indent:
-            block = self.findPreviousNoBlankBlock(block)
-        if block is not None:
-            return block
+    def findIndentedBlock(self, block, indent = None, direction = "down", comparison = operator.eq):
+        """ Return equal indent block """
+        indent = indent if indent is not None else self.blockUserData(block).indent
+        block = self.findNoBlankBlock(block, direction)
+        while block.isValid() and not comparison(self.blockUserData(block).indent, indent):
+            block = self.findNoBlankBlock(block, direction)
+        return block
     
-    def findPreviousLessIndentBlock(self, block, indent = None):
-        """ Return previous less indent block """
-        indent = indent if indent != None else block.userData().indent
-        block = self.findPreviousNoBlankBlock(block)
-        while block is not None and block.userData().indent >= indent:
-            block = self.findPreviousNoBlankBlock(block)
-        if block is not None:
-            return block
-
     def indentBlocks(self, cursor = None):
         """Indents text, block selections."""
         cursor = QtGui.QTextCursor(cursor or self.textCursor())
-        start, end = self.getSelectionBlockStartEnd(cursor)
+        start, end = self.selectionBlockStartEnd(cursor)
         cursor.beginEditBlock()
         while True:
             cursor.setPosition(start.position())
@@ -1461,7 +1150,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def unindentBlocks(self, cursor = None):
         cursor = QtGui.QTextCursor(cursor or self.textCursor())
-        start, end = self.getSelectionBlockStartEnd(cursor)
+        start, end = self.selectionBlockStartEnd(cursor)
         cursor.beginEditBlock()
         while True:
             data = start.userData()
@@ -1477,10 +1166,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 break
             start = start.next()
         cursor.endEditBlock()
-    
-    #===========================================================================
-    # Menus
-    #===========================================================================
+
+    # --------------- Menus
     # Flat Popup Menu
     def showFlatPopupMenu(self, menuItems, callback, cursorPosition = True):
         menu = QtGui.QMenu(self)
@@ -1488,7 +1175,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             if isinstance(item, dict):
                 title = "%s 	&%d" % (item["title"], index)
                 icon = resources.getIcon(item["image"]) if "image" in item else QtGui.QIcon()
-            elif isinstance(item,  basestring):
+            elif isinstance(item,  str):
                 title = "%s 	&%d" % (item, index)
                 icon = QtGui.QIcon()
             elif isinstance(item,  BundleItemTreeNode):
@@ -1510,15 +1197,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         menu.setParent(self)
 
         #Bundle Menu
-        bundleMenu = self.application.supportManager.menuForBundle(self.getSyntax().bundle)
+        bundleMenu = self.application.supportManager.menuForBundle(self.syntax().bundle)
         extend_menu(menu, [ "-", bundleMenu ])
 
         #Se lo pasamos a los addons
         cursor = self.cursorForPosition(point)
         items = ["-"]
-        for addon in self.addons:
-            if isinstance(addon, CodeEditorAddon):
-                items += addon.contributeToContextMenu(cursor)
+        for component in self.components():
+            if isinstance(component, CodeEditorAddon):
+                items += component.contributeToContextMenu(cursor)
         
         if len(items) > 1:
             actions = extend_menu(menu, items)
@@ -1534,23 +1221,25 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # Contributes to Tab Menu
     def contributeToTabMenu(self):
         menues = []
-        bundleMenu = self.application.supportManager.menuForBundle(self.getSyntax().bundle)
+        bundleMenu = self.application.supportManager.menuForBundle(self.syntax().bundle)
         if bundleMenu is not None:
             menues.append(bundleMenu)
             menues.append("-")
         if self.filePath:
-            menues.append({
-                "text": "Copy file path",
-                "icon": resources.getIcon("edit-copy"),
-                "callback": lambda editor = self: QtGui.QApplication.clipboard().setText(editor.filePath)  })
+            menues.extend([
+                {   "text": "Path to Clipboard",
+                    "callback": lambda editor = self: self.application.clipboard().setText(editor.filePath)  },
+                {   "text": "Name to Clipboard",
+                    "callback": lambda editor = self: self.application.clipboard().setText(editor.application.fileManager.basename(editor.filePath))  },
+                {   "text": "Directory to Clipboard",
+                    "callback": lambda editor = self: self.application.clipboard().setText(editor.application.fileManager.dirname(editor.filePath))  },
+                ])
         return menues
     
     # Contributes to Main Menu
     @classmethod
-    def contributeToMainMenu(cls, addonClasses):
-        edit = {
-            'text': 'Edit',
-            'items': [
+    def contributeToMainMenu(cls):
+        edit = [
                 '-',
                 {'text': 'Mode',
                  'items': [
@@ -1559,10 +1248,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                     {'text': 'Multi Edit Mode', 'shortcut': 'Meta+Alt+M'}
                  ]}
             ]
-        }
-        view = {
-            'text': 'View',
-            'items': [
+        view = [
                 {'text': 'Font',
                  'items': [
                      {'text': "Zoom In",
@@ -1572,9 +1258,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                       'shortcut': "Ctrl+-",
                       'callback': cls.zoomOut}
                 ]},
-                {'text': 'Left Gutter',
+                {'name': 'leftGutter',
+                 'text': 'Left Gutter',
                  'items': []},
-                 {'text': 'Right Gutter',
+                {'name': 'rightGutter',
+                 'text': 'Right Gutter',
                  'items': []},
                 '-',
                 {'text': "Show Tabs And Spaces",
@@ -1590,6 +1278,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'checkable': True,
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.WordWrap) },
                 "-",
+                {'text': "Highlight Current Line",
+                 'callback': cls.on_actionHighlightCurrentLine_toggled,
+                 'checkable': True,
+                 'testChecked': lambda editor: bool(editor.getFlags() & editor.HighlightCurrentLine) },
                 {'text': "Margin Line",
                  'callback': cls.on_actionMarginLine_toggled,
                  'checkable': True,
@@ -1598,34 +1290,39 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'callback': cls.on_actionIndentGuide_toggled,
                  'checkable': True,
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.IndentGuide) },
-            ]}
+            ]
         text = {
+            'name': 'text',
             'text': '&Text',
             'items': [ 
                 {'text': 'Select',
                  'items': [
                     {'text': '&Word',
-                     'callback': lambda editor: editor.select(0),
+                     'callback': lambda editor: editor.selectWordCurrent(),
+                     'shortcut': 'Ctrl+Meta+W',
+                     },
+                    {'text': '&Word Under',
+                     'callback': lambda editor: editor.selectWordUnder(),
                      'shortcut': 'Ctrl+Meta+W',
                      },
                     {'text': '&Line',
-                     'callback': lambda editor: editor.select(1),
+                     'callback': lambda editor: editor.selectLine(),
                      'shortcut': 'Ctrl+Meta+L',
                      },
                     {'text': '&Paragraph',
-                     'callback': lambda editor: editor.select(2),
+                     'callback': lambda editor: editor.selectParagraph(),
                      'shortcut': '',
                      },
                     {'text': 'Enclosing &Brackets',
-                     'callback': lambda editor: editor.select(editor.SelectEnclosingBrackets),
+                     'callback': lambda editor: editor.selectEnclosingBrackets(),
                      'shortcut': 'Ctrl+Meta+B',
                      },
                     {'text': 'Current &Scope',
-                     'callback': lambda editor: editor.select(editor.SelectCurrentScope),
+                     'callback': lambda editor: editor.selectCurrentScope(),
                      'shortcut': 'Ctrl+Meta+S',
                      },
                     {'text': '&All',
-                     'callback': lambda editor: editor.select(3),
+                     'callback': lambda editor: editor.selectDocument(),
                      'shortcut': 'Ctrl+A',
                      }    
                 ]},
@@ -1633,48 +1330,48 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'items': [
                     {'text': 'To Uppercase',
                      'shortcut': 'Ctrl+U',
-                     'callback': lambda editor: editor.convertText(editor.ConvertToUppercase),
+                     'callback': lambda editor: editor.convertToUppercase(),
                      },
                     {'text': 'To Lowercase',
                      'shortcut': 'Ctrl+Shift+U',
-                     'callback': lambda editor: editor.convertText(editor.ConvertToLowercase),
+                     'callback': lambda editor: editor.convertToLowercase(),
                      },
                     {'text': 'To Titlecase',
                      'shortcut': 'Ctrl+Alt+U',
-                     'callback': lambda editor: editor.convertText(editor.ConvertToTitlecase),
+                     'callback': lambda editor: editor.convertToTitlecase(),
                      },
                     {'text': 'To Opposite Case',
                      'shortcut': 'Ctrl+G',
-                     'callback': lambda editor: editor.convertText(editor.ConvertToOppositeCase),
+                     'callback': lambda editor: editor.convertToOppositeCase(),
                      }, '-',
                     {'text': 'Tab to Spaces',
-                     'callback': lambda editor: editor.convertText(editor.ConvertTabsToSpaces),
+                     'callback': lambda editor: editor.convertTabsToSpaces(),
                      },
                     {'text': 'Spaces to Tabs',
-                     'callback': lambda editor: editor.convertText(editor.ConvertSpacesToTabs),
+                     'callback': lambda editor: editor.convertSpacesToTabs(),
                      }, '-',
                     {'text': 'Transpose',
                      'shortcut': 'Ctrl+T',
-                     'callback': lambda editor: editor.convertText(editor.ConvertTranspose),
+                     'callback': lambda editor: editor.convertTranspose(),
                      }
                 ]},
                 {'text': 'Move',
                  'items': [
                     {'text': 'Line Up',
                      'shortcut': 'Meta+Ctrl+Up',
-                     'callback': lambda editor: editor.moveText(editor.MoveLineUp),
+                     'callback': lambda editor: editor.moveUp(),
                      },
                     {'text': 'Line Down',
                      'shortcut': 'Meta+Ctrl+Down',
-                     'callback': lambda editor: editor.moveText(editor.MoveLineDown),
+                     'callback': lambda editor: editor.moveDown(),
                      },
                     {'text': 'Column Left',
                      'shortcut': 'Meta+Ctrl+Left',
-                     'callback': lambda editor: editor.moveText(editor.MoveColumnLeft),
+                     'callback': lambda editor: editor.moveLeft(),
                      },
                     {'text': 'Column Right',
                      'shortcut': 'Meta+Ctrl+Right',
-                     'callback': lambda editor: editor.moveText(editor.MoveColumnRight),
+                     'callback': lambda editor: editor.moveRight(),
                      }  
                   ]},
                 '-',
@@ -1686,9 +1383,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'callback': lambda editor: editor.executeCommand(),
                  }
             ]}
-        navigation = {
-            'text': 'Navigation',
-            'items': [
+        navigation = [
                 "-",
                 {'text': 'Toggle Bookmark',
                  'callback': cls.toggleBookmark,
@@ -1715,43 +1410,47 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'callback': cls.on_actionGoToBookmark_triggered,
                  'shortcut': 'Meta+Ctrl+Shift+B',
                  }
-            ]}
-        menuContributions = { "Edit": edit, "View": view , "Text": text, "Navigation": navigation}
-        for addon in addonClasses:
-            update_menu(menuContributions, addon.contributeToMainMenu())
+            ]
+        menuContributions = { "edit": edit, "view": view , "text": text, "navigation": navigation}
         return menuContributions
     
     @classmethod
     def contributeToSettings(cls):
-        from prymatex.gui.settings.themes import ThemeSettingsWidget
+        from prymatex.gui.settings.theme import ThemeSettingsWidget
         from prymatex.gui.settings.editor import EditorSettingsWidget
+        from prymatex.gui.settings.edit import EditSettingsWidget
         from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
-        return [ EditorSettingsWidget, ThemeSettingsWidget, AddonsSettingsWidgetFactory("editor") ]
+        return [ EditorSettingsWidget, ThemeSettingsWidget, EditSettingsWidget, AddonsSettingsWidgetFactory("editor") ]
 
-    #===========================================================================
-    # Menu Actions
-    #===========================================================================
+    # ------------------ Menu Actions
     def on_actionShowTabsAndSpaces_toggled(self, checked):
         if checked:
             flags = self.getFlags() | self.ShowTabsAndSpaces
         else:
             flags = self.getFlags() & ~self.ShowTabsAndSpaces
         self.setFlags(flags)
-    
+
     def on_actionShowLineAndParagraphs_toggled(self, checked):
         if checked:
             flags = self.getFlags() | self.ShowLineAndParagraphs
         else:
             flags = self.getFlags() & ~self.ShowLineAndParagraphs
         self.setFlags(flags)
-        
+
     def on_actionWordWrap_toggled(self, checked):
         if checked:
             flags = self.getFlags() | self.WordWrap
         else:
             flags = self.getFlags() & ~self.WordWrap
         self.setFlags(flags)
-    
+
+    def on_actionHighlightCurrentLine_toggled(self, checked):
+        if checked:
+            flags = self.getFlags() | self.HighlightCurrentLine
+        else:
+            flags = self.getFlags() & ~self.HighlightCurrentLine
+        self.setFlags(flags)
+
     def on_actionMarginLine_toggled(self, checked):
         if checked:
             flags = self.getFlags() | self.MarginLine
@@ -1765,77 +1464,26 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         else:
             flags = self.getFlags() & ~self.IndentGuide
         self.setFlags(flags)
-    
-    def on_actionShowBookmarks_toggled(self, checked):
-        if checked:
-            flags = self.getFlags() | self.ShowBookmarks
-        else:
-            flags = self.getFlags() & ~self.ShowBookmarks
-        self.setFlags(flags)
-    
-    def on_actionShowLineNumbers_toggled(self, checked):
-        if checked:
-            flags = self.getFlags() | self.ShowLineNumbers
-        else:
-            flags = self.getFlags() & ~self.ShowLineNumbers
-        self.setFlags(flags)
-        
-    def on_actionShowFoldings_toggled(self, checked):
-        if checked:
-            flags = self.getFlags() | self.ShowFolding
-        else:
-            flags = self.getFlags() & ~self.ShowFolding
-        self.setFlags(flags)
-    
-    def on_actionSelectBundleItem_triggered(self):
-        scope = self.currentScope()
-        items = self.application.supportManager.getActionItems(scope)
-        def itemsToDict(items):
-            for item in items:
-                yield [dict(title = item.name, image = "bundle-item-%s" % item.TYPE), dict(title = item.bundle.name), dict(title = item.trigger)]
-        index = self.mainWindow.bundleSelectorDialog.select(itemsToDict(items))
-        if index is not None:
-            self.insertBundleItem(items[index])
-            
-    def on_actionGoToSymbol_triggered(self):
-        #TODO: Usar el modelo
-        blocks = self.symbolListModel.blocks
-        def symbolToDict(blocks):
-            for block in blocks:
-                userData = block.userData() 
-                yield [dict(title = userData.symbol, image = resources.getIcon('bulletblue'))]
-        index = self.mainWindow.symbolSelectorDialog.select(symbolToDict(blocks))
-        if index is not None:
-            self.goToBlock(blocks[index])
-        
-    def on_actionGoToBookmark_triggered(self):
-        blocks = self.bookmarkListModel.blocks
-        def bookmarkToDict(blocks):
-            for block in blocks:
-                yield [dict(title = block.text(), image = resources.getIcon('bookmarkflag'))]
-        index = self.mainWindow.bookmarkSelectorDialog.select(bookmarkToDict(blocks))
-        if index is not None:
-            self.goToBlock(blocks[index])
-    
-    #============================================================
-    # Text Menu Actions
-    #============================================================
-    def on_actionExecute_triggered(self):
-        self.currentEditor().executeCommand()
 
-    def on_actionFilterThroughCommand_triggered(self):
-        self.statusBar().showCommand()
+    def on_actionSelectBundleItem_triggered(self):
+        item = self.selectorDialog.select(self.bundleItemSelectableModel, title=_("Select Bundle Item"))
+
+        # Select one?
+        if item is not None:
+            self.insertBundleItem(item['data'])
+
     
-    #===========================================================================
-    # Navigation API
-    #===========================================================================
-    def newCursorAtPosition(self, position, anchor = None):
-        cursor = QtGui.QTextCursor(self.document())
-        cursor.setPosition(position)
-        if anchor is not None:
-            cursor.setPosition(anchor, QtGui.QTextCursor.KeepAnchor)
-        return cursor
-        
+    def on_actionGoToSymbol_triggered(self):
+        item = self.selectorDialog.select(self.symbolSelectableModel, title = _("Select Symbol"))
+        if item is not None:
+            self.goToBlock(item['data'])
+
+    def on_actionGoToBookmark_triggered(self):
+        item = self.selectorDialog.select(self.bookmarkSelectableModel, title=_("Select Bookmark"))
+        if item is not None:
+            self.goToBlock(item['data'])
+
+    # ---------------------- Navigation API
     def restoreLocationMemento(self, memento):
         self.setTextCursor(memento)
         
@@ -1843,10 +1491,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         cursor = self.textCursor()
         if not (cursor.atEnd() or cursor.atStart()):
             self.saveLocationMemento(self.newCursorAtPosition(cursor.position() - 1))
-    
-    #===========================================================================
-    # Drag and Drop
-    #===========================================================================
+
+    # ----------------- Drag and Drop
     def dragEnterEvent(self, event):
         self.setFocus(QtCore.Qt.MouseFocusReason)
         mimeData = event.mimeData()
@@ -1861,24 +1507,23 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         """When a url or text is dropped"""
         #mimeData = event.mimeData()
         if event.mimeData().hasUrls():
-            files = map(lambda url: url.toLocalFile(), event.mimeData().urls())
-            scope = self.currentScope()
-            for file in files:                
-                items = self.application.supportManager.getFileExtensionItem(file, scope)
+            files = [url.toLocalFile() for url in event.mimeData().urls()]
+            for filePath in files:                
+                items = self.application.supportManager.getFileExtensionItem(filePath, self.scope())
                 if items:
                     item = items[0]
                     env = { 
                             #relative path of the file dropped (relative to the document directory, which is also set as the current directory).
-                            'TM_DROPPED_FILE': file,
+                            'TM_DROPPED_FILE': filePath,
                             #the absolute path of the file dropped.
-                            'TM_DROPPED_FILEPATH': file,
+                            'TM_DROPPED_FILEPATH': filePath,
                             #the modifier keys which were held down when the file got dropped.
                             #This is a bitwise OR in the form: SHIFT|CONTROL|OPTION|COMMAND (in case all modifiers were down).
-                            'TM_MODIFIER_FLAGS': file
+                            'TM_MODIFIER_FLAGS': filePath
                     }
                     self.insertBundleItem(item, environment = env)
                 else:
-                    self.application.openFile(file)
+                    self.application.openFile(filePath)
         elif event.mimeData().hasText():
             self.textCursor().insertText(event.mimeData().text())
-        
+            

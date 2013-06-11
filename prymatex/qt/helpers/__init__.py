@@ -7,14 +7,16 @@ spyderlib site:
 http://code.google.com/p/spyderlib
 """
 
-from prymatex.qt.helpers.base import *
-from prymatex.qt.helpers.actions import *
-from prymatex.qt.helpers.buttons import *
-from prymatex.qt.helpers.colors import *
-from prymatex.qt.helpers.dialogs import *
-from prymatex.qt.helpers.icons import *
-from prymatex.qt.helpers.keyevents import *
-from prymatex.qt.helpers.keysequences import *
-from prymatex.qt.helpers.menus import *
-from prymatex.qt.helpers.mimedata import *
-from prymatex.qt.helpers.widgets import *
+from .base import *
+from .actions import *
+from .buttons import *
+from .colors import *
+from .dialogs import *
+from .icons import *
+from .keyevents import *
+from .keysequences import *
+from .menus import *
+from .mimedata import *
+from .widgets import *
+from .textcursors import *
+from .fonts import *

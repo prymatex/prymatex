@@ -8,10 +8,6 @@
 		<string>ddl</string>
 		<string>dml</string>
 	</array>
-	<key>foldingStartMarker</key>
-	<string>\s*\(\s*$</string>
-	<key>foldingStopMarker</key>
-	<string>^\s*\)</string>
 	<key>keyEquivalent</key>
 	<string>^~S</string>
 	<key>name</key>
@@ -42,7 +38,7 @@
 				</dict>
 			</dict>
 			<key>match</key>
-			<string>(?i:^\s*(create)\s+(aggregate|conversion|database|domain|function|group|(unique\s+)?index|language|operator class|operator|rule|schema|sequence|table|tablespace|trigger|type|user|view)\s+)(['"`]?)(\w+)\4</string>
+			<string>(?i:^\s*(create(?:\s+or\s+replace)?)\s+(aggregate|conversion|database|domain|function|group|(unique\s+)?index|language|operator class|operator|rule|schema|sequence|table|tablespace|trigger|type|user|view)\s+)(['"`]?)(\w+)\4</string>
 			<key>name</key>
 			<string>meta.create.sql</string>
 		</dict>
@@ -205,7 +201,7 @@
 				|\b(char|number|varchar\d?)\b(?:\((\d+)\))?
 
 				# special case, capture 6 + 7i + 8i
-				|\b(numeric)\b(?:\((\d+),(\d+)\))?
+				|\b(numeric|decimal)\b(?:\((\d+),(\d+)\))?
 
 				# special case, captures 9, 10i, 11
 				|\b(times)(?:\((\d+)\))(\swithoutstimeszone\b)?
@@ -360,32 +356,70 @@
 			<key>patterns</key>
 			<array>
 				<dict>
-					<key>captures</key>
+					<key>begin</key>
+					<string>(^[ \t]+)?(?=--)</string>
+					<key>beginCaptures</key>
 					<dict>
 						<key>1</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.comment.sql</string>
+							<string>punctuation.whitespace.comment.leading.sql</string>
 						</dict>
 					</dict>
-					<key>match</key>
-					<string>(--).*$\n?</string>
-					<key>name</key>
-					<string>comment.line.double-dash.sql</string>
+					<key>end</key>
+					<string>(?!\G)</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>begin</key>
+							<string>--</string>
+							<key>beginCaptures</key>
+							<dict>
+								<key>0</key>
+								<dict>
+									<key>name</key>
+									<string>punctuation.definition.comment.sql</string>
+								</dict>
+							</dict>
+							<key>end</key>
+							<string>\n</string>
+							<key>name</key>
+							<string>comment.line.double-dash.sql</string>
+						</dict>
+					</array>
 				</dict>
 				<dict>
-					<key>captures</key>
+					<key>begin</key>
+					<string>(^[ \t]+)?(?=#)</string>
+					<key>beginCaptures</key>
 					<dict>
 						<key>1</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.comment.sql</string>
+							<string>punctuation.whitespace.comment.leading.sql</string>
 						</dict>
 					</dict>
-					<key>match</key>
-					<string>(#).*$\n?</string>
-					<key>name</key>
-					<string>comment.line.number-sign.sql</string>
+					<key>end</key>
+					<string>(?!\G)</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>begin</key>
+							<string>#</string>
+							<key>beginCaptures</key>
+							<dict>
+								<key>0</key>
+								<dict>
+									<key>name</key>
+									<string>punctuation.definition.comment.sql</string>
+								</dict>
+							</dict>
+							<key>end</key>
+							<string>\n</string>
+							<key>name</key>
+							<string>comment.line.number-sign.sql</string>
+						</dict>
+					</array>
 				</dict>
 				<dict>
 					<key>begin</key>

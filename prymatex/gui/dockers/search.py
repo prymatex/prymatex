@@ -33,14 +33,16 @@ class PMXSearchDock(QtGui.QDockWidget, Ui_SearchDock, PMXBaseDock):
         #TODO: Si no se encontro nada o se cancelo cerrarlo
     
     @classmethod
-    def contributeToMainMenu(cls, addonClasses):
+    def contributeToMainMenu(cls):
         edit = {
+            'name': 'edit',
+            'text':'Edit',
             'items': [
                 "-",
                 {'text': "File Search",
                  'callback': cls.on_actionFileSearch_triggered }
             ]}
-        return { "Edit": edit }
+        return { "edit": edit }
         
     def on_treeView_activated(self, index):
         node = self.searchTreeModel.node(index)

@@ -1,27 +1,23 @@
 #!/usr/bin/env python
-#-*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
-import os
-    
-from PyQt4 import QtGui
+from .project import ProjectDialog
+from .about import AboutDialog
+from .selector import SelectorDialog
+from .settings import SettingsDialog
+from .bundles import BundleEditorDialog
+from .profile import ProfileDialog
+from .template import TemplateDialog
+from .properties import PropertiesDialog
+from .environment import EnvironmentDialog
 
-def getOpenFiles(directory):
-    return QtGui.QFileDialog.getOpenFileNames(None, "Open Files", directory)
-
-def getSaveFile(directory, name = "", title = "Save file", filters = []):
-    filePath = os.path.join(directory, name) 
-    
-    filters = ";;".join(filters)
-    name = QtGui.QFileDialog.getSaveFileName(None, title, filePath, filters)
-    if name:
-        return name
-
-def getFileName(extensions = [], directory = None, parent = None):
-    name, ok = QtGui.QInputDialog.getText(parent, "New file name", "<p>Please enter the new file name in</p><p>%s</p>" % directory)
-    if ok:
-        return name
-
-def getDirectoryName(directory = None, parent = None):
-    name, ok = QtGui.QInputDialog.getText(parent, "New directoy name", "<p>Please enter the new directoy name in</p><p>%s</p>" % directory)
-    if ok:
-        return name
+def registerPlugin(manager):
+    manager.registerComponent(ProjectDialog)
+    manager.registerComponent(AboutDialog)
+    manager.registerComponent(SelectorDialog)
+    manager.registerComponent(SettingsDialog)
+    manager.registerComponent(BundleEditorDialog)
+    manager.registerComponent(ProfileDialog)
+    manager.registerComponent(TemplateDialog)
+    manager.registerComponent(PropertiesDialog)
+    manager.registerComponent(EnvironmentDialog)

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 from prymatex.qt import QtGui, QtCore
-from prymatex.qt.helpers import keyequivalent2keysequence, keysequence2keyequivalent, rgba2color
+from prymatex.qt.helpers import keyequivalent2keysequence, keysequence2keyequivalent, rgba2color, color2rgba
 
 from prymatex import resources
 
@@ -20,14 +21,14 @@ class BundleItemTreeNode(TreeNodeBase):
         TreeNodeBase.__init__(self, bundleItem.name, nodeParent)
         self.__bundleItem = bundleItem
 
+    # ----------- Bundle Item attrs assessors -----------
     def __getattr__(self, name):
-        # Quitar esta cosa fea
         return getattr(self.__bundleItem, name)
 
     def bundleItem(self):
         return self.__bundleItem
 
-    # ----------- Item decoration -----------
+    # ----------- Bundle Item decoration -----------
     @property
     def keyEquivalent(self):
         if self.__bundleItem.keyEquivalent is not None:
@@ -41,13 +42,13 @@ class BundleItemTreeNode(TreeNodeBase):
     def trigger(self):
         trigger = []
         if self.tabTrigger != None:
-            trigger.append(u"%s⇥" % (self.tabTrigger))
+            trigger.append("%s⇥" % (self.tabTrigger))
         if self.keyEquivalent != None:
-            trigger.append(u"%s" % QtGui.QKeySequence(self.keyEquivalent).toString())
+            trigger.append("%s" % QtGui.QKeySequence(self.keyEquivalent).toString())
         return ", ".join(trigger)
     
     def buildBundleAccelerator(self):
-        name = unicode(self.name)
+        name = self.name
         for index, char in enumerate(name):
             if char in self.BANNED_ACCEL:
                 continue
@@ -58,9 +59,9 @@ class BundleItemTreeNode(TreeNodeBase):
         return name
     
     def buildMenuTextEntry(self, mnemonic = True):
-        text = unicode(self.name)
+        text = self.name
         if mnemonic:
-            text += u"\t%s" % (self.trigger)
+            text += "\t%s" % (self.trigger)
         return text.replace('&', '&&')
     
     def triggerItemAction(self, parent = None):
@@ -113,61 +114,100 @@ class BundleItemMenuTreeNode(TreeNodeBase):
         self.nodeType = nodeType
 
 #====================================================
-# Themes Styles Row
+# Theme Table Row
 #====================================================
-class ThemeStyleTableRow(object):
+class ThemeTableRow(object):
     """Theme and Style decorator"""
-    def __init__(self, style, scores = None):
-        self.__style = style
-        self.scores = scores
+    def __init__(self, themeItem):
+        self.__themeItem = themeItem
         self.STYLES_CACHE = {}
-    
+
+    # ----------- Theme attrs assessors -----------
     def __getattr__(self, name):
-        # Quitar esta cosa fea
-        return getattr(self.__style, name)
+        return getattr(self.__themeItem, name)
 
-    def style(self):
-        return self.__style
 
+    def themeItem(self):
+        return self.__themeItem
+
+
+    # ----------- Theme decoration -----------
     @property
     def settings(self):
-        settings = {}
-        for color_key in ['foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter']:
-            if color_key in self.__style.settings and self.__style.settings[color_key]:
-                color = rgba2color(self.__style.settings[color_key])
-                settings[color_key] = color
-        settings['fontStyle'] = self.__style.settings['fontStyle'].split() if 'fontStyle' in self.__style.settings else []
+        settings = dict([(key_value4[0], rgba2color(key_value4[1])) for key_value4 in [key_value for key_value in iter(self.__themeItem.settings.items()) if key_value[1].startswith('#')]])
+        
+        # Fix some color keys
+        settings.setdefault('gutter', settings['background'])
+        settings.setdefault('gutterForeground', settings['foreground'])
+        
+        # Fonts
+        settings['fontStyle'] = self.__themeItem.settings['fontStyle'].split() if 'fontStyle' in self.__themeItem.settings else []
         return settings
+
     
     def update(self, dataHash):
         if 'settings' in dataHash:
-            settings = {}
-            for key in dataHash['settings'].keys():
-                if key in ['foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter']:
-                    settings[key] = color2rgba(dataHash['settings'][key])
+            settings = dict([(key_value2[0], color2rgba(key_value2[1])) for key_value2 in iter(dataHash['settings'].items())])
             if 'fontStyle' in dataHash['settings']:
                 settings['fontStyle'] = " ".join(dataHash['settings']['fontStyle'])
             dataHash['settings'] = settings
-        self.__style.update(dataHash)
+        self.__themeItem.update(dataHash)
+
     
     def clearCache(self):
         self.STYLES_CACHE = {}
+
 
     def getStyle(self, scope = None):
         if scope in self.STYLES_CACHE:
             return self.STYLES_CACHE[scope]
         base = {}
         base.update(self.settings)
-        if scope == None:
+        if scope is None:
             return base
         styles = []
         for style in self.styles:
-            if style.scope != None:
-                score = self.scores.score(style.scope, scope)
-                if score != 0:
-                    styles.append((score, style))
+            rank = []
+            if style.selector.does_match(scope, rank):
+                styles.append((rank.pop(), style))
         styles.sort(key = lambda t: t[0])
-        for score, style in styles:
-            base.update(style.settings)
+        list(map(lambda style: base.update(style[1].settings), styles))
         self.STYLES_CACHE[scope] = base
         return base
+
+
+#====================================================
+# Themes Styles Row
+#====================================================
+class ThemeStyleTableRow(object):
+    """Theme and Style decorator"""
+    def __init__(self, styleItem):
+        self.__styleItem = styleItem
+
+
+    # ----------- Item attrs assessors -----------
+    def __getattr__(self, name):
+        return getattr(self.__styleItem, name)
+
+
+    def styleItem(self):
+        return self.__styleItem
+
+
+    # ----------- Item decoration -----------
+    @property
+    def settings(self):
+        settings = dict([(key_value5[0], rgba2color(key_value5[1])) for key_value5 in [key_value1 for key_value1 in iter(self.__styleItem.settings.items()) if key_value1[1].startswith('#')]])
+        
+        # Fonts
+        settings['fontStyle'] = self.__styleItem.settings['fontStyle'].split() if 'fontStyle' in self.__styleItem.settings else []
+        return settings
+
+    
+    def update(self, dataHash):
+        if 'settings' in dataHash:
+            settings = dict([(key_value3[0], color2rgba(key_value3[1])) for key_value3 in iter(dataHash['settings'].items())])
+            if 'fontStyle' in dataHash['settings']:
+                settings['fontStyle'] = " ".join(dataHash['settings']['fontStyle'])
+            dataHash['settings'] = settings
+        self.__styleItem.update(dataHash)

@@ -19,7 +19,7 @@ class BundleItemTreeModel(AbstractTreeModel):
         self.manager.bundleItemChanged.connect(self.on_manager_bundleItemChanged)
     
     def on_manager_bundleItemChanged(self, treeNode):
-        treeNode.setNodeName(treeNode.item.name)
+        treeNode.setNodeName(treeNode.bundleItem().name)
         index = self.createIndex(treeNode.row(), 0, treeNode)
         self.dataChanged.emit(index, index)
     
@@ -71,17 +71,17 @@ class BundleItemTreeModel(AbstractTreeModel):
     def removeBundleItem(self, bundleItem):
         self.removeNode(bundleItem, bundleItem.bundle)
     
-    def appendTemplateFile(self, templateFile):
-        self.appendNode(templateFile, templateFile.template)
+    def appendStaticFile(self, staticFile):
+        self.appendNode(staticFile, staticFile.parentItem)
 
-    def removeTemplateFile(self, templateFile):
-        self.removeNode(templateFile, templateFile.template)
+    def removeStaticFile(self, staticFile):
+        self.removeNode(staticFile, staticFile.parentItem)
 
 #===============================================
 # Bundle Menu Tree Model
 #===============================================
 class BundleItemMenuTreeModel(AbstractTreeModel):
-    menuChanged = QtCore.pyqtSignal()
+    menuChanged = QtCore.Signal()
     
     def __init__(self, manager, parent = None):
         AbstractTreeModel.__init__(self, parent)

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 """Source code text utilities
 This code was adapted from spyderlib original developed by Pierre Raybaut
@@ -10,9 +11,11 @@ http://code.google.com/p/spyderlib
 import re, os, locale, sys
 from codecs import BOM_UTF8, BOM_UTF16, BOM_UTF32
 
+from prymatex.utils import six
+
 PREFERRED_ENCODING = locale.getpreferredencoding()
 
-def transcode(text, input=PREFERRED_ENCODING, output=PREFERRED_ENCODING):
+def transcode(text, input = PREFERRED_ENCODING, output = PREFERRED_ENCODING):
     """Transcode a text string"""
     try:
         return text.decode("cp437").encode("cp1252")
@@ -42,14 +45,14 @@ def getfilesystemencoding():
 
 FS_ENCODING = getfilesystemencoding()
 
-def to_unicode_from_fs(string):
+def from_fs(string):
     """
     Return a unicode version of string decoded using the file system encoding.
     """
-    if not isinstance(string, basestring): # string is a QString
-        string = unicode(string.toUtf8(), 'utf-8')
+    if not isinstance(string, six.string_types): # string is a QString
+        string = six.text_type(string, 'utf-8')
     else:
-        if not isinstance(string, unicode):
+        if not isinstance(string, six.text_type):
             try:
                 unic = string.decode(FS_ENCODING)
             except (UnicodeError, TypeError):
@@ -58,18 +61,17 @@ def to_unicode_from_fs(string):
                 return unic
     return string
     
-def to_fs_from_unicode(unic):
+def to_fs(unic):
     """
     Return a byte string version of unic encoded using the file 
     system encoding.
     """
-    if isinstance(unic, unicode):
-        try:
-            string = unic.encode(FS_ENCODING)
-        except (UnicodeError, TypeError):
-            pass
-        else:
-            return string
+    try:
+        return six.text_type(unic).encode(FS_ENCODING)
+    except (UnicodeError, TypeError) as ex:
+        pass
+    except Exception as ex:
+        print(ex)
     return unic
 
 #------------------------------------------------------------------------------
@@ -78,12 +80,11 @@ def to_fs_from_unicode(unic):
 #------------------------------------------------------------------------------
 
 # Codecs for working with files and text.
-CODING_RE = re.compile(r"coding[:=]\s*([-\w_.]+)")
-CODECS = ['utf-8', 'iso8859-1',  'iso8859-15', 'koi8-r',
-          'koi8-u', 'iso8859-2', 'iso8859-3', 'iso8859-4', 'iso8859-5', 
-          'iso8859-6', 'iso8859-7', 'iso8859-8', 'iso8859-9', 
-          'iso8859-10', 'iso8859-13', 'iso8859-14', 'latin-1', 
-          'utf-16']
+CODING_RE = re.compile("coding[:=]\s*([-\w_.]+)")
+CODECS = []
+with open(os.path.join(os.path.dirname(__file__), "codecs")) as openFile:
+    for line in openFile.read().splitlines():
+        CODECS.append(tuple(line.split(";")))
     
 def get_coding(text):
     """
@@ -92,7 +93,7 @@ def get_coding(text):
     @return coding string
     """
     for line in text.splitlines()[:2]:
-        result = CODING_RE.search(line)
+        result = CODING_RE.search(str(line))
         if result:
             return result.group(1)
     return None
@@ -106,25 +107,25 @@ def decode(text):
     try:
         if text.startswith(BOM_UTF8):
             # UTF-8 with BOM
-            return unicode(text[len(BOM_UTF8):], 'utf-8'), 'utf-8-bom'
+            return six.text_type(text[len(BOM_UTF8):], 'utf-8'), 'utf-8-bom'
         elif text.startswith(BOM_UTF16):
             # UTF-16 with BOM
-            return unicode(text[len(BOM_UTF16):], 'utf-16'), 'utf-16'
+            return six.text_type(text[len(BOM_UTF16):], 'utf-16'), 'utf-16'
         elif text.startswith(BOM_UTF32):
             # UTF-32 with BOM
-            return unicode(text[len(BOM_UTF32):], 'utf-32'), 'utf-32'
+            return six.text_type(text[len(BOM_UTF32):], 'utf-32'), 'utf-32'
         coding = get_coding(text)
         if coding:
-            return unicode(text, coding), coding
+            return six.text_type(text, coding), coding
     except (UnicodeError, LookupError):
         pass
     # Assume UTF-8
     try:
-        return unicode(text, 'utf-8'), 'utf-8-guessed'
+        return six.text_type(text, 'utf-8'), 'utf-8-guessed'
     except (UnicodeError, LookupError):
         pass
     # Assume Latin-1 (behaviour before 3.7.1)
-    return unicode(text, "latin-1"), 'latin-1-guessed'
+    return six.text_type(text, "latin-1"), 'latin-1-guessed'
 
 def encode(text, orig_coding):
     """
@@ -161,20 +162,17 @@ def encode(text, orig_coding):
     # Save as UTF-8 without BOM
     return text.encode('utf-8'), 'utf-8'
     
-def to_unicode(string):
-    """Convert a string to unicode"""
-    if not isinstance(string, unicode):
-        for codec in CODECS:
-            try:
-                unic = unicode(string, codec)
-            except UnicodeError:
-                pass
-            except TypeError:
-                break
-            else:
-                return unic
-    return string
-    
+def to_text(value):
+    """Convert a value to text"""
+    value = six.text_type(value)
+    for codec, aliases, language in CODECS:
+        try:
+            return value.decode(codec)
+        except UnicodeError:
+            pass
+        except TypeError:
+            break
+    return value
 
 def write(text, filename, encoding='utf-8', mode='wb'):
     """
@@ -198,7 +196,7 @@ def read(filename, encoding='utf-8'):
     Read text from file ('filename')
     Return text and encoding
     """
-    text, encoding = decode( file(filename, 'rb').read() )
+    text, encoding = decode( open(filename, 'rb').read() )
     return text, encoding
 
 def readlines(filename, encoding='utf-8'):
@@ -208,3 +206,125 @@ def readlines(filename, encoding='utf-8'):
     """
     text, encoding = read(filename, encoding)
     return text.split(os.linesep), encoding
+
+# ------------- Force ------------------------
+def smart_text(s, encoding='utf-8', strings_only=False, errors='strict'):
+    """
+Returns a text object representing 's' -- unicode on Python 2 and str on
+Python 3. Treats bytestrings using the 'encoding' codec.
+
+If strings_only is True, don't convert (some) non-string-like objects.
+"""
+    return force_text(s, encoding, strings_only, errors)
+
+def is_protected_type(obj):
+    """Determine if the object instance is of a protected type.
+
+Objects of protected types are preserved as-is when passed to
+force_text(strings_only=True).
+"""
+    return isinstance(obj, six.integer_types + (type(None), float, Decimal,
+        datetime.datetime, datetime.date, datetime.time))
+
+def force_text(s, encoding='utf-8', strings_only=False, errors='strict'):
+    """
+Similar to smart_text, except that lazy instances are resolved to
+strings, rather than kept as lazy objects.
+
+If strings_only is True, don't convert (some) non-string-like objects.
+"""
+    # Handle the common case first, saves 30-40% when s is an instance of
+    # six.text_type. This function gets called often in that setting.
+    if isinstance(s, six.text_type):
+        return s
+    if strings_only and is_protected_type(s):
+        return s
+    try:
+        if not isinstance(s, six.string_types):
+            if hasattr(s, '__unicode__'):
+                s = s.__unicode__()
+            else:
+                if six.PY3:
+                    if isinstance(s, bytes):
+                        s = six.text_type(s, encoding, errors)
+                    else:
+                        s = six.text_type(s)
+                else:
+                    s = six.text_type(bytes(s), encoding, errors)
+        else:
+            # Note: We use .decode() here, instead of six.text_type(s, encoding,
+            # errors), so that if s is a SafeBytes, it ends up being a
+            # SafeText at the end.
+            s = s.decode(encoding, errors)
+    except UnicodeDecodeError as e:
+        if not isinstance(s, Exception):
+            raise DjangoUnicodeDecodeError(s, *e.args)
+        else:
+            # If we get to here, the caller has passed in an Exception
+            # subclass populated with non-ASCII bytestring data without a
+            # working unicode method. Try to handle this without raising a
+            # further exception by individually forcing the exception args
+            # to unicode.
+            s = ' '.join([force_text(arg, encoding, strings_only,
+                    errors) for arg in s])
+    return s
+
+def smart_bytes(s, encoding='utf-8', strings_only=False, errors='strict'):
+    """
+Returns a bytestring version of 's', encoded as specified in 'encoding'.
+
+If strings_only is True, don't convert (some) non-string-like objects.
+"""
+    return force_bytes(s, encoding, strings_only, errors)
+
+
+def force_bytes(s, encoding='utf-8', strings_only=False, errors='strict'):
+    """
+Similar to smart_bytes, except that lazy instances are resolved to
+strings, rather than kept as lazy objects.
+
+If strings_only is True, don't convert (some) non-string-like objects.
+"""
+    if isinstance(s, bytes):
+        if encoding == 'utf-8':
+            return s
+        else:
+            return s.decode('utf-8', errors).encode(encoding, errors)
+    if strings_only and (s is None or isinstance(s, int)):
+        return s
+    if not isinstance(s, six.string_types):
+        try:
+            if six.PY3:
+                return six.text_type(s).encode(encoding)
+            else:
+                return bytes(s)
+        except UnicodeEncodeError:
+            if isinstance(s, Exception):
+                # An Exception subclass containing non-ASCII data that doesn't
+                # know how to print itself properly. We shouldn't raise a
+                # further exception.
+                return b' '.join([force_bytes(arg, encoding, strings_only,
+                        errors) for arg in s])
+            return six.text_type(s).encode(encoding, errors)
+    else:
+        return s.encode(encoding, errors)
+
+if six.PY3:
+    smart_str = smart_text
+    force_str = force_text
+else:
+    smart_str = smart_bytes
+    force_str = force_bytes
+    # backwards compatibility for Python 2
+    smart_unicode = smart_text
+    force_unicode = force_text
+
+smart_str.__doc__ = """\
+Apply smart_text in Python 3 and smart_bytes in Python 2.
+
+This is suitable for writing to sys.stdout (for instance).
+"""
+
+force_str.__doc__ = """\
+Apply force_text in Python 3 and force_bytes in Python 2.
+"""

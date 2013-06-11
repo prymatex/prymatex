@@ -1,16 +1,16 @@
 import os, sys
 sys.path.append(os.path.abspath('..'))
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from prymatex.qt import QtCore, QtGui
+from prymatex.qt.QtCore import *
+from prymatex.qt.QtGui import *
 
 class PMBBundleTreeModel(QtCore.QAbstractItemModel):  
     def __init__(self, manager, parent = None):  
         super(PMBBundleTreeModel, self).__init__(parent)  
         self.parents = []
         self.manager = manager
-        self.rootItem = PMBBundleTreeItem("", u"Bundles", "root")
+        self.rootItem = PMBBundleTreeItem("", "Bundles", "root")
         for bundle in self.manager.getAllBundles():
             bti = PMBBundleTreeItem(bundle.uuid, bundle.name, "bundle", self.rootItem)
             self.rootItem.appendChild(bti)
@@ -22,7 +22,7 @@ class PMBBundleTreeModel(QtCore.QAbstractItemModel):
             return False
         elif role == QtCore.Qt.EditRole:  
             item = index.internalPointer()  
-            item.name = unicode(value.toString())
+            item.name = str(value.toString())
             return True
         return False  
      
@@ -181,7 +181,7 @@ class ColumnView(QTreeView):
                 # Ver si cambio algo de los valores
                 bitem = self.manager.getBundleItem(uuid = olditem.uuid)
                 hash = bitem.hash
-                print bitem.isChanged(hash)
+                print(bitem.isChanged(hash))
         indexes = newindex.indexes()
         if indexes:
             for index in indexes:

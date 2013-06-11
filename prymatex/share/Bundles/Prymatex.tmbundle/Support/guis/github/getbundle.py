@@ -1,81 +1,72 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import os, json, sys
-import urllib2, httplib2
-from urlparse import urlsplit
+import os
+import json
+import sys
+import urllib.request, urllib.error, urllib.parse
 
-# Third parties
-from PyQt4 import QtGui, QtCore
-
-from prymatex.core.plugin.dialog import PMXBaseDialog
-
-# UI
-from ui_githubclient import Ui_GitHubClientDialog
-from model import RepositoryTableModel
+from urllib.parse import urlsplit
+from prymatex.qt import QtGui, QtCore, QtNetwork
+from prymatex.core import PMXBaseDialog
+from .ui_githubclient import Ui_GitHubClientDialog
+from .model import RepositoryTableModel, RepositoryProxyTableModel
 
 GITHUB_API_SEARCH_URL = 'https://api.github.com/legacy/repos/search/%s+tmbundle'
 
-class GitHubSearchBundleThread(QtCore.QThread):
-    recordsFound = QtCore.pyqtSignal(object)
-    requestError = QtCore.pyqtSignal(str)
+class GithubBundleSearchThread(QtCore.QThread):
+    # Signals
+    dataUpdate = QtCore.Signal(object)
+    # Term to search for
     term = None
-    
-    def __init__(self, parent = None):
-        QtCore.QThread.__init__(self, parent)
-        self.http = self.buildHttp()
-    
-    def buildHttp(self):
-        ''' Build HTTP instance taking proxy information '''
-        # TODO: Use prymatex configuration as first option
-        proxy = None
-        http_proxy = os.environ.get('http_proxy', os.environ.get('HTTP_PROXY', ''))
-        if http_proxy:
-            data = urlsplit(http_proxy)
-            proxy = httplib2.ProxyInfo(proxy_type = httplib2.socks.PROXY_TYPE_HTTP,
-                                       proxy_host = data.hostname,
-                                       proxy_port = data.port,
-                                       proxy_user = data.username,
-                                       proxy_pass = data.password)
-        # TODO: Socks
-        # Disable SSL Certs to avoid erratic behaviour 
-        #http://pwnetics.wordpress.com/2012/02/06/ssl-certificate-verification-and-httplib2/
-        
-        http = httplib2.Http(proxy_info=proxy,
-                             disable_ssl_certificate_validation=True)
-        
-        return http
-    
-    def run(self):
-        if self.term:
-            try:
-                headers, response = self.http.request(GITHUB_API_SEARCH_URL % self.term)
-                data = json.loads(response)
-                self.recordsFound.emit(data) # Thread safety
-            except Exception as e:
-                print e
-                self.requestError.emit(str(e))
 
-class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
+    def run(self):
+        if not self.term or self.term < self.parent().MINIMUM_QUERY_LENGTH:
+            return
+        response = urllib.request.urlopen(GITHUB_API_SEARCH_URL % self.term).read()
+        data = json.loads(response.content)
+        self.dataUpdate.emit(data) # Thread safety
+
+    def setProxy(self):
+        print(self.parent().application.settingValue("Browser.proxyAddress"))
+        networkProxy = QtNetwork.QNetworkProxy.applicationProxy()
+        opener = urllib.request.build_opener(
+            urllib.request.HTTPHandler(),
+            urllib.request.HTTPSHandler(),
+            urllib.request.ProxyHandler({
+                'http': 'http://localhost:3128',
+                'https': 'http://localhost:3128'
+            }))
+        urllib.request.install_opener(opener)
+
+    def search(self, term):
+        '''Performs a lookup in Github REST API based on term'''
+        if self.isRunning():
+            raise RuntimeError("A search is alredy being made")
+        self.setProxy()
+        self.term = term
+        self.start()
+
+class GithubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
     MINIMUM_QUERY_LENGTH = 1
-    
-    def __init__(self, parent = None):
+
+    def __init__(self, parent=None):
         QtGui.QDialog.__init__(self, parent)
         PMXBaseDialog.__init__(self)
         self.setupUi(self)
-        
+
         self.currentRepository = None
-        
-        self.workerThread = GitHubSearchBundleThread(self)
+
+        self.workerThread = GithubBundleSearchThread(self)
         self.model = RepositoryTableModel(self)
-        self.proxy = QtGui.QSortFilterProxyModel()
+        self.proxy = RepositoryProxyTableModel()
         self.proxy.setSourceModel(self.model)
-        
+
         self.buttonSearch.setEnabled(False)
         self.buttonOk.setEnabled(False)
         self.widgetInfo.setVisible(False)
-        
-        self.workerThread.recordsFound.connect(self.on_workerThread_recordsFound)
+
+        self.workerThread.dataUpdate.connect(self.on_workerThread_recordsFound)
         self.model.dataChanged.connect(self.on_model_dataChanged)
 
         self.setupTableView()
@@ -88,7 +79,7 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         self.tableViewResults.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
         self.tableViewResults.horizontalHeader().setSortIndicatorShown(True)
         self.tableViewResults.horizontalHeader().setClickable(True)
-
+        
     def loadComboBoxNamespace(self):
         for ns in self.application.supportManager.safeNamespaces:
             self.comboBoxNamespace.addItem(ns)
@@ -99,49 +90,54 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         self.labelHomepage.setText(repo["homepage"])
         self.labelCreated.setText(repo["created"])
         self.labelPushed.setText(repo["pushed"])
-        self.labelWatchers.setText(unicode(repo["watchers"]))
-        self.labelFollowers.setText(unicode(repo["followers"]))
-        self.labelForks.setText(unicode(repo["forks"]))
+        self.labelWatchers.setText(str(repo["watchers"]))
+        self.labelFollowers.setText(str(repo["followers"]))
+        self.labelForks.setText(str(repo["forks"]))
         self.lineEditFolder.setText(repo["folder"])
         if repo["namespace"]:
             namespaceBundlePath, _ = self.application.supportManager.namespaceElementPath(repo["namespace"], "Bundles")
             self.labelDestiny.setText(os.path.join(namespaceBundlePath, repo["folder"]))
+        else:
+            self.labelDestiny.setText("")
         self.labelUrl.setText(repo["url"])
-        
+
     def reloadSupport(self):
         def showMessages(text):
-            print text
+            print(text)
         self.application.supportManager.reloadSupport(showMessages)
-        
+
     # =======================
     # = Señales de busqueda =
     # =======================
     def on_buttonSearch_pressed(self):
         text = self.lineEditQuery.text()
-        if len(text) < self.MINIMUM_QUERY_LENGTH or self.workerThread.isRunning():
+        try:
+            self.workerThread.search(text)
+        except RuntimeError as e:
             return
-        self.tableViewResults.setEnabled(False)
-        self.workerThread.term = text
-        self.workerThread.start()
-        
+        except ValueError:
+            return
+        else:
+            self.tableViewResults.setEnabled(False)
+
     def on_lineEditQuery_returnPressed(self):
         self.on_buttonSearch_pressed()
-        
-    def on_lineEditQuery_textChanged(self):    
+
+    def on_lineEditQuery_textChanged(self):
         self.buttonSearch.setEnabled(len(self.lineEditQuery.text()) >= self.MINIMUM_QUERY_LENGTH)
-    
+
     # ================================
     # = Señales que arman el destiny =
     # ================================
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def on_comboBoxNamespace_activated(self, namespace):
         self.currentRepository["namespace"] = namespace
         self.setCurrentRepository(self.currentRepository)
-    
+
     def on_lineEditFolder_editingFinished(self):
         self.currentRepository["folder"] = self.lineEditFolder.text()
         self.setCurrentRepository(self.currentRepository)
-    
+
     # ======================
     # = Señales del modelo =
     # ======================
@@ -152,8 +148,7 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         else:
             repo["namespace"] = None
         self.buttonOk.setEnabled(self.model.hasSelected())
-        self.setCurrentRepository(repo)
-        
+
     def on_tableViewResults_activated(self, index):
         self.widgetInfo.setVisible(True)
         repo = self.model.repositories[index.row()]
@@ -167,16 +162,17 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         self.model.addRepositories(data["repositories"])
         self.tableViewResults.resizeRowsToContents()
         self.tableViewResults.setEnabled(True)
-    
+        self.proxy.sort(0)
+
     def retrivalError(self, reason):
         self.tableViewResults.setEnabled(True)
         QtGui.QMessageBox.critical(self, _("Query Error"), "An error occurred<br><pre>%s</pre>" % reason)
-    
+
     def on_buttonOk_pressed(self):
         repos = self.model.allSelected()
         self._processCount = len(repos)
         for repo in repos:
-            namespaceBundlePath, _ = self.application.supportManager.namespaceElementPath(repo["namespace"], "Bundles", create = True)
+            namespaceBundlePath, _ = self.application.supportManager.namespaceElementPath(repo["namespace"], "Bundles", create=True)
             process = QtCore.QProcess(self)
             process.setWorkingDirectory(namespaceBundlePath)
             process.finished[int].connect(self.on_processClone_finished)
@@ -190,9 +186,9 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         if not self._processCount:
             self.reloadSupport()
             self.close()
-        
+
 if __name__ == '__main__':
     app = QtGui.QApplication([])
-    win = GitHubBundlesDialog()
+    win = GithubBundlesDialog()
     win.show()
     sys.exit(app.exec_())

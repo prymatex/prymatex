@@ -3,7 +3,7 @@
 
 import sys
 
-from PyQt4 import QtCore
+from prymatex.qt import QtCore
 
 from prymatex.ui.emergencycrash import Ui_CrashDialog
 from prymatex.gui.emergency.beautify import beautifyTraceback
@@ -29,7 +29,7 @@ class PMXCrashDialog(QtCore.QDialog, Ui_CrashDialog):
     def on_pushSendTraceback_pressed(self):
         res = QMessageBox.information(self, "Send traceback", "Send current traceback to "
                                 "Prymatex deevelopers?")
-        print res
+        print(res)
         
     def on_pushClose_pressed(self):
         self.accept()

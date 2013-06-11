@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+: ${TM_JAVA:=java}
+: ${TM_JAVAC:=javac}
+
 if [ "$1" = "--version" ]
 then
     "$TM_JAVA" -version 2>&1 | head -1
@@ -11,6 +14,11 @@ shift
 
 output="$TMPDIR/tm_javamate.${TM_PID:-$LOGNAME}";
 mkdir -p "$output"
+
+PACKAGEDIR=${TM_JAVA_PACKAGE//./\/} # replace . with / in package
+SOURCEDIR=$(dirname "$SOURCE")
+
+cd "${SOURCEDIR%$PACKAGEDIR}" # Compile from root folder
 
 if [ -n "$TM_JAVA_FILEGLOB" ]; then
   "$TM_JAVAC" -d "$output" -encoding UTF8 $TM_JAVA_FILEGLOB; rc=$?;

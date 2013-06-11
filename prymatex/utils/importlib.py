@@ -8,7 +8,7 @@ def _resolve_name(name, package, level):
     if not hasattr(package, 'rindex'):
         raise ValueError("'package' not set to a string")
     dot = len(package)
-    for x in xrange(level, 1, -1):
+    for x in range(level, 1, -1):
         try:
             dot = package.rindex('.', 0, dot)
         except ValueError:
@@ -46,7 +46,7 @@ def import_from_directory(directory, name):
     try:
         module = import_module(name)
         reload(module) # Might be out of date
-    except ImportError, reason:
+    except ImportError as reason:
         print(reason)
         raise reason
     finally:

@@ -1,58 +1,96 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/configure/terminal.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/terminal.ui'
 #
-# Created: Fri Nov  9 18:10:45 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Wed Jun  5 22:34:39 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Terminal(object):
     def setupUi(self, Terminal):
         Terminal.setObjectName(_fromUtf8("Terminal"))
-        Terminal.resize(400, 300)
+        Terminal.resize(533, 268)
         self.verticalLayout_2 = QtGui.QVBoxLayout(Terminal)
+        self.verticalLayout_2.setSpacing(6)
+        self.verticalLayout_2.setMargin(0)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
-        self.groupBox_2 = QtGui.QGroupBox(Terminal)
-        self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
-        self.horizontalLayout = QtGui.QHBoxLayout(self.groupBox_2)
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.lineFont = QtGui.QLineEdit(self.groupBox_2)
-        self.lineFont.setReadOnly(True)
-        self.lineFont.setObjectName(_fromUtf8("lineFont"))
-        self.horizontalLayout.addWidget(self.lineFont)
-        self.pushButtonChangeFont = QtGui.QPushButton(self.groupBox_2)
-        self.pushButtonChangeFont.setObjectName(_fromUtf8("pushButtonChangeFont"))
-        self.horizontalLayout.addWidget(self.pushButtonChangeFont)
-        self.verticalLayout_2.addWidget(self.groupBox_2)
+        self.groupBoxFont = QtGui.QGroupBox(Terminal)
+        self.groupBoxFont.setObjectName(_fromUtf8("groupBoxFont"))
+        self.horizontalLayout_3 = QtGui.QHBoxLayout(self.groupBoxFont)
+        self.horizontalLayout_3.setSpacing(2)
+        self.horizontalLayout_3.setMargin(6)
+        self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
+        self.fontComboBoxName = QtGui.QFontComboBox(self.groupBoxFont)
+        self.fontComboBoxName.setFontFilters(QtGui.QFontComboBox.MonospacedFonts)
+        self.fontComboBoxName.setObjectName(_fromUtf8("fontComboBoxName"))
+        self.horizontalLayout_3.addWidget(self.fontComboBoxName)
+        self.spinBoxFontSize = QtGui.QSpinBox(self.groupBoxFont)
+        self.spinBoxFontSize.setMaximumSize(QtCore.QSize(50, 16777215))
+        self.spinBoxFontSize.setMinimum(7)
+        self.spinBoxFontSize.setObjectName(_fromUtf8("spinBoxFontSize"))
+        self.horizontalLayout_3.addWidget(self.spinBoxFontSize)
+        self.checkBoxAntialias = QtGui.QCheckBox(self.groupBoxFont)
+        self.checkBoxAntialias.setMaximumSize(QtCore.QSize(80, 16777215))
+        self.checkBoxAntialias.setObjectName(_fromUtf8("checkBoxAntialias"))
+        self.horizontalLayout_3.addWidget(self.checkBoxAntialias)
+        self.verticalLayout_2.addWidget(self.groupBoxFont)
         self.groupBox = QtGui.QGroupBox(Terminal)
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
-        self.verticalLayout = QtGui.QVBoxLayout(self.groupBox)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.gridLayout = QtGui.QGridLayout()
-        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.formLayout = QtGui.QFormLayout(self.groupBox)
+        self.formLayout.setFieldGrowthPolicy(QtGui.QFormLayout.ExpandingFieldsGrow)
+        self.formLayout.setLabelAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.formLayout.setMargin(6)
+        self.formLayout.setSpacing(2)
+        self.formLayout.setObjectName(_fromUtf8("formLayout"))
         self.label = QtGui.QLabel(self.groupBox)
         self.label.setObjectName(_fromUtf8("label"))
-        self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
-        self.comboColorScheme = QtGui.QComboBox(self.groupBox)
-        self.comboColorScheme.setObjectName(_fromUtf8("comboColorScheme"))
-        self.gridLayout.addWidget(self.comboColorScheme, 0, 1, 1, 1)
-        self.label_2 = QtGui.QLabel(self.groupBox)
-        self.label_2.setObjectName(_fromUtf8("label_2"))
-        self.gridLayout.addWidget(self.label_2, 1, 0, 1, 1)
-        self.comboScrollBar = QtGui.QComboBox(self.groupBox)
-        self.comboScrollBar.setObjectName(_fromUtf8("comboScrollBar"))
-        self.gridLayout.addWidget(self.comboScrollBar, 1, 1, 1, 1)
-        self.verticalLayout.addLayout(self.gridLayout)
+        self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.label)
+        self.comboBoxScheme = QtGui.QComboBox(self.groupBox)
+        self.comboBoxScheme.setObjectName(_fromUtf8("comboBoxScheme"))
+        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.comboBoxScheme)
+        self.checkBoxEditorTheme = QtGui.QCheckBox(self.groupBox)
+        self.checkBoxEditorTheme.setObjectName(_fromUtf8("checkBoxEditorTheme"))
+        self.formLayout.setWidget(3, QtGui.QFormLayout.SpanningRole, self.checkBoxEditorTheme)
         self.verticalLayout_2.addWidget(self.groupBox)
+        self.groupBox_2 = QtGui.QGroupBox(Terminal)
+        self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
+        self.formLayout_2 = QtGui.QFormLayout(self.groupBox_2)
+        self.formLayout_2.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
+        self.formLayout_2.setLabelAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.formLayout_2.setMargin(6)
+        self.formLayout_2.setSpacing(2)
+        self.formLayout_2.setObjectName(_fromUtf8("formLayout_2"))
+        self.label_3 = QtGui.QLabel(self.groupBox_2)
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.formLayout_2.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_3)
+        self.spinBoxBufferSize = QtGui.QSpinBox(self.groupBox_2)
+        self.spinBoxBufferSize.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.spinBoxBufferSize.setMinimum(10)
+        self.spinBoxBufferSize.setMaximum(1000)
+        self.spinBoxBufferSize.setSingleStep(10)
+        self.spinBoxBufferSize.setObjectName(_fromUtf8("spinBoxBufferSize"))
+        self.formLayout_2.setWidget(2, QtGui.QFormLayout.FieldRole, self.spinBoxBufferSize)
+        self.checkBoxSynchronize = QtGui.QCheckBox(self.groupBox_2)
+        self.checkBoxSynchronize.setObjectName(_fromUtf8("checkBoxSynchronize"))
+        self.formLayout_2.setWidget(3, QtGui.QFormLayout.SpanningRole, self.checkBoxSynchronize)
+        self.verticalLayout_2.addWidget(self.groupBox_2)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem)
 
@@ -60,10 +98,13 @@ class Ui_Terminal(object):
         QtCore.QMetaObject.connectSlotsByName(Terminal)
 
     def retranslateUi(self, Terminal):
-        Terminal.setWindowTitle(_('Terminal'))
-        self.groupBox_2.setTitle(_('Font'))
-        self.pushButtonChangeFont.setText(_('&Change'))
-        self.groupBox.setTitle(_('Appearance'))
-        self.label.setText(_('Color Scheme'))
-        self.label_2.setText(_('Scroll'))
+        Terminal.setWindowTitle(_translate("Terminal", "Terminal", None))
+        self.groupBoxFont.setTitle(_translate("Terminal", "Font", None))
+        self.checkBoxAntialias.setText(_translate("Terminal", "Anti alias", None))
+        self.groupBox.setTitle(_translate("Terminal", "Appearance", None))
+        self.label.setText(_translate("Terminal", "Color scheme:", None))
+        self.checkBoxEditorTheme.setText(_translate("Terminal", "Use editor theme when possible", None))
+        self.groupBox_2.setTitle(_translate("Terminal", "Behavior", None))
+        self.label_3.setText(_translate("Terminal", "Buffer:", None))
+        self.checkBoxSynchronize.setText(_translate("Terminal", "Automatically synchronize the terminal with the current editor when possible", None))
 

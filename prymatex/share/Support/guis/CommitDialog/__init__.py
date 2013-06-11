@@ -9,8 +9,8 @@ from prymatex.core import PMXBaseDialog
 
 from prymatex.core.settings import pmxConfigPorperty
 
-from ui_commit import Ui_CommitDialog
-from model import FilesTableModel
+from .ui_commit import Ui_CommitDialog
+from .model import FilesTableModel
 
 class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
     lastCommitSummary = pmxConfigPorperty(default=[])
@@ -46,13 +46,13 @@ class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
         self.toolButtonSelect.setMenu(self.selectMenu)
         
     def chooseAll(self):
-        print "chooseAll"
+        print("chooseAll")
         
     def chooseNone(self):
-        print "chooseNone"
+        print("chooseNone")
         
     def revertChoices(self):
-        print "revertChoices"
+        print("revertChoices")
         
     def initialize(self, mainWindow):
         self.lastCommitSummary = self.lastCommitSummary[:10]
@@ -60,7 +60,7 @@ class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
         for summary in self.lastCommitSummary:
             self.comboBoxSummary.addItem("%s ..." % " ".join(summary.split()[:8]))
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def on_comboBoxSummary_activated(self, index):
         index -= 1
         if index < len(self.lastCommitSummary):
@@ -95,7 +95,7 @@ class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
                 name, cmd, args = action.split(',')
                 self.actions.append({ 'name': name, 'command': cmd, 'args': args, 'status': status.split(",")})
         if len(filePaths) == len(fileStatus):
-            self.filesTableModel.setFiles(map(lambda (f, s): {'path': f, 'status': s, 'checked': s != "?"}, zip(filePaths, fileStatus)))
+            self.filesTableModel.setFiles([{'path': f_s[0], 'status': f_s[1], 'checked': f_s[1] != "?"} for f_s in zip(filePaths, fileStatus)])
             self.tableViewFiles.resizeColumnsToContents()
             self.tableViewFiles.resizeRowsToContents()
     
@@ -124,5 +124,5 @@ if __name__ == '__main__':
     app = QtGui.QApplication([])
     win = dialogClass()
     win.setParameters({"title": "Commit", "files": "uno dos tres", "status": "M:?:A"})
-    print win.execModal()
+    print(win.execModal())
     sys.exit(app.exec_())

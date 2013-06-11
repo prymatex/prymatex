@@ -9,7 +9,7 @@ from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.codeeditor.editor import CodeEditor
 
-class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
+class CodeEditorSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "F7"
     ICON = resources.getIcon("code-class")
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
@@ -52,7 +52,7 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
         self.mainWindow.currentEditor().goToBlock(block)
         self.mainWindow.currentEditor().setFocus()
         
-class PMXCodeBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
+class CodeEditorBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "Shift+F7"
     ICON = resources.getIcon("bookmarks-organize")
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea

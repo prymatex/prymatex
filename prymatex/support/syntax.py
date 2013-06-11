@@ -1,17 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 """Syntax's module
 http://manual.macromates.com/en/language_grammars.html
-http://manual.macromates.com/en/navigation_overview#customizing_foldings.html
 """
 
 import re
 
 from prymatex.support.bundle import PMXBundleItem
-from prymatex.support.utils import compileRegexp
-    
-SPLITLINES = re.compile('\n')
+from prymatex.support.regexp import compileRegexp
 
 class PMXSyntaxNode(object):
     def __init__(self, dataHash, syntax):
@@ -19,26 +17,25 @@ class PMXSyntaxNode(object):
                     'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns']:
             setattr(self, k, None)
         self.syntax = syntax
-        for key, value in dataHash.iteritems():
+        for key, value in dataHash.items():
             try:
                 if key in ['match', 'begin']:
                     setattr(self, key, compileRegexp( value ))
                 elif key in ['content', 'name', 'contentName', 'end']:
                     setattr(self, key, value )
                 elif key in ['captures', 'beginCaptures', 'endCaptures']:
-                    value = sorted(value.items(), key=lambda v: int(v[0]))
+                    value = sorted(list(value.items()), key = lambda v: int(v[0]))
                     setattr(self, key, value)
                 elif key == 'repository':
                     self.parse_repository(value)
                 elif key in ['patterns']:
                     self.create_children(value)
-            except TypeError, e:
-                #an encoding can only be given for non-unicode patterns
-                print e, value
+            except TypeError as e:
+                print(e, value)
     
     def parse_repository(self, repository):
         self.repository = {}
-        for key, value in repository.iteritems():
+        for key, value in repository.items():
             if 'include' in value:
                 self.repository[key] = PMXSyntaxProxy( value, self.syntax )
             else:
@@ -55,7 +52,7 @@ class PMXSyntaxNode(object):
     def parse_captures(self, name, pattern, match, processor):
         captures = pattern.match_captures( name, match )
         #Aca tengo que comparar con -1, Ver nota en match_captures
-        captures = filter(lambda (group, range, name): range != -1 and range[0] != range[-1], captures)
+        captures = [group_range_name for group_range_name in captures if group_range_name[1][0] != -1 and group_range_name[1][0] != group_range_name[1][-1]]
         starts = []
         ends = []
         for group, range, name in captures:
@@ -65,12 +62,12 @@ class PMXSyntaxNode(object):
         ends = ends[::-1]
         
         while starts or ends:
-            if starts:
-                pos, _, name = starts.pop()
-                processor.openTag(name, pos)
-            elif ends:
+            if not starts:
                 pos, _, name = ends.pop()
                 processor.closeTag(name, pos)
+            elif not ends:
+                pos, _, name = starts.pop()
+                processor.openTag(name, pos)
             elif abs(ends[-1][1]) < starts[-1][1]:
                 pos, _, name = ends.pop()
                 processor.closeTag(name, pos)
@@ -84,11 +81,13 @@ class PMXSyntaxNode(object):
         
         if captures:
             for key, value in captures:
-                if re.compile('^\d*$').match(key):
-                    if int(key) <= len(match.groups()):
-                        #Problemas entre pytgon y ruby, al pones un span del match, en un None oniguruma me retorna (-1, -1),
+                if key.isdigit():
+                    # TODO 0 es igual a lo capturado no hace falta hacer el match.groups() seria directemente el pattern
+                    index = int(key)
+                    if index <= len(match.groups()):
+                        #Problemas entre python y ruby, al pones un span del match, en un None oniguruma me retorna (-1, -1),
                         #esto es importante para el filtro del llamador
-                        matches.append([int(key), match.span(int(key)), value['name']])
+                        matches.append([index, match.span(index), value['name']])
                 else:
                     if match.groups()[ key ]:
                         matches.append([match.groups()[ key ], match.groupdict[ key ], value['name']])
@@ -102,10 +101,10 @@ class PMXSyntaxNode(object):
         elif self.begin:
             match = self.begin.search( string, position )
             if match:
-                return (self, match) 
+                return (self, match)
         elif self.end:
             pass
-        else:
+        elif self.patterns:
             return self.match_first_son( string, position )
         return (None, None)
     
@@ -115,21 +114,22 @@ class PMXSyntaxNode(object):
             index = int(mobj.group(0)[1:])
             return match.group(index)
         def d_match(mobj):
-            print "d_match"
+            print("d_match")
             index = mobj.group(0)
             return match.groupdict[index]
-        regstring = compileRegexp(u'\\\\([1-9])').sub(g_match, regstring)
-        regstring = compileRegexp(u'\\\\k<(.*?)>').sub(d_match, regstring)
+        regstring = compileRegexp('\\\\([1-9])').sub(g_match, regstring)
+        regstring = compileRegexp('\\\\k<(.*?)>').sub(d_match, regstring)
         return compileRegexp( regstring ).search( string, position )
     
     def match_first_son(self, string, position):
         match = (None, None)
-        if self.patterns:
-            for p in self.patterns:
-                tmatch = p.match_first(string, position)
-                if tmatch[1]:
-                    if not match[1] or match[1].start() > tmatch[1].start():
-                        match = tmatch
+        for p in self.patterns:
+            tmatch = p.match_first(string, position)
+            if tmatch[1]:
+                if not match[1] or match[1].start() > tmatch[1].start():
+                    match = tmatch
+                #if tmatch[1].start() == position:
+                #    break
         return match
 
 class PMXSyntaxProxy(object):
@@ -146,7 +146,7 @@ class PMXSyntaxProxy(object):
     def __proxy(self):
         if re.compile('^#').search(self.proxy):
             grammar = self.syntax.grammar
-            if hasattr(grammar, 'repository') and grammar.repository.has_key(self.proxy[1:]):  
+            if hasattr(grammar, 'repository') and self.proxy[1:] in grammar.repository:  
                 return grammar.repository[self.proxy[1:]]
         elif self.proxy == '$self':
             return self.syntax.grammar
@@ -160,14 +160,11 @@ class PMXSyntaxProxy(object):
                 return PMXSyntaxNode({}, self.syntax)
 
 class PMXSyntax(PMXBundleItem):
-    KEYS = [ 'comment', 'firstLineMatch', 'foldingStartMarker', 'scopeName', 'repository', 'foldingStopMarker', 'fileTypes', 'patterns']
+    KEYS = [ 'comment', 'firstLineMatch', 'scopeName', 'repository', 'fileTypes', 'patterns']
     TYPE = 'syntax'
     FOLDER = 'Syntaxes'
     EXTENSION = 'tmLanguage'
     PATTERNS = ['*.tmLanguage', '*.plist']
-    FOLDING_NONE = 0
-    FOLDING_START = 1
-    FOLDING_STOP = -1
     ROOT_GROUPS = [ "comment", "constant", "entity", "invalid",
                     "keyword", "markup", "meta", "storage",
                     "string", "support", "variable" ]
@@ -175,12 +172,9 @@ class PMXSyntax(PMXBundleItem):
         super(PMXSyntax, self).load(dataHash)
         for key in PMXSyntax.KEYS:
             value = dataHash.get(key, None)
-            if value != None and key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
-                try:
+            if key in ['firstLineMatch']:
+                if value is not None:
                     value = compileRegexp( value )
-                except TypeError, e:
-                    value = None
-                    print self.name, key, e
             setattr(self, key, value)
     
     @property
@@ -188,8 +182,8 @@ class PMXSyntax(PMXBundleItem):
         dataHash = super(PMXSyntax, self).hash
         for key in PMXSyntax.KEYS:
             value = getattr(self, key)
-            if value != None:
-                if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
+            if value is not None:
+                if key in ['firstLineMatch']:
                     value = value.pattern
                 dataHash[key] = value
         return dataHash
@@ -197,8 +191,9 @@ class PMXSyntax(PMXBundleItem):
     @property
     def indentSensitive(self):
         #If stop marker match with "" the grammar is indent sensitive
-        match = self.foldingStopMarker.search("") if self.foldingStopMarker != None else None
-        return match != None
+        #match = self.foldingStopMarker.search("") if self.foldingStopMarker != None else None
+        #return match != None
+        return False
 
     @property
     def syntaxes(self):
@@ -217,6 +212,7 @@ class PMXSyntax(PMXBundleItem):
         repository = {}
         if self.scopeName is not None:
             syntaxes = self.syntaxes
+            # TODO Usar el selector
             index = self.scopeName.find(".")
             while index != -1:
                 parentScopeName = self.scopeName[0:index]
@@ -232,8 +228,9 @@ class PMXSyntax(PMXBundleItem):
         if processor:
             processor.startParsing(self.scopeName)
         stack = [[self.grammar, None]]
-        for line in SPLITLINES.split(string):
+        for line in string.splitlines(True):
             self.parseLine(stack, line, processor)
+            #print stack
         if processor:
             processor.endParsing(self.scopeName)
     
@@ -245,31 +242,25 @@ class PMXSyntax(PMXBundleItem):
         grammar = self.grammar
         
         while True:
+            end_match = pattern = pattern_match = None
             if top.patterns:
                 pattern, pattern_match = top.match_first_son(line, position)
-            else:
-                pattern, pattern_match = None, None
-            end_match = None
             if top.end:
                 end_match = top.match_end( line, match, position )
-            
             if end_match and ( not pattern_match or pattern_match.start() >= end_match.start() ):
-                pattern_match = end_match
-                start_pos = pattern_match.start()
-                end_pos = pattern_match.end()
+                start_pos = end_match.start()
+                end_pos = end_match.end()
                 if top.contentName and processor:
                     processor.closeTag(top.contentName, start_pos)
                 if processor:
-                    grammar.parse_captures('captures', top, pattern_match, processor)
+                    grammar.parse_captures('captures', top, end_match, processor)
                 if processor:
-                    grammar.parse_captures('endCaptures', top, pattern_match, processor)
+                    grammar.parse_captures('endCaptures', top, end_match, processor)
                 if top.name and processor:
                     processor.closeTag( top.name, end_pos)
                 stack.pop()
                 top, match = stack[-1]
-            else:
-                if not pattern:
-                    break 
+            elif pattern:
                 start_pos = pattern_match.start()
                 end_pos = pattern_match.end()
                 if pattern.begin:
@@ -291,22 +282,18 @@ class PMXSyntax(PMXBundleItem):
                         grammar.parse_captures('captures', pattern, pattern_match, processor)
                     if pattern.name and processor:
                         processor.closeTag(pattern.name, end_pos)
+            else:
+                # FIXME: Custom pop from stack for regexp
+                if not end_match and not pattern and top.end == "(?!\G)":
+                    stack.pop()
+                break
             position = end_pos
         if processor:
             processor.endLine(line)
         return position
-    
-    def folding(self, line):
-        start_match = self.foldingStartMarker.search(line) if self.foldingStartMarker != None else None
-        stop_match = self.foldingStopMarker.search(line) if self.foldingStopMarker != None else None
-        if start_match != None and stop_match == None:
-            return self.FOLDING_START
-        elif stop_match != None and start_match == None:
-            return self.FOLDING_STOP
-        return self.FOLDING_NONE
 
     def __str__(self):
-        return u"<PMXSyntax %s>" % self.name
+        return "<PMXSyntax %s>" % self.name
 
     @classmethod
     def findGroup(cls, scopes):

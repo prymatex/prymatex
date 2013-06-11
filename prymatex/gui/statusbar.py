@@ -6,10 +6,8 @@ Some of the widgets defined here are:
     * Syntax selector
     * 
 '''
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import SIGNAL
+from prymatex.qt import QtCore, QtGui
 from prymatex.utils.i18n import ugettext as _
-from prymatex import resources
             
 class PMXStatusBar(QtGui.QStatusBar):
     def __init__(self, mainWindow):
@@ -17,7 +15,6 @@ class PMXStatusBar(QtGui.QStatusBar):
         mainWindow.currentEditorChanged.connect(self.on_currentEditorChanged)
         self.statusBars = []
         self.activeBars = []
-        self.customActions = {}
 
     def addPermanentWidget(self, widget):
         self.statusBars.append(widget)
@@ -27,7 +24,7 @@ class PMXStatusBar(QtGui.QStatusBar):
         self.activeBars = []
         if editor is None:
             #Propagate and hide
-            map(lambda bar: bar.setCurrentEditor(editor), self.activeBars)
+            list(map(lambda bar: bar.setCurrentEditor(editor), self.activeBars))
             self.hide()
         else:
             for bar in self.statusBars:
@@ -38,35 +35,3 @@ class PMXStatusBar(QtGui.QStatusBar):
                 else:
                     bar.setVisible(False)
             self.show()
-        self.updateMenuForStatusBar()
-    
-    def updateMenuForStatusBar(self):
-        activeClasses = map(lambda bar: bar.__class__, self.activeBars)
-        
-        for statusClass, actions in self.customActions.iteritems():
-            for action in actions:
-                action.setVisible(statusClass in activeClasses)
-                if action.isCheckable() and hasattr(action, 'testChecked'):
-                    action.setChecked(action.testChecked(self.activeBars[activeClasses.index(statusClass)]))
-    
-    def actionDispatcher(self, checked, action):
-        #Find class for action
-        statusClasses = filter(lambda (cls, actions): action in actions, self.customActions.items())
-        assert len(statusClasses) == 1, "More than one status class for action %s" % action
-        statusClass = statusClasses[0][0]
-        #Find instance
-        statusInstance = filter(lambda status: status.__class__ == statusClass, self.statusBars)
-        assert len(statusInstance) == 1, "More than one instance for class %s" % statusClass
-        statusInstance = statusInstance[0]
-        
-        callbackArgs = [ statusInstance ]
-        if action.isCheckable():
-            callbackArgs.append(checked)
-        action.callback(*callbackArgs)
-    
-    def registerStatusClassActions(self, statusClass, actions):
-        for action in actions:
-            if hasattr(action, 'callback'):
-                receiver = lambda checked, action = action: self.actionDispatcher(checked, action)
-                self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
-        self.customActions[statusClass] = actions

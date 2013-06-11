@@ -6,83 +6,23 @@ import os, sys, shutil
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers.menus import create_menu
 
+# FileSystem docker parents
 from prymatex.core import PMXBaseDock
+from prymatex.gui.dockers.fstasks import FileSystemTasks
+from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
 
 from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.models.filesystem import SortFilterFileSystemProxyModel
-from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
-from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
-from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
-from prymatex.gui.dialogs.project import PMXNewProjectDialog
 
-#==============================================================
-# TODO: Migrar esta validacion para el rename al filemanager
-#==============================================================
-class PMXSafeFilesytemLineEdit(QtGui.QLineEdit):
-    def __init__(self, parent):
-        QtGui.QLineEdit.__init__(self, parent)
-        
-    def event(self, event):
-        if isinstance(event, QtGui.QKeyEvent):
-            key = event.key()
-            if not self.isValidPlatformPathKey(key):
-                return False
-            elif key == QtCore.Qt.Key_Return:
-                if not self.currentTextIsValidPath():
-                    return False
-        return super(PMXSafeFilesytemLineEdit, self).event(event)
-    
-    
-    def isValidPlatformPathKey(self, key):
-        k = QtCore.Qt
-        if key in [k.Key_Asterisk,
-                   k.Key_Backslash,
-                   k.Key_Less,
-                   k.Key_Greater,
-                   k.Key_Question,
-                   k.Key_Colon,
-                   ]:
-            return False
-        return True
 
-    DOS_NAMES = 'CON PRN AUX NUL COM1 COM2 COM3 COM4 COM5 COM6 COM7 COM8 COM9 LPT1 LPT2 LPT3 LPT4 LPT5 LPT6 LPT7 LPT8 LPT9'.split()
-    
-    def currentTextIsValidPath(self):
-        ''' Check if name is valid '''
-        text = self.text()
-        if not text:
-            return False
-        if sys.platform.count('win'):
-            if text.upper() in self.DOS_NAMES:
-                return False
-        
-        return False
-    
-class PMXFileSystemItemDelegate(QtGui.QItemDelegate):
-    def createEditor(self, parent, option, index):
-        """Create a new editor
-        """
-        
-        editor = PMXSafeFilesytemLineEdit(parent)
-        editor.setText(index.data())
-        return editor
-    
-    def setEditorData(self, editor, index):
-        return QtGui.QItemDelegate.setEditorData(self, editor, index)
-    
-    def setModelData(self, editor, model, index):
-        return QtGui.QItemDelegate.setModelData(self, editor, model, index)
-
-class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks, PMXBaseDock):
+class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSystemDock):
     SHORTCUT = "Shift+F8"
     ICON = resources.getIcon("system-file-manager")
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
     
-    #=======================================================================
-    # Settings
-    #=======================================================================
+    # ----------- Settings
     SETTINGS_GROUP = 'FileSystem'
     @pmxConfigPorperty(default = '')
     def customFilters(self, filters):
@@ -117,7 +57,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
-        mainWindow.fileSystem = self
+        self.templateDialog = self.mainWindow.findChild(QtGui.QDialog, "TemplateDialog")
         
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
@@ -221,9 +161,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         self.treeViewFileSystem.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeViewFileSystem.customContextMenuRequested.connect(self.showTreeViewFileSystemContextMenu)
     
-        #=======================================================================
         # Drag and Drop (see the proxy model)
-        #=======================================================================
         self.treeViewFileSystem.setDragEnabled(True)
         self.treeViewFileSystem.setAcceptDrops(True)
         self.treeViewFileSystem.setDefaultDropAction(QtCore.Qt.MoveAction)
@@ -232,7 +170,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         self.treeViewFileSystem.setAlternatingRowColors(True)
         self.treeViewFileSystem.setAnimated(True)
 
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def on_comboBoxLocation_currentIndexChanged(self, text):
         path = self.fileManager.expandVars(text)
         #TODO: Mostrar un error cuando sea None
@@ -240,7 +178,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
             path = self.fileManager.normpath(path)
             self.setPathAsRoot(path)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonUp_pressed(self):
         index = self.treeViewFileSystem.rootIndex()
         sIndex = self.fileSystemProxyModel.mapToSource(index)
@@ -254,7 +192,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         Adds an entry to the File Manager 
         @param path: Adds parameter to path
         """
-        if os.path.isdir(unicode(path)):
+        if os.path.isdir(str(path)):
             root, dirname_part = path.rsplit(os.sep, 1)
             self.comboFavourites.addItem(dirname_part, {
                                                     'path': path,
@@ -262,9 +200,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         else:
             self.logger.debug("Not a directory %s" % path)
 
-    #================================================
-    # Tree View File System
-    #================================================
+    # -------------- Tree View File System
     def showTreeViewFileSystemContextMenu(self, point):
         self.fileSystemMenu.popup(self.treeViewFileSystem.mapToGlobal(point))
                 
@@ -275,12 +211,13 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         elif os.path.isdir(path):
             self.setPathAsRoot(path)
     
-    #===========================================================================
-    # Insted of using indexes, it's easier for history handling
+    # --- Insted of using indexes, it's easier for history handling
     # to manage paths 
-    #===========================================================================
     def currentPath(self):
         return self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
+
+    def currentDirectory(self):
+        return self.application.fileManager.directory(self.currentPath())
 
     def currentRootPath(self):
         ''' Returns current root path '''
@@ -325,9 +262,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         if not len(self._pushButtonHistoryForward):
             self.pushButtonFoward.setEnabled(False)
 
-    #================================================
-    # Actions cut, copy, paste
-    #================================================
+    # ------------- Actions cut, copy, paste
     def on_actionCut_triggered(self):
         pass
         
@@ -347,63 +282,60 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
                 else:
                     self.application.fileManager.copy(srcPath, dstPath)
 
-    #================================================
-    # Actions Create and Delete objects
-    #================================================
-    @QtCore.pyqtSlot()
+    # ------ Actions Create and Delete objects
+    @QtCore.Slot()
     def on_actionNewFolder_triggered(self):
         basePath = self.currentPath()
         self.createDirectory(basePath)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionNewFile_triggered(self):
         basePath = self.currentPath()
         self.createFile(basePath)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionNewFromTemplate_triggered(self):
-        basePath = self.currentPath()
-        self.createFileFromTemplate(basePath)    
+        currentDirectory = self.currentDirectory()
+        filePath = self.templateDialog.createFile(fileDirectory = self.currentDirectory())
+        if filePath is not None:
+            self.application.openFile(filePath)
+        
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionDelete_triggered(self):
         basePath = self.currentPath()
         self.deletePath(basePath)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionRename_triggered(self):
         basePath = self.currentPath()
         self.renamePath(basePath)
     
-    #======================================================
     # Tree View Context Menu Actions
     # Some of them are in fstask's PMXFileSystemTasks mixin
-    #======================================================
     def pathToClipboard(self, checked = False):
         basePath = self.currentPath()
         QtGui.QApplication.clipboard().setText(basePath)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOpen_triggered(self):
         path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         if os.path.isfile(path):
             self.application.openFile(path)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOpenSystemEditor_triggered(self):
         path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % path, QtCore.QUrl.TolerantMode))
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOpenDefaultEditor_triggered(self):
         path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         if os.path.isfile(path):
             self.application.openFile(path)
     
-    #================================================
-    # Custom filters
-    #================================================      
-    @QtCore.pyqtSlot()
+    # ------ Custom filters
+    @QtCore.Slot()
     def on_pushButtonCustomFilters_pressed(self):
         filters, accepted = QtGui.QInputDialog.getText(self, _("Custom Filter"), 
                                                         _("Enter the filters (separated by comma)\nOnly * and ? may be used for custom matching"), 
@@ -413,11 +345,11 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
             self.settings.setValue('customFilters', filters)
             self.fileSystemProxyModel.setFilterRegExp(filters)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonCollapseAll_pressed(self):
         self.treeViewFileSystem.collapseAll()
         
-    @QtCore.pyqtSlot(bool)
+    @QtCore.Slot(bool)
     def on_pushButtonSync_toggled(self, checked):
         if checked:
             #Conectar señal
@@ -427,43 +359,41 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
             #Desconectar señal
             self.mainWindow.currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionSetInTerminal_triggered(self):
         path = self.currentPath()
         directory = self.application.fileManager.getDirectory(path)
         self.mainWindow.terminal.chdir(directory)
             
-    #================================================
-    # Sort and order Actions
-    #================================================        
-    @QtCore.pyqtSlot()
+    # ----- Sort and order Actions
+    @QtCore.Slot()
     def on_actionOrderByName_triggered(self):
         self.fileSystemProxyModel.sortBy("name", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderBySize_triggered(self):
         self.fileSystemProxyModel.sortBy("size", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderByDate_triggered(self):
         self.fileSystemProxyModel.sortBy("date", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderByType_triggered(self):
         self.fileSystemProxyModel.sortBy("type", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderDescending_triggered(self):
         self.fileSystemProxyModel.sortBy(self.fileSystemProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionOrderFoldersFirst_triggered(self):
         self.fileSystemProxyModel.sortBy(self.fileSystemProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
         
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionConvertIntoProject_triggered(self):
         _base, name = os.path.split(self.currentPath())
-        PMXNewProjectDialog.getNewProject(self, self.currentPath(), name)
+        self.mainWindow.componentByName("projectdialog").createProject(directory = self.currentPath(), name = name)
 
     def on_mainWindow_currentEditorChanged(self, editor):
         if editor is not None and not editor.isNew():

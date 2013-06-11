@@ -12,7 +12,7 @@ from prymatex.models.configure import SortFilterConfigureProxyModel
 from prymatex.models.projects.nodes import FileSystemTreeNode
 
 
-__all__ = [ 'ProjectTreeModel', 'ProjectTreeProxyModel', 'FileSystemProxyModel', 'PropertiesProxyModel', 'ProjectMenuProxyModel' ]
+__all__ = [ 'ProjectTreeModel', 'ProjectTreeProxyModel', 'FileSystemProxyModel', 'ProjectMenuProxyModel' ]
 
 #=========================================
 # Models
@@ -46,6 +46,7 @@ class ProjectTreeModel(AbstractTreeModel):
         elif role == QtCore.Qt.DecorationRole:
             return node.icon()
 
+
     def indexForPath(self, path):
         currentIndex = QtCore.QModelIndex()
         while self.rowCount(currentIndex):
@@ -77,8 +78,8 @@ class ProjectTreeModel(AbstractTreeModel):
 	
     def _update_directory(self, parentNode, parentIndex, notify = False):
         names = self.fileManager.listDirectory(parentNode.path())
-        addNames = filter(lambda name: parentNode.findChildByName(name) is None, names)
-        removeNodes = filter(lambda node: node.nodeName() not in names, parentNode.childNodes())
+        addNames = [name for name in names if parentNode.findChildByName(name) is None]
+        removeNodes = [node for node in parentNode.childNodes() if node.nodeName() not in names]
                 
         #Quitamos elementos eliminados
         for node in removeNodes:
@@ -99,7 +100,7 @@ class ProjectTreeModel(AbstractTreeModel):
             self.endInsertRows()
 
     def _collect_expanded_subdirs(self, parentNode):
-        return filter(lambda node: node.isdir and node._populated, parentNode.childNodes())
+        return [node for node in parentNode.childNodes() if node.isdir and node._populated]
 
     def refresh(self, updateIndex):
         updateNode = self.node(updateIndex)
@@ -148,7 +149,7 @@ class ProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, projectManager):
         QtGui.QSortFilterProxyModel.__init__(self, projectManager)
         self.projectManager = projectManager
-        self.fileManager = self.projectManager.fileManager
+        self.fileManager = projectManager.fileManager
         self.orderBy = "name"
         self.folderFirst = True
         self.descending = False
@@ -174,8 +175,7 @@ class ProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         regexp = self.filterRegExp()        
         if not regexp.isEmpty():
             pattern = regexp.pattern()
-            #TODO: Hacerlo en el fileManager!!!
-            match = any(map(lambda p: fnmatch.fnmatch(node.path(), p), map(lambda p: p.strip(), pattern.split(","))))
+            match = self.fileManager.fnmatchany(node.path(), pattern.split(","))
             return not match
         return True
 
@@ -190,7 +190,7 @@ class ProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         elif self.folderFirst and not leftNode.isdir and rightNode.isdir:
             return self.descending
         elif self.orderBy == "name" and rightNode.isproject and leftNode.isproject:
-            return cmp(leftNode.name, rightNode.name) < 0
+            return leftNode.name < rightNode.name
         else:
             return self.fileManager.compareFiles(leftNode.path(), rightNode.path(), self.orderBy) < 0
 
@@ -265,14 +265,14 @@ class ProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
             elif action == QtCore.Qt.LinkAction:
                 self.fileManager.link(srcPath, dstPath)
 
-        map(lambda index: self.refresh(index), updateIndexes)
+        list(map(lambda index: self.refresh(index), updateIndexes))
         return True
     
     def mimeTypes(self):
         return ["text/uri-list"]
         
     def mimeData(self, indexes):
-        urls = map(lambda index: QtCore.QUrl.fromLocalFile(self.filePath(index)), indexes)
+        urls = [QtCore.QUrl.fromLocalFile(self.filePath(index)) for index in indexes]
         mimeData = QtCore.QMimeData()
         mimeData.setUrls(urls)
         return mimeData
@@ -297,7 +297,7 @@ class FileSystemProxyModel(FlatTreeProxyModel):
     def compareIndex(self, xindex, yindex):
         xnode = self.sourceModel().node(xindex)
         ynode = self.sourceModel().node(yindex)
-        return cmp(xnode.name, ynode.name)
+        return (xnode.name > ynode.name) - (xnode.name < ynode.name)
     
     def findItemIndex(self, item):
         for num, index in enumerate(self.indexMap()):
@@ -310,26 +310,6 @@ class FileSystemProxyModel(FlatTreeProxyModel):
             items.append(self.sourceModel().node(index))
         return items
 
-class PropertiesProxyModel(SortFilterConfigureProxyModel):
-    def __init__(self, parent = None):
-        SortFilterConfigureProxyModel.__init__(self, parent)
-        self.fileSystemItem = None
-    
-    def filterAcceptsRow(self, sourceRow, sourceParent):
-        if self.fileSystemItem is None:
-            return False
-        sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
-        node = self.sourceModel().node(sIndex)
-        if not node.acceptFileSystemItem(self.fileSystemItem):
-            return False
-        regexp = self.filterRegExp()
-        if not regexp.isEmpty():
-            return regexp.indexIn(node.filterString()) != -1
-        return True
-    
-    def setFilterFileSystem(self, fileSystemItem):
-        self.fileSystemItem = fileSystemItem
-        self.setFilterRegExp("")
 
 #=========================================
 # Project Bundle Menu

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/bin/sh
+cd "${TM_DIRECTORY:-${TM_PROJECT_DIRECTORY:-$HOME}}"
+echo
+cat|"${TM_BASH:-/bin/bash}" 2&gt;&amp;1
+</string>
+	<key>fallbackInput</key>
+	<string>line</string>
+	<key>input</key>
+	<string>selection</string>
+	<key>inputFormat</key>
+	<string>text</string>
+	<key>keyEquivalent</key>
+	<string>^r</string>
+	<key>name</key>
+	<string>Execute Line / Selection</string>
+	<key>outputCaret</key>
+	<string>afterOutput</string>
+	<key>outputFormat</key>
+	<string>text</string>
+	<key>outputLocation</key>
+	<string>afterInput</string>
+	<key>uuid</key>
+	<string>1BD332E5-D97D-4D79-992C-758F003096AA</string>
+	<key>version</key>
+	<integer>2</integer>
+</dict>
+</plist>

@@ -5,24 +5,31 @@ from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers.icons import combine_icons
 
 from prymatex.core import exceptions
-from prymatex.core.components.base import PMXBaseWidgetComponent, PMXBaseKeyHelper, PMXBaseAddon
+from prymatex.core.components.base import PMXBaseComponent
+from prymatex.core.components.keyhelper import PMXBaseKeyHelper, PMXKeyHelperMixin
+from prymatex.core.components.addon import PMXBaseAddon
 
 from prymatex import resources
 
 __all__ = ["PMXBaseEditor", "PMXBaseEditorKeyHelper", "PMXBaseEditorAddon"]
 
-class PMXBaseEditor(PMXBaseWidgetComponent):
+class PMXBaseEditor(PMXBaseComponent, PMXKeyHelperMixin):
     """Every editor should extend this class in order to guarantee it'll be able to be place in tab.
     """
     #tabStatusChanged
     CREATION_COUNTER = 0
     UNTITLED_FILE_TEMPLATE = "Untitled {CREATION_COUNTER}"
     
-    def __init__(self):
-        PMXBaseWidgetComponent.__init__(self)
+    def initialize(self, mainWindow):
+        self.mainWindow = mainWindow
         self.filePath = None
         self.project = None
         self.externalAction = None
+    
+    def addComponent(self, component):
+        PMXBaseComponent.addComponent(self, component)
+        if isinstance(component, PMXBaseKeyHelper):
+            self.addKeyHelper(component)
     
     @property
     def creationCounter(self):
@@ -56,6 +63,7 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
 
     def reload(self):
         """ Reload current file """
+        self.setModified(False)
         self.setExternalAction(None)
         
     def setFilePath(self, filePath):
@@ -126,15 +134,11 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
         # FIXME: Rename or move files make produces bogus behavior 
         return self.externalAction == self.application.fileManager.DELETED    
 
-    #============================================================
-    # Bundle Item Handler
-    #============================================================
+    #------------ Bundle Item Handler
     def bundleItemHandler(self):
         return None
         
-    #============================================================
-    # Global navigation api
-    #============================================================
+    #------------ Global navigation api
     def saveLocationMemento(self, memento):
         # TODO Ver que va a pasar con esto de emitir señales y no heredar de qobject
         self.emit(QtCore.SIGNAL("newLocationMemento"), memento)
@@ -142,9 +146,7 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
     def restoreLocationMemento(self, memento):
         pass
     
-    #============================================================
-    # Cursor positions as tuple
-    #============================================================
+    #------------ Cursor positions as tuple
     def setCursorPosition(self, cursorPosition):
         pass
 
@@ -165,12 +167,12 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
                 break
         return runHelper
         
-    #======================================================================
-    # For Plugin Manager administrator
-    #======================================================================    
+
+    # ---------- For Plugin Manager administrator
     @classmethod
     def acceptFile(cls, filePath, mimetype):
         return True
+
 
 #======================================================================
 # Base Helper
@@ -180,11 +182,14 @@ class PMXBaseEditorKeyHelper(PMXBaseKeyHelper):
         PMXBaseKeyHelper.initialize(self, editor)
         self.editor = editor
 
+
     def accept(self, event):
         return PMXBaseKeyHelper.accept(self, event.key())
+
     
     def execute(self, event):
         PMXBaseKeyHelper.accept(self, event.key())
+
 
 #======================================================================
 # Base Addon
@@ -193,6 +198,7 @@ class PMXBaseEditorAddon(PMXBaseAddon):
     def initialize(self, editor):
         PMXBaseAddon.initialize(self, editor)
         self.editor = editor
+
 
     def finalize(self):
         pass

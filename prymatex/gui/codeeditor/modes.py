@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 from prymatex.qt.helpers.keyevents import KEY_NUMBERS
 from prymatex.utils.lists import bisect_key
@@ -54,9 +54,13 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
                 holder = self.editor.snippetProcessor.nextHolder(holder)
             else:
                 holder = self.editor.snippetProcessor.previousHolder(holder)
-            if holder == None:
+            if holder is None:
                 self.editor.showMessage("Last Holder")
-                self.setCursorPosition(self.editor.snippetProcessor.endPosition())
+                self.editor.setTextCursor(
+                    self.editor.newCursorAtPosition(
+                        self.editor.snippetProcessor.endPosition()
+                    )
+                )
                 self.endSnippet()
             else:
                 snippet = self.editor.snippetProcessor.snippet 
@@ -67,21 +71,21 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             currentHolder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
             if currentHolder is None or currentHolder.last:
                 return self.endSnippet(event)
-            
+
             #Cuidado con los extremos del holder
             if not cursor.hasSelection():
                 if event.key() == QtCore.Qt.Key_Backspace and cursor.position() == currentHolder.start:
                     return self.endSnippet(event)
-                
+
                 if event.key() == QtCore.Qt.Key_Delete and cursor.position() == currentHolder.end:
                     return self.endSnippet(event)
-                
+
             holderPosition = cursor.selectionStart() - currentHolder.start
             positionBefore = cursor.selectionStart()
             charactersBefore = cursor.document().characterCount()
             
             #Insert Text
-            self.editor.textCursor().beginEditBlock()
+            cursor.beginEditBlock()
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             positionAfter = cursor.position()
             charactersAfter = cursor.document().characterCount()
@@ -90,21 +94,23 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             #Capture Text
             cursor.setPosition(currentHolder.start)
             cursor.setPosition(currentHolder.end - length, QtGui.QTextCursor.KeepAnchor)
-            selectedText = cursor.selectedText().replace(u"\u2029", '\n').replace(u"\u2028", '\n')
+            selectedText = self.editor.selectedTextWithEol(cursor)
             currentHolder.setContent(selectedText)
             
-            #Remove text
-            self.selectSlice(self.editor.snippetProcessor.startPosition(), self.editor.snippetProcessor.endPosition() - length)
-            self.editor.textCursor().removeSelectedText()
-            #TODO: Hacer esto de purgar de una mejor forma
-            self.editor.symbolListModel._purge_blocks()
-            self.editor.folding._purge_blocks()
-            self.editor.alreadyTypedWords._purge_blocks()
+            # Wrap snippet
+            wrapCursor = self.editor.newCursorAtPosition(
+                self.editor.snippetProcessor.startPosition(), self.editor.snippetProcessor.endPosition() - length
+            )
             
             #Insert snippet
-            self.editor.snippetProcessor.render()
-            self.setCursorPosition(currentHolder.start + holderPosition + (positionAfter - positionBefore))
-            self.editor.textCursor().endEditBlock()
+            self.editor.snippetProcessor.render(wrapCursor)
+            
+            self.editor.setTextCursor(
+                self.editor.newCursorAtPosition(
+                    currentHolder.start + holderPosition + (positionAfter - positionBefore)
+                )
+            )
+            cursor.endEditBlock()
         else:
             self.logger.debug("Con cualquier otra tecla sin texto")
             return QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
@@ -114,22 +120,12 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
         if event is not None:
             return self.editor.keyPressEvent(event)
 
-    def setCursorPosition(self, position):
-        cursor = self.editor.textCursor()
-        cursor.setPosition(position)
-        self.editor.setTextCursor(cursor)
-        
-    def selectSlice(self, start, end):
-        cursor = self.editor.textCursor()
-        cursor.setPosition(start)
-        cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-        self.editor.setTextCursor(cursor)
 
 class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     def __init__(self, editor):
         PMXBaseEditorMode.__init__(self, editor)
         # TODO: Buscar una forma mejor de obtener o trabajar con este helper en el modo, quiza filtarndo por clase en el evento
-        self.helper = helpers.MultiCursorHelper(editor)
+        self.helper = helpers.MultiCursorHelper()
         self.helper.initialize(editor)
         self.cursors = []
         self.selectedCursors = []
@@ -146,10 +142,10 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
 
     def highlightEditor(self):
         cursors = {}
-        self.editor.setExtraSelectionCursors("selection", filter(lambda c: c.hasSelection(), map(lambda c: QtGui.QTextCursor(c), self.cursors)))
+        self.editor.setExtraSelectionCursors("selection", [c for c in [QtGui.QTextCursor(c) for c in self.cursors] if c.hasSelection()])
         cursorLines = []
-        for cursorLine in map(lambda c: QtGui.QTextCursor(c), self.cursors):
-            if all(map(lambda c: c.block() != cursorLine.block(), cursorLines)):
+        for cursorLine in [QtGui.QTextCursor(c) for c in self.cursors]:
+            if all([c.block() != cursorLine.block() for c in cursorLines]):
                 cursorLine.clearSelection()
                 cursorLines.append(cursorLine)
         self.editor.setExtraSelectionCursors("line", cursorLines)
@@ -171,7 +167,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         return self.cursors
         
     def getDragCursorRect(self):
-        """Retorna un rectangulo que representa la zona del drag cursor"""
+        """Retorna un rectángulo que representa la zona del drag cursor"""
         return QtCore.QRect(self.startPoint, self.dragPoint)
     
     def mousePressPoint(self, point):
@@ -239,8 +235,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         return hight, width, puntos
         
     def addMergeCursor(self, cursor):
-        """Only can add new cursors, if the cursor has selection then try to merge with others
-        """
+        """Only can add new cursors, if the cursor has selection then try to merge with others"""
         firstCursor = not bool(self.cursors)
         if cursor.hasSelection():
             newCursor = None
@@ -371,10 +366,10 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         self.highlightEditor()
 
     def canMoveRight(self):
-        return all(map(lambda c: not c.atEnd(), self.cursors))
+        return not self.cursors[-1].atEnd()
     
     def canMoveLeft(self):
-        return all(map(lambda c: not c.atStart(), self.cursors))
+        return not self.cursors[0].atStart()
     
     def keyPressEvent(self, event):
         if bool(event.modifiers() & QtCore.Qt.ControlModifier):
@@ -384,12 +379,12 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
             self.helper.execute(event, cursor)
         elif event.key() == QtCore.Qt.Key_Escape:
             #Deprecated usar una lista de cursores ordenados para tomar de [0] y [-1]
-            scursor = min(self.cursors, key = lambda cursor: cursor.position())
-            ecursor = max(self.cursors, key = lambda cursor: cursor.position())
-            self.editor.document().markContentsDirty(scursor.position(), ecursor.position())
-            if ecursor.hasSelection():
-                ecursor.clearSelection()
-            self.editor.setTextCursor(ecursor)
+            firstCursor = self.cursors[0]
+            lastCursor = self.cursors[-1]
+            self.editor.document().markContentsDirty(firstCursor.position(), lastCursor.position())
+            if lastCursor.hasSelection():
+                lastCursor.clearSelection()
+            self.editor.setTextCursor(lastCursor)
             self.inactive()
             self.highlightEditor()
             #Se termino la joda
@@ -423,6 +418,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                         cursor.movePosition(QtGui.QTextCursor.NextWord, mode)
                     else:
                         cursor.movePosition(QtGui.QTextCursor.NextCharacter, mode)
+                self.editor.setTextCursor(self.editor.newCursorAtPosition(cursor.position()))
                 self.highlightEditor()
         elif event.key() == QtCore.Qt.Key_Left:
             if self.canMoveLeft():
@@ -432,6 +428,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                         cursor.movePosition(QtGui.QTextCursor.PreviousWord, mode)
                     else:
                         cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, mode)
+                self.editor.setTextCursor(self.editor.newCursorAtPosition(cursor.position()))
                 self.highlightEditor()
         elif event.key() in [ QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown, QtCore.Qt.Key_End, QtCore.Qt.Key_Home]:
             #Desactivados por ahora

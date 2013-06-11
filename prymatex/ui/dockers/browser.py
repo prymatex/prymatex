@@ -1,24 +1,32 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/dockers/browser.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dockers/browser.ui'
 #
-# Created: Fri Nov  9 18:10:46 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Wed Jun  5 22:34:46 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_BrowserDock(object):
     def setupUi(self, BrowserDock):
         BrowserDock.setObjectName(_fromUtf8("BrowserDock"))
-        BrowserDock.resize(520, 301)
+        BrowserDock.resize(520, 54)
         self.dockWidgetContents = QtGui.QWidget()
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.verticalLayout = QtGui.QVBoxLayout(self.dockWidgetContents)
@@ -80,10 +88,6 @@ class Ui_BrowserDock(object):
         self.toolButtonOptions.setObjectName(_fromUtf8("toolButtonOptions"))
         self.horizontalLayout.addWidget(self.toolButtonOptions)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        self.webView = QtWebKit.QWebView(self.dockWidgetContents)
-        self.webView.setUrl(QtCore.QUrl(_fromUtf8("about:blank")))
-        self.webView.setObjectName(_fromUtf8("webView"))
-        self.verticalLayout.addWidget(self.webView)
         BrowserDock.setWidget(self.dockWidgetContents)
         self.actionSyncEditor = QtGui.QAction(BrowserDock)
         self.actionSyncEditor.setCheckable(True)
@@ -102,14 +106,13 @@ class Ui_BrowserDock(object):
         QtCore.QMetaObject.connectSlotsByName(BrowserDock)
 
     def retranslateUi(self, BrowserDock):
-        BrowserDock.setWindowTitle(_('Web Browser'))
-        self.buttonBack.setToolTip(_('Back'))
-        self.buttonNext.setToolTip(_('Next'))
-        self.buttonReload.setToolTip(_('Reload'))
-        self.buttonStop.setToolTip(_('Stop'))
-        self.actionSyncEditor.setText(_('Sync Editor'))
-        self.actionSyncEditor.setToolTip(_('Sync browser with current editor content'))
-        self.actionConnectEditor.setText(_('Connect Editor'))
-        self.actionConnectEditor.setToolTip(_('Connect browser with current editor'))
+        BrowserDock.setWindowTitle(_translate("BrowserDock", "Web Browser", None))
+        self.buttonBack.setToolTip(_translate("BrowserDock", "Back", None))
+        self.buttonNext.setToolTip(_translate("BrowserDock", "Next", None))
+        self.buttonReload.setToolTip(_translate("BrowserDock", "Reload", None))
+        self.buttonStop.setToolTip(_translate("BrowserDock", "Stop", None))
+        self.actionSyncEditor.setText(_translate("BrowserDock", "Sync Editor", None))
+        self.actionSyncEditor.setToolTip(_translate("BrowserDock", "Sync browser with current editor content", None))
+        self.actionConnectEditor.setText(_translate("BrowserDock", "Connect Editor", None))
+        self.actionConnectEditor.setToolTip(_translate("BrowserDock", "Connect browser with current editor", None))
 
-from PyQt4 import QtWebKit

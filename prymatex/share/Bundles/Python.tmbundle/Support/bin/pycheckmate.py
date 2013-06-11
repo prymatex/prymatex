@@ -33,7 +33,7 @@ import re
 import traceback
 from cgi import escape
 from select import select
-from urllib import quote
+from urllib.parse import quote
 
 ###
 ### Constants
@@ -148,7 +148,7 @@ class MyPopen:
             self._stderr_buf = ""
 
     def _run_child(self, cmd):
-        if isinstance(cmd, basestring):
+        if isinstance(cmd, str):
             cmd = ['/bin/sh', '-c', cmd]
         for i in range(3, self.MAXFD):
             try:
@@ -174,7 +174,7 @@ class MyPopen:
     def poll(self, timeout=None):
         """Returns (stdout, stderr) from child."""
         bufs = {self._stdout:self._stdout_buf, self._stderr:self._stderr_buf}
-        fds, dummy, dummy = select(bufs.keys(), [], [], timeout)
+        fds, dummy, dummy = select(list(bufs.keys()), [], [], timeout)
         for fd in fds:
             bufs[fd] += os.read(fd, 4096)
         self._stdout_buf = ""
@@ -227,25 +227,27 @@ def check_syntax(script_path):
     source = ''.join(f.readlines()+["\n"])
     f.close()
     try:
-        print "Syntax Errors...<br><br>"
+        print("Syntax Errors...<br><br>")
         compile(source, script_path, "exec")
-        print "None<br>"
-    except SyntaxError, e:
+        print("None<br>")
+    except SyntaxError as e:
         href = TXMT_URL2_FORMAT % (quote(script_path), e.lineno, e.offset)
-        print '<a href="%s">%s:%s</a> %s' % (
+        print('<a href="%s">%s:%s</a> %s' % (
             href,
             escape(os.path.basename(script_path)), e.lineno,
-            e.msg)
+            e.msg))
     except:
-        for line in apply(traceback.format_exception, sys.exc_info()):
+        for line in traceback.format_exception(*sys.exc_info()):
             stripped = line.lstrip()
             pad = "&nbsp;" * (len(line) - len(stripped))
             line = escape(stripped.rstrip())
-            print '<span class="stderr">%s%s</span><br>' % (pad, line)
+            print('<span class="stderr">%s%s</span><br>' % (pad, line))
 
 def find_checker_program():
     checkers = ["pychecker", "pyflakes", "pylint", "pep8", "flake8"]
     tm_pychecker = os.getenv("TM_PYCHECKER")
+
+    opts = [_f for _f in os.getenv('TM_PYCHECKER_OPTIONS', '').split() if _f]
 
     if tm_pychecker == "builtin":
         return ('', None, "Syntax check only")
@@ -278,7 +280,7 @@ def find_checker_program():
             status = p.close()
             if status is None and version:
                 version = "PyChecker %s" % version
-                return (checker, None, version)
+                return (checker, opts, version)
 
         elif basename == "pylint":
             p = os.popen('"%s" --version 2>/dev/null' % (checker))
@@ -288,7 +290,7 @@ def find_checker_program():
                 version = re.sub('^pylint\s*', '', version)
                 version = re.sub(',$', '', version)
                 version = "Pylint %s" % version
-                opts = ('--output-format=parseable',)
+                opts += ('--output-format=parseable',)
                 return (checker, opts, version)
 
         elif basename == "pyflakes":
@@ -298,7 +300,7 @@ def find_checker_program():
             output = p.readlines()
             status = p.close()
             if status is None and not output:
-                return (checker, None, "PyFlakes")
+                return (checker, opts, "PyFlakes")
 
         elif basename == "pep8":
             p = os.popen('"%s" --version 2>/dev/null' % (checker))
@@ -308,7 +310,7 @@ def find_checker_program():
                 version = "PEP 8 %s" % version
                 global PYCHECKER_RE
                 PYCHECKER_RE = re.compile(r"^(.*?\.pyc?):(\d+):(?:\d+:)?\s+(.*)$")
-                return (checker, None, version)
+                return (checker, opts, version)
 
         elif basename == "flake8":
             p = os.popen('"%s" --version 2>/dev/null' % (checker))
@@ -317,7 +319,7 @@ def find_checker_program():
             if status is None and version:
                 version = "flake8 %s" % version
                 PYCHECKER_RE = re.compile(r"^(.*?\.pyc?):(\d+):(?:\d+:)?\s+(.*)$")
-                return (checker, None, version)
+                return (checker, opts, version)
 
     return ('', None, "Syntax check only")
 
@@ -352,7 +354,7 @@ def run_checker_program(checker_bin, checker_opts, script_path):
                        escape(msg))
             else:
                 line = escape(line)
-            print "%s<br>" % line
+            print("%s<br>" % line)
         for line in stderr:
             # strip whitespace off front and replace with &nbsp; so that
             # we can allow the browser to wrap long lines but we don't lose
@@ -360,8 +362,8 @@ def run_checker_program(checker_bin, checker_opts, script_path):
             stripped = line.lstrip()
             pad = "&nbsp;" * (len(line) - len(stripped))
             line = escape(stripped.rstrip())
-            print '<span class="stderr">%s%s</span><br>' % (pad, line)
-    print "<br>Exit status: %s" % p.status()
+            print('<span class="stderr">%s%s</span><br>' % (pad, line))
+    print("<br>Exit status: %s" % p.status())
     p.close()
 
 def main(script_path):
@@ -377,7 +379,7 @@ def main(script_path):
         pep8_url = href_format % (PEP8_URL, "PEP 8")
         flake8_url = href_format % (FLAKE8_URL, "flake8")
         warning_string = \
-            "<p>Please install %s, %s or %s for more extensive code checking." \
+            "<p>Please install %s, %s, %s, %s or %s for more extensive code checking." \
             "</p><br>" % (pychecker_url, pyflakes_url, pylint_url, pep8_url, flake8_url)
 
     basepath = os.getenv("TM_PROJECT_DIRECTORY")
@@ -388,19 +390,19 @@ def main(script_path):
     else:
         title = escape(script_path)
 
-    print HTML_HEADER_FORMAT % (title, version_string)
+    print(HTML_HEADER_FORMAT % (title, version_string))
     if warning_string:
-        print warning_string
+        print(warning_string)
     if checker_bin:
         run_checker_program(checker_bin, checker_opts, script_path)
     else:
         check_syntax(script_path)
-    print HTML_FOOTER
+    print(HTML_FOOTER)
     return 0
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
         sys.exit(main(sys.argv[1]))
     else:
-        print "pycheckmate.py <file.py>"
+        print("pycheckmate.py <file.py>")
         sys.exit(1)

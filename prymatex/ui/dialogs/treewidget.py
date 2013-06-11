@@ -1,31 +1,36 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/dialogs/treewidget.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dialogs/treewidget.ui'
 #
-# Created: Thu Oct 18 20:33:12 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Wed Jun  5 22:34:44 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_TreeWidgetDialog(object):
     def setupUi(self, TreeWidgetDialog):
         TreeWidgetDialog.setObjectName(_fromUtf8("TreeWidgetDialog"))
-        TreeWidgetDialog.resize(700, 433)
-        TreeWidgetDialog.setMinimumSize(QtCore.QSize(700, 433))
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        TreeWidgetDialog.setWindowIcon(icon)
+        TreeWidgetDialog.resize(900, 600)
+        TreeWidgetDialog.setMinimumSize(QtCore.QSize(900, 600))
         self.verticalLayout_3 = QtGui.QVBoxLayout(TreeWidgetDialog)
-        self.verticalLayout_3.setSpacing(2)
-        self.verticalLayout_3.setMargin(0)
+        self.verticalLayout_3.setSpacing(6)
+        self.verticalLayout_3.setContentsMargins(6, 6, 3, 3)
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.splitter = QtGui.QSplitter(TreeWidgetDialog)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
@@ -34,7 +39,7 @@ class Ui_TreeWidgetDialog(object):
         self.verticalLayoutWidget.setObjectName(_fromUtf8("verticalLayoutWidget"))
         self.treeLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget)
         self.treeLayout.setSpacing(2)
-        self.treeLayout.setMargin(0)
+        self.treeLayout.setContentsMargins(0, 3, 0, 3)
         self.treeLayout.setObjectName(_fromUtf8("treeLayout"))
         self.lineEditFilter = QtGui.QLineEdit(self.verticalLayoutWidget)
         self.lineEditFilter.setObjectName(_fromUtf8("lineEditFilter"))
@@ -46,10 +51,12 @@ class Ui_TreeWidgetDialog(object):
         self.verticalLayoutWidget_2 = QtGui.QWidget(self.splitter)
         self.verticalLayoutWidget_2.setObjectName(_fromUtf8("verticalLayoutWidget_2"))
         self.widgetsLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
-        self.widgetsLayout.setSpacing(2)
-        self.widgetsLayout.setMargin(0)
+        self.widgetsLayout.setSpacing(6)
+        self.widgetsLayout.setContentsMargins(3, -1, -1, -1)
         self.widgetsLayout.setObjectName(_fromUtf8("widgetsLayout"))
         self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setSpacing(2)
+        self.horizontalLayout.setContentsMargins(3, 0, 3, 0)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.textLabelTitle = QtGui.QLabel(self.verticalLayoutWidget_2)
         font = QtGui.QFont()
@@ -77,6 +84,5 @@ class Ui_TreeWidgetDialog(object):
         QtCore.QMetaObject.connectSlotsByName(TreeWidgetDialog)
 
     def retranslateUi(self, TreeWidgetDialog):
-        TreeWidgetDialog.setWindowTitle(_('Dialog'))
-        self.textLabelTitle.setText(_('TextLabel'))
+        self.textLabelTitle.setText(_translate("TreeWidgetDialog", "TextLabel", None))
 

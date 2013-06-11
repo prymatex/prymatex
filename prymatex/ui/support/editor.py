@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/support/editor.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/support/editor.ui'
 #
-# Created: Wed Oct 17 21:19:23 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Thu Jun  6 12:51:16 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -15,19 +14,19 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class Ui_BundleEditor(object):
-    def setupUi(self, BundleEditor):
-        BundleEditor.setObjectName(_fromUtf8("BundleEditor"))
-        BundleEditor.resize(708, 575)
-        BundleEditor.setMinimumSize(QtCore.QSize(700, 575))
+class Ui_BundleEditorDialog(object):
+    def setupUi(self, BundleEditorDialog):
+        BundleEditorDialog.setObjectName(_fromUtf8("BundleEditorDialog"))
+        BundleEditorDialog.resize(900, 600)
+        BundleEditorDialog.setMinimumSize(QtCore.QSize(900, 600))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        BundleEditor.setWindowIcon(icon)
-        self.verticalLayout = QtGui.QVBoxLayout(BundleEditor)
+        BundleEditorDialog.setWindowIcon(icon)
+        self.verticalLayout = QtGui.QVBoxLayout(BundleEditorDialog)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.splitter = QtGui.QSplitter(BundleEditor)
+        self.splitter = QtGui.QSplitter(BundleEditorDialog)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.splitter.setObjectName(_fromUtf8("splitter"))
         self.verticalLayoutWidget = QtGui.QWidget(self.splitter)
@@ -80,35 +79,46 @@ class Ui_BundleEditor(object):
         self.labelActivation = QtGui.QLabel(self.verticalLayoutWidget_2)
         self.labelActivation.setObjectName(_fromUtf8("labelActivation"))
         self.basicFormLayout.setWidget(0, QtGui.QFormLayout.LabelRole, self.labelActivation)
-        self.activationLayout = QtGui.QHBoxLayout()
-        self.activationLayout.setSpacing(2)
-        self.activationLayout.setObjectName(_fromUtf8("activationLayout"))
-        self.comboBoxActivation = QtGui.QComboBox(self.verticalLayoutWidget_2)
-        self.comboBoxActivation.setObjectName(_fromUtf8("comboBoxActivation"))
-        self.activationLayout.addWidget(self.comboBoxActivation)
-        self.lineTabTriggerActivation = QtGui.QLineEdit(self.verticalLayoutWidget_2)
-        self.lineTabTriggerActivation.setObjectName(_fromUtf8("lineTabTriggerActivation"))
-        self.activationLayout.addWidget(self.lineTabTriggerActivation)
-        self.lineKeyEquivalentActivation = QtGui.QLineEdit(self.verticalLayoutWidget_2)
-        self.lineKeyEquivalentActivation.setObjectName(_fromUtf8("lineKeyEquivalentActivation"))
-        self.activationLayout.addWidget(self.lineKeyEquivalentActivation)
-        self.basicFormLayout.setLayout(0, QtGui.QFormLayout.FieldRole, self.activationLayout)
         self.labelScopeSelector = QtGui.QLabel(self.verticalLayoutWidget_2)
         self.labelScopeSelector.setObjectName(_fromUtf8("labelScopeSelector"))
         self.basicFormLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.labelScopeSelector)
-        self.lineEditScope = QtGui.QLineEdit(self.verticalLayoutWidget_2)
-        self.lineEditScope.setObjectName(_fromUtf8("lineEditScope"))
-        self.basicFormLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.lineEditScope)
+        self.lineEditScopeSelector = QtGui.QLineEdit(self.verticalLayoutWidget_2)
+        self.lineEditScopeSelector.setObjectName(_fromUtf8("lineEditScopeSelector"))
+        self.basicFormLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.lineEditScopeSelector)
+        self.labelActivation_3 = QtGui.QLabel(self.verticalLayoutWidget_2)
+        self.labelActivation_3.setObjectName(_fromUtf8("labelActivation_3"))
+        self.basicFormLayout.setWidget(3, QtGui.QFormLayout.LabelRole, self.labelActivation_3)
+        self.lineEditTabTriggerActivation = QtGui.QLineEdit(self.verticalLayoutWidget_2)
+        self.lineEditTabTriggerActivation.setObjectName(_fromUtf8("lineEditTabTriggerActivation"))
+        self.basicFormLayout.setWidget(3, QtGui.QFormLayout.FieldRole, self.lineEditTabTriggerActivation)
+        self.labelActivation_4 = QtGui.QLabel(self.verticalLayoutWidget_2)
+        self.labelActivation_4.setObjectName(_fromUtf8("labelActivation_4"))
+        self.basicFormLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.labelActivation_4)
+        self.lineEditKeyEquivalentActivation = QtGui.QLineEdit(self.verticalLayoutWidget_2)
+        self.lineEditKeyEquivalentActivation.setObjectName(_fromUtf8("lineEditKeyEquivalentActivation"))
+        self.basicFormLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.lineEditKeyEquivalentActivation)
+        self.labelActivation_5 = QtGui.QLabel(self.verticalLayoutWidget_2)
+        self.labelActivation_5.setObjectName(_fromUtf8("labelActivation_5"))
+        self.basicFormLayout.setWidget(4, QtGui.QFormLayout.LabelRole, self.labelActivation_5)
+        self.lineEditSemanticClass = QtGui.QLineEdit(self.verticalLayoutWidget_2)
+        self.lineEditSemanticClass.setObjectName(_fromUtf8("lineEditSemanticClass"))
+        self.basicFormLayout.setWidget(4, QtGui.QFormLayout.FieldRole, self.lineEditSemanticClass)
+        self.lineEditName = QtGui.QLineEdit(self.verticalLayoutWidget_2)
+        self.lineEditName.setObjectName(_fromUtf8("lineEditName"))
+        self.basicFormLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.lineEditName)
         self.editorsLayout.addLayout(self.basicFormLayout)
         self.verticalLayout.addWidget(self.splitter)
 
-        self.retranslateUi(BundleEditor)
-        QtCore.QMetaObject.connectSlotsByName(BundleEditor)
+        self.retranslateUi(BundleEditorDialog)
+        QtCore.QMetaObject.connectSlotsByName(BundleEditorDialog)
 
-    def retranslateUi(self, BundleEditor):
-        BundleEditor.setWindowTitle(_('Bundle Editor'))
-        self.pushButtonFilter.setText(_('Filter'))
-        self.labelTitle.setText(_('No item selected'))
-        self.labelActivation.setText(_('Activation:'))
-        self.labelScopeSelector.setText(_('Scope Selector:'))
+    def retranslateUi(self, BundleEditorDialog):
+        BundleEditorDialog.setWindowTitle(QtGui.QApplication.translate("BundleEditorDialog", "Bundle Editor", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButtonFilter.setText(QtGui.QApplication.translate("BundleEditorDialog", "Filter", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelTitle.setText(QtGui.QApplication.translate("BundleEditorDialog", "No item selected", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelActivation.setText(QtGui.QApplication.translate("BundleEditorDialog", "Name:", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelScopeSelector.setText(QtGui.QApplication.translate("BundleEditorDialog", "Scope Selector:", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelActivation_3.setText(QtGui.QApplication.translate("BundleEditorDialog", "Tab Trigger:", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelActivation_4.setText(QtGui.QApplication.translate("BundleEditorDialog", "Key Equivalent:", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelActivation_5.setText(QtGui.QApplication.translate("BundleEditorDialog", "Semantic Class:", None, QtGui.QApplication.UnicodeUTF8))
 

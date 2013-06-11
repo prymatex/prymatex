@@ -4,7 +4,7 @@
 from bisect import bisect
 
 def bisect_key(elements, element, key = lambda x: x):
-    indexs = map(key, elements)
+    indexs = list(map(key, elements))
     index = key(element)
     return bisect(indexs, index)
 

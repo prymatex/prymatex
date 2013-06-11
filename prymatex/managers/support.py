@@ -3,20 +3,25 @@
 
 import fnmatch
 from bisect import bisect
-
 import uuid as uuidmodule
-from PyQt4 import QtCore, QtGui
 
+from prymatex.qt import QtCore, QtGui
+
+from prymatex.core import PMXBaseComponent
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.utils.decorators.memoize import dynamic_memoized
+
+from prymatex.support.manager import PMXSupportBaseManager
+
+from prymatex.utils import encoding
+
 from prymatex.models.process import ExternalProcessTableModel
 from prymatex.models.support import (BundleItemTreeModel, BundleItemTreeNode,
                                     ThemeListModel, ThemeStylesTableModel, 
-                                    ThemeStyleTableRow)
+                                    ThemeTableRow, ThemeStyleTableRow)
 from prymatex.models.support import (BundleItemProxyTreeModel, BundleItemTypeProxyModel, 
                                     ThemeStyleProxyTableModel, BundleListModel, 
                                     SyntaxListModel, TemplateListModel, ProjectListModel)
-from prymatex.support.manager import PMXSupportBaseManager
+
 
 class BundleItemMenuGroup(QtCore.QObject):
     def __init__(self, manager):
@@ -33,10 +38,10 @@ class BundleItemMenuGroup(QtCore.QObject):
         self.manager.bundleRemoved.connect(self.on_manager_bundleRemoved)
         
     def appendMenu(self, menu, offset = None):
-        if menu not in map(lambda (menu, offset): menu, self.containers):
+        if menu not in [menu_offset[0] for menu_offset in self.containers]:
             self.containers.append((menu, offset is not None and offset or len(menu.actions())))
         #Append all bundle menus in order
-        for bundle, bundleMenu in iter(sorted(self.menus.iteritems(), key=lambda (bundle, bundleMenu): bundleMenu.title().replace("&","").lower())):
+        for bundle, bundleMenu in iter(sorted(iter(self.menus.items()), key=lambda bundle_bundleMenu: bundle_bundleMenu[1].title().replace("&","").lower())):
             menu.addMenu(bundleMenu)
         
     def buildMenu(self, items, menu, submenus, parent = None):
@@ -79,7 +84,7 @@ class BundleItemMenuGroup(QtCore.QObject):
         return self.menus.get(bundle)
 
     def addToContainers(self, menu):
-        currentTitles = sorted(map(lambda menu: menu.title().replace("&","").lower(), self.menus.values()))
+        currentTitles = sorted([menu.title().replace("&","").lower() for menu in list(self.menus.values())])
         index = bisect(currentTitles, menu.title().replace("&","").lower())
         for container, offset in self.containers:
             currentActions = container.actions()
@@ -137,44 +142,46 @@ class BundleItemMenuGroup(QtCore.QObject):
     def on_manager_bundleRemoved(self, bundle):
         self.removeFromContainers(self.menus[bundle])
 
-class SupportManager(QtCore.QObject, PMXSupportBaseManager):
+class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
     #Signals for bundle
-    bundleAdded = QtCore.pyqtSignal(object)
-    bundleRemoved = QtCore.pyqtSignal(object)
-    bundleChanged = QtCore.pyqtSignal(object)
-    bundlePopulated = QtCore.pyqtSignal(object)
+    bundleAdded = QtCore.Signal(object)
+    bundleRemoved = QtCore.Signal(object)
+    bundleChanged = QtCore.Signal(object)
+    bundlePopulated = QtCore.Signal(object)
 
     #Signals for bundle items
-    bundleItemAdded = QtCore.pyqtSignal(object)
-    bundleItemRemoved = QtCore.pyqtSignal(object)
-    bundleItemChanged = QtCore.pyqtSignal(object)
-    bundleItemTriggered = QtCore.pyqtSignal(object)
+    bundleItemAdded = QtCore.Signal(object)
+    bundleItemRemoved = QtCore.Signal(object)
+    bundleItemChanged = QtCore.Signal(object)
+    bundleItemTriggered = QtCore.Signal(object)
     
     #Signals for themes
-    themeAdded = QtCore.pyqtSignal(object)
-    themeRemoved = QtCore.pyqtSignal(object)
-    themeChanged = QtCore.pyqtSignal(object)
+    themeAdded = QtCore.Signal(object)
+    themeRemoved = QtCore.Signal(object)
+    themeChanged = QtCore.Signal(object)
     
     #Settings
-    shellVariables = pmxConfigPorperty(default = [], tm_name = u'OakShelVariables')
+    shellVariables = pmxConfigPorperty(default = [], tm_name = 'OakShelVariables')
     
-    @pmxConfigPorperty(default = [], tm_name = u'OakBundleManagerDeletedBundles')
+    @pmxConfigPorperty(default = [], tm_name = 'OakBundleManagerDeletedBundles')
     def deleted(self, deleted):
-        self.deletedObjects = map(lambda uuid: uuidmodule.UUID(uuid), deleted)
+        self.deletedObjects = [uuidmodule.UUID(uuid) for uuid in deleted]
         
-    @pmxConfigPorperty(default = [], tm_name = u'OakBundleManagerDeletedBundles')
+    @pmxConfigPorperty(default = [], tm_name = 'OakBundleManagerDeletedBundles')
     def disabled(self, disabled):
-        self.disabledObjects = map(lambda uuid: uuidmodule.UUID(uuid), disabled)
+        self.disabledObjects = [uuidmodule.UUID(uuid) for uuid in disabled]
     
     #http://manual.macromates.com/en/expert_preferences.html
     #When you create a new item in the bundle editor without having selected a bundle first, then the bundle with the UUID held by this defaults key is used as the target
-    defaultBundleForNewBundleItems = pmxConfigPorperty(default = u'B7BC3FFD-6E4B-11D9-91AF-000D93589AF6', tm_name = u'OakDefaultBundleForNewBundleItems')
+    defaultBundleForNewBundleItems = pmxConfigPorperty(default = 'B7BC3FFD-6E4B-11D9-91AF-000D93589AF6', tm_name = 'OakDefaultBundleForNewBundleItems')
         
     SETTINGS_GROUP = 'SupportManager'
     
     def __init__(self, application):
-        QtCore.QObject.__init__(self)
+        QtCore.QObject.__init__(self, application)
         PMXSupportBaseManager.__init__(self)
+        PMXBaseComponent.__init__(self)
+
         self.application = application
         self.bundleTreeModel = BundleItemTreeModel(self)
         self.themeListModel = ThemeListModel(self)
@@ -222,8 +229,8 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager):
 
     @classmethod
     def contributeToSettings(cls):
-        from prymatex.gui.settings.environment import PMXEnvVariablesWidget
-        return [ PMXEnvVariablesWidget ]
+        from prymatex.gui.settings.environment import VariablesSettingsWidget
+        return [ VariablesSettingsWidget ]
 
     def setEditorAvailable(self, available):
         self.editorAvailable = available
@@ -233,25 +240,22 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager):
 
     def menuForBundle(self, bundle):
         return self.bundleMenuGroup.menuForBundle(bundle)
+
+    # Override buildPlistFileCache for custom cache
+    def buildPlistFileCache(self):
+        return self.application.cacheManager.singleFileCache("support-plist")
         
     #---------------------------------------------------
     # Environment
     #---------------------------------------------------
     def environmentVariables(self):
-        environment = PMXSupportBaseManager.buildEnvironment(self)
+        environment = PMXSupportBaseManager.environmentVariables(self)
         #Extend wiht the user shell variables
         for var in self.shellVariables:
             if var['enabled']:
                 environment[var['variable']] = var['value']
         return environment
-    
-    def buildEnvironment(self, systemEnvironment = True):
-        env = PMXSupportBaseManager.buildEnvironment(self, systemEnvironment)
-        for var in self.shellVariables:
-            if var['enabled']:
-                env[var['variable']] = var['value']
-        return env
-    
+
     # Override loadSupport for emit signals
     def loadSupport(self, *largs, **kwargs):
         PMXSupportBaseManager.loadSupport(self, *largs, **kwargs)
@@ -266,37 +270,38 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager):
             
     #Interface
     def runQProcess(self, context, callback):
-        process = QtCore.QProcess(self)
+        context.process = QtCore.QProcess(self)
         if context.workingDirectory is not None:
-            process.setWorkingDirectory(context.workingDirectory)
+            context.process.setWorkingDirectory(context.workingDirectory)
             
-        self.processTableModel.appendProcess(process, description = context.description())
+        self.processTableModel.appendProcess(context.process, description = context.description())
 
         environment = QtCore.QProcessEnvironment()
-        for key, value in context.environment.iteritems():
+        print(context.environment)
+        for key, value in context.environment.items():
             environment.insert(key, value)
-                    
-        process.setProcessEnvironment(environment)
+
+        context.process.setProcessEnvironment(environment)
 
         def onQProcessFinished(process, context, callback):
             def runCallback(exitCode):
                 self.processTableModel.removeProcess(process)
-                context.errorValue = str(process.readAllStandardError()).decode("utf-8")
-                context.outputValue = str(process.readAllStandardOutput()).decode("utf-8")
+                context.errorValue = encoding.from_fs(process.readAllStandardError())
+                context.outputValue = encoding.from_fs(process.readAllStandardOutput())
                 context.outputType = exitCode
                 callback(context)
             return runCallback
 
-        process.finished[int].connect(onQProcessFinished(process, context, callback))
+        context.process.finished[int].connect(onQProcessFinished(context.process, context, callback))
 
         if context.inputType is not None:
-            process.start(context.shellCommand, QtCore.QIODevice.ReadWrite)
-            if not process.waitForStarted():
+            context.process.start(context.shellCommand, QtCore.QIODevice.ReadWrite)
+            if not context.process.waitForStarted():
                 raise Exception("No puedo correr")
-            process.write(unicode(context.inputValue).encode("utf-8"))
-            process.closeWriteChannel()
+            context.process.write(encoding.to_fs(context.inputValue))
+            context.process.closeWriteChannel()
         else:
-            process.start(context.shellCommand, QtCore.QIODevice.ReadOnly)
+            context.process.start(context.shellCommand, QtCore.QIODevice.ReadOnly)
 
     def buildAdHocCommand(self, *largs, **kwargs):
         return BundleItemTreeNode(PMXSupportBaseManager.buildAdHocCommand(self, *largs, **kwargs))
@@ -312,7 +317,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager):
         Marcar un managed object como eliminado
         """
         self.deletedObjects.append(uuid)
-        deleted = map(lambda uuid: unicode(uuid).upper(), self.deletedObjects)
+        deleted = [str(uuid).upper() for uuid in self.deletedObjects]
         self.settings.setValue('deleted', deleted)
 
     def isDeleted(self, uuid):
@@ -323,12 +328,12 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager):
     
     def setDisabled(self, uuid):
         self.disabledObjects.append(uuid)
-        disabled = map(lambda uuid: unicode(uuid).upper(), self.disabledObjects)
+        disabled = [str(uuid).upper() for uuid in self.disabledObjects]
         self.settings.setValue('disabled', disabled)
         
     def setEnabled(self, uuid):
         self.disabledObjects.remove(uuid)
-        disabled = map(lambda uuid: unicode(uuid).upper(), self.disabledObjects)
+        disabled = [str(uuid).upper() for uuid in self.disabledObjects]
         self.settings.setValue('disabled', disabled)
     
     #---------------------------------------------------
@@ -380,18 +385,21 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager):
         return nodes
         
     #---------------------------------------------------
-    # TEMPLATEFILE OVERRIDE INTERFACE
+    # STATICFILE OVERRIDE INTERFACE
     #---------------------------------------------------
-    def addTemplateFile(self, file):
-        bundleTemplateFileNode = BundleItemTreeNode(file)
-        self.bundleTreeModel.appendTemplateFile(bundleTemplateFileNode)
-        return bundleTemplateFileNode
+    def addStaticFile(self, staticFile):
+        bundleStaticFileNode = BundleItemTreeNode(staticFile)
+        self.bundleTreeModel.appendStaticFile(bundleStaticFileNode)
+        return bundleStaticFileNode
+    
+    def removeStaticFile(self, file):
+        pass
     
     #---------------------------------------------------
     # THEME OVERRIDE INTERFACE
     #---------------------------------------------------
     def addTheme(self, theme):
-        themeRow = ThemeStyleTableRow(theme, self.scores)
+        themeRow = ThemeTableRow(theme)
         self.themeListModel.appendTheme(themeRow)
         self.themeAdded.emit(themeRow)
         return themeRow
@@ -420,42 +428,56 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager):
     #---------------------------------------------------
     # PREFERENCES OVERRIDE INTERFACE
     #---------------------------------------------------
-    @dynamic_memoized
     def getAllPreferences(self):
-        return self.preferenceProxyModel.getAllItems()
-    
+        memoizedKey = ("getAllPreferences", None, None, None)
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
+        return self.bundleItemCache.setdefault(memoizedKey,
+            self.preferenceProxyModel.getAllItems())
+
     #---------------------------------------------------
     # TABTRIGGERS OVERRIDE INTERFACE
     #---------------------------------------------------
-    @dynamic_memoized
     def getAllTabTriggerItems(self):
+        memoizedKey = ("getAllTabTriggerItems", None, None, None)
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
         tabTriggers = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.tabTrigger != None:
                 tabTriggers.append(item)
-        return tabTriggers
+        return self.bundleItemCache.setdefault(memoizedKey,
+            tabTriggers)
         
-    @dynamic_memoized
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
+        memoizedKey = ("getAllBundleItemsByTabTrigger", tabTrigger, None, None)
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
         items = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.tabTrigger == tabTrigger:
                 items.append(item)
-        return items
+        return self.bundleItemCache.setdefault(memoizedKey,
+            items)
 
     #---------------------------------------------------
     # KEYEQUIVALENT OVERRIDE INTERFACE
     #---------------------------------------------------
-    @dynamic_memoized
     def getAllKeyEquivalentItems(self):
+        memoizedKey = ("getAllBundleItemsByTabTrigger", None, None, None)
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache[memoizedKey]
         keyEquivalent = []
         for item in self.actionItemsProxyModel.getAllItems() + self.syntaxProxyModel.getAllItems():
             if item.keyEquivalent != None:
                 keyEquivalent.append(item)
-        return keyEquivalent
+        return self.bundleItemCache.setdefault(memoizedKey,
+            keyEquivalent)
         
-    @dynamic_memoized
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
+        memoizedKey = ("getAllBundleItemsByKeyEquivalent", keyEquivalent, None, None)
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
         items = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.keyEquivalent == keyEquivalent:
@@ -463,7 +485,8 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager):
         for syntax in self.syntaxProxyModel.getAllItems():
             if syntax.keyEquivalent == keyEquivalent:
                 items.append(syntax)
-        return items
+        return self.bundleItemCache.setdefault(memoizedKey,
+            items)
     
     #---------------------------------------------------
     # FILE EXTENSION OVERRIDE INTERFACE
@@ -471,7 +494,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager):
     def getAllBundleItemsByFileExtension(self, path):
         items = []
         for item in self.dragcommandProxyModel.getAllItems():
-            if any(map(lambda extension: fnmatch.fnmatch(path, "*.%s" % extension), item.draggedFileExtensions)):
+            if any([fnmatch.fnmatch(path, "*.%s" % extension) for extension in item.draggedFileExtensions]):
                 items.append(item)
         return items
     

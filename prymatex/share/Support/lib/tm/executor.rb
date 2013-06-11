@@ -6,14 +6,13 @@
 # that fancily HTML format stdout/stderr.
 #
 # Nice features include:
-#  • Automatic interactive input.
 #  • Automatic Fancy HTML headers
 #  • The environment variable TM_ERROR_FD will contain a file descriptor to which HTML-formatted
 #    exceptions can be written.
 #
-# Executor runs best if TextMate.save_current_document is called first.  Doing so ensures
+# Executor runs best if TextMate.save_if_untitled is called first.  Doing so ensures
 # that TM_FILEPATH contains the path to the contents of your current document, even if the
-# current document has not yet been saved, or the file is unwriteable.
+# current document is untitled.
 #
 # Call it like this (you'll get rudimentary htmlification of the executable's output):
 #
@@ -22,25 +21,22 @@
 # Or like this if you want to transform the output yourself:
 #
 #   TextMate::Executor.run(ENV['TM_SHELL'] || ENV['SHELL'] || 'bash', ENV['TM_FILEPATH']) do |str, type|
-#     str = htmlize(str)
-#     str =  "<span class=\"stderr\">#{htmlize(str)}</span>" if type == :out
+#     "<span class=\"stderr\">#{htmlize(str)}</span>" if type == :out
 #   end
 # 
 # Your block will be called with type :out or :err.  If you don't want to handle a particular type,
-# return nil and Executor will apply basic formatting for you.
+# return nil and Executor will apply basic formatting for you, including adding links for lines
+# starting with ‘«file»[:«line»[:«column»:]]«message»’.
 #
-# TextMate::Executor.run also accepts six optional named arguments.
+# TextMate::Executor.run also accepts seven optional named arguments.
 #   :version_args are arguments that will be passed to the executable to generate a version string for use as the page's subtitle.
 #   :version_regex is a regular expression to which the resulting version string is passed.
 #     The subtitle of the Executor.run output is generated from this match.  By default, this just takes the first line.
 #   :version_replace is a string that is used to generate a version string for the page's subtitle from matching :version_regex.
 #     The rules of String.sub apply.  By default, this just extracts $1 from the match.
 #   :verb describes what the call to Executor is doing.  Default is “Running”.
+#   :noun describes what the call to Executor is working on.  Default is $TM_DISPLAY_NAME.
 #   :env is the environment in which the command will be run.  Default is ENV.
-#   :interactive_input tells Executor to inject the interactive input library
-#     into the program so that any requests for input present the user with a
-#     dialog to enter it. Default is true, or false if the environment has
-#     TM_INTERACTIVE_INPUT_DISABLED defined.
 #   :script_args are arguments to be passed to the *script* as opposed to the interpreter.  They will
 #     be appended after the path to the script in the arguments to the interpreter.
 #   :use_hashbang Tells Executor wether to override it's first argument with the current file's #! if that exists.
@@ -53,6 +49,7 @@ require SUPPORT_LIB + 'tm/require_cmd'
 require SUPPORT_LIB + 'escape'
 require SUPPORT_LIB + 'exit_codes'
 require SUPPORT_LIB + 'io'
+require 'pathname'
 
 $KCODE = 'u' if RUBY_VERSION < "1.9"
 
@@ -73,13 +70,13 @@ module TextMate
                    :version_regex     => /\A(.*)$(?:\n.*)*/,
                    :version_replace   => '\1',
                    :verb              => "Running",
+                   :noun              => ENV['TM_DISPLAYNAME'],
                    :env               => nil,
-                   :interactive_input => ENV['TM_INTERACTIVE_INPUT_DISABLED'].nil?,
                    :script_args       => [],
                    :use_hashbang      => true,
                    :controls          => {}}
         
-        passthrough_options = [:env, :input, :interactive_input]
+        passthrough_options = [:env, :input]
 
         options[:bootstrap] = ENV["TM_BUNDLE_SUPPORT"] + "/bin/bootstrap.sh" unless ENV["TM_BUNDLE_SUPPORT"].nil?
 
@@ -101,31 +98,25 @@ module TextMate
         tm_error_fd_read.fcntl(Fcntl::F_SETFD, 1)
         ENV['TM_ERROR_FD'] = tm_error_fd_write.to_i.to_s
 
-        tm_echo_fd_read, tm_echo_fd_write = ::IO.pipe
-        tm_echo_fd_read.fcntl(Fcntl::F_SETFD, 1)
-        ENV['TM_INTERACTIVE_INPUT_ECHO_FD'] = tm_echo_fd_write.to_i.to_s
-
         options[:script_args].each { |arg| args << arg }
         
-        TextMate::HTMLOutput.show(:title => "#{options[:verb]} “#{ENV['TM_DISPLAYNAME'] || File.basename(ENV["TM_FILEPATH"])}”…", :sub_title => version, :html_head => script_style_header) do |io|
+        TextMate::HTMLOutput.show(:title => "#{options[:verb]} “#{options[:noun]}”…", :sub_title => version, :html_head => script_style_header) do |io|
           
           io << '<div class="executor">'
           
           callback = proc do |str, type|
-            str.gsub!(ENV["TM_FILEPATH"], "untitled") if ENV["TM_FILE_IS_UNTITLED"]
             filtered_str = block.call(str,type) if [:err, :out].include? type
             if [:err, :out].include?(type) and not filtered_str.nil?
-              io << filtered_str
+              io << fix_links_to_unsaved(filtered_str)
             else
-              str = htmlize(str)
+              str = linkify_file_references(str)
               str = "<span class=\"err\">#{str}</span>" if type == :err
-              str = "<span class=\"echo\">#{str}</span>" if type == :echo
               io << str
             end
             sleep(0.001)
           end
           
-          process_options = {:echo => true, :watch_fds => { :echo => tm_echo_fd_read }}
+          process_options = { }
           passthrough_options.each { |key| process_options[key] = options[key] if options.has_key?(key) }
           
           io << "<!-- » #{args[0,args.length-1].join(" ")} #{ENV["TM_DISPLAYNAME"]} -->"
@@ -140,27 +131,12 @@ module TextMate
             TextMate::Process.run(args, process_options, &callback)
           end
           finish = Time.now
-          
-          
+
           tm_error_fd_write.close
           error = tm_error_fd_read.read
           tm_error_fd_read.close
 
-          if ENV.has_key? "TM_FILE_IS_UNTITLED"
-            # replace links to temporary file with links to current (unsaved) file, by removing
-            # the url option from any txmt:// links.
-            error.gsub!("url=file://#{ENV['TM_FILEPATH']}", '')
-            error.gsub!("url=file://#{e_url ENV['TM_FILEPATH']}", '')
-            error.gsub!(ENV['TM_FILENAME'], "untitled")
-            error.gsub!(e_url(ENV['TM_FILENAME']), "untitled")
-          elsif ENV.has_key? 'TM_ORIG_FILEPATH'
-            error.gsub!(ENV['TM_FILEPATH'], ENV['TM_ORIG_FILEPATH'])
-            error.gsub!(e_url(ENV['TM_FILEPATH']), e_url(ENV['TM_ORIG_FILEPATH']))
-            error.gsub!(ENV['TM_FILENAME'], ENV['TM_ORIG_FILENAME'])
-            error.gsub!(e_url(ENV['TM_FILENAME']), e_url(ENV['TM_ORIG_FILENAME']))
-          end
-
-          io << error
+          io << fix_links_to_unsaved(error)
           io << '<div class="controls"><a href="#" onclick="copyOutput(document.getElementById(\'_executor_output\'))">copy output</a>'
           
           options[:controls].each_key {|key| io << " | <a href=\"javascript:TextMate.system('#{options[:controls][key]}')\">#{key}</a>"}
@@ -208,13 +184,63 @@ module TextMate
       end
 
       def parse_version(executable, options)
-        out, err = TextMate::Process.run(executable, options[:version_args], :interactive_input => false)
+        out, err = TextMate::Process.run(executable, options[:version_args])
         if options[:version_regex] =~ (out + err)
           return (out + err).sub(options[:version_regex], options[:version_replace])
         end
       end
 
       private
+
+      def fix_links_to_unsaved(str)
+        return str unless ENV.has_key?("TM_FILE_IS_UNTITLED") || ENV.has_key?("TM_ORIG_FILEPATH")
+
+        path  = Pathname.new(ENV['TM_FILEPATH'])
+        paths = [ e_url(path.realpath.to_s), path.realpath, e_url(ENV['TM_FILEPATH']), ENV['TM_FILEPATH'] ]
+        names = [ path.realpath, ENV['TM_FILEPATH'], path.basename, File.basename(ENV['TM_FILEPATH']) ]
+
+        pathRegexp = Regexp.new(paths.map { |path| Regexp.escape("file://#{path}") }.join('|'))
+        nameRegexp = Regexp.new(names.map { |name| Regexp.escape(name) }.join('|'))
+
+        str = str.dup
+        if ENV.has_key? "TM_FILE_IS_UNTITLED"
+          str.gsub!(pathRegexp, "uuid=#{ENV['TM_DOCUMENT_UUID']}")
+          str.gsub!(nameRegexp, ENV['TM_DISPLAYNAME'])
+        elsif ENV.has_key? "TM_ORIG_FILEPATH"
+          str.gsub!(pathRegexp, "url=file://#{e_url ENV['TM_ORIG_FILEPATH']}")
+          str.gsub!(nameRegexp, ENV['TM_ORIG_FILENAME'])
+        end
+        str
+      end
+
+      def linkify_file_references(line)
+        dirs = [ '.', ENV['TM_PROJECT_DIRECTORY'] ]
+        if line =~ /^(.*?)(:(?:(\d+):)?(?:(\d+):)?)\s*(.*?)$/ and not $1.nil?
+          file, prefix, lineno, column, message = $1, $2, $3, $4, $5
+          path = dirs.map{ |dir| File.expand_path(file, dir) }.find{ |path| File.file? path }
+          unless path.nil?
+            relative = path
+
+            parms =  [ ]
+            parms << [   "line=#{lineno}" ] unless lineno.nil?
+            parms << [ "column=#{column}" ] unless column.nil?
+
+            if path == ENV['TM_FILEPATH'] and ENV.has_key? "TM_FILE_IS_UNTITLED"
+              parms << [ "uuid=#{ENV['TM_DOCUMENT_UUID']}" ]
+              relative = file = ENV['TM_DISPLAYNAME']
+            else
+              parms << [ "url=file://#{e_url path}" ]
+              relative = path.sub(/^#{Regexp.escape ENV['TM_PROJECT_DIRECTORY']}\/?/, '') if ENV.has_key? "TM_PROJECT_DIRECTORY"
+              file = File.basename(path)
+            end
+
+            info = relative.gsub('&', '&amp;').gsub('<', '&lt;').gsub('"', '&quot;')
+            return "<a href=\"txmt://open?#{parms.join '&'}\" title=\"#{info}\">#{file + prefix}</a> #{htmlize message}<br>\n"
+          end
+        end
+
+        return htmlize(fix_links_to_unsaved(line))
+      end
 
       def process_output_wrapper(io)
         io << <<-HTML
@@ -243,7 +269,7 @@ HTML
   
   function copyOutput(element) {
     output = element.innerText;
-    cmd = TextMate.system('__CF_USER_TEXT_ENCODING=$UID:0x8000100:0x8000100 /usr/bin/pbcopy', function(){});
+    cmd = TextMate.system('/usr/bin/pbcopy', function(){});
     cmd.write(output);
     cmd.close();
     element.innerText = 'output copied to clipboard';
@@ -304,9 +330,6 @@ HTML
     }
     div#_executor_output .err {  
       color: red;
-    }
-    div#_executor_output .echo {
-      font-style: italic;
     }
     div#_executor_output .test {
       font-weight: bold;

@@ -5,6 +5,7 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.models.trees import TreeNodeBase
 from prymatex.models.trees import AbstractNamespaceTreeModel
+import collections
 
 #=========================================
 # Nodes and Models
@@ -18,9 +19,19 @@ class ConfigureTreeNode(TreeNodeBase):
         self.setTitle(self.TITLE)
         self.setIcon(self.ICON)
         
-    def filterString(self):
-        return self.nodeName() + self.title() + reduce(lambda initial, child: initial + child.filterString(), self.childrenNodes, "")
-
+    def filterAcceptsNode(self, string):
+        string = string.lower()
+        if string in (self.nodeName() + self.title()).lower():
+            return True
+        for child in self.childNodes():
+            if child.filterAcceptsNode(string):
+                return True
+        textItems = [value for value in [getattr(self, key) for key in dir(self)] if isinstance(getattr(value, "text", None), collections.Callable)]
+        for item in textItems:
+            if string in item.text().lower():
+                return True
+        return False
+    
     def title(self):
         return self.__title
     
@@ -33,12 +44,14 @@ class ConfigureTreeNode(TreeNodeBase):
     def setIcon(self, icon):
         self.__icon = icon
 
+
 # Proxy for namespaced models
 class ProxyConfigureTreeNode(QtGui.QWidget, ConfigureTreeNode):
     def __init__(self, name, parent):
         QtGui.QWidget.__init__(self)
         ConfigureTreeNode.__init__(self, name, parent)
         self.setObjectName(name.title() + "Widget")
+
 
 class ConfigureTreeModelBase(AbstractNamespaceTreeModel):
     def __init__(self, parent = None):
@@ -53,13 +66,16 @@ class ConfigureTreeModelBase(AbstractNamespaceTreeModel):
 
     def addConfigNode(self, node):
         self.insertNamespaceNode(node.NAMESPACE, node)
-       
-class ConfigureTreeModel(ConfigureTreeModelBase):
-    proxyConfigureCreated = QtCore.pyqtSignal(object)
-    def treeNodeFactory(self, nodeName, nodeParent = None):
-        proxy = ProxyConfigureTreeNode(nodeName, nodeParent)
-        self.proxyConfigureCreated.emit(proxy)
-        return proxy
+
+    def __collect_nodes(self, parentNode):
+        nodes = [ parentNode ]
+        for node in parentNode.childNodes():
+            nodes.extend(self.__collect_nodes(node))
+        return nodes
+
+    def configNodes(self):
+        return self.__collect_nodes(self.rootNode)
+
         
 #=========================================
 # Proxies
@@ -73,7 +89,7 @@ class SortFilterConfigureProxyModel(QtGui.QSortFilterProxyModel):
         node = self.sourceModel().node(sIndex)
         regexp = self.filterRegExp()
         if not regexp.isEmpty():
-            return regexp.indexIn(node.filterString()) != -1
+            return node.filterAcceptsNode(regexp.pattern())
         return True
 
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
@@ -85,3 +101,6 @@ class SortFilterConfigureProxyModel(QtGui.QSortFilterProxyModel):
     def node(self, index):
         sIndex = self.mapToSource(index)
         return self.sourceModel().node(sIndex)
+        
+    def configNodes(self):
+        return self.sourceModel().configNodes()

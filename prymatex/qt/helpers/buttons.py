@@ -3,35 +3,32 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex import resources
 from prymatex.qt.helpers.base import text2objectname
+import collections
 
 def create_toolbutton(parent, settings):
     """Create a QToolButton"""
     button = QtGui.QToolButton(parent)
-    text = settings["text"] if settings.has_key("text") else "No name"
+    text = settings["text"] if "text" in settings else "No name"
     button.setObjectName(text2objectname(text, prefix = "toolButton"))
     button.setText(text)
     
     # attrs
-    if settings.has_key("icon"):
-        icon = settings["icon"]
-        if isinstance(icon, basestring):
-            icon = resources.getIcon(icon)
-        button.setIcon(icon)
-    if settings.has_key("shortcut"):
+    if "icon" in settings:
+        button.setIcon(settings["icon"])
+    if "shortcut" in settings:
         button.setShortcut(settings["shortcut"])
-    if settings.has_key("tip"):
+    if "tip" in settings:
         button.setToolTip(settings["tip"])
     if settings.get("text_beside_icon", False):
         button.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
     button.setAutoRaise(settings.get("autoraise", True))
     
-    if settings.has_key("triggered") and callable(settings["triggered"]):
+    if "triggered" in settings and isinstance(settings["triggered"], collections.Callable):
         parent.connect(button, QtCore.SIGNAL("clicked()"), settings["triggered"])
-    if settings.has_key("clicked") and callable(settings["clicked"]):
+    if "clicked" in settings and isinstance(settings["clicked"], collections.Callable):
         parent.connect(button, QtCore.SIGNAL("clicked()"), settings["clicked"])
-    if settings.has_key("toggled") and callable(settings["toggled"]):
+    if "toggled" in settings and isinstance(settings["toggled"], collections.Callable):
         parent.connect(button, QtCore.SIGNAL("toggled(bool)"), settings["toggled"])
         button.setCheckable(True)
         

@@ -10,7 +10,7 @@ class PMXFileMonitor(object):
     pass
 
 
-from PyQt4.QtCore import QThread
+from prymatex.qt.QtCore import QThread
 
 class PMXThreadFileMonitor(PMXFileMonitor, QThread):
     def __init__(self, parent):

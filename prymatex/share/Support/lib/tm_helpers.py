@@ -132,29 +132,29 @@ def exit_discard():
     sys.exit(200)
 
 def exit_replace_text(out = None):
-  if out: print out
+  if out: print(out)
   sys.exit(201)
   
 def exit_replace_document(out = None):
-  if out: print out
+  if out: print(out)
   sys.exit(202)
 
 def exit_insert_text(out = None):
-  if out: print out
+  if out: print(out)
   sys.exit(203)
 
 def exit_insert_snippet(out = None):
-  if out: print out
+  if out: print(out)
   sys.exit(204)
 
 def exit_show_html(out = None):
-  if out: print out
+  if out: print(out)
   sys.exit(205)
 
 def exit_show_tool_tip(out = None):
-  if out: print out
+  if out: print(out)
   sys.exit(206)
 
 def exit_create_new_document(out = None):
-  if out: print out
+  if out: print(out)
   sys.exit(207)

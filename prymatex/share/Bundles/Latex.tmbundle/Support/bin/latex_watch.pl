@@ -70,11 +70,6 @@ my ($mode, $viewer_option, $viewer, $base_format, @tex);
 		}
 	}
 
-
-# Remove the 'hide extension' attribute, or else ping_pdf_viewer_texshop will fail
-fail_unless_system("SetFile", "-a", "e", "$name.tex")
-    if $viewer eq "TeXShop";
-
 init_cleanup();
 main_loop();
 
@@ -92,7 +87,12 @@ main_loop();
 				"The Perl module Foundation.pm could not be loaded. If you have been foolish enough to remove the default Perl interpreter (/usr/bin/perl), you must install PerlObjCBridge manually.\n\n$@\0");
 		}
 	
-	    $prefs_file = "$ENV{HOME}/Library/Preferences/com.macromates.textmate.plist";
+		if($ENV{TM_APP_IDENTIFIER}) {
+			$prefs_file = "$ENV{HOME}/Library/Preferences/$ENV{TM_APP_IDENTIFIER}.plist";
+		} else {
+		    $prefs_file = "$ENV{HOME}/Library/Preferences/com.macromates.textmate.plist";
+		}
+	    
 	    $prefs = NSDictionary->dictionaryWithContentsOfFile_($prefs_file);
 	}
 
@@ -101,9 +101,7 @@ main_loop();
 		init_prefs() unless defined $prefs;
 		
         my $pref = $prefs->objectForKey_($prefName);
-        return ( ref($pref) eq 'NSCFString'
-            ? $pref->UTF8String()
-            : $default)
+		return $$pref ? $pref->UTF8String() : $default
     }
 }
 
@@ -127,7 +125,7 @@ sub init_environment {
 
 	# If TM_SUPPORT_PATH is undefined, make a plausible guess.
 	# (Useful for running this script from outside TextMate.)
-	$ENV{TM_SUPPORT_PATH} = "/Applications/TextMate.app/Contents/SharedSupport/Support"
+	$ENV{TM_SUPPORT_PATH} = "$ENV{HOME}/Library/Application Support/TextMate/Managed/Bundles/Bundle Support.tmbundle/Support/shared"
 		if !defined $ENV{TM_SUPPORT_PATH};
 
 	# Add TextMate support paths
@@ -211,7 +209,7 @@ sub main_loop {
 			compile() and view();
 			if (defined ($progressbar_pid)) {
 				debug_msg("Closing progress bar window ($progressbar_pid)");
-				kill(15, $progressbar_pid) or fail("Failed to close progress bar window: $!");
+				kill(9, $progressbar_pid) or fail("Failed to close progress bar window: $!");
 				undef $progressbar_pid;
 			}
 		}
@@ -705,20 +703,20 @@ sub start_pdf_viewer_texshop {
 	applescript (
 		qq(tell application "TeXShop" ).
 		qq(to open_for_externaleditor at ).
-		quote_applescript("$absolute_wd/$name.tex"));
+		quote_applescript("$absolute_wd/$name"));
 	$viewer_id = "TeXShop";
 }
 
 sub refresh_pdf_viewer_texshop {
 	debug_msg("Refreshing PDF viewer (TeXShop)");
 	applescript(
-		qq(tell document ).quote_applescript("$name.tex").
+		qq(tell document ).quote_applescript("$name").
 		qq( of application "TeXShop" to refreshpdf));
 }
 
 my $ping_failed;
 sub ping_pdf_viewer_texshop {
-	my $r = check_open($pdf_viewer_app, "$name.tex");
+    my $r = check_open($pdf_viewer_app, "$name");
 	$ping_failed = 1 if !$r;
 	return $r;
 }
@@ -728,7 +726,7 @@ sub cleanup_pdf_viewer_texshop {
 	debug_msg("Closing document in PDF viewer ($pdf_viewer_app)");
 	applescript_ignoring_errors(
 		qq(tell application ).quote_applescript($pdf_viewer_app).
-		qq( to close document ).quote_applescript("$name.tex"));
+		qq( to close document ).quote_applescript("$name"));
 }
 
 # TeXniscope

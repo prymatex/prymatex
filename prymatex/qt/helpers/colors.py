@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import string
 
 from prymatex.qt import QtGui
+
+
+if sys.version_info.major >= 3:
+    long = int
 
 """ caret, foreground, selection, invisibles, lineHighlight, gutter, background """
 
@@ -15,7 +20,7 @@ def rgba2color(rgba):
     @param rgba: A html formated color string i.e.: #RRGGBB or #RRGGBBAA
     @return: If rgba is a valid color, a QColor isntance
     ''' 
-    rgba = unicode(rgba).strip('#')
+    rgba = str(rgba).strip('#')
     if len(rgba) in [ 6, 8 ]:
         red, green, blue, alpha = rgba[0:2], rgba[2:4], rgba[4:6], rgba[6:8]
     else:
@@ -30,8 +35,8 @@ def color2rgba(color):
     if isinstance(color, QtGui.QColor):
         color = color.rgba()
     if isinstance(color, (int, long)):
-        color = hex(long(color))[2:-1]
-    if isinstance(color, (str, unicode)) and len(color) in [ 6, 7, 8 ]:
+        color = hex(int(color))[2:-1]
+    if isinstance(color, str) and len(color) in [ 6, 7, 8 ]:
         color = color.upper()
         if len(color) == 8:
             color = color[2:] + color[0:2] if color[0:2] != 'FF' else color[2:]

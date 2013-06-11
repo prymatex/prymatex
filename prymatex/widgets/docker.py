@@ -50,14 +50,14 @@ class DockWidgetTitleBarButton(QtGui.QAbstractButton):
         opt.icon = self.icon()
         opt.subControls = QtGui.QStyle.SubControls()
         opt.activeSubControls = QtGui.QStyle.SubControls()
-        opt.features = QtGui.QStyleOptionToolButton.None
+        #opt.features = QtGui.QStyleOptionToolButton.None
         opt.arrowType = QtCore.Qt.NoArrow
         size = self.style().pixelMetric(QtGui.QStyle.PM_SmallIconSize, None, self)
         opt.iconSize = QtCore.QSize(size, size)
         self.style().drawComplexControl(QtGui.QStyle.CC_ToolButton, opt, p, self)
 
 class DockWidgetTitleBar(QtGui.QWidget):
-    collpaseAreaRequest = QtCore.pyqtSignal(QtGui.QDockWidget)
+    collpaseAreaRequest = QtCore.Signal(QtGui.QDockWidget)
     
     def __init__(self, dockWidget):
         QtGui.QWidget.__init__(self, dockWidget)

@@ -3,10 +3,10 @@
 import re
 import sys
 from os import system, path, mkdir, environ as env
-import cPickle
-import urllib2
+import pickle
+import urllib.request, urllib.error, urllib.parse
 import inspect
-from urlparse import urljoin as _urljoin
+from urllib.parse import urljoin as _urljoin
 import time
 
 # make sure Support/lib is on the path
@@ -38,9 +38,9 @@ def urljoin(base, *fragments):
 def accessible(url):
     """ True if the url is accessible. """
     try:
-        urllib2.urlopen(url)
+        urllib.request.urlopen(url)
         return True
-    except urllib2.URLError:
+    except urllib.error.URLError:
         return False
 
 def pydoc_url():
@@ -66,7 +66,7 @@ def library_docs(word):
     paths = []
     try:
         f = open(path.join(env["TM_BUNDLE_SUPPORT"], 'DocMate/lib.index'))
-        index = cPickle.load(f)
+        index = pickle.load(f)
     finally:
         f.close()
     word_re = re.compile(r"\b(%s)\b" % re.sub('[^a-zA-Z0-9_\. ]+', '', word))

@@ -3,10 +3,10 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex import resources
 from prymatex.qt.helpers.base import text2objectname
 
 from prymatex.utils import programs
+import collections
 
 def toggle_actions(actions, enable):
     """Enable/disable actions"""
@@ -18,37 +18,37 @@ def toggle_actions(actions, enable):
 
 def create_action(parent, settings):
     """Create a QAction"""
-    text = settings.get("text", "Action")
+    text = settings.get("text")
     action = QtGui.QAction(text, parent)
-    action.setObjectName(text2objectname(text, prefix = "action"))
+    name = settings.get("name", text)
+    action.setObjectName(text2objectname(name, prefix = "action"))
     
     # attrs
-    if settings.has_key("icon"):
-        icon = settings["icon"]
-        if isinstance(icon, basestring):
-            icon = resources.getIcon(icon)
-        action.setIcon(icon)
-    if settings.has_key("shortcut"):
+    if "icon" in settings:
+        action.setIcon(settings["icon"])
+    if "shortcut" in settings:
         action.setShortcut(settings["shortcut"])
-    if settings.has_key("tip"):
+    if "tip" in settings:
         action.setToolTip(settings["tip"])
         action.setStatusTip(settings["tip"])
-    if settings.has_key("data"):
+    if "data" in settings:
         action.setData(settings["data"])
-    if settings.has_key("menurole"):
+    if "menurole" in settings:
         action.setMenuRole(settings["menurole"])
-    if settings.has_key("checkable"):
+    if "checkable" in settings:
         action.setCheckable(settings["checkable"])
     
-    # callables
-    if settings.has_key("callback"):
+    # Callables
+    if "callback" in settings:
         action.callback = settings["callback"]
-    if settings.has_key("testChecked"):
+    if "testChecked" in settings:
         action.testChecked = settings["testChecked"]
+    if "testEnabled" in settings:
+        action.testEnabled = settings["testEnabled"]
     
-    if settings.has_key("triggered") and callable(settings["triggered"]):
+    if "triggered" in settings and isinstance(settings["triggered"], collections.Callable):
         parent.connect(action, QtCore.SIGNAL("triggered()"), settings["triggered"])
-    if settings.has_key("toggled") and callable(settings["toggled"]):
+    if "toggled" in settings and isinstance(settings["toggled"], collections.Callable):
         parent.connect(action, QtCore.SIGNAL("toggled(bool)"), settings["toggled"])
         action.setCheckable(True)
         
@@ -56,8 +56,8 @@ def create_action(parent, settings):
     # (this will avoid calling shortcuts from another dockwidget
     #  since the context thing doesn't work quite well with these widgets)
     action.setShortcutContext(settings.get("context", QtCore.Qt.WindowShortcut))
+    
     return action
-
 
 
 def create_bookmark_action(parent, url, text, icon=None, shortcut=None):

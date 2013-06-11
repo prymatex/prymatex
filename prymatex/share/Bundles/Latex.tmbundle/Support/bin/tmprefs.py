@@ -27,6 +27,12 @@ except:
             stat = self.stdout.close()
             return stat
 
+# The preference file for textmate to retrieve the prefs from
+if 'TM_APP_IDENTIFIER' in os.environ:
+    TM_PREFERENCE_FILE = os.environ['TM_APP_IDENTIFIER'] + '.plist'
+else:
+    TM_PREFERENCE_FILE = 'com.macromates.textmate.plist'
+
 class Preferences(object):
     """docstring for Preferences"""
     def __init__(self):
@@ -64,9 +70,9 @@ class Preferences(object):
         #
         plDict = {}
         if haspyobjc:
-            plDict = NSDictionary.dictionaryWithContentsOfFile_(os.environ["HOME"]+"/Library/Preferences/com.macromates.textmate.plist")
+            plDict = NSDictionary.dictionaryWithContentsOfFile_(os.environ["HOME"]+"/Library/Preferences/" + TM_PREFERENCE_FILE)
         else:   # TODO remove all this once everyone is on leopard
-            os.system("plutil -convert xml1 \"$HOME/Library/Preferences/com.macromates.textmate.plist\" -o /tmp/tmltxprefs1.plist")
+            os.system("plutil -convert xml1 \"$HOME/Library/Preferences/"+TM_PREFERENCE_FILE+"\" -o /tmp/tmltxprefs1.plist")
             null_tt = "".join([chr(i) for i in range(256)])
             non_printables = null_tt.translate(null_tt, string.printable)
             plist_str = open('/tmp/tmltxprefs1.plist').read()
@@ -74,11 +80,11 @@ class Preferences(object):
             try:
                 plDict = plistlib.readPlistFromString(plist_str)
             except:
-                print '<p class="error">There was a problem reading the preferences file, continuing with defaults</p>'
+                print('<p class="error">There was a problem reading the preferences file, continuing with defaults</p>')
             try:
                 os.remove("/tmp/tmltxprefs1.plist")
             except:
-                print '<p class="error">Problem removing temporary prefs file</p>'
+                print('<p class="error">Problem removing temporary prefs file</p>')
         return plDict
         
     def toDefString(self):
@@ -92,10 +98,10 @@ class Preferences(object):
 
 if __name__ == '__main__':
     test = Preferences()
-    print test.toDefString()
-    print test['latexUselatexmk']
-    print test['Foo']
+    print(test.toDefString())
+    print(test['latexUselatexmk'])
+    print(test['Foo'])
     useLatexMk = test['latexUselatexmk']
-    print useLatexMk
+    print(useLatexMk)
     
     

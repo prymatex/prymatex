@@ -14,7 +14,7 @@ def cleanup_whitespace(filename = None):
       lines = f.readlines()
       f.close()
    
-   for linenum in xrange(len(lines)-1):
+   for linenum in range(len(lines)-1):
       this_line = lines[linenum]
       if re_blanks.search(this_line):
          # search forward for next non-blank line and get its indent

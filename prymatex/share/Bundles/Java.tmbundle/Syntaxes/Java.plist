@@ -7,10 +7,6 @@
 		<string>java</string>
 		<string>bsh</string>
 	</array>
-	<key>foldingStartMarker</key>
-	<string>(\{\s*(//.*)?$|^\s*// \{\{\{)</string>
-	<key>foldingStopMarker</key>
-	<string>^\s*(\}|// \}\}\}$)</string>
 	<key>keyEquivalent</key>
 	<string>^~J</string>
 	<key>name</key>
@@ -42,30 +38,16 @@
 			<string>meta.package.java</string>
 		</dict>
 		<dict>
-			<key>captures</key>
+			<key>begin</key>
+			<string>(import static)\b\s*</string>
+			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
 				<dict>
 					<key>name</key>
 					<string>keyword.other.import.static.java</string>
 				</dict>
-				<key>2</key>
-				<dict>
-					<key>name</key>
-					<string>storage.modifier.import.java</string>
-				</dict>
-				<key>3</key>
-				<dict>
-					<key>name</key>
-					<string>punctuation.terminator.java</string>
-				</dict>
 			</dict>
-			<key>match</key>
-			<string>^\s*(import static)\b(?:\s*([^ ;$]+)\s*(;)?)?</string>
-			<key>name</key>
-			<string>meta.import.static.java</string>
-		</dict>
-		<dict>
 			<key>captures</key>
 			<dict>
 				<key>1</key>
@@ -84,10 +66,94 @@
 					<string>punctuation.terminator.java</string>
 				</dict>
 			</dict>
-			<key>match</key>
-			<string>^\s*(import)\b(?:\s*([^ ;$]+)\s*(;)?)?</string>
+			<key>contentName</key>
+			<string>storage.modifier.import.java</string>
+			<key>end</key>
+			<string>\s*(?:$|(;))</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.terminator.java</string>
+				</dict>
+			</dict>
 			<key>name</key>
 			<string>meta.import.java</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>match</key>
+					<string>\.</string>
+					<key>name</key>
+					<string>punctuation.separator.java</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>\s</string>
+					<key>name</key>
+					<string>invalid.illegal.character_not_allowed_here.java</string>
+				</dict>
+			</array>
+		</dict>
+		<dict>
+			<key>begin</key>
+			<string>(import)\b\s*</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.other.import.java</string>
+				</dict>
+			</dict>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.other.import.java</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>storage.modifier.import.java</string>
+				</dict>
+				<key>3</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.terminator.java</string>
+				</dict>
+			</dict>
+			<key>contentName</key>
+			<string>storage.modifier.import.java</string>
+			<key>end</key>
+			<string>\s*(?:$|(;))</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.terminator.java</string>
+				</dict>
+			</dict>
+			<key>name</key>
+			<string>meta.import.java</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>match</key>
+					<string>\.</string>
+					<key>name</key>
+					<string>punctuation.separator.java</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>\s</string>
+					<key>name</key>
+					<string>invalid.illegal.character_not_allowed_here.java</string>
+				</dict>
+			</array>
 		</dict>
 		<dict>
 			<key>include</key>
@@ -213,7 +279,15 @@
 						</dict>
 					</dict>
 					<key>end</key>
-					<string>}|(?=\s*(?:,|;|\)))</string>
+					<string>(})|(?=\s*(?:,|;|\)))</string>
+					<key>endCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.section.block.end.java</string>
+						</dict>
+					</dict>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -232,6 +306,14 @@
 						<dict>
 							<key>begin</key>
 							<string>{</string>
+							<key>beginCaptures</key>
+							<dict>
+								<key>0</key>
+								<dict>
+									<key>name</key>
+									<string>punctuation.section.block.begin.java</string>
+								</dict>
+							</dict>
 							<key>end</key>
 							<string>(?=})</string>
 							<key>patterns</key>
@@ -281,8 +363,24 @@
 				<dict>
 					<key>begin</key>
 					<string>{</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.section.inner-class.begin.java</string>
+						</dict>
+					</dict>
 					<key>end</key>
 					<string>}</string>
+					<key>endCaptures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.section.inner-class.end.java</string>
+						</dict>
+					</dict>
 					<key>name</key>
 					<string>meta.inner-class.java</string>
 					<key>patterns</key>
@@ -432,6 +530,14 @@
 				<dict>
 					<key>begin</key>
 					<string>{</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.section.class.begin.java</string>
+						</dict>
+					</dict>
 					<key>end</key>
 					<string>(?=})</string>
 					<key>name</key>
@@ -499,8 +605,24 @@
 				<dict>
 					<key>begin</key>
 					<string>{</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.section.block.begin.java</string>
+						</dict>
+					</dict>
 					<key>end</key>
 					<string>}</string>
+					<key>endCaptures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.section.block.end.java</string>
+						</dict>
+					</dict>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -596,21 +718,37 @@
 					<string>comment.block.java</string>
 				</dict>
 				<dict>
-					<key>captures</key>
+					<key>begin</key>
+					<string>(^[ \t]+)?(?=//)</string>
+					<key>beginCaptures</key>
 					<dict>
 						<key>1</key>
 						<dict>
 							<key>name</key>
-							<string>comment.line.double-slash.java</string>
-						</dict>
-						<key>2</key>
-						<dict>
-							<key>name</key>
-							<string>punctuation.definition.comment.java</string>
+							<string>punctuation.whitespace.comment.leading.java</string>
 						</dict>
 					</dict>
-					<key>match</key>
-					<string>\s*((//).*$\n?)</string>
+					<key>end</key>
+					<string>(?!\G)</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>begin</key>
+							<string>//</string>
+							<key>beginCaptures</key>
+							<dict>
+								<key>0</key>
+								<dict>
+									<key>name</key>
+									<string>punctuation.definition.comment.java</string>
+								</dict>
+							</dict>
+							<key>end</key>
+							<string>\n</string>
+							<key>name</key>
+							<string>comment.line.double-slash.java</string>
+						</dict>
+					</array>
 				</dict>
 			</array>
 		</dict>
@@ -684,8 +822,24 @@
 						<dict>
 							<key>begin</key>
 							<string>{</string>
+							<key>beginCaptures</key>
+							<dict>
+								<key>0</key>
+								<dict>
+									<key>name</key>
+									<string>punctuation.section.enum.begin.java</string>
+								</dict>
+							</dict>
 							<key>end</key>
 							<string>}</string>
+							<key>endCaptures</key>
+							<dict>
+								<key>0</key>
+								<dict>
+									<key>name</key>
+									<string>punctuation.section.enum.end.java</string>
+								</dict>
+							</dict>
 							<key>patterns</key>
 							<array>
 								<dict>
@@ -840,9 +994,17 @@
 		<key>methods</key>
 		<dict>
 			<key>begin</key>
-			<string>(?!new)(?=[\w&lt;].*\s+)(?=[^=]+\()</string>
+			<string>(?!new)(?=[\w&lt;].*\s+)(?=([^=/]|/(?!/))+\()</string>
 			<key>end</key>
-			<string>}|(?=;)</string>
+			<string>(})|(?=;)</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.section.method.end.java</string>
+				</dict>
+			</dict>
 			<key>name</key>
 			<string>meta.method.java</string>
 			<key>patterns</key>
@@ -921,6 +1083,14 @@
 				<dict>
 					<key>begin</key>
 					<string>{</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.section.method.begin.java</string>
+						</dict>
+					</dict>
 					<key>end</key>
 					<string>(?=})</string>
 					<key>name</key>
@@ -932,6 +1102,10 @@
 							<string>#code</string>
 						</dict>
 					</array>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#comments</string>
 				</dict>
 			</array>
 		</dict>
@@ -1058,6 +1232,10 @@
 					<string>final</string>
 					<key>name</key>
 					<string>storage.modifier.java</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#annotations</string>
 				</dict>
 				<dict>
 					<key>include</key>

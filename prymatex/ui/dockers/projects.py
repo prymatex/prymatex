@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/dockers/projects.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dockers/projects.ui'
 #
-# Created: Fri Nov  9 18:10:46 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Wed Jun  5 22:34:46 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_ProjectsDock(object):
     def setupUi(self, ProjectsDock):
@@ -140,10 +148,10 @@ class Ui_ProjectsDock(object):
         self.actionSetInTerminal.setObjectName(_fromUtf8("actionSetInTerminal"))
         self.actionRemove = QtGui.QAction(ProjectsDock)
         self.actionRemove.setObjectName(_fromUtf8("actionRemove"))
-        self.actionBundleEditor = QtGui.QAction(ProjectsDock)
+        self.actionProjectBundles = QtGui.QAction(ProjectsDock)
         icon = QtGui.QIcon.fromTheme(_fromUtf8("bundle-item-bundle"))
-        self.actionBundleEditor.setIcon(icon)
-        self.actionBundleEditor.setObjectName(_fromUtf8("actionBundleEditor"))
+        self.actionProjectBundles.setIcon(icon)
+        self.actionProjectBundles.setObjectName(_fromUtf8("actionProjectBundles"))
         self.actionBashInit = QtGui.QAction(ProjectsDock)
         self.actionBashInit.setObjectName(_fromUtf8("actionBashInit"))
         self.actionCopy = QtGui.QAction(ProjectsDock)
@@ -158,43 +166,48 @@ class Ui_ProjectsDock(object):
         icon = QtGui.QIcon.fromTheme(_fromUtf8("edit-paste"))
         self.actionPaste.setIcon(icon)
         self.actionPaste.setObjectName(_fromUtf8("actionPaste"))
+        self.actionSelectRelatedBundles = QtGui.QAction(ProjectsDock)
+        self.actionSelectRelatedBundles.setObjectName(_fromUtf8("actionSelectRelatedBundles"))
 
         self.retranslateUi(ProjectsDock)
         QtCore.QMetaObject.connectSlotsByName(ProjectsDock)
 
     def retranslateUi(self, ProjectsDock):
-        ProjectsDock.setWindowTitle(_('Projects'))
-        self.pushButtonSync.setToolTip(_('Sync folder with current editor file path'))
-        self.actionNewFile.setText(_('File'))
-        self.actionNewFolder.setText(_('Folder'))
-        self.actionNewFromTemplate.setText(_('From Template'))
-        self.actionNewFromTemplate.setToolTip(_('From Template'))
-        self.actionDelete.setText(_('Delete'))
-        self.actionNewProject.setText(_('Project'))
-        self.actionCloseProject.setText(_('Close'))
-        self.actionOpenProject.setText(_('Open'))
-        self.actionProperties.setText(_('Properties'))
-        self.actionRefresh.setText(_('Refresh'))
-        self.actionRefresh.setShortcut(_('F5'))
-        self.actionOpen.setText(_('Open'))
-        self.actionOpenSystemEditor.setText(_('System Editor'))
-        self.actionRename.setText(_('Rename'))
-        self.actionRename.setToolTip(_('Rename'))
-        self.actionRename.setShortcut(_('F2'))
-        self.actionOrderByName.setText(_('By Name'))
-        self.actionOrderBySize.setText(_('By Size'))
-        self.actionOrderByDate.setText(_('By Date'))
-        self.actionOrderByType.setText(_('By Type'))
-        self.actionOrderDescending.setText(_('Descending'))
-        self.actionOrderFoldersFirst.setText(_('Folders First'))
-        self.actionSetInTerminal.setText(_('Set In Terminal'))
-        self.actionRemove.setText(_('Remove'))
-        self.actionBundleEditor.setText(_('Bundle Editor'))
-        self.actionBashInit.setText(_('Bash Init'))
-        self.actionCopy.setText(_('&Copy'))
-        self.actionCopy.setShortcut(_('Ctrl+C'))
-        self.actionCut.setText(_('Cu&t'))
-        self.actionCut.setShortcut(_('Ctrl+X'))
-        self.actionPaste.setText(_('&Paste'))
-        self.actionPaste.setShortcut(_('Ctrl+V'))
+        ProjectsDock.setWindowTitle(_translate("ProjectsDock", "Projects", None))
+        self.pushButtonSync.setToolTip(_translate("ProjectsDock", "Sync folder with current editor file path", None))
+        self.actionNewFile.setText(_translate("ProjectsDock", "File", None))
+        self.actionNewFolder.setText(_translate("ProjectsDock", "Folder", None))
+        self.actionNewFromTemplate.setText(_translate("ProjectsDock", "From Template", None))
+        self.actionNewFromTemplate.setToolTip(_translate("ProjectsDock", "From Template", None))
+        self.actionDelete.setText(_translate("ProjectsDock", "Delete", None))
+        self.actionNewProject.setText(_translate("ProjectsDock", "Project", None))
+        self.actionCloseProject.setText(_translate("ProjectsDock", "Close", None))
+        self.actionOpenProject.setText(_translate("ProjectsDock", "Open", None))
+        self.actionProperties.setText(_translate("ProjectsDock", "Properties", None))
+        self.actionRefresh.setText(_translate("ProjectsDock", "Refresh", None))
+        self.actionRefresh.setShortcut(_translate("ProjectsDock", "F5", None))
+        self.actionOpen.setText(_translate("ProjectsDock", "Open", None))
+        self.actionOpenSystemEditor.setText(_translate("ProjectsDock", "System Editor", None))
+        self.actionRename.setText(_translate("ProjectsDock", "Rename", None))
+        self.actionRename.setToolTip(_translate("ProjectsDock", "Rename", None))
+        self.actionRename.setShortcut(_translate("ProjectsDock", "F2", None))
+        self.actionOrderByName.setText(_translate("ProjectsDock", "By Name", None))
+        self.actionOrderBySize.setText(_translate("ProjectsDock", "By Size", None))
+        self.actionOrderByDate.setText(_translate("ProjectsDock", "By Date", None))
+        self.actionOrderByType.setText(_translate("ProjectsDock", "By Type", None))
+        self.actionOrderDescending.setText(_translate("ProjectsDock", "Descending", None))
+        self.actionOrderFoldersFirst.setText(_translate("ProjectsDock", "Folders First", None))
+        self.actionSetInTerminal.setText(_translate("ProjectsDock", "Set In Terminal", None))
+        self.actionRemove.setText(_translate("ProjectsDock", "Remove", None))
+        self.actionProjectBundles.setText(_translate("ProjectsDock", "Project Bundles", None))
+        self.actionProjectBundles.setToolTip(_translate("ProjectsDock", "Bundles inside this project", None))
+        self.actionBashInit.setText(_translate("ProjectsDock", "Bash Init", None))
+        self.actionCopy.setText(_translate("ProjectsDock", "&Copy", None))
+        self.actionCopy.setShortcut(_translate("ProjectsDock", "Ctrl+C", None))
+        self.actionCut.setText(_translate("ProjectsDock", "Cu&t", None))
+        self.actionCut.setShortcut(_translate("ProjectsDock", "Ctrl+X", None))
+        self.actionPaste.setText(_translate("ProjectsDock", "&Paste", None))
+        self.actionPaste.setShortcut(_translate("ProjectsDock", "Ctrl+V", None))
+        self.actionSelectRelatedBundles.setText(_translate("ProjectsDock", "Select Related Bundles", None))
+        self.actionSelectRelatedBundles.setToolTip(_translate("ProjectsDock", "Choose bundles related to this project", None))
 

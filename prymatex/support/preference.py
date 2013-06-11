@@ -23,23 +23,27 @@
     shellVariables, an array of key/value pairs. See context dependent variables.
     spellChecking, set to 0/1 to disable/enable spell checking.
 '''
-from copy import copy
-import uuid as uuidmodule
-
 from prymatex.support.bundle import PMXBundleItem
-from prymatex.support.utils import compileRegexp
-from prymatex.support.snippet import PMXSnippet
-from prymatex.support.processor import PMXDebugSnippetProcessor
+from prymatex.support.regexp import compileRegexp
+from .regexp import Transformation
 
 class PMXPreferenceSettings(object):
     KEYS = [    'completions', 'completionCommand', 'disableDefaultCompletion', 'showInSymbolList', 'symbolTransformation', 
-                'highlightPairs', 'smartTypingPairs', 'shellVariables', 'spellChecking',
+                'highlightPairs', 'smartTypingPairs', 'shellVariables', 'spellChecking', 
+                'indentedSoftWrap', 'softWrap',
+                'foldingIndentedBlockStart', 'foldingIndentedBlockIgnore', 'foldingStartMarker', 'foldingStopMarker',
                 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
     INDENT_KEYS = [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
+    FOLDING_KEYS = [ 'foldingIndentedBlockStart', 'foldingIndentedBlockIgnore', 'foldingStartMarker', 'foldingStopMarker' ]
     INDENT_INCREASE = 0
     INDENT_DECREASE = 1
     INDENT_NEXTLINE = 2
     UNINDENT = 3
+    FOLDING_NONE = 0
+    FOLDING_START = 1
+    FOLDING_STOP = 2
+    FOLDING_INDENTED_START = 3
+    FOLDING_INDENTED_IGNORE = 4
     def __init__(self, dataHash = {}, preference = None):
         self.preference = preference
         self.update(dataHash)
@@ -50,10 +54,10 @@ class PMXPreferenceSettings(object):
         for key in PMXPreferenceSettings.KEYS:
             value = getattr(self, key)
             if value != None:
-                if key in [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]:
+                if key in self.INDENT_KEYS or key in self.FOLDING_KEYS:
                     value = value.pattern
                 elif key in [ 'shellVariables' ]:
-                    value = [ {'name': t[0], 'value': t[1] } for t in  value.iteritems() ]
+                    value = [ {'name': t[0], 'value': t[1] } for t in  value.items() ]
                 elif key in [ 'symbolTransformation' ]:
                     value = ";".join(value) + ";"
                 elif key in [ 'showInSymbolList' ]:
@@ -67,12 +71,12 @@ class PMXPreferenceSettings(object):
         for key in self.KEYS:
             value = dataHash.get(key, None)
             if value != None:
-                if key in [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]:
+                if key in self.INDENT_KEYS or key in self.FOLDING_KEYS:
                     value = compileRegexp( value )
                 elif key in [ 'shellVariables' ]:
-                    value = dict(map(lambda d: (d['name'], d['value']), value))
+                    value = dict([(d['name'], d['value']) for d in value])
                 elif key in [ 'symbolTransformation' ]:
-                    value = map(lambda value: value.strip(), value.split(";"))
+                    value = [value for value in [value.strip() for value in value.split(";")] if bool(value)]
                 elif key in [ 'showInSymbolList' ]:
                     value = bool(int(value))
                 elif key in [ 'spellChecking' ]:
@@ -80,9 +84,9 @@ class PMXPreferenceSettings(object):
             setattr(self, key, value)
     
 class PMXPreferenceMasterSettings(object):
-    def __init__(self):
+    def __init__(self, settings):
         """docstring for __init__"""
-        self.settings = []
+        self.settings = settings
     
     @property
     def completions(self):
@@ -115,6 +119,7 @@ class PMXPreferenceMasterSettings(object):
         for settings in self.settings:
             if settings.symbolTransformation is not None:
                 return settings.symbolTransformation
+        return []
                 
     @property
     def highlightPairs(self):
@@ -127,12 +132,12 @@ class PMXPreferenceMasterSettings(object):
         for settings in self.settings:
             if settings.smartTypingPairs is not None:
                 return settings.smartTypingPairs[:]
-        
+
     @property
     def shellVariables(self):
         shellVariables = {}
         for settings in self.settings:
-            if isinstance(settings.shellVariables, dict) and all(map(lambda shellKey: shellKey not in shellVariables, settings.shellVariables.keys())):
+            if isinstance(settings.shellVariables, dict) and all([shellKey not in shellVariables for shellKey in list(settings.shellVariables.keys())]):
                 shellVariables.update(settings.shellVariables)
         return shellVariables
         
@@ -145,53 +150,86 @@ class PMXPreferenceMasterSettings(object):
         
     @property
     def decreaseIndentPattern(self):
-        settings = self._findIndentSettings()
+        settings = self.__findIndentSettings()
         if settings is not None:
             return settings.decreaseIndentPattern
             
     @property
     def increaseIndentPattern(self):
-        settings = self._findIndentSettings()
+        settings = self.__findIndentSettings()
         if settings is not None:
             return settings.increaseIndentPattern
             
     @property
     def indentNextLinePattern(self):
-        settings = self._findIndentSettings()
+        settings = self.__findIndentSettings()
         if settings is not None:
             return settings.indentNextLinePattern
             
     @property
     def unIndentedLinePattern(self):
-        settings = self._findIndentSettings()
+        settings = self.__findIndentSettings()
         if settings is not None:
             return settings.unIndentedLinePattern
-        
-    def append(self, otherSettings):
-        self.settings.append(otherSettings)
 
-    def _findIndentSettings(self):
+    @property
+    def foldingIndentedBlockStart(self):
+        if not hasattr(self, "_folding_indented_block_start"):
+            for settings in self.settings:
+                self._folding_indented_block_start = settings.foldingIndentedBlockStart
+                if self._folding_indented_block_start is not None:
+                    break
+        return self._folding_indented_block_start
+            
+    @property
+    def foldingIndentedBlockIgnore(self):
+        if not hasattr(self, "_folding_indented_block_ignore"):
+            for settings in self.settings:
+                self._folding_indented_block_ignore = settings.foldingIndentedBlockIgnore
+                if self._folding_indented_block_ignore is not None:
+                    break
+        return self._folding_indented_block_ignore
+        
+    @property
+    def foldingStartMarker(self):
+        if not hasattr(self, "_folding_start_marker"):
+            for settings in self.settings:
+                self._folding_start_marker = settings.foldingStartMarker
+                if self._folding_start_marker is not None:
+                    break
+        return self._folding_start_marker
+    
+    @property
+    def foldingStopMarker(self):
+        if not hasattr(self, "_folding_stop_marker"):
+            for settings in self.settings:
+                self._folding_stop_marker = settings.foldingStopMarker
+                if self._folding_stop_marker is not None:
+                    break
+        return self._folding_stop_marker
+        
+    def __findIndentSettings(self):
         #TODO: Algo de cache?
         for settings in self.settings:
-            if any(map(lambda indentKey: getattr(settings, indentKey) is not None, PMXPreferenceSettings.INDENT_KEYS)):
+            if any([getattr(settings, indentKey) is not None for indentKey in PMXPreferenceSettings.INDENT_KEYS]):
                 return settings
-                
+
     def getBundle(self, attrKey):
         for settings in self.settings:
             if getattr(settings, attrKey) is not None:
                 return settings.preference.bundle
-    
+
     def getManager(self, attrKey):
         for settings in self.settings:
             if getattr(settings, attrKey) is not None:
                 return settings.preference.manager
-                
+
     def indent(self, line):
         #IncreasePattern on return indent nextline
         #DecreasePattern evaluate line to decrease, no requiere del return
         #IncreaseOnlyNextLine on return indent nextline only
         #IgnoringLines evaluate line to unindent, no require el return
-        settings = self._findIndentSettings()
+        settings = self.__findIndentSettings()
         indent = []
         if settings.decreaseIndentPattern != None and settings.decreaseIndentPattern.search(line):
             indent.append(PMXPreferenceSettings.INDENT_DECREASE)
@@ -204,26 +242,32 @@ class PMXPreferenceMasterSettings(object):
         return indent
     
     def compileSymbolTransformation(self):
-        self._snippetsTransformation = []
-        for symbol in self.symbolTransformation:
-            symbol = "${SYMBOL" + symbol[1:] + "}"
-            dataHash = {    'content': symbol, 
-                            'name': symbol }
-            snippet = PMXSnippet(uuidmodule.uuid1(), "internal", dataHash = dataHash)
-            self._snippetsTransformation.append(snippet)
+        self._symbolTransformation = []
+        for trans in self.symbolTransformation:
+            if trans:
+                self._symbolTransformation.append(Transformation(trans[2:]))
     
     def transformSymbol(self, text):
-        #TODO: Hacer la transformacion de los simbolos
-        return text
-        if not hasattr(self, '_snippetsTransformation'):
+        if not hasattr(self, '_symbolTransformation'):
             self.compileSymbolTransformation()
-        pro = PMXDebugSnippetProcessor()
-        for snippet in self._snippetsTransformation:
-            snippet.execute(pro)
-            text = pro.text
-            if text:
-                return text
-        return text
+        for trans in self._symbolTransformation:
+            tt = trans.transform(text)
+            if tt is not None:
+                return tt
+    
+    def folding(self, line):
+        start_match = self.foldingStartMarker.search(line) if self.foldingStartMarker is not None else None
+        stop_match = self.foldingStopMarker.search(line) if self.foldingStopMarker is not None else None
+        if start_match != None and stop_match == None:
+            return PMXPreferenceSettings.FOLDING_START
+        elif start_match == None and stop_match != None:
+            return PMXPreferenceSettings.FOLDING_STOP
+        # Ahora probamos los de indented
+        if self.foldingIndentedBlockStart is not None and self.foldingIndentedBlockStart.search(line):
+            return PMXPreferenceSettings.FOLDING_INDENTED_START
+        if self.foldingIndentedBlockIgnore is not None and self.foldingIndentedBlockIgnore.search(line):
+            return PMXPreferenceSettings.FOLDING_INDENTED_IGNORE
+        return PMXPreferenceSettings.FOLDING_NONE
     
 class PMXPreference(PMXBundleItem):
     KEYS = [ 'settings' ]
@@ -251,7 +295,7 @@ class PMXPreference(PMXBundleItem):
         return dataHash
 
     def update(self, dataHash):
-        for key in dataHash.keys():
+        for key in list(dataHash.keys()):
             value = dataHash.get(key, None)
             if key == 'settings':
                 self.settings.update(value)
@@ -260,8 +304,5 @@ class PMXPreference(PMXBundleItem):
             
     @staticmethod
     def buildSettings(preferences):
-        settings = PMXPreferenceMasterSettings()
-        if preferences:
-            for p in preferences:
-                settings.append(p.settings)
-        return settings
+        """El orden si importa, las preferences vienen ordenadas por score"""
+        return PMXPreferenceMasterSettings([p.settings for p in preferences])

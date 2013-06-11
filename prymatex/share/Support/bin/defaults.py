@@ -19,14 +19,14 @@ def read(domain = None, key = None):
         domain = domain if domain.endswith('.plist') else domain + '.plist'
         file = os.path.join(PREFERENCES_PATH, domain)
         if os.path.exists(file):
-            print plistlib.readPlist(file)
+            print(plistlib.readPlist(file))
     else:
         domain = domain if domain.endswith('.plist') else domain + '.plist'
         file = os.path.join(PREFERENCES_PATH, domain)
         if os.path.exists(file):
             plist = plistlib.readPlist(file)
             if key in plist:
-                print plist[key]
+                print(plist[key])
 
 def read_type():
     '''

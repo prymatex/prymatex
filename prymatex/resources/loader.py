@@ -10,7 +10,8 @@ from prymatex.utils.decorators.memoize import memoized
 RESOURCES = {}
 RESOURCES_READY = False
 
-THEME_ICON_TEST = "document-open"
+THEME_ICON_TEST = "folder-sync"
+STANDARD_ICON_NAME = [name for name in dir(QtGui.QStyle) if name.startswith('SP_') ]
 
 STATICMAPPING = (
     # Process
@@ -56,7 +57,7 @@ STATICMAPPING = (
     (os.path.normcase("/bundles/drag-commands.png"), "bundle-item-dragcommand"),
     (os.path.normcase("/bundles/snippets.png"), "bundle-item-snippet"),
     (os.path.normcase("/bundles/macros.png"), "bundle-item-macro"),
-    (os.path.normcase("/bundles/template-files.png"), "bundle-item-templatefile"),
+    (os.path.normcase("/bundles/template-files.png"), "bundle-item-staticfile"),
     
     #Editor Sidebar
     (os.path.normcase("/modes/cursors.png"), "modes-cursors"),
@@ -85,7 +86,7 @@ def loadResources(resourcesPath, staticMapping = []):
         for dirpath, dirnames, filenames in os.walk(sourcePath):
             for filename in filenames:
                 iconPath = os.path.join(dirpath, filename)
-                staticNames = filter(lambda (path, names): iconPath.endswith(path), staticMapping)
+                staticNames = [path_names for path_names in staticMapping if iconPath.endswith(path_names[0])]
                 if staticNames:
                     for name in staticNames:
                         sources[name[1]] = iconPath
@@ -109,7 +110,7 @@ def loadPrymatexResources(resourcesPath, preferedThemeName = "oxygen"):
             themePaths.append(os.path.join(resourcesPath, "IconThemes"))
             themeNames = [ preferedThemeName ]
             for themePath in themePaths:
-	    	if os.path.exists(themePath):
+                if os.path.exists(themePath):
                     themeNames.extend(os.listdir(themePath))
             # Set and test
             QtGui.QIcon.setThemeSearchPaths( themePaths )
@@ -137,7 +138,7 @@ def getResourcePath(name, sources = None):
     if sources is not None:
         sources = sources if isinstance(sources, (list, tuple)) else (sources, )
     else:
-        sources = RESOURCES.keys()
+        sources = list(RESOURCES.keys())
     for source in sources:
         if source in RESOURCES and name in RESOURCES[source]:
             return RESOURCES[source].get(name)

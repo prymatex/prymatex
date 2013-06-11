@@ -4,17 +4,20 @@
 import os, re
 
 from prymatex.qt import QtCore, QtGui
-from prymatex.utils.text import to_ascii_cap
+from prymatex.utils import sourcecode
 
 # Local import
 import prymatex
 
 def text2objectname(text, sufix = "", prefix = ""):
+    """&Text Button name -> %{prefix}TextButtonName%{sufix}
     """
-    &Text Button name -> %{prefix}TextButtonName%{sufix}
-    """
-    words = text.split(' ')
-    name = ''.join(map(to_ascii_cap, words))
+    if ' ' in text:
+        words = text.split(' ')
+        name = ''.join(map(sourcecode.to_ascii_cap, words))
+    else:
+        text = sourcecode.to_ascii(text)
+        name = text[0].upper() + text[1:] if prefix else text
     return prefix + name + sufix
 
 def qapplication(translate=True):

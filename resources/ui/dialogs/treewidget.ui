@@ -6,29 +6,31 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
-    <height>433</height>
+    <width>900</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>700</width>
-    <height>433</height>
+    <width>900</width>
+    <height>600</height>
    </size>
-  </property>
-  <property name="windowTitle">
-   <string>Dialog</string>
-  </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>:/images/prymatex/logo.png</normaloff>:/images/prymatex/logo.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <property name="spacing">
-    <number>2</number>
+    <number>6</number>
    </property>
-   <property name="margin">
-    <number>0</number>
+   <property name="leftMargin">
+    <number>6</number>
+   </property>
+   <property name="topMargin">
+    <number>6</number>
+   </property>
+   <property name="rightMargin">
+    <number>3</number>
+   </property>
+   <property name="bottomMargin">
+    <number>3</number>
    </property>
    <item>
     <widget class="QSplitter" name="splitter">
@@ -39,6 +41,18 @@
       <layout class="QVBoxLayout" name="treeLayout">
        <property name="spacing">
         <number>2</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>3</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>3</number>
        </property>
        <item>
         <widget class="QLineEdit" name="lineEditFilter"/>
@@ -55,10 +69,28 @@
      <widget class="QWidget" name="verticalLayoutWidget_2">
       <layout class="QVBoxLayout" name="widgetsLayout">
        <property name="spacing">
-        <number>2</number>
+        <number>6</number>
+       </property>
+       <property name="leftMargin">
+        <number>3</number>
        </property>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="spacing">
+          <number>2</number>
+         </property>
+         <property name="leftMargin">
+          <number>3</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>3</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
          <item>
           <widget class="QLabel" name="textLabelTitle">
            <property name="font">

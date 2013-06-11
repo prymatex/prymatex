@@ -39,7 +39,12 @@
 			<string>6C601F8C-15B2-43DA-8C39-5DCAD2240424</string>
 			<string>------------------------------------</string>
 			<string>FCBE2215-19CA-470A-8D92-BB0D00491D62</string>
-			<string>4F3DE420-8203-4C57-835D-4C69AEE85B37</string>
+			<string>------------------------------------</string>
+			<string>D77CB8B6-C75D-4A59-9181-45D27BC82C45</string>
+			<string>B9B9EEC2-26C1-4475-9642-3EA551999169</string>
+			<string>------------------------------------</string>
+			<string>DD42B10A-E753-4E08-A998-5C2E7C2D0CC2</string>
+			<string>52DA9EF9-6D1A-4E55-BFB9-BCB85C250715</string>
 		</array>
 		<key>submenus</key>
 		<dict>
@@ -108,6 +113,15 @@
 		<string>0A0DA1FC-59DE-4FD9-9A2C-63C6811A3C39</string>
 		<string>A8D04E65-97FA-4DE0-85A5-AC426B6184C6</string>
 		<string>4F3DE420-8203-4C57-835D-4C69AEE85B37</string>
+	</array>
+	<key>require</key>
+	<array>
+		<dict>
+			<key>name</key>
+			<string>Bundle Support</string>
+			<key>uuid</key>
+			<string>0BB1F01A-4F0A-475A-ACDD-0F5578F2EFC3</string>
+		</dict>
 	</array>
 	<key>uuid</key>
 	<string>4F45FDC0-62CA-4786-9134-8BC7C1F5606F</string>

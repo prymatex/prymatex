@@ -12,4 +12,3 @@ def center_widget(widget, scale = None):
     if scale is not None:
         widget.resize(screen.width() * scale[0], screen.height() * scale[1])
     widget.move((screen.width() - widget.size().width()) / 2, (screen.height() - widget.size().height()) / 2)
-    

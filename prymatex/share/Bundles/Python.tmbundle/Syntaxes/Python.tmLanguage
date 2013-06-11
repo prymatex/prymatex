@@ -20,13 +20,11 @@
 		<string>Sconstruct</string>
 		<string>sconstruct</string>
 		<string>SConscript</string>
+		<string>gyp</string>
+		<string>gypi</string>
 	</array>
 	<key>firstLineMatch</key>
 	<string>^#!/.*\bpython\b</string>
-	<key>foldingStartMarker</key>
-	<string>^\s*(def|class)\s+([.a-zA-Z0-9_ &lt;]+)\s*(\((.*)\))?\s*:|\{\s*$|\(\s*$|\[\s*$|^\s*"""(?=.)(?!.*""")</string>
-	<key>foldingStopMarker</key>
-	<string>^\s*$|^\s*\}|^\s*\]|^\s*\)|^\s*"""\s*$</string>
 	<key>keyEquivalent</key>
 	<string>^~P</string>
 	<key>name</key>
@@ -34,18 +32,37 @@
 	<key>patterns</key>
 	<array>
 		<dict>
-			<key>captures</key>
+			<key>begin</key>
+			<string>(^[ \t]+)?(?=#)</string>
+			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.definition.comment.python</string>
+					<string>punctuation.whitespace.comment.leading.python</string>
 				</dict>
 			</dict>
-			<key>match</key>
-			<string>(#).*$\n?</string>
-			<key>name</key>
-			<string>comment.line.number-sign.python</string>
+			<key>end</key>
+			<string>(?!\G)</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>begin</key>
+					<string>#</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.definition.comment.python</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>\n</string>
+					<key>name</key>
+					<string>comment.line.number-sign.python</string>
+				</dict>
+			</array>
 		</dict>
 		<dict>
 			<key>match</key>
@@ -335,7 +352,7 @@
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>(\()|\s*($\n?|#.*$\n?)</string>
+			<string>(\()|(\s*$\n?|#.*$\n?)</string>
 			<key>endCaptures</key>
 			<dict>
 				<key>1</key>
@@ -1130,16 +1147,18 @@
 		<dict>
 			<key>match</key>
 			<string>(?x)\b(
-                (
-                    Arithmetic|Assertion|Attribute|Buffer|EOF|Environment|FloatingPoint|IO|
-                    Import|Indentation|Index|Key|Lookup|Memory|Name|NotImplemented|OS|Overflow|
-                    Reference|Runtime|Standard|Syntax|System|Tab|Type|UnboundLocal|
-                    Unicode(Encode|Decode|Translate)?|
-                    Value|VMS|Windows|ZeroDivision
-                )Error|
-                ((Pending)?Deprecation|Runtime|Syntax|User|Future|Import|Unicode|Bytes)?Warning|
-                (Base)?Exception|
-                SystemExit|StopIteration|NotImplemented|KeyboardInterrupt|GeneratorExit
+				(
+					Arithmetic|Assertion|Attribute|BlockingIO|BrokenPipe|Buffer|ChildProcess|
+					Connection(Aborted|Refused|Reset)?|EOF|Environment|FileExists|
+					FileNotFound|FloatingPoint|Interrupted|IO|IsADirectoryError|
+					Import|Indentation|Index|Key|Lookup|Memory|Name|NotADirectory|
+					NotImplemented|OS|Overflow|Permission|ProcessLookup|Reference|
+					Runtime|Standard|Syntax|System|Tab|Timeout|Type|UnboundLocal|
+					Unicode(Encode|Decode|Translate)?|Value|VMS|Windows|ZeroDivision
+				)Error|
+				((Pending)?Deprecation|Runtime|Syntax|User|Future|Import|Unicode|Bytes)?Warning|
+				(Base)?Exception|
+				SystemExit|StopIteration|NotImplemented|KeyboardInterrupt|GeneratorExit
 			)\b</string>
 			<key>name</key>
 			<string>support.type.exception.python</string>
@@ -1148,11 +1167,12 @@
 		<dict>
 			<key>match</key>
 			<string>(?x)\b(
-                __import__|all|abs|any|apply|callable|chr|cmp|coerce|compile|delattr|dir|
-                divmod|eval|execfile|filter|getattr|globals|hasattr|hash|hex|id|
-                input|intern|isinstance|issubclass|iter|len|locals|map|max|min|oct|
-                ord|pow|range|raw_input|reduce|reload|repr|round|setattr|sorted|
-                sum|unichr|vars|zip
+				__import__|all|abs|any|apply|ascii|bin|callable|chr|classmethod|cmp|coerce|
+				compile|delattr|dir|divmod|enumerate|eval|execfile|filter|format|getattr|
+				globals|hasattr|hash|help|hex|id|input|intern|isinstance|issubclass|iter|
+				len|locals|map|max|min|next|oct|open|ord|pow|print|property|range|
+				raw_input|reduce|reload|repr|reversed|round|setattr|sorted|staticmethod|
+				sum|super|type|unichr|vars|zip
 			)\b</string>
 			<key>name</key>
 			<string>support.function.builtin.python</string>
@@ -1161,9 +1181,8 @@
 		<dict>
 			<key>match</key>
 			<string>(?x)\b(
-				basestring|bool|buffer|classmethod|complex|dict|enumerate|file|
-				float|frozenset|int|list|long|object|open|property|reversed|set|
-				slice|staticmethod|str|super|tuple|type|unicode|xrange
+				basestring|bool|buffer|bytearray|bytes|complex|dict|float|frozenset|int|
+				list|long|memoryview|object|range|set|slice|str|tuple|unicode|xrange
 			)\b</string>
 			<key>name</key>
 			<string>support.type.python</string>

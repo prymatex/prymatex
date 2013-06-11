@@ -10,53 +10,10 @@ import os, shutil, codecs
 import functools
 from glob import glob
 
-from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
+from prymatex.support.bundle import (PMXBundleItem, PMXStaticFile, 
+    PMXRunningContext)
 from prymatex.support.utils import prepareShellScript
 from prymatex.utils import plist
-
-class PMXTemplateFile(object):
-    TYPE = 'templatefile'
-    def __init__(self, path, template):
-        self.path = path
-        self.name = os.path.basename(path)
-        self.template = template
-
-    def hasNamespace(self, namespace):
-        return self.template.hasNamespace(namespace)
-        
-    @property
-    def enabled(self):
-        return self.template.enabled
-        
-    def getFileContent(self):
-        if os.path.exists(self.path):
-            f = codecs.open(self.path, 'r', 'utf-8')
-            content = f.read()
-            f.close()
-            return content
-    
-    def setFileContent(self, content):
-        if os.path.exists(self.path):
-            f = codecs.open(self.path, 'w', 'utf-8')
-            f.write(content)
-            f.close()
-    content = property(getFileContent, setFileContent)
-
-    def update(self, dataHash):
-        for key in dataHash.keys():
-            setattr(self, key, dataHash[key])
-    
-    def relocate(self, path):
-        if os.path.exists(self.path):
-            shutil.move(self.path, path)
-        self.name = os.path.basename(path)
-    
-    def save(self, basePath = None):
-        path = os.path.join(basePath, self.name) if basePath is not None else self.path
-        f = codecs.open(path, 'w', 'utf-8')
-        f.write(self.content)
-        f.close()
-        self.path = path
     
 class PMXTemplate(PMXBundleItem):
     KEYS = [    'command', 'extension']
@@ -64,10 +21,6 @@ class PMXTemplate(PMXBundleItem):
     TYPE = 'template'
     FOLDER = 'Templates'
     PATTERNS = [ '*' ]
-    
-    def __init__(self, uuid, dataHash):
-        PMXBundleItem.__init__(self, uuid, dataHash)
-        self.files = []                    #Estos son los template files
     
     def load(self, dataHash):
         PMXBundleItem.load(self, dataHash)
@@ -110,7 +63,7 @@ class PMXTemplate(PMXBundleItem):
             pass
 
     def buildEnvironment(self, fileName, fileDirectory, localVars = False):
-        env = super(PMXTemplate, self).buildEnvironment() if not localVars else {}
+        env = super(PMXTemplate, self).environmentVariables() if not localVars else {}
         nameWithExtension = "{0}{1}{2}".format(fileName, os.path.extsep, self.extension) if self.extension else fileName
         env['TM_NEW_FILE'] = os.path.join(fileDirectory, nameWithExtension)
         env['TM_NEW_FILE_BASENAME'] = fileName
@@ -128,35 +81,17 @@ class PMXTemplate(PMXBundleItem):
         callback(filePath)
 
     @classmethod
-    def loadBundleItem(cls, path, namespace, bundle, manager):
-        info = os.path.join(path, cls.FILE)
-        templateFilePaths = glob(os.path.join(path, '*'))
-        templateFilePaths.remove(info)
-        try:
-            data = plist.readPlist(info)
-            uuid = manager.uuidgen(data.pop('uuid', None))
-            template = manager.getManagedObject(uuid)
-            if template is None and not manager.isDeleted(uuid):
-                template = cls(uuid, data)
-                template.setBundle(bundle)
-                template.setManager(manager)
-                template.addSource(namespace, path)
-                template = manager.addBundleItem(template)
-                manager.addManagedObject(template)
-                #Add files
-                for templateFilePath in templateFilePaths:
-                    templateFile = PMXTemplateFile(templateFilePath, template)
-                    templateFile = manager.addTemplateFile(templateFile)
-                    template.files.append(templateFile)
-            elif template is not None:
-                template.addSource(namespace, path)
-            return template
-        except Exception, e:
-            print "Error in template %s (%s)" % (info, e)
+    def dataFilePath(cls, path):
+        return os.path.join(path, cls.FILE)
+
+    def staticPaths(self):
+        templateFilePaths = glob(os.path.join(self.currentPath, '*'))
+        templateFilePaths.remove(self.dataFilePath(self.currentPath))
+        return templateFilePaths
 
     @classmethod
     def reloadBundleItem(cls, bundleItem, path, namespace, manager):
-        map(lambda style: manager.removeTemplateFile(style), bundleItem.files)
+        list(map(lambda style: manager.removeTemplateFile(style), bundleItem.files))
         info = os.path.join(path, cls.FILE)
         templateFilePaths = glob(os.path.join(path, '*'))
         templateFilePaths.remove(info)
@@ -164,6 +99,6 @@ class PMXTemplate(PMXBundleItem):
         bundleItem.load(data)
         #Add files
         for templateFilePath in templateFilePaths:
-            templateFile = PMXTemplateFile(templateFilePath, bundleItem)
-            templateFile = manager.addTemplateFile(templateFile)
+            templateFile = PMXStaticFile(templateFilePath, bundleItem)
+            templateFile = manager.addStaticFile(templateFile)
             bundleItem.files.append(templateFile)

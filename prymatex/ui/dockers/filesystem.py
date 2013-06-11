@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/dockers/filesystem.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dockers/filesystem.ui'
 #
-# Created: Fri Nov  9 18:10:46 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Wed Jun  5 22:34:45 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_FileSystemDock(object):
     def setupUi(self, FileSystemDock):
@@ -177,36 +185,36 @@ class Ui_FileSystemDock(object):
         QtCore.QMetaObject.connectSlotsByName(FileSystemDock)
 
     def retranslateUi(self, FileSystemDock):
-        FileSystemDock.setWindowTitle(_('File System'))
-        self.pushButtonBack.setToolTip(_('Go previous place'))
-        self.pushButtonFoward.setToolTip(_('Go next place'))
-        self.pushButtonUp.setToolTip(_('Go up one level'))
-        self.pushButtonSync.setToolTip(_('Sync folder with current editor file path'))
-        self.comboBoxLocation.setToolTip(_('Folders'))
-        self.actionNewFile.setText(_('File'))
-        self.actionNewFolder.setText(_('Folder'))
-        self.actionNewFromTemplate.setText(_('File From Template'))
-        self.actionNewFromTemplate.setToolTip(_('File From Template'))
-        self.actionDelete.setText(_('Delete'))
-        self.actionOrderByName.setText(_('By Name'))
-        self.actionOrderBySize.setText(_('By Size'))
-        self.actionOrderByDate.setText(_('By Date'))
-        self.actionOrderByType.setText(_('By Type'))
-        self.actionOrderDescending.setText(_('Descending'))
-        self.actionOrderFoldersFirst.setText(_('Folders First'))
-        self.actionOpen.setText(_('Open'))
-        self.actionOpenSystemEditor.setText(_('System Editor'))
-        self.actionOpenDefaultEditor.setText(_('Default Editor'))
-        self.actionRename.setText(_('Rename'))
-        self.actionRename.setToolTip(_('Rename'))
-        self.actionRename.setShortcut(_('F2'))
-        self.actionConvertIntoProject.setText(_('Convert Into Project'))
-        self.actionConvertIntoProject.setToolTip(_('Convert current directory into project'))
-        self.actionSetInTerminal.setText(_('Set In Terminal'))
-        self.actionCut.setText(_('Cu&t'))
-        self.actionCut.setShortcut(_('Ctrl+X'))
-        self.actionCopy.setText(_('&Copy'))
-        self.actionCopy.setShortcut(_('Ctrl+C'))
-        self.actionPaste.setText(_('&Paste'))
-        self.actionPaste.setShortcut(_('Ctrl+V'))
+        FileSystemDock.setWindowTitle(_translate("FileSystemDock", "File System", None))
+        self.pushButtonBack.setToolTip(_translate("FileSystemDock", "Go previous place", None))
+        self.pushButtonFoward.setToolTip(_translate("FileSystemDock", "Go next place", None))
+        self.pushButtonUp.setToolTip(_translate("FileSystemDock", "Go up one level", None))
+        self.pushButtonSync.setToolTip(_translate("FileSystemDock", "Sync folder with current editor file path", None))
+        self.comboBoxLocation.setToolTip(_translate("FileSystemDock", "Folders", None))
+        self.actionNewFile.setText(_translate("FileSystemDock", "File", None))
+        self.actionNewFolder.setText(_translate("FileSystemDock", "Folder", None))
+        self.actionNewFromTemplate.setText(_translate("FileSystemDock", "File From Template", None))
+        self.actionNewFromTemplate.setToolTip(_translate("FileSystemDock", "File From Template", None))
+        self.actionDelete.setText(_translate("FileSystemDock", "Delete", None))
+        self.actionOrderByName.setText(_translate("FileSystemDock", "By Name", None))
+        self.actionOrderBySize.setText(_translate("FileSystemDock", "By Size", None))
+        self.actionOrderByDate.setText(_translate("FileSystemDock", "By Date", None))
+        self.actionOrderByType.setText(_translate("FileSystemDock", "By Type", None))
+        self.actionOrderDescending.setText(_translate("FileSystemDock", "Descending", None))
+        self.actionOrderFoldersFirst.setText(_translate("FileSystemDock", "Folders First", None))
+        self.actionOpen.setText(_translate("FileSystemDock", "Open", None))
+        self.actionOpenSystemEditor.setText(_translate("FileSystemDock", "System Editor", None))
+        self.actionOpenDefaultEditor.setText(_translate("FileSystemDock", "Default Editor", None))
+        self.actionRename.setText(_translate("FileSystemDock", "Rename", None))
+        self.actionRename.setToolTip(_translate("FileSystemDock", "Rename", None))
+        self.actionRename.setShortcut(_translate("FileSystemDock", "F2", None))
+        self.actionConvertIntoProject.setText(_translate("FileSystemDock", "Convert Into Project", None))
+        self.actionConvertIntoProject.setToolTip(_translate("FileSystemDock", "Convert current directory into project", None))
+        self.actionSetInTerminal.setText(_translate("FileSystemDock", "Set In Terminal", None))
+        self.actionCut.setText(_translate("FileSystemDock", "Cu&t", None))
+        self.actionCut.setShortcut(_translate("FileSystemDock", "Ctrl+X", None))
+        self.actionCopy.setText(_translate("FileSystemDock", "&Copy", None))
+        self.actionCopy.setShortcut(_translate("FileSystemDock", "Ctrl+C", None))
+        self.actionPaste.setText(_translate("FileSystemDock", "&Paste", None))
+        self.actionPaste.setShortcut(_translate("FileSystemDock", "Ctrl+V", None))
 

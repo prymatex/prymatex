@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>629</width>
-    <height>267</height>
+    <height>189</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,6 +23,12 @@
    <item>
     <widget class="QWidget" name="widgetCommand" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <property name="margin">
+       <number>0</number>
+      </property>
       <item>
        <widget class="QPushButton" name="pushButtonCommandClose">
         <property name="text">
@@ -98,6 +104,12 @@
    <item>
     <widget class="QWidget" name="widgetGoToLine" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <property name="margin">
+       <number>0</number>
+      </property>
       <item>
        <widget class="QPushButton" name="pushButtonGoToLineClose">
         <property name="text">
@@ -149,6 +161,12 @@
    <item>
     <widget class="QWidget" name="widgetIFind" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <property name="margin">
+       <number>0</number>
+      </property>
       <item>
        <widget class="QPushButton" name="pushButtonIFindClose">
         <property name="text">
@@ -400,6 +418,12 @@ p, li { white-space: pre-wrap; }
    <item>
     <widget class="QWidget" name="widgetStatus" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <property name="margin">
+       <number>0</number>
+      </property>
       <item>
        <widget class="QLabel" name="labelLineColumn">
         <property name="maximumSize">
@@ -498,7 +522,9 @@ p, li { white-space: pre-wrap; }
       <item>
        <widget class="QToolButton" name="toolButtonMenuBundle">
         <property name="icon">
-         <iconset theme="applications-system"/>
+         <iconset theme="applications-system">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="popupMode">
          <enum>QToolButton::MenuButtonPopup</enum>

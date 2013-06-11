@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-"""
-OLD TREE MODULE, USE TREES
-"""
-
 from prymatex.qt import QtCore
 
 from prymatex.utils.lists import bisect_key
@@ -110,9 +106,7 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
     
     def node(self, index):
         if index.isValid():
-            node = index.internalPointer()
-            if node:
-                return node
+            return index.internalPointer()
         return self.rootNode
     
     def clear(self):
@@ -143,24 +137,25 @@ class AbstractNamespaceTreeModel(AbstractTreeModel):
         self.separator = separator
         
     def nodeForNamespace(self, namespace, createProxy = False):
+        if not namespace:
+            return self.rootNode
         node = self.rootNode
-        names = namespace.split(self.separator)
-        for name in names:
-            if name != "":
-                nextNode = node.findChildByName(name)
-                if nextNode is None and createProxy:
-                    nextNode = self.treeNodeFactory(name, node)
-                    nextNode._isproxy = True
-                    node.appendChild(nextNode)
-                    self.layoutChanged.emit()
-                elif nextNode is None:
-                    return None
-                node = nextNode
+        for name in namespace.split(self.separator):
+            if not name:
+                raise Exception("No path for" % namespace)
+            childNode = node.findChildByName(name)
+            if childNode is None and createProxy:
+                childNode = self.treeNodeFactory(name, node)
+                childNode._isproxy = True
+                node.appendChild(childNode)
+                self.layoutChanged.emit()
+            elif childNode is None:
+                return None
+            node = childNode
         return node
     
-    def insertNode(self, node):
-        # TODO esto es como un appendNode asi que no estaria mal que se use ese metodo
-        return self.addNamespaceNode("", node)
+    def appendNamespaceNode(self, node):
+        return self.insertNamespaceNode("", node)
 
     def insertNamespaceNode(self, namespace, node):
         parentNode = self.nodeForNamespace(namespace, True)
@@ -173,13 +168,11 @@ class AbstractNamespaceTreeModel(AbstractTreeModel):
                 for child in proxy.childNodes():
                     node.appendChild(child)
                 parentNode.removeChild(proxy)
-                self.layoutChanged.emit()
             else:
                 raise Exception("Node Already Exists" % node.nodeName())
-        self.beginInsertRows(parentIndex, node.childCount(), node.childCount())
         parentNode.appendChild(node)
         node._isproxy = False
-        self.endInsertRows()
+        self.layoutChanged.emit()
      
 #=========================================
 # Proxies
@@ -290,7 +283,7 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
             #self.dataChanged.emit(self.mapFromSource(topLeft), self.mapFromSource(topLeft))
     
     def on_sourceModel_rowsInserted(self, parent, start, end):
-        for i in xrange(start, end + 1):
+        for i in range(start, end + 1):
             sIndex = self.__sourceModel.index(i, 0, parent)
             if self.filterAcceptsRow(i, parent):
                 position = bisect_key(self.__indexMap, sIndex, lambda index: self.comparableValue(index))
@@ -300,7 +293,7 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
     
     def on_sourceModel_rowsAboutToBeRemoved(self, parent, start, end):
         #Remove indexes
-        for i in xrange(start, end + 1):
+        for i in range(start, end + 1):
             sIndex = self.sourceModel().index(i, 0, parent)
             if sIndex in self.__indexMap:
                 self.beginRemoveRows(QtCore.QModelIndex(), self.__indexMap.index(sIndex), self.__indexMap.index(sIndex))
@@ -308,4 +301,4 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
                 self.endRemoveRows()
 
     def on_sourceModel_layoutChanged(self):
-        print "cambio el layout"
+        print("cambio el layout")

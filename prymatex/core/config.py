@@ -5,6 +5,8 @@
 Application configuration based on Qt's QSettings module.
 """
 import sys, os, plistlib
+
+import prymatex
 from prymatex.utils.misc import get_home_dir
 
 #==============================================================================
@@ -22,9 +24,6 @@ PRYMATEX_HOME_NAME = ".prymatex"
 TEXTMATE_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
 TEXTMATE_PREFERENCE_NAMES = ["Library", "Preferences"]
 
-def get_prymatex_app_path():
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-
 def get_prymatex_home_path():
     path = os.path.join(USER_HOME_PATH, PRYMATEX_HOME_NAME)
     if not os.path.exists(path):
@@ -33,8 +32,13 @@ def get_prymatex_home_path():
     for extra in ['Bundles', 'Themes', 'Plugins']:
         extraPath = os.path.join(path, extra)
         if not os.path.exists(extraPath):
-            os.makedirs(extraPath, 0700)
+            os.makedirs(extraPath, 0o700)
     return path
+
+PMX_APP_PATH = os.path.dirname(prymatex.__file__)
+PMX_SHARE_PATH = os.path.join(PMX_APP_PATH, 'share')
+PMX_HOME_PATH = get_prymatex_home_path()
+PMX_PLUGINS_PATH = os.path.join(PMX_HOME_PATH, 'Plugins')
 
 def get_textmate_preferences_user_path():
     path = os.path.join(USER_HOME_PATH, *TEXTMATE_PREFERENCE_NAMES)
@@ -126,15 +130,15 @@ def get_translation(modname, dirname=None):
         _trans = gettext.translation(modname, locale_path, codeset="utf-8")
         lgettext = _trans.lgettext
         def translate_gettext(x):
-            if isinstance(x, unicode):
+            if isinstance(x, str):
                 x = x.encode("utf-8")
-            return unicode(lgettext(x), "utf-8")
+            return str(lgettext(x), "utf-8")
         return translate_gettext
-    except IOError, _e:  # analysis:ignore
+    except IOError as _e:  # analysis:ignore
         #print "Not using translations (%s)" % _e
         def translate_dumb(x):
-            if not isinstance(x, unicode):
-                return unicode(x, "utf-8")
+            if not isinstance(x, str):
+                return str(x, "utf-8")
             return x
         return translate_dumb
 
@@ -153,7 +157,7 @@ def get_supported_types():
     get_remote_data function in spyderlib/widgets/externalshell/monitor.py
     get_internal_shell_filter method in namespacebrowser.py"""
     from datetime import date
-    editable_types = [int, long, float, list, dict, tuple, str, unicode, date]
+    editable_types = [int, int, float, list, dict, tuple, str, str, date]
     try:
         from numpy import ndarray, matrix
         editable_types += [ndarray, matrix]

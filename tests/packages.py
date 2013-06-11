@@ -49,4 +49,4 @@ for dirpath, dirnames, filenames in os.walk(prymatex_dir):
         package_data['.'.join(parts)].extend([os.path.join(basename, p) for p in patterns])
 
 if __name__ == "__main__":
-    print packages, package_data
+    print(packages, package_data)

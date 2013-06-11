@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import traceback
 import os, sys
 from glob import glob
+import collections
 
 try:
     import json
@@ -13,8 +15,10 @@ from prymatex.qt import QtGui, QtCore
 
 from prymatex import resources
 from prymatex.utils import osextra
-from prymatex.core import PMXBaseComponent
+from prymatex.core import PMXBaseComponent, PMXBaseEditor
 from prymatex.utils.importlib import import_module, import_from_directory
+
+from prymatex.gui.mainwindow import PMXMainWindow as MainWindow
 
 PLUGIN_EXTENSION = 'pmxplugin'
 PLUGIN_DESCRIPTOR_FILE = 'info.json'
@@ -23,35 +27,23 @@ class ResourceProvider():
     def __init__(self, resources):
         self.resources = resources
 
-    def getImage(self, index, default = None):
+    def getImage(self, index, size = None, default = None):
         if index in self.resources:
             return QtGui.QPixmap(self.resources[index])
-        return resources.getImage(index)
+        return resources.getImage(index, size, default)
         
-    def getIcon(self, index, default = None):
+    def getIcon(self, index, size = None, default = None):
         if index in self.resources:
             return QtGui.QIcon(self.resources[index])
-        return resources.getIcon(index)
+        return resources.getIcon(index, size, default)
 
 class PluginDescriptor(object):
+    name = ""
+    description = ""
+    icon = None
     def __init__(self, entry):
-        self.__entry = entry
-    
-    def __getitem__(self, name):
-        if name in self.__entry:
-            return self.__entry[name]
-        raise KeyError(name)
-    
-    def __getattr__(self, name):
-        if name in self.__entry:
-            return self.__entry[name]
-        raise AttributeError(name)
-        
-    def getImage(self, key):
-        return self.__entry["resources"].getImage(key)
-
-    def getIcon(self, key):
-        return self.__entry["resources"].getIcon(key)
+        for key, value in entry.items():
+            setattr(self, key, value)
         
 class PluginManager(QtCore.QObject, PMXBaseComponent):
     
@@ -61,145 +53,67 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
     SETTINGS_GROUP = 'PluginManager'
     
     def __init__(self, application):
-        self.application = application
+        QtCore.QObject.__init__(self, application)
+        PMXBaseComponent.__init__(self)
+
         self.directories = []
         
         self.currentPluginDescriptor = None
-        self.modules = {}
+        self.plugins = {}
         
-        self.editors = []
-        self.dockers = []
-        self.statusBars = []
-        self.keyHelpers = {}
-        self.addons = {}
-        self.instances = {}
-    
+        self.components = {}
+        
+    @classmethod
+    def contributeToSettings(cls):
+        from prymatex.gui.settings.plugins import PluginsSettingsWidget
+        return [ PluginsSettingsWidget ]
+
     def addPluginDirectory(self, directory):
         self.directories.append(directory)
 
-    #==================================================
-    # Cargando clases
-    #==================================================
-    def registerEditor(self, editorClass):
-        self.application.populateComponent(editorClass)
-        editorClass.plugin = self.currentPluginDescriptor
-        self.editors.append(editorClass)
- 
-    def registerDocker(self, dockerClass):
-        self.application.populateComponent(dockerClass)
-        dockerClass.plugin = self.currentPluginDescriptor
-        self.dockers.append(dockerClass)
-        
-    def registerStatusBar(self, statusBarClass):
-        self.application.populateComponent(statusBarClass)
-        statusBarClass.plugin = self.currentPluginDescriptor
-        self.statusBars.append(statusBarClass)
+    # ------------- Cargando clases
+    def registerComponent(self, componentClass, componentBase = MainWindow):
+        self.application.populateComponentClass(componentClass)
+        componentClass.plugin = self.currentPluginDescriptor
+        self.components.setdefault(componentBase, []).append(componentClass)
     
-    def registerKeyHelper(self, widgetClass, helperClass):
-        self.application.extendComponent(helperClass)
-        helperClass.plugin = self.currentPluginDescriptor
-        keyHelperClasses = self.keyHelpers.setdefault(widgetClass, [])
-        keyHelperClasses.append(helperClass)
+    # ------------ Handle component classes
+    def findComponentsForClass(self, klass):
+        return self.components.get(klass, [])
     
-    def registerAddon(self, widgetClass, addonClass):
-        self.application.populateComponent(addonClass)
-        addonClass.plugin = self.currentPluginDescriptor
-        addonClasses = self.addons.setdefault(widgetClass, [])
-        addonClasses.append(addonClass)
-           
-    #==================================================
-    # Creando instancias
-    #==================================================     
-    def createWidgetInstance(self, widgetClass, mainWindow):
-        instance = widgetClass(mainWindow)
+    def componentHierarchyForClass(self, klass):
+        hierarchy = [ ]
+        while klass != MainWindow:
+            hierarchy.append(klass)
+            parent = [p_children for p_children in iter(self.components.items()) if klass in p_children[1]]
+            if len(parent) != 1:
+                break
+            klass = parent.pop()[0]
+        hierarchy.reverse()
+        return hierarchy
         
-        for addonClass in self.addons.get(widgetClass, []):
-            addon = addonClass(instance)
-            instance.addAddon(addon)
-        
-        for keyHelperClass in self.keyHelpers.get(widgetClass, []):
-            keyHelper = keyHelperClass(instance)
-            instance.addKeyHelper(keyHelper)
-            
-        self.application.profile.configure(instance)
-        instance.initialize(mainWindow)
-        
-        instances = self.instances.setdefault(widgetClass, [])
-        instances.append(instance)
-        return instance
-    
-    def createCustomActions(self, mainWindow):
-        for editorClass in self.editors:
-            addonClasses = self.addons.get(editorClass, [])
-            menus = editorClass.contributeToMainMenu(addonClasses)
-            if menus is not None:
-                customEditorActions = []
-                for name, settings in menus.iteritems():
-                    actions = mainWindow.contributeToMainMenu(name, settings)
-                    customEditorActions.extend(actions)
-            mainWindow.registerEditorClassActions(editorClass, customEditorActions)
-        
-        for dockClass in self.dockers:
-            addonClasses = self.addons.get(dockClass, [])
-            menus = dockClass.contributeToMainMenu(addonClasses)
-            if menus is not None:
-                customDockActions = []
-                for name, settings in menus.iteritems():
-                    actions = mainWindow.contributeToMainMenu(name, settings)
-                    customDockActions.extend(actions)
-            mainWindow.registerDockClassActions(dockClass, customDockActions)
-        
-        for statusClass in self.statusBars:
-            addonClasses = self.addons.get(statusClass, [])
-            menus = statusClass.contributeToMainMenu(addonClasses)
-            if menus is not None:
-                customStatusActions = []
-                for name, settings in menus.iteritems():
-                    actions = mainWindow.contributeToMainMenu(name, settings)
-                    customStatusActions.extend(actions)
-            mainWindow.registerStatusClassActions(statusClass, customStatusActions)
-            
-    def populateMainWindow(self, mainWindow):
-        self.createCustomActions(mainWindow)
-            
-        mainWindow.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
-        
-        for dockClass in self.dockers:
-            dock = self.createWidgetInstance(dockClass, mainWindow)
-            mainWindow.addDock(dock, dock.PREFERED_AREA)
-
-        for statusBarClass in self.statusBars:
-            status = self.createWidgetInstance(statusBarClass, mainWindow)
-            mainWindow.addStatusBar(status)
-    
-    #==================================================
-    # Handle editor classes
-    #==================================================
+    # ------------ Handle editor classes
     def findEditorClassForFile(self, filePath):
         mimetype = self.application.fileManager.mimeType(filePath)
-        for Klass in self.editors:
+        editors = [cmp for cmp in self.components.get(MainWindow, []) if issubclass(cmp, PMXBaseEditor)]
+        for Klass in editors:
             if Klass.acceptFile(filePath, mimetype):
                 return Klass
     
+    
     def defaultEditor(self):
-        return self.editors[0]
+        editors = [cmp for cmp in self.components.get(MainWindow, []) if issubclass(cmp, PMXBaseEditor)]
+        return editors[0]
 
-    #==================================================
-    # Load plugins
-    #==================================================
-    def beginRegisterPlugin(self, pluginId, pluginEntry):
-        self.modules[pluginId] = pluginEntry
-        self.currentPluginDescriptor = PluginDescriptor(pluginEntry)
-        
-    def endRegisterPlugin(self, success):
-        if not success:
-            del self.modules[self.currentPluginDescriptor["id"]]
-        self.currentPluginDescriptor = None
-        
+
+    # ---------- Load plugins
     def loadResources(self, pluginDirectory, pluginEntry):
-        if "resources" in pluginEntry:
-            resourcesDirectory = os.path.join(pluginDirectory, pluginEntry["resources"])
-            res = resources.loadResources(resourcesDirectory)
+        if "icon" in pluginEntry:
+            iconPath = os.path.join(pluginDirectory, pluginEntry["icon"])
+            pluginEntry["icon"] = QtGui.QIcon(iconPath)
+        if "share" in pluginEntry:
+            pluginEntry["share"] = os.path.join(pluginDirectory, pluginEntry["share"])
+            res = resources.loadResources(pluginEntry["share"])
             pluginEntry["resources"] = ResourceProvider(res)
         else:
             # Global resources
@@ -209,41 +123,45 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         pluginId = pluginEntry.get("id")
         packageName = pluginEntry.get("package")
         registerFunction = pluginEntry.get("register", "registerPlugin")
-        pluginDirectory = pluginEntry.get("path")    
+        pluginDirectory = pluginEntry.get("path")
         self.loadResources(pluginDirectory, pluginEntry)
-        self.beginRegisterPlugin(pluginId, pluginEntry)
         try:
             pluginEntry["module"] = import_from_directory(pluginDirectory, packageName)
             registerPluginFunction = getattr(pluginEntry["module"], registerFunction)
-            registerPluginFunction(self)
-            self.endRegisterPlugin(True)
-        except (ImportError, AttributeError), reason:
-            import traceback
+            if isinstance(registerPluginFunction, collections.Callable):
+                self.currentPluginDescriptor = self.plugins[pluginId] = PluginDescriptor(pluginEntry)
+                registerPluginFunction(self)
+        except Exception as reason:
+            # On exception remove entry
+            if pluginId in self.plugins:
+                del self.plugins[pluginId]
             traceback.print_exc()
-            self.endRegisterPlugin(False)
-            raise reason
+        self.currentPluginDescriptor = None
     
     def loadCoreModule(self, moduleName, pluginId):
         pluginEntry = {"id": pluginId,
                        "resources": resources}
-        self.beginRegisterPlugin(pluginId, pluginEntry)
         try:
             pluginEntry["module"] = import_module(moduleName)
             registerPluginFunction = getattr(pluginEntry["module"], "registerPlugin")
-            registerPluginFunction(self)
-            self.endRegisterPlugin(True)
-        except (ImportError, AttributeError), reason:
-            import traceback
+            if isinstance(registerPluginFunction, collections.Callable):
+                self.currentPluginDescriptor = self.plugins[pluginId] = PluginDescriptor(pluginEntry)
+                registerPluginFunction(self)
+        except (ImportError, AttributeError) as reason:
+            # On exception remove entry
+            if pluginId in self.plugins:
+                del self.plugins[pluginId]
             traceback.print_exc()
-            self.endRegisterPlugin(False)
             raise reason
-    
+        self.currentPluginDescriptor = None
+        
     def hasDependenciesResolved(self, pluginEntry):
-        return all(map(lambda dep: dep in self.modules, pluginEntry.get("depends", [])))
+        return all([dep in self.plugins for dep in pluginEntry.get("depends", [])])
     
     def loadPlugins(self):
         self.loadCoreModule('prymatex.gui.codeeditor', 'org.prymatex.codeeditor')
         self.loadCoreModule('prymatex.gui.dockers', 'org.prymatex.dockers')
+        self.loadCoreModule('prymatex.gui.dialogs', 'org.prymatex.dialogs')
         loadLaterEntries = []
         for directory in self.directories:
             if not os.path.isdir(directory):

@@ -5,9 +5,9 @@ import os, shutil, codecs
 import functools
 from glob import glob
 
-from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
+from prymatex.support.bundle import (PMXBundleItem, PMXStaticFile, 
+    PMXRunningContext)
 from prymatex.support.utils import prepareShellScript
-from prymatex.support.template import PMXTemplateFile
 from prymatex.utils import plist
    
 class PMXProject(PMXBundleItem):
@@ -16,11 +16,7 @@ class PMXProject(PMXBundleItem):
     TYPE = 'project'
     FOLDER = 'Projects'
     PATTERNS = [ '*' ]
-    
-    def __init__(self, uuid, dataHash):
-        PMXBundleItem.__init__(self, uuid, dataHash)
-        self.files = []                    #Estos son los project files
-    
+        
     def load(self, dataHash):
         PMXBundleItem.load(self, dataHash)
         for key in PMXProject.KEYS:
@@ -62,7 +58,7 @@ class PMXProject(PMXBundleItem):
             pass
 
     def buildEnvironment(self, projectName, projectLocation, localVars = False):
-        env = super(PMXProject, self).buildEnvironment() if not localVars else {}
+        env = super(PMXProject, self).environmentVariables() if not localVars else {}
         env['TM_NEW_PROJECT_NAME'] = projectName
         env['TM_NEW_PROJECT_LOCATION'] = projectLocation
         env['TM_NEW_PROJECT_BASENAME'] = os.path.basename(projectLocation)
@@ -81,35 +77,17 @@ class PMXProject(PMXBundleItem):
         callback(name, location)
 
     @classmethod
-    def loadBundleItem(cls, path, namespace, bundle, manager):
-        info = os.path.join(path, cls.FILE)
-        projectFilePaths = glob(os.path.join(path, '*'))
-        projectFilePaths.remove(info)
-        try:
-            data = plist.readPlist(info)
-            uuid = manager.uuidgen(data.pop('uuid', None))
-            project = manager.getManagedObject(uuid)
-            if project is None and not manager.isDeleted(uuid):
-                project = cls(uuid, data)
-                project.setBundle(bundle)
-                project.setManager(manager)
-                project.addSource(namespace, path)
-                project = manager.addBundleItem(project)
-                manager.addManagedObject(project)
-                #Add files
-                for projectFilePath in projectFilePaths:
-                    projectFile = PMXTemplateFile(projectFilePath, project)
-                    projectFile = manager.addTemplateFile(projectFile)
-                    project.files.append(projectFile)
-            elif project is not None:
-                project.addSource(namespace, path)
-            return project
-        except Exception, e:
-            print "Error in project %s (%s)" % (info, e)
+    def dataFilePath(cls, path):
+        return os.path.join(path, cls.FILE)
+
+    def staticPaths(self):
+        projectFilePaths = glob(os.path.join(self.currentPath, '*'))
+        projectFilePaths.remove(self.dataFilePath(self.currentPath))
+        return projectFilePaths
 
     @classmethod
     def reloadBundleItem(cls, bundleItem, path, namespace, manager):
-        map(lambda style: manager.removeTemplateFile(style), bundleItem.files)
+        list(map(lambda style: manager.removeTemplateFile(style), bundleItem.files))
         info = os.path.join(path, cls.FILE)
         projectFilePaths = glob(os.path.join(path, '*'))
         projectFilePaths.remove(info)
@@ -117,6 +95,6 @@ class PMXProject(PMXBundleItem):
         bundleItem.load(data)
         #Add files
         for projectFilePath in projectFilePaths:
-            projectFile = PMXTemplateFile(projectFilePath, bundleItem)
-            projectFile = manager.addTemplateFile(projectFile)
+            projectFile = PMXStaticFile(projectFilePath, bundleItem)
+            projectFile = manager.addStaticFile(projectFile)
             project.files.append(projectFile)

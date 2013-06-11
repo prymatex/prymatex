@@ -5,7 +5,8 @@ import os, re, shutil
 from copy import copy
 
 from prymatex.utils import plist
-from prymatex.support import utils
+from prymatex.utils import encoding
+from prymatex.support import scope, utils
 
 """
 Este es el unico camino -> http://manual.macromates.com/en/
@@ -22,6 +23,9 @@ class PMXManagedObject(object):
         self.namespaces = []
         self.sources = {}
         self.manager = None
+        self.populated = False
+        # TODO: mover esto a los bundle item
+        self.statics = []
 
     def load(self, dataHash):
         raise NotImplemented
@@ -36,8 +40,11 @@ class PMXManagedObject(object):
         raise NotImplemented
 
     def uuidAsUnicode(self):
-        return unicode(self.uuid).upper()
+        return str(self.uuid).upper()
 
+    def populate(self):
+        self.populated = True
+    
     @property
     def enabled(self):
         return self.manager.isEnabled(self.uuid)
@@ -94,6 +101,19 @@ class PMXManagedObject(object):
             self.sources[namespace] = (path, os.path.getmtime(path))
         else:
             self.sources[namespace] = (path, 0)
+
+    def staticPaths(self):
+        return []
+
+    def addStaticFile(self, staticPath):
+        self.statics.append(staticPath)
+
+    def removeStaticFile(self, staticPath):
+        self.statics.remove(staticPath)
+        
+    @classmethod
+    def dataFilePath(cls, path):
+        return path
     
     def updateMtime(self, namespace):
         path = self.sources[namespace][self._PATH]
@@ -105,26 +125,38 @@ class PMXManagedObject(object):
 
     def setManager(self, manager):
         self.manager = manager
-
+        
 class PMXBundle(PMXManagedObject):
     KEYS = [    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'
     TYPE = 'bundle'
-    def __init__(self, uuid, dataHash):
+    def __init__(self, uuid):
         PMXManagedObject.__init__(self, uuid)
-        self.populated = False
-        self.support = None    #supportPath
-        self.load(dataHash)
+        self.__supportPath = None
 
-    def setSupport(self, support):
-        self.support = support
+    def hasSupportPath(self):
+        return self.__supportPath is not None
         
+    def setSupportPath(self, supportPath):
+        self.__supportPath = supportPath
+    
+    def supportPath(self):
+        return self.__supportPath
+    
+    def relocateSupport(self, path):
+        try:
+            # TODO Ver que pasa si ya existe support
+            shutil.copytree(self.supportPath(), path, symlinks = True)
+            self.setSupportPath(path)
+        except:
+            pass
+    
     def load(self, dataHash):
         for key in PMXBundle.KEYS:
             setattr(self, key, dataHash.get(key, None))
 
     def update(self, dataHash):
-        for key in dataHash.keys():
+        for key in list(dataHash.keys()):
             setattr(self, key, dataHash[key])
     
     @property
@@ -137,15 +169,16 @@ class PMXBundle(PMXManagedObject):
         return dataHash
 
     def save(self, namespace):
+        # TODO: todo esto mandarlo al manager
         if not os.path.exists(self.path(namespace)):
             os.makedirs(self.path(namespace))
-        file = os.path.join(self.path(namespace), self.FILE)
-        plist.writePlist(self.hash, file)
+        dataFile = self.dataFilePath(self.path(namespace))
+        plist.writePlist(self.hash, dataFile)
         self.updateMtime(namespace)
 
     def delete(self, namespace):
         #No se puede borrar si tiene items, sub archivos o subdirectorios
-        os.unlink(os.path.join(self.path(namespace), self.FILE))
+        os.unlink(self.dataFilePath(self.path(namespace)))
         try:
             #Este a diferencia de los items borra todo el directorio
             shutil.rmtree(self.path(namespace))
@@ -155,45 +188,23 @@ class PMXBundle(PMXManagedObject):
     def environmentVariables(self):
         environment = self.manager.environmentVariables()
         environment['TM_BUNDLE_PATH'] = self.currentPath
-        if self.support != None:
-            environment['TM_BUNDLE_SUPPORT'] = self.support
+        if self.hasSupportPath():
+            environment['TM_BUNDLE_SUPPORT'] = self.supportPath()
         return environment
-        
-    @classmethod
-    def loadBundle(cls, path, namespace, manager):
-        info_file = os.path.join(path, cls.FILE)
-        try:
-            data = plist.readPlist(info_file)
-            uuid = manager.uuidgen(data.pop('uuid', None))
-            bundle = manager.getManagedObject(uuid)
-            if bundle is None and not manager.isDeleted(uuid):
-                bundle = cls(uuid, data)
-                bundle.setManager(manager)
-                bundle.addSource(namespace, path)
-                bundle = manager.addBundle(bundle)
-                manager.addManagedObject(bundle)
-            elif bundle is not None:
-                bundle.addSource(namespace, path)
-            return bundle
-        except Exception, e:
-            print "Error in laod bundle %s (%s)" % (info_file, e)
 
     @classmethod
-    def reloadBundle(cls, bundle, path, namespace, manager):
-        info_file = os.path.join(path, cls.FILE)
-        data = plist.readPlist(info_file)
-        bundle.load(data)
-            
+    def dataFilePath(cls, path):
+        return os.path.join(path, cls.FILE)
+
 class PMXBundleItem(PMXManagedObject):
-    KEYS = [ 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]
+    KEYS = [ 'name', 'tabTrigger', 'keyEquivalent', 'scope', 'semanticClass' ]
     TYPE = ''
     FOLDER = ''
     EXTENSION = ''
     PATTERNS = []
-    def __init__(self, uuid, dataHash):
+    def __init__(self, uuid):
         PMXManagedObject.__init__(self, uuid)
         self.bundle = None
-        self.load(dataHash)
 
     def setBundle(self, bundle):
         self.bundle = bundle
@@ -204,14 +215,20 @@ class PMXBundleItem(PMXManagedObject):
     
     def load(self, dataHash):
         for key in PMXBundleItem.KEYS:
-            setattr(self, key, dataHash.get(key, None))
+            value = dataHash.get(key, None)
+            if key == "scope":
+                self.selector = scope.Selector(value)
+            setattr(self, key, value)
     
     def update(self, dataHash):
-        for key in dataHash.keys():
-            setattr(self, key, dataHash[key])
+        for key in list(dataHash.keys()):
+            value = dataHash[key]
+            if key == "scope":
+                self.selector = scope.Selector(value)
+            setattr(self, key, value)
     
     def isChanged(self, dataHash):
-        for key in dataHash.keys():
+        for key in list(dataHash.keys()):
             if getattr(self, key) != dataHash[key]:
                 return True
         return False
@@ -244,36 +261,54 @@ class PMXBundleItem(PMXManagedObject):
     
     def environmentVariables(self):
         return self.bundle.environmentVariables()
-        
-    @classmethod
-    def loadBundleItem(cls, path, namespace, bundle, manager):
-        try:
-            data = plist.readPlist(path)
-            uuid = manager.uuidgen(data.pop('uuid', None))
-            item = manager.getManagedObject(uuid)
-            if item is None and not manager.isDeleted(uuid):
-                item = cls(uuid, data)
-                item.setBundle(bundle)
-                item.setManager(manager)
-                item.addSource(namespace, path)
-                item = manager.addBundleItem(item)
-                manager.addManagedObject(item)
-            elif item is not None:
-                item.addSource(namespace, path)
-            return item
-        except Exception, e:
-            print "Error in bundle item %s (%s)" % (path, e)
     
-    @classmethod
-    def reloadBundleItem(cls, bundleItem, path, namespace, manager):
-        data = plist.readPlist(path)
-        bundleItem.load(data)
-
     def execute(self, processor):
         pass
+
+class PMXStaticFile(object):
+    TYPE = 'staticfile'
+    def __init__(self, path, parentItem):
+        self.path = path
+        self.name = os.path.basename(path)
+        self.parentItem = parentItem
+
+    def hasNamespace(self, namespace):
+        return self.parentItem.hasNamespace(namespace)
         
+    @property
+    def enabled(self):
+        return self.parentItem.enabled
+        
+    def getFileContent(self):
+        content = ""
+        if os.path.exists(self.path):
+            with open(self.path, 'r') as f:
+                content = encoding.from_fs(f.read())
+        return content
+    
+    def setFileContent(self, content):
+        if os.path.exists(self.path):
+            with open(self.path, 'w') as f:
+                f.write(encoding.to_fs(content))
+    content = property(getFileContent, setFileContent)
+
+    def update(self, dataHash):
+        for key in list(dataHash.keys()):
+            setattr(self, key, dataHash[key])
+    
+    def relocate(self, path):
+        if os.path.exists(self.path):
+            shutil.move(self.path, path)
+        self.name = os.path.basename(path)
+    
+    def save(self, basePath = None):
+        path = os.path.join(basePath, self.name) if basePath is not None else self.path
+        with open(path, 'w') as f:
+            f.write(encoding.to_fs(self.content))
+        self.path = path
+
 class PMXRunningContext(object):
-    TEMPLATE = u"""Item Name: {itemName}
+    TEMPLATE = """Item Name: {itemName}
     Asynchronous: {asynchronous}
     Working Directory: {workingDirectory}
     Input:  Type {inputType}, Value {inputValue}
@@ -282,13 +317,21 @@ class PMXRunningContext(object):
     """
     def __init__(self, bundleItem, shellCommand, environment):
         self.bundleItem = bundleItem
-        self.inputType, self.inputValue = None, None
+        self.inputType = self.inputValue = None
         self.shellCommand = shellCommand
+        self.process = None
         self.environment = environment
         self.asynchronous = False
         self.outputValue = self.outputType = None
         self.workingDirectory = None
-        
+
+    def setShellCommand(self, shellCommand):
+        # Set new shell command clean old values
+        self.removeTempFile()
+        self.inputType = self.inputValue = None
+        self.outputValue = self.outputType = None
+        self.shellCommand = shellCommand
+
     def __enter__(self):
         #Build the full las environment with gui environment and support environment
         self.shellCommand, self.environment, self.tempFile = utils.prepareShellScript(self.shellCommand, self.environment)
@@ -328,3 +371,4 @@ class PMXRunningContext(object):
     def removeTempFile(self):
         if os.path.exists(self.tempFile):
             utils.deleteFile(self.tempFile)
+

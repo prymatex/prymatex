@@ -320,13 +320,16 @@
     <string>Remove</string>
    </property>
   </action>
-  <action name="actionBundleEditor">
+  <action name="actionProjectBundles">
    <property name="icon">
     <iconset theme="bundle-item-bundle">
      <normaloff>:/icons/bundles/bundle.png</normaloff>:/icons/bundles/bundle.png</iconset>
    </property>
    <property name="text">
-    <string>Bundle Editor</string>
+    <string>Project Bundles</string>
+   </property>
+   <property name="toolTip">
+    <string>Bundles inside this project</string>
    </property>
   </action>
   <action name="actionBashInit">
@@ -368,6 +371,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionSelectRelatedBundles">
+   <property name="text">
+    <string>Select Related Bundles</string>
+   </property>
+   <property name="toolTip">
+    <string>Choose bundles related to this project</string>
    </property>
   </action>
  </widget>

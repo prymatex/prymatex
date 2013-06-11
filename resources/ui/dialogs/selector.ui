@@ -16,10 +16,6 @@
     <height>371</height>
    </size>
   </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>:/images/prymatex/logo.png</normaloff>:/images/prymatex/logo.png</iconset>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>2</number>
@@ -31,22 +27,13 @@
     <widget class="QLineEdit" name="lineFilter"/>
    </item>
    <item>
-    <widget class="QTableView" name="tableItems">
-     <property name="selectionMode">
-      <enum>QAbstractItemView::SingleSelection</enum>
+    <widget class="QListView" name="listItems">
+     <property name="alternatingRowColors">
+      <bool>true</bool>
      </property>
-     <property name="selectionBehavior">
-      <enum>QAbstractItemView::SelectRows</enum>
+     <property name="uniformItemSizes">
+      <bool>true</bool>
      </property>
-     <property name="showGrid">
-      <bool>false</bool>
-     </property>
-     <attribute name="horizontalHeaderVisible">
-      <bool>false</bool>
-     </attribute>
-     <attribute name="verticalHeaderVisible">
-      <bool>false</bool>
-     </attribute>
     </widget>
    </item>
   </layout>

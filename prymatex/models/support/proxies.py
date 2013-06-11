@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 from prymatex.models.trees import FlatTreeProxyModel
 
 class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
     def __init__(self, manager, parent = None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)
         self.manager = manager
-        self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "templatefile", "syntax", "project"]
+        self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "staticfile", "syntax", "project"]
         self.namespacesFilter = [ "prymatex", "user" ]
         self.bundleItemTypesFilter = self.bundleItemTypeOrder[:]
     
@@ -18,7 +18,7 @@ class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
         if node.isRootNode() or not node.enabled:
             return False
         if self.namespacesFilter:
-            if not any(map(lambda ns: node.hasNamespace(ns), self.namespacesFilter)):
+            if not any([node.hasNamespace(ns) for ns in self.namespacesFilter]):
                 return False
         if self.bundleItemTypesFilter:
             if node.TYPE not in self.bundleItemTypesFilter:
@@ -42,13 +42,14 @@ class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
     def setData(self, index, value, role):
         if role == QtCore.Qt.EditRole:  
             node = self.node(index)
-            if node.TYPE == "bundle":
-                self.manager.updateBundle(node, self.namespacesFilter[-1], name = value)
-            elif node.TYPE == "templatefile":
-                self.manager.updateTemplateFile(node, self.namespacesFilter[-1], name = value)
-            else:
-                self.manager.updateBundleItem(node, self.namespacesFilter[-1], name = value)
-            return True
+            if node.name != value:
+                if node.TYPE == "bundle":
+                    self.manager.updateBundle(node, self.namespacesFilter[-1], name = value)
+                elif node.TYPE == "staticfile":
+                    self.manager.updateStaticFile(node, self.namespacesFilter[-1], name = value)
+                else:
+                    self.manager.updateBundleItem(node, self.namespacesFilter[-1], name = value)
+                return True
         return False
         
     def node(self, index):
@@ -84,8 +85,8 @@ class BundleItemTypeProxyModel(FlatTreeProxyModel):
         #Esto es para rastrear un error
         try:
             return node.name.lower()
-        except Exception, e:
-            print node, self.sourceModel(), index
+        except Exception as e:
+            print(node, self.sourceModel(), index)
     
     def compareIndex(self, xindex, yindex):
         xnode = xindex.internalPointer()
@@ -111,12 +112,11 @@ class BundleListModel(BundleItemTypeProxyModel):
         if self.sourceModel() is None:
             return QtCore.QVariant()
         
-        sIndex = self.mapToSource(index)
         if role == QtCore.Qt.CheckStateRole:
-            bundle = sIndex.internalPointer()
+            bundle = self.node(index)
             return QtCore.Qt.Checked if bundle.enabled else QtCore.Qt.Unchecked
         else:
-            return self.sourceModel().data(sIndex, role)
+            return BundleItemTypeProxyModel.data(self, index, role)
 
     def setData(self, index, value, role):
         if self.sourceModel() is None:
@@ -200,18 +200,23 @@ class ProjectListModel(BundleItemTypeProxyModel):
         return 2
 
 class ThemeStyleProxyTableModel(QtGui.QSortFilterProxyModel):
+    # ---------------- QtGui.QSortFilterProxyModel overrides
     def filterAcceptsRow(self, sourceRow, sourceParent):
         regexp = self.filterRegExp()
         if regexp.isEmpty():
             return True
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = index.internalPointer()
-        return regexp.exactMatch(unicode(node.style().theme.uuid))
-        
-    def filterAcceptsColumn(self, sourceColumn, sourceParent):
-        return True
-        
+        return regexp.exactMatch(str(node.styleItem().theme.uuid))
+
+
     def lessThan(self, left, right):
         leftData = left.internalPointer()
         rightData = right.internalPointer()
         return rightData.name > leftData.name
+
+
+    # ------------------ Custom functions
+    def style(self, index):
+        return self.sourceModel().style(self.mapToSource(index))
+        

@@ -1,312 +1,199 @@
 #-*- encoding: utf-8 -*-
+from __future__ import unicode_literals
 
-import signal
-import os
+import os, sys
+import random
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.core import PMXBaseDock
-
 from prymatex import resources
+
+from prymatex.core import config
+from prymatex.core import PMXBaseDock
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.utils.i18n import ugettext as _
+from prymatex.utils.misc import get_home_dir
+from prymatex.utils import six
 
-QTERMWIDGET_IMPORT_SUGGESTOIN = '''
-QTermWidget disabled because of:
-{}
-Please install QTermWidget. Please note QTermWidget consists 
-in a C++ with Python binding.
-Get/Update it at https://github.com/prymatex/qtermwidget
-'''
+from prymatex.widgets.pmxterm import Backend, BackendManager, TerminalWidget, ColorScheme
 
-class PMXTabTerminals(QtGui.QTabWidget):
+SHEME_SCOPES = [ 'comment', 'string', 'constant.numeric', 'constant.language', 
+    'constant.character, constant.other', 'variable.language, variable.other',
+    'keyword', 'storage', 'entity.name.class', 'entity.other.inherited-class',
+    'entity.name.function', 'variable.parameter', 'entity.name.tag',
+    'entity.other.attribute-name', 'support.function', 'support.constant',
+    'support.type, support.class', 'support.other.variable', 'invalid' ]
+
+# Load color schemes
+ColorScheme.loadSchemes(os.path.join(config.PMX_SHARE_PATH, "Schemes"))
+
+class TabbedTerminal(QtGui.QTabWidget):
     
-    def __init__(self, parent = None):
-        super(PMXTabTerminals, self).__init__(parent)
-        self.setupCornerWidget()
-        self.setupSignals()
+    def __init__(self, parent=None):
+        super(TabbedTerminal, self).__init__(parent)
+        self.setTabPosition(QtGui.QTabWidget.South)
+        
+        # Corner widget
+        self.buttonNew = QtGui.QPushButton(self)
+        self.buttonNew.setText("")
+        self.buttonNew.setIcon(QtGui.QIcon.fromTheme("tab-new"))
+        self.buttonNew.setMaximumSize(QtCore.QSize(28, 28))
+        self.buttonNew.clicked.connect(lambda checked: self.newTerminal())
+        self.setCornerWidget(self.buttonNew)
+        
         self.setTabsClosable(True)
-        #self.setMinimumHeight(200)
-    
-    def setupSignals(self):    
-        self.tabCloseRequested.connect(lambda index, s = self: s.removeTab(index))
-        QtCore.QMetaObject.connectSlotsByName(self)
+        self.setMovable(True)
+        self.tabCloseRequested[int].connect(self._on_close_request)
+        self.currentChanged[int].connect(self._on_current_changed)
         
-    def setupCornerWidget(self):
-        widget = QtGui.QWidget()
-        layout = QtGui.QHBoxLayout()
-        # Add
-        self.pushAddNewTerminal = QtGui.QPushButton()
-        self.pushAddNewTerminal.setIcon(resources.getIcon('utilities-terminal'))
-        self.pushAddNewTerminal.setToolTip(_("Add new terminal"))
-        self.pushAddNewTerminal.setFlat(True)
+        # Color scheme
+        self.__colorScheme = ColorScheme.scheme("default")
 
-        menuAddNew = QtGui.QMenu()
-        actionNew = menuAddNew.addAction("Terminal")
-        actionNew.triggered.connect(self.addTerminal)
-        actionCustom = menuAddNew.addAction("Run in terminal...")
-        actionCustom.triggered.connect(self.launchCustomCommandInTerminal)
-        self.pushAddNewTerminal.setMenu(menuAddNew)
-        layout.addWidget(self.pushAddNewTerminal)
-        
-        # Copy
-        shortcutCopy = QtGui.QShortcut(QtGui.QKeySequence("Ctrl+c"), self)
-        shortcutCopy.activated.connect(lambda s = self: s.currentWidget().copyClipboard())
-        
-        # Paste
-        self.pushPasteIntoTerminal = QtGui.QPushButton()
-        self.pushPasteIntoTerminal.setIcon(resources.getIcon('edit-paste'))
-        self.pushPasteIntoTerminal.setObjectName('pushPasteIntoTerminal')
-        self.pushPasteIntoTerminal.setToolTip('Paste text into terminal')
-        self.pushPasteIntoTerminal.setFlat(True)
-        self.pushPasteIntoTerminal.pressed.connect(lambda s=self: s.currentWidget().pasteClipboard())
-        layout.addWidget(self.pushPasteIntoTerminal)
-        
-        # Config
-        self.pushConfigTerminal = QtGui.QPushButton("C")
-        
-        #self.pushConfigTerminal.setIcon(getIcon('preference'))
-        # self.pushConfigTerminal.setObjectName('pushConfigTerminal')
-        # self.pushConfigTerminal.setToolTip('Configure terminal')
-        # self.pushConfigTerminal.setFlat(True)
-        # layout.addWidget(self.pushConfigTerminal)
-        self.cornerMenuButton = QtGui.QPushButton()        
-        self.cornerMenuButtonMenu = QtGui.QMenu()
-        self.cornerMenuButton.setMenu(self.cornerMenuButtonMenu)
-        self.cornerMenuButtonMenu.addAction("Alfa")
-        self.cornerMenuButtonMenu.addAction("Beta")
-        self.cornerMenuButtonMenu.addAction("Gama")
-        
-        layout.addWidget(self.cornerMenuButton)
-        
-        # Close
-        self.pushCloseTerminal = QtGui.QPushButton()
-        self.pushCloseTerminal.setIcon(resources.getIcon("close"))
-        self.pushCloseTerminal.setObjectName("pushCloseTerminal")
-        self.pushCloseTerminal.setToolTip(_("Close terminal"))
-        self.pushCloseTerminal.setFlat(True)
-        
-        self.pushCloseTerminal.pressed.connect(lambda s=self: s.removeTab(s.currentIndex()))
-        layout.addWidget(self.pushCloseTerminal)
-        
-        widget.setLayout(layout)
-        
-        # Save some space
-        widget.setStyleSheet('''
-        QPushButton {
-            margin: 0px;
-            padding: 0 0px 0 2px;
-        }
-        ''')
-        self.setCornerWidget(widget)
-
-    def eventFilter(self, obj, event):
-        if event.type() == QtCore.QEvent.KeyPress:
-            print "tecla"
-            return False
-        return QtGui.QTabWidget.eventFilter(self, obj, event)
-     
-    def getTerminal(self, cmd = None):
-        ''' Factory '''
-        from QTermWidget import QTermWidget
-        if not cmd:
-            term = QTermWidget(1)
-        else:
-            term = QTermWidget(0)
-            term.setShellProgram(cmd)
-            term.startShellProgram()
-        
-        term.setScrollBarPosition(QTermWidget.ScrollBarRight)
-        term.finished.connect(self.on_terminal_finished)
-        
-        term.setColorScheme(self.parent().colorScheme)
-        term.setTerminalFont(self.parent().font)
-        term.installEventFilter(self)
-        return term
-    
-    def launchCustomCommandInTerminal(self):
-        cmd, ok = QtGui.QInputDialog.getText(self, _("Command to run"), _("Command to run"))
-        if ok:
-            self.addTerminal(cmd)
-        
-    
-    def addTerminal(self, cmd = None, autoFocus = True):
-        widget, title = None, "Terminal"
-        try:
-            widget = self.getTerminal(cmd)
-            if not cmd:
-                title = "Terminal (PID: %d)" % widget.getShellPID()
-            else:
-                title = cmd
+    def _on_close_request(self, idx):
+        term = self.widget(idx)
+        term.stop()
             
-        except (ImportError, AttributeError) as exc:
-            from traceback import format_exc
-            tb = format_exc()
-            widget = QtGui.QTextEdit()
-            widget.setReadOnly(True)
-            widget.setText(_(QTERMWIDGET_IMPORT_SUGGESTOIN).format(tb))
-            title = _("Import Error")
-        self.addTab(widget, title)
-        if autoFocus:
-            self.setCurrentWidget(widget)
-            widget.setFocus()
+    def _on_current_changed(self, idx):
+        term = self.widget(idx)
+        self._update_title(term)
+    
+    def currentTerminal(self):
+        return self.currentWidget()
+    
+    def newTerminal(self, session = None):
+        # Create session
+        if session is None and self.parent().backend.state() == Backend.Running:
+            session = self.parent().backend.session()
+        if session is not None:
+            term = TerminalWidget(session, scheme = self.__colorScheme, parent = self)
+            term.sessionClosed.connect(self._on_session_closed)
+            self.addTab(term, "Terminal")
+            self.setCurrentWidget(term)
+            session.start()
+            term.setFocus()
         
+    def timerEvent(self, event):
+        self._update_title(self.currentWidget())
 
-    #===========================================================================
-    # Mouse events
-    #===========================================================================
-    def mouseDoubleClickEvent(self, event):
-        self.addTerminal()
-    
-    def clickedItem(self, pos):
-        for i in range(self.tabBar().count()):
-            if self.tabBar().tabRect(i).contains(pos):
-                return self.widget(i)
-    #===========================================================================
-    # Context menu stuff
-    #===========================================================================
-    def mousePressEvent(self, event):
-        from QTermWidget import QTermWidget
-        if event.button() == QtCore.Qt.RightButton:
-            menu = QtGui.QMenu()
-            widget = self.clickedItem(event.pos())
-            if not widget:
-                actionAddTerm = menu.addAction(_('Add terminal'))
-                actionAddTerm.triggered.connect(self.addTerminal)
-                
-            else:
-                pid = widget.getShellPID()
-                # Close
-                closeAction = menu.addAction(_("Close"))
-                closeAction.triggered.connect(lambda index, s=self: s.removeTab(index))
-                menu.addSeparator()
-                # Signals
-                signalSubMenu = menu.addMenu(_("&Send signal"))
-                for name, number in SIGNALS:
-                    signal = signalSubMenu.addAction("Send %s (%d)" % (name, number))
-                    signal.triggered.connect(lambda pid = pid, number = number: os.kill(pid, number))
-                # Scrollbar
-                scrollBarMenu = QtGui.QMenu("Scrollbar")
-                for name, enumVal in (("No Scrollbar", QTermWidget.NoScrollBar),
-                                      ("Left Scrollbar",QTermWidget.ScrollBarLeft),
-                                      ("Right Scrollbar", QTermWidget.ScrollBarRight)):
-                    action = scrollBarMenu.addAction(name)
-                    action.triggered.connect(lambda w=widget, n=enumVal: widget.setScrollBarPosition(n))
-                menu.addMenu(scrollBarMenu)
-                
-                # Colors
-                menuColors = QtGui.QMenu("Color Scheme")
-                for name in widget.availableColorSchemes():
-                    action = menuColors.addAction(name)
-                    action.triggered.connect(lambda w=widget, n=name: widget.setColorScheme(n))
-                
-                menu.addMenu(menuColors)
-                
-            menu.exec_(event.globalPos())
+    def _update_title(self, term):
+        if term is None:
+            self.setWindowTitle("Terminal")
             return
-        super(PMXTabTerminals, self).mousePressEvent(event)
+        idx = self.indexOf(term)
+        title = "Terminal"
+        self.setTabText(idx, title)
+        self.setWindowTitle(title)
     
-    def buildSingalMenu(self, process_pid):
-        '''Creates a singal with add hock menu events'''
-        menu = QtGui.QMenu(_('Send &Singal'))
-        # Signals
-        
-        
-    def sendSignalToCurrentProcess(self):
-        pass
-    
-    
-    def quitTab(self, index = None):
-        if index is None:
-            index = self.currentIndex()
-        terminal = self.widget(index)
-        self.removeTab(terminal)
-    
-    def on_terminal_finished(self):
-        terminal = self.sender()
-        index = self.indexOf(terminal)
-        self.removeTab(index)
-        
-    def tabRemoved(self, index):
-        # Do not allow the tab widget be empty
-        if not self.count():
-            self.addTerminal()
-    
-class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
+    def _on_session_closed(self):
+        term = self.sender()
+        self.removeTab(self.indexOf(term))
+        widget = self.currentWidget()
+        if widget:
+            widget.setFocus()
+        if self.count() == 0:
+            self.newTerminal()
+
+    def setColorScheme(self, schemeName):
+        self.__colorScheme = ColorScheme.scheme(schemeName) if isinstance(schemeName, six.string_types) else schemeName
+        for index in range(self.count()):
+            self.widget(index).setColorScheme(self.__colorScheme)
+
+    def setFont(self, font):
+        for index in range(self.count()):
+            self.widget(index).setFont(font)
+
+class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "F4"
     ICON = resources.getIcon("utilities-terminal")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
-    #=======================================================================
-    # Settings
-    #=======================================================================
+    # ------------------ Settings
     SETTINGS_GROUP = 'Terminal'
 
-    @pmxConfigPorperty(default = "linux")
-    def colorScheme(self, scheme):
-        for index in range(self.tabTerminals.count()):
-            self.tabTerminals.widget(index).setColorScheme(scheme)
+    @pmxConfigPorperty(default = "default")
+    def defaultScheme(self, name):
+        if not self.editorTheme:
+            self.tabTerminals.setColorScheme(name)
     
     @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
-    def font(self, font):
-        for index in range(self.tabTerminals.count()):
-            self.tabTerminals.widget(index).setTerminalFont(font)
+    def defaultFont(self, font):
+        self.tabTerminals.setFont(font)
 
-    terminalAvailable = True
+    @pmxConfigPorperty(default = False)
+    def editorTheme(self, value):
+        if value:
+            self.application.registerSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
+            self.on_defaultTheme_changed(self.application.settingValue("CodeEditor.defaultTheme"))
+        else:
+            self.application.unregisterSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
+            self.tabTerminals.setColorScheme(self.settings.value("defaultScheme"))
+
+    synchronizeEditor = pmxConfigPorperty(default = False)
+    bufferSize = pmxConfigPorperty(default = 300)
+        
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
         PMXBaseDock.__init__(self)
         self.setWindowTitle(_("Terminal"))
         self.setObjectName(_("TerminalDock"))
-        self.tabTerminals = PMXTabTerminals(self)
+        self.tabTerminals = TabbedTerminal(self)
         self.setWidget(self.tabTerminals)
-        self.installEventFilter(self)
-    
+        
+        # Manager
+        self.backendManager = BackendManager(parent = self)
+        self.application.aboutToQuit.connect(self.backendManager.closeAll)
+        
+        # Local Backend
+        self.backend = self.backendManager.localBackend()
+        self.backend.started.connect(self.tabTerminals.newTerminal)
+        self.backend.start()
+
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
-        mainWindow.terminal = self
-        self.widget().addTerminal()
-    
-    def eventFilter(self, obj, event):
-        if obj == self and event.type() == QtCore.QEvent.KeyPress:
-            if event.modifiers() == QtCore.Qt.ControlModifier and event.key() in [ QtCore.Qt.Key_W]:
-                print "W"
-                return
-        return super(PMXTerminalDock, self).eventFilter(obj, event)
-    
-    #========================================================
-    # Commands
-    #========================================================
-    def runCommand(self, command):
-        if not self.isVisible():
-            self.show()
-        self.raise_()
-        self.terminal.sendText("%s\n" % command)
+        self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
 
-    @property
-    def terminal(self):
-        return self.widget().currentWidget()
+    # ---------------- Settings hooks
+    def on_defaultTheme_changed(self, themeUUID):
+        theme = self.application.supportManager.getTheme(themeUUID)
+        scheme = ColorScheme(theme.name)
+        
+        # Foreground and background
+        scheme.setBackground(theme.settings["background"])
+        scheme.setBackground(theme.settings["selection"], intense = True)
+        scheme.setForeground(theme.settings["foreground"])
+        scheme.setForeground(theme.settings["lineHighlight"], intense = True)
+        
+        # Mapping scopes :)
+        scopes = SHEME_SCOPES[:]
+        random.shuffle(scopes)
+        scopes = scopes[:16]
+        for index, scope in enumerate(scopes[:8]):
+            scheme.setColor(index, theme.getStyle(scope)["foreground"])
+        for index, scope in enumerate(scopes[8:]):
+            scheme.setColor(index, theme.getStyle(scope)["foreground"], intense = True)
+        
+        self.tabTerminals.setColorScheme(scheme)
+        
+    # ---------------- Signals
+    def on_mainWindow_currentEditorChanged(self, editor):
+        if self.synchronizeEditor:
+            if editor is not None and not editor.isNew():
+                dirname = self.application.fileManager.dirname(editor.filePath)
+                self.runCommand('cd "%s"' % dirname)
+                
+    # ---------------- Commands
+    def runCommand(self, command):
+        self.sendCommand(command)
     
+    def sendCommand(self, command):
+        currentTerminal = self.tabTerminals.currentTerminal()
+        if currentTerminal:
+            if not self.isVisible():
+                self.show()
+            self.raise_()
+            currentTerminal.send("%s\n" % command)
+        
     @classmethod
     def contributeToSettings(cls):
-        from prymatex.gui.settings.terminal import PMXTerminalSettings
-        return [ PMXTerminalSettings ]
-    
-    def showEvent(self, event):
-        self.terminal.setFocus()
-        
-#===============================================================================
-# Signals
-#===============================================================================
-SIGNALS = [ ("%s" % x, getattr(signal, x)) for x in dir(signal) if x.startswith('SIG')]
-def signame_by_id(n):
-    try:
-        return [ name for name, number in SIGNALS if number == n ][0]
-    except:
-        return _("Uknown signal")
-    
-def sendSignalToProcess(pid, sig):
-    print("Sending %s to %s" % (signame_by_id(sig), pid))
-    os.kill(pid, sig)
-    
-    
+        from prymatex.gui.settings.terminal import TerminalSettingsWidget
+        return [ TerminalSettingsWidget ]

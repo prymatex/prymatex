@@ -30,7 +30,7 @@ class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXBaseDock):
         logging.root.addHandler(self.handler)
         self.debug_levels_menu = QtGui.QMenu()
         self.debug_levels_action_group = QtGui.QActionGroup(self)
-        for level, value in filter(lambda (key, value): type(key) == str, logging._levelNames.iteritems()):
+        for level, value in [key_value for key_value in iter(logging._levelNames.items()) if type(key_value[0]) == str]:
             action = QtGui.QAction(level.title(), self)
             action.setData({'name': level, 'level': value})
             action.setCheckable(True)
@@ -52,4 +52,4 @@ class QtLogHandler(BufferingHandler):
         self.widget = widget
     
     def flush(self):
-        self.widget.textLog.append('\n'.join(map(lambda log: log.getMessage(), self.buffer)))
+        self.widget.textLog.append('\n'.join([log.getMessage() for log in self.buffer]))

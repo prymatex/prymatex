@@ -4,7 +4,7 @@ import sys
 import os
 import re
 from texMate import expandName, findTexPackages, find_TEX_directives, findFileToTypeset
-import cPickle
+import pickle
 import time
 
 # PyTeXDoc
@@ -95,7 +95,7 @@ cachedIndex = False
 
 if os.path.exists(docdbfile) and os.path.getmtime(docdbfile) > ninty_days_ago:
     infile = open(docdbfile,'rb')
-    path_desc_list = cPickle.load(infile)
+    path_desc_list = pickle.load(infile)
     pathDict = path_desc_list[0]
     descDict = path_desc_list[1]    
     headings = path_desc_list[2] 
@@ -138,7 +138,7 @@ else:
                 desc = lineFields[1]
                 path = lineFields[2]
             except:
-                print "Error parsing line: ", line
+                print("Error parsing line: ", line)
             
             headings[currentHeading].append(key)
             if path.rfind('.sty') >= 0:
@@ -175,7 +175,7 @@ else:
     ##
     ## Continue to supplement with searched for files
     ##
-    for p in docDict.keys()+myDict.keys():
+    for p in list(docDict.keys())+list(myDict.keys()):
         if p not in pathDict:
             if p in docDict:
                 pathDict[p] = docDict[p].strip()
@@ -190,9 +190,9 @@ else:
         if not os.path.exists(docdbpath):
             os.mkdir(docdbpath)
         outfile = open(docdbfile, 'wb')                
-        cPickle.dump([pathDict,descDict,headings],outfile)
+        pickle.dump([pathDict,descDict,headings],outfile)
     except:
-        print "<p>Error: Could not cache documentation index</p>"
+        print("<p>Error: Could not cache documentation index</p>")
 
 ## Part 4
 ## if a word was selected then view the documentation for that word
@@ -207,7 +207,7 @@ if cwPackage in pathDict:
 ## Print out the results in html/javascript
 ## The java script gives us the nifty expand collapse outline look
 ##
-print """
+print("""
 <style type="text/css"><!--
 .save{
    behavior:url(#default#savehistory);}
@@ -255,34 +255,34 @@ function dsp(loc){
 
 //-->
 </script>
-"""    
-print "<h1>Your Packages</h1>"
-print "<ul>"
+""")    
+print("<h1>Your Packages</h1>")
+print("<ul>")
 for p in mList:
-    print '<div id="mypkg">'
+    print('<div id="mypkg">')
     if p in pathDict:
-        print """<li><a href="javascript:TextMate.system('viewDoc.sh %s', null);" >%s</a>
-             </li> """%(pathDict[p],descDict[p])
+        print("""<li><a href="javascript:TextMate.system('viewDoc.sh %s', null);" >%s</a>
+             </li> """%(pathDict[p],descDict[p]))
     else:
-        print """<li>%s</li>"""%(p)
-    print '</div>'
-print "</ul>"
+        print("""<li>%s</li>"""%(p))
+    print('</div>')
+print("</ul>")
 
-print "<hr />"
-print "<h1>Packages Browser</h1>"
-print "<ul>"
+print("<hr />")
+print("<h1>Packages Browser</h1>")
+print("<ul>")
 for h in headings:
-    print '<li><a href="javascript:dsp(this)" class="dsphead" onclick="dsp(this)">%s</a></li>'%(h)
-    print '<div class="dspcont">'
-    print "<ul>"
+    print('<li><a href="javascript:dsp(this)" class="dsphead" onclick="dsp(this)">%s</a></li>'%(h))
+    print('<div class="dspcont">')
+    print("<ul>")
     for p in headings[h]:
         if os.path.exists(pathDict[p]):
-            print """<li><a href="javascript:TextMate.system('viewDoc.sh %s', null);">%s</a>
-                </li> """%(pathDict[p],descDict[p])
+            print("""<li><a href="javascript:TextMate.system('viewDoc.sh %s', null);">%s</a>
+                </li> """%(pathDict[p],descDict[p]))
         else:
-            print """<li>%s</li>"""%(p)
-    print "</ul>"
-    print '</div>'
-print "</ul>"
+            print("""<li>%s</li>"""%(p))
+    print("</ul>")
+    print('</div>')
+print("</ul>")
 if cachedIndex:
-    print "<p>You are using a saved version of the LaTeX documentation index.  This index is automatically updated every 90 days.  If you want to force an update simply remove the file %s </p>" % docdbfile
+    print("<p>You are using a saved version of the LaTeX documentation index.  This index is automatically updated every 90 days.  If you want to force an update simply remove the file %s </p>" % docdbfile)

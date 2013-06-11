@@ -3,15 +3,18 @@
 
 import os
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
+from prymatex.core.components import PMXBaseDialog
 
 from prymatex.utils.i18n import ugettext as _
-from prymatex.ui.dialogs.template import Ui_NewFromTemplateDialog
 from prymatex.gui.dialogs.environment import EnvironmentDialog
 
-class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
+from prymatex.ui.dialogs.template import Ui_TemplateDialog
+
+class TemplateDialog(QtGui.QDialog, Ui_TemplateDialog, PMXBaseDialog):
     def __init__(self, parent = None):
         QtGui.QDialog.__init__(self, parent)
+        PMXBaseDialog.__init__(self)
         self.setupUi(self)
         self.application = QtGui.QApplication.instance()
         self.setupComboTemplates()
@@ -26,6 +29,10 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
         self.buttonCreate.setDefault(True)
         self.fileCreated = None
         self.userEnvironment = {}
+    
+    def initialize(self, mainWindow):
+        PMXBaseDialog.initialize(self, mainWindow)
+        self.environmentDialog = self.mainWindow.findChild(QtGui.QDialog, "EnvironmentDialog")
     
     def setupComboTemplates(self):
         tableView = QtGui.QTableView(self)
@@ -88,16 +95,12 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
         template = templateModel.node(templateModel.createIndex(self.comboTemplates.currentIndex(), 0))
         
         tEnv = template.buildEnvironment(fileName = name, fileDirectory = location, localVars = True)
-        self.userEnvironment = EnvironmentDialog.editEnvironment(self, self.userEnvironment, tEnv)
+        self.userEnvironment = self.environmentDialog.editEnvironment(self.userEnvironment, template = tEnv)
              
-    @classmethod
-    def newFileFromTemplate(cls, fileDirectory = "", fileName = "", parent = None):
-        '''
-        @return: new file path or None
-        '''
-        dlg = cls(parent = parent)
-        dlg.lineFileName.setText(fileName)
-        dlg.lineLocation.setText(fileDirectory)
-        dlg.buttonCreate.setEnabled(False)
-        if dlg.exec_() == cls.Accepted:
-            return dlg.fileCreated
+    def createFile(self, title="Create file from template", fileDirectory = "", fileName = "", parent = None):
+        self.setWindowTitle(title)
+        self.lineFileName.setText(fileName)
+        self.lineLocation.setText(fileDirectory)
+        self.buttonCreate.setEnabled(False)
+        if self.exec_() == self.Accepted:
+            return self.fileCreated

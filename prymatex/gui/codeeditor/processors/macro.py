@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtGui
+from prymatex.qt import QtGui
 
 from prymatex.support import PMXMacroProcessor
 from prymatex.support.command import PMXCommand
@@ -89,10 +89,10 @@ class PMXMacroProcessor(PMXMacroProcessor):
         pass
     
     def selectLine(self):
-        self.editor.select(self.editor.SelectLine)
+        self.editor.selectLine()
     
     def selectHardLine(self):
-        self.editor.select(self.editor.SelectParagraph)
+        self.editor.selectParagraph()
 
     def deleteBackward(self):
         self.editor.textCursor().deletePreviousChar()
@@ -110,7 +110,7 @@ class PMXMacroProcessor(PMXMacroProcessor):
         self.editor.insertBundleItem(command, asynchronous = False)
 
     def findWithOptions(self, options):
-        print options
+        print(options)
         """{'action': 'findNext',
         'findInProjectIgnoreCase': False,
         'findInProjectRegularExpression': False,

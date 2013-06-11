@@ -15,6 +15,7 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.utils import osextra
 from prymatex.utils.decorators import deprecated
+from prymatex.utils import encoding
 
 from prymatex.core import PMXBaseComponent
 from prymatex.core.settings import pmxConfigPorperty
@@ -23,58 +24,52 @@ from prymatex.core import exceptions
 
 class FileManager(QtCore.QObject, PMXBaseComponent):
     """A File Manager"""
-    #=========================================================
-    # Signals
-    #=========================================================
-    fileCreated = QtCore.pyqtSignal(str)
-    fileDeleted = QtCore.pyqtSignal(str)
-    fileChanged = QtCore.pyqtSignal(str)
-    fileRenamed = QtCore.pyqtSignal(str, str)
-    directoryCreated = QtCore.pyqtSignal(str)
-    directoryDeleted = QtCore.pyqtSignal(str)
-    directoryChanged = QtCore.pyqtSignal(str)
-    directoryRenamed = QtCore.pyqtSignal(str, str)
+    # ------------ Signals
+    fileCreated = QtCore.Signal(str)
+    fileDeleted = QtCore.Signal(str)
+    fileChanged = QtCore.Signal(str)
+    fileRenamed = QtCore.Signal(str, str)
+    directoryCreated = QtCore.Signal(str)
+    directoryDeleted = QtCore.Signal(str)
+    directoryChanged = QtCore.Signal(str)
+    directoryRenamed = QtCore.Signal(str, str)
 
     # Generic Signal 
-    filesytemChange = QtCore.pyqtSignal(str, int)
+    fileSytemChanged = QtCore.Signal(str, int)
 
-    #=========================================================
-    # Settings
-    #=========================================================
+    # ------------- Settings
     SETTINGS_GROUP = 'FileManager'
 
     fileHistory = pmxConfigPorperty(default = [])
     fileHistoryLength = pmxConfigPorperty(default = 10)
-    lineEnding = pmxConfigPorperty(default = 'unix')
-    encoding = pmxConfigPorperty(default = 'utf-8')
+    defaultEncoding = pmxConfigPorperty(default = 'utf_8')
+    defaultEndOfLine = pmxConfigPorperty(default = 'unix')
+    detectEndOfLine = pmxConfigPorperty(default = False)
+    removeTrailingSpaces = pmxConfigPorperty(default = False)
 
-    #=========================================================
-    # Constants
-    #=========================================================
+    # ---------------- Constants
     CREATED = 1<<0
     DELETED = 1<<1
     RENAMED = 1<<2
     MOVED   = 1<<3
     CHANGED = 1<<4
-    
-    ENCODINGS = ['windows-1253', 'iso-8859-7', 'macgreek']
 
     def __init__(self, application):
-        QtCore.QObject.__init__(self)
+        QtCore.QObject.__init__(self, application)
+        PMXBaseComponent.__init__(self)
         
         self.last_directory = get_home_dir()
         self.fileWatcher = QtCore.QFileSystemWatcher()
-        self.fileWatcher.fileChanged.connect(self.on_fileChanged)
-        self.fileWatcher.directoryChanged.connect(self.on_directoryChanged)
+        self.fileWatcher.fileChanged.connect(self.on_fileWatcher_fileChanged)
+        self.fileWatcher.directoryChanged.connect(self.on_fileWatcher_directoryChanged)
         self.connectGenericSignal()
 
     @classmethod
     def contributeToSettings(cls):
-        return [ ]
+        from prymatex.gui.settings.files import FilesSettingsWidget
+        return [ FilesSettingsWidget ]
     
-    #========================================================
-    # Signals
-    #========================================================
+    # ------------- Signals
     def connectGenericSignal(self):
         UNARY_SINGAL_CONSTANT_MAP = (
             (self.fileCreated, FileManager.CREATED ),
@@ -89,25 +84,23 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
             (self.directoryRenamed, FileManager.RENAMED ),                       
         )
         for signal, associatedConstant in UNARY_SINGAL_CONSTANT_MAP:
-            signal.connect(lambda path, constant = associatedConstant: self.filesytemChange.emit(path, constant))
+            signal.connect(lambda path, constant = associatedConstant: self.fileSytemChanged.emit(path, constant))
         for signal, associatedConstant in BINARY_SINGAL_CONSTANT_MAP:
-            signal.connect(lambda _x, path, constant = associatedConstant: self.filesytemChange.emit(path, constant))
+            signal.connect(lambda _x, path, constant = associatedConstant: self.fileSytemChanged.emit(path, constant))
 
-    def on_fileChanged(self, filePath):
+    def on_fileWatcher_fileChanged(self, filePath):
         if not os.path.exists(filePath):
             self.fileDeleted.emit(filePath)
         else:
             self.fileChanged.emit(filePath)
     
-    def on_directoryChanged(self, directoryPath):
+    def on_fileWatcher_directoryChanged(self, directoryPath):
         if not os.path.exists(directoryPath):
             self.directoryDeleted.emit(directoryPath)
         else:
             self.directoryChanged.emit(directoryPath)
     
-    #========================================================
-    # History
-    #========================================================
+    # -------------- History
     def add_file_history(self, filePath):
         if filePath in self.fileHistory:
             self.fileHistory.remove(filePath)
@@ -153,7 +146,7 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
 
     def deletePath(self, path):
         if os.path.isfile(path):
-            # Mandar señal para cerrar editores
+            # Send signal for close editors
             os.unlink(path)
         else:
             shutil.rmtree(path, onerror = self._onerror)
@@ -164,31 +157,50 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     exists = lambda self, path: os.path.exists(path)
     isdir = lambda self, path: os.path.isdir(path)
     isfile = lambda self, path: os.path.isfile(path)
+    islink = lambda self, path: os.path.islink(path)
+    ismount = lambda self, path: os.path.ismount(path)
     join = lambda self, *path: os.path.join(*path)
     extension = lambda self, path: os.path.splitext(path.lower())[-1][1:]
     splitext = lambda self, path: os.path.splitext(path)
     dirname = lambda self, path: os.path.dirname(path)
     basename = lambda self, path: os.path.basename(path)
     mimeType = lambda self, path: mimetypes.guess_type(path)[0] or ""
-    issubpath = lambda self, childPath, parentPath: osextra.path.issubpath(childPath, parentPath)
+    issubpath = lambda self, childPath, parentPath, **kwargs: osextra.path.issubpath(childPath, parentPath, **kwargs)
     fullsplit = lambda self, path: osextra.path.fullsplit(path)
     normcase = lambda self, path: os.path.normcase(path)
     normpath = lambda self, path: os.path.normpath(path)
     realpath = lambda self, path: os.path.realpath(path)
     relpath = lambda self, path: os.path.relpath(path)
+    samefile = lambda self, path1, path2: os.path.samefile(path1, path2)
+    fnmatch = lambda self, filename, pattern: fnmatch.fnmatch(filename, pattern)
+    getmtime = lambda self, path: os.path.getmtime(path)
+    getctime = lambda self, path: os.path.getctime(path)
 
     def expandVars(self, text):
-        context = self.application.supportManager.buildEnvironment()
+        context = self.application.supportManager.environmentVariables()
         path = osextra.path.expand_shell_var(text, context = context)
         if os.path.exists(path):
             return path
     
-    #==================================================================
-    # Handling files for retrieving data. open, read, write, close
-    #==================================================================
+    def fnmatchany(self, filename, patterns):
+        return any([fnmatch.fnmatch(filename, pattern) for pattern in patterns])
+
+    # -------------- Open file control
     def isOpen(self, filePath):
         return filePath in self.fileWatcher.files()
     
+    def isWatched(self, path):
+        return path in self.fileWatcher.files() or path in self.fileWatcher.directories()
+        
+    def watchPath(self, path):
+        self.logger.debug("Watch path %s" % path)
+        self.fileWatcher.addPath(path)
+    
+    def unwatchPath(self, path):
+        self.logger.debug("Unwatch path %s" % path)
+        self.fileWatcher.removePath(path)
+    
+    # ---------- Handling files for retrieving data. open, read, write, close
     def openFile(self, filePath):
         """
         Open and read a file, return the content.
@@ -204,41 +216,19 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
 
     def readFile(self, filePath):
         """Read from file"""
-        #TODO: Que se pueda hacer una rutina usando yield
-        for enc in [ self.encoding ] + self.ENCODINGS:
-            try:
-                fileRead = codecs.open(filePath, "r", encoding = enc)
-                content = fileRead.read()
-                break
-            except Exception, e:
-                print "File: %s, %s" % (filePath, e)
-        fileRead.close()
+        content, encode = encoding.read(filePath)
         return content
 
     def writeFile(self, filePath, content):
         """Function that actually save the content of a file."""
         self.unwatchPath(filePath)
-        fileWrite = codecs.open(filePath, "w", encoding = self.encoding)
-        fileWrite.write(content)
-        fileWrite.flush()
-        fileWrite.close()
+        encode = encoding.write(content, filePath, self.defaultEncoding)
         self.watchPath(filePath)
 
     def closeFile(self, filePath):
         if self.isWatched(filePath):
             self.unwatchPath(filePath)
 
-    def isWatched(self, path):
-        return path in self.fileWatcher.files() or path in self.fileWatcher.directories()
-        
-    def watchPath(self, path):
-        self.logger.debug("Watch path %s" % path)
-        self.fileWatcher.addPath(path)
-    
-    def unwatchPath(self, path):
-        self.logger.debug("Unwatch path %s" % path)
-        self.fileWatcher.removePath(path)
-    
     def directory(self, filePath = None):
         """
         Obtiene un directorio para el path
@@ -253,12 +243,13 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     def listDirectory(self, directory, absolute = False, filePatterns = []):
         if not os.path.isdir(directory):
             raise exceptions.DirectoryException("%s not exists" % directory)
-        names = os.listdir(directory)
+        filenames = os.listdir(directory)
         if filePatterns:
-            names = filter(lambda name: any(map(lambda pattern: os.path.isdir(os.path.join(directory, name)) or fnmatch.fnmatch(name, pattern), filePatterns)), names)
+            filenames = [filename for filename in filenames if os.path.isdir(os.path.join(directory, filename)) or\
+                    self.fnmatchany(filename, filePatterns)]
         if absolute:
-            return map(lambda name: os.path.join(directory, name), names)
-        return names
+            return [os.path.join(directory, name) for name in filenames]
+        return filenames
 
     def lastModification(self, filePath):
         return QtCore.QFileInfo(filePath).lastModified()
@@ -272,4 +263,4 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
         elif compareBy == "type":
             _, value1 = os.path.splitext(filePath1)
             _, value2 = os.path.splitext(filePath2)
-        return cmp(value1, value2)
+        return (value1 > value2) - (value1 < value2)

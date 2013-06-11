@@ -6,16 +6,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>314</width>
-    <height>221</height>
+    <width>574</width>
+    <height>392</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Resource</string>
   </property>
-  <layout class="QVBoxLayout" name="_2">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
-    <number>2</number>
+    <number>6</number>
    </property>
    <property name="margin">
     <number>0</number>
@@ -23,9 +23,12 @@
    <item>
     <layout class="QFormLayout" name="formLayout">
      <property name="labelAlignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
      <property name="horizontalSpacing">
+      <number>2</number>
+     </property>
+     <property name="verticalSpacing">
       <number>2</number>
      </property>
      <item row="0" column="0">
@@ -49,7 +52,7 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
+     <item row="4" column="0">
       <widget class="QLabel" name="labelLastModified">
        <property name="text">
         <string>Last modified:</string>
@@ -77,14 +80,245 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="4" column="1">
       <widget class="QLabel" name="textLabelLastModified">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="labelSize">
+       <property name="text">
+        <string>Size:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLabel" name="textLabelSize">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
     </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Permissions</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QTableWidget" name="tableWidgetPermissions">
+        <row>
+         <property name="text">
+          <string>Owner</string>
+         </property>
+        </row>
+        <row>
+         <property name="text">
+          <string>Group</string>
+         </property>
+        </row>
+        <row>
+         <property name="text">
+          <string>Other</string>
+         </property>
+        </row>
+        <column>
+         <property name="text">
+          <string>Read</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Write</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Execute</string>
+         </property>
+        </column>
+        <item row="0" column="0">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item row="0" column="1">
+         <property name="textAlignment">
+          <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item row="0" column="2">
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item row="1" column="0">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item row="1" column="1">
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item row="1" column="2">
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item row="2" column="0">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item row="2" column="1">
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item row="2" column="2">
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note:&lt;/span&gt; Removing de executable flag on a folder will cause its children to become unreadable&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Text file encoding</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_2">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::ExpandingFieldsGrow</enum>
+      </property>
+      <property name="horizontalSpacing">
+       <number>2</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>2</number>
+      </property>
+      <property name="margin">
+       <number>6</number>
+      </property>
+      <item row="0" column="0" colspan="2">
+       <widget class="QRadioButton" name="radioButton">
+        <property name="text">
+         <string>Inherited</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QRadioButton" name="radioButton_2">
+        <property name="text">
+         <string>Other:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="comboBoxEncoding">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Text file end of line</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_3">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::ExpandingFieldsGrow</enum>
+      </property>
+      <property name="horizontalSpacing">
+       <number>2</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>2</number>
+      </property>
+      <property name="margin">
+       <number>6</number>
+      </property>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="comboBoxEndOfLine_2">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QRadioButton" name="radioButton_4">
+        <property name="text">
+         <string>Other</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QRadioButton" name="radioButton_3">
+        <property name="text">
+         <string>Inherited</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>30</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>

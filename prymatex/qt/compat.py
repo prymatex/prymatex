@@ -26,9 +26,9 @@ def getExistingDirectory(parent=None, caption='', basedir='',
         if sys.platform == "win32":
             # On Windows platforms: restore standard outputs
             sys.stdout, sys.stderr = _temp1, _temp2
-    if not isinstance(result, basestring):
+    if not isinstance(result, str):
         # PyQt API #1
-        result = unicode(result)
+        result = str(result)
     return result
 
 def _qfiledialog_wrapper(attr, parent=None, caption='', basedir='',
@@ -82,13 +82,13 @@ def _qfiledialog_wrapper(attr, parent=None, caption='', basedir='',
         output = result
     if hasattr(QtCore, "QString"):
         # PyQt API #1: conversions needed from QString/QStringList
-        selectedfilter = unicode(selectedfilter)
+        selectedfilter = str(selectedfilter)
         if isinstance(output, QtCore.QString):
             # Single filename
-            output = unicode(output)
+            output = str(output)
         else:
             # List of filenames
-            output = [unicode(fname) for fname in output]
+            output = [str(fname) for fname in output]
             
     # Always returns the tuple (output, selectedfilter)
     return output, selectedfilter
@@ -129,8 +129,8 @@ def getSaveFileName(parent=None, caption='', basedir='', filters='',
 if __name__ == '__main__':
     from prymatex.utils.qthelpers import qapplication
     app = qapplication()
-    print repr(getExistingDirectory())
-    print repr(getOpenFileName(filters='*.py;;*.txt'))
-    print repr(getOpenFileNames(filters='*.py;;*.txt'))
-    print repr(getSaveFileName(filters='*.py;;*.txt'))
+    print(repr(getExistingDirectory()))
+    print(repr(getOpenFileName(filters='*.py;;*.txt')))
+    print(repr(getOpenFileNames(filters='*.py;;*.txt')))
+    print(repr(getSaveFileName(filters='*.py;;*.txt')))
     sys.exit()

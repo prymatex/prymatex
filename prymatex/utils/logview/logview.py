@@ -21,18 +21,18 @@ from logging.handlers import DEFAULT_TCP_LOGGING_PORT, DEFAULT_UDP_LOGGING_PORT
 import optparse
 import os
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 import re
 import sys
 import textinfo
 import threading
-from urllib import quote, unquote
+from urllib.parse import quote, unquote
 try:
     import zmq
 except ImportError:
-    print sys.exc_info()[1]
+    print(sys.exc_info()[1])
     zmq = None
 
 appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]

@@ -53,7 +53,7 @@ def select_port(default_port=20128):
                                  socket.IPPROTO_TCP)
 #            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.bind( ("127.0.0.1", default_port) )
-        except socket.error, _msg:
+        except socket.error as _msg:
             default_port += 1
         else:
             break
@@ -172,7 +172,7 @@ def get_home_dir():
     try:
         # expanduser() returns a raw byte string which needs to be
         # decoded with the codec that the OS is using to represent file paths.
-        path = encoding.to_unicode_from_fs(os.path.expanduser('~'))
+        path = encoding.from_fs(os.path.expanduser('~'))
     except:
         path = ''
     for env_var in ('HOME', 'USERPROFILE', 'TMP'):
@@ -181,7 +181,7 @@ def get_home_dir():
         # os.environ.get() returns a raw byte string which needs to be
         # decoded with the codec that the OS is using to represent environment
         # variables.
-        path = encoding.to_unicode_from_fs(os.environ.get(env_var, ''))
+        path = encoding.from_fs(os.environ.get(env_var, ''))
     if path:
         return path
     else:
@@ -191,7 +191,7 @@ def get_home_dir():
 if __name__ == '__main__':
     assert get_common_path([
                             'D:\\Python\\spyder-v21\\spyderlib\\widgets',
-                            u'D:\\Python\\spyder\\spyderlib\\utils',
-                            u'D:\\Python\\spyder\\spyderlib\\widgets',
+                            'D:\\Python\\spyder\\spyderlib\\utils',
+                            'D:\\Python\\spyder\\spyderlib\\widgets',
                             'D:\\Python\\spyder-v21\\spyderlib\\utils',
                             ]) == 'D:\\Python'

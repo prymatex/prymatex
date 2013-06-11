@@ -1,45 +1,58 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore
 
 from prymatex import resources
-from prymatex.ui.configure.general import Ui_GeneralWidget
+from prymatex.ui.configure.general import Ui_General
 from prymatex.models.settings import SettingsTreeNode
 
-class GeneralSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_GeneralWidget):
+
+class GeneralSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_General):
     TITLE = "General"
     ICON = resources.getIcon("preferences-other")
-    
-    def __init__(self, settingGroup, parent = None):
+
+
+    def __init__(self, settingGroup, profile = None, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "general", settingGroup)
+        SettingsTreeNode.__init__(self, "general", settingGroup, profile)
         self.setupUi(self)
 
-        #self.comboTabVisibility.addItem("Always shown", PMXTabWidget.TABBAR_ALWAYS_SHOWN)
-        #self.comboTabVisibility.addItem("Show when more than one", PMXTabWidget.TABBAR_WHEN_MULTIPLE)
-        #self.comboTabVisibility.addItem("Never show", PMXTabWidget.TABBAR_NEVER_SHOWN)
 
-    @QtCore.pyqtSlot(int)
-    def on_comboTabVisibility_currentIndexChanged(self, index):
-        value = self.comboTabVisibility.itemData(index)
-        self.settingGroup.setValue('showTabBar', value)
-    
-    def appendToCombo(self, text):
-        current_index = self.comboApplicationTitle.currentIndex()
-        current_text = self.comboApplicationTitle.currentText()
-        text = unicode(current_text or '') + unicode(text or '')
-        self.comboApplicationTitle.setItemText(current_index, text)
-    
-    def on_pushInsertAppName_pressed(self):
-        self.appendToCombo("$APPNAME")
+    def loadSettings(self):
+        SettingsTreeNode.loadSettings(self)
+        currentStyleName = self.settingGroup.value('qtStyle')
+        currentStyleSheetName = self.settingGroup.value('qtStyleSheet')
+        for index, styleName in enumerate(list(QtGui.QStyleFactory.keys())):
+            self.comboBoxQtStyle.addItem(styleName, styleName)
+            if currentStyleName and styleName == currentStyleName:
+                self.comboBoxQtStyle.setCurrentIndex(index)
+
+        for index, styleSheetName in enumerate(list(resources.STYLESHEETS.keys())):
+            self.comboBoxQtStyleSheet.addItem(styleSheetName, styleSheetName)
+            if currentStyleSheetName and styleSheetName == currentStyleSheetName:
+                self.comboBoxQtStyleSheet.setCurrentIndex(index)
+
+        checks = ( self.checkBoxAskAboutExternalDeletions, self.checkBoxAskAboutExternalChanges )
+        list(map(lambda check: check.blockSignals(True), checks))
+        self.checkBoxAskAboutExternalDeletions.setChecked(self.settingGroup.value('askAboutExternalDeletions'))
+        self.checkBoxAskAboutExternalChanges.setChecked(self.settingGroup.value('askAboutExternalChanges'))
+        list(map(lambda check: check.blockSignals(False), checks))
         
-    def on_pushInsertFile_pressed(self):
-        self.appendToCombo("$FILENAME")
+
+    @QtCore.Slot(int)
+    def on_checkBoxAskAboutExternalDeletions_stateChanged(self, state):
+        self.settingGroup.setValue('askAboutExternalDeletions', state == QtCore.Qt.Checked)
         
-    def on_pushInsertProject_pressed(self):
-        self.appendToCombo("$PROJECT")
-    
-    @QtCore.pyqtSlot(str)
-    def on_comboApplicationTitle_editTextChanged(self, text):
-        self.settingGroup.setValue('windowTitleTemplate', text)
+    @QtCore.Slot(int)
+    def on_checkBoxAskAboutExternalChanges_stateChanged(self, state):
+        self.settingGroup.setValue('askAboutExternalChanges', state == QtCore.Qt.Checked)
+        
+    @QtCore.Slot(str)
+    def on_comboBoxQtStyle_activated(self, styleName):
+        self.settingGroup.setValue('qtStyle', styleName)
+
+
+    @QtCore.Slot(str)
+    def on_comboBoxQtStyleSheet_activated(self, styleSheetName):
+        self.settingGroup.setValue('qtStyleSheet', styleSheetName)

@@ -6,7 +6,7 @@ import shelve
 import sys
 import os
 
-from PyQt4 import QtCore
+from prymatex.qt import QtCore
 
 from prymatex.utils.decorator import available_attrs, printparams, printtime
 
@@ -30,13 +30,13 @@ class cacheable(object):
             cacheable.warning_show = True
             return f
         
-        full_func_name = f.__module__ + '.' + f.func_name
+        full_func_name = f.__module__ + '.' + f.__name__
         def wrapped(*largs, **kwargs):
             key = largs + tuple(kwargs.items()) # Para que sea hasheable
             #print key
             func_memento = self.flashback.get(full_func_name, None)
             if func_memento:
-                if func_memento.has_key(key):
+                if key in func_memento:
                     return func_memento[key]
             else:
                 func_memento = {}
@@ -45,7 +45,7 @@ class cacheable(object):
             func_memento[key] = retval
             
             return retval
-        wrapped.func_name = f.func_name
+        wrapped.__name__ = f.__name__
         return wrapped
     
     @classmethod
@@ -75,7 +75,7 @@ def file_alteration_check(path):
 if __name__ == "__main__":
     import time, random
     cacheable.init_cache('functions.cache')
-    print cacheable.flashback
+    print(cacheable.flashback)
     
     @printtime
     @printparams
@@ -85,8 +85,8 @@ if __name__ == "__main__":
         return sum(largs)
 
     
-    print "Vamos a llamar una función que espera un tiempo"
-    print suma(1, 2)
-    print suma(1, 2)
-    print suma(1, 2)
+    print("Vamos a llamar una función que espera un tiempo")
+    print(suma(1, 2))
+    print(suma(1, 2))
+    print(suma(1, 2))
     cacheable.close_cache()

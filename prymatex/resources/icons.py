@@ -9,35 +9,50 @@
 import os
 
 from prymatex.qt import QtGui, QtCore
+from prymatex.qt.helpers import get_std_icon
 
 from prymatex.resources.loader import getResourcePath
 from prymatex.utils.decorators.memoize import memoized
+from prymatex.utils import six
 
 __fileIconProvider = QtGui.QFileIconProvider()
 
+NOTFOUND = set()
+
+def get_icon(index, size = None, default = None):
+    icon = __get_icon(index)
+    if icon is None and default is not None:
+        icon = default
+    elif icon is None:
+        NOTFOUND.add(index)
+        icon = QtGui.QIcon(getResourcePath("notfound", ["Icons"]))
+    if size is not None:
+        size = size if isinstance(size, (tuple, list)) else (size, size)
+        icon = QtGui.QIcon( icon.pixmap(*size) )
+    return icon
+
 @memoized
-def get_icon(index, default = None):
+def __get_icon(index):
     '''
     Makes the best effort to find an icon for an index.
     Index can be a path, a Qt resource path, an integer.
     @return: QIcon instance or None if no icon could be retrieved
     '''
-    #Try icon in db
-    path = getResourcePath(index, ["Icons", "External"])
-    if path is not None:
-        return QtGui.QIcon(path)
-    elif isinstance(index, basestring):
-        #Try file path
-        if os.path.isfile(index):
+    if isinstance(index, six.string_types):
+        if os.path.exists(index) and os.path.isabs(index):
+            #File path Icon
             return __fileIconProvider.icon(QtCore.QFileInfo(index))
-        elif os.path.isdir(index):
-            return __fileIconProvider.icon(QtGui.QFileIconProvider.Folder)
         elif QtGui.QIcon.hasThemeIcon(index):
+            #Theme Icon
             return QtGui.QIcon._fromTheme(index)
-        elif default is not None:
-            return default
-        else:
-            return QtGui.QIcon(getResourcePath("notfound", ["Icons"]))
-    elif isinstance(index, int):
-        #Try icon by int index in fileicon provider
+        else: 
+            #Try icon in the prymatex's resources
+            path = getResourcePath(index, ["Icons", "External"])
+            if path is not None:
+                return QtGui.QIcon(path)
+        #Standard Icon
+        return get_std_icon(index)
+    elif isinstance(index, six.integer_types):
+        #Icon by int index in fileicon provider
         return __fileIconProvider.icon(index)
+    

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from PyQt4 import QtCore
+from prymatex.qt import QtCore, QtGui
 
 GITHUB_CLONE_URL = 'https://github.com/{username}/{name}.git'
 
@@ -53,10 +53,10 @@ class RepositoryTableModel(QtCore.QAbstractTableModel):
         return bool(self.allSelected())
         
     def allSelected(self):
-        return filter(lambda repo: repo["checked"], self.repositories)
+        return [repo for repo in self.repositories if repo["checked"]]
         
     def clearUnselected(self):
-        self.repositories = filter(lambda repo: repo["checked"], self.repositories)
+        self.repositories = [repo for repo in self.repositories if repo["checked"]]
         self.layoutChanged.emit()
         
     def addRepositories(self, repositories):
@@ -75,3 +75,21 @@ class RepositoryTableModel(QtCore.QAbstractTableModel):
     
     def flags(self, index):
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
+        
+class RepositoryProxyTableModel(QtGui.QSortFilterProxyModel):
+    def filterAcceptsRow(self, sourceRow, sourceParent):
+        return True
+        
+    def filterAcceptsColumn(self, sourceColumn, sourceParent):
+        return True
+        
+    def lessThan(self, left, right):
+        source = self.sourceModel()
+        leftRepo = source.repositories[left.row()]
+        rightRepo = source.repositories[right.row()]
+        if self.sortColumn() == 0:
+            return leftRepo["name"] > rightRepo["name"]
+        elif self.sortColumn() == 1:
+            return leftRepo["username"] > rightRepo["username"]
+        elif self.sortColumn() == 2:
+            return leftRepo["watchers"] > rightRepo["watchers"]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-print __name__
+print(__name__)
 import sys
 import os
 
@@ -39,7 +39,7 @@ def km_from_string(s=''):
                 fullpath = find_connection_file(k,p)
             else:
                 fullpath = find_connection_file(s.lstrip().rstrip())
-        except IOError,e:
+        except IOError as e:
             echo(":IPython " + s + " failed", "Info")
             echo("^-- failed '" + s + "' not found", "Error")
             return
@@ -57,7 +57,7 @@ def km_from_string(s=''):
                 sub_address=(ip, cfg['iopub_port']),
                 stdin_address=(ip, cfg['stdin_port']),
                 hb_address=(ip, cfg['hb_port']))
-        except KeyError,e:
+        except KeyError as e:
             echo(":IPython " +s + " failed", "Info")
             echo("^-- failed --"+e.message.replace('_port','')+" not specified", "Error")
             return
@@ -74,7 +74,7 @@ def get_child_msg(msg_id):
             break
         else:
             #got a message, but not the one we were looking for
-            print 'skipping a message on shell_channel','WarningMsg'
+            print('skipping a message on shell_channel','WarningMsg')
     return m
     
 if __name__ == "__main__":
@@ -82,9 +82,9 @@ if __name__ == "__main__":
     
     from IPython.zmq.blockingkernelmanager import BlockingKernelManager
     connection_file = os.environ["PMX_IPYTHON_CONNECTION"]
-    print connection_file
+    print(connection_file)
     km = BlockingKernelManager(connection_file=connection_file)
     km.load_connection_file()
     km.start_channels()
     msg_id = km.shell_channel.execute("""a = 10""")
-    print get_child_msg(msg_id)
+    print(get_child_msg(msg_id))

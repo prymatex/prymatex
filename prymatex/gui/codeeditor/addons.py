@@ -10,8 +10,6 @@ from prymatex.core import PMXBaseEditorAddon
 from prymatex.utils.lists import bisect_key
 from prymatex.support import PMXPreferenceSettings
 
-RE_CHAR = re.compile(r"(\w)", re.UNICODE)
-
 class CodeEditorAddon(QtCore.QObject, PMXBaseEditorAddon):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
@@ -19,39 +17,38 @@ class CodeEditorAddon(QtCore.QObject, PMXBaseEditorAddon):
     def initialize(self, editor):
         PMXBaseEditorAddon.initialize(self, editor)
 
-    def extraSelectionCursors(self):
-        return {}
-
     def contributeToContextMenu(self, cursor):
         return PMXBaseEditorAddon.contributeToContextMenu(self)
 
 class CompleterAddon(CodeEditorAddon):
-    def __init__(self, parent):
-        CodeEditorAddon.__init__(self, parent)
-
     def initialize(self, editor):
         CodeEditorAddon.initialize(self, editor)
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
-        if event.text() and self.editor.currentWord(direction = "left", search = False)[0]:
+        if event.text() and event.modifiers() == 0 and self.editor.currentWord(direction = "left", search = False)[0]:
             self.editor.showCachedCompleter()
         
 class SmartUnindentAddon(CodeEditorAddon):
     def initialize(self, editor):
         CodeEditorAddon.initialize(self, editor)
-        self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
+        # TODO No usar esta señal porque el user data no esta listo
+        #self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
-        #Solo si metio texto, sino lo hace cuando me muevo entre caracteres
+        #Solo si tiene texto
         if event.text():
             cursor = self.editor.textCursor()
-            currentBlock = cursor.block()
-            previousBlock = currentBlock.previous()
-            settings = self.editor.preferenceSettings(self.editor.currentScope())
-            indentMarks = settings.indent(currentBlock.text())
-            if PMXPreferenceSettings.INDENT_DECREASE in indentMarks and previousBlock.isValid() and currentBlock.userData().indent >= previousBlock.userData().indent:
-                self.editor.unindentBlocks(cursor)
+            userData = cursor.userData()
+            positionInBlock = cursor.positionInBlock()
+            block = cursor.block()
+            settings = self.editor.scope(cursor = cursor, attribute='settings')
+            indentMarks = settings.indent(block.text()[:positionInBlock])
+            indentGuide = self.editor.findPreviousNoBlankBlock(block)
+            if PMXPreferenceSettings.INDENT_DECREASE in indentMarks and indentGuide is not None:
+                previousBlock = self.editor.findPreviousLessIndentBlock(indentGuide)
+                if previousBlock is not None and block.userData().indent > previousBlock.userData().indent:
+                    self.editor.unindentBlocks(cursor)
 
 class SpellCheckerAddon(CodeEditorAddon):
     def __init__(self, parent):
@@ -60,49 +57,6 @@ class SpellCheckerAddon(CodeEditorAddon):
         self.wordCursors = []
         self.currentSpellTask = None
         self.setupSpellChecker()
-        
-    def initialize(self, editor):
-        CodeEditorAddon.initialize(self, editor)
-        if self.dictionary is not None:
-            editor.registerTextCharFormatBuilder("spell", self.textCharFormat_spell_builder)
-            editor.syntaxReady.connect(self.on_editor_syntaxReady)
-            self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
-
-    @classmethod
-    def contributeToMainMenu(cls):
-        def on_actionSpellingOnType_toggled(editor, checked):
-            instance = editor.addonByClass(cls)
-            instance.spellingOnType = checked
-
-        def on_actionSpellingOnType_testChecked(editor):
-            instance = editor.addonByClass(cls)
-            return instance.spellingOnType
-
-        baseMenu = "Edit"
-        menuEntry = {'text': 'Spelling',
-                 'items': [
-                    {'text': 'Show Spelling'},
-                    {'text': 'Check Spelling'},
-                    {'text': 'Check Spelling as You Type',
-                      'callback': on_actionSpellingOnType_toggled,
-                      'checkable': True,
-                      'testChecked': on_actionSpellingOnType_testChecked
-                    }
-                ]}
-        return { baseMenu: menuEntry }
-
-    def contributeToContextMenu(self, cursor):
-        items = []
-        cursors = filter(lambda c: c.selectionStart() <= cursor.selectionStart() <= cursor.selectionEnd() <= c.selectionEnd(), self.wordCursors)
-        if cursors:
-            cursor = cursors[0]
-            for word in self.dictionary.suggest(cursor.selectedText()):
-                items.append({'title': word,
-                'callback': lambda word = word, cursor = cursor: cursor.insertText(word) })
-        return items
-
-    def extraSelectionCursors(self):
-        return { "spell": self.wordCursors[:] }
 
     def setupSpellChecker(self):
         try:
@@ -112,25 +66,66 @@ class SpellCheckerAddon(CodeEditorAddon):
         except Exception as e:
             self.dictionary = None
 
+    def initialize(self, editor):
+        CodeEditorAddon.initialize(self, editor)
+        if self.dictionary is not None:
+            self.editor.registerTextCharFormatBuilder("spell", self.textCharFormat_spell_builder)
+            #self.editor.syntaxReady.connect(self.on_editor_syntaxReady)
+            # TODO No usar esta señal porque el user data no esta listo
+            #self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
+
+    @classmethod
+    def contributeToMainMenu(cls):
+        def on_actionSpellingOnType_toggled(editor, checked):
+            instance = editor.findChild(cls, "Nombre")
+            #instance.spellingOnType = checked
+
+        def on_actionSpellingOnType_testChecked(editor):
+            instance = editor.findChild(cls, "Nombre")
+            return False
+            #return instance.spellingOnType
+
+        menuEntry = {
+                'name': 'spelling',
+                'text': 'Spelling',
+                'items': [
+                    {'text': 'Show Spelling'},
+                    {'text': 'Check Spelling'},
+                    {'text': 'Check Spelling as You Type',
+                      'callback': on_actionSpellingOnType_toggled,
+                      'checkable': True,
+                      'testChecked': on_actionSpellingOnType_testChecked
+                    }
+                ]}
+        return { 'edit': menuEntry }
+
+    def contributeToContextMenu(self, cursor):
+        items = []
+        cursors = [c for c in self.wordCursors if c.selectionStart() <= cursor.selectionStart() <= cursor.selectionEnd() <= c.selectionEnd()]
+        if cursors:
+            cursor = cursors[0]
+            for word in self.dictionary.suggest(cursor.selectedText()):
+                items.append({'text': word,
+                'callback': lambda word = word, cursor = cursor: cursor.insertText(word) })
+        return items
+
     def textCharFormat_spell_builder(self):
-        format = QtGui.QTextCharFormat()
-        format.setFontUnderline(True)
-        format.setUnderlineColor(QtCore.Qt.red) 
-        format.setUnderlineStyle(QtGui.QTextCharFormat.SpellCheckUnderline)
-        format.setBackground(QtCore.Qt.transparent)
-        return format
+        fmt = QtGui.QTextCharFormat()
+        fmt.setFontUnderline(True)
+        fmt.setUnderlineColor(QtCore.Qt.red) 
+        fmt.setUnderlineStyle(QtGui.QTextCharFormat.SpellCheckUnderline)
+        fmt.setBackground(QtCore.Qt.transparent)
+        return fmt
 
     def spellWordsForBlock(self, block):
-        #TODO: Proveer algo de esto directamente desde el editor
-        spellRange = filter(lambda ((start, end), p): p.spellChecking, 
-            map(lambda ((start, end), scope): ((start, end), self.editor.preferenceSettings(scope)), block.userData().scopeRanges()))
-        for ran, p in spellRange:
+        spellRange = self.editor.scopes(attribute = 'settings', scope_filter = lambda attr: attr.spellChecking)
+        for ran, _ in spellRange:
             wordRangeList = block.userData().wordsRanges(ran[0], ran[1])
-            for (start, end), word, group in wordRangeList:
+            for (start, end), word, _ in wordRangeList:
                 yield (start, end), word
 
     def cleanCursorsForBlock(self, block):
-        self.wordCursors = filter(lambda cursor: cursor.block() != block, self.wordCursors)
+        self.wordCursors = [cursor for cursor in self.wordCursors if cursor.block() != block]
 
     def spellCheckWord(self, word, block, start, end):
         if not self.dictionary.check(word):
@@ -149,7 +144,7 @@ class SpellCheckerAddon(CodeEditorAddon):
         self.editor.highlightEditor()
     
     def on_actionSpell_toggled(self, cursor):
-        print cursor.selectedText()
+        print(cursor.selectedText())
         
     def on_editor_syntaxReady(self):
         self.currentSpellTask = self.application.scheduler.newTask(self.spellCheckAllDocument())
@@ -169,14 +164,11 @@ class SpellCheckerAddon(CodeEditorAddon):
         self.editor.highlightEditor()
         
 class HighlightCurrentSelectionAddon(CodeEditorAddon):
-    def __init__(self, parent):
-        CodeEditorAddon.__init__(self, parent)
-        self.highlightCursors = []
-
     def initialize(self, editor):
         CodeEditorAddon.initialize(self, editor)
         editor.registerTextCharFormatBuilder("selection.extra", self.textCharFormat_extraSelection_builder)
-        editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
+        editor.selectionChanged.connect(self.findHighlightCursors)
+        editor.cursorPositionChanged.connect(self.findHighlightCursors)
 
     def textCharFormat_extraSelection_builder(self):
         format = QtGui.QTextCharFormat()
@@ -185,9 +177,12 @@ class HighlightCurrentSelectionAddon(CodeEditorAddon):
         format.setBackground(color)
         return format
     
-    def extraSelectionCursors(self):
-        return { "selection.extra": self.highlightCursors[:] }
-
-    def on_editor_cursorPositionChanged(self):
+    def findHighlightCursors(self):
         cursor = self.editor.textCursor()
-        self.highlightCursors = self.editor.findAll(cursor.selectedText(), QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords) if cursor.hasSelection() and cursor.selectedText().strip() != '' else []
+        cursors = self.editor.findAll(
+                cursor.selectedText(), 
+                QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords
+            ) if cursor.hasSelection() and cursor.selectedText().strip() != '' else []
+        self.editor.setExtraSelectionCursors("selection.extra", cursors)
+        self.editor.updateExtraSelections()
+        

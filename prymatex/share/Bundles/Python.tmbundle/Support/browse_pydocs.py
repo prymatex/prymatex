@@ -5,7 +5,8 @@ import os
 import sys
 import pydoc
 import time
-from urllib2 import urlopen, URLError
+from urllib.request import urlopen
+from urllib.error import URLError
 from traceback import format_exc
 
 PORT=9877
@@ -66,8 +67,8 @@ dd:after {
 %s
 </dl>""" % "\n".join([
     dd('url', '<a href="%(url)s">%(url)s</a>' % {'url':URL}),
-    dd('log', '<a href="tm-file://%(url)s">%(url)s</a>' % {'url':OUT_LOG.name}),
-    dd('error log', '<a href="tm-file://%(url)s">%(url)s</a>' % {'url':ERR_LOG.name})])
+    dd('log', '<a href="file://%(url)s">%(url)s</a>' % {'url':OUT_LOG.name}),
+    dd('error log', '<a href="file://%(url)s">%(url)s</a>' % {'url':ERR_LOG.name})])
 
 def wait_for_server(finished):
     timeout, interval, elapsed = 10,1,0
@@ -80,7 +81,7 @@ def wait_for_server(finished):
 
 def main():
     def onserve():
-        print info()
+        print(info())
         browse_docs()
         
     try:
@@ -95,8 +96,8 @@ def main():
             if pid > 0:
                 wait_for_server(onserve)
                 sys.exit(0)
-        except OSError, e: 
-            print >>sys.stderr, "fork #1 failed: %s" % (e) 
+        except OSError as e: 
+            print("fork #1 failed: %s" % (e), file=sys.stderr) 
             raise
     
         os.chdir('/')
@@ -108,17 +109,17 @@ def main():
             if pid > 0:
                 # this is the server's pid
                 sys.exit(0)
-        except OSError, e: 
-            print >>sys.stderr, "fork #2 failed: %s" % (e)
+        except OSError as e: 
+            print("fork #2 failed: %s" % (e), file=sys.stderr)
             raise
     
         start_serv()
-    except SystemExit, e:
+    except SystemExit as e:
         # don't want this printing a <pre> tag in the TM thread
         raise
     except:
         ERR_LOG.write(format_exc())
-        print "<pre>" # so we can read the traceback in the TM thread :)
+        print("<pre>") # so we can read the traceback in the TM thread :)
         raise
 
 if __name__ == '__main__':

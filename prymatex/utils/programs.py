@@ -94,7 +94,7 @@ def shell_split(text):
     strings with spaces). This function is almost equivalent to the shlex.split
     function (see standard library `shlex`) except that it is supporting 
     unicode strings (shlex does not support unicode until Python 2.7.3)."""
-    assert isinstance(text, basestring)  # in case a QString is passed...
+    assert isinstance(text, str)  # in case a QString is passed...
     pattern = r'(\s+|(?<!\\)".*?(?<!\\)"|(?<!\\)\'.*?(?<!\\)\')'
     out = []
     for token in re.split(pattern, text):
@@ -199,7 +199,7 @@ def is_module_installed(module_name, version=None):
             vlist = vlist[:len(actvlist)]
             if not vlist or not actvlist:
                 return False
-            for index, (nb, actnb) in enumerate(zip(vlist, actvlist)):
+            for index, (nb, actnb) in enumerate(list(zip(vlist, actvlist))):
                 if nb == actnb:
                     if index == len(vlist)-1 and '=' not in symb:
                         return False
@@ -216,6 +216,6 @@ def is_module_installed(module_name, version=None):
 
 
 if __name__ == '__main__':
-    print find_program('git')
-    print shell_split('-q -o -a')
-    print shell_split(u'-q "d:\\Python de xxxx\\t.txt" -o -a')
+    print(find_program('git'))
+    print(shell_split('-q -o -a'))
+    print(shell_split('-q "d:\\Python de xxxx\\t.txt" -o -a'))

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui
+import collections
 
 class PopupMessageWidget(QtGui.QLabel):
     ''' 
@@ -77,7 +78,7 @@ class PopupMessageWidget(QtGui.QLabel):
         if callback is None:
             self.logger.warn("No callback for %s" % link)
             return
-        if not callable(callback):
+        if not isinstance(callback, collections.Callable):
             self.logger.warn("Callback for %s is not callable: %s" % (link, callback))
             return
         

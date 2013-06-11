@@ -8,7 +8,7 @@
 # WARNING! All changes made in this file will be lost!
 
 from prymatex.utils.i18n import ugettext as _
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8

@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/support/project.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/support/project.ui'
 #
-# Created: Fri Nov  9 18:10:45 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Wed Jun  5 22:34:49 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Project(object):
     def setupUi(self, Project):
@@ -41,6 +49,6 @@ class Ui_Project(object):
         QtCore.QMetaObject.connectSlotsByName(Project)
 
     def retranslateUi(self, Project):
-        Project.setWindowTitle(_('Form'))
-        self.labelCommand.setText(_('Command(s):'))
+        Project.setWindowTitle(_translate("Project", "Form", None))
+        self.labelCommand.setText(_translate("Project", "Command(s):", None))
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 class FilesTableModel(QtCore.QAbstractTableModel):
     HEADER_NAMES = ["S", "File"]
@@ -52,7 +52,7 @@ class FilesTableModel(QtCore.QAbstractTableModel):
         return False
 
     def setFiles(self, files):
-        print files
+        print(files)
         self.files = files
         self.layoutChanged.emit()
         
@@ -64,4 +64,4 @@ class FilesTableModel(QtCore.QAbstractTableModel):
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
         
     def selectedFiles(self):
-        return map(lambda f: f["path"], filter(lambda f: f["checked"], self.files))
+        return [f["path"] for f in [f for f in self.files if f["checked"]]]

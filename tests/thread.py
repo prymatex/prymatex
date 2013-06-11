@@ -1,5 +1,5 @@
 import sys
-from PyQt4 import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 class MyThread(QtCore.QThread):
     def __init__(self, parent = None):
@@ -7,7 +7,7 @@ class MyThread(QtCore.QThread):
         
     def run(self):
         while True:
-            print "Ping"
+            print("Ping")
             QtCore.QThread.sleep(1)
 
 class Window(QtGui.QWidget):

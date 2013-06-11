@@ -10,7 +10,7 @@
 	<dict>
 		<key>decreaseIndentPattern</key>
 		<string>(?x)
-	    ^ (.*\*/)? \s* \} ( [^}{"']* \{ | \s* while \s* \( .* )? [;\s]* (//.*|/\*.*\*/\s*)? $
+	    ^ \s* ( (?! \S.* /[*] ) .* [*]/ \s* )? \}
 	|   ^ \s* (public|private|protected): \s* $
 	|   ^ \s* @(public|private|protected) \s* $
 	</string>
@@ -19,18 +19,20 @@
 	    ^ .* \{ [^}"']* $
 	|   ^ \s* (public|private|protected): \s* $
 	|   ^ \s* @(public|private|protected) \s* $
+	|   ^ \s* \{ \} $
 	</string>
 		<key>indentNextLinePattern</key>
 		<string>(?x)^
-	    (?! .* [;:{}]                   # do not indent when line ends with ;, :, {, or }
-	        \s* (//|/[*] .* [*]/ \s* $) #  …account for potential trailing comment
-	    |   @(public|private|protected) # do not indent after obj-c data access keywords
+	    (?! .* [;:{},] \s*                  # do not indent when line ends with ;, :, {, }, or comma
+	        ( // .* | /[*] .* [*]/ \s* )? $ #  …account for potential trailing comment
+	    |   @(public|private|protected)     # do not indent after obj-c data access keywords
 	    )
-	    .* [^\s;:{}] \s* $              # indent next if this one isn’t
-	                                    #  terminated with ;, :, {, or }
+	    .                                  # the negative look-ahead above means we don’t care about what we match here
 	</string>
 		<key>unIndentedLinePattern</key>
-		<string>^\s*((/\*|\*/|//|#|template\b.*?&gt;(?!\(.*\))|@protocol|@optional|@interface(?!.*\{)|@implementation|@end).*)?$</string>
+		<string>^\s*((/\*|\*/|//|template\b.*?&gt;(?!\(.*\))|@protocol|@optional|@interface(?!.*\{)|@implementation|@end).*)?$</string>
+		<key>zeroIndentPattern</key>
+		<string>^\s*#</string>
 	</dict>
 	<key>uuid</key>
 	<string>02EB44C6-9203-4F4C-BFCB-7E3360B12812</string>

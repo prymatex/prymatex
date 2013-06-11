@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import re, sys, os, stat, tempfile
+import re
+import sys
+import os
+import stat
+import tempfile
+import codecs
 
-try:
-    from ponyguruma import sre
-    from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_MULTILINE
-except Exception, e:
-    sre = re
-    OPTION_CAPTURE_GROUP = re.MULTILINE
-    OPTION_MULTILINE = re.MULTILINE
-    
+from prymatex.utils import six
+from prymatex.utils import encoding
+
 RE_SHEBANG = re.compile("^#!(.*)$")
 RE_SHEBANG_ENVKEY = re.compile("(\w+)_SHEBANG")
 RE_ABSPATH_LINENO = re.compile('''
@@ -34,8 +34,10 @@ http://en.wikipedia.org/wiki/Dennis_Ritchie
 def getSupportPath(environment):
     return environment["PMX_SUPPORT_PATH"]
 
+
 def getShellShebang(environment):
     return "#!%s" % environment.get("SHELL", SHELL_BASH)
+
 
 def buildShellScript(script, environment, shebang = None):
     shellScript = [ getShellShebang(environment) ] if shebang is None else [ shebang ]
@@ -46,6 +48,7 @@ def buildShellScript(script, environment, shebang = None):
     shellScript.append(script)
     return "\n".join(shellScript)
 
+
 def buildEnvScript(script, command, environment):
     supportPath = getSupportPath(environment)
 
@@ -53,15 +56,19 @@ def buildEnvScript(script, command, environment):
     envScript = [ "%s %s" % (shebang, command) ]
     envScript.append(script)
     return "\n".join(envScript)
+
     
 def has_shebang(line):
     return line.startswith("#!")
 
+
 def is_shell_shebang(line):
     return os.path.basename(line) in [ "bash", "sh", "csh", "zsh" ]
 
+
 def is_env_shebang(line):
     return os.path.basename(line) == "env"
+
 
 def shebang_patch(shebang, environment):
     shebangParts = shebang.split()
@@ -72,7 +79,7 @@ def shebang_patch(shebang, environment):
             shebang = "%s %s %s" % ("#!/usr/bin/env", patchValue, " ".join(shebangParts[2:]))
     else:
         #No portable shebang
-        for key, value in environment.iteritems():
+        for key, value in environment.items():
             match = RE_SHEBANG_ENVKEY.match(key)
             if match:
                 shebangKey = match.group(1).lower()
@@ -81,6 +88,7 @@ def shebang_patch(shebang, environment):
                     splitIndex += len(shebangKey)
                     shebang = value + shebang[splitIndex:]
     return shebang
+
 
 def shebang_command(shebang, environment):
     shebangParts = shebang.split()
@@ -91,11 +99,12 @@ def shebang_command(shebang, environment):
             return "%s %s" % (patchValue, " ".join(shebangParts[2:]))
     else:
         #No portable shebang
-        for key, value in environment.iteritems():
+        for key, value in environment.items():
             for prefix in [ "TM_", "PMX_" ]:
                 if key.startswith(prefix) and key[len(prefix):].lower() in shebang:
                     return ("%s %s") % (value, " ".join(shebangParts[1:]))
     return " ".join(shebangParts[1:])
+
 
 def ensureShellScript(script, environment):
     scriptLines = script.splitlines()
@@ -112,45 +121,31 @@ def ensureShellScript(script, environment):
         script = buildEnvScript(scriptContent, command, environment)
     return script
 
+
 #============================
 # UINX
 #============================
 def ensureUnixEnvironment(environment):
-    codingenv = {}
-    for key, value in environment.iteritems():
-        try:
-            key = unicode(key).encode('utf-8')
-            value = unicode(value).encode('utf-8')
-            codingenv[key] = value
-        except UnicodeDecodeError, e:
-            pass
-    return codingenv
+    return dict(map(lambda item: (encoding.to_fs(item[0]), encoding.to_fs(item[1])), environment.items()))
 
 def prepareUnixShellScript(script, environment):
-    environment = ensureUnixEnvironment(environment)
     script = ensureShellScript(script, environment)
     tmpFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
-    return tmpFile, environment, tmpFile
+    return tmpFile, ensureUnixEnvironment(environment), tmpFile
+
     
 #============================
 # WINDOWS
 #============================
 def ensureWindowsEnvironment(environment):
-    codingenv = {}
-    for key, value in environment.iteritems():
-        try:
-            key = unicode(key).encode('utf-8')
-            value = unicode(value).encode('utf-8')
-            codingenv[key] = value
-        except UnicodeDecodeError, e:
-            pass
-    return codingenv
+    return dict(map(lambda item: (encoding.to_fs(item[0]), encoding.to_fs(item[1])), environment.items()))
 
 def prepareWindowsShellScript(script, environment):
     environment = ensureWindowsEnvironment(environment)
     script = ensureShellScript(script, environment)
     tmpFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
     return tmpFile, environment, tmpFile
+
     
 #============================
 # CYGWIN
@@ -162,16 +157,10 @@ def ensureCygwinPath(path):
         path = path.replace("\\", "/")
     return path
 
+
 def ensureCygwinEnvironment(environment):
-    codingenv = {}
-    for key, value in environment.iteritems():
-        try:
-            key = unicode(key).encode('utf-8')
-            value = unicode(value).encode('utf-8')
-            codingenv[key] = ensureCygwinPath(value)
-        except UnicodeDecodeError, e:
-            pass
-    return codingenv
+    return dict(map(lambda item: (encoding.to_fs(item[0]), ensureCygwinPath(encoding.to_fs(item[1]))), environment.items()))
+
 
 def prepareCygwinShellScript(script, environment):
     cygwinPath = environment.get("PMX_CYGWIN_PATH", PMX_CYGWIN_PATH)
@@ -182,24 +171,35 @@ def prepareCygwinShellScript(script, environment):
     command = '%s\\bin\\env.exe "%s"' % (cygwinPath, tmpFile)
     return command, environment, tmpFile
 
-def prepareShellScript(script, environment):
-    assert 'PMX_SUPPORT_PATH' in environment, "PMX_SUPPORT_PATH is not in the environment"
+
+def prepareShellScript(script, variables):
+    #Aca entran las variables de prymatex, tengo que armar el environment con os.environ
+    assert 'PMX_SUPPORT_PATH' in variables, "PMX_SUPPORT_PATH is not in the environment"
+    
+    # Build final environment
+    environment = os.environ.copy()
+    environment.update(variables)
+    
     if sys.platform == "win32" and "PMX_CYGWIN_PATH" in environment:
         return prepareCygwinShellScript(script, environment)
     elif sys.platform == "win32":
         return prepareWindowsShellScript(script, environment)
     return prepareUnixShellScript(script, environment)
 
+
 def makeExecutableTempFile(content, directory):
+    # TODO: Mejorara la generacion de temp, se borra no se borra que onda
+    #tempFile = tempfile.NamedTemporaryFile(prefix='pmx', dir = directory)
     descriptor, name = tempfile.mkstemp(prefix='pmx', dir = directory)
     tempFile = os.fdopen(descriptor, 'w+')
-    tempFile.write(content.encode('utf-8'))
+    tempFile.write(six.PY3 and content or encoding.to_fs(content))
     tempFile.close()
     os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
     return name
 
 def deleteFile(filePath):
     os.unlink(filePath)
+
 
 def sh(cmd):
     """ Execute cmd and capture stdout, and return it as a string. """
@@ -212,6 +212,7 @@ def sh(cmd):
         if pipe: pipe.close()
     return result
 
+
 def ensurePath(path, name, suffix = 0):
     """
     Return a safe path, ensure not exists
@@ -219,11 +220,12 @@ def ensurePath(path, name, suffix = 0):
     if suffix == 0 and not os.path.exists(path % name):
         return path % name
     else:
-        newPath = path % (name + "_" + unicode(suffix))
+        newPath = path % (name + "_" + six.u(suffix))
         if not os.path.exists(newPath):
             return newPath
         else:
             return ensurePath(path, name, suffix + 1)
+
             
 def pathToLink(match):
     path = match.group('path')
@@ -232,32 +234,17 @@ def pathToLink(match):
     attrs['line'] = match.group('line')
     #attrs['column'] = match.group('column')
     
-    final_attrs = '?%s' % '?'.join(['%s=%s' % (k, v) for k, v in attrs.iteritems() if v ])
+    final_attrs = '?%s' % '?'.join(['%s=%s' % (k, v) for k, v in attrs.items() if v ])
     text = match.group('text')
     
     data = dict(attrs= final_attrs, text= text)
     link = '<a href="txmt://open/%(attrs)s">%(text)s</a>' % data 
     return link
 
+
 def makeHyperlinks(text):
     return re.sub(RE_ABSPATH_LINENO, pathToLink, text)
 
-def compileRegexp(string, flags = []):
-    #Muejejejeje
-    reflags = []
-    if flags and OPTION_CAPTURE_GROUP in flags:
-        reflags = [ re.MULTILINE ]
-    elif flags and OPTION_MULTILINE in flags:
-        reflags = [ re.MULTILINE ]
-    try:
-        restring = string.replace('?i:', '(?i)')
-        return re.compile(unicode(restring), reduce(lambda x, y: x | y, reflags, 0))
-    except:
-        try:
-            return sre.compile(unicode(string), reduce(lambda x, y: x | y, flags, 0))
-        except:
-            #Mala leche
-            pass
 
 if __name__ == '__main__':
     #http://en.wikipedia.org/wiki/Shebang_(Unix)
@@ -270,19 +257,19 @@ if __name__ == '__main__':
         "RUBY_SHEBANG": "#!/usr/local/bin/ruby1.8",
         "BASH_SHEBANG": "#!/bin/sh"
     }
-    print shebang_patch("#!/usr/bin/env python", environment)
-    print shebang_patch("#!/usr/bin/env python -s", environment)
-    print shebang_patch("#!/usr/bin/env ruby -w -u", environment)
-    print shebang_patch("#!/bin/ruby -uw --other", environment)
-    print shebang_patch("#!/usr/bin/python", environment)
-    print shebang_patch("#!/usr/bin/env bash", environment)
-    print shebang_patch("#!/usr/bin/bash", environment)
-    print shebang_command("#!/usr/bin/env python", environment)
-    print shebang_command("#!/usr/bin/env python -s", environment)
-    print shebang_command("#!/usr/bin/env ruby -w -u", environment)
-    print shebang_command("#!/bin/ruby -uw --other", environment)
-    print shebang_command("#!/bin/php -uw --other", environment)
-    print shebang_command("#!/usr/bin/python", environment)
-    print shebang_command("#!/usr/bin/env bash", environment)
-    print shebang_command("#!/usr/bin/env php", environment)
-    print shebang_command("#!/usr/bin/bash", environment)
+    print(shebang_patch("#!/usr/bin/env python", environment))
+    print(shebang_patch("#!/usr/bin/env python -s", environment))
+    print(shebang_patch("#!/usr/bin/env ruby -w -u", environment))
+    print(shebang_patch("#!/bin/ruby -uw --other", environment))
+    print(shebang_patch("#!/usr/bin/python", environment))
+    print(shebang_patch("#!/usr/bin/env bash", environment))
+    print(shebang_patch("#!/usr/bin/bash", environment))
+    print(shebang_command("#!/usr/bin/env python", environment))
+    print(shebang_command("#!/usr/bin/env python -s", environment))
+    print(shebang_command("#!/usr/bin/env ruby -w -u", environment))
+    print(shebang_command("#!/bin/ruby -uw --other", environment))
+    print(shebang_command("#!/bin/php -uw --other", environment))
+    print(shebang_command("#!/usr/bin/python", environment))
+    print(shebang_command("#!/usr/bin/env bash", environment))
+    print(shebang_command("#!/usr/bin/env php", environment))
+    print(shebang_command("#!/usr/bin/bash", environment))

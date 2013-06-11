@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/others/filterbundleitem.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/others/filterbundleitem.ui'
 #
-# Created: Fri Nov  9 18:10:44 2012
-#      by: PyQt4 UI code generator snapshot-4.9.6-95094339d25b
+# Created: Wed Jun  5 22:34:37 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_FilterThroughCommand(object):
     def setupUi(self, FilterThroughCommand):
@@ -118,20 +126,20 @@ class Ui_FilterThroughCommand(object):
         QtCore.QMetaObject.connectSlotsByName(FilterThroughCommand)
 
     def retranslateUi(self, FilterThroughCommand):
-        FilterThroughCommand.setWindowTitle(_('Filter Through Command'))
-        self.label.setText(_('Command'))
-        self.comboCommand.setProperty("className", _('bigPadding'))
-        self.groupBox.setTitle(_('Input'))
-        self.radioInputNone.setText(_('&None'))
-        self.radioInputSelection.setText(_('&Selection'))
-        self.radioInputDocument.setText(_('&Document'))
-        self.groupBox_2.setTitle(_('Output'))
-        self.radioOutputDiscard.setText(_('D&iscard'))
-        self.radioOutputSelection.setText(_('Replace Se&lection'))
-        self.radioOutputDocument.setText(_('Replace D&ocument'))
-        self.radioOutputInsertText.setText(_('&Insert As Text'))
-        self.radioOutputInsertSnippet.setText(_('Insert As Sni&ppet'))
-        self.radioOutputShowToolTip.setText(_('Show As &ToolTip'))
-        self.radioOutputShowAsHTML.setText(_('Show As &Html'))
-        self.radioOutputCreateNewDocument.setText(_('Create &New Document'))
+        FilterThroughCommand.setWindowTitle(_translate("FilterThroughCommand", "Filter Through Command", None))
+        self.label.setText(_translate("FilterThroughCommand", "Command", None))
+        self.comboCommand.setProperty("className", _translate("FilterThroughCommand", "bigPadding", None))
+        self.groupBox.setTitle(_translate("FilterThroughCommand", "Input", None))
+        self.radioInputNone.setText(_translate("FilterThroughCommand", "&None", None))
+        self.radioInputSelection.setText(_translate("FilterThroughCommand", "&Selection", None))
+        self.radioInputDocument.setText(_translate("FilterThroughCommand", "&Document", None))
+        self.groupBox_2.setTitle(_translate("FilterThroughCommand", "Output", None))
+        self.radioOutputDiscard.setText(_translate("FilterThroughCommand", "D&iscard", None))
+        self.radioOutputSelection.setText(_translate("FilterThroughCommand", "Replace Se&lection", None))
+        self.radioOutputDocument.setText(_translate("FilterThroughCommand", "Replace D&ocument", None))
+        self.radioOutputInsertText.setText(_translate("FilterThroughCommand", "&Insert As Text", None))
+        self.radioOutputInsertSnippet.setText(_translate("FilterThroughCommand", "Insert As Sni&ppet", None))
+        self.radioOutputShowToolTip.setText(_translate("FilterThroughCommand", "Show As &ToolTip", None))
+        self.radioOutputShowAsHTML.setText(_translate("FilterThroughCommand", "Show As &Html", None))
+        self.radioOutputCreateNewDocument.setText(_translate("FilterThroughCommand", "Create &New Document", None))
 

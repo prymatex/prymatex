@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>autoScrollOutput</key>
+	<true/>
 	<key>beforeRunningCommand</key>
 	<string>saveActiveFile</string>
 	<key>bundleUUID</key>
@@ -13,7 +15,6 @@
 require ENV["TM_SUPPORT_PATH"] + "/lib/tm/process"
 require ENV["TM_SUPPORT_PATH"] + "/lib/tm/htmloutput"
 require ENV["TM_SUPPORT_PATH"] + "/lib/tm/save_current_document"
-require ENV["TM_SUPPORT_PATH"] + "/lib/tm/require_cmd"
 
 # To enable the typesetting of unsaved documents, you must change the “Save” setting of
 # this command to “Current File” and add the variable TM_LATEX_AUTOSAVE to TextMate's
@@ -23,8 +24,6 @@ require ENV["TM_SUPPORT_PATH"] + "/lib/tm/require_cmd"
 
 TextMate.save_current_document unless ENV["TM_LATEX_AUTOSAVE"].nil?
 
-TextMate.require_cmd("kpsewhich")
-
 texMate = ENV["TM_BUNDLE_SUPPORT"] + "/bin/texMate.py"
 engine_version = TextMate::Process.run(texMate, "version")
 TextMate::HTMLOutput.show(:title =&gt; "Typesetting “#{ENV["TM_DISPLAYNAME"] || File.basename(ENV["TM_FILEPATH"])}”…", :sub_title =&gt; engine_version) do |io|
@@ -32,21 +31,41 @@ TextMate::HTMLOutput.show(:title =&gt; "Typesetting “#{ENV["TM_DISPLAYNAME"] |
 	io &lt;&lt; line
   end
 end
-::Process.exit($?.exitstatus)
+# ::Process.exit($?.exitstatus)
 </string>
-	<key>dontFollowNewOutput</key>
-	<false/>
 	<key>input</key>
 	<string>document</string>
+	<key>inputFormat</key>
+	<string>text</string>
 	<key>keyEquivalent</key>
 	<string>@r</string>
 	<key>name</key>
 	<string>Typeset &amp; View (PDF)</string>
-	<key>output</key>
-	<string>showAsHTML</string>
+	<key>outputCaret</key>
+	<string>afterOutput</string>
+	<key>outputFormat</key>
+	<string>html</string>
+	<key>outputLocation</key>
+	<string>newWindow</string>
+	<key>requiredCommands</key>
+	<array>
+		<dict>
+			<key>command</key>
+			<string>kpsewhich</string>
+			<key>locations</key>
+			<array>
+				<string>/usr/texbin/kpsewhich</string>
+				<string>/opt/local/bin/kpsewhich</string>
+			</array>
+		</dict>
+	</array>
 	<key>scope</key>
 	<string>text.tex</string>
+	<key>semanticClass</key>
+	<string>process.run.tex</string>
 	<key>uuid</key>
 	<string>6177C3DA-C580-11D9-B649-000393D4B5C8</string>
+	<key>version</key>
+	<integer>2</integer>
 </dict>
 </plist>

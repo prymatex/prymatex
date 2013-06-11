@@ -40,7 +40,7 @@ class ProgressDialog(QtGui.QDialog, Ui_ProgressDialog, PMXBaseDialog):
         if "isIndeterminate" in parameters and parameters["isIndeterminate"]:
             self.progressBar.setMaximum(0)
         if "details" in parameters:
-            print parameters["details"]
+            print(parameters["details"])
         if "summary" in parameters:
             self.labelSummary.setText(parameters["summary"])
         if "progressValue" in parameters and self.progressAnimate:
