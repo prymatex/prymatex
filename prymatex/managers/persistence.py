@@ -14,7 +14,7 @@ class ManagedCacheMixin(object):
 
     def sync(self):
         pass
-        
+
 class SingleFileCache(ManagedCacheMixin):
     def __init__(self, path):
         self.path = path
@@ -33,9 +33,9 @@ class PersistenceManager(QtCore.QObject, PMXBaseComponent):
         """docstring for buildKey"""
         return hashlib.sha1(text.encode("utf-8")).hexdigest()
 
-    def singleFileCache(self, value):
-        fileName = self.buildFileName(value)
-        print os.path.join(self.cacheDirectory, fileName)
+    def singleFileCache(self, cacheName):
+        fileName = self.buildFileName(cacheName)
+        print(os.path.join(self.cacheDirectory, fileName))
     
     def memoryCache(self, value):
         cache = MemoryCache()

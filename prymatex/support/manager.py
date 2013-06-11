@@ -69,7 +69,8 @@ class PMXSupportBaseManager(object):
         self.managedObjects = {}
 
         # Cache!!
-        self.memoizedCache = self.buildMemoizedCache()
+        self.bundleItemCache = self.buildBundleItemCache()
+        self.plistFileCache = self.buildPlistFileCache()
     
     # ------------ Namespaces ----------------------
     def addNamespace(self, name, path):
@@ -157,9 +158,12 @@ class PMXSupportBaseManager(object):
 
     #--------------- Plist --------------------
     def readPlist(self, path):
-        return plist.readPlist(path)
+        if path in self.plistFileCache:
+            return self.plistFileCache[path]
+        return self.plistFileCache.setdefault(path, plist.readPlist(path))
         
     def writePlist(self, hashData, path):
+        self.plistFileCache.set(path, hashData)
         return plist.writePlist(hashData, path)
 
     #--------------- Tools --------------------
@@ -516,7 +520,10 @@ class PMXSupportBaseManager(object):
         self.populatedBundle(bundle)
 
     # ------------ Build caches --------------------
-    def buildMemoizedCache(self):
+    def buildPlistFileCache(self):
+        return {}
+
+    def buildBundleItemCache(self):
         return {}
 
     # ------------ Cache coherence -----------------
@@ -532,7 +539,7 @@ class PMXSupportBaseManager(object):
         scopeSelectorAttr = testScope and scope.Selector(attrs['scope']) or None
         
         # Add keys for remove
-        for key in self.memoizedCache.keys():
+        for key in self.bundleItemCache.keys():
             if testKeyEquivalent:
                 if (key[0] == "getKeyEquivalentItem" and key[1] in [ bundleItem.keyEquivalent, attrs['keyEquivalent']]) or\
                 key[0] == "getAllKeyEquivalentItems":
@@ -554,7 +561,7 @@ class PMXSupportBaseManager(object):
             
         # Quitar claves
         for key in keys:
-            del self.memoizedCache[key]
+            self.bundleItemCache.pop(key)
 
     # ----------- MANAGED OBJECTS INTERFACE
     def setDeleted(self, uuid):
@@ -974,16 +981,16 @@ class PMXSupportBaseManager(object):
     #----------------- PREFERENCES ---------------------
     def getPreferences(self, leftScope, rightScope = None):
         memoizedKey = ("getPreferences", None, leftScope, rightScope)
-        if memoizedKey in self.memoizedCache:
-            return self.memoizedCache[memoizedKey]
-        return self.memoizedCache.setdefault(memoizedKey,
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
+        return self.bundleItemCache.setdefault(memoizedKey,
             self.__sort_filter_items(self.getAllPreferences(), leftScope, rightScope))
 
     def getPreferenceSettings(self, leftScope, rightScope = None):
         memoizedKey = ("getPreferenceSettings", None, leftScope, rightScope)
-        if memoizedKey in self.memoizedCache:
-            return self.memoizedCache[memoizedKey]
-        return self.memoizedCache.setdefault(memoizedKey,
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
+        return self.bundleItemCache.setdefault(memoizedKey,
             PMXPreference.buildSettings(self.getPreferences(leftScope, rightScope)))
 
     # ----------------- TABTRIGGERS INTERFACE
@@ -1000,9 +1007,9 @@ class PMXSupportBaseManager(object):
     # --------------- TABTRIGGERS
     def getAllTabTriggerSymbols(self):
         memoizedKey = ("getAllTabTriggerSymbols", None, None, None)
-        if memoizedKey in self.memoizedCache:
-            return self.memoizedCache[memoizedKey]
-        return self.memoizedCache.setdefault(memoizedKey,
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
+        return self.bundleItemCache.setdefault(memoizedKey,
             [ item.tabTrigger for item in self.getAllTabTriggerItems() ])
 
     def getTabTriggerSymbol(self, line, index):
@@ -1018,16 +1025,16 @@ class PMXSupportBaseManager(object):
 
     def getAllTabTiggerItemsByScope(self, leftScope, rightScope):
         memoizedKey = ("getAllTabTiggerItemsByScope", None, leftScope, rightScope)
-        if memoizedKey in self.memoizedCache:
-            return self.memoizedCache[memoizedKey]
-        return self.memoizedCache.setdefault(memoizedKey,
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
+        return self.bundleItemCache.setdefault(memoizedKey,
             self.__sort_filter_items(self.getAllTabTriggerItems(), leftScope, rightScope))
 
     def getTabTriggerItem(self, tabTrigger, leftScope, rightScope):
         memoizedKey = ("getTabTriggerItem", tabTrigger, leftScope, rightScope)
-        if memoizedKey in self.memoizedCache:
-            return self.memoizedCache[memoizedKey]
-        return self.memoizedCache.setdefault(memoizedKey,
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
+        return self.bundleItemCache.setdefault(memoizedKey,
             self.__sort_filter_items(self.getAllBundleItemsByTabTrigger(tabTrigger), leftScope, rightScope))
 
     # -------------- KEYEQUIVALENT INTERFACE
@@ -1044,16 +1051,16 @@ class PMXSupportBaseManager(object):
     #-------------- KEYEQUIVALENT ------------------------
     def getAllKeyEquivalentCodes(self):
         memoizedKey = ("getAllKeyEquivalentCodes", None, None, None)
-        if memoizedKey in self.memoizedCache:
-            return self.memoizedCache[memoizedKey]
-        return self.memoizedCache.setdefault(memoizedKey,
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
+        return self.bundleItemCache.setdefault(memoizedKey,
             [item.keyEquivalent for item in self.getAllKeyEquivalentItems()])
 
     def getKeyEquivalentItem(self, code, leftScope, rightScope):
         memoizedKey = ("getKeyEquivalentItem", code, leftScope, rightScope)
-        if memoizedKey in self.memoizedCache:
-            return self.memoizedCache[memoizedKey]
-        return self.memoizedCache.setdefault(memoizedKey,
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
+        return self.bundleItemCache.setdefault(memoizedKey,
             self.__sort_filter_items(self.getAllBundleItemsByKeyEquivalent(code), leftScope, rightScope))
 
     # --------------- FILE EXTENSION INTERFACE

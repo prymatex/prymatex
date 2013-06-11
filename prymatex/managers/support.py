@@ -240,6 +240,11 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
 
     def menuForBundle(self, bundle):
         return self.bundleMenuGroup.menuForBundle(bundle)
+
+    # Override buildPlistFileCache for custom cache
+    def buildPlistFileCache(self):
+        self.application.persistenceManager.singleFileCache()
+        return {}
         
     #---------------------------------------------------
     # Environment
@@ -426,9 +431,9 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
     #---------------------------------------------------
     def getAllPreferences(self):
         memoizedKey = ("getAllPreferences", None, None, None)
-        if memoizedKey in self.memoizedCache:
-            return self.memoizedCache[memoizedKey]
-        return self.memoizedCache.setdefault(memoizedKey,
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
+        return self.bundleItemCache.setdefault(memoizedKey,
             self.preferenceProxyModel.getAllItems())
 
     #---------------------------------------------------
@@ -436,24 +441,24 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
     #---------------------------------------------------
     def getAllTabTriggerItems(self):
         memoizedKey = ("getAllTabTriggerItems", None, None, None)
-        if memoizedKey in self.memoizedCache:
-            return self.memoizedCache[memoizedKey]
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
         tabTriggers = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.tabTrigger != None:
                 tabTriggers.append(item)
-        return self.memoizedCache.setdefault(memoizedKey,
+        return self.bundleItemCache.setdefault(memoizedKey,
             tabTriggers)
         
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
         memoizedKey = ("getAllBundleItemsByTabTrigger", tabTrigger, None, None)
-        if memoizedKey in self.memoizedCache:
-            return self.memoizedCache[memoizedKey]
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
         items = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.tabTrigger == tabTrigger:
                 items.append(item)
-        return self.memoizedCache.setdefault(memoizedKey,
+        return self.bundleItemCache.setdefault(memoizedKey,
             items)
 
     #---------------------------------------------------
@@ -461,19 +466,19 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
     #---------------------------------------------------
     def getAllKeyEquivalentItems(self):
         memoizedKey = ("getAllBundleItemsByTabTrigger", None, None, None)
-        if memoizedKey in self.memoizedCache:
-            return self.memoizedCache[memoizedKey]
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache[memoizedKey]
         keyEquivalent = []
         for item in self.actionItemsProxyModel.getAllItems() + self.syntaxProxyModel.getAllItems():
             if item.keyEquivalent != None:
                 keyEquivalent.append(item)
-        return self.memoizedCache.setdefault(memoizedKey,
+        return self.bundleItemCache.setdefault(memoizedKey,
             keyEquivalent)
         
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
         memoizedKey = ("getAllBundleItemsByKeyEquivalent", keyEquivalent, None, None)
-        if memoizedKey in self.memoizedCache:
-            return self.memoizedCache[memoizedKey]
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
         items = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.keyEquivalent == keyEquivalent:
@@ -481,7 +486,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
         for syntax in self.syntaxProxyModel.getAllItems():
             if syntax.keyEquivalent == keyEquivalent:
                 items.append(syntax)
-        return self.memoizedCache.setdefault(memoizedKey,
+        return self.bundleItemCache.setdefault(memoizedKey,
             items)
     
     #---------------------------------------------------
