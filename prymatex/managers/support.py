@@ -12,7 +12,6 @@ from prymatex.core.settings import pmxConfigPorperty
 
 from prymatex.support.manager import PMXSupportBaseManager
 
-from prymatex.utils.decorators.memoize import dynamic_memoized
 from prymatex.utils import encoding
 
 from prymatex.models.process import ExternalProcessTableModel
@@ -425,42 +424,56 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
     #---------------------------------------------------
     # PREFERENCES OVERRIDE INTERFACE
     #---------------------------------------------------
-    @dynamic_memoized
     def getAllPreferences(self):
-        return self.preferenceProxyModel.getAllItems()
-    
+        memoizedKey = ("getAllPreferences", None, None, None)
+        if memoizedKey in self.memoizedCache:
+            return self.memoizedCache[memoizedKey]
+        return self.memoizedCache.setdefault(memoizedKey,
+            self.preferenceProxyModel.getAllItems())
+
     #---------------------------------------------------
     # TABTRIGGERS OVERRIDE INTERFACE
     #---------------------------------------------------
-    @dynamic_memoized
     def getAllTabTriggerItems(self):
+        memoizedKey = ("getAllTabTriggerItems", None, None, None)
+        if memoizedKey in self.memoizedCache:
+            return self.memoizedCache[memoizedKey]
         tabTriggers = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.tabTrigger != None:
                 tabTriggers.append(item)
-        return tabTriggers
+        return self.memoizedCache.setdefault(memoizedKey,
+            tabTriggers)
         
-    @dynamic_memoized
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
+        memoizedKey = ("getAllBundleItemsByTabTrigger", tabTrigger, None, None)
+        if memoizedKey in self.memoizedCache:
+            return self.memoizedCache[memoizedKey]
         items = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.tabTrigger == tabTrigger:
                 items.append(item)
-        return items
+        return self.memoizedCache.setdefault(memoizedKey,
+            items)
 
     #---------------------------------------------------
     # KEYEQUIVALENT OVERRIDE INTERFACE
     #---------------------------------------------------
-    @dynamic_memoized
     def getAllKeyEquivalentItems(self):
+        memoizedKey = ("getAllBundleItemsByTabTrigger", None, None, None)
+        if memoizedKey in self.memoizedCache:
+            return self.memoizedCache[memoizedKey]
         keyEquivalent = []
         for item in self.actionItemsProxyModel.getAllItems() + self.syntaxProxyModel.getAllItems():
             if item.keyEquivalent != None:
                 keyEquivalent.append(item)
-        return keyEquivalent
+        return self.memoizedCache.setdefault(memoizedKey,
+            keyEquivalent)
         
-    @dynamic_memoized
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
+        memoizedKey = ("getAllBundleItemsByKeyEquivalent", keyEquivalent, None, None)
+        if memoizedKey in self.memoizedCache:
+            return self.memoizedCache[memoizedKey]
         items = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.keyEquivalent == keyEquivalent:
@@ -468,7 +481,8 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
         for syntax in self.syntaxProxyModel.getAllItems():
             if syntax.keyEquivalent == keyEquivalent:
                 items.append(syntax)
-        return items
+        return self.memoizedCache.setdefault(memoizedKey,
+            items)
     
     #---------------------------------------------------
     # FILE EXTENSION OVERRIDE INTERFACE

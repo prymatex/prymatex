@@ -81,3 +81,8 @@ class ScopeSelectorTests(unittest.TestCase):
             scope = Scope.fast_build("text.html.markdown meta.paragraph.markdown markup.bold.markdown")
             selector.does_match(scope)
         print(time() - start)
+
+    def test_none_selector(self):
+        selector = Selector("")
+        scope = Scope("source.pythonpunctuation.definition.list.end.python")
+        print(selector.does_match(scope))

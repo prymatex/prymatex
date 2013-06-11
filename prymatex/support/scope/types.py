@@ -227,10 +227,8 @@ class SelectorType(object):
     def __str__(self):
         return  ", ".join([str(c) for c in self.composites])
 
-
     def __repr__(self):
         return "%s\n[%s]" % (self.__class__.__name__, "\n".join([repr(c) for c in self.composites]))
-    
 
     def does_match(self, lhs, rhs, rank = None):
         if rank is not None:

@@ -23,7 +23,6 @@ from prymatex.support import scope
 
 from prymatex.utils import plist
 
-from prymatex.utils.decorators.memoize import dynamic_memoized, remove_memoized_argument, remove_memoized_function
 from functools import reduce
 
 BUNDLEITEM_CLASSES = [PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, 
@@ -69,7 +68,10 @@ class PMXSupportBaseManager(object):
         self.environment = {}
         self.managedObjects = {}
 
-    #------------- Namespaces ----------------------
+        # Cache!!
+        self.memoizedCache = self.buildMemoizedCache()
+    
+    # ------------ Namespaces ----------------------
     def addNamespace(self, name, path):
         # TODO: Quiza migrar a algo con mas forma para encapsular los namespace
         self.namespaces[name] = {"dirname": path}
@@ -513,39 +515,46 @@ class PMXSupportBaseManager(object):
                     traceback.print_exc()
         self.populatedBundle(bundle)
 
-    # --------------- CACHE COHERENCE
+    # ------------ Build caches --------------------
+    def buildMemoizedCache(self):
+        return {}
+
+    # ------------ Cache coherence -----------------
     def updateBundleItemCacheCoherence(self, bundleItem, attrs):
-        # TODO Terminar, identificar las funciones y borrar las cosas como corresponde
-        #Deprecate keyEquivalent in cache
-        if 'keyEquivalent' in attrs and bundleItem.keyEquivalent != attrs['keyEquivalent']:
-            remove_memoized_argument(bundleItem.keyEquivalent)
-            remove_memoized_argument(attrs['keyEquivalent'])
-            #Delete list of all keyEquivalent
-            remove_memoized_function(self.getAllKeyEquivalentItems)
+        # TODO NamedTuples para las keys
+        keys = []
+        testKeyEquivalent = bool('keyEquivalent' in attrs and bundleItem.keyEquivalent != attrs['keyEquivalent'])
+        testTabTrigger = bool('tabTrigger' in attrs and bundleItem.tabTrigger != attrs['tabTrigger'])
+        testScope = bool('scope' in attrs and bundleItem.scope != attrs['scope'])
+        testPreference = bool(PMXPreference.TYPE == bundleItem.TYPE)
 
-        #Deprecate tabTrigger in cache
-        if 'tabTrigger' in attrs and bundleItem.tabTrigger != attrs['tabTrigger']:
-            remove_memoized_argument(bundleItem.tabTrigger)
-            remove_memoized_argument(attrs['tabTrigger'])
-            #Delete list of all tabTrigers
-            remove_memoized_function(self.getAllTabTriggerItems)
-
-        #Deprecate scope in cache
-        def test_scope_bundleItem(itemType):
-            def test_scope(f, key, fkey):
-                reference = ""
-                if itemType == PMXPreference.TYPE and f.__name__ == "getPreferenceSettings":
-                    reference = fkey[1]
-                elif f.__name__ in ["getTabTriggerItem", "getKeyEquivalentItem"]:
-                    reference = fkey[2]
-                    # TODO Hacelo con soporte para left and right scope
-                return scope.Selector(key).does_match(reference)
-
-            return test_scope
-
-        if 'scope' in attrs and bundleItem.scope != attrs['scope']:
-            remove_memoized_argument(bundleItem.scope, condition=test_scope_bundleItem(bundleItem.TYPE))
-            remove_memoized_argument(attrs['scope'], condition=test_scope_bundleItem(bundleItem.TYPE))
+        scopeSelectorItem = testScope and scope.Selector(bundleItem.scope) or None
+        scopeSelectorAttr = testScope and scope.Selector(attrs['scope']) or None
+        
+        # Add keys for remove
+        for key in self.memoizedCache.keys():
+            if testKeyEquivalent:
+                if (key[0] == "getKeyEquivalentItem" and key[1] in [ bundleItem.keyEquivalent, attrs['keyEquivalent']]) or\
+                key[0] == "getAllKeyEquivalentItems":
+                    keys.append(key)
+                    continue
+            if testTabTrigger:
+                if (key[0] == "getTabTriggerItem" and key[1] in [ bundleItem.tabTrigger, attrs['tabTrigger']]) or\
+                key[0] == "getAllTabTriggerItems":
+                    keys.append(key)
+                    continue
+            if testPreference and key[0] == "getPreferenceSettings":
+                keys.append(key)
+                continue
+            if testScope and ( (key[2] and scopeSelectorItem.does_match(key[2])) or\
+            (key[3] and scopeSelectorItem.does_match(key[3])) or\
+            (key[2] and scopeSelectorAttr.does_match(key[2])) or\
+            (key[3] and scopeSelectorAttr.does_match(key[3]))):
+                keys.append(key)    
+            
+        # Quitar claves
+        for key in keys:
+            del self.memoizedCache[key]
 
     # ----------- MANAGED OBJECTS INTERFACE
     def setDeleted(self, uuid):
@@ -963,13 +972,19 @@ class PMXSupportBaseManager(object):
         raise NotImplementedError
 
     #----------------- PREFERENCES ---------------------
-    @dynamic_memoized
-    def getPreferences(self, scope):
-        return self.__sort_filter_items(self.getAllPreferences(), scope)
+    def getPreferences(self, leftScope, rightScope = None):
+        memoizedKey = ("getPreferences", None, leftScope, rightScope)
+        if memoizedKey in self.memoizedCache:
+            return self.memoizedCache[memoizedKey]
+        return self.memoizedCache.setdefault(memoizedKey,
+            self.__sort_filter_items(self.getAllPreferences(), leftScope, rightScope))
 
-    @dynamic_memoized
-    def getPreferenceSettings(self, scope):
-        return PMXPreference.buildSettings(self.getPreferences(scope))
+    def getPreferenceSettings(self, leftScope, rightScope = None):
+        memoizedKey = ("getPreferenceSettings", None, leftScope, rightScope)
+        if memoizedKey in self.memoizedCache:
+            return self.memoizedCache[memoizedKey]
+        return self.memoizedCache.setdefault(memoizedKey,
+            PMXPreference.buildSettings(self.getPreferences(leftScope, rightScope)))
 
     # ----------------- TABTRIGGERS INTERFACE
     def getAllTabTriggerItems(self):
@@ -983,11 +998,13 @@ class PMXSupportBaseManager(object):
         raise NotImplementedError
 
     # --------------- TABTRIGGERS
-    @dynamic_memoized
     def getAllTabTriggerSymbols(self):
-        return [item.tabTrigger for item in self.getAllTabTriggerItems()]
+        memoizedKey = ("getAllTabTriggerSymbols", None, None, None)
+        if memoizedKey in self.memoizedCache:
+            return self.memoizedCache[memoizedKey]
+        return self.memoizedCache.setdefault(memoizedKey,
+            [ item.tabTrigger for item in self.getAllTabTriggerItems() ])
 
-    @dynamic_memoized
     def getTabTriggerSymbol(self, line, index):
         line = line[:index][::-1]
         search = [(tabTrigger, line.find(tabTrigger[::-1]), len(tabTrigger)) for tabTrigger in self.getAllTabTriggerSymbols()]
@@ -999,13 +1016,19 @@ class PMXSupportBaseManager(object):
                     best = (trigger, length)
             return best[0]
 
-    @dynamic_memoized
-    def getAllTabTiggerItemsByScope(self, scope):
-        return self.__sort_filter_items(self.getAllTabTriggerItems(), scope)
+    def getAllTabTiggerItemsByScope(self, leftScope, rightScope):
+        memoizedKey = ("getAllTabTiggerItemsByScope", None, leftScope, rightScope)
+        if memoizedKey in self.memoizedCache:
+            return self.memoizedCache[memoizedKey]
+        return self.memoizedCache.setdefault(memoizedKey,
+            self.__sort_filter_items(self.getAllTabTriggerItems(), leftScope, rightScope))
 
-    @dynamic_memoized
     def getTabTriggerItem(self, tabTrigger, leftScope, rightScope):
-        return self.__sort_filter_items(self.getAllBundleItemsByTabTrigger(tabTrigger), leftScope, rightScope)
+        memoizedKey = ("getTabTriggerItem", tabTrigger, leftScope, rightScope)
+        if memoizedKey in self.memoizedCache:
+            return self.memoizedCache[memoizedKey]
+        return self.memoizedCache.setdefault(memoizedKey,
+            self.__sort_filter_items(self.getAllBundleItemsByTabTrigger(tabTrigger), leftScope, rightScope))
 
     # -------------- KEYEQUIVALENT INTERFACE
     def getAllKeyEquivalentItems(self):
@@ -1019,13 +1042,19 @@ class PMXSupportBaseManager(object):
         raise NotImplementedError
 
     #-------------- KEYEQUIVALENT ------------------------
-    @dynamic_memoized
     def getAllKeyEquivalentCodes(self):
-        return [item.keyEquivalent for item in self.getAllKeyEquivalentItems()]
+        memoizedKey = ("getAllKeyEquivalentCodes", None, None, None)
+        if memoizedKey in self.memoizedCache:
+            return self.memoizedCache[memoizedKey]
+        return self.memoizedCache.setdefault(memoizedKey,
+            [item.keyEquivalent for item in self.getAllKeyEquivalentItems()])
 
-    @dynamic_memoized
     def getKeyEquivalentItem(self, code, leftScope, rightScope):
-        return self.__sort_filter_items(self.getAllBundleItemsByKeyEquivalent(code), leftScope, rightScope)
+        memoizedKey = ("getKeyEquivalentItem", code, leftScope, rightScope)
+        if memoizedKey in self.memoizedCache:
+            return self.memoizedCache[memoizedKey]
+        return self.memoizedCache.setdefault(memoizedKey,
+            self.__sort_filter_items(self.getAllBundleItemsByKeyEquivalent(code), leftScope, rightScope))
 
     # --------------- FILE EXTENSION INTERFACE
     def getAllBundleItemsByFileExtension(self, path):
@@ -1085,8 +1114,6 @@ class PMXSupportBaseManager(object):
 #===================================================
 # PYTHON MANAGER
 #===================================================
-
-
 class PMXSupportPythonManager(PMXSupportBaseManager):
     BUNDLES = {}
     BUNDLE_ITEMS = {}

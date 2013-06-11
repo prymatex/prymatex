@@ -98,6 +98,7 @@ class Selector(object):
             if rank is not None:
                 rank.append(0)
             return True
+
         if isinstance(context, six.string_types) or isinstance(context, Scope):
             context = Context.get(context)
 
