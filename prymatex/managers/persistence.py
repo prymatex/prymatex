@@ -31,7 +31,7 @@ class PersistenceManager(QtCore.QObject, PMXBaseComponent):
 
     def buildFileName(self, text):
         """docstring for buildKey"""
-        return hashlib.sha1(text.encode("utf-8")).hexdigest()
+        return hashlib.md5(text.encode("utf-8")).hexdigest()
 
     def singleFileCache(self, cacheName):
         fileName = self.buildFileName(cacheName)

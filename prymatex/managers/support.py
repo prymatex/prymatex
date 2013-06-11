@@ -243,7 +243,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
 
     # Override buildPlistFileCache for custom cache
     def buildPlistFileCache(self):
-        self.application.persistenceManager.singleFileCache()
+        self.application.persistenceManager.singleFileCache("support-plist")
         return {}
         
     #---------------------------------------------------
