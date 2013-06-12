@@ -157,7 +157,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
     # ----------- Signals
     def on_editor_blocksRemoved(self):
         def validSymbolBlock(block):
-            return self.editor.blockUserData(block).symbol is not None
+            return bool(self.editor.blockUserData(block).symbol)
         self.blocks = list(filter(validSymbolBlock, self.blocks))
         self.layoutChanged.emit()
 
@@ -283,8 +283,7 @@ class AlreadyTypedWords(object):
     def __init__(self, editor):
         self.editor = editor
         self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
-        self.words = {}
-        self.groups = {}
+        self.documentWords = set()
         self.editor.registerBlockUserDataHandler(self)
 
     def contributeToBlockUserData(self, userData):
@@ -295,73 +294,26 @@ class AlreadyTypedWords(object):
         
         for token in userData.tokens()[::-1]:
             group = self.editor.scope(scopeHash = token.scopeHash).group
-            words.update([ (word, group) for word in self.editor.RE_WORD.findall(token.chunk) ])
+            words.update([(group, word) for word in self.editor.RE_WORD.findall(token.chunk) ])
         
+        # TODO: Una mejor estructura para las palabras y sus grupos
         if userData.words != words:
             #Quitar el block de las palabras anteriores
-            self.removeWordsBlock(block, [word for word in userData.words if word not in words])
+            self.documentWords.difference_update(
+                userData.words.difference(words)
+            )
             
             #Agregar las palabras nuevas
-            self.addWordsBlock(block, [word for word in words if word not in userData.words])
+            self.documentWords.update(words)
             userData.words = words
 
-    def _purge_words(self):
-        """ Limpiar palabras """
-        #TODO: Hacer python3 compatible
-        self.words = dict(
-            filter(lambda word_blocks: bool(word_blocks[1]), 
-                self.words.items())
-        )
-        self.groups = dict(
-            map(lambda group_words: (group_words[0], 
-                set(filter(lambda word: word in self.words, group_words[1]))), 
-            self.groups.items())
-        )
-
     def on_editor_blocksRemoved(self):
-        """ Quitar bloques que no van mas """
-        def validWordBlock(block):
-            return bool(self.editor.blockUserData(block).words)
-        self.words = dict(
-            map(lambda word_blocks: (word_blocks[0], set(filter(validWordBlock, word_blocks[1]))),
-                self.words.items())
-        )
-
-    def addWordsBlock(self, block, words):
-        for word, group in words:
-            self.words.setdefault(word, set()).add(block)
-            self.groups.setdefault(group, set()).add(word)
-                
-    def _addWordsBlock(self, block, words):
-        """ Agregar con orden, por ahora no lo uso"""
-        for word, group in words:
-            #Blocks
-            blocks = self.words.setdefault(word, [])
-            if block not in blocks:
-                indexes = [b.blockNumber() for b in blocks]
-                index = bisect(indexes, block.blockNumber())
-                blocks.insert(index, block)
-            #Words
-            words = self.groups.setdefault(group, [])
-            if word not in words:
-                position = bisect(words, word)
-                words.insert(position, word)
-
-    def removeWordsBlock(self, block, words):
-        for word, group in words:
-            self.words[word].discard(block)
-            self.groups[group].discard(word)    
-    
-    def _removeWordsBlock(self, block, words):
-        for word, group in words:
-            if block in self.words[word]:
-                self.words[word].remove(block)
-            if word in self.groups[group]:
-                self.groups[group].remove(word)
-
+        """ Quitar palabras que no van mas """
+        # TODO: purgar
+        print("purgar")
+            
     def typedWords(self):
-        self._purge_words()
-        return self.groups.copy()
+        return self.documentWords
 
 #=========================================================
 # Bundle Item Selectable Model

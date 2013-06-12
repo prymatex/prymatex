@@ -931,17 +931,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         #Lo ponemos en la mezcladora por grupos
         suggestions = tabTriggers + [{ "display": word, "image": "scope-root-keyword" } for word in completions]
         for group in CodeEditor.SORTED_GROUPS:
-            newWords = [word for word in typedWords.pop(group, []) if word not in completions and word != currentAlreadyTyped]
+            newWords = [ gw[1] for gw in typedWords if gw[0] == group and gw[1] not in completions and gw[1] != currentAlreadyTyped ]
             suggestions += [{ "display": word, "image": "scope-root-%s" % group } for word in newWords]
             completions += newWords
             yield
         
         #Finalizamos con las que quedaron guachas
-        for words in list(typedWords.values()):
-            newWords = [word for word in words if word not in completions and word != currentAlreadyTyped]
-            suggestions += [{ "display": word, "image": "scope-root-invalid" } for word in newWords]
-            completions += newWords
-            yield
+        print("quedaron solas", typedWords)
 
         yield coroutines.Return(suggestions)
 

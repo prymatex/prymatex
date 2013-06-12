@@ -126,13 +126,12 @@ def ensureShellScript(script, environment):
 # UINX
 #============================
 def ensureUnixEnvironment(environment):
-    return dict(map(lambda item: (encoding.to_fs(item[0]), encoding.to_fs(item[1])), environment.items()))
+    return dict(map(lambda item: (encoding.force_str(item[0]), encoding.force_str(item[1])), environment.items()))
 
 def prepareUnixShellScript(script, environment):
     script = ensureShellScript(script, environment)
     tmpFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
     return tmpFile, ensureUnixEnvironment(environment), tmpFile
-
     
 #============================
 # WINDOWS
