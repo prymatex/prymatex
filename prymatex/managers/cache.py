@@ -26,7 +26,7 @@ class SingleFileCache(ManagedCacheMixin):
 
     def __contains__(self, key):
         key = self.manager.buildKey(key)
-        return self.objs.has_key(key)
+        return key in self.objs
     
     def get(self, key):
         key = self.manager.buildKey(key)

@@ -65,7 +65,7 @@ class WebView(QtWebKit.QWebView):
         url = reply.url()
         if url.scheme() == "file":
             #mimetype = mimetypes.guess_type(filePath)[0]
-            print(url)
+            print("on_page_unsupportedContent", url)
             self.page().mainFrame().load(url)
 
     def runCommand(self, command):

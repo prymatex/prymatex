@@ -277,7 +277,6 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
         self.processTableModel.appendProcess(context.process, description = context.description())
 
         environment = QtCore.QProcessEnvironment()
-        print(context.environment)
         for key, value in context.environment.items():
             environment.insert(key, value)
 
