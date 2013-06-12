@@ -33,6 +33,7 @@ class TabbedWebView(QtGui.QTabWidget):
         webView.iconChanged.connect(self.on_webView_iconChanged)
         index = self.addTab(webView, webView.title())
         self.setTabIcon(index, webView.icon())
+        return index
     
     def currentWebView(self):
         return self.currentWidget()

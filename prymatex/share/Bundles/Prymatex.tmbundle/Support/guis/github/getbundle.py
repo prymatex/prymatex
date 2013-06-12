@@ -4,9 +4,14 @@
 import os
 import json
 import sys
-import urllib.request, urllib.error, urllib.parse
 
-from urllib.parse import urlsplit
+try:
+    #Python 3
+    from urllib import request as urltools
+except:
+    #Python 2
+    import urllib as urltools
+
 from prymatex.qt import QtGui, QtCore, QtNetwork
 from prymatex.core import PMXBaseDialog
 from .ui_githubclient import Ui_GitHubClientDialog
@@ -23,21 +28,21 @@ class GithubBundleSearchThread(QtCore.QThread):
     def run(self):
         if not self.term or self.term < self.parent().MINIMUM_QUERY_LENGTH:
             return
-        response = urllib.request.urlopen(GITHUB_API_SEARCH_URL % self.term).read()
+        response = urltools.urlopen(GITHUB_API_SEARCH_URL % self.term).read()
         data = json.loads(response.content)
         self.dataUpdate.emit(data) # Thread safety
 
     def setProxy(self):
         print(self.parent().application.settingValue("Browser.proxyAddress"))
         networkProxy = QtNetwork.QNetworkProxy.applicationProxy()
-        opener = urllib.request.build_opener(
-            urllib.request.HTTPHandler(),
-            urllib.request.HTTPSHandler(),
-            urllib.request.ProxyHandler({
+        opener = urltools.build_opener(
+            urltools.HTTPHandler(),
+            urltools.HTTPSHandler(),
+            urltools.ProxyHandler({
                 'http': 'http://localhost:3128',
                 'https': 'http://localhost:3128'
             }))
-        urllib.request.install_opener(opener)
+        urltools.install_opener(opener)
 
     def search(self, term):
         '''Performs a lookup in Github REST API based on term'''

@@ -5,14 +5,18 @@ import os
 import tmprefs
 from struct import *
 
-import urllib.request, urllib.parse, urllib.error
+try:
+    #Python 3
+    from urllib.parse import quote as urlquote
+except:
+    from urllib import quote as urlquote
 
 def percent_escape(str):
 	return re.sub('[\x80-\xff /&]', lambda x: '%%%02X' % unpack('B', x.group(0))[0], str)
 
-# Swapped call to percent_escape with urllib.quote.  Was causing links to fail in TM2
+# Swapped call to percent_escape.  Was causing links to fail in TM2
 def make_link(file, line):
-	return 'txmt://open/?url=file://' + urllib.parse.quote(file) + '&amp;line=' + line
+	return 'txmt://open/?url=file://' + urlquote(file) + '&amp;line=' + line
 
 def shell_quote(string):
 	return '"' + re.sub(r'([`$\\"])', r'\\\1', string) + '"'

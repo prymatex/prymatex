@@ -41,11 +41,16 @@ import re
 from os.path import basename
 import os
 import tmprefs
-from urllib.parse import quote
 from struct import *
 from texparser import *
 
 DEBUG = False
+
+# Python 2 vs Python 3
+try:
+    from urllib.parse import quote
+except:
+    from urllib import quote
 
 try:
     from subprocess import *

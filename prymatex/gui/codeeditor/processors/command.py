@@ -222,8 +222,12 @@ class PMXCommandProcessor(PMXCommandProcessor):
         editor.setPlainText(context.outputValue)
         
     def newWindow(self, context, outputFormat = None):
-        print(context.outputValue, outputFormat)
-        print("newWindow")
+        if outputFormat == "html":
+            self.editor.browserDock.newRunningContext(context)
+        elif outputFormat == "text":
+            # TODO: Quiza una mejor forma de crear documentos con texto
+            editor = self.editor.mainWindow.addEmptyEditor()
+            editor.setPlainText(context.outputValue)
 
     def openAsNewDocument(self, context, outputFormat = None):
         editor= self.editor.mainWindow.addEmptyEditor()

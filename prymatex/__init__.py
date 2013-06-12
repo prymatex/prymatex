@@ -12,8 +12,10 @@ def get_git_revision(path=None):
 
     pipe = None
     try:
-        pipe   = os.popen(git_command)
+        pipe = os.popen(git_command)
         rev = pipe.read()
+    except:
+        pass
     finally:
         if pipe: pipe.close()
     if rev:
