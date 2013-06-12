@@ -20,6 +20,7 @@ from prymatex.utils.decorators import deprecated
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime, logtime
 from prymatex.utils.zeromqt import ZmqSocket
+from prymatex.utils import six
 
 # The basic managers
 from prymatex.managers.profile import ProfileManager
@@ -479,7 +480,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         raise NotImplementedError("Directory contents should be opened as files here")
 
     def handleUrlCommand(self, url):
-        if isinstance(url, str):
+        if isinstance(url, six.string_types):
             url = QtCore.QUrl(url)
         if url.scheme() == "txmt":
             #TODO: Controlar que sea un open
