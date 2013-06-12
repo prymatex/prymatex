@@ -53,15 +53,14 @@ class ProfileManager(QtCore.QObject, PMXBaseComponent):
         self.sortFilterSettingsProxyModel = SortFilterSettingsProxyModel(self)
         self.sortFilterSettingsProxyModel.setSourceModel(self.settingsTreeModel)
 
-
     # --------------- Profile
     def build_prymatex_profile(self, path):
+        # TODO: Algo como ensure paths porque si falta uno que hago?
         os.makedirs(path)
         os.makedirs(os.path.join(path, 'tmp'), mode = 0o0700)
         os.makedirs(os.path.join(path, 'log'), mode = 0o0700)
         os.makedirs(os.path.join(path, 'cache'), mode = 0o0700)
         os.makedirs(os.path.join(path, 'screenshot'), mode = 0o0700)
-
 
     def saveProfiles(self):
         config = configparser.RawConfigParser()
@@ -77,14 +76,11 @@ class ProfileManager(QtCore.QObject, PMXBaseComponent):
         config.write(f)
         f.close()
 
-
     def createProfile(self, name, path = None, default = False):
         name = name.lower()
         profile = self.profilesListModel.findProfileByName(name)
         if profile is None:
             path = path if path is not None else os.path.abspath(os.path.join(PMX_HOME_PATH, name))
-            if not os.path.exists(path):
-                self.build_prymatex_profile(path)
             profile = PrymatexProfile(name, path)
             self.profilesListModel.addProfile(profile)
             self.setDefaultProfile(profile)
@@ -93,14 +89,16 @@ class ProfileManager(QtCore.QObject, PMXBaseComponent):
 
     def currentProfile(self, value = None):
         if value is None or not self.__dontAsk:
-            return ProfileDialog.selectStartupProfile(self)
+            profile = ProfileDialog.selectStartupProfile(self)
         elif value == "":
-            return self.defaultProfile()
-        profile = self.profilesListModel.findProfileByName(value)
+            profile = self.defaultProfile()
+        else:
+            profile = self.profilesListModel.findProfileByName(value)
         if profile is None:
             profile = self.createProfile(value, default = True)
+        if not os.path.exists(profile.PMX_PROFILE_PATH):
+            self.build_prymatex_profile(profile.PMX_PROFILE_PATH)
         return profile
-
 
     def renameProfile(self, profile, newName):
         newName = newName.lower()
@@ -111,17 +109,14 @@ class ProfileManager(QtCore.QObject, PMXBaseComponent):
         self.saveProfiles()
         return newName
 
-
     def deleteProfile(self, profile, files = False):
         self.profilesListModel.removeProfile(profile)
         if files:
             shutil.rmtree(profile.PMX_PROFILE_PATH)
         self.saveProfiles()
 
-
     def profileNames(self):
         return [ p.PMX_PROFILE_NAME for p in self.profilesListModel.profiles() ]
-
 
     def setDontAsk(self, value):
         self.__dontAsk = value

@@ -10,11 +10,9 @@ class ProfilesListModel(QtCore.QAbstractListModel):
         self.profileManager = profileManager
         self.__profiles = []
 
-
     # ------------------ QtCore.QAbstractListModel methods
     def rowCount(self, parent = None):
         return len(self.__profiles)
-
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
@@ -31,7 +29,6 @@ class ProfilesListModel(QtCore.QAbstractListModel):
         elif role == QtCore.Qt.DecorationRole:
             return resources.getIcon("user-identity")
 
-
     def setData(self, index, data, role):
         profile = self.__profiles[index.row()]
         if role == QtCore.Qt.CheckStateRole:
@@ -40,31 +37,25 @@ class ProfilesListModel(QtCore.QAbstractListModel):
             return True
         return False
 
-
     def flags(self, index):
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
-
 
     # ------------------ Custom functions
     def profiles(self):
         return self.__profiles
-
 
     def findProfileByName(self, name):
         for profile in self.__profiles:
             if profile.PMX_PROFILE_NAME == name:
                 return profile
 
-
     def profile(self, index):
         return self.__profiles[index.row()]
-
 
     def selectedProfile(self):
         for profile in self.__profiles:
             if profile.PMX_PROFILE_DEFAULT:
                 return profile
-
 
     # ------------------ Add remove keywords
     def addProfile(self, profile):
