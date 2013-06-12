@@ -93,7 +93,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def defaultTheme(self, uuid):
         theme = self.application.supportManager.getTheme(uuid)
 
-        self.syntaxHighlighter.setTheme(theme)
         self.colours = theme.settings
         
         #Set color for QPlainTextEdit
@@ -101,7 +100,14 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         color: %s;
         selection-background-color: %s; }""" % (self.colours['background'].name(), self.colours['foreground'].name(), self.colours['selection'].name())
         self.setStyleSheet(appStyle)
+        self.syntaxHighlighter.stop()
+        self.aboutToHighlightChange.emit()
+
+        self.syntaxHighlighter.setTheme(theme)        
         self.themeChanged.emit()
+        
+        # Run
+        self.syntaxHighlighter.runAsyncHighlight(self.highlightChanged.emit)
 
     @pmxConfigPorperty(default = MarginLine | IndentGuide | HighlightCurrentLine)
     def defaultFlags(self, flags):
