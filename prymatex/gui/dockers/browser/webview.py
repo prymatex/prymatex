@@ -25,7 +25,7 @@ class WebView(QtWebKit.QWebView):
         networkAccessManager.setCookieJar(defaultManager.cookieJar())
         networkAccessManager.setProxy(defaultManager.proxy())
         networkAccessManager.setProxyFactory(defaultManager.proxyFactory())
-        #networkAccessManager.commandUrlRequested.connect(self.on_manager_commandUrlRequested)
+        networkAccessManager.commandUrlRequested.connect(self.on_networkAccessManager_commandUrlRequested)
         return networkAccessManager
                 
     def setRunningContext(self, context):
@@ -65,8 +65,11 @@ class WebView(QtWebKit.QWebView):
         url = reply.url()
         if url.scheme() == "file":
             #mimetype = mimetypes.guess_type(filePath)[0]
-            print(url)
+            print("on_page_unsupportedContent", url)
             self.page().mainFrame().load(url)
+
+    def on_networkAccessManager_commandUrlRequested(self, url):
+        self.browserDock.application.handleUrlCommand(url)
 
     def runCommand(self, command):
         self.runningContext.removeTempFile()

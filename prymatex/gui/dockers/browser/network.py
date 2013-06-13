@@ -44,12 +44,11 @@ class NetworkAccessManager(QtNetwork.QNetworkAccessManager):
     commandUrlRequested = QtCore.Signal(QtCore.QUrl)
     
     def createRequest(self, operation, request, data):
+        print("createRequest", request.url().scheme())
+        #TODO: Aca tenemos que trabajar con el mime antes, ver el caso del os pdf
         if request.url().scheme() == "txmt":
-            print(request.url().scheme())
             self.commandUrlRequested.emit(request.url())
         elif request.url().scheme() == "tm-file" and operation == self.GetOperation:
-            print(request.url().scheme())
-            #TODO: Ava tenemos que trabajar con el mime antes, ver el caso del os pdf
             return FileReply(self, request.url(), self.GetOperation)
         return QtNetwork.QNetworkAccessManager.createRequest(self, operation, request, data)
         

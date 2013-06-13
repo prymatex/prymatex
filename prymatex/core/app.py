@@ -20,6 +20,7 @@ from prymatex.utils.decorators import deprecated
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime, logtime
 from prymatex.utils.zeromqt import ZmqSocket
+from prymatex.utils import six
 
 # The basic managers
 from prymatex.managers.profile import ProfileManager
@@ -174,7 +175,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             splash.show()
         try:
             # Build Managers
-            self.cacheManager = self.buildCacheManager()  # Persistence system Manager
+            self.storageManager = self.buildStorageManager()  # Persistence system Manager
             self.supportManager = self.buildSupportManager()  # Support Manager
             self.fileManager = self.buildFileManager()  # File Manager
             self.projectManager = self.buildProjectManager()  # Project Manager
@@ -272,9 +273,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         from prymatex.managers.projects import ProjectManager
         return self.createComponentInstance(ProjectManager)
 
-    def buildCacheManager(self):
-        from prymatex.managers.cache import CacheManager
-        return self.createComponentInstance(CacheManager)
+    def buildStorageManager(self):
+        from prymatex.managers.storage import StorageManager
+        return self.createComponentInstance(StorageManager)
 
     def buildSchedulerManager(self):
         from prymatex.utils import coroutines
@@ -288,7 +289,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     def closePrymatex(self):
         self.logger.debug("Close")
         
-        self.cacheManager.close()
+        self.storageManager.close()
         self.currentProfile.saveState(self.mainWindow)
         if os.path.exists(self.fileLock):
             os.unlink(self.fileLock)
@@ -479,7 +480,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         raise NotImplementedError("Directory contents should be opened as files here")
 
     def handleUrlCommand(self, url):
-        if isinstance(url, str):
+        if isinstance(url, six.string_types):
             url = QtCore.QUrl(url)
         if url.scheme() == "txmt":
             #TODO: Controlar que sea un open

@@ -142,24 +142,24 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def applyFormat(self, userData):
         for (start, end), scope in userData.scopeRanges():
-            format = self.highlightFormat(self.editor.scope(scopeHash = scope).name)
-            if format is not None:
-                self.setFormat(start, end - start, format)
+            frmt = self.highlightFormat(self.editor.scope(scopeHash = scope).name)
+            if frmt is not None:
+                self.setFormat(start, end - start, frmt)
 
     def highlightFormat(self, scope):
         if scope not in PMXSyntaxHighlighter.FORMAT_CACHE:
-            format = QtGui.QTextCharFormat()
+            frmt = QtGui.QTextCharFormat()
             settings = self.theme.getStyle(scope)
             if 'foreground' in settings:
-                format.setForeground(settings['foreground'])
+                frmt.setForeground(settings['foreground'])
             if 'background' in settings:
-                format.setBackground(settings['background'])
+                frmt.setBackground(settings['background'])
             if 'fontStyle' in settings:
                 if 'bold' in settings['fontStyle']:
-                    format.setFontWeight(QtGui.QFont.Bold)
+                    frmt.setFontWeight(QtGui.QFont.Bold)
                 if 'underline' in settings['fontStyle']:
-                    format.setFontUnderline(True)
+                    frmt.setFontUnderline(True)
                 if 'italic' in settings['fontStyle']:
-                    format.setFontItalic(True)
-            PMXSyntaxHighlighter.FORMAT_CACHE[scope] = format 
+                    frmt.setFontItalic(True)
+            PMXSyntaxHighlighter.FORMAT_CACHE[scope] = frmt 
         return PMXSyntaxHighlighter.FORMAT_CACHE[scope]

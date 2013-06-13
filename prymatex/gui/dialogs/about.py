@@ -38,7 +38,7 @@ class AboutDialog(QtGui.QDialog, Ui_AboutDialog, PMXBaseDialog):
             'pmx_url': prymatex.__url__,
             'pmx_source': prymatex.__source__,
             'commandline': ' '.join(sys.argv) ,
-            'pmx_version': "%s (%s)" % ('.'.join(map(str, prymatex.VERSION)), self.getGitVersion()),
+            'pmx_version': prymatex.__version__,
             'zmq_version': self.getZMQVersion(),
             'pony_version': self.getPonygurumaVersion(),
             'qt_version': qt_version_str,
@@ -46,12 +46,6 @@ class AboutDialog(QtGui.QDialog, Ui_AboutDialog, PMXBaseDialog):
             'pyqt_version': pyqt_version_str,
             'pyside_version': pyside_version_str
         }))
-
-    def getGitVersion(self):
-        try:
-            return prymatex.get_git_revision()
-        except:
-            return "GIT-Unknown"
 
     def getZMQVersion(self):
         try:

@@ -69,8 +69,8 @@ class PMXSupportBaseManager(object):
         self.managedObjects = {}
 
         # Cache!!
-        self.bundleItemCache = self.buildBundleItemCache()
-        self.plistFileCache = self.buildPlistFileCache()
+        self.bundleItemCache = self.buildBundleItemStorage()
+        self.plistFileCache = self.buildPlistFileStorage()
     
     # ------------ Namespaces ----------------------
     def addNamespace(self, name, path):
@@ -519,11 +519,11 @@ class PMXSupportBaseManager(object):
                     traceback.print_exc()
         self.populatedBundle(bundle)
 
-    # ------------ Build caches --------------------
-    def buildPlistFileCache(self):
+    # ------------ Build Storages --------------------
+    def buildPlistFileStorage(self):
         return {}
 
-    def buildBundleItemCache(self):
+    def buildBundleItemStorage(self):
         return {}
 
     # ------------ Cache coherence -----------------

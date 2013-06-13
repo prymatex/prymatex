@@ -139,7 +139,8 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
             #Connect signals
             webView.urlChanged.connect(self.on_webView_urlChanged)
             webView.loadProgress.connect(self.on_webView_loadProgress)
-            self.tabWebView.addWebView(webView)
+            index = self.tabWebView.addWebView(webView)
+            self.tabWebView.setCurrentIndex(index)
         elif mode == QtWebKit.QWebPage.WebModalDialog:
             # TODO Aca va dentro de un dialogo que tenga sus propias cosas de navegacion
             # webDialog = QtGui.QDialog(self)
@@ -159,6 +160,13 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
             self.show()
         self.raise_()
         self.tabWebView.currentWebView().setRunningContext(context)
+    
+    def newRunningContext(self, context):
+        if not self.isVisible():
+            self.show()
+        self.raise_()
+        webView = self.createWebView()
+        webView.setRunningContext(context)
     
     # ------------ TabbedWebView signals
     def on_tabWebView_currentWebViewChanged(self, webView):
