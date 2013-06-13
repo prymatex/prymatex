@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
+
+FS_ENCODING = sys.getfilesystemencoding()
+
 # Multiplexer process constants
 BURIED = 0
 BURIEDALL = 1
