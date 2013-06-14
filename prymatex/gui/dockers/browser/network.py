@@ -17,7 +17,7 @@ class FileReply(QtNetwork.QNetworkReply):
         self.offset = 0
 
         mimetype = mimetypes.guess_type(url.path())[0]
-        #self.setHeader(QtNetwork.QNetworkRequest.ContentTypeHeader, mimetype)
+        self.setHeader(QtNetwork.QNetworkRequest.ContentTypeHeader, mimetype)
         self.setHeader(QtNetwork.QNetworkRequest.ContentLengthHeader, len(self.content))
         QtCore.QTimer.singleShot(0, self, QtCore.SIGNAL("readyRead()"))
         QtCore.QTimer.singleShot(0, self, QtCore.SIGNAL("finished()"))
@@ -44,8 +44,7 @@ class NetworkAccessManager(QtNetwork.QNetworkAccessManager):
     commandUrlRequested = QtCore.Signal(QtCore.QUrl)
     
     def createRequest(self, operation, request, data):
-        print("createRequest", request.url().scheme())
-        #TODO: Aca tenemos que trabajar con el mime antes, ver el caso del os pdf
+        print("createRequest", operation, request.url().scheme(), data)
         if request.url().scheme() == "txmt":
             self.commandUrlRequested.emit(request.url())
         elif request.url().scheme() == "tm-file" and operation == self.GetOperation:
