@@ -336,7 +336,7 @@ class TerminalWidget(QtGui.QWidget):
     return_pressed = QtCore.Signal()
 
     def keyPressEvent(self, event):
-        text = encoding.to_fs(event.text())
+        text = event.text()
         key = event.key()
         modifiers = event.modifiers()
         ctrl = modifiers == QtCore.Qt.ControlModifier
