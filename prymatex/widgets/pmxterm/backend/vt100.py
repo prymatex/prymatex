@@ -12,10 +12,8 @@ import sys
 import array
 import constants
 
-if sys.version_info.major < 3:
-    chr = unichr
-
-FS_ENCODING = sys.getfilesystemencoding()
+if sys.version_info.major == 3:
+    unichr = chr
 
 class Terminal(object):
     CHARACTERS = 0
@@ -29,7 +27,7 @@ class Terminal(object):
             0x25ca, 0x2026, 0x2022, 0x3f,
             0xb6, 0x3f, 0xb0, 0xb1,
             0x3f, 0x3f, 0x2b, 0x2b,
-            0x2b, 0x2b, 0x2b, 0XAF,
+            0x2b, 0x2b, 0x2b, 0xaf,
             0x2014, 0x2014, 0x2014, 0x5f,
             0x2b, 0x2b, 0x2b, 0x2b,
             0x7c, 0x2264, 0x2265, 0xb6,
@@ -227,7 +225,7 @@ class Terminal(object):
         self.cx = 0
         self.cy = 0
         # Tab stops
-        self.tab_stops = list(range(0, self.w, 8))
+        self.tab_stops = range(0, self.w, 8)
 
 
     # UTF-8 functions
@@ -240,8 +238,8 @@ class Terminal(object):
                 if (char & 0xc0) == 0x80:
                     self.utf8_char = (self.utf8_char << 6) | (char & 0x3f)
                     if self.utf8_units_count == self.utf8_units_received:
-                        if self.utf8_char < 0x10000:
-                            o += chr(self.utf8_char)
+                        if self.utf8_char<0x10000:
+                            o += unichr(self.utf8_char)
                         self.utf8_units_count = self.utf8_units_received = 0
                 else:
                     o += '?'
@@ -265,7 +263,6 @@ class Terminal(object):
                     o += '?'
         return o
 
-
     def utf8_charwidth(self, char):
         if char >= 0x2e80:
             return 2
@@ -276,12 +273,10 @@ class Terminal(object):
     def peek(self, y0, x0, y1, x1):
         return self.screen[self.CHARACTERS][self.w * y0 + x0:self.w * (y1 - 1) + x1], self.screen[self.ATTRIBUTES][self.w * y0 + x0:self.w * (y1 - 1) + x1]
 
-
     def poke(self, y, x, c, a):
         pos = self.w * y + x
         self.screen[self.CHARACTERS][pos:pos + len(c)] = c
         self.screen[self.ATTRIBUTES][pos:pos + len(a)] = a
-
 
     def fill(self, y0, x0, y1, x1, char, attr):
         n = self.w * (y1 - y0 - 1) + (x1 - x0)
@@ -1101,13 +1096,13 @@ class Terminal(object):
                         char_msb = char & 0xf0
                         if char_msb == 0x20:
                             # Intermediate bytes (added to function)
-                            self.vt100_parse_func += chr(char)
+                            self.vt100_parse_func += unichr(char)
                         elif char_msb == 0x30 and self.vt100_parse_state == 'csi':
                             # Parameter byte
-                            self.vt100_parse_param += chr(char)
+                            self.vt100_parse_param += unichr(char)
                         else:
                             # Function byte
-                            self.vt100_parse_func += chr(char)
+                            self.vt100_parse_func += unichr(char)
                             self.vt100_parse_process()
                         return True
         self.vt100_lastchar = char
@@ -1131,7 +1126,8 @@ class Terminal(object):
 
 
     def write(self, d):
-        d = self.utf8_decode(d)
+        d = d.decode(constants.FS_ENCODING)
+        #d = self.utf8_decode(d.decode(constants.FS_ENCODING))
         for c in d:
             char = ord(c)
             if self.vt100_write(char):
@@ -1167,7 +1163,7 @@ class Terminal(object):
                 o += c
                 if self.vt100_mode_lfnewline and char == 13:
                     o += chr(10)
-        return o
+        return o.encode(constants.FS_ENCODING)
 
 
     def dump(self):
@@ -1208,7 +1204,7 @@ class Terminal(object):
                     attr_ = attr
                 wx += self.utf8_charwidth(char)
                 if wx <= self.w:
-                    line[-1] += chr(char).encode(FS_ENCODING)
+                    line[-1] += unichr(char)
             screen.append(line)
 
         # Scroll values

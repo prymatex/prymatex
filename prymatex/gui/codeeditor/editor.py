@@ -453,7 +453,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.syntaxChanged.emit(syntax)
             
             # Run
-            self.syntaxHighlighter.runAsyncHighlight(lambda editor = self: editor.highlightChanged.emit())
+            self.syntaxHighlighter.runAsyncHighlight(self.highlightChanged.emit)
 
     # -------------------- SideBars
     def updateViewportMargins(self):

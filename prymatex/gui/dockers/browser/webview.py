@@ -4,7 +4,7 @@
 import subprocess
 import mimetypes
 
-from prymatex.qt import QtCore, QtWebKit
+from prymatex.qt import QtGui, QtCore, QtWebKit
 
 from .network import NetworkAccessManager
 from .scripts import TextMate, SystemWrapper, WINDOW_JAVASCRIPT
@@ -63,10 +63,8 @@ class WebView(QtWebKit.QWebView):
 
     def on_page_unsupportedContent(self, reply):
         url = reply.url()
-        if url.scheme() == "file":
-            #mimetype = mimetypes.guess_type(filePath)[0]
-            print("on_page_unsupportedContent", url)
-            self.page().mainFrame().load(url)
+        print("UnsupportedContent", url)
+        QtGui.QDesktopServices.openUrl(url)
 
     def on_networkAccessManager_commandUrlRequested(self, url):
         self.browserDock.application.handleUrlCommand(url)

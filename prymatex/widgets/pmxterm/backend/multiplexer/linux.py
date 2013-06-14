@@ -36,6 +36,7 @@ def synchronized(func):
         return result
     return wrapper
 
+
 class ProcessInfo(object):
     def update(self):
         processes = [int(entry) for entry in os.listdir("/proc") if entry.isdigit()]
@@ -222,7 +223,7 @@ class Multiplexer(base.Multiplexer):
 
     @synchronized
     def proc_buryall(self):
-        for sid in self.session.keys():
+        for sid in list(self.session.keys()):
             self.proc_bury(sid)
         self.queue.put(constants.BURIEDALL)
 
@@ -248,7 +249,7 @@ class Multiplexer(base.Multiplexer):
             self.proc_waitfordeath(sid)
             return False
         term = self.session[sid]['term']
-        term.write(d.decode(FS_ENCODING))
+        term.write(d)
         # Read terminal response
         d = term.read()
         if d:

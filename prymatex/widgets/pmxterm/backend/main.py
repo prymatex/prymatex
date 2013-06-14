@@ -55,11 +55,9 @@ def worker_notifier(queue_notifier, addr):
     while should_continue:
         data = queue_notifier.get()
         if isinstance(data, (tuple, list)):
-            zpub.send_multipart(data)
+            zpub.send_multipart([ s.encode(constants.FS_ENCODING) for s in data ])
         elif isinstance(data, int) and data == constants.BURIEDALL:
             should_continue = False
-            
-            
 
 # ==============
 # = Parse args =

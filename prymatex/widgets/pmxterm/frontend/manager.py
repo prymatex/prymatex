@@ -70,6 +70,8 @@ class Backend(QtCore.QObject):
         message = self.notifier.recv_multipart()
         if len(message) % 2 == 0:
             for sid, payload in [message[x: x + 2] for x in range(0, len(message), 2)]:
+                sid = sid.decode("utf-8")
+                payload = payload.decode("utf-8")
                 if sid in self.sessions:
                     try:
                         self.sessions[sid].screenReady.emit(ast.literal_eval(payload))
