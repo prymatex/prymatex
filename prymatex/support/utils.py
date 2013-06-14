@@ -13,9 +13,6 @@ from prymatex.utils import encoding
 
 RE_SHEBANG = re.compile("^#!(.*)$")
 RE_SHEBANG_ENVKEY = re.compile("(\w+)_SHEBANG")
-RE_ABSPATH_LINENO = re.compile('''
-    (?P<text>(?P<path>/[\w\d\/\.]+)(:(?P<line>\d+))?)
-''', re.VERBOSE)
 
 PMX_CYGWIN_PATH = "c:\\cygwin"
 
@@ -224,26 +221,6 @@ def ensurePath(path, name, suffix = 0):
             return newPath
         else:
             return ensurePath(path, name, suffix + 1)
-
-            
-def pathToLink(match):
-    path = match.group('path')
-    attrs = {}
-    attrs['url'] = 'file://%s' % match.group('path')
-    attrs['line'] = match.group('line')
-    #attrs['column'] = match.group('column')
-    
-    final_attrs = '?%s' % '?'.join(['%s=%s' % (k, v) for k, v in attrs.items() if v ])
-    text = match.group('text')
-    
-    data = dict(attrs= final_attrs, text= text)
-    link = '<a href="txmt://open/%(attrs)s">%(text)s</a>' % data 
-    return link
-
-
-def makeHyperlinks(text):
-    return re.sub(RE_ABSPATH_LINENO, pathToLink, text)
-
 
 if __name__ == '__main__':
     #http://en.wikipedia.org/wiki/Shebang_(Unix)

@@ -21,7 +21,7 @@ link_target_attribute_re = re.compile(r'(<a [^>]*?)target=[^\s>]+')
 html_gunk_re = re.compile(r'(?:<br clear="all">|<i><\/i>|<b><\/b>|<em><\/em>|<strong><\/strong>|<\/?smallcaps>|<\/?uppercase>)', re.IGNORECASE)
 hard_coded_bullets_re = re.compile(r'((?:<p>(?:%s).*?[a-zA-Z].*?</p>\s*)+)' % '|'.join([re.escape(x) for x in DOTS]), re.DOTALL)
 trailing_empty_content_re = re.compile(r'(?:<p>(?:&nbsp;|\s|<br \/>)*?</p>\s*)+\Z')
-del x # Temporary variable
+file_abspath_line = re.compile(r'(?P<text>(?P<path>/[\w\d\/\.]+):|",[\s\w]+(?P<line>\d+))', re.VERBOSE)
 
 def escape(html):
     return html.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#39;').replace("`", "&#145;")
@@ -123,5 +123,41 @@ def clean_html(text):
     text = trailing_empty_content_re.sub('', text)
     return text
     
+def pathToLink(match):
+    path = match.group('path')
+    attrs = {}
+    attrs['url'] = 'file://%s' % match.group('path')
+    attrs['line'] = match.group('line')
+    #attrs['column'] = match.group('column')
+    
+    final_attrs = '?%s' % '?'.join(['%s=%s' % (k, v) for k, v in attrs.items() if v ])
+    text = match.group('text')
+    
+    data = dict(attrs= final_attrs, text= text)
+    link = '<a href="txmt://open/%(attrs)s">%(text)s</a>' % data 
+    return link
+
+def makeHyperlinks(text):
+    print(file_abspath_line.split(text))
+    return re.sub(file_abspath_line, pathToLink, text)
+    
 if __name__ == '__main__':
-    print(urlize("holaMunDSos <a href='http://www.google.com'>http://www.google.com</a> 452 3jhds f as12315sdf"))
+    print(urlize("holaMunDSos file:///etc/passwd www.google.com 452 3jhds f as12315sdf"))
+    text = """Traceback (most recent call last):
+  File "/mnt/datos/workspace/Prymatex/prymatex/prymatex/share/Support/bin/pmxctl.py", line 591, in <module>
+    main(sys.argv[1:])
+  File "/mnt/datos/workspace/Prymatex/prymatex/prymatex/share/Support/bin/pmxctl.py", line 569, in main
+    getattr(handler, commandName)(options, args)
+  File "/mnt/datos/workspace/Prymatex/prymatex/prymatex/share/Support/bin/pmxctl.py", line 551, in terminal
+    sys.stdout.write(value)
+TypeError: must be str, not bytes
+Traceback (most recent call last):
+  File "/mnt/datos/workspace/Prymatex/prymatex/prymatex/share/Support/bin/pmxctl.py", line 591, in <module>
+    main(sys.argv[1:])
+  File "/mnt/datos/workspace/Prymatex/prymatex/prymatex/share/Support/bin/pmxctl.py", line 569, in main
+    getattr(handler, commandName)(options, args)
+  File "/mnt/datos/workspace/Prymatex/prymatex/prymatex/share/Support/bin/pmxctl.py", line 551, in terminal
+    sys.stdout.write(value)
+TypeError: must be str, not bytes
+    """
+    print(makeHyperlinks(text))
