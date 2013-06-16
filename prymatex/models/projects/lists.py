@@ -21,7 +21,6 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
         self.__files = []
         self.__baseFilters = []
 
-
     def initialize(self, selector):
         SelectableModelMixin.initialize(self, selector)
         selector.finished.connect(self.on_selector_finished)
@@ -55,17 +54,14 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
         elif role == QtCore.Qt.ToolTipRole:
             return None
 
-
     def item(self, index):
         return self.__files[index.row()]["path"]
-
 
     def setFilterString(self, string):
         self.projectFileTask.cancel()
         self.__files = []
         self.layoutChanged.emit()
-        self.projectFileTask = self.projectManager.application.scheduler.newTask(self.__run_project_search(string))
-
+        self.projectFileTask = self.projectManager.application.schedulerManager.newTask(self.__run_project_search(string))
 
     def __run_file_filter(self, rootDirectory, filenames, pattern):
         for filename in filenames:
