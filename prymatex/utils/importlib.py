@@ -2,6 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 import sys
+import imp
 
 def _resolve_name(name, package, level):
     """Return the absolute name of the module to be imported."""
@@ -45,7 +46,7 @@ def import_from_directory(directory, name):
     sys.path.insert(1, directory)
     try:
         module = import_module(name)
-        reload(module) # Might be out of date
+        imp.reload(module) # Might be out of date
     except ImportError as reason:
         print(reason)
         raise reason
