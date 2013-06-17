@@ -82,8 +82,7 @@ class SearchTreeModel(AbstractNamespaceTreeModel):
 
     def addGroup(self, name, directory):
         #Estos son los roots, agregar un default group para cuando se busque en otros lugares o el por defecto
-        groupNode = GroupTreeNode(name, directory)
-        self.insertNode(groupNode)
+        self.appendNamespaceNode(GroupTreeNode(name, directory))
         
     def addFileFound(self, filePath, lines):
         #Buscar coincidencia con grupo para manejar el nombre

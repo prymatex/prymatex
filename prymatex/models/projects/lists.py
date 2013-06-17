@@ -25,23 +25,18 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
         SelectableModelMixin.initialize(self, selector)
         selector.finished.connect(self.on_selector_finished)
 
-
     def setBaseFilters(self, baseFilters):
         self.__baseFilters = baseFilters
 
-
     def isFilterable(self):
         return True
-
 
     def on_selector_finished(self, result):
         self.projectFileTask.cancel()
         self.selector.finished.disconnect(self.on_selector_finished)
 
-
     def rowCount(self, parent = None):
         return len(self.__files)
-
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
@@ -77,11 +72,9 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
                     self.endInsertRows()
             yield
 
-
     def __run_file_search(self, path, pattern):
         for root, dirnames, filenames in os.walk(path):
             yield self.__run_file_filter(root, filenames, pattern)
-
         
     def __run_project_search(self, pattern):
         for project in self.projectManager.getAllProjects():

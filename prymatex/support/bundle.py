@@ -365,6 +365,9 @@ class PMXRunningContext(object):
                 outputValue = self.outputValue
         )
 
+    def isBundleItem(self, bundleItem):
+        return self.bundleItem == bundleItem
+
     def description(self):
         return self.bundleItem.name or "No Name"
         

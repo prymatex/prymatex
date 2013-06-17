@@ -27,7 +27,12 @@ class WebView(QtWebKit.QWebView):
         networkAccessManager.setProxyFactory(defaultManager.proxyFactory())
         networkAccessManager.commandUrlRequested.connect(self.on_networkAccessManager_commandUrlRequested)
         return networkAccessManager
-                
+
+    def isSimilarContext(self, context):
+        if self.runningContext is None:
+            return False
+        return self.runningContext.isBundleItem(context.bundleItem)
+
     def setRunningContext(self, context):
         self.runningContext = context
         self.createWebPage(context.outputValue,

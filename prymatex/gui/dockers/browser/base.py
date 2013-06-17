@@ -165,7 +165,15 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         if not self.isVisible():
             self.show()
         self.raise_()
-        webView = self.createWebView()
+        webView = None
+        # Buscar un webView con un contexto similar
+        for index in range(self.tabWebView.count()):
+            widget = self.tabWebView.widget(index)
+            if widget.isSimilarContext(context):
+                webView = widget
+                self.tabWebView.setCurrentIndex(index)
+        if not webView:
+            webView = self.createWebView()
         webView.setRunningContext(context)
     
     # ------------ TabbedWebView signals
