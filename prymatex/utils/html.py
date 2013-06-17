@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
+import os
 import re
 import string
 
@@ -14,7 +15,9 @@ DOTS = ['&middot;', '*', '\u2022', '&#149;', '&bull;', '&#8226;']
 unencoded_ampersands_re = re.compile(r'&(?!(\w+|#\d+);)')
 unquoted_percents_re = re.compile(r'%(?![0-9A-Fa-f]{2})')
 word_split_re = re.compile(r'(\s+)')
+number_search_re = re.compile(r'(\d+)')
 simple_url_re = re.compile(r'^https?://\w')
+simple_abspath_re = re.compile(r'(/[\w\d\/\.-]+)')
 simple_url_2_re = re.compile(r'^www\.|^(?!http)\w[^@]+\.(com|edu|gov|int|mil|net|org)$')
 simple_email_re = re.compile(r'^\S+@\S+\.\S+$')
 link_target_attribute_re = re.compile(r'(<a [^>]*?)target=[^\s>]+')
@@ -25,7 +28,7 @@ file_abspath_line = re.compile(r'(?P<text>(?P<path>/[\w\d\/\.]+):|",[\s\w]+(?P<l
 
 def escape(html):
     return html.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#39;').replace("`", "&#145;")
-    
+
 def urlize(text, trim_url_limit = None, nofollow = False, autoescape = False):
     """
     Converts any URLs in text into clickable links.
@@ -47,7 +50,7 @@ def urlize(text, trim_url_limit = None, nofollow = False, autoescape = False):
     words = word_split_re.split(text)
     for i, word in enumerate(words):
         match = None
-        if '.' in word or '@' in word or ':' in word:
+        if '.' in word or '@' in word or ':' in word or '/' in word:
             # Deal with punctuation.
             lead, middle, trail = '', word, ''
             for punctuation in TRAILING_PUNCTUATION:
@@ -123,41 +126,49 @@ def clean_html(text):
     text = trailing_empty_content_re.sub('', text)
     return text
     
-def pathToLink(match):
-    path = match.group('path')
-    attrs = {}
-    attrs['url'] = 'file://%s' % match.group('path')
-    attrs['line'] = match.group('line')
-    #attrs['column'] = match.group('column')
-    
-    final_attrs = '?%s' % '?'.join(['%s=%s' % (k, v) for k, v in attrs.items() if v ])
-    text = match.group('text')
-    
-    data = dict(attrs= final_attrs, text= text)
-    link = '<a href="txmt://open/%(attrs)s">%(text)s</a>' % data 
-    return link
+def htmlize(text):
+    paths = set()
+    lines = []
+    for l, line in enumerate(text.splitlines()):
+        words = word_split_re.split(line)
+        lead = trail = ""
+        fileIndex = filePath = lineNumber = None
+        for i, word in enumerate(words):
+            match = simple_abspath_re.search(word)
+            if match:
+                lead, middle, trail = word[:match.start()], match.group(), word[match.end():]
+                if os.path.isfile(middle):
+                    filePath = middle
+                    paths.add("%s/" % os.path.dirname(filePath))
+                    fileIndex = i
+            if filePath is not None:
+                match = number_search_re.search(word)
+                # Atento a los numeros
+                if match:
+                    lineNumber = match.group()
+        if filePath:
+            txmtHref = "txmt://open/?url=%s" % filePath
+            if lineNumber is not None:
+                txmtHref += "&line=%s" % lineNumber
+            words[fileIndex] = (filePath, txmtHref, lead, trail)
+        lines.append(words)
+    commonprefix = os.path.commonprefix(paths)
+    for l, line in enumerate(lines):
+        for w, word in enumerate(line):
+            if isinstance(word, tuple):
+                lines[l][w] = '%s<a href="%s">%s</a>%s' % (word[2], word[1], word[0][len(commonprefix):], word[3])
+        lines[l] = "".join(line)
+    return "\n".join(lines)
 
 def makeHyperlinks(text):
     print(file_abspath_line.split(text))
     return re.sub(file_abspath_line, pathToLink, text)
     
 if __name__ == '__main__':
-    print(urlize("holaMunDSos file:///etc/passwd www.google.com 452 3jhds f as12315sdf"))
+    print(urlize("holaMunDSos /etc/pepe www.google.com 452 3jhds f as12315sdf"))
     text = """Traceback (most recent call last):
-  File "/mnt/datos/workspace/Prymatex/prymatex/prymatex/share/Support/bin/pmxctl.py", line 591, in <module>
-    main(sys.argv[1:])
-  File "/mnt/datos/workspace/Prymatex/prymatex/prymatex/share/Support/bin/pmxctl.py", line 569, in main
-    getattr(handler, commandName)(options, args)
-  File "/mnt/datos/workspace/Prymatex/prymatex/prymatex/share/Support/bin/pmxctl.py", line 551, in terminal
-    sys.stdout.write(value)
-TypeError: must be str, not bytes
-Traceback (most recent call last):
-  File "/mnt/datos/workspace/Prymatex/prymatex/prymatex/share/Support/bin/pmxctl.py", line 591, in <module>
-    main(sys.argv[1:])
-  File "/mnt/datos/workspace/Prymatex/prymatex/prymatex/share/Support/bin/pmxctl.py", line 569, in main
-    getattr(handler, commandName)(options, args)
-  File "/mnt/datos/workspace/Prymatex/prymatex/prymatex/share/Support/bin/pmxctl.py", line 551, in terminal
-    sys.stdout.write(value)
-TypeError: must be str, not bytes
+  File "/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/prymatex/gui/mainwindow.py", line 7, in <module>
+    from prymatex.qt import QtCore, QtGui
+ImportError: No module named prymatex.qt
     """
-    print(makeHyperlinks(text))
+    print(htmlize(text))

@@ -169,12 +169,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
             
             html_header "%(name)s error"
-            echo -e "<pre><code>%(output)s</code></pre>"
+            echo -e "%(output)s"
             echo -e "<p>Exit code was: %(exitcode)d</p>"
             html_footer
         ''' % {
                 'name': html.escape(title),
-                'output': html.escape(summary),
+                'output': html.htmlize(summary),
                 'exitcode': exitcode}
         bundle = self.application.supportManager.getBundle(self.application.supportManager.defaultBundleForNewBundleItems)
         command = self.application.supportManager.buildAdHocCommand(commandScript,
