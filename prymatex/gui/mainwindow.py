@@ -141,7 +141,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             env.update(docker.environmentVariables())
         return env
 
-
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.mainwindow import MainWindowSettingsWidget
@@ -166,12 +165,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
     def showErrorInBrowser(self, title, summary, exitcode = -1, **settings):
         from prymatex.utils import html
         commandScript = '''
-            source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
-            
-            html_header "%(name)s error"
-            echo -e "%(output)s"
-            echo -e "<p>Exit code was: %(exitcode)d</p>"
-            html_footer
+source "$TM_SUPPORT_PATH/lib/webpreview.sh"
+
+html_header '%(name)s error'
+echo -e '<pre>%(output)s</pre>'
+echo -e '<p>Exit code was: %(exitcode)d</p>'
+html_footer
         ''' % {
                 'name': html.escape(title),
                 'output': html.htmlize(summary),
@@ -183,7 +182,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             commandOutput = 'showAsHTML')
         self.bundleItem_handler(command, **settings)
 
-    
     # -------------------- Setups
     def setupDockToolBars(self):
         self.dockToolBars = {
@@ -195,7 +193,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         for dockArea, toolBar in self.dockToolBars.items():
             self.addToolBar(DockWidgetToolBar.DOCK_AREA_TO_TB[dockArea], toolBar)
             toolBar.hide()
-
 
     def toggleDockToolBarVisibility(self):
         for toolBar in list(self.dockToolBars.values()):

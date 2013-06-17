@@ -126,7 +126,7 @@ def clean_html(text):
     text = trailing_empty_content_re.sub('', text)
     return text
     
-def htmlize(text):
+def htmlize(text, autoescape = True):
     paths = set()
     lines = []
     for l, line in enumerate(text.splitlines()):
@@ -146,17 +146,25 @@ def htmlize(text):
                 # Atento a los numeros
                 if match:
                     lineNumber = match.group()
+                    break
         if filePath:
-            txmtHref = "txmt://open/?url=%s" % filePath
+            url = "txmt://open/?url=%s" % filePath
             if lineNumber is not None:
-                txmtHref += "&line=%s" % lineNumber
-            words[fileIndex] = (filePath, txmtHref, lead, trail)
+                url += "&line=%s" % lineNumber
+            words[fileIndex] = (filePath, url, lead, trail)
         lines.append(words)
-    commonprefix = os.path.commonprefix(paths)
+    commonprefix = len(os.path.commonprefix(paths))
     for l, line in enumerate(lines):
         for w, word in enumerate(line):
             if isinstance(word, tuple):
-                lines[l][w] = '%s<a href="%s">%s</a>%s' % (word[2], word[1], word[0][len(commonprefix):], word[3])
+                filePath, url, lead, trail = word
+                trimmed = filePath[commonprefix:]
+                if autoescape:
+                    lead, trail = escape(lead), escape(trail)
+                    url, trimmed = escape(url), escape(trimmed)
+                lines[l][w] = '%s<a href="%s">%s</a>%s' % (lead, url, trimmed, trail)
+            elif autoescape:
+                lines[l][w] = escape(word)
         lines[l] = "".join(line)
     return "\n".join(lines)
 
