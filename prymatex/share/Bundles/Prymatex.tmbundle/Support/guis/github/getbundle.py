@@ -10,7 +10,7 @@ try:
     from urllib import request as urltools
 except:
     #Python 2
-    import urllib as urltools
+    import urllib2 as urltools
 
 from prymatex.qt import QtGui, QtCore, QtNetwork
 from prymatex.core import PMXBaseDialog
