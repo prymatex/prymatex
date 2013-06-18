@@ -20,7 +20,7 @@ class KeyEquivalentHelper(CodeEditorKeyHelper):
         keyseq = int(event.modifiers()) + event.key()
         if keyseq not in self.application.supportManager.getAllKeyEquivalentCodes():
             return False
-
+        # https://github.com/textmate/textmate/blob/master/Applications/TextMate/about/Changes.md
         leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both')
         self.items = self.application.supportManager.getKeyEquivalentItem(keyseq, leftScope.name, rightScope.name)
         return bool(self.items)
@@ -36,9 +36,10 @@ class TabTriggerHelper(CodeEditorKeyHelper):
     def accept(self, event, cursor = None):
         if cursor.hasSelection(): return False
 
-        leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both')
         trigger = self.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
-        self.items = self.application.supportManager.getTabTriggerItem(trigger, leftScope.name, rightScope.name) if trigger is not None else []
+        if not trigger: return False
+        leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both')
+        self.items = self.application.supportManager.getTabTriggerItem(trigger, leftScope.name, rightScope.name)
         return bool(self.items)
 
     def execute(self, event, cursor = None):
