@@ -135,8 +135,9 @@ class PMXCommand(PMXBundleItem):
         if handlerFunction is not None:
             handlerFunction(context, self.outputFormat)
         # TODO: Ver que pasa con el outputCaret
-        #Delete temp file
-        context.removeTempFile()
+        # Delete temp file
+        if outputHandler != "error":
+            context.removeTempFile()
         processor.endCommand(self)
 
 class PMXDragCommand(PMXCommand):

@@ -359,7 +359,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             cls.SCOPES[scopeHash] = CodeEditorScope(
                 name = scopeName,
                 path = scopeStack,
-                settings = cls.application.supportManager.getPreferenceSettings(scopeName),
+                settings = cls.application.supportManager.getPreferenceSettings(scopeStack),
                 group = PMXSyntax.findGroup(scopeStack[::-1])
             )
         return scopeHash

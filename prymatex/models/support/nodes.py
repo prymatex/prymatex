@@ -158,21 +158,21 @@ class ThemeTableRow(object):
         self.STYLES_CACHE = {}
 
 
-    def getStyle(self, scope = None):
-        if scope in self.STYLES_CACHE:
-            return self.STYLES_CACHE[scope]
+    def getStyle(self, scopePath = None):
+        if scopePath in self.STYLES_CACHE:
+            return self.STYLES_CACHE[scopePath]
         base = {}
         base.update(self.settings)
-        if scope is None:
-            return base
-        styles = []
-        for style in self.styles:
-            rank = []
-            if style.selector.does_match(scope, rank):
-                styles.append((rank.pop(), style))
-        styles.sort(key = lambda t: t[0])
-        list(map(lambda style: base.update(style[1].settings), styles))
-        self.STYLES_CACHE[scope] = base
+        if scopePath is not None:
+            styles = []
+            for style in self.styles:
+                rank = []
+                if style.selector.does_match(scopePath, rank):
+                    styles.append((rank.pop(), style))
+            styles.sort(key = lambda t: t[0])
+            for style in styles:
+                base.update(style[1].settings)
+        self.STYLES_CACHE[scopePath] = base
         return base
 
 

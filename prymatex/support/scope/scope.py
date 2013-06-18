@@ -8,17 +8,13 @@ from .parser import Parser
 from .types import PathType, ScopeType
 
 class Scope(object):
-    def __init__(self, scope = None):
-        self.path = scope and Parser.path(scope) or PathType()
+    def __init__(self, path = None):
+        self.path = isinstance(path, PathType) and path or Parser.path(path)
 
     @classmethod
-    def fast_build(cls, scope):
-        so = cls()
-        for s in scope.split():
-            st = ScopeType()
-            st.atoms = s.split(".")
-            so.path.scopes.append(st)
-        return so
+    def fast_build(cls, path):
+        path = path.split() if isinstance(path, six.string_types) else path
+        return cls(PathType([ ScopeType(p.split(".")) for p in path ]))
 
     def __str__(self):
         return six.text_type(self.path)
@@ -57,7 +53,6 @@ class Context(object):
 
     @classmethod
     def get(cls, left, right = None):
-        # TODO: Testing cache
         right = right or left
         if left not in cls.CONTEXTS or right not in cls.CONTEXTS[left]:
             leftCache = cls.CONTEXTS.setdefault(left, {})
@@ -99,7 +94,7 @@ class Selector(object):
                 rank.append(0)
             return True
 
-        if isinstance(context, six.string_types) or isinstance(context, Scope):
+        if isinstance(context, (tuple, six.string_types, Scope)):
             context = Context.get(context)
 
         # Search in cache
