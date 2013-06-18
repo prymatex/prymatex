@@ -8,8 +8,17 @@ from prymatex.support.bundle import PMXManagedObject
 from prymatex.support import scope
 from prymatex.utils import plist
 
+# TODO Nuevos colores
 """foreground, background, selection, invisibles, lineHighlight, caret, gutter
 prymatex add gutterForeground
+gutterDivider: Border between text view and gutter.
+gutterForeground: Text color.
+gutterBackground: Background color.
+gutterIcons: Color of the images in the gutter.
+gutterSelectionForeground: Text color for lines containing caret / part of a selection.
+gutterSelectionBackground: Background color for lines containing caret / part of a selection.
+gutterSelectionIcons: Color of images on lines containing caret / part of a selection.
+gutterSelectionBorder: Border between selected and non-selected lines.
 """
 
 DEFAULT_THEME_SETTINGS = {'background':         '#FFFFFF',

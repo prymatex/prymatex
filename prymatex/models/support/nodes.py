@@ -184,15 +184,12 @@ class ThemeStyleTableRow(object):
     def __init__(self, styleItem):
         self.__styleItem = styleItem
 
-
     # ----------- Item attrs assessors -----------
     def __getattr__(self, name):
         return getattr(self.__styleItem, name)
 
-
     def styleItem(self):
         return self.__styleItem
-
 
     # ----------- Item decoration -----------
     @property
@@ -202,7 +199,6 @@ class ThemeStyleTableRow(object):
         # Fonts
         settings['fontStyle'] = self.__styleItem.settings['fontStyle'].split() if 'fontStyle' in self.__styleItem.settings else []
         return settings
-
     
     def update(self, dataHash):
         if 'settings' in dataHash:
