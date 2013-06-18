@@ -72,8 +72,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             if userData.testStateHash(self.__build_userData_hash(scopeName, text, blockState)):
                 # Only change the formats
                 for frange in block.layout().additionalFormats():
-                    scopeName = self.editor.scope(blockPosition = frange.start).name
-                    frange.format = self.highlightFormat(scopeName)
+                    frange.format = self.highlightFormat(self.editor.scope(blockPosition = frange.start).path)
                 blockState = block.userState()
                 block = block.next()
                 continue
@@ -94,7 +93,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 frange = QtGui.QTextLayout.FormatRange()
                 frange.start = start
                 frange.length = end - start
-                frange.format = self.highlightFormat(self.editor.scope(scopeHash = scopeHash).name)
+                frange.format = self.highlightFormat(self.editor.scope(scopeHash = scopeHash).path)
                 formats.append(frange)
 
             block.layout().setAdditionalFormats(formats)

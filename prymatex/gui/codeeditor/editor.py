@@ -39,9 +39,7 @@ from functools import reduce
 
 WIDTH_CHARACTER = "#"
 
-CodeEditorScope = namedtuple("CodeEditorScope", [
-    "name", "path", "settings", "group"
-])
+CodeEditorScope = namedtuple("CodeEditorScope", [ "path", "settings", "group" ])
 
 class CodeEditor(TextEditWidget, PMXBaseEditor):
     # -------------------- Scope groups
@@ -355,9 +353,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def flyweightScopeFactory(cls, scopeStack):
         scopeHash = hash(scopeStack)
         if scopeHash not in cls.SCOPES:
-            scopeName = " ".join(scopeStack)
             cls.SCOPES[scopeHash] = CodeEditorScope(
-                name = scopeName,
                 path = scopeStack,
                 settings = cls.application.supportManager.getPreferenceSettings(scopeStack),
                 group = PMXSyntax.findGroup(scopeStack[::-1])
@@ -939,7 +935,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             command.executeCallback(self.commandProcessor, commandCallback)
             
         #A tab tigger completion
-        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope.name)
+        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope.path)
         
         typedWords = self.alreadyTypedWords.typedWords()
         

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+# https://github.com/textmate/textmate/blob/master/Applications/TextMate/about/Changes.md
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import PMXBaseEditorKeyHelper
@@ -20,9 +21,13 @@ class KeyEquivalentHelper(CodeEditorKeyHelper):
         keyseq = int(event.modifiers()) + event.key()
         if keyseq not in self.application.supportManager.getAllKeyEquivalentCodes():
             return False
-        # https://github.com/textmate/textmate/blob/master/Applications/TextMate/about/Changes.md
+
         leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both')
-        self.items = self.application.supportManager.getKeyEquivalentItem(keyseq, leftScope.name, rightScope.name)
+        cursorScope = self.editor.cursorScope(cursor = cursor)
+        self.items = self.application.supportManager.getKeyEquivalentItem(
+            keyseq, 
+            leftScope.path + cursorScope, 
+            rightScope.path + cursorScope)
         return bool(self.items)
 
     def execute(self, event, cursor = None):
@@ -43,6 +48,7 @@ class TabTriggerHelper(CodeEditorKeyHelper):
         trigger = self.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
         if not trigger: return False
         leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both', delta = len(trigger))
+        # TODO Pasar el cursor con seleccion, no hace falta pasarle el tabTriggered ;)
         self.items = self.application.supportManager.getTabTriggerItem(
             trigger, 
             leftScope.path + self.editor.cursorScope(documentPosition = cursor.position() - len(trigger)), 
