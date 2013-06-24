@@ -22,7 +22,7 @@ from prymatex.support.regexp import compileRegexp
 #]
 
 class PMXCommand(PMXBundleItem):
-    KEYS = [    
+    KEYS = (    
         'input', 'fallbackInput', 'standardInput', 'inputFormat',               #Input
         #input [ "selection", "document", "scope", "line", "word", "character", "none" ]
         #inputFormat [ "text", "xml" ]
@@ -36,10 +36,11 @@ class PMXCommand(PMXBundleItem):
         #[ "nop", "saveActiveFile", "saveModifiedFiles" ]
         'version',                                                              #Command version
         'requiredCommands',
+        'require',
         'capturePattern', 'fileCaptureRegister',
         'columnCaptureRegister', 'disableOutputAutoIndent',
         'lineCaptureRegister', 'dontFollowNewOutput',
-        'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' ]
+        'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' )
     TYPE = 'command'
     FOLDER = 'Commands'
     EXTENSION = 'tmCommand'
