@@ -60,11 +60,9 @@ class PMXManagedObject(object):
     def currentPath(self):
         return self.sources[self.currentNamespace][self._PATH]
 
-    @property
     def isProtected(self):
-        return self.manager.protectedNamespace in self.namespaces
+        return self.manager.protectedNamespace() in self.namespaces
         
-    @property
     def isSafe(self):
         return len(self.namespaces) > 1
     
@@ -127,7 +125,8 @@ class PMXManagedObject(object):
         self.manager = manager
         
 class PMXBundle(PMXManagedObject):
-    KEYS = [    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
+    KEYS = (    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13',
+                'description', 'contactName', 'requiredCommands', 'require' )
     FILE = 'info.plist'
     TYPE = 'bundle'
     def __init__(self, uuid):
@@ -212,27 +211,27 @@ class PMXBundleItem(PMXManagedObject):
     @property
     def enabled(self):
         return self.bundle.enabled
-    
+
     def load(self, dataHash):
         for key in PMXBundleItem.KEYS:
             value = dataHash.get(key, None)
             if key == "scope":
                 self.selector = scope.Selector(value)
             setattr(self, key, value)
-    
+
     def update(self, dataHash):
         for key in list(dataHash.keys()):
             value = dataHash[key]
             if key == "scope":
                 self.selector = scope.Selector(value)
             setattr(self, key, value)
-    
+
     def isChanged(self, dataHash):
         for key in list(dataHash.keys()):
             if getattr(self, key) != dataHash[key]:
                 return True
         return False
-    
+
     @property
     def hash(self):
         dataHash = super(PMXBundleItem, self).hash

@@ -517,11 +517,11 @@ class PMXSnippetSyntaxProcessor(PMXSyntaxProcessor):
         self.node.close(name, token)
 
 class PMXSnippet(PMXBundleItem):
-    KEYS = [ 'content', 'disableAutoIndent', 'inputPattern' ]
+    KEYS = ( 'content', 'disableAutoIndent', 'inputPattern' )
     TYPE = 'snippet'
     FOLDER = 'Snippets'
     EXTENSION = 'tmSnippet'
-    PATTERNS = ['*.tmSnippet', '*.plist']
+    PATTERNS = ('*.tmSnippet', '*.plist')
     
     def __init__(self, uuid):
         PMXBundleItem.__init__(self, uuid)
