@@ -12,6 +12,7 @@ from glob import glob
 from prymatex.support.bundle import PMXBundle, PMXStaticFile
 from prymatex.support.macro import PMXMacro
 from prymatex.support.syntax import PMXSyntax
+from prymatex.support.proxy import PMXProxy
 from prymatex.support.snippet import PMXSnippet
 from prymatex.support.preference import PMXPreference
 from prymatex.support.command import PMXCommand, PMXDragCommand
@@ -25,8 +26,8 @@ from prymatex.utils import plist
 
 from functools import reduce
 
-BUNDLEITEM_CLASSES = [PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, 
-                        PMXPreference, PMXTemplate, PMXDragCommand, PMXProject]
+BUNDLEITEM_CLASSES = (PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXProxy,
+                        PMXPreference, PMXTemplate, PMXDragCommand, PMXProject)
 
 # ------- Tool function for compare bundle items by attributes
 def compare(obj, keys, tests):
