@@ -28,6 +28,21 @@ from functools import reduce
 BUNDLEITEM_CLASSES = [PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, 
                         PMXPreference, PMXTemplate, PMXDragCommand, PMXProject]
 
+# TODO: Por ahora pongo las reglas aca
+SCOPE_ATTRIBUTES = {
+    "rules": [
+        { "attribute": 'attr.scm.svn',       "glob": '.svn',        "group": 'scm',   },
+        { "attribute": 'attr.scm.hg',        "glob": '.hg',         "group": 'scm',   },
+        { "attribute": 'attr.scm.git',       "glob": '.git',        "group": 'scm',   },
+        { "attribute": 'attr.scm.p4',        "glob": '.p4config',   "group": 'scm',   },
+        { "attribute": 'attr.project.make',  "glob": 'Makefile',    "group": 'build', },
+        { "attribute": 'attr.project.rake',  "glob": 'Rakefile',    "group": 'build', },
+        { "attribute": 'attr.project.xcode', "glob": '*.xcodeproj', "group": 'build', },
+        { "attribute": 'attr.project.ninja', "glob": '*.ninja',     "group": 'build', },
+        { "attribute": 'attr.project.lein',  "glob": '*.lein',      "group": 'build', },
+    ],
+}
+
 # ------- Tool function for compare bundle items by attributes
 def compare(obj, keys, tests):
     if not len(keys):

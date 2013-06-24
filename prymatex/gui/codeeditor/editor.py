@@ -394,6 +394,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def cursorScope(self, cursor = None, documentPosition = None):
         # TODO: Si esta en modo multiedit agregar el mixed 
+        # TODO: Porque no usar el CodeEditorScope ?
         cursor = cursor or (documentPosition is not None and self.newCursorAtPosition(documentPosition)) or self.textCursor()
         path = []
         if cursor.hasSelection():
@@ -407,6 +408,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if cursor.atEnd():
             path.append("dyn.caret.end.document")
         return tuple(path)
+        
+    def attributeScope(self):
+        return tuple([])
         
     # ------------ Obteniendo datos del editor
     def tabKeyBehavior(self):
