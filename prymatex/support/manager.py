@@ -1078,9 +1078,13 @@ class PMXSupportBaseManager(object):
         raise NotImplementedError
 
     #---------------- ACTION ITEMS FOR SCOPE ---------------------------------
-    def getActionItems(self, leftScope, rightScope):
+    def getActionItemsByScope(self, leftScope, rightScope):
         """Return a list of actions items for scope"""
-        return self.__sort_filter_items(self.getAllActionItems(), leftScope, rightScope)
+        memoizedKey = ("getActionItemsByScope", None, leftScope, rightScope)
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
+        return self.bundleItemCache.setdefault(memoizedKey,
+            self.__sort_filter_items(self.getAllActionItems(), leftScope, rightScope))
 
     # ------------------ SYNTAXES INTERFACE
     def getAllSyntaxes(self):
