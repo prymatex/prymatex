@@ -19,7 +19,7 @@ from prymatex.support.command import PMXCommand, PMXDragCommand
 from prymatex.support.template import PMXTemplate
 from prymatex.support.project import PMXProject
 from prymatex.support.theme import PMXTheme, PMXThemeStyle
-from prymatex.support import scope, paths
+from prymatex.support import scope, paths, system
 
 from prymatex.utils import plist
 
@@ -1131,6 +1131,13 @@ class PMXSupportBaseManager(object):
         for syntax in self.getAllSyntaxes():
             if syntax.fileTypes is not None and any([fileType == "%s" % ft for ft in syntax.fileTypes]):
                 return syntax
+
+    # ------------------ SCOPE ATTRIBUTES
+    def attributeScopes(self, filePath):
+        scopes = []
+        scopes.append(paths.attributes(filePath))
+        scopes.append(system.attributes())
+        return tuple(scopes)
 
 #===================================================
 # PYTHON MANAGER

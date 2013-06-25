@@ -392,7 +392,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 return (None, None)
         return scopes
 
-    def cursorScope(self, cursor = None, documentPosition = None):
+    def cursorScopePath(self, cursor = None, documentPosition = None):
         # TODO: Si esta en modo multiedit agregar el mixed 
         # TODO: Porque no usar el CodeEditorScope ?
         cursor = cursor or (documentPosition is not None and self.newCursorAtPosition(documentPosition)) or self.textCursor()
@@ -409,7 +409,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             path.append("dyn.caret.end.document")
         return tuple(path)
         
-    def attributeScope(self):
+    def attributeScopePath(self):
+        return self.application.supportManager.attributeScopes(self.filePath)
         return tuple([])
         
     # ------------ Obteniendo datos del editor
@@ -835,16 +836,18 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         cursor = self.textCursor()
         block = cursor.block()
         line = block.text()
+        # TODO un shortcut para esto de obtener el path
         leftScope, rightScope = self.scope(direction = "both")
-        cursorScope = self.cursorScope(cursor = cursor)
+        attributeScopePath = self.attributeScopePath()
+        cursorScopePath = self.cursorScopePath(cursor = cursor)
         current_word, start, end = self.currentWord()
         environment.update({
                 'TM_CURRENT_LINE': line,
                 'TM_LINE_INDEX': cursor.positionInBlock(),
                 'TM_LINE_NUMBER': block.blockNumber() + 1,
                 'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
-                'TM_SCOPE': " ".join(rightScope.path + cursorScope),
-                'TM_LEFT_SCOPE': " ".join(leftScope.path + cursorScope),
+                'TM_SCOPE': " ".join(rightScope.path + attributeScopePath + cursorScopePath),
+                'TM_LEFT_SCOPE': " ".join(leftScope.path + attributeScopePath + cursorScopePath),
                 'TM_MODE': self.syntax().name,
                 'TM_SOFT_TABS': self.tabStopSoft and str('YES') or str('NO'),
                 'TM_TAB_SIZE': self.tabStopSize

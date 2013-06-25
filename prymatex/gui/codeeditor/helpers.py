@@ -23,11 +23,11 @@ class KeyEquivalentHelper(CodeEditorKeyHelper):
             return False
 
         leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both')
-        cursorScope = self.editor.cursorScope(cursor = cursor)
+        cursorScopePath = self.editor.cursorScopePath(cursor = cursor)
         self.items = self.application.supportManager.getKeyEquivalentItem(
             keyseq, 
-            leftScope.path + cursorScope, 
-            rightScope.path + cursorScope)
+            leftScope.path + cursorScopePath, 
+            rightScope.path + cursorScopePath)
         return bool(self.items)
 
     def execute(self, event, cursor = None):
@@ -51,8 +51,8 @@ class TabTriggerHelper(CodeEditorKeyHelper):
         # TODO Pasar el cursor con seleccion, no hace falta pasarle el tabTriggered ;)
         self.items = self.application.supportManager.getTabTriggerItem(
             trigger, 
-            leftScope.path + self.editor.cursorScope(documentPosition = cursor.position() - len(trigger)), 
-            rightScope.path + self.editor.cursorScope(cursor = cursor))
+            leftScope.path + self.editor.cursorScopePath(documentPosition = cursor.position() - len(trigger)), 
+            rightScope.path + self.editor.cursorScopePath(cursor = cursor))
         return bool(self.items)
 
     def execute(self, event, cursor = None):
