@@ -1,0 +1,3 @@
+[submodule "prymatex/share/Bundles/scm.tmbundle"]
+	path = prymatex/share/Bundles/scm.tmbundle
+	url = git@github.com:prymatex/scm.tmbundle.git

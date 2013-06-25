@@ -160,11 +160,12 @@ class PMXSyntaxProxy(object):
                 return PMXSyntaxNode({}, self.syntax)
 
 class PMXSyntax(PMXBundleItem):
-    KEYS = [ 'comment', 'firstLineMatch', 'scopeName', 'repository', 'fileTypes', 'patterns']
+    KEYS = ( 'comment', 'firstLineMatch', 'scopeName', 'repository',
+        'fileTypes', 'patterns', 'injectionSelector')
     TYPE = 'syntax'
     FOLDER = 'Syntaxes'
     EXTENSION = 'tmLanguage'
-    PATTERNS = ['*.tmLanguage', '*.plist']
+    PATTERNS = ('*.tmLanguage', '*.plist')
     ROOT_GROUPS = [ "comment", "constant", "entity", "invalid",
                     "keyword", "markup", "meta", "storage",
                     "string", "support", "variable" ]
