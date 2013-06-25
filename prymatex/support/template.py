@@ -12,7 +12,7 @@ from glob import glob
 
 from prymatex.support.bundle import (PMXBundleItem, PMXStaticFile, 
     PMXRunningContext)
-from prymatex.support.utils import prepareShellScript
+
 from prymatex.utils import plist
     
 class PMXTemplate(PMXBundleItem):

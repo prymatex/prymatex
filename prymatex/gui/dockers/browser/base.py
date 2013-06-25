@@ -13,7 +13,7 @@ from prymatex import resources
 from prymatex.qt.helpers import create_menu
 from prymatex.ui.dockers.browser import Ui_BrowserDock
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.support.utils import prepareShellScript, deleteFile
+
 from .tabwebview import TabbedWebView
 from .webview import WebView
 from .network import setGlobalApplicationProxy
