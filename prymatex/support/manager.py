@@ -19,8 +19,9 @@ from prymatex.support.command import PMXCommand, PMXDragCommand
 from prymatex.support.template import PMXTemplate
 from prymatex.support.project import PMXProject
 from prymatex.support.theme import PMXTheme, PMXThemeStyle
-from prymatex.support import scope, paths, system
+from prymatex.support import scope
 
+from prymatex.utils import osextra
 from prymatex.utils import plist
 
 from functools import reduce
@@ -652,7 +653,7 @@ class PMXSupportBaseManager(object):
         """
         namespace = namespace or self.defaultNamespace
         basePath, _ = self.namespaceElementPath(namespace, self.BUNDLES_NAME, create = True)
-        path = paths.ensurePath(os.path.join(basePath, "%s.tmbundle"), self.convertToValidPath(name))
+        path = osextra.path.ensure_not_exists(os.path.join(basePath, "%s.tmbundle"), self.convertToValidPath(name))
         bundle = PMXBundle(self.uuidgen(), {'name': name})
         bundle.setManager(self)
         bundle.addSource(namespace, path)
@@ -684,7 +685,7 @@ class PMXSupportBaseManager(object):
             self.logger.debug("Add namespace '%s' in source %s for bundle." % (namespace, path))
         elif not bundle.isProtected() and "name" in attrs:
             #Move bundle
-            path = paths.ensurePath(os.path.join(os.path.dirname(bundle.path(namespace)), "%s.tmbundle"), self.convertToValidPath(attrs["name"]))
+            path = osextra.path.ensure_not_exists(os.path.join(os.path.dirname(bundle.path(namespace)), "%s.tmbundle"), self.convertToValidPath(attrs["name"]))
             bundle.relocateSource(namespace, path)
         bundle.update(attrs)
         bundle.save(namespace)
@@ -805,7 +806,7 @@ class PMXSupportBaseManager(object):
         elif not item.isProtected() and "name" in attrs:
             #Move Bundle Item
             namePattern = "%%s.%s" % item.EXTENSION if item.EXTENSION else "%s"
-            path = paths.ensurePath(os.path.join(item.bundle.path(namespace), item.FOLDER, namePattern), self.convertToValidPath(attrs["name"]))
+            path = osextra.path.ensure_not_exists(os.path.join(item.bundle.path(namespace), item.FOLDER, namePattern), self.convertToValidPath(attrs["name"]))
             item.relocateSource(namespace, path)
         item.update(attrs)
         item.save(namespace)
@@ -838,7 +839,7 @@ class PMXSupportBaseManager(object):
         namespace = namespace or self.defaultNamespace
         if parentItem.isProtected() and not parentItem.isSafe():
             self.updateBundleItem(parentItem, namespace)
-        path = paths.ensurePath(os.path.join(parentItem.path(namespace), "%s"), self.convertToValidPath(name))
+        path = osextra.path.ensure_not_exists(os.path.join(parentItem.path(namespace), "%s"), self.convertToValidPath(name))
         staticFile = PMXStaticFile(path, parentItem)
         #No es la mejor forma pero es la forma de guardar el archivo
         staticFile = self.addStaticFile(staticFile)
@@ -852,7 +853,7 @@ class PMXSupportBaseManager(object):
         if parentItem.isProtected() and not parentItem.isSafe():
             self.updateBundleItem(parentItem, namespace)
         if "name" in attrs:
-            path = paths.ensurePath(os.path.join(parentItem.path(namespace), "%s"), self.convertToValidPath(attrs["name"]))
+            path = osextra.path.ensure_not_exists(os.path.join(parentItem.path(namespace), "%s"), self.convertToValidPath(attrs["name"]))
             staticFile.relocate(path)
         staticFile.update(attrs)
         self.modifyBundleItem(staticFile)
@@ -920,7 +921,7 @@ class PMXSupportBaseManager(object):
             path = os.path.join(self.namespaces[namespace][self.THEMES_NAME], os.path.basename(theme.path(self.protectedNamespace())))
             theme.addSource(namespace, path)
         elif not theme.isProtected() and "name" in attrs:
-            path = paths.ensurePath(os.path.join(os.path.dirname(theme.path(namespace)), "%s.tmTheme"), self.convertToValidPath(attrs["name"]))
+            path = osextra.path.ensure_not_exists(os.path.join(os.path.dirname(theme.path(namespace)), "%s.tmTheme"), self.convertToValidPath(attrs["name"]))
             theme.relocateSource(namespace, path)
         theme.update(attrs)
         theme.save(namespace)
@@ -1135,8 +1136,8 @@ class PMXSupportBaseManager(object):
     # ------------------ SCOPE ATTRIBUTES
     def attributeScopes(self, filePath):
         scopes = []
-        scopes.append(paths.attributes(filePath))
-        scopes.append(system.attributes())
+        scopes.append(scope.path.attributes(filePath))
+        scopes.append(scope.system.attributes())
         return tuple(scopes)
 
 #===================================================
