@@ -20,8 +20,6 @@ from .model import RepositoryTableModel, RepositoryProxyTableModel
 GITHUB_API_SEARCH_URL = 'https://api.github.com/legacy/repos/search/%s+tmbundle'
 MINIMUM_QUERY_LENGTH = 1
 
-NOPROXY = 1<<0
-
 class GithubBundleSearchThread(QtCore.QThread):
     # Signals
     dataUpdate = QtCore.Signal(object)
@@ -36,15 +34,17 @@ class GithubBundleSearchThread(QtCore.QThread):
         self.dataUpdate.emit(data) # Thread safety
 
     def setProxy(self):
-        proxyType = self.parent().application.settingValue("Browser.proxyType")
-        if proxyType != NOPROXY:
-            networkProxy = QtNetwork.QNetworkProxy.applicationProxy()
+        networkProxy = QtNetwork.QNetworkProxy.applicationProxy()
+        if networkProxy.type() == QtNetwork.QNetworkProxy.HttpProxy:
+            proxy = "{host}:{port}".format(
+                host = networkProxy.hostName(),
+                port = networkProxy.port())
             opener = urltools.build_opener(
                 urltools.HTTPHandler(),
                 urltools.HTTPSHandler(),
                 urltools.ProxyHandler({
-                    'http': networkProxy,
-                    'https': networkProxy
+                    'http': proxy,
+                    'https': proxy
                 }))
             urltools.install_opener(opener)
 
