@@ -31,10 +31,8 @@ http://en.wikipedia.org/wiki/Dennis_Ritchie
 def getSupportPath(environment):
     return environment["PMX_SUPPORT_PATH"]
 
-
 def getShellShebang(environment):
     return "#!%s" % environment.get("SHELL", SHELL_BASH)
-
 
 def buildShellScript(script, environment, shebang = None):
     shellScript = [ getShellShebang(environment) ] if shebang is None else [ shebang ]
@@ -45,7 +43,6 @@ def buildShellScript(script, environment, shebang = None):
     shellScript.append(script)
     return "\n".join(shellScript)
 
-
 def buildEnvScript(script, command, environment):
     supportPath = getSupportPath(environment)
 
@@ -53,19 +50,15 @@ def buildEnvScript(script, command, environment):
     envScript = [ "%s %s" % (shebang, command) ]
     envScript.append(script)
     return "\n".join(envScript)
-
     
 def has_shebang(line):
     return line.startswith("#!")
 
-
 def is_shell_shebang(line):
     return os.path.basename(line) in [ "bash", "sh", "csh", "zsh" ]
 
-
 def is_env_shebang(line):
     return os.path.basename(line) == "env"
-
 
 def shebang_patch(shebang, environment):
     shebangParts = shebang.split()
@@ -86,7 +79,6 @@ def shebang_patch(shebang, environment):
                     shebang = value + shebang[splitIndex:]
     return shebang
 
-
 def shebang_command(shebang, environment):
     shebangParts = shebang.split()
     if is_env_shebang(shebangParts[0]) and len(shebangParts) > 1:
@@ -101,7 +93,6 @@ def shebang_command(shebang, environment):
                 if key.startswith(prefix) and key[len(prefix):].lower() in shebang:
                     return ("%s %s") % (value, " ".join(shebangParts[1:]))
     return " ".join(shebangParts[1:])
-
 
 def ensureShellScript(script, environment):
     scriptLines = script.splitlines()
@@ -141,7 +132,6 @@ def prepareWindowsShellScript(script, environment):
     script = ensureShellScript(script, environment)
     tmpFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
     return tmpFile, environment, tmpFile
-
     
 #============================
 # CYGWIN
@@ -153,10 +143,8 @@ def ensureCygwinPath(path):
         path = path.replace("\\", "/")
     return path
 
-
 def ensureCygwinEnvironment(environment):
     return dict(map(lambda item: (encoding.to_fs(item[0]), ensureCygwinPath(encoding.to_fs(item[1]))), environment.items()))
-
 
 def prepareCygwinShellScript(script, environment):
     cygwinPath = environment.get("PMX_CYGWIN_PATH", PMX_CYGWIN_PATH)
@@ -166,7 +154,6 @@ def prepareCygwinShellScript(script, environment):
     tmpFile = makeExecutableTempFile(script, environment.get("PMX_TMP_PATH"))
     command = '%s\\bin\\env.exe "%s"' % (cygwinPath, tmpFile)
     return command, environment, tmpFile
-
 
 def prepareShellScript(script, variables):
     #Aca entran las variables de prymatex, tengo que armar el environment con os.environ
@@ -182,7 +169,6 @@ def prepareShellScript(script, variables):
         return prepareWindowsShellScript(script, environment)
     return prepareUnixShellScript(script, environment)
 
-
 def makeExecutableTempFile(content, directory):
     # TODO: Mejorara la generacion de temp, se borra no se borra que onda
     #tempFile = tempfile.NamedTemporaryFile(prefix='pmx', dir = directory)
@@ -196,7 +182,6 @@ def makeExecutableTempFile(content, directory):
 def deleteFile(filePath):
     os.unlink(filePath)
 
-
 def sh(cmd):
     """ Execute cmd and capture stdout, and return it as a string. """
     result = ""
@@ -208,11 +193,8 @@ def sh(cmd):
         if pipe: pipe.close()
     return result
 
-
 def ensurePath(path, name, suffix = 0):
-    """
-    Return a safe path, ensure not exists
-    """
+    """Return a safe path, ensure not exists"""
     if suffix == 0 and not os.path.exists(path % name):
         return path % name
     else:

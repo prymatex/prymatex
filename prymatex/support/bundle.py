@@ -6,7 +6,7 @@ from copy import copy
 
 from prymatex.utils import plist
 from prymatex.utils import encoding
-from prymatex.support import scope, utils
+from prymatex.support import scope, scripts
 
 """
 Este es el unico camino -> http://manual.macromates.com/en/
@@ -333,7 +333,7 @@ class PMXRunningContext(object):
 
     def __enter__(self):
         #Build the full las environment with gui environment and support environment
-        self.shellCommand, self.environment, self.tempFile = utils.prepareShellScript(self.shellCommand, self.environment)
+        self.shellCommand, self.environment, self.tempFile = scripts.prepareShellScript(self.shellCommand, self.environment)
         return self
 
     def __exit__(self, type, value, traceback):
@@ -372,5 +372,5 @@ class PMXRunningContext(object):
         
     def removeTempFile(self):
         if os.path.exists(self.tempFile):
-            utils.deleteFile(self.tempFile)
+            scripts.deleteFile(self.tempFile)
 
