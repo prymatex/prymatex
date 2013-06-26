@@ -13,3 +13,6 @@
 [submodule "prymatex/share/Bundles/text.tmbundle"]
 	path = prymatex/share/Bundles/text.tmbundle
 	url = git@github.com:prymatex/text.tmbundle.git
+[submodule "prymatex/share/Bundles/ruby.tmbundle"]
+	path = prymatex/share/Bundles/ruby.tmbundle
+	url = git@github.com:prymatex/ruby.tmbundle.git
