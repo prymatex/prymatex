@@ -122,7 +122,6 @@ class MainWindowActions(object):
             self.application.profileManager.defaultProfile() != self.application.currentProfile:
             self.application.restart()
 
-
     # ------------ Edit Actions
     @QtCore.Slot()
     def on_actionUndo_triggered(self):

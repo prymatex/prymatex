@@ -63,9 +63,8 @@ class PMXCommand(PMXBundleItem):
                 value = compileRegexp( value )
             setattr(self, key, value)
     
-    @property
-    def hash(self):
-        dataHash = super(PMXCommand, self).hash
+    def dump(self):
+        dataHash = super(PMXCommand, self).dump()
         for key in PMXCommand.KEYS:
             value = getattr(self, key)
             if value != None:
@@ -73,7 +72,7 @@ class PMXCommand(PMXBundleItem):
                     value = str(value)
                 dataHash[key] = value
         return dataHash
-
+    
     def getInputText(self, processor):
         def getInputTypeAndValue(inputType, format):
             if inputType is None or inputType == "none": return None, None
@@ -153,9 +152,8 @@ class PMXDragCommand(PMXCommand):
             value = dataHash.get(key, None)
             setattr(self, key, value)
     
-    @property
-    def hash(self):
-        dataHash = super(PMXDragCommand, self).hash
+    def dump(self):
+        dataHash = super(PMXDragCommand, self).dump()
         for key in PMXDragCommand.KEYS:
             value = getattr(self, key)
             dataHash[key] = value

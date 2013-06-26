@@ -48,8 +48,7 @@ class PMXPreferenceSettings(object):
         self.preference = preference
         self.update(dataHash)
     
-    @property
-    def hash(self):
+    def dump(self):
         dataHash = {}
         for key in PMXPreferenceSettings.KEYS:
             value = getattr(self, key)
@@ -284,13 +283,12 @@ class PMXPreference(PMXBundleItem):
                 value = PMXPreferenceSettings(value or {}, self)
             setattr(self, key, value)
     
-    @property
-    def hash(self):
-        dataHash = super(PMXPreference, self).hash
+    def dump(self):
+        dataHash = super(PMXPreference, self).dump()
         for key in PMXPreference.KEYS:
             value = getattr(self, key)
             if key == 'settings':
-                value = value.hash
+                value = value.dump()
             dataHash[key] = value
         return dataHash
 

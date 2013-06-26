@@ -27,9 +27,8 @@ class PMXTemplate(PMXBundleItem):
         for key in PMXTemplate.KEYS:
             setattr(self, key, dataHash.get(key, None))
     
-    @property
-    def hash(self):
-        dataHash = super(PMXTemplate, self).hash
+    def dump(self):
+        dataHash = super(PMXTemplate, self).dump()
         for key in PMXTemplate.KEYS:
             value = getattr(self, key)
             if value != None:
@@ -40,7 +39,7 @@ class PMXTemplate(PMXBundleItem):
         if not os.path.exists(self.path(namespace)):
             os.makedirs(self.path(namespace))
         file = os.path.join(self.path(namespace), self.FILE)
-        plist.writePlist(self.hash, file)
+        plist.writePlist(self.dump(), file)
         
         #Hora los archivos del template
         for file in self.files:

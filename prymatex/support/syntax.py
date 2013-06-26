@@ -178,9 +178,8 @@ class PMXSyntax(PMXBundleItem):
                     value = compileRegexp( value )
             setattr(self, key, value)
     
-    @property
-    def hash(self):
-        dataHash = super(PMXSyntax, self).hash
+    def dump(self):
+        dataHash = super(PMXSyntax, self).dump()
         for key in PMXSyntax.KEYS:
             value = getattr(self, key)
             if value is not None:
@@ -188,13 +187,6 @@ class PMXSyntax(PMXBundleItem):
                     value = value.pattern
                 dataHash[key] = value
         return dataHash
-
-    @property
-    def indentSensitive(self):
-        #If stop marker match with "" the grammar is indent sensitive
-        #match = self.foldingStopMarker.search("") if self.foldingStopMarker != None else None
-        #return match != None
-        return False
 
     @property
     def syntaxes(self):

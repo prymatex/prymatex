@@ -532,9 +532,8 @@ class PMXSnippet(PMXBundleItem):
         for key in PMXSnippet.KEYS:
             setattr(self, key, dataHash.get(key, None))
     
-    @property
-    def hash(self):
-        dataHash = super(PMXSnippet, self).hash
+    def dump(self):
+        dataHash = super(PMXSnippet, self).dump()
         for key in PMXSnippet.KEYS:
             value = getattr(self, key)
             if value != None:

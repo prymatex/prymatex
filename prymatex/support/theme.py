@@ -66,8 +66,7 @@ class PMXThemeStyle(object):
                 self.selector = scope.Selector(value)
             setattr(self, key, value)
 
-    @property
-    def hash(self):
+    def dump(self):
         dataHash = {'name': self.name}
         if self.scope is not None:
             dataHash['scope'] = self.scope
@@ -110,23 +109,22 @@ class PMXTheme(PMXManagedObject):
             else:
                 setattr(self, key, dataHash[key])
     
-    @property
-    def hash(self):
-        dataHash = super(PMXTheme, self).hash
+    def dump(self):
+        dataHash = super(PMXTheme, self).dump()
         for key in PMXTheme.KEYS:
             value = getattr(self, key)
             if value != None:
                 dataHash[key] = value
         dataHash['settings'] = [ { 'settings': self.settings } ]
         for style in self.styles:
-            dataHash['settings'].append(style.hash)
+            dataHash['settings'].append(style.dump())
         return dataHash
         
     def save(self, namespace):
         folder = os.path.dirname(self.path(namespace))
         if not os.path.exists(folder):
             os.makedirs(folder)
-        plist.writePlist(self.hash, self.path(namespace))
+        plist.writePlist(self.dump(), self.path(namespace))
     
     def removeThemeStyle(self, style):
         self.styles.remove(style)

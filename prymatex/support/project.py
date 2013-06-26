@@ -22,9 +22,8 @@ class PMXProject(PMXBundleItem):
         for key in PMXProject.KEYS:
             setattr(self, key, dataHash.get(key, None))
     
-    @property
-    def hash(self):
-        dataHash = super(PMXProject, self).hash
+    def dump(self):
+        dataHash = super(PMXProject, self).dump()
         for key in PMXProject.KEYS:
             value = getattr(self, key)
             if value != None:
@@ -35,7 +34,7 @@ class PMXProject(PMXBundleItem):
         if not os.path.exists(self.path(namespace)):
             os.makedirs(self.path(namespace))
         projectFile = os.path.join(self.path(namespace), self.FILE)
-        plist.writePlist(self.hash, projectFile)
+        plist.writePlist(self.dump(), projectFile)
         
         #Hora los archivos del project
         for projectFile in self.files:

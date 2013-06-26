@@ -622,7 +622,7 @@ class LanguageEditorWidget(BundleItemEditorBaseWidget, Ui_Language):
     
     def edit(self, bundleItem):
         super(LanguageEditorWidget, self).edit(bundleItem)
-        content = bundleItem.hash
+        content = bundleItem.dump()
         content.pop('name')
         content.pop('uuid')
         if len(content) == 0:
@@ -641,7 +641,7 @@ class PreferenceEditorWidget(BundleItemEditorBaseWidget, Ui_Preference):
         #Convertir a dict
         try:
             settings = ast.literal_eval(self.settings.toPlainText())
-            if self.bundleItem.hash["settings"] != settings:
+            if self.bundleItem.dump()["settings"] != settings:
                 self.changes['settings'] = settings
             else:
                 self.changes.pop("settings", None)
@@ -660,7 +660,7 @@ class PreferenceEditorWidget(BundleItemEditorBaseWidget, Ui_Preference):
     
     def edit(self, bundleItem):
         super(PreferenceEditorWidget, self).edit(bundleItem)
-        content = bundleItem.hash
+        content = bundleItem.dump()
         self.settings.setPlainText(pformat(content['settings']))
 
 class MacroEditorWidget(BundleItemEditorBaseWidget, Ui_Macro):

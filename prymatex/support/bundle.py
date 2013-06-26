@@ -27,11 +27,17 @@ class PMXManagedObject(object):
         # TODO: mover esto a los bundle item
         self.statics = []
 
+    # ----------- Load from dictionary
     def load(self, dataHash):
         raise NotImplemented
 
+    # ----------- Update from dictionary
     def update(self, dataHash):
         raise NotImplemented
+    
+    # ----------- Dump to dictionary
+    def dump(self):
+        return { 'uuid': self.uuidAsUnicode() }
     
     def save(self, namespace):
         raise NotImplemented
@@ -158,21 +164,20 @@ class PMXBundle(PMXManagedObject):
         for key in list(dataHash.keys()):
             setattr(self, key, dataHash[key])
     
-    @property
-    def hash(self):
-        dataHash = super(PMXBundle, self).hash
+    def dump(self):
+        dataHash = super(PMXBundle, self).dump()
         for key in PMXBundle.KEYS:
             value = getattr(self, key)
             if value != None:
                 dataHash[key] = value
         return dataHash
-
+    
     def save(self, namespace):
         # TODO: todo esto mandarlo al manager
         if not os.path.exists(self.path(namespace)):
             os.makedirs(self.path(namespace))
         dataFile = self.dataFilePath(self.path(namespace))
-        plist.writePlist(self.hash, dataFile)
+        plist.writePlist(self.dump(), dataFile)
         self.updateMtime(namespace)
 
     def delete(self, namespace):
@@ -226,27 +231,26 @@ class PMXBundleItem(PMXManagedObject):
                 self.selector = scope.Selector(value)
             setattr(self, key, value)
 
-    def isChanged(self, dataHash):
-        for key in list(dataHash.keys()):
-            if getattr(self, key) != dataHash[key]:
-                return True
-        return False
-
-    @property
-    def hash(self):
-        dataHash = super(PMXBundleItem, self).hash
+    def dump(self):
+        dataHash = super(PMXBundleItem, self).dump()
         for key in PMXBundleItem.KEYS:
             value = getattr(self, key)
             if value != None:
                 dataHash[key] = value
         return dataHash
 
+    def isChanged(self, dataHash):
+        for key in list(dataHash.keys()):
+            if getattr(self, key) != dataHash[key]:
+                return True
+        return False
+
     def save(self, namespace):
         #TODO: Si puedo garantizar el guardado con el manager puedo controlar los mtime en ese punto
         dir = os.path.dirname(self.path(namespace))
         if not os.path.exists(dir):
             os.makedirs(dir)
-        plist.writePlist(self.hash, self.path(namespace))
+        plist.writePlist(self.dump(), self.path(namespace))
         self.updateMtime(namespace)
     
     def delete(self, namespace):
