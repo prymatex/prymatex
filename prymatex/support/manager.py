@@ -114,7 +114,6 @@ class PMXSupportBaseManager(object):
     def protectedNamespace(self):
         return self.nsorder[self.PROTECTEDNS]
 
-    @property
     def defaultNamespace(self):
         if len(self.nsorder) < 2:
             raise Exception("No default namespace")
@@ -178,7 +177,8 @@ class PMXSupportBaseManager(object):
         return self.plistFileCache.setdefault(path, plist.readPlist(path))
         
     def writePlist(self, hashData, path):
-        self.plistFileCache.set(path, hashData)
+        # TODO Ver que pasa con este set que falta
+        self.plistFileCache[path] = hashData
         return plist.writePlist(hashData, path)
 
     #--------------- Tools --------------------
@@ -193,8 +193,9 @@ class PMXSupportBaseManager(object):
             return uuidmodule.uuid3(uuidmodule.NAMESPACE_DNS, uuid)
 
     def convertToValidPath(self, name):
+        # TODO mover a utils osextra path
         validPath = []
-        for char in unicodedata.normalize('NFKD', str(name)).encode('ASCII', 'ignore'):
+        for char in unicodedata.normalize('NFKD', unicode(name)).encode('ASCII', 'ignore'):
             char = char if char in self.VALID_PATH_CARACTERS else '-'
             validPath.append(char)
         return ''.join(validPath)
@@ -614,6 +615,22 @@ class PMXSupportBaseManager(object):
             uuid = uuidmodule.UUID(uuid)
         return self.managedObjects.get(uuid, None)
 
+    def saveManagedObject(self, obj, namespace):
+        # Save obj in namespace
+        objFilePath = obj.dataFilePath(obj.path(namespace))
+        dirname = os.path.dirname(objFilePath)
+        
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+
+        self.writePlist(obj.dump(), objFilePath)
+        
+        # Save static files
+        for static in obj.statics:
+            static.save(dirname)
+        
+        obj.updateMtime(namespace)
+        
     # ------------- BUNDLE INTERFACE
     def addBundle(self, bundle):
         return bundle
@@ -632,7 +649,7 @@ class PMXSupportBaseManager(object):
 
     def getAllBundles(self):
         return []
-
+    
     # ------------- BUNDLE CRUD
     def findBundles(self, **attrs):
         """Retorna todos los bundles que cumplan con attrs"""
@@ -651,10 +668,11 @@ class PMXSupportBaseManager(object):
             El nombre no este entre los nombres ya cargados.
         Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle nuevo.
         """
-        namespace = namespace or self.defaultNamespace
+        namespace = namespace or self.defaultNamespace()
         basePath, _ = self.namespaceElementPath(namespace, self.BUNDLES_NAME, create = True)
         path = osextra.path.ensure_not_exists(os.path.join(basePath, "%s.tmbundle"), self.convertToValidPath(name))
-        bundle = PMXBundle(self.uuidgen(), {'name': name})
+        bundle = PMXBundle(self.uuidgen())
+        bundle.load({"name": name})
         bundle.setManager(self)
         bundle.addSource(namespace, path)
         bundle = self.addBundle(bundle)
@@ -673,7 +691,7 @@ class PMXSupportBaseManager(object):
 
     def updateBundle(self, bundle, namespace = None, **attrs):
         """Actualiza un bundle"""
-        namespace = namespace or self.defaultNamespace
+        namespace = namespace or self.defaultNamespace()
 
         if bundle.isProtected() and not bundle.isSafe():
             #Safe bundle
@@ -687,9 +705,10 @@ class PMXSupportBaseManager(object):
             #Move bundle
             path = osextra.path.ensure_not_exists(os.path.join(os.path.dirname(bundle.path(namespace)), "%s.tmbundle"), self.convertToValidPath(attrs["name"]))
             bundle.relocateSource(namespace, path)
+        
+        # Do update and save
         bundle.update(attrs)
-        bundle.save(namespace)
-        bundle.updateMtime(namespace)
+        self.saveManagedObject(bundle, namespace)
         self.modifyBundle(bundle)
         return bundle
 
@@ -751,7 +770,7 @@ class PMXSupportBaseManager(object):
             El tipo tiene que ser uno de los conocidos
         Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle item nuevo.
         """
-        namespace = namespace or self.defaultNamespace
+        namespace = namespace or self.defaultNamespace()
         if bundle.isProtected() and not bundle.isSafe():
             self.updateBundle(bundle, namespace)
         klass = [c for c in BUNDLEITEM_CLASSES if c.TYPE == tipo]
@@ -760,7 +779,8 @@ class PMXSupportBaseManager(object):
         klass = klass.pop()
         path = os.path.join(bundle.path(namespace), klass.FOLDER, "%s.%s" % (self.convertToValidPath(name), klass.EXTENSION))
 
-        item = klass(self.uuidgen(), {'name': name})
+        item = klass(self.uuidgen())
+        item.load({'name': name})
         item.setBundle(bundle)
         item.setManager(self)
         item.addSource(namespace, path)
@@ -793,7 +813,7 @@ class PMXSupportBaseManager(object):
         self.updateBundleItemCacheCoherence(item, attrs)
 
         #TODO: Este paso es importante para obtener el namespace, quiza ponerlo en un metodo para trabajarlo un poco más
-        namespace = namespace or self.defaultNamespace
+        namespace = namespace or self.defaultNamespace()
 
         if item.bundle.isProtected() and not item.bundle.isSafe():
             self.updateBundle(item.bundle, namespace)
@@ -808,9 +828,10 @@ class PMXSupportBaseManager(object):
             namePattern = "%%s.%s" % item.EXTENSION if item.EXTENSION else "%s"
             path = osextra.path.ensure_not_exists(os.path.join(item.bundle.path(namespace), item.FOLDER, namePattern), self.convertToValidPath(attrs["name"]))
             item.relocateSource(namespace, path)
+
+        # Do update and save
         item.update(attrs)
-        item.save(namespace)
-        item.updateMtime(namespace)
+        self.saveManagedObject(item, namespace)
         self.modifyBundleItem(item)
         return item
 
@@ -836,7 +857,7 @@ class PMXSupportBaseManager(object):
 
     # -------------- STATICFILE CRUD
     def createStaticFile(self, name, parentItem, namespace=None):
-        namespace = namespace or self.defaultNamespace
+        namespace = namespace or self.defaultNamespace()
         if parentItem.isProtected() and not parentItem.isSafe():
             self.updateBundleItem(parentItem, namespace)
         path = osextra.path.ensure_not_exists(os.path.join(parentItem.path(namespace), "%s"), self.convertToValidPath(name))
@@ -848,7 +869,7 @@ class PMXSupportBaseManager(object):
         return staticFile
 
     def updateStaticFile(self, staticFile, namespace=None, **attrs):
-        namespace = namespace or self.defaultNamespace
+        namespace = namespace or self.defaultNamespace()
         parentItem = staticFile.parentItem
         if parentItem.isProtected() and not parentItem.isSafe():
             self.updateBundleItem(parentItem, namespace)
@@ -893,7 +914,7 @@ class PMXSupportBaseManager(object):
         if len(self.nsorder) < 2:
             return None
         if namespace is None:
-            namespace = self.defaultNamespace
+            namespace = self.defaultNamespace()
         path = os.path.join(self.namespaces[namespace][self.THEMES_NAME], "%s.tmTheme" % self.convertToValidPath(name))
         theme = PMXTheme(self.uuidgen(), namespace, {'name': name}, path)
         theme = self.addTheme(theme)
@@ -916,16 +937,17 @@ class PMXSupportBaseManager(object):
         """
         Actualiza un themes
         """
-        namespace = namespace or self.defaultNamespace
+        namespace = namespace or self.defaultNamespace()
         if theme.isProtected() and not theme.isSafe():
             path = os.path.join(self.namespaces[namespace][self.THEMES_NAME], os.path.basename(theme.path(self.protectedNamespace())))
             theme.addSource(namespace, path)
         elif not theme.isProtected() and "name" in attrs:
             path = osextra.path.ensure_not_exists(os.path.join(os.path.dirname(theme.path(namespace)), "%s.tmTheme"), self.convertToValidPath(attrs["name"]))
             theme.relocateSource(namespace, path)
+        
+        # Do update and save
         theme.update(attrs)
-        theme.save(namespace)
-        theme.updateMtime(namespace)
+        self.saveManagedObject(theme, namespace)
         self.modifyTheme(theme)
         return theme
 
@@ -951,29 +973,31 @@ class PMXSupportBaseManager(object):
 
     # ------------ THEMESTYLE CRUD
     def createThemeStyle(self, name, scope, theme, namespace=None):
-        namespace = namespace or self.defaultNamespace
+        namespace = namespace or self.defaultNamespace()
         if theme.isProtected() and not theme.isSafe():
             self.updateTheme(theme, namespace)
         style = PMXThemeStyle({'name': name, 'scope': scope, 'settings': {}}, theme)
         theme.styles.append(style)
-        theme.save(namespace)
-        theme.updateMtime(namespace)
+        
+        # Do update and save
+        self.saveManagedObject(theme, namespace)
         style = self.addThemeStyle(style)
         return style
 
     def updateThemeStyle(self, style, namespace=None, **attrs):
-        namespace = namespace or self.defaultNamespace
+        namespace = namespace or self.defaultNamespace()
         theme = style.theme
         if theme.isProtected() and not theme.isSafe():
             self.updateTheme(theme, namespace)
+        
+        # Do update and save
         style.update(attrs)
-        theme.save(namespace)
-        theme.updateMtime(namespace)
+        self.saveManagedObject(theme, namespace)
         self.modifyTheme(theme)
         return style
 
     def deleteThemeStyle(self, style, namespace=None):
-        namespace = namespace or self.defaultNamespace
+        namespace = namespace or self.defaultNamespace()
         theme = style.theme
         if theme.isProtected() and not theme.isSafe():
             self.updateTheme(theme, namespace)

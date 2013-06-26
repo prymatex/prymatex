@@ -34,21 +34,7 @@ class PMXTemplate(PMXBundleItem):
             if value != None:
                 dataHash[key] = value
         return dataHash
-    
-    def save(self, namespace):
-        if not os.path.exists(self.path(namespace)):
-            os.makedirs(self.path(namespace))
-        file = os.path.join(self.path(namespace), self.FILE)
-        plist.writePlist(self.dump(), file)
-        
-        #Hora los archivos del template
-        for file in self.files:
-            if file.path != self.path(namespace):
-                file.save(self.path(namespace))
-                
-        #TODO: Si puedo garantizar el guardado con el manager puedo controlar los mtime en ese punto
-        self.updateMtime(namespace)
-        
+
     def delete(self, namespace):
         for file in self.files:
             os.unlink(file.path)

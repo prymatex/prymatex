@@ -540,22 +540,20 @@ class PMXSnippet(PMXBundleItem):
                 dataHash[key] = value
         return dataHash
     
-    def save(self, namespace):
-        PMXBundleItem.save(self, namespace)
+    def update(self, dataHash):
+        PMXBundleItem.update(self, dataHash)
+        # TODO Solo si camio el content ;)
         self.snippet = None
     
-    @property
-    def ready(self):
-        return self.snippet != None
-    
     def compile(self):
+        # TODO Reusar un mismo processor haciendo un reparent del nodo resultante
         processor = PMXSnippetSyntaxProcessor(self)
         SNIPPET_PARSER.parse(self.content, processor)
         self.snippet = processor.node
         self.addTaborder(processor.taborder)
 
     def execute(self, processor):
-        if not self.ready:
+        if not self.snippet != None:
             self.compile()
         self.reset()
         processor.startSnippet(self)

@@ -29,21 +29,7 @@ class PMXProject(PMXBundleItem):
             if value != None:
                 dataHash[key] = value
         return dataHash
-    
-    def save(self, namespace):
-        if not os.path.exists(self.path(namespace)):
-            os.makedirs(self.path(namespace))
-        projectFile = os.path.join(self.path(namespace), self.FILE)
-        plist.writePlist(self.dump(), projectFile)
-        
-        #Hora los archivos del project
-        for projectFile in self.files:
-            if projectFile.path != self.path(namespace):
-                projectFile.save(self.path(namespace))
-                
-        #TODO: Si puedo garantizar el guardado con el manager puedo controlar los mtime en ese punto
-        self.updateMtime(namespace)
-        
+
     def delete(self, namespace):
         for file in self.files:
             os.unlink(file.path)

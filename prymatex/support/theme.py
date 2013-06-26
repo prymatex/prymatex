@@ -6,7 +6,6 @@ import os
 
 from prymatex.support.bundle import PMXManagedObject
 from prymatex.support import scope
-from prymatex.utils import plist
 
 # TODO Nuevos colores
 """foreground, background, selection, invisibles, lineHighlight, caret, gutter
@@ -119,12 +118,6 @@ class PMXTheme(PMXManagedObject):
         for style in self.styles:
             dataHash['settings'].append(style.dump())
         return dataHash
-        
-    def save(self, namespace):
-        folder = os.path.dirname(self.path(namespace))
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        plist.writePlist(self.dump(), self.path(namespace))
-    
+
     def removeThemeStyle(self, style):
         self.styles.remove(style)

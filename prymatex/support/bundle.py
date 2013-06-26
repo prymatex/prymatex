@@ -4,7 +4,6 @@
 import os, re, shutil
 from copy import copy
 
-from prymatex.utils import plist
 from prymatex.utils import encoding
 from prymatex.support import scope, scripts
 
@@ -24,7 +23,6 @@ class PMXManagedObject(object):
         self.sources = {}
         self.manager = None
         self.populated = False
-        # TODO: mover esto a los bundle item
         self.statics = []
 
     # ----------- Load from dictionary
@@ -54,11 +52,7 @@ class PMXManagedObject(object):
     @property
     def enabled(self):
         return self.manager.isEnabled(self.uuid)
-                
-    @property
-    def hash(self):
-        return { 'uuid': self.uuidAsUnicode() }
-
+    
     def path(self, namespace):
         return self.sources[namespace][self._PATH]
 
@@ -171,14 +165,6 @@ class PMXBundle(PMXManagedObject):
             if value != None:
                 dataHash[key] = value
         return dataHash
-    
-    def save(self, namespace):
-        # TODO: todo esto mandarlo al manager
-        if not os.path.exists(self.path(namespace)):
-            os.makedirs(self.path(namespace))
-        dataFile = self.dataFilePath(self.path(namespace))
-        plist.writePlist(self.dump(), dataFile)
-        self.updateMtime(namespace)
 
     def delete(self, namespace):
         #No se puede borrar si tiene items, sub archivos o subdirectorios
@@ -245,14 +231,6 @@ class PMXBundleItem(PMXManagedObject):
                 return True
         return False
 
-    def save(self, namespace):
-        #TODO: Si puedo garantizar el guardado con el manager puedo controlar los mtime en ese punto
-        dir = os.path.dirname(self.path(namespace))
-        if not os.path.exists(dir):
-            os.makedirs(dir)
-        plist.writePlist(self.dump(), self.path(namespace))
-        self.updateMtime(namespace)
-    
     def delete(self, namespace):
         os.unlink(self.path(namespace))
         folder = os.path.dirname(self.path(namespace))
