@@ -1,6 +1,9 @@
 [submodule "prymatex/share/Bundles/scm.tmbundle"]
 	path = prymatex/share/Bundles/scm.tmbundle
-	url = https://github.com/prymatex/scm.tmbundle.git
+	url = git@github.com:prymatex/scm.tmbundle.git
 [submodule "prymatex/share/Bundles/git.tmbundle"]
 	path = prymatex/share/Bundles/git.tmbundle
-	url = https://github.com/prymatex/git.tmbundle.git
+	url = git@github.com:prymatex/git.tmbundle.git
+[submodule "prymatex/share/Bundles/python.tmbundle"]
+	path = prymatex/share/Bundles/python.tmbundle
+	url = git@github.com:prymatex/python.tmbundle.git
