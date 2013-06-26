@@ -7,7 +7,7 @@ from glob import glob
 
 from prymatex.support.bundle import (PMXBundleItem, PMXStaticFile, 
     PMXRunningContext)
-from prymatex.support.utils import prepareShellScript
+
 from prymatex.utils import plist
    
 class PMXProject(PMXBundleItem):
@@ -22,29 +22,14 @@ class PMXProject(PMXBundleItem):
         for key in PMXProject.KEYS:
             setattr(self, key, dataHash.get(key, None))
     
-    @property
-    def hash(self):
-        dataHash = super(PMXProject, self).hash
+    def dump(self):
+        dataHash = super(PMXProject, self).dump()
         for key in PMXProject.KEYS:
             value = getattr(self, key)
             if value != None:
                 dataHash[key] = value
         return dataHash
-    
-    def save(self, namespace):
-        if not os.path.exists(self.path(namespace)):
-            os.makedirs(self.path(namespace))
-        projectFile = os.path.join(self.path(namespace), self.FILE)
-        plist.writePlist(self.hash, projectFile)
-        
-        #Hora los archivos del project
-        for projectFile in self.files:
-            if projectFile.path != self.path(namespace):
-                projectFile.save(self.path(namespace))
-                
-        #TODO: Si puedo garantizar el guardado con el manager puedo controlar los mtime en ese punto
-        self.updateMtime(namespace)
-        
+
     def delete(self, namespace):
         for file in self.files:
             os.unlink(file.path)

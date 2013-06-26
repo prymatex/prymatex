@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+# https://github.com/textmate/textmate/blob/master/Applications/TextMate/about/Changes.md
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import PMXBaseEditorKeyHelper
@@ -22,7 +23,11 @@ class KeyEquivalentHelper(CodeEditorKeyHelper):
             return False
 
         leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both')
-        self.items = self.application.supportManager.getKeyEquivalentItem(keyseq, leftScope.name, rightScope.name)
+        cursorScopePath = self.editor.cursorScopePath(cursor = cursor)
+        self.items = self.application.supportManager.getKeyEquivalentItem(
+            keyseq, 
+            leftScope.path + cursorScopePath, 
+            rightScope.path + cursorScopePath)
         return bool(self.items)
 
     def execute(self, event, cursor = None):
@@ -32,13 +37,22 @@ class KeyEquivalentHelper(CodeEditorKeyHelper):
             self.editor.selectBundleItem(self.items)
 
 class TabTriggerHelper(CodeEditorKeyHelper):
+    """When expanding tab triggers, the left scope is the scope to the left of
+    the start of the potential tab trigger and the right scope is likewise
+    that to the right of the potential tab trigger.
+    """
     KEY = QtCore.Qt.Key_Tab
     def accept(self, event, cursor = None):
         if cursor.hasSelection(): return False
 
-        leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both')
         trigger = self.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
-        self.items = self.application.supportManager.getTabTriggerItem(trigger, leftScope.name, rightScope.name) if trigger is not None else []
+        if not trigger: return False
+        leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both', delta = len(trigger))
+        # TODO Pasar el cursor con seleccion, no hace falta pasarle el tabTriggered ;)
+        self.items = self.application.supportManager.getTabTriggerItem(
+            trigger, 
+            leftScope.path + self.editor.cursorScopePath(documentPosition = cursor.position() - len(trigger)), 
+            rightScope.path + self.editor.cursorScopePath(cursor = cursor))
         return bool(self.items)
 
     def execute(self, event, cursor = None):

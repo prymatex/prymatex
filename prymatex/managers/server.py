@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import os, sys, plistlib
+import os, sys
 import zmq
 from xml.parsers.expat import ExpatError
 
@@ -10,6 +10,8 @@ from prymatex.core import PMXBaseComponent
 
 from prymatex import resources
 from prymatex.utils.importlib import import_from_directory
+from prymatex.utils import plist
+from prymatex.utils import six
 
 # TODO: por ahora este nombre esta bien, pero algo mas orientado a Prymatex server taria bueno
 class ServerManager(QtCore.QObject, PMXBaseComponent):
@@ -40,7 +42,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
         try:
             method(**kwargs)
         except Exception as reason:
-            self.sendResult({"error": {"code": -1, "message": reason.message}})
+            self.sendResult({"error": {"code": -1, "message": six.text_type(reason)}})
             raise reason
 
     def loadDialogClass(self, moduleName, directory):
@@ -67,7 +69,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
         if isinstance(value, int):
             value = str(value)
         if isinstance(value, dict):
-            value = plistlib.writePlistToString(value)
+            value = plist.writePlistToString(value)
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}  
         #Ensure Unicode encode
         result = str(value).encode("utf-8")
@@ -76,7 +78,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
         
     def async_window(self, **kwargs):
         try:
-            parameters = plistlib.readPlistFromString(kwargs["parameters"])
+            parameters = plist.readPlistFromString(kwargs["parameters"])
         except ExpatError:
             parameters = {}
         directory = os.path.dirname(kwargs["guiPath"])
@@ -89,7 +91,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
     
     def update_window(self, **kwargs):
         try:
-            parameters = plistlib.readPlistFromString(kwargs["parameters"])
+            parameters = plist.readPlistFromString(kwargs["parameters"])
         except ExpatError:
             parameters = {}
         instance = self.dialogInstance(int(kwargs["token"]))
@@ -112,7 +114,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
 
     def modal_window(self, **kwargs):
         try:
-            parameters = plistlib.readPlistFromString(kwargs["parameters"])
+            parameters = plist.readPlistFromString(kwargs["parameters"])
         except ExpatError:
             parameters = {}
         directory = os.path.dirname(kwargs["guiPath"])
@@ -125,7 +127,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
 
     def tooltip(self, message = "", format = "text", transparent = False):
         try:
-            data = plistlib.readPlistFromString(message)
+            data = plist.readPlistFromString(message)
             if data is not None:
                 message = data[format]
         except ExpatError as reason:
@@ -137,7 +139,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
     
     def menu(self, **kwargs):
         try:
-            parameters = plistlib.readPlistFromString(kwargs["parameters"])
+            parameters = plist.readPlistFromString(kwargs["parameters"])
         except ExpatError:
             parameters = {}
             
@@ -151,7 +153,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
             self.application.currentEditor().showFlatPopupMenu(parameters["menuItems"], sendSelectedIndex)
 
     def popup(self, **kwargs):
-        suggestions = plistlib.readPlistFromString(kwargs["suggestions"])
+        suggestions = plist.readPlistFromString(kwargs["suggestions"])
         if kwargs.get("returnChoice", False):
             def sendSelectedSuggestion(suggestion):
                 if suggestion is not None:
@@ -174,7 +176,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
         return True
     
     def images(self, parameters = ""):
-        data = plistlib.readPlistFromString(parameters)
+        data = plist.readPlistFromString(parameters)
         for name, path in data["register"].items():
             resources.registerImagePath(name, path)
         self.sendResult()

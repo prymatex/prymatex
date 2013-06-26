@@ -6,10 +6,18 @@ import os
 
 from prymatex.support.bundle import PMXManagedObject
 from prymatex.support import scope
-from prymatex.utils import plist
 
+# TODO Nuevos colores
 """foreground, background, selection, invisibles, lineHighlight, caret, gutter
 prymatex add gutterForeground
+gutterDivider: Border between text view and gutter.
+gutterForeground: Text color.
+gutterBackground: Background color.
+gutterIcons: Color of the images in the gutter.
+gutterSelectionForeground: Text color for lines containing caret / part of a selection.
+gutterSelectionBackground: Background color for lines containing caret / part of a selection.
+gutterSelectionIcons: Color of images on lines containing caret / part of a selection.
+gutterSelectionBorder: Border between selected and non-selected lines.
 """
 
 DEFAULT_THEME_SETTINGS = {'background':         '#FFFFFF',
@@ -57,8 +65,7 @@ class PMXThemeStyle(object):
                 self.selector = scope.Selector(value)
             setattr(self, key, value)
 
-    @property
-    def hash(self):
+    def dump(self):
         dataHash = {'name': self.name}
         if self.scope is not None:
             dataHash['scope'] = self.scope
@@ -101,23 +108,16 @@ class PMXTheme(PMXManagedObject):
             else:
                 setattr(self, key, dataHash[key])
     
-    @property
-    def hash(self):
-        dataHash = super(PMXTheme, self).hash
+    def dump(self):
+        dataHash = super(PMXTheme, self).dump()
         for key in PMXTheme.KEYS:
             value = getattr(self, key)
             if value != None:
                 dataHash[key] = value
         dataHash['settings'] = [ { 'settings': self.settings } ]
         for style in self.styles:
-            dataHash['settings'].append(style.hash)
+            dataHash['settings'].append(style.dump())
         return dataHash
-        
-    def save(self, namespace):
-        folder = os.path.dirname(self.path(namespace))
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        plist.writePlist(self.hash, self.path(namespace))
-    
+
     def removeThemeStyle(self, style):
         self.styles.remove(style)

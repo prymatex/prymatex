@@ -17,9 +17,8 @@ class PMXMacro(PMXBundleItem):
         for key in PMXMacro.KEYS:
             setattr(self, key, dataHash.get(key, None))
     
-    @property
-    def hash(self):
-        dataHash = super(PMXMacro, self).hash
+    def dump(self):
+        dataHash = super(PMXMacro, self).dump()
         for key in PMXMacro.KEYS:
             value = getattr(self, key)
             if value != None:

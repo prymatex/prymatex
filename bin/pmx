@@ -2,7 +2,7 @@
 
 # Run prymatex from any place!
 # Prymatex startup script for Unix platforms.
-# Tries to run in system's python2 (outside virtualenv)
+# Tries to run in system's python (outside virtualenv)
 
 PMX_PATH=$(dirname $0)
 
@@ -36,18 +36,6 @@ else
     #source $VIRTUAL_ENV/bin/activate
     #deactivate
     PYTHON=/usr/bin/python
-fi
-
-VERSION=$($PYTHON -c "import sys; sys.stdout.write(sys.version[0]+'\n')")
-
-if [ $VERSION -eq 3 ]; then
-    # Python 3 is not supported
-    if [ $(which "$PYTHON"2) ]; then
-        PYTHON="$PYTHON"2
-    else
-        echo "Python2 was not found, Prymatex needs python2 to run."
-        exit 1
-    fi
 fi
 
 $PYTHON $PMX_PATH/prymatex.py $@ &

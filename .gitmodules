@@ -1,0 +1,18 @@
+[submodule "prymatex/share/Bundles/scm.tmbundle"]
+	path = prymatex/share/Bundles/scm.tmbundle
+	url = git@github.com:prymatex/scm.tmbundle.git
+[submodule "prymatex/share/Bundles/git.tmbundle"]
+	path = prymatex/share/Bundles/git.tmbundle
+	url = git@github.com:prymatex/git.tmbundle.git
+[submodule "prymatex/share/Bundles/python.tmbundle"]
+	path = prymatex/share/Bundles/python.tmbundle
+	url = git@github.com:prymatex/python.tmbundle.git
+[submodule "prymatex/share/Bundles/source.tmbundle"]
+	path = prymatex/share/Bundles/source.tmbundle
+	url = git@github.com:prymatex/source.tmbundle.git
+[submodule "prymatex/share/Bundles/text.tmbundle"]
+	path = prymatex/share/Bundles/text.tmbundle
+	url = git@github.com:prymatex/text.tmbundle.git
+[submodule "prymatex/share/Bundles/ruby.tmbundle"]
+	path = prymatex/share/Bundles/ruby.tmbundle
+	url = git@github.com:prymatex/ruby.tmbundle.git

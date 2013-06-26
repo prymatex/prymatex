@@ -242,8 +242,11 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
         return self.bundleMenuGroup.menuForBundle(bundle)
 
     # Override buildPlistFileStorage for custom storage
-    def buildPlistFileCache(self):
+    def buildPlistFileStorage(self):
         return self.application.storageManager.singleFileStorage("support-plist")
+        
+    def buildBundleItemStorage(self):
+        return PMXSupportBaseManager.buildBundleItemStorage(self)
         
     #---------------------------------------------------
     # Environment

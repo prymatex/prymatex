@@ -25,7 +25,7 @@ class SingleFileStorage(ManagedStorageMixin):
         self.objs = shelve.open(self.path)
 
     def build_key(self, key):
-        return encoding.force_bytes(key)
+        return encoding.force_text(key)
         
     def __contains__(self, key):
         return self.build_key(key) in self.objs
@@ -63,14 +63,14 @@ class StorageManager(QtCore.QObject, PMXBaseComponent):
         storage.setManager(self)
         self.storages.append(storage)
         
-    def singleFileCache(self, storageName):
+    def singleFileStorage(self, storageName):
         fileName = self.buildFileName(storageName)
         storagePath = os.path.join(self.cacheDirectory, fileName)
-        storage = SingleFileCache(storagePath)
+        storage = SingleFileStorage(storagePath)
         self.__add_storage(storage)
         return storage
         
-    def memoryCache(self, value):
+    def memoryStorage(self, value):
         storage = MemoryStorage()
         self.__add_storage(storage)
         return storage

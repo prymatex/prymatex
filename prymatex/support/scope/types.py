@@ -12,9 +12,9 @@ def prefix_match(lhs, rhs):
     return True
 
 class ScopeType(object):
-    def __init__(self):
+    def __init__(self, atoms = None):
         self.anchor_to_previous = False
-        self.atoms = []
+        self.atoms = atoms or []
 
     def __str__(self):
         ret = self.anchor_to_previous and "> " or ""
@@ -33,10 +33,10 @@ class ScopeType(object):
         return self.atoms < rhs.atoms
 
 class PathType(object):
-    def __init__(self):
+    def __init__(self, scopes = None):
         self.anchor_to_bol = False
         self.anchor_to_eol = False
-        self.scopes = []
+        self.scopes = scopes or []
 
     def __str__(self):
         ret = self.anchor_to_bol and "^ " or ""

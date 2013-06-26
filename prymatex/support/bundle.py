@@ -4,9 +4,8 @@
 import os, re, shutil
 from copy import copy
 
-from prymatex.utils import plist
 from prymatex.utils import encoding
-from prymatex.support import scope, utils
+from prymatex.support import scope, scripts
 
 """
 Este es el unico camino -> http://manual.macromates.com/en/
@@ -24,14 +23,19 @@ class PMXManagedObject(object):
         self.sources = {}
         self.manager = None
         self.populated = False
-        # TODO: mover esto a los bundle item
         self.statics = []
 
+    # ----------- Load from dictionary
     def load(self, dataHash):
         raise NotImplemented
 
+    # ----------- Update from dictionary
     def update(self, dataHash):
         raise NotImplemented
+    
+    # ----------- Dump to dictionary
+    def dump(self):
+        return { 'uuid': self.uuidAsUnicode() }
     
     def save(self, namespace):
         raise NotImplemented
@@ -48,11 +52,7 @@ class PMXManagedObject(object):
     @property
     def enabled(self):
         return self.manager.isEnabled(self.uuid)
-                
-    @property
-    def hash(self):
-        return { 'uuid': self.uuidAsUnicode() }
-
+    
     def path(self, namespace):
         return self.sources[namespace][self._PATH]
 
@@ -60,11 +60,9 @@ class PMXManagedObject(object):
     def currentPath(self):
         return self.sources[self.currentNamespace][self._PATH]
 
-    @property
     def isProtected(self):
-        return self.manager.protectedNamespace in self.namespaces
+        return self.manager.protectedNamespace() in self.namespaces
         
-    @property
     def isSafe(self):
         return len(self.namespaces) > 1
     
@@ -127,7 +125,8 @@ class PMXManagedObject(object):
         self.manager = manager
         
 class PMXBundle(PMXManagedObject):
-    KEYS = [    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
+    KEYS = (    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13',
+                'description', 'contactName', 'requiredCommands', 'require' )
     FILE = 'info.plist'
     TYPE = 'bundle'
     def __init__(self, uuid):
@@ -159,22 +158,13 @@ class PMXBundle(PMXManagedObject):
         for key in list(dataHash.keys()):
             setattr(self, key, dataHash[key])
     
-    @property
-    def hash(self):
-        dataHash = super(PMXBundle, self).hash
+    def dump(self):
+        dataHash = super(PMXBundle, self).dump()
         for key in PMXBundle.KEYS:
             value = getattr(self, key)
             if value != None:
                 dataHash[key] = value
         return dataHash
-
-    def save(self, namespace):
-        # TODO: todo esto mandarlo al manager
-        if not os.path.exists(self.path(namespace)):
-            os.makedirs(self.path(namespace))
-        dataFile = self.dataFilePath(self.path(namespace))
-        plist.writePlist(self.hash, dataFile)
-        self.updateMtime(namespace)
 
     def delete(self, namespace):
         #No se puede borrar si tiene items, sub archivos o subdirectorios
@@ -212,44 +202,35 @@ class PMXBundleItem(PMXManagedObject):
     @property
     def enabled(self):
         return self.bundle.enabled
-    
+
     def load(self, dataHash):
         for key in PMXBundleItem.KEYS:
             value = dataHash.get(key, None)
             if key == "scope":
                 self.selector = scope.Selector(value)
             setattr(self, key, value)
-    
+
     def update(self, dataHash):
         for key in list(dataHash.keys()):
             value = dataHash[key]
             if key == "scope":
                 self.selector = scope.Selector(value)
             setattr(self, key, value)
-    
-    def isChanged(self, dataHash):
-        for key in list(dataHash.keys()):
-            if getattr(self, key) != dataHash[key]:
-                return True
-        return False
-    
-    @property
-    def hash(self):
-        dataHash = super(PMXBundleItem, self).hash
+
+    def dump(self):
+        dataHash = super(PMXBundleItem, self).dump()
         for key in PMXBundleItem.KEYS:
             value = getattr(self, key)
             if value != None:
                 dataHash[key] = value
         return dataHash
 
-    def save(self, namespace):
-        #TODO: Si puedo garantizar el guardado con el manager puedo controlar los mtime en ese punto
-        dir = os.path.dirname(self.path(namespace))
-        if not os.path.exists(dir):
-            os.makedirs(dir)
-        plist.writePlist(self.hash, self.path(namespace))
-        self.updateMtime(namespace)
-    
+    def isChanged(self, dataHash):
+        for key in list(dataHash.keys()):
+            if getattr(self, key) != dataHash[key]:
+                return True
+        return False
+
     def delete(self, namespace):
         os.unlink(self.path(namespace))
         folder = os.path.dirname(self.path(namespace))
@@ -334,7 +315,7 @@ class PMXRunningContext(object):
 
     def __enter__(self):
         #Build the full las environment with gui environment and support environment
-        self.shellCommand, self.environment, self.tempFile = utils.prepareShellScript(self.shellCommand, self.environment)
+        self.shellCommand, self.environment, self.tempFile = scripts.prepareShellScript(self.shellCommand, self.environment)
         return self
 
     def __exit__(self, type, value, traceback):
@@ -365,10 +346,13 @@ class PMXRunningContext(object):
                 outputValue = self.outputValue
         )
 
+    def isBundleItem(self, bundleItem):
+        return self.bundleItem == bundleItem
+
     def description(self):
         return self.bundleItem.name or "No Name"
         
     def removeTempFile(self):
         if os.path.exists(self.tempFile):
-            utils.deleteFile(self.tempFile)
+            scripts.deleteFile(self.tempFile)
 

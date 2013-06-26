@@ -21,28 +21,22 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
         self.__files = []
         self.__baseFilters = []
 
-
     def initialize(self, selector):
         SelectableModelMixin.initialize(self, selector)
         selector.finished.connect(self.on_selector_finished)
 
-
     def setBaseFilters(self, baseFilters):
         self.__baseFilters = baseFilters
 
-
     def isFilterable(self):
         return True
-
 
     def on_selector_finished(self, result):
         self.projectFileTask.cancel()
         self.selector.finished.disconnect(self.on_selector_finished)
 
-
     def rowCount(self, parent = None):
         return len(self.__files)
-
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
@@ -55,17 +49,14 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
         elif role == QtCore.Qt.ToolTipRole:
             return None
 
-
     def item(self, index):
         return self.__files[index.row()]["path"]
-
 
     def setFilterString(self, string):
         self.projectFileTask.cancel()
         self.__files = []
         self.layoutChanged.emit()
-        self.projectFileTask = self.projectManager.application.scheduler.newTask(self.__run_project_search(string))
-
+        self.projectFileTask = self.projectManager.application.schedulerManager.newTask(self.__run_project_search(string))
 
     def __run_file_filter(self, rootDirectory, filenames, pattern):
         for filename in filenames:
@@ -81,11 +72,9 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
                     self.endInsertRows()
             yield
 
-
     def __run_file_search(self, path, pattern):
         for root, dirnames, filenames in os.walk(path):
             yield self.__run_file_filter(root, filenames, pattern)
-
         
     def __run_project_search(self, pattern):
         for project in self.projectManager.getAllProjects():

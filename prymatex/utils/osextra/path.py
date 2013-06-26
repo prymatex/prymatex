@@ -5,6 +5,8 @@ import re, os
 from functools import partial
 import collections
 
+from prymatex.utils import six
+
 RE_SHELL_VAR = re.compile('\$([\w\d]+)')
 
 def callback(match, context = None, sensitive = True, default = ''):
@@ -18,12 +20,23 @@ def callback(match, context = None, sensitive = True, default = ''):
 # Expand $exp taking os.environ as context
 #===============================================================================
 def expand_shell_var(path, context = None, sensitive = True):
-    if context is not None and isinstance(context, collections.Callable):
+    if context is not None and six.callable(context):
         context = context()
     elif context is None:
         context = os.environ
     
     return RE_SHELL_VAR.sub(partial(callback, sensitive = sensitive, context = context), path)
+
+def ensure_not_exists(path, name, suffix = 0):
+    """Return a safe path, ensure not exists"""
+    if suffix == 0 and not os.path.exists(path % name):
+        return path % name
+    else:
+        newPath = path % (name + "_" + six.text_type(suffix))
+        if not os.path.exists(newPath):
+            return newPath
+        else:
+            return ensure_not_exists(path, name, suffix + 1)
 
 def fullsplit(path, result = None):
     """

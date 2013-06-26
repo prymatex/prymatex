@@ -41,7 +41,7 @@ def __wrapItem(item):
     if __shouldWrap(item):
         return plistlib.Data(item.encode("utf-8"))
     else:
-        return item.encode("utf-8")
+        return item
 
 def __shouldWrap(string):
     return not set(string).issubset(set(printable)) \
@@ -58,7 +58,9 @@ if six.PY3:
     # Monkey patch
     plistlib.readPlistFromString = lambda data: \
         plistlib.readPlistFromBytes(data.encode("utf-8"))
-  
+    plistlib.writePlistToString = lambda data: \
+        plistlib.writePlistToBytes(data).decode("utf-8")
+        
 def readPlist(filePath):
     try:
         data = plistlib.readPlist(filePath)
@@ -83,6 +85,12 @@ def readPlist(filePath):
     
 def writePlist(dictionary, filePath):
     plistlib.writePlist(__fixItems(dictionary, __fixWriteItem), filePath)
+    
+def writePlistToString(dictionary):
+    return plistlib.writePlistToString(__fixItems(dictionary, __fixWriteItem))
+    
+def readPlistFromString(string):
+    return plistlib.readPlistFromString(string)
     
 if __name__ == "__main__":
     testFile = "/mnt/datos/workspace/Prymatex/prymatex/prymatex/share/Bundles/ShellScript.tmbundle/Commands/man.plist"

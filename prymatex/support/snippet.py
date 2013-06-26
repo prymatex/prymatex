@@ -517,11 +517,11 @@ class PMXSnippetSyntaxProcessor(PMXSyntaxProcessor):
         self.node.close(name, token)
 
 class PMXSnippet(PMXBundleItem):
-    KEYS = [ 'content', 'disableAutoIndent', 'inputPattern' ]
+    KEYS = ( 'content', 'disableAutoIndent', 'inputPattern' )
     TYPE = 'snippet'
     FOLDER = 'Snippets'
     EXTENSION = 'tmSnippet'
-    PATTERNS = ['*.tmSnippet', '*.plist']
+    PATTERNS = ('*.tmSnippet', '*.plist')
     
     def __init__(self, uuid):
         PMXBundleItem.__init__(self, uuid)
@@ -532,31 +532,28 @@ class PMXSnippet(PMXBundleItem):
         for key in PMXSnippet.KEYS:
             setattr(self, key, dataHash.get(key, None))
     
-    @property
-    def hash(self):
-        dataHash = super(PMXSnippet, self).hash
+    def dump(self):
+        dataHash = super(PMXSnippet, self).dump()
         for key in PMXSnippet.KEYS:
             value = getattr(self, key)
             if value != None:
                 dataHash[key] = value
         return dataHash
     
-    def save(self, namespace):
-        PMXBundleItem.save(self, namespace)
+    def update(self, dataHash):
+        PMXBundleItem.update(self, dataHash)
+        # TODO Solo si camio el content ;)
         self.snippet = None
     
-    @property
-    def ready(self):
-        return self.snippet != None
-    
     def compile(self):
+        # TODO Reusar un mismo processor haciendo un reparent del nodo resultante
         processor = PMXSnippetSyntaxProcessor(self)
         SNIPPET_PARSER.parse(self.content, processor)
         self.snippet = processor.node
         self.addTaborder(processor.taborder)
 
     def execute(self, processor):
-        if not self.ready:
+        if not self.snippet != None:
             self.compile()
         self.reset()
         processor.startSnippet(self)

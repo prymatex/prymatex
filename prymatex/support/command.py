@@ -22,7 +22,7 @@ from prymatex.support.regexp import compileRegexp
 #]
 
 class PMXCommand(PMXBundleItem):
-    KEYS = [    
+    KEYS = (    
         'input', 'fallbackInput', 'standardInput', 'inputFormat',               #Input
         #input [ "selection", "document", "scope", "line", "word", "character", "none" ]
         #inputFormat [ "text", "xml" ]
@@ -36,10 +36,11 @@ class PMXCommand(PMXBundleItem):
         #[ "nop", "saveActiveFile", "saveModifiedFiles" ]
         'version',                                                              #Command version
         'requiredCommands',
+        'require',
         'capturePattern', 'fileCaptureRegister',
         'columnCaptureRegister', 'disableOutputAutoIndent',
         'lineCaptureRegister', 'dontFollowNewOutput',
-        'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' ]
+        'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' )
     TYPE = 'command'
     FOLDER = 'Commands'
     EXTENSION = 'tmCommand'
@@ -62,9 +63,8 @@ class PMXCommand(PMXBundleItem):
                 value = compileRegexp( value )
             setattr(self, key, value)
     
-    @property
-    def hash(self):
-        dataHash = super(PMXCommand, self).hash
+    def dump(self):
+        dataHash = super(PMXCommand, self).dump()
         for key in PMXCommand.KEYS:
             value = getattr(self, key)
             if value != None:
@@ -72,7 +72,7 @@ class PMXCommand(PMXBundleItem):
                     value = str(value)
                 dataHash[key] = value
         return dataHash
-
+    
     def getInputText(self, processor):
         def getInputTypeAndValue(inputType, format):
             if inputType is None or inputType == "none": return None, None
@@ -135,8 +135,9 @@ class PMXCommand(PMXBundleItem):
         if handlerFunction is not None:
             handlerFunction(context, self.outputFormat)
         # TODO: Ver que pasa con el outputCaret
-        #Delete temp file
-        context.removeTempFile()
+        # Delete temp file
+        if outputHandler != "error":
+            context.removeTempFile()
         processor.endCommand(self)
 
 class PMXDragCommand(PMXCommand):
@@ -151,9 +152,8 @@ class PMXDragCommand(PMXCommand):
             value = dataHash.get(key, None)
             setattr(self, key, value)
     
-    @property
-    def hash(self):
-        dataHash = super(PMXDragCommand, self).hash
+    def dump(self):
+        dataHash = super(PMXDragCommand, self).dump()
         for key in PMXDragCommand.KEYS:
             value = getattr(self, key)
             dataHash[key] = value

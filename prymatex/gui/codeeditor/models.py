@@ -324,35 +324,15 @@ def bundleItemSelectableModelFactory(editor):
         leftScope, rightScope = editor.scope(direction = "both")
         return [dict(data = bundleItem, 
                 template = "<table width='100%%'><tr><td>%(name)s - %(bundle)s</td><td align='right'>%(trigger)s</td></tr></table>",
-                ratio = 1.0,
                 display = { 
                     "name": bundleItem.name, 
                     "bundle": bundleItem.bundle.name, 
                     "trigger": bundleItem.trigger
                 }, 
-                image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE)) for bundleItem in editor.application.supportManager.getActionItems(leftScope.name, rightScope.name)]
+                image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE)) for bundleItem in editor.application.supportManager.getActionItemsByScope(leftScope.path, rightScope.path)]
 
     # Filter function        
     def bundleItemFilter(text, item):
-        name = item["data"].name
-        if text:
-            index = 0
-            slices = []
-            item["ratio"] = difflib.SequenceMatcher(None, text.lower(), name.lower()).quick_ratio()
-            if len(text) > 4 and item["ratio"] < 0.4: return False
-            for m in sourcecode.subsearch(text, name, ignoreCase = True):
-                slices.append(name[index:m[2]])
-                slices.append("<strong>" + name[m[2]:m[3]] + "</strong>")
-                index = m[3]
-            slices.append(name[index:])
-            name = "".join(slices)
-        item["display"]["name"] = name
-        return True
+        return not text or text.lower() in item["data"].name.lower()
 
-
-    # Sort function
-    def bundleItemSort(leftItem, rightItem):
-        return leftItem["ratio"] > rightItem["ratio"]
-
-    return selectableModelFactory(editor, bundleItemData, filterFunction=bundleItemFilter,
-            sortFunction=bundleItemSort)
+    return selectableModelFactory(editor, bundleItemData, filterFunction=bundleItemFilter)

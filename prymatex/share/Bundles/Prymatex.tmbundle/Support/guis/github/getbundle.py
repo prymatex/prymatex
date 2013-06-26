@@ -10,7 +10,7 @@ try:
     from urllib import request as urltools
 except:
     #Python 2
-    import urllib as urltools
+    import urllib2 as urltools
 
 from prymatex.qt import QtGui, QtCore, QtNetwork
 from prymatex.core import PMXBaseDialog
@@ -18,6 +18,7 @@ from .ui_githubclient import Ui_GitHubClientDialog
 from .model import RepositoryTableModel, RepositoryProxyTableModel
 
 GITHUB_API_SEARCH_URL = 'https://api.github.com/legacy/repos/search/%s+tmbundle'
+MINIMUM_QUERY_LENGTH = 1
 
 class GithubBundleSearchThread(QtCore.QThread):
     # Signals
@@ -26,23 +27,26 @@ class GithubBundleSearchThread(QtCore.QThread):
     term = None
 
     def run(self):
-        if not self.term or self.term < self.parent().MINIMUM_QUERY_LENGTH:
+        if not self.term or len(self.term) < MINIMUM_QUERY_LENGTH:
             return
-        response = urltools.urlopen(GITHUB_API_SEARCH_URL % self.term).read()
-        data = json.loads(response.content)
+        response = urltools.urlopen(GITHUB_API_SEARCH_URL % self.term).read().decode('utf-8')
+        data = json.loads(response)
         self.dataUpdate.emit(data) # Thread safety
 
     def setProxy(self):
-        print(self.parent().application.settingValue("Browser.proxyAddress"))
         networkProxy = QtNetwork.QNetworkProxy.applicationProxy()
-        opener = urltools.build_opener(
-            urltools.HTTPHandler(),
-            urltools.HTTPSHandler(),
-            urltools.ProxyHandler({
-                'http': 'http://localhost:3128',
-                'https': 'http://localhost:3128'
-            }))
-        urltools.install_opener(opener)
+        if networkProxy.type() == QtNetwork.QNetworkProxy.HttpProxy:
+            proxy = "{host}:{port}".format(
+                host = networkProxy.hostName(),
+                port = networkProxy.port())
+            opener = urltools.build_opener(
+                urltools.HTTPHandler(),
+                urltools.HTTPSHandler(),
+                urltools.ProxyHandler({
+                    'http': proxy,
+                    'https': proxy
+                }))
+            urltools.install_opener(opener)
 
     def search(self, term):
         '''Performs a lookup in Github REST API based on term'''
@@ -53,8 +57,6 @@ class GithubBundleSearchThread(QtCore.QThread):
         self.start()
 
 class GithubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
-    MINIMUM_QUERY_LENGTH = 1
-
     def __init__(self, parent=None):
         QtGui.QDialog.__init__(self, parent)
         PMXBaseDialog.__init__(self)
@@ -129,7 +131,7 @@ class GithubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         self.on_buttonSearch_pressed()
 
     def on_lineEditQuery_textChanged(self):
-        self.buttonSearch.setEnabled(len(self.lineEditQuery.text()) >= self.MINIMUM_QUERY_LENGTH)
+        self.buttonSearch.setEnabled(len(self.lineEditQuery.text()) >= MINIMUM_QUERY_LENGTH)
 
     # ================================
     # = Señales que arman el destiny =
