@@ -87,7 +87,7 @@ class PMXSupportBaseManager(object):
         # Cache!!
         self.bundleItemCache = self.buildBundleItemStorage()
         self.plistFileCache = self.buildPlistFileStorage()
-    
+        
     # ------------ Namespaces ----------------------
     def addNamespace(self, name, path):
         # TODO: Quiza migrar a algo con mas forma para encapsular los namespace
@@ -178,7 +178,7 @@ class PMXSupportBaseManager(object):
         
     def writePlist(self, hashData, path):
         # TODO Ver que pasa con este set que falta
-        self.plistFileCache[path] = hashData
+        self.plistFileCache.set(path, hashData)
         return plist.writePlist(hashData, path)
 
     #--------------- Tools --------------------

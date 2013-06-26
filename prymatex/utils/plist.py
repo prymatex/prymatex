@@ -41,7 +41,7 @@ def __wrapItem(item):
     if __shouldWrap(item):
         return plistlib.Data(item.encode("utf-8"))
     else:
-        return item.encode("utf-8")
+        return item
 
 def __shouldWrap(string):
     return not set(string).issubset(set(printable)) \
@@ -87,11 +87,9 @@ def writePlist(dictionary, filePath):
     plistlib.writePlist(__fixItems(dictionary, __fixWriteItem), filePath)
     
 def writePlistToString(dictionary):
-    print(dictionary)
     return plistlib.writePlistToString(__fixItems(dictionary, __fixWriteItem))
     
 def readPlistFromString(string):
-    print(string)
     return plistlib.readPlistFromString(string)
     
 if __name__ == "__main__":
