@@ -34,7 +34,7 @@ class SingleFileStorage(ManagedStorageMixin):
         return self.objs[self.build_key(key)]
 
     def set(self, key, item):
-        return self.objs[self.build_key(key)] = item
+        self.objs[self.build_key(key)] = item
 
     def setdefault(self, key, item):
         return self.objs.setdefault(self.build_key(key), item)
