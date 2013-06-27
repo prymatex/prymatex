@@ -16,19 +16,20 @@ from prymatex.core import exceptions
 from prymatex.qt.helpers.menus import extend_menu, update_menu
 from prymatex.models.support import BundleItemTreeNode
 
-from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserData
-from prymatex.gui.codeeditor.addons import CodeEditorAddon
-from prymatex.gui.codeeditor.sidebar import CodeEditorSideBar, SideBarWidgetAddon
-from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
-from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
-from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
-from prymatex.gui.codeeditor.models import (SymbolListModel, BookmarkListModel, 
-                                            AlreadyTypedWords, 
-                                            bundleItemSelectableModelFactory,
-                                            bookmarkSelectableModelFactory,
-                                            symbolSelectableModelFactory)
+from .userdata import CodeEditorBlockUserData
+from .addons import CodeEditorAddon
+from .sidebar import CodeEditorSideBar, SideBarWidgetAddon
+from .processors import (PMXCommandProcessor, PMXSnippetProcessor, 
+        PMXMacroProcessor)
+from .modes import (PMXMultiCursorEditorMode, PMXCompleterEditorMode,
+        PMXSnippetEditorMode)
+from .highlighter import PMXSyntaxHighlighter
+from .models import (SymbolListModel, BookmarkListModel, AlreadyTypedWords, 
+        bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
+        symbolSelectableModelFactory)
 
-from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
+from prymatex.support import (PMXSnippet, PMXMacro, PMXCommand,
+        PMXDragCommand, PMXSyntax, PMXPreferenceSettings)
 
 from prymatex.utils import coroutines
 from prymatex.utils import sourcecode
@@ -930,8 +931,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         settings = scope.settings
         currentAlreadyTyped = self.currentWord(direction = "left", search = False)[0]
         
+        readyWords = set()
+        
         #An array of additional candidates when cycling through completion candidates from the current document.
-        completions = settings.completions[:]
+        completions = settings.completions
         
         #A shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
         if settings.completionCommand:
@@ -940,7 +943,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             command = self.application.supportManager.buildAdHocCommand(settings.completionCommand, self.syntax().bundle, commandInput="document")
             self.commandProcessor.configure({ "asynchronous": False })
             command.executeCallback(self.commandProcessor, commandCallback)
-            
+            yield
+        
         #A tab tigger completion
         tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope.path)
         
@@ -948,14 +952,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
         #Lo ponemos en la mezcladora por grupos
         suggestions = tabTriggers + [{ "display": word, "image": "scope-root-keyword" } for word in completions]
-        for group in CodeEditor.SORTED_GROUPS:
-            newWords = [ gw[1] for gw in typedWords if gw[0] == group and gw[1] not in completions and gw[1] != currentAlreadyTyped ]
-            suggestions += [{ "display": word, "image": "scope-root-%s" % group } for word in newWords]
-            completions += newWords
-            yield
+        readyWords.update(completions)
         
-        #Finalizamos con las que quedaron guachas
-        print("quedaron solas", typedWords)
+        for typed in sorted(typedWords, key = lambda typed: typed[0], reverse=True):
+            if typed[1] not in readyWords:
+                suggestions.append({ "display": typed[1], "image": "scope-root-%s" % ( typed[0] or "none") })
+                readyWords.add(typed[1])
+                yield
 
         yield coroutines.Return(suggestions)
 
@@ -980,7 +983,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             if nest == 0:
                 return block
             block = block.next() if direction == "down" else block.previous()
-    
+
     def _find_indented_block_fold_close(self, block):
         assert self.isFoldingIndentedBlockStart(block), "Block isn't folding indented start"
         indent = self.blockUserData(block).indent
