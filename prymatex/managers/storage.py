@@ -15,7 +15,7 @@ class ManagedStorageMixin(object):
 
     def sync(self):
         pass
-    
+
     def close(self):
         pass
 
@@ -25,23 +25,23 @@ class SingleFileStorage(ManagedStorageMixin):
         self.objs = shelve.open(self.path)
 
     def build_key(self, key):
-        return encoding.force_text(key)
-        
+        return str(hash(key))
+
     def __contains__(self, key):
         return self.build_key(key) in self.objs
-    
+
     def get(self, key):
         return self.objs[self.build_key(key)]
-    
+
     def set(self, key, item):
-        return self.objs.set(self.build_key(key), item)
+        return self.objs[self.build_key(key)] = item
 
     def setdefault(self, key, item):
         return self.objs.setdefault(self.build_key(key), item)
 
     def sync(self):
         self.objs.sync()
-        
+
     def close(self):
         self.objs.close()
 
@@ -62,14 +62,14 @@ class StorageManager(QtCore.QObject, PMXBaseComponent):
     def __add_storage(self, storage):
         storage.setManager(self)
         self.storages.append(storage)
-        
+
     def singleFileStorage(self, storageName):
         fileName = self.buildFileName(storageName)
         storagePath = os.path.join(self.cacheDirectory, fileName)
         storage = SingleFileStorage(storagePath)
         self.__add_storage(storage)
         return storage
-        
+
     def memoryStorage(self, value):
         storage = MemoryStorage()
         self.__add_storage(storage)
