@@ -631,6 +631,17 @@ class PMXSupportBaseManager(object):
         
         obj.updateMtime(namespace)
         
+    def deleteManagedObject(self, obj, namespace):
+        objFilePath = obj.dataFilePath(obj.path(namespace))
+        dirname = os.path.dirname(objFilePath)
+        
+        # Delete static files
+        for static in obj.statics:
+            os.unlink(static.path)
+
+        os.unlink(objFilePath)
+        os.rmdir(dirname)
+
     # ------------- BUNDLE INTERFACE
     def addBundle(self, bundle):
         return bundle

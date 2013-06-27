@@ -30,18 +30,6 @@ class PMXProject(PMXBundleItem):
                 dataHash[key] = value
         return dataHash
 
-    def delete(self, namespace):
-        for file in self.files:
-            os.unlink(file.path)
-        os.unlink(os.path.join(self.path(namespace), self.FILE))
-        os.rmdir(self.path(namespace))
-        folder = os.path.dirname(self.path(namespace))
-        try:
-            #El ultimo apaga la luz, elimina el directorio base
-            os.rmdir(folder)
-        except:
-            pass
-
     def buildEnvironment(self, projectName, projectLocation, localVars = False):
         env = super(PMXProject, self).environmentVariables() if not localVars else {}
         env['TM_NEW_PROJECT_NAME'] = projectName

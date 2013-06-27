@@ -145,7 +145,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
     def contributeToSettings(cls):
         from prymatex.gui.settings.mainwindow import MainWindowSettingsWidget
         return [ MainWindowSettingsWidget ]
-
     
     # --------------- Bundle Items
     def on_bundleItemTriggered(self, bundleItem):

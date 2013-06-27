@@ -35,18 +35,6 @@ class PMXTemplate(PMXBundleItem):
                 dataHash[key] = value
         return dataHash
 
-    def delete(self, namespace):
-        for file in self.files:
-            os.unlink(file.path)
-        os.unlink(os.path.join(self.path(namespace), self.FILE))
-        os.rmdir(self.path(namespace))
-        folder = os.path.dirname(self.path(namespace))
-        try:
-            #El ultimo apaga la luz, elimina el directorio base
-            os.rmdir(folder)
-        except:
-            pass
-
     def buildEnvironment(self, fileName, fileDirectory, localVars = False):
         env = super(PMXTemplate, self).environmentVariables() if not localVars else {}
         nameWithExtension = "{0}{1}{2}".format(fileName, os.path.extsep, self.extension) if self.extension else fileName

@@ -2,17 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import os, re, shutil
-from copy import copy
 
 from prymatex.utils import encoding
 from prymatex.support import scope, scripts
-
-"""
-Este es el unico camino -> http://manual.macromates.com/en/
-http://manual.macromates.com/en/bundles
-http://blog.macromates.com/2005/introduction-to-scopes/
-http://manual.macromates.com/en/scope_selectors.html
-"""
 
 class PMXManagedObject(object):
     _PATH = 0
@@ -37,12 +29,6 @@ class PMXManagedObject(object):
     def dump(self):
         return { 'uuid': self.uuidAsUnicode() }
     
-    def save(self, namespace):
-        raise NotImplemented
-
-    def delete(self, namespace):
-        raise NotImplemented
-
     def uuidAsUnicode(self):
         return str(self.uuid).upper()
 
@@ -166,15 +152,6 @@ class PMXBundle(PMXManagedObject):
                 dataHash[key] = value
         return dataHash
 
-    def delete(self, namespace):
-        #No se puede borrar si tiene items, sub archivos o subdirectorios
-        os.unlink(self.dataFilePath(self.path(namespace)))
-        try:
-            #Este a diferencia de los items borra todo el directorio
-            shutil.rmtree(self.path(namespace))
-        except:
-            pass
-    
     def environmentVariables(self):
         environment = self.manager.environmentVariables()
         environment['TM_BUNDLE_PATH'] = self.currentPath
@@ -187,7 +164,7 @@ class PMXBundle(PMXManagedObject):
         return os.path.join(path, cls.FILE)
 
 class PMXBundleItem(PMXManagedObject):
-    KEYS = [ 'name', 'tabTrigger', 'keyEquivalent', 'scope', 'semanticClass' ]
+    KEYS = ( 'name', 'tabTrigger', 'keyEquivalent', 'scope', 'semanticClass' )
     TYPE = ''
     FOLDER = ''
     EXTENSION = ''
@@ -226,20 +203,11 @@ class PMXBundleItem(PMXManagedObject):
         return dataHash
 
     def isChanged(self, dataHash):
-        for key in list(dataHash.keys()):
+        for key in dataHash.keys():
             if getattr(self, key) != dataHash[key]:
                 return True
         return False
 
-    def delete(self, namespace):
-        os.unlink(self.path(namespace))
-        folder = os.path.dirname(self.path(namespace))
-        try:
-            #El ultimo apaga la luz, elimina el directorio base
-            os.rmdir(folder)
-        except:
-            pass
-    
     def environmentVariables(self):
         return self.bundle.environmentVariables()
     
@@ -355,4 +323,3 @@ class PMXRunningContext(object):
     def removeTempFile(self):
         if os.path.exists(self.tempFile):
             scripts.deleteFile(self.tempFile)
-

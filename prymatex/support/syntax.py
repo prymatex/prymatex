@@ -13,22 +13,22 @@ from prymatex.support.regexp import compileRegexp
 
 class PMXSyntaxNode(object):
     def __init__(self, dataHash, syntax):
-        for k in [  'syntax', 'match', 'begin', 'content', 'name', 'contentName', 'end',
-                    'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns']:
+        for k in (  'syntax', 'match', 'begin', 'content', 'name', 'contentName', 'end',
+                    'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns'):
             setattr(self, k, None)
         self.syntax = syntax
         for key, value in dataHash.items():
             try:
-                if key in ['match', 'begin']:
+                if key in ('match', 'begin'):
                     setattr(self, key, compileRegexp( value ))
-                elif key in ['content', 'name', 'contentName', 'end']:
+                elif key in ('content', 'name', 'contentName', 'end'):
                     setattr(self, key, value )
-                elif key in ['captures', 'beginCaptures', 'endCaptures']:
+                elif key in ('captures', 'beginCaptures', 'endCaptures'):
                     value = sorted(list(value.items()), key = lambda v: int(v[0]))
                     setattr(self, key, value)
                 elif key == 'repository':
                     self.parse_repository(value)
-                elif key in ['patterns']:
+                elif key == 'patterns':
                     self.create_children(value)
             except TypeError as e:
                 print(e, value)
