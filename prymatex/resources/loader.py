@@ -39,6 +39,7 @@ STATICMAPPING = (
     (os.path.normcase("/groups/darkgreen.png"), "scope-root-string"),
     (os.path.normcase("/groups/brown.png"), "scope-root-support"),
     (os.path.normcase("/groups/orange.png"), "scope-root-variable"),
+    (os.path.normcase("/groups/darkgreen.png"), "scope-root-none"),
     
     #Editor Sidebar
     (os.path.normcase("/sidebar/folding-top.png"), "foldingtop"),
