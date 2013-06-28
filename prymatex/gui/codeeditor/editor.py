@@ -764,8 +764,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             #No tengo helper paso el evento a la base
             TextEditWidget.keyPressEvent(self, event)
             
-            self.emit(QtCore.SIGNAL("keyPressEvent(QEvent)"), event)
-
     def keyReleaseEvent(self, event):
         #Primero ver si tengo un modo activo,
         for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:
