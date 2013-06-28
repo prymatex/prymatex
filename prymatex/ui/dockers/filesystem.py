@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dockers/filesystem.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dockers/filesystem.ui'
 #
-# Created: Wed Jun  5 22:34:45 2013
-#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
+# Created: Fri Jun 28 09:26:38 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,16 +12,7 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+    _fromUtf8 = lambda s: s
 
 class Ui_FileSystemDock(object):
     def setupUi(self, FileSystemDock):
@@ -185,36 +176,36 @@ class Ui_FileSystemDock(object):
         QtCore.QMetaObject.connectSlotsByName(FileSystemDock)
 
     def retranslateUi(self, FileSystemDock):
-        FileSystemDock.setWindowTitle(_translate("FileSystemDock", "File System", None))
-        self.pushButtonBack.setToolTip(_translate("FileSystemDock", "Go previous place", None))
-        self.pushButtonFoward.setToolTip(_translate("FileSystemDock", "Go next place", None))
-        self.pushButtonUp.setToolTip(_translate("FileSystemDock", "Go up one level", None))
-        self.pushButtonSync.setToolTip(_translate("FileSystemDock", "Sync folder with current editor file path", None))
-        self.comboBoxLocation.setToolTip(_translate("FileSystemDock", "Folders", None))
-        self.actionNewFile.setText(_translate("FileSystemDock", "File", None))
-        self.actionNewFolder.setText(_translate("FileSystemDock", "Folder", None))
-        self.actionNewFromTemplate.setText(_translate("FileSystemDock", "File From Template", None))
-        self.actionNewFromTemplate.setToolTip(_translate("FileSystemDock", "File From Template", None))
-        self.actionDelete.setText(_translate("FileSystemDock", "Delete", None))
-        self.actionOrderByName.setText(_translate("FileSystemDock", "By Name", None))
-        self.actionOrderBySize.setText(_translate("FileSystemDock", "By Size", None))
-        self.actionOrderByDate.setText(_translate("FileSystemDock", "By Date", None))
-        self.actionOrderByType.setText(_translate("FileSystemDock", "By Type", None))
-        self.actionOrderDescending.setText(_translate("FileSystemDock", "Descending", None))
-        self.actionOrderFoldersFirst.setText(_translate("FileSystemDock", "Folders First", None))
-        self.actionOpen.setText(_translate("FileSystemDock", "Open", None))
-        self.actionOpenSystemEditor.setText(_translate("FileSystemDock", "System Editor", None))
-        self.actionOpenDefaultEditor.setText(_translate("FileSystemDock", "Default Editor", None))
-        self.actionRename.setText(_translate("FileSystemDock", "Rename", None))
-        self.actionRename.setToolTip(_translate("FileSystemDock", "Rename", None))
-        self.actionRename.setShortcut(_translate("FileSystemDock", "F2", None))
-        self.actionConvertIntoProject.setText(_translate("FileSystemDock", "Convert Into Project", None))
-        self.actionConvertIntoProject.setToolTip(_translate("FileSystemDock", "Convert current directory into project", None))
-        self.actionSetInTerminal.setText(_translate("FileSystemDock", "Set In Terminal", None))
-        self.actionCut.setText(_translate("FileSystemDock", "Cu&t", None))
-        self.actionCut.setShortcut(_translate("FileSystemDock", "Ctrl+X", None))
-        self.actionCopy.setText(_translate("FileSystemDock", "&Copy", None))
-        self.actionCopy.setShortcut(_translate("FileSystemDock", "Ctrl+C", None))
-        self.actionPaste.setText(_translate("FileSystemDock", "&Paste", None))
-        self.actionPaste.setShortcut(_translate("FileSystemDock", "Ctrl+V", None))
+        FileSystemDock.setWindowTitle(QtGui.QApplication.translate("FileSystemDock", "File System", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButtonBack.setToolTip(QtGui.QApplication.translate("FileSystemDock", "Go previous place", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButtonFoward.setToolTip(QtGui.QApplication.translate("FileSystemDock", "Go next place", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButtonUp.setToolTip(QtGui.QApplication.translate("FileSystemDock", "Go up one level", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButtonSync.setToolTip(QtGui.QApplication.translate("FileSystemDock", "Sync folder with current editor file path", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBoxLocation.setToolTip(QtGui.QApplication.translate("FileSystemDock", "Folders", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionNewFile.setText(QtGui.QApplication.translate("FileSystemDock", "File", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionNewFolder.setText(QtGui.QApplication.translate("FileSystemDock", "Folder", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionNewFromTemplate.setText(QtGui.QApplication.translate("FileSystemDock", "File From Template", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionNewFromTemplate.setToolTip(QtGui.QApplication.translate("FileSystemDock", "File From Template", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionDelete.setText(QtGui.QApplication.translate("FileSystemDock", "Delete", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOrderByName.setText(QtGui.QApplication.translate("FileSystemDock", "By Name", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOrderBySize.setText(QtGui.QApplication.translate("FileSystemDock", "By Size", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOrderByDate.setText(QtGui.QApplication.translate("FileSystemDock", "By Date", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOrderByType.setText(QtGui.QApplication.translate("FileSystemDock", "By Type", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOrderDescending.setText(QtGui.QApplication.translate("FileSystemDock", "Descending", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOrderFoldersFirst.setText(QtGui.QApplication.translate("FileSystemDock", "Folders First", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOpen.setText(QtGui.QApplication.translate("FileSystemDock", "Open", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOpenSystemEditor.setText(QtGui.QApplication.translate("FileSystemDock", "System Editor", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOpenDefaultEditor.setText(QtGui.QApplication.translate("FileSystemDock", "Default Editor", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRename.setText(QtGui.QApplication.translate("FileSystemDock", "Rename", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRename.setToolTip(QtGui.QApplication.translate("FileSystemDock", "Rename", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRename.setShortcut(QtGui.QApplication.translate("FileSystemDock", "F2", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionConvertIntoProject.setText(QtGui.QApplication.translate("FileSystemDock", "Convert Into Project", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionConvertIntoProject.setToolTip(QtGui.QApplication.translate("FileSystemDock", "Convert current directory into project", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSetInTerminal.setText(QtGui.QApplication.translate("FileSystemDock", "Set In Terminal", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionCut.setText(QtGui.QApplication.translate("FileSystemDock", "Cu&t", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionCut.setShortcut(QtGui.QApplication.translate("FileSystemDock", "Ctrl+X", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionCopy.setText(QtGui.QApplication.translate("FileSystemDock", "&Copy", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionCopy.setShortcut(QtGui.QApplication.translate("FileSystemDock", "Ctrl+C", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionPaste.setText(QtGui.QApplication.translate("FileSystemDock", "&Paste", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionPaste.setShortcut(QtGui.QApplication.translate("FileSystemDock", "Ctrl+V", None, QtGui.QApplication.UnicodeUTF8))
 

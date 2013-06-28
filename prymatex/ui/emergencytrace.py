@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/emergencytrace.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/emergencytrace.ui'
 #
-# Created: Wed Jun  5 22:34:35 2013
-#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
+# Created: Fri Jun 28 09:26:34 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,16 +12,7 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+    _fromUtf8 = lambda s: s
 
 class Ui_TracebackDialog(object):
     def setupUi(self, TracebackDialog):
@@ -63,9 +54,9 @@ class Ui_TracebackDialog(object):
         QtCore.QMetaObject.connectSlotsByName(TracebackDialog)
 
     def retranslateUi(self, TracebackDialog):
-        TracebackDialog.setWindowTitle(_translate("TracebackDialog", "Traceback", None))
-        self.labelTitle.setText(_translate("TracebackDialog", "Exception Text", None))
-        self.pushButtonKillApp.setText(_translate("TracebackDialog", "Terminate", None))
-        self.pushCopy.setText(_translate("TracebackDialog", "&Copy", None))
-        self.pushClose.setText(_translate("TracebackDialog", "&Close", None))
+        TracebackDialog.setWindowTitle(QtGui.QApplication.translate("TracebackDialog", "Traceback", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelTitle.setText(QtGui.QApplication.translate("TracebackDialog", "Exception Text", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButtonKillApp.setText(QtGui.QApplication.translate("TracebackDialog", "Terminate", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushCopy.setText(QtGui.QApplication.translate("TracebackDialog", "&Copy", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushClose.setText(QtGui.QApplication.translate("TracebackDialog", "&Close", None, QtGui.QApplication.UnicodeUTF8))
 

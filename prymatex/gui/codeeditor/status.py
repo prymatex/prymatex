@@ -201,10 +201,10 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         for size in [2, 4, 8]:
             action = menu.addAction("%d" % size, lambda size = size: self.setCurrentEditorTabSize(size))
             action.setCheckable(True)
-            action.setChecked(editor.tabStopSize == size)
+            action.setChecked(editor.tabWidth == size)
         
-        if editor.tabStopSize not in [2,4,8]:
-            action = menu.addAction("Other (%d)" % editor.tabStopSize)
+        if editor.tabWidth not in [2,4,8]:
+            action = menu.addAction("Other (%d)" % editor.tabWidth)
             action.setCheckable(True)
             action.setChecked(True)
         else:
@@ -221,12 +221,12 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.currentEditor.tabStopSoft = soft
 
     def setCurrentEditorTabSize(self, size):
-        self.currentEditor.tabStopSize = size
+        self.currentEditor.tabWidth = size
         self.setTabSizeLabel(self.currentEditor)
 
     def setTabSizeLabel(self, editor):
         #Tab Size
-        self.labelTabSize.setText("Soft Tab: %d" % editor.tabStopSize if editor.tabStopSoft else "Hard Tab: %d" % editor.tabStopSize)
+        self.labelTabSize.setText("Soft Tab: %d" % editor.tabWidth if editor.tabStopSoft else "Hard Tab: %d" % editor.tabWidth)
 
     # -------------- AutoConnect Command widget signals
     @QtCore.Slot()

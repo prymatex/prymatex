@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dialogs/template.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/template.ui'
 #
-# Created: Wed Jun  5 22:34:43 2013
-#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
+# Created: Fri Jun 28 09:26:35 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,16 +12,7 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+    _fromUtf8 = lambda s: s
 
 class Ui_TemplateDialog(object):
     def setupUi(self, TemplateDialog):
@@ -104,10 +95,10 @@ class Ui_TemplateDialog(object):
         TemplateDialog.setTabOrder(self.buttonChoose, self.buttonCreate)
 
     def retranslateUi(self, TemplateDialog):
-        self.label1.setText(_translate("TemplateDialog", "File Name:", None))
-        self.label2.setText(_translate("TemplateDialog", "Location:", None))
-        self.buttonChoose.setText(_translate("TemplateDialog", "Ch&oose", None))
-        self.label3.setText(_translate("TemplateDialog", "Template:", None))
-        self.buttonCreate.setText(_translate("TemplateDialog", "&Create", None))
-        self.buttonCancel.setText(_translate("TemplateDialog", "C&ancel", None))
+        self.label1.setText(QtGui.QApplication.translate("TemplateDialog", "File Name:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label2.setText(QtGui.QApplication.translate("TemplateDialog", "Location:", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonChoose.setText(QtGui.QApplication.translate("TemplateDialog", "Ch&oose", None, QtGui.QApplication.UnicodeUTF8))
+        self.label3.setText(QtGui.QApplication.translate("TemplateDialog", "Template:", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonCreate.setText(QtGui.QApplication.translate("TemplateDialog", "&Create", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonCancel.setText(QtGui.QApplication.translate("TemplateDialog", "C&ancel", None, QtGui.QApplication.UnicodeUTF8))
 

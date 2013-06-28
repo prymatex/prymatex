@@ -36,7 +36,6 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
         self.foldingBarGroup = profile.groupByClass(FoldingSideBarAddon)
         self.selectionBarGroup = profile.groupByClass(SelectionSideBarAddon)
 
-
     def loadSettings(self):
         SettingsTreeNode.loadSettings(self)
         self.comboBoxDefaultSyntax.setModel(self.application.supportManager.syntaxProxyModel)
@@ -59,7 +58,6 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
         self.checkBoxFolding.setChecked(self.foldingBarGroup.value("showFolding"))
         self.checkBoxSelection.setChecked(self.selectionBarGroup.value("showSelection"))
 
-
     def on_checkBoxLineNumbers_toggled(self, checked):
         self.lineNumberBarGroup.setValue('showLineNumbers', self.checkBoxLineNumbers.isChecked())
 
@@ -72,18 +70,15 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
     def on_checkBoxSelection_toggled(self, checked):
         self.selectionBarGroup.setValue('showSelection', self.checkBoxSelection.isChecked())
 
-    
     @QtCore.Slot(int)
     def on_spinBoxMarginLineSpace_valueChanged(self, value):
         self.settingGroup.setValue('marginLineSpaces', value)
-
 
     @QtCore.Slot(int)
     def on_comboBoxDefaultSyntax_activated(self, index):
         model = self.comboBoxDefaultSyntax.model()
         node = model.mapToSource(model.createIndex(index, 0))
         self.settingGroup.setValue('defaultSyntax', str(node.internalPointer().uuid).upper())
-
 
     def on_editorFlags_toggled(self, checked):
         flags = 0

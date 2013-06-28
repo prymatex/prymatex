@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/general.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/general.ui'
 #
-# Created: Wed Jun  5 22:34:39 2013
-#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
+# Created: Fri Jun 28 09:26:37 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,16 +12,7 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+    _fromUtf8 = lambda s: s
 
 class Ui_General(object):
     def setupUi(self, General):
@@ -72,11 +63,11 @@ class Ui_General(object):
         QtCore.QMetaObject.connectSlotsByName(General)
 
     def retranslateUi(self, General):
-        General.setWindowTitle(_translate("General", "General", None))
-        self.groupBox_2.setTitle(_translate("General", "Interface", None))
-        self.label_2.setText(_translate("General", "Qt style:", None))
-        self.label_3.setText(_translate("General", "Qt style sheet:", None))
-        self.groupBox_3.setTitle(_translate("General", "External actions", None))
-        self.checkBoxAskAboutExternalDeletions.setText(_translate("General", "Ask about external file deletions? or remove editor", None))
-        self.checkBoxAskAboutExternalChanges.setText(_translate("General", "Ask about external file changes? or replace editor content", None))
+        General.setWindowTitle(QtGui.QApplication.translate("General", "General", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox_2.setTitle(QtGui.QApplication.translate("General", "Interface", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_2.setText(QtGui.QApplication.translate("General", "Qt style:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_3.setText(QtGui.QApplication.translate("General", "Qt style sheet:", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox_3.setTitle(QtGui.QApplication.translate("General", "External actions", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBoxAskAboutExternalDeletions.setText(QtGui.QApplication.translate("General", "Ask about external file deletions? or remove editor", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBoxAskAboutExternalChanges.setText(QtGui.QApplication.translate("General", "Ask about external file changes? or replace editor content", None, QtGui.QApplication.UnicodeUTF8))
 

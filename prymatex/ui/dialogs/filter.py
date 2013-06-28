@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dialogs/filter.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/filter.ui'
 #
-# Created: Wed Jun  5 22:34:43 2013
-#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
+# Created: Fri Jun 28 09:26:35 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,16 +12,7 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+    _fromUtf8 = lambda s: s
 
 class Ui_FilterDialog(object):
     def setupUi(self, FilterDialog):
@@ -75,21 +66,21 @@ class Ui_FilterDialog(object):
         QtCore.QMetaObject.connectSlotsByName(FilterDialog)
 
     def retranslateUi(self, FilterDialog):
-        FilterDialog.setWindowTitle(_translate("FilterDialog", "Dialog", None))
-        self.groupBox.setTitle(_translate("FilterDialog", "Filter type", None))
-        self.radioButton.setText(_translate("FilterDialog", "Include only", None))
-        self.radioButton_2.setText(_translate("FilterDialog", "Exclude all", None))
-        self.groupBox_2.setTitle(_translate("FilterDialog", "Applies to", None))
-        self.radioButton_3.setText(_translate("FilterDialog", "Files", None))
-        self.radioButton_4.setText(_translate("FilterDialog", "Folders", None))
-        self.radioButton_5.setText(_translate("FilterDialog", "Files and folders", None))
-        self.checkBox.setText(_translate("FilterDialog", "All children (recursive)", None))
-        self.groupBox_3.setTitle(_translate("FilterDialog", "File and folders attributes", None))
-        self.comboBox.setItemText(0, _translate("FilterDialog", "Name", None))
-        self.comboBox.setItemText(1, _translate("FilterDialog", "Project relative path", None))
-        self.comboBox.setItemText(2, _translate("FilterDialog", "Location", None))
-        self.comboBox.setItemText(3, _translate("FilterDialog", "Last modified", None))
-        self.comboBox.setItemText(4, _translate("FilterDialog", "File length", None))
-        self.comboBox.setItemText(5, _translate("FilterDialog", "Read only", None))
-        self.comboBox.setItemText(6, _translate("FilterDialog", "Symbolic link", None))
+        FilterDialog.setWindowTitle(QtGui.QApplication.translate("FilterDialog", "Dialog", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox.setTitle(QtGui.QApplication.translate("FilterDialog", "Filter type", None, QtGui.QApplication.UnicodeUTF8))
+        self.radioButton.setText(QtGui.QApplication.translate("FilterDialog", "Include only", None, QtGui.QApplication.UnicodeUTF8))
+        self.radioButton_2.setText(QtGui.QApplication.translate("FilterDialog", "Exclude all", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox_2.setTitle(QtGui.QApplication.translate("FilterDialog", "Applies to", None, QtGui.QApplication.UnicodeUTF8))
+        self.radioButton_3.setText(QtGui.QApplication.translate("FilterDialog", "Files", None, QtGui.QApplication.UnicodeUTF8))
+        self.radioButton_4.setText(QtGui.QApplication.translate("FilterDialog", "Folders", None, QtGui.QApplication.UnicodeUTF8))
+        self.radioButton_5.setText(QtGui.QApplication.translate("FilterDialog", "Files and folders", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBox.setText(QtGui.QApplication.translate("FilterDialog", "All children (recursive)", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox_3.setTitle(QtGui.QApplication.translate("FilterDialog", "File and folders attributes", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBox.setItemText(0, QtGui.QApplication.translate("FilterDialog", "Name", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBox.setItemText(1, QtGui.QApplication.translate("FilterDialog", "Project relative path", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBox.setItemText(2, QtGui.QApplication.translate("FilterDialog", "Location", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBox.setItemText(3, QtGui.QApplication.translate("FilterDialog", "Last modified", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBox.setItemText(4, QtGui.QApplication.translate("FilterDialog", "File length", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBox.setItemText(5, QtGui.QApplication.translate("FilterDialog", "Read only", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBox.setItemText(6, QtGui.QApplication.translate("FilterDialog", "Symbolic link", None, QtGui.QApplication.UnicodeUTF8))
 

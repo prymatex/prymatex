@@ -43,10 +43,6 @@ WIDTH_CHARACTER = "#"
 CodeEditorScope = namedtuple("CodeEditorScope", [ "path", "settings", "group" ])
 
 class CodeEditor(TextEditWidget, PMXBaseEditor):
-    # -------------------- Scope groups
-    SORTED_GROUPS = [   "keyword", "entity", "meta", "variable", "markup", 
-                        "support", "storage", "constant", "string", "comment", "invalid" ]
-
     # Aca vamos a guardar los scopes de los editores, quiza esto pueda ser un objeto factory,
     # por ahora la fabricacion la hace el editor en el factory method flyweightScopeFactory
     SCOPES = {}
@@ -71,12 +67,23 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     
     # ------------------- Settings
     SETTINGS_GROUP = 'CodeEditor'
-        
-    tabStopSoft = pmxConfigPorperty(default = True)
+    
+    removeTrailingSpaces = pmxConfigPorperty(default = False)
+    autoBrackets = pmxConfigPorperty(default = True)
+    smartHomeSmartEnd = pmxConfigPorperty(default = True)
+    enableAutoCompletion = pmxConfigPorperty(default = True)
+    wordLengthToComplete = pmxConfigPorperty(default = 3)
+
     marginLineSpaces = pmxConfigPorperty(default = 80)
-     
+    tabStopSoft = pmxConfigPorperty(default = True)
+    adjustIndentationOnPaste = pmxConfigPorperty(default = False)
+        
     @pmxConfigPorperty(default = 4)
-    def tabStopSize(self, size):
+    def indentationWidth(self, size):
+        self.setTabStopWidth(size * 9)
+    
+    @pmxConfigPorperty(default = 4)
+    def tabWidth(self, size):
         self.setTabStopWidth(size * 9)
     
     @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
@@ -416,7 +423,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
     # ------------ Obteniendo datos del editor
     def tabKeyBehavior(self):
-        return self.tabStopSoft and str(' ') * self.tabStopSize or str('	')
+        return self.tabStopSoft and str(' ') * self.tabWidth or str('	')
 
     # Flags
     def getFlags(self):
@@ -646,7 +653,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                         indentPattern = blockPattern.userData().indent
                         # TODO: Obtener este valor mas decoroso
                         for s in range(0, (len(indentPattern) // len(self.tabKeyBehavior()))):
-                            positionX = (font_metrics.width(WIDTH_CHARACTER) * self.tabStopSize * s) + font_metrics.width(WIDTH_CHARACTER) + offset.x()
+                            positionX = (font_metrics.width(WIDTH_CHARACTER) * self.tabWidth * s) + font_metrics.width(WIDTH_CHARACTER) + offset.x()
                             painter.drawLine(positionX, positionY, positionX, positionY + font_metrics.height())
                 
             block = block.next()
@@ -851,7 +858,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 'TM_LEFT_SCOPE': " ".join(leftScope.path + attributeScopePath + cursorScopePath),
                 'TM_MODE': self.syntax().name,
                 'TM_SOFT_TABS': self.tabStopSoft and str('YES') or str('NO'),
-                'TM_TAB_SIZE': self.tabStopSize
+                'TM_TAB_SIZE': self.tabWidth
         })
 
         if current_word:
@@ -1063,10 +1070,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # ---------- Override convert tabs <---> spaces
     def convertTabsToSpaces(self):
         match = "\t"
-        self.replaceMatch(match, " " * self.tabStopSize, QtGui.QTextDocument.FindFlags(), True)
+        self.replaceMatch(match, " " * self.tabWidth, QtGui.QTextDocument.FindFlags(), True)
         
     def convertSpacesToTabs(self):
-        match = " " * self.tabStopSize
+        match = " " * self.tabWidth
         self.replaceMatch(match, "\t", QtGui.QTextDocument.FindFlags(), True)
         
     # -------------- Add select text functions
@@ -1178,7 +1185,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         while True:
             data = start.userData()
             if self.tabStopSoft:
-                counter = self.tabStopSize if len(data.indent) > self.tabStopSize else len(data.indent)
+                counter = self.tabWidth if len(data.indent) > self.tabWidth else len(data.indent)
             else:
                 counter = 1 if len(data.indent) else 0
             if counter > 0:

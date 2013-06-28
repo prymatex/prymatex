@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/filters.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/filters.ui'
 #
-# Created: Wed Jun  5 22:34:38 2013
-#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
+# Created: Fri Jun 28 09:26:37 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,16 +12,7 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+    _fromUtf8 = lambda s: s
 
 class Ui_FiltersWidget(object):
     def setupUi(self, FiltersWidget):
@@ -53,8 +44,8 @@ class Ui_FiltersWidget(object):
         QtCore.QMetaObject.connectSlotsByName(FiltersWidget)
 
     def retranslateUi(self, FiltersWidget):
-        FiltersWidget.setWindowTitle(_translate("FiltersWidget", "Form", None))
-        self.pushButtonAdd.setText(_translate("FiltersWidget", "Add", None))
-        self.pushButtonEdit.setText(_translate("FiltersWidget", "Edit", None))
-        self.pushButtonRemove.setText(_translate("FiltersWidget", "Remove", None))
+        FiltersWidget.setWindowTitle(QtGui.QApplication.translate("FiltersWidget", "Form", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButtonAdd.setText(QtGui.QApplication.translate("FiltersWidget", "Add", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButtonEdit.setText(QtGui.QApplication.translate("FiltersWidget", "Edit", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButtonRemove.setText(QtGui.QApplication.translate("FiltersWidget", "Remove", None, QtGui.QApplication.UnicodeUTF8))
 

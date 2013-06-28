@@ -178,7 +178,8 @@ class TabIndentHelper(CodeEditorKeyHelper):
             self.editor.indentBlocks()
         else:
             #Insertar un numero multiplo de espacios a la posicion del cursor
-            spaces = self.editor.tabStopSize - (cursor.columnNumber() % self.editor.tabStopSize)
+            # TODO Ayudar a resolver los tabs desde el editor
+            spaces = self.editor.tabWidth - (cursor.columnNumber() % self.editor.tabWidth)
             cursor.insertText(spaces * ' ')
 
 class BacktabUnindentHelper(CodeEditorKeyHelper):
@@ -195,7 +196,7 @@ class BackspaceUnindentHelper(CodeEditorKeyHelper):
         return lineText[:cursor.columnNumber()].endswith(self.editor.tabKeyBehavior())
         
     def execute(self, event, cursor = None):
-        counter = cursor.columnNumber() % self.editor.tabStopSize or self.editor.tabStopSize
+        counter = cursor.columnNumber() % self.editor.tabWidth or self.editor.tabWidth
         for _ in range(counter):
             cursor.deletePreviousChar()
 
@@ -220,7 +221,7 @@ class DeleteUnindentHelper(CodeEditorKeyHelper):
         return lineText[cursor.columnNumber():].startswith(self.editor.tabKeyBehavior())
         
     def execute(self, event, cursor = None):
-        counter = cursor.columnNumber() % self.editor.tabStopSize or self.editor.tabStopSize
+        counter = cursor.columnNumber() % self.editor.tabWidth or self.editor.tabWidth
         for _ in range(counter):
             cursor.deleteChar()
 

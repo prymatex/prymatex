@@ -13,12 +13,11 @@ from prymatex.widgets.pmxterm.schemes import ColorScheme
 class TerminalSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Terminal):
     TITLE = "Terminal"
     ICON = resources.getIcon("utilities-terminal")
-    
+
     def __init__(self, settingGroup, profile = None, parent = None):
         QtGui.QWidget.__init__(self, parent)
         SettingsTreeNode.__init__(self, "terminal", settingGroup, profile)
         self.setupUi(self)
-        
         
     def loadSettings(self):
         SettingsTreeNode.loadSettings(self)
@@ -49,7 +48,6 @@ class TerminalSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Terminal):
         self.spinBoxFontSize.valueChanged[int].connect(self.setDefaultFontSetting)
         self.fontComboBoxName.activated.connect(self.setDefaultFontSetting)
 
-
     # ---------------------- Set Settings
     def setDefaultFontSetting(self):
         font = self.fontComboBoxName.currentFont()
@@ -68,7 +66,6 @@ class TerminalSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Terminal):
     @QtCore.Slot(str)
     def on_comboBoxScheme_activated(self, name):
         self.settingGroup.setValue('defaultScheme', name)
-
 
     @QtCore.Slot()
     def on_pushButtonChangeFont_pressed(self):

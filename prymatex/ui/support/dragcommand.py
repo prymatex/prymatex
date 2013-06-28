@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/support/dragcommand.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/support/dragcommand.ui'
 #
-# Created: Wed Jun  5 22:34:48 2013
-#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
+# Created: Fri Jun 28 09:26:34 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,16 +12,7 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+    _fromUtf8 = lambda s: s
 
 class Ui_DragCommand(object):
     def setupUi(self, DragCommand):
@@ -69,8 +60,8 @@ class Ui_DragCommand(object):
         QtCore.QMetaObject.connectSlotsByName(DragCommand)
 
     def retranslateUi(self, DragCommand):
-        DragCommand.setWindowTitle(_translate("DragCommand", "Form", None))
-        self.label.setText(_translate("DragCommand", "File Types:", None))
-        self.label_2.setText(_translate("DragCommand", "Command(s):", None))
-        self.label_4.setText(_translate("DragCommand", "Output:", None))
+        DragCommand.setWindowTitle(QtGui.QApplication.translate("DragCommand", "Form", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("DragCommand", "File Types:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_2.setText(QtGui.QApplication.translate("DragCommand", "Command(s):", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_4.setText(QtGui.QApplication.translate("DragCommand", "Output:", None, QtGui.QApplication.UnicodeUTF8))
 

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/others/filesystemsettings.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/others/filesystemsettings.ui'
 #
-# Created: Wed Jun  5 22:34:37 2013
-#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
+# Created: Fri Jun 28 09:26:36 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,16 +12,7 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+    _fromUtf8 = lambda s: s
 
 class Ui_FSSettingsDialog(object):
     def setupUi(self, FSSettingsDialog):
@@ -92,12 +83,12 @@ class Ui_FSSettingsDialog(object):
         QtCore.QMetaObject.connectSlotsByName(FSSettingsDialog)
 
     def retranslateUi(self, FSSettingsDialog):
-        FSSettingsDialog.setWindowTitle(_translate("FSSettingsDialog", "File System Panel Settings", None))
-        self.label.setText(_translate("FSSettingsDialog", "Include Files...", None))
-        self.label_2.setText(_translate("FSSettingsDialog", "Exclude Files...", None))
-        self.label_3.setText(_translate("FSSettingsDialog", "Include Dirs...", None))
-        self.label_4.setText(_translate("FSSettingsDialog", "Exclude Dirs...", None))
-        self.label_5.setText(_translate("FSSettingsDialog", "Use commas for filter separation, i.e. *.o, *~", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabFilters), _translate("FSSettingsDialog", "Filters", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabEnviroment), _translate("FSSettingsDialog", "Enviroment", None))
+        FSSettingsDialog.setWindowTitle(QtGui.QApplication.translate("FSSettingsDialog", "File System Panel Settings", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("FSSettingsDialog", "Include Files...", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_2.setText(QtGui.QApplication.translate("FSSettingsDialog", "Exclude Files...", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_3.setText(QtGui.QApplication.translate("FSSettingsDialog", "Include Dirs...", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_4.setText(QtGui.QApplication.translate("FSSettingsDialog", "Exclude Dirs...", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_5.setText(QtGui.QApplication.translate("FSSettingsDialog", "Use commas for filter separation, i.e. *.o, *~", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabFilters), QtGui.QApplication.translate("FSSettingsDialog", "Filters", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabEnviroment), QtGui.QApplication.translate("FSSettingsDialog", "Enviroment", None, QtGui.QApplication.UnicodeUTF8))
 

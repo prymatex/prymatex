@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/emergencycrash.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/emergencycrash.ui'
 #
-# Created: Wed Jun  5 22:34:36 2013
-#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
+# Created: Fri Jun 28 09:26:34 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,16 +12,7 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+    _fromUtf8 = lambda s: s
 
 class Ui_CrashDialog(object):
     def setupUi(self, CrashDialog):
@@ -84,13 +75,13 @@ class Ui_CrashDialog(object):
         QtCore.QMetaObject.connectSlotsByName(CrashDialog)
 
     def retranslateUi(self, CrashDialog):
-        CrashDialog.setWindowTitle(_translate("CrashDialog", "Prymatex Crash", None))
-        self.label.setText(_translate("CrashDialog", "Prymatex Has Crashed", None))
-        self.label_2.setText(_translate("CrashDialog", "Prymatex has crashed, an uncattched exception has been risen somewhere.\n"
+        CrashDialog.setWindowTitle(QtGui.QApplication.translate("CrashDialog", "Prymatex Crash", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("CrashDialog", "Prymatex Has Crashed", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_2.setText(QtGui.QApplication.translate("CrashDialog", "Prymatex has crashed, an uncattched exception has been risen somewhere.\n"
 "If you\'re a developer you could dig into the code and send a path if appopiate.\n"
-"Full detail about the exception has been pasted below.", None))
-        self.label_3.setToolTip(_translate("CrashDialog", "No monkeys have been hurt in the process", None))
-        self.pushSendTraceback.setText(_translate("CrashDialog", "Send", None))
-        self.pushCopyTraceback.setText(_translate("CrashDialog", "Copy", None))
-        self.pushClose.setText(_translate("CrashDialog", "Close", None))
+"Full detail about the exception has been pasted below.", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_3.setToolTip(QtGui.QApplication.translate("CrashDialog", "No monkeys have been hurt in the process", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushSendTraceback.setText(QtGui.QApplication.translate("CrashDialog", "Send", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushCopyTraceback.setText(QtGui.QApplication.translate("CrashDialog", "Copy", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushClose.setText(QtGui.QApplication.translate("CrashDialog", "Close", None, QtGui.QApplication.UnicodeUTF8))
 

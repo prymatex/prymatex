@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/resource.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/resource.ui'
 #
-# Created: Wed Jun  5 22:34:42 2013
-#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
+# Created: Fri Jun 28 09:26:37 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,16 +12,7 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+    _fromUtf8 = lambda s: s
 
 class Ui_ResouceWidget(object):
     def setupUi(self, ResouceWidget):
@@ -174,33 +165,33 @@ class Ui_ResouceWidget(object):
         QtCore.QMetaObject.connectSlotsByName(ResouceWidget)
 
     def retranslateUi(self, ResouceWidget):
-        ResouceWidget.setWindowTitle(_translate("ResouceWidget", "Resource", None))
-        self.labelPath.setText(_translate("ResouceWidget", "Path:", None))
-        self.labelType.setText(_translate("ResouceWidget", "Type:", None))
-        self.labelLocation.setText(_translate("ResouceWidget", "Location:", None))
-        self.labelLastModified.setText(_translate("ResouceWidget", "Last modified:", None))
-        self.labelSize.setText(_translate("ResouceWidget", "Size:", None))
-        self.groupBox_3.setTitle(_translate("ResouceWidget", "Permissions", None))
+        ResouceWidget.setWindowTitle(QtGui.QApplication.translate("ResouceWidget", "Resource", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelPath.setText(QtGui.QApplication.translate("ResouceWidget", "Path:", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelType.setText(QtGui.QApplication.translate("ResouceWidget", "Type:", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelLocation.setText(QtGui.QApplication.translate("ResouceWidget", "Location:", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelLastModified.setText(QtGui.QApplication.translate("ResouceWidget", "Last modified:", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelSize.setText(QtGui.QApplication.translate("ResouceWidget", "Size:", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox_3.setTitle(QtGui.QApplication.translate("ResouceWidget", "Permissions", None, QtGui.QApplication.UnicodeUTF8))
         item = self.tableWidgetPermissions.verticalHeaderItem(0)
-        item.setText(_translate("ResouceWidget", "Owner", None))
+        item.setText(QtGui.QApplication.translate("ResouceWidget", "Owner", None, QtGui.QApplication.UnicodeUTF8))
         item = self.tableWidgetPermissions.verticalHeaderItem(1)
-        item.setText(_translate("ResouceWidget", "Group", None))
+        item.setText(QtGui.QApplication.translate("ResouceWidget", "Group", None, QtGui.QApplication.UnicodeUTF8))
         item = self.tableWidgetPermissions.verticalHeaderItem(2)
-        item.setText(_translate("ResouceWidget", "Other", None))
+        item.setText(QtGui.QApplication.translate("ResouceWidget", "Other", None, QtGui.QApplication.UnicodeUTF8))
         item = self.tableWidgetPermissions.horizontalHeaderItem(0)
-        item.setText(_translate("ResouceWidget", "Read", None))
+        item.setText(QtGui.QApplication.translate("ResouceWidget", "Read", None, QtGui.QApplication.UnicodeUTF8))
         item = self.tableWidgetPermissions.horizontalHeaderItem(1)
-        item.setText(_translate("ResouceWidget", "Write", None))
+        item.setText(QtGui.QApplication.translate("ResouceWidget", "Write", None, QtGui.QApplication.UnicodeUTF8))
         item = self.tableWidgetPermissions.horizontalHeaderItem(2)
-        item.setText(_translate("ResouceWidget", "Execute", None))
+        item.setText(QtGui.QApplication.translate("ResouceWidget", "Execute", None, QtGui.QApplication.UnicodeUTF8))
         __sortingEnabled = self.tableWidgetPermissions.isSortingEnabled()
         self.tableWidgetPermissions.setSortingEnabled(False)
         self.tableWidgetPermissions.setSortingEnabled(__sortingEnabled)
-        self.label.setText(_translate("ResouceWidget", "<html><head/><body><p><span style=\" font-weight:600;\">Note:</span> Removing de executable flag on a folder will cause its children to become unreadable</p></body></html>", None))
-        self.groupBox.setTitle(_translate("ResouceWidget", "Text file encoding", None))
-        self.radioButton.setText(_translate("ResouceWidget", "Inherited", None))
-        self.radioButton_2.setText(_translate("ResouceWidget", "Other:", None))
-        self.groupBox_2.setTitle(_translate("ResouceWidget", "Text file end of line", None))
-        self.radioButton_4.setText(_translate("ResouceWidget", "Other", None))
-        self.radioButton_3.setText(_translate("ResouceWidget", "Inherited", None))
+        self.label.setText(QtGui.QApplication.translate("ResouceWidget", "<html><head/><body><p><span style=\" font-weight:600;\">Note:</span> Removing de executable flag on a folder will cause its children to become unreadable</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox.setTitle(QtGui.QApplication.translate("ResouceWidget", "Text file encoding", None, QtGui.QApplication.UnicodeUTF8))
+        self.radioButton.setText(QtGui.QApplication.translate("ResouceWidget", "Inherited", None, QtGui.QApplication.UnicodeUTF8))
+        self.radioButton_2.setText(QtGui.QApplication.translate("ResouceWidget", "Other:", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox_2.setTitle(QtGui.QApplication.translate("ResouceWidget", "Text file end of line", None, QtGui.QApplication.UnicodeUTF8))
+        self.radioButton_4.setText(QtGui.QApplication.translate("ResouceWidget", "Other", None, QtGui.QApplication.UnicodeUTF8))
+        self.radioButton_3.setText(QtGui.QApplication.translate("ResouceWidget", "Inherited", None, QtGui.QApplication.UnicodeUTF8))
 

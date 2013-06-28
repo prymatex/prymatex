@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/editor.ui'
+# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/editor.ui'
 #
-# Created: Wed Jun  5 22:34:38 2013
-#      by: PyQt4 UI code generator snapshot-4.10.2-6f54723ef2ba
+# Created: Fri Jun 28 09:26:37 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,16 +12,7 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+    _fromUtf8 = lambda s: s
 
 class Ui_Editor(object):
     def setupUi(self, Editor):
@@ -109,18 +100,18 @@ class Ui_Editor(object):
         QtCore.QMetaObject.connectSlotsByName(Editor)
 
     def retranslateUi(self, Editor):
-        Editor.setWindowTitle(_translate("Editor", "Editor", None))
-        self.groupBox_2.setTitle(_translate("Editor", "Source", None))
-        self.labelDefaultSyntax.setText(_translate("Editor", "Default syntax:", None))
-        self.checkBoxHighlightCurrenLine.setText(_translate("Editor", "Highlight current line", None))
-        self.checkBoxShowMarginLine.setText(_translate("Editor", "Show margin line after", None))
-        self.checkBoxShowIndentGuide.setText(_translate("Editor", "Show indent guides", None))
-        self.checkBoxShowTabSpaces.setText(_translate("Editor", "Show tabs and spaces", None))
-        self.checkBoxShowLineParagraph.setText(_translate("Editor", "Show line and paragraph", None))
-        self.checkBoxWrapLines.setText(_translate("Editor", "Wrap lines", None))
-        self.groupBox.setTitle(_translate("Editor", "Gutters", None))
-        self.checkBoxLineNumbers.setText(_translate("Editor", "Show line numbers", None))
-        self.checkBoxBookmarks.setText(_translate("Editor", "Show bookmarks", None))
-        self.checkBoxFolding.setText(_translate("Editor", "Show folding", None))
-        self.checkBoxSelection.setText(_translate("Editor", "Show selected text", None))
+        Editor.setWindowTitle(QtGui.QApplication.translate("Editor", "Editor", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox_2.setTitle(QtGui.QApplication.translate("Editor", "Source", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelDefaultSyntax.setText(QtGui.QApplication.translate("Editor", "Default syntax:", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBoxHighlightCurrenLine.setText(QtGui.QApplication.translate("Editor", "Highlight current line", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBoxShowMarginLine.setText(QtGui.QApplication.translate("Editor", "Show margin line after", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBoxShowIndentGuide.setText(QtGui.QApplication.translate("Editor", "Show indent guides", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBoxShowTabSpaces.setText(QtGui.QApplication.translate("Editor", "Show tabs and spaces", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBoxShowLineParagraph.setText(QtGui.QApplication.translate("Editor", "Show line and paragraph", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBoxWrapLines.setText(QtGui.QApplication.translate("Editor", "Wrap lines", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox.setTitle(QtGui.QApplication.translate("Editor", "Gutters", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBoxLineNumbers.setText(QtGui.QApplication.translate("Editor", "Show line numbers", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBoxBookmarks.setText(QtGui.QApplication.translate("Editor", "Show bookmarks", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBoxFolding.setText(QtGui.QApplication.translate("Editor", "Show folding", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBoxSelection.setText(QtGui.QApplication.translate("Editor", "Show selected text", None, QtGui.QApplication.UnicodeUTF8))
 
