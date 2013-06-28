@@ -29,7 +29,7 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
         
         for check, flag in self.checks:
             check.toggled.connect(self.on_editorFlags_toggled)
-        
+
         # Default addons groups
         self.bookmarksBarGroup = profile.groupByClass(BookmarkSideBarAddon)
         self.lineNumberBarGroup = profile.groupByClass(LineNumberSideBarAddon)

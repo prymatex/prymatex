@@ -43,8 +43,9 @@ WIDTH_CHARACTER = "#"
 CodeEditorScope = namedtuple("CodeEditorScope", [ "path", "settings", "group" ])
 
 class CodeEditor(TextEditWidget, PMXBaseEditor):
-    # Aca vamos a guardar los scopes de los editores, quiza esto pueda ser un objeto factory,
-    # por ahora la fabricacion la hace el editor en el factory method flyweightScopeFactory
+    # Aca vamos a guardar los scopes de los editores, quiza esto pueda
+    # ser un objeto factory, por ahora la fabricacion la hace el editor
+    # en el factory method flyweightScopeFactory
     SCOPES = {}
         
     # -------------------- Signals
@@ -80,11 +81,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
     @pmxConfigPorperty(default = 4)
     def indentationWidth(self, size):
-        self.setTabStopWidth(size * 9)
+        self.repaint()
     
     @pmxConfigPorperty(default = 4)
     def tabWidth(self, size):
-        self.setTabStopWidth(size * 9)
+        self.setTabStopWidth(size * self.fontMetrics().width(WIDTH_CHARACTER))
     
     @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
     def defaultFont(self, font):
@@ -183,7 +184,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.modificationChanged.connect(self.on_modificationChanged)
         self.syntaxChanged.connect(self.on_syntaxChanged)
         self.themeChanged.connect(self.highlightEditor)
-
+        # TODO Algo mejor para acomodar el ancho del tabulador
+        self.fontChanged.connect(lambda editor = self: editor.setTabStopWidth(editor.tabWidth * editor.fontMetrics().width(WIDTH_CHARACTER)))
+        
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
         self.syntaxHighlighter.setDocument(self.document())
@@ -423,7 +426,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
     # ------------ Obteniendo datos del editor
     def tabKeyBehavior(self):
-        return self.tabStopSoft and str(' ') * self.tabWidth or str('	')
+        return self.tabStopSoft and ' ' * self.indentationWidth or '\t'
 
     # Flags
     def getFlags(self):
@@ -650,10 +653,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                     while blockPattern.isValid() and self.blockUserData(blockPattern).blank():
                         blockPattern = blockPattern.next()
                     if blockPattern.isValid() and blockPattern.userData():
-                        indentPattern = blockPattern.userData().indent
+                        indentLen = len(blockPattern.userData().indent)
                         # TODO: Obtener este valor mas decoroso
-                        for s in range(0, (len(indentPattern) // len(self.tabKeyBehavior()))):
-                            positionX = (font_metrics.width(WIDTH_CHARACTER) * self.tabWidth * s) + font_metrics.width(WIDTH_CHARACTER) + offset.x()
+                        for s in range(0, indentLen // self.indentationWidth):
+                            positionX = (font_metrics.width(WIDTH_CHARACTER) * self.indentationWidth * s) + font_metrics.width(WIDTH_CHARACTER) + offset.x()
                             painter.drawLine(positionX, positionY, positionX, positionY + font_metrics.height())
                 
             block = block.next()
