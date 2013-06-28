@@ -44,11 +44,8 @@ class EditSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Edit):
     def on_checkBoxEnableAutoCompletion_toggled(self, checked):
         self.settingGroup.setValue('enableAutoCompletion', self.checkBoxEnableAutoCompletion.isChecked())
 
-    def on_radioButtonTabulators_toggled(self, checked):
-        self.settingGroup.setValue('tabStopSoft', False)
-
     def on_radioButtonSpaces_toggled(self, checked):
-        self.settingGroup.setValue('tabStopSoft', True)
+        self.settingGroup.setValue('tabStopSoft', checked)
     
     def on_checkBoxAdjustIndentationOnPaste_toggled(self, checked):
         self.settingGroup.setValue('adjustIndentationOnPaste', self.checkBoxAdjustIndentationOnPaste.isChecked())
