@@ -7,6 +7,7 @@
 import os, re, signal
 import unicodedata
 import string
+from prymatex.utils import six
 
 from subprocess import PIPE, Popen
 
@@ -36,7 +37,7 @@ def pid_proc_dict():
         d[pid] = proc
     return d
 
-def to_valid_name(self, name):
+def to_valid_name(name):
     name = unicodedata.normalize('NFKD', six.text_type(name)).encode('ASCII', 'ignore')
     return "".join([ c for c in name if c in VALID_PATH_CARACTERS ])
 

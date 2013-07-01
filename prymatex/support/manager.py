@@ -670,6 +670,7 @@ class PMXSupportBaseManager(object):
         Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle nuevo.
         """
         namespace = namespace or self.defaultNamespace()
+        
         basePath, _ = self.namespaceElementPath(namespace, self.BUNDLES_NAME, create = True)
         path = osextra.path.ensure_not_exists(os.path.join(basePath, "%s.tmbundle"), osextra.to_valid_name(name))
         
@@ -694,10 +695,8 @@ class PMXSupportBaseManager(object):
     def getBundle(self, uuid):
         return self.getManagedObject(uuid)
 
-    def updateBundle(self, bundle, namespace = None, **attrs):
-        """Actualiza un bundle"""
-        namespace = namespace or self.defaultNamespace()
-
+    def ensureBundleIsSafe(self, bundle, namespace):
+        """Ensure the bundle is safe"""
         if bundle.isProtected() and not bundle.isSafe():
             #Safe bundle
             basePath, _ = self.namespaceElementPath(namespace, self.BUNDLES_NAME, create = True)
@@ -706,11 +705,19 @@ class PMXSupportBaseManager(object):
             if bundle.hasSupportPath():
                 bundle.relocateSupport(os.path.join(path, self.SUPPORT_NAME))
             self.logger.debug("Add namespace '%s' in source %s for bundle." % (namespace, path))
-        elif not bundle.isProtected() and "name" in attrs:
-            #Move bundle
+        return bundle
+
+    def updateBundle(self, bundle, namespace = None, **attrs):
+        """Actualiza un bundle"""
+        namespace = namespace or self.defaultNamespace()
+
+        bundle = self.ensureBundleIsSafe(bundle, namespace)
+        
+        if not bundle.isProtected() and "name" in attrs:
+            #Rename bundle
             path = osextra.path.ensure_not_exists(os.path.join(os.path.dirname(bundle.path(namespace)), "%s.tmbundle"), osextra.to_valid_name(attrs["name"]))
             bundle.relocateSource(namespace, path)
-        
+
         # Do update and save
         bundle.update(attrs)
         self.saveManagedObject(bundle, namespace)
@@ -776,8 +783,9 @@ class PMXSupportBaseManager(object):
         Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle item nuevo.
         """
         namespace = namespace or self.defaultNamespace()
-        if bundle.isProtected() and not bundle.isSafe():
-            self.updateBundle(bundle, namespace)
+        
+        bundle = self.ensureBundleIsSafe(bundle, namespace)
+
         klass = [c for c in BUNDLEITEM_CLASSES if c.TYPE == tipo]
         if len(klass) != 1:
             raise Exception("No class type for %s" % tipo)
@@ -806,22 +814,12 @@ class PMXSupportBaseManager(object):
         return self.getManagedObject(uuid)
 
     def updateBundleItem(self, item, namespace=None, **attrs):
-        """
-        Actualiza un bundle item
-        """
-        print(item, namespace, attrs)
-        # TODO Sacar esta porqueria
-        if len(attrs) == 1 and "name" in attrs and attrs["name"] == item.name:
-            #Updates que no son updates
-            return item
-
+        """Actualiza un bundle item"""
         self.updateBundleItemCacheCoherence(item, attrs)
 
-        #TODO: Este paso es importante para obtener el namespace, quiza ponerlo en un metodo para trabajarlo un poco más
         namespace = namespace or self.defaultNamespace()
 
-        if item.bundle.isProtected() and not item.bundle.isSafe():
-            self.updateBundle(item.bundle, namespace)
+        bundle = self.ensureBundleIsSafe(item.bundle, namespace)
 
         if item.isProtected() and not item.isSafe():
             #Safe Bundle Item
@@ -939,9 +937,7 @@ class PMXSupportBaseManager(object):
         return self.getManagedObject(uuid)
 
     def updateTheme(self, theme, namespace=None, **attrs):
-        """
-        Actualiza un themes
-        """
+        """Actualiza un themes"""
         namespace = namespace or self.defaultNamespace()
         if theme.isProtected() and not theme.isSafe():
             path = os.path.join(self.namespaces[namespace][self.THEMES_NAME], os.path.basename(theme.path(self.protectedNamespace())))
@@ -957,9 +953,7 @@ class PMXSupportBaseManager(object):
         return theme
 
     def deleteTheme(self, theme):
-        """
-        Elimina un theme por su uuid
-        """
+        """Elimina un theme por su uuid"""
         for namespace in theme.namespaces:
             #Si el espacio de nombres es distinto al protegido lo elimino
             if namespace != self.protectedNamespace():

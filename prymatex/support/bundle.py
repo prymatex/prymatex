@@ -80,11 +80,8 @@ class PMXManagedObject(object):
         return bool(self.sources)
         
     def relocateSource(self, namespace, path):
-        if os.path.exists(self.path(namespace)):
-            shutil.move(self.path(namespace), path)
-            self.sources[namespace] = (path, os.path.getmtime(path))
-        else:
-            self.sources[namespace] = (path, 0)
+        shutil.move(self.path(namespace), path)
+        self.sources[namespace] = (path, os.path.getmtime(path))
 
     def staticPaths(self):
         return []

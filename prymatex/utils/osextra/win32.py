@@ -7,6 +7,8 @@
 
 import wmi
 import os
+from prymatex.utils import six
+
 instrumentation = wmi.WMI()
 
 def pid_proc_dict():
@@ -23,7 +25,7 @@ def pid_proc_dict():
     return d
 
 # TODO Filter names like lpt, com, etc
-def to_valid_name(self, name):
+def to_valid_name(name):
     name = unicodedata.normalize('NFKD', six.text_type(name)).encode('ASCII', 'ignore')
     return "".join([ c for c in name if c in VALID_PATH_CARACTERS ])
 
