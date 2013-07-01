@@ -5,6 +5,8 @@
 #http://en.wikipedia.org/wiki/Unix_signal
 
 import os, re, signal
+import unicodedata
+import string
 
 from subprocess import PIPE, Popen
 
@@ -14,9 +16,8 @@ ps_output = re.compile('''
       (?P<pid>\d{1,6})\s*(?P<tty>[\d\w\?\/]+)\s*(?P<time>[\d\:]+)\s*(?P<name>[\d\w\/\<\>\s]+)   
 ''', re.VERBOSE| re.IGNORECASE)
 
-
 SIGNALS = dict([(keyname, getattr(signal, keyname)) for keyname in dir(signal) if keyname.startswith('SIG')])
-
+VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
 
 def ps_proc_dict():
     proc = Popen("ps -ea".split(), stdout=PIPE)
@@ -28,7 +29,6 @@ def ps_proc_dict():
             proc_list.append(match.groupdict())
     return proc_list
 
-
 def pid_proc_dict():
     d = {}
     for proc in ps_proc_dict():
@@ -36,6 +36,9 @@ def pid_proc_dict():
         d[pid] = proc
     return d
 
+def to_valid_name(self, name):
+    name = unicodedata.normalize('NFKD', six.text_type(name)).encode('ASCII', 'ignore')
+    return "".join([ c for c in name if c in VALID_PATH_CARACTERS ])
 
 if __name__ == "__main__":
     from pprint import pprint

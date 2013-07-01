@@ -3,7 +3,6 @@
 
 import os
 import string
-import unicodedata
 import hashlib
 import uuid as uuidmodule
 import subprocess
@@ -72,7 +71,6 @@ class PMXSupportBaseManager(object):
     VAR_PREFIX = 'PMX'
     PROTECTEDNS = 0  # El primero es el protected
     DEFAULTNS = 1  # El segundo es el default
-    VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
 
     SETTINGS_CACHE = {}
 
@@ -175,7 +173,7 @@ class PMXSupportBaseManager(object):
         if path in self.plistFileCache:
             return self.plistFileCache.get(path)
         return self.plistFileCache.setdefault(path, plist.readPlist(path))
-        
+
     def writePlist(self, hashData, path):
         # TODO Ver que pasa con este set que falta
         self.plistFileCache.set(path, hashData)
@@ -191,14 +189,6 @@ class PMXSupportBaseManager(object):
         except ValueError:
             #generate
             return uuidmodule.uuid3(uuidmodule.NAMESPACE_DNS, uuid)
-
-    def convertToValidPath(self, name):
-        # TODO mover a utils osextra path
-        validPath = []
-        for char in unicodedata.normalize('NFKD', unicode(name)).encode('ASCII', 'ignore'):
-            char = char if char in self.VALID_PATH_CARACTERS else '-'
-            validPath.append(char)
-        return ''.join(validPath)
 
     def runProcess(self, context, callback):
         """Synchronous run process"""
@@ -681,11 +671,15 @@ class PMXSupportBaseManager(object):
         """
         namespace = namespace or self.defaultNamespace()
         basePath, _ = self.namespaceElementPath(namespace, self.BUNDLES_NAME, create = True)
-        path = osextra.path.ensure_not_exists(os.path.join(basePath, "%s.tmbundle"), self.convertToValidPath(name))
+        path = osextra.path.ensure_not_exists(os.path.join(basePath, "%s.tmbundle"), osextra.to_valid_name(name))
+        
+        # Do create and save
         bundle = PMXBundle(self.uuidgen())
         bundle.load({"name": name})
         bundle.setManager(self)
         bundle.addSource(namespace, path)
+        self.saveManagedObject(bundle, namespace)
+        
         bundle = self.addBundle(bundle)
         self.addManagedObject(bundle)
         return bundle
@@ -714,7 +708,7 @@ class PMXSupportBaseManager(object):
             self.logger.debug("Add namespace '%s' in source %s for bundle." % (namespace, path))
         elif not bundle.isProtected() and "name" in attrs:
             #Move bundle
-            path = osextra.path.ensure_not_exists(os.path.join(os.path.dirname(bundle.path(namespace)), "%s.tmbundle"), self.convertToValidPath(attrs["name"]))
+            path = osextra.path.ensure_not_exists(os.path.join(os.path.dirname(bundle.path(namespace)), "%s.tmbundle"), osextra.to_valid_name(attrs["name"]))
             bundle.relocateSource(namespace, path)
         
         # Do update and save
@@ -788,7 +782,7 @@ class PMXSupportBaseManager(object):
         if len(klass) != 1:
             raise Exception("No class type for %s" % tipo)
         klass = klass.pop()
-        path = os.path.join(bundle.path(namespace), klass.FOLDER, "%s.%s" % (self.convertToValidPath(name), klass.EXTENSION))
+        path = os.path.join(bundle.path(namespace), klass.FOLDER, "%s.%s" % (osextra.to_valid_name(name), klass.EXTENSION))
 
         item = klass(self.uuidgen())
         item.load({'name': name})
@@ -837,7 +831,7 @@ class PMXSupportBaseManager(object):
         elif not item.isProtected() and "name" in attrs:
             #Move Bundle Item
             namePattern = "%%s.%s" % item.EXTENSION if item.EXTENSION else "%s"
-            path = osextra.path.ensure_not_exists(os.path.join(item.bundle.path(namespace), item.FOLDER, namePattern), self.convertToValidPath(attrs["name"]))
+            path = osextra.path.ensure_not_exists(os.path.join(item.bundle.path(namespace), item.FOLDER, namePattern), osextra.to_valid_name(attrs["name"]))
             item.relocateSource(namespace, path)
 
         # Do update and save
@@ -871,7 +865,7 @@ class PMXSupportBaseManager(object):
         namespace = namespace or self.defaultNamespace()
         if parentItem.isProtected() and not parentItem.isSafe():
             self.updateBundleItem(parentItem, namespace)
-        path = osextra.path.ensure_not_exists(os.path.join(parentItem.path(namespace), "%s"), self.convertToValidPath(name))
+        path = osextra.path.ensure_not_exists(os.path.join(parentItem.path(namespace), "%s"), osextra.to_valid_name(name))
         staticFile = PMXStaticFile(path, parentItem)
         #No es la mejor forma pero es la forma de guardar el archivo
         staticFile = self.addStaticFile(staticFile)
@@ -885,7 +879,7 @@ class PMXSupportBaseManager(object):
         if parentItem.isProtected() and not parentItem.isSafe():
             self.updateBundleItem(parentItem, namespace)
         if "name" in attrs:
-            path = osextra.path.ensure_not_exists(os.path.join(parentItem.path(namespace), "%s"), self.convertToValidPath(attrs["name"]))
+            path = osextra.path.ensure_not_exists(os.path.join(parentItem.path(namespace), "%s"), osextra.to_valid_name(attrs["name"]))
             staticFile.relocate(path)
         staticFile.update(attrs)
         self.modifyBundleItem(staticFile)
@@ -926,7 +920,7 @@ class PMXSupportBaseManager(object):
             return None
         if namespace is None:
             namespace = self.defaultNamespace()
-        path = os.path.join(self.namespaces[namespace][self.THEMES_NAME], "%s.tmTheme" % self.convertToValidPath(name))
+        path = os.path.join(self.namespaces[namespace][self.THEMES_NAME], "%s.tmTheme" % osextra.to_valid_name(name))
         theme = PMXTheme(self.uuidgen(), namespace, {'name': name}, path)
         theme = self.addTheme(theme)
         self.addManagedObject(theme)
@@ -953,7 +947,7 @@ class PMXSupportBaseManager(object):
             path = os.path.join(self.namespaces[namespace][self.THEMES_NAME], os.path.basename(theme.path(self.protectedNamespace())))
             theme.addSource(namespace, path)
         elif not theme.isProtected() and "name" in attrs:
-            path = osextra.path.ensure_not_exists(os.path.join(os.path.dirname(theme.path(namespace)), "%s.tmTheme"), self.convertToValidPath(attrs["name"]))
+            path = osextra.path.ensure_not_exists(os.path.join(os.path.dirname(theme.path(namespace)), "%s.tmTheme"), osextra.to_valid_name(attrs["name"]))
             theme.relocateSource(namespace, path)
         
         # Do update and save

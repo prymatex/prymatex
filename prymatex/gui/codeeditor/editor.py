@@ -763,6 +763,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if not self.runKeyHelper(event):
             #No tengo helper paso el evento a la base
             TextEditWidget.keyPressEvent(self, event)
+
+            if event.text() and self.enableAutoCompletion:
+                # Cached Completer
+                word, start, end = self.currentWord(direction = "left",
+                    search = False)
+                if end - start >= self.wordLengthToComplete:
+                    self.showCachedCompleter()
             
     def keyReleaseEvent(self, event):
         #Primero ver si tengo un modo activo,
@@ -1529,11 +1536,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         mimeData = event.mimeData()
         if mimeData.hasUrls() or mimeData.hasText():
             event.accept()
-    
+
     def dragMoveEvent(self, event):
         cursor = self.cursorForPosition(event.pos())
         self.setTextCursor(cursor)
-    
+
     def dropEvent(self, event):
         """When a url or text is dropped"""
         #mimeData = event.mimeData()

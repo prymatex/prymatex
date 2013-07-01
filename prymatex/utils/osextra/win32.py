@@ -22,6 +22,11 @@ def pid_proc_dict():
         d[pid] = proc
     return d
 
+# TODO Filter names like lpt, com, etc
+def to_valid_name(self, name):
+    name = unicodedata.normalize('NFKD', six.text_type(name)).encode('ASCII', 'ignore')
+    return "".join([ c for c in name if c in VALID_PATH_CARACTERS ])
+
 def get_homedir():
     return os.environ.get('USERPROFILE')
 

@@ -27,10 +27,9 @@ def registerPlugin(manager):
     manager.registerComponent(helpers.SmartIndentHelper, CodeEditor)
     manager.registerComponent(helpers.OverwriteHelper, CodeEditor)
     manager.registerComponent(helpers.MultiCursorHelper, CodeEditor)
-
+    
     manager.registerComponent(helpers.PrintEditorStatusHelper, CodeEditor)
 
-    manager.registerComponent(addons.CompleterAddon, CodeEditor)
     manager.registerComponent(addons.SmartUnindentAddon, CodeEditor)
     manager.registerComponent(addons.SpellCheckerAddon, CodeEditor)
     manager.registerComponent(addons.HighlightCurrentSelectionAddon, CodeEditor)

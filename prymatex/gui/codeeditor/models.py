@@ -222,13 +222,13 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
         self.suggestions = suggestions
         self.columns = 2 if any([isinstance(s, BundleItemTreeNode) for s in suggestions]) else 1
         self.layoutChanged.emit()
-        
+
     def index(self, row, column, parent = QtCore.QModelIndex()):
         if row < len(self.suggestions):
             return self.createIndex(row, column, parent)
         else:
             return QtCore.QModelIndex()
-    
+
     def rowCount(self, parent = None):
         return len(self.suggestions)
 

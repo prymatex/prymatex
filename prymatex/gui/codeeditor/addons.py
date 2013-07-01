@@ -20,17 +20,6 @@ class CodeEditorAddon(QtCore.QObject, PMXBaseEditorAddon):
     def contributeToContextMenu(self, cursor):
         return PMXBaseEditorAddon.contributeToContextMenu(self)
 
-class CompleterAddon(CodeEditorAddon):
-    def initialize(self, editor):
-        CodeEditorAddon.initialize(self, editor)
-        editor.document().contentsChange.connect(self.on_document_contentsChange)
-    
-    def on_document_contentsChange(self, position, charsRemoved, charsAdded):
-        if charsAdded == 1:
-            word, start, end = self.editor.currentWord(direction = "left", search = False)
-            if end - start >= self.editor.wordLengthToComplete:
-                self.editor.showCachedCompleter()
-
 class SmartUnindentAddon(CodeEditorAddon):
     def initialize(self, editor):
         CodeEditorAddon.initialize(self, editor)
@@ -153,7 +142,7 @@ class SpellCheckerAddon(CodeEditorAddon):
         def on_spellReady():
             self.currentSpellTask = None
         self.currentSpellTask.done.connect(on_spellReady)
-        
+
     def on_editor_keyPressEvent(self, event):
         '''Dynamically connect dependant on pyenchant import'''
         assert self.dictionary is not None
@@ -168,16 +157,17 @@ class SpellCheckerAddon(CodeEditorAddon):
 class HighlightCurrentSelectionAddon(CodeEditorAddon):
     def initialize(self, editor):
         CodeEditorAddon.initialize(self, editor)
-        editor.registerTextCharFormatBuilder("selection.extra", self.textCharFormat_extraSelection_builder)
+        editor.registerTextCharFormatBuilder("selection.extra", 
+            self.textCharFormat_extraSelection_builder)
         editor.selectionChanged.connect(self.findHighlightCursors)
         editor.cursorPositionChanged.connect(self.findHighlightCursors)
 
     def textCharFormat_extraSelection_builder(self):
-        format = QtGui.QTextCharFormat()
+        frmt = QtGui.QTextCharFormat()
         color = QtGui.QColor(self.editor.colours['selection'])
         color.setAlpha(128)
-        format.setBackground(color)
-        return format
+        frmt.setBackground(color)
+        return frmt
     
     def findHighlightCursors(self):
         cursor = self.editor.textCursor()
