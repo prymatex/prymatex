@@ -326,7 +326,7 @@ class ProjectMenuProxyModel(QtGui.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = self.sourceModel().node(index)
-        return not node.isRootNode() and node.enabled
+        return not node.isRootNode() and node.enabled()
         
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
         return True

@@ -46,7 +46,7 @@ class PMXTemplate(PMXBundleItem):
     def execute(self, environment = {}, callback = lambda x: x):
         with PMXRunningContext(self, self.command, environment) as context:
             context.asynchronous = False
-            context.workingDirectory = self.currentPath
+            context.workingDirectory = self.currentPath()
             self.manager.runProcess(context, functools.partial(self.afterExecute, callback))
     
     def afterExecute(self, callback, context):
@@ -58,8 +58,8 @@ class PMXTemplate(PMXBundleItem):
         return os.path.join(path, cls.FILE)
 
     def staticPaths(self):
-        templateFilePaths = glob(os.path.join(self.currentPath, '*'))
-        templateFilePaths.remove(self.dataFilePath(self.currentPath))
+        templateFilePaths = glob(os.path.join(self.currentPath(), '*'))
+        templateFilePaths.remove(self.dataFilePath(self.currentPath()))
         return templateFilePaths
 
     @classmethod

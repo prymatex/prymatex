@@ -15,7 +15,7 @@ class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = self.sourceModel().node(index)
-        if node.isRootNode() or not node.enabled:
+        if node.isRootNode() or not node.enabled():
             return False
         if self.namespacesFilter:
             if not any([node.hasNamespace(ns) for ns in self.namespacesFilter]):
@@ -114,7 +114,7 @@ class BundleListModel(BundleItemTypeProxyModel):
         
         if role == QtCore.Qt.CheckStateRole:
             bundle = self.node(index)
-            return QtCore.Qt.Checked if bundle.enabled else QtCore.Qt.Unchecked
+            return QtCore.Qt.Checked if bundle.enabled() else QtCore.Qt.Unchecked
         else:
             return BundleItemTypeProxyModel.data(self, index, role)
 

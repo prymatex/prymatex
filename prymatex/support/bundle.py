@@ -35,16 +35,14 @@ class PMXManagedObject(object):
     def populate(self):
         self.populated = True
     
-    @property
     def enabled(self):
         return self.manager.isEnabled(self.uuid)
     
     def path(self, namespace):
         return self.sources[namespace][self._PATH]
 
-    @property
     def currentPath(self):
-        return self.sources[self.currentNamespace][self._PATH]
+        return self.sources[self.currentNamespace()][self._PATH]
 
     def isProtected(self):
         return self.manager.protectedNamespace() in self.namespaces
@@ -55,7 +53,6 @@ class PMXManagedObject(object):
     def hasNamespace(self, namespace):
         return namespace in self.namespaces
 
-    @property
     def currentNamespace(self):
         return self.namespaces[-1]
 
@@ -151,7 +148,7 @@ class PMXBundle(PMXManagedObject):
 
     def environmentVariables(self):
         environment = self.manager.environmentVariables()
-        environment['TM_BUNDLE_PATH'] = self.currentPath
+        environment['TM_BUNDLE_PATH'] = self.currentPath()
         if self.hasSupportPath():
             environment['TM_BUNDLE_SUPPORT'] = self.supportPath()
         return environment
@@ -173,9 +170,8 @@ class PMXBundleItem(PMXManagedObject):
     def setBundle(self, bundle):
         self.bundle = bundle
     
-    @property
     def enabled(self):
-        return self.bundle.enabled
+        return self.bundle.enabled()
 
     def load(self, dataHash):
         for key in PMXBundleItem.KEYS:
@@ -221,9 +217,8 @@ class PMXStaticFile(object):
     def hasNamespace(self, namespace):
         return self.parentItem.hasNamespace(namespace)
         
-    @property
     def enabled(self):
-        return self.parentItem.enabled
+        return self.parentItem.enabled()
         
     def getFileContent(self):
         content = ""

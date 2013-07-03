@@ -97,9 +97,14 @@ class BundleItemTreeNode(TreeNodeBase):
         return True
 
     def producingOutputText(self):
+        # TODO Esta mal este nombre, porque puede producir salida en nuevos documentos pero no requerir entrada
+        output = True
         if self.__bundleItem.TYPE == "command":
-            return self.__bundleItem.output not in [ "discard", "showAsHTML", "showAsTooltip", "createNewDocument", "openAsNewDocument"]
-        return True
+            output = output and self.__bundleItem.output not in [ "discard", "showAsTooltip" ] and\
+                self.__bundleItem.output not in [ "showAsHTML" ] and\
+                self.__bundleItem.output not in [ "createNewDocument", "openAsNewDocument" ] and\
+                self.__bundleItem.outputLocation not in [ "newWindow", "toolTip" ]
+        return output
 
 #===============================================
 # Bundle Menu Node

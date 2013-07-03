@@ -133,7 +133,7 @@ class PMXSupportBaseManager(object):
         if self.ready:
             self.loadThemes(project.namespace)
             for bundle in self.loadBundles(project.namespace):
-                if bundle.enabled:
+                if bundle.enabled():
                     self.populateBundle(bundle)
 
     #-------------- Environment ---------------------
@@ -266,7 +266,7 @@ class PMXSupportBaseManager(object):
             self.loadThemes(ns)
             self.loadBundles(ns)
         for bundle in self.getAllBundles():
-            if bundle.enabled:
+            if bundle.enabled():
                 self.populateBundle(bundle)
         # Uninstall message handler
         self.messageHandler = None
@@ -395,7 +395,7 @@ class PMXSupportBaseManager(object):
             self.reloadThemes(namespace)
             self.reloadBundles(namespace)
         for bundle in self.getAllBundles():
-            if bundle.enabled:
+            if bundle.enabled():
                 self.repopulateBundle(bundle)
         # Uninstall message handler
         self.messageHandler = None
@@ -726,11 +726,11 @@ class PMXSupportBaseManager(object):
 
     def deleteBundle(self, bundle):
         """Elimina un bundle, si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado"""
-        #Primero los items
-        items = self.findBundleItems(bundle = bundle)
+        #Primero los bundleItems
+        bundleItems = self.findBundleItems(bundle = bundle)
 
-        for item in items:
-            self.deleteBundleItem(item)
+        for bundleItem in bundleItems:
+            self.deleteBundleItem(bundleItem)
 
         for namespace in bundle.namespaces:
             #Si el espacio de nombres es distinto al protegido lo elimino
@@ -768,12 +768,12 @@ class PMXSupportBaseManager(object):
         """
         Retorna todos los items que complan las condiciones en attrs
         """
-        items = []
-        for item in self.getAllBundleItems():
-            if compare(item, list(attrs.keys()), attrs):
-                items.append(item)
-        return items
-
+        bundleItems = []
+        for bundleItem in self.getAllBundleItems():
+            if compare(bundleItem, list(attrs.keys()), attrs):
+                bundleItems.append(bundleItem)
+        return bundleItems
+    
     def createBundleItem(self, name, tipo, bundle, namespace=None):
         """
         Crea un bundle item nuevo lo agrega en los bundle items y lo retorna,
@@ -792,14 +792,14 @@ class PMXSupportBaseManager(object):
         klass = klass.pop()
         path = os.path.join(bundle.path(namespace), klass.FOLDER, "%s.%s" % (osextra.to_valid_name(name), klass.EXTENSION))
 
-        item = klass(self.uuidgen())
-        item.load({'name': name})
-        item.setBundle(bundle)
-        item.setManager(self)
-        item.addSource(namespace, path)
-        item = self.addBundleItem(item)
-        self.addManagedObject(item)
-        return item
+        bundleItem = klass(self.uuidgen())
+        bundleItem.load({'name': name})
+        bundleItem.setBundle(bundle)
+        bundleItem.setManager(self)
+        bundleItem.addSource(namespace, path)
+        bundleItem = self.addBundleItem(bundleItem)
+        self.addManagedObject(bundleItem)
+        return bundleItem
 
     def readBundleItem(self, **attrs):
         """
@@ -812,44 +812,49 @@ class PMXSupportBaseManager(object):
 
     def getBundleItem(self, uuid):
         return self.getManagedObject(uuid)
-
-    def updateBundleItem(self, item, namespace=None, **attrs):
+    
+    def ensureBundleItemIsSafe(self, bundleItem, namespace):
+        """Ensure the bundle item is safe"""
+        if bundleItem.isProtected() and not bundleItem.isSafe():
+            #Safe Bundle Item
+            path = os.path.join(bundleItem.bundle.path(namespace), bundleItem.FOLDER, os.path.basename(bundleItem.path(self.protectedNamespace())))
+            bundleItem.addSource(namespace, path)
+            self.logger.debug("Add namespace '%s' in source %s for bundle item." % (namespace, path))
+        return bundleItem
+    
+    def updateBundleItem(self, bundleItem, namespace=None, **attrs):
         """Actualiza un bundle item"""
-        self.updateBundleItemCacheCoherence(item, attrs)
+        self.updateBundleItemCacheCoherence(bundleItem, attrs)
 
         namespace = namespace or self.defaultNamespace()
 
-        bundle = self.ensureBundleIsSafe(item.bundle, namespace)
-
-        if item.isProtected() and not item.isSafe():
-            #Safe Bundle Item
-            path = os.path.join(item.bundle.path(namespace), item.FOLDER, os.path.basename(item.path(self.protectedNamespace())))
-            item.addSource(namespace, path)
-            self.logger.debug("Add namespace '%s' in source %s for bundle item." % (namespace, path))
-        elif not item.isProtected() and "name" in attrs:
+        bundle = self.ensureBundleIsSafe(bundleItem.bundle, namespace)
+        bundleItem = self.ensureBundleItemIsSafe(bundleItem, namespace)
+        
+        if not bundleItem.isProtected() and "name" in attrs:
             #Move Bundle Item
-            namePattern = "%%s.%s" % item.EXTENSION if item.EXTENSION else "%s"
-            path = osextra.path.ensure_not_exists(os.path.join(item.bundle.path(namespace), item.FOLDER, namePattern), osextra.to_valid_name(attrs["name"]))
-            item.relocateSource(namespace, path)
+            namePattern = "%%s.%s" % bundleItem.EXTENSION if bundleItem.EXTENSION else "%s"
+            path = osextra.path.ensure_not_exists(os.path.join(bundleItem.bundle.path(namespace), bundleItem.FOLDER, namePattern), osextra.to_valid_name(attrs["name"]))
+            bundleItem.relocateSource(namespace, path)
 
         # Do update and save
-        item.update(attrs)
-        self.saveManagedObject(item, namespace)
-        self.modifyBundleItem(item)
-        return item
+        bundleItem.update(attrs)
+        self.saveManagedObject(bundleItem, namespace)
+        self.modifyBundleItem(bundleItem)
+        return bundleItem
 
-    def deleteBundleItem(self, item):
+    def deleteBundleItem(self, bundleItem):
         """Elimina un bundle por su uuid,
         si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
         """
-        for namespace in item.namespaces:
+        for namespace in bundleItem.namespaces:
             #Si el espacio de nombres es distinto al protegido lo elimino
             if namespace != self.protectedNamespace():
-                item.delete(namespace)
+                bundleItem.delete(namespace)
             else:
-                self.setDeleted(item.uuid)
-        self.removeManagedObject(item)
-        self.removeBundleItem(item)
+                self.setDeleted(bundleItem.uuid)
+        self.removeManagedObject(bundleItem)
+        self.removeBundleItem(bundleItem)
 
     # ------------- STATICFILE INTERFACE
     def addStaticFile(self, file):

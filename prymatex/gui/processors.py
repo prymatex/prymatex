@@ -48,7 +48,7 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
         return True
     
     # --------------- Outpus function
-    def error(self, context, format = None):
+    def error(self, context, outputFormat = None):
         if self.errorCommand:
             raise Exception(context.errorValue)
         else:
@@ -60,25 +60,30 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
                 errorCommand = True
             )
 
-    def showAsHTML(self, context, format = None):
+    def showAsHTML(self, context, outputFormat = None):
         self.mainWindow.browserDock.setRunningContext(context)
 
-    def showAsTooltip(self, context, format = None):
+    def showAsTooltip(self, context, outputFormat = None):
         message = context.outputValue.strip()
         timeout = len(message) * 20
 
         self.mainWindow.showMessage(context.outputValue, timeout = timeout)
     
-    def toolTip(self, context, format = None):
+    def toolTip(self, context, outputFormat = None):
         print("toolTip")
 
-    def createNewDocument(self, context, format = None):
+    def createNewDocument(self, context, outputFormat = None):
         editor = self.mainWindow.addEmptyEditor()
         editor.setPlainText(context.outputValue)
         
-    def newWindow(self, context, format = None):
-        print("newWindow")
+    def newWindow(self, context, outputFormat = None):
+        if outputFormat == "html":
+            self.mainWindow.browserDock.newRunningContext(context)
+        elif outputFormat == "text":
+            # TODO: Quiza una mejor forma de crear documentos con texto
+            editor = self.mainWindow.addEmptyEditor()
+            editor.setPlainText(context.outputValue)
 
-    def openAsNewDocument(self, context, format = None):
+    def openAsNewDocument(self, context, outputFormat = None):
         editor = self.mainWindow.addEmptyEditor()
         editor.setPlainText(context.outputValue)
