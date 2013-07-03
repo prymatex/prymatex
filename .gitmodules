@@ -16,3 +16,6 @@
 [submodule "prymatex/share/Bundles/ruby.tmbundle"]
 	path = prymatex/share/Bundles/ruby.tmbundle
 	url = git@github.com:prymatex/ruby.tmbundle.git
+[submodule "prymatex/share/Bundles/todo.tmbundle"]
+	path = prymatex/share/Bundles/todo.tmbundle
+	url = git@github.com:prymatex/todo.tmbundle.git

@@ -293,7 +293,7 @@ class AlreadyTypedWords(object):
         words = set()
         
         for token in userData.tokens()[::-1]:
-            group = self.editor.scope(scopeHash = token.scopeHash).group
+            group = self.editor.scope(scopeHash = token.scopeHash).group or ""
             words.update([(group, word) for word in self.editor.RE_WORD.findall(token.chunk) ])
         
         # TODO: Una mejor estructura para las palabras y sus grupos
