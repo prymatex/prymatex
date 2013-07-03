@@ -52,3 +52,6 @@
 [submodule "prymatex/share/Bundles/javascript.tmbundle"]
 	path = prymatex/share/Bundles/javascript.tmbundle
 	url = git@github.com:prymatex/javascript.tmbundle.git
+[submodule "prymatex/share/Bundles/make.tmbundle"]
+	path = prymatex/share/Bundles/make.tmbundle
+	url = git@github.com:prymatex/make.tmbundle.git
