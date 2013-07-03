@@ -43,3 +43,6 @@
 [submodule "prymatex/share/Bundles/perl.tmbundle"]
 	path = prymatex/share/Bundles/perl.tmbundle
 	url = git@github.com:prymatex/perl.tmbundle.git
+[submodule "prymatex/share/Bundles/latex.tmbundle"]
+	path = prymatex/share/Bundles/latex.tmbundle
+	url = git@github.com:prymatex/latex.tmbundle.git
