@@ -79,3 +79,6 @@
 [submodule "prymatex/share/Bundles/textmate.tmbundle"]
 	path = prymatex/share/Bundles/textmate.tmbundle
 	url = git@github.com:prymatex/textmate.tmbundle
+[submodule "prymatex/share/Bundles/prymatex.tmbundle"]
+	path = prymatex/share/Bundles/prymatex.tmbundle
+	url = git@github.com:prymatex/prymatex.tmbundle
