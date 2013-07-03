@@ -17,12 +17,14 @@ def keybinding(attr):
 # Key Equivalents
 #======================
 QTCHARCODES = {
-    9: QtCore.Qt.Key_Backspace,
+    0: QtCore.Qt.Key_Escape,
+    8: QtCore.Qt.Key_Backspace,
+    9: QtCore.Qt.Key_Tab,
     10: QtCore.Qt.Key_Return,
     127: QtCore.Qt.Key_Delete,
     63232: QtCore.Qt.Key_F1,
+    63233: QtCore.Qt.Key_F3,
     63234: QtCore.Qt.Key_F2,
-    #63233: QtCore.Qt.Key_F3,
     63235: QtCore.Qt.Key_F11, #No se que es
     63236: QtCore.Qt.Key_F11, #No se que es
     63238: QtCore.Qt.Key_F3, #No se que es
@@ -95,6 +97,8 @@ def _keyboard_layout_qtkeys(character):
     code = ord(character.upper())
     if code in QTCHARCODES:
         code = QTCHARCODES[code]
+    else:
+        print("no esta", code)
     keys.append(code)
     return keys
 
