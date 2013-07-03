@@ -25,3 +25,6 @@
 [submodule "prymatex/share/Bundles/css.tmbundle"]
 	path = prymatex/share/Bundles/css.tmbundle
 	url = git@github.com:prymatex/css.tmbundle.git
+[submodule "prymatex/share/Bundles/html.tmbundle"]
+	path = prymatex/share/Bundles/html.tmbundle
+	url = git@github.com:prymatex/html.tmbundle.git
