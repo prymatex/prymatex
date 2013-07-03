@@ -97,8 +97,6 @@ def _keyboard_layout_qtkeys(character):
     code = ord(character.upper())
     if code in QTCHARCODES:
         code = QTCHARCODES[code]
-    else:
-        print("no esta", code)
     keys.append(code)
     return keys
 

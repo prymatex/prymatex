@@ -76,3 +76,6 @@
 [submodule "prymatex/share/Bundles/python-django-templates.tmbundle"]
 	path = prymatex/share/Bundles/python-django-templates.tmbundle
 	url = git@github.com:prymatex/python-django-templates.tmbundle
+[submodule "prymatex/share/Bundles/textmate.tmbundle"]
+	path = prymatex/share/Bundles/textmate.tmbundle
+	url = git@github.com:prymatex/textmate.tmbundle
