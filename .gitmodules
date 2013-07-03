@@ -34,3 +34,6 @@
 [submodule "prymatex/share/Bundles/shellscript.tmbundle"]
 	path = prymatex/share/Bundles/shellscript.tmbundle
 	url = git@github.com:prymatex/shellscript.tmbundle.git
+[submodule "prymatex/share/Bundles/php.tmbundle"]
+	path = prymatex/share/Bundles/php.tmbundle
+	url = git@github.com:prymatex/php.tmbundle.git
