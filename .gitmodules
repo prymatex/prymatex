@@ -64,3 +64,6 @@
 [submodule "prymatex/share/Bundles/javadoc.tmbundle"]
 	path = prymatex/share/Bundles/javadoc.tmbundle
 	url = git@github.com:prymatex/javadoc.tmbundle.git
+[submodule "prymatex/share/Bundles/ruby-on-rails.tmbundle"]
+	path = prymatex/share/Bundles/ruby-on-rails.tmbundle
+	url = git@github.com:prymatex/ruby-on-rails.tmbundle.git
