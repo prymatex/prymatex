@@ -40,3 +40,6 @@
 [submodule "prymatex/share/Bundles/restructuredtext.tmbundle"]
 	path = prymatex/share/Bundles/restructuredtext.tmbundle
 	url = git@github.com:prymatex/restructuredtext.tmbundle.git
+[submodule "prymatex/share/Bundles/perl.tmbundle"]
+	path = prymatex/share/Bundles/perl.tmbundle
+	url = git@github.com:prymatex/perl.tmbundle.git
