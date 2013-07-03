@@ -61,3 +61,6 @@
 [submodule "prymatex/share/Bundles/java.tmbundle"]
 	path = prymatex/share/Bundles/java.tmbundle
 	url = git@github.com:prymatex/java.tmbundle.git
+[submodule "prymatex/share/Bundles/javadoc.tmbundle"]
+	path = prymatex/share/Bundles/javadoc.tmbundle
+	url = git@github.com:prymatex/javadoc.tmbundle.git
