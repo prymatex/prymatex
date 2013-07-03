@@ -37,3 +37,6 @@
 [submodule "prymatex/share/Bundles/php.tmbundle"]
 	path = prymatex/share/Bundles/php.tmbundle
 	url = git@github.com:prymatex/php.tmbundle.git
+[submodule "prymatex/share/Bundles/restructuredtext.tmbundle"]
+	path = prymatex/share/Bundles/restructuredtext.tmbundle
+	url = git@github.com:prymatex/restructuredtext.tmbundle.git
