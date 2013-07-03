@@ -46,3 +46,6 @@
 [submodule "prymatex/share/Bundles/latex.tmbundle"]
 	path = prymatex/share/Bundles/latex.tmbundle
 	url = git@github.com:prymatex/latex.tmbundle.git
+[submodule "prymatex/share/Bundles/sql.tmbundle"]
+	path = prymatex/share/Bundles/sql.tmbundle
+	url = git@github.com:prymatex/sql.tmbundle.git
