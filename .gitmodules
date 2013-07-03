@@ -55,3 +55,6 @@
 [submodule "prymatex/share/Bundles/make.tmbundle"]
 	path = prymatex/share/Bundles/make.tmbundle
 	url = git@github.com:prymatex/make.tmbundle.git
+[submodule "prymatex/share/Bundles/textile.tmbundle"]
+	path = prymatex/share/Bundles/textile.tmbundle
+	url = git@github.com:prymatex/textile.tmbundle.git
