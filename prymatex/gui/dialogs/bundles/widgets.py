@@ -232,7 +232,8 @@ echo Selection: "$TM_SELECTED_TEXT"''',
                 'inputFormat': 'text',
                 'fallbackInput': 'document',
                 'output': 'replaceSelectedText',
-                'outputFormat': 'text'}
+                'outputFormat': 'text',
+                'outputCaret': 'afterOutput'}
     
     COMMAND_TEMPLATES = {
                          'Default': '''# just to remind you of some useful environment variables
@@ -288,6 +289,13 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''}
         self.comboBoxOutputFormat.addItem("Text", "text")
         self.comboBoxOutputFormat.addItem("Html", "html")
         self.comboBoxOutputFormat.currentIndexChanged[int].connect(self.on_comboBoxOutputFormat_changed)
+        
+        self.comboBoxCaret.addItem("After Output", "afterOutput")
+        self.comboBoxCaret.addItem("Select Output", "selectOutput")
+        self.comboBoxCaret.addItem("Interpolate by Char", "interpolateByChar")
+        self.comboBoxCaret.addItem("Interpolate by Line", "interpolateByLine")
+        self.comboBoxCaret.addItem("Heuristic", "heuristic")
+        self.comboBoxCaret.currentIndexChanged[int].connect(self.on_comboBoxCaret_changed)
         
         self.labelInputOption.setVisible(False)
         self.comboBoxFallbackInput.setVisible(False)
@@ -367,6 +375,13 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''}
         else:
             self.changes.pop('outputFormat', None)
     
+    def on_comboBoxCaret_changed(self, index):
+        value = self.comboBoxCaret.itemData(index)
+        if value != self.bundleItem.outputCaret:
+            self.changes['outputCaret'] = value
+        else:
+            self.changes.pop('outputCaret', None)
+    
     @property
     def title(self):
         if self.bundleItem != None:
@@ -437,6 +452,14 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''}
             index = self.comboBoxOutputFormat.findData(commandOutputFormat)
             if index != -1:
                 self.comboBoxOutputFormat.setCurrentIndex(index)
+            
+            #Output Format
+            commandOutputCaret = bundleItem.outputCaret
+            if commandOutputCaret is None:
+                commandOutputCaret = self.changes['outputCaret'] = self.DEFAULTS['outputCaret']
+            index = self.comboBoxCaret.findData(commandOutputCaret)
+            if index != -1:
+                self.comboBoxCaret.setCurrentIndex(index)
             
 class TemplateEditorWidget(BundleItemEditorBaseWidget, Ui_Template):
     TYPE = 'template'
