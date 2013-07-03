@@ -67,3 +67,6 @@
 [submodule "prymatex/share/Bundles/ruby-on-rails.tmbundle"]
 	path = prymatex/share/Bundles/ruby-on-rails.tmbundle
 	url = git@github.com:prymatex/ruby-on-rails.tmbundle.git
+[submodule "prymatex/share/Bundles/subversion.tmbundle"]
+	path = prymatex/share/Bundles/subversion.tmbundle
+	url = git@github.com:prymatex/subversion.tmbundle.git
