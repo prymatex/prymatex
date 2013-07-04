@@ -3,8 +3,7 @@
 
 from __future__ import unicode_literals
 
-import re
-
+from prymatex.utils import six
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.regexp import compileRegexp
 
@@ -20,7 +19,7 @@ class PMXSyntaxProxy(object):
                 return getattr(proxy_value, name)
     
     def __proxy(self):
-        if re.compile('^#').search(self.proxy):
+        if self.proxy.startswith('#'):
             grammar = self.syntax.grammar
             if hasattr(grammar, 'repository') and self.proxy[1:] in grammar.repository:  
                 return grammar.repository[self.proxy[1:]]
@@ -37,8 +36,7 @@ class PMXSyntaxProxy(object):
 
 class PMXSyntaxNode(object):
     KEYS = ('name', 'match', 'begin', 'content', 'contentName', 'end',
-            'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns',
-            'injectionSelector')
+            'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns')
     def __init__(self, dataHash, syntax):
         self.syntax = syntax
         for key in PMXSyntaxNode.KEYS:
@@ -163,10 +161,14 @@ class PMXSyntax(PMXBundleItem):
         super(PMXSyntax, self).load(dataHash)
         for key in PMXSyntax.KEYS:
             value = dataHash.get(key, None)
-            if key in ['firstLineMatch'] and value:
-                value = compileRegexp( value )
-            elif key == 'scopeName' and value:
-                self.scopeNameSelector = self.manager.createScopeSelector(value)
+            if value is not None:
+                if key == 'firstLineMatch':
+                    value = compileRegexp( value )
+                elif key == 'scopeName':
+                    self.scopeNameSelector = self.manager.createScopeSelector(value)
+                elif key == 'injectionSelector':
+                    value = self.manager.createScopeSelector(value)
+                    print("injectionSelector", value, self.scopeName)
             setattr(self, key, value)
     
     def dump(self):
@@ -174,11 +176,18 @@ class PMXSyntax(PMXBundleItem):
         for key in PMXSyntax.KEYS:
             value = getattr(self, key)
             if value is not None:
-                if key in ['firstLineMatch']:
+                if key == 'firstLineMatch':
                     value = value.pattern
+                elif key == 'injectionSelector':
+                    value = six.text_type(value)
                 dataHash[key] = value
         return dataHash
 
+    def update(self, dataHash):
+        PMXBundleItem.update(self, dataHash)
+        # TODO Solo si camio el content ;)
+        delattr(self, '_grammar')
+        
     @property
     def syntaxes(self):
         return self.manager.getSyntaxesAsDictionary()
@@ -189,7 +198,7 @@ class PMXSyntax(PMXBundleItem):
             dataHash = {}
             dataHash['repository'] = self.buildRepository() if self.scopeName else {}
             dataHash['patterns'] = self.patterns if self.patterns else []
-            setattr(self, '_grammar', PMXSyntaxNode(dataHash , self ))
+            self._grammar = PMXSyntaxNode(dataHash , self )
         return self._grammar
 
     def buildRepository(self):

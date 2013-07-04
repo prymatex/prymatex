@@ -177,14 +177,13 @@ class PMXBundleItem(PMXManagedObject):
         for key in PMXBundleItem.KEYS:
             value = dataHash.get(key, None)
             if key == "scope":
-                self.selector = scope.Selector(value)
+                self.selector = self.manager.createScopeSelector(value)
             setattr(self, key, value)
 
     def update(self, dataHash):
-        for key in list(dataHash.keys()):
-            value = dataHash[key]
+        for key, value in dataHash.items():
             if key == "scope":
-                self.selector = scope.Selector(value)
+                self.scopeSelector = self.manager.createScopeSelector(value)
             setattr(self, key, value)
 
     def dump(self):

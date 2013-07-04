@@ -13,7 +13,7 @@ from prymatex.support.processor import PMXSyntaxProcessor
 from prymatex.support.syntax import PMXSyntax
 
 SNIPPET_PARSER = PMXSyntax(uuidmodule.uuid1())
-SNIPPET_PARSER.load({ 
+SNIPPET_SYNTAX = { 
  'patterns': [{'captures': {'1': {'name': 'keyword.escape.snippet'}},
                'match': '\\\\(\\\\|\\$|`)',
                'name': 'constant.character.escape.snippet'},
@@ -72,7 +72,7 @@ SNIPPET_PARSER.load({
                                  'end': '/([mg]?)/?',
                                  'endCaptures': {'1': {'name': 'string.regexp.options'}},
                                  'patterns': [{'include': '#escaped_char'}]}},
-})
+}
 
 #Snippet Node Bases
 class Node(object):
@@ -80,6 +80,8 @@ class Node(object):
         self.scope = scope
         self.parent = parent
         self.disable = False
+        self.start = self.end = 0
+        self.content = None
 
     def open(self, scope, text):
         return self
@@ -90,15 +92,11 @@ class Node(object):
         return self
     
     def reset(self):
-        attrs = ['start', 'end', 'content']
-        for attr in attrs:
-            if hasattr(self, attr):
-                delattr(self, attr)
-    
+        self.start = self.end = 0
+        self.content = None
+
     def __len__(self):
-        if hasattr(self, 'start') and hasattr(self, 'end'):
-            return self.end - self.start
-        return 0
+        return self.end - self.start
     
     def render(self, processor):
         pass
@@ -109,7 +107,9 @@ class NodeList(list):
         self.scope = scope
         self.parent = parent
         self.__disable = False
-
+        self.start = self.end = 0
+        self.content = None
+        
     @property
     def disable(self):
         return self.__disable
@@ -170,15 +170,11 @@ class NodeList(list):
     def reset(self):
         for child in self:
             child.reset()
-        attrs = ['start', 'end', 'content']
-        for attr in attrs:
-            if hasattr(self, attr):
-                delattr(self, attr)
-    
+        self.start = self.end = 0
+        self.content = None
+
     def __len__(self):
-        if hasattr(self, 'start') and hasattr(self, 'end'):
-            return self.end - self.start
-        return 0
+        return self.end - self.start
         
     def __str__(self):
         return "".join([six.text_type(node) for node in self])
@@ -250,7 +246,7 @@ class StructureTabstop(Node):
         if self.placeholder != None:
             self.placeholder.render(processor, mirror = True)
         else:
-            if hasattr(self, 'content'):
+            if self.content is not None:
                 processor.insertText(self.content)
         self.end = processor.caretPosition()
     
@@ -281,7 +277,7 @@ class StructurePlaceholder(NodeList):
     def render(self, processor, mirror = False):
         if not mirror:
             self.start = processor.caretPosition()
-        if hasattr(self, 'content'):
+        if self.content is not None:
             processor.insertText(self.content)
         elif self.placeholder != None:
             self.placeholder.render(processor)
@@ -362,7 +358,7 @@ class StructureMenu(Node):
         if self.placeholder != None:
             self.placeholder.render(processor, mirror = True)
         else:
-            if hasattr(self, 'content'):
+            if self.content is not None:
                 processor.insertText(self.content)
             else:
                 processor.insertText(self.options[self.optionIndex])
@@ -478,7 +474,7 @@ class Shell(NodeList):
             self.manager.runProcess(context, afterExecute)
         
     def render(self, processor):
-        if not hasattr(self, 'content'):
+        if self.content is None:
             self.execute(processor)
         processor.insertText(self.content)
 
@@ -523,10 +519,6 @@ class PMXSnippet(PMXBundleItem):
     EXTENSION = 'tmSnippet'
     PATTERNS = ('*.tmSnippet', '*.plist')
     
-    def __init__(self, uuid):
-        PMXBundleItem.__init__(self, uuid)
-        self.snippet = None                     #TODO: Poner un mejor nombre, este es el snippet compilado
-    
     def load(self, dataHash):
         PMXBundleItem.load(self, dataHash)
         for key in PMXSnippet.KEYS:
@@ -543,18 +535,21 @@ class PMXSnippet(PMXBundleItem):
     def update(self, dataHash):
         PMXBundleItem.update(self, dataHash)
         # TODO Solo si camio el content ;)
-        self.snippet = None
+        delattr(self, '_snippet')
     
-    def compile(self):
-        # TODO Reusar un mismo processor haciendo un reparent del nodo resultante
-        processor = PMXSnippetSyntaxProcessor(self)
-        SNIPPET_PARSER.parse(self.content, processor)
-        self.snippet = processor.node
-        self.addTaborder(processor.taborder)
-
+    @property
+    def snippet(self):
+        if not hasattr(self, '_snippet'):
+            processor = PMXSnippetSyntaxProcessor(self)
+            # TODO: Parche feo de manager
+            SNIPPET_PARSER.setManager(self.manager)
+            SNIPPET_PARSER.load(SNIPPET_SYNTAX)
+            SNIPPET_PARSER.parse(self.content, processor)
+            self._snippet = processor.node
+            self.addTaborder(processor.taborder)
+        return self._snippet
+    
     def execute(self, processor):
-        if not self.snippet != None:
-            self.compile()
         self.reset()
         processor.startSnippet(self)
         self.render(processor)
@@ -566,15 +561,11 @@ class PMXSnippet(PMXBundleItem):
     
     @property
     def start(self):
-        if hasattr(self, 'snippet') and hasattr(self.snippet, 'start'):
-            return self.snippet.start
-        return 0
+        return self.snippet.start
     
-    @property    
+    @property
     def end(self):
-        if hasattr(self, 'snippet') and hasattr(self.snippet, 'end'):
-            return self.snippet.end
-        return 0
+        return self.snippet.end
     
     def reset(self):
         self.index = -1
@@ -614,7 +605,6 @@ class PMXSnippet(PMXBundleItem):
         #    self.taborder[-1].last = True
         self.taborder.append(lastHolder)
             
-
     def getHolder(self, start, end = None):
         ''' Return the placeholder for position, where starts > positiσn > ends'''
         end = end != None and end or start
