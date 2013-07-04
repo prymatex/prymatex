@@ -172,7 +172,7 @@ class ThemeTableRow(object):
             styles = []
             for style in self.styles:
                 rank = []
-                if style.selector.does_match(scopePath, rank):
+                if style.scopeSelector.does_match(scopePath, rank):
                     styles.append((rank.pop(), style))
             styles.sort(key = lambda t: t[0])
             for style in styles:

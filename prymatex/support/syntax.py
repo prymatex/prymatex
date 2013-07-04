@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
-"""Syntax's module
-http://manual.macromates.com/en/language_grammars.html
-"""
+from __future__ import unicode_literals
 
 import re
 
@@ -173,9 +170,10 @@ class PMXSyntax(PMXBundleItem):
         super(PMXSyntax, self).load(dataHash)
         for key in PMXSyntax.KEYS:
             value = dataHash.get(key, None)
-            if key in ['firstLineMatch']:
-                if value is not None:
-                    value = compileRegexp( value )
+            if key in ['firstLineMatch'] and value:
+                value = compileRegexp( value )
+            elif key == 'scopeName' and value:
+                self.scopeNameSelector = self.manager.createScopeSelector(value)
             setattr(self, key, value)
     
     def dump(self):
@@ -196,25 +194,18 @@ class PMXSyntax(PMXBundleItem):
     def grammar(self):
         if not hasattr(self, '_grammar'):
             dataHash = {}
-            dataHash['repository'] = self.buildRepository()
-            dataHash['patterns'] = self.patterns if self.patterns != None else []
+            dataHash['repository'] = self.buildRepository() if self.scopeName else {}
+            dataHash['patterns'] = self.patterns if self.patterns else []
             setattr(self, '_grammar', PMXSyntaxNode(dataHash , self ))
         return self._grammar
 
     def buildRepository(self):
         repository = {}
-        if self.scopeName is not None:
-            syntaxes = self.syntaxes
-            # TODO Usar el selector
-            index = self.scopeName.find(".")
-            while index != -1:
-                parentScopeName = self.scopeName[0:index]
-                parentSyntax = syntaxes.get(parentScopeName)
-                if parentSyntax is not None and parentSyntax.repository is not None:
-                    repository.update(parentSyntax.repository)
-                index = self.scopeName.find(".", index + 1)
-        if self.repository is not None:
-            repository.update(self.repository)
+        for key, value in self.syntaxes.items():
+            if value.scopeNameSelector.does_match(self.scopeName) and\
+            value.repository:
+                print("Agregando", key)
+                repository.update(value.repository)
         return repository
 
     def parse(self, string, processor = None):
@@ -284,9 +275,6 @@ class PMXSyntax(PMXBundleItem):
         if processor:
             processor.endLine(line)
         return position
-
-    def __str__(self):
-        return "<PMXSyntax %s>" % self.name
 
     @classmethod
     def findGroup(cls, scopes):

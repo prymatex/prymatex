@@ -224,9 +224,9 @@ class PMXSupportBaseManager(object):
         commandHash['name'] = name if name is not None else "Ad-Hoc command %s" % commandScript
 
         command = PMXCommand(self.uuidgen())
-        command.load(commandHash)
         command.setBundle(bundle)
         command.setManager(self)
+        command.load(commandHash)
         return command
 
     def buildAdHocSnippet(self, snippetContent, bundle, name=None, tabTrigger=None):
@@ -234,9 +234,9 @@ class PMXSupportBaseManager(object):
                        'tabTrigger': tabTrigger}
         snippetHash['name'] = name if name is not None else "Ad-Hoc snippet"
         snippet = PMXSnippet(self.uuidgen())
-        snippet.load(snippetHash)
         snippet.setBundle(bundle)
         snippet.setManager(self)
+        snippet.load(snippetHash)
         return snippet
 
     #--------------- Scopes and selectors --------------
@@ -294,9 +294,9 @@ class PMXSupportBaseManager(object):
         theme = self.getManagedObject(uuid)
         if not (theme or self.isDeleted(uuid)):
             theme = PMXTheme(uuid)
-            theme.load(data)
             theme.setManager(self)
             theme.addSource(namespace, themePath)
+            theme.load(data)
             theme = self.addTheme(theme)
             settings = data.pop('settings', [])
             if settings:
@@ -331,9 +331,9 @@ class PMXSupportBaseManager(object):
         bundle = self.getManagedObject(uuid)
         if bundle is None and not self.isDeleted(uuid):
             bundle = PMXBundle(uuid)
-            bundle.load(data)
             bundle.setManager(self)
             bundle.addSource(namespace, bundle_dir)
+            bundle.load(data)
             bundle = self.addBundle(bundle)
             self.addManagedObject(bundle)
         elif bundle is not None:
@@ -369,10 +369,10 @@ class PMXSupportBaseManager(object):
         bundleItem = self.getManagedObject(uuid)
         if bundleItem is None and not self.isDeleted(uuid):
             bundleItem = klass(uuid)
-            bundleItem.load(data)
             bundleItem.setBundle(bundle)
             bundleItem.setManager(self)
             bundleItem.addSource(namespace, file_path)
+            bundleItem.load(data)
             bundleItem = self.addBundleItem(bundleItem)
             for staticPath in bundleItem.staticPaths():
                 # TODO: Ver que hacer con directorios
@@ -541,8 +541,8 @@ class PMXSupportBaseManager(object):
         testScope = bool('scope' in attrs and bundleItem.scope != attrs['scope'])
         testPreference = bool(PMXPreference.TYPE == bundleItem.TYPE)
 
-        scopeSelectorItem = testScope and scope.Selector(bundleItem.scope) or None
-        scopeSelectorAttr = testScope and scope.Selector(attrs['scope']) or None
+        scopeSelectorItem = testScope and self.createScopeSelector(bundleItem.scope) or None
+        scopeSelectorAttr = testScope and self.createScopeSelector(attrs['scope']) or None
         
         # Add keys for remove
         for key in self.bundleItemCache.keys():
@@ -676,9 +676,9 @@ class PMXSupportBaseManager(object):
         
         # Do create and save
         bundle = PMXBundle(self.uuidgen())
-        bundle.load({"name": name})
         bundle.setManager(self)
         bundle.addSource(namespace, path)
+        bundle.load({"name": name})
         self.saveManagedObject(bundle, namespace)
         
         bundle = self.addBundle(bundle)
@@ -793,10 +793,10 @@ class PMXSupportBaseManager(object):
         path = os.path.join(bundle.path(namespace), klass.FOLDER, "%s.%s" % (osextra.to_valid_name(name), klass.EXTENSION))
 
         bundleItem = klass(self.uuidgen())
-        bundleItem.load({'name': name})
         bundleItem.setBundle(bundle)
         bundleItem.setManager(self)
         bundleItem.addSource(namespace, path)
+        bundleItem.load({'name': name})
         bundleItem = self.addBundleItem(bundleItem)
         self.addManagedObject(bundleItem)
         return bundleItem

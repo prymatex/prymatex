@@ -43,7 +43,7 @@ class PMXProject(PMXBundleItem):
             context.asynchronous = True
             context.workingDirectory = self.currentPath()
             self.manager.runProcess(context, functools.partial(self.afterExecute, callback))
-            
+
     def afterExecute(self, callback, context):
         name = context.environment['TM_NEW_PROJECT_NAME']
         location = context.environment['TM_NEW_PROJECT_LOCATION']

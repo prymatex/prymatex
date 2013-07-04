@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import os
 
 from prymatex.support.bundle import PMXManagedObject
-from prymatex.support import scope
 
 # TODO Nuevos colores
 """foreground, background, selection, invisibles, lineHighlight, caret, gutter
@@ -62,7 +61,7 @@ class PMXThemeStyle(object):
         for key in PMXThemeStyle.KEYS:
             value = dataHash.get(key, None)
             if key == 'scope':
-                self.selector = scope.Selector(value)
+                self.scopeSelector = self.theme.manager.createScopeSelector(value)
             setattr(self, key, value)
 
     def dump(self):
@@ -83,11 +82,11 @@ class PMXThemeStyle(object):
                 self.settings = dict([tupla for tupla in iter(self.settings.items()) if tupla[1] != None])
                 continue
             elif key == 'scope':
-                self.selector = scope.Selector(value)
+                self.scopeSelector = self.theme.manager.createScopeSelector(value)
             setattr(self, key, value)
     
 class PMXTheme(PMXManagedObject):
-    KEYS = [    'name', 'comment', 'author', 'settings']
+    KEYS = ( 'name', 'comment', 'author', 'settings' )
     
     def __init__(self, uuid):
         super(PMXTheme, self).__init__(uuid)

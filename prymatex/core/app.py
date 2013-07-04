@@ -34,11 +34,11 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     # ---------------------- Settings
     SETTINGS_GROUP = "Global"
 
-    @pmxConfigPorperty(valueType=str)
+    @pmxConfigPorperty(valueType = str)
     def qtStyle(self, styleName):
         self.setStyle(styleName)
 
-    @pmxConfigPorperty(valueType=str)
+    @pmxConfigPorperty(valueType = str)
     def qtStyleSheet(self, styleSheetName):
         self.setStyleSheet(resources.STYLESHEETS[styleSheetName])
 
