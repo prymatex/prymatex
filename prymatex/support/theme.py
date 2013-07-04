@@ -52,7 +52,7 @@ DEFAULT_SCOPE_SELECTORS = [('Comment', 'comment'),
 
 
 class PMXThemeStyle(object):
-    KEYS = [ 'scope', 'name', 'settings' ]
+    KEYS = ( 'scope', 'name', 'settings' )
     def __init__(self, dataHash, theme):
         self.theme = theme
         self.load(dataHash)

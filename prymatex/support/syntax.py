@@ -8,43 +8,63 @@ import re
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.regexp import compileRegexp
 
-class PMXSyntaxNode(object):
+class PMXSyntaxProxy(object):
     def __init__(self, dataHash, syntax):
-        for k in (  'syntax', 'match', 'begin', 'content', 'name', 'contentName', 'end',
-                    'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns'):
-            setattr(self, k, None)
         self.syntax = syntax
-        for key, value in dataHash.items():
-            try:
-                if key in ('match', 'begin'):
-                    setattr(self, key, compileRegexp( value ))
-                elif key in ('content', 'name', 'contentName', 'end'):
-                    setattr(self, key, value )
-                elif key in ('captures', 'beginCaptures', 'endCaptures'):
-                    value = sorted(list(value.items()), key = lambda v: int(v[0]))
-                    setattr(self, key, value)
-                elif key == 'repository':
-                    self.parse_repository(value)
-                elif key == 'patterns':
-                    self.create_children(value)
-            except TypeError as e:
-                print(e, value)
+        self.proxy = dataHash['include']
     
-    def parse_repository(self, repository):
-        self.repository = {}
-        for key, value in repository.items():
-            if 'include' in value:
-                self.repository[key] = PMXSyntaxProxy( value, self.syntax )
+    def __getattr__(self, name):
+        if self.proxy:
+            proxy_value = self.__proxy()
+            if proxy_value:
+                return getattr(proxy_value, name)
+    
+    def __proxy(self):
+        if re.compile('^#').search(self.proxy):
+            grammar = self.syntax.grammar
+            if hasattr(grammar, 'repository') and self.proxy[1:] in grammar.repository:  
+                return grammar.repository[self.proxy[1:]]
+        elif self.proxy == '$self':
+            return self.syntax.grammar
+        elif self.proxy == '$base':
+            return self.syntax.grammar
+        else:
+            syntaxes = self.syntax.syntaxes
+            if self.proxy in syntaxes:
+                return syntaxes[self.proxy].grammar
             else:
-                self.repository[key] = PMXSyntaxNode( value, self.syntax )
+                return PMXSyntaxNode({}, self.syntax)
+
+class PMXSyntaxNode(object):
+    KEYS = ('name', 'match', 'begin', 'content', 'contentName', 'end',
+            'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns',
+            'injectionSelector')
+    def __init__(self, dataHash, syntax):
+        self.syntax = syntax
+        for key in PMXSyntaxNode.KEYS:
+            value = dataHash.get(key, None)
+            if value is not None:
+                if key in ('match', 'begin'):
+                    value = compileRegexp( value )
+                elif key in ('captures', 'beginCaptures', 'endCaptures'):
+                    value = sorted(value.items(), key = lambda v: int(v[0]))
+                elif key == 'repository':
+                    value = self.parse_repository(value)
+                elif key == 'patterns':
+                    value = self.create_children(value)
+            setattr(self, key, value )
+            
+    def parse_repository(self, repository):
+        return dict([ (key, 'include' in value and\
+                    PMXSyntaxProxy( value, self.syntax ) or\
+                    PMXSyntaxNode( value, self.syntax ))
+                for key, value in repository.items() ])
 
     def create_children(self, patterns):
-        self.patterns = []
-        for p in patterns:
-            if 'include' in p:
-                self.patterns.append(PMXSyntaxProxy( p, self.syntax ))
-            else:
-                self.patterns.append(PMXSyntaxNode( p, self.syntax ))
+        return [ 'include' in pattern and\
+                    PMXSyntaxProxy( pattern, self.syntax ) or\
+                    PMXSyntaxNode( pattern, self.syntax )
+                for pattern in patterns ]
     
     def parse_captures(self, name, pattern, match, processor):
         captures = pattern.match_captures( name, match )
@@ -128,33 +148,6 @@ class PMXSyntaxNode(object):
                 #if tmatch[1].start() == position:
                 #    break
         return match
-
-class PMXSyntaxProxy(object):
-    def __init__(self, dataHash, syntax):
-        self.syntax = syntax
-        self.proxy = dataHash['include']
-    
-    def __getattr__(self, name):
-        if self.proxy:
-            proxy_value = self.__proxy()
-            if proxy_value:
-                return getattr(proxy_value, name)
-    
-    def __proxy(self):
-        if re.compile('^#').search(self.proxy):
-            grammar = self.syntax.grammar
-            if hasattr(grammar, 'repository') and self.proxy[1:] in grammar.repository:  
-                return grammar.repository[self.proxy[1:]]
-        elif self.proxy == '$self':
-            return self.syntax.grammar
-        elif self.proxy == '$base':
-            return self.syntax.grammar
-        else:
-            syntaxes = self.syntax.syntaxes
-            if self.proxy in syntaxes:
-                return syntaxes[self.proxy].grammar
-            else:
-                return PMXSyntaxNode({}, self.syntax)
 
 class PMXSyntax(PMXBundleItem):
     KEYS = ( 'comment', 'firstLineMatch', 'scopeName', 'repository',
