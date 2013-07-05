@@ -764,7 +764,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             #No tengo helper paso el evento a la base
             TextEditWidget.keyPressEvent(self, event)
 
-            if event.text() and self.enableAutoCompletion:
+            if not event.modifiers() and event.text() and self.enableAutoCompletion:
                 # Cached Completer
                 word, start, end = self.currentWord(direction = "left",
                     search = False)

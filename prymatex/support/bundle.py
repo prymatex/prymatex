@@ -135,14 +135,16 @@ class PMXBundle(PMXManagedObject):
             setattr(self, key, dataHash.get(key, None))
 
     def update(self, dataHash):
-        for key in list(dataHash.keys()):
+        for key in PMXBundle.KEYS:
+            if not dataHash.has_key(key):
+                continue
             setattr(self, key, dataHash[key])
     
     def dump(self):
         dataHash = super(PMXBundle, self).dump()
         for key in PMXBundle.KEYS:
-            value = getattr(self, key)
-            if value != None:
+            value = getattr(self, key, None)
+            if value is not None:
                 dataHash[key] = value
         return dataHash
 
@@ -181,16 +183,19 @@ class PMXBundleItem(PMXManagedObject):
             setattr(self, key, value)
 
     def update(self, dataHash):
-        for key, value in dataHash.items():
+        for key in PMXBundleItem.KEYS:
+            if not dataHash.has_key(key):
+                continue
+            value = dataHash[key]
             if key == "scope":
                 self.scopeSelector = self.manager.createScopeSelector(value)
             setattr(self, key, value)
-
+                
     def dump(self):
         dataHash = super(PMXBundleItem, self).dump()
         for key in PMXBundleItem.KEYS:
-            value = getattr(self, key)
-            if value != None:
+            value = getattr(self, key, None)
+            if value is not None:
                 dataHash[key] = value
         return dataHash
 

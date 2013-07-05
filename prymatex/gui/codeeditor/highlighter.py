@@ -61,7 +61,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         lastBlock = self.document().lastBlock()
         scopeName = self.syntax.scopeName
         self.processor.startParsing(scopeName)
-        stack = [[ self.syntax.grammar, None ]]
+        stack = [( self.syntax.grammar, None )]
         length = 0
         blockState = -1
         while block.isValid():

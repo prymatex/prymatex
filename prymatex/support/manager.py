@@ -1135,7 +1135,11 @@ class PMXSupportBaseManager(object):
 
     # ------------------ SYNTAXES
     def getSyntaxesAsDictionary(self):
-        return dict([(syntax.scopeName, syntax) for syntax in self.getAllSyntaxes()])
+        memoizedKey = ("getSyntaxesAsDictionary", None, None, None)
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
+        return self.bundleItemCache.setdefault(memoizedKey,
+            dict([(syntax.scopeName, syntax) for syntax in self.getAllSyntaxes()]))
 
     def getSyntaxes(self, sort=False):
         stxs = []

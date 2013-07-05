@@ -30,7 +30,7 @@ class Parser(object):
         return bool(res)
 
     def parse_int(self, res):
-        if(self.it == self.last or not self.source[self.it].isdigit()):
+        if self.it == self.last or not self.source[self.it].isdigit():
             return False
         res.append(0)
         while self.it != self.last and self.source[self.it].isdigit():
@@ -61,7 +61,7 @@ class Parser(object):
         return True
 
     def parse_transformation(self, nodes):
-        res = types.TransformationType()
+        res = types.VariableTransformationType("none")
         regexp = []
         if self.parse_until("/", regexp) \
             and self.parse_format_string("/", res.format.composites) \
@@ -76,7 +76,8 @@ class Parser(object):
         esc = "\\$(" + stopChars
 
         while self.it != self.last and self.source[self.it] not in stopChars:
-            if False or self.parse_condition(nodes) \
+            if False or self.parse_variable(self.parse_format_string, nodes) \
+                or self.parse_condition(nodes) \
                 or self.parse_control_code(nodes) \
                 or self.parse_case_change(nodes) \
                 or self.parse_escape(esc, nodes) \
@@ -89,11 +90,71 @@ class Parser(object):
         self.it = backtrack
         return False
 
+    def parse_variable(self, parse_content, nodes):
+        backtrack = self.it
+        if self.parse_char("$"):
+            name = []
+            if self.parse_char("{") and self.parse_until("/:}", name):
+                if self.it[-1] == '}':
+                    nodes.append(types.VariableType(name.pop()))
+                    return True
+                elif self.it[-1] == '/':
+                    res = types.VariableTransformationType(name.pop())
+                    regexp = []
+                    if self.parse_until("/", regexp) and self.parse_format_string("/", res.format) and self.parse_regexp_options(res.options) and parse_char("}"):
+                        res.pattern = compileRegexp(regexp.pop(), res.options)
+                        nodes.append(res)
+                        return True
+                else: # it[-1] == ':'
+                    if self.parse_char("+"):
+                        res = types.VariableConditionType(name.pop())
+                        if parse_content("}", res.if_set):
+                            nodes.append(res)
+                            return True
+                    elif self.parse_char("?"):
+                        res = types.VariableConditionType(name)
+                        if parse_content(":", res.if_set) and parse_content("}", res.if_not_set):
+                            nodes.append(res)
+                            return True
+                    elif self.parse_char("/"):
+                        res = types.VariableChangeType(name, types.transform['kNone'] )
+                        while self.it[-1] == '/':
+                            option = []
+                            if self.parse_until("/}", option):
+                                option = option.pop()
+                                res.change |= { 
+                                    "upcase": types.transform['kUpcase'],
+                                    "downcase": types.transform['kDowncase'],
+                                    "capitalize": types.transform['kCapitalize'],
+                                    "asciify": types.transform['kAsciify'] }[option]
+                            else:
+                                break                                
+                        if self.it[-1] == '}':
+                            nodes.append(res)
+                            return True
+                    else:
+                        self.parse_char("-") # to be backwards compatible, this character is not required
+                        res = types.VariableFallbackType( name )
+                        if parse_content("}", res.fallback):
+                            nodes.append(res)
+                            return True
+            else:
+                index = []
+                if self.parse_int(index):
+                    nodes.append(types.VariableType(index.pop()))
+                    return True
+                variable = []
+                if self.parse_chars("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_abcdefghijklmnopqrstuvwxyz", variable):
+                    nodes.append(types.VariableType(variable.pop()))
+                    return True
+        self.it = backtrack
+        return False
+
     def parse_condition(self, nodes):
         backtrack = self.it
         captureRegister = []
         if self.parse_char("(") and self.parse_char("?") and self.parse_int(captureRegister) and self.parse_char(":"):
-            res = types.ConditionType(captureRegister.pop())
+            res = types.VariableConditionType(captureRegister.pop())
             if self.parse_format_string(":)", res.if_set) \
                 and (self.source[self.it - 1] == ')' or \
                     self.source[self.it - 1] == ':' and \
@@ -156,6 +217,66 @@ class Parser(object):
             nodes.append("")
         nodes[-1] = nodes[-1] + char
     
+    def parse_placeholder(self, nodes):
+        backtrack = self.it
+        if self.parse_char("$"):
+            index = []
+            if self.parse_char("{") and self.parse_int(index):
+                if self.parse_char(":"):
+                    res = types.PlaceholderType(index.pop())
+                    if self.parse_snippet("}", res.content):
+                        nodes.append(res)
+                        return True
+                    elif self.parse_char("/"):
+                        regexp = []
+                        res = types.PlaceholderTransformType( index.pop() )
+                        if self.parse_until("/", regexp) and self.parse_format_string("/", res.format) and self.parse_regexp_options(res.options) and self.parse_char("}"):
+                            res.pattern = compileRegexp(regexp.pop(), res.options)
+                            nodes.append(res)
+                            return True
+                    elif self.parse_char("|"):
+                        res = PlaceholderChoiceType( index.pop() )
+                        while self.parse_format_string(",|", res.choices) and self.it[-1] == ',':
+                            pass
+                        if self.it[-1] == '|' and self.parse_char("}"):
+                            nodes.append(res)
+                            return True
+                    elif self.parse_char("}"):
+                        nodes.append(types.PlaceholderType(index.pop()))
+                        return True
+            elif self.parse_int(index):
+                nodes.append(types.PlaceholderType(index.pop()))
+                return True;
+        self.it = backtrack
+        return False
+
+    def parse_code(self, nodes):
+        backtrack = self.it
+        code = []
+        if self.parse_char("`") and self.parse_until("`", code):
+            nodes.append(types.CodeType(code.pop()))            
+            return True
+        self.it = backtrack
+        return False
+    
+    def parse_snippet(self, stopChars, nodes):
+        backtrack = self.it
+        esc = "\\$`" + stopChars
+
+        while self.it != self.last and self.source[self.it] not in stopChars:
+            if False or self.parse_placeholder(nodes) \
+                or self.parse_variable(self.parse_snippet, nodes) \
+                or self.parse_code(nodes) \
+                or self.parse_escape(esc, nodes) \
+                or self.parse_text(nodes):
+                continue
+            break
+
+        if (self.it == self.last and len(stopChars) == 0) or self.parse_char(stopChars):
+            return True
+        self.it = backtrack
+        return False
+    
     # = API =
     @staticmethod
     def format(source):
@@ -168,4 +289,13 @@ class Parser(object):
         nodes = []
         if Parser(source).parse_transformation(nodes):
             return nodes.pop()
-            
+
+def parse_format_string(source):
+    nodes = []
+    Parser(source).parse_format_string("", nodes)
+    return nodes
+
+def parse_snippet(source):
+    nodes = []
+    Parser(source).parse_snippet("", nodes)
+    return nodes

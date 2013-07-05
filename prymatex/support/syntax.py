@@ -51,7 +51,15 @@ class PMXSyntaxNode(object):
                 elif key == 'patterns':
                     value = self.create_children(value)
             setattr(self, key, value )
-            
+        
+        if self.name is not None:
+            # Inject
+            for injector in self.syntax.injectors.values():
+                if injector.injectionSelector.does_match(self.name):
+                    if self.patterns is None:
+                        self.patterns = []
+                    self.patterns.extend(injector.grammar.patterns)
+
     def parse_repository(self, repository):
         return dict([ (key, 'include' in value and\
                     PMXSyntaxProxy( value, self.syntax ) or\
@@ -71,8 +79,8 @@ class PMXSyntaxNode(object):
         starts = []
         ends = []
         for group, range, name in captures:
-            starts.append([range[0], group, name])
-            ends.append([range[-1], -group, name])
+            starts.append((range[0], group, name))
+            ends.append((range[-1], -group, name))
         starts = starts[::-1]
         ends = ends[::-1]
         
@@ -168,7 +176,6 @@ class PMXSyntax(PMXBundleItem):
                     self.scopeNameSelector = self.manager.createScopeSelector(value)
                 elif key == 'injectionSelector':
                     value = self.manager.createScopeSelector(value)
-                    print("injectionSelector", value, self.scopeName)
             setattr(self, key, value)
     
     def dump(self):
@@ -193,6 +200,11 @@ class PMXSyntax(PMXBundleItem):
         return self.manager.getSyntaxesAsDictionary()
 
     @property
+    def injectors(self):
+        return dict(filter(lambda key_val: key_val[1].injectionSelector is not None, 
+                self.syntaxes.items()))
+    
+    @property
     def grammar(self):
         if not hasattr(self, '_grammar'):
             dataHash = {}
@@ -213,10 +225,9 @@ class PMXSyntax(PMXBundleItem):
     def parse(self, string, processor = None):
         if processor:
             processor.startParsing(self.scopeName)
-        stack = [[self.grammar, None]]
+        stack = [( self.grammar, None )]
         for line in string.splitlines(True):
             self.parseLine(stack, line, processor)
-            #print stack
         if processor:
             processor.endParsing(self.scopeName)
     
@@ -260,7 +271,7 @@ class PMXSyntax(PMXBundleItem):
                         processor.openTag(pattern.contentName, end_pos)
                     top = pattern
                     match = pattern_match
-                    stack.append([top, match])
+                    stack.append((top, match))
                 elif pattern.match:
                     if pattern.name and processor:
                         processor.openTag(pattern.name, start_pos)

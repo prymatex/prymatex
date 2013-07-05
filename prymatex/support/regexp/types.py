@@ -5,6 +5,28 @@ from __future__ import unicode_literals
 import re
 from prymatex.utils import six
 
+regexp_options = { 
+    'none': 1 << 0,
+    'g': 1 << 1,
+    'i': 1 << 2,
+    'e': 1 << 3,
+    'm': 1 << 4,
+    's': 1 << 5 }
+
+case_change = { 
+    'none': 0, 
+    'upper_next': 1,
+    'lower_next': 2,
+    'upper': 3, 
+    'lower': 4 }
+
+transform = { 
+    'kNone': 0 << 0, 
+    'kUpcase': 1 << 0,
+    'kDowncase': 1 << 1,
+    'kCapitalize': 1 << 2, 
+    'kAsciify': 1 << 3 }
+
 CASE_UPPER = 0
 CASE_LOWER = 1
 CASE_NONE = 2
@@ -24,7 +46,18 @@ def escapeCharacters(text, esc):
         text = text.replace(e, '\\' + e)            
     return text
 
-class ConditionType(object):
+#struct variable_t { std::string name; WATCH_LEAKS(parser::variable_t); };
+class VariableType(object):
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return "$" + six.text_type(self.name)
+    
+    __unicode__ = __str__
+
+#struct variable_condition_t { std::string name; nodes_t if_set, if_not_set; WATCH_LEAKS(parser::variable_condition_t); };
+class VariableConditionType(object):
     def __init__(self, name):
         self.name = name
         self.if_set = []
@@ -56,7 +89,7 @@ class ConditionType(object):
     
     __unicode__ = __str__
 
-
+# TODO: Quitar este
 class FormatType(object):
     _repl_re = re.compile("\$(?:(\d+)|g<(.+?)>)")
     def __init__(self):
@@ -96,7 +129,7 @@ class FormatType(object):
             endText = text[match.end():]
             # Translate to conditions
             for composite in self.composites:
-                if isinstance(composite, ConditionType):
+                if isinstance(composite, VariableConditionType):
                     nodes.extend(composite.apply(match))
                 else:
                     nodes.append(composite)
@@ -105,6 +138,8 @@ class FormatType(object):
             for value in nodes:
                 if isinstance(value, six.string_types):
                     value = pattern.sub(self.prepare_replacement(value), sourceText)
+                elif isinstance(value, VariableType):
+                    value = match.groups()[value.name - 1]
                 elif isinstance(value, six.integer_types):
                     case = value
                     continue
@@ -115,7 +150,11 @@ class FormatType(object):
             if 'g' not in flags:
                 break
             match = pattern.search(text, match.end())
-        return "%s%s%s" % (beginText, "".join(result), endText)
+        try:
+            result = "%s%s%s" % (beginText, "".join(result), endText)
+        except Exception as ex:
+            print(ex, result, six.text_type(self))
+        return result 
 
     def __str__(self):
         frmt = ""
@@ -127,10 +166,50 @@ class FormatType(object):
         return frmt
     
     __unicode__ = __str__
+
+#struct text_t { std::string text; WATCH_LEAKS(parser::text); };
+class TextType(object):
+    def __init__(self, text):
+        self.text = text
+
+#struct placeholder_t { size_t index; nodes_t content; WATCH_LEAKS(parser::placeholder_t); };
+class PlaceholderType(object):
+    def __init__(self, index):
+        self.index = index
+        self.content = []
         
-class TransformationType(object):
-    def __init__(self):
+#struct placeholder_choice_t { size_t index; std::vector<nodes_t> choices; WATCH_LEAKS(parser::placeholder_choice_t); };
+class PlaceholderChoiceType(object):
+    def __init__(self, index):
+        self.index = index
+        self.choices = []
+
+#struct placeholder_transform_t { size_t index; regexp::pattern_t pattern; nodes_t format; regexp_options::type options; WATCH_LEAKS(parser::placeholder_transform_t); };
+class PlaceholderTransformType(object):
+    def __init__(self, index):
+        self.index = index
         self.pattern = None
+        self.format = []
+        self.options = regexp_options['none']
+
+#struct variable_fallback_t { std::string name; nodes_t fallback; WATCH_LEAKS(parser::variable_fallback_t); };
+class VariableFallbackType(object):
+    def __init__(self, name, change):
+        self.name = name
+        self.fallback = []
+        
+#struct variable_change_t { std::string name; uint8_t change; WATCH_LEAKS(parser::variable_change_t); };
+class VariableChangeType(object):
+    def __init__(self, name, change):
+        self.name = name
+        self.change = change
+        
+#struct variable_transform_t { std::string name; regexp::pattern_t pattern; nodes_t format; regexp_options::type options; WATCH_LEAKS(parser::variable_transform_t); };
+class VariableTransformationType(object):
+    def __init__(self, name):
+        self.name = name
+        self.pattern = None
+        # TODO: Sacar este format se tiene que resolver aca
         self.format = FormatType()
         self.options = []
         
@@ -144,3 +223,8 @@ class TransformationType(object):
         return trns
     
     __unicode__ = __str__
+
+#struct code_t { std::string code; WATCH_LEAKS(parser::code_t); };
+class CodeType(object):
+    def __init__(self, code):
+        self.code = code
