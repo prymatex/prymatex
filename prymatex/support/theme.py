@@ -64,6 +64,17 @@ class PMXThemeStyle(object):
                 self.scopeSelector = self.theme.manager.createScopeSelector(value)
             setattr(self, key, value)
 
+    def update(self, dataHash):
+        for key in dataHash.keys():
+            value = dataHash[key]
+            if key == 'settings':
+                self.settings.update(value)
+                self.settings = dict([tupla for tupla in iter(self.settings.items()) if tupla[1] != None])
+                continue
+            elif key == 'scope':
+                self.scopeSelector = self.theme.manager.createScopeSelector(value)
+            setattr(self, key, value)
+    
     def dump(self):
         dataHash = {'name': self.name}
         if self.scope is not None:
@@ -74,17 +85,6 @@ class PMXThemeStyle(object):
                 dataHash['settings'][name] = setting
         return dataHash
         
-    def update(self, dataHash):
-        for key in list(dataHash.keys()):
-            value = dataHash[key]
-            if key == 'settings':
-                self.settings.update(value)
-                self.settings = dict([tupla for tupla in iter(self.settings.items()) if tupla[1] != None])
-                continue
-            elif key == 'scope':
-                self.scopeSelector = self.theme.manager.createScopeSelector(value)
-            setattr(self, key, value)
-    
 class PMXTheme(PMXManagedObject):
     KEYS = ( 'name', 'comment', 'author', 'settings' )
     
@@ -100,12 +100,14 @@ class PMXTheme(PMXManagedObject):
         self.settings = settings
         
     def update(self, dataHash):
-        for key in list(dataHash.keys()):
-            if key == 'settings':
-                self.settings.update(dataHash[key])
-                self.settings = dict([tupla for tupla in iter(self.settings.items()) if tupla[1] != None])
-            else:
-                setattr(self, key, dataHash[key])
+        for key in PMXTheme.KEYS:
+            if key in dataHash:
+                value = dataHash.get(key)
+                if key == 'settings':
+                    self.settings.update(value)
+                    self.settings = dict([tupla for tupla in iter(self.settings.items()) if tupla[1] != None])
+                else:
+                    setattr(self, key, value)
     
     def dump(self):
         dataHash = super(PMXTheme, self).dump()

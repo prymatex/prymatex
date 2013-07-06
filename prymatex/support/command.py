@@ -51,7 +51,7 @@ class PMXCommand(PMXBundleItem):
     TYPE = 'command'
     FOLDER = 'Commands'
     EXTENSION = 'tmCommand'
-    PATTERNS = ['*.tmCommand', '*.plist']
+    PATTERNS = ( '*.tmCommand', '*.plist' )
     EXIT_CODES = {
         200: 'discard',
         201: 'replaceSelectedText',
@@ -62,13 +62,23 @@ class PMXCommand(PMXBundleItem):
         206: 'showAsTooltip',
         207: 'createNewDocument'
     }
+    
+    def __load_update(self, dataHash, initialize):
+        for key in PMXCommand.KEYS:
+            if key in dataHash or initialize:
+                value = dataHash.get(key, None)
+                if value is not None:
+                    if key == 'capturePattern':
+                        value = compileRegexp(value)
+                setattr(self, key, value)
+    
     def load(self, dataHash):
         PMXBundleItem.load(self, dataHash)
-        for key in PMXCommand.KEYS:
-            value = dataHash.get(key, None)
-            if value != None and key in [    'capturePattern' ]:
-                value = compileRegexp( value )
-            setattr(self, key, value)
+        self.__load_update(dataHash, True)
+    
+    def update(self, dataHash):
+        PMXBundleItem.update(self, dataHash)
+        self.__load_update(dataHash, False)
     
     def dump(self):
         dataHash = super(PMXCommand, self).dump()
@@ -148,17 +158,24 @@ class PMXCommand(PMXBundleItem):
         processor.endCommand(self)
 
 class PMXDragCommand(PMXCommand):
-    KEYS = [    'draggedFileExtensions' ]
+    KEYS = ( 'draggedFileExtensions', )
     TYPE = 'dragcommand'
     FOLDER = 'DragCommands'
-    FILES = ['*.tmCommand', '*.plist']
+    FILES = ( '*.tmCommand', '*.plist' )
 
+    def __load_update(self, dataHash, initialize):
+        for key in PMXDragCommand.KEYS:
+            if key in dataHash or initialize:
+                setattr(self, key, dataHash.get(key, None))
+    
     def load(self, dataHash):
         PMXCommand.load(self, dataHash)
-        for key in PMXDragCommand.KEYS:
-            value = dataHash.get(key, None)
-            setattr(self, key, value)
+        self.__load_update(dataHash, True)
     
+    def update(self, dataHash):
+        PMXCommand.update(self, dataHash)
+        self.__load_update(dataHash, False)
+
     def dump(self):
         dataHash = super(PMXDragCommand, self).dump()
         for key in PMXDragCommand.KEYS:

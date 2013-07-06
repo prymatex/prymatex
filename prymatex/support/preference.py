@@ -28,13 +28,20 @@ from prymatex.support.regexp import compileRegexp
 from .regexp import Transformation
 
 class PMXPreferenceSettings(object):
-    KEYS = [    'completions', 'completionCommand', 'disableDefaultCompletion', 'showInSymbolList', 'symbolTransformation', 
-                'highlightPairs', 'smartTypingPairs', 'shellVariables', 'spellChecking', 
-                'indentedSoftWrap', 'softWrap',
-                'foldingIndentedBlockStart', 'foldingIndentedBlockIgnore', 'foldingStartMarker', 'foldingStopMarker',
-                'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
-    INDENT_KEYS = [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
-    FOLDING_KEYS = [ 'foldingIndentedBlockStart', 'foldingIndentedBlockIgnore', 'foldingStartMarker', 'foldingStopMarker' ]
+    KEYS = (
+        'completions', 'completionCommand', 'disableDefaultCompletion',
+        'showInSymbolList', 'symbolTransformation', 'highlightPairs',
+        'smartTypingPairs', 'shellVariables', 'spellChecking', 'softWrap',
+        'indentedSoftWrap', 'foldingIndentedBlockStart',
+        'foldingIndentedBlockIgnore', 'foldingStartMarker', 'foldingStopMarker',
+        'decreaseIndentPattern', 'increaseIndentPattern',
+        'indentNextLinePattern', 'unIndentedLinePattern' )
+    INDENT_KEYS = ( 
+        'decreaseIndentPattern', 'increaseIndentPattern',
+        'indentNextLinePattern', 'unIndentedLinePattern' )
+    FOLDING_KEYS = ( 
+        'foldingIndentedBlockStart', 'foldingIndentedBlockIgnore',
+        'foldingStartMarker', 'foldingStopMarker' )
     INDENT_INCREASE = 0
     INDENT_DECREASE = 1
     INDENT_NEXTLINE = 2
@@ -269,19 +276,29 @@ class PMXPreferenceMasterSettings(object):
         return PMXPreferenceSettings.FOLDING_NONE
     
 class PMXPreference(PMXBundleItem):
-    KEYS = [ 'settings' ]
+    KEYS = ( 'settings', )
     TYPE = 'preference'
     FOLDER = 'Preferences'
     EXTENSION = 'tmPreferences'
-    PATTERNS = ['*.tmPreferences', '*.plist']
+    PATTERNS = ('*.tmPreferences', '*.plist')
 
     def load(self, dataHash):
-        super(PMXPreference, self).load(dataHash)
+        PMXBundleItem.load(self, dataHash)
         for key in PMXPreference.KEYS:
             value = dataHash.get(key, None)
             if key == 'settings':
                 value = PMXPreferenceSettings(value or {}, self)
             setattr(self, key, value)
+    
+    def update(self, dataHash):
+        PMXBundleItem.update(self, dataHash)
+        for key in PMXPreference.KEYS:
+            if key in dataHash:
+                value = dataHash.get(key)
+                if key == 'settings':
+                    self.settings.update(value)
+                else:
+                    setattr(self, key, value)
     
     def dump(self):
         dataHash = super(PMXPreference, self).dump()
@@ -292,14 +309,6 @@ class PMXPreference(PMXBundleItem):
             dataHash[key] = value
         return dataHash
 
-    def update(self, dataHash):
-        for key in list(dataHash.keys()):
-            value = dataHash.get(key, None)
-            if key == 'settings':
-                self.settings.update(value)
-            else:
-                setattr(self, key, value)
-            
     @staticmethod
     def buildSettings(preferences):
         """El orden si importa, las preferences vienen ordenadas por score"""

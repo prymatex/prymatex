@@ -5,7 +5,7 @@ from prymatex.support.bundle import PMXBundleItem
 from prymatex.utils import plist
    
 class PMXProxy(PMXBundleItem):
-    KEYS = ( 'content' )
+    KEYS = ( 'content', )
     TYPE = 'proxy'
     FOLDER = 'Proxies'
     EXTENSION = 'tmProxy'

@@ -105,8 +105,8 @@ class PMXManagedObject(object):
         self.manager = manager
         
 class PMXBundle(PMXManagedObject):
-    KEYS = (    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13',
-                'description', 'contactName', 'requiredCommands', 'require' )
+    KEYS = ('name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13',
+            'description', 'contactName', 'requiredCommands', 'require' )
     FILE = 'info.plist'
     TYPE = 'bundle'
     def __init__(self, uuid):
@@ -130,16 +130,17 @@ class PMXBundle(PMXManagedObject):
         except:
             pass
     
-    def load(self, dataHash):
+    def __load_update(self, dataHash, initialize):
         for key in PMXBundle.KEYS:
-            setattr(self, key, dataHash.get(key, None))
+            if key in dataHash or initialize:
+                setattr(self, key, dataHash.get(key, None))
 
+    def load(self, dataHash):
+        self.__load_update(dataHash, True)
+        
     def update(self, dataHash):
-        for key in PMXBundle.KEYS:
-            if not dataHash.has_key(key):
-                continue
-            setattr(self, key, dataHash[key])
-    
+        self.__load_update(dataHash, False)
+
     def dump(self):
         dataHash = super(PMXBundle, self).dump()
         for key in PMXBundle.KEYS:
@@ -174,23 +175,21 @@ class PMXBundleItem(PMXManagedObject):
     
     def enabled(self):
         return self.bundle.enabled()
+    
+    def __load_update(self, dataHash, initialize):
+        for key in PMXBundleItem.KEYS:
+            if key in dataHash or initialize:
+                value = dataHash.get(key, None)
+                if key == "scope":
+                    self.selector = self.manager.createScopeSelector(value)
+                setattr(self, key, value)
 
     def load(self, dataHash):
-        for key in PMXBundleItem.KEYS:
-            value = dataHash.get(key, None)
-            if key == "scope":
-                self.selector = self.manager.createScopeSelector(value)
-            setattr(self, key, value)
-
+        self.__load_update(dataHash, True)
+        
     def update(self, dataHash):
-        for key in PMXBundleItem.KEYS:
-            if not dataHash.has_key(key):
-                continue
-            value = dataHash[key]
-            if key == "scope":
-                self.scopeSelector = self.manager.createScopeSelector(value)
-            setattr(self, key, value)
-                
+        self.__load_update(dataHash, False)
+    
     def dump(self):
         dataHash = super(PMXBundleItem, self).dump()
         for key in PMXBundleItem.KEYS:
@@ -223,7 +222,8 @@ class PMXStaticFile(object):
         
     def enabled(self):
         return self.parentItem.enabled()
-        
+    
+    # TODO Mejorar esto del content
     def getFileContent(self):
         content = ""
         if os.path.exists(self.path):
@@ -238,7 +238,7 @@ class PMXStaticFile(object):
     content = property(getFileContent, setFileContent)
 
     def update(self, dataHash):
-        for key in list(dataHash.keys()):
+        for key in dataHash.keys():
             setattr(self, key, dataHash[key])
     
     def relocate(self, path):

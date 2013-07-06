@@ -519,11 +519,21 @@ class PMXSnippet(PMXBundleItem):
     EXTENSION = 'tmSnippet'
     PATTERNS = ('*.tmSnippet', '*.plist')
     
+    def __load_update(self, dataHash, initialize):
+        for key in PMXSnippet.KEYS:
+            if key in dataHash or initialize:
+                setattr(self, key, dataHash.get(key, None))
+    
     def load(self, dataHash):
         PMXBundleItem.load(self, dataHash)
-        for key in PMXSnippet.KEYS:
-            setattr(self, key, dataHash.get(key, None))
+        self.__load_update(dataHash, True)
     
+    def update(self, dataHash):
+        PMXBundleItem.update(self, dataHash)
+        self.__load_update(dataHash, False)
+        if 'content' in dataHash:
+            delattr(self, '_snippet')
+
     def dump(self):
         dataHash = super(PMXSnippet, self).dump()
         for key in PMXSnippet.KEYS:
@@ -531,12 +541,7 @@ class PMXSnippet(PMXBundleItem):
             if value != None:
                 dataHash[key] = value
         return dataHash
-    
-    def update(self, dataHash):
-        PMXBundleItem.update(self, dataHash)
-        # TODO Solo si camio el content ;)
-        delattr(self, '_snippet')
-    
+
     @property
     def snippet(self):
         if not hasattr(self, '_snippet'):

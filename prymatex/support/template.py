@@ -16,16 +16,24 @@ from prymatex.support.bundle import (PMXBundleItem, PMXStaticFile,
 from prymatex.utils import plist
     
 class PMXTemplate(PMXBundleItem):
-    KEYS = [    'command', 'extension']
+    KEYS = ( 'command', 'extension')
     FILE = 'info.plist'
     TYPE = 'template'
     FOLDER = 'Templates'
-    PATTERNS = [ '*' ]
+    PATTERNS = ( '*', )
+    
+    def __load_update(self, dataHash, initialize):
+        for key in PMXTemplate.KEYS:
+            if key in dataHash or initialize:
+                setattr(self, key, dataHash.get(key, None))
     
     def load(self, dataHash):
         PMXBundleItem.load(self, dataHash)
-        for key in PMXTemplate.KEYS:
-            setattr(self, key, dataHash.get(key, None))
+        self.__load_update(dataHash, True)
+    
+    def update(self, dataHash):
+        PMXBundleItem.update(self, dataHash)
+        self.__load_update(dataHash, False)
     
     def dump(self):
         dataHash = super(PMXTemplate, self).dump()
