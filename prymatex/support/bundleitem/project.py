@@ -1,21 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, shutil, codecs
-import functools
+import os
 from glob import glob
+import functools
 
-from prymatex.support.bundle import (PMXBundleItem, PMXStaticFile, 
-    PMXRunningContext)
+from prymatex.utils import osextra
 
-from prymatex.utils import plist
-   
+from .base import PMXBundleItem
+from ..staticfile import PMXStaticFile
+from ..base import PMXRunningContext
+
 class PMXProject(PMXBundleItem):
     KEYS = ( 'command', )
     FILE = 'info.plist'
     TYPE = 'project'
     FOLDER = 'Projects'
     PATTERNS = ( '*', )
+    DEFAULTS = {
+        'name': 'untitled',
+        'command': '''if [[ ! -f "$TM_NEW_PROJECT_LOCATION" ]]; then
+    TM_YEAR=`date +%Y` \
+    TM_DATE=`date +%Y-%m-%d` \
+    perl -pe 's/\$\{([^}]*)\}/$ENV{$1}/g' \
+        < template_in.txt > "$TM_NEW_PROJECT_LOCATION"
+fi"'''}
         
     def __load_update(self, dataHash, initialize):
         for key in PMXProject.KEYS:
@@ -57,10 +66,14 @@ class PMXProject(PMXBundleItem):
         location = context.environment['TM_NEW_PROJECT_LOCATION']
         callback(name, location)
 
+    def dataFilePath(self, basePath, baseName = None):
+        directory = osextra.path.ensure_not_exists(os.path.join(basePath, self.FOLDER, "%s"), osextra.to_valid_name(baseName or self.name))
+        return os.path.join(directory, self.FILE)
+    
     @classmethod
     def dataFilePath(cls, path):
         return os.path.join(path, cls.FILE)
-
+    
     def staticPaths(self):
         projectFilePaths = glob(os.path.join(self.currentPath(), '*'))
         projectFilePaths.remove(self.dataFilePath(self.currentPath()))

@@ -7,10 +7,11 @@ import uuid as uuidmodule
 
 from prymatex.utils import six
 
-from prymatex.support.regexp import Transformation
-from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
-from prymatex.support.processor import PMXSyntaxProcessor
-from prymatex.support.syntax import PMXSyntax
+from ..regexp import Transformation
+from .base import PMXBundleItem
+from ..base import PMXRunningContext
+from ..processor import PMXSyntaxProcessor
+from .syntax import PMXSyntax
 
 SNIPPET_PARSER = PMXSyntax(uuidmodule.uuid1())
 SNIPPET_SYNTAX = { 
@@ -518,6 +519,13 @@ class PMXSnippet(PMXBundleItem):
     FOLDER = 'Snippets'
     EXTENSION = 'tmSnippet'
     PATTERNS = ('*.tmSnippet', '*.plist')
+    # ----- Default Snippet content on create action
+    DEFAULTS = {
+        'name': 'untitled',
+        'content': '''Syntax Summary:
+Variables        $TM_FILENAME, $TM_SELECTED_TEXT
+Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''
+    }
     
     def __load_update(self, dataHash, initialize):
         for key in PMXSnippet.KEYS:
@@ -531,14 +539,14 @@ class PMXSnippet(PMXBundleItem):
     def update(self, dataHash):
         PMXBundleItem.update(self, dataHash)
         self.__load_update(dataHash, False)
-        if 'content' in dataHash:
+        if 'content' in dataHash and hasattr(self, '_snippet'):
             delattr(self, '_snippet')
 
     def dump(self):
         dataHash = super(PMXSnippet, self).dump()
         for key in PMXSnippet.KEYS:
             value = getattr(self, key)
-            if value != None:
+            if value is not None:
                 dataHash[key] = value
         return dataHash
 
@@ -611,7 +619,7 @@ class PMXSnippet(PMXBundleItem):
         self.taborder.append(lastHolder)
             
     def getHolder(self, start, end = None):
-        ''' Return the placeholder for position, where starts > positiσn > ends'''
+        '''Return the placeholder for position, where starts > positiσn > ends'''
         end = end != None and end or start
         found = None
         for holder in self.taborder:

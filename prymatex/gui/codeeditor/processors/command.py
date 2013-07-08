@@ -4,7 +4,6 @@
 from prymatex.qt import QtGui
 
 from prymatex.support.processor import PMXCommandProcessor
-from prymatex.support.snippet import PMXSnippet
 
 class PMXCommandProcessor(PMXCommandProcessor):
     def __init__(self, editor):

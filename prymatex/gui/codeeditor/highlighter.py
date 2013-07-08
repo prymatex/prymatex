@@ -7,8 +7,6 @@ import re
 from prymatex.qt import QtGui, QtCore
 
 from prymatex.gui.codeeditor.processors import CodeEditorSyntaxProcessor
-from prymatex.support.syntax import PMXSyntax
-from prymatex.utils.decorators.helpers import printtime
 
 class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     NO_STATE = -1

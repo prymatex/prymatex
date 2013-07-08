@@ -38,7 +38,6 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
     def on_bundleEditor_finished(self, code):
         self.saveChanges()
 
-
     # ---------------- custom execs
     def exec_(self):
         #Limiar el editor
@@ -48,7 +47,6 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         self.treeView.setSelection(self.treeView.visualRect(firstIndex), QtGui.QItemSelectionModel.Clear)
         
         return QtGui.QDialog.exec_(self)
-
 
     def execEditor(self, typeFilter = None, namespaceFilter = None, title = "Bundle Editor"):
         # Title
@@ -64,18 +62,14 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         # Go!
         self.exec_()
 
-
     def execCommand(self):
         return self.execEditor("command")
-
 
     def execLanguage(self):
         return self.execEditor("syntax")
 
-
     def execSnippet(self):
         return self.execEditor("snippet")
-
 
     def configEditorWidgets(self):
         self.stackedWidget = QtGui.QStackedWidget()
@@ -103,7 +97,7 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
             return self.manager.getDefaultBundle()
         bundle = self.proxyTreeModel.node(index)
         while bundle.TYPE != 'bundle':
-            bundle = bundle.parentNode()
+            bundle = bundle.nodeParent()
         return bundle
 
     def createBundleItem(self, itemName, itemType):
@@ -146,7 +140,7 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         if index.isValid():
             template = self.proxyTreeModel.node(index)
             if template.TYPE == 'staticfile':
-                template = template.parentNode()
+                template = template.nodeParent()
         self.manager.createStaticFile("untitled", template, self.namespace)
 
     @QtCore.Slot()

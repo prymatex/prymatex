@@ -4,7 +4,6 @@
 from prymatex.qt import QtGui
 
 from prymatex.support import PMXMacroProcessor
-from prymatex.support.command import PMXCommand
 
 class PMXMacroProcessor(PMXMacroProcessor):
     def __init__(self, editor):
@@ -104,9 +103,7 @@ class PMXMacroProcessor(PMXMacroProcessor):
         self.editor.insertPlainText(text)
 
     def executeCommandWithOptions(self, commandHash):
-        command = PMXCommand(self.editor.application.supportManager.uuidgen(), dataHash = commandHash)
-        command.setBundle(self.macro.bundle)
-        command.setManager(self.macro.manager)
+        command = self.editor.application.supportManager.buildAdHocCommand(**commandHash)
         self.editor.insertBundleItem(command, asynchronous = False)
 
     def findWithOptions(self, options):

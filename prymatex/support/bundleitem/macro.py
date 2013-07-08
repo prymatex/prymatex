@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-Macro's module
-"""
-from prymatex.support.bundle import PMXBundleItem
+from .base import PMXBundleItem
 
 class PMXMacro(PMXBundleItem):
     KEYS = ( 'commands', )
@@ -12,7 +9,9 @@ class PMXMacro(PMXBundleItem):
     FOLDER = 'Macros'
     EXTENSION = 'tmMacro'
     PATTERNS = ( '*.tmMacro', '*.plist')
-    
+    DEFAULTS = {
+        'name': 'untitled',
+    }
     def __load_update(self, dataHash, initialize):
         for key in PMXMacro.KEYS:
             if key in dataHash or initialize:

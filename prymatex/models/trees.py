@@ -10,25 +10,25 @@ class TreeNodeBase(object):
         self.__nodeName = nodeName
         self.__nodeParent = nodeParent
         self.__children = []
-    
+
     def setNodeName(self, nodeName):
         self.__nodeName = nodeName
-        
+
     def nodeName(self):
         return self.__nodeName
-        
+
     def setNodeParent(self, nodeParent):
         self.__nodeParent = nodeParent
-        
+
     def nodeParent(self):
         return self.__nodeParent
     
     def childNodes(self):
         return self.__children
-                
+
     def isRootNode(self):
         return self.__nodeParent is None
-    
+
     def appendChild(self, child):
         self.__children.append(child)
         child.setNodeParent(self)

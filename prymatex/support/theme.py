@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import os
-
-from prymatex.support.bundle import PMXManagedObject
+from .base import PMXManagedObject
 
 # TODO Nuevos colores
 """foreground, background, selection, invisibles, lineHighlight, caret, gutter

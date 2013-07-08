@@ -6,8 +6,9 @@
 import os
 import functools
 
-from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
-from prymatex.support.regexp import compileRegexp
+from .base import PMXBundleItem
+from ..base import PMXRunningContext
+from ..regexp import compileRegexp
 
 # New commands
 #input [ selection ]
@@ -52,6 +53,22 @@ class PMXCommand(PMXBundleItem):
     FOLDER = 'Commands'
     EXTENSION = 'tmCommand'
     PATTERNS = ( '*.tmCommand', '*.plist' )
+    # ------ Default Command content on create action
+    DEFAULTS = {
+        'name': 'untitled',
+        'beforeRunningCommand': 'nop',
+        'command': '''# just to remind you of some useful environment variables
+# see Help / Environment Variables for the full list
+echo File: "$TM_FILEPATH"
+echo Word: "$TM_CURRENT_WORD"
+echo Selection: "$TM_SELECTED_TEXT"''',
+        'input': 'selection',
+        'inputFormat': 'text',
+        'fallbackInput': 'document',
+        'output': 'replaceSelectedText',
+        'outputFormat': 'text',
+        'outputCaret': 'afterOutput'
+    }
     EXIT_CODES = {
         200: 'discard',
         201: 'replaceSelectedText',
@@ -156,6 +173,11 @@ class PMXCommand(PMXBundleItem):
         if outputHandler != "error":
             context.removeTempFile()
         processor.endCommand(self)
+
+DEFAULTS = {
+    'draggedFileExtensions': ['png', 'jpg'],
+    'command': '''echo "$TM_DROPPED_FILE"'''
+}
 
 class PMXDragCommand(PMXCommand):
     KEYS = ( 'draggedFileExtensions', )

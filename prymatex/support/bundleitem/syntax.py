@@ -4,8 +4,9 @@
 from __future__ import unicode_literals
 
 from prymatex.utils import six
-from prymatex.support.bundle import PMXBundleItem
-from prymatex.support.regexp import compileRegexp
+
+from .base import PMXBundleItem
+from ..regexp import compileRegexp
 
 class PMXSyntaxProxy(object):
     def __init__(self, dataHash, syntax):
@@ -162,9 +163,34 @@ class PMXSyntax(PMXBundleItem):
     FOLDER = 'Syntaxes'
     EXTENSION = 'tmLanguage'
     PATTERNS = ('*.tmLanguage', '*.plist')
+    DEFAULTS = {
+        'name': 'untitled',
+    'content': {       
+        'scopeName': 'source.untitled',
+        'fileTypes': [],
+        'foldingStartMarker': '/\*\*|\{\s*$',
+        'foldingStopMarker': '\*\*/|^\s*\}',
+        'patterns': [ 
+            { 
+                'name': 'keyword.control.untitled',
+                'match': '\b(if|while|for|return)\b' 
+            },
+            {
+                'name': 'string.quoted.double.untitled',
+                'begin': '"',
+                'end': '"',
+                'patterns': [
+                    { 
+                        'name': 'constant.character.escape.untitled',
+                        'match': '\\.'
+                    }
+            ]}
+        ]}
+    }
     ROOT_GROUPS = [ "comment", "constant", "entity", "invalid",
                     "keyword", "markup", "meta", "storage",
                     "string", "support", "variable" ]
+    
     def load(self, dataHash):
         super(PMXSyntax, self).load(dataHash)
         for key in PMXSyntax.KEYS:

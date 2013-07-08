@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.support.bundle import PMXBundleItem
-from prymatex.utils import plist
+from .base import PMXBundleItem
    
 class PMXProxy(PMXBundleItem):
     KEYS = ( 'content', )
@@ -10,3 +9,6 @@ class PMXProxy(PMXBundleItem):
     FOLDER = 'Proxies'
     EXTENSION = 'tmProxy'
     PATTERNS = ('*.tmProxy', '*.plist')
+    DEFAULTS = {
+        'name': 'untitled'
+    }

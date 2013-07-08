@@ -22,21 +22,10 @@ from prymatex.models.support import BundleItemMenuTreeModel
 
 TABWIDTH = 20
 
-'''
-s = "Name1='Value=2';Name2=Value2;Name3=Value3"
-
-dict(csv.reader([item], delimiter='=', quotechar="'").next() 
-    for item in csv.reader([s], delimiter=';', quotechar="'").next())
-
-{'Name2': 'Value2', 'Name3': 'Value3', 'Name1': 'Value1=2'}
-'''
-
 class BundleItemEditorBaseWidget(QtGui.QWidget):
-    '''
-        Base class for editors  
-    '''
+    '''Base class for editors'''
     TYPE = ''
-    
+
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
         #The bundle item
@@ -235,20 +224,6 @@ echo Selection: "$TM_SELECTED_TEXT"''',
                 'outputFormat': 'text',
                 'outputCaret': 'afterOutput'}
     
-    COMMAND_TEMPLATES = {
-                         'Default': '''# just to remind you of some useful environment variables
-# see Help / Environment Variables for the full list
-echo File: "$TM_FILEPATH"
-echo Word: "$TM_CURRENT_WORD"
-echo Selection: "$TM_SELECTED_TEXT"''',
-                         'Python': '''#!/usr/bin/env python
-# just to remind you of some useful environment variables
-# see Help / Environment Variables for the full list
-import os
-print "File:",  os.environ("TM_FILEPATH")
-print "Word:",  os.environ("TM_CURRENT_WORD")
-print "Selection:",  os.environ("TM_SELECTED_TEXT")'''}
-    
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
@@ -304,10 +279,10 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''}
         
         self.menuCommandTemplates = QtGui.QMenu()
         
-        for name, templateText in self.COMMAND_TEMPLATES.items():
-            action = self.menuCommandTemplates.addAction(name)
-            receiver = lambda template = templateText: self.command.setPlainText(template)
-            self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
+        #for name, templateText in self.COMMAND_TEMPLATES.items():
+        #    action = self.menuCommandTemplates.addAction(name)
+        #    receiver = lambda template = templateText: self.command.setPlainText(template)
+        #    self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
         # TODO Este menu ponerlo como menu contextual    
         # self.pushButtonOptions.setMenu(self.menuCommandTemplates)
 

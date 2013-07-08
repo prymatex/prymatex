@@ -23,9 +23,8 @@
     shellVariables, an array of key/value pairs. See context dependent variables.
     spellChecking, set to 0/1 to disable/enable spell checking.
 '''
-from prymatex.support.bundle import PMXBundleItem
-from prymatex.support.regexp import compileRegexp
-from .regexp import Transformation
+from .base import PMXBundleItem
+from ..regexp import compileRegexp, Transformation
 
 class PMXPreferenceSettings(object):
     KEYS = (
@@ -281,7 +280,9 @@ class PMXPreference(PMXBundleItem):
     FOLDER = 'Preferences'
     EXTENSION = 'tmPreferences'
     PATTERNS = ('*.tmPreferences', '*.plist')
-
+    DEFAULTS = {
+        'name': 'untitled',
+    }
     def load(self, dataHash):
         PMXBundleItem.load(self, dataHash)
         for key in PMXPreference.KEYS:
