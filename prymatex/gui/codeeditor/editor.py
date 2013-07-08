@@ -421,8 +421,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return tuple(path)
         
     def attributeScopePath(self):
-        return self.application.supportManager.attributeScopes(self.filePath)
-        return tuple([])
+        return self.application.supportManager.attributeScopes(self.filePath, self.project and self.project.directory)
         
     # ------------ Obteniendo datos del editor
     def tabKeyBehavior(self):
@@ -609,7 +608,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setExtraSelectionCursors("brace", [cursor for cursor in list(self._currentBraces) if cursor is not None])
         self.updateExtraSelections()
 
-        
     # ------------ QPlainTextEdit Events
     def focusInEvent(self, event):
         # TODO No es para este evento pero hay que poner en alugn lugar el update de las side bars
