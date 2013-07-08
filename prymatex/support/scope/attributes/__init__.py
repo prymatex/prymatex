@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from functools import reduce
+
 from .system import attributes as system_attributes
 from .scm import attributes as scm_attributes
 from .path import attributes as path_attributes
