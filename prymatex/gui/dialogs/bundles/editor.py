@@ -149,7 +149,7 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
 
     @QtCore.Slot()
     def on_actionBundle_triggered(self):
-        bundleNode = self.manager.createBundle("untitled", self.namespace)
+        bundleNode = self.manager.createBundle(self.namespace)
         sIndex = self.manager.bundleTreeModel.createIndex(bundleNode.row(), 0, bundleNode)
         index = self.proxyTreeModel.mapFromSource(sIndex)
         self.treeView.setCurrentIndex(index)

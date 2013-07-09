@@ -50,14 +50,14 @@ class PMXSupportBaseManager(object):
     PROTECTEDNS = 0  # El primero es el protected
     DEFAULTNS = 1  # El segundo es el default
     BUNDLEITEM_CLASSES = dict([ (cls.TYPE, cls) for cls in (
-        bundleitem.PMXSyntax, 
-        bundleitem.PMXSnippet, 
-        bundleitem.PMXMacro, 
-        bundleitem.PMXCommand, 
-        bundleitem.PMXDragCommand, 
+        bundleitem.PMXSyntax,
+        bundleitem.PMXSnippet,
+        bundleitem.PMXMacro,
+        bundleitem.PMXCommand,
+        bundleitem.PMXDragCommand,
         bundleitem.PMXProxy,
-        bundleitem.PMXPreference, 
-        bundleitem.PMXTemplate, 
+        bundleitem.PMXPreference,
+        bundleitem.PMXTemplate,
         bundleitem.PMXProject
     )])
 
@@ -156,7 +156,6 @@ class PMXSupportBaseManager(object):
         assert element in self.ELEMENTS, "The %s namespace is not registered" % namespace
         path = os.path.join(self.namespaces[namespace]["dirname"], element)
         if element not in self.namespaces[namespace] and create:
-            # TODO Usar el del fileManager
             os.makedirs(path)
             self.addNamespaceElement(namespace, element, path)
         return path, os.path.exists(path)
@@ -660,7 +659,7 @@ class PMXSupportBaseManager(object):
         return bundles
 
     def createBundle(self, namespace, **attrs):
-        """Crea un bundle nuevo lo agrega en los bundles y lo retorna,
+        """Crea un bundle nuevo lo agrega en los bundles y lo retorna.
         Precondiciones:
             Tenes por lo menos dos espacios de nombre el base o proteguido y
             uno donde generar los nuevos bundles
