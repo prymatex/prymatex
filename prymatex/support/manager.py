@@ -89,17 +89,13 @@ class PMXSupportBaseManager(object):
         return name in self.namespaces
 
     def protectedNamespace(self):
-        return six.next(self.namespaces.itervalues())
+        return list(self.namespaces.values())[self.PROTECTEDNS]
 
     def defaultNamespace(self):
-        itervalue = self.namespaces.itervalues()
-        six.next(itervalue)
-        return six.next(itervalue)
+        return list(self.namespaces.values())[self.DEFAULTNS]
 
     def safeNamespaceNames(self):
-        iterkeys = self.namespaces.iterkeys()
-        six.next(iterkeys)
-        return list(iterkeys)
+        return list(self.namespaces.values())[self.DEFAULTNS:]
 
     def safeNamespace(self, name = None):
         if name is None:
@@ -252,7 +248,7 @@ class PMXSupportBaseManager(object):
     def loadSupport(self, callback=None):
         # Install message handler
         self.messageHandler = callback
-        for namespace in list(self.namespaces.itervalues())[::-1]:
+        for namespace in list(self.namespaces.values())[::-1]:
             self.loadThemes(namespace)
             self.loadBundles(namespace)
         for bundle in self.getAllBundles():
@@ -319,7 +315,7 @@ class PMXSupportBaseManager(object):
 
     # ----------- POPULATE BUNDLE AND LOAD BUNDLE ITEMS
     def populateBundle(self, bundle):
-        for namespace in list(self.namespaces.itervalues())[::-1]:
+        for namespace in list(self.namespaces.values())[::-1]:
             if not bundle.hasSource(namespace.name):
                 continue
             bundleDirectory = os.path.dirname(bundle.sourcePath(namespace.name))
@@ -359,7 +355,7 @@ class PMXSupportBaseManager(object):
         # Install message handler
         self.messageHandler = callback
         self.logger.debug("Begin reload support.")
-        for namespace in list(self.namespaces.itervalues())[::-1]:
+        for namespace in list(self.namespaces.values())[::-1]:
             print(namespace.name)
             self.logger.debug("Search in %s, %s." % (namespace.name, namespace.basedir))
             self.reloadThemes(namespace)
@@ -431,7 +427,7 @@ class PMXSupportBaseManager(object):
 
     # ----- REPOPULATED BUNDLE AND RELOAD BUNDLE ITEMS
     def repopulateBundle(self, bundle):
-        for namespace in list(self.namespaces.itervalues())[::-1]:
+        for namespace in list(self.namespaces.values())[::-1]:
             if not bundle.hasSource(namespace.name):
                 continue
             bundlePath = bundle.sourcePath(namespace.name)
@@ -686,7 +682,7 @@ class PMXSupportBaseManager(object):
         for bundleItem in bundleItems:
             self.deleteBundleItem(bundleItem)
 
-        for namespace in self.namespaces.itervalues():
+        for namespace in self.namespaces.values():
             if not bundle.hasSource(namespace.name):
                 continue
             #Si el espacio de nombres es distinto al protegido lo elimino
@@ -805,7 +801,7 @@ class PMXSupportBaseManager(object):
         """Elimina un bundle por su uuid,
         si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
         """
-        for namespace in self.namespaces.itervalues():
+        for namespace in self.namespaces.values():
             if not bundleItem.hasSource(namespace.name):
                 continue
             #Si el espacio de nombres es distinto al protegido lo elimino
@@ -941,7 +937,7 @@ class PMXSupportBaseManager(object):
     def deleteTheme(self, theme):
         """Elimina un theme por su uuid"""
         
-        for namespace in self.namespaces.itervalues():
+        for namespace in self.namespaces.values():
             if not theme.hasSource(namespace.name):
                 continue
             #Si el espacio de nombres es distinto al protegido lo elimino
