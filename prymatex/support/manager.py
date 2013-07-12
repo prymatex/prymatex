@@ -226,7 +226,7 @@ class PMXSupportBaseManager(object):
         syntaxHash = {'content': syntax}
         syntaxHash['name'] = name if name is not None else "Ad-Hoc syntax"
         syntax = bundleitem.PMXSyntax(self.uuidgen(), self, bundle)
-        syntax.load(snippetHash)
+        syntax.load(syntaxHash)
         return syntax
 
     #--------------- Scopes and selectors --------------
