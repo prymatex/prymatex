@@ -71,15 +71,6 @@ class ProjectTreeNode(FileSystemTreeNode):
         self.namespace = None
         self.load(dataHash)
     
-    def environment(self):
-        env = {
-            'TM_PROJECT_DIRECTORY': self.directory,
-            'TM_PROJECT_NAME': self.nodeName(),
-            'TM_PROJECT_PATH': self.projectPath,
-            'TM_PROJECT_NAMESPACE': self.namespace }
-        env.update(self.manager.supportProjectEnvironment(self))
-        return env
-
     def load(self, hash):
         for key in ProjectTreeNode.KEYS:
             value = hash.get(key, None)
@@ -119,7 +110,11 @@ class ProjectTreeNode(FileSystemTreeNode):
             for var in self.shellVariables:
                 if var['enabled']:
                     environment[var['variable']] = var['value']
-        environment.update(self.environment())
+        environment.update({
+            'TM_PROJECT_DIRECTORY': self.directory,
+            'TM_PROJECT_NAME': self.nodeName(),
+            'TM_PROJECT_PATH': self.projectPath,
+            'TM_PROJECT_NAMESPACE': self.namespaceName })
         return environment
 
     @classmethod

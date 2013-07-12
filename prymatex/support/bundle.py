@@ -18,42 +18,27 @@ class PMXBundle(PMXManagedObject):
     }
     def __init__(self, uuid, manager):
         PMXManagedObject.__init__(self, uuid, manager)
-        self.__supportPath = None
         self.populated = False
 
     def populate(self):
         self.populated = True
 
-    def hasSupportPath(self):
-        return self.__supportPath is not None
-        
-    def setSupportPath(self, supportPath):
-        self.__supportPath = supportPath
-    
-    def supportPath(self):
-        return self.__supportPath
-    
-    def relocateSupport(self, path):
-        try:
-            # TODO Ver que pasa si ya existe support
-            shutil.copytree(self.supportPath(), path, symlinks = True)
-            self.setSupportPath(path)
-        except:
-            pass
-    
     def __load_update(self, dataHash, initialize):
         for key in PMXBundle.KEYS:
             if key in dataHash or initialize:
                 setattr(self, key, dataHash.get(key, None))
 
     def load(self, dataHash):
+        PMXManagedObject.load(self, dataHash)
+        self.supportPath = None
         self.__load_update(dataHash, True)
         
     def update(self, dataHash):
+        PMXManagedObject.update(self, dataHash)
         self.__load_update(dataHash, False)
 
     def dump(self):
-        dataHash = super(PMXBundle, self).dump()
+        dataHash = PMXManagedObject.dump(self)
         for key in PMXBundle.KEYS:
             value = getattr(self, key, None)
             if value is not None:
@@ -62,9 +47,16 @@ class PMXBundle(PMXManagedObject):
 
     def environmentVariables(self):
         environment = self.manager.environmentVariables()
-        environment['TM_BUNDLE_PATH'] = self.currentPath()
-        if self.hasSupportPath():
-            environment['TM_BUNDLE_SUPPORT'] = self.supportPath()
+        environment['TM_BUNDLE_PATH'] = self.sourcePath()
+        if self.supportPath is None:
+           self.supportPath = ""
+           for name, source in self.sources.items():
+               supportPath = os.path.join(source.path, "Support")
+               if os.path.exists(supportPath):
+                   self.supportPath = supportPath
+                   break
+        if self.supportPath != "":
+            environment['TM_BUNDLE_SUPPORT'] = self.supportPath
         return environment
 
     def createSourcePath(self, baseDirectory):
