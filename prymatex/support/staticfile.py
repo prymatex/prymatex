@@ -4,28 +4,26 @@ import os
 
 from prymatex.utils import encoding
 
-DEFAULTS = {
+class PMXStaticFile(object):
+    TYPE = 'staticfile'
+    DEFAULTS = {
     'content': '''//
 //  ${TM_NEW_FILE_BASENAME}
 //
 //  Created by ${TM_FULLNAME} on ${TM_DATE}.
 //  Copyright (c) ${TM_YEAR} ${TM_ORGANIZATION_NAME}. All rights reserved.
-//'''
-}
-
-class PMXStaticFile(object):
-    TYPE = 'staticfile'
+//'''}
     def __init__(self, path, parentItem):
         self.path = path
         self.name = os.path.basename(path)
         self.parentItem = parentItem
-
-    def hasNamespace(self, namespace):
-        return self.parentItem.hasNamespace(namespace)
-        
+    
     def enabled(self):
         return self.parentItem.enabled()
     
+    def hasSource(self, sourceName):
+        return self.parentItem.hasSource(sourceName)
+        
     # TODO Mejorar esto del content
     def getFileContent(self):
         content = ""

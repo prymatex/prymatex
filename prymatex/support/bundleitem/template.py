@@ -66,7 +66,7 @@ fi"'''
         # TODO Decile al manager que corra el comando
         with PMXRunningContext(self, self.command, environment) as context:
             context.asynchronous = False
-            context.workingDirectory = self.currentPath()
+            context.workingDirectory = self.source()
             self.manager.runProcess(context, functools.partial(self.afterExecute, callback))
     
     def afterExecute(self, callback, context):
@@ -78,12 +78,13 @@ fi"'''
         return os.path.join(directory, self.FILE)
 
     @classmethod
-    def dataFilePath(cls, path):
-        return os.path.join(path, cls.FILE)
-        
-    def staticPaths(self):
-        templateFilePaths = glob(os.path.join(self.currentPath(), '*'))
-        templateFilePaths.remove(self.dataFilePath(self.currentPath()))
+    def dataFilePath(cls, sourcePath):
+        return os.path.join(sourcePath, cls.FILE)
+    
+    @classmethod
+    def staticFilePaths(cls, sourceFilePath):
+        templateFilePaths = glob(os.path.join(sourceFilePath, '*'))
+        templateFilePaths.remove(cls.dataFilePath(sourceFilePath))
         return templateFilePaths
 
     @classmethod

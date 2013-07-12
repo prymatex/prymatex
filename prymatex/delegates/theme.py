@@ -8,16 +8,16 @@ class ColorDelegate(QtGui.QStyledItemDelegate):
         editor = QtGui.QColorDialog(parent)
         editor.setOptions(QtGui.QColorDialog.ShowAlphaChannel)
         return editor
-    
-    def setModelData(self, colorDialog, model, index):
-        if colorDialog.result() == QtGui.QDialog.Accepted:
-            color = colorDialog.currentColor()
+
+    def setModelData(self, editedWidget, model, index):
+        if editedWidget.result() == QtGui.QDialog.Accepted:
+            color = editedWidget.currentColor()
             model.setData(index, color)
-    
-    def setEditorData(self, colorDialog, index):
+
+    def setEditorData(self, editedWidget, index):
         color = index.data()
         if color is not None:
-            colorDialog.setCurrentColor(color)
+            editedWidget.setCurrentColor(color)
             
     def paint(self, painter, option, index):
         data = index.data()

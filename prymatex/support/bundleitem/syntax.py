@@ -165,7 +165,6 @@ class PMXSyntax(PMXBundleItem):
     PATTERNS = ('*.tmLanguage', '*.plist')
     DEFAULTS = {
         'name': 'untitled',
-    'content': {       
         'scopeName': 'source.untitled',
         'fileTypes': [],
         'foldingStartMarker': '/\*\*|\{\s*$',
@@ -185,7 +184,8 @@ class PMXSyntax(PMXBundleItem):
                         'match': '\\.'
                     }
             ]}
-        ]}
+        ],
+        'repository': []
     }
     ROOT_GROUPS = [ "comment", "constant", "entity", "invalid",
                     "keyword", "markup", "meta", "storage",
@@ -218,9 +218,9 @@ class PMXSyntax(PMXBundleItem):
 
     def update(self, dataHash):
         PMXBundleItem.update(self, dataHash)
-        # TODO Solo si camio el content ;)
-        delattr(self, '_grammar')
-        
+        if hasattr(self, '_grammar'):
+            delattr(self, '_grammar')
+
     @property
     def syntaxes(self):
         return self.manager.getSyntaxesAsDictionary()

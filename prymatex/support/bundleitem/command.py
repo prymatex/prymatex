@@ -174,16 +174,16 @@ echo Selection: "$TM_SELECTED_TEXT"''',
             context.removeTempFile()
         processor.endCommand(self)
 
-DEFAULTS = {
-    'draggedFileExtensions': ['png', 'jpg'],
-    'command': '''echo "$TM_DROPPED_FILE"'''
-}
-
 class PMXDragCommand(PMXCommand):
     KEYS = ( 'draggedFileExtensions', )
     TYPE = 'dragcommand'
     FOLDER = 'DragCommands'
     FILES = ( '*.tmCommand', '*.plist' )
+    DEFAULTS = {
+        'name': 'untitled',
+        'draggedFileExtensions': ['png', 'jpg'],
+        'command': '''echo "$TM_DROPPED_FILE"'''
+    }
 
     def __load_update(self, dataHash, initialize):
         for key in PMXDragCommand.KEYS:

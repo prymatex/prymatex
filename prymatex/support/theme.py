@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
+from prymatex.utils import osextra
+
 from .base import PMXManagedObject
 
 # TODO Nuevos colores
@@ -51,72 +54,98 @@ DEFAULT_SCOPE_SELECTORS = [('Comment', 'comment'),
 
 class PMXThemeStyle(object):
     KEYS = ( 'scope', 'name', 'settings' )
-    def __init__(self, dataHash, theme):
+    def __init__(self, theme):
         self.theme = theme
-        self.load(dataHash)
+        self.__settings = {}
+
+    def settings(self):
+        return self.__settings
+
+    def __load_update(self, dataHash, initialize):
+        for key in PMXThemeStyle.KEYS:
+            if key in dataHash or initialize:
+                value = dataHash.get(key, None)
+                if key == 'settings':
+                    self.__settings.update(value or {})
+                    self.__settings = dict([ item for item in self.__settings.items() if item[1] is not None])
+                    continue
+                elif key == 'scope':
+                    self.scopeSelector = self.theme.manager.createScopeSelector(value)
+                setattr(self, key, value)
 
     def load(self, dataHash):
-        for key in PMXThemeStyle.KEYS:
-            value = dataHash.get(key, None)
-            if key == 'scope':
-                self.scopeSelector = self.theme.manager.createScopeSelector(value)
-            setattr(self, key, value)
-
+        self.__load_update(dataHash, True)
+        
     def update(self, dataHash):
-        for key in dataHash.keys():
-            value = dataHash[key]
-            if key == 'settings':
-                self.settings.update(value)
-                self.settings = dict([tupla for tupla in iter(self.settings.items()) if tupla[1] != None])
-                continue
-            elif key == 'scope':
-                self.scopeSelector = self.theme.manager.createScopeSelector(value)
-            setattr(self, key, value)
-    
+        self.__load_update(dataHash, False)
+
     def dump(self):
         dataHash = {'name': self.name}
         if self.scope is not None:
             dataHash['scope'] = self.scope
-        dataHash['settings'] = {}
-        for name, setting in self.settings.items():
-            if setting != None:
-                dataHash['settings'][name] = setting
+        if self.__settings is not None:
+            dataHash['settings'] = self.__settings
         return dataHash
-        
+
 class PMXTheme(PMXManagedObject):
     KEYS = ( 'name', 'comment', 'author', 'settings' )
+    EXTENSION = 'tmTheme'
+    PATTERNS = ( '*.tmTheme', )
     
-    def __init__(self, uuid):
-        super(PMXTheme, self).__init__(uuid)
+    def __init__(self, uuid, manager):
+        PMXManagedObject.__init__(self, uuid, manager)
+        self.defaultSettings = {}
         self.styles = []
-
-    def load(self, dataHash):
+    
+    def __load_update(self, dataHash, initialize):
         for key in PMXTheme.KEYS:
-            setattr(self, key, dataHash.get(key, None))
-
-    def setDefaultSettings(self, settings):
-        self.settings = settings
-        
-    def update(self, dataHash):
-        for key in PMXTheme.KEYS:
-            if key in dataHash:
-                value = dataHash.get(key)
+            if key in dataHash or initialize:
+                value = dataHash.get(key, None)
                 if key == 'settings':
-                    self.settings.update(value)
-                    self.settings = dict([tupla for tupla in iter(self.settings.items()) if tupla[1] != None])
+                    if isinstance(value, dict):
+                        self.setSettings(value)
+                    elif isinstance(value, list):
+                        if value:
+                            self.setSettings(value.pop(0)["settings"])
+                        for setting in value:
+                            self.createThemeStyle(setting)
                 else:
                     setattr(self, key, value)
+
+    def load(self, dataHash):
+        self.__load_update(dataHash, True)
+        
+    def update(self, dataHash):
+        self.__load_update(dataHash, False)
+
+    def setSettings(self, settings):
+        self.defaultSettings.update(settings or {})
+        self.defaultSettings = dict([ item for item in self.defaultSettings.items() if item[1] is not None])
+    
+    def settings(self):
+        return self.defaultSettings
     
     def dump(self):
-        dataHash = super(PMXTheme, self).dump()
+        dataHash = PMXManagedObject.dump(self)
         for key in PMXTheme.KEYS:
-            value = getattr(self, key)
-            if value != None:
+            value = getattr(self, key, None)
+            if value is not None:
                 dataHash[key] = value
-        dataHash['settings'] = [ { 'settings': self.settings } ]
+        dataHash['settings'] = [ { 'settings': self.defaultSettings } ]
         for style in self.styles:
             dataHash['settings'].append(style.dump())
         return dataHash
 
+    def createThemeStyle(self, settings):
+        if 'name' not in settings or not settings['name']:
+            settings['name'] = 'untitled'
+        style = self.manager.addThemeStyle(PMXThemeStyle(self))
+        style.load(settings)
+        self.styles.append(style)
+        return style
+
     def removeThemeStyle(self, style):
         self.styles.remove(style)
+        
+    def createSourcePath(self, baseDirectory):
+        return osextra.path.ensure_not_exists(os.path.join(baseDirectory, "%%s.%s" % self.EXTENSION), osextra.to_valid_name(self.name))

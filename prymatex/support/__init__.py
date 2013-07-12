@@ -3,4 +3,5 @@
 
 from .bundleitem import *
 from prymatex.support.theme import PMXTheme
-from prymatex.support.processor import PMXSyntaxProcessor, PMXCommandProcessor, PMXMacroProcessor
+from prymatex.support.processor import (PMXSyntaxProcessor,
+    PMXCommandProcessor, PMXMacroProcessor)

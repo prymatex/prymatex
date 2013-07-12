@@ -18,7 +18,7 @@ class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
         if node.isRootNode() or not node.enabled():
             return False
         if self.namespacesFilter:
-            if not any([node.hasNamespace(ns) for ns in self.namespacesFilter]):
+            if not any([node.hasSource(ns) for ns in self.namespacesFilter]):
                 return False
         if self.bundleItemTypesFilter:
             if node.TYPE not in self.bundleItemTypesFilter:
@@ -209,12 +209,10 @@ class ThemeStyleProxyTableModel(QtGui.QSortFilterProxyModel):
         node = index.internalPointer()
         return regexp.exactMatch(str(node.styleItem().theme.uuid))
 
-
     def lessThan(self, left, right):
         leftData = left.internalPointer()
         rightData = right.internalPointer()
         return rightData.name > leftData.name
-
 
     # ------------------ Custom functions
     def style(self, index):

@@ -1,16 +1,22 @@
 #!/usr/bin/env python
 
 import os
-from prymatex.support import scope, scripts
+from glob import glob
+from functools import reduce
+from collections import namedtuple
+
+from prymatex.support import scripts
+from prymatex.utils import six
+
+Source = namedtuple("Source", "name path mtime")
 
 class PMXManagedObject(object):
-    _PATH = 0
-    _MTIME = 1
-    def __init__(self, uuid):
+    PATTERNS = ()
+    def __init__(self, uuid, manager):
         self.uuid = uuid
-        self.namespaces = []
+        self.manager = manager
         self.sources = {}
-        self.manager = None
+        self.pointer = None
         self.populated = False
         self.statics = []
 
@@ -35,73 +41,52 @@ class PMXManagedObject(object):
     def enabled(self):
         return self.manager.isEnabled(self.uuid)
     
-    def path(self, namespace):
-        return self.sources[namespace][self._PATH]
+    def setSource(self, name):
+        assert name in self.sources
+        self.pointer = name
 
-    def currentPath(self):
-        return self.sources[self.currentNamespace()][self._PATH]
+    def addSource(self, name, path):
+        assert name not in self.sources
+        mtime = os.path.exists(path) and os.path.getmtime(path) or 0
+        self.sources[name] = Source(name = name, path = path, mtime = mtime)
+        if self.pointer is None:
+            self.pointer = name
 
-    def isProtected(self):
-        return self.manager.protectedNamespace() in self.namespaces
-        
-    def isSafe(self):
-        return len(self.namespaces) > 1
+    def hasSource(self, name):
+        return name in self.sources
+    hasNamespace = hasSource
     
-    def hasNamespace(self, namespace):
-        return namespace in self.namespaces
-
-    def currentNamespace(self):
-        return self.namespaces[-1]
-
-    def sourceChanged(self, namespace):
-        return self.sources[namespace][self._MTIME] != os.path.getmtime(self.sources[namespace][self._PATH])
-
-    def removeSource(self, namespace):
-        if namespace in self.namespaces:
-            self.namespaces.remove(namespace)
-            self.sources.pop(namespace)
-
-    def addSource(self, namespace, path):
-        if namespace not in self.namespaces:
-            index = self.manager.nsorder.index(namespace)
-            if index < len(self.namespaces):
-                self.namespaces.insert(index, namespace)
-            else:
-                self.namespaces.append(namespace)
-            self.setSource(namespace, path)
-            
-    def setSource(self, namespace, path):
-        self.sources[namespace] = (path, 0)
-
-    def hasSources(self):
-        return bool(self.sources)
-
-    def staticPaths(self):
-        return []
+    def sourceName(self):
+        return self.pointer
+    
+    def sourcePath(self, name = None):
+        return self.sources[name or self.pointer].path
+    
+    def updateMtime(self, sourceName):
+        source = self.sources[sourceName]
+        self.sources[sourceName] = source._replace(mtime = os.path.getmtime(source.path))
 
     def addStaticFile(self, staticPath):
         self.statics.append(staticPath)
 
     def removeStaticFile(self, staticPath):
         self.statics.remove(staticPath)
-        
-    def createDataFilePath(self, basePath, baseName = None):
-        return os.path.join(basePath, baseName or '')
+
+    def createSourcePath(self, baseDirectory):
+        return baseDirectory
 
     @classmethod
-    def dataFilePath(cls, path):
-        return path
-        
-    def updateMtime(self, namespace):
-        path = self.sources[namespace][self._PATH]
-        self.sources[namespace] = (path, os.path.getmtime(path))
+    def staticFilePaths(cls, baseDirectory):
+        return []
 
-    def setDirty(self):
-        for namespace in self.namespaces:
-            self.sources[namespace] = (self.sources[namespace][self._PATH], 0)
-
-    def setManager(self, manager):
-        self.manager = manager
+    @classmethod
+    def dataFilePath(cls, sourcePath):
+        return sourcePath
+    
+    @classmethod
+    def sourcePaths(cls, baseDirectory):
+        patterns = map(lambda pattern: os.path.join(baseDirectory, pattern), cls.PATTERNS)
+        return reduce(lambda x, y: x + glob(y), patterns, [])
 
 class PMXRunningContext(object):
     TEMPLATE = """Item Name: {itemName}

@@ -100,7 +100,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def defaultTheme(self, uuid):
         theme = self.application.supportManager.getTheme(uuid)
 
-        self.colours = theme.settings
+        self.colours = theme.settings()
         
         #Set color for QPlainTextEdit
         appStyle = """QPlainTextEdit {background-color: %s;

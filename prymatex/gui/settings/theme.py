@@ -80,7 +80,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
 
     def updateUi(self, theme):
         self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.model().findIndex(theme))    
-        settings = theme.settings
+        settings = theme.settings()
         self.pushButtonForeground.setStyleSheet("background-color: " + color2rgba(settings['foreground'])[:7])
         self.pushButtonBackground.setStyleSheet("background-color: " + color2rgba(settings['background'])[:7])
         self.pushButtonSelection.setStyleSheet("background-color: " + color2rgba(settings['selection'])[:7])
@@ -117,31 +117,26 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         self.comboBoxScope.currentIndexChanged[str].connect(self.on_comboBoxScope_changed)
         self.comboBoxScope.editTextChanged.connect(self.on_comboBoxScope_changed)
 
-
     def on_tableView_activatedOrPressed(self, index):
         style = self.application.supportManager.themeStyleProxyModel.style(index)
         self.comboBoxScope.setEditText(style.scope)
 
-
-    def on_comboBoxScope_changed(self, string):
+    def on_comboBoxScope_changed(self, scopeText):
         index = self.tableViewStyles.currentIndex()
         if index.isValid():
             style = self.application.supportManager.themeStyleProxyModel.style(index)
-            if string != style.scope:
-                self.application.supportManager.updateThemeStyle(style, scope = string)
-
+            if scopeText != style.scope:
+                self.application.supportManager.updateThemeStyle(style, scope = scopeText)
 
     def on_pushButtonAdd_pressed(self):
         theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
-        self.application.supportManager.createThemeStyle('untitled', str(self.comboBoxScope.currentText()), theme)
-
+        self.application.supportManager.createThemeStyle(theme, scope = str(self.comboBoxScope.currentText()))
 
     def on_pushButtonRemove_pressed(self):
         index = self.tableViewStyles.currentIndex()
         if index.isValid():
             style = self.application.supportManager.themeStyleProxyModel.mapToSource(index).internalPointer()
             self.application.supportManager.deleteThemeStyle(style)
-
 
     # -------------------- Colors Push Button
     def setupPushButton(self):
@@ -154,12 +149,11 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         self.pushButtonGutterBackground.pressed.connect(lambda element='gutter': self.on_pushButtonColor_pressed(element))
         self.pushButtonGutterForeground.pressed.connect(lambda element='gutterForeground': self.on_pushButtonColor_pressed(element))
 
-
     def on_pushButtonColor_pressed(self, element):
         theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
-        settings = theme.settings
+        settings = theme.settings()
         color, ok = QtGui.QColorDialog.getRgba(settings[element].rgba(), self)
         if ok:
-            self.application.supportManager.updateTheme(theme, settings={element: color})
+            self.application.supportManager.updateTheme(theme, settings = { element: color })
             self.updateUi(theme)
             self.setDefaultThemeSetting(theme)

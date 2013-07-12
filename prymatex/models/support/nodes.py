@@ -131,43 +131,38 @@ class ThemeTableRow(object):
     def __getattr__(self, name):
         return getattr(self.__themeItem, name)
 
-
     def themeItem(self):
         return self.__themeItem
 
-
     # ----------- Theme decoration -----------
-    @property
     def settings(self):
-        settings = dict([(key_value4[0], rgba2color(key_value4[1])) for key_value4 in [key_value for key_value in iter(self.__themeItem.settings.items()) if key_value[1].startswith('#')]])
+        settings = dict([(key_value4[0], rgba2color(key_value4[1])) for key_value4 in [key_value for key_value in iter(self.__themeItem.settings().items()) if key_value[1].startswith('#')]])
         
         # Fix some color keys
         settings.setdefault('gutter', settings['background'])
         settings.setdefault('gutterForeground', settings['foreground'])
         
         # Fonts
-        settings['fontStyle'] = self.__themeItem.settings['fontStyle'].split() if 'fontStyle' in self.__themeItem.settings else []
+        settings['fontStyle'] = self.__themeItem.settings()['fontStyle'].split() if 'fontStyle' in self.__themeItem.settings() else []
         return settings
 
-    
     def update(self, dataHash):
         if 'settings' in dataHash:
-            settings = dict([(key_value2[0], color2rgba(key_value2[1])) for key_value2 in iter(dataHash['settings'].items())])
-            if 'fontStyle' in dataHash['settings']:
-                settings['fontStyle'] = " ".join(dataHash['settings']['fontStyle'])
+            fontStyle = dataHash['settings'].pop('fontStyle', None)
+            settings = dict([(key_value2[0], color2rgba(key_value2[1])) for key_value2 in dataHash['settings'].items()])
+            if fontStyle is not None:
+                settings['fontStyle'] = " ".join(fontStyle)
             dataHash['settings'] = settings
         self.__themeItem.update(dataHash)
-
     
     def clearCache(self):
         self.STYLES_CACHE = {}
-
 
     def getStyle(self, scopePath = None):
         if scopePath in self.STYLES_CACHE:
             return self.STYLES_CACHE[scopePath]
         base = {}
-        base.update(self.settings)
+        base.update(self.settings())
         if scopePath is not None:
             styles = []
             for style in self.styles:
@@ -176,10 +171,9 @@ class ThemeTableRow(object):
                     styles.append((rank.pop(), style))
             styles.sort(key = lambda t: t[0])
             for style in styles:
-                base.update(style[1].settings)
+                base.update(style[1].settings())
         self.STYLES_CACHE[scopePath] = base
         return base
-
 
 #====================================================
 # Themes Styles Row
@@ -197,18 +191,18 @@ class ThemeStyleTableRow(object):
         return self.__styleItem
 
     # ----------- Item decoration -----------
-    @property
     def settings(self):
-        settings = dict([(key_value5[0], rgba2color(key_value5[1])) for key_value5 in [key_value1 for key_value1 in iter(self.__styleItem.settings.items()) if key_value1[1].startswith('#')]])
+        settings = dict([(key_value5[0], rgba2color(key_value5[1])) for key_value5 in [key_value1 for key_value1 in self.__styleItem.settings().items() if key_value1[1].startswith('#')]])
         
         # Fonts
-        settings['fontStyle'] = self.__styleItem.settings['fontStyle'].split() if 'fontStyle' in self.__styleItem.settings else []
+        settings['fontStyle'] = self.__styleItem.settings()['fontStyle'].split() if 'fontStyle' in self.__styleItem.settings() else []
         return settings
     
     def update(self, dataHash):
         if 'settings' in dataHash:
-            settings = dict([(key_value3[0], color2rgba(key_value3[1])) for key_value3 in iter(dataHash['settings'].items())])
-            if 'fontStyle' in dataHash['settings']:
-                settings['fontStyle'] = " ".join(dataHash['settings']['fontStyle'])
+            fontStyle = dataHash['settings'].pop('fontStyle', None)
+            settings = dict([(key_value2[0], color2rgba(key_value2[1])) for key_value2 in dataHash['settings'].items()])
+            if fontStyle is not None:
+                settings['fontStyle'] = " ".join(fontStyle)
             dataHash['settings'] = settings
         self.__styleItem.update(dataHash)

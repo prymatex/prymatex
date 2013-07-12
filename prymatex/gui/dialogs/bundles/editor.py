@@ -100,10 +100,10 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
             bundle = bundle.nodeParent()
         return bundle
 
-    def createBundleItem(self, itemName, itemType):
+    def createBundleItem(self, itemType):
         index = self.treeView.currentIndex()
         bundle = self.getBundleForIndex(index)
-        bundleItemNode = self.manager.createBundleItem(itemName, itemType, bundle, self.namespace)
+        bundleItemNode = self.manager.createBundleItem(itemType, bundle, self.namespace)
         sIndex = self.manager.bundleTreeModel.createIndex(bundleItemNode.row(), 0, bundleItemNode)
         index = self.proxyTreeModel.mapFromSource(sIndex)
         self.treeView.setCurrentIndex(index)
@@ -112,27 +112,27 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         
     @QtCore.Slot()
     def on_actionCommand_triggered(self):
-        self.createBundleItem("untitled", "command")
+        self.createBundleItem("command")
 
     @QtCore.Slot()        
     def on_actionDragCommand_triggered(self):
-        self.createBundleItem("untitled", "dragcommand")
+        self.createBundleItem("dragcommand")
 
     @QtCore.Slot()        
     def on_actionLanguage_triggered(self):
-        self.createBundleItem("untitled", "syntax")
+        self.createBundleItem("syntax")
 
     @QtCore.Slot()        
     def on_actionSnippet_triggered(self):
-        self.createBundleItem("untitled", "snippet")
+        self.createBundleItem("snippet")
 
     @QtCore.Slot()        
     def on_actionTemplate_triggered(self):
-        self.createBundleItem("untitled", "template")
+        self.createBundleItem("template")
 
     @QtCore.Slot()        
     def on_actionProject_triggered(self):
-        self.createBundleItem("untitled", "project")
+        self.createBundleItem("project")
 
     @QtCore.Slot()        
     def on_actionStaticFile_triggered(self):
@@ -141,11 +141,11 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
             template = self.proxyTreeModel.node(index)
             if template.TYPE == 'staticfile':
                 template = template.nodeParent()
-        self.manager.createStaticFile("untitled", template, self.namespace)
+        self.manager.createStaticFile(template, self.namespace)
 
     @QtCore.Slot()
     def on_actionPreferences_triggered(self):
-        self.createBundleItem("untitled", "preference")
+        self.createBundleItem("preference")
 
     @QtCore.Slot()
     def on_actionBundle_triggered(self):

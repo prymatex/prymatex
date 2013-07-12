@@ -69,8 +69,11 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             
             if userData.testStateHash(self.__build_userData_hash(scopeName, text, blockState)):
                 # Only change the formats
+                formats = []
                 for frange in block.layout().additionalFormats():
                     frange.format = self.highlightFormat(self.editor.scope(blockPosition = frange.start).path)
+                    formats.append(frange)
+                block.layout().setAdditionalFormats(formats)
                 blockState = block.userState()
                 block = block.next()
                 continue

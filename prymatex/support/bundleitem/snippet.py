@@ -13,7 +13,6 @@ from ..base import PMXRunningContext
 from ..processor import PMXSyntaxProcessor
 from .syntax import PMXSyntax
 
-SNIPPET_PARSER = PMXSyntax(uuidmodule.uuid1())
 SNIPPET_SYNTAX = { 
  'patterns': [{'captures': {'1': {'name': 'keyword.escape.snippet'}},
                'match': '\\\\(\\\\|\\$|`)',
@@ -549,15 +548,18 @@ Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''
             if value is not None:
                 dataHash[key] = value
         return dataHash
+  
+    @property
+    def parser(self):
+        if not hasattr(self, '_parser'):
+            self._parser = self.manager.buildAdHocSyntax(SNIPPET_SYNTAX, self.bundle)
+        return self._parser
 
     @property
     def snippet(self):
         if not hasattr(self, '_snippet'):
             processor = PMXSnippetSyntaxProcessor(self)
-            # TODO: Parche feo de manager
-            SNIPPET_PARSER.setManager(self.manager)
-            SNIPPET_PARSER.load(SNIPPET_SYNTAX)
-            SNIPPET_PARSER.parse(self.content, processor)
+            self.parser.parse(self.content, processor)
             self._snippet = processor.node
             self.addTaborder(processor.taborder)
         return self._snippet

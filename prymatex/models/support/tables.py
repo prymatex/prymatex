@@ -13,15 +13,12 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
         self.styles = []
         self.headers = ['Element', 'Fg', 'Bg', 'Font Style']
 
-
     # ---------------------- QtCore.QAbstractTableModel overrides
     def rowCount(self, parent):
         return len(self.styles)
 
-
     def columnCount(self, parent):
         return 4
-
 
     def data(self, index, role):
         if not index.isValid(): 
@@ -30,7 +27,7 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
             row = index.row()
             column = index.column()
             style = self.styles[row]
-            settings = self.styles[row].settings
+            settings = self.styles[row].settings()
             if column == 0:
                 return style.name
             elif column == 1 and 'foreground' in settings:
@@ -43,7 +40,7 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
             row = index.row()
             column = index.column()
             style = self.styles[row]
-            settings = self.styles[row].settings
+            settings = self.styles[row].settings()
             if column == 0:
                 font = QtGui.QFont()
                 if 'bold' in settings['fontStyle']:
@@ -57,14 +54,14 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
             row = index.row()
             column = index.column()
             style = self.styles[row]
-            settings = self.styles[row].settings
+            settings = self.styles[row].settings()
             if column == 0 and 'foreground' in settings:
                 return settings['foreground']
         elif role is QtCore.Qt.BackgroundColorRole:
             row = index.row()
             column = index.column()
             style = self.styles[row]
-            settings = self.styles[row].settings
+            settings = self.styles[row].settings()
             if column == 0 and 'background' in settings:
                 return settings['background']
             elif column == 1 and 'foreground' in settings:
@@ -72,12 +69,9 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
             elif column == 2 and 'background' in settings:
                 return settings['background']
 
-
     def setData(self, index, value, role):
-        """
-        Retornar verdadero si se puedo hacer el camio, falso en caso contratio
-        """
-        if not index.isValid: return False
+        """Retornar verdadero si se puedo hacer el camio, falso en caso contratio"""
+        if not index.isValid(): return False
 
         if role == QtCore.Qt.EditRole:
             row = index.row()
@@ -95,18 +89,15 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
             return True
         return False
 
-
     def flags(self, index):
         if not index.isValid():  
             return QtCore.Qt.NoItemFlags  
         return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
-
     def headerData(self, section, orientation, role):
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
                 return self.headers[section]
-
 
     def index(self, row, column, parent = QtCore.QModelIndex()):
         style = self.styles[row]
@@ -114,7 +105,6 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
             return self.createIndex(row, column, style)
         else:
             return QtCore.QModelIndex()
-
 
     # -------------------- Custom functions
     def style(self, index):
@@ -125,7 +115,6 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
         self.beginInsertRows(QtCore.QModelIndex(), len(self.styles), len(self.styles))
         self.styles.append(style)
         self.endInsertRows()
-
 
     def removeStyle(self, style):
         index = self.styles.index(style)

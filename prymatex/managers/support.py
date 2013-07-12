@@ -407,6 +407,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
         return themeRow
     
     def modifyTheme(self, theme):
+        theme.clearCache()
         self.themeChanged.emit(theme)
         
     def removeTheme(self, theme):

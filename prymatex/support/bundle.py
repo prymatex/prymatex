@@ -12,11 +12,12 @@ class PMXBundle(PMXManagedObject):
             'description', 'contactName', 'requiredCommands', 'require' )
     FILE = 'info.plist'
     TYPE = 'bundle'
+    PATTERNS = ( '*.tmbundle', )
     DEFAULTS = {
         'name': 'Untitled'
     }
-    def __init__(self, uuid):
-        PMXManagedObject.__init__(self, uuid)
+    def __init__(self, uuid, manager):
+        PMXManagedObject.__init__(self, uuid, manager)
         self.__supportPath = None
 
     def hasSupportPath(self):
@@ -62,10 +63,9 @@ class PMXBundle(PMXManagedObject):
             environment['TM_BUNDLE_SUPPORT'] = self.supportPath()
         return environment
 
-    def createDataFilePath(self, basePath, baseName = None):
-        directory = osextra.path.ensure_not_exists(os.path.join(basePath, "%s.tmbundle"), osextra.to_valid_name(baseName or self.name))
-        return os.path.join(directory, self.FILE)
-
+    def createSourcePath(self, baseDirectory):
+        return osextra.path.ensure_not_exists(os.path.join(baseDirectory, "%s.tmbundle"), osextra.to_valid_name(self.name))
+        
     @classmethod
-    def dataFilePath(cls, path):
-        return os.path.join(path, cls.FILE)
+    def dataFilePath(cls, sourceFilePath):
+        return os.path.join(sourceFilePath, cls.FILE)

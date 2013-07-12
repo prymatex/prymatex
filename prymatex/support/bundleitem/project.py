@@ -58,7 +58,7 @@ fi"'''}
     def execute(self, environment = {}, callback = lambda x: x):
         with PMXRunningContext(self, self.command, environment) as context:
             context.asynchronous = True
-            context.workingDirectory = self.currentPath()
+            context.workingDirectory = self.source()
             self.manager.runProcess(context, functools.partial(self.afterExecute, callback))
 
     def afterExecute(self, callback, context):
@@ -74,10 +74,11 @@ fi"'''}
     def dataFilePath(cls, path):
         return os.path.join(path, cls.FILE)
     
-    def staticPaths(self):
-        projectFilePaths = glob(os.path.join(self.currentPath(), '*'))
-        projectFilePaths.remove(self.dataFilePath(self.currentPath()))
-        return projectFilePaths
+    @classmethod
+    def staticFilePaths(cls, sourceFilePath):
+        templateFilePaths = glob(os.path.join(sourceFilePath, '*'))
+        templateFilePaths.remove(cls.dataFilePath(sourceFilePath))
+        return templateFilePaths
 
     @classmethod
     def reloadBundleItem(cls, bundleItem, path, namespace, manager):

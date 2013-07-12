@@ -18,6 +18,8 @@ class ThemeListModel(QtCore.QAbstractListModel):
         self.themes = []
         
     def index(self, row, column = 0, parent = None):
+        if not (0 <= row < len(self.themes)):
+            return QtCore.QModelIndex()
         return self.createIndex(row, column, self.themes[row])
     
     def rowCount (self, parent = None):
