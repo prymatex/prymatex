@@ -32,9 +32,11 @@ class PMXBundleItem(PMXManagedObject):
                 setattr(self, key, value)
 
     def load(self, dataHash):
+        PMXManagedObject.load(self, dataHash)
         self.__load_update(dataHash, True)
         
     def update(self, dataHash):
+        PMXManagedObject.update(self, dataHash)
         self.__load_update(dataHash, False)
     
     def dump(self):

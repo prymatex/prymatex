@@ -19,6 +19,10 @@ class PMXBundle(PMXManagedObject):
     def __init__(self, uuid, manager):
         PMXManagedObject.__init__(self, uuid, manager)
         self.__supportPath = None
+        self.populated = False
+
+    def populate(self):
+        self.populated = True
 
     def hasSupportPath(self):
         return self.__supportPath is not None

@@ -64,8 +64,7 @@ class PMXSupportBaseManager(object):
 
     def __init__(self):
         self.namespaces = OrderedDict()
-        self.nsorder = []
-
+        
         self.ready = False
         self.environment = {}
         self.managedObjects = {}
@@ -286,6 +285,8 @@ class PMXSupportBaseManager(object):
             theme.load(data)
             theme = self.addTheme(theme)
             self.addManagedObject(theme)
+        else:
+            theme.load(data)
         theme.addSource(namespace.name, sourceThemePath)
         return theme
 
@@ -311,6 +312,8 @@ class PMXSupportBaseManager(object):
             bundle.load(data)
             bundle = self.addBundle(bundle)
             self.addManagedObject(bundle)
+        else:
+            bundle.load(data)
         bundle.addSource(namespace.name, sourceBundlePath)
         return bundle
 
@@ -352,12 +355,13 @@ class PMXSupportBaseManager(object):
 
     # -------------------- RELOAD SUPPORT
     def reloadSupport(self, callback = None):
-        #Reload Implica ver en todos los espacios de nombre instalados por cambios en los items
+        # Reload Implica ver en todos los espacios de nombre instalados por cambios en los items
         # Install message handler
         self.messageHandler = callback
         self.logger.debug("Begin reload support.")
-        for namespace in self.nsorder[::-1]:
-            self.logger.debug("Search in %s, %s." % (namespace, self.namespaces[namespace]))
+        for namespace in list(self.namespaces.itervalues())[::-1]:
+            print(namespace.name)
+            self.logger.debug("Search in %s, %s." % (namespace.name, namespace.basedir))
             self.reloadThemes(namespace)
             self.reloadBundles(namespace)
         for bundle in self.getAllBundles():
@@ -369,125 +373,99 @@ class PMXSupportBaseManager(object):
 
     # ------------------ RELOAD THEMES
     def reloadThemes(self, namespace):
-        if self.THEMES_NAME in self.namespaces[namespace]:
-            installedThemes = [theme for theme in self.getAllThemes() if theme.hasNamespace(namespace)]
-            themePaths = glob(os.path.join(self.namespaces[namespace][self.THEMES_NAME], '*.tmTheme'))
-            for theme in installedThemes:
-                themePath = theme.path(namespace)
-                if themePath in themePaths:
-                    if namespace == theme.currentNamespace and theme.sourceChanged(namespace):
-                        # Remove all styles
-                        for style in theme.styles:
-                            theme.removeThemeStyle(style)
-                        self.logger.debug("Theme %s changed, reload from %s." % (theme.name, themePath))
-                        data = self.readPlist(themePath)
-                        theme.load(data)
-                        settings = data.pop('settings', [])
-                        if settings:
-                            theme.setDefaultSettings(settings.pop(0)["settings"])
-                        for setting in settings:
-                            style = PMXThemeStyle(setting, theme)
-                            style = self.addThemeStyle(style)
-                            theme.styles.append(style)
-                        theme.updateMtime(namespace)
-                        self.modifyTheme(theme)
-                    themePaths.remove(themePath)
+        installedThemes = [ theme for theme in self.getAllThemes() if theme.hasSource(namespace.name) ]
+        themePaths = PMXTheme.sourcePaths(namespace.themes)
+        print(themePaths)
+        for theme in installedThemes:
+            themePath = theme.sourcePath(namespace.name)
+            if themePath in themePaths:
+                if namespace.name == theme.sourceName() and theme.sourceChanged(namespace.name):
+                    self.loadTheme(themePath, namespace)
+                    self.modifyTheme(theme)
+                themePaths.remove(themePath)
+            else:
+                theme.removeSource(namespace)
+                if not theme.hasSources():
+                    self.logger.debug("Theme %s removed." % theme.name)
+                    self.removeManagedObject(theme)
+                    self.removeTheme(theme)
                 else:
-                    theme.removeSource(namespace)
-                    if not theme.hasSources():
-                        self.logger.debug("Theme %s removed." % theme.name)
-                        self.removeManagedObject(theme)
-                        self.removeTheme(theme)
-                    else:
-                        theme.setDirty()
-            for path in themePaths:
-                self.logger.debug("New theme %s." % path)
-                self.loadTheme(path, namespace)
+                    theme.setDirty()
+        for path in themePaths:
+            self.logger.debug("New theme %s." % path)
+            self.loadTheme(path, namespace)
 
     # ---------------- RELOAD BUNDLES
     def reloadBundles(self, namespace):
-        if self.BUNDLES_NAME in self.namespaces[namespace]:
-            installedBundles = [theme for theme in self.getAllBundles() if theme.hasNamespace(namespace)]
-            bundlePaths = glob(os.path.join(self.namespaces[namespace][self.BUNDLES_NAME], '*.tmbundle'))
-            for bundle in installedBundles:
-                if bundlePath in bundlePaths:
-                    if namespace == bundle.currentNamespace and bundle.sourceChanged(namespace):
-                        self.logger.debug("Bundle %s changed, reload from %s." % (bundle.name, bundlePath))
-                        data = self.readPlist(bundlePath)
-                        bundle.load(data)
-                        bundle.updateMtime(namespace)
-                        self.modifyBundle(bundle)
-                    bundlePaths.remove(bundlePath)
+        installedBundles = [bundle for bundle in self.getAllBundles() if bundle.hasSource(namespace.name)]
+        bundlePaths =  PMXBundle.sourcePaths(namespace.bundles)
+        for bundle in installedBundles:
+            bundlePath = bundle.sourcePath(namespace.name)
+            if bundlePath in bundlePaths:
+                if namespace.name == bundle.sourceName() and bundle.sourceChanged(namespace.name):
+                    self.loadBundle(bundlePath, namespace)
+                    self.modifyBundle(bundle)
+                bundlePaths.remove(bundlePath)
+            else:
+                bundleItems = self.findBundleItems(bundle = bundle)
+                list(map(lambda item: item.removeSource(namespace.name), bundleItems))
+                bundle.removeSource(namespace)
+                if not bundle.hasSources():
+                    self.logger.debug("Bundle %s removed." % bundle.name)
+                    list(map(lambda item: self.removeManagedObject(item), bundleItems))
+                    list(map(lambda item: self.removeBundleItem(item), bundleItems))
+                    self.removeManagedObject(bundle)
+                    self.removeBundle(bundle)
                 else:
-                    bundleItems = self.findBundleItems(bundle=bundle)
-                    list(map(lambda item: item.removeSource(namespace), bundleItems))
-                    bundle.removeSource(namespace)
-                    if not bundle.hasSources():
-                        self.logger.debug("Bundle %s removed." % bundle.name)
-                        list(map(lambda item: self.removeManagedObject(item), bundleItems))
-                        list(map(lambda item: self.removeBundleItem(item), bundleItems))
-                        self.removeManagedObject(bundle)
-                        self.removeBundle(bundle)
-                    else:
-                        list(map(lambda item: item.setDirty(), bundleItems))
-                        bundle.setSupportPath(None)
-                        bundle.setDirty()
-            for bundle_dir in bundlePaths:
-                self.logger.debug("New bundle %s." % path)
-                try:
-                    # TODO: Que pasa con los nuevos
-                    bundle = self.loadBundle(bundle_dir, namespace)
-                except Exception as ex:
-                    import traceback
-                    print("Error in laod bundle %s (%s)" % (bundle_dir, ex))
-                    traceback.print_exc()
+                    list(map(lambda item: item.setDirty(), bundleItems))
+                    bundle.setSupportPath(None)
+                    bundle.setDirty()
+        for bundlePath in bundlePaths:
+            self.logger.debug("New bundle %s." % path)
+            try:
+                bundle = self.loadBundle(bundlePath, namespace)
+            except Exception as ex:
+                import traceback
+                print("Error in laod bundle %s (%s)" % (bundlePath, ex))
+                traceback.print_exc()
 
     # ----- REPOPULATED BUNDLE AND RELOAD BUNDLE ITEMS
     def repopulateBundle(self, bundle):
-        namespaces = bundle.namespaces[::-1]
-        bundleItems = self.findBundleItems(bundle=bundle)
-        bundle.setSupport(None)
-        for namespace in namespaces:
-            bpath = bundle.path(namespace)
-            # Search for support
-            supportPath = os.path.join(bpath, self.SUPPORT_NAME)
-            if not bundle.hasSupportPath() and os.path.exists(supportPath):
-                bundle.setSupport(supportPath)
-            bundleItemPaths = {}
-            for klass in self.BUNDLEITEM_CLASSES.values():
-                klassPaths = reduce(lambda x, y: x + glob(y), [os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS], [])
-                bundleItemPaths.update(dict([(path, klass) for path in klassPaths]))
-            for bundleItem in bundleItems:
-                if not bundleItem.hasNamespace(namespace):
+        for namespace in list(self.namespaces.itervalues())[::-1]:
+            if not bundle.hasSource(namespace.name):
+                continue
+            bundlePath = bundle.sourcePath(namespace.name)
+            bundleItemPaths = dict([ (klass.TYPE, klass.sourcePaths(bundlePath)) 
+                for klass in self.BUNDLEITEM_CLASSES.values() ])
+            print(bundleItemPaths)
+            for bundleItem in self.findBundleItems(bundle=bundle):
+                if not bundleItem.hasSource(namespace.name):
                     continue
-                bundleItemPath = bundleItem.path(namespace)
-                if bundleItemPath in bundleItemPaths:
-                    if namespace == bundleItem.currentNamespace and bundleItem.sourceChanged(namespace):
-                        for staticFile in bundleItem.statics:
-                            bundleItem.removeStaticFile(staticFile)
+                bundleItemPath = bundleItem.sourcePath(namespace.name)
+                if bundleItemPath in bundleItemPaths[bundleItem.TYPE]:
+                    if namespace.name == bundleItem.sourceName() and bundleItem.sourceChanged(namespace.name):
                         self.logger.debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, bundleItemPath))
-                        data = self.readPlist(bundleItemPath)
-                        bundleItem.load(data)
-                        bundleItem.updateMtime(namespace)
+                        self.loadBundleItem(self.BUNDLEITEM_CLASSES[bundleItem.TYPE], bundleItemPath, namespace, bundle)
                         self.modifyBundleItem(bundleItem)
-                    bundleItemPaths.pop(bundleItemPath)
+                    bundleItemPaths[bundleItem.TYPE].remove(bundleItemPath)
                 else:
-                    bundleItem.removeSource(namespace)
+                    bundleItem.removeSource(namespace.name)
                     if not bundleItem.hasSources():
                         self.logger.debug("Bundle Item %s removed." % bundleItem.name)
                         self.removeManagedObject(bundleItem)
                         self.removeBundleItem(bundleItem)
                     else:
                         bundleItem.setDirty()
-            for bundle_item_file, klass in bundleItemPaths.items():
-                self.logger.debug("New bundle item %s." % path)
-                try:
-                    item = self.loadBundleItem(klass, bundle_item_file, namespace, bundle)
-                    item.populate()
-                except Exception as e:
-                    import traceback
-                    print("Error in bundle item %s (%s)" % (path, e))
-                    traceback.print_exc()
+            for itemType, itemPaths in bundleItemPaths.items():
+                klass = self.BUNDLEITEM_CLASSES[itemType]
+                for itemPath in itemPaths:
+                    try:
+                        self.logger.debug("New bundle item %s." % itemPath)
+                        item = self.loadBundleItem(klass, itemPath, namespace, bundle)
+                    except Exception as e:
+                        import traceback
+                        print("Error in bundle item %s (%s)" % (itemPath, e))
+                        traceback.print_exc()
         self.populatedBundle(bundle)
 
     # ------------ Build Storages --------------------

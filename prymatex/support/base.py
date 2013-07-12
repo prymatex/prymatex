@@ -17,16 +17,14 @@ class PMXManagedObject(object):
         self.manager = manager
         self.sources = {}
         self.pointer = None
-        self.populated = False
-        self.statics = []
 
     # ----------- Load from dictionary
     def load(self, dataHash):
-        raise NotImplemented
+        self.statics = []
 
     # ----------- Update from dictionary
     def update(self, dataHash):
-        raise NotImplemented
+        pass
     
     # ----------- Dump to dictionary
     def dump(self):
@@ -35,9 +33,6 @@ class PMXManagedObject(object):
     def uuidAsUnicode(self):
         return str(self.uuid).upper()
 
-    def populate(self):
-        self.populated = True
-    
     def enabled(self):
         return self.manager.isEnabled(self.uuid)
     
@@ -46,11 +41,13 @@ class PMXManagedObject(object):
         self.pointer = name
 
     def addSource(self, name, path):
-        assert name not in self.sources
         mtime = os.path.exists(path) and os.path.getmtime(path) or 0
         self.sources[name] = Source(name = name, path = path, mtime = mtime)
         if self.pointer is None:
             self.pointer = name
+
+    def removeSource(self, name):
+        del self.sources[name]
 
     def hasSource(self, name):
         return name in self.sources
@@ -62,6 +59,10 @@ class PMXManagedObject(object):
     def sourcePath(self, name = None):
         return self.sources[name or self.pointer].path
     
+    def sourceChanged(self, sourceName):
+        source = self.sources[sourceName]
+        return source.mtime != os.path.getmtime(source.path)
+
     def updateMtime(self, sourceName):
         source = self.sources[sourceName]
         self.sources[sourceName] = source._replace(mtime = os.path.getmtime(source.path))

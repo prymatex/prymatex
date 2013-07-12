@@ -91,12 +91,7 @@ class PMXTheme(PMXManagedObject):
     KEYS = ( 'name', 'comment', 'author', 'settings' )
     EXTENSION = 'tmTheme'
     PATTERNS = ( '*.tmTheme', )
-    
-    def __init__(self, uuid, manager):
-        PMXManagedObject.__init__(self, uuid, manager)
-        self.defaultSettings = {}
-        self.styles = []
-    
+
     def __load_update(self, dataHash, initialize):
         for key in PMXTheme.KEYS:
             if key in dataHash or initialize:
@@ -113,9 +108,13 @@ class PMXTheme(PMXManagedObject):
                     setattr(self, key, value)
 
     def load(self, dataHash):
+        PMXManagedObject.load(self, dataHash)
+        self.defaultSettings = {}
+        self.styles = []
         self.__load_update(dataHash, True)
         
     def update(self, dataHash):
+        PMXManagedObject.update(self, dataHash)
         self.__load_update(dataHash, False)
 
     def setSettings(self, settings):

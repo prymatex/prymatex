@@ -235,7 +235,7 @@ class MainWindowActions(object):
         
     @QtCore.Slot()
     def on_actionReloadBundles_triggered(self):
-        self.supportManager.reloadSupport(self.showMessage)
+        self.application.supportManager.reloadSupport(self.showMessage)
 
     # ------------ Preferences Actions
     @QtCore.Slot(bool)
