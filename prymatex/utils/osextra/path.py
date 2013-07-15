@@ -19,7 +19,7 @@ def callback(match, context = None, sensitive = True, default = ''):
 #===============================================================================
 # Expand $exp taking os.environ as context
 #===============================================================================
-def expand_shell_var(path, context = None, sensitive = True):
+def expand_shell_variables(path, context = None, sensitive = True):
     if context is not None and six.callable(context):
         context = context()
     elif context is None:
@@ -62,4 +62,4 @@ def issubpath(childPath, parentPath, normpath = True, realpath = False):
 if __name__ == "__main__":
     print(issubpath("\\cygwin\\home\\dvanhaaster\\workspace\\prymatex\\prymatex\\utils\\osextra\\path.py", "/cygwin/home/dvanhaaster/workspace/prymatex"))
     print(issubpath("/home/diego/workspace/Prymatex/prymatex/setup.py", "/mnt/datos/workspace/Prymatex/prymatex", realpath=True))
-    print(expand_shell_var("$PATH/alfa"))
+    print(expand_shell_variables("$PATH/alfa"))

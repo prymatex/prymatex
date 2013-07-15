@@ -4,6 +4,7 @@
 """Command's module"""
 
 import os
+import sys
 import functools
 
 from prymatex.utils import programs
@@ -150,9 +151,9 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         return inputType, value
 
     def systemCommand(self):
-        if self.winCommand != None and 'Window' in os.environ['OS']:
+        if self.winCommand is not None and sys.platform.count("win"):
             return self.winCommand
-        elif self.linuxCommand != None:
+        elif self.linuxCommand is not None:
             return self.linuxCommand
         else:
             return self.command
@@ -168,7 +169,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
     def beforeExecute(self, processor):
         beforeMethod = None
         if self.beforeRunningCommand is not None:
-            beforeMethod  = getattr(processor, self.beforeRunningCommand)
+            beforeMethod = getattr(processor, self.beforeRunningCommand)
             return beforeMethod()
         return True
 

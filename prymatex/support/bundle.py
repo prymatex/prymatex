@@ -22,9 +22,7 @@ class PMXBundle(PMXManagedObject):
         PMXManagedObject.__init__(self, uuid, manager)
         self.populated = False
 
-    def populate(self):
-        self.populated = True
-
+    # ---------------- Load, update, dump
     def __load_update(self, dataHash, initialize):
         for key in PMXBundle.KEYS:
             if key in dataHash or initialize:
@@ -74,6 +72,9 @@ class PMXBundle(PMXManagedObject):
         environment['TM_BUNDLE_PATH'] = self.sourcePath()
         environment.update(self.variables)
         return environment
+
+    def populate(self):
+        self.populated = True
 
     # --------------- Source Handlers
     def createSourcePath(self, baseDirectory):

@@ -109,7 +109,6 @@ def ensureShellScript(script, environment):
         script = buildEnvScript(scriptContent, command, environment)
     return script
 
-
 #============================
 # UINX
 #============================

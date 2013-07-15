@@ -23,6 +23,9 @@
     shellVariables, an array of key/value pairs. See context dependent variables.
     spellChecking, set to 0/1 to disable/enable spell checking.
 '''
+
+from prymatex.utils import osextra
+
 from .base import PMXBundleItem
 from ..regexp import compileRegexp, Transformation
 
@@ -53,6 +56,10 @@ class PMXPreferenceSettings(object):
     def __init__(self, dataHash = {}, preference = None):
         self.preference = preference
         self.update(dataHash)
+    
+    @property
+    def bundle(self):
+        return self.preference.bundle
     
     def dump(self):
         dataHash = {}
@@ -90,7 +97,6 @@ class PMXPreferenceSettings(object):
     
 class PMXPreferenceMasterSettings(object):
     def __init__(self, settings):
-        """docstring for __init__"""
         self.settings = settings
     
     @property
@@ -142,8 +148,10 @@ class PMXPreferenceMasterSettings(object):
     def shellVariables(self):
         shellVariables = {}
         for settings in self.settings:
-            if isinstance(settings.shellVariables, dict) and all([shellKey not in shellVariables for shellKey in list(settings.shellVariables.keys())]):
-                shellVariables.update(settings.shellVariables)
+            if settings.shellVariables:
+                for key, value in settings.shellVariables.items():
+                    shellVariables[key] = osextra.path.expand_shell_variables(
+                        value, context = settings.bundle.variables)
         return shellVariables
         
     @property
@@ -158,25 +166,24 @@ class PMXPreferenceMasterSettings(object):
         settings = self.__findIndentSettings()
         if settings is not None:
             return settings.decreaseIndentPattern
-            
+
     @property
     def increaseIndentPattern(self):
         settings = self.__findIndentSettings()
         if settings is not None:
             return settings.increaseIndentPattern
-            
+
     @property
     def indentNextLinePattern(self):
         settings = self.__findIndentSettings()
         if settings is not None:
             return settings.indentNextLinePattern
-            
+
     @property
     def unIndentedLinePattern(self):
         settings = self.__findIndentSettings()
         if settings is not None:
             return settings.unIndentedLinePattern
-
     @property
     def foldingIndentedBlockStart(self):
         if not hasattr(self, "_folding_indented_block_start"):
@@ -219,7 +226,7 @@ class PMXPreferenceMasterSettings(object):
             if any([getattr(settings, indentKey) is not None for indentKey in PMXPreferenceSettings.INDENT_KEYS]):
                 return settings
 
-    def getBundle(self, attrKey):
+    def _getBundle(self, attrKey):
         for settings in self.settings:
             if getattr(settings, attrKey) is not None:
                 return settings.preference.bundle

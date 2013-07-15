@@ -5,7 +5,6 @@ from glob import glob
 from functools import reduce
 
 from prymatex.utils import osextra
-from prymatex.utils import programs
 
 from ..base import PMXManagedObject
 
@@ -21,9 +20,7 @@ class PMXBundleItem(PMXManagedObject):
         PMXManagedObject.__init__(self, uuid, manager)
         self.bundle = bundle
 
-    def enabled(self):
-        return self.bundle.enabled()
-
+    # ---------------- Load, update, dump
     def __load_update(self, dataHash, initialize):
         for key in PMXBundleItem.KEYS:
             if key in dataHash or initialize:
@@ -47,6 +44,9 @@ class PMXBundleItem(PMXManagedObject):
             if value is not None:
                 dataHash[key] = value
         return dataHash
+
+    def enabled(self):
+        return self.bundle.enabled()
 
     def isChanged(self, dataHash):
         for key in dataHash.keys():
