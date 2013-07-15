@@ -128,11 +128,6 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
     def environmentVariables(self):
         return {}
 
-
-    def supportProjectEnvironment(self, project):
-        return self.supportManager.projectEnvironment(project)
-
-
     #---------------------------------------------------
     # PROJECT CRUD
     #---------------------------------------------------

@@ -71,10 +71,15 @@ class ProjectTreeNode(FileSystemTreeNode):
         self.namespace = None
         self.load(dataHash)
     
+    # ----------- Load, update and dump
     def load(self, hash):
         for key in ProjectTreeNode.KEYS:
             value = hash.get(key, None)
             setattr(self, key, value)
+
+    def update(self, dataHash):
+        for key in list(dataHash.keys()):
+            setattr(self, key, dataHash[key])
 
     def dataHash(self):
         dataHash = {}
@@ -83,11 +88,18 @@ class ProjectTreeNode(FileSystemTreeNode):
             if value != None:
                 dataHash[key] = value
         return dataHash
-        
-    def update(self, dataHash):
-        for key in list(dataHash.keys()):
-            setattr(self, key, dataHash[key])
-
+    
+    # ---------------- Variables
+    @property
+    def variables(self):
+        if not hasattr(self, '_variables'):
+            self._variables = {
+            'TM_PROJECT_DIRECTORY': self.directory,
+            'TM_PROJECT_NAME': self.nodeName(),
+            'TM_PROJECT_PATH': self.projectPath,
+            'TM_PROJECT_NAMESPACE': self.namespaceName }
+        return self._variables
+    
     def save(self):
         path = self.projectPath
         
@@ -110,11 +122,7 @@ class ProjectTreeNode(FileSystemTreeNode):
             for var in self.shellVariables:
                 if var['enabled']:
                     environment[var['variable']] = var['value']
-        environment.update({
-            'TM_PROJECT_DIRECTORY': self.directory,
-            'TM_PROJECT_NAME': self.nodeName(),
-            'TM_PROJECT_PATH': self.projectPath,
-            'TM_PROJECT_NAMESPACE': self.namespaceName })
+        environment.update(self.variables)
         return environment
 
     @classmethod
