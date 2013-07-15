@@ -219,7 +219,7 @@ class PMXSupportBaseManager(object):
         return snippet
 
     def buildAdHocSyntax(self, syntax, bundle, name=None):
-        syntaxHash = {'content': syntax}
+        syntaxHash = syntax.copy()
         syntaxHash['name'] = name if name is not None else "Ad-Hoc syntax"
         syntax = bundleitem.PMXSyntax(self.uuidgen(), self, bundle)
         syntax.load(syntaxHash)

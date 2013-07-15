@@ -538,8 +538,8 @@ Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''
     def update(self, dataHash):
         PMXBundleItem.update(self, dataHash)
         self.__load_update(dataHash, False)
-        if 'content' in dataHash and hasattr(self, '_snippet'):
-            delattr(self, '_snippet')
+        if 'content' in dataHash and hasattr(self, '_snippetNode'):
+            delattr(self, '_snippetNode')
 
     def dump(self):
         dataHash = super(PMXSnippet, self).dump()
@@ -556,13 +556,14 @@ Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''
         return self._parser
 
     @property
-    def snippet(self):
-        if not hasattr(self, '_snippet'):
+    def snippetNode(self):
+        if not hasattr(self, '_snippetNode'):
             processor = PMXSnippetSyntaxProcessor(self)
             self.parser.parse(self.content, processor)
-            self._snippet = processor.node
+            print("Compilado")
+            self._snippetNode = processor.node
             self.addTaborder(processor.taborder)
-        return self._snippet
+        return self._snippetNode
     
     def execute(self, processor):
         self.reset()
@@ -576,20 +577,20 @@ Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''
     
     @property
     def start(self):
-        return self.snippet.start
+        return self.snippetNode.start
     
     @property
     def end(self):
-        return self.snippet.end
+        return self.snippetNode.end
     
     def reset(self):
         self.index = -1
-        self.snippet.disable = False
-        self.snippet.reset()
+        self.snippetNode.disable = False
+        self.snippetNode.reset()
     
     def render(self, processor):
         processor.startRender()
-        self.snippet.render(processor)
+        self.snippetNode.render(processor)
         processor.endRender()
         
     def addTaborder(self, taborder):
