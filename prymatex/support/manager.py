@@ -84,6 +84,7 @@ class PMXSupportBaseManager(object):
             protected = len(self.namespaces) == 0,
             **directories)
         self.namespaces[name] = namespace
+        return namespace
 
     def hasNamespace(self, name):
         return name in self.namespaces
@@ -112,11 +113,11 @@ class PMXSupportBaseManager(object):
         while project.namespaceName in self.namespaces:
             #Crear valores random
             project.namespaceName = project.namespaceName + hashlib.md5(project.namespaceName + path).hexdigest()[:7]
-        self.addNamespace(project.namespaceName, path)
+        namespace = self.addNamespace(project.namespaceName, path)
         #Ya esta listo tengo que cargar este namespace
         if self.ready:
-            self.loadThemes(project.namespaceName)
-            for bundle in self.loadBundles(project.namespaceName):
+            self.loadThemes(namespace)
+            for bundle in self.loadBundles(namespace):
                 if bundle.enabled():
                     self.populateBundle(bundle)
 
