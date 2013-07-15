@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+from glob import glob
 
 from prymatex.utils import osextra
 
@@ -14,7 +15,11 @@ SCM_RULES = [
 def attributes(filePath, projectDirectory = None):
     directories = osextra.path.fullsplit(projectDirectory or os.path.dirname(filePath))
     for rule in SCM_RULES:
-        testPath = os.sep + os.path.join(*(directories + [ rule["glob"] ]))
-        if os.path.exists(testPath):
-            return [ rule["attribute"] ]
+        # TODO Iterative search until root
+        directory = directories + [ rule["glob"] ]
+        while len(directory) > 1:
+            testPath = os.sep + os.path.join(*directory)
+            if glob(testPath):
+                return [ rule["attribute"] ]
+            directory.pop(-2)
     return [ ]
