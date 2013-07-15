@@ -5,6 +5,7 @@ from glob import glob
 from functools import reduce
 
 from prymatex.utils import osextra
+from prymatex.utils import programs
 
 from ..base import PMXManagedObject
 
@@ -33,8 +34,9 @@ class PMXBundleItem(PMXManagedObject):
 
     def load(self, dataHash):
         PMXManagedObject.load(self, dataHash)
+        self.variables = None
         self.__load_update(dataHash, True)
-        
+
     def update(self, dataHash):
         PMXManagedObject.update(self, dataHash)
         self.__load_update(dataHash, False)
@@ -54,8 +56,20 @@ class PMXBundleItem(PMXManagedObject):
         return False
 
     def environmentVariables(self):
-        return self.bundle.environmentVariables()
-    
+        environment = self.bundle.environmentVariables()
+        if self.variables is None:
+            self.variables = {}
+            if hasattr(self, 'requiredCommands') and self.requiredCommands:
+                for program in self.requiredCommands:
+                    if not programs.is_program_installed(program["command"]):
+                        # Search in locations
+                        for location in program["locations"]:
+                            if os.path.exists(location):
+                                self.variables[program["variable"]] = location
+                                break
+        environment.update(self.variables)
+        return environment
+        
     def execute(self, processor):
         pass
 

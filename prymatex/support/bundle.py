@@ -4,6 +4,7 @@
 import os, re, shutil
 
 from prymatex.utils import osextra
+from prymatex.utils import programs
 
 from .base import PMXManagedObject
 
@@ -30,7 +31,7 @@ class PMXBundle(PMXManagedObject):
 
     def load(self, dataHash):
         PMXManagedObject.load(self, dataHash)
-        self.supportPath = None
+        self.variables = None
         self.__load_update(dataHash, True)
         
     def update(self, dataHash):
@@ -45,20 +46,29 @@ class PMXBundle(PMXManagedObject):
                 dataHash[key] = value
         return dataHash
 
+    # ---------------- Bundle Variables
     def environmentVariables(self):
         environment = self.manager.environmentVariables()
         environment['TM_BUNDLE_PATH'] = self.sourcePath()
-        if self.supportPath is None:
-           self.supportPath = ""
-           for name, source in self.sources.items():
-               supportPath = os.path.join(source.path, "Support")
-               if os.path.exists(supportPath):
-                   self.supportPath = supportPath
-                   break
-        if self.supportPath != "":
-            environment['TM_BUNDLE_SUPPORT'] = self.supportPath
+        if self.variables is None:
+            self.variables = {}
+            for name, source in self.sources.items():
+                supportPath = os.path.join(source.path, "Support")
+                if os.path.exists(supportPath):
+                    self.variables['TM_BUNDLE_SUPPORT'] = supportPath
+                    break
+            if self.requiredCommands:
+                for program in self.requiredCommands:
+                    if not programs.is_program_installed(program["command"]):
+                        # Search in locations
+                        for location in program["locations"]:
+                            if os.path.exists(location):
+                                self.variables[program["variable"]] = location
+                                break
+        environment.update(self.variables)
         return environment
 
+    # --------------- Source Handlers
     def createSourcePath(self, baseDirectory):
         return osextra.path.ensure_not_exists(os.path.join(baseDirectory, "%s.tmbundle"), osextra.to_valid_name(self.name))
         

@@ -24,7 +24,6 @@ def is_program_installed(basename):
         if osp.isfile(abspath):
             return abspath
 
-
 def find_program(basename):
     """Find program in PATH and return absolute path
     Try adding .exe or .bat to basename on Windows platforms
@@ -40,7 +39,6 @@ def find_program(basename):
         if path:
             return path
 
-
 def run_program(name, args=[], cwd=None):
     """Run program in a separate process"""
     assert isinstance(args, (tuple, list))
@@ -54,8 +52,8 @@ def start_file(filename):
     """Generalized os.startfile for all platforms supported by Qt
     (this function is simply wrapping QDesktopServices.openUrl)
     Returns True if successfull, otherwise returns False."""
-    from spyderlib.qt.QtGui import QDesktopServices
-    from spyderlib.qt.QtCore import QUrl
+    from prymatex.qt.QtGui import QDesktopServices
+    from prymatex.qt.QtCore import QUrl
     url = QUrl()
     url.setUrl(filename)
     return QDesktopServices.openUrl(url)
@@ -77,7 +75,6 @@ def python_script_exists(package=None, module=None):
     if osp.isfile(path):
         return path
 
-
 def run_python_script(package=None, module=None, args=[], p_args=[]):
     """Run Python script in a separate process
     package=None -> module is in sys.path (standard library modules)"""
@@ -85,7 +82,6 @@ def run_python_script(package=None, module=None, args=[], p_args=[]):
     assert isinstance(args, (tuple, list)) and isinstance(p_args, (tuple, list))
     path = python_script_exists(package, module)
     subprocess.Popen([sys.executable]+p_args+[path]+args)
-
 
 def shell_split(text):
     """Split the string `text` using shell-like syntax
@@ -101,7 +97,6 @@ def shell_split(text):
         if token.strip():
             out.append(token.strip('"').strip("'"))
     return out
-
 
 def get_python_args(fname, python_args, interact, debug, end_args):
     """Construct Python interpreter arguments"""
@@ -123,7 +118,6 @@ def get_python_args(fname, python_args, interact, debug, end_args):
     if end_args:
         p_args.extend(shell_split(end_args))
     return p_args
-
 
 def run_python_script_in_terminal(fname, wdir, args, interact,
                                   debug, python_args):
@@ -160,7 +154,6 @@ def run_python_script_in_terminal(fname, wdir, args, interact,
         #       OSX
     else:
         raise NotImplementedError
-
 
 def is_module_installed(module_name, version=None):
     """Return True if module *module_name* is installed
@@ -213,7 +206,6 @@ def is_module_installed(module_name, version=None):
                 return True
     except ImportError:
         return False
-
 
 if __name__ == '__main__':
     print(find_program('git'))

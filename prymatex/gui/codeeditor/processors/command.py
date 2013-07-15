@@ -14,10 +14,12 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def startCommand(self, command):
         self.command = command
         self.__env = command.environmentVariables()
+        # TODO No es mejor que tambien el editor saque de la mainwindow para 
+        # preservar la composision?
         self.__env.update(self.editor.mainWindow.environmentVariables())
         self.__env.update(self.editor.environmentVariables())
         self.__env.update(self.baseEnvironment)
-        
+
     def endCommand(self, command):
         self.command = None
         

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
+from __future__ import unicode_literals
 
 import re
 import operator
@@ -863,7 +864,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 'TM_SCOPE': " ".join(rightScope.path + attributeScopePath + cursorScopePath),
                 'TM_LEFT_SCOPE': " ".join(leftScope.path + attributeScopePath + cursorScopePath),
                 'TM_MODE': self.syntax().name,
-                'TM_SOFT_TABS': self.tabStopSoft and str('YES') or str('NO'),
+                'TM_SOFT_TABS': self.tabStopSoft and 'YES' or 'NO',
                 'TM_TAB_SIZE': self.tabWidth
         })
 
