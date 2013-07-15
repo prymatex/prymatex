@@ -14,13 +14,14 @@ BUILD_RULES = [
 ]
 
 def attributes(filePath, projectDirectory = None):
-    directories = osextra.path.fullsplit(projectDirectory or os.path.dirname(filePath))
-    for rule in BUILD_RULES:
-        # TODO Iterative search until root
-        directory = directories + [ rule["glob"] ]
-        while len(directory) > 1:
-            testPath = os.sep + os.path.join(*directory)
-            if glob(testPath):
-                return [ rule["attribute"] ]
-            directory.pop(-2)
+    if filePath:
+        directories = osextra.path.fullsplit(projectDirectory or os.path.dirname(filePath))
+        for rule in BUILD_RULES:
+            # TODO Iterative search until root
+            directory = directories + [ rule["glob"] ]
+            while len(directory) > 1:
+                testPath = os.sep + os.path.join(*directory)
+                if glob(testPath):
+                    return [ rule["attribute"] ]
+                directory.pop(-2)
     return [ ]
