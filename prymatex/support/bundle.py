@@ -13,6 +13,7 @@ class PMXBundle(PMXManagedObject):
             'description', 'contactName', 'requiredCommands', 'require' )
     FILE = 'info.plist'
     TYPE = 'bundle'
+    SUPPORT = 'Support'
     PATTERNS = ( '*.tmbundle', )
     DEFAULTS = {
         'name': 'Untitled'
@@ -31,9 +32,11 @@ class PMXBundle(PMXManagedObject):
 
     def load(self, dataHash):
         PMXManagedObject.load(self, dataHash)
-        self.variables = None
         self.__load_update(dataHash, True)
-        
+        # Remove cached values
+        if hasattr(self, '_variables'):
+            delattr(self, '_variables')
+            
     def update(self, dataHash):
         PMXManagedObject.update(self, dataHash)
         self.__load_update(dataHash, False)
@@ -46,25 +49,29 @@ class PMXBundle(PMXManagedObject):
                 dataHash[key] = value
         return dataHash
 
-    # ---------------- Bundle Variables
+    # ---------------- Variables
+    @property
+    def variables(self):
+        if not hasattr(self, '_variables'):
+            self._variables = {}
+            for name, source in self.sources.items():
+                supportPath = os.path.join(source.path, self.SUPPORT)
+                if os.path.exists(supportPath):
+                    self._variables['TM_BUNDLE_SUPPORT'] = supportPath
+                    break
+            for program in self.requiredCommands or []:
+                if not programs.is_program_installed(program["command"]):
+                    # Search in locations
+                    for location in program["locations"]:
+                        if os.path.exists(location):
+                            self._variables[program["variable"]] = location
+                            break
+        return self._variables
+
+    # ------------------ Environment variables
     def environmentVariables(self):
         environment = self.manager.environmentVariables()
         environment['TM_BUNDLE_PATH'] = self.sourcePath()
-        if self.variables is None:
-            self.variables = {}
-            for name, source in self.sources.items():
-                supportPath = os.path.join(source.path, "Support")
-                if os.path.exists(supportPath):
-                    self.variables['TM_BUNDLE_SUPPORT'] = supportPath
-                    break
-            if self.requiredCommands:
-                for program in self.requiredCommands:
-                    if not programs.is_program_installed(program["command"]):
-                        # Search in locations
-                        for location in program["locations"]:
-                            if os.path.exists(location):
-                                self.variables[program["variable"]] = location
-                                break
         environment.update(self.variables)
         return environment
 

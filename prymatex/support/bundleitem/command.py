@@ -6,6 +6,8 @@
 import os
 import functools
 
+from prymatex.utils import programs
+
 from .base import PMXBundleItem
 from ..base import PMXRunningContext
 from ..regexp import compileRegexp
@@ -80,6 +82,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         207: 'createNewDocument'
     }
     
+    # ---------------- Load, update, dump
     def __load_update(self, dataHash, initialize):
         for key in PMXCommand.KEYS:
             if key in dataHash or initialize:
@@ -92,13 +95,16 @@ echo Selection: "$TM_SELECTED_TEXT"''',
     def load(self, dataHash):
         PMXBundleItem.load(self, dataHash)
         self.__load_update(dataHash, True)
+        # Remove cached values
+        if hasattr(self, '_variables'):
+            delattr(self, '_variables')
     
     def update(self, dataHash):
         PMXBundleItem.update(self, dataHash)
         self.__load_update(dataHash, False)
     
     def dump(self):
-        dataHash = super(PMXCommand, self).dump()
+        dataHash = PMXBundleItem.dump(self)
         for key in PMXCommand.KEYS:
             value = getattr(self, key)
             if value != None:
@@ -106,6 +112,26 @@ echo Selection: "$TM_SELECTED_TEXT"''',
                     value = str(value)
                 dataHash[key] = value
         return dataHash
+    
+    # ---------------- Variables
+    @property
+    def variables(self):
+        if not hasattr(self, '_variables'):
+            self._variables = {}
+            for program in self.requiredCommands or []:
+                if not programs.is_program_installed(program["command"]):
+                    # Search in locations
+                    for location in program["locations"]:
+                        if os.path.exists(location):
+                            self._variables[program["variable"]] = location
+                            break
+        return self._variables
+    
+    # ---------------- Environment Variables
+    def environmentVariables(self):
+        environment = PMXBundleItem.environmentVariables(self)
+        environment.update(self.variables)
+        return environment
     
     def getInputText(self, processor):
         def getInputTypeAndValue(inputType, format):
@@ -185,6 +211,7 @@ class PMXDragCommand(PMXCommand):
         'command': '''echo "$TM_DROPPED_FILE"'''
     }
 
+    # ---------------- Load, update, dump
     def __load_update(self, dataHash, initialize):
         for key in PMXDragCommand.KEYS:
             if key in dataHash or initialize:
