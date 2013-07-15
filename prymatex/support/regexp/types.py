@@ -121,7 +121,7 @@ class FormatType(object):
     def apply(self, pattern, text, flags):
         result = []
         match = pattern.search(text)
-        if not match: return None
+        if not match: return ""
         beginText = text[:match.start()]
         while match:
             nodes = []
