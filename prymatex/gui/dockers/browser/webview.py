@@ -78,6 +78,7 @@ class WebView(QtWebKit.QWebView):
         self.runningContext.removeTempFile()
         self.runningContext.setShellCommand(command)
         with self.runningContext as context:
+            print(command)
             context.process = subprocess.Popen(context.shellCommand, 
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, env=context.environment)
