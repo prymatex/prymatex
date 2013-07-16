@@ -671,14 +671,14 @@ class MacroEditorWidget(BundleItemEditorBaseWidget, Ui_Macro):
     
     @property
     def title(self):
-        if self.bundleItem != None:
+        if self.bundleItem is not None:
             return 'Macro (read only): "%s"' % self.bundleItem.name
-        return super(MacroEditorWidget, self).title()
+        return super(MacroEditorWidget, self).title
     
     @property
     def isChanged(self):
-        return False
-    
+        return super(MacroEditorWidget, self).isChanged
+
     def on_listActionWidget_itemClicked(self, item):
         index = self.listActionWidget.indexFromItem(item)
         row = index.row()
@@ -688,7 +688,7 @@ class MacroEditorWidget(BundleItemEditorBaseWidget, Ui_Macro):
             self.argument.clear()
 
     def edit(self, bundleItem):
-        super(MacroEditorWidget, self).edit(bundleItem)
+        BundleItemEditorBaseWidget.edit(self, bundleItem)
         self.listActionWidget.clear()
         self.argument.clear()
         commands = bundleItem.commands
