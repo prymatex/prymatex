@@ -159,7 +159,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         self.commandProcessor.configure(processorSettings)
         bundleItem.execute(self.commandProcessor)
 
-
     # Browser error
     def showErrorInBrowser(self, title, summary, exitcode = -1, **settings):
         from prymatex.utils import html

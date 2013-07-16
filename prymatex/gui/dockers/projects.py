@@ -225,9 +225,13 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
     def on_contextMenu_triggered(self, action):
         if hasattr(action, "bundleTreeNode"):
             node = self.currentNode()
-            env =   {   'TM_FILEPATH': node.path(),
-                        'TM_FILENAME': node.nodeName(),
-                        'TM_DIRECTORY': node.nodeParent().path() } if node.isfile else {   'TM_DIRECTORY': node.path() }
+            env =   {   
+                'TM_FILEPATH': node.path(),
+                'TM_FILENAME': node.nodeName(),
+                'TM_DIRECTORY': node.nodeParent().path() 
+            } if node.isfile else {
+                'TM_DIRECTORY': node.path()
+            }
             
             env.update(node.project().environmentVariables())
             self.mainWindow.insertBundleItem(action.bundleTreeNode, environment = env)
