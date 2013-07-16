@@ -8,8 +8,8 @@ from prymatex.qt import QtCore
 # wrap a process for using in window context of javascript
 #=======================================================================
 class SystemWrapper(QtCore.QObject):
-    def __init__(self, wrappedProcess):
-        QtCore.QObject.__init__(self)
+    def __init__(self, wrappedProcess, parent = None):
+        QtCore.QObject.__init__(self, parent)
         self.wrappedProcess = wrappedProcess
 
     @QtCore.Slot(str)

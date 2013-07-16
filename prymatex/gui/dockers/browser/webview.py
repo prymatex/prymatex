@@ -83,4 +83,4 @@ class WebView(QtWebKit.QWebView):
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, env=context.environment)
             self.page().mainFrame().addToJavaScriptWindowObject("_systemWrapper", 
-                SystemWrapper(context.process))
+                SystemWrapper(context.process, self))
