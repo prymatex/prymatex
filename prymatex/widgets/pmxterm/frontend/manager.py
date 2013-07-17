@@ -147,35 +147,28 @@ class LocalBackend(Backend):
         self.error.emit(self.ReadError)
         self.finished.emit(-1)
 
-
     #------------ Process Normal Signals
     def backend_finished(self):
         self.finished.emit(0)
-
 
     def backend_error(self, error):
         self.error.emit(error)
 
     def backend_readyReadStandardError(self):
         print(encoding.from_fs(self.process.readAllStandardError()))
-
-        
+    
     def backend_readyReadStandardOutput(self):
         print(encoding.from_fs(self.process.readAllStandardOutput()))
-        
     
     # -------------- set backend process attrs and settings
     def setWorkingDirectory(self, directory):
         self.process.setWorkingDirectory(directory)
 
-
     def setProtocol(self, protocol):
         self.protocol = protocol
 
-
     def setAddress(self, address):
         self.address = address
-
 
 class BackendManager(QtCore.QObject):
     def __init__(self, parent = None):
