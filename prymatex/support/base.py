@@ -95,7 +95,9 @@ class PMXRunningContext(object):
     Working Directory: {workingDirectory}
     Input:  Type {inputType}, Value {inputValue}
     Environment: {environment}
-    Output: Type {outputType}, Value {outputValue}
+    OutputType: {outputType}
+    OutputValue: {outputValue}
+    ErrorValue: {errorValue}
     """
     def __init__(self, bundleItem, shellCommand, environment):
         self.bundleItem = bundleItem
@@ -104,15 +106,8 @@ class PMXRunningContext(object):
         self.process = None
         self.environment = environment
         self.asynchronous = False
-        self.outputValue = self.outputType = None
+        self.errorValue = self.outputValue = self.outputType = None
         self.workingDirectory = None
-
-    def setShellCommand(self, shellCommand):
-        # Set new shell command clean old values
-        self.removeTempFile()
-        self.inputType = self.inputValue = None
-        self.outputValue = self.outputType = None
-        self.shellCommand = shellCommand
 
     def __enter__(self):
         #Build the full las environment with gui environment and support environment
@@ -125,26 +120,28 @@ class PMXRunningContext(object):
 
     def __unicode__(self):
         return self.TEMPLATE.format(
-                itemName = self.bundleItem.name,
-                asynchronous = self.asynchronous,
-                workingDirectory = self.workingDirectory,
-                inputType = self.inputType,
-                inputValue = self.inputValue,
-                environment = self.environment,
-                outputType = self.outputType,
-                outputValue = self.outputValue
+            itemName = self.bundleItem.name,
+            asynchronous = self.asynchronous,
+            workingDirectory = self.workingDirectory,
+            inputType = self.inputType,
+            inputValue = self.inputValue,
+            environment = self.environment,
+            outputType = self.outputType,
+            outputValue = self.outputValue,
+            errorValue = self.errorValue
         )
 
     def __str__(self):
         return self.TEMPLATE.format(
-                itemName = self.bundleItem.name,
-                asynchronous = self.asynchronous,
-                workingDirectory = self.workingDirectory,
-                inputType = self.inputType,
-                inputValue = self.inputValue,
-                environment = self.environment,
-                outputType = self.outputType,
-                outputValue = self.outputValue
+            itemName = self.bundleItem.name,
+            asynchronous = self.asynchronous,
+            workingDirectory = self.workingDirectory,
+            inputType = self.inputType,
+            inputValue = self.inputValue,
+            environment = self.environment,
+            outputType = self.outputType,
+            outputValue = self.outputValue,
+            errorValue = self.errorValue
         )
 
     def isBundleItem(self, bundleItem):

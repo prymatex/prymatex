@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import subprocess
 import mimetypes
 
 from prymatex.qt import QtGui, QtCore, QtWebKit
@@ -74,13 +73,19 @@ class WebView(QtWebKit.QWebView):
     def on_networkAccessManager_commandUrlRequested(self, url):
         self.browserDock.application.handleUrlCommand(url)
 
-    def runCommand(self, command):
-        self.runningContext.removeTempFile()
-        self.runningContext.setShellCommand(command)
-        with self.runningContext as context:
-            print(command)
-            context.process = subprocess.Popen(context.shellCommand, 
-                stdin=subprocess.PIPE, stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE, env=context.environment)
-            self.page().mainFrame().addToJavaScriptWindowObject("_systemWrapper", 
-                SystemWrapper(context.process, self))
+    def commandCallback(self, context):
+        print("lista la corrida", context)
+        #self.page().mainFrame().evaluateJavaScript("alert('listo el pollo');")
+        self.page().mainFrame().addToJavaScriptWindowObject("_systemWrapper", 
+            SystemWrapper(context, self))
+
+    def runCommand(self, shellCommand, asynchronous = False):
+        supportManager = self.browserDock.application.supportManager
+        commandProcessor = self.browserDock.mainWindow.commandProcessor
+        
+        command = supportManager.buildAdHocCommand(shellCommand, self.runningContext.bundleItem.bundle)
+        commandProcessor.configure({ 
+            "asynchronous": asynchronous,
+            "environment": self.runningContext.environment
+            })
+        command.executeCallback(commandProcessor, self.commandCallback)

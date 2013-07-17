@@ -6,41 +6,28 @@ from prymatex.qt import QtCore
 from prymatex.utils import encoding
 
 #=======================================================================
-# System process wrapper
-# wrap a process for using in window context of javascript
+# System runningContext wrapper
+# wrap a runningContext for using in window context of javascript
 #=======================================================================
 class SystemWrapper(QtCore.QObject):
-    def __init__(self, process, parent = None):
+    def __init__(self, context, parent = None):
         QtCore.QObject.__init__(self, parent)
-        self.process = process
-        self.stdoutdata = None
-        self.stderrdata = None
-        
-    def communicate(self, inputdata = None):
-        inputdata = inputdata and encoding.to_fs(inputdata)
-        stdout, stderr = self.process.communicate(inputdata)
-        self.stdoutdata = encoding.from_fs(stdout)
-        self.stderrdata = encoding.from_fs(stderr)
+        self.context = context
         
     @QtCore.Slot(str)
     def write(self, data):
-        self.communicate(data)
+        pass
 
     @QtCore.Slot()
     def read(self):
-        if self.stdoutdata is None or self.stderrdata is None:
-            self.communicate()
-        return self.stdoutdata or self.stderrdata
+        pass
 
     @QtCore.Slot()
     def close(self):
-        self.process.stdout.close()
-        self.process.stderr.close()
-        self.process.stdin.close()
-        self.process.wait()
+        pass
 
     def outputString(self):
-        return self.read()
+        return self.context.outputValue
     outputString = QtCore.Property(str, outputString)
 
 #=======================================================================
@@ -50,9 +37,7 @@ WINDOW_JAVASCRIPT = """
 %s
 TextMate.system = function(command, callback) {
     this._system(command);
-    if (callback != null) {
-        
-    }
+    if (callback != null) {}
     return _systemWrapper;
 }
 """
