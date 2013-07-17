@@ -256,12 +256,12 @@ def mate_parse_args(args):
     """ 
 
     parser = OptionParser()
-    parser.add_option("-a", "--async", action = 'store')
-    parser.add_option("-w", "--wait", action = 'store')
+    parser.add_option("-a", "--async", action = 'store_true')
+    parser.add_option("-w", "--wait", action = 'store_true')
     parser.add_option("-l", "--line", action = 'store')
-    parser.add_option("-r", "--recent", action = 'store')
-    parser.add_option("-d", "--change-dir", action = 'store')
-    parser.add_option("-n", "--no-reactivation", action = 'store')
+    parser.add_option("-r", "--recent", action = 'store_true')
+    parser.add_option("-d", "--change-dir", action = 'store_true')
+    parser.add_option("-n", "--no-reactivation", action = 'store_true')
     
     options, args = parser.parse_args(args)
     return options, args
