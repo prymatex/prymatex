@@ -12,12 +12,12 @@ from collections import namedtuple, OrderedDict
 
 from .bundle import PMXBundle
 from . import bundleitem 
+from . import scope
 from .theme import PMXTheme, PMXThemeStyle
 from .staticfile import PMXStaticFile
 
-from prymatex.support import scope
-
 from prymatex.utils import plist, osextra, six
+from prymatex.utils import encoding
 
 from functools import reduce
 
@@ -185,13 +185,13 @@ class PMXSupportBaseManager(object):
             stderr=subprocess.PIPE, env=context.environment)
 
         if context.inputType is not None:
-            context.process.stdin.write(str(context.inputValue).encode("utf-8"))
+            context.process.stdin.write(encoding.to_fs(context.inputValue))
         context.process.stdin.close()
         try:
-            context.outputValue = context.process.stdout.read()
-            context.errorValue = context.process.stderr.read()
+            context.outputValue = encoding.from_fs(context.process.stdout.read())
+            context.errorValue = encoding.from_fs(context.process.stderr.read())
         except IOError as e:
-            context.errorValue = str(e).decode("utf-8")
+            context.errorValue =  six.text_type(e)
         context.process.stdout.close()
         context.process.stderr.close()
         context.outputType = context.process.wait()
