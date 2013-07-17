@@ -401,6 +401,11 @@ class CommandHandler(object):
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(PMX_DIALOG_ADDRESS)
         
+    def sendCommand(self, command):
+        self.socket.send_json(command)
+        value = self.socket.recv()
+        sys.stdout.write(value.decode("utf-8"))
+        
     # ======================
     # = New dialog methods =
     # ======================
@@ -411,10 +416,7 @@ class CommandHandler(object):
         kwargs["quiet"] = options.quiet
         kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
         
-        command = {"name": "async_window", "kwargs": kwargs}
-        self.socket.send_json(command)
-        value = self.socket.recv()
-        sys.stdout.write(value)
+        self.sendCommand({"name": "async_window", "kwargs": kwargs})
         
     def update_window(self, options, args):
         """docstring for update_window"""
@@ -422,30 +424,21 @@ class CommandHandler(object):
         kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
         kwargs["token"] = options.update_window
 
-        command = {"name": "update_window", "kwargs": kwargs}
-        self.socket.send_json(command)
-        value = self.socket.recv()
-        sys.stdout.write(value)
+        self.sendCommand({"name": "update_window", "kwargs": kwargs})
 
     def close_window(self, options, args):
         """docstring for close_window"""
         kwargs = {}
         kwargs["token"] = options.close_window
 
-        command = {"name": "close_window", "kwargs": kwargs}
-        self.socket.send_json(command)
-        value = self.socket.recv()
-        sys.stdout.write(value)
+        self.sendCommand({"name": "close_window", "kwargs": kwargs})
     
     def wait_for_input(self, options, args):
         """docstring for wait_for_input"""
         kwargs = {}
         kwargs["token"] = options.wait_for_input
 
-        command = {"name": "wait_for_input", "kwargs": kwargs}
-        self.socket.send_json(command)
-        value = self.socket.recv()
-        sys.stdout.write(value)
+        self.sendCommand({"name": "wait_for_input", "kwargs": kwargs})
         
     def modal_window(self, options, args):
         """docstring for modal_window"""
@@ -454,10 +447,7 @@ class CommandHandler(object):
         kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
         kwargs["center"] = options.center
         
-        command = {"name": "modal_window", "kwargs": kwargs}
-        self.socket.send_json(command)
-        value = self.socket.recv()
-        sys.stdout.write(value)
+        self.sendCommand({"name": "modal_window", "kwargs": kwargs})
     
     # ======================
     # = Old dialgo methods =
@@ -468,18 +458,12 @@ class CommandHandler(object):
         kwargs["format"] = options.html and "html" or "text"
         kwargs["transparent"] = options.transparent
         
-        command = {"name": "tooltip", "kwargs": kwargs}
-        self.socket.send_json(command)
-        value = self.socket.recv()
-        sys.stdout.write(value)
+        self.sendCommand({"name": "tooltip", "kwargs": kwargs})
 
     def menu(self, options, args):
         kwargs = {}
         kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
-        command = {"name": "menu", "kwargs": kwargs}
-        self.socket.send_json(command)
-        value = self.socket.recv()
-        sys.stdout.write(value)
+        self.sendCommand({"name": "menu", "kwargs": kwargs})
         
     def popup(self, options, args):
         kwargs = {
@@ -491,73 +475,48 @@ class CommandHandler(object):
         }
         kwargs["suggestions"] = options.suggestions if options.suggestions is not None else "".join(sys.stdin.readlines())
         
-        command = {"name": "popup", "kwargs": kwargs}
-        
-        self.socket.send_json(command)
-        value = self.socket.recv()
-        sys.stdout.write(value)
+        self.sendCommand({"name": "popup", "kwargs": kwargs})
         
     def defaults(self, options, args):
-        command = {"name": "defaults", "kwargs": {}}
-        self.socket.send_json(command)
-        value = self.socket.recv()
-        sys.stdout.write(value)
+        self.sendCommand({"name": "defaults", "kwargs": {}})
 
     def images(self, options, args):
         kwargs = {}
         kwargs["parameters"] = options.plist if options.plist is not None else "".join(sys.stdin.readlines())
         
-        command = {"name": "images", "kwargs": kwargs}
-        self.socket.send_json(command)
-        value = self.socket.recv()
-        sys.stdout.write(value)
+        self.sendCommand({"name": "images", "kwargs": kwargs})
         
     def alert(self, options, args):
         kwargs = {}
-        command = {"name": "alert", "kwargs": kwargs}
-        self.socket.send_json(command)
-        value = self.socket.recv()
-        sys.stdout.write(value)
+        self.sendCommand({"name": "alert", "kwargs": kwargs})
 
     def open(self, options, urls):
         for url in urls:
             if url.startswith("txmt"):   # or "pmtx" :)
-                command = {"name": "open", "kwargs": { "url": url}}
-                self.socket.send_json(command)
-                _ = self.socket.recv()
+                self.sendCommand({"name": "open", "kwargs": { "url": url}})
             else:
                 os.popen("xdg-open %s" % url)
     
     def completer(self, options, urls):
         kwargs = {}
-        command = {"name": "completer", "kwargs": kwargs}
-        self.socket.send_json(command)
-        value = self.socket.recv()
-        sys.stdout.write(value)
+        self.sendCommand({"name": "completer", "kwargs": kwargs})
     
     def mate(self, options, args):
         kwargs = {"paths": args}
-        command = {"name": "mate", "kwargs": kwargs }
-        self.socket.send_json(command)
-        value = self.socket.recv()
-        sys.stdout.write(value)
+        kwargs["line"] = options.line
+        kwargs["wait"] = options.wait
+        self.sendCommand({"name": "mate", "kwargs": kwargs })
         
     def terminal(self, options, args):
         kwargs = {}
         kwargs["commands"] = args
-        command = {"name": "terminal", "kwargs": kwargs}
-        self.socket.send_json(command)
-        value = self.socket.recv()
-        sys.stdout.write(value)
+        self.sendCommand({"name": "terminal", "kwargs": kwargs})
 
     def debug(self, options, args):
         kwargs = {}
         kwargs["args"] = args
         kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
-        command = {"name": "debug", "kwargs": kwargs}
-        self.socket.send_json(command)
-        value = self.socket.recv()
-        sys.stdout.write(value)
+        self.sendCommand({"name": "debug", "kwargs": kwargs})
     
 def main(args):
     handler = CommandHandler()
