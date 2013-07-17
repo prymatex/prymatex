@@ -3,39 +3,44 @@
 
 from prymatex.qt import QtCore
 
+from prymatex.utils import encoding
+
 #=======================================================================
 # System process wrapper
 # wrap a process for using in window context of javascript
 #=======================================================================
 class SystemWrapper(QtCore.QObject):
-    def __init__(self, wrappedProcess, parent = None):
+    def __init__(self, process, parent = None):
         QtCore.QObject.__init__(self, parent)
-        self.wrappedProcess = wrappedProcess
-
+        self.process = process
+        self.stdoutdata = None
+        self.stderrdata = None
+        
+    def communicate(self, inputdata = None):
+        inputdata = inputdata and encoding.to_fs(inputdata)
+        stdout, stderr = self.process.communicate(inputdata)
+        self.stdoutdata = encoding.from_fs(stdout)
+        self.stderrdata = encoding.from_fs(stderr)
+        
     @QtCore.Slot(str)
     def write(self, data):
-        self.wrappedProcess.stdin.write(data)
+        self.communicate(data)
 
     @QtCore.Slot()
     def read(self):
-        self.wrappedProcess.stdin.close()
-        text = self.wrappedProcess.stdout.read()
-        self.wrappedProcess.stdout.close()
-        self.wrappedProcess.wait()
-        return text
+        if self.stdoutdata is None or self.stderrdata is None:
+            self.communicate()
+        return self.stdoutdata or self.stderrdata
 
     @QtCore.Slot()
     def close(self):
-        self.wrappedProcess.stdin.close()
-        self.wrappedProcess.stdout.close()
-        self.wrappedProcess.wait()
+        self.process.stdout.close()
+        self.process.stderr.close()
+        self.process.stdin.close()
+        self.process.wait()
 
     def outputString(self):
-        self.wrappedProcess.stdin.close()
-        text = self.wrappedProcess.stdout.read()
-        self.wrappedProcess.stdout.close()
-        self.wrappedProcess.wait()
-        return text
+        return self.read()
     outputString = QtCore.Property(str, outputString)
 
 #=======================================================================
