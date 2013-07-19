@@ -226,9 +226,10 @@ class PMXDragCommand(PMXCommand):
         PMXCommand.update(self, dataHash)
         self.__load_update(dataHash, False)
 
-    def dump(self):
-        dataHash = super(PMXDragCommand, self).dump()
+    def dump(self, includeNone = False):
+        dataHash = PMXCommand.dump(self, includeNone)
         for key in PMXDragCommand.KEYS:
-            value = getattr(self, key)
-            dataHash[key] = value
+            value = getattr(self, key, None)
+            if includeNone or value != None:
+                dataHash[key] = value
         return dataHash

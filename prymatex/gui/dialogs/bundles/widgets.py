@@ -368,8 +368,6 @@ class StaticFileEditorWidget(BundleItemEditorBaseWidget, Ui_TemplateFile):
     
 class DragCommandEditorWidget(BundleItemEditorBaseWidget, Ui_DragCommand):
     TYPE = 'dragcommand'
-    DEFAULTS = {'draggedFileExtensions': ['png', 'jpg'],
-                'command': '''echo "$TM_DROPPED_FILE"'''}
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
@@ -378,78 +376,51 @@ class DragCommandEditorWidget(BundleItemEditorBaseWidget, Ui_DragCommand):
     
     @QtCore.Slot()
     def on_command_textChanged(self):
-        text = self.command.toPlainText()
-        if self.bundleItem.command != text:
-            self.changes['command'] = text
-        else:
-            self.changes.pop('command', None)
+        self.changes['command'] = self.command.toPlainText()
     
     @QtCore.Slot(str)
     def on_lineEditExtensions_textEdited(self, text):
         value = [item.strip() for item in text.split(",")]
-        if value != self.bundleItem.draggedFileExtensions:
-            self.changes['draggedFileExtensions'] = value
-        else:
-            self.changes.pop('draggedFileExtensions', None)
+        self.changes['draggedFileExtensions'] = value
         
     def getScope(self):
-        scope = super(DragCommandEditorWidget, self).getScope()
-        return scope is not None and scope or ""
+        return super(DragCommandEditorWidget, self).getScope() or ""
         
     def edit(self, bundleItem):
-        super(DragCommandEditorWidget, self).edit(bundleItem)
-        command = bundleItem.command
-        if command is None:
-            command = self.DEFAULTS['command']
-        self.command.setPlainText(command)
-        draggedFileExtensions = bundleItem.draggedFileExtensions
-        if draggedFileExtensions is None:
-            draggedFileExtensions = self.changes['draggedFileExtensions'] = self.DEFAULTS['draggedFileExtensions']
-        self.lineEditExtensions.setText(", ".join(draggedFileExtensions))
+        BundleItemEditorBaseWidget.edit(self, bundleItem)
+        self.command.setPlainText(self.changes['command'])
+        self.lineEditExtensions.setText(", ".join(self.changes['draggedFileExtensions']))
 
 class LanguageEditorWidget(BundleItemEditorBaseWidget, Ui_Language):
     TYPE = 'syntax'
-    DEFAULTS = {'content': {       'scopeName': 'source.untitled',
-       'fileTypes': [],
-       'foldingStartMarker': '/\*\*|\{\s*$',
-       'foldingStopMarker': '\*\*/|^\s*\}',
-       'patterns': [
-               {       'name': 'keyword.control.untitled',
-                       'match': '\b(if|while|for|return)\b' },
-               {       'name': 'string.quoted.double.untitled',
-                       'begin': '"',
-                       'end': '"',
-                       'patterns': [
-                               {     'name': 'constant.character.escape.untitled',
-                                     'match': '\\.' } ]
-               }
-       ]}
-    }
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
         self.content.setTabStopWidth(TABWIDTH)
-    
+
+    def isChanged(self):
+        return False
+
     @QtCore.Slot()
     def on_content_textChanged(self):
         #Convertir a dict
         try:
-            self.changes['content'] = ast.literal_eval(self.command.toPlainText())
+            grammar = self.command.toPlainText()
+            self.changes['grammar'] = ast.literal_eval(grammar)
         except:
             pass
     
     def getKeyEquivalent(self):
-        keyEquivalent = super(LanguageEditorWidget, self).getKeyEquivalent()
-        return keyEquivalent is not None and keyEquivalent or ""
+        return super(LanguageEditorWidget, self).getKeyEquivalent() or ""
     
     def edit(self, bundleItem):
-        super(LanguageEditorWidget, self).edit(bundleItem)
-        content = bundleItem.dump()
-        content.pop('name')
-        content.pop('uuid')
-        if len(content) == 0:
-            content = self.changes['content'] = self.DEFAULTS['content']
-        self.content.setPlainText(pformat(content))
+        BundleItemEditorBaseWidget.edit(self, bundleItem)
+        self.changes = {
+            "name" : self.changes.pop("name"),
+            "uuid" :self.changes.pop("uuid"),
+            "grammar": self.changes
+        }
+        self.content.setPlainText(pformat(self.changes["grammar"]))
     
 class PreferenceEditorWidget(BundleItemEditorBaseWidget, Ui_Preference):
     TYPE = 'preference'
@@ -462,22 +433,18 @@ class PreferenceEditorWidget(BundleItemEditorBaseWidget, Ui_Preference):
     def on_settings_textChanged(self):
         #Convertir a dict
         try:
-            settings = ast.literal_eval(self.settings.toPlainText())
-            if self.bundleItem.dump()["settings"] != settings:
-                self.changes['settings'] = settings
-            else:
-                self.changes.pop("settings", None)
+            settings = self.settings.toPlainText()
+            self.changes['settings'] = ast.literal_eval(settings)
         except:
+            # Un mensaje de error estaria bueno no? :)
             pass
 
     def getScope(self):
-        scope = super(PreferenceEditorWidget, self).getScope()
-        return scope is not None and scope or ""
+        return super(PreferenceEditorWidget, self).getScope() or ""
     
     def edit(self, bundleItem):
-        super(PreferenceEditorWidget, self).edit(bundleItem)
-        content = bundleItem.dump()
-        self.settings.setPlainText(pformat(content['settings']))
+        BundleItemEditorBaseWidget.edit(self, bundleItem)
+        self.settings.setPlainText(pformat(self.changes['settings']))
 
 class MacroEditorWidget(BundleItemEditorBaseWidget, Ui_Macro):
     TYPE = 'macro'
@@ -490,8 +457,8 @@ class MacroEditorWidget(BundleItemEditorBaseWidget, Ui_Macro):
     def on_listActionWidget_itemClicked(self, item):
         index = self.listActionWidget.indexFromItem(item)
         row = index.row()
-        if 'argument' in self.bundleItem.commands[row]:
-            self.argument.setPlainText(pformat(self.bundleItem.commands[row]['argument']))
+        if 'argument' in self.changes["commands"][row]:
+            self.argument.setPlainText(pformat(self.changes["commands"][row]['argument']))
         else:
             self.argument.clear()
 
@@ -499,8 +466,7 @@ class MacroEditorWidget(BundleItemEditorBaseWidget, Ui_Macro):
         BundleItemEditorBaseWidget.edit(self, bundleItem)
         self.listActionWidget.clear()
         self.argument.clear()
-        commands = bundleItem.commands
-        for command in commands:
+        for command in self.changes["commands"]:
             item = QtGui.QListWidgetItem(command['command'], self.listActionWidget, self.COMMAND)
             self.listActionWidget.addItem(item)
 
@@ -532,19 +498,13 @@ class BundleEditorWidget(BundleItemEditorBaseWidget, Ui_Menu):
     def getSemanticClass(self):
         return None
     
-    def edit(self, bundle):
-        super(BundleEditorWidget, self).edit(bundle)
-        self.treeMenuModel.setBundle(bundle)
+    def edit(self, bundleItem):
+        BundleItemEditorBaseWidget.edit(self, bundleItem)
+        self.treeMenuModel.setBundle(bundleItem)
 
 class ProjectEditorWidget(BundleItemEditorBaseWidget, Ui_Project):
     TYPE = 'project'
-    DEFAULTS = {
-                'command': '''if [[ ! -f "$TM_NEW_PROJECT_LOCATION" ]]; then
-  TM_YEAR=`date +%Y` \
-  TM_DATE=`date +%Y-%m-%d` \
-  perl -pe 's/\$\{([^}]*)\}/$ENV{$1}/g' \
-     < template_in.txt > "$TM_NEW_PROJECT_LOCATION"
-fi"'''}
+
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
@@ -555,8 +515,5 @@ fi"'''}
         self.changes['command'] = self.command.toPlainText()
     
     def edit(self, bundleItem):
-        super(ProjectEditorWidget, self).edit(bundleItem)
-        command = bundleItem.command
-        if command is None:
-            command = self.DEFAULTS['command']
-        self.command.setPlainText(command)
+        BundleItemEditorBaseWidget.edit(self, bundleItem)
+        self.command.setPlainText(self.cahnges['command'])

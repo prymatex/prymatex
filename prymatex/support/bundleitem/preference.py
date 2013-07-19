@@ -61,7 +61,7 @@ class PMXPreferenceSettings(object):
     def bundle(self):
         return self.preference.bundle
     
-    def dump(self, includeNone):
+    def dump(self):
         dataHash = {}
         for key in PMXPreferenceSettings.KEYS:
             value = getattr(self, key, None)
@@ -314,7 +314,7 @@ class PMXPreference(PMXBundleItem):
             value = getattr(self, key, None)
             if includeNone or value != None:
                 if key == 'settings' and value != None:
-                    value = value.dump(includeNone)
+                    value = value.dump()
                 dataHash[key] = value
         return dataHash
 
