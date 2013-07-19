@@ -25,11 +25,11 @@ class PMXMacro(PMXBundleItem):
         PMXBundleItem.update(self, dataHash)
         self.__load_update(dataHash, False)
     
-    def dump(self):
-        dataHash = PMXBundleItem.dump(self)
+    def dump(self, includeNone = False):
+        dataHash = PMXBundleItem.dump(self, includeNone)
         for key in PMXMacro.KEYS:
-            value = getattr(self, key)
-            if value != None:
+            value = getattr(self, key, None)
+            if includeNone or value != None:
                 dataHash[key] = value
         return dataHash
             

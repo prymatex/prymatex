@@ -204,10 +204,10 @@ class PMXSyntax(PMXBundleItem):
                     value = self.manager.createScopeSelector(value)
             setattr(self, key, value)
     
-    def dump(self):
-        dataHash = super(PMXSyntax, self).dump()
+    def dump(self, includeNone = False):
+        dataHash = super(PMXSyntax, self).dump(includeNone)
         for key in PMXSyntax.KEYS:
-            value = getattr(self, key)
+            value = getattr(self, key, None)
             if value is not None:
                 if key == 'firstLineMatch':
                     value = value.pattern

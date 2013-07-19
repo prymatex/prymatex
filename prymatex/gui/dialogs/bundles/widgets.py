@@ -71,8 +71,8 @@ class BundleItemEditorBaseWidget(QtGui.QWidget):
 
     def edit(self, bundleItem):
         self.bundleItem = bundleItem
-        self.__title = 'Edit %s: "%s"' % (self.TYPE, bundleItem.name)
-        self.changes = bundleItem.dump()
+        self.__title = bundleItem and 'Edit %s: "%s"' % (self.TYPE, bundleItem.name) or 'No item selected'
+        self.changes = bundleItem and bundleItem.dump(includeNone = True) or {}
 
 #============================================================
 # None Widget
@@ -135,18 +135,6 @@ class SnippetEditorWidget(BundleItemEditorBaseWidget, Ui_Snippet):
 
 class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
     TYPE = 'command'
-    DEFAULTS = {'beforeRunningCommand': 'nop',
-                'command': '''# just to remind you of some useful environment variables
-# see Help / Environment Variables for the full list
-echo File: "$TM_FILEPATH"
-echo Word: "$TM_CURRENT_WORD"
-echo Selection: "$TM_SELECTED_TEXT"''',
-                'input': 'selection',
-                'inputFormat': 'text',
-                'fallbackInput': 'document',
-                'output': 'replaceSelectedText',
-                'outputFormat': 'text',
-                'outputCaret': 'afterOutput'}
     
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
@@ -212,32 +200,18 @@ echo Selection: "$TM_SELECTED_TEXT"''',
 
     @QtCore.Slot()
     def on_command_textChanged(self):
-        text = self.command.toPlainText()
-        if self.bundleItem.command != text:
-            self.changes['command'] = text
-        else:
-            self.changes.pop('command', None)
+        self.changes['command'] = self.command.toPlainText()
         
     def on_comboBoxBeforeRunning_changed(self, index):
-        value = self.comboBoxBeforeRunning.itemData(index)
-        if value != self.bundleItem.beforeRunningCommand:
-            self.changes['beforeRunningCommand'] = value
-        else:
-            self.changes.pop('beforeRunningCommand', None)
+        self.changes['beforeRunningCommand'] = self.comboBoxBeforeRunning.itemData(index)
             
     def on_comboBoxInput_changed(self, index):
         value = self.comboBoxInput.itemData(index)
-        if value != self.bundleItem.input:
-            self.changes['input'] = value
-        else:
-            self.changes.pop('input', None)
+        self.changes['input'] = value
         if value == 'selection':
             self.labelInputOption.setVisible(True)
             self.comboBoxFallbackInput.setVisible(True)
-            fallbackInput = self.bundleItem.fallbackInput
-            if fallbackInput is None:
-                fallbackInput = self.DEFAULTS['fallbackInput']
-            index = self.comboBoxFallbackInput.findData(fallbackInput)
+            index = self.comboBoxFallbackInput.findData(self.changes["fallbackInput"] or "document")
             if index != -1:
                 self.comboBoxFallbackInput.setCurrentIndex(index)
         else:
@@ -246,111 +220,67 @@ echo Selection: "$TM_SELECTED_TEXT"''',
             self.comboBoxFallbackInput.setVisible(False)
     
     def on_comboBoxFallbackInput_changed(self, index):
-        value = self.comboBoxFallbackInput.itemData(index)
-        if value != self.bundleItem.fallbackInput and value != self.DEFAULTS['fallbackInput']:
-            self.changes['fallbackInput'] = value
-        else:
-            self.changes.pop('fallbackInput', None)
-    
+        self.changes['fallbackInput'] = self.comboBoxFallbackInput.itemData(index)
+
     def on_comboBoxInputFormat_changed(self, index):
-        value = self.comboBoxInputFormat.itemData(index)
-        if value != self.bundleItem.inputFormat:
-            self.changes['inputFormat'] = value
-        else:
-            self.changes.pop('inputFormat', None)
+        self.changes['inputFormat'] = self.comboBoxInputFormat.itemData(index)
 
     def on_comboBoxOutput_changed(self, index):
         value = self.comboBoxOutput.itemData(index)
-        outputKey = "outputLocation" if self.bundleItem.version == 2 else "output"
-        if value != getattr(self.bundleItem, outputKey):
-            self.changes[outputKey] = value
-        else:
-            self.changes.pop(outputKey, None)
+        outputKey = "outputLocation" if self.changes["version"] == 2 else "output"
+        self.changes[outputKey] = value
     
     def on_comboBoxOutputFormat_changed(self, index):
-        value = self.comboBoxOutputFormat.itemData(index)
-        if value != self.bundleItem.outputFormat:
-            self.changes['outputFormat'] = value
-        else:
-            self.changes.pop('outputFormat', None)
+        self.changes['outputFormat'] = self.comboBoxOutputFormat.itemData(index)
     
     def on_comboBoxCaret_changed(self, index):
-        value = self.comboBoxCaret.itemData(index)
-        if value != self.bundleItem.outputCaret:
-            self.changes['outputCaret'] = value
-        else:
-            self.changes.pop('outputCaret', None)
+        self.changes['outputCaret'] = self.comboBoxCaret.itemData(index)
     
     def getScope(self):
-        scope = super(CommandEditorWidget, self).getScope()
-        return scope is not None and scope or ""
+        return super(CommandEditorWidget, self).getScope() or ""
         
     def getTabTrigger(self):
-        tabTrigger = super(CommandEditorWidget, self).getTabTrigger()
-        return  tabTrigger is not None and tabTrigger or ""
+        return  super(CommandEditorWidget, self).getTabTrigger() or ""
     
     def getKeyEquivalent(self):
-        keyEquivalent = super(CommandEditorWidget, self).getKeyEquivalent()
-        return keyEquivalent is not None and keyEquivalent or ""
+        return super(CommandEditorWidget, self).getKeyEquivalent() or ""
     
     def getSemanticClass(self):
-        semanticClass = super(CommandEditorWidget, self).getSemanticClass()
-        return semanticClass is not None and semanticClass or ""
+        return super(CommandEditorWidget, self).getSemanticClass() or ""
     
     def edit(self, bundleItem):
         super(CommandEditorWidget, self).edit(bundleItem)
         #Command
-        command = bundleItem.command
-        if command is None:
-            command = self.DEFAULTS['command']
-        self.command.setPlainText(command)
+        self.command.setPlainText(self.changes["command"])
         
         #BeforeRunningCommand
-        beforeRunningCommand = bundleItem.beforeRunningCommand
-        if beforeRunningCommand is None:
-            beforeRunningCommand = self.changes['beforeRunningCommand'] = self.DEFAULTS['beforeRunningCommand']
-        index = self.comboBoxBeforeRunning.findData(beforeRunningCommand)
+        index = self.comboBoxBeforeRunning.findData(self.changes["beforeRunningCommand"])
         if index != -1:
             self.comboBoxBeforeRunning.setCurrentIndex(index)
 
         #Input
-        commandInput = bundleItem.input
-        if commandInput is None:
-            commandInput = self.changes['input'] = self.DEFAULTS['input']
-        index = self.comboBoxInput.findData(commandInput)
+        index = self.comboBoxInput.findData(self.changes["input"])
         if index != -1:
             self.comboBoxInput.setCurrentIndex(index)
     
         #Output
-        output = bundleItem.output or bundleItem.outputLocation
-        if output is None:
-            output = self.changes['output'] = self.DEFAULTS['output']
-        index = self.comboBoxOutput.findData(output)
+        index = self.comboBoxOutput.findData(self.changes["output"])
         if index != -1:
             self.comboBoxOutput.setCurrentIndex(index)
     
-        if bundleItem.version == 2:
+        if self.changes["version"] == 2:
             #Input Format
-            commandInputFormat = bundleItem.inputFormat
-            if commandInputFormat is None:
-                commandInputFormat = self.changes['inputFormat'] = self.DEFAULTS['inputFormat']
-            index = self.comboBoxInputFormat.findData(commandInputFormat)
+            index = self.comboBoxInputFormat.findData(self.changes["inputFormat"])
             if index != -1:
                 self.comboBoxInputFormat.setCurrentIndex(index)
             
             #Output Format
-            commandOutputFormat = bundleItem.outputFormat
-            if commandOutputFormat is None:
-                commandOutputFormat = self.changes['outputFormat'] = self.DEFAULTS['outputFormat']
-            index = self.comboBoxOutputFormat.findData(commandOutputFormat)
+            index = self.comboBoxOutputFormat.findData(self.changes["outputFormat"])
             if index != -1:
                 self.comboBoxOutputFormat.setCurrentIndex(index)
             
             #Output Format
-            commandOutputCaret = bundleItem.outputCaret
-            if commandOutputCaret is None:
-                commandOutputCaret = self.changes['outputCaret'] = self.DEFAULTS['outputCaret']
-            index = self.comboBoxCaret.findData(commandOutputCaret)
+            index = self.comboBoxCaret.findData(self.changes["outputCaret"])
             if index != -1:
                 self.comboBoxCaret.setCurrentIndex(index)
             

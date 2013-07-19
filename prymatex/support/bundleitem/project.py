@@ -39,8 +39,8 @@ fi"'''}
         PMXBundleItem.update(self, dataHash)
         self.__load_update(dataHash, False)
         
-    def dump(self):
-        dataHash = super(PMXProject, self).dump()
+    def dump(self, includeNone = False):
+        dataHash = super(PMXProject, self).dump(includeNone)
         for key in PMXProject.KEYS:
             value = getattr(self, key)
             if value != None:

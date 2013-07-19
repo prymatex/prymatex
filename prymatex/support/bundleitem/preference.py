@@ -61,10 +61,10 @@ class PMXPreferenceSettings(object):
     def bundle(self):
         return self.preference.bundle
     
-    def dump(self):
+    def dump(self, includeNone):
         dataHash = {}
         for key in PMXPreferenceSettings.KEYS:
-            value = getattr(self, key)
+            value = getattr(self, key, None)
             if value != None:
                 if key in self.INDENT_KEYS or key in self.FOLDING_KEYS:
                     value = value.pattern
@@ -308,13 +308,14 @@ class PMXPreference(PMXBundleItem):
                 else:
                     setattr(self, key, value)
     
-    def dump(self):
-        dataHash = super(PMXPreference, self).dump()
+    def dump(self, includeNone = False):
+        dataHash = PMXBundleItem.dump(self, includeNone)
         for key in PMXPreference.KEYS:
-            value = getattr(self, key)
-            if key == 'settings':
-                value = value.dump()
-            dataHash[key] = value
+            value = getattr(self, key, None)
+            if includeNone or value != None:
+                if key == 'settings' and value != None:
+                    value = value.dump(includeNone)
+                dataHash[key] = value
         return dataHash
 
     @staticmethod

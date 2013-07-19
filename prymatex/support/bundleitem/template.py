@@ -46,11 +46,11 @@ fi"'''
         PMXBundleItem.update(self, dataHash)
         self.__load_update(dataHash, False)
     
-    def dump(self):
-        dataHash = super(PMXTemplate, self).dump()
+    def dump(self, includeNone = False):
+        dataHash = super(PMXTemplate, self).dump(includeNone)
         for key in PMXTemplate.KEYS:
-            value = getattr(self, key)
-            if value != None:
+            value = getattr(self, key, None)
+            if includeNone or value != None:
                 dataHash[key] = value
         return dataHash
 
