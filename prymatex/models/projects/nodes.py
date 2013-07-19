@@ -162,10 +162,10 @@ class ProjectTreeNode(FileSystemTreeNode):
     def addBundleMenu(self, bundle):
         if not isinstance(self.bundleMenu, list):
             self.bundleMenu = []
-        self.bundleMenu.append(bundle.uuidAsUnicode())
+        self.bundleMenu.append(bundle.uuidAsText())
         
     def removeBundleMenu(self, bundle):
-        uuid = bundle.uuidAsUnicode()
+        uuid = bundle.uuidAsText()
         if uuid in self.bundleMenu:
             self.bundleMenu.remove(uuid)
         if not self.bundleMenu:
@@ -173,4 +173,4 @@ class ProjectTreeNode(FileSystemTreeNode):
             
     def hasBundleMenu(self, bundle):
         if self.bundleMenu is None: return False
-        return bundle.uuidAsUnicode() in self.bundleMenu
+        return bundle.uuidAsText() in self.bundleMenu

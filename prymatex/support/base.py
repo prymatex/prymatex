@@ -18,6 +18,9 @@ class PMXManagedObject(object):
         self.sources = {}
         self.pointer = None
 
+    def uuidAsText(self):
+        return six.text_type(self.uuid).upper()
+
     # ----------- Load from dictionary
     def load(self, dataHash):
         self.statics = []
@@ -28,11 +31,15 @@ class PMXManagedObject(object):
     
     # ----------- Dump to dictionary
     def dump(self):
-        return { 'uuid': self.uuidAsUnicode() }
+        return { 'uuid': self.uuidAsText() }
     
-    def uuidAsUnicode(self):
-        return str(self.uuid).upper()
-
+    def hasChanged(self, dataHash):
+        currentHash = self.dump()
+        for key, value in dataHash.items():
+            if key not in currentHash or currentHash[key] != value:
+                return True
+        return False
+        
     def enabled(self):
         return self.manager.isEnabled(self.uuid)
     

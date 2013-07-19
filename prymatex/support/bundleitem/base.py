@@ -48,12 +48,6 @@ class PMXBundleItem(PMXManagedObject):
     def enabled(self):
         return self.bundle.enabled()
 
-    def isChanged(self, dataHash):
-        for key in dataHash.keys():
-            if getattr(self, key) != dataHash[key]:
-                return True
-        return False
-
     # ---------------- Environment Variables
     def environmentVariables(self):
         return self.bundle.environmentVariables()

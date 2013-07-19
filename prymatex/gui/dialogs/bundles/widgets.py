@@ -31,107 +31,48 @@ class BundleItemEditorBaseWidget(QtGui.QWidget):
         #The bundle item
         self.bundleItem = None
         self.changes = {}
-    
-    @property
-    def isNew(self):
-        return self.new
+        self.__title = 'No item selected'
         
-    @property
     def isChanged(self):
-        return bool(self.changes)
+        return self.bundleItem.hasChanged(self.changes)
     
-    @property
     def title(self):
-        return 'No item selected'
+        return self.__title
     
     def getName(self):
-        if self.bundleItem is None:
-            return None
-        return self.bundleItem.name
+        return self.changes.get('name', None)
     
     def setName(self, value):
-        current = self.getName()
-        if value is not None and current is not None:
-            if value != current:
-                self.changes['name'] = value
-            else:
-                self.changes.pop('name', None)
-        elif value is None and current is not None:
-            self.changes['name'] = value
-        else:
-            self.changes.pop('name', None)
+        self.changes['name'] = value
     
     def getScope(self):
-        if self.bundleItem is None:
-            return None
-        return self.bundleItem.scope
+        return  self.changes.get('scope', None)
     
     def setScope(self, value):
-        current = self.getScope()
-        if value is not None and current is not None:
-            if value != current:
-                self.changes['scope'] = value
-            else:
-                self.changes.pop('scope', None)
-        elif value is None and current is not None:
-            self.changes['scope'] = value
-        else:
-            self.changes.pop('scope', None)
+        self.changes['scope'] = value
 
     def getTabTrigger(self):
-        if self.bundleItem is None:
-            return None
-        return self.bundleItem.tabTrigger
+        return self.changes.get('tabTrigger', None)
     
     def setTabTrigger(self, value):
-        current = self.getTabTrigger()
-        if value is not None and current is not None:
-            if value != current:
-                self.changes['tabTrigger'] = value
-            else:
-                self.changes.pop('tabTrigger', None)
-        elif value is None and current is not None:
-            self.changes['tabTrigger'] = value
-        else:
-            self.changes.pop('tabTrigger', None)
+        self.changes['tabTrigger'] = value
     
     def getKeyEquivalent(self):
-        if self.bundleItem is None:
-            return None
-        return self.bundleItem.keyEquivalent
+        return self.changes.get('keyEquivalent', None)
     
     def setKeyEquivalent(self, value):
-        current = self.getKeyEquivalent()
-        if value is not None and current is not None:
-            if value != current:
-                self.changes['keyEquivalent'] = value
-            else:
-                self.changes.pop('keyEquivalent', None)
-        elif value is None and current is not None:
-            self.changes['keyEquivalent'] = value
-        else:
-            self.changes.pop('keyEquivalent', None)
+        self.changes['keyEquivalent'] = value
     
     def getSemanticClass(self):
-        if self.bundleItem is None:
-            return None
-        return self.bundleItem.semanticClass
+        return self.changes.get('semanticClass', None)
     
     def setSemanticClass(self, value):
-        current = self.getSemanticClass()
-        if value is not None and current is not None:
-            if value != current:
-                self.changes['semanticClass'] = value
-            else:
-                self.changes.pop('semanticClass', None)
-        elif value is None and current is not None:
-            self.changes['semanticClass'] = value
-        else:
-            self.changes.pop('semanticClass', None)
-    
+        self.changes['semanticClass'] = value
+
     def edit(self, bundleItem):
-        self.changes = {}
         self.bundleItem = bundleItem
+        self.__title = 'Edit %s: "%s"' % (self.TYPE, bundleItem.name)
+        self.changes = bundleItem.dump()
 
 #============================================================
 # None Widget
@@ -141,6 +82,9 @@ class NoneEditorWidget(BundleItemEditorBaseWidget):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
 
+    def isChanged(self):
+        return False
+        
     def setupUi(self, widget):
         widget.setObjectName("NoneWidget")
         self.gridLayout = QtGui.QGridLayout(widget)
@@ -166,10 +110,6 @@ class NoneEditorWidget(BundleItemEditorBaseWidget):
 #============================================================
 class SnippetEditorWidget(BundleItemEditorBaseWidget, Ui_Snippet):
     TYPE = 'snippet'
-    DEFAULTS = {'content': '''Syntax Summary:
-
-  Variables        $TM_FILENAME, $TM_SELECTED_TEXT
-  Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''}
 
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
@@ -178,36 +118,20 @@ class SnippetEditorWidget(BundleItemEditorBaseWidget, Ui_Snippet):
 
     @QtCore.Slot()
     def on_content_textChanged(self):
-        text = self.content.toPlainText()
-        if self.bundleItem.content != text:
-            self.changes['content'] = text
-        else:
-            self.changes.pop('content', None)
-        
-    @property
-    def title(self):
-        if self.bundleItem != None:
-            return 'Edit Snippet: "%s"' % self.bundleItem.name
-        return super(SnippetEditorWidget, self).title
+        self.changes['content'] = self.content.toPlainText()
     
     def getScope(self):
-        scope = super(SnippetEditorWidget, self).getScope()
-        return scope is not None and scope or ""
+        return super(SnippetEditorWidget, self).getScope() or ""
     
     def getTabTrigger(self):
-        tabTrigger = super(SnippetEditorWidget, self).getTabTrigger()
-        return tabTrigger is not None and tabTrigger or ""
+        return super(SnippetEditorWidget, self).getTabTrigger() or ""
     
     def getKeyEquivalent(self):
-        keyEquivalent = super(SnippetEditorWidget, self).getKeyEquivalent()
-        return keyEquivalent is not None and keyEquivalent or ""
+        return super(SnippetEditorWidget, self).getKeyEquivalent() or ""
     
     def edit(self, bundleItem):
         super(SnippetEditorWidget, self).edit(bundleItem)
-        content = bundleItem.content
-        if content is None:
-            content = self.DEFAULTS['content']
-        self.content.setPlainText(content)
+        self.content.setPlainText(self.changes["content"])
 
 class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
     TYPE = 'command'
@@ -357,12 +281,6 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         else:
             self.changes.pop('outputCaret', None)
     
-    @property
-    def title(self):
-        if self.bundleItem != None:
-            return 'Edit Command: "%s"' % self.bundleItem.name
-        return super(CommandEditorWidget, self).title
-    
     def getScope(self):
         scope = super(CommandEditorWidget, self).getScope()
         return scope is not None and scope or ""
@@ -465,13 +383,7 @@ fi"'''}
             self.changes['extension'] = text
         else:
             self.changes.pop('extension', None)
-            
-    @property
-    def title(self):
-        if self.bundleItem != None:
-            return 'Edit Template: "%s"' % self.bundleItem.name
-        return super(TemplateEditorWidget, self).title
-
+    
     def edit(self, bundleItem):
         super(TemplateEditorWidget, self).edit(bundleItem)
         command = bundleItem.command
@@ -504,13 +416,7 @@ class StaticFileEditorWidget(BundleItemEditorBaseWidget, Ui_TemplateFile):
             self.changes['content'] = text
         else:
             self.changes.pop('content', None)
-        
-    @property
-    def title(self):
-        if self.bundleItem != None:
-            return 'Edit Template File: "%s"' % self.bundleItem.name
-        return super(StaticFileEditorWidget, self).title
-
+    
     def getScope(self):
         return None
     
@@ -555,12 +461,6 @@ class DragCommandEditorWidget(BundleItemEditorBaseWidget, Ui_DragCommand):
             self.changes['draggedFileExtensions'] = value
         else:
             self.changes.pop('draggedFileExtensions', None)
-            
-    @property
-    def title(self):
-        if self.bundleItem != None:
-            return 'Edit Drag Command: "%s"' % self.bundleItem.name
-        return super(DragCommandEditorWidget, self).title
         
     def getScope(self):
         scope = super(DragCommandEditorWidget, self).getScope()
@@ -608,12 +508,6 @@ class LanguageEditorWidget(BundleItemEditorBaseWidget, Ui_Language):
         except:
             pass
     
-    @property
-    def title(self):
-        if self.bundleItem != None:
-            return 'Edit Language: "%s"' % self.bundleItem.name
-        return super(LanguageEditorWidget, self).title()
-    
     def getKeyEquivalent(self):
         keyEquivalent = super(LanguageEditorWidget, self).getKeyEquivalent()
         return keyEquivalent is not None and keyEquivalent or ""
@@ -646,12 +540,6 @@ class PreferenceEditorWidget(BundleItemEditorBaseWidget, Ui_Preference):
         except:
             pass
 
-    @property
-    def title(self):
-        if self.bundleItem != None:
-            return 'Edit Preferences: "%s"' % self.bundleItem.name
-        return super(PreferenceEditorWidget, self).title()
-    
     def getScope(self):
         scope = super(PreferenceEditorWidget, self).getScope()
         return scope is not None and scope or ""
@@ -669,16 +557,6 @@ class MacroEditorWidget(BundleItemEditorBaseWidget, Ui_Macro):
         self.setupUi(self)
         self.argument.setTabStopWidth(TABWIDTH)
     
-    @property
-    def title(self):
-        if self.bundleItem is not None:
-            return 'Macro (read only): "%s"' % self.bundleItem.name
-        return super(MacroEditorWidget, self).title
-    
-    @property
-    def isChanged(self):
-        return super(MacroEditorWidget, self).isChanged
-
     def on_listActionWidget_itemClicked(self, item):
         index = self.listActionWidget.indexFromItem(item)
         row = index.row()
@@ -712,12 +590,6 @@ class BundleEditorWidget(BundleItemEditorBaseWidget, Ui_Menu):
     def on_menuChanged(self):
         self.changes['mainMenu'] = self.treeMenuModel.getMainMenu()
 
-    @property
-    def title(self):
-        if self.bundleItem != None:
-            return 'Edit Menu: "%s"' % self.bundleItem.name
-        return super(BundleEditorWidget, self).title()
-
     def getScope(self):
         return None
     
@@ -750,18 +622,8 @@ fi"'''}
 
     @QtCore.Slot()
     def on_command_textChanged(self):
-        text = self.command.toPlainText()
-        if self.bundleItem.command != text:
-            self.changes['command'] = text
-        else:
-            self.changes.pop('command', None)
+        self.changes['command'] = self.command.toPlainText()
     
-    @property
-    def title(self):
-        if self.bundleItem != None:
-            return 'Edit Template: "%s"' % self.bundleItem.name
-        return super(ProjectEditorWidget, self).title
-
     def edit(self, bundleItem):
         super(ProjectEditorWidget, self).edit(bundleItem)
         command = bundleItem.command

@@ -257,12 +257,10 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         self.editTreeItem(node)
         self.treeView.edit(index)
 
-
     def on_proxyTreeModel_dataChanged(self, sindex, eindex):
         current = self.stackedWidget.currentWidget()
-        self.labelTitle.setText(current.title)
+        self.labelTitle.setText(current.title())
 
-        
     def on_treeView_selectionChanged(self, selected, deselected):
         indexes = selected.indexes()
         if indexes:
@@ -310,7 +308,7 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
     def saveChanges(self):
         #TODO: ver si tengo que guardar el current editor
         current = self.stackedWidget.currentWidget()
-        if current.isChanged:
+        if current.isChanged():
             if current.TYPE != "":
                 if current.TYPE == "bundle":
                     self.manager.updateBundle(current.bundleItem, self.namespace, **current.changes)
@@ -330,7 +328,7 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
 
     def setCurrentEditor(self, editor):
         self.stackedWidget.setCurrentWidget(editor)
-        self.labelTitle.setText(editor.title)
+        self.labelTitle.setText(editor.title())
         self.lineEditName.setText(editor.getName())
         self.lineEditSemanticClass.setText(editor.getSemanticClass())
         scope = editor.getScope()
