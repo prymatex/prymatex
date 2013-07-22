@@ -42,7 +42,6 @@ def move_file(source, dest):
     shutil.copy(source, dest)
     remove_file(source)
 
-
 def select_port(default_port=20128):
     """Find and return a non used port"""
     import socket
@@ -61,7 +60,6 @@ def select_port(default_port=20128):
             sock.close()
             sock = None
     return default_port
-
 
 def count_lines(path, extensions=None, excluded_dirnames=None):
     """Return number of source code lines for all filenames in subdirectories
@@ -119,7 +117,6 @@ def fix_reference_name(name, blacklist=None):
         name = get_new_name(index)
     return name
 
-
 def remove_trailing_single_backslash(text):
     """Remove trailing single backslash in *text*
     
@@ -130,12 +127,10 @@ def remove_trailing_single_backslash(text):
         text = text[:-1]
     return text
 
-
 def get_error_match(text):
     """Return error match"""
     import re
     return re.match(r'  File "(.*)", line (\d*)', text)
-
 
 def get_python_executable():
     """Return path to Python executable"""
@@ -145,11 +140,9 @@ def get_python_executable():
         executable = "python.exe"
     return executable
 
-
 def abspardir(path):
     """Return absolute parent dir"""
     return os.path.abspath(os.path.join(path, os.pardir))
-
 
 def get_common_path(pathlist):
     """Return common path for all paths in pathlist"""
@@ -186,7 +179,6 @@ def get_home_dir():
         return path
     else:
         raise RuntimeError('Please define environment variable $HOME')
-
 
 if __name__ == '__main__':
     assert get_common_path([

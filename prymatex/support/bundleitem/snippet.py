@@ -7,7 +7,7 @@ import uuid as uuidmodule
 
 from prymatex.utils import six
 
-from ..regexp import Transformation
+from ..regexp import FormatString
 from .base import PMXBundleItem
 from ..base import PMXRunningContext
 from ..processor import PMXSyntaxProcessor
@@ -314,7 +314,7 @@ class StructureTransformation(Node):
             self.index = int(text)
         elif scope == 'string.transformation':
             self.text += text
-            self.transformation = Transformation(self.text)
+            self.transformation = FormatString(self.text)
         else:
             return super(StructureTransformation, self).close(scope, text)
         return node
@@ -434,7 +434,7 @@ class VariableTransformation(Node):
             self.name = text
         elif scope == 'string.transformation':
             self.transformationSource += text
-            self.transformation = Transformation(self.transformationSource)
+            self.transformation = FormatString(self.transformationSource)
         else:
             return super(VariableTransformation, self).close(scope, text)
         return node

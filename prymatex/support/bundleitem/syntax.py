@@ -289,7 +289,7 @@ class PMXSyntax(PMXBundleItem):
                 if pattern.begin:
                     if pattern.name and processor:
                         processor.openTag(pattern.name, start_pos)
-                    if processor:    
+                    if processor:
                         grammar.parse_captures('captures', pattern, pattern_match, processor)
                     if processor:
                         grammar.parse_captures('beginCaptures', pattern, pattern_match, processor)

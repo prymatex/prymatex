@@ -5,13 +5,12 @@ from __future__ import unicode_literals
 import re, sys
 import ponyguruma
 from ponyguruma import sre
+
 ONIG_OPTION_NONE = ponyguruma.OPTION_NONE
 ONIG_OPTION_IGNORECASE = ponyguruma.OPTION_IGNORECASE
 ONIG_OPTION_SINGLELINE = ponyguruma.OPTION_SINGLELINE
 ONIG_OPTION_MULTILINE = ponyguruma.OPTION_MULTILINE
 ONIG_OPTION_EXTEND = ponyguruma.OPTION_EXTEND
-
-RE_OPTION_MULTILINE = re.MULTILINE
 
 def convertOnig(options):
     res = ONIG_OPTION_NONE
@@ -35,7 +34,7 @@ def convertRe(options):
 
 def compileRe(string, flags):
     # Test oniguruma chars
-    if not any([string.find(tests) != -1 for tests in ["\G"]]):
+    if not any([string.find(tests) != -1 for tests in ["\G", "[[:"]]):
         for o, r in (('?i:', '(?i)'), ):
             string = string.replace(o, r)
         try:

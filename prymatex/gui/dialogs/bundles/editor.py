@@ -236,18 +236,15 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-project"), "Projects", "project staticfile")
         self.comboBoxItemFilter.setInsertPolicy(QtGui.QComboBox.NoInsert)
         self.comboBoxItemFilter.lineEdit().returnPressed.connect(self.on_comboBoxItemFilter_returnPressed)
-        
 
     # --------------------------- Tree View display the bundle items model
     def getEditorBase(self):
         return self.editors[self.BASE_EDITOR]
 
-
     def getEditorForTreeItem(self, treeItem):
         if not treeItem.isRootNode() and treeItem.TYPE in self.indexes:
             index = self.indexes[treeItem.TYPE]
             return self.editors[index]
-
 
     def on_bundleTreeModel_rowsInserted(self, parent, start, end):
         sIndex = self.manager.bundleTreeModel.index(start, 0, parent)
@@ -268,7 +265,6 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
             self.editTreeItem(treeItem)
         else:
             self.editTreeItem(None)
-
             
     def configTreeView(self, manager = None):
         self.proxyTreeModel.dataChanged.connect(self.on_proxyTreeModel_dataChanged)
@@ -277,7 +273,6 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         self.treeView.setHeaderHidden(True)
         self.treeView.setAnimated(True)
         self.treeView.selectionModel().selectionChanged.connect(self.on_treeView_selectionChanged)
-
 
     # -------------------- Activation
     def eventFilter(self, obj, event):
@@ -292,7 +287,6 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
     def on_lineEditScopeSelector_textEdited(self, text):
         self.stackedWidget.currentWidget().setScope(text)
 
-
     @QtCore.Slot(str)
     def on_lineEditTabTriggerActivation_textEdited(self, text):
         self.stackedWidget.currentWidget().setTabTrigger(text)
@@ -304,19 +298,15 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
     def configActivation(self):
         self.lineEditKeyEquivalentActivation.installEventFilter(self)
 
-
     def saveChanges(self):
-        #TODO: ver si tengo que guardar el current editor
         current = self.stackedWidget.currentWidget()
         if current.isChanged():
-            if current.TYPE != "":
-                if current.TYPE == "bundle":
-                    self.manager.updateBundle(current.bundleItem, self.namespace, **current.changes)
-                elif current.TYPE == "staticfile":
-                    self.manager.updateStaticFile(current.bundleItem, self.namespace, **current.changes)
-                else:
-                    self.manager.updateBundleItem(current.bundleItem, self.namespace, **current.changes)
-
+            if current.TYPE == "bundle":
+                self.manager.updateBundle(current.bundleItem, self.namespace, **current.changes)
+            elif current.TYPE == "staticfile":
+                self.manager.updateStaticFile(current.bundleItem, self.namespace, **current.changes)
+            else:
+                self.manager.updateBundleItem(current.bundleItem, self.namespace, **current.changes)
 
     def editTreeItem(self, treeItem):
         self.saveChanges()
@@ -324,7 +314,6 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         if editor != None:
             editor.edit(treeItem)
             self.setCurrentEditor(editor)
-
 
     def setCurrentEditor(self, editor):
         self.stackedWidget.setCurrentWidget(editor)

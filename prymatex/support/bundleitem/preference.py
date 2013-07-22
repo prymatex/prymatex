@@ -27,7 +27,7 @@
 from prymatex.utils import osextra
 
 from .base import PMXBundleItem
-from ..regexp import compileRegexp, Transformation
+from ..regexp import compileRegexp, FormatString
 
 class PMXPreferenceSettings(object):
     KEYS = (
@@ -257,14 +257,14 @@ class PMXPreferenceMasterSettings(object):
         self._symbolTransformation = []
         for trans in self.symbolTransformation:
             if trans:
-                self._symbolTransformation.append(Transformation(trans[2:]))
+                self._symbolTransformation.append(FormatString("${0/" + trans[2:] + "}"))
     
     def transformSymbol(self, text):
         if not hasattr(self, '_symbolTransformation'):
             self.compileSymbolTransformation()
         for trans in self._symbolTransformation:
-            tt = trans.transform(text)
-            if tt is not None:
+            tt = trans.replace(text, ".+")
+            if tt:
                 return tt
     
     def folding(self, line):

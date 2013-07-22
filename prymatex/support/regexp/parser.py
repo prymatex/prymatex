@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from . import types
-from .base import compileRegexp
+from .base import compileRegexp, convertOnig
 
 from prymatex.utils import six
 
@@ -32,9 +32,9 @@ class Parser(object):
     def parse_int(self, res):
         if self.it == self.last or not self.source[self.it].isdigit():
             return False
-        res.append(0)
+        res.append("")
         while self.it != self.last and self.source[self.it].isdigit():
-            res[0] = (res[0] * 10) + int(self.source[self.it])
+            res[0] += self.source[self.it]
             self.it += 1
         return True
 
@@ -53,7 +53,7 @@ class Parser(object):
             res.append(chrs)
             return True
         self.it = backtrack
-        return false
+        return False
 
     def parse_regexp_options(self, options):
         while self.parse_char("giems"):
@@ -95,30 +95,30 @@ class Parser(object):
         if self.parse_char("$"):
             name = []
             if self.parse_char("{") and self.parse_until("/:}", name):
-                if self.it[-1] == '}':
+                if self.source[self.it - 1] == '}':
                     nodes.append(types.VariableType(name.pop()))
                     return True
-                elif self.it[-1] == '/':
+                elif self.source[self.it - 1] == '/':
                     res = types.VariableTransformationType(name.pop())
                     regexp = []
-                    if self.parse_until("/", regexp) and self.parse_format_string("/", res.format) and self.parse_regexp_options(res.options) and parse_char("}"):
+                    if self.parse_until("/", regexp) and self.parse_format_string("/", res.format) and self.parse_regexp_options(res.options) and self.parse_char("}"):
                         res.pattern = compileRegexp(regexp.pop(), res.options)
                         nodes.append(res)
                         return True
-                else: # it[-1] == ':'
+                else: # self.source[self.it - 1] == ':'
                     if self.parse_char("+"):
                         res = types.VariableConditionType(name.pop())
                         if parse_content("}", res.if_set):
                             nodes.append(res)
                             return True
                     elif self.parse_char("?"):
-                        res = types.VariableConditionType(name)
+                        res = types.VariableConditionType(name.pop())
                         if parse_content(":", res.if_set) and parse_content("}", res.if_not_set):
                             nodes.append(res)
                             return True
                     elif self.parse_char("/"):
-                        res = types.VariableChangeType(name, types.transform['kNone'] )
-                        while self.it[-1] == '/':
+                        res = types.VariableChangeType(name.pop(), types.transform['kNone'] )
+                        while self.source[self.it - 1] == '/':
                             option = []
                             if self.parse_until("/}", option):
                                 option = option.pop()
@@ -129,7 +129,7 @@ class Parser(object):
                                     "asciify": types.transform['kAsciify'] }[option]
                             else:
                                 break                                
-                        if self.it[-1] == '}':
+                        if self.source[self.it - 1] == '}':
                             nodes.append(res)
                             return True
                     else:
@@ -184,15 +184,15 @@ class Parser(object):
         if(self.parse_char("\\") and self.parse_char("ULEul")):
             case = self.source[self.it - 1]
             if case == 'U':
-                nodes.append(types.CASE_UPPER)
+                nodes.append(types.case_change["upper"])
             elif case == 'L':
-                nodes.append(types.CASE_LOWER)
+                nodes.append(types.case_change["lower"])
             elif case == 'E':
-                nodes.append(types.CASE_NONE)
+                nodes.append(types.case_change["none"])
             elif case == 'u':
-                nodes.append(types.CASE_UPPER_NEXT)
+                nodes.append(types.case_change["upper_next"])
             elif case == 'l':
-                nodes.append(types.CASE_LOWER_NEXT)
+                nodes.append(types.case_change["lower_next"])
             return True
         self.it = backtrack
         return False
@@ -213,9 +213,9 @@ class Parser(object):
         return False
 
     def text_node(self, nodes, char):
-        if not nodes or not isinstance(nodes[-1], six.string_types):
-            nodes.append("")
-        nodes[-1] = nodes[-1] + char
+        if not nodes or not isinstance(nodes[-1], types.TextType):
+            nodes.append(types.TextType(""))
+        nodes[-1].text += char
     
     def parse_placeholder(self, nodes):
         backtrack = self.it
@@ -227,26 +227,26 @@ class Parser(object):
                     if self.parse_snippet("}", res.content):
                         nodes.append(res)
                         return True
-                    elif self.parse_char("/"):
-                        regexp = []
-                        res = types.PlaceholderTransformType( index.pop() )
-                        if self.parse_until("/", regexp) and self.parse_format_string("/", res.format) and self.parse_regexp_options(res.options) and self.parse_char("}"):
-                            res.pattern = compileRegexp(regexp.pop(), res.options)
-                            nodes.append(res)
-                            return True
-                    elif self.parse_char("|"):
-                        res = PlaceholderChoiceType( index.pop() )
-                        while self.parse_format_string(",|", res.choices) and self.it[-1] == ',':
-                            pass
-                        if self.it[-1] == '|' and self.parse_char("}"):
-                            nodes.append(res)
-                            return True
-                    elif self.parse_char("}"):
-                        nodes.append(types.PlaceholderType(index.pop()))
+                elif self.parse_char("/"):
+                    regexp = []
+                    res = types.PlaceholderTransformType( index.pop() )
+                    if self.parse_until("/", regexp) and self.parse_format_string("/", res.format) and self.parse_regexp_options(res.options) and self.parse_char("}"):
+                        res.pattern = compileRegexp(regexp.pop(), res.options)
+                        nodes.append(res)
                         return True
+                elif self.parse_char("|"):
+                    res = types.PlaceholderChoiceType( index.pop() )
+                    while self.parse_format_string(",|", res.choices) and self.source[self.it - 1] == ',':
+                        res.choices.append(types.TextType(""))
+                    if self.source[self.it - 1] == '|' and self.parse_char("}"):
+                        nodes.append(res)
+                        return True
+                elif self.parse_char("}"):
+                    nodes.append(types.PlaceholderType(index.pop()))
+                    return True
             elif self.parse_int(index):
                 nodes.append(types.PlaceholderType(index.pop()))
-                return True;
+                return True
         self.it = backtrack
         return False
 
@@ -276,19 +276,6 @@ class Parser(object):
             return True
         self.it = backtrack
         return False
-    
-    # = API =
-    @staticmethod
-    def format(source):
-        frmt = types.FormatType()
-        if Parser(source).parse_format_string("", frmt.composites):
-            return frmt
-    
-    @staticmethod
-    def transformation(source):
-        nodes = []
-        if Parser(source).parse_transformation(nodes):
-            return nodes.pop()
 
 def parse_format_string(source):
     nodes = []

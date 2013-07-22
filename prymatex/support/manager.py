@@ -663,6 +663,8 @@ class PMXSupportBaseManager(object):
         
         moveSource = not self.isProtected(bundle) and "name" in attrs
 
+        print(moveSource, attrs)
+        
         # Do update and save
         bundle.update(attrs)
         self.saveManagedObject(bundle, namespace)
