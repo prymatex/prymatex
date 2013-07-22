@@ -183,7 +183,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
                 context.asynchronous = processor.asynchronous
                 context.inputType, context.inputValue = self.getInputText(processor)
                 self.manager.runProcess(context, callback)
-                
+
     def afterExecute(self, processor, context):
         outputHandler = self.getOutputHandler(context.outputType)
         # Remove old

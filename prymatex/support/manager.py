@@ -164,15 +164,21 @@ class PMXSupportBaseManager(object):
         return plist.writePlist(hashData, path)
 
     #--------------- Tools --------------------
-    def uuidgen(self, uuid=None):
-        # TODO: ver que el uuid generado no este entre los elementos existentes
+    def uuidgen(self, uuid = None):
         if uuid is None:
             return uuidmodule.uuid1()
         try:
             return uuidmodule.UUID(uuid)
         except ValueError:
-            #generate
+            # Generate
             return uuidmodule.uuid3(uuidmodule.NAMESPACE_DNS, uuid)
+
+    #--------------- System process --------------------
+    def runSystemCommand(self):
+        pass
+
+    def runExternalProcess(self, context, callback):
+        return self.runProcess(context, callback)
 
     def runProcess(self, context, callback):
         """Synchronous run process"""
@@ -201,6 +207,7 @@ class PMXSupportBaseManager(object):
 
         callback(context)
 
+    #--------------- Ad-Hoc Bundle Items --------------
     def buildAdHocCommand(self, commandScript, bundle, name=None, commandInput="none", commandOutput="insertText"):
         commandHash = {'command': commandScript,
                        'input': commandInput,
