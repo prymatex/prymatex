@@ -79,7 +79,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
         return cursor.document().characterAt(cursor.position())
         
     def scope(self, inputFormat = None):
-        return self.editor.scope()
+        scopePath = self.editor.scope().path
+        attributeScopePath = self.editor.attributeScopePath()
+        cursorScopePath = self.editor.cursorScopePath()
+        return " ".join(scopePath + attributeScopePath + cursorScopePath)
     
     def selection(self, inputFormat = None):
         cursor = self.editor.textCursor()
@@ -216,7 +219,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.mainWindow.showMessage(message, timeout = timeout, point = point, linkMap = callbacks)
         
     def toolTip(self, context, outputFormat = None):
-        print("toolTip")
+        print(context)
+        self.showAsTooltip(context, outputFormat)
 
     def createNewDocument(self, context, outputFormat = None):
         editor= self.editor.mainWindow.addEmptyEditor()

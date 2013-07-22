@@ -12,7 +12,7 @@ class FormatString(object):
         return "".join([unicode(node) for node in self.nodes])
 
     __unicode__ = __str__
-        
+    
     def replace(self, source, pattern, repeat = False, variables = None):
         memodict = {}
         pattern = compileRegexp(pattern)
@@ -26,3 +26,9 @@ class FormatString(object):
                 match = pattern.search(source, match.end())
             text += source[match.end():]
             return text
+    
+    def escape(self):
+        pass
+        
+    def expand(self, match, variables = None):
+        return "".join([node.replace({}, match = match, variables = variables) for node in self.nodes])

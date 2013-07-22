@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 from prymatex.utils import six
 
 from .base import PMXBundleItem
-from ..regexp import compileRegexp
+from ..regexp import compileRegexp, FormatString
 
 class PMXSyntaxProxy(object):
     def __init__(self, dataHash, syntax):
@@ -36,7 +36,7 @@ class PMXSyntaxProxy(object):
                 return PMXSyntaxNode({}, self.syntax)
 
 class PMXSyntaxNode(object):
-    KEYS = ('name', 'match', 'begin', 'content', 'contentName', 'end',
+    KEYS = ('name', 'contentName', 'match', 'begin', 'content', 'end',
             'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns')
     def __init__(self, dataHash, syntax):
         self.syntax = syntax
@@ -60,6 +60,13 @@ class PMXSyntaxNode(object):
                     if self.patterns is None:
                         self.patterns = []
                     self.patterns.extend(injector.grammar.patterns)
+
+            # FormatString for name
+            self.__nameFormater = "$" in self.name and FormatString(self.name) or None 
+        
+        if self.contentName is not None:
+            # FormatString for contentName
+            self.__contentNameFormater = "$" in self.contentName and FormatString(self.contentName) or None 
 
     def parse_repository(self, repository):
         return dict([ (key, 'include' in value and\
@@ -155,6 +162,12 @@ class PMXSyntaxNode(object):
                 #if tmatch[1].start() == position:
                 #    break
         return match
+
+    def expanded_name(self, match):
+        return self.__nameFormater and self.__nameFormater.expand(match) or self.name
+
+    def expanded_contentName(self, match):
+        return self.__contentNameFormater and self.__contentNameFormater.expand(match) or self.contentName
 
 class PMXSyntax(PMXBundleItem):
     KEYS = ( 'comment', 'firstLineMatch', 'scopeName', 'repository',
@@ -274,13 +287,13 @@ class PMXSyntax(PMXBundleItem):
                 start_pos = end_match.start()
                 end_pos = end_match.end()
                 if top.contentName and processor:
-                    processor.closeTag(top.contentName, start_pos)
+                    processor.closeTag(top.expanded_contentName(end_match), start_pos)
                 if processor:
                     grammar.parse_captures('captures', top, end_match, processor)
                 if processor:
                     grammar.parse_captures('endCaptures', top, end_match, processor)
                 if top.name and processor:
-                    processor.closeTag( top.name, end_pos)
+                    processor.closeTag( top.expanded_name(end_match), end_pos)
                 stack.pop()
                 top, match = stack[-1]
             elif pattern:
@@ -288,23 +301,23 @@ class PMXSyntax(PMXBundleItem):
                 end_pos = pattern_match.end()
                 if pattern.begin:
                     if pattern.name and processor:
-                        processor.openTag(pattern.name, start_pos)
+                        processor.openTag(pattern.expanded_name(pattern_match), start_pos)
                     if processor:
                         grammar.parse_captures('captures', pattern, pattern_match, processor)
                     if processor:
                         grammar.parse_captures('beginCaptures', pattern, pattern_match, processor)
                     if pattern.contentName and processor:
-                        processor.openTag(pattern.contentName, end_pos)
+                        processor.openTag(pattern.expanded_contentName(end_match), end_pos)
                     top = pattern
                     match = pattern_match
                     stack.append((top, match))
                 elif pattern.match:
                     if pattern.name and processor:
-                        processor.openTag(pattern.name, start_pos)
+                        processor.openTag(pattern.expanded_name(pattern_match), start_pos)
                     if processor:
                         grammar.parse_captures('captures', pattern, pattern_match, processor)
                     if pattern.name and processor:
-                        processor.closeTag(pattern.name, end_pos)
+                        processor.closeTag(pattern.expanded_name(pattern_match), end_pos)
             else:
                 # FIXME: Custom pop from stack for regexp
                 if not end_match and not pattern and top.end == "(?!\G)":
