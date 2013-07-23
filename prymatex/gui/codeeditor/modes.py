@@ -33,11 +33,15 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
         PMXBaseEditorMode.__init__(self, editor)
         self.logger = editor.application.getLogger('.'.join([self.__class__.__module__, self.__class__.__name__]))
 
+    @property
+    def snippet(self):
+        return self.editor.snippetProcessor.snippet
+
     def isActive(self):
-        return self.editor.snippetProcessor.snippet is not None
+        return self.snippet is not None
 
     def inactive(self):
-        self.editor.endSnippet()
+        self.endSnippet()
 
     def keyPressEvent(self, event):
         cursor = self.editor.textCursor()
@@ -46,41 +50,35 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             return self.endSnippet(event)
         elif event.key() in [ QtCore.Qt.Key_Tab, QtCore.Qt.Key_Backtab ]:
             self.logger.debug("Camino entre los holders")
-            holder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
-            if holder is None:
+            if not self.snippet.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
                 return self.endSnippet(event)
 
             if event.key() == QtCore.Qt.Key_Tab:
-                holder = self.editor.snippetProcessor.nextHolder(holder)
+                ok = self.snippet.nextHolder()
             else:
-                holder = self.editor.snippetProcessor.previousHolder(holder)
-            if holder is None:
-                self.editor.showMessage("Last Holder")
-                self.editor.setTextCursor(
-                    self.editor.newCursorAtPosition(
-                        self.editor.snippetProcessor.endPosition()
-                    )
-                )
+                ok = self.snippet.previousHolder()
+            if not ok:
+                self.editor.showMessage("Snippet end")
+                self.editor.snippetProcessor.selectHolder()
                 self.endSnippet()
             else:
-                snippet = self.editor.snippetProcessor.snippet 
-                self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (snippet.name, snippet.index + 1, len(snippet)))
-                self.editor.snippetProcessor.selectHolder(holder)
+                self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (self.snippet.name, self.snippet.holderNumber() + 1, len(self.snippet)))
+                self.editor.snippetProcessor.selectHolder()
         elif event.text():
             self.logger.debug("Con texto %s" % event.text())
-            currentHolder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
-            if currentHolder is None or currentHolder.last:
+            if not self.snippet.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
                 return self.endSnippet(event)
-
+            
+            holderStart, holderEnd = self.snippet.currentPosition()
             #Cuidado con los extremos del holder
             if not cursor.hasSelection():
-                if event.key() == QtCore.Qt.Key_Backspace and cursor.position() == currentHolder.start:
+                if event.key() == QtCore.Qt.Key_Backspace and cursor.position() == holderStart:
                     return self.endSnippet(event)
 
-                if event.key() == QtCore.Qt.Key_Delete and cursor.position() == currentHolder.end:
+                if event.key() == QtCore.Qt.Key_Delete and cursor.position() == holderEnd:
                     return self.endSnippet(event)
 
-            holderPosition = cursor.selectionStart() - currentHolder.start
+            holderPosition = cursor.selectionStart() - holderStart
             positionBefore = cursor.selectionStart()
             charactersBefore = cursor.document().characterCount()
             
@@ -92,10 +90,11 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             length = charactersBefore - charactersAfter 
             
             #Capture Text
-            cursor.setPosition(currentHolder.start)
-            cursor.setPosition(currentHolder.end - length, QtGui.QTextCursor.KeepAnchor)
+            cursor.setPosition(holderStart)
+            cursor.setPosition(holderEnd - length, QtGui.QTextCursor.KeepAnchor)
             selectedText = self.editor.selectedTextWithEol(cursor)
-            currentHolder.setContent(selectedText)
+
+            self.snippet.setContent(selectedText)
             
             # Wrap snippet
             wrapCursor = self.editor.newCursorAtPosition(
@@ -105,11 +104,18 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             #Insert snippet
             self.editor.snippetProcessor.render(wrapCursor)
             
-            self.editor.setTextCursor(
-                self.editor.newCursorAtPosition(
-                    currentHolder.start + holderPosition + (positionAfter - positionBefore)
+            if selectedText:
+                self.editor.setTextCursor(
+                    self.editor.newCursorAtPosition(
+                        holderStart + holderPosition + (positionAfter - positionBefore)
+                    )
                 )
-            )
+            elif self.snippet.nextHolder():
+                # Mate un holder
+                self.editor.snippetProcessor.selectHolder()
+            else:
+                self.endSnippet()
+                
             cursor.endEditBlock()
         else:
             self.logger.debug("Con cualquier otra tecla sin texto")

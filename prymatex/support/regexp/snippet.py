@@ -83,9 +83,9 @@ class SnippetHandler(object):
             lambda node: isinstance(node, types.PlaceholderType), 
             self.placeholders)
         for placeholder in placeholders:
-            chain = []
+            chain = [ ]
             if placeholder.collect(holder, chain):
-                return any(map(lambda holder: self.memodict.get_or_create(holder).content, chain))
+                return any(map(lambda holder: self.memodict.get_or_create(holder).content is not None, chain))
         return False
         
     def currentPosition(self):
@@ -125,5 +125,11 @@ class SnippetHandler(object):
     def lastHolder(self):
         return self.holderIndex == len(self.placeholders)
 
+    def holderNumber(self):
+        return self.holderIndex + 1
+
     def setContent(self, text):
         self.__current_holder().setContent(text, self.memodict)
+        
+    def __len__(self):
+        return len(self.placeholders)

@@ -38,8 +38,10 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
     def startRender(self):
         self.output = ""
         self.captures = []
+        self.__startPosition = self.caretPosition()
 
     def endRender(self):
+        self.__endPosition = self.caretPosition()
         self.editor.updatePlainText(self.output, self.snippetCursorWrapper)
 
     def environmentVariables(self):
@@ -61,7 +63,8 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
             text = text.replace('\n', '\n' + self.indentation)
             self.output += text.replace('\t', self.tabreplacement)
     
-    def selectHolder(self, start, end):
+    def selectHolder(self):
+        start, end = self.snippet.currentPosition()
         self.editor.setTextCursor(self.editor.newCursorAtPosition(start, end))
         #if hasattr(holder, 'options'):
         #    self.editor.showFlatPopupMenu(
@@ -90,10 +93,10 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         return self.snippet.previousHolder()
 
     def endPosition(self):
-        return self.snippet.end
+        return self.__endPosition
 
     def startPosition(self):
-        return self.snippet.start
+        return self.__startPosition
 
     def render(self, cursor):
         self.snippetCursorWrapper = cursor

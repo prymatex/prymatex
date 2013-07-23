@@ -193,7 +193,7 @@ class PlaceholderType(PlaceholderTypeMixin):
         
     def replace(self, memodict, holders = None, match = None, variables = None):
         memo = memodict.get_or_create(self)
-        if memo.content:
+        if memo.content is not None:
             return memo.content
         elif holders[self.index] != self:
             #Mirror
@@ -206,7 +206,7 @@ class PlaceholderType(PlaceholderTypeMixin):
         memo = memodict.get_or_create(self)
         start = visitor.caretPosition()
         
-        if memo.content:
+        if memo.content is not None:
             visitor.insertText(memo.content)
         elif holders[self.index] != self:
             #Mirror
@@ -370,12 +370,12 @@ class CodeType(object):
     
     def replace(self, memodict, holders = None, match = None, variables = None):
         memo = memodict.get_or_create(self)
-        if memo.content:
+        if memo.content is not None:
             return memo.content
         return self.name
 
     def render(self, visitor, memodict, holders = None, match = None):
         visitor.insertText(self.replace(memodict, holders, match, visitor.environmentVariables()))
     
-    def mementoFactory(self, identifier):
+    def memoFactory(self, identifier):
         return Memo(identifier = identifier, start = 0, end = 0, content = None)

@@ -55,7 +55,4 @@ Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''
         if self.lastHolder():
             processor.endSnippet(self)
         else:
-            processor.selectHolder(*self.currentPosition())
-    
-    def __len__(self):
-        return len(self.placeholders)
+            processor.selectHolder()
