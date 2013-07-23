@@ -85,7 +85,7 @@ class VariableType(object):
     def replace(self, memodict, holders = None, match = None, variables = None):
         if self.name.isdigit():
             return match.group(int(self.name))
-        if variables and self.name in variables:
+        elif variables and self.name in variables:
             return variables[self.name]
         return ""
 
@@ -204,18 +204,18 @@ class PlaceholderType(PlaceholderTypeMixin):
     
     def render(self, visitor, memodict, holders = None, match = None):
         memo = memodict.get_or_create(self)
-        start = visitor.position()
+        start = visitor.caretPosition()
         
         if memo.content:
             visitor.insertText(memo.content)
         elif holders[self.index] != self:
             #Mirror
-            holders[self.index].render(visitor, memodict, holders, match)
+            visitor.insertText(holders[self.index].replace(memodict, holders, match))
         else:
             for node in self.content:
                 node.render(visitor, memodict, holders, match)
 
-        end = visitor.position()
+        end = visitor.caretPosition()
         memodict.set(self, memo._replace(start = start, end = end))
     
     def memoFactory(self, identifier):
@@ -240,11 +240,11 @@ class PlaceholderChoiceType(PlaceholderTypeMixin):
 
     def render(self, visitor, memodict, holders = None, match = None):
         memo = memodict.get_or_create(self)
-        start = visitor.position()
+        start = visitor.caretPosition()
         
         visitor.insertText(self.replace(memodict, holders, match, visitor.environmentVariables()))
 
-        end = visitor.position()
+        end = visitor.caretPosition()
         memodict.set(self, memo._replace(start = start, end = end))
     
     def memoFactory(self, identifier):
@@ -279,11 +279,11 @@ class PlaceholderTransformType(PlaceholderTypeMixin):
 
     def render(self, visitor, memodict, holders = None, match = None):
         memo = memodict.get_or_create(self)
-        start = visitor.position()
+        start = visitor.caretPosition()
         
         visitor.insertText(self.replace(memodict, holders, match, visitor.environmentVariables()))
         
-        end = visitor.position()
+        end = visitor.caretPosition()
         memodict.set(self, memo._replace(start = start, end = end))
 
     def memoFactory(self, identifier):
@@ -341,10 +341,12 @@ class VariableTransformationType(object):
     
     def replace(self, memodict, holders = None, match = None, variables = None):
         text = ""
-        if holders:
+        if holders and self.name in holders:
             value = holders[self.name].replace(memodict, holders, match)
         elif match and self.name.isdigit():
             value = match.group(int(self.name))
+        elif variables and self.name in variables:
+            value = variables[self.name]
         match = self.pattern.search(value)
         while match:
             text += "".join([ frmt.replace(memodict, holders, match) for frmt in self.format])

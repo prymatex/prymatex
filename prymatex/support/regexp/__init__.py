@@ -3,4 +3,4 @@
 
 from .base import compileRegexp
 from .string import FormatString
-from .snippet import Snippet
+from .snippet import Snippet, SnippetHandler

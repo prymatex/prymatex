@@ -10,7 +10,6 @@ import functools
 from prymatex.utils import programs
 
 from .base import PMXBundleItem
-from ..base import PMXRunningContext
 from ..regexp import compileRegexp
 
 # New commands
@@ -179,10 +178,16 @@ echo Selection: "$TM_SELECTED_TEXT"''',
     def executeCallback(self, processor, callback):
         processor.startCommand(self)
         if self.beforeExecute(processor):
-            with PMXRunningContext(self, self.systemCommand(), processor.environmentVariables()) as context:
-                context.asynchronous = processor.asynchronous
-                context.inputType, context.inputValue = self.getInputText(processor)
-                self.manager.runProcess(context, callback)
+            inputType, inputValue = self.getInputText(processor)
+            self.manager.runSystemCommand(
+                bundleItem = self,
+                shellCommand = self.systemCommand(),
+                environment = processor.environmentVariables(),
+                asynchronous = processor.asynchronous,
+                inputType = inputType,
+                inputValue = inputValue,
+                callback = callback
+            )
 
     def afterExecute(self, processor, context):
         outputHandler = self.getOutputHandler(context.outputType)

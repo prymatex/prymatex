@@ -9,7 +9,6 @@ from prymatex.utils import osextra
 
 from .base import PMXBundleItem
 from ..staticfile import PMXStaticFile
-from ..base import PMXRunningContext
 
 class PMXProject(PMXBundleItem):
     KEYS = ( 'command', )
@@ -56,11 +55,15 @@ fi"'''}
         return env
     
     def execute(self, environment = {}, callback = lambda x: x):
-        with PMXRunningContext(self, self.command, environment) as context:
-            context.asynchronous = True
-            context.workingDirectory = self.source()
-            self.manager.runProcess(context, functools.partial(self.afterExecute, callback))
-
+        self.manager.runSystemCommand(
+            bundleItem = self, 
+            shellCommand = self.command,
+            environment = environment,
+            asynchronous = True,
+            workingDirectory = self.source(),
+            callback = functools.partial(self.afterExecute, callback)
+        )
+        
     def afterExecute(self, callback, context):
         name = context.environment['TM_NEW_PROJECT_NAME']
         location = context.environment['TM_NEW_PROJECT_LOCATION']

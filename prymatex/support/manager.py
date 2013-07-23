@@ -15,6 +15,7 @@ from . import bundleitem
 from . import scope
 from .theme import PMXTheme, PMXThemeStyle
 from .staticfile import PMXStaticFile
+from .process import RunningContext
 
 from prymatex.utils import plist, osextra, six
 from prymatex.utils import encoding
@@ -173,24 +174,20 @@ class PMXSupportBaseManager(object):
             # Generate
             return uuidmodule.uuid3(uuidmodule.NAMESPACE_DNS, uuid)
 
-    #--------------- System process --------------------
-    def runSystemCommand(self):
-        pass
-
-    def runExternalProcess(self, context, callback):
-        return self.runProcess(context, callback)
-
-    def runProcess(self, context, callback):
-        """Synchronous run process"""
+    #--------------- Run system commands --------------------
+    def runSystemCommand(self, **attrs):
+        """Synchronous run system command"""
+        context = RunningContext(**attrs)
+        
         origWD = os.getcwd()  # remember our original working directory
         if context.workingDirectory is not None:
             os.chdir(context.workingDirectory)
 
         context.process = subprocess.Popen(context.shellCommand, 
-            stdin=subprocess.PIPE, stdout=subprocess.PIPE, 
-            stderr=subprocess.PIPE, env=context.environment)
+            stdin = subprocess.PIPE, stdout = subprocess.PIPE, 
+            stderr = subprocess.PIPE, env = context.environment)
 
-        if context.inputType is not None:
+        if context.inputValue is not None:
             context.process.stdin.write(encoding.to_fs(context.inputValue))
         context.process.stdin.close()
         try:
@@ -204,8 +201,10 @@ class PMXSupportBaseManager(object):
 
         if context.workingDirectory is not None:
             os.chdir(origWD)
-
-        callback(context)
+        
+        if context.callback is not None:
+            context.callback(context)
+        return context
 
     #--------------- Ad-Hoc Bundle Items --------------
     def buildAdHocCommand(self, commandScript, bundle, name=None, commandInput="none", commandOutput="insertText"):

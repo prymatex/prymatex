@@ -50,14 +50,6 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.disableIndent = settings.get("disableIndent", False)
         self.baseEnvironment = settings.get("environment", {})
 
-    def startTransformation(self, transformation):
-        self.captures.append("")
-
-    def endTransformation(self, transformation):
-        captured = self.captures.pop()
-        text = transformation.transform(captured)
-        self.insertText(text)
-
     def caretPosition(self):
         return self.snippetCursorWrapper.selectionStart() + len(self.output)
 
@@ -69,13 +61,13 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
             text = text.replace('\n', '\n' + self.indentation)
             self.output += text.replace('\t', self.tabreplacement)
     
-    def selectHolder(self, holder):
-        self.editor.setTextCursor(self.editor.newCursorAtPosition(holder.start, holder.end))
-        if hasattr(holder, 'options'):
-            self.editor.showFlatPopupMenu(
-                holder.options, 
-                lambda index, holder = holder: self.setSnippetHolderOption(holder, index), 
-                cursorPosition = True)
+    def selectHolder(self, start, end):
+        self.editor.setTextCursor(self.editor.newCursorAtPosition(start, end))
+        #if hasattr(holder, 'options'):
+        #    self.editor.showFlatPopupMenu(
+        #        holder.options, 
+        #        lambda index, holder = holder: self.setSnippetHolderOption(holder, index), 
+        #        cursorPosition = True)
 
     def setSnippetHolderOption(self, holder, index):
         if index >= 0:
@@ -89,16 +81,6 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
             if holder is not None:
                 self.selectHolder(holder)
     
-    def getHolder(self, start, end = None):
-        return self.snippet.getHolder(start, end)
-
-    def currentHolder(self, start, end):
-        #Get the current holder
-        holder = self.getHolder(start, end)
-        if holder == None: return holder
-        self.snippet.setCurrentHolder(holder)
-        return holder
-
     def nextHolder(self, holder):
         self.snippet.setCurrentHolder(holder)
         return self.snippet.nextHolder()

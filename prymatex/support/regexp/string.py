@@ -29,6 +29,9 @@ class FormatString(object):
     
     def escape(self):
         pass
-        
-    def expand(self, match, variables = None):
+
+    def expand(self, match = None, variables = None):
         return "".join([node.replace({}, match = match, variables = variables) for node in self.nodes])
+
+    def substitute(self, source, variables = None):
+        return self.replace(source, ".+")

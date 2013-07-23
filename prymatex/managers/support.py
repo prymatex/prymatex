@@ -11,6 +11,7 @@ from prymatex.core import PMXBaseComponent
 from prymatex.core.settings import pmxConfigPorperty
 
 from prymatex.support.manager import PMXSupportBaseManager
+from prymatex.support.process import RunningContext
 
 from prymatex.utils import encoding
 
@@ -265,14 +266,16 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
         self.bundleProxyTreeModel.sort(0, QtCore.Qt.AscendingOrder)
         self.bundleProxyTreeModel.setDynamicSortFilter(True)
 
-    def runProcess(self, context, callback):
-        if context.asynchronous:
-            return self.runQProcess(context, callback)
+    def runSystemCommand(self, **attrs):
+        if attrs.get("asynchronous", False):
+            return self.runQtProcessCommand(**attrs)
         else:
-            return PMXSupportBaseManager.runProcess(self, context, callback)
+            return PMXSupportBaseManager.runSystemCommand(self, **attrs)
             
     #Interface
-    def runQProcess(self, context, callback):
+    def runQtProcessCommand(self, **attrs):
+        context = RunningContext(**attrs)
+        
         context.process = QtCore.QProcess(self)
         if context.workingDirectory is not None:
             context.process.setWorkingDirectory(context.workingDirectory)
@@ -285,21 +288,21 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
 
         context.process.setProcessEnvironment(environment)
 
-        def onQProcessFinished(process, context, callback):
+        def onQProcessFinished(context):
             def runCallback(exitCode):
-                self.processTableModel.removeProcess(process)
-                context.errorValue = encoding.from_fs(process.readAllStandardError())
-                context.outputValue = encoding.from_fs(process.readAllStandardOutput())
+                self.processTableModel.removeProcess(context.process)
+                context.errorValue = encoding.from_fs(context.process.readAllStandardError())
+                context.outputValue = encoding.from_fs(context.process.readAllStandardOutput())
                 context.outputType = exitCode
-                callback(context)
+                context.callback(context)
             return runCallback
 
-        context.process.finished[int].connect(onQProcessFinished(context.process, context, callback))
-
-        if context.inputType is not None:
+        context.process.finished[int].connect(onQProcessFinished(context))
+        
+        if context.inputValue is not None:
             context.process.start(context.shellCommand, QtCore.QIODevice.ReadWrite)
-            if not context.process.waitForStarted():
-                raise Exception("No puedo correr")
+            #if not context.process.waitForStarted():
+            #    raise Exception("No puedo correr")
             context.process.write(encoding.to_fs(context.inputValue))
             context.process.closeWriteChannel()
         else:
