@@ -64,10 +64,8 @@ PMXSnippetProcessor = type("PMXSnippetProcessor", (object, ), {
     "endSnippet": nop,
     "startRender": nop,
     "endRender": nop,
+    "runShellScript": nop,
     "environmentVariables": nop,
-    # transformations
-    "startTransformation": nop,
-    "endTransformation": nop,
     # cursor or caret
     "caretPosition": nop,
     # select

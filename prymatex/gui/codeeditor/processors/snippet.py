@@ -84,14 +84,13 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
             if holder is not None:
                 self.selectHolder(holder)
     
-    def nextHolder(self, holder):
-        self.snippet.setCurrentHolder(holder)
-        return self.snippet.nextHolder()
-
-    def previousHolder(self, holder):
-        self.snippet.setCurrentHolder(holder)
-        return self.snippet.previousHolder()
-
+    def runShellScript(self, script):
+        context = self.editor.application.supportManager.runSystemCommand(
+            shellCommand = script,
+            environment = self.environmentVariables()
+        )
+        return context.outputValue.strip()
+    
     def endPosition(self):
         return self.__endPosition
 

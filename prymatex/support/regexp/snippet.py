@@ -12,14 +12,15 @@ def collect(nodes, placeholders):
         collect(node.content, placeholders)
 
 class Snippet(object):
+    LAST_INDEX = "0"
     def __init__(self, source):
         self.nodes = parse_snippet(source)
         self.placeholders = {}
         collect(self.nodes, self.placeholders)
-        self.__hasLastHolder = '0' in self.placeholders
+        self.__hasLastHolder = self.LAST_INDEX in self.placeholders
         if not self.__hasLastHolder:
-            self.placeholders['0'] = types.PlaceholderType("0")
-            self.nodes.append(self.placeholders['0'])
+            self.placeholders[self.LAST_INDEX] = types.PlaceholderType(self.LAST_INDEX)
+            self.nodes.append(self.placeholders[self.LAST_INDEX])
 
     def __str__(self):
         return "".join([unicode(node) for node in self.lastHolderFixed() and self.nodes[:-1] or self.nodes ])
@@ -129,7 +130,7 @@ class SnippetHandler(object):
         return False
 
     def lastHolder(self):
-        return self.holderIndex == len(self.holders)
+        return self.__current_holder().index == self.snippet.LAST_INDEX
 
     def holderNumber(self):
         return self.holderIndex + 1

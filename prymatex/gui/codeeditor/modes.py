@@ -62,7 +62,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
                 self.editor.snippetProcessor.selectHolder()
                 self.endSnippet()
             else:
-                self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (self.snippet.name, self.snippet.holderNumber() + 1, len(self.snippet)))
+                self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (self.snippet.name, self.snippet.holderNumber(), len(self.snippet)))
                 self.editor.snippetProcessor.selectHolder()
         elif event.text():
             self.logger.debug("Con texto %s" % event.text())
@@ -111,12 +111,12 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
                         newHolderStart + holderPosition + (positionAfter - positionBefore)
                     )
                 )
-                if self.snippet.lastHolder() and self.snippet.lastHolderFixed():
-                    self.endSnippet()
             elif self.snippet.nextHolder():
-                # Mate un holder
+                # The holder is killed
                 self.editor.snippetProcessor.selectHolder()
-                
+            if self.snippet.lastHolder():
+                # Put text on last holder, force snippet ends
+                self.endSnippet()
             cursor.endEditBlock()
         else:
             self.logger.debug("Con cualquier otra tecla sin texto")
