@@ -114,7 +114,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             elif self.snippet.nextHolder():
                 # The holder is killed
                 self.editor.snippetProcessor.selectHolder()
-            if self.snippet.lastHolder():
+            if selectedText and self.snippet.lastHolder():
                 # Put text on last holder, force snippet ends
                 self.endSnippet()
             cursor.endEditBlock()

@@ -207,7 +207,7 @@ class PlaceholderType(PlaceholderTypeMixin):
             visitor.insertText(memo.content)
         elif holders[self.index] != self:
             #Mirror
-            visitor.insertText(holders[self.index].replace(memodict, holders, match, variables))
+            visitor.insertText(holders[self.index].replace(memodict, holders, match, visitor.environmentVariables()))
         else:
             for node in self.content:
                 node.render(visitor, memodict, holders, match)
