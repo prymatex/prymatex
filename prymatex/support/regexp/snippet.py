@@ -22,10 +22,13 @@ class Snippet(object):
             self.nodes.append(self.placeholders['0'])
 
     def __str__(self):
-        return "".join([unicode(node) for node in self.__hasLastHolder and self.nodes or self.nodes[:-1]])
+        return "".join([unicode(node) for node in self.lastHolderFixed() and self.nodes[:-1] or self.nodes ])
     
     __unicode__ = __str__
     
+    def lastHolderFixed(self):
+        return not self.__hasLastHolder
+
     def replace(self, memodict):
         return "".join([node.replace(memodict, holders = self.placeholders) for node in self.nodes])
 
@@ -33,6 +36,9 @@ class Snippet(object):
         for node in self.nodes:
             node.render(visitor, memodict, holders = self.placeholders)
 
+    def __len__(self):
+        return len(self.placeholders)
+    
 class Visitor(object):
     def __init__(self):
         self.output = ""
@@ -56,13 +62,13 @@ class Visitor(object):
 class SnippetHandler(object):
     def __init__(self):
         self.snippet = None
-        self.placeholders = [ ]
+        self.holders = [ ]
 
     def setSnippet(self, snippet):
         self.snippet = snippet
         taborder = sorted(snippet.placeholders.keys())
         taborder.append(taborder.pop(0))
-        self.placeholders = [ snippet.placeholders[key] for key in taborder ]
+        self.holders = [ snippet.placeholders[key] for key in taborder ]
 
     def execute(self, visitor):
         self.memodict = types.Memodict()
@@ -76,12 +82,12 @@ class SnippetHandler(object):
         visitor.endRender()
 
     def __current_holder(self):
-        return self.placeholders[self.holderIndex]
+        return self.holders[self.holderIndex]
         
     def __is_disabled(self, holder):
         placeholders = filter(
             lambda node: isinstance(node, types.PlaceholderType), 
-            self.placeholders)
+            self.holders)
         for placeholder in placeholders:
             chain = [ ]
             if placeholder.collect(holder, chain):
@@ -95,20 +101,20 @@ class SnippetHandler(object):
         '''Set the placeholder for position, where start > holder position > end'''
         end = end != None and end or start
         found = None
-        for holder in self.placeholders:
+        for holder in self.holders:
             holderStart, holderEnd = holder.position(self.memodict)
             holderLength = holderEnd -holderStart
             if holderStart <= start <= end <= holderEnd and \
                 (found == None or holderLength < found):
                 found = holderLength
-                self.holderIndex = self.placeholders.index(holder)
+                self.holderIndex = self.holders.index(holder)
         return found != None
 
     def nextHolder(self):
-        if self.holderIndex < len(self.placeholders) - 1:
+        if self.holderIndex < len(self.holders) - 1:
             self.holderIndex += 1
             #Fix disabled placeholders
-            while self.holderIndex < len(self.placeholders) - 1 and self.__is_disabled(self.placeholders[self.holderIndex]):
+            while self.holderIndex < len(self.holders) - 1 and self.__is_disabled(self.holders[self.holderIndex]):
                 self.holderIndex += 1
             return True
         return False
@@ -117,19 +123,22 @@ class SnippetHandler(object):
         if self.holderIndex > 0:
             self.holderIndex -= 1
             #Fix disabled placeholders
-            while self.holderIndex != 0 and self.__is_disabled(self.placeholders[self.holderIndex]):
+            while self.holderIndex != 0 and self.__is_disabled(self.holders[self.holderIndex]):
                 self.holderIndex -= 1
             return True
         return False
 
     def lastHolder(self):
-        return self.holderIndex == len(self.placeholders)
+        return self.holderIndex == len(self.holders)
 
     def holderNumber(self):
         return self.holderIndex + 1
 
     def setContent(self, text):
         self.__current_holder().setContent(text, self.memodict)
-        
+
+    def lastHolderFixed(self):
+        return self.snippet.lastHolderFixed()
+
     def __len__(self):
-        return len(self.placeholders)
+        return len(self.snippet)

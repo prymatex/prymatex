@@ -105,16 +105,17 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             self.editor.snippetProcessor.render(wrapCursor)
             
             if selectedText:
+                newHolderStart, _ = self.snippet.currentPosition()
                 self.editor.setTextCursor(
                     self.editor.newCursorAtPosition(
-                        holderStart + holderPosition + (positionAfter - positionBefore)
+                        newHolderStart + holderPosition + (positionAfter - positionBefore)
                     )
                 )
+                if self.snippet.lastHolder() and self.snippet.lastHolderFixed():
+                    self.endSnippet()
             elif self.snippet.nextHolder():
                 # Mate un holder
                 self.editor.snippetProcessor.selectHolder()
-            else:
-                self.endSnippet()
                 
             cursor.endEditBlock()
         else:
@@ -125,7 +126,6 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
         self.editor.snippetProcessor.endSnippet(self.editor.snippetProcessor.snippet)
         if event is not None:
             return self.editor.keyPressEvent(event)
-
 
 class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     def __init__(self, editor):
