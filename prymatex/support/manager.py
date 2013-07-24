@@ -106,7 +106,10 @@ class PMXSupportBaseManager(object):
         if namespace.protected:
             return self.defaultNamespace()
         return namespace
-        
+
+    def namespace(self, name):
+        return self.namespaces.get(name)
+                
     def addProjectNamespace(self, project):
         #TODO: Asegurar que no esta ya cargado eso del md5 es medio trucho
         path = project.projectPath
