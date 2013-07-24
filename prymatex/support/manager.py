@@ -97,7 +97,7 @@ class PMXSupportBaseManager(object):
         return list(self.namespaces.values())[self.DEFAULTNS]
 
     def safeNamespaceNames(self):
-        return list(self.namespaces.values())[self.DEFAULTNS:]
+        return list(self.namespaces.keys())[self.DEFAULTNS:]
 
     def safeNamespace(self, name = None):
         if name is None:
