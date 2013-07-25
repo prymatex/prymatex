@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import os, plistlib
-
+import os
+from prymatex.utils import plist
 
 class TextMateSettings(object):
     def __init__(self, file):
@@ -10,17 +10,15 @@ class TextMateSettings(object):
 
         if os.path.exists(self.file):
             try:
-                self.settings = plistlib.readPlist(self.file)
+                self.settings = plist.readPlist(self.file)
             except Exception as e:
                 print(("Exception raised while reading settings file: %s" % e))
         
         not hasattr(self, "settings") and self.initializeSettings()
 
-
     def initializeSettings(self):
         self.settings = {}
         self.sync()
-
 
     def setValue(self, name, value):
         if name in self.settings and self.settings[name] == value:
@@ -28,21 +26,17 @@ class TextMateSettings(object):
         self.settings[name] = value
         self.sync()
 
-
     def value(self, name, default = None):
         try:
             return self.settings[name]
         except KeyError:
             return default
 
-
     def clear(self):
         self.initializeSettings()
 
-
     def sync(self):
-        plistlib.writePlist(self.settings, self.file)
-
+        plist.writePlist(self.settings, self.file)
 
 class SettingsGroup(object):
     def __init__(self, name, qsettings, tmsettings):
@@ -58,10 +52,8 @@ class SettingsGroup(object):
         # Dialogs
         self.dialogs = []
 
-
     def groupName(self):
         return self.__groupName
-
 
     def setValue(self, name, value):
         setting = self.settings.get(name)
@@ -76,7 +68,6 @@ class SettingsGroup(object):
             for hookFunction in self.hooks.get(name, []):
                 hookFunction(value)
 
-
     def value(self, name, default = None):
         setting = self.settings.get(name)
         if setting:
@@ -87,23 +78,19 @@ class SettingsGroup(object):
                 return self.settings[name].getDefault()
             return setting.toPython(value)
 
-
     def hasValue(self, name):
         self.qsettings.beginGroup(self.__groupName)
         value = self.qsettings.value(name)
         self.qsettings.endGroup()
         return name in self.settings and value is not None
 
-
     def addSetting(self, setting):
         self.settings[setting.name] = setting
         if setting.tm_name != None and self.tmsettings.value(setting.tm_name) == None:
             self.tmsettings.setValue(setting.tm_name, setting.getDefault())
 
-
     def addListener(self, listener):
         self.listeners.append(listener)
-
     
     def removeListener(self, listener):
         self.listeners.remove(listener)
@@ -121,7 +108,6 @@ class SettingsGroup(object):
     def addDialog(self, dialog):
         self.dialogs.append(dialog)
 
-
     def configure(self, obj):
         for key, setting in self.settings.items():
             value = self.value(key)
@@ -132,14 +118,12 @@ class SettingsGroup(object):
             if value is not None:
                 setattr(obj, key, value)
 
-
     def sync(self):
         for key, setting in self.settings.items():
             if setting.default == None and self.listeners:
                 self.qsettings.beginGroup(self.__groupName)
                 self.qsettings.setValue(key, setting.getDefault())
                 self.qsettings.endGroup()
-
 
 class pmxConfigPorperty(object):
     """Configuration descriptor"""
@@ -153,7 +137,6 @@ class pmxConfigPorperty(object):
     def getDefault(self):
         return self.default
 
-
     def toPython(self, value):
         if self.valueType == bool and isinstance(value, str):
             return value.lower() not in ('false', '0')
@@ -163,7 +146,6 @@ class pmxConfigPorperty(object):
     def __call__(self, function):
         self.fset = function
         return self
-
 
     def __get__(self, obj, objtype=None):
         if obj is None:
