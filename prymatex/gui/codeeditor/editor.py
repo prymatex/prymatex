@@ -611,7 +611,20 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setExtraSelectionCursors("brace", [cursor for cursor in list(self._currentBraces) if cursor is not None])
         self.updateExtraSelections()
 
-    # ------------ QPlainTextEdit Events
+    # ------------ Override event handlers
+    def event(self, event):
+        if event.type() in (QtCore.QEvent.KeyPress, QtCore.QEvent.KeyRelease):
+            #Ver si tengo un modo activo,
+            for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:
+                if mode.isActive():
+                    if event.type() == QtCore.QEvent.KeyPress:
+                        mode.keyPressEvent(event)
+                    elif event.type() == QtCore.QEvent.KeyRelease:
+                        mode.keyReleaseEvent(event)
+                    return True
+        
+        return TextEditWidget.event(self, event)
+ 
     def focusInEvent(self, event):
         # TODO No es para este evento pero hay que poner en alugn lugar el update de las side bars
         TextEditWidget.focusInEvent(self, event)
@@ -743,7 +756,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     # -------------------- Keyboard Events
     def runKeyHelper(self, event):
-        #No tengo modo activo, intento con los helpers
+        #Intento con los helpers
         cursor = self.textCursor()
         for helper in self.findHelpers(event.key()):
             #Buscar Entre los helpers
@@ -755,12 +768,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def keyPressEvent(self, event):
         """This method is called whenever a key is pressed.
         The key code is stored in event.key()"""
-        
-        #Primero ver si tengo un modo activo,
-        for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:
-            if mode.isActive():
-                return mode.keyPressEvent(event)
-        
+
         if not self.runKeyHelper(event):
             #No tengo helper paso el evento a la base
             TextEditWidget.keyPressEvent(self, event)
@@ -771,13 +779,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                     search = False)
                 if end - start >= self.wordLengthToComplete:
                     self.showCachedCompleter()
-            
-    def keyReleaseEvent(self, event):
-        #Primero ver si tengo un modo activo,
-        for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:
-            if mode.isActive():
-                return mode.keyReleaseEvent(event)
-        TextEditWidget.keyReleaseEvent(self, event)
 
     # ------------ Insert API
     def insertNewLine(self, cursor = None):
