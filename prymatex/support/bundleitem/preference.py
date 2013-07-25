@@ -149,9 +149,12 @@ class PMXPreferenceMasterSettings(object):
         shellVariables = {}
         for settings in self.settings:
             if settings.shellVariables:
-                for key, value in settings.shellVariables.items():
-                    shellVariables[key] = osextra.path.expand_shell_variables(
-                        value, context = settings.bundle.variables)
+                # Only if not has all variables
+                if all([ name not in shellVariables for name in settings.shellVariables.keys()]):
+                    for key, value in settings.shellVariables.items():
+                        # TODO: Son format strings
+                        shellVariables[key] = osextra.path.expand_shell_variables(
+                            value, context = settings.bundle.variables)
         return shellVariables
         
     @property

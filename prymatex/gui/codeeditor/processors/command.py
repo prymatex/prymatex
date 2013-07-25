@@ -97,11 +97,11 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     def selectedText(self, inputFormat = None):
         return self.selection(inputFormat)
-    
+
     def word(self, inputFormat = None):
         word, start, end = self.editor.currentWord()
         return word
-    
+
     # ----------------- Before Running Command
     def saveModifiedFiles(self):
         ret = True
