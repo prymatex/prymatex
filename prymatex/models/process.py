@@ -26,7 +26,7 @@ class ExternalProcessTableModel(QtCore.QAbstractTableModel):
     
     def rowCount (self, parent = None):
         return len(self.processItems)
-        
+    
     def columnCount(self, parent):
         return 3
 

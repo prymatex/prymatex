@@ -79,11 +79,12 @@ class PMXCommandProcessor(PMXCommandProcessor):
         return cursor.document().characterAt(cursor.position())
         
     def scope(self, inputFormat = None):
-        scopePath = self.editor.scope().path
-        attributeScopePath = self.editor.attributeScopePath()
-        cursorScopePath = self.editor.cursorScopePath()
-        return " ".join(scopePath + attributeScopePath + cursorScopePath)
-    
+        cursor = self.editor.textCursor()
+        block = cursor.block()
+        token = self.editor.blockUserData(block).tokenAtPosition(
+            cursor.positionInBlock())
+        return token.chunk
+
     def selection(self, inputFormat = None):
         cursor = self.editor.textCursor()
         if cursor.hasSelection():

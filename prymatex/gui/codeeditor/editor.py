@@ -266,7 +266,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if indent != userData.indent:
             userData.indent = indent
         # Folding
-        foldingMark = self.scope(scopeHash = userData.lastScope()).settings.folding(text)
+        # TODO: Ver si lo puedo sacar del scope basico o hace falta tomar de algun lugar
+        # Principio, fin de la linea
+        foldingMark = self.basicScope().settings.folding(text)
         if foldingMark != userData.foldingMark:
             userData.foldingMark = foldingMark
         # Handlers
@@ -1101,12 +1103,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         cursor = cursor or self.textCursor()
         block = cursor.block()
         beginPosition = block.position()
-        # TODO Todo lo que implique userData centrarlo en una API en la instancia de cada editor
-        (start, end), scope = self.blockUserData(block).scopeRange(cursor.positionInBlock())
-        if scope is not None:
-            cursor.setPosition(beginPosition + start)
-            cursor.setPosition(beginPosition + end, QtGui.QTextCursor.KeepAnchor)
-            self.setTextCursor(cursor)
+        token = self.blockUserData(block).tokenAtPosition(cursor.positionInBlock())
+        cursor = self.newCursorAtPosition(beginPosition + token.start, beginPosition + token.end)
+        self.setTextCursor(cursor)
     
     # ---------- Bookmarks and gotos
     def toggleBookmark(self, block = None):
