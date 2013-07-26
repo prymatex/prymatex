@@ -854,15 +854,21 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         cursor = self.textCursor()
         block = cursor.block()
         line = block.text()
+        
         # TODO un shortcut para esto de obtener el path
         leftScope, rightScope = self.scope(direction = "both")
         attributeScopePath = self.attributeScopePath()
         cursorScopePath = self.cursorScopePath(cursor = cursor)
         current_word, start, end = self.currentWord()
+        
+        theme = self.application.supportManager.getTheme(self.defaultTheme)
+
+        # Build environment
         environment.update({
                 'TM_CURRENT_LINE': line,
                 'TM_LINE_INDEX': cursor.positionInBlock(),
                 'TM_LINE_NUMBER': block.blockNumber() + 1,
+                'TM_CURRENT_THEME_PATH': theme.sourcePath(),
                 'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
                 'TM_SCOPE': " ".join(rightScope.path + attributeScopePath + cursorScopePath),
                 'TM_LEFT_SCOPE': " ".join(leftScope.path + attributeScopePath + cursorScopePath),

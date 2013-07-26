@@ -14,7 +14,6 @@ from prymatex.support.theme import DEFAULT_THEME_SETTINGS, DEFAULT_SCOPE_SELECTO
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.delegates.theme import FontStyleDelegate, ColorDelegate
 
-
 class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
     """Changes font and theme"""
     NAMESPACE = "editor"
@@ -27,7 +26,6 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         self.setupUi(self)
         self.setupTableView()
         self.setupPushButton()
-
 
     def loadSettings(self):
         SettingsTreeNode.loadSettings(self)
@@ -52,7 +50,6 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         self.spinBoxFontSize.valueChanged[int].connect(self.setDefaultFontSetting)
         self.fontComboBoxName.activated.connect(self.setDefaultFontSetting)
 
-
     # ---------------------- Set Settings
     def setDefaultFontSetting(self):
         font = self.fontComboBoxName.currentFont()
@@ -60,7 +57,6 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         if self.checkBoxAntialias.isChecked():
             font.setStyleStrategy(font.styleStrategy() | QtGui.QFont.PreferAntialias)
         self.settingGroup.setValue('defaultFont', font)
-
 
     def setDefaultThemeSetting(self, theme):
         self.settingGroup.setValue('defaultTheme', str(theme.uuid))
@@ -70,14 +66,12 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
             message += "<i>(by %s)</i>" % theme.author
         self.application.showMessage(message)
 
-
     # ---------------------- Themes
     @QtCore.Slot(int)
     def on_comboBoxThemes_activated(self, index):
         theme = self.comboBoxThemes.model().themeForIndex(index)
         self.updateUi(theme)
         self.setDefaultThemeSetting(theme)
-
 
     def updateUi(self, theme):
         self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.model().findIndex(theme))    

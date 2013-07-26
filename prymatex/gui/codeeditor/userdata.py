@@ -19,9 +19,8 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
         
         self.__blank = True
         self.__tokens = []
-        
-        self.__scopeRanges = None
-        self.__lineChunks = None
+        self.__ranges = None
+
         self.__cache = {}
 
     def setStateHash(self, stateHash):
@@ -32,8 +31,7 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
 
     def setTokens(self, tokens):
         self.__tokens = tokens
-        self.__scopeRanges = None
-        self.__lineChunks = None
+        self.__ranges = None
 
     def tokens(self, start = None, end = None):
         tokens = self.__tokens
@@ -43,23 +41,15 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
             tokens = [ token for token in tokens if token.end <= end ]
         return tokens
 
-    def scopeRanges(self, start = None, end = None):
-        # deprecated
-        if not self.__scopeRanges:
-            self.__scopeRanges = [ ((token.start, token.end), token.scopeHash) for token in self.__tokens ]
-        ranges = self.__scopeRanges[:]
-        if start is not None:
-            ranges = [ range for range in ranges if range[0][0] >= start ]
-        if end is not None:
-            ranges = [ range for range in ranges if range[0][1] <= end ]
-        return ranges
-
-    def lineChunks(self):
-        # deprecated
-        if not self.__lineChunks:
-            self.__lineChunks = [ ((token.start, token.end), token.chunk) for token in self.__tokens ]
-        return self.__lineChunks[:]
-
+    def ranges(self, start = None, end = None):
+        if self.__ranges is None:
+            ranges = set()
+            for token in self.tokens(start, end):
+                ranges.add(token.start)
+                ranges.add(token.end)
+            self.__ranges = sorted(ranges)
+        return self.__ranges
+    
     def setBlank(self, blank):
         self.__blank = blank
     

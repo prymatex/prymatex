@@ -90,11 +90,12 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             block.setUserState(blockState)
             
             formats = []
-            for (start, end), scopeHash in userData.scopeRanges():
+            for token in userData.tokens():
                 frange = QtGui.QTextLayout.FormatRange()
-                frange.start = start
-                frange.length = end - start
-                frange.format = self.highlightFormat(self.editor.scope(scopeHash = scopeHash).path)
+                frange.start = token.start
+                frange.length = token.end - token.start
+                frange.format = self.highlightFormat(self.editor.scope(
+                    scopeHash = token.scopeHash).path)
                 formats.append(frange)
 
             block.layout().setAdditionalFormats(formats)
@@ -151,10 +152,10 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.applyFormat(userData)
 
     def applyFormat(self, userData):
-        for (start, end), scopeHash in userData.scopeRanges():
-            frmt = self.highlightFormat(self.editor.scope(scopeHash = scopeHash).path)
+        for token in userData.tokens():
+            frmt = self.highlightFormat(self.editor.scope(scopeHash = token.scopeHash).path)
             if frmt is not None:
-                self.setFormat(start, end - start, frmt)
+                self.setFormat(token.start, token.end - token.start, frmt)
 
     def highlightFormat(self, scopePath):
         if scopePath not in PMXSyntaxHighlighter.FORMAT_CACHE:

@@ -292,7 +292,6 @@ html_footer
         self.addEditor(editor)
         return editor
 
-
     def removeEditor(self, editor):
         self.disconnect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_editor_newLocationMemento)
         self.splitTabWidget.removeTab(editor)
