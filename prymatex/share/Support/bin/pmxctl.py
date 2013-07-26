@@ -404,7 +404,8 @@ class CommandHandler(object):
     def sendCommand(self, command):
         self.socket.send_json(command)
         value = self.socket.recv()
-        sys.stdout.write(value.decode("utf-8"))
+        if value:
+            sys.stdout.write(value.decode("utf-8"))
         
     # ======================
     # = New dialog methods =
