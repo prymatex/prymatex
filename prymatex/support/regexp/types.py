@@ -81,10 +81,12 @@ class VariableType(object):
     __unicode__ = __str__    
         
     def replace(self, memodict, holders = None, match = None, variables = None):
-        if self.name.isdigit():
-            return match.group(int(self.name))
-        else:
-            return variables.get(self.name, "")
+        if match and self.name.isdigit():
+            try:
+                return match.group(int(self.name))
+            except:
+                print("no paso")
+        return variables and variables.get(self.name, "") or ""
 
     def render(self, visitor, memodict, holders = None, match = None):
         visitor.insertText(self.replace(memodict, holders, match, visitor.environmentVariables()))

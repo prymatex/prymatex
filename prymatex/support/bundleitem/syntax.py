@@ -164,10 +164,12 @@ class PMXSyntaxNode(object):
         return match
 
     def expanded_name(self, match):
-        return self.__nameFormater and self.__nameFormater.expand(match) or self.name
-
+        self._name = self.__nameFormater and self.__nameFormater.expand(match) or self.name
+        return self._name
+        
     def expanded_contentName(self, match):
-        return self.__contentNameFormater and self.__contentNameFormater.expand(match) or self.contentName
+        self._contentName = self.__contentNameFormater and self.__contentNameFormater.expand(match) or self.contentName
+        return self._contentName
 
 class PMXSyntax(PMXBundleItem):
     KEYS = ( 'comment', 'firstLineMatch', 'scopeName', 'repository',
@@ -287,13 +289,13 @@ class PMXSyntax(PMXBundleItem):
                 start_pos = end_match.start()
                 end_pos = end_match.end()
                 if top.contentName and processor:
-                    processor.closeTag(top.expanded_contentName(end_match), start_pos)
+                    processor.closeTag(top._contentName, start_pos)
                 if processor:
                     grammar.parse_captures('captures', top, end_match, processor)
                 if processor:
                     grammar.parse_captures('endCaptures', top, end_match, processor)
                 if top.name and processor:
-                    processor.closeTag( top.expanded_name(end_match), end_pos)
+                    processor.closeTag( top._name, end_pos)
                 stack.pop()
                 top, match = stack[-1]
             elif pattern:
