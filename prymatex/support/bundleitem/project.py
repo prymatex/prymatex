@@ -60,7 +60,7 @@ fi"'''}
             shellCommand = self.command,
             environment = environment,
             asynchronous = True,
-            workingDirectory = self.source(),
+            workingDirectory = self.sourcePath(),
             callback = functools.partial(self.afterExecute, callback)
         )
         
@@ -72,7 +72,7 @@ fi"'''}
     def dataFilePath(self, basePath, baseName = None):
         directory = osextra.path.ensure_not_exists(os.path.join(basePath, self.FOLDER, "%s"), osextra.to_valid_name(baseName or self.name))
         return os.path.join(directory, self.FILE)
-    
+
     @classmethod
     def dataFilePath(cls, path):
         return os.path.join(path, cls.FILE)

@@ -38,32 +38,33 @@ class PMXCommandProcessor(PMXCommandProcessor):
         block = firstBlock
         for line in text.splitlines():
             if block == firstBlock and block == lastBlock:
-                scopes = block.userData().scopeRanges(start = startIndex, end = endIndex)
+                tokens = self.editor.blockUserData(block).tokens(
+                    start = startIndex, end = endIndex)
             elif block == firstBlock:
-                scopes = block.userData().scopeRanges(start = startIndex)
+                tokens = self.editor.blockUserData(block).tokens(
+                    start = startIndex)
             elif block == lastBlock:
-                scopes = block.userData().scopeRanges(end = endIndex)
+                tokens = self.editor.blockUserData(block).tokens(
+                    end = endIndex)
             else:
-                scopes = block.userData().scopeRanges()
+                tokens = self.editor.blockUserData(block).tokens()
             lineXML = ""
-            print(scopes)
-            for (start, end), scope in scopes:
-                ss = scope.split()
-                token = "".join(["<" + scope + ">" for scope in ss])
-                token += line[start:end]
-                ss.reverse()
-                token += "".join(["</" + scope + ">" for scope in ss])
-                lineXML += token
+            for token in tokens:
+                scopePath = self.editor.scope(scopeHash = token.scopeHash).path
+                lineXML = "".join(["<" + scope + ">" for scope in scopePath])
+                lineXML += token.chunk
+                scopePath = scopePath[::-1]
+                lineXML += "".join(["</" + scope + ">" for scope in scopePath])
             result.append(lineXML)
             if block == lastBlock:
                 break
             block = block.next()
+        print("\n".join(result))
         return "\n".join(result)
 
     # --------------------- Inputs
     def document(self, inputFormat = None):
         text = self.editor.document().toPlainText()
-        print(text)
         if inputFormat == "xml":
             firstBlock = self.editor.document().firstBlock()
             lastBlock = self.editor.document().lastBlock()
@@ -148,7 +149,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
         if self.errorCommand:
             raise Exception(context.errorValue)
         else:
-            print(context.workingDirectory)
             self.editor.mainWindow.showErrorInBrowser(
                 context.description(),
                 context.errorValue,
@@ -220,7 +220,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.mainWindow.showMessage(message, timeout = timeout, point = point, linkMap = callbacks)
         
     def toolTip(self, context, outputFormat = None):
-        print(context)
         self.showAsTooltip(context, outputFormat)
 
     def createNewDocument(self, context, outputFormat = None):

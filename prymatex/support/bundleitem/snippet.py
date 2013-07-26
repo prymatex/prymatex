@@ -3,10 +3,6 @@
 from __future__ import unicode_literals
 
 """Snippte's module"""
-import uuid as uuidmodule
-
-from prymatex.utils import six
-
 from ..regexp import Snippet, SnippetHandler
 from .base import PMXBundleItem
 
