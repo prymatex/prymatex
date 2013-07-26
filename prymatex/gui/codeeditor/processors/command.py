@@ -36,30 +36,31 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def formatAsXml(self, text, firstBlock, lastBlock, startIndex, endIndex):
         result = []
         block = firstBlock
-        for line in text.splitlines():
+        for line in text.splitlines(True):
+            userData = self.editor.blockUserData(block) 
             if block == firstBlock and block == lastBlock:
-                tokens = self.editor.blockUserData(block).tokens(
-                    start = startIndex, end = endIndex)
+                ranges = userData.ranges(start = startIndex, end = endIndex)
             elif block == firstBlock:
-                tokens = self.editor.blockUserData(block).tokens(
-                    start = startIndex)
+                ranges = userData.ranges(start = startIndex)
             elif block == lastBlock:
-                tokens = self.editor.blockUserData(block).tokens(
-                    end = endIndex)
+                ranges = userData.ranges(end = endIndex)
             else:
-                tokens = self.editor.blockUserData(block).tokens()
+                ranges = userData.ranges()
             lineXML = ""
-            for token in tokens:
+            start = ranges.pop(0)
+            token = userData.tokenAtPosition(start)
+            for index in ranges:
                 scopePath = self.editor.scope(scopeHash = token.scopeHash).path
-                lineXML = "".join(["<" + scope + ">" for scope in scopePath])
-                lineXML += token.chunk
-                scopePath = scopePath[::-1]
-                lineXML += "".join(["</" + scope + ">" for scope in scopePath])
-            result.append(lineXML)
+                lineXML += "".join(["<" + scope + ">" for scope in scopePath])
+                lineXML += line[start:index]
+                lineXML += "".join(["</" + scope + ">" for scope in scopePath[::-1]])
+                token = userData.tokenAtPosition(index)
+                start = index
+            # TODO Ver si esta bien esto del replace
+            result.append(lineXML.replace('\n', ''))
             if block == lastBlock:
                 break
             block = block.next()
-        print("\n".join(result))
         return "\n".join(result)
 
     # --------------------- Inputs
@@ -235,5 +236,5 @@ class PMXCommandProcessor(PMXCommandProcessor):
             editor.setPlainText(context.outputValue)
 
     def openAsNewDocument(self, context, outputFormat = None):
-        editor= self.editor.mainWindow.addEmptyEditor()
+        editor = self.editor.mainWindow.addEmptyEditor()
         editor.setPlainText(context.outputValue)
