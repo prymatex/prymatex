@@ -100,11 +100,9 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
             if Klass.acceptFile(filePath, mimetype):
                 return Klass
     
-    
     def defaultEditor(self):
         editors = [cmp for cmp in self.components.get(MainWindow, []) if issubclass(cmp, PMXBaseEditor)]
         return editors[0]
-
 
     # ---------- Load plugins
     def loadResources(self, pluginDirectory, pluginEntry):

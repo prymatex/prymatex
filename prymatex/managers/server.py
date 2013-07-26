@@ -28,7 +28,6 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
     @QtCore.Slot()
     def socketReadyRead(self):
         command = self.socket.recv_json()
-        print(command)
         name = command.get("name")
         kwargs = command.get("kwargs", {})
 
@@ -72,7 +71,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}  
         #Ensure Unicode encode
         result = str(value).encode("utf-8")
-        self.logger.debug("Dialog Send --> Result: %s" % (result))
+        self.logger.debug("Dialog Send --> Result %s: %s" % (type(result), result))
         self.socket.send(result)
         
     def async_window(self, **kwargs):
