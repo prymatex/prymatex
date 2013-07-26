@@ -3,7 +3,6 @@
 
 import os, sys
 import zmq
-from xml.parsers.expat import ExpatError
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.core import PMXBaseComponent
@@ -77,10 +76,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
         self.socket.send(result)
         
     def async_window(self, **kwargs):
-        try:
-            parameters = plist.readPlistFromString(kwargs["parameters"])
-        except ExpatError:
-            parameters = {}
+        parameters = plist.readPlistFromString(kwargs["parameters"])
         directory = os.path.dirname(kwargs["guiPath"])
         name = os.path.basename(kwargs["guiPath"])
         dialogClass = self.loadDialogClass(name, directory)
@@ -90,10 +86,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
         self.sendResult(instanceId)
     
     def update_window(self, **kwargs):
-        try:
-            parameters = plist.readPlistFromString(kwargs["parameters"])
-        except ExpatError:
-            parameters = {}
+        parameters = plist.readPlistFromString(kwargs["parameters"])
         instance = self.dialogInstance(int(kwargs["token"]))
         instance.setParameters(parameters)
         self.sendResult()
@@ -113,10 +106,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
         instance.waitForInput(sendInputResult)
 
     def modal_window(self, **kwargs):
-        try:
-            parameters = plist.readPlistFromString(kwargs["parameters"])
-        except ExpatError:
-            parameters = {}
+        parameters = plist.readPlistFromString(kwargs["parameters"])
         directory = os.path.dirname(kwargs["guiPath"])
         name = os.path.basename(kwargs["guiPath"])
         dialogClass = self.loadDialogClass(name, directory)
@@ -126,23 +116,15 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
         self.sendResult({"result": value})
 
     def tooltip(self, message = "", format = "text", transparent = False):
-        try:
-            data = plist.readPlistFromString(message)
-            if data is not None:
-                message = data[format]
-        except ExpatError as reason:
-            pass
+        data = plist.readPlistFromString(message)
+        message = data[format]
         message = message.strip()
         if message:
             self.application.currentEditor().showMessage(message)
         self.sendResult()
     
     def menu(self, **kwargs):
-        try:
-            parameters = plist.readPlistFromString(kwargs["parameters"])
-        except ExpatError:
-            parameters = {}
-            
+        parameters = plist.readPlistFromString(kwargs["parameters"])
         def sendSelectedIndex(index):
             if index != -1:
                 self.sendResult({"selectedIndex": index})
