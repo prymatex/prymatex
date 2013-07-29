@@ -61,12 +61,13 @@ class PMXPreferenceSettings(object):
             if value != None:
                 if key in self.INDENT_KEYS or key in self.FOLDING_KEYS:
                     value = value.pattern
-                elif key in [ 'shellVariables' ]:
+                elif key == 'shellVariables':
                     value = [ {'name': t[0], 'value': t[1] } for t in  value.items() ]
+                elif key == 'symbolTransformation':
                     value = "%s" % value
-                elif key in [ 'showInSymbolList' ]:
+                elif key == 'showInSymbolList':
                     value = value and "1" or "0"
-                elif key in [ 'spellChecking' ]:
+                elif key == 'spellChecking':
                     value = value and "1" or "0"
                 dataHash[key] = value
         return dataHash
@@ -77,11 +78,13 @@ class PMXPreferenceSettings(object):
             if value != None:
                 if key in self.INDENT_KEYS or key in self.FOLDING_KEYS:
                     value = compileRegexp( value )
-                elif key in [ 'shellVariables' ]:
+                elif key == 'shellVariables':
                     value = dict([(d['name'], d['value']) for d in value])
-                elif key in [ 'showInSymbolList' ]:
+                elif key == 'symbolTransformation':
+                    value = SymbolTransformation(value)
+                elif key == 'showInSymbolList':
                     value = bool(int(value))
-                elif key in [ 'spellChecking' ]:
+                elif key == 'spellChecking':
                     value = bool(int(value))
             setattr(self, key, value)
 
@@ -257,7 +260,8 @@ class PMXPreferenceMasterSettings(object):
         return indent
 
     def transformSymbol(self, text):
-        return self.symbolTransformation.transform(text)
+        transformation = self.symbolTransformation
+        return transformation and transformation.transform(text) or ""
 
     def folding(self, line):
         start_match = self.foldingStartMarker.search(line) if self.foldingStartMarker is not None else None
