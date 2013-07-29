@@ -27,7 +27,7 @@
 from prymatex.utils import osextra
 
 from .base import PMXBundleItem
-from ..regexp import compileRegexp, FormatString
+from ..regexp import compileRegexp, SymbolTransformation
 
 class PMXPreferenceSettings(object):
     KEYS = (
@@ -71,7 +71,7 @@ class PMXPreferenceSettings(object):
                 elif key in [ 'shellVariables' ]:
                     value = [ {'name': t[0], 'value': t[1] } for t in  value.items() ]
                 elif key in [ 'symbolTransformation' ]:
-                    value = ";".join(value) + ";"
+                    value = "%s" % value
                 elif key in [ 'showInSymbolList' ]:
                     value = value and "1" or "0"
                 elif key in [ 'spellChecking' ]:
@@ -88,7 +88,7 @@ class PMXPreferenceSettings(object):
                 elif key in [ 'shellVariables' ]:
                     value = dict([(d['name'], d['value']) for d in value])
                 elif key in [ 'symbolTransformation' ]:
-                    value = [value for value in [value.strip() for value in value.split(";")] if bool(value)]
+                    value = SymbolTransformation(value)
                 elif key in [ 'showInSymbolList' ]:
                     value = bool(int(value))
                 elif key in [ 'spellChecking' ]:
@@ -256,19 +256,8 @@ class PMXPreferenceMasterSettings(object):
             indent.append(PMXPreferenceSettings.UNINDENT)
         return indent
     
-    def compileSymbolTransformation(self):
-        self._symbolTransformation = []
-        for trans in self.symbolTransformation:
-            if trans:
-                self._symbolTransformation.append(FormatString("${0/" + trans[2:] + "}"))
-    
     def transformSymbol(self, text):
-        if not hasattr(self, '_symbolTransformation'):
-            self.compileSymbolTransformation()
-        for trans in self._symbolTransformation:
-            tt = trans.replace(text, ".+")
-            if tt:
-                return tt
+        return self.symbolTransformation.transform(text)
     
     def folding(self, line):
         start_match = self.foldingStartMarker.search(line) if self.foldingStartMarker is not None else None

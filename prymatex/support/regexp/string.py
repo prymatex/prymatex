@@ -4,7 +4,7 @@ from .parser import parse_format_string
 from . import types
 from .base import compileRegexp
 
-class FormatString(object):
+class String(object):
     def __init__(self, source):
         self.nodes = parse_format_string(source)
         

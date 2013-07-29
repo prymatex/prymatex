@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 from prymatex.utils import six
 
 from .base import PMXBundleItem
-from ..regexp import compileRegexp, FormatString
+from ..regexp import compileRegexp, String
 
 class PMXSyntaxProxy(object):
     def __init__(self, dataHash, syntax):
@@ -61,12 +61,12 @@ class PMXSyntaxNode(object):
                         self.patterns = []
                     self.patterns.extend(injector.grammar.patterns)
 
-            # FormatString for name
-            self.__nameFormater = "$" in self.name and FormatString(self.name) or None 
+            # String for name
+            self.__nameFormater = "$" in self.name and String(self.name) or None 
         
         if self.contentName is not None:
-            # FormatString for contentName
-            self.__contentNameFormater = "$" in self.contentName and FormatString(self.contentName) or None 
+            # String for contentName
+            self.__contentNameFormater = "$" in self.contentName and String(self.contentName) or None 
 
     def parse_repository(self, repository):
         return dict([ (key, 'include' in value and\
