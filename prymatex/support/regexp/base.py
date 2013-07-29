@@ -46,6 +46,7 @@ def compileOnig(string, flags):
     return sre.compile(string, convertOnig(flags))
 
 def compileRegexp(string, flags = []):
+    #return compileOnig(string, flags) All oniguruma
     pattern = compileRe(string, flags)
     if pattern is None:
         pattern = compileOnig(string, flags)

@@ -19,7 +19,7 @@ class Parser(object):
                 self.it += 1
                 return True
         return False
-
+    
     def parse_chars(self, chars, res):
         chs = ""
         while(self.it != self.last and self.source[self.it] in chars):
@@ -60,15 +60,27 @@ class Parser(object):
             options.append(self.source[self.it - 1])
         return True
 
-    def parse_transformation(self, nodes):
-        res = types.VariableTransformationType("none")
-        regexp = []
-        if self.parse_until("/", regexp) \
-            and self.parse_format_string("/", res.format.composites) \
-            and self.parse_regexp_options(res.options):
-            res.pattern = compileRegexp(regexp.pop(), res.options)
-            nodes.append(res)
+    def parse_format_symbol(self, stopChars, nodes):
+        backtrack = self.it
+        
+        while self.it != self.last:
+            if self.source[self.it] == "s" and self.it != self.last and self.source[self.it + 1] == "/":
+                self.parse_char("s")
+                self.parse_char("/")
+                res = types.VariableTransformationType("s")
+                regexp = []
+                if self.parse_until("/", regexp) and self.parse_format_string("/", res.format) and self.parse_regexp_options(res.options) and self.parse_char(";"):
+                    res.pattern = compileRegexp(regexp.pop(), res.options)
+                    nodes.append(res)
+                    continue
+                break
+            elif self.parse_text(nodes):
+                continue
+            break
+            
+        if (self.it == self.last and len(stopChars) == 0) or self.parse_char(stopChars):
             return True
+        self.it = backtrack
         return False
 
     def parse_format_string(self, stopChars, nodes):
@@ -276,6 +288,11 @@ class Parser(object):
             return True
         self.it = backtrack
         return False
+
+def parse_format_symbol(source):
+    nodes = []
+    Parser(source).parse_format_symbol("", nodes)
+    return nodes
 
 def parse_format_string(source):
     nodes = []
