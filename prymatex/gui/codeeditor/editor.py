@@ -30,7 +30,7 @@ from .models import (SymbolListModel, BookmarkListModel, AlreadyTypedWords,
         symbolSelectableModelFactory)
 
 from prymatex.support import (PMXSnippet, PMXMacro, PMXCommand,
-        PMXDragCommand, PMXSyntax, PMXPreferenceSettings)
+        PMXDragCommand, PMXSyntax, PMXPreferenceSettings, PMXPreferenceMasterSettings)
 
 from prymatex.utils import coroutines
 from prymatex.utils import sourcecode
@@ -250,7 +250,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             userData.indent = ""
             
             # Folding
-            userData.foldingMark = PMXPreferenceSettings.FOLDING_NONE
+            userData.foldingMark = PMXPreferenceMasterSettings.FOLDING_NONE
             userData.foldedLevel = 0
             userData.folded = False
             
@@ -788,17 +788,17 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         userData = self.blockUserData(block)
         settings = self.scope().settings
         indentMarks = settings.indent(block.text()[:positionInBlock])
-        if PMXPreferenceSettings.INDENT_INCREASE in indentMarks:
+        if settings.INDENT_INCREASE in indentMarks:
             self.logger.debug("Increase indent")
             indent = userData.indent + self.tabKeyBehavior()
-        elif PMXPreferenceSettings.INDENT_NEXTLINE in indentMarks:
+        elif settings.INDENT_NEXTLINE in indentMarks:
             #TODO: Creo que este no es el correcto
             self.logger.debug("Increase next line indent")
             indent = userData.indent + self.tabKeyBehavior()
-        elif PMXPreferenceSettings.UNINDENT in indentMarks:
+        elif settings.UNINDENT in indentMarks:
             self.logger.debug("Unindent")
             indent = ""
-        elif PMXPreferenceSettings.INDENT_DECREASE in indentMarks:
+        elif settings.INDENT_DECREASE in indentMarks:
             self.logger.debug("Decrease indent")
             indent = userData.indent[:-len(self.tabKeyBehavior())]
         else:
@@ -986,10 +986,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         yield coroutines.Return(suggestions)
 
     # ---------- Folding
-    def _folding_mark(self, block):
-        userData = self.blockUserData(block)
-        return userData.foldingMark or PMXPreferenceSettings.FOLDING_NONE
-    
     def _find_block_fold_peer(self, block, direction = "down"):
         """ Direction are 'down' or up"""
         if direction == "down":
@@ -999,9 +995,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         nest = 0
         while block.isValid():
             userData = self.blockUserData(block)
-            if userData.foldingMark == PMXPreferenceSettings.FOLDING_START:
+            if userData.foldingMark == PMXPreferenceMasterSettings.FOLDING_START:
                 nest += 1
-            elif userData.foldingMark == PMXPreferenceSettings.FOLDING_STOP:
+            elif userData.foldingMark == PMXPreferenceMasterSettings.FOLDING_STOP:
                 nest -= 1
             if nest == 0:
                 return block
@@ -1019,16 +1015,16 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             return self.document().lastBlock()
         
     def isFoldingStartMarker(self, block):
-        return self._folding_mark(block) == PMXPreferenceSettings.FOLDING_START
+        return self.blockUserData(block).foldingMark == PMXPreferenceMasterSettings.FOLDING_START
 
     def isFoldingStopMarker(self, block):
-        return self._folding_mark(block) == PMXPreferenceSettings.FOLDING_STOP
+        return self.blockUserData(block).foldingMark == PMXPreferenceMasterSettings.FOLDING_STOP
     
     def isFoldingIndentedBlockStart(self, block):
-        return self._folding_mark(block) == PMXPreferenceSettings.FOLDING_INDENTED_START
+        return self.blockUserData(block).foldingMark == PMXPreferenceMasterSettings.FOLDING_INDENTED_START
     
     def isFoldingIndentedBlockIgnore(self, block):
-        return self._folding_mark(block) == PMXPreferenceSettings.FOLDING_INDENTED_IGNORE
+        return self.blockUserData(block).foldingMark == PMXPreferenceMasterSettings.FOLDING_INDENTED_IGNORE
     
     def isFoldingMark(self, block):
         return self.isFoldingStartMarker(block) or self.isFoldingStopMarker(block) or self.isFoldingIndentedBlockStart(block)

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 '''
     Preferences's module
@@ -44,15 +45,7 @@ class PMXPreferenceSettings(object):
     FOLDING_KEYS = ( 
         'foldingIndentedBlockStart', 'foldingIndentedBlockIgnore',
         'foldingStartMarker', 'foldingStopMarker' )
-    INDENT_INCREASE = 0
-    INDENT_DECREASE = 1
-    INDENT_NEXTLINE = 2
-    UNINDENT = 3
-    FOLDING_NONE = 0
-    FOLDING_START = 1
-    FOLDING_STOP = 2
-    FOLDING_INDENTED_START = 3
-    FOLDING_INDENTED_IGNORE = 4
+    
     def __init__(self, dataHash = {}, preference = None):
         self.preference = preference
         self.update(dataHash)
@@ -70,8 +63,6 @@ class PMXPreferenceSettings(object):
                     value = value.pattern
                 elif key in [ 'shellVariables' ]:
                     value = [ {'name': t[0], 'value': t[1] } for t in  value.items() ]
-                elif key in [ 'symbolTransformation' ]:
-                    value = ";".join(value) + ";"
                 elif key in [ 'showInSymbolList' ]:
                     value = value and "1" or "0"
                 elif key in [ 'spellChecking' ]:
@@ -87,8 +78,6 @@ class PMXPreferenceSettings(object):
                     value = compileRegexp( value )
                 elif key in [ 'shellVariables' ]:
                     value = dict([(d['name'], d['value']) for d in value])
-                elif key in [ 'symbolTransformation' ]:
-                    value = [value for value in [value.strip() for value in value.split(";")] if bool(value)]
                 elif key in [ 'showInSymbolList' ]:
                     value = bool(int(value))
                 elif key in [ 'spellChecking' ]:
@@ -96,6 +85,17 @@ class PMXPreferenceSettings(object):
             setattr(self, key, value)
     
 class PMXPreferenceMasterSettings(object):
+    INDENT_INCREASE = 0
+    INDENT_DECREASE = 1
+    INDENT_NEXTLINE = 2
+    UNINDENT = 3
+    FOLDING_NONE = 0
+    FOLDING_START = 1
+    FOLDING_STOP = 2
+    FOLDING_INDENTED_START = 3
+    FOLDING_INDENTED_IGNORE = 4
+    TRANSFORMATION_PATTERN = compileRegexp(r"s(/.+/.+/\w*);")
+    
     def __init__(self, settings):
         self.settings = settings
     
@@ -130,7 +130,6 @@ class PMXPreferenceMasterSettings(object):
         for settings in self.settings:
             if settings.symbolTransformation is not None:
                 return settings.symbolTransformation
-        return []
                 
     @property
     def highlightPairs(self):
@@ -247,26 +246,25 @@ class PMXPreferenceMasterSettings(object):
         settings = self.__findIndentSettings()
         indent = []
         if settings.decreaseIndentPattern != None and settings.decreaseIndentPattern.search(line):
-            indent.append(PMXPreferenceSettings.INDENT_DECREASE)
+            indent.append(self.INDENT_DECREASE)
         if settings.increaseIndentPattern != None and settings.increaseIndentPattern.search(line):
-            indent.append(PMXPreferenceSettings.INDENT_INCREASE)
+            indent.append(self.INDENT_INCREASE)
         if settings.indentNextLinePattern != None and settings.indentNextLinePattern.search(line):
-            indent.append(PMXPreferenceSettings.INDENT_NEXTLINE)
+            indent.append(self.INDENT_NEXTLINE)
         if settings.unIndentedLinePattern != None and settings.unIndentedLinePattern.search(line):
-            indent.append(PMXPreferenceSettings.UNINDENT)
+            indent.append(self.UNINDENT)
         return indent
-    
-    def compileSymbolTransformation(self):
-        self._symbolTransformation = []
-        for trans in self.symbolTransformation:
-            if trans:
-                self._symbolTransformation.append(FormatString("${0/" + trans[2:] + "}"))
     
     def transformSymbol(self, text):
         if not hasattr(self, '_symbolTransformation'):
-            self.compileSymbolTransformation()
+            self._symbolTransformation = [
+                FormatString( "${0" + transform + "}" ) \
+                for transform in self.TRANSFORMATION_PATTERN.findall(
+                    self.symbolTransformation or "")
+            ]
+            print(self._symbolTransformation)
         for trans in self._symbolTransformation:
-            tt = trans.replace(text, ".+")
+            tt = trans.replace(text, ".+");
             if tt:
                 return tt
     
@@ -274,15 +272,15 @@ class PMXPreferenceMasterSettings(object):
         start_match = self.foldingStartMarker.search(line) if self.foldingStartMarker is not None else None
         stop_match = self.foldingStopMarker.search(line) if self.foldingStopMarker is not None else None
         if start_match != None and stop_match == None:
-            return PMXPreferenceSettings.FOLDING_START
+            return self.FOLDING_START
         elif start_match == None and stop_match != None:
-            return PMXPreferenceSettings.FOLDING_STOP
+            return self.FOLDING_STOP
         # Ahora probamos los de indented
         if self.foldingIndentedBlockStart is not None and self.foldingIndentedBlockStart.search(line):
-            return PMXPreferenceSettings.FOLDING_INDENTED_START
+            return self.FOLDING_INDENTED_START
         if self.foldingIndentedBlockIgnore is not None and self.foldingIndentedBlockIgnore.search(line):
-            return PMXPreferenceSettings.FOLDING_INDENTED_IGNORE
-        return PMXPreferenceSettings.FOLDING_NONE
+            return self.FOLDING_INDENTED_IGNORE
+        return self.FOLDING_NONE
     
 class PMXPreference(PMXBundleItem):
     KEYS = ( 'settings', )
