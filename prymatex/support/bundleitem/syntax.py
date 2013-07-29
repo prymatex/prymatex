@@ -62,11 +62,11 @@ class PMXSyntaxNode(object):
                     self.patterns.extend(injector.grammar.patterns)
 
             # String for name
-            self.__nameFormater = "$" in self.name and String(self.name) or None 
+            self._nameFormater = "$" in self.name and String(self.name) or None 
         
         if self.contentName is not None:
             # String for contentName
-            self.__contentNameFormater = "$" in self.contentName and String(self.contentName) or None 
+            self._contentNameFormater = "$" in self.contentName and String(self.contentName) or None 
 
     def parse_repository(self, repository):
         return dict([ (key, 'include' in value and\
@@ -118,7 +118,10 @@ class PMXSyntaxNode(object):
                     if index <= len(match.groups()):
                         #Problemas entre python y ruby, al pones un span del match, en un None oniguruma me retorna (-1, -1),
                         #esto es importante para el filtro del llamador
-                        matches.append([index, match.span(index), value['name']])
+                        try:
+                            matches.append([index, match.span(index), value['name']])
+                        except:
+                            print(name, match, match.groups(), value, key)
                 else:
                     if match.groups()[ key ]:
                         matches.append([match.groups()[ key ], match.groupdict[ key ], value['name']])
@@ -157,19 +160,18 @@ class PMXSyntaxNode(object):
         for p in self.patterns:
             tmatch = p.match_first(string, position)
             if tmatch[1]:
+                if tmatch[1].start() == 0:
+                    match = tmatch
+                    break
                 if not match[1] or match[1].start() > tmatch[1].start():
                     match = tmatch
-                #if tmatch[1].start() == position:
-                #    break
+        # Expand names
+        if match[1] is not None and (match[0].name or match[0].contentName):
+            if match[0].name:
+                match[0]._ex_name = match[0]._nameFormater and match[0]._nameFormater.expand(match[1]) or match[0].name
+            if match[0].contentName:
+                match[0]._ex_contentName = match[0]._contentNameFormater and match[0]._contentNameFormater.expand(match[1]) or match[0].contentName
         return match
-
-    def expanded_name(self, match):
-        self._name = self.__nameFormater and self.__nameFormater.expand(match) or self.name
-        return self._name
-        
-    def expanded_contentName(self, match):
-        self._contentName = self.__contentNameFormater and self.__contentNameFormater.expand(match) or self.contentName
-        return self._contentName
 
 class PMXSyntax(PMXBundleItem):
     KEYS = ( 'comment', 'firstLineMatch', 'scopeName', 'repository',
@@ -289,13 +291,13 @@ class PMXSyntax(PMXBundleItem):
                 start_pos = end_match.start()
                 end_pos = end_match.end()
                 if top.contentName and processor:
-                    processor.closeTag(top._contentName, start_pos)
+                    processor.closeTag(top._ex_contentName, start_pos)
                 if processor:
                     grammar.parse_captures('captures', top, end_match, processor)
                 if processor:
                     grammar.parse_captures('endCaptures', top, end_match, processor)
                 if top.name and processor:
-                    processor.closeTag( top._name, end_pos)
+                    processor.closeTag( top._ex_name, end_pos)
                 stack.pop()
                 top, match = stack[-1]
             elif pattern:
@@ -303,23 +305,23 @@ class PMXSyntax(PMXBundleItem):
                 end_pos = pattern_match.end()
                 if pattern.begin:
                     if pattern.name and processor:
-                        processor.openTag(pattern.expanded_name(pattern_match), start_pos)
+                        processor.openTag(pattern._ex_name, start_pos)
                     if processor:
                         grammar.parse_captures('captures', pattern, pattern_match, processor)
                     if processor:
                         grammar.parse_captures('beginCaptures', pattern, pattern_match, processor)
                     if pattern.contentName and processor:
-                        processor.openTag(pattern.expanded_contentName(end_match), end_pos)
+                        processor.openTag(pattern._ex_contentName, end_pos)
                     top = pattern
                     match = pattern_match
                     stack.append((top, match))
                 elif pattern.match:
                     if pattern.name and processor:
-                        processor.openTag(pattern.expanded_name(pattern_match), start_pos)
+                        processor.openTag(pattern._ex_name, start_pos)
                     if processor:
                         grammar.parse_captures('captures', pattern, pattern_match, processor)
                     if pattern.name and processor:
-                        processor.closeTag(pattern.expanded_name(pattern_match), end_pos)
+                        processor.closeTag(pattern._ex_name, end_pos)
             else:
                 # FIXME: Custom pop from stack for regexp
                 if not end_match and not pattern and top.end == "(?!\G)":
