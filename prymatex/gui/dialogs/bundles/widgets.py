@@ -161,34 +161,36 @@ class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
         self.comboBoxInputFormat.addItem("XML", "xml")
         self.comboBoxInputFormat.currentIndexChanged[int].connect(self.on_comboBoxInputFormat_changed)
         
-        self.comboBoxOutput.addItem("Discard", "discard")
-        self.comboBoxOutput.addItem("Replace Selected Text", "replaceSelectedText")
-        self.comboBoxOutput.addItem("Replace Document", "replaceDocument")
-        self.comboBoxOutput.addItem("Insert as Text", "insertText")
-        self.comboBoxOutput.addItem("Insert as Snippet", "insertAsSnippet")
-        self.comboBoxOutput.addItem("Show as HTML", "showAsHTML")
-        self.comboBoxOutput.addItem("Show as Tool Tip", "showAsTooltip")
-        self.comboBoxOutput.addItem("Create New Document", "createNewDocument")
-        self.comboBoxOutput.addItem("Open as New Document", "openAsNewDocument")
-        self.comboBoxOutput.addItem("Open as New Window", "newWindow")
-        self.comboBoxOutput.currentIndexChanged[int].connect(self.on_comboBoxOutput_changed)
-        
+        self.comboBoxOutputLocation.addItem("Discard", "discard")
+        self.comboBoxOutputLocation.addItem("Replace Selected Text", "replaceSelectedText")
+        self.comboBoxOutputLocation.addItem("Replace Document", "replaceDocument")
+        self.comboBoxOutputLocation.addItem("Replace Input", "replaceInput")
+        self.comboBoxOutputLocation.addItem("Insert as Text", "insertText")
+        self.comboBoxOutputLocation.addItem("Insert as Snippet", "insertAsSnippet")
+        self.comboBoxOutputLocation.addItem("Show as HTML", "showAsHTML")
+        self.comboBoxOutputLocation.addItem("Show as Tool Tip", "showAsTooltip")
+        self.comboBoxOutputLocation.addItem("Create New Document", "createNewDocument")
+        self.comboBoxOutputLocation.addItem("Open as New Document", "openAsNewDocument")
+        self.comboBoxOutputLocation.addItem("Open as New Window", "newWindow")
+        self.comboBoxOutputLocation.currentIndexChanged[int].connect(self.on_comboBoxOutputLocation_changed)
+
         self.comboBoxOutputFormat.addItem("Text", "text")
         self.comboBoxOutputFormat.addItem("Html", "html")
+        self.comboBoxOutputFormat.addItem("Snippet", "snippet")
         self.comboBoxOutputFormat.currentIndexChanged[int].connect(self.on_comboBoxOutputFormat_changed)
-        
-        self.comboBoxCaret.addItem("After Output", "afterOutput")
-        self.comboBoxCaret.addItem("Select Output", "selectOutput")
-        self.comboBoxCaret.addItem("Interpolate by Char", "interpolateByChar")
-        self.comboBoxCaret.addItem("Interpolate by Line", "interpolateByLine")
-        self.comboBoxCaret.addItem("Heuristic", "heuristic")
-        self.comboBoxCaret.currentIndexChanged[int].connect(self.on_comboBoxCaret_changed)
+
+        self.comboBoxOutputCaret.addItem("After Output", "afterOutput")
+        self.comboBoxOutputCaret.addItem("Select Output", "selectOutput")
+        self.comboBoxOutputCaret.addItem("Interpolate by Char", "interpolateByChar")
+        self.comboBoxOutputCaret.addItem("Interpolate by Line", "interpolateByLine")
+        self.comboBoxOutputCaret.addItem("Heuristic", "heuristic")
+        self.comboBoxOutputCaret.currentIndexChanged[int].connect(self.on_comboBoxOutputCaret_changed)
         
         self.labelInputOption.setVisible(False)
         self.comboBoxFallbackInput.setVisible(False)
-        
+
         self.command.setTabStopWidth(TABWIDTH)
-        
+
         self.menuCommandTemplates = QtGui.QMenu()
         
         #for name, templateText in self.COMMAND_TEMPLATES.items():
@@ -225,16 +227,16 @@ class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
     def on_comboBoxInputFormat_changed(self, index):
         self.changes['inputFormat'] = self.comboBoxInputFormat.itemData(index)
 
-    def on_comboBoxOutput_changed(self, index):
-        value = self.comboBoxOutput.itemData(index)
-        outputKey = "outputLocation" if self.changes["version"] == 2 else "output"
+    def on_comboBoxOutputLocation_changed(self, index):
+        value = self.comboBoxOutputLocation.itemData(index)
+        outputKey = "outputLocation" if self.changes["version"] == '2' else "output"
         self.changes[outputKey] = value
     
     def on_comboBoxOutputFormat_changed(self, index):
         self.changes['outputFormat'] = self.comboBoxOutputFormat.itemData(index)
     
-    def on_comboBoxCaret_changed(self, index):
-        self.changes['outputCaret'] = self.comboBoxCaret.itemData(index)
+    def on_comboBoxOutputCaret_changed(self, index):
+        self.changes['outputCaret'] = self.comboBoxOutputCaret.itemData(index)
     
     def getScope(self):
         return super(CommandEditorWidget, self).getScope() or ""
@@ -264,11 +266,12 @@ class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
             self.comboBoxInput.setCurrentIndex(index)
     
         #Output
-        index = self.comboBoxOutput.findData(self.changes["output"])
+        outputKey = "outputLocation" if self.changes["version"] == '2' else "output"
+        index = self.comboBoxOutputLocation.findData(self.changes[outputKey])
         if index != -1:
-            self.comboBoxOutput.setCurrentIndex(index)
+            self.comboBoxOutputLocation.setCurrentIndex(index)
     
-        if self.changes["version"] == 2:
+        if self.changes["version"] == '2':
             #Input Format
             index = self.comboBoxInputFormat.findData(self.changes["inputFormat"])
             if index != -1:
@@ -280,9 +283,9 @@ class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
                 self.comboBoxOutputFormat.setCurrentIndex(index)
             
             #Output Format
-            index = self.comboBoxCaret.findData(self.changes["outputCaret"])
+            index = self.comboBoxOutputCaret.findData(self.changes["outputCaret"])
             if index != -1:
-                self.comboBoxCaret.setCurrentIndex(index)
+                self.comboBoxOutputCaret.setCurrentIndex(index)
             
 class TemplateEditorWidget(BundleItemEditorBaseWidget, Ui_Template):
     TYPE = 'template'

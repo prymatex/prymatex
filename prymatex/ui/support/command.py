@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/support/command.ui'
 #
-# Created: Fri Jun 28 09:26:34 2013
+# Created: Tue Jul 30 11:11:58 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -63,9 +63,9 @@ class Ui_Command(object):
         self.formLayout_2.setWidget(6, QtGui.QFormLayout.LabelRole, self.label_4)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
-        self.comboBoxOutput = QtGui.QComboBox(Command)
-        self.comboBoxOutput.setObjectName(_fromUtf8("comboBoxOutput"))
-        self.horizontalLayout_3.addWidget(self.comboBoxOutput)
+        self.comboBoxOutputLocation = QtGui.QComboBox(Command)
+        self.comboBoxOutputLocation.setObjectName(_fromUtf8("comboBoxOutputLocation"))
+        self.horizontalLayout_3.addWidget(self.comboBoxOutputLocation)
         self.label_6 = QtGui.QLabel(Command)
         self.label_6.setObjectName(_fromUtf8("label_6"))
         self.horizontalLayout_3.addWidget(self.label_6)
@@ -77,9 +77,9 @@ class Ui_Command(object):
         self.formLayout_2.setLayout(6, QtGui.QFormLayout.FieldRole, self.horizontalLayout_3)
         self.horizontalLayout_4 = QtGui.QHBoxLayout()
         self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
-        self.comboBoxCaret = QtGui.QComboBox(Command)
-        self.comboBoxCaret.setObjectName(_fromUtf8("comboBoxCaret"))
-        self.horizontalLayout_4.addWidget(self.comboBoxCaret)
+        self.comboBoxOutputCaret = QtGui.QComboBox(Command)
+        self.comboBoxOutputCaret.setObjectName(_fromUtf8("comboBoxOutputCaret"))
+        self.horizontalLayout_4.addWidget(self.comboBoxOutputCaret)
         self.checkBoxAutoScrollOutput = QtGui.QCheckBox(Command)
         self.checkBoxAutoScrollOutput.setObjectName(_fromUtf8("checkBoxAutoScrollOutput"))
         self.horizontalLayout_4.addWidget(self.checkBoxAutoScrollOutput)

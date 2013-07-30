@@ -176,8 +176,14 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def replaceSelection(self, context, outputFormat = None):
         print("replaceSelection")
 
+    # ------------ Version 2
     def replaceInput(self, context, outputFormat = None):
-        self.editor.textCursor().insertText(context.outputValue)
+        if outputFormat == "text":
+            self.editor.textCursor().insertText(context.outputValue)
+        elif outputFormat == "html":
+            self.editor.textCursor().appendHtml(context.outputValue)
+        elif outputFormat == "snippet":
+            self.insertAsSnippet(context)
 
     def insertText(self, context, outputFormat = None):
         cursor = self.editor.textCursor()
