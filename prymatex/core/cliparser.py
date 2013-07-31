@@ -23,8 +23,7 @@ except ImportError: # Python < 2.7
 
 parser = argparse.ArgumentParser(usage=usage,
     description=description,
-    version=version,
-    epilog=epilog)
+    epilog="%s Version %s" % (epilog, version))
 
 parser.add_argument('file', metavar='file', type=str,
     nargs='*', help='A file/s to edit', default=[])
