@@ -8,8 +8,6 @@ from pprint import pprint
 
 from prymatex.support.manager import PMXSupportPythonManager
 from prymatex.support.processor import PMXDebugSnippetProcessor, PMXDebugSyntaxProcessor
-from prymatex.support.syntax import PMXSyntax
-from prymatex.support.snippet import PMXSnippet
 
 TEXT = """#!/usr/bin/env python
 
@@ -50,7 +48,7 @@ class TestSupportFunctions(unittest.TestCase):
         syntax = self.manager.getSyntaxByScopeName('source.python')
         #file = open(os.path.abspath('./prymatex/gui/codeeditor/editor.py'), 'r')
         processor = PMXDebugSyntaxProcessor(showOutput = True)
-        syntax.parse(CLASS_TEXT, processor)
+        syntax.parse(TEXT, processor)
         #text = file.read().decode('utf-8')
         #file.close()
             

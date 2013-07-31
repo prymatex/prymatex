@@ -9,6 +9,8 @@ from prymatex import resources
 
 from prymatex.models.trees import TreeNodeBase
 
+from prymatex.utils import six
+
 #====================================================
 # Bundle Tree Node
 #====================================================
@@ -31,7 +33,7 @@ class BundleItemTreeNode(TreeNodeBase):
     # ----------- Bundle Item decoration -----------
     @property
     def keyEquivalent(self):
-        if self.__bundleItem.keyEquivalent is not None:
+        if isinstance(self.__bundleItem.keyEquivalent, six.string_types):
             return keyequivalent2keysequence(self.__bundleItem.keyEquivalent)
     
     @property
@@ -84,10 +86,10 @@ class BundleItemTreeNode(TreeNodeBase):
         return action
     
     def update(self, dataHash):
-        if 'keyEquivalent' in dataHash:
+        if 'keyEquivalent' in dataHash and isinstance(dataHash['keyEquivalent'], six.integer_types):
             dataHash['keyEquivalent'] = keysequence2keyequivalent(dataHash['keyEquivalent'])
         self.__bundleItem.update(dataHash)
-
+    
     def isEditorNeeded(self):
         return self.isTextInputNeeded() or self.producingOutputText()
 

@@ -229,7 +229,7 @@ class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
 
     def on_comboBoxOutputLocation_changed(self, index):
         value = self.comboBoxOutputLocation.itemData(index)
-        outputKey = "outputLocation" if self.changes["version"] == '2' else "output"
+        outputKey = "outputLocation" if self.changes["version"] == 2 else "output"
         self.changes[outputKey] = value
     
     def on_comboBoxOutputFormat_changed(self, index):
@@ -266,12 +266,12 @@ class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
             self.comboBoxInput.setCurrentIndex(index)
     
         #Output
-        outputKey = "outputLocation" if self.changes["version"] == '2' else "output"
+        outputKey = "outputLocation" if self.changes["version"] == 2 else "output"
         index = self.comboBoxOutputLocation.findData(self.changes[outputKey])
         if index != -1:
             self.comboBoxOutputLocation.setCurrentIndex(index)
     
-        if self.changes["version"] == '2':
+        if self.changes["version"] == 2:
             #Input Format
             index = self.comboBoxInputFormat.findData(self.changes["inputFormat"])
             if index != -1:
@@ -289,13 +289,7 @@ class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
             
 class TemplateEditorWidget(BundleItemEditorBaseWidget, Ui_Template):
     TYPE = 'template'
-    DEFAULTS = {'extension': 'txt',
-                'command': '''if [[ ! -f "$TM_NEW_FILE" ]]; then
-  TM_YEAR=`date +%Y` \
-  TM_DATE=`date +%Y-%m-%d` \
-  perl -pe 's/\$\{([^}]*)\}/$ENV{$1}/g' \
-     < template_in.txt > "$TM_NEW_FILE"
-fi"'''}
+
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
@@ -319,24 +313,12 @@ fi"'''}
     
     def edit(self, bundleItem):
         super(TemplateEditorWidget, self).edit(bundleItem)
-        command = bundleItem.command
-        if command is None:
-            command = self.DEFAULTS['command']
-        self.command.setPlainText(command)
-        extension = bundleItem.extension
-        if extension is None:
-            extension = self.changes['extension'] = self.DEFAULTS['extension']
-        self.lineEditExtension.setText(extension)
+        self.command.setPlainText(self.changes['command'])
+        self.lineEditExtension.setText(self.changes['extension'])
 
 #TODO: Ui_TemplateFile --> Ui_StaticFile
 class StaticFileEditorWidget(BundleItemEditorBaseWidget, Ui_TemplateFile):
     TYPE = 'staticfile'
-    DEFAULTS = {'content': '''//
-//  ${TM_NEW_FILE_BASENAME}
-//
-//  Created by ${TM_FULLNAME} on ${TM_DATE}.
-//  Copyright (c) ${TM_YEAR} ${TM_ORGANIZATION_NAME}. All rights reserved.
-//'''}
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
@@ -344,11 +326,7 @@ class StaticFileEditorWidget(BundleItemEditorBaseWidget, Ui_TemplateFile):
 
     @QtCore.Slot()
     def on_content_textChanged(self):
-        text = self.content.toPlainText()
-        if self.bundleItem.content != text:
-            self.changes['content'] = text
-        else:
-            self.changes.pop('content', None)
+        self.changes['content'] = self.content.toPlainText()
     
     def getScope(self):
         return None
@@ -364,13 +342,11 @@ class StaticFileEditorWidget(BundleItemEditorBaseWidget, Ui_TemplateFile):
     
     def edit(self, bundleItem):
         super(StaticFileEditorWidget, self).edit(bundleItem)
-        content = bundleItem.content
-        if content is None:
-            content = self.DEFAULTS['content']
-        self.content.setPlainText(content)
+        self.content.setPlainText(self.changes['content'])
     
 class DragCommandEditorWidget(BundleItemEditorBaseWidget, Ui_DragCommand):
     TYPE = 'dragcommand'
+
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
@@ -396,6 +372,7 @@ class DragCommandEditorWidget(BundleItemEditorBaseWidget, Ui_DragCommand):
 
 class LanguageEditorWidget(BundleItemEditorBaseWidget, Ui_Language):
     TYPE = 'syntax'
+
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
@@ -420,13 +397,17 @@ class LanguageEditorWidget(BundleItemEditorBaseWidget, Ui_Language):
         BundleItemEditorBaseWidget.edit(self, bundleItem)
         self.changes = {
             "name" : self.changes.pop("name"),
-            "uuid" :self.changes.pop("uuid"),
+            "uuid" : self.changes.pop("uuid"),
+            "scope": self.changes.pop("scope"),
+            "semanticClass": self.changes.pop("semanticClass"),
+            "tabTrigger": self.changes.pop("tabTrigger"),
             "grammar": self.changes
         }
         self.content.setPlainText(pformat(self.changes["grammar"]))
     
 class PreferenceEditorWidget(BundleItemEditorBaseWidget, Ui_Preference):
     TYPE = 'preference'
+
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)

@@ -51,7 +51,10 @@ def __fixReadItem(item):
         return list(map(__fixReadItem, item))
     elif isinstance(item, plistlib.Data):
         return item.data.decode("utf-8")
-    return six.text_type(item)
+    elif isinstance(item, six.string_types):
+        # Return unicode in python 2
+        return six.text_type(item)
+    return item
 
 def __wrapItem(item):
     if __shouldWrap(item):
@@ -85,6 +88,9 @@ def readPlist(filePath):
         with open(filePath) as plistFile:
             data = plistlib.readPlist(__fixString(plistFile.read()))
     return __fixItems(data, __fixReadItem)
+
+def writePlist(dictionary, filePath):
+    plistlib.writePlist(__fixItems(dictionary, __fixWriteItem), filePath)
     
 def readPlistFromString(string):
     try:
@@ -93,14 +99,6 @@ def readPlistFromString(string):
         # Solo si tiene error
         data = plistlib.readPlistFromString(__fixString(string))
     return __fixItems(data, __fixReadItem)
-
-def writePlist(dictionary, filePath):
-    plistlib.writePlist(__fixItems(dictionary, __fixWriteItem), filePath)
     
 def writePlistToString(dictionary):
     return plistlib.writePlistToString(__fixItems(dictionary, __fixWriteItem))
-
-if __name__ == "__main__":
-    testFile = "/mnt/datos/workspace/Prymatex/prymatex/prymatex/share/Bundles/ShellScript.tmbundle/Commands/man.plist"
-    datos = readPlist(testFile)
-    print(datos)

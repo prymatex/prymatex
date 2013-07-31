@@ -295,7 +295,9 @@ class VariableFallbackType(object):
         self.fallback = []
     
     def replace(self, memodict, holders = None, match = None, variables = None):
-        return self.name
+        if self.name in variables:
+            return variables[self.name]
+        return "".join([ "%s" % node for node in self.fallback ])
         
     def render(self, visitor, memodict, holders = None, match = None):
         visitor.insertText(self.replace(memodict, holders, match, visitor.environmentVariables()))
@@ -331,7 +333,7 @@ class VariableTransformationType(object):
         self.options = []
     
     def __str__(self):
-        return "%s/%s/%s/%s" % (self.name, 
+        return "${%s/%s/%s/%s}" % (self.name, 
             self.pattern.pattern, 
             "".join([ unicode(frmt) for frmt in self.format]),
             "".join(self.options))

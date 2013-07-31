@@ -146,7 +146,7 @@ class Parser(object):
                             return True
                     else:
                         self.parse_char("-") # to be backwards compatible, this character is not required
-                        res = types.VariableFallbackType( name )
+                        res = types.VariableFallbackType( name.pop() )
                         if parse_content("}", res.fallback):
                             nodes.append(res)
                             return True
