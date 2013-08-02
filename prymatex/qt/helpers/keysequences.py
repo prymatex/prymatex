@@ -51,6 +51,7 @@ def _keyboard_layout_keys(key):
 """
 @memoized
 def keysequence2keyequivalent(sequence):
+    sequence = int(sequence)
     nemonic = []
     if sequence & QtCore.Qt.CTRL:
         nemonic.append("^")
@@ -121,4 +122,4 @@ def keyequivalent2keysequence(nemonic):
         if QtCore.Qt.SHIFT in keys and QtCore.Qt.SHIFT in sequence:
             keys.remove(QtCore.Qt.SHIFT)
         sequence.extend(keys)
-    return sum(sequence)
+    return QtGui.QKeySequence(sum(sequence))

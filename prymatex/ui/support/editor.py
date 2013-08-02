@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/support/editor.ui'
 #
-# Created: Tue Jul 30 11:11:59 2013
+# Created: Fri Aug  2 11:12:55 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -94,9 +94,6 @@ class Ui_BundleEditorDialog(object):
         self.labelActivation_4 = QtGui.QLabel(self.verticalLayoutWidget_2)
         self.labelActivation_4.setObjectName(_fromUtf8("labelActivation_4"))
         self.basicFormLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.labelActivation_4)
-        self.lineEditKeyEquivalentActivation = QtGui.QLineEdit(self.verticalLayoutWidget_2)
-        self.lineEditKeyEquivalentActivation.setObjectName(_fromUtf8("lineEditKeyEquivalentActivation"))
-        self.basicFormLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.lineEditKeyEquivalentActivation)
         self.labelActivation_5 = QtGui.QLabel(self.verticalLayoutWidget_2)
         self.labelActivation_5.setObjectName(_fromUtf8("labelActivation_5"))
         self.basicFormLayout.setWidget(4, QtGui.QFormLayout.LabelRole, self.labelActivation_5)
@@ -106,6 +103,20 @@ class Ui_BundleEditorDialog(object):
         self.lineEditName = QtGui.QLineEdit(self.verticalLayoutWidget_2)
         self.lineEditName.setObjectName(_fromUtf8("lineEditName"))
         self.basicFormLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.lineEditName)
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.lineEditKeyEquivalentActivation = QtGui.QLineEdit(self.verticalLayoutWidget_2)
+        self.lineEditKeyEquivalentActivation.setObjectName(_fromUtf8("lineEditKeyEquivalentActivation"))
+        self.horizontalLayout.addWidget(self.lineEditKeyEquivalentActivation)
+        self.pushButtonCleanKeyEquivalent = QtGui.QPushButton(self.verticalLayoutWidget_2)
+        self.pushButtonCleanKeyEquivalent.setMaximumSize(QtCore.QSize(32, 16777215))
+        self.pushButtonCleanKeyEquivalent.setText(_fromUtf8(""))
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("edit-clear-locationbar-rtl"))
+        self.pushButtonCleanKeyEquivalent.setIcon(icon)
+        self.pushButtonCleanKeyEquivalent.setFlat(True)
+        self.pushButtonCleanKeyEquivalent.setObjectName(_fromUtf8("pushButtonCleanKeyEquivalent"))
+        self.horizontalLayout.addWidget(self.pushButtonCleanKeyEquivalent)
+        self.basicFormLayout.setLayout(2, QtGui.QFormLayout.FieldRole, self.horizontalLayout)
         self.editorsLayout.addLayout(self.basicFormLayout)
         self.verticalLayout.addWidget(self.splitter)
 

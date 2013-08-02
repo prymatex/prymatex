@@ -35,8 +35,8 @@ Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''
         if 'content' in dataHash and hasattr(self, '_snippetNode'):
             delattr(self, '_snippetNode')
 
-    def dump(self, includeNone = False):
-        dataHash = super(PMXSnippet, self).dump(includeNone)
+    def dump(self, allKeys = False):
+        dataHash = super(PMXSnippet, self).dump(allKeys)
         for key in PMXSnippet.KEYS:
             value = getattr(self, key)
             if value is not None:

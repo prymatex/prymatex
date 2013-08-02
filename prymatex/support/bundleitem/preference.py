@@ -304,11 +304,11 @@ class PMXPreference(PMXBundleItem):
                 else:
                     setattr(self, key, value)
 
-    def dump(self, includeNone = False):
-        dataHash = PMXBundleItem.dump(self, includeNone)
+    def dump(self, allKeys = False):
+        dataHash = PMXBundleItem.dump(self, allKeys)
         for key in PMXPreference.KEYS:
             value = getattr(self, key, None)
-            if includeNone or value != None:
+            if allKeys or value != None:
                 if key == 'settings' and value != None:
                     value = value.dump()
                 dataHash[key] = value

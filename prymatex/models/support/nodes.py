@@ -31,22 +31,20 @@ class BundleItemTreeNode(TreeNodeBase):
         return self.__bundleItem
 
     # ----------- Bundle Item decoration -----------
-    @property
-    def keyEquivalent(self):
-        if isinstance(self.__bundleItem.keyEquivalent, six.string_types):
+    def keySequence(self):
+        if hasattr(self.__bundleItem, "keyEquivalent") and isinstance(self.__bundleItem.keyEquivalent, six.string_types):
             return keyequivalent2keysequence(self.__bundleItem.keyEquivalent)
     
     @property
     def icon(self):
         return resources.getIcon("bundle-item-%s" % self.TYPE)
     
-    @property
     def trigger(self):
         trigger = []
         if self.tabTrigger != None:
             trigger.append("%s⇥" % (self.tabTrigger))
         if self.keyEquivalent != None:
-            trigger.append("%s" % QtGui.QKeySequence(self.keyEquivalent).toString())
+            trigger.append("%s" % self.keySequence().toString())
         return ", ".join(trigger)
     
     def buildBundleAccelerator(self):
@@ -63,7 +61,7 @@ class BundleItemTreeNode(TreeNodeBase):
     def buildMenuTextEntry(self, mnemonic = True):
         text = self.name
         if mnemonic:
-            text += "\t%s" % (self.trigger)
+            text += "\t%s" % (self.trigger())
         return text.replace('&', '&&')
     
     def triggerItemAction(self, parent = None):
@@ -86,9 +84,16 @@ class BundleItemTreeNode(TreeNodeBase):
         return action
     
     def update(self, dataHash):
-        if 'keyEquivalent' in dataHash and isinstance(dataHash['keyEquivalent'], six.integer_types):
-            dataHash['keyEquivalent'] = keysequence2keyequivalent(dataHash['keyEquivalent'])
+        if 'keySequence' in dataHash and isinstance(dataHash['keySequence'], QtGui.QKeySequence):
+            dataHash['keyEquivalent'] = keysequence2keyequivalent(dataHash['keySequence'])
+        else:
+            dataHash['keyEquivalent'] = None
         self.__bundleItem.update(dataHash)
+    
+    def dataHash(self):
+        dataHash = self.dump(allKeys = True)
+        dataHash["keySequence"] = self.keySequence()
+        return dataHash
     
     def isEditorNeeded(self):
         return self.isTextInputNeeded() or self.producingOutputText()

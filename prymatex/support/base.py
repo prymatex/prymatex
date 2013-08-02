@@ -30,11 +30,11 @@ class PMXManagedObject(object):
         pass
     
     # ----------- Dump to dictionary
-    def dump(self, includeNone = False):
+    def dump(self, allKeys = False):
         return { 'uuid': self.uuidAsText() }
     
     def hasChanged(self, dataHash):
-        currentHash = self.dump(includeNone = True)
+        currentHash = self.dump(allKeys = True)
         for key, value in dataHash.items():
             if key not in currentHash or currentHash[key] != value:
                 return True

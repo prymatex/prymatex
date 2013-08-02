@@ -39,11 +39,11 @@ class PMXBundle(PMXManagedObject):
         PMXManagedObject.update(self, dataHash)
         self.__load_update(dataHash, False)
 
-    def dump(self, includeNone = False):
-        dataHash = PMXManagedObject.dump(self, includeNone)
+    def dump(self, allKeys = False):
+        dataHash = PMXManagedObject.dump(self, allKeys)
         for key in PMXBundle.KEYS:
             value = getattr(self, key, None)
-            if includeNone or value is not None:
+            if allKeys or value is not None:
                 dataHash[key] = value
         return dataHash
 

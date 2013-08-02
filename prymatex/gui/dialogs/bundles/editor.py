@@ -277,11 +277,16 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
     # -------------------- Activation
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress and obj == self.lineEditKeyEquivalentActivation:
-            keyseq = int(event.modifiers()) + event.key()
-            self.stackedWidget.currentWidget().setKeyEquivalent(keyseq)
-            self.lineEditKeyEquivalentActivation.setText(QtGui.QKeySequence(keyseq).toString())
+            keyseq = QtGui.QKeySequence(int(event.modifiers()) + event.key())
+            self.stackedWidget.currentWidget().setKeySequence(keyseq)
+            self.lineEditKeyEquivalentActivation.setText(keyseq.toString())
             return True
         return QtGui.QDialog.eventFilter(self, obj, event)
+
+    @QtCore.Slot()
+    def on_pushButtonCleanKeyEquivalent_pressed(self):
+        self.stackedWidget.currentWidget().setKeySequence(None)
+        self.lineEditKeyEquivalentActivation.setText("")
 
     @QtCore.Slot(str)
     def on_lineEditScopeSelector_textEdited(self, text):
@@ -322,15 +327,15 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         self.lineEditSemanticClass.setText(editor.getSemanticClass())
         scope = editor.getScope()
         tabTrigger = editor.getTabTrigger()
-        keyEquivalent = editor.getKeyEquivalent()
+        keySequence = editor.getKeySequence()
         semanticClass = editor.getSemanticClass()
         # Scope
         self.lineEditScopeSelector.setEnabled(scope is not None)
         self.lineEditScopeSelector.setText(scope is not None and scope or "")
-        # KeyEquivalent
-        self.lineEditKeyEquivalentActivation.setEnabled(keyEquivalent is not None)
-        self.lineEditKeyEquivalentActivation.setText(keyEquivalent and\
-            QtGui.QKeySequence(keyEquivalent).toString() or "")
+        # KeySequence
+        self.lineEditKeyEquivalentActivation.setEnabled(keySequence is not None)
+        self.lineEditKeyEquivalentActivation.setText(keySequence and\
+            keySequence.toString() or "")
         # TabTrigger
         self.lineEditTabTriggerActivation.setEnabled(tabTrigger is not None)
         self.lineEditTabTriggerActivation.setText(tabTrigger or "")

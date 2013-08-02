@@ -34,7 +34,9 @@ class BundleItemEditorBaseWidget(QtGui.QWidget):
         self.__title = 'No item selected'
         
     def isChanged(self):
-        return self.bundleItem.hasChanged(self.changes)
+        dataHash = self.bundleItem.dataHash()
+        return len(dataHash) != len(self.changes) or \
+            any([ dataHash[key] != self.changes[key] for key in dataHash.keys() ])
     
     def title(self):
         return self.__title
@@ -57,11 +59,11 @@ class BundleItemEditorBaseWidget(QtGui.QWidget):
     def setTabTrigger(self, value):
         self.changes['tabTrigger'] = value
     
-    def getKeyEquivalent(self):
-        return self.changes.get('keyEquivalent', None)
+    def getKeySequence(self):
+        return self.changes.get('keySequence', None)
     
-    def setKeyEquivalent(self, value):
-        self.changes['keyEquivalent'] = value
+    def setKeySequence(self, value):
+        self.changes['keySequence'] = value
     
     def getSemanticClass(self):
         return self.changes.get('semanticClass', None)
@@ -72,7 +74,7 @@ class BundleItemEditorBaseWidget(QtGui.QWidget):
     def edit(self, bundleItem):
         self.bundleItem = bundleItem
         self.__title = bundleItem and 'Edit %s: "%s"' % (self.TYPE, bundleItem.name) or 'No item selected'
-        self.changes = bundleItem and bundleItem.dump(includeNone = True) or {}
+        self.changes = bundleItem and bundleItem.dataHash() or {}
 
 #============================================================
 # None Widget
@@ -126,8 +128,8 @@ class SnippetEditorWidget(BundleItemEditorBaseWidget, Ui_Snippet):
     def getTabTrigger(self):
         return super(SnippetEditorWidget, self).getTabTrigger() or ""
     
-    def getKeyEquivalent(self):
-        return super(SnippetEditorWidget, self).getKeyEquivalent() or ""
+    def getKeySequence(self):
+        return super(SnippetEditorWidget, self).getKeySequence() or ""
     
     def edit(self, bundleItem):
         super(SnippetEditorWidget, self).edit(bundleItem)
@@ -244,8 +246,8 @@ class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
     def getTabTrigger(self):
         return  super(CommandEditorWidget, self).getTabTrigger() or ""
     
-    def getKeyEquivalent(self):
-        return super(CommandEditorWidget, self).getKeyEquivalent() or ""
+    def getKeySequence(self):
+        return super(CommandEditorWidget, self).getKeySequence() or ""
     
     def getSemanticClass(self):
         return super(CommandEditorWidget, self).getSemanticClass() or ""
@@ -334,7 +336,7 @@ class StaticFileEditorWidget(BundleItemEditorBaseWidget, Ui_TemplateFile):
     def getTabTrigger(self):
         return None
     
-    def getKeyEquivalent(self):
+    def getKeySequence(self):
         return None
     
     def getSemanticClass(self):
@@ -390,8 +392,8 @@ class LanguageEditorWidget(BundleItemEditorBaseWidget, Ui_Language):
         except:
             pass
     
-    def getKeyEquivalent(self):
-        return super(LanguageEditorWidget, self).getKeyEquivalent() or ""
+    def getKeySequence(self):
+        return super(LanguageEditorWidget, self).getKeySequence() or ""
     
     def edit(self, bundleItem):
         BundleItemEditorBaseWidget.edit(self, bundleItem)
@@ -476,7 +478,7 @@ class BundleEditorWidget(BundleItemEditorBaseWidget, Ui_Menu):
     def getTabTrigger(self):
         return None
     
-    def getKeyEquivalent(self):
+    def getKeySequence(self):
         return None
     
     def getSemanticClass(self):

@@ -103,11 +103,11 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         PMXBundleItem.update(self, dataHash)
         self.__load_update(dataHash, False)
     
-    def dump(self, includeNone = False):
-        dataHash = PMXBundleItem.dump(self, includeNone)
+    def dump(self, allKeys = False):
+        dataHash = PMXBundleItem.dump(self, allKeys)
         for key in PMXCommand.KEYS:
             value = getattr(self, key, None)
-            if includeNone or value != None:
+            if allKeys or value != None:
                 if key in ['capturePattern'] and value != None:
                     value = str(value)
                 dataHash[key] = value
@@ -231,10 +231,10 @@ class PMXDragCommand(PMXCommand):
         PMXCommand.update(self, dataHash)
         self.__load_update(dataHash, False)
 
-    def dump(self, includeNone = False):
-        dataHash = PMXCommand.dump(self, includeNone)
+    def dump(self, allKeys = False):
+        dataHash = PMXCommand.dump(self, allKeys)
         for key in PMXDragCommand.KEYS:
             value = getattr(self, key, None)
-            if includeNone or value != None:
+            if allKeys or value != None:
                 dataHash[key] = value
         return dataHash

@@ -221,8 +221,8 @@ class PMXSyntax(PMXBundleItem):
                     value = self.manager.createScopeSelector(value)
             setattr(self, key, value)
     
-    def dump(self, includeNone = False):
-        dataHash = super(PMXSyntax, self).dump(includeNone)
+    def dump(self, allKeys = False):
+        dataHash = super(PMXSyntax, self).dump(allKeys)
         for key in PMXSyntax.KEYS:
             value = getattr(self, key, None)
             if value is not None:
