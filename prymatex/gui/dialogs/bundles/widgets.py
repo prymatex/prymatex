@@ -403,6 +403,8 @@ class LanguageEditorWidget(BundleItemEditorBaseWidget, Ui_Language):
             "scope": self.changes.pop("scope"),
             "semanticClass": self.changes.pop("semanticClass"),
             "tabTrigger": self.changes.pop("tabTrigger"),
+            "keySequence": self.changes.pop("keySequence"),
+            "keyEquivalent": self.changes.pop("keyEquivalent"),
             "grammar": self.changes
         }
         self.content.setPlainText(pformat(self.changes["grammar"]))
