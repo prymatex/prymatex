@@ -148,7 +148,7 @@ class SyntaxListModel(BundleItemTypeProxyModel):
         
         if role == QtCore.Qt.DisplayRole and index.column() == 1:
             syntax = self.sourceModel().node(sIndex)
-            return syntax.trigger
+            return syntax.trigger()
         elif index.column() == 0:
             return self.sourceModel().data(sIndex, role)
 
