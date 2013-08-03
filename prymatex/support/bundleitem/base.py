@@ -52,6 +52,9 @@ class PMXBundleItem(PMXManagedObject):
     def environmentVariables(self):
         return self.bundle.environmentVariables()
 
+    def keyCode(self):
+        return self.keyEquivalent
+      
     def execute(self, processor):
         pass
 
