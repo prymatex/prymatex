@@ -473,23 +473,23 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
         memoizedKey = ("getAllBundleItemsByTabTrigger", None, None, None)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache[memoizedKey]
-        keyEquivalent = []
+        keyCode = []
         for item in self.actionItemsProxyModel.getAllItems() + self.syntaxProxyModel.getAllItems():
-            if item.keyEquivalent != None:
-                keyEquivalent.append(item)
+            if item.keyCode() != None:
+                keyCode.append(item)
         return self.bundleItemCache.setdefault(memoizedKey,
-            keyEquivalent)
+            keyCode)
         
-    def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
-        memoizedKey = ("getAllBundleItemsByKeyEquivalent", keyEquivalent, None, None)
+    def getAllBundleItemsByKeyEquivalent(self, keyCode):
+        memoizedKey = ("getAllBundleItemsByKeyEquivalent", keyCode, None, None)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         items = []
         for item in self.actionItemsProxyModel.getAllItems():
-            if item.keyEquivalent == keyEquivalent:
+            if item.keyCode() == keyCode:
                 items.append(item)
         for syntax in self.syntaxProxyModel.getAllItems():
-            if syntax.keyEquivalent == keyEquivalent:
+            if syntax.keyCode() == keyCode:
                 items.append(syntax)
         return self.bundleItemCache.setdefault(memoizedKey,
             items)

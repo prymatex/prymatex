@@ -25,7 +25,7 @@ class KeyEquivalentHelper(CodeEditorKeyHelper):
         leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both')
         cursorScopePath = self.editor.cursorScopePath(cursor = cursor)
         self.items = self.application.supportManager.getKeyEquivalentItem(
-            keyseq, 
+            keyseq,
             leftScope.path + cursorScopePath, 
             rightScope.path + cursorScopePath)
         return bool(self.items)

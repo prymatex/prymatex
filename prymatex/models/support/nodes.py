@@ -35,6 +35,10 @@ class BundleItemTreeNode(TreeNodeBase):
         if hasattr(self.__bundleItem, "keyEquivalent") and isinstance(self.__bundleItem.keyEquivalent, six.string_types):
             return keyequivalent2keysequence(self.__bundleItem.keyEquivalent)
     
+    def keyCode(self):
+        if hasattr(self.__bundleItem, "keyEquivalent") and isinstance(self.__bundleItem.keyEquivalent, six.string_types):
+            return keyequivalent2keysequence(self.__bundleItem.keyEquivalent)
+    
     @property
     def icon(self):
         return resources.getIcon("bundle-item-%s" % self.TYPE)

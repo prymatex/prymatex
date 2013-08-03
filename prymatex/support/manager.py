@@ -1067,24 +1067,25 @@ class PMXSupportBaseManager(object):
         """
         raise NotImplementedError
 
-    def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
+    def getAllBundleItemsByKeyEquivalent(self, keyCode):
         """Return a list of key equivalent bundle items"""
         raise NotImplementedError
 
     #-------------- KEYEQUIVALENT ------------------------
     def getAllKeyEquivalentCodes(self):
+        # TODO En este nivel no se como estan implementados los codes no puedo llamar a keySequence
         memoizedKey = ("getAllKeyEquivalentCodes", None, None, None)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
-            [item.keyEquivalent for item in self.getAllKeyEquivalentItems()])
+            [item.keySequence() for item in self.getAllKeyEquivalentItems()])
 
-    def getKeyEquivalentItem(self, code, leftScope, rightScope):
-        memoizedKey = ("getKeyEquivalentItem", code, leftScope, rightScope)
+    def getKeyEquivalentItem(self, keyCode, leftScope, rightScope):
+        memoizedKey = ("getKeyEquivalentItem", keyCode, leftScope, rightScope)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
-            self.__sort_filter_items(self.getAllBundleItemsByKeyEquivalent(code), leftScope, rightScope))
+            self.__sort_filter_items(self.getAllBundleItemsByKeyEquivalent(keyCode), leftScope, rightScope))
 
     # --------------- FILE EXTENSION INTERFACE
     def getAllBundleItemsByFileExtension(self, path):
