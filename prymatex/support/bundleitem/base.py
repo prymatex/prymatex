@@ -54,7 +54,8 @@ class PMXBundleItem(PMXManagedObject):
 
     def keyCode(self):
         return self.keyEquivalent
-      
+    
+    # ---------------- The executor method
     def execute(self, processor):
         pass
 

@@ -324,7 +324,7 @@ class PMXSyntax(PMXBundleItem):
                         processor.closeTag(pattern._ex_name, end_pos)
             else:
                 # FIXME: Custom pop from stack for regexp
-                if not end_match and not pattern and top.end == "(?!\G)":
+                if not end_match and not pattern and top.end and top.end.find("\G") != -1:
                     stack.pop()
                 break
             position = end_pos

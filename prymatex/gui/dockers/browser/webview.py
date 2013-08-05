@@ -57,9 +57,14 @@ class WebView(QtWebKit.QWebView):
     def createWindow(self, windowType):
         return self.browserDock.createWebView(windowType)
 
+    def environmentVariables(self):
+        return self.runningContext.environment.copy()
+
     # ------------ Page Signals handlers
     def on_mainFrame_javaScriptWindowObjectCleared(self):
-        self.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self))
+        self.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self,
+            self.browserDock.application.supportManager
+        ))
         environment = "\n".join(
             ['window["{0}"]="{1}";'.format(key_value[0], key_value[1]) for key_value in self.runningContext is not None and iter(self.runningContext.environment.items()) or {}]
         )
@@ -72,20 +77,3 @@ class WebView(QtWebKit.QWebView):
 
     def on_networkAccessManager_commandUrlRequested(self, url):
         self.browserDock.application.handleUrlCommand(url)
-
-    def commandCallback(self, context):
-        print("lista la corrida", context)
-        #self.page().mainFrame().evaluateJavaScript("alert('listo el pollo');")
-        self.page().mainFrame().addToJavaScriptWindowObject("_systemWrapper", 
-            SystemWrapper(context, self))
-
-    def runCommand(self, shellCommand, asynchronous = False):
-        supportManager = self.browserDock.application.supportManager
-        commandProcessor = self.browserDock.mainWindow.commandProcessor
-        
-        command = supportManager.buildAdHocCommand(shellCommand, self.runningContext.bundleItem.bundle)
-        commandProcessor.configure({ 
-            "asynchronous": asynchronous,
-            "environment": self.runningContext.environment
-            })
-        command.executeCallback(commandProcessor, self.commandCallback)

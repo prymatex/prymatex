@@ -64,7 +64,7 @@ class RunningContext(object):
         return self.bundleItem == bundleItem
 
     def description(self):
-        return self.bundleItem.name or "No Name"
+        return hasattr(self, "bundleItem") and self.bundleItem.name or "No Name"
         
     def removeTempFile(self):
         if os.path.exists(self.tempFile):
