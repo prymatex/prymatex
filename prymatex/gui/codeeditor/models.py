@@ -326,8 +326,8 @@ def bundleItemSelectableModelFactory(editor):
                 template = "<table width='100%%'><tr><td>%(name)s - %(bundle)s</td><td align='right'>%(trigger)s</td></tr></table>",
                 display = { 
                     "name": bundleItem.name, 
-                    "bundle": bundleItem.bundle.name, 
-                    "trigger": bundleItem.trigger
+                    "bundle": bundleItem.bundle.name,
+                    "trigger": bundleItem.trigger()
                 }, 
                 image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE)) for bundleItem in editor.application.supportManager.getActionItemsByScope(leftScope.path, rightScope.path)]
 
