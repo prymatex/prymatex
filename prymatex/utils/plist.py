@@ -6,25 +6,26 @@ import re
 import re, plistlib
 from string import printable
 
+from . import encoding
 from . import six
 
-XMLPATTERN = re.compile("<(\w+)>(.*)<\/\w+>");
-
-# FIX, FIX, FIX
+# FIX the string tags
 def __fixString(sourceString):
     fixedString = ""
-    sourceIndex = 0
-    if not six.PY3 and not isinstance(sourceString, unicode):
-        sourceString = sourceString.decode("utf-8")
-    for match in XMLPATTERN.finditer(sourceString):
-        if __shouldWrap(match.group(2)):
-            fixedString += sourceString[sourceIndex:match.start()]
-            item = b'<data>' + plistlib.Data(match.group(2).encode("utf-8")).asBase64() + b'</data>'
-            fixedString += item.decode("utf-8")
-            sourceIndex = match.end()
-    fixedString += sourceString[sourceIndex:]
-    if not six.PY3 and not isinstance(sourceString, unicode):
-        fixedString = fixedString.encode("utf-8")
+    index = fixStart = fixEnd = 0
+    fixStart = sourceString.find("<string>", index)
+    fixEnd = sourceString.find("</string>", fixStart)
+    while fixStart != -1 and fixEnd != -1:
+        fixedString += sourceString[index:fixStart]
+        testString = sourceString[fixStart:fixEnd]
+        if __shouldWrap(testString):
+            testString = '<data>' + plistlib.Data(testString.encode("utf-8")).asBase64() + '</data>'
+            fixEnd += 9
+        fixedString += testString
+        index = fixEnd
+        fixStart = sourceString.find("<string>", index)
+        fixEnd = sourceString.find("</string>", fixStart)
+    fixedString += sourceString[index:]
     return fixedString
     
 def __fixItems(dictionary, applyFunction):
@@ -85,8 +86,7 @@ def readPlist(filePath):
         data = plistlib.readPlist(filePath)
     except Exception as e:
         # Solo si tiene error
-        with open(filePath) as plistFile:
-            data = plistlib.readPlist(__fixString(plistFile.read()))
+        data = plistlib.readPlistFromString(__fixString(encoding.read(filePath)[0]))
     return __fixItems(data, __fixReadItem)
 
 def writePlist(dictionary, filePath):
