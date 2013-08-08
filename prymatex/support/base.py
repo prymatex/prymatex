@@ -42,11 +42,8 @@ class PMXManagedObject(object):
         
     def enabled(self):
         return self.manager.isEnabled(self.uuid)
-    
-    def setSource(self, name):
-        assert name in self.sources
-        self.pointer = name
 
+    # ------------ Object Sources
     def addSource(self, name, path):
         mtime = os.path.exists(path) and os.path.getmtime(path) or 0
         self.sources[name] = Source(name = name, path = path, mtime = mtime)
@@ -58,13 +55,9 @@ class PMXManagedObject(object):
 
     def hasSource(self, name):
         return name in self.sources
-    hasNamespace = hasSource
     
-    def sourceName(self):
-        return self.pointer
-    
-    def sourcePath(self, name = None):
-        return self.sources[name or self.pointer].path
+    def sourcePath(self, name):
+        return self.sources[name].path
     
     def sourceChanged(self, sourceName):
         source = self.sources[sourceName]
@@ -73,6 +66,17 @@ class PMXManagedObject(object):
     def updateMtime(self, sourceName):
         source = self.sources[sourceName]
         self.sources[sourceName] = source._replace(mtime = os.path.getmtime(source.path))
+
+    # ------------ Current Source, is the source in self.pointer
+    def setCurrentSource(self, name):
+        assert name in self.sources
+        self.pointer = name
+
+    def currentSourceName(self):
+        return self.pointer
+    
+    def currentSourcePath(self):
+        return self.sourcePath(self.pointer)
 
     def addStaticFile(self, staticPath):
         self.statics.append(staticPath)

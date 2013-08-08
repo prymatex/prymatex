@@ -74,12 +74,12 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
     # -------------- Signals from suppor manager
     def on_supportManager_bundleAdded(self, bundle):
         for project in self.getAllProjects():
-            if bundle.hasNamespace(project.namespace) and not project.hasBundleMenu(bundle):
+            if bundle.hasSource(project.namespace) and not project.hasBundleMenu(bundle):
                 self.addProjectBundleMenu(project, bundle)
 
     def on_supportManager_bundleRemoved(self, bundle):
         for project in self.getAllProjects():
-            if bundle.hasNamespace(project.namespace) and project.hasBundleMenu(bundle):
+            if bundle.hasSource(project.namespace) and project.hasBundleMenu(bundle):
                 self.removeProjectBundleMenu(project, bundle)
 
     def on_supportManager_bundleItemAdded(self, bundleItem):
@@ -91,7 +91,6 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
         if bundleItem.TYPE == "syntax":
             self.keywordsListModel.removeItems(bundleItem.scopeName.split('.'))
 
-
     # -------------------- Load projects
     def loadProjects(self):
         for path in self.knownProjects[:]:
@@ -102,25 +101,20 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
                 self.knownProjects.remove(path)
                 self.settings.setValue('knownProjects', self.knownProjects)
 
-
     def isOpen(self, project):
         return True
-
 
     def appendToKnowProjects(self, project):
         self.knownProjects.append(project.path())
         self.settings.setValue('knownProjects', self.knownProjects)
 
-
     def removeFromKnowProjects(self, project):
         self.knownProjects.remove(project.path())
         self.settings.setValue('knownProjects', self.knownProjects)
 
-
     # ------------------- Properties
     def registerPropertyWidget(self, propertyWidget):
         self.propertiesTreeModel.addConfigNode(propertyWidget)
-
 
     #---------------------------------------------------
     # Environment

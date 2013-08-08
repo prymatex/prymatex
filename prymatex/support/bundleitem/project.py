@@ -60,7 +60,7 @@ fi"'''}
             shellCommand = self.command,
             environment = environment,
             asynchronous = True,
-            workingDirectory = self.sourcePath(),
+            workingDirectory = self.currentSourcePath(),
             callback = functools.partial(self.afterExecute, callback)
         )
         

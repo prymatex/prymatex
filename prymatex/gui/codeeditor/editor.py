@@ -868,7 +868,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 'TM_CURRENT_LINE': line,
                 'TM_LINE_INDEX': cursor.positionInBlock(),
                 'TM_LINE_NUMBER': block.blockNumber() + 1,
-                'TM_CURRENT_THEME_PATH': theme.sourcePath(),
+                'TM_CURRENT_THEME_PATH': theme.currentSourcePath(),
                 'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
                 'TM_SCOPE': " ".join(rightScope.path + attributeScopePath + cursorScopePath),
                 'TM_LEFT_SCOPE': " ".join(leftScope.path + attributeScopePath + cursorScopePath),

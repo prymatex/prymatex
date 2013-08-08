@@ -385,7 +385,7 @@ class PMXSupportBaseManager(object):
         for theme in installedThemes:
             themePath = theme.sourcePath(namespace.name)
             if themePath in themePaths:
-                if namespace.name == theme.sourceName() and theme.sourceChanged(namespace.name):
+                if namespace.name == theme.currentSourceName() and theme.sourceChanged(namespace.name):
                     self.loadTheme(themePath, namespace)
                     self.modifyTheme(theme)
                 themePaths.remove(themePath)
@@ -408,7 +408,7 @@ class PMXSupportBaseManager(object):
         for bundle in installedBundles:
             bundlePath = bundle.sourcePath(namespace.name)
             if bundlePath in bundlePaths:
-                if namespace.name == bundle.sourceName() and bundle.sourceChanged(namespace.name):
+                if namespace.name == bundle.currentSourceName() and bundle.sourceChanged(namespace.name):
                     self.loadBundle(bundlePath, namespace)
                     self.modifyBundle(bundle)
                 bundlePaths.remove(bundlePath)
@@ -427,7 +427,7 @@ class PMXSupportBaseManager(object):
                     bundle.setSupportPath(None)
                     bundle.setDirty()
         for bundlePath in bundlePaths:
-            self.logger.debug("New bundle %s." % path)
+            self.logger.debug("New bundle %s." % bundlePath)
             try:
                 bundle = self.loadBundle(bundlePath, namespace)
             except Exception as ex:
@@ -449,7 +449,7 @@ class PMXSupportBaseManager(object):
                     continue
                 bundleItemPath = bundleItem.sourcePath(namespace.name)
                 if bundleItemPath in bundleItemPaths[bundleItem.TYPE]:
-                    if namespace.name == bundleItem.sourceName() and bundleItem.sourceChanged(namespace.name):
+                    if namespace.name == bundleItem.currentSourceName() and bundleItem.sourceChanged(namespace.name):
                         self.logger.debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, bundleItemPath))
                         self.loadBundleItem(self.BUNDLEITEM_CLASSES[bundleItem.TYPE], bundleItemPath, namespace, bundle)
                         self.modifyBundleItem(bundleItem)
@@ -547,7 +547,7 @@ class PMXSupportBaseManager(object):
         return obj.hasSource(self.protectedNamespace().name)
         
     def isSafe(self, obj):
-        return obj.sourceName() != self.protectedNamespace().name
+        return obj.currentSourceName() != self.protectedNamespace().name
 
     def addManagedObject(self, obj):
         self.managedObjects[obj.uuid] = obj
@@ -659,7 +659,7 @@ class PMXSupportBaseManager(object):
         if self.isProtected(bundle) and not self.isSafe(bundle):
             #Safe bundle
             bundle.addSource(namespace.name, bundle.createSourcePath(namespace.bundles))
-            bundle.setSource(namespace.name)
+            bundle.setCurrentSource(namespace.name)
             self.saveManagedObject(bundle, namespace)
             self.logger.debug("Add namespace '%s' in source %s for bundle." % (namespace.name, bundle.sourcePath(namespace.name)))
         return bundle
@@ -679,11 +679,13 @@ class PMXSupportBaseManager(object):
         self.saveManagedObject(bundle, namespace)
         self.modifyBundle(bundle)
         if moveSource:
-            pass
-            # rename bundle
-            # basePath, _ = self.namespaceElementPath(namespace, self.BUNDLES_NAME, create = True)
-            # path = bundle.createDataFilePath(basePath, baseName = attrs["name"])
-            # self.moveManagedObject(bundle, path)
+            # Para mover hay que renombrar el directorio y mover todos los items del bundle
+            bundleSourcePath = bundle.currentSourcePath()
+            bundleDestinyPath = bundle.createSourcePath(namespace.bundles)
+            for bundleItem in self.findBundleItems(bundle = bundle):
+                bundleItemSourcePath = bundleItem.currentSourcePath()
+                bundleItemDestinyPath = bundleDestinyPath + bundleItemSourcePath[len(bundleSourcePath):]
+                print(bundleItemSourcePath, bundleItemDestinyPath)
         return bundle
 
     def deleteBundle(self, bundle):
@@ -782,7 +784,7 @@ class PMXSupportBaseManager(object):
             bundle = self.ensureBundleIsSafe(bundleItem.bundle, namespace)
             path = bundleItem.createSourcePath(bundle.sourcePath(namespace.name))
             bundleItem.addSource(namespace.name, path)
-            bundleItem.setSource(namespace.name)
+            bundleItem.setCurrentSource(namespace.name)
             self.saveManagedObject(bundleItem, namespace)
             self.logger.debug("Add namespace '%s' in source %s for bundle item." % (namespace.name, bundle.sourcePath(namespace.name)))
         return bundleItem
@@ -923,7 +925,7 @@ class PMXSupportBaseManager(object):
         if self.isProtected(theme) and not self.isSafe(theme):
             #Safe theme
             theme.addSource(namespace.name, theme.createSourcePath(namespace.themes))
-            theme.setSource(namespace.name)
+            theme.setCurrentSource(namespace.name)
             self.saveManagedObject(theme, namespace)
             self.logger.debug("Add namespace '%s' in source %s for theme." % (namespace.name, theme.sourcePath(namespace.name)))
         return theme

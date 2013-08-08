@@ -69,7 +69,7 @@ class PMXBundle(PMXManagedObject):
     # ------------------ Environment variables
     def environmentVariables(self):
         environment = self.manager.environmentVariables()
-        environment['TM_BUNDLE_PATH'] = self.sourcePath()
+        environment['TM_BUNDLE_PATH'] = self.currentSourcePath()
         environment.update(self.variables)
         return environment
 

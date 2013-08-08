@@ -66,7 +66,7 @@ fi"'''
             bundleItem = self,
             shellCommand = self.command,
             environment = environment,
-            workingDirectory = self.sourcePath(),
+            workingDirectory = self.currentSourcePath(),
             asynchronous = True,
             callback = functools.partial(self.afterExecute, callback)
         )
