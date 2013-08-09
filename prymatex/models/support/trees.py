@@ -4,6 +4,8 @@
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import keyequivalent2keysequence, keysequence2keyequivalent
 
+from prymatex.models.mimes import PyMimeData
+
 from prymatex.models.trees import AbstractTreeModel
 from prymatex.models.support.nodes import BundleItemTreeNode, BundleItemMenuTreeNode
 from prymatex.models.support.lists import BundleItemExcludedListModel
