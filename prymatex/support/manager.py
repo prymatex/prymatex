@@ -592,7 +592,8 @@ class PMXSupportBaseManager(object):
             os.unlink(static.path)
 
         os.unlink(filePath)
-        os.rmdir(dirname)
+        if not os.listdir(dirname):
+            os.rmdir(dirname)
 
     # ------------- BUNDLE INTERFACE
     def addBundle(self, bundle):
