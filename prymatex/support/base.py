@@ -58,14 +58,18 @@ class PMXManagedObject(object):
     
     def sourcePath(self, name):
         return self.sources[name].path
-    
-    def sourceChanged(self, sourceName):
-        source = self.sources[sourceName]
+
+    def setSourcePath(self, name, path):
+        source = self.sources[name]
+        self.sources[name] = source._replace(path = path, mtime = os.path.getmtime(path))
+
+    def sourceChanged(self, name):
+        source = self.sources[name]
         return source.mtime != os.path.getmtime(source.path)
 
-    def updateMtime(self, sourceName):
-        source = self.sources[sourceName]
-        self.sources[sourceName] = source._replace(mtime = os.path.getmtime(source.path))
+    def updateMtime(self, name):
+        source = self.sources[name]
+        self.sources[name] = source._replace(mtime = os.path.getmtime(source.path))
 
     # ------------ Current Source, is the source in self.pointer
     def setCurrentSource(self, name):

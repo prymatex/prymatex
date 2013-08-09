@@ -671,8 +671,6 @@ class PMXSupportBaseManager(object):
         bundle = self.ensureBundleIsSafe(bundle, namespace)
         
         moveSource = not self.isProtected(bundle) and "name" in attrs
-
-        print(moveSource, attrs)
         
         # Do update and save
         bundle.update(attrs)
@@ -682,10 +680,14 @@ class PMXSupportBaseManager(object):
             # Para mover hay que renombrar el directorio y mover todos los items del bundle
             bundleSourcePath = bundle.currentSourcePath()
             bundleDestinyPath = bundle.createSourcePath(namespace.bundles)
+            shutil.move(bundleSourcePath, bundleDestinyPath)
+            bundle.setSourcePath(namespace.name, bundleDestinyPath)
+            print(bundleDestinyPath)
             for bundleItem in self.findBundleItems(bundle = bundle):
                 bundleItemSourcePath = bundleItem.currentSourcePath()
                 bundleItemDestinyPath = bundleDestinyPath + bundleItemSourcePath[len(bundleSourcePath):]
-                print(bundleItemSourcePath, bundleItemDestinyPath)
+                print(namespace.name, bundleItemDestinyPath)
+                bundleItem.setSourcePath(namespace.name, bundleItemDestinyPath)
         return bundle
 
     def deleteBundle(self, bundle):
