@@ -682,11 +682,9 @@ class PMXSupportBaseManager(object):
             bundleDestinyPath = bundle.createSourcePath(namespace.bundles)
             shutil.move(bundleSourcePath, bundleDestinyPath)
             bundle.setSourcePath(namespace.name, bundleDestinyPath)
-            print(bundleDestinyPath)
             for bundleItem in self.findBundleItems(bundle = bundle):
                 bundleItemSourcePath = bundleItem.currentSourcePath()
                 bundleItemDestinyPath = bundleDestinyPath + bundleItemSourcePath[len(bundleSourcePath):]
-                print(namespace.name, bundleItemDestinyPath)
                 bundleItem.setSourcePath(namespace.name, bundleItemDestinyPath)
         return bundle
 
@@ -806,11 +804,11 @@ class PMXSupportBaseManager(object):
         self.saveManagedObject(bundleItem, namespace)
         self.modifyBundleItem(bundleItem)
         if moveSource:
-            pass
-            #Move Bundle Item
-            #path = bundleItem.createDataFilePath(os.path.dirname(bundleItem.bundle.path(namespace)), baseName = attrs["name"])
-            #shutil.move(bundleItem.path(namespace), path)
-            #bundleItem.addSource(namespace.name, path)
+            # Para mover hay que renombrar el item
+            bundleItemSourcePath = bundleItem.currentSourcePath()
+            bundleItemDestinyPath = bundleItem.createSourcePath(bundleItem.bundle.sourcePath(namespace.name))
+            shutil.move(bundleItemSourcePath, bundleItemDestinyPath)
+            bundleItem.setSourcePath(namespace.name, bundleItemDestinyPath)
         return bundleItem
 
     def deleteBundleItem(self, bundleItem):
