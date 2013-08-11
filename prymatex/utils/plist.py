@@ -19,7 +19,7 @@ def __fixString(sourceString):
         fixedString += sourceString[index:fixStart]
         testString = sourceString[fixStart:fixEnd]
         if __shouldWrap(testString):
-            testString = '<data>' + plistlib.Data(testString.encode("utf-8")).asBase64() + '</data>'
+            testString = '<data>' + plistlib.Data(testString.encode('utf-8')).asBase64().decode('utf-8') + '</data>'
             fixEnd += 9
         fixedString += testString
         index = fixEnd
