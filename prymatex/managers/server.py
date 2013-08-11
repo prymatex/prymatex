@@ -75,12 +75,12 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
         self.socket.send(result)
         
     def async_window(self, **kwargs):
-        parameters = plist.readPlistFromString(kwargs["parameters"])
         directory = os.path.dirname(kwargs["guiPath"])
         name = os.path.basename(kwargs["guiPath"])
         dialogClass = self.loadDialogClass(name, directory)
         instance, instanceId = self.createDialogInstance(dialogClass, self.application.mainWindow, async = True)
-        instance.setParameters(parameters)
+        if "parameters" in kwargs and kwargs["parameters"]:
+            instance.setParameters(plist.readPlistFromString(kwargs["parameters"]))
         instance.show()
         self.sendResult(instanceId)
     
@@ -115,9 +115,6 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
         self.sendResult({"result": value})
 
     def tooltip(self, message = "", format = "text", transparent = False):
-        data = plist.readPlistFromString(message)
-        message = data[format]
-        message = message.strip()
         if message:
             self.application.currentEditor().showMessage(message)
         self.sendResult()
