@@ -82,11 +82,7 @@ class BundleItemTypeProxyModel(FlatTreeProxyModel):
         
     def comparableValue(self, index):
         node = self.sourceModel().node(index)
-        #Esto es para rastrear un error
-        try:
-            return node.name.lower()
-        except Exception as e:
-            print(node, self.sourceModel(), index)
+        return node.name.lower()
     
     def compareIndex(self, xindex, yindex):
         xnode = xindex.internalPointer()
