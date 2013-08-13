@@ -120,8 +120,8 @@ class PMXSyntaxNode(object):
                         #esto es importante para el filtro del llamador
                         try:
                             matches.append([index, match.span(index), value['name']])
-                        except:
-                            print(name, match, match.groups(), value, key)
+                        except Exception as ex:
+                            print(name, match, match.groups(), value, key, ex)
                 else:
                     if match.groups()[ key ]:
                         matches.append([match.groups()[ key ], match.groupdict[ key ], value['name']])
@@ -323,9 +323,6 @@ class PMXSyntax(PMXBundleItem):
                     if pattern.name and processor:
                         processor.closeTag(pattern._ex_name, end_pos)
             else:
-                # FIXME: Custom pop from stack for regexp
-                if not end_match and not pattern and top.end and top.end.find("\G") != -1:
-                    stack.pop()
                 break
             position = end_pos
         if processor:
