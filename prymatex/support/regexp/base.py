@@ -6,6 +6,8 @@ import re, sys
 import ponyguruma
 from ponyguruma import sre
 
+import regex
+
 ONIG_OPTION_NONE = ponyguruma.OPTION_NONE
 ONIG_OPTION_IGNORECASE = ponyguruma.OPTION_IGNORECASE
 ONIG_OPTION_SINGLELINE = ponyguruma.OPTION_SINGLELINE
@@ -32,6 +34,10 @@ def convertRe(options):
         res |= re.MULTILINE
     return res
 
+def convertRegex(flags):
+    res = 0x0
+    return res
+
 def compileRe(string, flags):
     # Test oniguruma chars
     if not any([string.find(tests) != -1 for tests in ["\G", "[[:"]]):
@@ -42,12 +48,23 @@ def compileRe(string, flags):
         except:
             pass
 
+def compileRegex(string, flags):
+    try:
+        return regex.compile(string, convertRegex(flags))
+    except:
+        pass
+
 def compileOnig(string, flags):
     return sre.compile(string, convertOnig(flags))
 
 def compileRegexp(string, flags = []):
-    #return compileOnig(string, flags) All oniguruma
+    # 1
+    #pattern = compileRegex(string, flags)
+    #if pattern is not None:
+    #    return pattern
+    # 2
     pattern = compileRe(string, flags)
-    if pattern is None:
-        pattern = compileOnig(string, flags)
-    return pattern
+    if pattern is not None:
+        return pattern
+    # 3
+    return compileOnig(string, flags)
