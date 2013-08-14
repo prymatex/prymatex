@@ -282,10 +282,10 @@ class PrintEditorStatusHelper(CodeEditorKeyHelper):
         
     def execute(self, event, cursor = None):
         #Aca lo que queramos hacer
+        from prymatex.support.regexp import base
+        print(base.REGEX_COUNTER, base.RE_COUNTER, base.ONIG_COUNTER, base.REGEXPS)
         userData = cursor.block().userData()
         print(self.editor.currentWord())
-        print(self.editor.scopes())
+        print(self.editor.scope())
         print(self.editor.wordUnderCursor(), cursor.position())
-        for group in [ "comment", "constant", "entity", "invalid", "keyword", "markup", "meta", "storage", "string", "support", "variable" ]:
-            print("%s: %s" % (group, cursor.block().userData().wordsByGroup(group)))
-        print("sin comentarios, sin cadenas", cursor.block().userData().wordsByGroup("-string -comment"))
+

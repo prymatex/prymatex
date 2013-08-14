@@ -2,7 +2,7 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
-import re, sys
+import re
 import ponyguruma
 from ponyguruma import sre
 
@@ -34,8 +34,12 @@ def convertRe(options):
         res |= re.MULTILINE
     return res
 
-def convertRegex(flags):
-    res = 0x0
+def convertRegex(options):
+    res = 0x0 | regex.VERSION1
+    if 'i' in options:
+        res |= regex.IGNORECASE
+    if 'm' in options:
+        res |= regex.MULTILINE
     return res
 
 def compileRe(string, flags):
@@ -57,14 +61,24 @@ def compileRegex(string, flags):
 def compileOnig(string, flags):
     return sre.compile(string, convertOnig(flags))
 
+REGEX_COUNTER = 0
+RE_COUNTER = 0
+ONIG_COUNTER = 0
+REGEXPS = []
+
 def compileRegexp(string, flags = []):
+    global REGEX_COUNTER, RE_COUNTER, ONIG_COUNTER, REGEXPS
     # 1
-    #pattern = compileRegex(string, flags)
-    #if pattern is not None:
-    #    return pattern
-    # 2
     pattern = compileRe(string, flags)
     if pattern is not None:
+        RE_COUNTER += 1
+        return pattern
+    # 2
+    pattern = compileRegex(string, flags)
+    if pattern is not None:
+        REGEX_COUNTER += 1
         return pattern
     # 3
+    ONIG_COUNTER += 1
+    REGEXPS.append(string)
     return compileOnig(string, flags)

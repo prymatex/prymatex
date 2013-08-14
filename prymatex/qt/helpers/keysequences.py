@@ -51,7 +51,6 @@ def _keyboard_layout_keys(key):
 """
 @memoized
 def keysequence2keyequivalent(sequence):
-    sequence = int(sequence)
     nemonic = []
     if sequence & QtCore.Qt.CTRL:
         nemonic.append("^")
