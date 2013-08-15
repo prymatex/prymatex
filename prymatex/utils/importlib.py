@@ -20,6 +20,8 @@ def _import(name, globals=None, locals=None, fromlist=None, level=-1):
     _parent = name
 
     # Perform the actual import using the base import function.
+    if sys.version_info.major == 3 and level < 0:
+        level = 0
     m = _baseimport(name, globals, locals, fromlist, level)
 
     # If we have a parent (i.e. this is a nested import) and this is a
@@ -102,7 +104,7 @@ def import_module(name, package=None):
     specifies the package to use as the anchor point from which to resolve the
     relative import to an absolute import.
     """
-    
+
     if name.startswith('.'):
         if not package:
             raise TypeError("relative imports require the 'package' argument")
@@ -111,19 +113,20 @@ def import_module(name, package=None):
             if character != '.':
                 break
             level += 1
+
         name = _resolve_name(name[level:], package, level)
 
     # Reeplace builtin __import__
     builtins.__import__ = _import
-    
+
     if name in sys.modules:
         reload_module(sys.modules[name])
     else:
         __import__(name)
-    
+
     # Restore builtin __import__
     builtins.__import__ = _baseimport
-    
+
     return sys.modules[name]
 
 def import_from_directory(directory, name):
