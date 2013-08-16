@@ -25,8 +25,8 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         self.proxyTreeModel = self.manager.bundleProxyTreeModel
         
         # Connect signals
-        self.manager.bundleChanged.connect(self.on_manager_bundleChanged)
-        self.manager.bundleItemChanged.connect(self.on_manager_bundleItemChanged)
+        self.manager.bundleChanged.connect(self.on_manager_itemChanged)
+        self.manager.bundleItemChanged.connect(self.on_manager_itemChanged)
         self.finished.connect(self.on_bundleEditor_finished)
         
         #Cargar los widgets editores
@@ -39,11 +39,12 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         self.configActivation()
 
     # --------------- signal handlers
-    def on_manager_bundleChanged(self, bundle):
-        print(self.currentEditor().bundleItem, bundle)
-
-    def on_manager_bundleItemChanged(self, bundleItem):
-        print(self.currentEditor().bundleItem, bundle)
+    def on_manager_itemChanged(self, item):
+        currentEditor = self.currentEditor()
+        if currentEditor.bundleItem == item and currentEditor.getName() != item.name:
+            self.currentEditor().setName(item.name)
+            self.labelTitle.setText(currentEditor.title())
+            self.lineEditName.setText(currentEditor.getName())
 
     def on_bundleEditor_finished(self, code):
         self.saveChanges()

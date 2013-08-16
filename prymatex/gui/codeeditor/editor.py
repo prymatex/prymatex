@@ -1256,7 +1256,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                         self.connect(action, QtCore.SIGNAL('triggered()'), action.callback)
 
         menu.popup(self.mapToGlobal(point))
-    
+
     # Contributes to Tab Menu
     def contributeToTabMenu(self):
         menues = []

@@ -31,7 +31,6 @@ class BundleItemEditorBaseWidget(QtGui.QWidget):
         #The bundle item
         self.bundleItem = None
         self.changes = {}
-        self.__title = 'No item selected'
         
     def isChanged(self):
         dataHash = self.bundleItem.dataHash()
@@ -39,7 +38,9 @@ class BundleItemEditorBaseWidget(QtGui.QWidget):
             any([ dataHash[key] != self.changes[key] for key in dataHash.keys() ])
     
     def title(self):
-        return self.__title
+        if self.bundleItem is not None:
+            return 'Edit %s: "%s"' % (self.TYPE, self.bundleItem.name)
+        return 'No item selected'
     
     def getName(self):
         return self.changes.get('name', None)
@@ -73,7 +74,6 @@ class BundleItemEditorBaseWidget(QtGui.QWidget):
 
     def edit(self, bundleItem):
         self.bundleItem = bundleItem
-        self.__title = bundleItem and 'Edit %s: "%s"' % (self.TYPE, bundleItem.name) or 'No item selected'
         self.changes = bundleItem and bundleItem.dataHash() or {}
 
 #============================================================
