@@ -7,12 +7,13 @@ from prymatex.qt import QtGui, QtCore
 from prymatex.gui.codeeditor.sidebar import SideBarWidgetAddon
 
 class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
-    ALIGNMENT = QtCore.Qt.AlignRight
+    ALIGNMENT = QtCore.Qt.AlignLeft
+    WIDTH = 120
     
     def __init__(self, parent):
         QtGui.QPlainTextEdit.__init__(self, parent)
         font = self.document().defaultFont()
-        font.setPixelSize(1)
+        font.setPixelSize(2)
         self.document().setDefaultFont(font)
         self.setWordWrapMode(QtGui.QTextOption.NoWrap)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
@@ -23,8 +24,6 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         self.viewport().setCursor(QtCore.Qt.PointingHandCursor)
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
 
-        self.editor = None
-        self.highlighter = None
         self.lines_count = 0
 
         self.goe = QtGui.QGraphicsOpacityEffect()
@@ -34,13 +33,13 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
 
         self.slider = SliderArea(self)
         self.slider.show()
-        self.setFixedWidth(60)
+        self.setFixedWidth(self.WIDTH)
 
     def initialize(self, editor):
         SideBarWidgetAddon.initialize(self, editor)
-        self.editor = editor
-        editor.textChanged.connect(self.updateDocumentText)
         editor.themeChanged.connect(self.on_editor_themeChanged)
+        editor.highlightChanged.connect(self.on_editor_highlightChanged)
+        editor.document().contentsChange.connect(self.on_document_contentsChange)
         self.on_editor_themeChanged()
         
     def on_editor_themeChanged(self):
@@ -50,10 +49,30 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         border: 0px;
         selection-background-color: %s; }""" % (self.editor.colours['background'].name(), self.editor.colours['foreground'].name(), self.editor.colours['selection'].name())
         self.setStyleSheet(appStyle)
+    
+    def on_editor_highlightChanged(self):
+        block = self.editor.document().begin()
+        length = 0
+        while block.isValid():
+            miniBlock = self.document().findBlockByNumber(block.blockNumber())
+            miniBlock.layout().setAdditionalFormats(block.layout().additionalFormats())
+            length += block.length()
+            block = block.next()
 
-    def updateDocumentText(self):
-        text = self.editor.toPlainText()
-        self.setPlainText(text)
+        self.document().markContentsDirty(0, length)
+    
+    def on_document_contentsChange(self, position, charsRemoved, charsAdded):
+        print(position, charsRemoved, charsAdded)
+        cursor = QtGui.QTextCursor(self.document())
+        cursor.setPosition(position)
+        if charsRemoved:
+            cursor.setPosition(position + charsRemoved, QtGui.QTextCursor.KeepAnchor)
+        text = self.editor.document().toPlainText()[position: position + charsAdded]
+        cursor.insertText(text)
+        block = self.editor.document().findBlock(position)
+        miniBlock = self.document().findBlock(position)
+        miniBlock.layout().setAdditionalFormats(block.layout().additionalFormats())
+        self.document().markContentsDirty(miniBlock.position(), miniBlock.length())
         
     def __calculate_max(self):
         line_height = self.editor.cursorRect().height()
