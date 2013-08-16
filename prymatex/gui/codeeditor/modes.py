@@ -9,7 +9,7 @@ from prymatex.gui.codeeditor import helpers
 from prymatex.models.support import BundleItemTreeNode
 from prymatex.gui.codeeditor.models import PMXCompleterTableModel
 
-class PMXBaseEditorMode(object):
+class CodeEditorBaseMode(object):
     def __init__(self, editor):
         self.editor = editor
     
@@ -22,15 +22,26 @@ class PMXBaseEditorMode(object):
     def inactive(self):
         pass
     
+    # ------------ Mouse Events
+    def mousePressEvent(self, event):
+        return self.editor.mousePressEvent(event)
+        
+    def mouseMoveEvent(self, event):
+        return self.editor.mouseMoveEvent(event)
+        
+    def mouseReleaseEvent(self, event):
+        return self.editor.mouseReleaseEvent(event)
+        
+    # ------------ Key Events
     def keyPressEvent(self, event):
-        QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
+        return self.editor.keyPressEvent(event)
         
     def keyReleaseEvent(self, event):
-        QtGui.QPlainTextEdit.keyReleaseEvent(self.editor, event)
+        return self.editor.keyReleaseEvent(event)
 
-class PMXSnippetEditorMode(PMXBaseEditorMode):
+class PMXSnippetEditorMode(CodeEditorBaseMode):
     def __init__(self, editor):
-        PMXBaseEditorMode.__init__(self, editor)
+        CodeEditorBaseMode.__init__(self, editor)
         self.logger = editor.application.getLogger('.'.join([self.__class__.__module__, self.__class__.__name__]))
 
     @property
@@ -127,9 +138,9 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
         if event is not None:
             return self.editor.keyPressEvent(event)
 
-class PMXMultiCursorEditorMode(PMXBaseEditorMode):
+class PMXMultiCursorEditorMode(CodeEditorBaseMode):
     def __init__(self, editor):
-        PMXBaseEditorMode.__init__(self, editor)
+        CodeEditorBaseMode.__init__(self, editor)
         # TODO: Buscar una forma mejor de obtener o trabajar con este helper en el modo, quiza filtarndo por clase en el evento
         self.helper = helpers.MultiCursorHelper()
         self.helper.initialize(editor)
@@ -453,10 +464,10 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
         QtGui.QPlainTextEdit.keyReleaseEvent(self.editor, event)
 
-class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
+class PMXCompleterEditorMode(QtGui.QCompleter, CodeEditorBaseMode):
     def __init__(self, editor):
         QtGui.QCompleter.__init__(self, editor)
-        PMXBaseEditorMode.__init__(self, editor)
+        CodeEditorBaseMode.__init__(self, editor)
         self.setWidget(self.editor)
 
         #Table view
