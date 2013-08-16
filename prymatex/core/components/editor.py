@@ -182,11 +182,9 @@ class PMXBaseEditorKeyHelper(PMXBaseKeyHelper):
         PMXBaseKeyHelper.initialize(self, editor)
         self.editor = editor
 
-
     def accept(self, event):
         return PMXBaseKeyHelper.accept(self, event.key())
 
-    
     def execute(self, event):
         PMXBaseKeyHelper.accept(self, event.key())
 
@@ -198,7 +196,6 @@ class PMXBaseEditorAddon(PMXBaseAddon):
     def initialize(self, editor):
         PMXBaseAddon.initialize(self, editor)
         self.editor = editor
-
 
     def finalize(self):
         pass

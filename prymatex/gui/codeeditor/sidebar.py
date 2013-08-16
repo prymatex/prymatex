@@ -186,7 +186,6 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     def showBookmarks(self, value):
         self.setVisible(value)
     
-    
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
         self.bookmarkflagImage = resources.getImage("bookmarkflag")

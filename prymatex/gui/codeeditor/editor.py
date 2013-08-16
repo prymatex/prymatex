@@ -187,7 +187,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.themeChanged.connect(self.highlightEditor)
         # TODO Algo mejor para acomodar el ancho del tabulador
         self.fontChanged.connect(lambda editor = self: editor.setTabStopWidth(editor.tabWidth * editor.fontMetrics().width(WIDTH_CHARACTER)))
-        
+
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
         self.syntaxHighlighter.setDocument(self.document())

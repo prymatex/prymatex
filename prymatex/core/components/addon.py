@@ -5,3 +5,4 @@ from prymatex.core.components.base import PMXBaseComponent
         
 class PMXBaseAddon(PMXBaseComponent):
     pass
+        
