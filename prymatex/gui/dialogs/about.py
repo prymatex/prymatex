@@ -16,6 +16,7 @@ informationHtml = '''<style>dt {{ font-weight: bold; }}</style><dl>
 <dt>Source</dt><dd><a href="{pmx_url}">{pmx_source}</a></dd>
 <dt>Version</dt><dd>{pmx_version}</dd>
 <dt>Command Line</dt><dd>{commandline}</dd>
+<dt>Python</dt><dd>{python_version}</dd>
 <dt>Qt</dt><dd>{qt_version}</dd>'''
 
 if API == "pyqt":
@@ -38,6 +39,7 @@ class AboutDialog(QtGui.QDialog, Ui_AboutDialog, PMXBaseDialog):
             'pmx_url': prymatex.__url__,
             'pmx_source': prymatex.__source__,
             'commandline': ' '.join(sys.argv) ,
+            'python_version': "%d.%d.%d %s" % sys.version_info[:4],
             'pmx_version': prymatex.__version__,
             'zmq_version': self.getZMQVersion(),
             'pony_version': self.getPonygurumaVersion(),
