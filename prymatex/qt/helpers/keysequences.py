@@ -61,11 +61,12 @@ def keysequence2keyequivalent(sequence):
     if sequence & QtCore.Qt.META:
         nemonic.append("@")
     key = chr(sequence & 0xFFFF)
-    if key in string.uppercase and "$" in nemonic:
+    # TODO Refactorizar esto que es un asco
+    if key in string.ascii_uppercase and "$" in nemonic:
         nemonic.remove("$")
         nemonic.append(key)
         return "".join(nemonic)
-    elif key in string.uppercase and "$" not in nemonic:
+    elif key in string.ascii_uppercase and "$" not in nemonic:
         nemonic.append(key.lower())
         return "".join(nemonic)
     elif "$" not in nemonic:
