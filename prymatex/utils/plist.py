@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 import re
-import re, plistlib
+import plistlib
 from string import printable
 
 from . import encoding

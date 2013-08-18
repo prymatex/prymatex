@@ -11,7 +11,7 @@ http://code.google.com/p/spyderlib
 import re, os, locale, sys
 from codecs import BOM_UTF8, BOM_UTF16, BOM_UTF32
 
-from prymatex.utils import six
+from . import six
 
 PREFERRED_ENCODING = locale.getpreferredencoding()
 
