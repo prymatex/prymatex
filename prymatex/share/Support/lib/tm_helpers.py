@@ -12,7 +12,7 @@ import sys, os, tempfile, stat
 from re import sub, compile as compile_
 from os import popen, path, environ as env
 
-from plistlib import writePlistToString, readPlistFromString
+from plist import writePlistToString, readPlistFromString
 
 # alias the plistlib functions, we will replace these
 # with PyObjC when it becomes available.
