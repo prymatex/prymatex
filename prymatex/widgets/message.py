@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 import collections
 
 from prymatex.qt import QtCore, QtGui
-from prymatex.utils import html
 
 class PopupMessageWidget(QtGui.QLabel):
     ''' 
