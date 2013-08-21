@@ -497,7 +497,8 @@ class CommandHandler(object):
                 self.sendCommand({"name": "open", "kwargs": { "url": url}})
             else:
                 os.popen("xdg-open %s" % url)
-    
+            print(url)
+
     def completer(self, options, urls):
         kwargs = {}
         self.sendCommand({"name": "completer", "kwargs": kwargs})
