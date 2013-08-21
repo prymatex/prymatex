@@ -17,6 +17,7 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core import PMXBaseComponent, PMXBaseDock, PMXBaseDialog, PMXBaseStatusBar
 
 from prymatex.utils.i18n import ugettext as _
+from prymatex.utils import html
 
 from prymatex.gui.actions import MainWindowActions, tabSelectableModelFactory
 from prymatex.gui.statusbar import PMXStatusBar
@@ -161,7 +162,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
     # Browser error
     def showErrorInBrowser(self, title, summary, exitcode = -1, **settings):
-        from prymatex.utils import html
         commandScript = '''
 source "$TM_SUPPORT_PATH/lib/webpreview.sh"
 
