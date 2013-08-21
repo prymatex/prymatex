@@ -17,7 +17,7 @@ if [[ -f "$TM_BASH_INIT" ]]; then
 fi
 
 #For Project bash_init.sh
-: ${TM_PROJECT_INIT:="$TM_PROJECT_SUPPORT/lib/bash_init.sh"}
+: ${TM_PROJECT_INIT:="$TM_PROJECT_PATH/Support/lib/bash_init.sh"}
 if [[ -f "$TM_PROJECT_INIT" ]]; then
 	. "$TM_PROJECT_INIT"
 fi
