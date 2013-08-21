@@ -25,7 +25,7 @@ fi
 set +u # avoid warning when we use unset variables (if user had ‘set -u’ in his profile)
 
 if [[ -d "$TM_SUPPORT_PATH/bin" ]]; then
-	PATH="$PATH:$TM_SUPPORT_PATH/bin"
+	PATH="$TM_SUPPORT_PATH/bin:$PATH"
 	if [[ -d "$TM_SUPPORT_PATH/bin/CocoaDialog.app/Contents/MacOS" ]]; then
 		PATH="$TM_SUPPORT_PATH/bin/CocoaDialog.app/Contents/MacOS:$PATH"
 	fi
