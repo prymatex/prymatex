@@ -9,6 +9,8 @@ from prymatex.gui.codeeditor.sidebar import SideBarWidgetAddon
 class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignRight
     WIDTH = 120
+    MINIMAP_MAX_OPACITY = 0.8
+    MINIMAP_MIN_OPACITY = 0.1
     
     def __init__(self, parent):
         QtGui.QPlainTextEdit.__init__(self, parent)
@@ -25,12 +27,11 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
 
         self.lines_count = 0
-
         self.goe = QtGui.QGraphicsOpacityEffect()
         self.setGraphicsEffect(self.goe)
-        self.goe.setOpacity(50)
+        self.goe.setOpacity(self.MINIMAP_MIN_OPACITY)
         self.animation = QtCore.QPropertyAnimation(self.goe, "opacity")
-
+        
         self.slider = SliderArea(self)
         self.slider.show()
         self.setFixedWidth(self.WIDTH)
@@ -40,6 +41,7 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         editor.themeChanged.connect(self.on_editor_themeChanged)
         editor.highlightChanged.connect(self.on_editor_highlightChanged)
         editor.document().contentsChange.connect(self.on_document_contentsChange)
+        editor.updateRequest.connect(self.update_visible_area)
         self.on_editor_themeChanged()
         
     def on_editor_themeChanged(self):
@@ -49,7 +51,7 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         border: 0px;
         selection-background-color: %s; }""" % (self.editor.colours['background'].name(), self.editor.colours['foreground'].name(), self.editor.colours['selection'].name())
         self.setStyleSheet(appStyle)
-    
+
     def on_editor_highlightChanged(self):
         block = self.editor.document().begin()
         length = 0
@@ -62,7 +64,6 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         self.document().markContentsDirty(0, length)
     
     def on_document_contentsChange(self, position, charsRemoved, charsAdded):
-        print(position, charsRemoved, charsAdded)
         cursor = QtGui.QTextCursor(self.document())
         cursor.setPosition(position)
         if charsRemoved:
@@ -86,18 +87,12 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         self.setPlainText(source)
         self.__calculate_max()
         self.highlighter.async_highlight()
-
+    
     def adjust_to_parent(self):
         self.setFixedHeight(self.editor.height())
-        self.setFixedWidth(self.editor.width() * 10)
+        self.setFixedWidth(self.WIDTH)
         x = self.editor.width() - self.width()
         self.move(x, 0)
-        fontsize = int(self.width() / 20)
-        if fontsize < 1:
-            fontsize = 1
-        font = self.document().defaultFont()
-        font.setPointSize(fontsize)
-        self.setFont(font)
         self.__calculate_max()
 
     def update_visible_area(self):
@@ -112,14 +107,14 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
 
     def enterEvent(self, event):
         self.animation.setDuration(300)
-        self.animation.setStartValue(50)
-        self.animation.setEndValue(50)
+        self.animation.setStartValue(self.MINIMAP_MIN_OPACITY)
+        self.animation.setEndValue(self.MINIMAP_MAX_OPACITY)
         self.animation.start()
 
     def leaveEvent(self, event):
         self.animation.setDuration(300)
-        self.animation.setStartValue(50)
-        self.animation.setEndValue(50)
+        self.animation.setStartValue(self.MINIMAP_MAX_OPACITY)
+        self.animation.setEndValue(self.MINIMAP_MIN_OPACITY)
         self.animation.start()
 
     def mousePressEvent(self, event):
@@ -130,6 +125,7 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
     def resizeEvent(self, event):
         QtGui.QPlainTextEdit.resizeEvent(self, event)
         self.slider.update_position()
+        self.adjust_to_parent()
 
     def scroll_area(self, pos_parent, pos_slider):
         pos_parent.setY(pos_parent.y() - pos_slider.y())
@@ -144,23 +140,23 @@ class SliderArea(QtGui.QFrame):
 
     def __init__(self, parent):
         QtGui.QFrame.__init__(self, parent)
-        self._parent = parent
         self.setMouseTracking(True)
         self.setCursor(QtCore.Qt.OpenHandCursor)
         self.setStyleSheet("background: red;")
+
         self.goe = QtGui.QGraphicsOpacityEffect()
         self.setGraphicsEffect(self.goe)
-        self.goe.setOpacity(50 / 2)
+        self.goe.setOpacity(parent.MINIMAP_MAX_OPACITY / 2)
 
         self.pressed = False
         self.__scroll_margins = None
 
     def update_position(self):
-        font_size = QtGui.QFontMetrics(self._parent.font()).height()
-        height = self._parent.lines_count * font_size
+        font_size = QtGui.QFontMetrics(self.parent().font()).height()
+        height = self.parent().lines_count * font_size
         self.setFixedHeight(height)
-        self.setFixedWidth(self._parent.width())
-        self.__scroll_margins = (height, self._parent.height() - height)
+        self.setFixedWidth(self.parent().width())
+        self.__scroll_margins = (height, self.parent().height() - height)
 
     def move_slider(self, y):
         self.move(0, y)
@@ -168,12 +164,12 @@ class SliderArea(QtGui.QFrame):
     def mousePressEvent(self, event):
         QtGui.QFrame.mousePressEvent(self, event)
         self.pressed = True
-        self.setCursor(Qt.ClosedHandCursor)
+        self.setCursor(QtCore.Qt.ClosedHandCursor)
 
     def mouseReleaseEvent(self, event):
         QtGui.QFrame.mouseReleaseEvent(self, event)
         self.pressed = False
-        self.setCursor(Qt.OpenHandCursor)
+        self.setCursor(QtCore.Qt.OpenHandCursor)
 
     def mouseMoveEvent(self, event):
         QtGui.QFrame.mouseMoveEvent(self, event)
@@ -183,10 +179,10 @@ class SliderArea(QtGui.QFrame):
             if y < 0:
                 y = 0
             if y < self.__scroll_margins[0]:
-                self._parent.verticalScrollBar().setSliderPosition(
-                    self._parent.verticalScrollBar().sliderPosition() - 2)
+                self.parent().verticalScrollBar().setSliderPosition(
+                    self.parent().verticalScrollBar().sliderPosition() - 2)
             elif y > self.__scroll_margins[1]:
-                self._parent.verticalScrollBar().setSliderPosition(
-                    self._parent.verticalScrollBar().sliderPosition() + 2)
+                self.parent().verticalScrollBar().setSliderPosition(
+                    self.parent().verticalScrollBar().sliderPosition() + 2)
             self.move(0, y)
-            self._parent.scroll_area(pos, event.pos())
+            self.parent().scroll_area(pos, event.pos())
