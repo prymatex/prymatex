@@ -7,7 +7,7 @@ from prymatex.qt import QtGui, QtCore
 from prymatex.gui.codeeditor.sidebar import SideBarWidgetAddon
 
 class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
-    ALIGNMENT = QtCore.Qt.AlignLeft
+    ALIGNMENT = QtCore.Qt.AlignRight
     WIDTH = 120
     
     def __init__(self, parent):
