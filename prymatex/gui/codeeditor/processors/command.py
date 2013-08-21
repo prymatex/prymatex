@@ -212,19 +212,16 @@ class PMXCommandProcessor(PMXCommandProcessor):
         timeout = len(message) * 20
         if timeout > 2000:
             timeout = 2000
-
+        
         point = self.editor.cursorRect(self.editor.textCursor()).bottomRight()
         point = self.editor.mapToGlobal(point)
-        # TODO: Ver que pasa sin usar el html con los replace
-        html = """
-            <span>%s</span><hr>
-            <div style='text-align: right; font-size: small;'><a href='copy'>Copy</a>
-            </div>""" % context.outputValue.strip().replace('\n', '<br/>').replace(' ', '&nbsp;')
         callbacks = {
-            'copy': lambda s = context.outputValue: QtGui.qApp.instance().clipboard().setText(s)
+            'copy': lambda s = message: QtGui.qApp.instance().clipboard().setText(s)
         }
         
-        self.editor.mainWindow.showMessage(message, timeout = timeout, point = point, linkMap = callbacks)
+        self.editor.mainWindow.showMessage(message, 
+            frmt = outputFormat or "text", timeout = timeout, point = point,
+            linkMap = callbacks)
         
     def toolTip(self, context, outputFormat = None):
         self.showAsTooltip(context, outputFormat)

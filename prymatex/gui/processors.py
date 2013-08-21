@@ -70,7 +70,7 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
         message = context.outputValue.strip()
         timeout = len(message) * 20
 
-        self.mainWindow.showMessage(context.outputValue, timeout = timeout)
+        self.mainWindow.showMessage(message, timeout = timeout)
     
     def toolTip(self, context, outputFormat = None):
         print("toolTip")

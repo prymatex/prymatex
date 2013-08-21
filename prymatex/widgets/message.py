@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
 import collections
+
+from prymatex.qt import QtCore, QtGui
+from prymatex.utils import html
 
 class PopupMessageWidget(QtGui.QLabel):
     ''' 
@@ -57,7 +59,7 @@ class PopupMessageWidget(QtGui.QLabel):
         self.timeoutTimer.timeout.connect(self.animationOut.start)
         self.hide()
         
-    def showMessage(self, message, timeout = 2000, icon = None, point = None, linkMap = {} ):
+    def showMessage(self, message, frmt = "text", timeout = 2000, icon = None, point = None, linkMap = {} ):
         '''
         @param message: Text message, can be HTML
         @param timeout: Timeout before message fades
@@ -65,6 +67,14 @@ class PopupMessageWidget(QtGui.QLabel):
         @param point: An QPoint with message position
         @param linkMap: 
         '''
+        if frmt == "text" and linkMap:
+            message = "<pre>%s</pre>" % message
+        if linkMap:
+            message += "<hr><div style='text-align: right; font-size: small;'>"
+            for key in linkMap.keys():
+                message += "<a href='%s'>%s</a>" % (key, key.title())
+            message += "</div>"
+        
         self.setText(message)
         self.adjustSize()
         self.updatePosition(point)
@@ -75,15 +85,8 @@ class PopupMessageWidget(QtGui.QLabel):
 
     def linkHandler(self, link):
         callback = self.linkMap.get(link, None)
-        if callback is None:
-            self.logger.warn("No callback for %s" % link)
-            return
-        if not isinstance(callback, collections.Callable):
-            self.logger.warn("Callback for %s is not callable: %s" % (link, callback))
-            return
-        
-        self.logger.debug( "Running callback: %s %s" % (link, callback))
-        callback()
+        if isinstance(callback, collections.Callable):
+            callback()
   
     def updatePosition(self, point = None):
         if point is not None:
