@@ -91,7 +91,7 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         self.editor.fontChanged.connect(self.on_editor_fontChanged)
     
     def __update_colours(self):
-        self.background = self.editor.colours['gutter']
+        self.background = self.editor.colours['gutterBackground']
         self.foreground = self.editor.colours['gutterForeground']
         self.invisibles = self.editor.colours['invisibles']
         
@@ -195,13 +195,13 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         
     def initialize(self, editor):
         SideBarWidgetAddon.initialize(self, editor)
-        self.background = self.editor.colours['gutter']
+        self.background = self.editor.colours['gutterBackground']
         self.foreground = self.editor.colours['gutterForeground']
         self.invisibles = self.editor.colours['invisibles']
         self.editor.themeChanged.connect(self.updateColours)
         
     def updateColours(self):
-        self.background = self.editor.colours['gutter']
+        self.background = self.editor.colours['gutterBackground']
         self.foreground = self.editor.colours['gutterForeground']
         self.invisibles = self.editor.colours['invisibles']
         self.repaint(self.rect())
@@ -266,7 +266,6 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     @pmxConfigPorperty(default = True)
     def showFolding(self, value):
         self.setVisible(value)
-    
 
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
@@ -279,12 +278,12 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
 
     def initialize(self, editor):
         SideBarWidgetAddon.initialize(self, editor)
-        self.background = self.editor.colours['gutter']
+        self.background = self.editor.colours['gutterBackground']
         self.invisibles = self.editor.colours['invisibles']
         self.editor.themeChanged.connect(self.updateColours)
         
     def updateColours(self):
-        self.background = self.editor.colours['gutter']
+        self.background = self.editor.colours['gutterBackground']
         self.invisibles = self.editor.colours['invisibles']
         self.repaint(self.rect())
     
@@ -365,12 +364,12 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         
     def initialize(self, editor):
         SideBarWidgetAddon.initialize(self, editor)
-        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
+        self.background = self.editor.colours['gutterBackground']
         self.editor.themeChanged.connect(self.updateColours)
         self.editor.extraSelectionChanged.connect(self.on_editor_extraSelectionChanged)
         
     def updateColours(self):
-        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
+        self.background = self.editor.colours['gutterBackground']
         self.update()
     
     def on_editor_extraSelectionChanged(self):
@@ -383,7 +382,6 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             'name': 'selection',
             'text': 'Selection',
             'callback': cls.on_actionShowSelection_toggled,
-            'shortcut': 'Shift+F10',
             'checkable': True,
             'testChecked': cls.on_actionShowSelection_testChecked }
         return { baseMenu: menuEntry }

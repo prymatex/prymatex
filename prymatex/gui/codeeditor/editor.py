@@ -106,7 +106,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         #Set color for QPlainTextEdit
         appStyle = """QPlainTextEdit {background-color: %s;
         color: %s;
-        selection-background-color: %s; }""" % (self.colours['background'].name(), self.colours['foreground'].name(), self.colours['selection'].name())
+        selection-background-color: %s; }""" % (
+            self.colours['background'].name(),
+            self.colours['foreground'].name(),
+            self.colours['selection'].name())
+
         self.setStyleSheet(appStyle)
         self.syntaxHighlighter.stop()
         self.aboutToHighlightChange.emit()
