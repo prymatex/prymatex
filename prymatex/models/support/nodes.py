@@ -136,6 +136,7 @@ class ThemeTableRow(object):
     """Theme and Style decorator"""
     def __init__(self, themeItem):
         self.__themeItem = themeItem
+        self.__settings = None             # Settings cache
         self.STYLES_CACHE = {}
 
     # ----------- Theme attrs assessors -----------
@@ -147,18 +148,17 @@ class ThemeTableRow(object):
 
     # ----------- Theme decoration -----------
     def settings(self):
-        settings = dict([(key_value4[0], rgba2color(key_value4[1])) for key_value4 in [key_value for key_value in iter(self.__themeItem.settings().items()) if key_value[1].startswith('#')]])
-        
-        # Fix some color keys
-        settings.setdefault('gutter', settings['background'])
-        settings.setdefault('gutterForeground', settings['foreground'])
-        
-        # Fonts
-        settings['fontStyle'] = self.__themeItem.settings()['fontStyle'].split() if 'fontStyle' in self.__themeItem.settings() else []
-        return settings
+        if self.__settings is None:
+            settings = self.__themeItem.settings()
+            self.__settings = dict([(key_value4[0], rgba2color(key_value4[1])) for key_value4 in [key_value for key_value in iter(settings.items()) if key_value[1].startswith('#')]])
+    
+            # Fonts
+            self.__settings['fontStyle'] = settings['fontStyle'].split() if 'fontStyle' in settings else []
+        return self.__settings
 
     def update(self, dataHash):
         if 'settings' in dataHash:
+            self.__settings = None  # Clean settings cache
             fontStyle = dataHash['settings'].pop('fontStyle', None)
             settings = dict([(key_value2[0], color2rgba(key_value2[1])) for key_value2 in dataHash['settings'].items()])
             if fontStyle is not None:
@@ -193,7 +193,8 @@ class ThemeStyleTableRow(object):
     """Theme and Style decorator"""
     def __init__(self, styleItem):
         self.__styleItem = styleItem
-
+        self.__settings = None             # Settings cache
+        
     # ----------- Item attrs assessors -----------
     def __getattr__(self, name):
         return getattr(self.__styleItem, name)
@@ -203,14 +204,17 @@ class ThemeStyleTableRow(object):
 
     # ----------- Item decoration -----------
     def settings(self):
-        settings = dict([(key_value5[0], rgba2color(key_value5[1])) for key_value5 in [key_value1 for key_value1 in self.__styleItem.settings().items() if key_value1[1].startswith('#')]])
+        if self.__settings is None:
+            settings = self.__styleItem.settings()
+            self.__settings = dict([(key_value5[0], rgba2color(key_value5[1])) for key_value5 in [key_value1 for key_value1 in settings.items() if key_value1[1].startswith('#')]])
         
-        # Fonts
-        settings['fontStyle'] = self.__styleItem.settings()['fontStyle'].split() if 'fontStyle' in self.__styleItem.settings() else []
-        return settings
+            # Fonts
+            self.__settings['fontStyle'] = settings['fontStyle'].split() if 'fontStyle' in settings else []
+        return self.__settings
     
     def update(self, dataHash):
         if 'settings' in dataHash:
+            self.__settings = None              # Clean cache
             fontStyle = dataHash['settings'].pop('fontStyle', None)
             settings = dict([(key_value2[0], color2rgba(key_value2[1])) for key_value2 in dataHash['settings'].items()])
             if fontStyle is not None:
