@@ -109,7 +109,7 @@ class PMXSupportBaseManager(object):
 
     def namespace(self, name):
         return self.namespaces.get(name)
-                
+
     def addProjectNamespace(self, project):
         #TODO: Asegurar que no esta ya cargado eso del md5 es medio trucho
         path = project.projectPath
@@ -258,7 +258,7 @@ class PMXSupportBaseManager(object):
     def loadSupport(self, callback=None):
         # Install message handler
         self.messageHandler = callback
-        for namespace in list(self.namespaces.values())[::-1]:
+        for namespace in self.namespaces.values():
             self.loadThemes(namespace)
             self.loadBundles(namespace)
         for bundle in self.getAllBundles():
@@ -325,7 +325,7 @@ class PMXSupportBaseManager(object):
 
     # ----------- POPULATE BUNDLE AND LOAD BUNDLE ITEMS
     def populateBundle(self, bundle):
-        for namespace in list(self.namespaces.values())[::-1]:
+        for namespace in self.namespaces.values():
             if not bundle.hasSource(namespace.name):
                 continue
             bundleDirectory = os.path.dirname(bundle.sourcePath(namespace.name))
@@ -356,6 +356,8 @@ class PMXSupportBaseManager(object):
                 staticFile = self.addStaticFile(staticFile)
                 bundleItem.addStaticFile(staticFile)
             self.addManagedObject(bundleItem)
+        else:
+            bundleItem.load(data)
         bundleItem.addSource(namespace.name, sourceBundleItemPath)
         return bundleItem
 
@@ -365,7 +367,7 @@ class PMXSupportBaseManager(object):
         # Install message handler
         self.messageHandler = callback
         self.logger.debug("Begin reload support.")
-        for namespace in list(self.namespaces.values())[::-1]:
+        for namespace in self.namespaces.values():
             print(namespace.name)
             self.logger.debug("Search in %s, %s." % (namespace.name, namespace.basedir))
             self.reloadThemes(namespace)
@@ -437,7 +439,7 @@ class PMXSupportBaseManager(object):
 
     # ----- REPOPULATED BUNDLE AND RELOAD BUNDLE ITEMS
     def repopulateBundle(self, bundle):
-        for namespace in list(self.namespaces.values())[::-1]:
+        for namespace in self.namespaces.values():
             if not bundle.hasSource(namespace.name):
                 continue
             bundlePath = bundle.sourcePath(namespace.name)
