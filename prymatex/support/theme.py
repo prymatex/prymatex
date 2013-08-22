@@ -7,7 +7,6 @@ from prymatex.utils import osextra
 
 from .base import PMXManagedObject
 
-# TODO Nuevos colores
 """foreground, background, selection, invisibles, lineHighlight, caret, gutter
 prymatex add gutterForeground
 gutterDivider: Border between text view and gutter.
@@ -17,15 +16,14 @@ gutterIcons: Color of the images in the gutter.
 gutterSelectionForeground: Text color for lines containing caret / part of a selection.
 gutterSelectionBackground: Background color for lines containing caret / part of a selection.
 gutterSelectionIcons: Color of images on lines containing caret / part of a selection.
-gutterSelectionBorder: Border between selected and non-selected lines.
-"""
+gutterSelectionBorder: Border between selected and non-selected lines."""
 
 DEFAULT_THEME_SETTINGS = {'background':         '#FFFFFF',
                           'caret':              '#000000',
                           'foreground':         '#000000',
                           'invisibles':         '#BFBFBF',
                           'lineHighlight':      '#00000012',
-                          'gutter':             '#FFFFFF',
+                          'gutterBackground':   '#FFFFFF',
                           'gutterForeground':   '#000000',
                           'lineHighlight':      '#00000012',
                           'selection':          '#A6CBFF'}
@@ -118,11 +116,18 @@ class PMXTheme(PMXManagedObject):
         self.__load_update(dataHash, False)
 
     def setSettings(self, settings):
+        if "gutter" in settings:
+            settings["gutterBackground"] = settings.pop("gutter")
         self.defaultSettings.update(settings or {})
         self.defaultSettings = dict([ item for item in self.defaultSettings.items() if item[1] is not None])
-    
+
     def settings(self):
-        return self.defaultSettings
+        # Asegurar los basicos
+        settings = self.defaultSettings.copy()
+        for key, color in DEFAULT_THEME_SETTINGS.items():
+            if key not in settings:
+                settings[key] = color
+        return settings
     
     def dump(self):
         dataHash = PMXManagedObject.dump(self)
