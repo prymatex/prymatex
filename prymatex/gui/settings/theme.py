@@ -82,7 +82,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         self.pushButtonInvisibles.setStyleSheet("background-color: " + color2rgba(settings['invisibles'])[:7])
         self.pushButtonLineHighlight.setStyleSheet("background-color: " + color2rgba(settings['lineHighlight'])[:7])
         self.pushButtonCaret.setStyleSheet("background-color: " + color2rgba(settings['caret'])[:7])
-        self.pushButtonGutterBackground.setStyleSheet("background-color: " + color2rgba(settings['gutter'])[:7])
+        self.pushButtonGutterBackground.setStyleSheet("background-color: " + color2rgba(settings['gutterBackground'])[:7])
         self.pushButtonGutterForeground.setStyleSheet("background-color: " + color2rgba(settings['gutterForeground'])[:7])
         self.application.supportManager.themeStyleProxyModel.setFilterRegExp(str(theme.uuid))
 
@@ -141,7 +141,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         self.pushButtonInvisibles.pressed.connect(lambda element='invisibles': self.on_pushButtonColor_pressed(element))
         self.pushButtonLineHighlight.pressed.connect(lambda element='lineHighlight': self.on_pushButtonColor_pressed(element))
         self.pushButtonCaret.pressed.connect(lambda element='caret': self.on_pushButtonColor_pressed(element))
-        self.pushButtonGutterBackground.pressed.connect(lambda element='gutter': self.on_pushButtonColor_pressed(element))
+        self.pushButtonGutterBackground.pressed.connect(lambda element='gutterBackground': self.on_pushButtonColor_pressed(element))
         self.pushButtonGutterForeground.pressed.connect(lambda element='gutterForeground': self.on_pushButtonColor_pressed(element))
 
     def on_pushButtonColor_pressed(self, element):
