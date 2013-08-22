@@ -4,19 +4,22 @@ import sys
 
 from prymatex.qt import QtGui, QtCore
 
+from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.codeeditor.sidebar import SideBarWidgetAddon
 
 class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignRight
-    WIDTH = 120
+    WIDTH = 160
     MINIMAP_MAX_OPACITY = 0.8
     MINIMAP_MIN_OPACITY = 0.1
     
+    @pmxConfigPorperty(default = True)
+    def showMiniMap(self, value):
+        self.setVisible(value)
+    
     def __init__(self, parent):
         QtGui.QPlainTextEdit.__init__(self, parent)
-        font = self.document().defaultFont()
-        font.setPixelSize(2)
-        self.document().setDefaultFont(font)
+
         self.setWordWrapMode(QtGui.QTextOption.NoWrap)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
@@ -25,6 +28,11 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         self.setMouseTracking(True)
         self.viewport().setCursor(QtCore.Qt.PointingHandCursor)
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
+
+        # Font
+        font = self.document().defaultFont()
+        font.setPointSize(2)
+        self.setFont(font)
 
         self.lines_count = 0
         self.goe = QtGui.QGraphicsOpacityEffect()
@@ -43,14 +51,35 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         editor.document().contentsChange.connect(self.on_document_contentsChange)
         editor.updateRequest.connect(self.update_visible_area)
         self.on_editor_themeChanged()
+    
+    @classmethod
+    def contributeToMainMenu(cls):
+        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter")
+        menuEntry = {
+            'name': 'miniMap',
+            'text': "Mini Map",
+            'callback': cls.on_actionShowMiniMap_toggled,
+            'checkable': True,
+            'testChecked': cls.on_actionShowMiniMap_testChecked }
+        return { baseMenu: menuEntry }
+
+    def on_actionShowMiniMap_toggled(self, checked):
+        self.setVisible(checked)
+
+    def on_actionShowMiniMap_testChecked(self):
+        return self.isVisible()    
         
     def on_editor_themeChanged(self):
         #Editor colours
         appStyle = """QPlainTextEdit {background-color: %s;
         color: %s;
         border: 0px;
-        selection-background-color: %s; }""" % (self.editor.colours['background'].name(), self.editor.colours['foreground'].name(), self.editor.colours['selection'].name())
+        selection-background-color: %s; }""" % (
+            self.editor.colours['background'].name(), 
+            self.editor.colours['foreground'].name(), 
+            self.editor.colours['selection'].name())
         self.setStyleSheet(appStyle)
+        self.slider.setStyleSheet("background: %s;" % self.editor.colours['selection'].name())
 
     def on_editor_highlightChanged(self):
         block = self.editor.document().begin()
@@ -74,27 +103,7 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         miniBlock = self.document().findBlock(position)
         miniBlock.layout().setAdditionalFormats(block.layout().additionalFormats())
         self.document().markContentsDirty(miniBlock.position(), miniBlock.length())
-        
-    def __calculate_max(self):
-        line_height = self.editor.cursorRect().height()
-        if line_height > 0:
-            self.lines_count = self.editor.viewport().height() / line_height
-        self.slider.update_position()
-        self.update_visible_area()
-
-    def set_code(self, source):
-        self.highlighter.highlight_function = self.highlighter.open_highlight
-        self.setPlainText(source)
-        self.__calculate_max()
-        self.highlighter.async_highlight()
     
-    def adjust_to_parent(self):
-        self.setFixedHeight(self.editor.height())
-        self.setFixedWidth(self.WIDTH)
-        x = self.editor.width() - self.width()
-        self.move(x, 0)
-        self.__calculate_max()
-
     def update_visible_area(self):
         if not self.slider.pressed:
             line_number = self.editor.firstVisibleBlock().blockNumber()
@@ -102,8 +111,12 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
             cursor = self.textCursor()
             cursor.setPosition(block.position())
             rect = self.cursorRect(cursor)
+            line_height = self.editor.cursorRect().height()
+            if line_height:
+                self.lines_count = self.editor.viewport().height() / line_height
             self.setTextCursor(cursor)
             self.slider.move_slider(rect.y())
+            self.slider.update_position()
 
     def enterEvent(self, event):
         self.animation.setDuration(300)
@@ -125,7 +138,6 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
     def resizeEvent(self, event):
         QtGui.QPlainTextEdit.resizeEvent(self, event)
         self.slider.update_position()
-        self.adjust_to_parent()
 
     def scroll_area(self, pos_parent, pos_slider):
         pos_parent.setY(pos_parent.y() - pos_slider.y())
@@ -136,13 +148,14 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         QtGui.QPlainTextEdit.wheelEvent(self, event)
         self.editor.wheelEvent(event)
 
+    def scroll(self, *largs):
+        pass
+            
 class SliderArea(QtGui.QFrame):
-
     def __init__(self, parent):
         QtGui.QFrame.__init__(self, parent)
         self.setMouseTracking(True)
         self.setCursor(QtCore.Qt.OpenHandCursor)
-        self.setStyleSheet("background: red;")
 
         self.goe = QtGui.QGraphicsOpacityEffect()
         self.setGraphicsEffect(self.goe)
@@ -152,8 +165,8 @@ class SliderArea(QtGui.QFrame):
         self.__scroll_margins = None
 
     def update_position(self):
-        font_size = QtGui.QFontMetrics(self.parent().font()).height()
-        height = self.parent().lines_count * font_size
+        line_height = self.parent().cursorRect().height()
+        height = self.parent().lines_count * line_height
         self.setFixedHeight(height)
         self.setFixedWidth(self.parent().width())
         self.__scroll_margins = (height, self.parent().height() - height)
@@ -170,6 +183,9 @@ class SliderArea(QtGui.QFrame):
         QtGui.QFrame.mouseReleaseEvent(self, event)
         self.pressed = False
         self.setCursor(QtCore.Qt.OpenHandCursor)
+    
+    def wheelEvent(self, event):
+        self.parent().wheelEvent(event)
 
     def mouseMoveEvent(self, event):
         QtGui.QFrame.mouseMoveEvent(self, event)
