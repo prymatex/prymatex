@@ -509,7 +509,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if self.application.platform == "win32" and self.verticalScrollBar().isVisible():
             rightBarPosition -= self.verticalScrollBar().width()
         self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
-    
 
     # -------------- Braces
     def setCurrentBraces(self, cursor = None):
@@ -836,7 +835,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.textCursor().endEditBlock()
         elif item.TYPE == PMXSyntax.TYPE:
             self.setSyntax(item)
-
 
     def selectBundleItem(self, items, tabTriggered = False):
         #Tengo mas de uno que hago?, muestro un menu
@@ -1516,7 +1514,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if item is not None:
             self.insertBundleItem(item['data'])
 
-    
     def on_actionGoToSymbol_triggered(self):
         item = self.selectorDialog.select(self.symbolSelectableModel, title = _("Select Symbol"))
         if item is not None:

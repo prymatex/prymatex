@@ -23,15 +23,15 @@ class PMXSyntaxProxy(object):
     def __proxy(self):
         if self.proxyName.startswith('#'):
             name = self.proxyName[1:]
+            repository = getattr(self.rootSyntax.grammar, 'repository')
+            if name in repository:
+                return repository[name]
             parentNode = self.parentNode
             while parentNode:
                 repository = getattr(parentNode, 'repository')
                 if name in repository:
                     return repository[name]
                 parentNode = parentNode.parentNode
-            repository = getattr(self.rootSyntax.grammar, 'repository')
-            if name in repository:
-                return repository[name]
         elif self.proxyName == '$self':
             return self.rootSyntax.grammar
         elif self.proxyName == '$base':
