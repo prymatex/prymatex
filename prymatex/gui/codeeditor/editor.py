@@ -491,7 +491,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     # -------------------- SideBars
     def updateViewportMargins(self):
-        self.setViewportMargins(self.leftBar.width(), 0, self.rightBar.width(), 0)
+        #self.setViewportMargins(self.leftBar.width(), 0, self.rightBar.width(), 0)
+        self.setViewportMargins(self.leftBar.width(), 0, 0, 0)
     
     def updateSideBars(self, rect, dy):
         if dy:
