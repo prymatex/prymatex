@@ -8,6 +8,16 @@ from ponyguruma import sre
 
 import regex
 
+# Con ustedes las clases que rompen las pelotas
+
+ONIG_DEPENDENCY = [ 
+    ("[a-z_\\x{7f}-\\x{ff}]", "[a-zA-Z_]"),
+    ("[a-z0-9_\\x{7f}-\\x{ff}]", "[a-zA-Z_]"),
+    ("[a-zA-Z_\\x{7f}-\\x{ff}]", "[a-zA-Z_]"),
+    ("[a-zA-Z0-9_\\x{7f}-\\x{ff}]", "[a-zA-Z_]"),
+    ("[^\\x{00}-\\x{7F}]", "[^a-fA-F0-9_]{2}"),
+]
+
 ONIG_OPTION_NONE = ponyguruma.OPTION_NONE
 ONIG_OPTION_IGNORECASE = ponyguruma.OPTION_IGNORECASE
 ONIG_OPTION_SINGLELINE = ponyguruma.OPTION_SINGLELINE
@@ -44,13 +54,12 @@ def convertRegex(options):
 
 def compileRe(string, flags):
     # Test oniguruma chars
-    if not any([string.find(tests) != -1 for tests in ["\G", "[[:"]]):
-        for o, r in (('?i:', '(?i)'), ):
-            string = string.replace(o, r)
-        try:
-            return re.compile(string, convertRe(flags))
-        except:
-            pass
+    if any([string.find(tests) != -1 for tests in ["\G", "[[:"]]):
+        return None
+    try:
+        return re.compile(string, convertRe(flags))
+    except:
+        pass
 
 def compileRegex(string, flags):
     try:
@@ -78,6 +87,14 @@ def compileRegexp(string, flags = []):
     if pattern is not None:
         REGEX_COUNTER += 1
         return pattern
+    # 2.1
+    for od in ONIG_DEPENDENCY:
+        string = string.replace(od[0], od[1])
+    pattern = compileRegex(string, flags)
+    if pattern is not None:
+        REGEX_COUNTER += 1
+        return pattern
+
     # 3
     ONIG_COUNTER += 1
     REGEXPS.append(string)
