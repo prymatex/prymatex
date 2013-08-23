@@ -47,8 +47,7 @@ class PMXManagedObject(object):
     def addSource(self, name, path):
         mtime = os.path.exists(path) and os.path.getmtime(path) or 0
         self.sources[name] = Source(name = name, path = path, mtime = mtime)
-        if self.pointer is None:
-            self.pointer = name
+        self.pointer = name
 
     def removeSource(self, name):
         del self.sources[name]
