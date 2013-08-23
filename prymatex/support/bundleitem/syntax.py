@@ -19,13 +19,19 @@ class PMXSyntaxProxy(object):
             proxy_value = self.__proxy()
             if proxy_value:
                 return getattr(proxy_value, name)
-    
+
     def __proxy(self):
         if self.proxyName.startswith('#'):
-            grammar = self.rootSyntax.grammar
-            if hasattr(grammar, 'repository') and self.proxyName[1:] in grammar.repository:
-                print(grammar.repository)
-                return grammar.repository[self.proxyName[1:]]
+            name = self.proxyName[1:]
+            parentNode = self.parentNode
+            while parentNode:
+                repository = getattr(parentNode, 'repository')
+                if name in repository:
+                    return repository[name]
+                parentNode = parentNode.parentNode
+            repository = getattr(self.rootSyntax.grammar, 'repository')
+            if name in repository:
+                return repository[name]
         elif self.proxyName == '$self':
             return self.rootSyntax.grammar
         elif self.proxyName == '$base':
@@ -34,9 +40,8 @@ class PMXSyntaxProxy(object):
             syntaxes = self.rootSyntax.syntaxes
             if self.proxyName in syntaxes:
                 return syntaxes[self.proxyName].grammar
-            else:
-                print("Algo esta mal")
-                return PMXSyntaxNode({}, self.rootSyntax)
+        print("Algo esta mal")
+        return PMXSyntaxNode({}, self.rootSyntax)
 
 class PMXSyntaxNode(object):
     KEYS = ('name', 'contentName', 'match', 'begin', 'content', 'end',
@@ -46,15 +51,14 @@ class PMXSyntaxNode(object):
         self.parentNode = parentNode
         for key in PMXSyntaxNode.KEYS:
             value = dataHash.get(key, None)
-            if value is not None:
-                if key in ('match', 'begin'):
-                    value = compileRegexp( value )
-                elif key in ('captures', 'beginCaptures', 'endCaptures'):
-                    value = sorted(value.items(), key = lambda v: int(v[0]))
-                elif key == 'repository':
-                    value = self.parse_repository(value)
-                elif key == 'patterns':
-                    value = self.create_children(value)
+            if value is not None and key in ('match', 'begin'):
+                value = compileRegexp( value )
+            elif value is not None and key in ('captures', 'beginCaptures', 'endCaptures'):
+                value = sorted(value.items(), key = lambda v: int(v[0]))
+            elif key == 'repository':
+                value = self.parse_repository(value)
+            elif key == 'patterns':
+                value = self.create_children(value)
             setattr(self, key, value )
         
         if self.name is not None:
@@ -72,13 +76,17 @@ class PMXSyntaxNode(object):
             # String for contentName
             self._contentNameFormater = "$" in self.contentName and String(self.contentName) or None 
 
-    def parse_repository(self, repository):
+    def parse_repository(self, repository = None):
+        if repository is None:
+            return {}
         return dict([ (key, 'include' in value and\
                     PMXSyntaxProxy( value["include"], self.rootSyntax, self ) or\
                     PMXSyntaxNode( value, self.rootSyntax, self ))
                 for key, value in repository.items() ])
 
-    def create_children(self, patterns):
+    def create_children(self, patterns = None):
+        if patterns is None:
+            return []
         return [ 'include' in pattern and\
                     PMXSyntaxProxy( pattern["include"], self.rootSyntax, self ) or\
                     PMXSyntaxNode( pattern, self.rootSyntax, self )
@@ -162,11 +170,7 @@ class PMXSyntaxNode(object):
     def match_first_son(self, string, position):
         match = (None, None)
         for p in self.patterns:
-            try:
-                tmatch = p.match_first(string, position)
-            except:
-                print(p, p.proxy, self.repository)
-                return (None, None)
+            tmatch = p.match_first(string, position)
             if tmatch[1]:
                 if tmatch[1].start() == 0:
                     match = tmatch
@@ -269,7 +273,6 @@ class PMXSyntax(PMXBundleItem):
         for key, value in self.syntaxes.items():
             if value.scopeNameSelector.does_match(self.scopeName) and\
             value.repository:
-                print("Agregando", key)
                 repository.update(value.repository)
         return repository
 
