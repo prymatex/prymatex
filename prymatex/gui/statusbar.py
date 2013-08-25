@@ -1,11 +1,10 @@
 # encoding: utf-8
-'''
-This module contains the main window status bar definition and widgets.
+
+"""This module contains the main window status bar definition and widgets.
 Some of the widgets defined here are:
     * The line counter
-    * Syntax selector
-    * 
-'''
+    * Syntax selector"""
+    
 from prymatex.qt import QtCore, QtGui
 from prymatex.utils.i18n import ugettext as _
             

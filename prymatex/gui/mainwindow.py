@@ -407,11 +407,9 @@ html_footer
             return
         self.addHistoryEntry({"editor": editor})
 
-
     def addHistoryEntry(self, entry):
         self._editorHistory = [entry] + self._editorHistory[self._editorHistoryIndex:]
         self._editorHistoryIndex = 0
-
 
     # ---------------- MainWindow Events
     def closeEvent(self, event):
@@ -429,7 +427,6 @@ html_footer
                     event.ignore()
                     return
 
-
     # ---------- MainWindow State
     def componentState(self):
         #Documentos abiertos
@@ -444,7 +441,6 @@ html_footer
             "geometry": self.saveGeometry(),
         }
         return state
-
 
     def setComponentState(self, state):
         # Restore dockers

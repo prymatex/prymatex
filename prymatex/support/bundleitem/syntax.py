@@ -8,48 +8,16 @@ from prymatex.utils import six
 from .base import PMXBundleItem
 from ..regexp import compileRegexp, String
 
-class PMXSyntaxProxy(object):
-    def __init__(self, proxyName, rootSyntax, parentNode = None):
-        self.rootSyntax = rootSyntax
-        self.parentNode = parentNode
-        self.proxyName = proxyName
-    
-    def __getattr__(self, name):
-        if self.proxyName:
-            proxy_value = self.__proxy()
-            if proxy_value:
-                return getattr(proxy_value, name)
-
-    def __proxy(self):
-        if self.proxyName.startswith('#'):
-            name = self.proxyName[1:]
-            repository = getattr(self.rootSyntax.grammar, 'repository')
-            if name in repository:
-                return repository[name]
-            parentNode = self.parentNode
-            while parentNode:
-                repository = getattr(parentNode, 'repository')
-                if name in repository:
-                    return repository[name]
-                parentNode = parentNode.parentNode
-        elif self.proxyName == '$self':
-            return self.rootSyntax.grammar
-        elif self.proxyName == '$base':
-            return self.rootSyntax.grammar
-        else:
-            syntaxes = self.rootSyntax.syntaxes
-            if self.proxyName in syntaxes:
-                return syntaxes[self.proxyName].grammar
-        print("Algo esta mal")
-        return PMXSyntaxNode({}, self.rootSyntax)
-
-class PMXSyntaxNode(object):
+# ==========================
+# = Node syntax definition =
+# ==========================
+class SyntaxNode(object):
     KEYS = ('name', 'contentName', 'match', 'begin', 'content', 'end',
             'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns')
     def __init__(self, dataHash, rootSyntax, parentNode = None):
         self.rootSyntax = rootSyntax
         self.parentNode = parentNode
-        for key in PMXSyntaxNode.KEYS:
+        for key in SyntaxNode.KEYS:
             value = dataHash.get(key, None)
             if value is not None and key in ('match', 'begin'):
                 value = compileRegexp( value )
@@ -80,16 +48,16 @@ class PMXSyntaxNode(object):
         if repository is None:
             return {}
         return dict([ (key, 'include' in value and\
-                    PMXSyntaxProxy( value["include"], self.rootSyntax, self ) or\
-                    PMXSyntaxNode( value, self.rootSyntax, self ))
+                    SyntaxProxyNode( value["include"], self.rootSyntax, self ) or\
+                    SyntaxNode( value, self.rootSyntax, self ))
                 for key, value in repository.items() ])
 
     def create_children(self, patterns = None):
         if patterns is None:
             return []
         return [ 'include' in pattern and\
-                    PMXSyntaxProxy( pattern["include"], self.rootSyntax, self ) or\
-                    PMXSyntaxNode( pattern, self.rootSyntax, self )
+                    SyntaxProxyNode( pattern["include"], self.rootSyntax, self ) or\
+                    SyntaxNode( pattern, self.rootSyntax, self )
                 for pattern in patterns ]
     
     def parse_captures(self, name, pattern, match, processor):
@@ -185,6 +153,44 @@ class PMXSyntaxNode(object):
                 match[0]._ex_contentName = match[0]._contentNameFormater and match[0]._contentNameFormater.expand(match[1]) or match[0].contentName
         return match
 
+# ================
+# = Syntax proxy =
+# ================
+class SyntaxProxyNode(object):
+    def __init__(self, proxyName, rootSyntax, parentNode = None):
+        self.rootSyntax = rootSyntax
+        self.parentNode = parentNode
+        self.__proxyName = proxyName
+        self.__proxyValue = None
+    
+    def __getattr__(self, name):
+        if self.__proxyValue is None:
+            self.__proxyValue = self.__proxy()
+        return getattr(self.__proxyValue, name)
+
+    def __proxy(self):
+        if self.__proxyName.startswith('#'):
+            name = self.__proxyName[1:]
+            repository = getattr(self.rootSyntax.grammar, 'repository')
+            if name in repository:
+                return repository[name]
+            parentNode = self.parentNode
+            while parentNode:
+                repository = getattr(parentNode, 'repository')
+                if name in repository:
+                    return repository[name]
+                parentNode = parentNode.parentNode
+        elif self.__proxyName == '$self':
+            return self.rootSyntax.grammar
+        elif self.__proxyName == '$base':
+            return self.rootSyntax.grammar
+        else:
+            syntaxes = self.rootSyntax.syntaxes
+            if self.__proxyName in syntaxes:
+                return syntaxes[self.proxyName].grammar
+        print("Algo esta mal")
+        return SyntaxNode({}, self.rootSyntax)
+
 class PMXSyntax(PMXBundleItem):
     KEYS = ( 'comment', 'firstLineMatch', 'scopeName', 'repository',
         'fileTypes', 'patterns', 'injectionSelector')
@@ -265,7 +271,7 @@ class PMXSyntax(PMXBundleItem):
             dataHash = {}
             dataHash['repository'] = self.buildRepository() if self.scopeName else {}
             dataHash['patterns'] = self.patterns if self.patterns else []
-            self._grammar = PMXSyntaxNode(dataHash, self)
+            self._grammar = SyntaxNode(dataHash, self)
         return self._grammar
 
     def buildRepository(self):
