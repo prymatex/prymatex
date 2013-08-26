@@ -3,9 +3,8 @@
 
 from .dockers import CodeEditorBookmarksDock, CodeEditorSymbolsDock
 from .editor import CodeEditor
-from . import helpers, addons, sidebar, minimap
+from . import helpers, addons, sidebar, minimap, modes
 from .status import CodeEditorStatus
-#from .overlay import EditorMessageOverlay, MiniMapOverlay
 
 def registerPlugin(manager):
     manager.registerComponent(CodeEditor)
@@ -30,10 +29,15 @@ def registerPlugin(manager):
     
     manager.registerComponent(helpers.PrintEditorStatusHelper, CodeEditor)
 
+    # ---------------- Modes
+    # manager.registerComponent(modes.CodeEditorTestMode, CodeEditor)
+    
+    # ---------------- Addons
     manager.registerComponent(addons.SmartUnindentAddon, CodeEditor)
     manager.registerComponent(addons.SpellCheckerAddon, CodeEditor)
     manager.registerComponent(addons.HighlightCurrentSelectionAddon, CodeEditor)
 
+    # ---------------- Sidebars
     manager.registerComponent(minimap.MiniMapAddon, CodeEditor)
     manager.registerComponent(sidebar.BookmarkSideBarAddon, CodeEditor)
     manager.registerComponent(sidebar.LineNumberSideBarAddon, CodeEditor)

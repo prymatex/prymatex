@@ -161,6 +161,7 @@ setup(
     dependency_links = ['git+http://github.com/prymatex/ponyguruma.git#egg=ponyguruma-dev'],
     install_requires = [ 
         'pyzmq',
+        'regex',
         'ponyguruma'
     ],
     
