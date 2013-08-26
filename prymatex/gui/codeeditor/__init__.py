@@ -30,7 +30,7 @@ def registerPlugin(manager):
     manager.registerComponent(helpers.PrintEditorStatusHelper, CodeEditor)
 
     # ---------------- Modes
-    manager.registerComponent(modes.CodeEditorTestMode, CodeEditor)
+    # manager.registerComponent(modes.CodeEditorTestMode, CodeEditor)
     
     # ---------------- Addons
     manager.registerComponent(addons.SmartUnindentAddon, CodeEditor)

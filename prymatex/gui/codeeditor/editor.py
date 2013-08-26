@@ -48,17 +48,17 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # ser un objeto factory, por ahora la fabricacion la hace el editor
     # en el factory method flyweightScopeFactory
     SCOPES = {}
-        
+
     # -------------------- Signals
     syntaxChanged = QtCore.Signal(object)
     themeChanged = QtCore.Signal()
     modeChanged = QtCore.Signal()
     blocksRemoved = QtCore.Signal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.Signal(QtGui.QTextBlock, int)
-    
+
     aboutToHighlightChange = QtCore.Signal()
     highlightChanged = QtCore.Signal()
-    
+
     # ------------------ Flags
     ShowTabsAndSpaces     = 1<<0
     ShowLineAndParagraphs = 1<<1
@@ -66,10 +66,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     MarginLine            = 1<<3
     IndentGuide           = 1<<4
     HighlightCurrentLine  = 1<<5
-    
+
     # ------------------- Settings
     SETTINGS_GROUP = 'CodeEditor'
-    
+
     removeTrailingSpaces = pmxConfigPorperty(default = False)
     autoBrackets = pmxConfigPorperty(default = True)
     smartHomeSmartEnd = pmxConfigPorperty(default = True)
@@ -79,11 +79,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     marginLineSpaces = pmxConfigPorperty(default = 80)
     tabStopSoft = pmxConfigPorperty(default = True)
     adjustIndentationOnPaste = pmxConfigPorperty(default = False)
-        
+
     @pmxConfigPorperty(default = 4)
     def indentationWidth(self, size):
         self.repaint()
-    
+
     @pmxConfigPorperty(default = 4)
     def tabWidth(self, size):
         self.setTabStopWidth(size * self.fontMetrics().width(WIDTH_CHARACTER))
