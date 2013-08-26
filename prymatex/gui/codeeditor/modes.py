@@ -3,16 +3,18 @@
 
 from prymatex.qt import QtCore, QtGui
 
+from prymatex.core import PMXBaseEditorAddon
+
 from prymatex.qt.helpers.keyevents import KEY_NUMBERS
 from prymatex.utils.lists import bisect_key
 from prymatex.gui.codeeditor import helpers
 from prymatex.models.support import BundleItemTreeNode
 from prymatex.gui.codeeditor.models import PMXCompleterTableModel
 
-class CodeEditorBaseMode(object):
+class CodeEditorBaseMode(PMXBaseEditorAddon):
     def __init__(self, editor):
         self.editor = editor
-    
+
     def active(self, event, scope):
         pass
     
@@ -22,6 +24,41 @@ class CodeEditorBaseMode(object):
     def inactive(self):
         pass
     
+    # ------------ Mouse Events
+    def mousePressEvent(self, event):
+        return self.editor.mousePressEvent(event)
+        
+    def mouseMoveEvent(self, event):
+        return self.editor.mouseMoveEvent(event)
+        
+    def mouseReleaseEvent(self, event):
+        return self.editor.mouseReleaseEvent(event)
+        
+    # ------------ Key Events
+    def keyPressEvent(self, event):
+        return self.editor.keyPressEvent(event)
+        
+    def keyReleaseEvent(self, event):
+        return self.editor.keyReleaseEvent(event)
+
+class CodeEditorTestMode(QtCore.QObject, CodeEditorBaseMode):
+    def __init__(self, parent = None):
+        QtCore.QObject.__init__(self, parent)
+
+    def active(self, event, scope):
+        pass
+
+    def isActive(self):
+        return False
+
+    def inactive(self):
+        pass
+
+    def eventFilter(self, obj, event):
+        if event.type() in (QtCore.QEvent.KeyPress, QtCore.QEvent.KeyRelease):
+            print("Te estoy escuchando :)")
+        return False
+
     # ------------ Mouse Events
     def mousePressEvent(self, event):
         return self.editor.mousePressEvent(event)

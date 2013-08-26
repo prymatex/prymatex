@@ -12,7 +12,7 @@ class CodeEditorKeyHelper(QtCore.QObject, PMXBaseEditorKeyHelper):
         
     def accept(self, event, cursor):
         return PMXBaseEditorKeyHelper.accept(self, event)
-    
+
     def execute(self, event, cursor):
         PMXBaseEditorKeyHelper.accept(self, event)
 

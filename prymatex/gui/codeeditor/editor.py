@@ -22,8 +22,8 @@ from .addons import CodeEditorAddon
 from .sidebar import CodeEditorSideBar, SideBarWidgetAddon
 from .processors import (PMXCommandProcessor, PMXSnippetProcessor, 
         PMXMacroProcessor)
-from .modes import (PMXMultiCursorEditorMode, PMXCompleterEditorMode,
-        PMXSnippetEditorMode)
+from .modes import (CodeEditorBaseMode, PMXMultiCursorEditorMode,
+        PMXCompleterEditorMode, PMXSnippetEditorMode)
 from .highlighter import PMXSyntaxHighlighter
 from .models import (SymbolListModel, BookmarkListModel, AlreadyTypedWords, 
         bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
@@ -158,6 +158,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.syntaxHighlighter = PMXSyntaxHighlighter(self)
         
         # TODO Quiza algo como que los modos se registren solos?
+        self.codeEditorModes = []
         #Modes
         self.multiCursorMode = PMXMultiCursorEditorMode(self)
         self.completerMode = PMXCompleterEditorMode(self)
@@ -209,6 +210,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         PMXBaseEditor.addComponent(self, component)
         if isinstance(component, SideBarWidgetAddon):
             self.addSideBarWidget(component)
+        elif isinstance(component, CodeEditorBaseMode):
+            self.addCodeEditorMode(component)
 
     def addSideBarWidget(self, widget):
         if widget.ALIGNMENT == QtCore.Qt.AlignRight:
@@ -216,6 +219,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         else:
             self.leftBar.addWidget(widget)
 
+    def addCodeEditorMode(self, codeEditorMode):
+        self.installEventFilter(codeEditorMode)
+        self.codeEditorModes.append(codeEditorMode)
+        
     def on_syntaxChanged(self, syntax):
         # Set the basic scope
         self.setBasicScope(( syntax.scopeName, ))
