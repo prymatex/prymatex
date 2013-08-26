@@ -187,7 +187,7 @@ class SyntaxProxyNode(object):
         else:
             syntaxes = self.rootSyntax.syntaxes
             if self.__proxyName in syntaxes:
-                return syntaxes[self.proxyName].grammar
+                return syntaxes[self.__proxyName].grammar
         print("Algo esta mal")
         return SyntaxNode({}, self.rootSyntax)
 
