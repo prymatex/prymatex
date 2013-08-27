@@ -63,50 +63,57 @@ class SyntaxNode(object):
                 for pattern in patterns ]
     
     def parse_captures(self, name, pattern, match, processor):
-        captures = pattern.match_captures( name, match)
         #Aca tengo que comparar con -1, Ver nota en match_captures
-        captures = [group_range_name for group_range_name in captures if group_range_name[1][0] != -1 and group_range_name[1][0] != group_range_name[1][-1]]
+        captures = filter(lambda capture: 
+            capture[1][0] != -1 and capture[1][0] != capture[1][-1],
+            pattern.match_captures( name, match ))
         starts = []
         ends = []
-        for group, range, value in captures:
-            starts.append((range[0], group, value))
-            ends.append((range[-1], -group, value))
+        for group, _range, value in captures:
+            starts.append((_range[0], group, value))
+            ends.append((_range[-1], group, value))
         starts = starts[::-1]
         ends = ends[::-1]
         # Agarrate de algo
-
+        
+        def apply_captures(position, group, value, method):
+            if value.patterns and method == "openTag":
+                stack = [(value, None)]
+                print(position, match.group(group))
+                value.parse_source(position, stack, match.group(group), processor)
+            elif value.name:
+                name = value._nameFormater and value._nameFormater.expand(match) or value.name
+                getattr(processor, method)(name, position)
+            else:
+                print("nada", position, group, value, method)
+                
         while starts or ends:
             if not starts:
-                pos, _, value = ends.pop()
-                print(value.name)
-                processor.closeTag(value.name, pos)
+                pos, group, value = ends.pop()
+                apply_captures(pos, group, value, "closeTag")
             elif not ends:
-                pos, _, value = starts.pop()
-                print(value.name)                
-                processor.openTag(value.name, pos)
-            elif abs(ends[-1][1]) < starts[-1][1]:
-                pos, _, value = ends.pop()
-                print(value.name)
-                processor.closeTag(value.name, pos)
+                pos, group, value = starts.pop()
+                apply_captures(pos, group, value, "openTag")
+            elif ends[-1][1] < starts[-1][1]:
+                pos, group, value = ends.pop()
+                apply_captures(pos, group, value, "closeTag")
             else:
-                pos, _, value = starts.pop()
-                print(value.name)
-                processor.openTag(value.name, pos)
-    
+                pos, group, value = starts.pop()
+                apply_captures(pos, group, value, "openTag")
+
     def match_captures(self, name, match):
         matches = []
         captures = getattr(self, name) or {}
+        groups_len = len(match.groups())
 
         for key, value in captures.items():
-            try:
-                capture = ( int(key), match.span(int(key)), value ) if key.isdigit()\
-                    else ( match.groups().index(match.group(key)) + 1, match.span(key), value )
-                matches.append(capture)
-            except IndexError as indexError:
-                # Esta es cuando no le pega con el index al match
-                pass
-            except Exception as ex:
-                print(ex, match, match.groups(), key, value)
+            if key.isdigit():
+                index = int(key)
+                if index < groups_len:
+                    matches.append(( index, match.span(index), value ))
+            else:
+                matches.append(( match.groups().index(match.group(key)), match.span(key), value ))
+        # TODO Ver si no hay que entregarlos ordenados por (index,,)
         return matches
       
     def match_first(self, string, position):
@@ -155,27 +162,31 @@ class SyntaxNode(object):
                 match[0]._ex_contentName = match[0]._contentNameFormater and match[0]._contentNameFormater.expand(match[1]) or match[0].contentName
         return match
 
-    def parse(self, string, processor = None):
+    def parse(self, text, processor = None):
         if processor:
             processor.startParsing(self.scopeName)
         stack = [( self, None )]
-        for line in string.splitlines(True):
-            self.parseLine(stack, line, processor)
+        for line in text.splitlines(True):
+            self.parse_line(stack, line, processor)
         if processor:
             processor.endParsing(self.scopeName)
     
     def parse_line(self, stack, line, processor):
         if processor:
             processor.beginLine(line)
+        position = self.parse_source(0, stack, line, processor)
+        if processor:
+            processor.endLine(line)
+    
+    def parse_source(self, position, stack, source, processor):
         top, match = stack[-1]
-        position = 0
         
         while True:
             end_match = pattern = pattern_match = None
             if top.patterns:
-                pattern, pattern_match = top.match_first_son(line, position)
+                pattern, pattern_match = top.match_first_son(source, position)
             if top.end:
-                end_match = top.match_end( line, match, position )
+                end_match = top.match_end( source, match, position )
             if end_match and ( not pattern_match or pattern_match.start() >= end_match.start() ):
                 start_pos = end_match.start()
                 end_pos = end_match.end()
@@ -215,8 +226,6 @@ class SyntaxNode(object):
                     if pattern.name and processor:
                         processor.closeTag(pattern._ex_name, end_pos)
             position = end_pos
-        if processor:
-            processor.endLine(line)
         return position
 
 # ================
@@ -246,9 +255,7 @@ class SyntaxProxyNode(object):
                 if name in repository:
                     return repository[name]
                 parentNode = parentNode.parentNode
-        elif self.__proxyName == '$self':
-            return self.rootSyntax.grammar
-        elif self.__proxyName == '$base':
+        elif self.__proxyName in ['$self', '$base']:
             return self.rootSyntax.grammar
         else:
             syntaxes = self.rootSyntax.syntaxes
@@ -348,8 +355,8 @@ class PMXSyntax(PMXBundleItem):
                 repository.update(value.repository)
         return repository
 
-    def parse(self, string, processor = None):
-        self.grammar.parse(string, processor)
+    def parse(self, text, processor = None):
+        self.grammar.parse(text, processor)
     
     def parseLine(self, stack, line, processor):
         self.grammar.parse_line(stack, line, processor)
