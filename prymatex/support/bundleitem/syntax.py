@@ -22,7 +22,9 @@ class SyntaxNode(object):
             if value is not None and key in ('match', 'begin'):
                 value = compileRegexp( value )
             elif value is not None and key in ('captures', 'beginCaptures', 'endCaptures'):
-                value = sorted(value.items(), key = lambda v: int(v[0]))
+                value = dict(
+                    map(lambda item: (item[0], SyntaxNode(item[1], self.rootSyntax, self)), value.items())
+                )
             elif key == 'repository':
                 value = self.parse_repository(value)
             elif key == 'patterns':
@@ -61,50 +63,50 @@ class SyntaxNode(object):
                 for pattern in patterns ]
     
     def parse_captures(self, name, pattern, match, processor):
-        captures = pattern.match_captures( name, match )
+        captures = pattern.match_captures( name, match)
         #Aca tengo que comparar con -1, Ver nota en match_captures
         captures = [group_range_name for group_range_name in captures if group_range_name[1][0] != -1 and group_range_name[1][0] != group_range_name[1][-1]]
         starts = []
         ends = []
-        for group, range, name in captures:
-            starts.append((range[0], group, name))
-            ends.append((range[-1], -group, name))
+        for group, range, value in captures:
+            starts.append((range[0], group, value))
+            ends.append((range[-1], -group, value))
         starts = starts[::-1]
         ends = ends[::-1]
-        
+        # Agarrate de algo
+
         while starts or ends:
             if not starts:
-                pos, _, name = ends.pop()
-                processor.closeTag(name, pos)
+                pos, _, value = ends.pop()
+                print(value.name)
+                processor.closeTag(value.name, pos)
             elif not ends:
-                pos, _, name = starts.pop()
-                processor.openTag(name, pos)
+                pos, _, value = starts.pop()
+                print(value.name)                
+                processor.openTag(value.name, pos)
             elif abs(ends[-1][1]) < starts[-1][1]:
-                pos, _, name = ends.pop()
-                processor.closeTag(name, pos)
+                pos, _, value = ends.pop()
+                print(value.name)
+                processor.closeTag(value.name, pos)
             else:
-                pos, _, name = starts.pop()
-                processor.openTag(name, pos)
+                pos, _, value = starts.pop()
+                print(value.name)
+                processor.openTag(value.name, pos)
     
     def match_captures(self, name, match):
         matches = []
-        captures = getattr(self, name)
-        
-        if captures:
-            for key, value in captures:
-                if key.isdigit():
-                    # TODO 0 es igual a lo capturado no hace falta hacer el match.groups() seria directemente el pattern
-                    index = int(key)
-                    if index <= len(match.groups()):
-                        #Problemas entre python y ruby, al pones un span del match, en un None oniguruma me retorna (-1, -1),
-                        #esto es importante para el filtro del llamador
-                        try:
-                            matches.append([index, match.span(index), value['name']])
-                        except Exception as ex:
-                            print(name, match, match.groups(), value, key, ex)
-                else:
-                    if match.groups()[ key ]:
-                        matches.append([match.groups()[ key ], match.groupdict[ key ], value['name']])
+        captures = getattr(self, name) or {}
+
+        for key, value in captures.items():
+            try:
+                capture = ( int(key), match.span(int(key)), value ) if key.isdigit()\
+                    else ( match.groups().index(match.group(key)) + 1, match.span(key), value )
+                matches.append(capture)
+            except IndexError as indexError:
+                # Esta es cuando no le pega con el index al match
+                pass
+            except Exception as ex:
+                print(ex, match, match.groups(), key, value)
         return matches
       
     def match_first(self, string, position):
@@ -152,6 +154,70 @@ class SyntaxNode(object):
             if match[0].contentName:
                 match[0]._ex_contentName = match[0]._contentNameFormater and match[0]._contentNameFormater.expand(match[1]) or match[0].contentName
         return match
+
+    def parse(self, string, processor = None):
+        if processor:
+            processor.startParsing(self.scopeName)
+        stack = [( self, None )]
+        for line in string.splitlines(True):
+            self.parseLine(stack, line, processor)
+        if processor:
+            processor.endParsing(self.scopeName)
+    
+    def parse_line(self, stack, line, processor):
+        if processor:
+            processor.beginLine(line)
+        top, match = stack[-1]
+        position = 0
+        
+        while True:
+            end_match = pattern = pattern_match = None
+            if top.patterns:
+                pattern, pattern_match = top.match_first_son(line, position)
+            if top.end:
+                end_match = top.match_end( line, match, position )
+            if end_match and ( not pattern_match or pattern_match.start() >= end_match.start() ):
+                start_pos = end_match.start()
+                end_pos = end_match.end()
+                if top.contentName and processor:
+                    processor.closeTag(top._ex_contentName, start_pos)
+                if processor:
+                    self.parse_captures('captures', top, end_match, processor)
+                if processor:
+                    self.parse_captures('endCaptures', top, end_match, processor)
+                if top.name and processor:
+                    processor.closeTag( top._ex_name, end_pos)
+                stack.pop()
+                top, match = stack[-1]
+            else:
+                if not pattern:
+                    break
+
+                start_pos = pattern_match.start()
+                end_pos = pattern_match.end()
+                if pattern.begin:
+                    if pattern.name and processor:
+                        processor.openTag(pattern._ex_name, start_pos)
+                    if processor:
+                        self.parse_captures('captures', pattern, pattern_match, processor)
+                    if processor:
+                        self.parse_captures('beginCaptures', pattern, pattern_match, processor)
+                    if pattern.contentName and processor:
+                        processor.openTag(pattern._ex_contentName, end_pos)
+                    top = pattern
+                    match = pattern_match
+                    stack.append((top, match))
+                elif pattern.match:
+                    if pattern.name and processor:
+                        processor.openTag(pattern._ex_name, start_pos)
+                    if processor:
+                        self.parse_captures('captures', pattern, pattern_match, processor)
+                    if pattern.name and processor:
+                        processor.closeTag(pattern._ex_name, end_pos)
+            position = end_pos
+        if processor:
+            processor.endLine(line)
+        return position
 
 # ================
 # = Syntax proxy =
@@ -283,69 +349,11 @@ class PMXSyntax(PMXBundleItem):
         return repository
 
     def parse(self, string, processor = None):
-        if processor:
-            processor.startParsing(self.scopeName)
-        stack = [( self.grammar, None )]
-        for line in string.splitlines(True):
-            self.parseLine(stack, line, processor)
-        if processor:
-            processor.endParsing(self.scopeName)
+        self.grammar.parse(string, processor)
     
     def parseLine(self, stack, line, processor):
-        if processor:
-            processor.beginLine(line)
-        top, match = stack[-1]
-        position = 0
-        grammar = self.grammar
+        self.grammar.parse_line(stack, line, processor)
         
-        while True:
-            end_match = pattern = pattern_match = None
-            if top.patterns:
-                pattern, pattern_match = top.match_first_son(line, position)
-            if top.end:
-                end_match = top.match_end( line, match, position )
-            if end_match and ( not pattern_match or pattern_match.start() >= end_match.start() ):
-                start_pos = end_match.start()
-                end_pos = end_match.end()
-                if top.contentName and processor:
-                    processor.closeTag(top._ex_contentName, start_pos)
-                if processor:
-                    grammar.parse_captures('captures', top, end_match, processor)
-                if processor:
-                    grammar.parse_captures('endCaptures', top, end_match, processor)
-                if top.name and processor:
-                    processor.closeTag( top._ex_name, end_pos)
-                stack.pop()
-                top, match = stack[-1]
-            elif pattern:
-                start_pos = pattern_match.start()
-                end_pos = pattern_match.end()
-                if pattern.begin:
-                    if pattern.name and processor:
-                        processor.openTag(pattern._ex_name, start_pos)
-                    if processor:
-                        grammar.parse_captures('captures', pattern, pattern_match, processor)
-                    if processor:
-                        grammar.parse_captures('beginCaptures', pattern, pattern_match, processor)
-                    if pattern.contentName and processor:
-                        processor.openTag(pattern._ex_contentName, end_pos)
-                    top = pattern
-                    match = pattern_match
-                    stack.append((top, match))
-                elif pattern.match:
-                    if pattern.name and processor:
-                        processor.openTag(pattern._ex_name, start_pos)
-                    if processor:
-                        grammar.parse_captures('captures', pattern, pattern_match, processor)
-                    if pattern.name and processor:
-                        processor.closeTag(pattern._ex_name, end_pos)
-            else:
-                break
-            position = end_pos
-        if processor:
-            processor.endLine(line)
-        return position
-
     @classmethod
     def findGroup(cls, scopes):
         for scope in scopes:
