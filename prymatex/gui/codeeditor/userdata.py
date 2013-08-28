@@ -61,7 +61,7 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
     
     def tokenAtPosition(self, pos):
         for token in self.__tokens[::-1]:
-            if token.start <= pos <= token.end:
+            if token.start <= pos < token.end:
                 return token
 
     # ------------------- Cache Handle
