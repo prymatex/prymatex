@@ -398,7 +398,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             rightToken = userData.tokenAtPosition(positionInBlock)
             return self.SCOPES[rightToken and rightToken.scopeHash or self.basicScopeHash]
         elif direction == "left":
-            leftToken = userData.tokenAtPosition(positionInBlock - 1)
+            leftToken = userData.tokenAtPosition(positionInBlock - delta)
             return self.SCOPES[leftToken and leftToken.scopeHash or self.basicScopeHash]
         elif direction == "both":
             leftToken = userData.tokenAtPosition(positionInBlock - delta)
