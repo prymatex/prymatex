@@ -284,7 +284,8 @@ class PrintEditorStatusHelper(CodeEditorKeyHelper):
         #Aca lo que queramos hacer
         from prymatex.support.regexp import base
         print(base.REGEX_COUNTER, base.RE_COUNTER, base.ONIG_COUNTER, base.REGEXPS)
-        userData = cursor.block().userData()
+        userData = self.editor.blockUserData(cursor.block())
+        print(userData.tokens())
         print(self.editor.currentWord())
         print(self.editor.scope())
         print(self.editor.wordUnderCursor(), cursor.position())
