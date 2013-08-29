@@ -66,54 +66,27 @@ class SyntaxNode(object):
         captures = filter(lambda capture: 
             capture[1][0] != -1 and capture[1][0] != capture[1][-1],
             pattern.match_captures( name, match ))
-        starts = []
-        ends = []
-        for group, _range, value in captures:
-            starts.append((_range[0], group, value))
-            ends.append((_range[-1], group, value))
-        starts = starts[::-1]
-        ends = ends[::-1]
-        # Agarrate de algo
         
-        def apply_captures(position, group, value, method):
-            if value.patterns and method == "openTag":
+        for group, _range, value in sorted(captures, key = lambda t: t[0]):
+            if value.name:
+                _ex_name = value._nameFormater.expand(match)
+                processor.openTag(_ex_name, _range[0])
+                processor.closeTag(_ex_name, _range[1])
+            else:
                 stack = [(value, None)]
-                print(position, match.group(group))
-                value.parse_source(position, stack, match.group(group), processor)
-            elif value.name:
-                getattr(processor, method)(value._nameFormater.expand(match), position)
-            else:
-                print("nada", position, group, value, method)
-                
-        while starts or ends:
-            if not starts:
-                pos, group, value = ends.pop()
-                apply_captures(pos, group, value, "closeTag")
-            elif not ends:
-                pos, group, value = starts.pop()
-                apply_captures(pos, group, value, "openTag")
-            elif ends[-1][1] < starts[-1][1]:
-                pos, group, value = ends.pop()
-                apply_captures(pos, group, value, "closeTag")
-            else:
-                pos, group, value = starts.pop()
-                apply_captures(pos, group, value, "openTag")
+                value.parse_source(_range[0], stack, match.group(group), processor)
 
     def match_captures(self, name, match):
-        matches = []
         captures = getattr(self, name) or {}
-
+        len_groups = len(match.groups())
         for key, value in captures.items():
-            try:
-                if key.isdigit():
-                    matches.append(( int(key), match.span(int(key)), value ))
-                else:
-                    matches.append(( match.groups().index(match.group(key)), match.span(key), value ))
-            except:
-                pass
-        # TODO Ver si no hay que entregarlos ordenados por (index,,)
-        return matches
-      
+            if key.isdigit():
+                index = int(key)
+                if index <= len_groups:
+                    yield ( index, match.span(index), value )
+            else:
+                yield ( match.groups().index(match.group(key)), match.span(key), value )
+
     def match_first(self, string, position):
         if self.match:
             match = self.match.search( string, position )
@@ -271,7 +244,7 @@ class SyntaxProxyNode(object):
             syntaxes = self.rootNode.syntaxes()
             if self.__proxyName in syntaxes:
                 return syntaxes[self.__proxyName].grammar
-        print("Algo esta mal")
+        print("Not found %s" % self.__proxyName)
         return SyntaxNode({})
 
 class PMXSyntax(PMXBundleItem):
