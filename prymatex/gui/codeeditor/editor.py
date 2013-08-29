@@ -856,7 +856,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def executeCommand(self, commandScript = None, commandInput = "none", commandOutput = "insertText"):
         if commandScript is None:
             commandScript = self.textCursor().selectedText() if self.textCursor().hasSelection() else self.textCursor().block().text()
-        command = self.application.supportManager.buildAdHocCommand(commandScript, self.syntax().bundle, commandInput, commandOutput)
+        command = self.application.supportManager.buildAdHocCommand(
+            commandScript, self.syntax().bundle, 
+            commandInput=commandInput, commandOutput=commandOutput)
         self.insertBundleItem(command)
 
     def environmentVariables(self):
