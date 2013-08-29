@@ -7,6 +7,8 @@ from prymatex.qt import QtGui, QtCore
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.codeeditor.sidebar import SideBarWidgetAddon
 
+WIDTH_CHARACTER = "#"
+
 class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignRight
     WIDTH = 120
@@ -34,6 +36,8 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         font.setPixelSize(2)
         self.setFont(font)
 
+        self.setTabStopWidth(4 * self.fontMetrics().width(WIDTH_CHARACTER))
+        
         self.lines_count = 0
         self.goe = QtGui.QGraphicsOpacityEffect()
         self.setGraphicsEffect(self.goe)
