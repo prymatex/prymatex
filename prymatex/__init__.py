@@ -16,7 +16,7 @@ so it's sufficient for generating the development version numbers.
 """
     if path is None:
         import prymatex
-        repo_dir = os.path.dirname(os.path.dirname(prymatex.__file__))
+        repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(prymatex.__file__)))
     else:
         repo_dir = path
     git_log = subprocess.Popen('git log --pretty=format:%ct --quiet -1 HEAD',
