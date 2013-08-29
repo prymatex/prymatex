@@ -3,6 +3,8 @@
 
 from __future__ import unicode_literals
 
+from time import time
+
 from prymatex.utils import six
 
 from .base import PMXBundleItem
@@ -14,8 +16,7 @@ from ..regexp import compileRegexp, String
 class SyntaxNode(object):
     KEYS = ('name', 'contentName', 'match', 'begin', 'content', 'end',
             'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns')
-    def __init__(self, dataHash, rootSyntax, parentNode = None):
-        self.rootSyntax = rootSyntax
+    def __init__(self, dataHash, parentNode = None):
         self.parentNode = parentNode
         for key in SyntaxNode.KEYS:
             value = dataHash.get(key, None)
@@ -23,7 +24,7 @@ class SyntaxNode(object):
                 value = compileRegexp( value )
             elif value is not None and key in ('captures', 'beginCaptures', 'endCaptures'):
                 value = dict(
-                    map(lambda item: (item[0], SyntaxNode(item[1], self.rootSyntax, self)), value.items())
+                    map(lambda item: (item[0], SyntaxNode(item[1], self)), value.items())
                 )
             elif key == 'repository':
                 value = self.parse_repository(value)
@@ -32,34 +33,35 @@ class SyntaxNode(object):
             setattr(self, key, value )
         
         if self.name is not None:
-            # Inject
-            for injector in self.rootSyntax.injectors.values():
-                if injector.injectionSelector.does_match(self.name):
-                    if self.patterns is None:
-                        self.patterns = []
-                    self.patterns.extend(injector.grammar.patterns)
-
             # String for name
-            self._nameFormater = "$" in self.name and String(self.name) or None 
+            self._nameFormater = String(self.name)
         
         if self.contentName is not None:
             # String for contentName
-            self._contentNameFormater = "$" in self.contentName and String(self.contentName) or None 
+            self._contentNameFormater = String(self.contentName)
 
+    def set_injectors(self, injectors):
+        for injector in injectors.values():
+            if injector.injectionSelector.does_match(self.name):
+                self.patterns.extend(injector.grammar.patterns)
+
+    def set_syntaxes(self, syntaxes):
+        self.syntaxes = syntaxes
+                
     def parse_repository(self, repository = None):
         if repository is None:
             return {}
         return dict([ (key, 'include' in value and\
-                    SyntaxProxyNode( value["include"], self.rootSyntax, self ) or\
-                    SyntaxNode( value, self.rootSyntax, self ))
+                    SyntaxProxyNode( value["include"], self ) or\
+                    SyntaxNode( value, self ))
                 for key, value in repository.items() ])
 
     def create_children(self, patterns = None):
         if patterns is None:
             return []
         return [ 'include' in pattern and\
-                    SyntaxProxyNode( pattern["include"], self.rootSyntax, self ) or\
-                    SyntaxNode( pattern, self.rootSyntax, self )
+                    SyntaxProxyNode( pattern["include"], self ) or\
+                    SyntaxNode( pattern, self )
                 for pattern in patterns ]
     
     def parse_captures(self, name, pattern, match, processor):
@@ -82,8 +84,7 @@ class SyntaxNode(object):
                 print(position, match.group(group))
                 value.parse_source(position, stack, match.group(group), processor)
             elif value.name:
-                name = value._nameFormater and value._nameFormater.expand(match) or value.name
-                getattr(processor, method)(name, position)
+                getattr(processor, method)(value._nameFormater.expand(match), position)
             else:
                 print("nada", position, group, value, method)
                 
@@ -104,15 +105,15 @@ class SyntaxNode(object):
     def match_captures(self, name, match):
         matches = []
         captures = getattr(self, name) or {}
-        groups_len = len(match.groups())
 
         for key, value in captures.items():
-            if key.isdigit():
-                index = int(key)
-                if index < groups_len:
-                    matches.append(( index, match.span(index), value ))
-            else:
-                matches.append(( match.groups().index(match.group(key)), match.span(key), value ))
+            try:
+                if key.isdigit():
+                    matches.append(( int(key), match.span(int(key)), value ))
+                else:
+                    matches.append(( match.groups().index(match.group(key)), match.span(key), value ))
+            except:
+                pass
         # TODO Ver si no hay que entregarlos ordenados por (index,,)
         return matches
       
@@ -154,27 +155,31 @@ class SyntaxNode(object):
                     break
                 if not match[1] or match[1].start() > tmatch[1].start():
                     match = tmatch
+        
         # Expand names
         if match[1] is not None and (match[0].name or match[0].contentName):
             if match[0].name:
-                match[0]._ex_name = match[0]._nameFormater and match[0]._nameFormater.expand(match[1]) or match[0].name
+                match[0]._ex_name = match[0]._nameFormater.expand(match[1])
             if match[0].contentName:
-                match[0]._ex_contentName = match[0]._contentNameFormater and match[0]._contentNameFormater.expand(match[1]) or match[0].contentName
+                match[0]._ex_contentName = match[0]._contentNameFormater.expand(match[1])
         return match
 
     def parse(self, text, processor = None):
         if processor:
-            processor.startParsing(self.scopeName)
+            processor.startParsing(self.name)
         stack = [( self, None )]
         for line in text.splitlines(True):
             self.parse_line(stack, line, processor)
         if processor:
-            processor.endParsing(self.scopeName)
+            processor.endParsing(self.name)
     
     def parse_line(self, stack, line, processor):
         if processor:
             processor.beginLine(line)
         position = self.parse_source(0, stack, line, processor)
+        # Fixed stack
+        if stack and stack[-1][0].name is None and stack[-1][0].contentName is None:
+            stack.pop()
         if processor:
             processor.endLine(line)
     
@@ -232,21 +237,29 @@ class SyntaxNode(object):
 # = Syntax proxy =
 # ================
 class SyntaxProxyNode(object):
-    def __init__(self, proxyName, rootSyntax, parentNode = None):
-        self.rootSyntax = rootSyntax
+    def __init__(self, proxyName, parentNode):
         self.parentNode = parentNode
         self.__proxyName = proxyName
         self.__proxyValue = None
-    
+        self.__rootNode = None
+
     def __getattr__(self, name):
         if self.__proxyValue is None:
             self.__proxyValue = self.__proxy()
         return getattr(self.__proxyValue, name)
-
+    
+    @property
+    def rootNode(self):
+        if self.__rootNode is None:
+            self.__rootNode = self.parentNode
+            while self.__rootNode.parentNode is not None:
+                self.__rootNode = self.__rootNode.parentNode
+        return self.__rootNode
+        
     def __proxy(self):
         if self.__proxyName.startswith('#'):
             name = self.__proxyName[1:]
-            repository = getattr(self.rootSyntax.grammar, 'repository')
+            repository = getattr(self.rootNode, 'repository')
             if name in repository:
                 return repository[name]
             parentNode = self.parentNode
@@ -256,13 +269,13 @@ class SyntaxProxyNode(object):
                     return repository[name]
                 parentNode = parentNode.parentNode
         elif self.__proxyName in ['$self', '$base']:
-            return self.rootSyntax.grammar
+            return self.rootNode
         else:
-            syntaxes = self.rootSyntax.syntaxes
+            syntaxes = self.rootNode.syntaxes
             if self.__proxyName in syntaxes:
                 return syntaxes[self.__proxyName].grammar
         print("Algo esta mal")
-        return SyntaxNode({}, self.rootSyntax)
+        return SyntaxNode({})
 
 class PMXSyntax(PMXBundleItem):
     KEYS = ( 'comment', 'firstLineMatch', 'scopeName', 'repository',
@@ -342,9 +355,12 @@ class PMXSyntax(PMXBundleItem):
     def grammar(self):
         if not hasattr(self, '_grammar'):
             dataHash = {}
-            dataHash['repository'] = self.buildRepository() if self.scopeName else {}
-            dataHash['patterns'] = self.patterns if self.patterns else []
-            self._grammar = SyntaxNode(dataHash, self)
+            dataHash['repository'] = self.buildRepository()
+            dataHash['name'] = self.scopeName
+            dataHash['patterns'] = self.patterns or []
+            self._grammar = SyntaxNode(dataHash)
+            self._grammar.set_injectors(self.injectors)
+            self._grammar.set_syntaxes(self.syntaxes)
         return self._grammar
 
     def buildRepository(self):
