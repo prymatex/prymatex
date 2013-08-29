@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-from time import time
+import types
 
 from prymatex.utils import six
 
@@ -41,13 +41,10 @@ class SyntaxNode(object):
             self._contentNameFormater = String(self.contentName)
 
     def set_injectors(self, injectors):
-        for injector in injectors.values():
+        for injector in injectors:
             if injector.injectionSelector.does_match(self.name):
                 self.patterns.extend(injector.grammar.patterns)
-
-    def set_syntaxes(self, syntaxes):
-        self.syntaxes = syntaxes
-                
+            
     def parse_repository(self, repository = None):
         if repository is None:
             return {}
@@ -271,7 +268,7 @@ class SyntaxProxyNode(object):
         elif self.__proxyName in ['$self', '$base']:
             return self.rootNode
         else:
-            syntaxes = self.rootNode.syntaxes
+            syntaxes = self.rootNode.syntaxes()
             if self.__proxyName in syntaxes:
                 return syntaxes[self.__proxyName].grammar
         print("Algo esta mal")
@@ -341,31 +338,35 @@ class PMXSyntax(PMXBundleItem):
         PMXBundleItem.update(self, dataHash)
         if hasattr(self, '_grammar'):
             delattr(self, '_grammar')
-
-    @property
-    def syntaxes(self):
-        return self.manager.getSyntaxesAsDictionary()
-
-    @property
-    def injectors(self):
-        return dict(filter(lambda key_val: key_val[1].injectionSelector is not None, 
-                self.syntaxes.items()))
     
     @property
     def grammar(self):
         if not hasattr(self, '_grammar'):
-            dataHash = {}
-            dataHash['repository'] = self.buildRepository()
-            dataHash['name'] = self.scopeName
-            dataHash['patterns'] = self.patterns or []
+            # Build grammar
+            syntaxes = self.manager.getSyntaxesAsDictionary()
+
+            dataHash = {
+                'repository': self.buildRepository(syntaxes),
+                'name': self.scopeName,
+                'patterns': self.patterns or []
+            }
             self._grammar = SyntaxNode(dataHash)
-            self._grammar.set_injectors(self.injectors)
-            self._grammar.set_syntaxes(self.syntaxes)
+
+            # Injectors
+            self._grammar.set_injectors(filter(lambda injector: injector.injectionSelector, 
+                syntaxes.values()))
+
+            # Syntaxes
+            def syntaxes(item):
+                def _syntaxes(self):
+                    return item.manager.getSyntaxesAsDictionary()
+                return _syntaxes
+            self._grammar.syntaxes = types.MethodType(syntaxes(self), self._grammar)
         return self._grammar
 
-    def buildRepository(self):
+    def buildRepository(self, syntaxes):
         repository = {}
-        for key, value in self.syntaxes.items():
+        for key, value in syntaxes.items():
             if value.scopeNameSelector.does_match(self.scopeName) and\
             value.repository:
                 repository.update(value.repository)
