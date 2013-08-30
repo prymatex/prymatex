@@ -311,6 +311,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     
     def close(self):
         PMXBaseEditor.close(self)
+        # Stp'highlighter
+        self.syntaxHighlighter.stop()
         TextEditWidget.close(self)
         
     def reload(self):
@@ -385,8 +387,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             )
         return scopeHash
 
-    def scope(self, cursor = None, block = None, blockPosition = None, documentPosition = None,
-                scopeHash = None, direction = "right", delta = 1):
+    def scope(self, cursor = None, block = None, blockPosition = None, 
+            documentPosition = None, scopeHash = None, direction = "right", delta = 1):
         if scopeHash is not None:
             return self.SCOPES[scopeHash]
         if block is None:

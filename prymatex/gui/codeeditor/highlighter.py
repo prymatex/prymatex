@@ -20,6 +20,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.processor = CodeEditorSyntaxProcessor(editor)
         self.syntax = syntax
         self.theme = theme
+        self.__format_cache = None
         
         self.highlightTask = self.editor.application.schedulerManager.idleTask()
 
@@ -51,7 +52,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.syntax = syntax
         
     def setTheme(self, theme):
-        PMXSyntaxHighlighter.FORMAT_CACHE = {}
+        self.__format_cache = PMXSyntaxHighlighter.FORMAT_CACHE.setdefault(theme.uuidAsText(), {})
         self.theme = theme
 
     def asyncHighlightFunction(self):
@@ -70,10 +71,14 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             if userData.testStateHash(self.__build_userData_hash(scopeName, text, blockState)):
                 # Only change the formats
                 formats = []
-                for frange in block.layout().additionalFormats():
+                blockLayout = block.layout()
+                blockLayout.beginLayout()
+                for frange in blockLayout.additionalFormats():
                     frange.format = self.highlightFormat(self.editor.scope(blockPosition = frange.start).path)
                     formats.append(frange)
-                block.layout().setAdditionalFormats(formats)
+                blockLayout.clearAdditionalFormats()
+                blockLayout.setAdditionalFormats(formats)
+                blockLayout.endLayout()
                 blockState = block.userState()
                 block = block.next()
                 continue
@@ -158,7 +163,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 self.setFormat(token.start, token.end - token.start, frmt)
 
     def highlightFormat(self, scopePath):
-        if scopePath not in PMXSyntaxHighlighter.FORMAT_CACHE:
+        if scopePath not in self.__format_cache:
             frmt = QtGui.QTextCharFormat()
             settings = self.theme.getStyle(scopePath)
             if 'foreground' in settings:
@@ -172,5 +177,5 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                     frmt.setFontUnderline(True)
                 if 'italic' in settings['fontStyle']:
                     frmt.setFontItalic(True)
-            PMXSyntaxHighlighter.FORMAT_CACHE[scopePath] = frmt 
-        return PMXSyntaxHighlighter.FORMAT_CACHE[scopePath]
+            self.__format_cache[scopePath] = frmt 
+        return self.__format_cache[scopePath]

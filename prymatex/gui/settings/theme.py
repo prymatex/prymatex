@@ -58,20 +58,16 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
             font.setStyleStrategy(font.styleStrategy() | QtGui.QFont.PreferAntialias)
         self.settingGroup.setValue('defaultFont', font)
 
-    def setDefaultThemeSetting(self, theme):
-        self.settingGroup.setValue('defaultTheme', str(theme.uuid))
-        # TODO: Ver si el mensage esta bien aca
-        message = "<b>%s</b> theme set " % theme.name
-        if theme.author is not None:
-            message += "<i>(by %s)</i>" % theme.author
-        self.application.showMessage(message)
-
     # ---------------------- Themes
     @QtCore.Slot(int)
     def on_comboBoxThemes_activated(self, index):
         theme = self.comboBoxThemes.model().themeForIndex(index)
         self.updateUi(theme)
-        self.setDefaultThemeSetting(theme)
+        self.settingGroup.setValue('defaultTheme', str(theme.uuid))
+        message = "<b>%s</b> theme set " % theme.name
+        if theme.author is not None:
+            message += "<i>(by %s)</i>" % theme.author
+        self.application.showMessage(message)
 
     def updateUi(self, theme):
         self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.model().findIndex(theme))    
@@ -94,7 +90,6 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         self.tableViewStyles.resizeColumnsToContents()
         self.tableViewStyles.resizeRowsToContents()
         self.tableViewStyles.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
-
 
     # --------------------- TableView
     def setupTableView(self):
@@ -151,4 +146,3 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         if ok:
             self.application.supportManager.updateTheme(theme, settings = { element: color })
             self.updateUi(theme)
-            self.setDefaultThemeSetting(theme)

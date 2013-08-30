@@ -369,7 +369,6 @@ html_footer
         if filePath:
             editor.save(filePath)
 
-
     def closeEditor(self, editor = None, cancel = False):
         editor = editor or self.currentEditor()
         buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No
@@ -390,17 +389,14 @@ html_footer
         editor.close()
         self.removeEditor(editor)
 
-
     def tryCloseEmptyEditor(self, editor = None):
         editor = editor or self.currentEditor()
         if editor is not None and editor.isNew() and not editor.isModified():
             self.closeEditor(editor)
 
-
     # ---------------- Handle location history
     def on_editor_newLocationMemento(self, memento):
         self.addHistoryEntry({"editor": self.sender(), "memento": memento})
-
 
     def addEditorToHistory(self, editor):
         if self._editorHistory and self._editorHistory[self._editorHistoryIndex]["editor"] == editor:
@@ -455,12 +451,10 @@ html_footer
             self.application.openFile(*doc, mainWindow = self)
         QtGui.QMainWindow.restoreState(self, state["self"])
 
-
     # ------------ Drag and Drop
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
-
 
     def dropEvent(self, event):
         def collectFiles(paths):
