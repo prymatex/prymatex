@@ -38,7 +38,7 @@ def pid_proc_dict():
     return d
 
 def to_valid_name(name):
-    name = unicodedata.normalize('NFKD', six.text_type(name)).encode('ASCII', 'ignore')
+    name = unicodedata.normalize('NFKD', six.text_type(name))
     return "".join([ c for c in six.text_type(name) if c in VALID_PATH_CARACTERS ])
 
 if __name__ == "__main__":

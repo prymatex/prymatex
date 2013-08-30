@@ -172,7 +172,7 @@ def asciify(text):
     except AttributeError:
         return str(text).encode('ascii')
     except UnicodeEncodeError:
-        return unicodedata.normalize('NFKD', text.translate(char_mapper)).encode('ascii', 'replace')
+        return unicodedata.normalize('NFKD', text.translate(char_mapper))
 
 # ----------------- Text search -------------------------
 def subsearch(pattern, text, pstart = 0, tstart = 0, ignoreCase = False):
