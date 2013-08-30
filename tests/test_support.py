@@ -4,13 +4,13 @@
 import os
 import unittest
 from time import time
+import timeit
 from pprint import pprint
 
 from prymatex.support.manager import PMXSupportPythonManager
 from prymatex.support.processor import PMXDebugSnippetProcessor, PMXDebugSyntaxProcessor
 
 TEXT = """#!/usr/bin/env python
-
 import pepe
 #Comment
 class Persona(object):
@@ -46,11 +46,14 @@ class TestSupportFunctions(unittest.TestCase):
         
     def test_syntax(self):
         syntax = self.manager.getSyntaxByScopeName('source.python')
-        #file = open(os.path.abspath('./prymatex/gui/codeeditor/editor.py'), 'r')
-        processor = PMXDebugSyntaxProcessor(showOutput = True)
-        syntax.parse(TEXT, processor)
-        #text = file.read().decode('utf-8')
-        #file.close()
+        file = open(os.path.abspath('./prymatex/gui/codeeditor/editor.py'), 'r')
+        processor = PMXDebugSyntaxProcessor(showOutput = False)
+        text = file.read()
+        start = time()
+        for _ in range(5):
+            syntax.parse(text, processor)
+        print("Time:", (time() - start)/5 )
+        file.close()
             
     def test_preferences(self):
         settings = self.manager.getPreferenceSettings('text.html.textile markup.heading.textile')
