@@ -67,14 +67,21 @@ class SyntaxNode(object):
             capture[1][0] != -1 and capture[1][0] != capture[1][-1],
             pattern.match_captures( name, match ))
         
+        close = []
         for group, _range, value in sorted(captures, key = lambda t: t[0]):
+            if close and close[-1][1] <= _range[0]:
+                processor.closeTag(close[-1][0], close[-1][1])
+                close.pop()
             if value.name:
                 _ex_name = value._nameFormater.expand(match)
                 processor.openTag(_ex_name, _range[0])
-                processor.closeTag(_ex_name, _range[1])
+                close.append((_ex_name, _range[1]))
             else:
                 stack = [(value, None)]
                 value.parse_source(_range[0], stack, match.group(group), processor)
+        while close:
+            processor.closeTag(close[-1][0], close[-1][1])
+            close.pop()
 
     def match_captures(self, name, match):
         captures = getattr(self, name) or {}
