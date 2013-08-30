@@ -560,7 +560,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], otherBrace)
 
     def currentBracesPairs(self, cursor = None, direction = "both"):
-        """ Retorna el otro cursor correspondiente al cursor (brace) pasado o actual del editor, puede retornar None en caso de no estar cerrado el brace"""
+        """ Retorna el otro cursor correspondiente al cursor (brace)
+        pasado o actual del editor, puede retornar None en caso de no
+        estar cerrado el brace"""
         cursor = cursor or self.textCursor()
         brace1, brace2 = (None, None)
         if cursor.hasSelection():
