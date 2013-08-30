@@ -150,6 +150,6 @@ class PMXTheme(PMXManagedObject):
 
     def removeThemeStyle(self, style):
         self.styles.remove(style)
-        
+
     def createSourcePath(self, baseDirectory):
         return osextra.path.ensure_not_exists(os.path.join(baseDirectory, "%%s.%s" % self.EXTENSION), osextra.to_valid_name(self.name))
