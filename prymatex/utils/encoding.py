@@ -49,29 +49,24 @@ def from_fs(string):
     """
     Return a unicode version of string decoded using the file system encoding.
     """
-    if not isinstance(string, six.string_types): # string is a QString
-        string = six.text_type(string, 'utf-8')
-    else:
-        if not isinstance(string, six.text_type):
-            try:
-                unic = string.decode(FS_ENCODING)
-            except (UnicodeError, TypeError):
-                pass
-            else:
-                return unic
+    if not isinstance(string, six.string_types): # string is a QByteArray
+        string = six.text_type(string, FS_ENCODING)
+    elif not isinstance(string, six.text_type):
+        try:
+            return string.decode(FS_ENCODING)
+        except (UnicodeError, TypeError):
+            pass
     return string
-    
+
 def to_fs(unic):
     """
-    Return a byte string version of unic encoded using the file 
+    Return a byte string version of unic encoded using the file
     system encoding.
     """
     try:
         return six.text_type(unic).encode(FS_ENCODING)
     except (UnicodeError, TypeError) as ex:
         pass
-    except Exception as ex:
-        print(ex)
     return unic
 
 #------------------------------------------------------------------------------
@@ -85,7 +80,7 @@ CODECS = []
 with open(os.path.join(os.path.dirname(__file__), "codecs")) as openFile:
     for line in openFile.read().splitlines():
         CODECS.append(tuple(line.split(";")))
-    
+
 def get_coding(text):
     """
     Function to get the coding of a text.
@@ -136,7 +131,7 @@ def encode(text, orig_coding):
     """
     if orig_coding == 'utf-8-bom':
         return BOM_UTF8 + text.encode("utf-8"), 'utf-8-bom'
-    
+
     # Try declared coding spec
     coding = get_coding(text)
     if coding:
@@ -152,16 +147,16 @@ def encode(text, orig_coding):
             pass
     if orig_coding == 'utf-8-guessed':
         return text.encode('utf-8'), 'utf-8'
-    
+
     # Try saving as ASCII
     try:
         return text.encode('ascii'), 'ascii'
     except UnicodeError:
         pass
-    
+
     # Save as UTF-8 without BOM
     return text.encode('utf-8'), 'utf-8'
-    
+
 def to_text(value):
     """Convert a value to text"""
     value = six.text_type(value)

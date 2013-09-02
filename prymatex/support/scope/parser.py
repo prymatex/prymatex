@@ -146,4 +146,3 @@ class Parser(object):
         selector = types.SelectorType()
         if Parser(source).parse_selector(selector):
             return selector
-

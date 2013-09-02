@@ -80,7 +80,6 @@ class Backend(QtCore.QObject):
         else:
             raise Exception("Session data error")
 
-            
     def start(self):
         self._set_state(self.Running)
         self.started.emit()
@@ -99,13 +98,11 @@ class Backend(QtCore.QObject):
         return session
 
 class LocalBackend(Backend):
-    
     def __init__(self, parent = None):
         Backend.__init__(self, 'local', parent)
         self.process = QtCore.QProcess(self)
         self.protocol = 'ipc' if sys.platform.startswith('linux') else 'tcp'
         self.address = None
-
 
     def start(self):
         self._set_state(self.Starting)
@@ -117,12 +114,10 @@ class LocalBackend(Backend):
         self.process.readyReadStandardOutput.connect(self.backend_start_readyReadStandardOutput)
         self.process.start(sys.executable, args)
 
-
     def close(self):
         Backend.close(self)
         os.kill(self.process.pid(), signal.SIGTERM)
         self.process.waitForFinished()
-
         
     #------------ Process Start Signal
     def backend_start_readyReadStandardOutput(self):
@@ -138,7 +133,6 @@ class LocalBackend(Backend):
         self.process.error.connect(self.backend_error)
         self._set_state(self.Running)
         self.started.emit()
-
 
     def backend_start_readyReadStandardError(self):
         print(encoding.from_fs(self.process.readAllStandardError()))
