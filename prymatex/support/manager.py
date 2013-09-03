@@ -1011,14 +1011,14 @@ class PMXSupportBaseManager(object):
     #----------------- PREFERENCES ---------------------
     def getPreferences(self, leftScope, rightScope = None):
         memoizedKey = ("getPreferences", None, leftScope, rightScope)
-        if memoizedKey in self.bundleItemCache:
+        if self.bundleItemCache.has_key(memoizedKey):
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
             self.__sort_filter_items(self.getAllPreferences(), leftScope, rightScope))
 
     def getPreferenceSettings(self, leftScope, rightScope = None):
         memoizedKey = ("getPreferenceSettings", None, leftScope, rightScope)
-        if memoizedKey in self.bundleItemCache:
+        if self.bundleItemCache.has_key(memoizedKey):
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
             bundleitem.PMXPreference.buildSettings(self.getPreferences(leftScope, rightScope)))
@@ -1035,7 +1035,7 @@ class PMXSupportBaseManager(object):
     # --------------- TABTRIGGERS
     def getAllTabTriggerSymbols(self):
         memoizedKey = ("getAllTabTriggerSymbols", None, None, None)
-        if memoizedKey in self.bundleItemCache:
+        if self.bundleItemCache.has_key(memoizedKey):
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
             [ item.tabTrigger for item in self.getAllTabTriggerItems() ])
@@ -1053,14 +1053,14 @@ class PMXSupportBaseManager(object):
 
     def getAllTabTiggerItemsByScope(self, leftScope, rightScope = None):
         memoizedKey = ("getAllTabTiggerItemsByScope", None, leftScope, rightScope)
-        if memoizedKey in self.bundleItemCache:
+        if self.bundleItemCache.has_key(memoizedKey):
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
             self.__sort_filter_items(self.getAllTabTriggerItems(), leftScope, rightScope))
 
     def getTabTriggerItem(self, tabTrigger, leftScope, rightScope):
         memoizedKey = ("getTabTriggerItem", tabTrigger, leftScope, rightScope)
-        if memoizedKey in self.bundleItemCache:
+        if self.bundleItemCache.has_key(memoizedKey):
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
             self.__sort_filter_items(self.getAllBundleItemsByTabTrigger(tabTrigger), leftScope, rightScope))
@@ -1080,14 +1080,14 @@ class PMXSupportBaseManager(object):
     def getAllKeyEquivalentCodes(self):
         # TODO En este nivel no se como estan implementados los codes no puedo llamar a keySequence
         memoizedKey = ("getAllKeyEquivalentCodes", None, None, None)
-        if memoizedKey in self.bundleItemCache:
+        if self.bundleItemCache.has_key(memoizedKey):
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
             [item.keySequence() for item in self.getAllKeyEquivalentItems()])
 
     def getKeyEquivalentItem(self, keyCode, leftScope, rightScope):
         memoizedKey = ("getKeyEquivalentItem", keyCode, leftScope, rightScope)
-        if memoizedKey in self.bundleItemCache:
+        if self.bundleItemCache.has_key(memoizedKey):
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
             self.__sort_filter_items(self.getAllBundleItemsByKeyEquivalent(keyCode), leftScope, rightScope))
@@ -1114,7 +1114,7 @@ class PMXSupportBaseManager(object):
     def getActionItemsByScope(self, leftScope, rightScope):
         """Return a list of actions items for scope"""
         memoizedKey = ("getActionItemsByScope", None, leftScope, rightScope)
-        if memoizedKey in self.bundleItemCache:
+        if self.bundleItemCache.has_key(memoizedKey):
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
             self.__sort_filter_items(self.getAllActionItems(), leftScope, rightScope))
@@ -1126,7 +1126,7 @@ class PMXSupportBaseManager(object):
     # ------------------ SYNTAXES
     def getSyntaxesAsDictionary(self):
         memoizedKey = ("getSyntaxesAsDictionary", None, None, None)
-        if memoizedKey in self.bundleItemCache:
+        if self.bundleItemCache.has_key(memoizedKey):
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
             dict([(syntax.scopeName, syntax) for syntax in self.getAllSyntaxes()]))
