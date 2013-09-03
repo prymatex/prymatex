@@ -57,43 +57,29 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def asyncHighlightFunction(self):
         block = self.document().begin()
-        lastBlock = self.document().lastBlock()
         scopeName = self.syntax.scopeName
+        
         self.processor.startParsing(scopeName)
         stack = [( self.syntax.grammar, None )]
-        length = 0
         blockState = -1
         while block.isValid():
             text = block.text() + "\n"
             userData = self.editor.blockUserData(block)
-            length += block.length()
             
-            if userData.testStateHash(self.__build_userData_hash(scopeName, text, blockState)):
-                # Only change the formats
-                formats = []
-                blockLayout = block.layout()
-                blockLayout.beginLayout()
-                for frange in blockLayout.additionalFormats():
-                    frange.format = self.highlightFormat(self.editor.scope(blockPosition = frange.start).path)
-                    formats.append(frange)
-                blockLayout.clearAdditionalFormats()
-                blockLayout.setAdditionalFormats(formats)
-                blockLayout.endLayout()
-                blockState = block.userState()
-                block = block.next()
-                continue
+            if not userData.testStateHash(self.__build_userData_hash(scopeName, text, blockState)):
+                self.syntax.parseLine(stack, text, self.processor)
 
-            self.syntax.parseLine(stack, text, self.processor)
-            
-            self.setupBlockUserData(text, block, userData)
-            userData.setStateHash(self.__build_userData_hash(scopeName, text, blockState))
-            
-            # Store stack and state
-            blockState = len(stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
-            if blockState == self.MULTI_LINE:
-                userData.setProcessorState((stack[:], self.processor.scopes()[:])) #Store copy
-            block.setUserState(blockState)
-            
+                self.setupBlockUserData(text, block, userData)
+                userData.setStateHash(self.__build_userData_hash(scopeName, text, blockState))
+
+                # Store stack and state
+                blockState = len(stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
+                if blockState == self.MULTI_LINE:
+                    userData.setProcessorState((stack[:], self.processor.scopes()[:])) #Store copy
+                block.setUserState(blockState)
+            else:
+                blockState = block.userState()
+
             formats = []
             for token in userData.tokens():
                 frange = QtGui.QTextLayout.FormatRange()
@@ -106,7 +92,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             block.layout().setAdditionalFormats(formats)
             block = block.next()
             yield
-        self.document().markContentsDirty(0, length)
+        self.document().markContentsDirty(0, self.document().characterCount())
         self.processor.endParsing(self.syntax.scopeName)
     
     @staticmethod
