@@ -2,28 +2,31 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtGui
-
 from prymatex.support.processor import PMXCommandProcessor
 
 class PMXCommandProcessor(PMXCommandProcessor):
     def __init__(self, editor):
         super(PMXCommandProcessor, self).__init__()
         self.editor = editor
-        self.__env = {}
 
     def startCommand(self, command):
         self.command = command
-        self.__env = command.environmentVariables()
-        # TODO No es mejor que tambien el editor saque de la mainwindow para 
-        # preservar la composision?
-        self.__env.update(self.editor.mainWindow.environmentVariables())
-        self.__env.update(self.editor.environmentVariables())
-        self.__env.update(self.baseEnvironment)
+        self.__env = None
 
     def endCommand(self, command):
         self.command = None
         
     def environmentVariables(self):
+        if self.__env is None:
+            # TODO No es mejor que tambien el editor saque de la mainwindow para 
+            # preservar la composision?
+            self.__env = {}
+            envs = [ self.command.environmentVariables(),
+                self.editor.mainWindow.environmentVariables(),
+                self.editor.environmentVariables(),
+                self.baseEnvironment ]
+            for env in envs:
+                self.__env.update(env)
         return self.__env
         
     def configure(self, settings):

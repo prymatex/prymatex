@@ -2,27 +2,33 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtGui
-
 from prymatex.support import PMXMacroProcessor
 
 class PMXMacroProcessor(PMXMacroProcessor):
     def __init__(self, editor):
         super(PMXMacroProcessor, self).__init__()
         self.editor = editor
-        self.__env = {}
+        self.__env = None
 
     def startMacro(self, macro):
         """docstring for startMacro"""
         self.macro = macro
-        self.__env = macro.environmentVariables()
-        self.__env.update(self.editor.mainWindow.environmentVariables())
-        self.__env.update(self.editor.environmentVariables())
-        self.__env.update(self.baseEnvironment)
+        self.__env = None
         
     def endMacro(self, macro):
         pass
 
     def environmentVariables(self):
+        if self.__env is None:
+            # TODO No es mejor que tambien el editor saque de la mainwindow para 
+            # preservar la composision?
+            self.__env = {}
+            envs = [ self.macro.environmentVariables(),
+                self.editor.mainWindow.environmentVariables(),
+                self.editor.environmentVariables(),
+                self.baseEnvironment ]
+            for env in envs:
+                self.__env.update(env)
         return self.__env
         
     def configure(self, settings):

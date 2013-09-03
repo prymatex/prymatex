@@ -10,7 +10,20 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.snippetCursorWrapper = self.snippet = None
         self.tabreplacement = "\t"
         self.indentation = ""
-        self.__env = {}
+        self.__env = None
+
+    def environmentVariables(self):
+        if self.__env is None:
+            # TODO No es mejor que tambien el editor saque de la mainwindow para 
+            # preservar la composision?
+            self.__env = {}
+            envs = [ self.snippet.environmentVariables(),
+                self.editor.mainWindow.environmentVariables(),
+                self.editor.environmentVariables(),
+                self.baseEnvironment ]
+            for env in envs:
+                self.__env.update(env)
+        return self.__env
 
     def startSnippet(self, snippet):
         """Inicia el snippet"""
@@ -24,10 +37,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.tabreplacement = self.editor.tabKeyBehavior()
         self.indentation = "" if self.disableIndent else self.editor.blockUserData(self.snippetCursorWrapper.block()).indent
         
-        self.__env = snippet.environmentVariables()
-        self.__env.update(self.editor.mainWindow.environmentVariables())
-        self.__env.update(self.editor.environmentVariables())
-        self.__env.update(self.baseEnvironment)
+        self.__env = None
 
     def endSnippet(self, snippet):
         """Termina el snippet"""
@@ -44,9 +54,6 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.__endPosition = self.caretPosition()
         self.editor.updatePlainText(self.output, self.snippetCursorWrapper)
 
-    def environmentVariables(self):
-        return self.__env
-    
     def configure(self, settings):
         self.tabTriggered = settings.get("tabTriggered", False)
         self.disableIndent = settings.get("disableIndent", False)

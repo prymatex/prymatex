@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.support import processor
-
+from prymatex.support.processor import PMXSyntaxProcessor
 from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserDataToken
 
 # Primera prueba 
-class CodeEditorSyntaxProcessor1(processor.PMXSyntaxProcessor):
+class CodeEditorSyntaxProcessor1(PMXSyntaxProcessor):
     def __init__(self, editor):
         self.editor = editor
 
@@ -64,7 +63,7 @@ class CodeEditorSyntaxProcessor1(processor.PMXSyntaxProcessor):
         self.lineIndex = end
 
 # No me gusta la comparacion es poco performante y molesta en python3
-class CodeEditorSyntaxProcessor2(processor.PMXSyntaxProcessor):
+class CodeEditorSyntaxProcessor2(PMXSyntaxProcessor):
     def __init__(self, editor):
         self.editor = editor
         self.__scopePath = []
@@ -142,7 +141,7 @@ class CodeEditorSyntaxProcessor2(processor.PMXSyntaxProcessor):
         pass
 
 # Esta es la posta!
-class CodeEditorTokenSyntaxProcessor(processor.PMXSyntaxProcessor):
+class CodeEditorTokenSyntaxProcessor(PMXSyntaxProcessor):
     def __init__(self, editor):
         self.editor = editor
 
