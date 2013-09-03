@@ -13,9 +13,9 @@ def suite():
     supportSuite = unittest.TestSuite()
     #supportSuite.addTest(PlistTests("test_readPlist"))
     #supportSuite.addTest(ScopeSelectorTests("test_none_selector"))
-    #supportSuite.addTest(TestSupportFunctions("test_syntax"))
-    supportSuite.addTest(OsExtraTests("test_paths"))
+    supportSuite.addTest(TestSupportFunctions("test_syntax"))
+    #supportSuite.addTest(OsExtraTests("test_paths"))
     return unittest.TestSuite([ supportSuite ])
-    
+
 if __name__ == '__main__':
     unittest.TextTestRunner().run(suite())

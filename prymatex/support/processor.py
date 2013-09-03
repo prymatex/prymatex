@@ -112,11 +112,13 @@ PMXMacroProcessor = type("PMXMacroProcessor", (object, ), {
     
 ############# Debugs Preocessors ###############
 class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
-    def __init__(self, showOutput = True):
+    def __init__(self, showOutput = True, hashOutput = False):
         self.line_number = 0
         self.printable_line = ''
         self.showOutput = showOutput
-
+        self.hashOutput = hashOutput
+        self.hashValue = 0
+        
     def pprint(self, line, string, position = 0):
         line = line[:position] + string + line[position:]
         return line
@@ -124,10 +126,14 @@ class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
     def openTag(self, name, position):
         if self.showOutput:
             print(self.pprint( '', '{ %d - %s' % (position, name), position + len(self.line_marks)))
-
+        if self.hashOutput:
+            self.hashValue = hash("%s:%d:%d" % (name, position, self.hashValue))
+            
     def closeTag(self, name, position):
         if self.showOutput:
             print(self.pprint( '', '} %d - %s' % (position, name), position + len(self.line_marks)))
+        if self.hashOutput:
+            self.hashValue = hash("%s:%d:%d" % (name, position, self.hashValue))
 
     def beginLine(self, line):
         self.line_number += 1
@@ -138,10 +144,14 @@ class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
     def startParsing(self, name):
         if self.showOutput:
             print('{%s' % name)
-
+        if self.hashOutput:
+            self.hashValue = hash("%s:%d" % (name, self.hashValue))
+            
     def endParsing(self, name):
         if self.showOutput:
             print('}%s' % name)
+        if self.hashOutput:
+            self.hashValue = hash("%s:%d" % (name, self.hashValue))
 
 class PMXDebugSnippetProcessor(PMXSnippetProcessor):
     def __init__(self):

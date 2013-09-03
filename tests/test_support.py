@@ -47,12 +47,13 @@ class TestSupportFunctions(unittest.TestCase):
     def test_syntax(self):
         syntax = self.manager.getSyntaxByScopeName('source.python')
         file = open(os.path.abspath('./prymatex/gui/codeeditor/editor.py'), 'r')
-        processor = PMXDebugSyntaxProcessor(showOutput = False)
+        processor = PMXDebugSyntaxProcessor(showOutput = False, hashOutput = True)
         text = file.read()
         start = time()
-        for _ in range(5):
+        for _ in range(1):
             syntax.parse(text, processor)
-        print("Time:", (time() - start)/5 )
+        print("Time:", (time() - start)/1 )
+        print("Hash:", processor.hashValue )
         file.close()
             
     def test_preferences(self):

@@ -4,7 +4,7 @@
 def prefix_match(lhs, rhs):
     if len(lhs) > len(rhs):
         return False
-    
+
     for i in range(len(lhs)):
         assert i < len(lhs); assert i < len(rhs)
         if lhs[i] != rhs[i] and lhs[i] != "*":

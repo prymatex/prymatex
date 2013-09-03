@@ -286,9 +286,11 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
         for i in range(start, end + 1):
             sIndex = self.__sourceModel.index(i, 0, parent)
             if self.filterAcceptsRow(i, parent):
-                position = bisect_key(self.__indexMap, sIndex, lambda index: self.comparableValue(index))
-                self.beginInsertRows(QtCore.QModelIndex(), position, position)
-                self.__indexMap.insert(position, sIndex)
+                #position = bisect_key(self.__indexMap, sIndex, lambda index: self.comparableValue(index))
+                #self.beginInsertRows(QtCore.QModelIndex(), position, position)
+                #self.__indexMap.insert(position, sIndex)
+                self.beginInsertRows(QtCore.QModelIndex(), len(self.__indexMap), len(self.__indexMap))
+                self.__indexMap.append(sIndex)
                 self.endInsertRows()
     
     def on_sourceModel_rowsAboutToBeRemoved(self, parent, start, end):

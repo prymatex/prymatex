@@ -123,23 +123,23 @@ class SyntaxNode(object):
         return compileRegexp( regstring ).search( string, position )
     
     def match_first_son(self, string, position):
-        match = (None, None)
+        son = match = None
         for p in self.patterns:
-            tmatch = p.match_first(string, position)
-            if tmatch[1]:
-                if tmatch[1].start() == 0:
-                    match = tmatch
+            tson, tmatch = p.match_first(string, position)
+            if tmatch:
+                if tmatch.start() == 0:
+                    son, match = tson, tmatch
                     break
-                if not match[1] or match[1].start() > tmatch[1].start():
-                    match = tmatch
-        
+                if not match or match.start() > tmatch.start():
+                    son, match = tson, tmatch
+
         # Expand names
-        if match[1] is not None and (match[0].name or match[0].contentName):
-            if match[0].name:
-                match[0]._ex_name = match[0]._nameFormater.expand(match[1])
-            if match[0].contentName:
-                match[0]._ex_contentName = match[0]._contentNameFormater.expand(match[1])
-        return match
+        if son and (son.name or son.contentName):
+            if son.name:
+                son._ex_name = son._nameFormater.expand(match)
+            if son.contentName:
+                son._ex_contentName = son._contentNameFormater.expand(match)
+        return (son, match)
 
     def parse(self, text, processor = None):
         if processor:
