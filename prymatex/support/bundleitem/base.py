@@ -26,7 +26,7 @@ class PMXBundleItem(PMXManagedObject):
             if key in dataHash or initialize:
                 value = dataHash.get(key, None)
                 if key == "scope":
-                    self.selector = self.manager.createScopeSelector(value)
+                    self.selector = self.manager.selectorFactory(value)
                 setattr(self, key, value)
 
     def load(self, dataHash):

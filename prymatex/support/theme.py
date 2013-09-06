@@ -68,7 +68,7 @@ class PMXThemeStyle(object):
                     self.__settings = dict([ item for item in self.__settings.items() if item[1] is not None])
                     continue
                 elif key == 'scope':
-                    self.scopeSelector = self.theme.manager.createScopeSelector(value)
+                    self.scopeSelector = self.theme.manager.selectorFactory(value)
                 setattr(self, key, value)
 
     def load(self, dataHash):

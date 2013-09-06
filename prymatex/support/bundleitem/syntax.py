@@ -297,9 +297,9 @@ class PMXSyntax(PMXBundleItem):
                 if key == 'firstLineMatch':
                     value = compileRegexp( value )
                 elif key == 'scopeName':
-                    self.scopeNameSelector = self.manager.createScopeSelector(value)
+                    self.scopeNameSelector = self.manager.selectorFactory(value)
                 elif key == 'injectionSelector':
-                    value = self.manager.createScopeSelector(value)
+                    value = self.manager.selectorFactory(value)
             setattr(self, key, value)
     
     def dump(self, allKeys = False):

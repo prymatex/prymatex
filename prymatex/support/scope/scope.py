@@ -77,7 +77,6 @@ class Context(object):
     def __lt__(self, rhs):
         return self.left < rhs.left or self.left == self.rhs.left and self.right < rhs.right
 
-
 class Selector(object):
     def __init__(self, selector):
         self.selector = selector and Parser.selector(selector)

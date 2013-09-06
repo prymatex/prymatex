@@ -235,9 +235,15 @@ class PMXSupportBaseManager(object):
         syntax.load(syntaxHash)
         return syntax
 
-    #--------------- Scopes and selectors --------------
-    def createScopeSelector(self, scopeSelector):
-        return scope.Selector(scopeSelector)
+    #--------------- Scopes selectors and context --------------
+    def scopeFactory(self, scope):
+        return scope.Scope(scope)
+        
+    def selectorFactory(self, selector):
+        return scope.Selector(selector)
+        
+    def contextFactory(self, leftScope, rightScope):
+        return scope.Context(leftScope, rightScope)
         
     def __sort_filter_items(self, items, leftScope, rightScope = None):
         context = scope.Context.get(leftScope, rightScope)
@@ -492,8 +498,8 @@ class PMXSupportBaseManager(object):
         testScope = bool('scope' in attrs and bundleItem.scope != attrs['scope'])
         testPreference = bool(bundleItem.TYPE == 'preference')
 
-        scopeSelectorItem = testScope and self.createScopeSelector(bundleItem.scope) or None
-        scopeSelectorAttr = testScope and self.createScopeSelector(attrs['scope']) or None
+        scopeSelectorItem = testScope and self.selectorFactory(bundleItem.scope) or None
+        scopeSelectorAttr = testScope and self.selectorFactory(attrs['scope']) or None
         
         # Add keys for remove
         for key in self.bundleItemCache.keys():
