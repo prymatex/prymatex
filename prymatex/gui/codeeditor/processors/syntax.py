@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.support.processor import PMXSyntaxProcessor
-from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserDataToken
+from prymatex.gui.codeeditor.userdata import CodeEditorTokenData
 
 class CodeEditorTokenSyntaxProcessor(PMXSyntaxProcessor):
     def __init__(self, editor):
@@ -56,11 +56,11 @@ class CodeEditorTokenSyntaxProcessor(PMXSyntaxProcessor):
     def closeToken(self, end, closeAll = False):
         while self.__indexes:
             start, index = self.__indexes.pop()
-            scopeHash = self.editor.flyweightScopeFactory(tuple(self.stackScopes))
-            self.__tokens[index] = CodeEditorBlockUserDataToken(
+            data = self.editor.flyweightScopeDataFactory(tuple(self.stackScopes))
+            self.__tokens[index] = CodeEditorTokenData(
                 start = start,
                 end = end,
-                scopeHash = scopeHash,
+                data = data,
                 chunk = self.line[start : end]
             )
             if not closeAll:

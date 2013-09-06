@@ -33,7 +33,10 @@ class ScopeType(object):
     
     def __lt__(self, rhs):
         return self.atoms < rhs.atoms
-
+    
+    def __add__(self, rhs):
+        return ScopeType(self.atoms + rhs.atoms)
+    
 class PathType(object):
     def __init__(self, scopes = None):
         self.anchor_to_bol = False
@@ -60,7 +63,10 @@ class PathType(object):
     
     def __lt__(self, rhs):
         return self.scopes < rhs.scopes
-
+    
+    def __add__(self, rhs):
+        return PathType(self.scopes + rhs.scopes)
+    
     def does_match(self, lhs, path, rank = None):
         i = len(path.scopes)
         size_i = i

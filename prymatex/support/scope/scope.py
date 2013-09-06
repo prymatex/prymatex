@@ -38,8 +38,11 @@ class Scope(object):
     
     def __lt__(self, rhs):
         return self.path < self.rhs.path
-        
-    def __bool__(self, rhs):
+    
+    def __add__(self, rhs):
+        return Scope(self.path + rhs.path)
+
+    def __bool__(self):
         return bool(self.path)
 
 wildcard = Scope("x-any")

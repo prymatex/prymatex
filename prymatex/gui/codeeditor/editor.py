@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 import re
 import operator
-from collections import namedtuple
 
 from prymatex.qt import QtCore, QtGui
 
@@ -17,7 +16,7 @@ from prymatex.core import exceptions
 from prymatex.qt.helpers.menus import extend_menu, update_menu
 from prymatex.models.support import BundleItemTreeNode
 
-from .userdata import CodeEditorBlockUserData
+from .userdata import CodeEditorBlockUserData, CodeEditorScopeData
 from .addons import CodeEditorAddon
 from .sidebar import CodeEditorSideBar, SideBarWidgetAddon
 from .processors import (PMXCommandProcessor, PMXSnippetProcessor, 
@@ -41,12 +40,10 @@ from functools import reduce
 
 WIDTH_CHARACTER = "#"
 
-CodeEditorScope = namedtuple("CodeEditorScope", [ "scope", "path", "settings", "group" ])
-
 class CodeEditor(TextEditWidget, PMXBaseEditor):
     # Aca vamos a guardar los scopes de los editores, quiza esto pueda
     # ser un objeto factory, por ahora la fabricacion la hace el editor
-    # en el factory method flyweightScopeFactory
+    # en el factory method flyweightScopeDataFactory
     SCOPES = {}
 
     # -------------------- Signals
@@ -371,60 +368,36 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     # ---------------------- Scopes
     def setBasicScope(self, scopeStack):
-        self.basicScopeHash = self.flyweightScopeFactory(scopeStack)
+        self.basicScopeHash = self.flyweightScopeDataFactory(scopeStack)
 
     def basicScope(self):
-        return self.scope(scopeHash = self.basicScopeHash)
+        return self.basicScopeHash
 
     @classmethod
-    def flyweightScopeFactory(cls, scopeStack):
-        scopeHash = hash(scopeStack)
-        if scopeStack not in cls.SCOPES:
-            scope = cls.application.supportManager.scopeFactory(scopeStack)
-            cls.SCOPES[scopeHash] = CodeEditorScope(
+    def flyweightScopeDataFactory(cls, path):
+        if path in cls.SCOPES:
+            return cls.SCOPES[path]
+        # TODO: Hacer algo con el grupo
+        scope = cls.application.supportManager.scopeFactory(path)
+        return cls.SCOPES.setdefault(path, CodeEditorScopeData(
                 scope = scope,
-                path = scopeStack,
+                path = path,
                 settings = cls.application.supportManager.getPreferenceSettings(scope),
-                group = PMXSyntax.findGroup(scopeStack[::-1])
-            )
-        return hash(scopeStack)
+                group = PMXSyntax.findGroup(path[::-1])))
 
-    def scope(self, cursor = None, block = None, blockPosition = None, 
-            documentPosition = None, scopeHash = None, direction = "right", delta = 1):
-        if scopeHash is not None:
-            return self.SCOPES[scopeHash]
-        if block is None:
-            cursor = cursor or (documentPosition is not None and self.newCursorAtPosition(documentPosition)) or self.textCursor()
-            block = cursor.block()
-        userData = self.blockUserData(block)
-        positionInBlock = blockPosition or (cursor is not None and cursor.positionInBlock()) or 0
-        if direction == "right":
-            rightToken = userData.tokenAtPosition(positionInBlock)
-            return self.SCOPES[rightToken and rightToken.scopeHash or self.basicScopeHash]
-        elif direction == "left":
-            leftToken = userData.tokenAtPosition(positionInBlock - delta)
-            return self.SCOPES[leftToken and leftToken.scopeHash or self.basicScopeHash]
+    def scope(self, cursor = None, direction = "right"):
+        cursor = cursor or self.textCursor()
+        userData = self.blockUserData(cursor.block())
+        if direction == "left":
+            return userData.tokenAtPosition(cursor.selectionStart() - cursor.position())
+        elif direction == "right":
+            return userData.tokenAtPosition(cursor.selectionEnd() - cursor.position())
         elif direction == "both":
-            leftToken = userData.tokenAtPosition(positionInBlock - delta)
-            rightToken = userData.tokenAtPosition(positionInBlock)
-            return (self.SCOPES[leftToken and leftToken.scopeHash or self.basicScopeHash],
-                self.SCOPES[rightToken and rightToken.scopeHash or self.basicScopeHash])
+            return (userData.tokenAtPosition(cursor.selectionStart() - cursor.position()),
+                userData.tokenAtPosition(cursor.selectionEnd() - cursor.position()))
 
-    def findScopes(self, block = None, scope_filter = lambda attr: True, firstOnly = False):
-        userData = self.blockUserData(block) if block is not None else self.textCursor().block()
-        scopes = iter(filter(lambda item: scope_filter(item[1]), 
-            map( lambda token: (token, self.SCOPES[token.scopeHash]), userData.tokens() ) ))
-        if firstOnly:
-            try:
-                return six.next(scopes)
-            except StopIteration as ex:
-                return (None, None)
-        return scopes
-
-    def cursorScopePath(self, cursor = None, documentPosition = None):
-        # TODO: Si esta en modo multiedit agregar el mixed 
-        # TODO: Porque no usar el CodeEditorScope ?
-        cursor = cursor or (documentPosition is not None and self.newCursorAtPosition(documentPosition)) or self.textCursor()
+    def cursorScope(self, cursor = None):
+        cursor = cursor or self.textCursor()
         path = []
         if cursor.hasSelection():
             path.append("dyn.selection")
@@ -436,9 +409,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             path.append("dyn.caret.end.line")
         if cursor.atEnd():
             path.append("dyn.caret.end.document")
-        return tuple(path)
+        return self.application.supportManager.scopeFactory(path)
         
-    def attributeScopePath(self):
+    def attributeScope(self):
         return self.application.supportManager.attributeScopes(self.filePath, self.project and self.project.directory)
         
     # ------------ Obteniendo datos del editor
@@ -875,8 +848,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
         # TODO un shortcut para esto de obtener el path
         leftScope, rightScope = self.scope(direction = "both")
-        attributeScopePath = self.attributeScopePath()
-        cursorScopePath = self.cursorScopePath(cursor = cursor)
+        attributeScope = self.attributeScope()
+        cursorScope = self.cursorScope(cursor = cursor)
         current_word, start, end = self.currentWord()
         
         theme = self.application.supportManager.getTheme(self.defaultTheme)
@@ -888,8 +861,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 'TM_LINE_NUMBER': block.blockNumber() + 1,
                 'TM_CURRENT_THEME_PATH': theme.currentSourcePath(),
                 'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
-                'TM_SCOPE': " ".join(rightScope.path + attributeScopePath + cursorScopePath),
-                'TM_LEFT_SCOPE': " ".join(leftScope.path + attributeScopePath + cursorScopePath),
+                'TM_SCOPE': "%s" % (rightScope.scope + attributeScope + cursorScope),
+                'TM_LEFT_SCOPE': "%s" % (leftScope.scope + attributeScope + cursorScope),
                 'TM_MODE': self.syntax().name,
                 'TM_SOFT_TABS': self.tabStopSoft and 'YES' or 'NO',
                 'TM_TAB_SIZE': self.tabWidth

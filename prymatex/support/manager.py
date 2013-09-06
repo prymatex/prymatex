@@ -244,7 +244,11 @@ class PMXSupportBaseManager(object):
         
     def contextFactory(self, leftScope, rightScope = None):
         return scope.Context(leftScope, rightScope or leftScope)
-        
+    
+    # ------------------ SCOPE ATTRIBUTES
+    def attributeScopes(self, filePath, projectDirectory = None):
+        return self.scopeFactory(scope.attributes(filePath, projectDirectory))
+    
     def __sort_filter_items(self, items, leftScope, rightScope = None):
         context = self.contextFactory(leftScope, rightScope)
         sortFilterItems = []
@@ -1161,10 +1165,6 @@ class PMXSupportBaseManager(object):
         for syntax in self.getAllSyntaxes():
             if syntax.fileTypes is not None and any([fileType == "%s" % ft for ft in syntax.fileTypes]):
                 return syntax
-
-    # ------------------ SCOPE ATTRIBUTES
-    def attributeScopes(self, filePath, projectDirectory = None):
-        return scope.attributes(filePath, projectDirectory)
 
 #===================================================
 # PYTHON MANAGER

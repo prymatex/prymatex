@@ -130,12 +130,11 @@ class SymbolListModel(QtCore.QAbstractListModel):
         userData.symbol = None
 
     def processBlockUserData(self, text, block, userData):
-        token, scope = self.editor.findScopes(
-            block = block,
-            scope_filter = lambda scope: scope.settings.showInSymbolList,
-            firstOnly = True)
-        
-        symbol = scope.settings.transformSymbol(text[token.start:token.end]) if scope else None
+        symbol = None
+        for token in userData.tokens():
+            if token.settings.showInSymbolList:
+                symbol = token.settings.transformSymbol(token.chunk)
+                break
         
         if userData.symbol != symbol:
             userData.symbol = symbol
@@ -293,8 +292,7 @@ class AlreadyTypedWords(object):
         words = set()
         
         for token in userData.tokens()[::-1]:
-            group = self.editor.scope(scopeHash = token.scopeHash).group or ""
-            words.update([(group, word) for word in self.editor.RE_WORD.findall(token.chunk) ])
+            words.update([(token.group, word) for word in self.editor.RE_WORD.findall(token.chunk) ])
         
         # TODO: Una mejor estructura para las palabras y sus grupos
         if userData.words != words:

@@ -85,8 +85,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 frange = QtGui.QTextLayout.FormatRange()
                 frange.start = token.start
                 frange.length = token.end - token.start
-                frange.format = self.highlightFormat(self.editor.scope(
-                    scopeHash = token.scopeHash).path)
+                frange.format = self.highlightFormat(token.scope)
                 formats.append(frange)
 
             block.layout().setAdditionalFormats(formats)
@@ -144,14 +143,14 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def applyFormat(self, userData):
         for token in userData.tokens():
-            frmt = self.highlightFormat(self.editor.scope(scopeHash = token.scopeHash).path)
+            frmt = self.highlightFormat(token.scope)
             if frmt is not None:
                 self.setFormat(token.start, token.end - token.start, frmt)
 
-    def highlightFormat(self, scopePath):
-        if scopePath not in self.__format_cache:
+    def highlightFormat(self, scope):
+        if scope not in self.__format_cache:
             frmt = QtGui.QTextCharFormat()
-            settings = self.theme.getStyle(scopePath)
+            settings = self.theme.getStyle(scope)
             if 'foreground' in settings:
                 frmt.setForeground(settings['foreground'])
             if 'background' in settings:
@@ -163,5 +162,5 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                     frmt.setFontUnderline(True)
                 if 'italic' in settings['fontStyle']:
                     frmt.setFontItalic(True)
-            self.__format_cache[scopePath] = frmt 
-        return self.__format_cache[scopePath]
+            self.__format_cache[scope] = frmt 
+        return self.__format_cache[scope]
