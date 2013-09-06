@@ -8,14 +8,13 @@ from .parser import Parser
 from .types import PathType, ScopeType
 
 class Scope(object):
-    def __init__(self, path = None):
+    def __init__(self, path):
         self.path = isinstance(path, PathType) and path or Parser.path(path)
 
     @classmethod
-    def fast_build(cls, path):
-        path = path.split() if isinstance(path, six.string_types) else path
-        return cls(PathType([ ScopeType(p.split(".")) for p in path ]))
-
+    def factory(cls, path):
+        return cls(PathType(tuple([ ScopeType(tuple(p.split("."))) for p in path ])))
+    
     def __str__(self):
         return six.text_type(self.path)
 
@@ -46,19 +45,10 @@ class Scope(object):
 wildcard = Scope("x-any")
 
 class Context(object):
-    CONTEXTS = {}
     def __init__(self, left, right):
-        self.left = isinstance(left, Scope) and left or Scope.fast_build(left)
-        self.right = isinstance(right, Scope) and right or Scope.fast_build(right)
+        self.left = left
+        self.right = right
 
-    @classmethod
-    def get(cls, left, right = None):
-        right = right or left
-        if left not in cls.CONTEXTS or right not in cls.CONTEXTS[left]:
-            leftCache = cls.CONTEXTS.setdefault(left, {})
-            leftCache[right] = cls(left, right)
-        return cls.CONTEXTS[left][right]
-        
     def __str__(self):
         if self.left == self.right:
             return "(l/r '%s')" % six.text_type(self.left)
@@ -80,8 +70,7 @@ class Context(object):
 class Selector(object):
     def __init__(self, selector):
         self.selector = selector and Parser.selector(selector)
-        self.previousMatch = {}
-
+        
     def __str__(self):
         return six.text_type(self.selector)
 
@@ -92,17 +81,9 @@ class Selector(object):
             if rank is not None:
                 rank.append(0)
             return True
-
-        if isinstance(context, (tuple, six.string_types, Scope)):
-            context = Context.get(context)
-
-        # Search in cache
-        matchKey = (context, isinstance(rank, list))
-        if matchKey in self.previousMatch:
-            if matchKey[1]:
-                rank.append(self.previousMatch[matchKey][1])
-            return self.previousMatch[matchKey][0]
+        
+        if isinstance(context, Scope):
+            context = Context(context, context)
         
         match = context.left == wildcard or context.right == wildcard or self.selector.does_match(context.left.path, context.right.path, rank)
-        self.previousMatch[matchKey] = (match, matchKey[1] and sum(rank) or None)
         return match
