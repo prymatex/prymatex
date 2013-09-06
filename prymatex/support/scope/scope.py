@@ -29,7 +29,7 @@ class Scope(object):
         return i == len(rhsScopes)
 
     def __hash__(self):
-        return hash(six.text_type(self.path))
+        return hash(self.path)
       
     def __eq__(self, rhs):
         return self.path == rhs.path
@@ -66,7 +66,7 @@ class Context(object):
             return "(left '%s', right '%s')" % (six.text_type(self.left), six.text_type(self.right))
     
     def __hash__(self):
-        return hash(six.text_type(self.left) + six.text_type(self.right))
+        return hash(six.text_type(self.left)) + hash(six.text_type(self.right))
 
     def __eq__(self, rhs):
         return self.left == rhs.left and self.right == rhs.right

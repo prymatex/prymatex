@@ -22,6 +22,9 @@ class ScopeType(object):
     def __repr__(self):
         return "%s anchor_to_previous:%s\n[%s]" % (self.__class__.__name__, self.anchor_to_previous, "\n".join([repr(a) for a in self.atoms]))
 
+    def __hash__(self):
+        return hash(self.anchor_to_previous) + hash(self.atoms)
+    
     def __eq__(self, rhs):
         return self.atoms == rhs.atoms
     
@@ -45,6 +48,9 @@ class PathType(object):
 
     def __repr__(self):
         return "%s anchor_to_bol:%s anchor_to_eol:%s\n[%s]" % (self.__class__.__name__, self.anchor_to_bol, self.anchor_to_eol, "\n".join([repr(s) for s in self.scopes]))
+
+    def __hash__(self):
+        return hash(self.anchor_to_bol) + hash(self.anchor_to_eol) + hash(self.scopes)
 
     def __eq__(self, rhs):
         return self.scopes == rhs.scopes
@@ -104,7 +110,7 @@ class PathType(object):
         if j == 0 and rank is not None:
             rank.append(score)
         return j == 0
-			
+
 class GroupType(object):
     def __init__(self):
         self.selector = SelectorType()
@@ -114,6 +120,9 @@ class GroupType(object):
 
     def __repr__(self):
         return "%s\n[%s]" % (self.__class__.__name__, repr(self.selector))
+
+    def __hash__(self):
+        return hash(self.selector)
 
     def does_match(self, lhs, rhs, rank = None):
         return self.selector.does_match(lhs, rhs, rank)
@@ -129,6 +138,9 @@ class FilterType(object):
     def __repr__(self):
         return "%s fltr:%s\n[%s]" % (self.__class__.__name__, self.fltr, repr(self.selector))
 
+    def __hash__(self):
+        return hash(self.selector) + hash(self.fltr)
+    
     def does_match(self, lhs, rhs, rank = None):
         if self.fltr == 'B' and rank is not None:
             r1 = []
@@ -145,7 +157,7 @@ class FilterType(object):
             elif self.fltr == 'B':
                 return self.selector.does_match(lhs, lhs, rank) and self.selector.does_match(rhs, rhs, rank)
             return False
-		
+        
 class ExpressionType(object):
     def __init__(self, op):
         self.op = op
@@ -160,7 +172,10 @@ class ExpressionType(object):
     
     def __repr__(self):
         return "%s op:%s negate:%s\n[%s]" % (self.__class__.__name__, self.op, self.negate, repr(self.selector))
-            
+    
+    def __hash__(self):
+        return hash(self.selector) + hash(self.op) + hash(self.negate)
+    
 class CompositeType(object):
     def __init__(self):
         self.expressions = []
@@ -171,6 +186,9 @@ class CompositeType(object):
     def __repr__(self):
         return "%s\n[%s]" % (self.__class__.__name__, "\n".join([repr(e) for e in self.expressions]))
             
+    def __hash__(self):
+        return hash(self.expressions)
+    
     def does_match(self, lhs, rhs, rank = None):
         res = False
         if rank is not None:
@@ -218,7 +236,7 @@ class CompositeType(object):
                 elif op == '-':
                     res = res and not local
             return res
-		
+    
 class SelectorType(object):
     def __init__(self):
         self.composites = []
@@ -229,6 +247,9 @@ class SelectorType(object):
     def __repr__(self):
         return "%s\n[%s]" % (self.__class__.__name__, "\n".join([repr(c) for c in self.composites]))
 
+    def __hash__(self):
+        return hash(self.composites)
+    
     def does_match(self, lhs, rhs, rank = None):
         if rank is not None:
             res = False
