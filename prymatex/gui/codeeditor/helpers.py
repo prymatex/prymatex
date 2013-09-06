@@ -47,20 +47,22 @@ class TabTriggerHelper(CodeEditorKeyHelper):
 
         trigger = self.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
         if not trigger: return False
-        leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both', delta = len(trigger))
-        # TODO Pasar el cursor con seleccion, no hace falta pasarle el tabTriggered ;)
+        
+        self.triggerCursor = self.editor.newCursorAtPosition(cursor.position(), cursor.position() - len(trigger))
+        leftScope, rightScope = self.editor.scope(cursor = self.triggerCursor, direction = 'both')
+        cursorScope = self.editor.cursorScope(cursor = cursor)
         self.items = self.application.supportManager.getTabTriggerItem(
             trigger, 
-            leftScope.path + self.editor.cursorScope(documentPosition = cursor.position() - len(trigger)), 
-            rightScope.path + self.editor.cursorScope(cursor = cursor))
+            leftScope.scope + cursorScope, 
+            rightScope.scope + cursorScope)
         return bool(self.items)
 
     def execute(self, event, cursor = None):
         #Inserto los items
         if len(self.items) == 1:
-            self.editor.insertBundleItem(self.items[0], tabTriggered = True)
+            self.editor.insertBundleItem(self.items[0], cursorWrapper = self.triggerCursor)
         else:
-            self.editor.selectBundleItem(self.items, tabTriggered = True)
+            self.editor.selectBundleItem(self.items, cursorWrapper = self.triggerCursor)
 
 class CompleterHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Space
