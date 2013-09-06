@@ -41,7 +41,7 @@ from functools import reduce
 
 WIDTH_CHARACTER = "#"
 
-CodeEditorScope = namedtuple("CodeEditorScope", [ "path", "settings", "group" ])
+CodeEditorScope = namedtuple("CodeEditorScope", [ "scope", "path", "settings", "group" ])
 
 class CodeEditor(TextEditWidget, PMXBaseEditor):
     # Aca vamos a guardar los scopes de los editores, quiza esto pueda
@@ -379,13 +379,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     @classmethod
     def flyweightScopeFactory(cls, scopeStack):
         scopeHash = hash(scopeStack)
-        if scopeHash not in cls.SCOPES:
+        if scopeStack not in cls.SCOPES:
+            scope = cls.application.supportManager.scopeFactory(scopeStack)
             cls.SCOPES[scopeHash] = CodeEditorScope(
+                scope = scope,
                 path = scopeStack,
-                settings = cls.application.supportManager.getPreferenceSettings(scopeStack),
+                settings = cls.application.supportManager.getPreferenceSettings(scope),
                 group = PMXSyntax.findGroup(scopeStack[::-1])
             )
-        return scopeHash
+        return hash(scopeStack)
 
     def scope(self, cursor = None, block = None, blockPosition = None, 
             documentPosition = None, scopeHash = None, direction = "right", delta = 1):
