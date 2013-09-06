@@ -236,17 +236,17 @@ class PMXSupportBaseManager(object):
         return syntax
 
     #--------------- Scopes selectors and context --------------
-    def scopeFactory(self, scope):
-        return scope.Scope(scope)
+    def scopeFactory(self, data):
+        return scope.Scope.factory(isinstance(data, six.string_types) and data.split() or data)
         
     def selectorFactory(self, selector):
         return scope.Selector(selector)
         
-    def contextFactory(self, leftScope, rightScope):
-        return scope.Context(leftScope, rightScope)
+    def contextFactory(self, leftScope, rightScope = None):
+        return scope.Context(leftScope, rightScope or leftScope)
         
     def __sort_filter_items(self, items, leftScope, rightScope = None):
-        context = scope.Context.get(leftScope, rightScope)
+        context = self.contextFactory(leftScope, rightScope)
         sortFilterItems = []
         for item in items:
             rank = []
@@ -1145,12 +1145,13 @@ class PMXSupportBaseManager(object):
             return sorted(stxs, key=lambda s: s.name)
         return stxs
 
-    def getSyntaxByScopeName(self, scopeName):
-        syntaxes = self.getSyntaxesAsDictionary()
-        if scopeName in syntaxes:
-            return syntaxes[scopeName]
-        return None
-
+    def getSyntaxesByScope(self, leftScope, rightScope = None):
+        memoizedKey = ("getSyntaxesByScope", None, leftScope, rightScope)
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
+        return self.bundleItemCache.setdefault(memoizedKey,
+            self.__sort_filter_items(self.getAllSyntaxes(), leftScope, rightScope))
+        
     def findSyntaxByFirstLine(self, line):
         for syntax in self.getAllSyntaxes():
             if syntax.firstLineMatch != None and syntax.firstLineMatch.search(line):
