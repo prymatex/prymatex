@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+from functools import reduce
 import types
 
 from prymatex.utils import six
@@ -317,13 +318,16 @@ class PMXSyntax(PMXBundleItem):
 
             # Injectors
             scope = self.manager.scopeFactory(self.scopeName)
-            injectors = [injector.grammar for injector in self.manager.getAllSyntaxes() if 
+            injectors = [injector for injector in self.manager.getAllSyntaxes() if 
                          injector.injectionSelector and injector.injectionSelector.does_match(scope) ]
             
+            injectPatterns = reduce(lambda i1, i2: i1 + i2.patterns, injectors, [])
+            
+            print(injectPatterns)
             dataHash = {
                 'repository': self.repository or {},
                 'name': self.scopeName,
-                'patterns': (self.patterns or []) + injectors
+                'patterns': (self.patterns or []) + injectPatterns
             }
             self._grammar = SyntaxNode(dataHash)
 

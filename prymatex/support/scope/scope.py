@@ -84,6 +84,6 @@ class Selector(object):
         
         if isinstance(context, Scope):
             context = Context(context, context)
-        
+            
         match = context.left == wildcard or context.right == wildcard or self.selector.does_match(context.left.path, context.right.path, rank)
         return match
