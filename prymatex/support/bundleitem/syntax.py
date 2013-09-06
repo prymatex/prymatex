@@ -40,11 +40,6 @@ class SyntaxNode(object):
             # String for contentName
             self._contentNameFormater = String(self.contentName)
 
-    def set_injectors(self, injectors):
-        for injector in injectors:
-            if injector.injectionSelector.does_match(self.name):
-                self.patterns.extend(injector.grammar.patterns)
-            
     def parse_repository(self, repository = None):
         if repository is None:
             return {}
@@ -248,12 +243,8 @@ class SyntaxProxyNode(object):
         elif self.__proxyName in ['$self', '$base']:
             return self.rootNode
         else:
-            syntaxes = self.rootNode.syntaxes()
-            if self.__proxyName in syntaxes:
-                return syntaxes[self.__proxyName].grammar
-        print("Not found %s" % self.__proxyName)
-        return SyntaxNode({})
-
+            return self.rootNode.findSyntax(self.__proxyName)
+        
 class PMXSyntax(PMXBundleItem):
     KEYS = ( 'comment', 'firstLineMatch', 'scopeName', 'repository',
         'fileTypes', 'patterns', 'injectionSelector')
@@ -297,7 +288,7 @@ class PMXSyntax(PMXBundleItem):
                 if key == 'firstLineMatch':
                     value = compileRegexp( value )
                 elif key == 'scopeName':
-                    self.scopeNameSelector = self.manager.selectorFactory(value)
+                    self.selector = self.manager.selectorFactory(value)
                 elif key == 'injectionSelector':
                     value = self.manager.selectorFactory(value)
             setattr(self, key, value)
@@ -323,34 +314,31 @@ class PMXSyntax(PMXBundleItem):
     def grammar(self):
         if not hasattr(self, '_grammar'):
             # Build grammar
-            syntaxes = self.manager.getSyntaxesAsDictionary()
 
+            # Injectors
+            scope = self.manager.scopeFactory(self.scopeName)
+            injectors = [injector.grammar for injector in self.manager.getAllSyntaxes() if 
+                         injector.injectionSelector and injector.injectionSelector.does_match(scope) ]
+            
             dataHash = {
-                'repository': self.buildRepository(syntaxes),
+                'repository': self.repository or {},
                 'name': self.scopeName,
-                'patterns': self.patterns or []
+                'patterns': (self.patterns or []) + injectors
             }
             self._grammar = SyntaxNode(dataHash)
 
-            # Injectors
-            self._grammar.set_injectors(filter(lambda injector: injector.injectionSelector, 
-                syntaxes.values()))
-
             # Syntaxes
-            def syntaxes(item):
-                def _syntaxes(self):
-                    return item.manager.getSyntaxesAsDictionary()
-                return _syntaxes
-            self._grammar.syntaxes = types.MethodType(syntaxes(self), self._grammar)
+            def findSyntax(item):
+                def _findSyntax(self, scopeName):
+                    scope = item.manager.scopeFactory(scopeName)
+                    syntaxes = item.manager.getSyntaxesByScope(scope)
+                    if syntaxes:
+                        return syntaxes[0].grammar
+                    print("Not found %s" % scopeName)
+                    return SyntaxNode({})
+                return _findSyntax
+            self._grammar.findSyntax = types.MethodType(findSyntax(self), self._grammar)
         return self._grammar
-
-    def buildRepository(self, syntaxes):
-        repository = {}
-        for key, value in syntaxes.items():
-            if value.scopeNameSelector.does_match(self.scopeName) and\
-            value.repository:
-                repository.update(value.repository)
-        return repository
 
     def parse(self, text, processor = None):
         self.grammar.parse(text, processor)
