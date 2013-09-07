@@ -30,6 +30,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         return self.__env
         
     def configure(self, settings):
+        # TODO El cursor :)
         self.asynchronous = settings.get("asynchronous", True)
         self.tabTriggered = settings.get("tabTriggered", False)
         self.disableIndent = settings.get("disableIndent", False)

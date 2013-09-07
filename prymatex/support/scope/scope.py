@@ -12,8 +12,8 @@ class Scope(object):
         self.path = isinstance(path, PathType) and path or Parser.path(path)
 
     @classmethod
-    def factory(cls, path):
-        return cls(PathType(tuple([ ScopeType(tuple(p.split("."))) for p in path ])))
+    def factory(cls, sources):
+        return cls(PathType.factory(sources))
     
     def __str__(self):
         return six.text_type(self.path)

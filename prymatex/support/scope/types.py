@@ -11,10 +11,16 @@ def prefix_match(lhs, rhs):
     return True
 
 class ScopeType(object):
-    def __init__(self, atoms = None):
+    def __init__(self):
         self.anchor_to_previous = False
-        self.atoms = atoms or []
+        self.atoms = ()
 
+    @classmethod
+    def factory(cls, atoms):
+        scope = cls()
+        scope.atoms = tuple(atoms.split("."))
+        return scope
+    
     def __str__(self):
         ret = self.anchor_to_previous and "> " or ""
         return ret + ".".join(self.atoms)
@@ -38,11 +44,17 @@ class ScopeType(object):
         return ScopeType(self.atoms + rhs.atoms)
     
 class PathType(object):
-    def __init__(self, scopes = None):
+    def __init__(self):
         self.anchor_to_bol = False
         self.anchor_to_eol = False
-        self.scopes = scopes or []
+        self.scopes = ()
 
+    @classmethod
+    def factory(cls, scopes):
+        path = cls()
+        path.scopes = tuple([ ScopeType.factory(scope) for scope in scopes])
+        return path
+    
     def __str__(self):
         ret = self.anchor_to_bol and "^ " or ""
         ret += " ".join([str(s) for s in self.scopes])
