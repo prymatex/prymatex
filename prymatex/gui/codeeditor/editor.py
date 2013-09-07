@@ -368,10 +368,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     # ---------------------- Scopes
     def setBasicScope(self, scopeStack):
-        self.basicScopeHash = self.flyweightScopeDataFactory(scopeStack)
+        self.__basicScope = self.flyweightScopeDataFactory(scopeStack)
 
     def basicScope(self):
-        return self.basicScopeHash
+        return self.__basicScope
 
     @classmethod
     def flyweightScopeDataFactory(cls, path):
@@ -386,15 +386,23 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 group = PMXSyntax.findGroup(path[::-1])))
 
     def scope(self, cursor = None, direction = "right"):
+        print("nooo")
         cursor = cursor or self.textCursor()
-        userData = self.blockUserData(cursor.block())
         if direction == "left":
-            return userData.tokenAtPosition(cursor.selectionStart() - cursor.position())
+            leftCursor = self.newCursorAtPosition(cursor.selectionStart())
+            leftUserData = self.blockUserData(leftCursor.block())
+            return leftUserData.tokenAtPosition(leftCursor.positionInBlock())
         elif direction == "right":
-            return userData.tokenAtPosition(cursor.selectionEnd() - cursor.position())
+            rightCursor = self.newCursorAtPosition(cursor.selectionEnd())
+            rightUserData = self.blockUserData(rightCursor.block())
+            return rightUserData.tokenAtPosition(rightCursor.positionInBlock())
         elif direction == "both":
-            return (userData.tokenAtPosition(cursor.selectionStart() - cursor.position()),
-                userData.tokenAtPosition(cursor.selectionEnd() - cursor.position()))
+            rightCursor = self.newCursorAtPosition(cursor.selectionEnd())
+            rightUserData = self.blockUserData(rightCursor.block())
+            leftCursor = self.newCursorAtPosition(cursor.selectionStart())
+            leftUserData = self.blockUserData(leftCursor.block())
+            return (leftUserData.tokenAtPosition(leftCursor.positionInBlock()),
+                rightUserData.tokenAtPosition(rightCursor.positionInBlock()))
 
     def cursorScope(self, cursor = None):
         cursor = cursor or self.textCursor()
@@ -960,7 +968,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             yield
         
         #A tab tigger completion
-        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope.path)
+        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
         
         typedWords = self.alreadyTypedWords.typedWords()
         

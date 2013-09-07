@@ -41,7 +41,9 @@ class ScopeType(object):
         return self.atoms < rhs.atoms
     
     def __add__(self, rhs):
-        return ScopeType(self.atoms + rhs.atoms)
+        scope = ScopeType()
+        scope.atoms = self.atoms + rhs.atoms
+        return scope
     
 class PathType(object):
     def __init__(self):
@@ -61,6 +63,12 @@ class PathType(object):
         ret += self.anchor_to_eol and " $" or ""
         return ret
 
+    def to_open_xml(self):
+        return "".join(["<" + scope + ">" for scope in self.scopes])
+
+    def to_close_xml(self):
+        return "".join(["</" + scope + ">" for scope in self.scopes[::-1]])
+                
     def __repr__(self):
         return "%s anchor_to_bol:%s anchor_to_eol:%s\n[%s]" % (self.__class__.__name__, self.anchor_to_bol, self.anchor_to_eol, "\n".join([repr(s) for s in self.scopes]))
 
@@ -77,7 +85,9 @@ class PathType(object):
         return self.scopes < rhs.scopes
     
     def __add__(self, rhs):
-        return PathType(self.scopes + rhs.scopes)
+        path = PathType()
+        path.scopes = self.scopes + rhs.scopes
+        return path
     
     def does_match(self, lhs, path, rank = None):
         i = len(path.scopes)

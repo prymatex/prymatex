@@ -74,11 +74,11 @@ class CompleterHelper(CodeEditorKeyHelper):
         self.editor.runCompleter()
 
 class SmartTypingPairsHelper(CodeEditorKeyHelper):
-    #TODO: Mas amor para la inteligencia de los cursores balanceados
     def accept(self, event, cursor = None):
-        settings = self.editor.scope(cursor = cursor).settings
+        # CHANGED: Aca uso editor.braces para no estar atacando los scopes
+        # por los settings.smartTypingPairs
         character = event.text()
-        pairs = [pair for pair in settings.smartTypingPairs if character in pair]
+        pairs = [pair for pair in self.editor.braces if character in pair]
         
         #Si no tengo nada retorno
         if not pairs: return False
@@ -91,7 +91,7 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
         if isOpen and cursor.hasSelection():
             #El cursor tiene seleccion, veamos si es un brace de apertura y tiene seleccionado un brace de apertura 
             selectedText = cursor.selectedText()
-            if any([selectedText == pair[0] for pair in settings.smartTypingPairs]):
+            if any([selectedText == pair[0] for pair in self.editor.braces]):
                 self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor)
             return True
         
@@ -99,7 +99,7 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
         if isClose:
             if cursor.hasSelection():
                 selectedText = cursor.selectedText()
-                if any([selectedText == pair[1] for pair in settings.smartTypingPairs]):
+                if any([selectedText == pair[1] for pair in self.editor.braces]):
                     self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor)
                 return True
             else:

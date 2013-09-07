@@ -54,10 +54,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
             start = ranges.pop(0)
             token = userData.tokenAtPosition(start)
             for index in ranges:
-                scopePath = self.editor.scope(scopeHash = token.scopeHash).path
-                lineXML += "".join(["<" + scope + ">" for scope in scopePath])
-                lineXML += line[start:index]
-                lineXML += "".join(["</" + scope + ">" for scope in scopePath[::-1]])
+                lineXML += token.scope.to_xml(line[start:index])
                 token = userData.tokenAtPosition(index)
                 start = index
             # TODO Ver si esta bien esto del replace

@@ -18,6 +18,9 @@ class Scope(object):
     def __str__(self):
         return six.text_type(self.path)
 
+    def to_xml(self, text = ""):
+        return self.path.to_open_xml() + text + self.path.to_close_xml()
+        
     def has_prefix(self, rhs):
         lhsScopes = self.path.scopes
         rhsScopes = rhs.path.scopes
