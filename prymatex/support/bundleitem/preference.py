@@ -124,14 +124,14 @@ class PMXPreferenceMasterSettings(object):
 
     @property
     def showInSymbolList(self):
-        for settings in self.settings:
+        for index, settings in enumerate(self.settings):
             if settings.showInSymbolList is not None:
                 return settings.showInSymbolList
         return False
 
     @property
     def symbolTransformation(self):
-        for settings in self.settings:
+        for index, settings in enumerate(self.settings):
             if settings.symbolTransformation is not None:
                 return settings.symbolTransformation
 
@@ -166,72 +166,7 @@ class PMXPreferenceMasterSettings(object):
             if settings.spellChecking is not None:
                 return settings.spellChecking
         return True
-
-    @property
-    def decreaseIndentPattern(self):
-        settings = self.__findIndentSettings()
-        if settings is not None:
-            return settings.decreaseIndentPattern
-
-    @property
-    def increaseIndentPattern(self):
-        settings = self.__findIndentSettings()
-        if settings is not None:
-            return settings.increaseIndentPattern
-
-    @property
-    def indentNextLinePattern(self):
-        settings = self.__findIndentSettings()
-        if settings is not None:
-            return settings.indentNextLinePattern
-
-    @property
-    def unIndentedLinePattern(self):
-        settings = self.__findIndentSettings()
-        if settings is not None:
-            return settings.unIndentedLinePattern
-    @property
-    def foldingIndentedBlockStart(self):
-        if not hasattr(self, "_folding_indented_block_start"):
-            for settings in self.settings:
-                self._folding_indented_block_start = settings.foldingIndentedBlockStart
-                if self._folding_indented_block_start is not None:
-                    break
-        return self._folding_indented_block_start
-
-    @property
-    def foldingIndentedBlockIgnore(self):
-        if not hasattr(self, "_folding_indented_block_ignore"):
-            for settings in self.settings:
-                self._folding_indented_block_ignore = settings.foldingIndentedBlockIgnore
-                if self._folding_indented_block_ignore is not None:
-                    break
-        return self._folding_indented_block_ignore
-
-    @property
-    def foldingStartMarker(self):
-        if not hasattr(self, "_folding_start_marker"):
-            for settings in self.settings:
-                self._folding_start_marker = settings.foldingStartMarker
-                if self._folding_start_marker is not None:
-                    break
-        return self._folding_start_marker
-
-    @property
-    def foldingStopMarker(self):
-        if not hasattr(self, "_folding_stop_marker"):
-            for settings in self.settings:
-                self._folding_stop_marker = settings.foldingStopMarker
-                if self._folding_stop_marker is not None:
-                    break
-        return self._folding_stop_marker
-
-    def __findIndentSettings(self):
-        #TODO: Algo de cache?
-        for settings in self.settings:
-            if any([getattr(settings, indentKey) is not None for indentKey in PMXPreferenceSettings.INDENT_KEYS]):
-                return settings
-
+        
     def _getBundle(self, attrKey):
         for settings in self.settings:
             if getattr(settings, attrKey) is not None:
@@ -241,40 +176,61 @@ class PMXPreferenceMasterSettings(object):
         for settings in self.settings:
             if getattr(settings, attrKey) is not None:
                 return settings.preference.manager
-
-    def indent(self, line):
-        #IncreasePattern on return indent nextline
-        #DecreasePattern evaluate line to decrease, no requiere del return
-        #IncreaseOnlyNextLine on return indent nextline only
-        #IgnoringLines evaluate line to unindent, no require el return
-        settings = self.__findIndentSettings()
-        indent = []
-        if settings.decreaseIndentPattern != None and settings.decreaseIndentPattern.search(line):
-            indent.append(self.INDENT_DECREASE)
-        if settings.increaseIndentPattern != None and settings.increaseIndentPattern.search(line):
-            indent.append(self.INDENT_INCREASE)
-        if settings.indentNextLinePattern != None and settings.indentNextLinePattern.search(line):
-            indent.append(self.INDENT_NEXTLINE)
-        if settings.unIndentedLinePattern != None and settings.unIndentedLinePattern.search(line):
-            indent.append(self.UNINDENT)
-        return indent
-
+    
     def transformSymbol(self, text):
         transformation = self.symbolTransformation
         return transformation and transformation.transform(text) or ""
 
+    def indent(self, line):
+        if not hasattr(self, "_indent_settings"):
+            self._indent_settings = None
+            for settings in self.settings:
+                if any([getattr(settings, indentKey) for indentKey in PMXPreferenceSettings.INDENT_KEYS]):
+                    self._indent_settings = settings
+                    break
+        indent = []
+        if self._indent_settings is not None:
+            #IncreasePattern on return indent nextline
+            #DecreasePattern evaluate line to decrease, no requiere del return
+            #IncreaseOnlyNextLine on return indent nextline only
+            #IgnoringLines evaluate line to unindent, no require el return
+            if self._indent_settings.decreaseIndentPattern != None and \
+                self._indent_settings.decreaseIndentPattern.search(line):
+                indent.append(self.INDENT_DECREASE)
+            if self._indent_settings.increaseIndentPattern != None and \
+                self._indent_settings.increaseIndentPattern.search(line):
+                indent.append(self.INDENT_INCREASE)
+            if self._indent_settings.indentNextLinePattern != None and \
+                self._indent_settings.indentNextLinePattern.search(line):
+                indent.append(self.INDENT_NEXTLINE)
+            if self._indent_settings.unIndentedLinePattern != None and \
+                self._indent_settings.unIndentedLinePattern.search(line):
+                indent.append(self.UNINDENT)
+        return indent
+
     def folding(self, line):
-        start_match = self.foldingStartMarker.search(line) if self.foldingStartMarker is not None else None
-        stop_match = self.foldingStopMarker.search(line) if self.foldingStopMarker is not None else None
-        if start_match != None and stop_match == None:
-            return self.FOLDING_START
-        elif start_match == None and stop_match != None:
-            return self.FOLDING_STOP
-        # Ahora probamos los de indented
-        if self.foldingIndentedBlockStart is not None and self.foldingIndentedBlockStart.search(line):
-            return self.FOLDING_INDENTED_START
-        if self.foldingIndentedBlockIgnore is not None and self.foldingIndentedBlockIgnore.search(line):
-            return self.FOLDING_INDENTED_IGNORE
+        if not hasattr(self, "_folding_settings"):
+            self._folding_settings = None
+            for settings in self.settings:
+                if any([getattr(settings, foldingKey) for foldingKey in PMXPreferenceSettings.FOLDING_KEYS]):
+                    self._folding_settings = settings
+                    break
+        if self._folding_settings is not None:
+            start_match = self._folding_settings.foldingStartMarker.search(line) \
+                if self._folding_settings.foldingStartMarker is not None else None
+            stop_match = self._folding_settings.foldingStopMarker.search(line) \
+                if self._folding_settings.foldingStopMarker is not None else None
+            if start_match != None and stop_match == None:
+                return self.FOLDING_START
+            elif start_match == None and stop_match != None:
+                return self.FOLDING_STOP
+            # Ahora probamos los de indented
+            if self._folding_settings.foldingIndentedBlockStart is not None and \
+                self._folding_settings.foldingIndentedBlockStart.search(line):
+                return self.FOLDING_INDENTED_START
+            if self._folding_settings.foldingIndentedBlockIgnore is not None and \
+                self._folding_settings.foldingIndentedBlockIgnore.search(line):
+                return self.FOLDING_INDENTED_IGNORE
         return self.FOLDING_NONE
 
 class PMXPreference(PMXBundleItem):

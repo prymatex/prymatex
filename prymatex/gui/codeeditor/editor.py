@@ -386,7 +386,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 group = PMXSyntax.findGroup(path[::-1])))
 
     def scope(self, cursor = None, direction = "right"):
-        print("nooo")
         cursor = cursor or self.textCursor()
         if direction == "left":
             leftCursor = self.newCursorAtPosition(cursor.selectionStart())
@@ -968,7 +967,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             yield
         
         #A tab tigger completion
-        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
+        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope.scope)
         
         typedWords = self.alreadyTypedWords.typedWords()
         
