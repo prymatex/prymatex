@@ -422,8 +422,7 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
 
     @QtCore.Slot()
     def on_actionProjectBundles_triggered(self):
-        project = self.currentNode()
-        self.bundleEditorDialog.execEditor(namespaceFilter = project.namespace)
+        self.bundleEditorDialog.execEditor(namespaceFilter = self.currentNode().namespaceName)
     
     @QtCore.Slot()
     def on_actionSelectRelatedBundles_triggered(self):

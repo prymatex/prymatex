@@ -1,84 +1,84 @@
 [submodule "prymatex/share/Bundles/scm.tmbundle"]
 	path = prymatex/share/Bundles/scm.tmbundle
-	url = git@github.com:prymatex/scm.tmbundle.git
+	url = https://github.com/prymatex/scm.tmbundle.git
 [submodule "prymatex/share/Bundles/git.tmbundle"]
 	path = prymatex/share/Bundles/git.tmbundle
-	url = git@github.com:prymatex/git.tmbundle.git
+	url = https://github.com/prymatex/git.tmbundle.git
 [submodule "prymatex/share/Bundles/python.tmbundle"]
 	path = prymatex/share/Bundles/python.tmbundle
-	url = git@github.com:prymatex/python.tmbundle.git
+	url = https://github.com/prymatex/python.tmbundle.git
 [submodule "prymatex/share/Bundles/source.tmbundle"]
 	path = prymatex/share/Bundles/source.tmbundle
-	url = git@github.com:prymatex/source.tmbundle.git
+	url = https://github.com/prymatex/source.tmbundle.git
 [submodule "prymatex/share/Bundles/text.tmbundle"]
 	path = prymatex/share/Bundles/text.tmbundle
-	url = git@github.com:prymatex/text.tmbundle.git
+	url = https://github.com/prymatex/text.tmbundle.git
 [submodule "prymatex/share/Bundles/ruby.tmbundle"]
 	path = prymatex/share/Bundles/ruby.tmbundle
-	url = git@github.com:prymatex/ruby.tmbundle.git
+	url = https://github.com/prymatex/ruby.tmbundle.git
 [submodule "prymatex/share/Bundles/todo.tmbundle"]
 	path = prymatex/share/Bundles/todo.tmbundle
-	url = git@github.com:prymatex/todo.tmbundle.git
+	url = https://github.com/prymatex/todo.tmbundle.git
 [submodule "prymatex/share/Bundles/c.tmbundle"]
 	path = prymatex/share/Bundles/c.tmbundle
-	url = git@github.com:prymatex/c.tmbundle.git
+	url = https://github.com/prymatex/c.tmbundle.git
 [submodule "prymatex/share/Bundles/css.tmbundle"]
 	path = prymatex/share/Bundles/css.tmbundle
-	url = git@github.com:prymatex/css.tmbundle.git
+	url = https://github.com/prymatex/css.tmbundle.git
 [submodule "prymatex/share/Bundles/html.tmbundle"]
 	path = prymatex/share/Bundles/html.tmbundle
-	url = git@github.com:prymatex/html.tmbundle.git
+	url = https://github.com/prymatex/html.tmbundle.git
 [submodule "prymatex/share/Bundles/bundle-development.tmbundle"]
 	path = prymatex/share/Bundles/bundle-development.tmbundle
-	url = git@github.com:prymatex/bundle-development.tmbundle.git
+	url = https://github.com/prymatex/bundle-development.tmbundle.git
 [submodule "prymatex/share/Bundles/shellscript.tmbundle"]
 	path = prymatex/share/Bundles/shellscript.tmbundle
-	url = git@github.com:prymatex/shellscript.tmbundle.git
+	url = https://github.com/prymatex/shellscript.tmbundle.git
 [submodule "prymatex/share/Bundles/php.tmbundle"]
 	path = prymatex/share/Bundles/php.tmbundle
-	url = git@github.com:prymatex/php.tmbundle.git
+	url = https://github.com/prymatex/php.tmbundle.git
 [submodule "prymatex/share/Bundles/restructuredtext.tmbundle"]
 	path = prymatex/share/Bundles/restructuredtext.tmbundle
-	url = git@github.com:prymatex/restructuredtext.tmbundle.git
+	url = https://github.com/prymatex/restructuredtext.tmbundle.git
 [submodule "prymatex/share/Bundles/perl.tmbundle"]
 	path = prymatex/share/Bundles/perl.tmbundle
-	url = git@github.com:prymatex/perl.tmbundle.git
+	url = https://github.com/prymatex/perl.tmbundle.git
 [submodule "prymatex/share/Bundles/latex.tmbundle"]
 	path = prymatex/share/Bundles/latex.tmbundle
-	url = git@github.com:prymatex/latex.tmbundle.git
+	url = https://github.com/prymatex/latex.tmbundle.git
 [submodule "prymatex/share/Bundles/sql.tmbundle"]
 	path = prymatex/share/Bundles/sql.tmbundle
-	url = git@github.com:prymatex/sql.tmbundle.git
+	url = https://github.com/prymatex/sql.tmbundle.git
 [submodule "prymatex/share/Bundles/javascript.tmbundle"]
 	path = prymatex/share/Bundles/javascript.tmbundle
-	url = git@github.com:prymatex/javascript.tmbundle.git
+	url = https://github.com/prymatex/javascript.tmbundle.git
 [submodule "prymatex/share/Bundles/make.tmbundle"]
 	path = prymatex/share/Bundles/make.tmbundle
-	url = git@github.com:prymatex/make.tmbundle.git
+	url = https://github.com/prymatex/make.tmbundle.git
 [submodule "prymatex/share/Bundles/textile.tmbundle"]
 	path = prymatex/share/Bundles/textile.tmbundle
-	url = git@github.com:prymatex/textile.tmbundle.git
+	url = https://github.com/prymatex/textile.tmbundle.git
 [submodule "prymatex/share/Bundles/java.tmbundle"]
 	path = prymatex/share/Bundles/java.tmbundle
-	url = git@github.com:prymatex/java.tmbundle.git
+	url = https://github.com/prymatex/java.tmbundle.git
 [submodule "prymatex/share/Bundles/javadoc.tmbundle"]
 	path = prymatex/share/Bundles/javadoc.tmbundle
-	url = git@github.com:prymatex/javadoc.tmbundle.git
+	url = https://github.com/prymatex/javadoc.tmbundle.git
 [submodule "prymatex/share/Bundles/ruby-on-rails.tmbundle"]
 	path = prymatex/share/Bundles/ruby-on-rails.tmbundle
-	url = git@github.com:prymatex/ruby-on-rails.tmbundle.git
+	url = https://github.com/prymatex/ruby-on-rails.tmbundle.git
 [submodule "prymatex/share/Bundles/subversion.tmbundle"]
 	path = prymatex/share/Bundles/subversion.tmbundle
-	url = git@github.com:prymatex/subversion.tmbundle.git
+	url = https://github.com/prymatex/subversion.tmbundle.git
 [submodule "prymatex/share/Bundles/python-django.tmbundle"]
 	path = prymatex/share/Bundles/python-django.tmbundle
-	url = git@github.com:prymatex/python-django.tmbundle.git
+	url = https://github.com/prymatex/python-django.tmbundle.git
 [submodule "prymatex/share/Bundles/python-django-templates.tmbundle"]
 	path = prymatex/share/Bundles/python-django-templates.tmbundle
-	url = git@github.com:prymatex/python-django-templates.tmbundle
+	url = https://github.com/prymatex/python-django-templates.tmbundle
 [submodule "prymatex/share/Bundles/textmate.tmbundle"]
 	path = prymatex/share/Bundles/textmate.tmbundle
-	url = git@github.com:prymatex/textmate.tmbundle
+	url = https://github.com/prymatex/textmate.tmbundle
 [submodule "prymatex/share/Bundles/prymatex.tmbundle"]
 	path = prymatex/share/Bundles/prymatex.tmbundle
-	url = git@github.com:prymatex/prymatex.tmbundle
+	url = https://github.com/prymatex/prymatex.tmbundle

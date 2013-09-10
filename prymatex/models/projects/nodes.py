@@ -68,7 +68,7 @@ class ProjectTreeNode(FileSystemTreeNode):
         FileSystemTreeNode.__init__(self, dataHash.get("name"))
         self.workingSet = None
         self.manager = None
-        self.namespace = None
+        self.namespaceName = ""
         self.load(dataHash)
     
     # ----------- Load, update and dump

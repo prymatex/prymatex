@@ -74,12 +74,12 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
     # -------------- Signals from suppor manager
     def on_supportManager_bundleAdded(self, bundle):
         for project in self.getAllProjects():
-            if bundle.hasSource(project.namespace) and not project.hasBundleMenu(bundle):
+            if bundle.hasSource(project.namespaceName) and not project.hasBundleMenu(bundle):
                 self.addProjectBundleMenu(project, bundle)
 
     def on_supportManager_bundleRemoved(self, bundle):
         for project in self.getAllProjects():
-            if bundle.hasSource(project.namespace) and project.hasBundleMenu(bundle):
+            if bundle.hasSource(project.namespaceName) and project.hasBundleMenu(bundle):
                 self.removeProjectBundleMenu(project, bundle)
 
     def on_supportManager_bundleItemAdded(self, bundleItem):

@@ -262,9 +262,9 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
 
     # Override loadSupport for emit signals
     def loadSupport(self, *largs, **kwargs):
-        PMXSupportBaseManager.loadSupport(self, *largs, **kwargs)
-        self.bundleProxyTreeModel.sort(0, QtCore.Qt.AscendingOrder)
         self.bundleProxyTreeModel.setDynamicSortFilter(True)
+        PMXSupportBaseManager.loadSupport(self, *largs, **kwargs)
+        #self.bundleProxyTreeModel.sort(0, QtCore.Qt.AscendingOrder)
 
     def runSystemCommand(self, **attrs):
         if attrs.get("asynchronous", False):
