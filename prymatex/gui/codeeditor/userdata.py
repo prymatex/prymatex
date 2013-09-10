@@ -7,7 +7,7 @@ from prymatex.qt import QtGui
 
 from functools import reduce
 
-CodeEditorScopeData = namedtuple("CodeEditorScopeData", [ "scope", "path", "settings", "group" ])
+CodeEditorScopeData = namedtuple("CodeEditorScopeData", [ "scope", "settings", "group" ])
 
 class CodeEditorTokenData(namedtuple('CodeEditorTokenData', 'start end data chunk')):
         __slots__ = ()

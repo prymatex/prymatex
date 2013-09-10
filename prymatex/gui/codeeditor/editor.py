@@ -381,9 +381,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         scope = cls.application.supportManager.scopeFactory(path)
         return cls.SCOPES.setdefault(path, CodeEditorScopeData(
                 scope = scope,
-                path = path,
                 settings = cls.application.supportManager.getPreferenceSettings(scope),
-                group = PMXSyntax.findGroup(path[::-1])))
+                group = scope.rootGroupName()))
 
     def scope(self, cursor = None, direction = "right"):
         cursor = cursor or self.textCursor()
