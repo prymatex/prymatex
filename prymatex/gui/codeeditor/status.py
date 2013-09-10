@@ -76,27 +76,31 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
 
     # -------------- Setup Widgets
     def setupWidgetStatus(self):
-        tableView = QtGui.QTableView(self)
-        tableView.setModel(self.application.supportManager.syntaxProxyModel)
-        tableView.resizeColumnsToContents()
-        tableView.resizeRowsToContents()
-        tableView.verticalHeader().setVisible(False)
-        tableView.horizontalHeader().setVisible(False)
-        tableView.setShowGrid(False)
-        tableView.setMinimumWidth(tableView.horizontalHeader().length() + 25)
-        tableView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-        tableView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        tableView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        tableView.setAutoScroll(False)
-        self.comboBoxSyntaxes.setModel(self.application.supportManager.syntaxProxyModel);
-        self.comboBoxSyntaxes.setView(tableView)
+        # Custom Table view for syntax combo
+        self.comboBoxSyntaxes.setView(QtGui.QTableView(self))
+        self.comboBoxSyntaxes.setModel(
+            self.application.supportManager.syntaxProxyModel);
         self.comboBoxSyntaxes.setModelColumn(0)
+        self.comboBoxSyntaxes.view().resizeColumnsToContents()
+        self.comboBoxSyntaxes.view().resizeRowsToContents()
+        self.comboBoxSyntaxes.view().verticalHeader().setVisible(False)
+        self.comboBoxSyntaxes.view().horizontalHeader().setVisible(False)
+        self.comboBoxSyntaxes.view().setShowGrid(False)
+        self.comboBoxSyntaxes.view().setMinimumWidth(
+            self.comboBoxSyntaxes.view().horizontalHeader().length() + 25)
+        self.comboBoxSyntaxes.view().setHorizontalScrollBarPolicy(
+            QtCore.Qt.ScrollBarAsNeeded)
+        self.comboBoxSyntaxes.view().setSelectionMode(
+            QtGui.QAbstractItemView.SingleSelection)
+        self.comboBoxSyntaxes.view().setSelectionBehavior(
+            QtGui.QAbstractItemView.SelectRows)
+        self.comboBoxSyntaxes.view().setAutoScroll(False)
         
-        #Connect tab size context menu
+        # Connect tab size context menu
         self.labelTabSize.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.labelTabSize.customContextMenuRequested.connect(self.showTabSizeContextMenu)
         
-        #Create bundle menu
+        # Create bundle menu
         self.menuBundle = QtGui.QMenu(self)
         self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundle)
         self.toolButtonMenuBundle.setMenu(self.menuBundle)
