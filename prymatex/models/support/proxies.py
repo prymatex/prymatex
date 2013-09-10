@@ -35,6 +35,7 @@ class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
         leftNode = self.sourceModel().node(left)
         rightNode = self.sourceModel().node(right)
         if leftNode.TYPE == rightNode.TYPE:
+            print(rightNode.name, leftNode.name, rightNode.name > leftNode.name)
             return rightNode.name > leftNode.name
         else:
             return self.bundleItemTypeOrder.index(rightNode.TYPE) > self.bundleItemTypeOrder.index(leftNode.TYPE)
@@ -53,8 +54,7 @@ class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
         return False
         
     def node(self, index):
-        sIndex = self.mapToSource(index)
-        return self.sourceModel().node(sIndex)
+        return self.sourceModel().node(self.mapToSource(index))
     
     def setFilterNamespace(self, namespace):
         if namespace:
