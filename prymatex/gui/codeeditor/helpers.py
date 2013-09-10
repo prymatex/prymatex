@@ -302,4 +302,3 @@ class PrintEditorStatusHelper(CodeEditorKeyHelper):
         print(self.editor.currentWord())
         print(self.editor.scope())
         print(self.editor.wordUnderCursor(), cursor.position())
-

@@ -277,10 +277,7 @@ class PMXSyntax(PMXBundleItem):
         ],
         'repository': []
     }
-    ROOT_GROUPS = [ "comment", "constant", "entity", "invalid",
-                    "keyword", "markup", "meta", "storage",
-                    "string", "support", "variable" ]
-    
+
     def load(self, dataHash):
         super(PMXSyntax, self).load(dataHash)
         for key in PMXSyntax.KEYS:
@@ -349,10 +346,3 @@ class PMXSyntax(PMXBundleItem):
     
     def parseLine(self, stack, line, processor):
         self.grammar.parse_line(stack, line, processor)
-        
-    @classmethod
-    def findGroup(cls, scopes):
-        for scope in scopes:
-            group = scope.split(".")[0]
-            if group in cls.ROOT_GROUPS:
-                return group
