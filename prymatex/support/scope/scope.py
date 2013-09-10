@@ -30,9 +30,12 @@ class Scope(object):
                 break
         return i == len(rhsScopes)
 
+    def rootGroupName(self):
+        return self.path.rootGroup() or ""
+        
     def __hash__(self):
         return hash(self.path)
-      
+    
     def __eq__(self, rhs):
         return self.path == rhs.path
     
