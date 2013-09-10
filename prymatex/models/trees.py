@@ -178,9 +178,7 @@ class AbstractNamespaceTreeModel(AbstractTreeModel):
 # Proxies
 #=========================================   
 class FlatTreeProxyModel(QtCore.QAbstractItemModel):
-    """
-    Proxy for create flat models from tree models
-    """
+    """Proxy for create flat models from tree models"""
     def __init__(self, parent = None):
         QtCore.QAbstractItemModel.__init__(self, parent)
         self.__indexMap = []
@@ -267,28 +265,17 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
                 return self.__indexMap[row]
         return QtCore.QModelIndex()
     
-    #=========================================
-    # source model handler
-    #=========================================
+    # --------------- Source model handler
     def on_sourceModel_dataChanged(self, topLeft, bottomRight):
-        #Cambiaron los datos tengo que ponerlos en funcion del comparableValue
         if topLeft in self.__indexMap:
-            self.beginRemoveRows(QtCore.QModelIndex(), self.__indexMap.index(topLeft), self.__indexMap.index(topLeft))
-            self.__indexMap.remove(topLeft)
-            self.endRemoveRows()
-            position = bisect_key(self.__indexMap, topLeft, lambda index: self.comparableValue(index))
-            self.beginInsertRows(QtCore.QModelIndex(), position, position)
-            self.__indexMap.insert(position, topLeft)
-            self.endInsertRows()
-            #self.dataChanged.emit(self.mapFromSource(topLeft), self.mapFromSource(topLeft))
+            print("Cambian los datos")
+            self.dataChanged.emit(self.mapFromSource(topLeft), self.mapFromSource(bottomRight))
     
     def on_sourceModel_rowsInserted(self, parent, start, end):
         for i in range(start, end + 1):
             sIndex = self.__sourceModel.index(i, 0, parent)
             if self.filterAcceptsRow(i, parent):
-                #position = bisect_key(self.__indexMap, sIndex, lambda index: self.comparableValue(index))
-                #self.beginInsertRows(QtCore.QModelIndex(), position, position)
-                #self.__indexMap.insert(position, sIndex)
+                print("Inserto uno", self.__class__.__name__)
                 self.beginInsertRows(QtCore.QModelIndex(), len(self.__indexMap), len(self.__indexMap))
                 self.__indexMap.append(sIndex)
                 self.endInsertRows()
@@ -298,6 +285,7 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
         for i in range(start, end + 1):
             sIndex = self.sourceModel().index(i, 0, parent)
             if sIndex in self.__indexMap:
+                print("Quito uno")
                 self.beginRemoveRows(QtCore.QModelIndex(), self.__indexMap.index(sIndex), self.__indexMap.index(sIndex))
                 self.__indexMap.remove(sIndex)
                 self.endRemoveRows()
