@@ -48,7 +48,4 @@ Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''
             self.setSnippet(Snippet(self.content))
         processor.startSnippet(self)
         SnippetHandler.execute(self, processor)
-        if self.lastHolder():
-            processor.endSnippet(self)
-        else:
-            processor.selectHolder()
+        processor.selectHolder()

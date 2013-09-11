@@ -43,7 +43,6 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
 
     def startRender(self):
         self.output = ""
-        self.captures = []
         self.__startPosition = self.caretPosition()
 
     def endRender(self):
@@ -59,12 +58,9 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         return self.cursorWrapper.selectionStart() + len(self.output)
 
     def insertText(self, text):
-        if self.captures:
-            self.captures[-1] = self.captures[-1] + text
-        else:
-            # Replace new lines and tabs
-            text = text.replace('\n', '\n' + self.indentation)
-            self.output += text.replace('\t', self.tabreplacement)
+        # Replace new lines and tabs
+        text = text.replace('\n', '\n' + self.indentation)
+        self.output += text.replace('\t', self.tabreplacement)
     
     def selectHolder(self):
         start, end = self.snippet.currentPosition()
