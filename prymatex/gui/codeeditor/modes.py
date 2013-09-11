@@ -117,16 +117,16 @@ class PMXSnippetEditorMode(CodeEditorBaseMode):
             #Insert snippet
             self.editor.snippetProcessor.render(wrapCursor)
             
-            if selectedText:
-                newHolderStart, _ = self.snippet.currentPosition()
-                self.editor.setTextCursor(
-                    self.editor.newCursorAtPosition(
-                        newHolderStart + holderPosition + (positionAfter - positionBefore)
-                    )
+            #if selectedText:
+            newHolderStart, _ = self.snippet.currentPosition()
+            self.editor.setTextCursor(
+                self.editor.newCursorAtPosition(
+                    newHolderStart + holderPosition + (positionAfter - positionBefore)
                 )
-            elif self.snippet.nextHolder():
+            )
+            #elif self.snippet.nextHolder():
                 # The holder is killed
-                self.editor.snippetProcessor.selectHolder()
+            #    self.editor.snippetProcessor.selectHolder()
             if selectedText and self.snippet.lastHolder():
                 # Put text on last holder, force snippet ends
                 self.endSnippet()

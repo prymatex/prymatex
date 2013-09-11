@@ -386,23 +386,24 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def scope(self, cursor = None, direction = "right"):
         cursor = cursor or self.textCursor()
-        if direction == "left":
-            leftCursor = self.newCursorAtPosition(cursor.selectionStart())
-            leftUserData = self.blockUserData(leftCursor.block())
-            return leftUserData.tokenAtPosition(leftCursor.positionInBlock())
-        elif direction == "right":
-            rightCursor = self.newCursorAtPosition(cursor.selectionEnd())
-            rightUserData = self.blockUserData(rightCursor.block())
-            return rightUserData.tokenAtPosition(rightCursor.positionInBlock())
-        elif direction == "both":
-            rightCursor = self.newCursorAtPosition(cursor.selectionEnd())
-            rightUserData = self.blockUserData(rightCursor.block())
-            leftCursor = self.newCursorAtPosition(cursor.selectionStart())
-            leftUserData = self.blockUserData(leftCursor.block())
-            return (leftUserData.tokenAtPosition(leftCursor.positionInBlock()),
-                rightUserData.tokenAtPosition(rightCursor.positionInBlock()))
-
-    def cursorScope(self, cursor = None):
+        cursor = self.newCursorAtPosition(cursor.selectionStart() -1,
+            cursor.selectionEnd())
+        leftScope = rightScope = None
+        leftPosition = rightPosition = None
+        startBlock, endBlock = self.selectionBlockStartEnd(cursor)
+        if direction in [ "left", "both" ]:
+            leftPosition = cursor.selectionStart() - startBlock.position()
+            leftUserData = self.blockUserData(startBlock)
+            leftScope = leftUserData.tokenAtPosition(leftPosition)
+        if direction in [ "right", "both" ]:
+            rightPosition = cursor.selectionEnd() - endBlock.position()
+            rightUserData = self.blockUserData(endBlock)
+            rightScope = rightUserData.tokenAtPosition(rightPosition)
+        if direction == "both":
+            return (leftScope, rightScope)
+        return direction == "right" and rightScope or leftScope
+        
+    def cursorScope(self, cursor = None, direction = "right"):
         cursor = cursor or self.textCursor()
         path = []
         if cursor.hasSelection():
