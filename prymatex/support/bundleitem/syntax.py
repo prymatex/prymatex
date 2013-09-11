@@ -28,30 +28,36 @@ class SyntaxNode(object):
                     map(lambda item: (item[0], SyntaxNode(item[1], self)), value.items())
                 )
             elif key == 'repository':
-                value = self.parse_repository(value)
+                value = self.parse_repository(value or {})
             elif key == 'patterns':
-                value = self.create_children(value)
+                value = self.create_children(value or [])
             setattr(self, key, value )
         
         if self.name is not None:
             # String for name
             self._nameFormater = String(self.name)
-        
+            
         if self.contentName is not None:
             # String for contentName
             self._contentNameFormater = String(self.contentName)
+    
+    def inject(self, injectors, scopeFactoryFunction):
+        for pattern in filter(lambda p: isinstance(p, SyntaxNode), self.patterns):
+            pattern.inject(injectors, scopeFactoryFunction)
+        if self.name:
+            scope = scopeFactoryFunction(self.name)
+            for injector in injectors:
+                if injector.injectionSelector.does_match(scope):
+                    self.patterns.extend(self.create_children(injector.patterns or []))
+                    self.repository.update(self.parse_repository(injector.repository or {}))
 
-    def parse_repository(self, repository = None):
-        if repository is None:
-            return {}
+    def parse_repository(self, repository):
         return dict([ (key, 'include' in value and\
                     SyntaxProxyNode( value["include"], self ) or\
                     SyntaxNode( value, self ))
                 for key, value in repository.items() ])
 
-    def create_children(self, patterns = None):
-        if patterns is None:
-            return []
+    def create_children(self, patterns):
         return [ 'include' in pattern and\
                     SyntaxProxyNode( pattern["include"], self ) or\
                     SyntaxNode( pattern, self )
@@ -224,8 +230,8 @@ class SyntaxProxyNode(object):
     @property
     def rootNode(self):
         if self.__rootNode is None:
-            self.__rootNode = self.parentNode
-            while self.__rootNode.parentNode is not None:
+            self.__rootNode = self
+            while self.__rootNode.parentNode:
                 self.__rootNode = self.__rootNode.parentNode
         return self.__rootNode
         
@@ -312,19 +318,11 @@ class PMXSyntax(PMXBundleItem):
     def grammar(self):
         if not hasattr(self, '_grammar'):
             # Build grammar
-
-            # Injectors
-            scope = self.manager.scopeFactory(self.scopeName)
-            injectors = [injector for injector in self.manager.getAllSyntaxes() if 
-                         injector.injectionSelector and injector.injectionSelector.does_match(scope) ]
             
-            injectPatterns = reduce(lambda i1, i2: i1 + i2.patterns, injectors, [])
-            
-            print(injectPatterns)
             dataHash = {
-                'repository': self.repository or {},
+                'repository': self.repository,
                 'name': self.scopeName,
-                'patterns': (self.patterns or []) + injectPatterns
+                'patterns': self.patterns
             }
             self._grammar = SyntaxNode(dataHash)
 
@@ -339,6 +337,8 @@ class PMXSyntax(PMXBundleItem):
                     return SyntaxNode({})
                 return _findSyntax
             self._grammar.findSyntax = types.MethodType(findSyntax(self), self._grammar)
+            self._grammar.inject([injector for injector in self.manager.getAllSyntaxes() if 
+                         injector.injectionSelector ], self.manager.scopeFactory)
         return self._grammar
 
     def parse(self, text, processor = None):
