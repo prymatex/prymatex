@@ -8,7 +8,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def __init__(self, editor):
         super(PMXCommandProcessor, self).__init__()
         self.editor = editor
-
+        self.cursorWrapper = self.command = None
+        
     def startCommand(self, command):
         self.command = command
         self.__env = None
@@ -30,9 +31,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
         return self.__env
         
     def configure(self, settings):
-        # TODO El cursor :)
         self.asynchronous = settings.get("asynchronous", True)
-        self.tabTriggered = settings.get("tabTriggered", False)
+        self.cursorWrapper = settings.get("cursorWrapper", self.editor.textCursor())
         self.disableIndent = settings.get("disableIndent", False)
         self.baseEnvironment = settings.get("environment", {})
         self.errorCommand = settings.get("errorCommand", False)
@@ -202,8 +202,14 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor.insertText(context.outputValue)
         
     def insertAsSnippet(self, context, outputFormat = None):
-        snippet = self.editor.application.supportManager.buildAdHocSnippet(context.outputValue, context.bundleItem.bundle, tabTrigger = context.bundleItem.tabTrigger)
-        self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
+        # Build Snippet
+        snippet = self.editor.application.supportManager.buildAdHocSnippet(
+            context.outputValue, context.bundleItem.bundle, 
+            tabTrigger = context.bundleItem.tabTrigger)
+        # Insert snippet
+        self.editor.insertBundleItem(snippet, 
+            cursorWrapper = self.cursorWrapper, 
+            disableIndent = self.disableIndent)
             
     def showAsHTML(self, context, outputFormat = None):
         self.editor.browserDock.setRunningContext(context)
