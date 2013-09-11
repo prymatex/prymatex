@@ -116,11 +116,8 @@ class TextEditWidget(QtGui.QPlainTextEdit):
 
     def selectionBlockStartEnd(self, cursor = None):
         cursor = cursor or self.textCursor()
-        start, end = cursor.selectionStart(), cursor.selectionEnd()
-        if start > end:
-            return self.document().findBlock(end), self.document().findBlock(start)
-        else:
-            return self.document().findBlock(start), self.document().findBlock(end)
+        return ( self.document().findBlock(cursor.selectionStart()), 
+            self.document().findBlock(cursor.selectionEnd()))
 
     #------ Find and Replace
     def findTypingPair(self, b1, b2, cursor, backward = False):
