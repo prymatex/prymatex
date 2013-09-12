@@ -528,12 +528,14 @@ class PMXCompleterEditorMode(QtGui.QCompleter, CodeEditorBaseMode):
         self.activatedCallback = callback
 
     def setSource(self, source):
+        # TODO Esto esta muy feo y es lento
         self.activeSources.append(source)
         self.currentSource = source
         self.completionModel().sourceModel().setSuggestions(self.completerSuggestions[source])
         self.fixPopupViewSize()
 
     def setSuggestions(self, suggestions, source):
+        # TODO Esto esta muy feo y es lento
         self.completerSuggestions[source] = suggestions
         self.activeSources.append(source)
         self.currentSource = source
