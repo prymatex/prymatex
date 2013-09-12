@@ -5,6 +5,7 @@
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import PMXBaseEditorKeyHelper
+from prymatex.qt.helpers import debug_key
 
 class CodeEditorKeyHelper(QtCore.QObject, PMXBaseEditorKeyHelper):
     def __init__(self, parent = None):
@@ -21,13 +22,15 @@ class KeyEquivalentHelper(CodeEditorKeyHelper):
         keyseq = int(event.modifiers()) + event.key()
         if keyseq not in self.application.supportManager.getAllKeyEquivalentCodes():
             return False
-
-        leftScope, rightScope = self.editor.scope(cursor = cursor, direction = 'both')
-        cursorScope = self.editor.cursorScope(cursor = cursor)
+        
+        leftScope, rightScope = self.editor.scope(
+            cursor = cursor, direction = 'both')
+        leftCursorScope, rightCursorScope = self.editor.cursorScope(
+            cursor = cursor, direction = 'both')
         self.items = self.application.supportManager.getKeyEquivalentItem(
             keyseq,
-            leftScope.scope + cursorScope, 
-            rightScope.scope + cursorScope)
+            leftScope.scope + leftCursorScope, 
+            rightScope.scope + rightCursorScope)
         return bool(self.items)
 
     def execute(self, event, cursor = None):

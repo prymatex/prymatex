@@ -377,7 +377,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def flyweightScopeDataFactory(cls, path):
         if path in cls.SCOPES:
             return cls.SCOPES[path]
-        # TODO: Hacer algo con el grupo
         scope = cls.application.supportManager.scopeFactory(path)
         return cls.SCOPES.setdefault(path, CodeEditorScopeData(
                 scope = scope,
@@ -405,18 +404,32 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
     def cursorScope(self, cursor = None, direction = "right"):
         cursor = cursor or self.textCursor()
-        path = []
+        leftCursor = self.newCursorAtPosition(cursor.selectionStart())
+        rightCursor = self.newCursorAtPosition(cursor.selectionEnd())
+        leftPath, rightPath = [], []
         if cursor.hasSelection():
-            path.append("dyn.selection")
-        if cursor.atBlockStart():
-            path.append("dyn.caret.begin.line")
-        if cursor.atStart():
-            path.append("dyn.caret.begin.document")
-        if cursor.atBlockEnd():
-            path.append("dyn.caret.end.line")
-        if cursor.atEnd():
-            path.append("dyn.caret.end.document")
-        return self.application.supportManager.scopeFactory(path)
+            # If there is one or more selections: dyn.selection.
+            # TODO If there is a single zero-width selection: dyn.caret.mixed.columnarself.
+            # TODO If there are multiple carets and/or selections: dyn.caret.mixed.            
+            leftPath.append("dyn.selection")
+            rightPath.append("dyn.selection")
+        # When there is only a single caret or a single continuous selection
+        # the left scope may contain: dyn.caret.begin.line or dyn.caret.begin.document
+        if leftCursor.atBlockStart():
+            leftPath.append("dyn.caret.begin.line")
+        if leftCursor.atStart():
+            leftPath.append("dyn.caret.begin.document")
+        # Likewise the right scope may contain: dyn.caret.end.line or dyn.caret.end.document.
+        if rightCursor.atBlockEnd():
+            rightPath.append("dyn.caret.end.line")
+        if rightCursor.atEnd():
+            rightPath.append("dyn.caret.end.document")
+        if direction == "both":
+            return (self.application.supportManager.scopeFactory(leftPath), 
+            self.application.supportManager.scopeFactory(rightPath))
+        return direction == "right" and \
+            self.application.supportManager.scopeFactory(rightPath) or \
+            self.application.supportManager.scopeFactory(leftPath)
         
     def attributeScope(self):
         return self.application.supportManager.attributeScopes(self.filePath, self.project and self.project.directory)
@@ -856,7 +869,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         # TODO un shortcut para esto de obtener el path
         leftScope, rightScope = self.scope(direction = "both")
         attributeScope = self.attributeScope()
-        cursorScope = self.cursorScope(cursor = cursor)
+        leftCursorScope, rightCursorScope = self.cursorScope(cursor = cursor, direction = "both")
         current_word, start, end = self.currentWord()
         
         theme = self.application.supportManager.getTheme(self.defaultTheme)
@@ -868,8 +881,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 'TM_LINE_NUMBER': block.blockNumber() + 1,
                 'TM_CURRENT_THEME_PATH': theme.currentSourcePath(),
                 'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
-                'TM_SCOPE': "%s" % (rightScope.scope + attributeScope + cursorScope),
-                'TM_LEFT_SCOPE': "%s" % (leftScope.scope + attributeScope + cursorScope),
+                'TM_SCOPE': "%s" % (rightScope.scope + rightCursorScope + attributeScope),
+                'TM_LEFT_SCOPE': "%s" % (leftScope.scope + leftCursorScope + attributeScope),
                 'TM_MODE': self.syntax().name,
                 'TM_SOFT_TABS': self.tabStopSoft and 'YES' or 'NO',
                 'TM_TAB_SIZE': self.tabWidth
