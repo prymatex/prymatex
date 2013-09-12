@@ -291,8 +291,6 @@ class PMXSyntax(PMXBundleItem):
             if value is not None:
                 if key == 'firstLineMatch':
                     value = compileRegexp( value )
-                elif key == 'scopeName':
-                    self.selector = self.manager.selectorFactory(value)
                 elif key == 'injectionSelector':
                     value = self.manager.selectorFactory(value)
             setattr(self, key, value)
