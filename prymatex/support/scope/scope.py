@@ -52,6 +52,7 @@ class Scope(object):
         return bool(self.path)
 
 wildcard = Scope("x-any")
+none = Scope("")
 
 class Context(object):
     def __init__(self, left, right):
@@ -86,13 +87,13 @@ class Selector(object):
     # ------- Matching 
     def does_match(self, context, rank = None):
         #assert isinstance(rank, list)
-        if not self.selector:
-            if rank is not None:
-                rank.append(0)
-            return True
         
         if isinstance(context, Scope):
             context = Context(context, context)
             
-        match = context.left == wildcard or context.right == wildcard or self.selector.does_match(context.left.path, context.right.path, rank)
-        return match
+        if not self.selector or context.left == wildcard or context.right == wildcard:
+            if rank is not None:
+                rank.append(0)
+            return True
+            
+        return self.selector.does_match(context.left.path, context.right.path, rank)

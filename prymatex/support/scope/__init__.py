@@ -1,3 +1,3 @@
 
-from .scope import wildcard, Scope, Context, Selector
+from .scope import wildcard, none, Scope, Context, Selector
 from .attributes import attributes

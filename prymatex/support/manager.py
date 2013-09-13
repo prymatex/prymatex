@@ -1026,7 +1026,7 @@ class PMXSupportBaseManager(object):
         return self.bundleItemCache.setdefault(memoizedKey,
             self.__sort_filter_items(self.getAllPreferences(), leftScope, rightScope))
 
-    def getPreferenceSettings(self, leftScope, rightScope = None):
+    def getPreferenceSettings(self, leftScope = scope.none, rightScope = scope.none):
         memoizedKey = ("getPreferenceSettings", None, leftScope, rightScope)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)

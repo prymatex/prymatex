@@ -14,7 +14,7 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
 
     def startCommand(self, command):
         self.command = command
-        settings = self.mainWindow.application.supportManager.getPreferenceSettings(())
+        settings = self.mainWindow.application.supportManager.getPreferenceSettings()
         print(settings.shellVariables)
         self.__env = command.environmentVariables()
         self.__env.update(self.mainWindow.environmentVariables())
