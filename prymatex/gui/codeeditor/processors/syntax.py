@@ -27,7 +27,8 @@ class CodeEditorTokenSyntaxProcessor(PMXSyntaxProcessor):
         self.line = line
         self.__tokens = []
         self.__indexes = []
-        self.openToken(0)
+        for _ in self.stackScopes:
+            self.openToken(0)
     
     # -------- OPEN TAG
     def openTag(self, scope, position):
