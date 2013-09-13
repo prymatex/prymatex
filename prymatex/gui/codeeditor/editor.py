@@ -383,27 +383,19 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 settings = cls.application.supportManager.getPreferenceSettings(scope),
                 group = scope.rootGroupName()))
 
-    def scope(self, cursor = None, direction = "right"):
-        cursor = cursor or self.textCursor()
-        cursor = self.newCursorAtPosition(cursor.selectionStart() -1,
-            cursor.selectionEnd())
-        leftScope = rightScope = None
-        leftPosition = rightPosition = None
-        startBlock, endBlock = self.selectionBlockStartEnd(cursor)
-        if direction in [ "left", "both" ]:
-            leftPosition = cursor.selectionStart() - startBlock.position()
-            leftUserData = self.blockUserData(startBlock)
-            leftScope = leftUserData.tokenAtPosition(leftPosition)
-        if direction in [ "right", "both" ]:
-            rightPosition = cursor.selectionEnd() - endBlock.position()
-            rightUserData = self.blockUserData(endBlock)
-            rightScope = rightUserData.tokenAtPosition(rightPosition)
-        if direction == "both":
-            return (leftScope, rightScope)
-        return direction == "right" and rightScope or leftScope
+    def tokenAtPosition(self, position):
+        if position < 0:
+            position = 0
+        elif position > self.document().characterCount():
+            position = self.document().characterCount()
+        block = self.document().findBlock(position)
+        return self.blockUserData(block).tokenAtPosition(position - block.position())
         
-    def cursorScope(self, cursor = None, direction = "right"):
+    def scope(self, cursor = None):
         cursor = cursor or self.textCursor()
+        leftToken, rightToken = (self.tokenAtPosition(cursor.selectionStart() - 1),
+            self.tokenAtPosition(cursor.selectionEnd()))
+        # Cursor scope
         leftCursor = self.newCursorAtPosition(cursor.selectionStart())
         rightCursor = self.newCursorAtPosition(cursor.selectionEnd())
         leftPath, rightPath = [], []
@@ -424,15 +416,21 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             rightPath.append("dyn.caret.end.line")
         if rightCursor.atEnd():
             rightPath.append("dyn.caret.end.document")
-        if direction == "both":
-            return (self.application.supportManager.scopeFactory(leftPath), 
+        lcs, rcs = (self.application.supportManager.scopeFactory(leftPath), 
             self.application.supportManager.scopeFactory(rightPath))
-        return direction == "right" and \
-            self.application.supportManager.scopeFactory(rightPath) or \
-            self.application.supportManager.scopeFactory(leftPath)
+            
+        # TODO Attribute scope cache
+        attrScope = self.application.supportManager.attributeScopes(
+            self.filePath, self.project and self.project.directory)
+        return leftToken.scope + lcs + attrScope, rightToken.scope + rcs + attrScope
         
-    def attributeScope(self):
-        return self.application.supportManager.attributeScopes(self.filePath, self.project and self.project.directory)
+    def settings(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        cursorWrapper = self.newCursorAtPosition(cursor.selectionStart() -1,
+            cursor.selectionEnd())
+        leftToken, rightToken = (self.tokenAtPosition(cursorWrapper.selectionStart()),
+            self.tokenAtPosition(cursorWrapper.selectionEnd()))
+        return leftToken.settings, rightToken.settings
         
     # ------------ Obteniendo datos del editor
     def tabKeyBehavior(self):
@@ -796,7 +794,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         block = cursor.block()
         positionInBlock = cursor.positionInBlock()
         userData = self.blockUserData(block)
-        settings = self.scope().settings
+        _, settings = self.settings(cursor)
         indentMarks = settings.indent(block.text()[:positionInBlock])
         if settings.INDENT_INCREASE in indentMarks:
             self.logger.debug("Increase indent")
@@ -867,9 +865,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         line = block.text()
         
         # TODO un shortcut para esto de obtener el path
-        leftScope, rightScope = self.scope(direction = "both")
-        attributeScope = self.attributeScope()
-        leftCursorScope, rightCursorScope = self.cursorScope(cursor = cursor, direction = "both")
+        leftScope, rightScope = self.scope(cursor)
         current_word, start, end = self.currentWord()
         
         theme = self.application.supportManager.getTheme(self.defaultTheme)
@@ -881,8 +877,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 'TM_LINE_NUMBER': block.blockNumber() + 1,
                 'TM_CURRENT_THEME_PATH': theme.currentSourcePath(),
                 'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
-                'TM_SCOPE': "%s" % (rightScope.scope + rightCursorScope + attributeScope),
-                'TM_LEFT_SCOPE': "%s" % (leftScope.scope + leftCursorScope + attributeScope),
+                'TM_SCOPE': "%s" % rightScope,
+                'TM_LEFT_SCOPE': "%s" % leftScope,
                 'TM_MODE': self.syntax().name,
                 'TM_SOFT_TABS': self.tabStopSoft and 'YES' or 'NO',
                 'TM_TAB_SIZE': self.tabWidth
@@ -907,7 +903,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             environment['TM_INPUT_START_LINE'] = start.blockNumber() + 1
             environment['TM_INPUT_START_LINE_INDEX'] = cursor.selectionStart() - start.position()
         
-        settings = self.scope().settings
+        _, settings = self.settings(cursor)
         environment.update(settings.shellVariables)
         return environment
 
@@ -961,8 +957,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def runCompletionSuggestions(self, cursor = None, scope = None):
         cursor = cursor or self.textCursor()
-        scope = scope or self.scope(cursor = cursor)
-        settings = scope.settings
+        leftScope, rightScope = self.scope(cursor)
+        _, settings = self.settings(cursor)
         currentAlreadyTyped = self.currentWord(direction = "left", search = False)[0]
         
         readyWords = set()
@@ -980,7 +976,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             yield
         
         #A tab tigger completion
-        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope.scope)
+        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(leftScope, rightScope)
         
         typedWords = self.alreadyTypedWords.typedWords()
         

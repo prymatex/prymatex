@@ -319,7 +319,7 @@ class AlreadyTypedWords(object):
 def bundleItemSelectableModelFactory(editor):
     # Data function    
     def bundleItemData():
-        leftScope, rightScope = editor.scope(direction = "both")
+        leftScope, rightScope = editor.scope()
         return [dict(data = bundleItem, 
                 template = "<table width='100%%'><tr><td>%(name)s - %(bundle)s</td><td align='right'>%(trigger)s</td></tr></table>",
                 display = { 
@@ -327,7 +327,7 @@ def bundleItemSelectableModelFactory(editor):
                     "bundle": bundleItem.bundle.name,
                     "trigger": bundleItem.trigger()
                 }, 
-                image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE)) for bundleItem in editor.application.supportManager.getActionItemsByScope(leftScope.path, rightScope.path)]
+                image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE)) for bundleItem in editor.application.supportManager.getActionItemsByScope(leftScope, rightScope)]
 
     # Filter function        
     def bundleItemFilter(text, item):

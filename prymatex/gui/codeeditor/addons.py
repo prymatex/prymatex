@@ -33,7 +33,7 @@ class SmartUnindentAddon(CodeEditorAddon):
             userData = cursor.userData()
             positionInBlock = cursor.positionInBlock()
             block = cursor.block()
-            settings = self.editor.scope(cursor = cursor, attribute='settings')
+            _, settings = self.editor.settings(cursor)
             indentMarks = settings.indent(block.text()[:positionInBlock])
             indentGuide = self.editor.findPreviousNoBlankBlock(block)
             if PMXPreferenceSettings.INDENT_DECREASE in indentMarks and indentGuide is not None:
@@ -109,11 +109,12 @@ class SpellCheckerAddon(CodeEditorAddon):
         return fmt
 
     def spellWordsForBlock(self, block):
-        spellRange = self.editor.scopes(attribute = 'settings', scope_filter = lambda attr: attr.spellChecking)
-        for ran, _ in spellRange:
-            wordRangeList = block.userData().wordsRanges(ran[0], ran[1])
-            for (start, end), word, _ in wordRangeList:
-                yield (start, end), word
+        userData = self.editor.blockUserData(block)
+        for token in userData.tokens():
+            if token.settings.spellChecking:
+                wordRangeList = userData.wordsRanges(ran[0], ran[1])
+                for (start, end), word, _ in wordRangeList:
+                    yield (start, end), word
 
     def cleanCursorsForBlock(self, block):
         self.wordCursors = [cursor for cursor in self.wordCursors if cursor.block() != block]
