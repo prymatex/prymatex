@@ -37,8 +37,8 @@ class PMXProfile(object):
 
     # ------------------------ Setting Groups
     def __group_name(self, configurableClass):
-        if hasattr(configurableClass, 'settings'):
-            return configurableClass.settings.groupName()
+        if hasattr(configurableClass, '_settings'):
+            return configurableClass._settings.groupName()
         return configurableClass.__dict__['SETTINGS_GROUP'] if 'SETTINGS_GROUP' in configurableClass.__dict__ else configurableClass.__name__
 
     def groupByName(self, name):
@@ -51,13 +51,15 @@ class PMXProfile(object):
 
     def registerConfigurable(self, configurableClass):
         # Prepare class group
-        configurableClass.settings = self.groupByClass(configurableClass)
+        # TODO: Una forma de obtener y setear los valores en las settings
+        # Las configurableClass tiene que tener esos metodos
+        configurableClass._settings = self.groupByClass(configurableClass)
         # Prepare configurable attributes
         for key, value in configurableClass.__dict__.items():
             if isinstance(value, pmxConfigPorperty):
                 # TODO: Migrar a un sistema de nombres explicito
                 value.name = key
-                configurableClass.settings.addSetting(value)
+                configurableClass._settings.addSetting(value)
 
     def saveState(self, component):
         self.state.setValue(component.objectName(), component.componentState())

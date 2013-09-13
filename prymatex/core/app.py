@@ -303,8 +303,8 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         self.currentProfile.registerConfigurable(componentClass)
         for settingClass in componentClass.contributeToSettings():
             self.extendComponent(settingClass)
-            settingWidget = settingClass(componentClass.settings, profile = self.currentProfile)
-            componentClass.settings.addDialog(settingWidget)
+            settingWidget = settingClass(componentClass._settings, profile = self.currentProfile)
+            componentClass._settings.addDialog(settingWidget)
             self.profileManager.registerSettingsWidget(settingWidget)
 
     def populateComponentClass(self, componentClass):

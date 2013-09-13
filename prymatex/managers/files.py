@@ -107,11 +107,11 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
         self.fileHistory.insert(0, filePath)
         if len(self.fileHistory) > self.fileHistoryLength:
             self.fileHistory = self.fileHistory[0:self.fileHistoryLength]
-        self.settings.setValue("fileHistory", self.fileHistory)
+        self._settings.setValue("fileHistory", self.fileHistory)
     
     def clearFileHistory(self):
         self.fileHistory = []
-        self.settings.setValue("fileHistory", self.fileHistory)
+        self._settings.setValue("fileHistory", self.fileHistory)
     
     #========================================================
     # Path handling, create, move, copy, link, delete

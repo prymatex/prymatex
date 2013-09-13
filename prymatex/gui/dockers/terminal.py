@@ -126,7 +126,7 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
             self.on_defaultTheme_changed(self.application.settingValue("CodeEditor.defaultTheme"))
         else:
             self.application.unregisterSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
-            self.tabTerminals.setColorScheme(self.settings.value("defaultScheme"))
+            self.tabTerminals.setColorScheme(self._settings.value("defaultScheme"))
 
     synchronizeEditor = pmxConfigPorperty(default = False)
     bufferSize = pmxConfigPorperty(default = 300)
