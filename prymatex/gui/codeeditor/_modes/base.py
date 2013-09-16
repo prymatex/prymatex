@@ -21,16 +21,16 @@ class CodeEditorBaseMode(PMXBaseEditorAddon):
     # ------------ Mouse Events
     def mousePressEvent(self, event):
         return self.editor.mousePressEvent(event)
-        
+
     def mouseMoveEvent(self, event):
         return self.editor.mouseMoveEvent(event)
-        
+
     def mouseReleaseEvent(self, event):
         return self.editor.mouseReleaseEvent(event)
-        
+
     # ------------ Key Events
     def keyPressEvent(self, event):
         return self.editor.keyPressEvent(event)
-        
+
     def keyReleaseEvent(self, event):
         return self.editor.keyReleaseEvent(event)
