@@ -380,7 +380,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         scope = cls.application.supportManager.scopeFactory(path)
         return cls.SCOPES.setdefault(path, CodeEditorScopeData(
                 scope = scope,
-                settings = cls.application.supportManager.getPreferenceSettings(scope),
+                settings = cls.application.supportManager.getPreferenceSettings(scope, scope),
                 group = scope.rootGroupName()))
 
     def tokenAtPosition(self, position):
