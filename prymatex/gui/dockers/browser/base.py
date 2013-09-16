@@ -43,7 +43,7 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     SETTINGS_GROUP = "Browser"
     
     updateInterval = pmxConfigPorperty(default = 3000)
-    homePage = pmxConfigPorperty(default = "http://www.prymatex.org")
+    homePage = pmxConfigPorperty(default = "https://github.com/prymatex")
     
     @pmxConfigPorperty(default = NoProxy)
     def proxyType(self, value):
