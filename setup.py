@@ -158,11 +158,9 @@ setup(
         "Programming Language :: Python :: 2",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     ],
-    dependency_links = ['git+http://github.com/prymatex/ponyguruma.git#egg=ponyguruma-dev'],
     install_requires = [ 
         'pyzmq',
         'regex',
-        'ponyguruma'
     ],
     
     cmdclass = {

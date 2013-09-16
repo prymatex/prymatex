@@ -1,3 +1,4 @@
 pygments
+pyzmq
+regex
 -e git+https://github.com/prymatex/ponyguruma.git#egg=ponyguruma
-pyzmq==2.1.4

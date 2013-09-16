@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from . import types
-from .base import compileRegexp, convertOnig
+from .base import compileRegexp
 
 from prymatex.utils import six
 
