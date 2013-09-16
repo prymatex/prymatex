@@ -3,24 +3,19 @@
 
 from prymatex.qt import QtCore, QtGui
 
-# Completer Model
-class CompleterTableModel(QtCore.QAbstractTableModel): 
+# Models
+class AlreadyTypedWordsModel(QtCore.QAbstractTableModel): 
     def __init__(self, parent): 
         QtCore.QAbstractListModel.__init__(self, parent) 
-        self.columns = 1
         self.suggestions = []
-        self.alreadyTypedWords = set()
-
+        self.typedWords = set()
+        self.suggestions = []
+        
     def removeWords(self, words):
-        self.alreadyTypedWords.difference_update(words)
+        self.typedWords.difference_update(words)
         
     def addWords(self, words):
-        self.alreadyTypedWords.update(words)
-
-    def setSuggestions(self, suggestions):
-        self.suggestions = suggestions
-        self.columns = 2 if any([isinstance(s, BundleItemTreeNode) for s in suggestions]) else 1
-        self.layoutChanged.emit()
+        self.typedWords.update(words)
 
     def index(self, row, column, parent = QtCore.QModelIndex()):
         if row < len(self.suggestions):
@@ -32,45 +27,16 @@ class CompleterTableModel(QtCore.QAbstractTableModel):
         return len(self.suggestions)
 
     def columnCount(self, parent = None):
-        return self.columns
+        return 1
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
         suggestion = self.suggestions[index.row()]
         if role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
-            if isinstance(suggestion, dict) and index.column() == 0:
-                if 'display' in suggestion:
-                    return suggestion['display']
-                elif 'title' in suggestion:
-                    return suggestion['title']
-            elif isinstance(suggestion, BundleItemTreeNode):
-                #Es un bundle item
-                if index.column() == 0:
-                    return suggestion.tabTrigger
-                elif index.column() == 1:
-                    return suggestion.name
-            elif isinstance(suggestion, tuple):
-                return suggestion[index.column()]
-            elif index.column() == 0:
-                return suggestion
+            return suggestion[1]
         elif role == QtCore.Qt.DecorationRole:
-            if index.column() == 0:
-                if isinstance(suggestion, dict) and 'image' in suggestion:
-                    return resources.getIcon(suggestion['image'])
-                elif isinstance(suggestion, BundleItemTreeNode):
-                    return suggestion.icon
-                else:
-                    return resources.getIcon('inserttext')
-        elif role == QtCore.Qt.ToolTipRole:
-            if isinstance(suggestion, dict) and 'tool_tip' in suggestion:
-                if 'tool_tip_format' in suggestion:
-                    print(suggestion["tool_tip_format"])
-                return suggestion['tool_tip']
-            elif isinstance(suggestion, BundleItemTreeNode):
-                return suggestion.name
-        elif role == QtCore.Qt.ForegroundRole:
-            return QtCore.Qt.lightGray
+            return resources.getIcon("scope-root-%s" % ( suggestion[0] or "none"))
 
     def getSuggestion(self, index):
         return self.suggestions[index.row()]
@@ -83,8 +49,9 @@ class CodeEditorCompleter(QtGui.QCompleter):
 
         # Popup table view
         self.setPopup(QtGui.QTableView())
-        # Model
-        self.setModel(CompleterTableModel(self))
+        # Models
+        self.alreadyTypedWordsModel = AlreadyTypedWordsModel(self)
+        self.setModel(self.alreadyTypedWordsModel)
         
         # Config popup table view
         self.popup().setAlternatingRowColors(True)
@@ -121,10 +88,10 @@ class CodeEditorCompleter(QtGui.QCompleter):
         
         if userData.words != words:
             #Quitar las palabras anteriores
-            self.model().removeWords(userData.words.difference(words))
+            self.alreadyTypedWordsModel.removeWords(userData.words.difference(words))
             
             #Agregar las palabras nuevas
-            self.model().addWords(words)
+            self.alreadyTypedWordsModel.addWords(words)
             userData.words = words
     
     def fixPopupViewSize(self):
