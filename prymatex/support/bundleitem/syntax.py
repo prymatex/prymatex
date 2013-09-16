@@ -114,6 +114,7 @@ class SyntaxNode(object):
     def match_end(self, string, match, position):
         regstring = self.end[:]
         def g_match(mobj):
+            print("g_match")
             index = int(mobj.group(0)[1:])
             return match.group(index)
         def d_match(mobj):
@@ -122,7 +123,9 @@ class SyntaxNode(object):
             return match.groupdict[index]
         regstring = compileRegexp('\\\\([1-9])').sub(g_match, regstring)
         regstring = compileRegexp('\\\\k<(.*?)>').sub(d_match, regstring)
-        return compileRegexp( regstring ).search( string, position )
+        regexp = compileRegexp( regstring )
+        if regexp:
+            return regexp.search( string, position )
     
     def match_first_son(self, string, position):
         son = match = None

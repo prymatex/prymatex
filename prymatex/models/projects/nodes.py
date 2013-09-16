@@ -157,7 +157,6 @@ class ProjectTreeNode(FileSystemTreeNode):
         if self.manager.isOpen(self):
             return resources.getIcon("project-development")
 
-
     # --------------- Bundle Menu
     def addBundleMenu(self, bundle):
         if not isinstance(self.bundleMenu, list):
