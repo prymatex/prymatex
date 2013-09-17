@@ -16,15 +16,9 @@ from prymatex.core.components import PMXBaseComponent, PMXBaseEditor
 from prymatex.core import logger, exceptions
 from prymatex.core.settings import pmxConfigPorperty
 
-from prymatex.utils.decorators import deprecated
 from prymatex.utils.i18n import ugettext as _
-from prymatex.utils.decorators.helpers import printtime, logtime
 from prymatex.utils.zeromqt import ZmqSocket
 from prymatex.utils import six
-
-# The basic managers
-from prymatex.managers.profile import ProfileManager
-from prymatex.managers.plugins import PluginManager
 
 class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     """The application instance.
@@ -66,20 +60,14 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         self.aboutToQuit.connect(self.closePrymatex)
         self.componentInstances = {}
         
-        # Exceptions, Print exceptions in a window
         self.replaceSysExceptHook()
-        
-        # Route Qt output
-        QtCore.qInstallMsgHandler(self.qtMessageHandler)
-        
-        # Root logger
-        self.logger = logger.getLogger()
 
     # ------ exception and logger handlers
     def getLogger(self, *largs, **kwargs):
         return logger.getLogger(*largs, **kwargs)
 
     def replaceSysExceptHook(self):
+        # Exceptions, Print exceptions in a window
         def displayExceptionDialog(exctype, value, traceback):
             ''' Display a nice dialog showing the python traceback'''
             from prymatex.gui.emergency.tracedialog import PMXTraceBackDialog
@@ -87,6 +75,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             PMXTraceBackDialog.fromSysExceptHook(exctype, value, traceback).exec_()
 
         sys.excepthook = displayExceptionDialog
+
+        # Route messages to application logger
+        QtCore.qInstallMsgHandler(self.qtMessageHandler)
 
     def qtMessageHandler(self, msgType, msgString):
         ''' Route Qt messaging system into Prymatex/Python one'''
@@ -103,45 +94,32 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
     # ------- prymatex's micro kernel
     def applyOptions(self, options):
+        # The basic managers
         self.options = options
-        
+
         # Prepare profile
+        from prymatex.managers.profile import ProfileManager
         self.extendComponent(ProfileManager)
         self.profileManager = ProfileManager(self)
         self.currentProfile = self.profileManager.currentProfile(self.options.profile)
         if self.currentProfile is None:
             return False
+        
+        if self.options.reset_settings:
+            self.currentProfile.clear()
+        
+        # Prepare settings for application
+        self.populateComponentClass(PrymatexApplication)
 
+        # TODO Esto al currentProfile
+        settings = self.currentProfile.groupByClass(PrymatexApplication)
+        settings.addListener(self)
+        settings.configure(self)
+            
         logger.config(self.options.verbose, self.currentProfile.PMX_LOG_PATH, self.options.log_pattern)
         
         self.checkSingleInstance()
         
-        if self.options.reset_settings:
-            self.currentProfile.clear()
-
-        # Prepare settings for application
-        self.registerConfigurable(PrymatexApplication)
-
-        # Configure application
-        settings = self.currentProfile.groupByClass(PrymatexApplication)
-        settings.addListener(self)
-        settings.configure(self)
-        
-        verbose = self.options.verbose
-        namePattern = self.options.log_pattern
-
-        # Prepare Plugins
-        self.populateComponentClass(PluginManager)
-        self.pluginManager = PluginManager(self)
-        settings = self.currentProfile.groupByClass(PluginManager)
-        settings.addListener(self.pluginManager)
-        settings.configure(self.pluginManager)
-        
-        self.pluginManager.initialize(self)
-
-        self.pluginManager.addPluginDirectory(config.PMX_PLUGINS_PATH)
-
-        self.pluginManager.loadPlugins()
         return True
 
     def installTranslator(self):
@@ -175,6 +153,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             splash.show()
         try:
             # Build Managers
+            self.pluginManager = self.buildPluginManager()  # WARN: FIST Plugin Manager
             self.storageManager = self.buildStorageManager()  # Persistence system Manager
             self.supportManager = self.buildSupportManager()  # Support Manager
             self.fileManager = self.buildFileManager()  # File Manager
@@ -197,7 +176,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
                 splash.finish(self.mainWindow)
             else:
                 self.mainWindow.show()
-
+            self.logger.info("Application startup")
         except KeyboardInterrupt:
             self.logger.critical("\nQuit signal catched during application startup. Quiting...")
             self.quit()
@@ -228,6 +207,24 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             f.close()
 
     # -------------------- Managers
+    def buildPluginManager(self):
+        from prymatex.managers.plugins import PluginManager
+        #manager = self.createComponentInstance(PluginManager)
+        self.populateComponentClass(PluginManager)
+        manager = PluginManager(self)
+
+        # TODO Esto al currentProfile
+        settings = self.currentProfile.groupByClass(PluginManager)
+        settings.addListener(manager)
+        settings.configure(manager)
+        
+        manager.initialize(self)
+
+        manager.addPluginDirectory(config.PMX_PLUGINS_PATH)
+
+        manager.loadPlugins()
+        return manager
+
     def buildSupportManager(self):
         from prymatex.managers.support import SupportManager
         manager = self.createComponentInstance(SupportManager)

@@ -28,8 +28,8 @@ from .models import (SymbolListModel, BookmarkListModel, AlreadyTypedWords,
         bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
         symbolSelectableModelFactory)
 
-from prymatex.support import (PMXSnippet, PMXMacro, PMXCommand,
-        PMXDragCommand, PMXSyntax, PMXPreferenceSettings, PMXPreferenceMasterSettings)
+from prymatex.support import (PMXSnippet, PMXMacro, PMXCommand, PMXSyntax,
+    PMXDragCommand, PMXPreferenceSettings, PMXPreferenceMasterSettings)
 
 from prymatex.utils import coroutines
 from prymatex.utils import sourcecode
@@ -242,7 +242,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         def highlightReady(editor):
             def _ready():
                 editor.highlightChanged.emit()
-                print("Time", time() - self.highlightTime)
+                self.logger.info("Time %f" % (time() - self.highlightTime))
             return _ready
         self.syntaxHighlighter.runAsyncHighlight(highlightReady(self))
         #self.syntaxHighlighter.runAsyncHighlight(lambda editor = self: editor.highlightChanged.emit())

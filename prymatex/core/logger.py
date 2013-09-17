@@ -5,7 +5,13 @@ import os
 import logging
 from datetime import datetime
 
-LOGGING_LEVELS = [logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG]
+LOGGING_LEVELS = [
+    logging.CRITICAL,
+    logging.ERROR,
+    logging.WARNING,
+    logging.INFO,
+    logging.DEBUG
+]
 
 class NameFilter(logging.Filter):
     def __init__(self, pattern):
@@ -14,13 +20,13 @@ class NameFilter(logging.Filter):
     def filter(self, record):
         return record.name.find(self.pattern) != -1
 
-
-def config(verbose, directory,  namePattern = None):
+def config(verbose, directory, namePattern=None):
     level = LOGGING_LEVELS[verbose % 5]
     # Prepara logging
-    
+
     # File name
-    filename = os.path.join(directory, '%s-%s.log' % (logging.getLevelName(level), datetime.now().strftime('%d-%m-%Y')))
+    filename = os.path.join(directory, '%s-%s.log' % (
+        logging.getLevelName(level), datetime.now().strftime('%d-%m-%Y')))
     logging.basicConfig(filename=filename, level=level)
 
     # Console handler
@@ -34,10 +40,6 @@ def config(verbose, directory,  namePattern = None):
         ch.addFilter(NameFilter(namePattern))
 
     logging.root.addHandler(ch)
-    logging.root.info("Application startup")
-    logging.root.debug("Application startup debug")
 
 def getLogger(*largs, **kwargs):
     return logging.getLogger(*largs, **kwargs)
-  
-        

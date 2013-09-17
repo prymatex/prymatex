@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 # encoding: utf-8
+
 from __future__ import unicode_literals
 
+import logging
+
 COMPILERS = []
+logger = logging.getLogger(__name__)
 
 # =================
 #        Re
@@ -58,7 +62,7 @@ try:
 
     COMPILERS.append(compileRegex)
 except:
-    print("In order to run prymatex is highly recommended install regex")
+    logger.warn("In order to run prymatex is highly recommended install regex")
 
 # =================
 #   oniguruma
@@ -84,7 +88,7 @@ try:
 
     COMPILERS.append(compileOnig)
 except:
-    print("Ponyguruma is not installed, don't worry prymatex runs well without it")
+    logger.info("Ponyguruma is not installed, don't worry prymatex runs well without it")
     
 # =================
 #     Compile
@@ -95,4 +99,4 @@ def compileRegexp(string, flags = []):
             return compiler(string, flags)
         except:
             pass
-    print("Ooops, can't compile %s" % string)
+    logger.debug("Ooops, can't compile %s" % string)

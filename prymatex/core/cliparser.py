@@ -41,7 +41,7 @@ parser.add_argument('-p', '--profile', metavar='profile', nargs="?", default="",
 parser.add_argument('-d', '--devel', default=False, action='store_true',
                 help='Enable developer mode. Useful for plugin developers.')
 
-parser.add_argument('--verbose', default=0, type=int,
+parser.add_argument('--verbose', default=2, type=int,
                 help='Set verbose level from 0 to 4.')
 
 parser.add_argument('--log-pattern', default='', type=str,

@@ -23,7 +23,6 @@ from prymatex.models.support import (BundleItemProxyTreeModel, BundleItemTypePro
                                     ThemeStyleProxyTableModel, BundleListModel, 
                                     SyntaxListModel, TemplateListModel, ProjectListModel)
 
-
 class BundleItemMenuGroup(QtCore.QObject):
     def __init__(self, manager):
         QtCore.QObject.__init__(self, manager)
