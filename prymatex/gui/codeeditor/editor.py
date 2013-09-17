@@ -242,7 +242,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         def highlightReady(editor):
             def _ready():
                 editor.highlightChanged.emit()
-                print("Tiempo", time() - self.highlightTime)
+                print("Time", time() - self.highlightTime)
             return _ready
         self.syntaxHighlighter.runAsyncHighlight(highlightReady(self))
         #self.syntaxHighlighter.runAsyncHighlight(lambda editor = self: editor.highlightChanged.emit())

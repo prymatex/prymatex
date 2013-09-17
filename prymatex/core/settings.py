@@ -2,7 +2,9 @@
 #-*- encoding: utf-8 -*-
 
 import os
+
 from prymatex.utils import plist
+from prymatex.utils import six
 
 class TextMateSettings(object):
     def __init__(self, file):
@@ -72,11 +74,11 @@ class SettingsGroup(object):
         setting = self.settings.get(name)
         if setting:
             self.qsettings.beginGroup(self.__groupName)
-            value = self.qsettings.value(name, default)
+            value = setting.toPython(self.qsettings.value(name, default))
             self.qsettings.endGroup()
             if value is None:
-                return self.settings[name].getDefault()
-            return setting.toPython(value)
+                value = setting.getDefault()
+            return value
 
     def hasValue(self, name):
         self.qsettings.beginGroup(self.__groupName)
@@ -110,13 +112,10 @@ class SettingsGroup(object):
 
     def configure(self, obj):
         for key, setting in self.settings.items():
-            value = self.value(key)
+            value = setting.toPython(self.value(key))
             if value is None:
                 value = setting.getDefault()
-            else:
-                value = setting.toPython(value)
-            if value is not None:
-                setattr(obj, key, value)
+            setattr(obj, key, value)
 
     def sync(self):
         for key, setting in self.settings.items():
@@ -138,10 +137,15 @@ class pmxConfigPorperty(object):
         return self.default
 
     def toPython(self, value):
-        if self.valueType == bool and isinstance(value, str):
-            return value.lower() not in ('false', '0')
-        else:
-            return self.valueType(value)
+        try:
+            if value is None:
+                return value
+            elif self.valueType == bool and isinstance(value, six.string_types):
+                return value.lower() not in ('false', '0')
+            else:
+                return self.valueType(value)
+        except:
+            pass
     
     def __call__(self, function):
         self.fset = function

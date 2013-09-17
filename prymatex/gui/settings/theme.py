@@ -34,7 +34,6 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         self.tableViewStyles.setModel(self.application.supportManager.themeStyleProxyModel)
         
         currentThemeUUID = self.settingGroup.value('defaultTheme')
-        print(currentThemeUUID)
         currentTheme = self.application.supportManager.getTheme(currentThemeUUID)
         if currentTheme is not None:
             self.updateUi(currentTheme)

@@ -38,7 +38,6 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         eol_chars = sourcecode.get_eol_chars(text)
         if eol_chars is not None and self.eol_chars is not None:
             self.document().setModified(True)
-        print("eol: ", eol_chars)
         self.eol_chars = eol_chars
         
     def lineSeparator(self):
