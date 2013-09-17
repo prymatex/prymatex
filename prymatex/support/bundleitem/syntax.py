@@ -113,15 +113,13 @@ class SyntaxNode(object):
     
     def match_end(self, string, match, position):
         regstring = self.end[:]
-        def g_match(mobj):
-            print("g_match")
-            index = int(mobj.group(0)[1:])
-            return match.group(index)
         def d_match(mobj):
             print("d_match")
             index = mobj.group(0)
             return match.groupdict[index]
-        regstring = compileRegexp('\\\\([1-9])').sub(g_match, regstring)
+        regstring = compileRegexp('\\\\([1-9])').sub(
+            lambda mobj: match.group(int(mobj.group(0)[1:])),
+            regstring)
         regstring = compileRegexp('\\\\k<(.*?)>').sub(d_match, regstring)
         regexp = compileRegexp( regstring )
         if regexp:
