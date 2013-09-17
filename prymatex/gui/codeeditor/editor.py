@@ -85,8 +85,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def tabWidth(self, size):
         self.setTabStopWidth(size * self.fontMetrics().width(WIDTH_CHARACTER))
     
-    @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
-    def defaultFont(self, font):
+    @pmxConfigPorperty(default = ("Monospace", 9))
+    def defaultFont(self, value):
+        font = QtGui.QFont(*value)
         self.setFont(font)
 
     @pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
