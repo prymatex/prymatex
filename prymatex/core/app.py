@@ -110,12 +110,8 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         
         # Prepare settings for application
         self.populateComponentClass(PrymatexApplication)
+        self.currentProfile.configure(self)
 
-        # TODO Esto al currentProfile
-        settings = self.currentProfile.groupByClass(PrymatexApplication)
-        settings.addListener(self)
-        settings.configure(self)
-            
         logger.config(self.options.verbose, self.currentProfile.PMX_LOG_PATH, self.options.log_pattern)
         
         self.checkSingleInstance()
@@ -211,12 +207,10 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         from prymatex.managers.plugins import PluginManager
         #manager = self.createComponentInstance(PluginManager)
         self.populateComponentClass(PluginManager)
+        
         manager = PluginManager(self)
 
-        # TODO Esto al currentProfile
-        settings = self.currentProfile.groupByClass(PluginManager)
-        settings.addListener(manager)
-        settings.configure(manager)
+        self.currentProfile.configure(manager)
         
         manager.initialize(self)
 
@@ -319,10 +313,8 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             instance = klass(parent)
 
             # Configure
-            settings = self.currentProfile.groupByClass(klass)
-            settings.addListener(instance)
-            settings.configure(instance)
-
+            self.currentProfile.configure(instance)
+            
             # Add components
             componentClasses = self.pluginManager.findComponentsForClass(klass)
             for componentClass in componentClasses:
@@ -389,9 +381,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         
     # ------------- Editors and mainWindow handle
     def createEditorInstance(self, filePath=None, parent=None):
-        editorClass = filePath is not None and self.pluginManager.findEditorClassForFile(filePath) or self.pluginManager.defaultEditor()
+        editorClass = filePath and self.pluginManager.findEditorClassForFile(filePath) or self.pluginManager.defaultEditor()
 
-        if editorClass is not None:
+        if editorClass:
             return self.createComponentInstance(editorClass, parent)
 
     def createMainWindow(self):

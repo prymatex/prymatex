@@ -104,7 +104,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         elif isinstance(component, PMXBaseStatusBar):
             self.addStatusBar(component)
 
-
     def populate(self, manager):
         def extendMainMenu(klass):
             menuExtensions = klass.contributeToMainMenu()

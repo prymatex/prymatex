@@ -61,6 +61,11 @@ class PMXProfile(object):
                 value.name = key
                 configurableClass._settings.addSetting(value)
 
+    def configure(self, component):
+        settings = self.groupByClass(component.__class__)
+        settings.addListener(component)
+        settings.configure(component)
+
     def saveState(self, component):
         self.state.setValue(component.objectName(), component.componentState())
         self.state.sync()
@@ -80,9 +85,9 @@ class PMXProfile(object):
 
     def clear(self):
         self.qsettings.clear()
-        
+
     def sync(self):
         #Save capture values from qt
-        for group in list(self.GROUPS.values()):
+        for group in self.GROUPS.values():
             group.sync()
         self.qsettings.sync()
