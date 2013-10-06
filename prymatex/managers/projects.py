@@ -11,7 +11,7 @@ from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.utils.misc import get_home_dir
 from prymatex.models.lists import CheckableListModel
-from prymatex.models.projects import (ProjectTreeNode, ProjectTreeModel, 
+from prymatex.models.projects import (ProjectTreeNode, ProjectTreeModel,
     ProjectTreeProxyModel, ProjectMenuProxyModel)
 
 from prymatex.models.properties import PropertiesProxyModel, PropertiesTreeModel
@@ -25,25 +25,25 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
     projectRemoved = QtCore.Signal(object)
     projectClose = QtCore.Signal(object)
     projectOpen = QtCore.Signal(object)
-    
+
     #Settings
     SETTINGS_GROUP = 'ProjectManager'
-    
+
     workspaceDirectory  = pmxConfigPorperty(default = os.path.join(get_home_dir(), "workspace"))  #Eclipse muejejeje
     knownProjects = pmxConfigPorperty(default = [])
-    
+
     VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
-    
+
     def __init__(self, application):
         QtCore.QObject.__init__(self)
         PMXBaseComponent.__init__(self)
         self.fileManager = application.fileManager
         self.supportManager = application.supportManager
-        
+
         self.projectTreeModel = ProjectTreeModel(self)
         self.keywordsListModel = CheckableListModel(self)
         self.propertiesTreeModel = PropertiesTreeModel(self)
-        
+
         self.projectTreeProxyModel = ProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
 
@@ -99,18 +99,18 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
             except exceptions.FileNotExistsException as e:
                 print(e)
                 self.knownProjects.remove(path)
-                self.settings.setValue('knownProjects', self.knownProjects)
+                self._settings.setValue('knownProjects', self.knownProjects)
 
     def isOpen(self, project):
         return True
 
     def appendToKnowProjects(self, project):
         self.knownProjects.append(project.path())
-        self.settings.setValue('knownProjects', self.knownProjects)
+        self._settings.setValue('knownProjects', self.knownProjects)
 
     def removeFromKnowProjects(self, project):
         self.knownProjects.remove(project.path())
-        self.settings.setValue('knownProjects', self.knownProjects)
+        self._settings.setValue('knownProjects', self.knownProjects)
 
     # ------------------- Properties
     def registerPropertyWidget(self, propertyWidget):
@@ -135,7 +135,7 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
         self.addProject(project)
         self.appendToKnowProjects(project)
         return project
-    
+
     def updateProject(self, project, **attrs):
         """Actualiza un proyecto"""
         project.update(attrs)
