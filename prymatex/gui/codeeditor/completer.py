@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+from functools import reduce
 from prymatex.qt import QtCore, QtGui
 
 from prymatex import resources
 from prymatex.models.support import BundleItemTreeNode
 
 # Models
-class AlreadyTypedWordsModel(QtCore.QAbstractTableModel): 
-    def __init__(self, editor): 
+class AlreadyTypedWordsModel(QtCore.QAbstractTableModel):
+    def __init__(self, editor):
         QtCore.QAbstractTableModel.__init__(self, editor)
         self.editor = editor
         self.editor.registerBlockUserDataHandler(self)
@@ -27,7 +28,7 @@ class AlreadyTypedWordsModel(QtCore.QAbstractTableModel):
                     userData.tokens()[::-1]
                 )
         , []))
-        
+
         if userData.words != words:
             #Quitar las palabras anteriores
             for word in userData.words.difference(words):
@@ -35,7 +36,7 @@ class AlreadyTypedWordsModel(QtCore.QAbstractTableModel):
 
             #Agregar las palabras nuevas
             self.words.extend(words)
-            
+
             userData.words = words
 
     def buildSuggestions(self):
@@ -49,7 +50,7 @@ class AlreadyTypedWordsModel(QtCore.QAbstractTableModel):
 
     def rowCount(self, parent = None):
         return len(self.suggestions)
-    
+
     def columnCount(self, parent = None):
         return 1
 
@@ -75,7 +76,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.setPopup(QtGui.QTableView())
         # Models
         self.alreadyTypedWordsModel = AlreadyTypedWordsModel(self.editor)
-        
+
         # Config popup table view
         self.popup().setAlternatingRowColors(True)
         self.popup().setWordWrap(False)
@@ -86,15 +87,15 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.popup().setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.popup().setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.popup().setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        
+
         #QCompleter::PopupCompletion	0	Current completions are displayed in a popup window.
         #QCompleter::InlineCompletion	2	Completions appear inline (as selected text).
         #QCompleter::UnfilteredPopupCompletion	1	All possible completions are displayed in a popup window with the most likely suggestion indicated as current.
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.connect(self, QtCore.SIGNAL('activated(QModelIndex)'), self.insertCompletion)
-        
+
         self.setWidget(self.editor)
-        
+
     def fixPopupViewSize(self):
         self.popup().resizeColumnsToContents()
         self.popup().resizeRowsToContents()
@@ -102,7 +103,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
         for columnIndex in range(self.model().columnCount()):
             width += self.popup().sizeHintForColumn(columnIndex)
         self.popup().setMinimumWidth(width)
-    
+
     def pre_key_event(self, event):
         if self.popup().isVisible():
             if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab):
@@ -112,12 +113,12 @@ class CodeEditorCompleter(QtGui.QCompleter):
             elif event.key() in (QtCore.Qt.Key_Space, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
                 self.popup().hide()
         return False
-        
+
     def post_key_event(self, event):
         if self.popup().isVisible():
             maxPosition = self.startCursorPosition + len(self.completionPrefix()) + 1
             cursor = self.editor.textCursor()
-            
+
             if self.startCursorPosition <= cursor.position() <= maxPosition:
                 cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
                 prefix = cursor.selectedText()
@@ -133,7 +134,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
             event.key() == QtCore.Qt.Key_Period or \
             (event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier):
                 self.complete(self.editor.cursorRect(), currentAlreadyTyped)
-
+    
     def insertCompletion(self, index):
         sIndex = self.completionModel().mapToSource(index)
         suggestion = self.model().getSuggestion(sIndex)
@@ -151,7 +152,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
             self.editor.insertBundleItem(suggestion)
         else:
             cursor.insertText(suggestion)
-    
+
     def setCompletionPrefix(self, prefix):
         QtGui.QCompleter.setCompletionPrefix(self, prefix)
         self.fixPopupViewSize()
@@ -160,7 +161,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
     def setModel(self, model):
         model.buildSuggestions()
         QtGui.QCompleter.setModel(self, model)
-
+    
     def complete(self, rect, currentAlreadyTyped):
         self.setModel(self.alreadyTypedWordsModel)
         self.startCursorPosition = self.editor.textCursor().position() - len(currentAlreadyTyped)
