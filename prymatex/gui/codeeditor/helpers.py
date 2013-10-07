@@ -59,15 +59,6 @@ class TabTriggerHelper(CodeEditorKeyHelper):
         else:
             self.editor.selectBundleItem(self.items, cursorWrapper = self.triggerCursor)
 
-class CompleterHelper(CodeEditorKeyHelper):
-    KEY = QtCore.Qt.Key_Space
-    def accept(self, event, cursor = None):
-        """Accept the completer event"""
-        return event.modifiers() == QtCore.Qt.ControlModifier
-
-    def execute(self, event, cursor = None):
-        self.editor.runCompleter()
-
 class SmartTypingPairsHelper(CodeEditorKeyHelper):
     def accept(self, event, cursor = None):
         # CHANGED: Aca uso editor.braces para no estar atacando los scopes

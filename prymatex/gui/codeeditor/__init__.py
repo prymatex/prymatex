@@ -16,7 +16,6 @@ def registerPlugin(manager):
     manager.registerComponent(helpers.SmartTypingPairsHelper, CodeEditor)
     manager.registerComponent(helpers.TabTriggerHelper, CodeEditor)
     manager.registerComponent(helpers.TabIndentHelper, CodeEditor)
-    manager.registerComponent(helpers.CompleterHelper, CodeEditor)
     manager.registerComponent(helpers.BacktabUnindentHelper, CodeEditor)
     manager.registerComponent(helpers.BackspaceUnindentHelper, CodeEditor)
     manager.registerComponent(helpers.BackspaceRemoveBracesHelper, CodeEditor)

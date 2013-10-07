@@ -103,7 +103,6 @@ def bookmarkSelectableModelFactory(editor):
     return selectableModelFactory(editor, bookmarkData, 
         filterFunction = lambda text, item: item["display"].find(text) != -1)
 
-
 #=========================================================
 # Symbol
 #=========================================================
@@ -196,7 +195,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
         if blockIndex == -1:
             blockIndex = 0
         return blockIndex
-
+    
 #=========================================================
 # Bookmark Selectable Model
 #=========================================================  
@@ -207,7 +206,7 @@ def symbolSelectableModelFactory(editor):
 
     return selectableModelFactory(editor, symbolData, 
         filterFunction = lambda text, item: item["display"].find(text) != -1)
-
+    
 #=========================================================
 # Completer
 #=========================================================
@@ -274,7 +273,7 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
 
     def getSuggestion(self, index):
         return self.suggestions[index.row()]
-
+    
 #=========================================================
 # Word Struct for Completer
 #=========================================================

@@ -27,6 +27,7 @@ from .highlighter import PMXSyntaxHighlighter
 from .models import (SymbolListModel, BookmarkListModel, AlreadyTypedWords, 
         bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
         symbolSelectableModelFactory)
+from .completer import CodeEditorCompleter
 
 from prymatex.support import (PMXSnippet, PMXMacro, PMXCommand, PMXSyntax,
     PMXDragCommand, PMXPreferenceSettings, PMXPreferenceMasterSettings)
@@ -142,7 +143,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         #Models
         self.bookmarkListModel = BookmarkListModel(self)
         self.symbolListModel = SymbolListModel(self)
-        self.alreadyTypedWords = AlreadyTypedWords(self)
         self.bundleItemSelectableModel = bundleItemSelectableModelFactory(self)
         self.symbolSelectableModel = symbolSelectableModelFactory(self)
         self.bookmarkSelectableModel = bookmarkSelectableModelFactory(self)
@@ -159,8 +159,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.codeEditorModes = []
         #Modes
         self.multiCursorMode = PMXMultiCursorEditorMode(self)
-        self.completerMode = PMXCompleterEditorMode(self)
         self.snippetMode = PMXSnippetEditorMode(self)
+        
+        #Completer
+        self.completer = CodeEditorCompleter(self)
         
         #Block Count
         self.lastBlockCount = self.document().blockCount()
@@ -624,7 +626,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def event(self, event):
         if event.type() in (QtCore.QEvent.KeyPress, QtCore.QEvent.KeyRelease):
             #Ver si tengo un modo activo,
-            for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:
+            for mode in [ self.snippetMode, self.multiCursorMode ]:
                 if mode.isActive():
                     if event.type() == QtCore.QEvent.KeyPress:
                         mode.keyPressEvent(event)
@@ -778,16 +780,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         """This method is called whenever a key is pressed.
         The key code is stored in event.key()"""
 
-        if not self.runKeyHelper(event):
-            #No tengo helper paso el evento a la base
+        if not ((self.enableAutoCompletion and self.completer.pre_key_event(event))
+            or self.runKeyHelper(event)):
             TextEditWidget.keyPressEvent(self, event)
 
-            if not event.modifiers() and event.text() and self.enableAutoCompletion:
-                # Cached Completer
-                word, start, end = self.currentWord(direction = "left",
-                    search = False)
-                if end - start >= self.wordLengthToComplete:
-                    self.showCachedCompleter()
+            if self.enableAutoCompletion:
+                self.completer.post_key_event(event)
 
     # ------------ Insert API
     def insertNewLine(self, cursor = None):
@@ -870,7 +868,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         current_word, start, end = self.currentWord()
         
         theme = self.application.supportManager.getTheme(self.defaultTheme)
-
+        
         # Build environment
         environment.update({
                 'TM_CURRENT_LINE': line,

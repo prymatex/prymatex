@@ -4,20 +4,42 @@
 from prymatex.qt import QtCore, QtGui
 
 from prymatex import resources
+from prymatex.models.support import BundleItemTreeNode
 
 # Models
 class AlreadyTypedWordsModel(QtCore.QAbstractTableModel): 
-    def __init__(self, parent): 
-        QtCore.QAbstractListModel.__init__(self, parent) 
+    def __init__(self, editor): 
+        QtCore.QAbstractTableModel.__init__(self, editor)
+        self.editor = editor
+        self.editor.registerBlockUserDataHandler(self)
+
         self.suggestions = []
-        self.typedWords = set()
-        self.suggestions = []
+        self.words = []
+
+    # -------------------- Process User Data
+    def contributeToBlockUserData(self, userData):
+        userData.words = set()
+
+    def processBlockUserData(self, text, block, userData):
+        words = set(
+            reduce(lambda w1, w2: w1 + w2,
+                map(lambda token: self.editor.RE_WORD.findall(token.chunk),
+                    userData.tokens()[::-1]
+                )
+        , []))
         
-    def removeWords(self, words):
-        self.typedWords.difference_update(words)
-        
-    def addWords(self, words):
-        self.typedWords.update(words)
+        if userData.words != words:
+            #Quitar las palabras anteriores
+            for word in userData.words.difference(words):
+                self.words.remove(word)
+
+            #Agregar las palabras nuevas
+            self.words.extend(words)
+            
+            userData.words = words
+
+    def buildSuggestions(self):
+        self.suggestions = list(set(self.words))
 
     def index(self, row, column, parent = QtCore.QModelIndex()):
         if row < len(self.suggestions):
@@ -27,23 +49,18 @@ class AlreadyTypedWordsModel(QtCore.QAbstractTableModel):
 
     def rowCount(self, parent = None):
         return len(self.suggestions)
-
+    
     def columnCount(self, parent = None):
         return 1
-
-    def freezeWords(self):
-        self.suggestions = list(self.typedWords)
-        print(self.suggestions)
-        self.layoutChanged.emit()
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
         suggestion = self.suggestions[index.row()]
         if role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
-            return suggestion[1]
+            return suggestion
         elif role == QtCore.Qt.DecorationRole:
-            return resources.getIcon("scope-root-%s" % ( suggestion[0] or "none"))
+            return resources.getIcon("scope-root-none")
 
     def getSuggestion(self, index):
         return self.suggestions[index.row()]
@@ -57,8 +74,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
         # Popup table view
         self.setPopup(QtGui.QTableView())
         # Models
-        self.alreadyTypedWordsModel = AlreadyTypedWordsModel(self)
-        self.setModel(self.alreadyTypedWordsModel)
+        self.alreadyTypedWordsModel = AlreadyTypedWordsModel(self.editor)
         
         # Config popup table view
         self.popup().setAlternatingRowColors(True)
@@ -66,58 +82,36 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.popup().verticalHeader().setVisible(False)
         self.popup().horizontalHeader().setVisible(False)
         self.popup().setShowGrid(False)
+        self.popup().setMinimumHeight(200)
         self.popup().setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.popup().setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.popup().setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-
+        
         #QCompleter::PopupCompletion	0	Current completions are displayed in a popup window.
         #QCompleter::InlineCompletion	2	Completions appear inline (as selected text).
         #QCompleter::UnfilteredPopupCompletion	1	All possible completions are displayed in a popup window with the most likely suggestion indicated as current.
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.connect(self, QtCore.SIGNAL('activated(QModelIndex)'), self.insertCompletion)
         
-        self.editor.registerBlockUserDataHandler(self)
         self.setWidget(self.editor)
         
-    # -------------------- Process User Data
-    def contributeToBlockUserData(self, userData):
-        userData.words = set()
-
-    def processBlockUserData(self, text, block, userData):
-        words = set()
-        
-        for token in userData.tokens()[::-1]:
-            words.update([(token.group, word) for word in self.editor.RE_WORD.findall(token.chunk) ])
-        
-        if userData.words != words:
-            #Quitar las palabras anteriores
-            self.alreadyTypedWordsModel.removeWords(userData.words.difference(words))
-            
-            #Agregar las palabras nuevas
-            self.alreadyTypedWordsModel.addWords(words)
-            userData.words = words
-        
     def fixPopupViewSize(self):
-        self.popup().setMinimumHeight(200)
         self.popup().resizeColumnsToContents()
+        self.popup().resizeRowsToContents()
         width = self.popup().verticalScrollBar().sizeHint().width()
-        for columnIndex in range(self.completionModel().sourceModel().columnCount()):
+        for columnIndex in range(self.model().columnCount()):
             width += self.popup().sizeHintForColumn(columnIndex)
         self.popup().setMinimumWidth(width)
-      
-    def hasSource(self, source):
-        return source in self.activeSources
     
     def pre_key_event(self, event):
-        skip = False
         if self.popup().isVisible():
             if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab):
                 event.ignore()
                 self.popup().hide()
-                skip = True
+                return True
             elif event.key() in (QtCore.Qt.Key_Space, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
                 self.popup().hide()
-        return skip
+        return False
         
     def post_key_event(self, event):
         if self.popup().isVisible():
@@ -126,22 +120,19 @@ class CodeEditorCompleter(QtGui.QCompleter):
             
             if self.startCursorPosition <= cursor.position() <= maxPosition:
                 cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
-                self.setCompletionPrefix(cursor.selectedText())
-                self.popup().setCurrentIndex(
-                    self.completionModel().index(0, 0))
-                self.setCurrentRow(0)
+                prefix = cursor.selectedText()
+                if (event.text() and prefix == self.currentCompletion()) or self.completionCount() == 0:
+                    self.popup().hide()
+                else:
+                    self.setCompletionPrefix(prefix)
             else:
                 self.popup().hide()
-        word, start, end = self.editor.currentWord(direction="left", search=False)
-        if end - start >= self.editor.wordLengthToComplete or \
-        event.key() == QtCore.Qt.Key_Period or \
-        (event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier):
-            self.complete(self.editor.cursorRect())
-
-    def setStartCursorPosition(self, position):
-        self.setCompletionPrefix("")
-        self.activeSources = []
-        self.startCursorPosition = position
+        elif event.text():
+            currentAlreadyTyped, start, end = self.editor.currentWord(direction="left", search=False)
+            if (end - start >= self.editor.wordLengthToComplete and event.modifiers() != QtCore.Qt.ControlModifier) or \
+            event.key() == QtCore.Qt.Key_Period or \
+            (event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier):
+                self.complete(self.editor.cursorRect(), currentAlreadyTyped)
 
     def insertCompletion(self, index):
         sIndex = self.completionModel().mapToSource(index)
@@ -160,11 +151,19 @@ class CodeEditorCompleter(QtGui.QCompleter):
             self.editor.insertBundleItem(suggestion)
         else:
             cursor.insertText(suggestion)
-
-    def complete(self, rect):
-        self.model().freezeWords()
+    
+    def setCompletionPrefix(self, prefix):
+        QtGui.QCompleter.setCompletionPrefix(self, prefix)
         self.fixPopupViewSize()
-        currentAlreadyTyped = self.editor.currentWord(direction = "left", search = False)[0]
-        self.setStartCursorPosition(self.editor.textCursor().position() - len(currentAlreadyTyped))
+        self.popup().setCurrentIndex(self.completionModel().index(0, 0))
+
+    def setModel(self, model):
+        model.buildSuggestions()
+        QtGui.QCompleter.setModel(self, model)
+
+    def complete(self, rect, currentAlreadyTyped):
+        self.setModel(self.alreadyTypedWordsModel)
+        self.startCursorPosition = self.editor.textCursor().position() - len(currentAlreadyTyped)
         self.setCompletionPrefix(currentAlreadyTyped)
-        QtGui.QCompleter.complete(self, rect)
+        if currentAlreadyTyped != self.currentCompletion() and self.completionCount():
+            QtGui.QCompleter.complete(self, rect)

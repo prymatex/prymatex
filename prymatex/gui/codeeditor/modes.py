@@ -515,7 +515,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, CodeEditorBaseMode):
       
     def hasSource(self, source):
         return source in self.activeSources
-        
+
     def switch(self):
         if len(self.activeSources) > 1:
             index = self.activeSources.index(self.currentSource)
