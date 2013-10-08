@@ -429,10 +429,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
     def settings(self, cursor = None):
         cursor = cursor or self.textCursor()
-        cursorWrapper = self.newCursorAtPosition(cursor.selectionStart() -1,
-            cursor.selectionEnd())
-        leftToken, rightToken = (self.tokenAtPosition(cursorWrapper.selectionStart()),
-            self.tokenAtPosition(cursorWrapper.selectionEnd()))
+        leftToken, rightToken = (self.tokenAtPosition(cursor.selectionStart() - 1),
+            self.tokenAtPosition(cursor.selectionEnd()))
         return leftToken.settings, rightToken.settings
         
     # ------------ Obteniendo datos del editor
