@@ -40,7 +40,10 @@ class AlreadyTypedWordsModel(QtCore.QAbstractTableModel):
             userData.words = words
 
     def buildSuggestions(self):
-        self.suggestions = list(set(self.words))
+        leftSettings, rightSettings = self.editor.settings()
+        suggestions = set(self.words)
+        suggestions.update(rightSettings.completions)
+        self.suggestions = list(suggestions)
 
     def index(self, row, column, parent = QtCore.QModelIndex()):
         if row < len(self.suggestions):

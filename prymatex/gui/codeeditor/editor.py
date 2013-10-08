@@ -24,7 +24,7 @@ from .processors import (PMXCommandProcessor, PMXSnippetProcessor,
 from .modes import (CodeEditorBaseMode, PMXMultiCursorEditorMode,
         PMXCompleterEditorMode, PMXSnippetEditorMode)
 from .highlighter import PMXSyntaxHighlighter
-from .models import (SymbolListModel, BookmarkListModel, AlreadyTypedWords, 
+from .models import (SymbolListModel, BookmarkListModel, 
         bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
         symbolSelectableModelFactory)
 from .completer import CodeEditorCompleter
@@ -907,28 +907,18 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return environment
 
     # ---------- Completer
-    def showCompleter(self, suggestions, source = "default", alreadyTyped = None, caseInsensitive = True, callback = None):
-        currentAlreadyTyped = self.currentWord(direction = "left", search = False)[0]
+    def showCompleter(self, suggestions, alreadyTyped=None, caseInsensitive=True, callback = None):
+        currentAlreadyTyped, start, end = self.currentWord(direction = "left", search = False)
+        print(suggestions, alreadyTyped, currentAlreadyTyped, caseInsensitive, callback)
         if alreadyTyped is None or currentAlreadyTyped.startswith(alreadyTyped) or callback is not None:
-            case = QtCore.Qt.CaseInsensitive if caseInsensitive else QtCore.Qt.CaseSensitive
-            self.completerMode.setCaseSensitivity(case)
-            self.completerMode.setActivatedCallback(callback)
-            self.completerMode.setStartCursorPosition(self.textCursor().position() - len(currentAlreadyTyped))
-            self.completerMode.setSuggestions(suggestions, source)
-            self.completerMode.setCompletionPrefix(currentAlreadyTyped)
-            self.completerMode.complete(self.cursorRect())
+            self.completer.setCaseSensitivity( QtCore.Qt.CaseInsensitive and \
+                caseInsensitive or QtCore.Qt.CaseSensitive)
+            #self.completer.setActivatedCallback(callback)
+            #self.completer.setStartCursorPosition(self.textCursor().position() - len(currentAlreadyTyped))
+            #self.completer.setSuggestions(suggestions, source)
+            #self.completer.setCompletionPrefix(currentAlreadyTyped)
+            #self.completer.complete(self.cursorRect())
     
-    def showCachedCompleter(self):
-        if not self.completerMode.hasSource("default"):
-            return
-        currentAlreadyTyped = self.currentWord(direction = "left", search = False)[0]
-        if currentAlreadyTyped:
-            self.completerMode.setActivatedCallback(None)
-            self.completerMode.setStartCursorPosition(self.textCursor().position() - len(currentAlreadyTyped))
-            self.completerMode.setSource("default")
-            self.completerMode.setCompletionPrefix(currentAlreadyTyped)
-            self.completerMode.complete(self.cursorRect())
-
     def switchCompleter(self):
         if not self.completerMode.hasSource("default"):
             def on_suggestionsReady(suggestions):
@@ -962,9 +952,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
         readyWords = set()
         
-        #An array of additional candidates when cycling through completion candidates from the current document.
-        completions = settings.completions
-        
         #A shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
         if settings.completionCommand:
             def commandCallback(context):
@@ -977,18 +964,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         #A tab tigger completion
         tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(leftScope, rightScope)
         
-        typedWords = self.alreadyTypedWords.typedWords()
-        
-        #Lo ponemos en la mezcladora por grupos
-        suggestions = tabTriggers + [{ "display": word, "image": "scope-root-keyword" } for word in completions]
-        readyWords.update(completions)
-        
-        for typed in sorted(typedWords, key = lambda typed: typed[0], reverse=True):
-            if typed[1] not in readyWords:
-                suggestions.append({ "display": typed[1], "image": "scope-root-%s" % ( typed[0] or "none") })
-                readyWords.add(typed[1])
-                yield
-
         yield coroutines.Return(suggestions)
 
     # ---------- Folding
