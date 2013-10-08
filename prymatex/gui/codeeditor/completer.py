@@ -7,7 +7,9 @@ from prymatex.qt import QtCore, QtGui
 from prymatex import resources
 from prymatex.models.support import BundleItemTreeNode
 
-# Models
+# ===================================
+# Completer Models
+# ===================================
 class AlreadyTypedWordsModel(QtCore.QAbstractTableModel):
     def __init__(self, editor):
         QtCore.QAbstractTableModel.__init__(self, editor)
@@ -65,6 +67,47 @@ class AlreadyTypedWordsModel(QtCore.QAbstractTableModel):
             return suggestion
         elif role == QtCore.Qt.DecorationRole:
             return resources.getIcon("scope-root-none")
+
+    def getSuggestion(self, index):
+        return self.suggestions[index.row()]
+
+class TabTriggerItemsModel(QtCore.QAbstractTableModel):
+    def __init__(self, editor):
+        QtCore.QAbstractTableModel.__init__(self, editor)
+        self.editor = editor
+        
+        self.suggestions = []
+
+    def buildSuggestions(self):
+        leftScope, rightScope = self.editor.scope()
+        self.suggestions = self.editor.application.supportManager.getAllTabTiggerItemsByScope(leftScope, rightScope)
+
+    def index(self, row, column, parent = QtCore.QModelIndex()):
+        if row < len(self.suggestions):
+            return self.createIndex(row, column, parent)
+        else:
+            return QtCore.QModelIndex()
+
+    def rowCount(self, parent = None):
+        return len(self.suggestions)
+
+    def columnCount(self, parent = None):
+        return 2
+
+    def data(self, index, role = QtCore.Qt.DisplayRole):
+        if not index.isValid():
+            return None
+        suggestion = self.suggestions[index.row()]
+        if role == QtCore.Qt.DisplayRole:
+            #Es un bundle item
+            if index.column() == 0:
+                return suggestion.tabTrigger
+            elif index.column() == 1:
+                return suggestion.name
+        elif role == QtCore.Qt.DecorationRole:
+            return suggestion.icon
+        elif role == QtCore.Qt.ToolTipRole:
+            return suggestion.name
 
     def getSuggestion(self, index):
         return self.suggestions[index.row()]
