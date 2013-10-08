@@ -139,13 +139,11 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
                 else:
                     self.sendResult({})
             self.application.currentEditor().showCompleter( suggestions = suggestions["suggestions"], 
-                                                        source = "external",
                                                         alreadyTyped = kwargs.get("alreadyTyped"), 
                                                         caseInsensitive = kwargs.get("caseInsensitive", True),
                                                         callback = sendSelectedSuggestion)
         else:
             self.application.currentEditor().showCompleter( suggestions = suggestions["suggestions"], 
-                                                        source = "external",
                                                         alreadyTyped = kwargs.get("alreadyTyped"), 
                                                         caseInsensitive = kwargs.get("caseInsensitive", True))
             self.sendResult()

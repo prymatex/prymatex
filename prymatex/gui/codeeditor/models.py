@@ -273,44 +273,6 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
 
     def getSuggestion(self, index):
         return self.suggestions[index.row()]
-    
-#=========================================================
-# Word Struct for Completer
-#=========================================================
-class AlreadyTypedWords(object):
-    def __init__(self, editor):
-        self.editor = editor
-        self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
-        self.documentWords = set()
-        self.editor.registerBlockUserDataHandler(self)
-
-    def contributeToBlockUserData(self, userData):
-        userData.words = set()
-
-    def processBlockUserData(self, text, block, userData):
-        words = set()
-        
-        for token in userData.tokens()[::-1]:
-            words.update([(token.group, word) for word in self.editor.RE_WORD.findall(token.chunk) ])
-        
-        # TODO: Una mejor estructura para las palabras y sus grupos
-        if userData.words != words:
-            #Quitar el block de las palabras anteriores
-            self.documentWords.difference_update(
-                userData.words.difference(words)
-            )
-            
-            #Agregar las palabras nuevas
-            self.documentWords.update(words)
-            userData.words = words
-
-    def on_editor_blocksRemoved(self):
-        """ Quitar palabras que no van mas """
-        # TODO: purgar
-        print("purgar")
-            
-    def typedWords(self):
-        return self.documentWords
 
 #=========================================================
 # Bundle Item Selectable Model
