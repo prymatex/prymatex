@@ -88,7 +88,7 @@ def get_coding(text):
     @return coding string
     """
     for line in text.splitlines()[:2]:
-        result = CODING_RE.search(str(line))
+        result = CODING_RE.search(line)
         if result:
             return result.group(1)
     return None

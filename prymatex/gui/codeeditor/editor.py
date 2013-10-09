@@ -27,7 +27,8 @@ from .highlighter import PMXSyntaxHighlighter
 from .models import (SymbolListModel, BookmarkListModel, 
         bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
         symbolSelectableModelFactory)
-from .completer import CodeEditorCompleter
+from .completer import (CodeEditorCompleter, WordsCompletionModel,
+        TabTriggerItemsCompletionModel, SuggestionsCompletionModel)
 
 from prymatex.support import (PMXSnippet, PMXMacro, PMXCommand, PMXSyntax,
     PMXDragCommand, PMXPreferenceSettings, PMXPreferenceMasterSettings)
@@ -163,7 +164,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
         #Completer
         self.completer = CodeEditorCompleter(self)
-        
+        self.completer.addModel(WordsCompletionModel(self))
+        self.completer.addModel(TabTriggerItemsCompletionModel(self))
+        self.suggestionsCompletionModel = SuggestionsCompletionModel(self)
+        self.completer.addModel(self.suggestionsCompletionModel)
+
         #Block Count
         self.lastBlockCount = self.document().blockCount()
         #Connect context menu
