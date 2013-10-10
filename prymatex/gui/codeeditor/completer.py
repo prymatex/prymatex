@@ -10,23 +10,20 @@ from prymatex import resources
 from prymatex.utils.sourcecode import asciify
 from prymatex.models.support import BundleItemTreeNode
 
-COMPLETER_CHARS = list(string.ascii_letters) + [ '.' ]
+COMPLETER_CHARS = list(string.ascii_letters) + [ chr(QtCore.Qt.Key_Period) ]
 
 # ===================================
-# Completer Models
+# Completer Base Model
 # ===================================
-class CompletionModel(QtCore.QAbstractTableModel):
+class CompletionBaseModel(QtCore.QAbstractTableModel):
     def __init__(self, editor):
         QtCore.QAbstractTableModel.__init__(self, editor)
         self.editor = editor
         self.ready = False
         self.suggestions = []
-        
+
     def isReady(self):
         return self.ready
-
-    def hasSuggestions(self):
-        return bool(self.suggestions)
 
     def fill(self):
         self.ready = True
@@ -34,10 +31,26 @@ class CompletionModel(QtCore.QAbstractTableModel):
     def clear(self):
         self.suggestions = []
         self.ready = False
-    
-class WordsCompletionModel(CompletionModel):
+
+    # -------------- Model overrite methods
+    def columnCount(self, parent = None):
+        return 1
+
+    def rowCount(self, parent = None):
+        return len(self.suggestions)
+
+    def index(self, row, column, parent = QtCore.QModelIndex()):
+        if row < len(self.suggestions):
+            return self.createIndex(row, column, parent)
+        else:
+            return QtCore.QModelIndex()
+
+# ===================================
+# Custom completer models
+# ===================================
+class WordsCompletionModel(CompletionBaseModel):
     def __init__(self, editor):
-        CompletionModel.__init__(self, editor)
+        CompletionBaseModel.__init__(self, editor)
         self.editor.registerBlockUserDataHandler(self)
         self.words = []
 
@@ -64,24 +77,11 @@ class WordsCompletionModel(CompletionModel):
             userData.words = words
 
     def fill(self):
-        CompletionModel.fill(self)
+        CompletionBaseModel.fill(self)
         leftSettings, rightSettings = self.editor.settings()
         suggestions = set(self.words)
         suggestions.update(rightSettings.completions)
-
-        self.suggestions = list(suggestions)
-    
-    def index(self, row, column, parent = QtCore.QModelIndex()):
-        if row < len(self.suggestions):
-            return self.createIndex(row, column, parent)
-        else:
-            return QtCore.QModelIndex()
-
-    def rowCount(self, parent = None):
-        return len(self.suggestions)
-
-    def columnCount(self, parent = None):
-        return 1
+        self.suggestions = sorted(list(suggestions))
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
@@ -90,7 +90,7 @@ class WordsCompletionModel(CompletionModel):
         if role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
             return suggestion
         elif role == QtCore.Qt.DecorationRole:
-            return resources.getIcon("scope-root-none")
+            return resources.getIcon('insert-text')
 
     def insertCompletion(self, index):
         suggestion = self.suggestions[index.row()]
@@ -98,23 +98,11 @@ class WordsCompletionModel(CompletionModel):
         cursor = self.editor.newCursorAtPosition(start, end)
         cursor.insertText(suggestion)
 
-class TabTriggerItemsCompletionModel(CompletionModel):
-    def __init__(self, editor):
-        CompletionModel.__init__(self, editor)
-
+class TabTriggerItemsCompletionModel(CompletionBaseModel):
     def fill(self):
-        CompletionModel.fill(self)
+        CompletionBaseModel.fill(self)
         leftScope, rightScope = self.editor.scope()
         self.suggestions = self.editor.application.supportManager.getAllTabTriggerItemsByScope(leftScope, rightScope)
-
-    def index(self, row, column, parent = QtCore.QModelIndex()):
-        if row < len(self.suggestions):
-            return self.createIndex(row, column, parent)
-        else:
-            return QtCore.QModelIndex()
-
-    def rowCount(self, parent = None):
-        return len(self.suggestions)
 
     def columnCount(self, parent = None):
         return 2
@@ -139,17 +127,46 @@ class TabTriggerItemsCompletionModel(CompletionModel):
         currentWord, start, end = self.editor.currentWord(search = False)
         cursor = self.editor.newCursorAtPosition(start, end)
         cursor.removeSelectedText()
-        self.editor.insertBundleItem(suggestion)        
+        self.editor.insertBundleItem(suggestion)
 
-class SuggestionsCompletionModel(CompletionModel):
-    pass
+class SuggestionsCompletionModel(CompletionBaseModel):
+    def data(self, index, role = QtCore.Qt.DisplayRole):
+        if not index.isValid():
+            return None
+        suggestion = self.suggestions[index.row()]
+        if role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
+            if 'display' in suggestion:
+                return suggestion['display']
+            elif 'title' in suggestion:
+                return suggestion['title']
+        elif role == QtCore.Qt.DecorationRole:
+            if index.column() == 0 and 'image' in suggestion:
+                return resources.getIcon(suggestion['image'])
+        elif role == QtCore.Qt.ToolTipRole:
+            if 'tool_tip' in suggestion:
+                if 'tool_tip_format' in suggestion:
+                    print(suggestion["tool_tip_format"])
+                return suggestion['tool_tip']
 
+    def insertCompletion(self, index):
+        suggestion = self.suggestions[index.row()]
+        currentWord, start, end = self.editor.currentWord(search = False)
+        cursor = self.editor.newCursorAtPosition(start, end)
+        if 'display' in suggestion:
+            cursor.insertText(suggestion['display'])
+        elif 'title' in suggestion:
+            cursor.insertText(suggestion['title'])
+
+# ===================================
 # Completer
+# ===================================
 class CodeEditorCompleter(QtGui.QCompleter):
     def __init__(self, editor):
         QtGui.QCompleter.__init__(self, editor)
         self.editor = editor
-
+        self.startCursorPosition = None
+        self.explicitRunning = False
+        
         # Popup table view
         self.setPopup(QtGui.QTableView())
         
@@ -158,7 +175,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
 
         # Config popup table view
         self.popup().setAlternatingRowColors(True)
-        self.popup().setWordWrap(False)
+        #self.popup().setWordWrap(False)
         self.popup().verticalHeader().setVisible(False)
         self.popup().horizontalHeader().setVisible(False)
         self.popup().setShowGrid(False)
@@ -171,26 +188,27 @@ class CodeEditorCompleter(QtGui.QCompleter):
         #QCompleter::InlineCompletion	2	Completions appear inline (as selected text).
         #QCompleter::UnfilteredPopupCompletion	1	All possible completions are displayed in a popup window with the most likely suggestion indicated as current.
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
+        #self.setModelSorting(QtGui.QCompleter.CaseSensitivelySortedModel)
         self.connect(self, QtCore.SIGNAL('activated(QModelIndex)'), self.insertCompletion)
 
         self.setWidget(self.editor)
 
-    def addModel(self, completionModel):
-        self.completionModels.append(completionModel)
-
     def fixPopupView(self):
         self.popup().resizeColumnsToContents()
         self.popup().resizeRowsToContents()
-        if self.model():
-            width = self.popup().verticalScrollBar().sizeHint().width()
-            for columnIndex in range(self.model().columnCount()):
-                width += self.popup().sizeHintForColumn(columnIndex)
-            self.popup().setMinimumWidth(width)
-            self.popup().setCurrentIndex(self.completionModel().index(0, 0))
+        width = self.popup().verticalScrollBar().sizeHint().width()
+        for columnIndex in range(self.model().columnCount()):
+            width += self.popup().sizeHintForColumn(columnIndex)
+        self.popup().setMinimumWidth(width)
 
     def close(self):
-        [model.clear() for model in self.completionModels]
+        # Clean completer
+        for model in self.completionModels:
+            model.clear()
         self.popup().hide()
+        self.setModel(None)
+        self.startCursorPosition = None
+        self.explicitRunning = False
 
     def pre_key_event(self, event):
         if self.popup().isVisible():
@@ -199,11 +217,16 @@ class CodeEditorCompleter(QtGui.QCompleter):
                 return True
             elif event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier and self.nextModel():
                 self.complete(self.editor.cursorRect())
-                return True
+                return self.explicitRunning
             elif event.key() in (QtCore.Qt.Key_Space, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
                 self.close()
+        elif event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
+            alreadyTyped, start, end = self.editor.currentWord(
+                direction="left", search=False)
+            self.setCompletionPrefix(alreadyTyped)
+            self.complete(self.editor.cursorRect())
         return False
-
+    
     def post_key_event(self, event):
         if self.popup().isVisible():
             maxPosition = self.startCursorPosition + len(self.completionPrefix()) + 1
@@ -212,51 +235,34 @@ class CodeEditorCompleter(QtGui.QCompleter):
             if self.startCursorPosition <= cursor.position() <= maxPosition:
                 cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
                 self.setCompletionPrefix(cursor.selectedText())
-                if not self.completionCount() and not self.nextModel():
+                if self.setCurrentRow(0) and (self.completionCount() > 1 or self.completionPrefix() != self.currentCompletion()):
+                    self.fixPopupView()
+                elif self.nextModel():
+                    self.complete(self.editor.cursorRect())
+                else:
                     self.close()
             else:
                 self.close()
         elif asciify(event.text()) in COMPLETER_CHARS and not event.modifiers():
             alreadyTyped, start, end = self.editor.currentWord(
                 direction="left", search=False)
-            if end - start >= self.editor.wordLengthToComplete:
-                self.startCursorPosition = self.editor.textCursor().position() - len(alreadyTyped)
+            if end - start >= self.editor.wordLengthToComplete or event.key() == QtCore.Qt.Key_Period:
                 self.setCompletionPrefix(alreadyTyped)
-                if self.nextModel():
-                    self.complete(self.editor.cursorRect())
-
-        elif event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
-            alreadyTyped, start, end = self.editor.currentWord(
-                direction="left", search=False)
-            self.startCursorPosition = self.editor.textCursor().position() - len(alreadyTyped)
-            self.setCompletionPrefix(alreadyTyped)
-            if self.nextModel():
                 self.complete(self.editor.cursorRect())
-    
+
     def insertCompletion(self, index):
         sIndex = self.completionModel().mapToSource(index)
         self.model().insertCompletion(sIndex)
         self.close()
-        return
-        suggestion = self.model().insertCompletion(sIndex)
-        currentWord, start, end = self.editor.currentWord(search = False)
-        cursor = self.editor.newCursorAtPosition(start, end)
-        if isinstance(suggestion, tuple):
-            cursor.insertText(suggestion[1])
-        elif isinstance(suggestion, dict):
-            if 'display' in suggestion:
-                cursor.insertText(suggestion['display'])
-            elif 'title' in suggestion:
-                cursor.insertText(suggestion['title'])
-        elif isinstance(suggestion, BundleItemTreeNode):
-            cursor.removeSelectedText()
-            self.editor.insertBundleItem(suggestion)
-        else:
-            cursor.insertText(suggestion)
 
-    def setCompletionPrefix(self, prefix):
-        QtGui.QCompleter.setCompletionPrefix(self, prefix)
-        self.fixPopupView()
+    def setCurrentRow(self, index):
+        successful = QtGui.QCompleter.setCurrentRow(self, index)
+        if successful:
+            self.popup().setCurrentIndex(self.completionModel().index(index, 0))
+        return successful
+
+    def addModel(self, completionModel):
+        self.completionModels.append(completionModel)
 
     def nextModel(self):
         currentModel = self.model() or self.completionModels[-1]
@@ -266,12 +272,15 @@ class CodeEditorCompleter(QtGui.QCompleter):
             model = self.completionModels[index]
             if not model.isReady():
                 model.fill()
-            if not model.hasSuggestions():
-                continue
-            QtGui.QCompleter.setModel(self, model)
-            if self.completionCount():
-                break
-            if currentModel == model:
+            self.setModel(model)
+            if self.setCurrentRow(0) and (self.completionCount() > 1 or self.completionPrefix() != self.currentCompletion()):
+                return True
+            elif model == currentModel:
                 return False
-        self.fixPopupView()
-        return True
+    
+    def complete(self, rect, explicit = None):
+        self.explicitRunning = explicit is not None and explicit or self.explicitRunning
+        if self.model() or self.nextModel():
+            self.fixPopupView()
+            self.startCursorPosition = self.editor.textCursor().position() - len(self.completionPrefix())
+            return QtGui.QCompleter.complete(self, rect)

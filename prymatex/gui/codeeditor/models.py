@@ -273,7 +273,7 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
 
     def getSuggestion(self, index):
         return self.suggestions[index.row()]
-
+    
 #=========================================================
 # Bundle Item Selectable Model
 #=========================================================  

@@ -911,64 +911,18 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     # ---------- Completer
     def showCompleter(self, suggestions, alreadyTyped=None, caseInsensitive=True, callback = None):
-        currentAlreadyTyped, start, end = self.currentWord(direction = "left", search = False)
-        print(suggestions, alreadyTyped, currentAlreadyTyped, caseInsensitive, callback)
-        if alreadyTyped is None or currentAlreadyTyped.startswith(alreadyTyped) or callback is not None:
-            self.completer.setCaseSensitivity( QtCore.Qt.CaseInsensitive and \
-                caseInsensitive or QtCore.Qt.CaseSensitive)
-            #self.completer.setActivatedCallback(callback)
-            #self.completer.setStartCursorPosition(self.textCursor().position() - len(currentAlreadyTyped))
-            #self.completer.setSuggestions(suggestions, source)
-            #self.completer.setCompletionPrefix(currentAlreadyTyped)
-            #self.completer.complete(self.cursorRect())
+        self.suggestionsCompletionModel.suggestions = suggestions
+        self.suggestionsCompletionModel.fill()
+        print(alreadyTyped)
+        alreadyTyped, start, end = self.currentWord(direction="left", search=False)
+        self.completer.setCaseSensitivity( QtCore.Qt.CaseInsensitive and \
+            caseInsensitive or QtCore.Qt.CaseSensitive)
+        #self.completer.setActivatedCallback(callback)
+        self.completer.setModel(self.suggestionsCompletionModel)
+        self.completer.setCompletionPrefix(alreadyTyped)
+        if self.completer.setCurrentRow(0):
+            self.completer.complete(self.cursorRect(), explicit = True)
     
-    def switchCompleter(self):
-        if not self.completerMode.hasSource("default"):
-            def on_suggestionsReady(suggestions):
-                if bool(suggestions):
-                    self.completerMode.setSuggestions(suggestions, "default")
-            self.defaultCompletion(self.scope(), on_suggestionsReady)
-        else:
-            self.completerMode.switch()
-
-    def runCompleter(self):
-        def on_suggestionsReady(suggestions):
-             if bool(suggestions):
-                self.showCompleter(suggestions)
-        self.defaultCompletion(self.scope(), on_suggestionsReady)
-
-    def defaultCompletion(self, scope, callback):
-        if not self.completerTask.isRunning():
-            self.completerTask = self.application.schedulerManager.newTask(self.runCompletionSuggestions(scope = scope))
-            def on_completerTaskReady(callback):
-                def completerTaskReady(result):
-                    callback(result.value)
-                return completerTaskReady
-            #En una clausura
-            self.completerTask.done.connect(on_completerTaskReady(callback))
-
-    def runCompletionSuggestions(self, cursor = None, scope = None):
-        cursor = cursor or self.textCursor()
-        leftScope, rightScope = self.scope(cursor)
-        _, settings = self.settings(cursor)
-        currentAlreadyTyped = self.currentWord(direction = "left", search = False)[0]
-        
-        readyWords = set()
-        
-        #A shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
-        if settings.completionCommand:
-            def commandCallback(context):
-                print(str(context))
-            command = self.application.supportManager.buildAdHocCommand(settings.completionCommand, self.syntax().bundle, commandInput="document")
-            self.commandProcessor.configure({ "asynchronous": False })
-            command.executeCallback(self.commandProcessor, commandCallback)
-            yield
-        
-        #A tab tigger completion
-        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(leftScope, rightScope)
-        
-        yield coroutines.Return(suggestions)
-
     # ---------- Folding
     def _find_block_fold_peer(self, block, direction = "down"):
         """ Direction are 'down' or up"""
@@ -986,7 +940,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             if nest == 0:
                 return block
             block = block.next() if direction == "down" else block.previous()
-
+    
     def _find_indented_block_fold_close(self, block):
         assert self.isFoldingIndentedBlockStart(block), "Block isn't folding indented start"
         indent = self.blockUserData(block).indent

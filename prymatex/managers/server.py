@@ -147,7 +147,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
                                                         alreadyTyped = kwargs.get("alreadyTyped"), 
                                                         caseInsensitive = kwargs.get("caseInsensitive", True))
             self.sendResult()
-        
+    
     def defaults(self, **kwargs):
         return True
     
@@ -169,11 +169,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
     def open(self, **kwargs):
         self.application.handleUrlCommand(kwargs["url"])
         self.sendResult()
-
-    def completer(self, **kwargs):
-        self.application.currentEditor().runCompleter()
-        self.sendResult()
-        
+    
     def terminal(self, **kwargs):
         for command in kwargs["commands"]:
             self.application.mainWindow.terminalDock.runCommand(command)

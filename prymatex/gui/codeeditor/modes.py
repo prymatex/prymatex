@@ -567,7 +567,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, CodeEditorBaseMode):
                 self.complete(self.editor.cursorRect())
             else:
                 self.inactive()
-
+    
     def onlyOneSameSuggestion(self):
         cursor = self.editor.textCursor()
         if not self.completionModel().hasIndex(1, 0):
