@@ -193,8 +193,10 @@ class CodeEditorCompleter(QtGui.QCompleter):
 
         self.setWidget(self.editor)
     
-    def clearModels(self):
+    def clear(self):
         self.external = False
+        self.setModel(None)
+        self.setCompletionPrefix("")
         for model in self.completionModels:
             model.clear()
 
@@ -230,7 +232,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
             if self.startCursorPosition <= cursor.position() <= maxPosition:
                 cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
                 self.setCompletionPrefix(cursor.selectedText())
-                if self.setCurrentRow(0) and (self.completionCount() > 1 or self.completionPrefix() != self.currentCompletion()):
+                if self.setCurrentRow(0) or self.nextModel():
                     self.fixPopupView()
                 else:
                     self.popup().hide()
@@ -255,8 +257,9 @@ class CodeEditorCompleter(QtGui.QCompleter):
     def addModel(self, completionModel):
         self.completionModels.append(completionModel)
 
-    def nextModel(self):
+    def nextModel(self, prefix = None):
         currentModel = self.model() or self.completionModels[-1]
+        prefix = prefix or self.completionPrefix()
         index = self.completionModels.index(currentModel)
         while True:
             index = (index + 1) % len(self.completionModels)
@@ -264,7 +267,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
             if not model.isReady():
                 model.fill()
             self.setModel(model)
-            if self.setCurrentRow(0) and (self.completionCount() > 1 or self.completionPrefix() != self.currentCompletion()):
+            if self.setCurrentRow(0):
                 return True
             elif model == currentModel:
                 return False
@@ -272,18 +275,16 @@ class CodeEditorCompleter(QtGui.QCompleter):
     def complete(self, rect, model = None, prefix = None):
         # Clear
         if not self.popup().isVisible():
-            self.clearModels()
+            self.clear()
         # Model
         if model is not None:
             self.setModel(model)
             self.external = True
-        elif not self.nextModel():
-            return
-        # Prefix
-        if prefix is not None:
-            self.setCompletionPrefix(prefix)
-        
-        if self.setCurrentRow(0):
+        if model or self.nextModel(prefix = prefix):
             self.fixPopupView()
+            # Prefix
+            if prefix is not None:
+                self.setCompletionPrefix(prefix)
+
             self.startCursorPosition = self.editor.textCursor().position() - len(self.completionPrefix())
             return QtGui.QCompleter.complete(self, rect)

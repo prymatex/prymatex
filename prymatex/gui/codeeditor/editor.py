@@ -22,7 +22,7 @@ from .sidebar import CodeEditorSideBar, SideBarWidgetAddon
 from .processors import (PMXCommandProcessor, PMXSnippetProcessor, 
         PMXMacroProcessor)
 from .modes import (CodeEditorBaseMode, PMXMultiCursorEditorMode,
-        PMXCompleterEditorMode, PMXSnippetEditorMode)
+        PMXSnippetEditorMode)
 from .highlighter import PMXSyntaxHighlighter
 from .models import (SymbolListModel, BookmarkListModel, 
         bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
