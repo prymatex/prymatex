@@ -842,13 +842,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         elif item.TYPE == PMXSyntax.TYPE:
             self.setSyntax(item)
 
-    def selectBundleItem(self, items, tabTriggered = False):
+    def selectBundleItem(self, items, **processorSettings):
         #Tengo mas de uno que hago?, muestro un menu
         syntax = any([item.TYPE == 'syntax' for item in items])
         
         def insertBundleItem(index):
             if index >= 0:
-                self.insertBundleItem(items[index], tabTriggered = tabTriggered)
+                self.insertBundleItem(items[index], **processorSettings)
         
         self.showFlatPopupMenu(items, insertBundleItem, cursorPosition = not syntax)
 
