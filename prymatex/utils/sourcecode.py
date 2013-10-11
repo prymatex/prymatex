@@ -75,7 +75,7 @@ class unaccented_map(dict):
         if ch is not None:
             return ch
         try:
-            de = unicodedata.decomposition(unichr(key))
+            de = unicodedata.decomposition(chr(key))
             p1, p2 = [int(x, 16) for x in de.split(None, 1)]
             if p2 == 0x308:
                 ch = self.CHAR_REPLACEMENT.get(key)
@@ -168,9 +168,7 @@ spaces_to_tabs = lambda text, spaceLength = 4: text.replace(' ' * spaceLength, '
 
 def asciify(text):
     try:
-        return text.encode('ascii')
-    except AttributeError:
-        return str(text).encode('ascii')
+        return text.encode('ascii').decode()
     except UnicodeEncodeError:
         return unicodedata.normalize('NFKD', text.translate(char_mapper))
 

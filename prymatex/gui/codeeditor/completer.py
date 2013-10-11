@@ -27,7 +27,7 @@ class CompletionBaseModel(QtCore.QAbstractTableModel):
 
     def fill(self):
         self.ready = True
-    
+
     def clear(self):
         self.suggestions = []
         self.ready = False
@@ -166,10 +166,10 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.editor = editor
         self.startCursorPosition = None
         self.explicitRunning = False
-        
+
         # Popup table view
         self.setPopup(QtGui.QTableView())
-        
+
         # Models
         self.completionModels = [ ]
 
@@ -226,7 +226,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
             self.setCompletionPrefix(alreadyTyped)
             self.complete(self.editor.cursorRect())
         return False
-    
+
     def post_key_event(self, event):
         if self.popup().isVisible():
             maxPosition = self.startCursorPosition + len(self.completionPrefix()) + 1
@@ -249,7 +249,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
             if end - start >= self.editor.wordLengthToComplete or event.key() == QtCore.Qt.Key_Period:
                 self.setCompletionPrefix(alreadyTyped)
                 self.complete(self.editor.cursorRect())
-
+    
     def insertCompletion(self, index):
         sIndex = self.completionModel().mapToSource(index)
         self.model().insertCompletion(sIndex)
@@ -277,7 +277,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
                 return True
             elif model == currentModel:
                 return False
-    
+
     def complete(self, rect, explicit = None):
         self.explicitRunning = explicit is not None and explicit or self.explicitRunning
         if self.model() or self.nextModel():
