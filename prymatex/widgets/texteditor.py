@@ -19,7 +19,8 @@ class TextEditWidget(QtGui.QPlainTextEdit):
     fontChanged = QtCore.Signal()
     
     #------ Regular expresions
-    RE_WORD = re.compile(r"([A-Za-z_]\w+\b)", re.UNICODE)
+    # TODO Ver esto que no esta muy bien
+    RE_WORD = re.compile(r"([A-Za-z_]+)", re.UNICODE)
     
     def __init__(self, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
@@ -54,7 +55,8 @@ class TextEditWidget(QtGui.QPlainTextEdit):
 
     #------ Retrieve text
     def wordUnderCursor(self, cursor = None):
-        cursor = cursor or self.textCursor()
+        #Como cambio el cursor hago una copia
+        cursor =  QtGui.QTextCursor(cursor or self.textCursor())
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
         return cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
 
@@ -62,12 +64,48 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         return self.word(cursor = self.textCursor(), direction = direction, search = search)
         
     def word(self, cursor = None, pattern = RE_WORD, direction = "both", search = True):
-        cursor = cursor or self.textCursor()
-        line = cursor.block().text()
-        position = cursor.position()
-        columnNumber = cursor.columnNumber()
+        cursor =  cursor or self.textCursor()
+        wordUnderCursor, start, end = self.wordUnderCursor(cursor = cursor)
+        
+        if pattern.match(wordUnderCursor) and start <= cursor.position() <= end:
+            if direction == "both":
+                return wordUnderCursor, start, end
+            elif direction == "left":
+                index = cursor.position() - start
+                return wordUnderCursor[:index], start, start + index
+            elif direction == "right":
+                index = end - cursor.position()
+                return wordUnderCursor[len(wordUnderCursor) - index:], end - index, end
+        elif search:
+            columnNumber = cursor.columnNumber()
+            line = cursor.block().text()
+            position = cursor.position()
+            first_part, last_part = line[:columnNumber][::-1], line[columnNumber:]
+            lword = rword = ""
+            #Search left word
+            for i in range(len(first_part)):
+                lword += first_part[i]
+                m = pattern.search(first_part[i + 1:])
+                if m and m.group(0):
+                    lword += m.group(0)
+                    break
+            lword = lword[::-1]
+            #Search right word
+            for i in range(len(last_part)):
+                rword += last_part[i]
+                m = pattern.search(last_part[i:])
+                if m and m.group(0):
+                    rword += m.group(0)
+                    break
+            lword = lword.lstrip()
+            rword = rword.rstrip()
+            return lword + rword, position - len(lword), position + len(rword)
+        return "", cursor.position(), cursor.position()
+        #line = cursor.block().text()
+        #position = cursor.position()
+        #columnNumber = cursor.columnNumber()
         #Get text before and after the cursor position.
-        first_part, last_part = line[:columnNumber][::-1], line[columnNumber:]
+        #first_part, last_part = line[:columnNumber][::-1], line[columnNumber:]
         
         #Try left word
         lword = rword = ""

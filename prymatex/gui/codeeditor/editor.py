@@ -913,15 +913,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def showCompleter(self, suggestions, alreadyTyped=None, caseInsensitive=True, callback = None):
         self.suggestionsCompletionModel.suggestions = suggestions
         self.suggestionsCompletionModel.fill()
-        print(alreadyTyped)
         alreadyTyped, start, end = self.currentWord(direction="left", search=False)
         self.completer.setCaseSensitivity( QtCore.Qt.CaseInsensitive and \
             caseInsensitive or QtCore.Qt.CaseSensitive)
         #self.completer.setActivatedCallback(callback)
-        self.completer.setModel(self.suggestionsCompletionModel)
-        self.completer.setCompletionPrefix(alreadyTyped)
-        if self.completer.setCurrentRow(0):
-            self.completer.complete(self.cursorRect(), explicit = True)
+        self.completer.complete(self.cursorRect(), 
+            model = self.suggestionsCompletionModel,
+            prefix = alreadyTyped)
     
     # ---------- Folding
     def _find_block_fold_peer(self, block, direction = "down"):

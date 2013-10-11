@@ -281,10 +281,13 @@ class PrintEditorStatusHelper(CodeEditorKeyHelper):
         
     def execute(self, event, cursor = None):
         #Aca lo que queramos hacer
-        from prymatex.support.regexp import base
-        print(base.REGEX_COUNTER, base.RE_COUNTER, base.ONIG_COUNTER, base.REGEXPS)
         userData = self.editor.blockUserData(cursor.block())
         print(userData.tokens())
         print(self.editor.currentWord())
         print(self.editor.scope())
         print(self.editor.wordUnderCursor(), cursor.position())
+        print(self.editor.currentWord())
+        print(self.editor.currentWord(direction = "left", search = False))
+        print(self.editor.currentWord(direction = "right", search = False))
+        print(self.editor.currentWord(search = True))
+        print(self.editor.currentWord(search = False)) 
