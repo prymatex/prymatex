@@ -30,11 +30,13 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
     @pmxConfigPorperty(valueType = str)
     def qtStyle(self, styleName):
-        self.setStyle(styleName)
+        if styleName:
+            self.setStyle(styleName)
 
-    @pmxConfigPorperty(valueType = str)
+    @pmxConfigPorperty(default = "default")
     def qtStyleSheet(self, styleSheetName):
-        self.setStyleSheet(resources.STYLESHEETS[styleSheetName])
+        if styleSheetName in resources.STYLESHEETS:
+            self.setStyleSheet(resources.STYLESHEETS[styleSheetName])
 
     askAboutExternalDeletions = pmxConfigPorperty(default=False)
     askAboutExternalChanges = pmxConfigPorperty(default=False)
