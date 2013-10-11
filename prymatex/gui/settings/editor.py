@@ -44,7 +44,9 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
         uuid = self.settingGroup.value('defaultSyntax')
         syntax = self.application.supportManager.getBundleItem(uuid)
         index = self.comboBoxDefaultSyntax.model().findItemIndex(syntax)
-        self.comboBoxDefaultSyntax.setCurrentIndex(index)
+        # TODO Ver porque no esta el valor
+        if index:
+            self.comboBoxDefaultSyntax.setCurrentIndex(index)
         
         # Flags
         flags = int(self.settingGroup.value('defaultFlags'))
