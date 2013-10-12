@@ -826,19 +826,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         
         if item.TYPE == PMXSnippet.TYPE:
             self.snippetProcessor.configure(processorSettings)
-            self.textCursor().beginEditBlock()
             item.execute(self.snippetProcessor)
-            self.textCursor().endEditBlock()
-        elif item.TYPE == PMXCommand.TYPE or item.TYPE == PMXDragCommand.TYPE:
+        elif item.TYPE in ( PMXCommand.TYPE, PMXDragCommand.TYPE ):
             self.commandProcessor.configure(processorSettings)
-            self.textCursor().beginEditBlock()
             item.execute(self.commandProcessor)
-            self.textCursor().endEditBlock()
         elif item.TYPE == PMXMacro.TYPE:
             self.macroProcessor.configure(processorSettings)
-            self.textCursor().beginEditBlock()
             item.execute(self.macroProcessor)
-            self.textCursor().endEditBlock()
         elif item.TYPE == PMXSyntax.TYPE:
             self.setSyntax(item)
 
