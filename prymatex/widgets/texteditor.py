@@ -85,7 +85,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
             #Search left word
             for i in range(len(first_part)):
                 lword += first_part[i]
-                m = pattern.search(first_part[i + 1:])
+                m = pattern.search(first_part[i:])
                 if m and m.group(0):
                     lword += m.group(0)
                     break
@@ -101,47 +101,6 @@ class TextEditWidget(QtGui.QPlainTextEdit):
             rword = rword.rstrip()
             return lword + rword, position - len(lword), position + len(rword)
         return "", cursor.position(), cursor.position()
-        #line = cursor.block().text()
-        #position = cursor.position()
-        #columnNumber = cursor.columnNumber()
-        #Get text before and after the cursor position.
-        #first_part, last_part = line[:columnNumber][::-1], line[columnNumber:]
-        
-        #Try left word
-        lword = rword = ""
-        m = pattern.match(first_part)
-        if m and direction in ("left", "both"):
-            lword = m.group(0)[::-1]
-        #Try right word
-        m = pattern.match(last_part)
-        if m and direction in ("right", "both"):
-            rword = m.group(0)
-        
-        if lword or rword:
-            return lword + rword, position - len(lword), position + len(rword)
-        
-        if not search: 
-            return "", position, position
-
-        lword = rword = ""
-        #Search left word
-        for i in range(len(first_part)):
-            lword += first_part[i]
-            m = pattern.search(first_part[i + 1:])
-            if m and m.group(0):
-                lword += m.group(0)
-                break
-        lword = lword[::-1]
-        #Search right word
-        for i in range(len(last_part)):
-            rword += last_part[i]
-            m = pattern.search(last_part[i:])
-            if m and m.group(0):
-                rword += m.group(0)
-                break
-        lword = lword.lstrip()
-        rword = rword.rstrip()
-        return lword + rword, position - len(lword), position + len(rword)
 
     #------ Retrieve cursors and blocks
     def newCursorAtPosition(self, position, anchor = None):
