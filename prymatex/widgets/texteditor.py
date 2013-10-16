@@ -60,10 +60,10 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
         return cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
 
-    def currentWord(self, direction = "both", search = True):
+    def currentWord(self, direction = "both", search = False):
         return self.word(cursor = self.textCursor(), direction = direction, search = search)
         
-    def word(self, cursor = None, pattern = RE_WORD, direction = "both", search = True):
+    def word(self, cursor = None, pattern = RE_WORD, direction = "both", search = False):
         cursor =  cursor or self.textCursor()
         wordUnderCursor, start, end = self.wordUnderCursor(cursor = cursor)
         
@@ -79,27 +79,34 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         elif search:
             columnNumber = cursor.columnNumber()
             line = cursor.block().text()
-            position = cursor.position()
+            blockPosition = cursor.block().position()
             first_part, last_part = line[:columnNumber][::-1], line[columnNumber:]
-            lword = rword = ""
-            #Search left word
-            for i in range(len(first_part)):
-                lword += first_part[i]
-                m = pattern.search(first_part[i:])
-                if m and m.group(0):
-                    lword += m.group(0)
-                    break
-            lword = lword[::-1]
-            #Search right word
-            for i in range(len(last_part)):
-                rword += last_part[i]
-                m = pattern.search(last_part[i:])
-                if m and m.group(0):
-                    rword += m.group(0)
-                    break
-            lword = lword.lstrip()
-            rword = rword.rstrip()
-            return lword + rword, position - len(lword), position + len(rword)
+            
+            if direction in ("left", "both"):
+                #Search left word
+                lword = ""
+                lstart = lend = blockPosition
+                lmatch = pattern.search(first_part)
+                if lmatch:
+                    lword = lmatch.group(0)[::-1]
+                    lstart += len(first_part[lmatch.end():])
+                    lend += len(first_part[:lmatch.start()])
+                if direction == "left":
+                    return lword, lstart, lend
+            
+            if direction in ("right", "both"):
+                #Search right word
+                rword = ""
+                rstart = rend = blockPosition + len(first_part)
+                rmatch = pattern.search(last_part)
+                if rmatch:
+                    rword = rmatch.group(0)
+                    rstart +=  len(last_part[rmatch.start():])
+                    rend += len(first_part[:rmatch.end()])
+                if direction == "right":
+                    return rword, rstart, rend
+
+            return lword + rword, lstart, rend
         return "", cursor.position(), cursor.position()
 
     #------ Retrieve cursors and blocks
