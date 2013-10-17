@@ -106,7 +106,7 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
                     self.cursor1.setPosition(self.cursor1.selectionEnd())
                     self.cursor2.setPosition(self.cursor2.selectionStart())
                 return True
-        word, wordStart, wordEnd = self.editor.currentWord(search = False)
+        word, wordStart, wordEnd = self.editor.currentWord()
         return not (wordStart <= cursor.position() < wordEnd)
         
     def execute(self, event, cursor = None):
@@ -283,11 +283,12 @@ class PrintEditorStatusHelper(CodeEditorKeyHelper):
         #Aca lo que queramos hacer
         userData = self.editor.blockUserData(cursor.block())
         print(userData.tokens())
-        print(self.editor.currentWord())
         print(self.editor.scope())
-        print(self.editor.wordUnderCursor(), cursor.position())
-        print(self.editor.currentWord())
-        print(self.editor.currentWord(direction = "left", search = True), cursor.position())
-        print(self.editor.currentWord(direction = "right", search = True), cursor.position())
-        print(self.editor.currentWord(search = True), cursor.position())
-        print(self.editor.currentWord(search = False))
+        print("wordUnderCursor", self.editor.wordUnderCursor(), cursor.position())
+        print("currentWord", self.editor.currentWord(), cursor.position())
+        print("currentWord, left", self.editor.currentWord(direction = "left"), cursor.position())
+        print("currentWord, right", self.editor.currentWord(direction = "right"), cursor.position())
+        print(self.editor.word(), cursor.position())
+        print(self.editor.word(direction = "left", search=True), cursor.position())
+        print(self.editor.word(direction = "right", search=True), cursor.position())
+        print(self.editor.word(search=True), cursor.position())

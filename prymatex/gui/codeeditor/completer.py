@@ -117,7 +117,7 @@ class WordsCompletionModel(CompletionBaseModel):
 
     def insertCompletion(self, index):
         suggestion = self.suggestions[index.row()]
-        currentWord, start, end = self.editor.currentWord(search = False)
+        currentWord, start, end = self.editor.currentWord()
         cursor = self.editor.newCursorAtPosition(start, end)
         cursor.insertText(suggestion)
 
@@ -150,7 +150,7 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
 
     def insertCompletion(self, index):
         suggestion = self.suggestions[index.row()]
-        currentWord, start, end = self.editor.currentWord(search = False)
+        currentWord, start, end = self.editor.currentWord()
         cursor = self.editor.newCursorAtPosition(start, end)
         cursor.removeSelectedText()
         self.editor.insertBundleItem(suggestion)
@@ -176,7 +176,7 @@ class SuggestionsCompletionModel(CompletionBaseModel):
 
     def insertCompletion(self, index):
         suggestion = self.suggestions[index.row()]
-        currentWord, start, end = self.editor.currentWord(search = False)
+        currentWord, start, end = self.editor.currentWord()
         cursor = self.editor.newCursorAtPosition(start, end)
         if 'display' in suggestion:
             cursor.insertText(suggestion['display'])
@@ -244,8 +244,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
             elif event.key() in (QtCore.Qt.Key_Space, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
                 self.popup().hide()
         elif event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
-            alreadyTyped, start, end = self.editor.currentWord(
-                direction="left", search=True)
+            alreadyTyped, start, end = self.editor.currentWord(direction="left")
             self.explicitLaunch = True
             self.complete(self.editor.cursorRect(), prefix = alreadyTyped)
         return False
@@ -265,9 +264,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
             else:
                 self.popup().hide()
         elif asciify(event.text()) in COMPLETER_CHARS and not event.modifiers():
-            alreadyTyped, start, end = self.editor.currentWord(
-                direction="left", search=True)
-            print(alreadyTyped)
+            alreadyTyped, start, end = self.editor.currentWord(direction="left")
             if end - start >= self.editor.wordLengthToComplete:
                 self.explicitLaunch = False
                 self.complete(self.editor.cursorRect(), prefix = alreadyTyped)
