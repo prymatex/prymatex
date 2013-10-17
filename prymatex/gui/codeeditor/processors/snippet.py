@@ -25,6 +25,10 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
                 self.__env.update(env)
         return self.__env
 
+    def shellVariables(self):
+        leftSettings, rightSettings = self.editor.settings(self.cursorWrapper)
+        return rightSettings.shellVariables
+
     def startSnippet(self, snippet):
         """Inicia el snippet"""
         self.snippet = snippet
@@ -86,7 +90,8 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
     def runShellScript(self, script):
         context = self.editor.application.supportManager.runSystemCommand(
             shellCommand = script,
-            environment = self.environmentVariables()
+            environment = self.environmentVariables(),
+            shellVariables = self.shellVariables()
         )
         return context.outputValue.strip()
     

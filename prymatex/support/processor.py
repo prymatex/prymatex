@@ -23,6 +23,7 @@ PMXCommandProcessor = type("PMXCommandProcessor", (object, ), {
     "startCommand": nop,
     "endCommand": nop,
     "environmentVariables": nop,
+    "shellVariables": nop,
     #Inputs
     "document": nop,
     "line": nop,
@@ -62,6 +63,7 @@ PMXSnippetProcessor = type("PMXSnippetProcessor", (object, ), {
     "endRender": nop,
     "runShellScript": nop,
     "environmentVariables": nop,
+    "shellVariables": nop,
     # cursor or caret
     "caretPosition": nop,
     # select
@@ -75,6 +77,7 @@ PMXMacroProcessor = type("PMXMacroProcessor", (object, ), {
     "startMacro": nop,
     "endMacro": nop,
     "environmentVariables": nop,
+    "shellVariables": nop,
     # Move
     "moveRight": nop,
     "moveLeft": nop,

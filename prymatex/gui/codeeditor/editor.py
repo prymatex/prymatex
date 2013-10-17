@@ -899,9 +899,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             environment['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
             environment['TM_INPUT_START_LINE'] = start.blockNumber() + 1
             environment['TM_INPUT_START_LINE_INDEX'] = cursor.selectionStart() - start.position()
-        
-        _, settings = self.settings(cursor)
-        environment.update(settings.shellVariables)
         return environment
 
     # ---------- Completer

@@ -154,19 +154,21 @@ def prepareCygwinShellScript(script, environment):
     command = '%s\\bin\\env.exe "%s"' % (cygwinPath, tmpFile)
     return command, environment, tmpFile
 
-def prepareShellScript(script, variables):
+def prepareShellScript(script, environment, variables):
     #Aca entran las variables de prymatex, tengo que armar el environment con os.environ
-    assert 'PMX_SUPPORT_PATH' in variables, "PMX_SUPPORT_PATH is not in the environment"
+    assert 'PMX_SUPPORT_PATH' in environment, "PMX_SUPPORT_PATH is not in the environment"
     
     # Build final environment
-    environment = os.environ.copy()
-    environment.update(variables)
+    env = os.environ.copy()
+    env.update(environment)
+    # TODO Magia
+    env.update(variables)
     
-    if sys.platform == "win32" and "PMX_CYGWIN_PATH" in environment:
-        return prepareCygwinShellScript(script, environment)
+    if sys.platform == "win32" and "PMX_CYGWIN_PATH" in env:
+        return prepareCygwinShellScript(script, env)
     elif sys.platform == "win32":
-        return prepareWindowsShellScript(script, environment)
-    return prepareUnixShellScript(script, environment)
+        return prepareWindowsShellScript(script, env)
+    return prepareUnixShellScript(script, env)
 
 def makeExecutableTempFile(content, directory):
     # TODO: Mejorara la generacion de temp, se borra no se borra que onda

@@ -30,6 +30,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
                 self.__env.update(env)
         return self.__env
         
+    def shellVariables(self):
+        leftSettings, rightSettings = self.editor.settings(self.cursorWrapper)
+        return rightSettings.shellVariables
+
     def configure(self, settings):
         self.asynchronous = settings.get("asynchronous", True)
         self.cursorWrapper = settings.get("cursorWrapper", self.editor.textCursor())
@@ -88,7 +92,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
 
     def selection(self, inputFormat = None):
         if self.cursorWrapper.hasSelection():
-            text = self.editor.selectedTextWithEol(cursor)
+            text = self.editor.selectedTextWithEol(self.cursorWrapper)
             if inputFormat == "xml":
                 firstBlock, lastBlock = self.editor.selectionBlockStartEnd()
                 return self.formatAsXml(text, firstBlock, lastBlock, 

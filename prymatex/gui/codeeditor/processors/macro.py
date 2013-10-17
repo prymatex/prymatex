@@ -31,7 +31,12 @@ class PMXMacroProcessor(PMXMacroProcessor):
                 self.__env.update(env)
         return self.__env
         
+    def shellVariables(self):
+        leftSettings, rightSettings = self.editor.settings()
+        return rightSettings.shellVariables
+
     def configure(self, settings):
+        # TODO self.cursorWrapper
         self.tabTriggered = settings.get("tabTriggered", False)
         self.disableIndent = settings.get("disableIndent", False)
         self.baseEnvironment = settings.get("environment", {})

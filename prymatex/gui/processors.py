@@ -14,19 +14,24 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
 
     def startCommand(self, command):
         self.command = command
-        settings = self.mainWindow.application.supportManager.getPreferenceSettings()
-        print(settings.shellVariables)
-        self.__env = command.environmentVariables()
-        self.__env.update(self.mainWindow.environmentVariables())
-        self.__env.update(settings.shellVariables)
-        self.__env.update(self.baseEnvironment)
         
     def endCommand(self, command):
         self.command = None
         
     def environmentVariables(self):
+        if self.__env is None:
+            self.__env = {}
+            envs = [ self.command.environmentVariables(),
+                self.mainWindow.environmentVariables(),
+                self.baseEnvironment ]
+            for env in envs:
+                self.__env.update(env)
         return self.__env
         
+    def shellVariables(self):
+        settings = self.mainWindow.application.supportManager.getPreferenceSettings()
+        return settings.shellVariables
+
     def configure(self, settings):
         self.asynchronous = settings.get("asynchronous", True)
         self.baseEnvironment = settings.get("environment", {})
