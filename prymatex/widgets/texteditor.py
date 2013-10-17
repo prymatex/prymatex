@@ -106,7 +106,8 @@ class TextEditWidget(QtGui.QPlainTextEdit):
                     end = blockPosition + len(first_part) + len(first_part[:rmatch.end()])
                 if direction == "right":
                     return rmatch.group(0), rstart, end
-            if lmatch.start() == 0:
+            # Si estamos aca es porque es both
+            if lmatch and lmatch.start() == 0:
                 return line[start - blockPosition : end - blockPosition], start, end
         return "", cursor.position(), cursor.position()
 
