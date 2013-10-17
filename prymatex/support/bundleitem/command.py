@@ -191,12 +191,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
 
     def afterExecute(self, processor, context):
         outputHandler = self.getOutputHandler(context.outputType)
-        # Remove old
-        if context.inputType != None and outputHandler in [ "insertText", "insertAsSnippet", "replaceSelectedText", "replaceInput" ]:
-            deleteMethod = getattr(processor, 'delete' + context.inputType.title(), None)
-            if deleteMethod != None:
-                deleteMethod()
-
+        
         handlerFunction = getattr(processor, outputHandler, None)
         if handlerFunction is not None:
             handlerFunction(context, self.outputFormat)

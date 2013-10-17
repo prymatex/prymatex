@@ -35,10 +35,6 @@ PMXCommandProcessor = type("PMXCommandProcessor", (object, ), {
     "saveActiveFile": return_true,
     "saveModifiedFiles": return_true,
     "nop": return_true,
-    # deleteFromEditor
-    "deleteWord": nop,
-    "deleteSelection": nop,
-    "deleteCharacter": nop,
     # Outpu functions
     "replaceInput": nop,
     "atCaret": nop,

@@ -75,26 +75,25 @@ class PMXCommandProcessor(PMXCommandProcessor):
             return text
         
     def line(self, inputFormat = None):
-        return self.editor.textCursor().block().text()
+        self.cursorWrapper.select(QtGui.QTextCursor.LineUnderCursor)
+        return self.cursorWrapper.selectedText()
         
     def character(self, inputFormat = None):
-        cursor = self.editor.textCursor()
-        return cursor.document().characterAt(cursor.position())
-        
+        self.cursorWrapper.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
+        return self.cursorWrapper.selectedText()
+
     def scope(self, inputFormat = None):
-        cursor = self.editor.textCursor()
-        block = cursor.block()
-        token = self.editor.blockUserData(block).tokenAtPosition(
-            cursor.positionInBlock())
+        token = self.editor.tokenAtPosition(self.cursorWrapper.position())
         return token.chunk
 
     def selection(self, inputFormat = None):
-        cursor = self.editor.textCursor()
-        if cursor.hasSelection():
+        if self.cursorWrapper.hasSelection():
             text = self.editor.selectedTextWithEol(cursor)
             if inputFormat == "xml":
                 firstBlock, lastBlock = self.editor.selectionBlockStartEnd()
-                return self.formatAsXml(text, firstBlock, lastBlock, cursor.selectionStart() - firstBlock.position(), cursor.selectionEnd() - lastBlock.position())
+                return self.formatAsXml(text, firstBlock, lastBlock, 
+                    self.cursorWrapper.selectionStart() - firstBlock.position(),
+                    self.cursorWrapper.selectionEnd() - lastBlock.position())
             else:
                 return text
         
@@ -103,6 +102,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
 
     def word(self, inputFormat = None):
         word, start, end = self.editor.currentWord()
+        self.cursorWrapper.setPosition(start)
+        self.cursorWrapper.setPosition(end, QtGui.QTextCursor.KeepAnchor)
         return word
 
     # ----------------- Before Running Command
@@ -119,33 +120,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def saveActiveFile(self):
         self.editor.mainWindow.saveEditor(editor = self.editor)
         return not (self.editor.isModified() or self.editor.isNew())
-    
-    # ----------------- Delete From Editor
-    def deleteWord(self):
-        _, start, end = self.editor.currentWord()
-        cursor = self.editor.textCursor()
-        cursor.setPosition(start)
-        cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-        cursor.removeSelectedText()
-        
-    def deleteSelection(self):
-        cursor = self.editor.textCursor()
-        cursor.removeSelectedText()
 
-    def deleteLine(self):
-        cursor = self.editor.textCursor()
-        block = cursor.block()
-        cursor.setPosition(block.position())
-        cursor.setPosition(block.position() + block.length() - 1, QtGui.QTextCursor.KeepAnchor)
-        cursor.removeSelectedText()
-        
-    def deleteCharacter(self):
-        cursor = self.editor.textCursor()
-        cursor.deleteChar()
-    
-    def deleteDocument(self):
-        self.editor.document().clear()
-       
     # ------------------- Outpus function
     def error(self, context, outputFormat = None):
         if self.errorCommand:
@@ -162,14 +137,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         pass
         
     def replaceSelectedText(self, context, outputFormat = None):
-        cursor = self.editor.textCursor()
-        if cursor.hasSelection():
-            position = cursor.selectionStart()
-            cursor.insertText(context.outputValue)
-            cursor.setPosition(position, position + len(context.outputValue))
-        else:
-            cursor.insertText(context.outputValue)
-        self.editor.setTextCursor(cursor)
+        self.cursorWrapper.insertText(context.outputValue)
         
     def replaceDocument(self, context, outputFormat = None):
         self.editor.updatePlainText(context.outputValue)
@@ -180,15 +148,14 @@ class PMXCommandProcessor(PMXCommandProcessor):
     # ------------ Version 2
     def replaceInput(self, context, outputFormat = None):
         if outputFormat == "text":
-            self.editor.textCursor().insertText(context.outputValue)
+            self.cursorWrapper.insertText(context.outputValue)
         elif outputFormat == "html":
-            self.editor.textCursor().appendHtml(context.outputValue)
+            self.cursorWrapper.appendHtml(context.outputValue)
         elif outputFormat == "snippet":
             self.insertAsSnippet(context)
 
     def insertText(self, context, outputFormat = None):
-        cursor = self.editor.textCursor()
-        cursor.insertText(context.outputValue)
+        self.cursorWrapper.insertText(context.outputValue)
     
     def atCaret(self, context, outputFormat = None):
         print("atCaret")
@@ -197,9 +164,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
         print("afterInput")
 
     def afterSelectedText(self, context, outputFormat = None):
-        cursor = self.editor.textCursor()
-        cursor.setPosition(cursor.selectionEnd())
-        cursor.insertText(context.outputValue)
+        self.cursorWrapper.setPosition(self.cursorWrapper.selectionEnd())
+        self.cursorWrapper.insertText(context.outputValue)
         
     def insertAsSnippet(self, context, outputFormat = None):
         # Build Snippet
@@ -220,7 +186,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         if timeout > 2000:
             timeout = 2000
         
-        point = self.editor.cursorRect(self.editor.textCursor()).bottomRight()
+        point = self.editor.cursorRect(self.cursorWrapper).bottomRight()
         point = self.editor.mapToGlobal(point)
         callbacks = {
             'copy': lambda s = message: QtGui.qApp.instance().clipboard().setText(s)
