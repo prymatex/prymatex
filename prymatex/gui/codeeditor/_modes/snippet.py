@@ -5,10 +5,7 @@ from prymatex.qt import QtCore, QtGui
 
 from .base import CodeEditorBaseMode
 
-class CodeEditorSnippetMode(QtCore.QObject, CodeEditorBaseMode):
-    def __init__(self, parent = None):
-        QtCore.QObject.__init__(self, parent)
-
+class CodeEditorSnippetMode(CodeEditorBaseMode):
     @property
     def snippet(self):
         return self.editor.snippetProcessor.snippet

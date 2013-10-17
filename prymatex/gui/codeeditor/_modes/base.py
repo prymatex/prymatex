@@ -5,7 +5,10 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import PMXBaseEditorAddon
 
-class CodeEditorBaseMode(PMXBaseEditorAddon):
+class CodeEditorBaseMode(QtCore.QObject, PMXBaseEditorAddon):
+    def __init__(self, parent):
+        QtCore.QObject.__init__(self, parent)
+
     def active(self, event, scope):
         pass
     
@@ -34,3 +37,10 @@ class CodeEditorBaseMode(PMXBaseEditorAddon):
 
     def keyReleaseEvent(self, event):
         return self.editor.keyReleaseEvent(event)
+
+class CodeEditorTestMode(CodeEditorBaseMode):
+    def initialize(self, editor):
+        CodeEditorBaseMode.initialize(self, editor)
+
+    def eventFilter(self, obj, event):
+        return False

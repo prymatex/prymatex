@@ -3,7 +3,7 @@
 
 from .dockers import CodeEditorBookmarksDock, CodeEditorSymbolsDock
 from .editor import CodeEditor
-from . import helpers, addons, sidebar, minimap, modes
+from . import helpers, addons, sidebar, minimap, _modes
 from .status import CodeEditorStatus
 
 def registerPlugin(manager):
@@ -29,7 +29,7 @@ def registerPlugin(manager):
     manager.registerComponent(helpers.PrintEditorStatusHelper, CodeEditor)
 
     # ---------------- Modes
-    # manager.registerComponent(modes.CodeEditorTestMode, CodeEditor)
+    manager.registerComponent(_modes.CodeEditorTestMode, CodeEditor)
     
     # ---------------- Addons
     manager.registerComponent(addons.SmartUnindentAddon, CodeEditor)

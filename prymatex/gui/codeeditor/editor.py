@@ -21,8 +21,9 @@ from .addons import CodeEditorAddon
 from .sidebar import CodeEditorSideBar, SideBarWidgetAddon
 from .processors import (PMXCommandProcessor, PMXSnippetProcessor, 
         PMXMacroProcessor)
-from .modes import (CodeEditorBaseMode, PMXMultiCursorEditorMode,
-        PMXSnippetEditorMode)
+from .modes import PMXMultiCursorEditorMode, PMXSnippetEditorMode
+from ._modes import CodeEditorBaseMode
+
 from .highlighter import PMXSyntaxHighlighter
 from .models import (SymbolListModel, BookmarkListModel, 
         bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
@@ -907,7 +908,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def showCompleter(self, suggestions, alreadyTyped=None, caseInsensitive=True, callback = None):
         self.suggestionsCompletionModel.suggestions = suggestions
         self.suggestionsCompletionModel.fill()
-        alreadyTyped, start, end = self.currentWord(direction="left", search=False)
+        alreadyTyped, start, end = self.currentWord(direction="left")
         self.completer.setCaseSensitivity( QtCore.Qt.CaseInsensitive and \
             caseInsensitive or QtCore.Qt.CaseSensitive)
         #self.completer.setActivatedCallback(callback)

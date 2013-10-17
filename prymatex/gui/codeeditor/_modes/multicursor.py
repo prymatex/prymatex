@@ -9,9 +9,9 @@ from prymatex.qt.helpers.keyevents import KEY_NUMBERS
 from prymatex.utils.lists import bisect_key
 from prymatex.gui.codeeditor import helpers
 
-class CodeEditorMultiCursorMode(QtCore.QObject, CodeEditorBaseMode):
+class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def __init__(self, parent = None):
-        QtCore.QObject.__init__(self, parent)
+        CodeEditorBaseMode__init__(self, parent)
         # TODO: Buscar una forma mejor de obtener o trabajar con este helper en el modo, quiza filtarndo por clase en el evento
         self.helper = helpers.MultiCursorHelper()
         self.helper.initialize(editor)
