@@ -150,12 +150,13 @@ setup(
 
     keywords = "editor python prymatex development",
     classifiers = [
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 3 - Alpha",
         "Environment :: X11 Applications",
         "Topic :: Text Editors",
         "Topic :: Utilities",
         "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     ],
     install_requires = [ 
