@@ -162,10 +162,10 @@ def prepareShellScript(script, environment, variables):
     # Build final environment
     env = os.environ.copy()
     env.update(environment)
-    # TODO Meter esto en el script y dejarle el trabajo al bash
-    for key, value in variables.items():
-        env[key] = osextra.path.expand_shell_variables( value, context = env)
-    
+
+    for name, value in variables:
+        env[name] = osextra.path.expand_shell_variables( value, context = env)
+
     if sys.platform == "win32" and "PMX_CYGWIN_PATH" in env:
         return prepareCygwinShellScript(script, env)
     elif sys.platform == "win32":

@@ -24,7 +24,6 @@ from __future__ import unicode_literals
     shellVariables, an array of key/value pairs. See context dependent variables.
     spellChecking, set to 0/1 to disable/enable spell checking.
 '''
-
 from prymatex.utils import osextra
 
 from .base import PMXBundleItem
@@ -62,7 +61,7 @@ class PMXPreferenceSettings(object):
                 if key in self.INDENT_KEYS or key in self.FOLDING_KEYS:
                     value = value.pattern
                 elif key == 'shellVariables':
-                    value = [ {'name': t[0], 'value': t[1] } for t in  value.items() ]
+                    value = [ {'name': name, 'value': value } for name, value in  value ]
                 elif key == 'symbolTransformation':
                     value = "%s" % value
                 elif key == 'showInSymbolList':
@@ -79,7 +78,7 @@ class PMXPreferenceSettings(object):
                 if key in self.INDENT_KEYS or key in self.FOLDING_KEYS:
                     value = compileRegexp( value )
                 elif key == 'shellVariables':
-                    value = dict([(d['name'], d['value']) for d in value])
+                    value = [(d['name'], d['value']) for d in value]
                 elif key == 'symbolTransformation':
                     value = SymbolTransformation(value)
                 elif key == 'showInSymbolList':
@@ -149,15 +148,19 @@ class PMXPreferenceMasterSettings(object):
 
     @property
     def shellVariables(self):
-        shellVariables = {}
+        shellVariables = []
+        variableNames = set()
         for settings in self.settings:
             if settings.shellVariables:
                 # Only if not has all variables
-                # TODO User listas y respetar la linealidad de la definicion
-                if all([ key not in shellVariables for key in settings.shellVariables.keys()]):
-                    for key, value in settings.shellVariables.items():
-                        shellVariables[key] = osextra.path.expand_shell_variables(
-                            value, context = settings.bundle.variables)
+                if all([ name not in variableNames for name, _ in settings.shellVariables]):
+                    context = settings.bundle.variables
+                    for name, value in settings.shellVariables:
+                        value = osextra.path.expand_shell_variables( value,
+                            context = context)
+                        shellVariables.append((name, value))
+                        context[name] = value
+                        variableNames.add(name)
         return shellVariables
 
     @property

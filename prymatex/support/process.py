@@ -20,7 +20,7 @@ class RunningContext(object):
         self.shellCommand, self.environment, self.tempFile = scripts.prepareShellScript(
             attrs.pop("shellCommand"), 
             attrs.pop("environment", {}),
-            attrs.pop("shellVariables", {}))
+            attrs.pop("shellVariables", []))
 
         self.asynchronous = attrs.pop("asynchronous", False)
         self.workingDirectory = attrs.pop("workingDirectory", None)
