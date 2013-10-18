@@ -2,9 +2,9 @@
 # encoding: utf-8
 
 import unittest
-from prymatex.support.regexp import Transformation
+from prymatex.support.regexp import SymbolTransformation, String
 
-class ScopeSelectorTests(unittest.TestCase):
+class RegexpTests(unittest.TestCase):
     def setUp(self):
         pass
 
@@ -18,7 +18,7 @@ class ScopeSelectorTests(unittest.TestCase):
             
         ]
         for s in sources:
-            self.assertEqual(s, str(Transformation(s)))
+            self.assertEqual(s, str(SymbolTransformation(s)))
     
     def test_symbol_transformation(self):
         sources = [
@@ -26,10 +26,14 @@ class ScopeSelectorTests(unittest.TestCase):
             "def\s+([A-Za-z_][A-Za-z0-9_]*\()(?:(.{,40}?\))|((.{40}).+?\)))(\:)/$1(?2:$2)(?3:$4…\))/g",
         ]
         for s in sources:
-            trans = Transformation(s)
+            trans = SymbolTransformation(s)
             print(trans.transform("    def apply(self, pattern, text, flags):"))
             
     def test_transformation(self):
-        trans = Transformation("(\A\s*,\s*\Z)|,?\s*([A-Za-z_][a-zA-Z0-9_]*)\s*(=[^,]*)?(,\s*|$)/(?2:\t\tself.$2 = $2\n)/g")
+        trans = SymbolTransformation("(\A\s*,\s*\Z)|,?\s*([A-Za-z_][a-zA-Z0-9_]*)\s*(=[^,]*)?(,\s*|$)/(?2:\t\tself.$2 = $2\n)/g")
         print(trans.transform("uno, dos, tres"))
+        
+    def test_string(self):
+        s = String("${PATH:+$PATH}/hola")
+        print(s)
         

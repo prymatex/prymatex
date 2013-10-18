@@ -7,6 +7,43 @@ from .base import compileRegexp
 
 from prymatex.utils import six
 
+# In Snippets
+
+## Placeholders
+
+        # $«int»
+        # ${«int»}
+        # ${«int»:«snippet»}
+        # ${«int»/«regexp»/«format»/«options»}
+        # ${«int»|«choice 1»,…,«choice n»|}
+
+## Code
+
+        # `«code»`
+
+# In Format Strings
+
+        # $0-n
+        # 
+        # \U, \L, \E, \u, \l
+        # \t, \r, \n, \x{HHHH}, \xHH
+        # 
+        # «variables»
+        # 
+        # (?«var»:«if»:«else»}
+        # (?«var»:«if»}
+
+# In Both
+
+## Variables
+
+        # ${«var»:?«if»:«else»}
+        # ${«var»:+«if»}
+        # ${«var»:-«else»}
+        # ${«var»:«else»}
+        # ${«var»/«regexp»/«format»/«options»}
+        # ${«var»:[/upcase][/downcase][/capitalize][/asciify]}
+
 class Parser(object):
     def __init__(self, source):
         self.source = source
