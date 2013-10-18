@@ -94,8 +94,8 @@ class TextEditWidget(QtGui.QPlainTextEdit):
                 if lmatch:
                     start = blockPosition + len(first_part[lmatch.end():])
                     lend = blockPosition + len(first_part[lmatch.start():])
-                if direction == "left":
-                    return lmatch.group(0)[::-1], start, lend
+                    if direction == "left":
+                        return lmatch.group(0)[::-1], start, lend
             
             if direction in ("right", "both"):
                 #Search right word
@@ -104,8 +104,9 @@ class TextEditWidget(QtGui.QPlainTextEdit):
                 if rmatch and ( rmatch.start() == 0 or direction == "right"):
                     rstart = blockPosition + len(first_part) + len(last_part[:rmatch.start()])
                     end = blockPosition + len(first_part) + len(first_part[:rmatch.end()])
-                if direction == "right":
-                    return rmatch.group(0), rstart, end
+                    if direction == "right":
+                        return rmatch.group(0), rstart, end
+
             # Si estamos aca es porque es both
             if lmatch and lmatch.start() == 0:
                 return line[start - blockPosition : end - blockPosition], start, end

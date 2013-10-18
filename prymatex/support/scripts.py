@@ -10,6 +10,7 @@ import codecs
 
 from prymatex.utils import six
 from prymatex.utils import encoding
+from prymatex.utils import osextra
 
 RE_SHEBANG = re.compile("^#!(.*)$")
 RE_SHEBANG_ENVKEY = re.compile("(\w+)_SHEBANG")
@@ -161,8 +162,9 @@ def prepareShellScript(script, environment, variables):
     # Build final environment
     env = os.environ.copy()
     env.update(environment)
-    # TODO Magia
-    env.update(variables)
+    # TODO Meter esto en el script y dejarle el trabajo al bash
+    for key, value in variables.items():
+        env[key] = osextra.path.expand_shell_variables( value, context = env)
     
     if sys.platform == "win32" and "PMX_CYGWIN_PATH" in env:
         return prepareCygwinShellScript(script, env)

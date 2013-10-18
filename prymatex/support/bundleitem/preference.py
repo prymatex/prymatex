@@ -149,9 +149,16 @@ class PMXPreferenceMasterSettings(object):
 
     @property
     def shellVariables(self):
+        shellVariables = {}
         for settings in self.settings:
             if settings.shellVariables:
-                return settings.shellVariables.copy()
+                # Only if not has all variables
+                # TODO User listas y respetar la linealidad de la definicion
+                if all([ key not in shellVariables for key in settings.shellVariables.keys()]):
+                    for key, value in settings.shellVariables.items():
+                        shellVariables[key] = osextra.path.expand_shell_variables(
+                            value, context = settings.bundle.variables)
+        return shellVariables
 
     @property
     def spellChecking(self):

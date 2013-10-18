@@ -9,23 +9,26 @@ from prymatex.utils import six
 
 RE_SHELL_VAR = re.compile('\$([\w\d]+)')
 
-def callback(match, context = None, sensitive = True, default = ''):
-    key = match.group(1)
-    if sensitive:
-        return context.get(key, default)
-    else:
-        return context.get(key.lower(), context.get(key.upper(), default))
-
 #===============================================================================
 # Expand $exp taking os.environ as context
 #===============================================================================
-def expand_shell_variables(path, context = None, sensitive = True):
-    if context is not None and six.callable(context):
+def expand_shell_variables(path, context=None, sensitive=True):
+    
+    # Get context
+    if six.callable(context):
         context = context()
     elif context is None:
         context = os.environ
     
-    return RE_SHELL_VAR.sub(partial(callback, sensitive = sensitive, context = context), path)
+    if not sensitive:
+        context = dict([(key.upper(), value) for key, value in context.items()])
+
+    def callback(match, context = None, sensitive = True):
+        key = match.group(1)
+        value = context.get(key) if sensitive else context.get(key.upper())
+        return value or "$%s" % key
+    
+    return RE_SHELL_VAR.sub(partial(callback, context = context, sensitive = sensitive), path)
 
 def ensure_not_exists(path, name, suffix = 0):
     """Return a safe path, ensure not exists"""

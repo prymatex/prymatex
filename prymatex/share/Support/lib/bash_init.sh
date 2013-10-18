@@ -1,14 +1,24 @@
 unset BASH_ENV # avoid recursively running this script
 export LC_CTYPE="en_US.UTF-8"
 
-# First read the system-wide profile
-[ -f /etc/profile ] && . /etc/profile               &>/dev/null
+set +u # avoid warning when we use unset variables (if user had ‘set -u’ in his profile)
 
-# Now find the first local profile, just like a normal login shell
-if   [ -f ~/.bash_profile ]; then . ~/.bash_profile &>/dev/null
-elif [ -f ~/.bash_login ];   then . ~/.bash_login   &>/dev/null
-elif [ -f ~/.profile ];      then . ~/.profile      &>/dev/null
+if [[ -d "$TM_SUPPORT_PATH/bin" ]]; then
+	PATH="$TM_SUPPORT_PATH/bin:$PATH"
+	if [[ -d "$TM_SUPPORT_PATH/bin/CocoaDialog.app/Contents/MacOS" ]]; then
+		PATH="$TM_SUPPORT_PATH/bin/CocoaDialog.app/Contents/MacOS:$PATH"
+	fi
 fi
+
+if [[ -d "$TM_BUNDLE_SUPPORT" && -d "$TM_BUNDLE_SUPPORT/bin" ]]; then
+   PATH="$TM_BUNDLE_SUPPORT/bin:$PATH"
+fi
+
+if [[ -d "$PMX_PROJECT_SUPPORT" && -d "$PMX_PROJECT_SUPPORT/bin" ]]; then
+   PATH="$PMX_PROJECT_SUPPORT/bin:$PATH"
+fi
+
+export PATH
 
 #For TextMate bash_init.sh
 : ${TM_BASH_INIT:=$HOME/Library/Application Support/TextMate/bash_init.sh}
@@ -21,25 +31,6 @@ fi
 if [[ -f "$TM_PROJECT_INIT" ]]; then
 	. "$TM_PROJECT_INIT"
 fi
-
-set +u # avoid warning when we use unset variables (if user had ‘set -u’ in his profile)
-
-if [[ -d "$TM_SUPPORT_PATH/bin" ]]; then
-	PATH="$TM_SUPPORT_PATH/bin:$PATH"
-	if [[ -d "$TM_SUPPORT_PATH/bin/CocoaDialog.app/Contents/MacOS" ]]; then
-		PATH="$TM_SUPPORT_PATH/bin/CocoaDialog.app/Contents/MacOS:$PATH"
-	fi
-fi
-
-if [[ -d "$PMX_PROJECT_SUPPORT" && -d "$PMX_PROJECT_SUPPORT/bin" ]]; then
-   PATH="$PMX_PROJECT_SUPPORT/bin:$PATH"
-fi
-
-if [[ -d "$TM_BUNDLE_SUPPORT" && -d "$TM_BUNDLE_SUPPORT/bin" ]]; then
-   PATH="$TM_BUNDLE_SUPPORT/bin:$PATH"
-fi
-
-export PATH
 
 #Now export
 export DIALOG="$PMX_SUPPORT_PATH/bin/pmxctl"
@@ -69,11 +60,7 @@ exit_show_tool_tip ()			{ echo -n "$1"; exit 206; }
 exit_create_new_document ()	     { echo -n "$1"; exit 207; }
 
 # force TM to refresh current file and project drawer
-rescan_project () {
-	osascript &>/dev/null \
-	   -e 'tell app "SystemUIServer" to activate' \
-	   -e 'tell app "TextMate" to activate' &
-}
+rescan_project () { true; }
 
 # use this as a filter (|pre) when you want 
 # raw output to show as such in the HTML output
