@@ -15,31 +15,31 @@ STANDARD_ICON_NAME = [name for name in dir(QtGui.QStyle) if name.startswith('SP_
 
 STATICMAPPING = (
     # Process
-    (os.path.normcase("/groups/red.png"), "porcess-not-running"),
-    (os.path.normcase("/groups/yellow.png"), "porcess-starting"),
-    (os.path.normcase("/groups/green.png"), "porcess-running"),
+    (os.path.normcase("/bullets/red.png"), "porcess-not-running"),
+    (os.path.normcase("/bullets/yellow.png"), "porcess-starting"),
+    (os.path.normcase("/bullets/green.png"), "porcess-running"),
     
     # Symbols
-    (os.path.normcase("/groups/blue.png"), "symbol-class"),
-    (os.path.normcase("/groups/green.png"), "symbol-block"),
-    (os.path.normcase("/groups/yellow.png"), "symbol-context"),
-    (os.path.normcase("/groups/ligthblue.png"), "symbol-function"),
-    (os.path.normcase("/groups/brown.png"), "symbol-typedef"),
-    (os.path.normcase("/groups/red.png"), "symbol-variable"),
+    (os.path.normcase("/bullets/blue.png"), "symbol-class"),
+    (os.path.normcase("/bullets/green.png"), "symbol-block"),
+    (os.path.normcase("/bullets/yellow.png"), "symbol-context"),
+    (os.path.normcase("/bullets/ligthblue.png"), "symbol-function"),
+    (os.path.normcase("/bullets/brown.png"), "symbol-typedef"),
+    (os.path.normcase("/bullets/red.png"), "symbol-variable"),
     
     # Scope Root Groups
-    (os.path.normcase("/groups/blue.png"), "scope-root-comment"),
-    (os.path.normcase("/groups/yellow.png"), "scope-root-constant"),
-    (os.path.normcase("/groups/ligthblue.png"), "scope-root-entity"),
-    (os.path.normcase("/groups/red.png"), "scope-root-invalid"),
-    (os.path.normcase("/groups/green.png"), "scope-root-keyword"),
-    (os.path.normcase("/groups/violet.png"), "scope-root-markup"),
-    (os.path.normcase("/groups/darkviolet.png"), "scope-root-meta"),
-    (os.path.normcase("/groups/gray.png"), "scope-root-storage"),
-    (os.path.normcase("/groups/darkgreen.png"), "scope-root-string"),
-    (os.path.normcase("/groups/brown.png"), "scope-root-support"),
-    (os.path.normcase("/groups/orange.png"), "scope-root-variable"),
-    (os.path.normcase("/groups/darkgreen.png"), "scope-root-none"),
+    (os.path.normcase("/bullets/blue.png"), "scope-root-comment"),
+    (os.path.normcase("/bullets/yellow.png"), "scope-root-constant"),
+    (os.path.normcase("/bullets/ligthblue.png"), "scope-root-entity"),
+    (os.path.normcase("/bullets/red.png"), "scope-root-invalid"),
+    (os.path.normcase("/bullets/green.png"), "scope-root-keyword"),
+    (os.path.normcase("/bullets/violet.png"), "scope-root-markup"),
+    (os.path.normcase("/bullets/darkviolet.png"), "scope-root-meta"),
+    (os.path.normcase("/bullets/gray.png"), "scope-root-storage"),
+    (os.path.normcase("/bullets/darkgreen.png"), "scope-root-string"),
+    (os.path.normcase("/bullets/brown.png"), "scope-root-support"),
+    (os.path.normcase("/bullets/orange.png"), "scope-root-variable"),
+    (os.path.normcase("/bullets/darkgreen.png"), "scope-root-none"),
     
     #Editor Sidebar
     (os.path.normcase("/sidebar/folding-top.png"), "foldingtop"),
@@ -60,10 +60,8 @@ STATICMAPPING = (
     (os.path.normcase("/bundles/macros.png"), "bundle-item-macro"),
     (os.path.normcase("/bundles/template-files.png"), "bundle-item-staticfile"),
     
-    #Editor Sidebar
-    (os.path.normcase("/modes/cursors.png"), "modes-cursors"),
-    (os.path.normcase("/modes/snippet.png"), "modes-snippet"),
-    (os.path.normcase("/modes/insert.png"), "modes-insert"),
+    #Editor Mode
+    (os.path.normcase("/bullets/red.png"), "editor-mode"),
 )
 
 #===============================================================
