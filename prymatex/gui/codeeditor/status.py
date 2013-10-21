@@ -151,7 +151,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
             self.comboBoxSymbols.setModel(self.currentEditor.symbolListModel)
             self.on_cursorPositionChanged(self.currentEditor)
             self.on_syntaxChanged(self.currentEditor.syntax())
-            self.on_modeChanged(self.currentEditor)
+            self.on_modeChanged("", self.currentEditor)
             self.setTabSizeLabel(self.currentEditor)
 
     # ---------------- AutoConnect Status Widget signals
@@ -190,11 +190,9 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         index = model.findItemIndex(syntax)
         self.comboBoxSyntaxes.setCurrentIndex(index)
 
-    def on_modeChanged(self, editor = None):
+    def on_modeChanged(self, mode, editor = None):
         editor = editor or self.currentEditor
-        self.pushButtonMultiCursor.setEnabled(editor.multiCursorMode.isActive())
-        self.pushButtonSnippet.setEnabled(editor.snippetMode.isActive())
-        self.pushButtonOverwrite.setEnabled(editor.overwriteMode())
+        self.pushButtonEditorMode.setEnabled(bool(mode))
 
     def showTabSizeContextMenu(self, point):
         editor = self.currentEditor

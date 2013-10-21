@@ -14,17 +14,24 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         return self.snippet is not None
 
     def inactive(self):
-        self.endSnippet()
+        self.editor.snippetProcessor.endSnippet(self.snippet)
+
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.KeyPress and self.isActive():
+            return self.keyPressEvent(event)
+        return False
 
     def keyPressEvent(self, event):
         cursor = self.editor.textCursor()
         if event.key() == QtCore.Qt.Key_Escape:
             self.logger.debug("Se termina el modo snippet")
-            return self.endSnippet(event)
+            self.inactive()
+            return False
         elif event.key() in [ QtCore.Qt.Key_Tab, QtCore.Qt.Key_Backtab ]:
             self.logger.debug("Camino entre los holders")
             if not self.snippet.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
-                return self.endSnippet(event)
+                self.inactive()
+                return False
 
             if event.key() == QtCore.Qt.Key_Tab:
                 ok = self.snippet.nextHolder()
@@ -33,23 +40,27 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
             if not ok:
                 self.editor.showMessage("Snippet end")
                 self.editor.snippetProcessor.selectHolder()
-                self.endSnippet()
+                self.inactive()
             else:
                 self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (self.snippet.name, self.snippet.holderNumber(), len(self.snippet)))
                 self.editor.snippetProcessor.selectHolder()
+            return True
         elif event.text():
             self.logger.debug("Con texto %s" % event.text())
             if not self.snippet.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
-                return self.endSnippet(event)
+                self.inactive()
+                return False
             
             holderStart, holderEnd = self.snippet.currentPosition()
             #Cuidado con los extremos del holder
             if not cursor.hasSelection():
                 if event.key() == QtCore.Qt.Key_Backspace and cursor.position() == holderStart:
-                    return self.endSnippet(event)
+                    self.inactive()
+                    return False
 
                 if event.key() == QtCore.Qt.Key_Delete and cursor.position() == holderEnd:
-                    return self.endSnippet(event)
+                    self.inactive()
+                    return False
 
             holderPosition = cursor.selectionStart() - holderStart
             positionBefore = cursor.selectionStart()
@@ -57,7 +68,7 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
             
             #Insert Text
             cursor.beginEditBlock()
-            QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
+            self.editor.keyPressEvent(event)
             positionAfter = cursor.position()
             charactersAfter = cursor.document().characterCount()
             length = charactersBefore - charactersAfter 
@@ -89,13 +100,7 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
                 self.editor.snippetProcessor.selectHolder()
             if selectedText and self.snippet.lastHolder():
                 # Put text on last holder, force snippet ends
-                self.endSnippet()
+                self.inactive()
             cursor.endEditBlock()
-        else:
-            self.logger.debug("Con cualquier otra tecla sin texto")
-            return QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
-            
-    def endSnippet(self, event = None):
-        self.editor.snippetProcessor.endSnippet(self.editor.snippetProcessor.snippet)
-        if event is not None:
-            return self.editor.keyPressEvent(event)
+            return True
+        return False

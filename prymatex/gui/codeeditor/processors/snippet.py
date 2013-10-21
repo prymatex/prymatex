@@ -32,18 +32,18 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
     def startSnippet(self, snippet):
         """Inicia el snippet"""
         self.snippet = snippet
-        self.editor.modeChanged.emit()
         
         self.tabreplacement = self.editor.tabKeyBehavior()
         self.indentation = "" if self.disableIndent else self.editor.blockUserData(self.cursorWrapper.block()).indent
         
         self.__env = None
+        self.editor.modeChanged.emit("snippet")
 
     def endSnippet(self, snippet):
         """Termina el snippet"""
         self.cursorWrapper = self.snippet = None
         self.output = ""
-        self.editor.modeChanged.emit()
+        self.editor.modeChanged.emit("")
 
     def startRender(self):
         self.output = ""

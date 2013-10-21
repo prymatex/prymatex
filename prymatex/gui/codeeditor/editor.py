@@ -52,7 +52,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # -------------------- Signals
     syntaxChanged = QtCore.Signal(object)
     themeChanged = QtCore.Signal()
-    modeChanged = QtCore.Signal()
+    modeChanged = QtCore.Signal(str)
     blocksRemoved = QtCore.Signal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.Signal(QtGui.QTextBlock, int)
 
@@ -161,7 +161,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.codeEditorModes = []
         #Modes
         self.multiCursorMode = PMXMultiCursorEditorMode(self)
-        self.snippetMode = PMXSnippetEditorMode(self)
+        #self.snippetMode = PMXSnippetEditorMode(self)
         
         #Completer
         self.completer = CodeEditorCompleter(self)
@@ -630,7 +630,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def event(self, event):
         if event.type() in (QtCore.QEvent.KeyPress, QtCore.QEvent.KeyRelease):
             #Ver si tengo un modo activo,
-            for mode in [ self.snippetMode, self.multiCursorMode ]:
+            for mode in [ self.multiCursorMode ]:
                 if mode.isActive():
                     if event.type() == QtCore.QEvent.KeyPress:
                         mode.keyPressEvent(event)
