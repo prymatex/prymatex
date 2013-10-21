@@ -21,7 +21,7 @@ from .addons import CodeEditorAddon
 from .sidebar import CodeEditorSideBar, SideBarWidgetAddon
 from .processors import (PMXCommandProcessor, PMXSnippetProcessor, 
         PMXMacroProcessor)
-from .modes import PMXMultiCursorEditorMode, PMXSnippetEditorMode
+from .modes import PMXMultiCursorEditorMode
 from ._modes import CodeEditorBaseMode
 
 from .highlighter import PMXSyntaxHighlighter
@@ -627,19 +627,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.updateExtraSelections()
 
     # ------------ Override event handlers
-    def event(self, event):
-        if event.type() in (QtCore.QEvent.KeyPress, QtCore.QEvent.KeyRelease):
-            #Ver si tengo un modo activo,
-            for mode in [ self.multiCursorMode ]:
-                if mode.isActive():
-                    if event.type() == QtCore.QEvent.KeyPress:
-                        mode.keyPressEvent(event)
-                    elif event.type() == QtCore.QEvent.KeyRelease:
-                        mode.keyReleaseEvent(event)
-                    return True
-        
-        return TextEditWidget.event(self, event)
- 
     def focusInEvent(self, event):
         # TODO No es para este evento pero hay que poner en alugn lugar el update de las side bars
         TextEditWidget.focusInEvent(self, event)
@@ -653,7 +640,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         TextEditWidget.paintEvent(self, event)
         page_bottom = self.viewport().height()
         # TODO: los widgets se pueden hacer del fontMetric, que tal poner algo que me retorne directamente el ancho de un caracter?
-        font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
+        #font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
+        font_metrics = self.fontMetrics()
 
         painter = QtGui.QPainter(self.viewport())
         font = painter.font()
@@ -694,30 +682,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             pos_margin = self.fontMetrics().width(WIDTH_CHARACTER) * self.marginLineSpaces
             painter.drawLine(pos_margin + offset.x(), 0, pos_margin + offset.x(), self.viewport().height())
 
-        if self.multiCursorMode.isActive():
-            ctrl_down = bool(self.application.keyboardModifiers() & QtCore.Qt.ControlModifier)
-            for index, cursor in enumerate(self.multiCursorMode.cursors, 1):
-                rec = self.cursorRect(cursor)
-                fakeCursor = QtCore.QLine(rec.x(), rec.y(), rec.x(), rec.y() + font_metrics.ascent() + font_metrics.descent())
-                colour = self.colours['caret']
-                painter.setPen(QtGui.QPen(colour))
-                if ctrl_down:
-                    painter.drawText(rec.x() + 2, rec.y() + font_metrics.ascent(), str(index))
-                if (self.multiCursorMode.hasSelection() and not self.multiCursorMode.isSelected(cursor)) or \
-                (ctrl_down and not self.multiCursorMode.hasSelection()):
-                     colour = self.colours['selection']
-                painter.setPen(QtGui.QPen(colour))
-                painter.drawLine(fakeCursor)
-
-        if self.multiCursorMode.isDragCursor:
-            pen = QtGui.QPen(self.colours['caret'])
-            pen.setWidth(2)
-            painter.setPen(pen)
-            color = QtGui.QColor(self.colours['selection'])
-            color.setAlpha(128)
-            painter.setBrush(QtGui.QBrush(color))
-            painter.setOpacity(0.2)
-            painter.drawRect(self.multiCursorMode.getDragCursorRect())
         painter.end()
 
     # ----------------- Mouse Events
@@ -731,27 +695,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         else:
             TextEditWidget.wheelEvent(self, event)
 
-    def mousePressEvent(self, event):
-        if event.modifiers() & QtCore.Qt.ControlModifier or self.multiCursorMode.isActive():
-            self.multiCursorMode.mousePressPoint(event.pos())
-        else:
-            TextEditWidget.mousePressEvent(self, event)
-
-    def mouseMoveEvent(self, event):
-        if event.modifiers() & QtCore.Qt.ControlModifier or self.multiCursorMode.isActive():
-            #En este modo no hago el cursor visible
-            self.multiCursorMode.mouseMovePoint(event.pos())
-            self.viewport().repaint(self.viewport().visibleRegion())
-        else:
-            self.ensureCursorVisible()
-            TextEditWidget.mouseReleaseEvent(self, event)
- 
     def mouseReleaseEvent(self, event):
         freehanded = False
-        if self.multiCursorMode.isActive():
-            self.multiCursorMode.mouseReleasePoint(event.pos(), bool(event.modifiers() & QtCore.Qt.MetaModifier))
-            self.viewport().repaint(self.viewport().visibleRegion())
-        elif freehanded:
+        if freehanded:
             #Modo freehanded
             cursor = self.cursorForPosition(event.pos())
             if not self.cursorRect(cursor).contains(event.pos()):

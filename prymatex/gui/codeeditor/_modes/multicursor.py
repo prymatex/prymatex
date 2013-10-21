@@ -11,14 +11,50 @@ from prymatex.gui.codeeditor import helpers
 
 class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def __init__(self, parent = None):
-        CodeEditorBaseMode__init__(self, parent)
-        # TODO: Buscar una forma mejor de obtener o trabajar con este helper en el modo, quiza filtarndo por clase en el evento
-        self.helper = helpers.MultiCursorHelper()
-        self.helper.initialize(editor)
+        CodeEditorBaseMode.__init__(self, parent)
         self.cursors = []
         self.selectedCursors = []
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
     
+    def initialize(self, editor):
+        CodeEditorBaseMode.initialize(self, editor)
+        # TODO: Buscar una forma mejor de obtener o trabajar con este helper en el modo, quiza filtarndo por clase en el evento
+        helperInstances = editor.keyHelpersByClass(helpers.MultiCursorHelper)
+        if helperInstances:
+            self.helper = helperInstances[0]
+        editor.viewport().installEventFilter(self)
+
+    def eventFilter(self, obj, event):
+        if self.isActive():
+            if event.type() == QtCore.QEvent.KeyPress:
+                self.keyPressEvent(event)
+                return True
+            elif event.type() == QtCore.QEvent.KeyRelease:
+                self.keyReleaseEvent(event)
+                return True
+            elif event.type() == QtCore.QEvent.MouseButtonPress:
+                self.mousePressPoint(event.pos())
+                return True
+            elif event.type() == QtCore.QEvent.MouseButtonRelease:
+                self.mouseReleasePoint(event.pos(), event.modifiers() & QtCore.Qt.MetaModifier)
+                self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
+                return True
+            elif event.type() == QtCore.QEvent.MouseMove:
+                self.mouseMovePoint(event.pos())
+                self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
+                return True
+        elif event.type() == QtCore.QEvent.MouseButtonPress and bool(event.modifiers() & QtCore.Qt.ControlModifier):
+            self.mousePressPoint(event.pos())
+            return True
+        elif event.type() == QtCore.QEvent.MouseMove and bool(event.modifiers() & QtCore.Qt.ControlModifier):
+            self.mouseMovePoint(event.pos())
+            self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
+            return True
+        if event.type() == QtCore.QEvent.Paint and (self.isActive() or self.isDragCursor()):
+            self.paintEvent(event)
+            return True
+        return False
+
     def isActive(self):
         return bool(self.cursors) or self.startPoint != None
     
@@ -26,8 +62,38 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.cursors = []
         self.selectedCursors = []
         self.editor.application.restoreOverrideCursor()
-        self.editor.modeChanged.emit()
+        self.editor.modeChanged.emit("")
 
+    def paintEvent(self, event):
+        self.editor.paintEvent(event)
+        painter = QtGui.QPainter(self.editor.viewport())
+        font_metrics = self.editor.fontMetrics()
+        ctrl_down = bool(self.application.keyboardModifiers() & QtCore.Qt.ControlModifier)
+        
+        for index, cursor in enumerate(self.cursors, 1):
+            rec = self.editor.cursorRect(cursor)
+            fakeCursor = QtCore.QLine(rec.x(), rec.y(), rec.x(), rec.y() + font_metrics.ascent() + font_metrics.descent())
+            colour = self.editor.colours['caret']
+            painter.setPen(QtGui.QPen(colour))
+            if ctrl_down:
+                painter.drawText(rec.x() + 2, rec.y() + font_metrics.ascent(), str(index))
+            if (self.hasSelection() and not self.isSelected(cursor)) or \
+            (ctrl_down and not self.hasSelection()):
+                 colour = self.editor.colours['selection']
+            painter.setPen(QtGui.QPen(colour))
+            painter.drawLine(fakeCursor)
+        
+        if self.isDragCursor():
+            pen = QtGui.QPen(self.editor.colours['caret'])
+            pen.setWidth(2)
+            painter.setPen(pen)
+            color = QtGui.QColor(self.editor.colours['selection'])
+            color.setAlpha(128)
+            painter.setBrush(QtGui.QBrush(color))
+            painter.setOpacity(0.2)
+            painter.drawRect(self.getDragCursorRect())
+        painter.end()
+                            
     def highlightEditor(self):
         cursors = {}
         self.editor.setExtraSelectionCursors("selection", [c for c in [QtGui.QTextCursor(c) for c in self.cursors] if c.hasSelection()])
@@ -39,7 +105,6 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.editor.setExtraSelectionCursors("line", cursorLines)
         self.editor.updateExtraSelections()
 
-    @property
     def isDragCursor(self):
         return self.startPoint != None and self.dragPoint != None
 
@@ -179,7 +244,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
             lastCursor.clearSelection()
             self.editor.setTextCursor(lastCursor)
             self.editor.application.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-            self.editor.modeChanged.emit()
+            self.editor.modeChanged.emit("multicursor")
         self.highlightEditor()
 
     def removeBreakCursor(self, cursor):
@@ -333,4 +398,4 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     
     def keyReleaseEvent(self, event):
         self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
-        QtGui.QPlainTextEdit.keyReleaseEvent(self.editor, event)
+        return False
