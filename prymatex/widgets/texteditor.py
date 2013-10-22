@@ -245,7 +245,8 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         self.__scopedExtraSelections[scope] = self.__build_extra_selections(scope, cursors)
     
     def updateExtraSelectionCursors(self, cursorsDict):
-        list(map(lambda scope_cursors: self.setExtraSelectionCursors(scope_cursors[0], scope_cursors[1]), iter(cursorsDict.items())))
+        for scope, cursors in cursorsDict.items():
+            self.setExtraSelectionCursors(scope, cursors)
     
     def updateExtraSelections(self):
         extraSelections = []
