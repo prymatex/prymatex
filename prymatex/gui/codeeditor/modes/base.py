@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore
 
 from prymatex.core import PMXBaseEditorAddon
 
@@ -14,14 +14,6 @@ class CodeEditorBaseMode(QtCore.QObject, PMXBaseEditorAddon):
 
     def inactive(self):
         pass
-    
-    def eventFilter(self, obj, event):
-        return False
-
-class CodeEditorTestMode(CodeEditorBaseMode):
-    def initialize(self, editor):
-        CodeEditorBaseMode.initialize(self, editor)
 
     def eventFilter(self, obj, event):
         return False
-        

@@ -7,23 +7,60 @@ from .base import CodeEditorBaseMode
 
 from prymatex.qt.helpers.keyevents import KEY_NUMBERS
 from prymatex.utils.lists import bisect_key
-from prymatex.gui.codeeditor import helpers
+from prymatex.gui.codeeditor.helpers import CodeEditorKeyHelper
+
+# ==================================
+# Helper for MultiCursor
+# ==================================
+class MultiCursorHelper(CodeEditorKeyHelper):
+    KEY = QtCore.Qt.Key_M
+    def __init__(self, multiCursorMode):
+        CodeEditorKeyHelper.__init__(self, multiCursorMode)
+        self.multiCursorMode = multiCursorMode
+
+    def accept(self, event, cursor = None):
+        control_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
+        meta_down = bool(event.modifiers() & QtCore.Qt.MetaModifier)
+        return event.key() == self.KEY and control_down and meta_down
+
+    def execute(self, event, cursor = None):
+        cursor = cursor or self.editor.textCursor()
+        flags = QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords
+        if not cursor.hasSelection():
+            text, start, end = self.editor.currentWord()
+            newCursor = QtGui.QTextCursor(cursor)
+            newCursor.setPosition(start)
+            newCursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
+            self.multiCursorMode.addMergeCursor(newCursor)
+        else:
+            text = cursor.selectedText()
+            self.multiCursorMode.addMergeCursor(cursor)
+            if event.modifiers() & QtCore.Qt.ShiftModifier:
+                flags |= QtGui.QTextDocument.FindBackward
+            newCursor = self.editor.document().find(text, cursor, flags)
+            if not newCursor.isNull():
+                self.multiCursorMode.addMergeCursor(newCursor)
+                self.editor.centerCursor(newCursor)
 
 class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def __init__(self, parent = None):
         CodeEditorBaseMode.__init__(self, parent)
+        self.keyHelper = MultiCursorHelper(self)
         self.cursors = []
         self.selectedCursors = []
-        self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
-    
+        self.draggedCursors = []
+        self.scursor = self.startPoint = self.doublePoint = None
+
     def initialize(self, editor):
         CodeEditorBaseMode.initialize(self, editor)
-        # TODO: Buscar una forma mejor de obtener o trabajar con este helper en el modo, quiza filtarndo por clase en el evento
-        helperInstances = editor.keyHelpersByClass(helpers.MultiCursorHelper)
-        if helperInstances:
-            self.helper = helperInstances[0]
-        editor.viewport().installEventFilter(self)
-
+        self.editor.installEventFilter(self)
+        self.editor.viewport().installEventFilter(self)
+        # Helper
+        self.keyHelper.initialize(editor)
+        self.editor.addKeyHelper(self.keyHelper)
+        # Formater
+        editor.registerTextCharFormatBuilder("dragged", self.textCharFormat_dragged_builder)
+        
     def eventFilter(self, obj, event):
         if self.isActive():
             if event.type() == QtCore.QEvent.KeyPress:
@@ -50,52 +87,25 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
             self.mouseMovePoint(event.pos())
             self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
             return True
-        if event.type() == QtCore.QEvent.Paint and (self.isActive() or self.isDragCursor()):
-            self.paintEvent(event)
-            return True
         return False
 
+    def textCharFormat_dragged_builder(self):
+        textCharFormat = self.editor.textCharFormat_selection_builder()
+        textCharFormat.setBackground(self.editor.colours['lineHighlight'])
+        return textCharFormat
+        
     def isActive(self):
         return bool(self.cursors) or self.startPoint != None
-    
+
     def inactive(self):
         self.cursors = []
         self.selectedCursors = []
         self.editor.application.restoreOverrideCursor()
         self.editor.modeChanged.emit("")
 
-    def paintEvent(self, event):
-        self.editor.paintEvent(event)
-        painter = QtGui.QPainter(self.editor.viewport())
-        font_metrics = self.editor.fontMetrics()
-        ctrl_down = bool(self.application.keyboardModifiers() & QtCore.Qt.ControlModifier)
-        
-        for index, cursor in enumerate(self.cursors, 1):
-            rec = self.editor.cursorRect(cursor)
-            fakeCursor = QtCore.QLine(rec.x(), rec.y(), rec.x(), rec.y() + font_metrics.ascent() + font_metrics.descent())
-            colour = self.editor.colours['caret']
-            painter.setPen(QtGui.QPen(colour))
-            if ctrl_down:
-                painter.drawText(rec.x() + 2, rec.y() + font_metrics.ascent(), str(index))
-            if (self.hasSelection() and not self.isSelected(cursor)) or \
-            (ctrl_down and not self.hasSelection()):
-                 colour = self.editor.colours['selection']
-            painter.setPen(QtGui.QPen(colour))
-            painter.drawLine(fakeCursor)
-        
-        if self.isDragCursor():
-            pen = QtGui.QPen(self.editor.colours['caret'])
-            pen.setWidth(2)
-            painter.setPen(pen)
-            color = QtGui.QColor(self.editor.colours['selection'])
-            color.setAlpha(128)
-            painter.setBrush(QtGui.QBrush(color))
-            painter.setOpacity(0.2)
-            painter.drawRect(self.getDragCursorRect())
-        painter.end()
-                            
     def highlightEditor(self):
         cursors = {}
+        self.editor.setExtraSelectionCursors("dragged", [c for c in [QtGui.QTextCursor(c) for c in self.draggedCursors] if c.hasSelection()])
         self.editor.setExtraSelectionCursors("selection", [c for c in [QtGui.QTextCursor(c) for c in self.cursors] if c.hasSelection()])
         cursorLines = []
         for cursorLine in [QtGui.QTextCursor(c) for c in self.cursors]:
@@ -105,45 +115,34 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.editor.setExtraSelectionCursors("line", cursorLines)
         self.editor.updateExtraSelections()
 
-    def isDragCursor(self):
-        return self.startPoint != None and self.dragPoint != None
-
     def isSelected(self, cursor):
         return cursor in self.selectedCursors
-    
+
     def hasSelection(self):
         return bool(self.selectedCursors)
-        
+
     def activeCursors(self):
         if self.selectedCursors:
             return self.selectedCursors
         return self.cursors
-        
-    def getDragCursorRect(self):
-        """Retorna un rectángulo que representa la zona del drag cursor"""
-        return QtCore.QRect(self.startPoint, self.dragPoint)
-    
+
     def mousePressPoint(self, point):
         self.startPoint = point
 
     def mouseDoubleClickPoint(self, point):
         self.doublePoint = point
-        
-    def mouseMovePoint(self, point):
-        self.dragPoint = point
 
-    def mouseReleasePoint(self, endPoint, remove = False):
-        _, width, points = self.getPoints(self.startPoint, endPoint)
+    def mouseMovePoint(self, dragPoint):
+        self.draggedCursors = []
+        _, width, points = self.getPoints(self.startPoint, dragPoint)
         
-        multicursorAction = self.addMergeCursor if not remove else self.removeBreakCursor
         lastCursor = None
         for tupla in points:
             if tupla[0] == tupla[1]:
-                cursor = self.editor.cursorForPosition(QtCore.QPoint(*tupla[0]))
-                multicursorAction(cursor)
+                self.draggedCursors.append(self.editor.cursorForPosition(QtCore.QPoint(*tupla[0])))
                 continue
             #Sentido en el que queda el cursor
-            if self.startPoint.x() < endPoint.x():  #izquierda a derecha
+            if self.startPoint.x() < dragPoint.x():  #izquierda a derecha
                 start, end = tupla
                 cursor = self.editor.cursorForPosition(QtCore.QPoint(*start))
                 rect = self.editor.cursorRect(cursor)
@@ -153,7 +152,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
                     if (rect.right() <= end[0] or rect.right() - width / 2 <= end[0] <= rect.right() + width / 2) and rect.top() <= end[1] <= rect.bottom():
                         cursor.setPosition(ecursor.position(), QtGui.QTextCursor.KeepAnchor)
                         if lastCursor is None or (lastCursor.position() != cursor.position()):
-                            multicursorAction(cursor)
+                            self.draggedCursors.append(cursor)
                             lastCursor = cursor
             else: # Derecha a izquierda
                 start, end = tupla
@@ -165,11 +164,21 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
                     if (rect.right() <= end[0] or rect.right() - width / 2 <= end[0] <= rect.right() + width / 2) and rect.top() <= end[1] <= rect.bottom():
                         ecursor.setPosition(cursor.position(), QtGui.QTextCursor.KeepAnchor)
                         if lastCursor is None or (lastCursor.position() != ecursor.position()):
-                            multicursorAction(ecursor)
+                            self.draggedCursors.append(ecursor)
                             lastCursor = ecursor
-        
+        self.highlightEditor()
+
+    def mouseReleasePoint(self, endPoint, remove = False):
+        _, width, points = self.getPoints(self.startPoint, endPoint)
+
+        multicursorAction = self.addMergeCursor if not remove else self.removeBreakCursor
+        for cursor in self.draggedCursors:
+            multicursorAction(cursor)
+
         #Clean last acction
-        self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
+        self.draggedCursors = []
+        self.scursor = self.startPoint = self.doublePoint = None
+        self.highlightEditor()
 
     def getPoints(self, start, end):
         #TODO: Ver de mejorar las medidas porque esta salteando lineas de seleccion
@@ -186,7 +195,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
             p += hight
         puntos.append( ( (sx, ey), (ex, ey) ) )
         return hight, width, puntos
-        
+
     def addMergeCursor(self, cursor):
         """Only can add new cursors, if the cursor has selection then try to merge with others"""
         firstCursor = not bool(self.cursors)
@@ -320,16 +329,16 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
 
     def canMoveRight(self):
         return not self.cursors[-1].atEnd()
-    
+
     def canMoveLeft(self):
         return not self.cursors[0].atStart()
-    
+
     def keyPressEvent(self, event):
         if bool(event.modifiers() & QtCore.Qt.ControlModifier):
             self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
-        if self.helper.accept(event):
+        if self.keyHelper.accept(event):
             cursor = self.cursors[0] if event.modifiers() & QtCore.Qt.ShiftModifier else self.cursors[-1]
-            self.helper.execute(event, cursor)
+            self.keyHelper.execute(event, cursor)
         elif event.key() == QtCore.Qt.Key_Escape:
             #Deprecated usar una lista de cursores ordenados para tomar de [0] y [-1]
             firstCursor = self.cursors[0]
@@ -395,7 +404,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
                 self.editor.setTextCursor(cursor)
                 QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             cursor.endEditBlock()
-    
+
     def keyReleaseEvent(self, event):
         self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
         return False

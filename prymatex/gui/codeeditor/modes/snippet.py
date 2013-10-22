@@ -10,6 +10,10 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
     def snippet(self):
         return self.editor.snippetProcessor.snippet
 
+    def initialize(self, editor):
+        CodeEditorBaseMode.initialize(self, editor)
+        editor.installEventFilter(self)
+    
     def isActive(self):
         return self.snippet is not None
 
