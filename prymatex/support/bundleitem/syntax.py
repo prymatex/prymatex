@@ -294,6 +294,8 @@ class PMXSyntax(PMXBundleItem):
                     value = compileRegexp( value )
                 elif key == 'injectionSelector':
                     value = self.manager.selectorFactory(value)
+                elif key == 'scopeName':
+                    self.scopeNameSelector = self.manager.selectorFactory(value)
             setattr(self, key, value)
     
     def dump(self, allKeys = False):
@@ -332,7 +334,6 @@ class PMXSyntax(PMXBundleItem):
                     syntaxes = item.manager.getSyntaxesByScope(scope)
                     if syntaxes:
                         return syntaxes[0].grammar
-                    print("Not found %s" % scopeName)
                     return SyntaxNode({})
                 return _findSyntax
             self._grammar.findSyntax = types.MethodType(findSyntax(self), self._grammar)

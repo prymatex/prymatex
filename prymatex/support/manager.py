@@ -1149,13 +1149,20 @@ class PMXSupportBaseManager(object):
             return sorted(stxs, key=lambda s: s.name)
         return stxs
 
-    def getSyntaxesByScope(self, leftScope, rightScope = None):
-        memoizedKey = ("getSyntaxesByScope", None, leftScope, rightScope)
+    def getSyntaxesByScope(self, scope):
+        memoizedKey = ("getSyntaxesByScopeName", scope, None, None)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            self.__sort_filter_items(self.getAllSyntaxes(), leftScope, rightScope))
-        
+        context = self.contextFactory(scope)
+        syntaxes = []
+        for syntax in self.getAllSyntaxes():
+            rank = []
+            if syntax.scopeNameSelector.does_match(context, rank):
+                syntaxes.append((rank.pop(), syntax))
+        syntaxes.sort(key=lambda t: t[0], reverse = True)
+        return self.bundleItemCache.setdefault(memoizedKey, 
+            [score_syntax[1] for score_syntax in syntaxes])
+
     def findSyntaxByFirstLine(self, line):
         for syntax in self.getAllSyntaxes():
             if syntax.firstLineMatch != None and syntax.firstLineMatch.search(line):
