@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-VERSION = (0, 9, 8, 'alpha', 0)
+VERSION = (0, 9, 8, 'alpha', 0) #(major, minor, micro, releaselevel, serial)
 
 import datetime
 import os

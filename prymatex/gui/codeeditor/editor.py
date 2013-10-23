@@ -837,11 +837,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             environment['TM_INPUT_START_LINE'] = start.blockNumber() + 1
             environment['TM_INPUT_START_LINE_INDEX'] = cursor.selectionStart() - start.position()
         return environment
-
+    
     # ---------- Completer
     def showCompleter(self, suggestions, alreadyTyped=None, caseInsensitive=True, callback = None):
-        self.suggestionsCompletionModel.suggestions = suggestions
-        self.suggestionsCompletionModel.fill()
+        self.suggestionsCompletionModel.setSuggestions(suggestions)
+        self.suggestionsCompletionModel.setCallback(callback)
         alreadyTyped, start, end = self.currentWord(direction="left")
         self.completer.setCaseSensitivity( QtCore.Qt.CaseInsensitive and \
             caseInsensitive or QtCore.Qt.CaseSensitive)

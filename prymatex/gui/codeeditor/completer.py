@@ -29,6 +29,9 @@ class CompletionBaseModel(QtCore.QAbstractTableModel):
     def setCompletionPrefix(self, prefix):
         self.prefix = prefix
 
+    def setSuggestions(self, suggestions):
+        self.suggestions = suggestions
+
     def allowOneSuggestion(self, isPrefix):
         return not isPrefix
 
@@ -104,7 +107,7 @@ class WordsCompletionModel(CompletionBaseModel):
         if self.prefix in suggestions:
             suggestions.remove(self.prefix)
         suggestions.update(rightSettings.completions)
-        self.suggestions = sorted(list(suggestions))
+        self.setSuggestions(sorted(list(suggestions)))
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
@@ -125,7 +128,8 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
     def fill(self):
         CompletionBaseModel.fill(self)
         leftScope, rightScope = self.editor.scope()
-        self.suggestions = self.editor.application.supportManager.getAllTabTriggerItemsByScope(leftScope, rightScope)
+        suggestions = self.editor.application.supportManager.getAllTabTriggerItemsByScope(leftScope, rightScope)
+        self.setSuggestions(suggestions)
 
     def allowOneSuggestion(self, isPrefix):
         return True
@@ -156,12 +160,30 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
         self.editor.insertBundleItem(suggestion)
 
 class SuggestionsCompletionModel(CompletionBaseModel):
+    def __init__(self, editor):
+        CompletionBaseModel.__init__(self, editor)
+        self.callback = None
+    
+    def clear(self):
+        CompletionBaseModel.clear(self)
+        self.callback = None
+        
+    def setCallback(self, callback):
+        self.callback = callback
+        
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
         suggestion = self.suggestions[index.row()]
-        if role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
+        if role == QtCore.Qt.DisplayRole:
             if 'display' in suggestion:
+                return suggestion['display']
+            elif 'title' in suggestion:
+                return suggestion['title']
+        elif role == QtCore.Qt.EditRole:
+            if 'match' in suggestion:
+                return suggestion['match']
+            elif 'display' in suggestion:
                 return suggestion['display']
             elif 'title' in suggestion:
                 return suggestion['title']
@@ -176,12 +198,18 @@ class SuggestionsCompletionModel(CompletionBaseModel):
 
     def insertCompletion(self, index):
         suggestion = self.suggestions[index.row()]
-        currentWord, start, end = self.editor.currentWord()
-        cursor = self.editor.newCursorAtPosition(start, end)
-        if 'display' in suggestion:
-            cursor.insertText(suggestion['display'])
-        elif 'title' in suggestion:
-            cursor.insertText(suggestion['title'])
+        if self.callback is not None:
+            self.callback(suggestion)
+        else:
+            currentWord, start, end = self.editor.currentWord()
+            cursor = self.editor.newCursorAtPosition(start, end)
+            if 'display' in suggestion:
+                cursor.insertText(suggestion['display'])
+            elif 'title' in suggestion:
+                cursor.insertText(suggestion['title'])
+
+    def allowOneSuggestion(self, isPrefix):
+        return self.callback is not None
 
 # ===================================
 # Completer
@@ -214,13 +242,6 @@ class CodeEditorCompleter(QtGui.QCompleter):
 
         self.setWidget(self.editor)
     
-    def clear(self):
-        self.setModel(None)
-        self.setCompletionPrefix("")
-        self.startCursorPosition = None
-        for model in self.completionModels:
-            model.clear()
-
     def fixPopupView(self):
         self.popup().resizeColumnsToContents()
         self.popup().resizeRowsToContents()
@@ -228,7 +249,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
         for columnIndex in range(self.model().columnCount()):
             width += self.popup().sizeHintForColumn(columnIndex)
         self.popup().setMinimumWidth(width)
-
+    
     def pre_key_event(self, event):
         if self.popup().isVisible():
             if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab):
@@ -321,8 +342,13 @@ class CodeEditorCompleter(QtGui.QCompleter):
 
         # Clear
         if not self.popup().isVisible():
-            self.clear()
-        
+            #self.setModel(None)
+            #self.setCompletionPrefix("")
+            #self.startCursorPosition = None
+            for completionModel in self.completionModels:
+                if model != completionModel:
+                    completionModel.clear()
+
         # Prefix
         if prefix is not None:
             self.setCompletionPrefix(prefix)
