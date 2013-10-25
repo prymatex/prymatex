@@ -8,7 +8,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def __init__(self, editor):
         super(PMXCommandProcessor, self).__init__()
         self.editor = editor
-        self.cursorWrapper = self.command = None
+        self.cursorWrapper = None
         
     def startCommand(self, command):
         self.command = command

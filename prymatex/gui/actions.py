@@ -47,7 +47,7 @@ class MainWindowActions(object):
 
         if filePath:
             self.application.openFile(filePath)
-    
+
     @QtCore.Slot()
     def on_actionNewProject_triggered(self):
         projectDialog = self.findChild(QtGui.QDialog, "ProjectDialog")
@@ -64,7 +64,7 @@ class MainWindowActions(object):
         focus = len(filePaths) == 1
         for filePath in filePaths:
             editor = self.application.openFile(filePath, focus = focus)
-    
+
     @QtCore.Slot()
     def on_actionOpenAllRecentFiles_triggered(self):
         for filePath in self.application.fileManager.fileHistory:
@@ -86,11 +86,11 @@ class MainWindowActions(object):
     @QtCore.Slot()
     def on_actionSave_triggered(self):
         self.saveEditor()
-        
+
     @QtCore.Slot()
     def on_actionSaveAs_triggered(self):
         self.saveEditor(saveAs = True)
-        
+
     @QtCore.Slot()
     def on_actionSaveAll_triggered(self):
         for w in self.editors():
@@ -300,7 +300,6 @@ class MainWindowActions(object):
             self.addAction(obj)
     
     def setupHelpMenuMiscConnections(self):
-        #self.actoin
         from webbrowser import open
         from functools import partial # Less code in simple callbacks :)
         import prymatex
@@ -326,4 +325,3 @@ def tabSelectableModelFactory(mainWindow):
 
     return selectableModelFactory(mainWindow,
         dataFunction, filterFunction = lambda text, item: item["display"]["name"].find(text) != -1)
-        

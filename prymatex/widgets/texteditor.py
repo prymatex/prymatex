@@ -129,6 +129,15 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         return ( self.document().findBlock(cursor.selectionStart()), 
             self.document().findBlock(cursor.selectionEnd()))
 
+    #------ Retrieve and set cursor position
+    def setCursorPosition(self, position):
+        if isinstance(position, (tuple, list)):
+            position = self.document().findBlockByNumber(position[0]).position() + position[1]
+        self.setTextCursor(self.newCursorAtPosition(position))
+
+    def cursorPosition(self):
+        return self.textCursor().position()
+
     #------ Find and Replace
     def findTypingPair(self, b1, b2, cursor, backward = False):
         """

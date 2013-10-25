@@ -356,16 +356,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return [ "%s (%s)" % (self.syntax().bundle.name, " ".join(["*." + ft for ft in self.syntax().fileTypes])) ]
         #return PMXBaseEditor.fileFilters(self)
 
-    def setCursorPosition(self, position):
-        cursor = self.textCursor()
-        blockPosition = self.document().findBlockByNumber(position[0]).position()
-        cursor.setPosition(blockPosition + position[1])
-        self.setTextCursor(cursor)
-
-    def cursorPosition(self):
-        cursor = self.textCursor()
-        return (cursor.block().blockNumber(), cursor.positionInBlock())
-
     # ---------------------- Scopes
     def setBasicScope(self, scopeStack):
         self.__basicScope = self.flyweightScopeDataFactory(scopeStack)

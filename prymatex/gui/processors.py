@@ -10,10 +10,10 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
     def __init__(self, mainWindow):
         super(PMXCommandProcessor, self).__init__()
         self.mainWindow = mainWindow
-        self.__env = {}
 
     def startCommand(self, command):
         self.command = command
+        self.__env = None
         
     def endCommand(self, command):
         self.command = None
