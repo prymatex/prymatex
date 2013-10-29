@@ -125,18 +125,15 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         parentMenu = self.menubar
         while names and parentMenu is not None:
             parentMenu = parentMenu.findChild(QtGui.QMenu, text2objectname(names.pop(0), prefix = "menu"))
+
         if parentMenu is None and isinstance(settings, dict) and 'items' in settings and not names:
             # Es un nuevo menu
             menu, actions = create_menu(self.menubar, settings)
             add_actions(self.menubar, [ menu ], insert_before=self.menuNavigation.menuAction())
-        elif parentMenu is not None:
-            if isinstance(settings, list):
-                actions = extend_menu(parentMenu, settings)
-            elif isinstance(settings, dict) and 'items' in settings:
-                menu, actions = create_menu(parentMenu, settings)
-                add_actions(self.menubar, [ menu ])
-            elif isinstance(settings, dict):
-                actions = extend_menu(parentMenu, [ settings ])
+        elif parentMenu is not None and settings:
+            if not isinstance(settings, list):
+                settings = [ settings ]
+            actions = extend_menu(parentMenu, settings)
         return actions
 
     def initialize(self, application):

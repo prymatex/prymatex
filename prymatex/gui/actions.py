@@ -312,7 +312,29 @@ class MainWindowActions(object):
         }
         for action, url in ACTION_MAPPING.items():
             action.triggered.connect(partial(open, url))
-            
+    
+    @classmethod
+    def contributeToMainMenu(cls):
+        edit = {
+            'text': '&Editor',
+            "items": [{'text': 'Mode',
+             'items': [
+                {'text': 'Freehanded Editing', 'shortcut': 'Meta+Alt+E'},
+                {'text': 'Overwrite Mode', 'shortcut': 'Meta+Alt+O'},
+                {'text': 'Multi Edit Mode', 'shortcut': 'Meta+Alt+M'}
+             ]}]
+        }
+        return { 
+        "file": {},
+        "edit": {},
+        "view": {},
+        "text": {},
+        "navigation": {},
+        "bundles": {},
+        "preferences": {},
+        "help": {},
+        }
+    
 def tabSelectableModelFactory(mainWindow):
     """ 
     Shows select tab, and change to selected 
