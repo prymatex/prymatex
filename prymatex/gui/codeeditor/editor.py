@@ -185,7 +185,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         # Editor signals
         self.blockCountChanged.connect(self.on_blockCountChanged)
         self.updateRequest.connect(self.updateSideBars)
-        self.modificationChanged.connect(self.on_modificationChanged)
         self.syntaxChanged.connect(self.on_syntaxChanged)
         self.themeChanged.connect(self.highlightEditor)
         # TODO Algo mejor para acomodar el ancho del tabulador
@@ -282,9 +281,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         # Handlers
         for handler in self.__blockUserDataHandlers:
             handler.processBlockUserData(text, block, userData)
-
-    def on_modificationChanged(self, value):
-        self.emit(QtCore.SIGNAL("tabStatusChanged()"))
 
     def on_blockCountChanged(self, newBlockCount):
         self.logger.debug("block Count changed")

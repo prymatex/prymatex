@@ -16,7 +16,6 @@ __all__ = ["PMXBaseEditor", "PMXBaseEditorKeyHelper", "PMXBaseEditorAddon"]
 class PMXBaseEditor(PMXBaseComponent, PMXKeyHelperMixin):
     """Every editor should extend this class in order to guarantee it'll be able to be place in tab.
     """
-    #tabStatusChanged
     CREATION_COUNTER = 0
     UNTITLED_FILE_TEMPLATE = "Untitled {CREATION_COUNTER}"
     
@@ -25,6 +24,8 @@ class PMXBaseEditor(PMXBaseComponent, PMXKeyHelperMixin):
         self.filePath = None
         self.project = None
         self.externalAction = None
+        if not hasattr(self, "modificationChanged"):
+            self.modificationChanged = QtCore.Signal(bool)
     
     def addComponent(self, component):
         PMXBaseComponent.addComponent(self, component)
@@ -69,15 +70,15 @@ class PMXBaseEditor(PMXBaseComponent, PMXKeyHelperMixin):
     def setFilePath(self, filePath):
         self.filePath = filePath
         self.project = self.application.projectManager.findProjectForPath(filePath)
-        self.emit(QtCore.SIGNAL("tabStatusChanged()"))
-        
+        self.modificationChanged.emit(False)
+
     def tabIcon(self):
         baseIcon = QtGui.QIcon()
         if self.filePath is not None:
             baseIcon = resources.getIcon(self.filePath)
         if self.isModified():
             baseIcon = resources.getIcon("document-save")
-        if self.externalAction != None:
+        if self.externalAction is not None:
             importantIcon = resources.getIcon("emblem-important")
             baseIcon = combine_icons(baseIcon, importantIcon, 0.8)
         return baseIcon
@@ -125,7 +126,7 @@ class PMXBaseEditor(PMXBaseComponent, PMXKeyHelperMixin):
 
     def setExternalAction(self, action):
         self.externalAction = action
-        self.emit(QtCore.SIGNAL("tabStatusChanged()"))
+        self.modificationChanged.emit(False)
 
     def isExternalChanged(self):
         return self.externalAction == self.application.fileManager.CHANGED

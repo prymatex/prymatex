@@ -194,7 +194,7 @@ class SplitTabWidget(QtGui.QSplitter):
         idx = ch.addTab(w, self.disambiguatedWidgetTitle(w))
         self.setWidgetToolTip(w, w.tabToolTip())
         self.setWidgetIcon(w, w.tabIcon())
-        self.connect(w, QtCore.SIGNAL("tabStatusChanged()"), self._update_tab_status)
+        w.modificationChanged.connect(self._update_tab_status)
 
         # If the tab has been added to the current tab widget then make it the
         # current tab.
@@ -206,7 +206,7 @@ class SplitTabWidget(QtGui.QSplitter):
         """ Remove tab to the tab widget."""
         tw, tidx = self._tab_widget(w)
         if tw is not None:
-            self.disconnect(w, QtCore.SIGNAL("tabStatusChanged()"), self._update_tab_status)
+            w.modificationChanged.disconnect(self._update_tab_status)
             self._remove_tab(tw, tidx)
             if tw.count() == 0 and self.count() > 0:
                 for tw in self.findChildren(_TabWidget):
@@ -334,7 +334,7 @@ class SplitTabWidget(QtGui.QSplitter):
                     widgets.append(widget)
         return widgets
 
-    def _update_tab_status(self):
+    def _update_tab_status(self, changed = None):
         sender = self.sender()
         self.setWidgetTitle(sender, sender.tabTitle())
         self.setWidgetIcon(sender, sender.tabIcon())
