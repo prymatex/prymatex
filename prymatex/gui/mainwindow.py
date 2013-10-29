@@ -82,7 +82,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         self.dialogs = []
         self.customComponentActions = {}
         
-
         self.setAcceptDrops(True)
 
         #self.setMainWindowAsActionParent()
@@ -107,21 +106,41 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
     def populate(self, manager):
         def extendMainMenu(klass):
             menuExtensions = klass.contributeToMainMenu()
+
             for name, settings in menuExtensions.items():
-                actions = self.contributeToMainMenu(name, settings)
+                actions = self.addExtensionsToMainMenu(name, settings)
                 # TODO: Pasarle las acciones generadas a la clase
                 self.customComponentActions.setdefault(klass, []).extend(actions)
-            componentClasses = manager.findComponentsForClass(klass)
-            for componentClass in componentClasses:
+
+            for componentClass in manager.findComponentsForClass(klass):
                 extendMainMenu(componentClass)
 
-        for componentClass in manager.findComponentsForClass(self.__class__):
-            extendMainMenu(componentClass)
+        extendMainMenu(self.__class__)
         
         #Conect Actions
         for action in reduce(lambda a1, a2: a1 + a2, list(self.customComponentActions.values()), []):
             if hasattr(action, 'callback'):
                 self.connect(action, QtCore.SIGNAL('triggered(bool)'), self.componentActionDispatcher)
+
+    def addExtensionsToMainMenu(self, name, settings):
+        actions = []
+        names = list(name) if isinstance(name, (tuple, list)) else [ name ]
+        parentMenu = self.menubar
+        while names and parentMenu is not None:
+            parentMenu = parentMenu.findChild(QtGui.QMenu, text2objectname(names.pop(0), prefix = "menu"))
+        if parentMenu is None and isinstance(settings, dict) and 'items' in settings and not names:
+            # Es un nuevo menu
+            menu, actions = create_menu(self.menubar, settings)
+            actions.insert(0, self.menubar.insertMenu(self.menuNavigation.children()[0], menu))
+        elif parentMenu is not None:
+            if isinstance(settings, list):
+                actions = extend_menu(parentMenu, settings)
+            elif isinstance(settings, dict) and 'items' in settings:
+                menu, actions = create_menu(parentMenu, settings)
+                actions.append(parentMenu.addMenu(menu))
+            elif isinstance(settings, dict):
+                actions = extend_menu(parentMenu, [ settings ])
+        return actions
 
     def initialize(self, application):
         PMXBaseComponent.initialize(self, application)
@@ -220,26 +239,6 @@ html_footer
         if not dock.isFloating():
             area = self.dockWidgetArea(dock)
             self.dockToolBars[area].show()
-
-    def contributeToMainMenu(self, name, settings):
-        actions = []
-        names = list(name) if isinstance(name, (tuple, list)) else [ name ]
-        parentMenu = self.menubar
-        while names and parentMenu is not None:
-            parentMenu = parentMenu.findChild(QtGui.QMenu, text2objectname(names.pop(0), prefix = "menu"))
-        if parentMenu is None and isinstance(settings, dict) and 'items' in settings and not names:
-            # Es un nuevo menu
-            menu, actions = create_menu(self.menubar, settings)
-            actions.insert(0, self.menubar.insertMenu(self.menuNavigation.children()[0], menu))
-        elif parentMenu is not None:
-            if isinstance(settings, list):
-                actions = extend_menu(parentMenu, settings)
-            elif isinstance(settings, dict) and 'items' in settings:
-                menu, actions = create_menu(parentMenu, settings)
-                actions.append(parentMenu.addMenu(menu))
-            elif isinstance(settings, dict):
-                actions = extend_menu(parentMenu, [ settings ])
-        return actions
 
     def componentActionDispatcher(self, checked):
         action = self.sender()

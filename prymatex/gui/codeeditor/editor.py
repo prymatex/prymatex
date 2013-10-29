@@ -1305,8 +1305,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'shortcut': 'Meta+Ctrl+Shift+B',
                  }
             ]
-        menuContributions = { "edit": edit, "view": view , "text": text, "navigation": navigation}
-        return menuContributions
+        return { 
+            "edit": edit, 
+            "view": view , 
+            "text": text, 
+            "navigation": navigation
+        }
 
     @classmethod
     def contributeToSettings(cls):
