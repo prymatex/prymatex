@@ -949,6 +949,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if not openCursor[0].isNull():
             closeCursor = self.findTypingPair(openCursor[0].selectedText(), openCursor[1], openCursor[0])
             if openCursor[0].selectionEnd() <= cursor.selectionStart() <= closeCursor.selectionStart():
+                # TODO New cursor at position
                 cursor.setPosition(openCursor[0].selectionEnd())
                 cursor.setPosition(closeCursor.selectionStart(), QtGui.QTextCursor.KeepAnchor)
                 self.setTextCursor(cursor)
@@ -956,9 +957,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def selectCurrentScope(self, cursor = None):
         cursor = cursor or self.textCursor()
         block = cursor.block()
-        beginPosition = block.position()
-        token = self.blockUserData(block).tokenAtPosition(cursor.positionInBlock())
-        cursor = self.newCursorAtPosition(beginPosition + token.start, beginPosition + token.end)
+        token = self.tokenAtPosition(cursor.position())
+        cursor = self.newCursorAtPosition(block.position() + token.start, 
+            block.position() + token.end)
         self.setTextCursor(cursor)
 
     # ---------- Bookmarks and gotos

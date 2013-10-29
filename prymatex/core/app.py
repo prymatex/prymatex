@@ -443,7 +443,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             mainWindow, editor = self.findEditorForFile(filePath)
             if editor is not None:
                 mainWindow.setCurrentEditor(editor)
-                if isinstance(cursorPosition, tuple):
+                if cursorPosition is not None:
                     editor.setCursorPosition(cursorPosition)
         elif self.fileManager.exists(filePath):
             mainWindow = mainWindow or self.mainWindow
@@ -451,7 +451,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
             def on_editorReady(mainWindow, editor, cursorPosition, focus):
                 def editorReady(openResult):
-                    if isinstance(cursorPosition, tuple):
+                    if cursorPosition is not None:
                         editor.setCursorPosition(cursorPosition)
                     mainWindow.tryCloseEmptyEditor()
                     mainWindow.addEditor(editor, focus)
@@ -481,7 +481,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
                 position = (position[0], int(column) - 1)
             if sourceFile:
                 filePath = QtCore.QUrl(sourceFile, QtCore.QUrl.TolerantMode).toLocalFile()
-                self.openFile(filePath, position)
+                self.openFile(filePath, cursorPosition = position)
             else:
                 self.currentEditor().setCursorPosition(position)
         elif url.scheme() == "file":
