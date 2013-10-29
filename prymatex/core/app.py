@@ -330,14 +330,12 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         
         instance = buildComponentInstance(componentClass, componentParent)
         # buildedObjects.reverse()
-        # Initialize order is important, fist goes the internal components
-        # then the main component
+        # Initialize order is important, fist goes the internal components then the main component
         for ni, np in buildedObjects:
             ni.initialize(np)
             
-        instances = self.componentInstances.setdefault(componentClass, [])
-        instances.append(instance)
-
+        self.componentInstances.setdefault(componentClass, []).append(instance)
+        
         return instance
 
     # ------------ Find Component
@@ -395,9 +393,8 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         #TODO: Testeame con mas de una
         for _ in range(1):
             self.mainWindow = self.createComponentInstance(PMXMainWindow)
-            self.mainWindow.populate(self.pluginManager)
-
             self.mainWindow.show()
+
             self.currentProfile.restoreState(self.mainWindow)
 
             if not self.mainWindow.editors():

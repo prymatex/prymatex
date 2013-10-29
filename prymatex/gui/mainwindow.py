@@ -100,23 +100,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         elif isinstance(component, PMXBaseStatusBar):
             self.addStatusBar(component)
 
-    def populate(self, manager):
-        def extendMainMenu(klass):
-            menuExtensions = klass.contributeToMainMenu()
-            for name, settings in menuExtensions.items():
-                actions = self.addExtensionsToMainMenu(name, settings)
-                self.customComponentActions.setdefault(klass, []).extend(actions)
-                for action in actions:
-                    if hasattr(action, 'callback'):
-                        self.connect(action,
-                            QtCore.SIGNAL('triggered(bool)'),
-                            self.componentActionDispatcher)
-
-            for componentClass in manager.findComponentsForClass(klass):
-                extendMainMenu(componentClass)
-
-        extendMainMenu(self.__class__)
-
     def addExtensionsToMainMenu(self, name, settings):
         actions = []
         names = list(name) if isinstance(name, (tuple, list)) else [ name ]
@@ -145,6 +128,23 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         self.browserDock = self.findChild(QtGui.QDockWidget, "BrowserDock")
         self.terminalDock = self.findChild(QtGui.QDockWidget, "TerminalDock")
         self.projectsDock = self.findChild(QtGui.QDockWidget, "ProjectsDock")
+    
+        # Build Main Menu    
+        def extendMainMenu(klass):
+            menuExtensions = klass.contributeToMainMenu()
+            for name, settings in menuExtensions.items():
+                actions = self.addExtensionsToMainMenu(name, settings)
+                self.customComponentActions.setdefault(klass, []).extend(actions)
+                for action in actions:
+                    if hasattr(action, 'callback'):
+                        self.connect(action,
+                            QtCore.SIGNAL('triggered(bool)'),
+                            self.componentActionDispatcher)
+
+            for componentClass in application.pluginManager.findComponentsForClass(klass):
+                extendMainMenu(componentClass)
+
+        extendMainMenu(self.__class__)
 
     def environmentVariables(self):
         env = {}
