@@ -85,8 +85,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         self.setAcceptDrops(True)
 
         #self.setMainWindowAsActionParent()
-        self.setupHelpMenuMiscConnections()
-
         self.popupMessage = PopupMessageWidget(self)
 
         #Processor de comandos local a la main window

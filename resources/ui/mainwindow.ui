@@ -101,19 +101,6 @@
     <addaction name="actionLocationBack"/>
     <addaction name="actionLocationForward"/>
    </widget>
-   <widget class="QMenu" name="menuHelp">
-    <property name="title">
-     <string>&amp;Help</string>
-    </property>
-    <addaction name="actionReportBug"/>
-    <addaction name="actionTranslatePrymatex"/>
-    <addaction name="actionProjectHomepage"/>
-    <addaction name="actionReadDocumentation"/>
-    <addaction name="separator"/>
-    <addaction name="actionTakeScreenshot"/>
-    <addaction name="actionAboutQt"/>
-    <addaction name="actionAbout"/>
-   </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
      <string>&amp;Edit</string>
@@ -162,7 +149,6 @@
    <addaction name="menuNavigation"/>
    <addaction name="menuBundles"/>
    <addaction name="menuPreferences"/>
-   <addaction name="menuHelp"/>
   </widget>
   <action name="actionNewEditor">
    <property name="icon">

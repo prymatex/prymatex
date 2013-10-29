@@ -39,7 +39,7 @@ def create_menu(parent, settings, useSeparatorName = False, connectActions = Fal
     menu = QtGui.QMenu(text, parent)
     name = settings.get("name", text)
     menu.setObjectName(text2objectname(name, prefix = "menu"))
-
+    
     # attrs
     if "icon" in settings:
         menu.setIcon(settings["icon"])

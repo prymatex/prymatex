@@ -267,22 +267,15 @@ class MainWindowActions(object):
     def on_actionAbout_triggered(self):
         self.aboutDialog.exec_()
         
-    @QtCore.Slot()
-    def on_actionProjectHomepage_triggered(self):
-        import webbrowser
-        import prymatex
-        webbrowser.open(getattr(prymatex, '__url__', "https://github.com/prymatex/prymatex"))
-    
     SCREENSHOT_FORMAT = 'png'
     
-    @QtCore.Slot()
     def on_actionTakeScreenshot_triggered(self):
         pxm = QtGui.QPixmap.grabWindow(self.winId())
         import os
         from datetime import datetime
         now = datetime.now()
         baseName = now.strftime("%Y-%m-%d-%H_%M_%S") + '.' + self.SCREENSHOT_FORMAT
-        path = os.path.join(self.application.profile.PMX_SCREENSHOT_PATH, baseName)
+        path = os.path.join(self.application.currentProfile.PMX_SCREENSHOT_PATH, baseName)
         pxm.save(path, self.SCREENSHOT_FORMAT)
         try:
             self.currentEditor().showMessage("%s saved" % baseName)
@@ -299,22 +292,9 @@ class MainWindowActions(object):
             #print "Making %s available when menubar is hidden %s" % (obj.objectName(), obj.text())
             self.addAction(obj)
     
-    def setupHelpMenuMiscConnections(self):
-        from webbrowser import open
-        from functools import partial # Less code in simple callbacks :)
-        import prymatex
-        
-        ACTION_MAPPING = {
-                          self.actionReadDocumentation: prymatex.__source__ + '/wiki',
-                          self.actionReportBug: 'https://github.com/prymatex/prymatex/issues?utf8=%E2%9C%93',
-                          self.actionTranslatePrymatex: 'https://prymatex.com/translate',
-                          self.actionProjectHomepage: prymatex.__url__
-        }
-        for action, url in ACTION_MAPPING.items():
-            action.triggered.connect(partial(open, url))
-    
     @classmethod
     def contributeToMainMenu(cls):
+        import prymatex
         edit = {
             'text': '&Editor',
             "items": [{'text': 'Mode',
@@ -324,15 +304,42 @@ class MainWindowActions(object):
                 {'text': 'Multi Edit Mode', 'shortcut': 'Meta+Alt+M'}
              ]}]
         }
+        help_menu = {
+            "text": "&Help",
+            "items": [ {
+                    "text": "Report Bug",
+                    "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/issues?utf8=%E2%9C%93')
+                }, {
+                    "text": "Translate Prymatex",
+                    "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/wiki')
+                }, {
+                    "text": "Project Homepage",
+                    "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__url__)
+                }, {
+                    "text": "Read Documentation",
+                    "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/wiki')
+                }, "-", {
+                    "text": "Take Screenshoot",
+                    "icon": resources.get_icon("ksnapshot"),
+                    "callback": cls.on_actionTakeScreenshot_triggered
+                }, {
+                    "text": "About Qt",
+                    "callback": lambda mainWindow: mainWindow.application.aboutQt()
+                }, {
+                    "text": "About Prymatex",
+                    "callback": lambda mainWindow: mainWindow.aboutDialog.exec_()
+                }
+            ]
+        }
         return { 
-        "file": {},
-        "edit": {},
-        "view": {},
-        "text": {},
-        "navigation": {},
-        "bundles": {},
-        "preferences": {},
-        "help": {},
+            "file": {},
+            "edit": {},
+            "view": {},
+            "text": {},
+            "navigation": {},
+            "bundles": {},
+            "preferences": {},
+            "help": help_menu
         }
     
 def tabSelectableModelFactory(mainWindow):

@@ -470,11 +470,10 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     def openDirectory(self, directoryPath):
         raise NotImplementedError("Directory contents should be opened as files here")
 
-    def handleUrlCommand(self, url):
+    def openUrl(self, url):
         if isinstance(url, six.string_types):
             url = QtCore.QUrl(url)
         if url.scheme() == "txmt":
-            #TODO: Controlar que sea un open
             sourceFile = url.queryItemValue('url')
             position = (0, 0)
             line = url.queryItemValue('line')
@@ -488,7 +487,11 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
                 self.openFile(filePath, position)
             else:
                 self.currentEditor().setCursorPosition(position)
-
+        elif url.scheme() == "file":
+            self.openFile(url.toLocalFile())
+        else:
+            QtGui.QDesktopServices.openUrl(url)
+            
     def openArgumentFiles(self, args):
         for filePath in [f for f in args if os.path.exists(f)]:
             if os.path.isfile(filePath):
