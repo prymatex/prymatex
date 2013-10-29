@@ -44,16 +44,8 @@ def create_menu(parent, settings, useSeparatorName = False, connectActions = Fal
     if "icon" in settings:
         menu.setIcon(settings["icon"])
 
-    actions = []
-    if isinstance(parent, QtGui.QMenu):
-        menuAction = parent.addMenu(menu)
-        if "testEnabled" in settings:
-            menuAction.testEnabled = settings["testEnabled"]
-        if "testVisible" in settings:
-            menuAction.testVisible = settings["testVisible"]
-
     # actions
-    actions += extend_menu(menu, settings.get("items", []), useSeparatorName = useSeparatorName)
+    actions = [menu.menuAction()] + extend_menu(menu, settings.get("items", []), useSeparatorName = useSeparatorName)
     if connectActions:
         for action in actions:
             if hasattr(action, 'callback'):
@@ -61,6 +53,11 @@ def create_menu(parent, settings, useSeparatorName = False, connectActions = Fal
                     parent.connect(action, QtCore.SIGNAL('triggered(bool)'), action.callback)
                 else:
                     parent.connect(action, QtCore.SIGNAL('triggered()'), action.callback)
+
+    if "testEnabled" in settings:
+        actions[0].testEnabled = settings["testEnabled"]
+    if "testVisible" in settings:
+        actions[0].testVisible = settings["testVisible"]
 
     return menu, actions
 
@@ -80,26 +77,24 @@ def extend_menu(menu, items, useSeparatorName = False):
         elif isinstance(item, dict) and 'items' in item:
             submenu, subactions = create_menu(menu, item)
             actions.extend(subactions)
+            add_actions(menu, [ submenu ])
         elif isinstance(item, dict):
             action = create_action(menu, item)
-            actions.append(action)
             menu.addAction(action)
+            actions.append(action)
         elif isinstance(item, QtGui.QAction):
             menu.addAction(item)
+            actions.append(item)
         elif isinstance(item, QtGui.QMenu):
-            menu.addMenu(item)
-        elif isinstance(item, list):
+            actions.append(menu.addMenu(item))
+        elif isinstance(item, (tuple, list)):
             actionGroup = QtGui.QActionGroup(menu)
             actions.append(actionGroup)
-            actionGroup.setExclusive(False)
-            list(map(menu.addAction, item))
-            list(map(lambda action: action.setActionGroup(actionGroup), item))
-        elif isinstance(item, tuple):
-            actionGroup = QtGui.QActionGroup(menu)
-            actions.append(actionGroup)
-            actionGroup.setExclusive(True)
-            list(map(menu.addAction, item))
-            list(map(lambda action: action.setActionGroup(actionGroup), item))
+            actionGroup.setExclusive(isinstance(item, tuple))
+            for i in item:
+                # TODO i puede ser un dict
+                menu.addAction(i)
+                i.setActionGroup(actionGroup)
         else:
             raise Exception("%s" % item)
     return actions

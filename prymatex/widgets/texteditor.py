@@ -85,8 +85,9 @@ class TextEditWidget(QtGui.QPlainTextEdit):
             line = cursor.block().text()
             blockPosition = cursor.block().position()
             first_part, last_part = line[:columnNumber][::-1], line[columnNumber:]
-            
+            rmatch = lmatch = None
             start = end = cursor.position()
+
             if direction in ("left", "both"):
                 #Search left word
                 lend = start

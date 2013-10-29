@@ -8,7 +8,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.qt.compat import getSaveFileName
 from prymatex.qt.helpers import text2objectname
 from prymatex.qt.helpers.widgets import center_widget
-from prymatex.qt.helpers.menus import create_menu, extend_menu, update_menu
+from prymatex.qt.helpers.menus import create_menu, extend_menu, update_menu, add_actions
 
 from prymatex import resources
 
@@ -105,7 +105,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
     def populate(self, manager):
         def extendMainMenu(klass):
             menuExtensions = klass.contributeToMainMenu()
-
             for name, settings in menuExtensions.items():
                 actions = self.addExtensionsToMainMenu(name, settings)
                 self.customComponentActions.setdefault(klass, []).extend(actions)
@@ -129,13 +128,13 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         if parentMenu is None and isinstance(settings, dict) and 'items' in settings and not names:
             # Es un nuevo menu
             menu, actions = create_menu(self.menubar, settings)
-            actions.insert(0, self.menubar.insertMenu(self.menuNavigation.children()[0], menu))
+            add_actions(self.menubar, [ menu ], insert_before=self.menuNavigation.menuAction())
         elif parentMenu is not None:
             if isinstance(settings, list):
                 actions = extend_menu(parentMenu, settings)
             elif isinstance(settings, dict) and 'items' in settings:
                 menu, actions = create_menu(parentMenu, settings)
-                actions.append(parentMenu.addMenu(menu))
+                add_actions(self.menubar, [ menu ])
             elif isinstance(settings, dict):
                 actions = extend_menu(parentMenu, [ settings ])
         return actions
@@ -167,7 +166,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
     def on_bundleItemTriggered(self, bundleItem):
         if self.bundleItem_handler is not None:
             self.bundleItem_handler(bundleItem)
-
 
     def insertBundleItem(self, bundleItem, **processorSettings):
         '''Insert selected bundle item in current editor if possible'''
@@ -251,9 +249,9 @@ html_footer
             componentInstances = reduce(
                 lambda ai, ci: ai + ci.findChildren(componentClass),
                 componentInstances, [])
-            
+
         self.logger.debug("Trigger %s over %s" % (action, componentInstances))
-        
+
         def triggerAction(instance, action):
             callbackArgs = [ instance ]
             if action.isCheckable():
