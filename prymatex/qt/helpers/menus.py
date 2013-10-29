@@ -9,17 +9,17 @@ settings = {
     "text": "Menu Title",
     "icon": "resourece icon key"
     "items": [
-        action1, action2, 
+        action1, action2,
         {"text": "SubMenu Title",
          "items": [
             (gaction1, qaction2, qaction3), # Create Action Group, Exclusive = True
             [gaction1, qaction2, qaction3], # Create ACtion Group, Exclusive = False
             { 'text': "Action Title",       # Create action whit callback
-              "sortcut": 'F20', 
-              "icon": ...., 
+              "sortcut": 'F20',
+              "icon": ....,
               'callback': ....},
             "-",                            # Add separator
-            action1, 
+            action1,
             "--Section",                            # Add named separator
             action2
         ]}
@@ -39,13 +39,21 @@ def create_menu(parent, settings, useSeparatorName = False, connectActions = Fal
     menu = QtGui.QMenu(text, parent)
     name = settings.get("name", text)
     menu.setObjectName(text2objectname(name, prefix = "menu"))
-    
+
     # attrs
     if "icon" in settings:
         menu.setIcon(settings["icon"])
 
+    actions = []
+    if isinstance(parent, QtGui.QMenu):
+        menuAction = parent.addMenu(menu)
+        if "testEnabled" in settings:
+            menuAction.testEnabled = settings["testEnabled"]
+        if "testVisible" in settings:
+            menuAction.testVisible = settings["testVisible"]
+
     # actions
-    actions = extend_menu(menu, settings.get("items", []), useSeparatorName = useSeparatorName)
+    actions += extend_menu(menu, settings.get("items", []), useSeparatorName = useSeparatorName)
     if connectActions:
         for action in actions:
             if hasattr(action, 'callback'):
@@ -53,7 +61,7 @@ def create_menu(parent, settings, useSeparatorName = False, connectActions = Fal
                     parent.connect(action, QtCore.SIGNAL('triggered(bool)'), action.callback)
                 else:
                     parent.connect(action, QtCore.SIGNAL('triggered()'), action.callback)
-                    
+
     return menu, actions
 
 def extend_menu(menu, items, useSeparatorName = False):
@@ -72,7 +80,6 @@ def extend_menu(menu, items, useSeparatorName = False):
         elif isinstance(item, dict) and 'items' in item:
             submenu, subactions = create_menu(menu, item)
             actions.extend(subactions)
-            actions.append(menu.addMenu(submenu))
         elif isinstance(item, dict):
             action = create_action(menu, item)
             actions.append(action)
@@ -122,7 +129,7 @@ def add_actions(target, actions, insert_before=None):
             else:
                 target.insertAction(insert_before, action)
         previous_action = action
-        
+
 # Sections
 def _chunk_sections(items):
     sections = []
@@ -133,7 +140,7 @@ def _chunk_sections(items):
             start = i
     sections.append(items[start:len(items)])
     return sections
-    
+
 def _section_name_range(items, name):
     begin, end = -1, -1
     for index, item in enumerate(items):
@@ -192,7 +199,7 @@ def update_menu(menuBase, menuUpdates):
         else:
             if name not in menuBase:
                 menuBase[name] = update
-            else:    
+            else:
                 position = update.pop('position', None)
                 section = update.pop('section', 0)
                 extend_menu_section(menuBase.get(name), update, section = section, position = position)

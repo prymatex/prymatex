@@ -15,7 +15,6 @@ def toggle_actions(actions, enable):
             if action is not None:
                 action.setEnabled(enable)
 
-
 def create_action(parent, settings):
     """Create a QAction"""
     text = settings.get("text")
@@ -45,7 +44,9 @@ def create_action(parent, settings):
         action.testChecked = settings["testChecked"]
     if "testEnabled" in settings:
         action.testEnabled = settings["testEnabled"]
-    
+    if "testVisible" in settings:
+        action.testVisible = settings["testVisible"]
+        
     if "triggered" in settings and isinstance(settings["triggered"], collections.Callable):
         parent.connect(action, QtCore.SIGNAL("triggered()"), settings["triggered"])
     if "toggled" in settings and isinstance(settings["toggled"], collections.Callable):

@@ -49,7 +49,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
     _editorHistory = []
     _editorHistoryIndex = 0
-    
+
     # Constructor
     def __init__(self, parent = None):
         """The main window
@@ -81,7 +81,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         self.dockers = []
         self.dialogs = []
         self.customComponentActions = {}
-        
+
         self.setAcceptDrops(True)
 
         #self.setMainWindowAsActionParent()
@@ -92,7 +92,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         #Processor de comandos local a la main window
         self.commandProcessor = MainWindowCommandProcessor(self)
         self.bundleItem_handler = self.insertBundleItem
-
 
     # ---------- Implements PMXBaseComponent's interface
     def addComponent(self, component):
@@ -109,18 +108,17 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
             for name, settings in menuExtensions.items():
                 actions = self.addExtensionsToMainMenu(name, settings)
-                # TODO: Pasarle las acciones generadas a la clase
                 self.customComponentActions.setdefault(klass, []).extend(actions)
+                for action in actions:
+                    if hasattr(action, 'callback'):
+                        self.connect(action,
+                            QtCore.SIGNAL('triggered(bool)'),
+                            self.componentActionDispatcher)
 
             for componentClass in manager.findComponentsForClass(klass):
                 extendMainMenu(componentClass)
 
         extendMainMenu(self.__class__)
-        
-        #Conect Actions
-        for action in reduce(lambda a1, a2: a1 + a2, list(self.customComponentActions.values()), []):
-            if hasattr(action, 'callback'):
-                self.connect(action, QtCore.SIGNAL('triggered(bool)'), self.componentActionDispatcher)
 
     def addExtensionsToMainMenu(self, name, settings):
         actions = []
@@ -153,7 +151,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         self.browserDock = self.findChild(QtGui.QDockWidget, "BrowserDock")
         self.terminalDock = self.findChild(QtGui.QDockWidget, "TerminalDock")
         self.projectsDock = self.findChild(QtGui.QDockWidget, "ProjectsDock")
-        
+
     def environmentVariables(self):
         env = {}
         for docker in self.dockers:
@@ -164,7 +162,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
     def contributeToSettings(cls):
         from prymatex.gui.settings.mainwindow import MainWindowSettingsWidget
         return [ MainWindowSettingsWidget ]
-    
+
     # --------------- Bundle Items
     def on_bundleItemTriggered(self, bundleItem):
         if self.bundleItem_handler is not None:
@@ -174,7 +172,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
     def insertBundleItem(self, bundleItem, **processorSettings):
         '''Insert selected bundle item in current editor if possible'''
         assert not bundleItem.isEditorNeeded(), "Bundle Item needs editor"
-        
+
         self.commandProcessor.configure(processorSettings)
         bundleItem.execute(self.commandProcessor)
 
@@ -247,39 +245,48 @@ html_footer
             if action in actions:
                 componentClass = cmpClass
                 break
-        hierarchy = self.application.componentHierarchyForClass(componentClass)
-        componentInstance = self
-        for componentClass in hierarchy:
-            componentInstance = componentInstance.findChildren(componentClass).pop()
-        callbackArgs = [ componentInstance ]
-        if action.isCheckable():
-            callbackArgs.append(checked)
-        action.callback(*callbackArgs)
+
+        componentInstances = [ self ]
+        for componentClass in self.application.componentHierarchyForClass(componentClass):
+            componentInstances = reduce(
+                lambda ai, ci: ai + ci.findChildren(componentClass),
+                componentInstances, [])
+            
+        self.logger.debug("Trigger %s over %s" % (action, componentInstances))
+        
+        def triggerAction(instance, action):
+            callbackArgs = [ instance ]
+            if action.isCheckable():
+                callbackArgs.append(checked)
+            action.callback(*callbackArgs)
+
+        # TODO Tengo todas pero solo se lo aplico a la ultima que es la que generalmente esta en uso
+        # for componentInstance in componentInstances:
+        #    triggerAction(componentInstance, action)
+        triggerAction(componentInstances[-1], action)
 
     def updateMenuForEditor(self, editor):
         def set_actions(instance, actions):
             for action in actions:
-                action.setVisible(hasattr(action, "testVisible") and \
-                    action.testVisible(instance) or \
-                    True)
-                action.setEnabled(hasattr(action, "testEnabled") and \
-                    action.testEnabled(instance) or \
-                    True)
+                action.setVisible(not hasattr(action, "testVisible") or \
+                    action.testVisible(instance))
+                action.setEnabled(not hasattr(action, "testEnabled") or \
+                    action.testEnabled(instance))
                 if action.isCheckable():
                     action.setChecked(hasattr(action, "testChecked") and \
-                        action.testChecked(instance) or \
-                        False)
-        
+                        action.testChecked(instance))
+
         # Primero las del editor
-        set_actions(editor, self.customComponentActions.get(editor.__class__, []))
-        
+        self.logger.debug("Update editor %s actions" % editor)
+        actions = self.customComponentActions.get(editor.__class__, [])
+        set_actions(editor, actions)
+
         # Ahora sus children
         componentClass = self.application.findComponentsForClass(editor.__class__)
         for klass in componentClass:
-            componentInstance = editor.findChildren(klass).pop()
-            set_actions(componentInstance, self.customComponentActions.get(klass, []))
-        #for componentClass, actions in componentActions.iteritems():
-        #    map(lambda action: action.setVisible(False), actions)
+            for componentInstance in editor.findChildren(klass):
+                actions = self.customComponentActions.get(klass, [])
+                set_actions(componentInstance, actions)
 
     def showMessage(self, *largs, **kwargs):
         self.popupMessage.showMessage(*largs, **kwargs)
@@ -319,12 +326,12 @@ html_footer
 
     def on_currentWidgetChanged(self, editor):
         #Update Menu
-        self.updateMenuForEditor(editor)        
-        
+        self.updateMenuForEditor(editor)
+
         #Avisar al manager si tenemos editor y preparar el handler
         self.application.supportManager.setEditorAvailable(editor is not None)
-        self.bundleItem_handler = editor.bundleItemHandler() or self.insertBundleItem if editor is not None else self.insertBundleItem    
-        
+        self.bundleItem_handler = editor.bundleItemHandler() or self.insertBundleItem if editor is not None else self.insertBundleItem
+
         #Emitir señal de cambio
         self.currentEditorChanged.emit(editor)
 
@@ -356,9 +363,9 @@ html_footer
             fileFilters = editor.fileFilters()
             # TODO Armar el archivo destino y no solo el basedir
             filePath, _ = getSaveFileName(
-                self, 
-                caption = "Save file as" if saveAs else "Save file", 
-                basedir = fileDirectory, 
+                self,
+                caption = "Save file as" if saveAs else "Save file",
+                basedir = fileDirectory,
                 filters = fileFilters
             )
         else:
@@ -374,9 +381,9 @@ html_footer
             buttons |= QtGui.QMessageBox.Cancel
         if editor is None: return
         while editor and editor.isModified():
-            response = QtGui.QMessageBox.question(self, "Save", 
-                "Save %s" % editor.tabTitle(), 
-                buttons = buttons, 
+            response = QtGui.QMessageBox.question(self, "Save",
+                "Save %s" % editor.tabTitle(),
+                buttons = buttons,
                 defaultButton = QtGui.QMessageBox.Ok)
             if response == QtGui.QMessageBox.Ok:
                 self.saveEditor(editor = editor)
@@ -409,9 +416,9 @@ html_footer
     def closeEvent(self, event):
         for editor in self.editors():
             while editor and editor.isModified():
-                response = QtGui.QMessageBox.question(self, "Save", 
-                    "Save %s" % editor.tabTitle(), 
-                    buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel, 
+                response = QtGui.QMessageBox.question(self, "Save",
+                    "Save %s" % editor.tabTitle(),
+                    buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel,
                     defaultButton = QtGui.QMessageBox.Ok)
                 if response == QtGui.QMessageBox.Ok:
                     self.saveEditor(editor = editor)
@@ -442,7 +449,7 @@ html_footer
             dockName = dock.objectName()
             if dockName in state["dockers"]:
                 dock.setComponentState(state["dockers"][dockName])
-        
+
         # Restore Main window
         self.restoreGeometry(state["geometry"])
         for doc in state["documents"]:
@@ -465,9 +472,9 @@ html_footer
                     dirSubEntries = glob(os.path.join(path, '*'))
                     for entry in collectFiles(dirSubEntries):
                         yield entry
-                        
+
         urls = [url.toLocalFile() for url in event.mimeData().urls()]
-        
+
         for path in collectFiles(urls):
             # TODO: Take this code somewhere else, this should change as more editor are added
             if not self.canBeOpened(path):
@@ -480,7 +487,7 @@ html_footer
     FILE_SIZE_THERESHOLD = 1024 ** 2 # 1MB file is enough, ain't it?
     STARTSWITH_BLACKLIST = ['.', '#', ]
     ENDSWITH_BLACKLIST = ['~', 'pyc', 'bak', 'old', 'tmp', 'swp', '#', ]
-    
+
     def canBeOpened(self, path):
         # Is there any support for it?
         if not self.application.supportManager.findSyntaxByFileType(path):
@@ -494,4 +501,4 @@ html_footer
         if os.path.getsize(path) > self.FILE_SIZE_THERESHOLD:
             return False
         return True
-        
+
