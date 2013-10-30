@@ -132,23 +132,11 @@
     <addaction name="menuBundleEditor"/>
     <addaction name="separator"/>
    </widget>
-   <widget class="QMenu" name="menuPreferences">
-    <property name="title">
-     <string>&amp;Preferences</string>
-    </property>
-    <addaction name="actionShowMenus"/>
-    <addaction name="actionShowStatus"/>
-    <addaction name="separator"/>
-    <addaction name="actionFullscreen"/>
-    <addaction name="separator"/>
-    <addaction name="actionSettings"/>
-   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
    <addaction name="menuNavigation"/>
    <addaction name="menuBundles"/>
-   <addaction name="menuPreferences"/>
   </widget>
   <action name="actionNewEditor">
    <property name="icon">

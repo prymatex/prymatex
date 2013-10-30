@@ -44,7 +44,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
     @pmxConfigPorperty(default = True)
     def showMenuBar(self, value):
-        self._showMenuBar = value
         self.menuBar().setShown(value)
 
     _editorHistory = []

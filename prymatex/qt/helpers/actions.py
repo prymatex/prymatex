@@ -34,8 +34,9 @@ def create_action(parent, settings):
         action.setData(settings["data"])
     if "menurole" in settings:
         action.setMenuRole(settings["menurole"])
-    if "checkable" in settings:
-        action.setCheckable(settings["checkable"])
+    # TODO Deprecated checkable by default if has testChecked key the action is checkable
+    if "checkable" in settings or "testChecked" in settings:
+        action.setCheckable("testChecked" in settings or settings["checkable"])
     
     # Callables
     if "callback" in settings:

@@ -236,36 +236,6 @@ class MainWindowActions(object):
     @QtCore.Slot()
     def on_actionReloadBundles_triggered(self):
         self.application.supportManager.reloadSupport(self.showMessage)
-
-    # ------------ Preferences Actions
-    @QtCore.Slot(bool)
-    def on_actionShowMenus_toggled(self, checked):
-        self.menuBar().setVisible(checked)
-        
-    @QtCore.Slot(bool)
-    def on_actionShowStatus_toggled(self, checked):
-        self.statusBar().setVisible(checked)
-    
-    @QtCore.Slot(bool)
-    def on_actionFullscreen_toggled(self, checked):
-        self.toggleDockToolBarVisibility()
-        if checked:
-            self.showFullScreen()
-        else:
-            self.showNormal()
-
-    @QtCore.Slot()
-    def on_actionSettings_triggered(self):
-        self.settingsDialog.exec_()
-            
-    # ------------ Help Actions
-    @QtCore.Slot()
-    def on_actionAboutQt_triggered(self):
-        QtGui.qApp.aboutQt()
-
-    @QtCore.Slot()
-    def on_actionAbout_triggered(self):
-        self.aboutDialog.exec_()
         
     SCREENSHOT_FORMAT = 'png'
     
@@ -304,32 +274,52 @@ class MainWindowActions(object):
                 {'text': 'Multi Edit Mode', 'shortcut': 'Meta+Alt+M'}
              ]}]
         }
+        # ------------- Preferences menu
+        preferences_menu = {
+            "text": "&Preferences",
+            "items": [{
+                "text": "Show main menu",
+                "callback": lambda mainWindow, checked: mainWindow.menuBar().setShown(checked),
+                "testChecked": lambda mainWindow: mainWindow.menuBar().isVisible()
+            }, {
+                "text": "Show status",
+                "callback": lambda mainWindow, checked: mainWindow.statusBar().setShown(checked),
+                "testChecked": lambda mainWindow: mainWindow.statusBar().isVisible()
+            }, "-", {
+                "text": "Fullscreen",
+                "callback": lambda mainWindow, checked: getattr(mainWindow, checked and "showFullScreen" or "showNormal")(),
+                "testChecked": lambda mainWindow: mainWindow.isFullScreen()
+            }, "-", {
+                "text": "Settings",
+                "callback": lambda mainWindow: mainWindow.settingsDialog.exec_()
+            }]
+        }
+        # ------------- Help menu
         help_menu = {
             "text": "&Help",
             "items": [ {
-                    "text": "Report Bug",
-                    "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/issues?utf8=%E2%9C%93')
-                }, {
-                    "text": "Translate Prymatex",
-                    "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/wiki')
-                }, {
-                    "text": "Project Homepage",
-                    "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__url__)
-                }, {
-                    "text": "Read Documentation",
-                    "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/wiki')
-                }, "-", {
-                    "text": "Take Screenshoot",
-                    "icon": resources.get_icon("ksnapshot"),
-                    "callback": cls.on_actionTakeScreenshot_triggered
-                }, {
-                    "text": "About Qt",
-                    "callback": lambda mainWindow: mainWindow.application.aboutQt()
-                }, {
-                    "text": "About Prymatex",
-                    "callback": lambda mainWindow: mainWindow.aboutDialog.exec_()
-                }
-            ]
+                "text": "Report bug",
+                "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/issues?utf8=%E2%9C%93')
+            }, {
+                "text": "Translate Prymatex",
+                "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/wiki')
+            }, {
+                "text": "Project homepage",
+                "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__url__)
+            }, {
+                "text": "Read documentation",
+                "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/wiki')
+            }, "-", {
+                "text": "Take screenshoot",
+                "icon": resources.get_icon("ksnapshot"),
+                "callback": cls.on_actionTakeScreenshot_triggered
+            }, {
+                "text": "About Qt",
+                "callback": lambda mainWindow: mainWindow.application.aboutQt()
+            }, {
+                "text": "About Prymatex",
+                "callback": lambda mainWindow: mainWindow.aboutDialog.exec_()
+            }]
         }
         return { 
             "file": {},
@@ -338,7 +328,7 @@ class MainWindowActions(object):
             "text": {},
             "navigation": {},
             "bundles": {},
-            "preferences": {},
+            "preferences": preferences_menu,
             "help": help_menu
         }
     

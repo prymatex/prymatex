@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/mainwindow.ui'
 #
-# Created: Tue Oct 29 11:02:15 2013
+# Created: Wed Oct 30 09:09:43 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -64,8 +64,6 @@ class Ui_MainWindow(object):
         self.menuBundles.setObjectName(_fromUtf8("menuBundles"))
         self.menuBundleEditor = QtGui.QMenu(self.menuBundles)
         self.menuBundleEditor.setObjectName(_fromUtf8("menuBundleEditor"))
-        self.menuPreferences = QtGui.QMenu(self.menubar)
-        self.menuPreferences.setObjectName(_fromUtf8("menuPreferences"))
         MainWindow.setMenuBar(self.menubar)
         self.actionNewEditor = QtGui.QAction(MainWindow)
         icon = QtGui.QIcon.fromTheme(_fromUtf8("tab-new"))
@@ -260,18 +258,11 @@ class Ui_MainWindow(object):
         self.menuBundleEditor.addAction(self.actionReloadBundles)
         self.menuBundles.addAction(self.menuBundleEditor.menuAction())
         self.menuBundles.addSeparator()
-        self.menuPreferences.addAction(self.actionShowMenus)
-        self.menuPreferences.addAction(self.actionShowStatus)
-        self.menuPreferences.addSeparator()
-        self.menuPreferences.addAction(self.actionFullscreen)
-        self.menuPreferences.addSeparator()
-        self.menuPreferences.addAction(self.actionSettings)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
         self.menubar.addAction(self.menuNavigation.menuAction())
         self.menubar.addAction(self.menuBundles.menuAction())
-        self.menubar.addAction(self.menuPreferences.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -286,7 +277,6 @@ class Ui_MainWindow(object):
         self.menuEdit.setTitle(_translate("MainWindow", "&Edit", None))
         self.menuBundles.setTitle(_translate("MainWindow", "&Bundles", None))
         self.menuBundleEditor.setTitle(_translate("MainWindow", "Bundle &Editor", None))
-        self.menuPreferences.setTitle(_translate("MainWindow", "&Preferences", None))
         self.actionNewEditor.setText(_translate("MainWindow", "&Editor", None))
         self.actionNewEditor.setShortcut(_translate("MainWindow", "Ctrl+N", None))
         self.actionOpen.setText(_translate("MainWindow", "Open", None))
