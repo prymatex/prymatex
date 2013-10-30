@@ -197,7 +197,7 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
 
     # ------------ Browser Signals handlers
     def on_manager_commandUrlRequested(self, url):
-        self.application.handleUrlCommand(url)
+        self.application.openUrl(url)
 
     def on_lineUrl_returnPressed(self):
         """Url have been changed by user"""

@@ -167,7 +167,7 @@ class ServerManager(QtCore.QObject, PMXBaseComponent):
         self.sendResult()
     
     def open(self, **kwargs):
-        self.application.handleUrlCommand(kwargs["url"])
+        self.application.openUrl(kwargs["url"])
         self.sendResult()
     
     def terminal(self, **kwargs):
