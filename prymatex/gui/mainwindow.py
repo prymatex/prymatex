@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+##!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import os
@@ -108,12 +108,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
         if parentMenu is None and isinstance(settings, dict) and 'items' in settings and not names:
             # Es un nuevo menu
-            menu, actions = create_menu(self.menubar, settings)
-            add_actions(self.menubar, [ menu ], insert_before=self.menuNavigation.menuAction())
+            menu, actions = create_menu(self.menubar, settings, connectActions = self.componentActionDispatcher)
+            add_actions(self.menubar, [ menu ], insert_before = self.menuNavigation.menuAction())
         elif parentMenu is not None and settings:
             if not isinstance(settings, list):
                 settings = [ settings ]
-            actions = extend_menu(parentMenu, settings)
+            actions = extend_menu(parentMenu, settings, connectActions = self.componentActionDispatcher)
         return actions
 
     def initialize(self, application):
@@ -134,11 +134,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             for name, settings in menuExtensions.items():
                 actions = self.addExtensionsToMainMenu(name, settings)
                 self.customComponentActions.setdefault(klass, []).extend(actions)
-                for action in actions:
-                    if hasattr(action, 'callback'):
-                        self.connect(action,
-                            QtCore.SIGNAL('triggered(bool)'),
-                            self.componentActionDispatcher)
 
             for componentClass in application.pluginManager.findComponentsForClass(klass):
                 extendMainMenu(componentClass)
@@ -230,7 +225,7 @@ html_footer
             area = self.dockWidgetArea(dock)
             self.dockToolBars[area].show()
 
-    def componentActionDispatcher(self, checked):
+    def componentActionDispatcher(self, checked = None):
         action = self.sender()
         componentClass = None
         for cmpClass, actions in self.customComponentActions.items():
@@ -247,11 +242,11 @@ html_footer
         self.logger.debug("Trigger %s over %s" % (action, componentInstances))
 
         def triggerAction(instance, action):
-            callbackArgs = [ instance ]
-            if action.isCheckable():
-                callbackArgs.append(checked)
-            action.callback(*callbackArgs)
-
+            if checked is not None:
+                action.functionToggled(instance, checked)
+            else:
+                action.functionTriggered(instance)
+        print(checked, componentInstances)
         # TODO Tengo todas pero solo se lo aplico a la ultima que es la que generalmente esta en uso
         # for componentInstance in componentInstances:
         #    triggerAction(componentInstance, action)

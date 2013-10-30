@@ -381,22 +381,22 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
                 '-',
                 {'text': "Find",
                  'shortcut': "Ctrl+F",
-                 'callback': cls.showIFind
+                 'triggered': cls.showIFind
                 },
                 {'text': "Replace",
                  'shortcut': "Ctrl+R",
-                 'callback': cls.showFindReplace
+                 'triggered': cls.showFindReplace
                 }
             ]
         text = [
                 {'text': 'Filter Through Command',
-                 'callback': cls.showCommand
+                 'triggered': cls.showCommand
                  }
             ]
         navigation = [
                 "-",
                 {'text': 'Go To &Line',
-                 'callback': cls.showGoToLine,
+                 'triggered': cls.showGoToLine,
                  'shortcut': 'Meta+Ctrl+Shift+L',
                  }
             ]

@@ -81,7 +81,7 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
         navigation = [
                 "-",
                 {'text': 'Go To Project File',
-                 'callback': cls.on_actionGoToProjectFile_triggered,
+                 'triggered': cls.on_actionGoToProjectFile_triggered,
                  'shortcut': 'Meta+Ctrl+Shift+F',
                  }
             ]
@@ -201,10 +201,6 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
         # contextMenu, contextMenuActions = create_menu(contextMenu, self, useSeparatorName = True)
         contextMenu, contextMenuActions = create_menu(self, contextMenu)
         
-        for action in contextMenuActions:
-            if hasattr(action, "callback"):
-                action.triggered.connect(action.callback)
-
         contextMenu.aboutToShow.connect(self.on_contextMenu_aboutToShow)
         contextMenu.aboutToHide.connect(self.on_contextMenu_aboutToHide)
         contextMenu.triggered.connect(self.on_contextMenu_triggered)

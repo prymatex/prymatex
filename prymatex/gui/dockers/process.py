@@ -43,24 +43,20 @@ class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
             "text": "Process",
             "items": [ 
                 { "text": "Close",
-                  "callback": self.on_actionCloseProcess_triggered },
+                  "triggered": self.on_actionCloseProcess_triggered },
                 { "text": "Kill",
-                  "callback": self.on_actionKill_triggered },
+                  "triggered": self.on_actionKill_triggered },
                 { "text": "Terminate",
-                  "callback": self.on_actionTerminate_triggered },
+                  "triggered": self.on_actionTerminate_triggered },
                 "-",
                 { "text": "Send Signal",
                   "items": [{ "text": "%s (%s)" % (key_value[0], key_value[1]),
-                          "callback": lambda _, signal = key_value[1]: self.on_actionSendSignal_triggered(signal)
+                          "triggered": lambda _, signal = key_value[1]: self.on_actionSendSignal_triggered(signal)
                         } for key_value in sorted(iter(osextra.SIGNALS.items()), key = lambda k_v: k_v[1])]
                 }
             ]
         }
         self.processMenu, self.processMenuActions = create_menu(self, contextMenu)
-
-        for action in self.processMenuActions:
-            if hasattr(action, "callback"):
-                action.triggered.connect(action.callback)
         
         self.tableViewProcess.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tableViewProcess.customContextMenuRequested.connect(self.showtableViewProcessContextMenu)

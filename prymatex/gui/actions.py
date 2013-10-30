@@ -279,19 +279,19 @@ class MainWindowActions(object):
             "text": "&Preferences",
             "items": [{
                 "text": "Show main menu",
-                "callback": lambda mainWindow, checked: mainWindow.menuBar().setShown(checked),
+                "toggled": lambda mainWindow, checked: mainWindow.menuBar().setShown(checked),
                 "testChecked": lambda mainWindow: mainWindow.menuBar().isVisible()
             }, {
                 "text": "Show status",
-                "callback": lambda mainWindow, checked: mainWindow.statusBar().setShown(checked),
+                "toggled": lambda mainWindow, checked: mainWindow.statusBar().setShown(checked),
                 "testChecked": lambda mainWindow: mainWindow.statusBar().isVisible()
             }, "-", {
                 "text": "Fullscreen",
-                "callback": lambda mainWindow, checked: getattr(mainWindow, checked and "showFullScreen" or "showNormal")(),
+                "toggled": lambda mainWindow, checked: getattr(mainWindow, checked and "showFullScreen" or "showNormal")(),
                 "testChecked": lambda mainWindow: mainWindow.isFullScreen()
             }, "-", {
                 "text": "Settings",
-                "callback": lambda mainWindow: mainWindow.settingsDialog.exec_()
+                "triggered": lambda mainWindow: mainWindow.settingsDialog.exec_()
             }]
         }
         # ------------- Help menu
@@ -299,26 +299,26 @@ class MainWindowActions(object):
             "text": "&Help",
             "items": [ {
                 "text": "Report bug",
-                "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/issues?utf8=%E2%9C%93')
+                "triggered": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/issues?utf8=%E2%9C%93')
             }, {
                 "text": "Translate Prymatex",
-                "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/wiki')
+                "triggered": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/wiki')
             }, {
                 "text": "Project homepage",
-                "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__url__)
+                "triggered": lambda mainWindow: mainWindow.application.openUrl(prymatex.__url__)
             }, {
                 "text": "Read documentation",
-                "callback": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/wiki')
+                "triggered": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/wiki')
             }, "-", {
                 "text": "Take screenshoot",
                 "icon": resources.get_icon("ksnapshot"),
-                "callback": cls.on_actionTakeScreenshot_triggered
+                "triggered": cls.on_actionTakeScreenshot_triggered
             }, {
                 "text": "About Qt",
-                "callback": lambda mainWindow: mainWindow.application.aboutQt()
+                "triggered": lambda mainWindow: mainWindow.application.aboutQt()
             }, {
                 "text": "About Prymatex",
-                "callback": lambda mainWindow: mainWindow.aboutDialog.exec_()
+                "triggered": lambda mainWindow: mainWindow.aboutDialog.exec_()
             }]
         }
         return { 

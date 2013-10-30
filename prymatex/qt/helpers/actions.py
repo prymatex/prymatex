@@ -15,7 +15,7 @@ def toggle_actions(actions, enable):
             if action is not None:
                 action.setEnabled(enable)
 
-def create_action(parent, settings):
+def create_action(parent, settings, connect = True):
     """Create a QAction"""
     text = settings.get("text")
     action = QtGui.QAction(text, parent)
@@ -38,22 +38,32 @@ def create_action(parent, settings):
     if "checkable" in settings or "testChecked" in settings:
         action.setCheckable("testChecked" in settings or settings["checkable"])
     
-    # Callables
-    if "callback" in settings:
-        action.callback = settings["callback"]
-    if "testChecked" in settings:
-        action.testChecked = settings["testChecked"]
-    if "testEnabled" in settings:
-        action.testEnabled = settings["testEnabled"]
-    if "testVisible" in settings:
-        action.testVisible = settings["testVisible"]
-        
+    # Action functions
+    action.functionTriggered = action.functionToggled = None
     if "triggered" in settings and isinstance(settings["triggered"], collections.Callable):
-        parent.connect(action, QtCore.SIGNAL("triggered()"), settings["triggered"])
+        action.functionTriggered = settings["triggered"]
     if "toggled" in settings and isinstance(settings["toggled"], collections.Callable):
-        parent.connect(action, QtCore.SIGNAL("toggled(bool)"), settings["toggled"])
+        action.functionToggled = settings["toggled"]
         action.setCheckable(True)
-        
+
+    if connect and action.functionTriggered:
+        parent.connect(action, 
+            QtCore.SIGNAL("triggered()"),
+            isinstance(connect, collections.Callable) and connect or action.functionTriggered)
+
+    if connect and action.functionToggled:
+        parent.connect(action, 
+            QtCore.SIGNAL("toggled(bool)"),
+            isinstance(connect, collections.Callable) and connect or action.functionToggled)
+
+    # Test functions
+    if "testChecked" in settings and isinstance(settings["testChecked"], collections.Callable):
+        action.testChecked = settings["testChecked"]
+    if "testEnabled" in settings and isinstance(settings["testEnabled"], collections.Callable):
+        action.testEnabled = settings["testEnabled"]
+    if "testVisible" in settings and isinstance(settings["testVisible"], collections.Callable):
+        action.testVisible = settings["testVisible"]
+    
     #TODO: Hard-code all shortcuts and choose context=QtCore.Qt.WidgetShortcut
     # (this will avoid calling shortcuts from another dockwidget
     #  since the context thing doesn't work quite well with these widgets)

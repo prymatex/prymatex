@@ -125,9 +125,8 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         menuEntry = {
             'name': 'lineNumbers',
             'text': "Line Numbers",
-            'callback': cls.on_actionShowLineNumbers_toggled,
+            'toggled': cls.on_actionShowLineNumbers_toggled,
             'shortcut': 'F10',
-            'checkable': True,
             'testChecked': cls.on_actionShowLineNumbers_testChecked }
         return { baseMenu: menuEntry }
 
@@ -212,9 +211,8 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         menuEntry = {
             'name': 'bookmarks',
             'text': "Bookmarks",
-            'callback': cls.on_actionShowBookmarks_toggled,
+            'toggled': cls.on_actionShowBookmarks_toggled,
             'shortcut': 'Alt+F10',
-            'checkable': True,
             'testChecked': cls.on_actionShowBookmarks_testChecked }
         return { baseMenu: menuEntry} 
 
@@ -293,9 +291,8 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         menuEntry = {
             'name': 'foldings',
             'text': 'Foldings',
-            'callback': cls.on_actionShowFoldings_toggled,
+            'toggled': cls.on_actionShowFoldings_toggled,
             'shortcut': 'Shift+F10',
-            'checkable': True,
             'testChecked': cls.on_actionShowFoldings_testChecked }
         return {baseMenu: menuEntry} 
 
@@ -381,8 +378,7 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         menuEntry = {
             'name': 'selection',
             'text': 'Selection',
-            'callback': cls.on_actionShowSelection_toggled,
-            'checkable': True,
+            'toggled': cls.on_actionShowSelection_toggled,
             'testChecked': cls.on_actionShowSelection_testChecked }
         return { baseMenu: menuEntry }
 

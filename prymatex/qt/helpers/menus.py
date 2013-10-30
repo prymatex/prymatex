@@ -4,29 +4,6 @@
 """
 Create QMenu
 Handle dictionary's menu format
-
-settings = {
-    "text": "Menu Title",
-    "icon": "resourece icon key"
-    "items": [
-        action1, action2,
-        {"text": "SubMenu Title",
-         "items": [
-            (gaction1, qaction2, qaction3), # Create Action Group, Exclusive = True
-            [gaction1, qaction2, qaction3], # Create ACtion Group, Exclusive = False
-            { 'text': "Action Title",       # Create action whit callback
-              "sortcut": 'F20',
-              "icon": ....,
-              'callback': ....},
-            "-",                            # Add separator
-            action1,
-            "--Section",                            # Add named separator
-            action2
-        ]}
-        action3, "-", action4
-    ]
-}
-
 """
 
 from prymatex.qt import QtCore, QtGui
@@ -34,7 +11,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.qt.helpers.base import text2objectname
 from prymatex.qt.helpers.actions import create_action
 
-def create_menu(parent, settings, useSeparatorName = False, connectActions = False):
+def create_menu(parent, settings, connectActions = True, useSeparatorName = False):
     text = settings.get("text", "Menu")
     menu = QtGui.QMenu(text, parent)
     name = settings.get("name", text)
@@ -45,14 +22,10 @@ def create_menu(parent, settings, useSeparatorName = False, connectActions = Fal
         menu.setIcon(settings["icon"])
 
     # actions
-    actions = [menu.menuAction()] + extend_menu(menu, settings.get("items", []), useSeparatorName = useSeparatorName)
-    if connectActions:
-        for action in actions:
-            if hasattr(action, 'callback'):
-                if action.isCheckable():
-                    parent.connect(action, QtCore.SIGNAL('triggered(bool)'), action.callback)
-                else:
-                    parent.connect(action, QtCore.SIGNAL('triggered()'), action.callback)
+    actions = [menu.menuAction()] + extend_menu(menu, 
+        settings.get("items", []),
+        connectActions = connectActions,
+        useSeparatorName = useSeparatorName)
 
     if "testEnabled" in settings:
         actions[0].testEnabled = settings["testEnabled"]
@@ -61,7 +34,7 @@ def create_menu(parent, settings, useSeparatorName = False, connectActions = Fal
 
     return menu, actions
 
-def extend_menu(menu, items, useSeparatorName = False):
+def extend_menu(menu, items, connectActions = True, useSeparatorName = False):
     actions = []
     for item in items:
         if item == "-":
@@ -75,11 +48,13 @@ def extend_menu(menu, items, useSeparatorName = False):
                 action.setText(name)
             actions.append(action)
         elif isinstance(item, dict) and 'items' in item:
-            submenu, subactions = create_menu(menu, item)
+            submenu, subactions = create_menu(menu, item, 
+                connectActions = connectActions,
+                useSeparatorName = useSeparatorName)
             actions.extend(subactions)
             add_actions(menu, [ submenu ])
         elif isinstance(item, dict):
-            action = create_action(menu, item)
+            action = create_action(menu, item, connect = connectActions)
             menu.addAction(action)
             actions.append(action)
         elif isinstance(item, QtGui.QAction):

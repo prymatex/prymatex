@@ -62,8 +62,7 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         menuEntry = {
             'name': 'miniMap',
             'text': "Mini Map",
-            'callback': cls.on_actionShowMiniMap_toggled,
-            'checkable': True,
+            'toggled': cls.on_actionShowMiniMap_toggled,
             'testChecked': cls.on_actionShowMiniMap_testChecked }
         return { baseMenu: menuEntry }
 

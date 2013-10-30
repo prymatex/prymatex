@@ -83,8 +83,7 @@ class SpellCheckerAddon(CodeEditorAddon):
                     {'text': 'Show Spelling'},
                     {'text': 'Check Spelling'},
                     {'text': 'Check Spelling as You Type',
-                      'callback': on_actionSpellingOnType_toggled,
-                      'checkable': True,
+                      'toggled': on_actionSpellingOnType_toggled,
                       'testChecked': on_actionSpellingOnType_testChecked
                     }
                 ]}
@@ -97,7 +96,7 @@ class SpellCheckerAddon(CodeEditorAddon):
             cursor = cursors[0]
             for word in self.dictionary.suggest(cursor.selectedText()):
                 items.append({'text': word,
-                'callback': lambda word = word, cursor = cursor: cursor.insertText(word) })
+                'triggered': lambda word = word, cursor = cursor: cursor.insertText(word) })
         return items
 
     def textCharFormat_spell_builder(self):
