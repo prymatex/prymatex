@@ -265,7 +265,9 @@ class MainWindowActions(object):
     @classmethod
     def contributeToMainMenu(cls):
         import prymatex
-        edit = {
+        file_menu = {}
+        # ------------- Edit menu
+        edit_menu = {
             'text': '&Editor',
             "items": [{'text': 'Mode',
              'items': [
@@ -274,6 +276,13 @@ class MainWindowActions(object):
                 {'text': 'Multi Edit Mode', 'shortcut': 'Meta+Alt+M'}
              ]}]
         }
+        # ------------- Edit menu
+        view_menu = {
+            "text": "Panels",
+            "items": []
+        }
+        navigation_menu = {}
+        bundles_menu = {}
         # ------------- Preferences menu
         preferences_menu = {
             "text": "&Preferences",
@@ -321,13 +330,12 @@ class MainWindowActions(object):
                 "triggered": lambda mainWindow: mainWindow.aboutDialog.exec_()
             }]
         }
-        return { 
-            "file": {},
-            "edit": {},
-            "view": {},
-            "text": {},
-            "navigation": {},
-            "bundles": {},
+        return {
+            "file": file_menu,
+            "edit": edit_menu,
+            "view": view_menu,
+            "navigation": navigation_menu,
+            "bundles": bundles_menu,
             "preferences": preferences_menu,
             "help": help_menu
         }

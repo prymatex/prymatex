@@ -110,7 +110,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         if parentMenu is None and isinstance(settings, dict) and 'items' in settings and not names:
             # Es un nuevo menu
             menus, actions = create_menu(self.menubar, settings, dispatcher = self.componentInstanceDispatcher, allMenus = True)
-            add_actions(self.menubar, menus, insert_before = self.menuNavigation.menuAction())
+            add_actions(self.menubar, [ menus[0] ])
         elif parentMenu is not None and settings:
             if not isinstance(settings, list):
                 settings = [ settings ]
