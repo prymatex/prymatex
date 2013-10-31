@@ -15,7 +15,7 @@ def toggle_actions(actions, enable):
             if action is not None:
                 action.setEnabled(enable)
 
-def create_action(parent, settings, connect = True):
+def create_action(parent, settings, dispatcher = None):
     """Create a QAction"""
     text = settings.get("text")
     action = QtGui.QAction(text, parent)
@@ -46,15 +46,23 @@ def create_action(parent, settings, connect = True):
         action.functionToggled = settings["toggled"]
         action.setCheckable(True)
 
-    if connect and action.functionTriggered:
-        parent.connect(action, 
-            QtCore.SIGNAL("triggered()"),
-            isinstance(connect, collections.Callable) and connect or action.functionTriggered)
+    # The signal dispatcher
+    def dispatch_signal(dispatcher, handler):
+        def _dispatch(*largs):
+            dispatcher(handler, *largs)
+        return _dispatch
 
-    if connect and action.functionToggled:
-        parent.connect(action, 
-            QtCore.SIGNAL("toggled(bool)"),
-            isinstance(connect, collections.Callable) and connect or action.functionToggled)
+    if action.functionTriggered is not None:
+        parent.connect(action, QtCore.SIGNAL("triggered()"),
+            isinstance(dispatcher, collections.Callable) and \
+            dispatch_signal(dispatcher, action.functionTriggered) or \
+            action.functionTriggered)
+
+    if action.functionToggled is not None:
+        parent.connect(action, QtCore.SIGNAL("toggled(bool)"),
+            isinstance(dispatcher, collections.Callable) and \
+            dispatch_signal(dispatcher, action.functionToggled) or \
+            action.functionToggled)
 
     # Test functions
     if "testChecked" in settings and isinstance(settings["testChecked"], collections.Callable):

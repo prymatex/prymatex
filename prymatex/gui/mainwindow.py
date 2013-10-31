@@ -80,6 +80,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         self.dockers = []
         self.dialogs = []
         self.customComponentActions = {}
+        self.customComponentMenus = {}
 
         self.setAcceptDrops(True)
 
@@ -100,7 +101,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
             self.addStatusBar(component)
 
     def addExtensionsToMainMenu(self, name, settings):
-        actions = []
+        menus = actions = []
         names = list(name) if isinstance(name, (tuple, list)) else [ name ]
         parentMenu = self.menubar
         while names and parentMenu is not None:
@@ -108,13 +109,13 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
         if parentMenu is None and isinstance(settings, dict) and 'items' in settings and not names:
             # Es un nuevo menu
-            menu, actions = create_menu(self.menubar, settings, connectActions = self.componentActionDispatcher)
-            add_actions(self.menubar, [ menu ], insert_before = self.menuNavigation.menuAction())
+            menus, actions = create_menu(self.menubar, settings, dispatcher = self.componentInstanceDispatcher, allMenus = True)
+            add_actions(self.menubar, menus, insert_before = self.menuNavigation.menuAction())
         elif parentMenu is not None and settings:
             if not isinstance(settings, list):
                 settings = [ settings ]
-            actions = extend_menu(parentMenu, settings, connectActions = self.componentActionDispatcher)
-        return actions
+            menus, actions = extend_menu(parentMenu, settings, dispatcher = self.componentInstanceDispatcher)
+        return menus, actions
 
     def initialize(self, application):
         PMXBaseComponent.initialize(self, application)
@@ -132,7 +133,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         def extendMainMenu(klass):
             menuExtensions = klass.contributeToMainMenu()
             for name, settings in menuExtensions.items():
-                actions = self.addExtensionsToMainMenu(name, settings)
+                menus, actions = self.addExtensionsToMainMenu(name, settings)
+                self.customComponentMenus.setdefault(klass, []).extend(menus)
                 self.customComponentActions.setdefault(klass, []).extend(actions)
 
             for componentClass in application.pluginManager.findComponentsForClass(klass):
@@ -225,7 +227,7 @@ html_footer
             area = self.dockWidgetArea(dock)
             self.dockToolBars[area].show()
 
-    def componentActionDispatcher(self, checked = None):
+    def componentInstanceDispatcher(self, handler, *largs):
         action = self.sender()
         componentClass = None
         for cmpClass, actions in self.customComponentActions.items():
@@ -241,16 +243,10 @@ html_footer
 
         self.logger.debug("Trigger %s over %s" % (action, componentInstances))
 
-        def triggerAction(instance, action):
-            if checked is not None:
-                action.functionToggled(instance, checked)
-            else:
-                action.functionTriggered(instance)
-        print(checked, componentInstances)
         # TODO Tengo todas pero solo se lo aplico a la ultima que es la que generalmente esta en uso
         # for componentInstance in componentInstances:
         #    triggerAction(componentInstance, action)
-        triggerAction(componentInstances[-1], action)
+        handler(componentInstances[-1], *largs)
 
     def updateMenuForEditor(self, editor):
         def set_actions(instance, actions):

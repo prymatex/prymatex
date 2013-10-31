@@ -11,7 +11,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.qt.helpers.base import text2objectname
 from prymatex.qt.helpers.actions import create_action
 
-def create_menu(parent, settings, connectActions = True, useSeparatorName = False):
+def create_menu(parent, settings, dispatcher = None, separatorName = False, allMenus = False):
     text = settings.get("text", "Menu")
     menu = QtGui.QMenu(text, parent)
     name = settings.get("name", text)
@@ -21,58 +21,65 @@ def create_menu(parent, settings, connectActions = True, useSeparatorName = Fals
     if "icon" in settings:
         menu.setIcon(settings["icon"])
 
-    # actions
-    actions = [menu.menuAction()] + extend_menu(menu, 
+    menus, actions = extend_menu(menu, 
         settings.get("items", []),
-        connectActions = connectActions,
-        useSeparatorName = useSeparatorName)
+        dispatcher = dispatcher,
+        separatorName = separatorName)
+        
+    actions = [ menu.menuAction() ] + actions
+    menus = [ menu ] + menus
 
     if "testEnabled" in settings:
         actions[0].testEnabled = settings["testEnabled"]
     if "testVisible" in settings:
         actions[0].testVisible = settings["testVisible"]
 
-    return menu, actions
+    if not allMenus:
+        return menus[0], actions
+    return menus, actions
 
-def extend_menu(menu, items, connectActions = True, useSeparatorName = False):
+def extend_menu(parent, settings, dispatcher = True, separatorName = False):
     actions = []
-    for item in items:
+    menus = []
+    for item in settings:
+        action = menu = None
         if item == "-":
-            action = menu.addSeparator()
-            actions.append(action)
+            action = parent.addSeparator()
         elif isinstance(item, str) and item.startswith("--"):
             name = item[item.rfind("-") + 1:]
-            action = menu.addSeparator()
+            action = parent.addSeparator()
             action.setObjectName(text2objectname(name, prefix = "section"))
-            if useSeparatorName:
+            if separatorName:
                 action.setText(name)
-            actions.append(action)
         elif isinstance(item, dict) and 'items' in item:
-            submenu, subactions = create_menu(menu, item, 
-                connectActions = connectActions,
-                useSeparatorName = useSeparatorName)
-            actions.extend(subactions)
-            add_actions(menu, [ submenu ])
+            menu, action = create_menu(parent, item, 
+                dispatcher = dispatcher,
+                separatorName = separatorName)
+            add_actions(parent, [ menu ])
         elif isinstance(item, dict):
-            action = create_action(menu, item, connect = connectActions)
-            menu.addAction(action)
-            actions.append(action)
+            action = create_action(parent, item, dispatcher = dispatcher)
+            add_actions(parent, [ action ])
         elif isinstance(item, QtGui.QAction):
-            menu.addAction(item)
-            actions.append(item)
+            parent.addAction(item)
+            action = item
         elif isinstance(item, QtGui.QMenu):
-            actions.append(menu.addMenu(item))
+            action = parent.addMenu(item)
         elif isinstance(item, (tuple, list)):
             actionGroup = QtGui.QActionGroup(menu)
-            actions.append(actionGroup)
             actionGroup.setExclusive(isinstance(item, tuple))
+            action = []
             for i in item:
-                # TODO i puede ser un dict
-                menu.addAction(i)
+                # TODO i puede ser mas configuracion
+                parent.addAction(i)
                 i.setActionGroup(actionGroup)
+                action.append(i)
         else:
             raise Exception("%s" % item)
-    return actions
+        if action is not None:
+            getattr(actions, isinstance(action, (tuple, list)) and "extend" or "append")(action)
+        if menu is not None:
+            getattr(menus, isinstance(menu, (tuple, list)) and "extend" or "append")(menu)
+    return menus, actions
 
 def add_actions(target, actions, insert_before=None):
     """Add actions to a menu"""

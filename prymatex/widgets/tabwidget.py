@@ -112,14 +112,14 @@ class _DragableTabBar(QtGui.QTabBar):
                 "items": [
                     {   "text": "Close",
                         "icon": resources.getIcon("tab-close"),
-                        "callback": partial(tabWidget._close_widget, widget) 
+                        "triggered": partial(tabWidget._close_widget, widget) 
                     },
                     {   "text": "Close All",
-                        "callback": tabSplitter.closeAll
+                        "triggered": tabSplitter.closeAll
                     },
                     {   "text": "Close Other",
                         "icon": resources.getIcon("tab-close-other"),
-                        "callback": partial(tabSplitter.closeAllExceptWidget, widget)
+                        "triggered": partial(tabSplitter.closeAllExceptWidget, widget)
                     }
                 ]
             }
@@ -138,7 +138,7 @@ class _DragableTabBar(QtGui.QTabBar):
             # Create custom menu (
             tabMenu["items"].extend(widget.contributeToTabMenu())
             
-            menu, actions = create_menu(self, tabMenu, connectActions = True)
+            menu, actions = create_menu(self, tabMenu)
             
             # Display menu
             menu.exec_(e.globalPos())
