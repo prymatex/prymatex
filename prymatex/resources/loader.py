@@ -98,10 +98,18 @@ def loadResources(resourcesPath, staticMapping = []):
         resources[source] = loadSourcePath(os.path.join(resourcesPath, source))
     return resources
 
+def loadStyles(resourcesPath):
+    styles = {}
+    stylesPath = os.path.join(resourcesPath, "Styles")
+    for styleFileName in os.listdir(stylesPath):
+        name = os.path.splitext(styleFileName)[0]
+        styles[name] = os.path.join(stylesPath, styleFileName)
+    return {"Styles": styles}
+
 def loadPrymatexResources(resourcesPath, preferedThemeName = "oxygen"):
     global RESOURCES, RESOURCES_READY
     if not RESOURCES_READY:
-        #Test default theme:
+        # Test default theme:
         if not QtGui.QIcon.hasThemeIcon(THEME_ICON_TEST):
             themePaths = QtGui.QIcon.themeSearchPaths()
             if os.path.exists("/usr/share/icons") and "/usr/share/icons" not in themePaths:
@@ -117,10 +125,14 @@ def loadPrymatexResources(resourcesPath, preferedThemeName = "oxygen"):
                 QtGui.QIcon.setThemeName(themeName)
                 if QtGui.QIcon.hasThemeIcon(THEME_ICON_TEST):
                     break
-        RESOURCES = loadResources(resourcesPath, STATICMAPPING)
+        # Load Icons and Images
+        RESOURCES.update(loadResources(resourcesPath, STATICMAPPING))
+        # Load Styles
+        RESOURCES.update(loadStyles(resourcesPath))
+
         installCustomFromThemeMethod()
         RESOURCES_READY = True
-        
+
 def installCustomFromThemeMethod():
     #Install fromTheme custom function
     from prymatex.resources.icons import get_icon
@@ -132,7 +144,7 @@ def registerImagePath(name, path):
     external = RESOURCES.setdefault("External", {})
     external[name] = path
 
-def getResourcePath(name, sources = None):
+def getResource(name, sources = None):
     global RESOURCES
     if sources is not None:
         sources = sources if isinstance(sources, (list, tuple)) else (sources, )

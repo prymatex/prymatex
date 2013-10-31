@@ -4,7 +4,7 @@
 from prymatex.qt import QtGui
 from prymatex.qt.helpers import get_std_icon
 
-from prymatex.resources.loader import getResourcePath
+from prymatex.resources.loader import getResource
 from prymatex.utils.decorators.memoize import memoized
 
 def get_image(index, size = None, default = None):
@@ -12,7 +12,7 @@ def get_image(index, size = None, default = None):
     if image is None and default is not None:
         image = default
     elif image is None:
-        image = QtGui.QPixmap(getResourcePath("notfound", ["Icons"]))
+        image = QtGui.QPixmap(getResource("notfound", ["Icons"]))
     if size is not None:
         size = size if isinstance(size, (tuple, list)) else (size, size)
         image = image.scaled(*size)
@@ -20,7 +20,7 @@ def get_image(index, size = None, default = None):
 
 @memoized
 def __get_image(index):
-    path = getResourcePath(index, ["Images", "Icons"])
+    path = getResource(index, ["Images", "Icons"])
     if path is not None:
         return QtGui.QPixmap(path)
     else:

@@ -11,7 +11,7 @@ import os
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import get_std_icon
 
-from prymatex.resources.loader import getResourcePath
+from prymatex.resources.loader import getResource
 from prymatex.utils.decorators.memoize import memoized
 from prymatex.utils import six
 
@@ -25,7 +25,7 @@ def get_icon(index, size = None, default = None):
         icon = default
     elif icon is None:
         NOTFOUND.add(index)
-        icon = QtGui.QIcon(getResourcePath("notfound", ["Icons"]))
+        icon = QtGui.QIcon(getResource("notfound", ["Icons"]))
     if size is not None:
         size = size if isinstance(size, (tuple, list)) else (size, size)
         icon = QtGui.QIcon( icon.pixmap(*size) )
@@ -47,7 +47,7 @@ def __get_icon(index):
             return QtGui.QIcon._fromTheme(index)
         else: 
             #Try icon in the prymatex's resources
-            path = getResourcePath(index, ["Icons", "External"])
+            path = getResource(index, ["Icons", "External"])
             if path is not None:
                 return QtGui.QIcon(path)
         #Standard Icon
