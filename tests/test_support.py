@@ -20,7 +20,7 @@ class Persona(object):
 CLASS_TEXT = """class Persona(object):\n"""
 
 #https://github.com/textmate/textmate/blob/master/Applications/TextMate/about/Changes.md
-class TestSupportFunctions(unittest.TestCase):
+class SupportTests(unittest.TestCase):
 
     def setUp(self):
         self.manager = PMXSupportPythonManager()
