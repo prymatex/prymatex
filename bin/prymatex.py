@@ -32,7 +32,9 @@ def runPrymatexApplication(options, files):
         if not prymatexAppInstance.applyOptions(instanceOptions):
             return 0
         prymatexAppInstance.loadGraphicalUserInterface()
-        prymatexAppInstance.openArgumentFiles(files)
+        # ---- Open files
+        for path in files:
+            prymatexAppInstance.openPath(path)
         return prymatexAppInstance.exec_()
 
     returnCode = PrymatexApplication.RESTART_CODE

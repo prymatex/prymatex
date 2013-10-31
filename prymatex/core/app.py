@@ -435,6 +435,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         self.__options = value
         # Send some singal? Don't think so yet, this is intended to be set at startup
 
+    # ---- Open (file, directory, url, canelones)
     def openFile(self, filePath, cursorPosition=None, focus=True, mainWindow=None, useTasks=True):
         """Open a editor in current window"""
         filePath = self.fileManager.normcase(filePath)
@@ -489,12 +490,46 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         else:
             QtGui.QDesktopServices.openUrl(url)
             
-    def openArgumentFiles(self, args):
-        for filePath in [f for f in args if os.path.exists(f)]:
-            if os.path.isfile(filePath):
-                self.openFile(filePath)
+    def openPath(self, path):
+        if os.path.exists(path):
+            if os.path.isfile(path):
+                self.openFile(path)
             else:
-                self.openDirectory(filePath)
+                self.openDirectory(path)
+
+    # --- Shortcuts
+    def register_shortcut(self, qaction_or_qshortcut, context, name,
+                          default=None):
+        """
+        Register QAction or QShortcut to Spyder main application,
+        with shortcut (context, name, default)
+        """
+        self.shortcut_data.append( (qaction_or_qshortcut,
+                                    context, name, default) )
+        self.apply_shortcuts()
+
+    def remove_deprecated_shortcuts(self):
+        """Remove deprecated shortcuts"""
+        data = [(context, name) for (qobject, context, name,
+                default) in self.shortcut_data]
+        remove_deprecated_shortcuts(data)
+        
+    def apply_shortcuts(self):
+        """Apply shortcuts settings to all widgets/plugins"""
+        toberemoved = []
+        for index, (qobject, context, name,
+                    default) in enumerate(self.shortcut_data):
+            keyseq = QKeySequence( get_shortcut(context, name, default) )
+            try:
+                if isinstance(qobject, QtGui.QAction):
+                    qobject.setShortcut(keyseq)
+                elif isinstance(qobject, QtGui.QShortcut):
+                    qobject.setKey(keyseq)
+            except RuntimeError:
+                # Object has been deleted
+                toberemoved.append(index)
+        for index in sorted(toberemoved, reverse=True):
+            self.shortcut_data.pop(index)
 
     def checkExternalAction(self, mainWindow, editor):
         if editor.isExternalChanged():
