@@ -14,8 +14,9 @@ from prymatex.qt.helpers.actions import create_action
 def create_menu(parent, settings, dispatcher = None, separatorName = False, allMenus = False):
     text = settings.get("text", "Menu")
     menu = QtGui.QMenu(text, parent)
-    name = settings.get("name", text)
-    menu.setObjectName(text2objectname(name, prefix = "menu"))
+    objectName = text2objectname(settings.get("name", text), prefix = "menu")
+    menu.setObjectName(text2objectname(objectName))
+    menu.menuAction().setObjectName(text2objectname(objectName, prefix = "action"))
     
     # attrs
     if "icon" in settings:
@@ -45,17 +46,18 @@ def extend_menu(parent, settings, dispatcher = True, separatorName = False):
         action = menu = None
         if item == "-":
             action = parent.addSeparator()
+            action.setObjectName(text2objectname("None", prefix = "separator"))
         elif isinstance(item, str) and item.startswith("--"):
             name = item[item.rfind("-") + 1:]
             action = parent.addSeparator()
-            action.setObjectName(text2objectname(name, prefix = "section"))
+            action.setObjectName(text2objectname(name, prefix = "separator"))
             if separatorName:
                 action.setText(name)
         elif isinstance(item, dict) and 'items' in item:
-            menu, action = create_menu(parent, item, 
+            menus, action = create_menu(parent, item, 
                 dispatcher = dispatcher,
-                separatorName = separatorName)
-            add_actions(parent, [ menu ])
+                separatorName = separatorName, allMenus = True)
+            add_actions(parent, [ menus[0] ])
         elif isinstance(item, dict):
             action = create_action(parent, item, dispatcher = dispatcher)
             add_actions(parent, [ action ])
