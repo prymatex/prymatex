@@ -10,15 +10,9 @@ from prymatex.utils import sourcecode
 import prymatex
 
 def text2objectname(text, sufix = "", prefix = ""):
-    """&Text Button name -> %{prefix}TextButtonName%{sufix}
-    """
-    if ' ' in text:
-        words = text.split(' ')
-        name = ''.join(map(sourcecode.to_ascii_cap, words))
-    else:
-        text = sourcecode.to_ascii(text)
-        name = text[0].upper() + text[1:] if prefix else text
-    return prefix + name + sufix
+    """&Text Button name -> %{prefix}TextButtonName%{sufix}"""
+    text = text.title() if " " in text else text[0].upper() + text[1:]
+    return prefix + ''.join(sourcecode.to_alphanumeric(text)) + sufix
 
 def qapplication(translate=True):
     """Return QApplication instance creates it if it doesn't already exist"""

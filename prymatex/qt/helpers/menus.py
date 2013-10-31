@@ -12,10 +12,10 @@ from prymatex.qt.helpers.base import text2objectname
 from prymatex.qt.helpers.actions import create_action
 
 def create_menu(parent, settings, dispatcher = None, separatorName = False, allMenus = False):
-    text = settings.get("text", "Menu")
-    menu = QtGui.QMenu(text, parent)
-    objectName = text2objectname(settings.get("name", text), prefix = "menu")
-    menu.setObjectName(text2objectname(objectName))
+    menu = QtGui.QMenu(settings["text"], parent)
+    objectName = text2objectname(settings.get("name", settings["text"]), prefix = "menu")
+    
+    menu.setObjectName(objectName)
     menu.menuAction().setObjectName(text2objectname(objectName, prefix = "action"))
     
     # attrs

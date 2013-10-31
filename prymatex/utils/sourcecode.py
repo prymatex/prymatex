@@ -8,8 +8,13 @@ import string
 import difflib
 import unicodedata
 
-to_ascii = lambda s: "".join([c for c in s if c in string.ascii_letters])
-to_ascii_cap = lambda s: to_ascii(s).capitalize()
+def _remove_characters(source, characters):
+    for char in source:
+        if char in characters:
+            yield char
+
+to_ascii = lambda source: _remove_characters(source, string.ascii_letters)
+to_alphanumeric = lambda source: _remove_characters(source, string.ascii_letters + string.digits)
 
 class unaccented_map(dict):
 # Translation dictionary.  Translation entries are added to this dictionary as needed.
