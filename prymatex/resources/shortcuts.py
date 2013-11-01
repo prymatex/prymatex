@@ -6,14 +6,14 @@ from prymatex.qt.helpers import keybinding
 
 from prymatex.resources.loader import getResource, setResource, getSection
 
-
 def get_shortcut(context, name, default = None):
     """Get keyboard shortcut (key sequence string)"""
     shortcut = keybinding(name)
-    if shortcut is None:
-        shortcut = getResource('%s.%s' % (context, name), 'Shortcuts')
-    if shortcut is None:
-        return default
+    if shortcut.isEmpty():
+        keystr = getResource('%s.%s' % (context, name), 'Shortcuts')
+        shortcut = QtGui.QKeySequence.fromString(keystr)
+    if shortcut.isEmpty():
+        shortcut = QtGui.QKeySequence.fromString(default)
     return shortcut
 
 def set_shortcut(context, name, keystr):
