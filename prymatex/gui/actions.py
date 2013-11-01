@@ -3,7 +3,7 @@
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.compat import getOpenFileNames
-from prymatex.qt.helpers import text2objectname
+from prymatex.qt.helpers import text2objectname, text2iconname
 
 from prymatex import resources
 from prymatex.core import exceptions
@@ -232,18 +232,21 @@ class MainWindowActions(object):
         import prymatex
         file_menu = {}
         # ------------- Edit menu
-        def globalEditAction(name):
+        def globalEditAction(text):
+            objectName = text2objectname(text)
+            iconName = text2iconname(text, prefix = "edit")
+            print(iconName)
             return {
-                "text": name.title(),
-                "shortcut": resources.get_shortcut("_", name.title()),
-                "icon": resources.get_icon("edit-%s" % name),
+                "text": text,
+                "shortcut": resources.get_shortcut("_", objectName),
+                "icon": resources.get_icon(iconName),
                 "triggered": cls.globalCallback,
-                "data": text2objectname(name)
+                "data": objectName
             }
         edit_menu = {
             'text': '&Edit',
-            "items": [ globalEditAction(name) for name in ("undo", "redo") ] + ["-"] +
-            [ globalEditAction(name) for name in ("cut", "copy", "paste", "delete") ]
+            "items": [ globalEditAction(name) for name in ("&Undo", "&Redo") ] + ["-"] +
+            [ globalEditAction(name) for name in ("Cu&t", "&Copy", "&Paste", "&Delete") ]
         }
         # ------------- View menu
         view_menu = {
