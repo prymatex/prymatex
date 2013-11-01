@@ -235,7 +235,6 @@ class MainWindowActions(object):
         def globalEditAction(text):
             objectName = text2objectname(text)
             iconName = text2iconname(text, prefix = "edit")
-            print(iconName)
             return {
                 "text": text,
                 "shortcut": resources.get_shortcut("_", objectName),

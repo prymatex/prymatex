@@ -237,7 +237,6 @@ html_footer
         widget = self.application.focusWidget()
         action = self.sender()
         callback = action.data()
-        print(callback)
         getattr(widget, callback, lambda : None)()
 
     def componentInstanceDispatcher(self, handler, *largs):
