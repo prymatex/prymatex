@@ -78,8 +78,6 @@ class VariableType(object):
         else:
             return "${%s}" % self.name
 
-    __unicode__ = __str__    
-        
     def replace(self, memodict, holders = None, match = None, variables = None):
         if match and self.name.isdigit():
             try:
@@ -115,8 +113,6 @@ class VariableConditionType(object):
         cnd += ")"
         return cnd
     
-    __unicode__ = __str__
-
     def replace(self, memodict, holders = None, match = None, variables = None):
         group = match.group(int(self.name))
         nodes = self.if_set if group else self.if_not_set
@@ -142,9 +138,7 @@ class TextType(object):
         self.text = text
     
     def __str__(self):
-        return self.text
-    
-    __unicode__ = __str__
+        return "%s" % self.text
     
     def replace(self, memodict, holders = None, match = None, variables = None):
         return self.text
@@ -156,6 +150,9 @@ class PlaceholderTypeMixin(object):
     def memoFactory(self, identifier):
         raise NotImplemented
 
+    def hasContent(self, memodict):
+        return memodict.get_or_create(self).content is not None
+        
     def setContent(self, text, memodict):
         memodict.set(self, memodict.get_or_create(self)._replace(content = text))
         return True
@@ -172,12 +169,10 @@ class PlaceholderType(PlaceholderTypeMixin):
     
     def __str__(self):
         if self.content:
-            return "${%s:%s}" % (self.index, "".join([unicode(node) for node in self.content]))
+            return "${%s:%s}" % (self.index, "".join(["%s" % node for node in self.content]))
         else:
             return "$%s" % self.index
 
-    __unicode__ = __str__
-    
     def collect(self, other, chain):
         if other == self:
             return True
@@ -217,6 +212,9 @@ class PlaceholderType(PlaceholderTypeMixin):
         end = visitor.caretPosition()
         memodict.set(self, memo._replace(start = start, end = end))
     
+    def hasContent(self, memodict):
+        return PlaceholderTypeMixin.hasContent(self, memodict) or bool(self.content)
+    
     def memoFactory(self, identifier):
         return Memo(identifier = identifier, start = 0, end = 0, content = None)
         
@@ -227,9 +225,7 @@ class PlaceholderChoiceType(PlaceholderTypeMixin):
         self.choices = []
 
     def __str__(self):
-        return "${%s|%s|}" % (self.index, ",".join([ unicode(choice) for choice in self.choices]))
-
-    __unicode__ = __str__
+        return "${%s|%s|}" % (self.index, ",".join([ "%s" % choice for choice in self.choices]))
 
     def replace(self, memodict, holders = None, match = None, variables = None):
         memo = memodict.get_or_create(self)
@@ -246,6 +242,9 @@ class PlaceholderChoiceType(PlaceholderTypeMixin):
         end = visitor.caretPosition()
         memodict.set(self, memo._replace(start = start, end = end))
     
+    def hasContent(self, memodict):
+        return PlaceholderTypeMixin.hasContent(self, memodict) or bool(self.choices)
+    
     def memoFactory(self, identifier):
         return Memo(identifier = identifier, start = 0, end = 0, content = 0)
         
@@ -260,10 +259,8 @@ class PlaceholderTransformType(PlaceholderTypeMixin):
     def __str__(self):
         return "${%s/%s/%s/%s}" % (self.index, 
             self.pattern.pattern, 
-            "".join([ unicode(frmt) for frmt in self.format]),
+            "".join([ "%s" % frmt for frmt in self.format]),
             "".join(self.options))
-    
-    __unicode__ = __str__
     
     def replace(self, memodict, holders = None, match = None, variables = None):
         text = ""
@@ -284,6 +281,9 @@ class PlaceholderTransformType(PlaceholderTypeMixin):
         
         end = visitor.caretPosition()
         memodict.set(self, memo._replace(start = start, end = end))
+
+    def hasContent(self, memodict):
+        return PlaceholderTypeMixin.hasContent(self, memodict) or True
 
     def memoFactory(self, identifier):
         return Memo(identifier = identifier, start = 0, end = 0, content = None)
@@ -312,8 +312,6 @@ class VariableChangeType(object):
         changes = [""]
         return "${%s:%s}" % (self.name, "/".join(changes))
     
-    __unicode__ = __str__
-
     def replace(self, memodict, holders = None, match = None, variables = None):
         text = match.group(int(self.name))
         for key, function in transform_function.items():
@@ -335,10 +333,8 @@ class VariableTransformationType(object):
     def __str__(self):
         return "${%s/%s/%s/%s}" % (self.name, 
             self.pattern.pattern, 
-            "".join([ unicode(frmt) for frmt in self.format]),
+            "".join([ "%s" % frmt for frmt in self.format]),
             "".join(self.options))
-    
-    __unicode__ = __str__
     
     def replace(self, memodict, holders = None, match = None, variables = None):
         text = ""
@@ -366,8 +362,6 @@ class CodeType(object):
 
     def __str__(self):
         return "`%s`" % (self.code)
-    
-    __unicode__ = __str__
     
     def replace(self, memodict, holders = None, match = None, variables = None):
         memo = memodict.get_or_create(self)

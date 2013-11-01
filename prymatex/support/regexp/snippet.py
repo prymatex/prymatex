@@ -135,9 +135,12 @@ class SnippetHandler(object):
     def holderNumber(self):
         return self.holderIndex + 1
 
-    def setContent(self, text):
+    def setHolderContent(self, text):
         self.__current_holder().setContent(text, self.memodict)
 
+    def hasHolderContent(self):
+        return self.__current_holder().hasContent(self.memodict)
+        
     def lastHolderFixed(self):
         return self.snippet.lastHolderFixed()
 
