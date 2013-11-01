@@ -3,7 +3,18 @@
 
 from prymatex.qt import QtCore, QtGui
 
-__all__ = [ "combine_icons", "get_std_icon" ]
+from prymatex.utils import sourcecode
+
+__all__ = [ "combine_icons", "get_std_icon", "text2iconname" ]
+
+def text2iconname(text, sufix = "", prefix = ""):
+    """&Text Button name -> %{prefix}-text-button-name-%{sufix}"""
+    text = [ "".join(sourcecode.to_alphanumeric(t)) for t in text.lower().split() ]
+    if prefix:
+        text = [ prefix ] + text
+    if sufix:
+        text += [ sufix ]
+    return '-'.join(text)
 
 def combine_icons(icon1, icon2, scale = 1):
     newIcon = QtGui.QIcon()

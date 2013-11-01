@@ -8,11 +8,12 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.utils.decorators.memoize import memoized
 from prymatex.utils.modmap import get_keymap_table
 
-def keybinding(attr):
+def keybinding(name):
     """Return keybinding"""
-    ks = getattr(QtGui.QKeySequence, attr, None)
+    ks = getattr(QtGui.QKeySequence, name, None)
     if ks:
         return QtGui.QKeySequence.keyBindings(ks)[0]
+    return QtGui.QKeySequence.mnemonic(name)
     
 #======================
 # Key Equivalents
