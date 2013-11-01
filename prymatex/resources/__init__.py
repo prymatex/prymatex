@@ -8,6 +8,7 @@ from prymatex.resources.images import get_image
 from prymatex.resources.styles import *
 from prymatex.resources.fonts import *
 from prymatex.resources.files import *
+from prymatex.resources.shortcuts import *
 
 # TODO: Remove backward compatibility
 getIcon = get_icon

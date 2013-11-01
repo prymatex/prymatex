@@ -10,8 +10,9 @@ from prymatex.utils.modmap import get_keymap_table
 
 def keybinding(attr):
     """Return keybinding"""
-    ks = getattr(QtGui.QKeySequence, attr)
-    return QtGui.QKeySequence.keyBindings(ks)[0]
+    ks = getattr(QtGui.QKeySequence, attr, None)
+    if ks:
+        return QtGui.QKeySequence.keyBindings(ks)[0]
     
 #======================
 # Key Equivalents

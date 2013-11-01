@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/mainwindow.ui'
 #
-# Created: Wed Oct 30 09:09:43 2013
+# Created: Fri Nov  1 09:06:11 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -52,14 +52,8 @@ class Ui_MainWindow(object):
         icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.menuNew.setIcon(icon1)
         self.menuNew.setObjectName(_fromUtf8("menuNew"))
-        self.menuView = QtGui.QMenu(self.menubar)
-        self.menuView.setObjectName(_fromUtf8("menuView"))
-        self.menuPanels = QtGui.QMenu(self.menuView)
-        self.menuPanels.setObjectName(_fromUtf8("menuPanels"))
         self.menuNavigation = QtGui.QMenu(self.menubar)
         self.menuNavigation.setObjectName(_fromUtf8("menuNavigation"))
-        self.menuEdit = QtGui.QMenu(self.menubar)
-        self.menuEdit.setObjectName(_fromUtf8("menuEdit"))
         self.menuBundles = QtGui.QMenu(self.menubar)
         self.menuBundles.setObjectName(_fromUtf8("menuBundles"))
         self.menuBundleEditor = QtGui.QMenu(self.menuBundles)
@@ -233,7 +227,6 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionSwitchProfile)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionQuit)
-        self.menuView.addAction(self.menuPanels.menuAction())
         self.menuNavigation.addAction(self.actionNextTab)
         self.menuNavigation.addAction(self.actionPreviousTab)
         self.menuNavigation.addAction(self.actionSelectTab)
@@ -242,13 +235,6 @@ class Ui_MainWindow(object):
         self.menuNavigation.addAction(self.actionLastEditLocation)
         self.menuNavigation.addAction(self.actionLocationBack)
         self.menuNavigation.addAction(self.actionLocationForward)
-        self.menuEdit.addAction(self.actionUndo)
-        self.menuEdit.addAction(self.actionRedo)
-        self.menuEdit.addSeparator()
-        self.menuEdit.addAction(self.actionCut)
-        self.menuEdit.addAction(self.actionCopy)
-        self.menuEdit.addAction(self.actionPaste)
-        self.menuEdit.addAction(self.actionDelete)
         self.menuBundleEditor.addAction(self.actionShowBundleEditor)
         self.menuBundleEditor.addSeparator()
         self.menuBundleEditor.addAction(self.actionEditCommands)
@@ -259,8 +245,6 @@ class Ui_MainWindow(object):
         self.menuBundles.addAction(self.menuBundleEditor.menuAction())
         self.menuBundles.addSeparator()
         self.menubar.addAction(self.menuFile.menuAction())
-        self.menubar.addAction(self.menuEdit.menuAction())
-        self.menubar.addAction(self.menuView.menuAction())
         self.menubar.addAction(self.menuNavigation.menuAction())
         self.menubar.addAction(self.menuBundles.menuAction())
 
@@ -271,10 +255,7 @@ class Ui_MainWindow(object):
         self.menuFile.setTitle(_translate("MainWindow", "&File", None))
         self.menuRecentFiles.setTitle(_translate("MainWindow", "&Recent Files", None))
         self.menuNew.setTitle(_translate("MainWindow", "New", None))
-        self.menuView.setTitle(_translate("MainWindow", "&View", None))
-        self.menuPanels.setTitle(_translate("MainWindow", "Panels", None))
         self.menuNavigation.setTitle(_translate("MainWindow", "&Navigation", None))
-        self.menuEdit.setTitle(_translate("MainWindow", "&Edit", None))
         self.menuBundles.setTitle(_translate("MainWindow", "&Bundles", None))
         self.menuBundleEditor.setTitle(_translate("MainWindow", "Bundle &Editor", None))
         self.actionNewEditor.setText(_translate("MainWindow", "&Editor", None))

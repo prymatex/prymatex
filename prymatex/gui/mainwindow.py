@@ -142,6 +142,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
         extendMainMenu(self.__class__)
 
+        # Metemos las acciones de las dockers al menu panels
+        menuPanels = self.menuBar().findChild(QtGui.QMenu, "menuPanels")
+        if menuPanels:
+            for dock in self.dockers:
+                toggleAction = dock.toggleViewAction()
+                menuPanels.addAction(toggleAction)
+                self.addAction(toggleAction)
+
     def environmentVariables(self):
         env = {}
         for docker in self.dockers:
@@ -210,9 +218,6 @@ html_footer
 
     def addDock(self, dock, area):
         self.addDockWidget(area, dock)
-        toggleAction = dock.toggleViewAction()
-        self.menuPanels.addAction(toggleAction)
-        self.addAction(toggleAction)
         titleBar = DockWidgetTitleBar(dock)
         titleBar.collpaseAreaRequest.connect(self.on_dockWidgetTitleBar_collpaseAreaRequest)
         dock.setTitleBarWidget(titleBar)
@@ -227,6 +232,14 @@ html_footer
             area = self.dockWidgetArea(dock)
             self.dockToolBars[area].show()
 
+    def globalCallback(self):
+        """Global callback"""
+        widget = self.application.focusWidget()
+        action = self.sender()
+        callback = action.data()
+        print(callback)
+        getattr(widget, callback, lambda : None)()
+
     def componentInstanceDispatcher(self, handler, *largs):
         action = self.sender()
         componentClass = None
@@ -240,7 +253,8 @@ html_footer
             componentInstances = reduce(
                 lambda ai, ci: ai + ci.findChildren(componentClass),
                 componentInstances, [])
-
+        
+        widget = self.application.focusWidget()
         self.logger.debug("Trigger %s over %s" % (action, componentInstances))
 
         # TODO Tengo todas pero solo se lo aplico a la ultima que es la que generalmente esta en uso

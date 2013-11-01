@@ -81,21 +81,21 @@ def buildResourceKey(filename, namePrefixes, installedKeys):
 def loadResources(resourcesPath, staticMapping = []):
     from prymatex.utils import osextra
     def loadSourcePath(sourcePath):
-        sources ={}
+        sections ={}
         for dirpath, dirnames, filenames in os.walk(sourcePath):
             for filename in filenames:
                 iconPath = os.path.join(dirpath, filename)
                 staticNames = [path_names for path_names in staticMapping if iconPath.endswith(path_names[0])]
                 if staticNames:
                     for name in staticNames:
-                        sources[name[1]] = iconPath
+                        sections[name[1]] = iconPath
                 else:
-                    name = buildResourceKey(filename, osextra.path.fullsplit(dirpath), sources)
-                    sources[name] = iconPath
-        return sources
+                    name = buildResourceKey(filename, osextra.path.fullsplit(dirpath), sections)
+                    sections[name] = iconPath
+        return sections
     resources = {}
-    for source in [ "Icons", "Images" ]:
-        resources[source] = loadSourcePath(os.path.join(resourcesPath, source))
+    for section in [ "Icons", "Images" ]:
+        resources[section] = loadSourcePath(os.path.join(resourcesPath, section))
     return resources
 
 def loadStyles(resourcesPath):
@@ -144,15 +144,23 @@ def registerImagePath(name, path):
     external = RESOURCES.setdefault("External", {})
     external[name] = path
 
-def getResource(name, sources = None):
+def getResource(name, sections = None):
     global RESOURCES
-    if sources is not None:
-        sources = sources if isinstance(sources, (list, tuple)) else (sources, )
+    if sections is not None:
+        sections = sections if isinstance(sections, (list, tuple)) else (sections, )
     else:
-        sources = list(RESOURCES.keys())
-    for source in sources:
-        if source in RESOURCES and name in RESOURCES[source]:
-            return RESOURCES[source].get(name)
+        sections = list(RESOURCES.keys())
+    for section in sections:
+        if section in RESOURCES and name in RESOURCES[section]:
+            return RESOURCES[section].get(name)
+
+def setResource(section, name, value):
+    global RESOURCES
+    RESOURCES.setdefault(section, {})[name] = value
+
+def getSection(name):
+    global RESOURCES
+    return RESOURCES.setdefault(name, {})
 
 #===============================================================
 # FUNCTIONS

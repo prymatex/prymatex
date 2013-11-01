@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-try:
-    from prymatex.qt import QtCore, QtGui
-except:
-    from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui
 
 __all__ = [ "combine_icons", "get_std_icon" ]
 

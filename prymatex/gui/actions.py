@@ -3,6 +3,7 @@
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.compat import getOpenFileNames
+from prymatex.qt.helpers import text2objectname
 
 from prymatex import resources
 from prymatex.core import exceptions
@@ -124,49 +125,13 @@ class MainWindowActions(object):
 
     # ------------ Edit Actions
     @QtCore.Slot()
-    def on_actionUndo_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().undo()
-
-    @QtCore.Slot()
-    def on_actionRedo_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().redo()
-        
-    @QtCore.Slot()
-    def on_actionCopy_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().copy()
-    
-    @QtCore.Slot()
-    def on_actionCut_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().cut()
-        
-    @QtCore.Slot()
-    def on_actionPaste_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().paste()
-
-    @QtCore.Slot()
     def on_actionFind_triggered(self):
         self.statusBar().showIFind()
 
     @QtCore.Slot()
     def on_actionFindReplace_triggered(self):
         self.statusBar().showFindReplace()
-        
-    # ------------ View Actions
-    @QtCore.Slot()
-    def on_actionZoomIn_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().zoomIn()
-            
-    @QtCore.Slot()
-    def on_actionZoomOut_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().zoomOut()
-
+    
     # ------------ Navigation Actions
     @QtCore.Slot()
     def on_actionNextTab_triggered(self):
@@ -267,19 +232,27 @@ class MainWindowActions(object):
         import prymatex
         file_menu = {}
         # ------------- Edit menu
+        def globalEditAction(name):
+            return {
+                "text": name.title(),
+                "shortcut": resources.get_shortcut("_", name.title()),
+                "icon": resources.get_icon("edit-%s" % name),
+                "triggered": cls.globalCallback,
+                "data": text2objectname(name)
+            }
         edit_menu = {
-            'text': '&Editor',
-            "items": [{'text': 'Mode',
-             'items': [
-                {'text': 'Freehanded Editing', 'shortcut': 'Meta+Alt+E'},
-                {'text': 'Overwrite Mode', 'shortcut': 'Meta+Alt+O'},
-                {'text': 'Multi Edit Mode', 'shortcut': 'Meta+Alt+M'}
-             ]}]
+            'text': '&Edit',
+            "items": [ globalEditAction(name) for name in ("undo", "redo") ] + ["-"] +
+            [ globalEditAction(name) for name in ("cut", "copy", "paste", "delete") ]
         }
-        # ------------- Edit menu
+        # ------------- View menu
         view_menu = {
-            "text": "Panels",
-            "items": []
+            'text': '&View',
+            "items": [{
+                "text": "Panels",
+                "items": []
+            }]
+            
         }
         navigation_menu = {}
         bundles_menu = {}

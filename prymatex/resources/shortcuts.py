@@ -2,29 +2,33 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtGui
+from prymatex.qt.helpers import keybinding
 
-from prymatex.resources.loader import getResource
+from prymatex.resources.loader import getResource, setResource, getSection
+
 
 def get_shortcut(context, name, default = None):
     """Get keyboard shortcut (key sequence string)"""
-    shortcut = getResource('%s.%s' % (context, name), 'Shortcuts')
+    shortcut = keybinding(name)
+    if shortcut is None:
+        shortcut = getResource('%s.%s' % (context, name), 'Shortcuts')
     if shortcut is None:
         return default
     return shortcut
 
 def set_shortcut(context, name, keystr):
     """Set keyboard shortcut (key sequence string)"""
-    CONF.set('shortcuts', '%s.%s' % (context, name), keystr)
+    setResource('Shortcuts', '%s.%s' % (context, name), keystr)
     
 def iter_shortcuts():
     """Iterate over keyboard shortcuts"""
-    for option in CONF.options('shortcuts'):
+    for option, value in getSection('Shortcuts').items():
         context, name = option.split(".", 1)
-        yield context, name, get_shortcut(context, name)
+        yield context, name, value
 
 def remove_deprecated_shortcuts(data):
     """Remove deprecated shortcuts (shortcuts in CONF but not registered)"""
-    section = 'shortcuts'
+    source = 'Shortcuts'
     options = [('%s.%s' % (context, name)).lower() for (context, name) in data]
     for option, _ in CONF.items(section, raw=CONF.raw):
         if option not in options:
@@ -34,4 +38,4 @@ def remove_deprecated_shortcuts(data):
 
 def reset_shortcuts():
     """Reset keyboard shortcuts to default values"""
-    CONF.remove_section('shortcuts')
+    CONF.remove_section('Shortcuts')

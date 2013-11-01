@@ -23,21 +23,18 @@ def create_action(parent, settings, dispatcher = None):
     action.setObjectName(text2objectname(name, prefix = "action"))
     
     # attrs
-    if "icon" in settings:
+    if "icon" in settings and settings["icon"] is not None:
         action.setIcon(settings["icon"])
-    if "shortcut" in settings:
+    if "shortcut" in settings and settings["shortcut"] is not None:
         action.setShortcut(settings["shortcut"])
-    if "tip" in settings:
+    if "tip" in settings and settings["tip"] is not None:
         action.setToolTip(settings["tip"])
         action.setStatusTip(settings["tip"])
     if "data" in settings:
         action.setData(settings["data"])
     if "menurole" in settings:
         action.setMenuRole(settings["menurole"])
-    # TODO Deprecated checkable by default if has testChecked key the action is checkable
-    if "checkable" in settings or "testChecked" in settings:
-        action.setCheckable("testChecked" in settings or settings["checkable"])
-    
+
     # Action functions
     action.functionTriggered = action.functionToggled = None
     if "triggered" in settings and isinstance(settings["triggered"], collections.Callable):

@@ -1134,15 +1134,16 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  ]}
             ]
         view = [
-                {'text': 'Font',
-                 'items': [
-                     {'text': "Zoom In",
-                      'shortcut': "Ctrl++",
-                      'triggered': cls.zoomIn},
-                     {'text': "Zoom Out",
-                      'shortcut': "Ctrl+-",
-                      'triggered': cls.zoomOut}
-                ]},
+                '-',
+                {'text': "Zoom In",
+                  'icon': resources.get_icon("zoom-in"),
+                  'shortcut': resources.get_shortcut("Editor", "ZoomIn"),
+                  'triggered': cls.zoomIn},
+                 {'text': "Zoom Out",
+                  'icon': resources.get_icon("zoom-out"),
+                  'shortcut': resources.get_shortcut("Editor", "ZoomOut"),
+                  'triggered': cls.zoomOut},
+                '-',
                 {'name': 'leftGutter',
                  'text': 'Left Gutter',
                  'items': []},

@@ -77,17 +77,6 @@
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
-   <widget class="QMenu" name="menuView">
-    <property name="title">
-     <string>&amp;View</string>
-    </property>
-    <widget class="QMenu" name="menuPanels">
-     <property name="title">
-      <string>Panels</string>
-     </property>
-    </widget>
-    <addaction name="menuPanels"/>
-   </widget>
    <widget class="QMenu" name="menuNavigation">
     <property name="title">
      <string>&amp;Navigation</string>
@@ -100,18 +89,6 @@
     <addaction name="actionLastEditLocation"/>
     <addaction name="actionLocationBack"/>
     <addaction name="actionLocationForward"/>
-   </widget>
-   <widget class="QMenu" name="menuEdit">
-    <property name="title">
-     <string>&amp;Edit</string>
-    </property>
-    <addaction name="actionUndo"/>
-    <addaction name="actionRedo"/>
-    <addaction name="separator"/>
-    <addaction name="actionCut"/>
-    <addaction name="actionCopy"/>
-    <addaction name="actionPaste"/>
-    <addaction name="actionDelete"/>
    </widget>
    <widget class="QMenu" name="menuBundles">
     <property name="title">
@@ -133,8 +110,6 @@
     <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
-   <addaction name="menuView"/>
    <addaction name="menuNavigation"/>
    <addaction name="menuBundles"/>
   </widget>
