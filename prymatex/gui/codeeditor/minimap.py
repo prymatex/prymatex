@@ -11,7 +11,7 @@ WIDTH_CHARACTER = "#"
 
 class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignRight
-    WIDTH = 120
+    WIDTH = 80
     MINIMAP_MAX_OPACITY = 0.8
     MINIMAP_MIN_OPACITY = 0.1
     
@@ -33,7 +33,7 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
 
         # Font
         font = self.document().defaultFont()
-        font.setPixelSize(2)
+        font.setPixelSize(1)
         self.setFont(font)
 
         self.setTabStopWidth(4 * self.fontMetrics().width(WIDTH_CHARACTER))
