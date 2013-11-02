@@ -79,8 +79,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         center_widget(self, scale = (0.9, 0.8))
         self.dockers = []
         self.dialogs = []
-        self.customComponentActions = {}
-        self.customComponentMenus = {}
+        self.customComponentObjects = {}
 
         self.setAcceptDrops(True)
 
@@ -102,40 +101,42 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
     def addExtensionsToMainMenu(self, name, settings):
         menus = actions = []
-        names = list(name) if isinstance(name, (tuple, list)) else [ name ]
-        parentMenu = self.menubar
-        while names and parentMenu is not None:
-            parentMenu = parentMenu.findChild(QtGui.QMenu, text2objectname(names.pop(0), prefix = "menu"))
-
-        if parentMenu is None and isinstance(settings, dict) and 'items' in settings and not names:
+        menuName = text2objectname(name, prefix = "menu")
+        parentMenu = self.findChild(QtGui.QMenu, menuName)
+        
+        if parentMenu is None:
             # Es un nuevo menu
-            menus, actions = create_menu(self.menubar, settings, dispatcher = self.componentInstanceDispatcher, allMenus = True)
-            add_actions(self.menubar, [ menus[0] ])
-        elif parentMenu is not None and settings:
+            objects = create_menu(self, settings, dispatcher = self.componentInstanceDispatcher, allObjects = True)
+            add_actions(self.menubar, [ objects[0] ])
+            return objects
+        else:
             if not isinstance(settings, list):
                 settings = [ settings ]
-            menus, actions = extend_menu(parentMenu, settings, dispatcher = self.componentInstanceDispatcher)
-        return menus, actions
+            return extend_menu(parentMenu, settings, dispatcher = self.componentInstanceDispatcher)
 
     def initialize(self, application):
         PMXBaseComponent.initialize(self, application)
+        # Dialogs
         self.selectorDialog = self.findChild(QtGui.QDialog, "SelectorDialog")
         self.aboutDialog = self.findChild(QtGui.QDialog, "AboutDialog")
         self.settingsDialog = self.findChild(QtGui.QDialog, "SettingsDialog")
         self.bundleEditorDialog = self.findChild(QtGui.QDialog, "BundleEditorDialog")
         self.profileDialog = self.findChild(QtGui.QDialog, "ProfileDialog")
         self.templateDialog = self.findChild(QtGui.QDialog, "TemplateDialog")
+        self.projectDialog = self.findChild(QtGui.QDialog, "ProjectDialog")
+
+        # Dockers
         self.browserDock = self.findChild(QtGui.QDockWidget, "BrowserDock")
         self.terminalDock = self.findChild(QtGui.QDockWidget, "TerminalDock")
         self.projectsDock = self.findChild(QtGui.QDockWidget, "ProjectsDock")
-    
-        # Build Main Menu    
+
+        # Build Main Menu
         def extendMainMenu(klass):
             menuExtensions = klass.contributeToMainMenu()
             for name, settings in menuExtensions.items():
-                menus, actions = self.addExtensionsToMainMenu(name, settings)
-                self.customComponentMenus.setdefault(klass, []).extend(menus)
-                self.customComponentActions.setdefault(klass, []).extend(actions)
+                if settings:
+                    objects = self.addExtensionsToMainMenu(name, settings)
+                    self.customComponentObjects.setdefault(klass, []).extend(objects)
 
             for componentClass in application.pluginManager.findComponentsForClass(klass):
                 extendMainMenu(componentClass)
@@ -143,13 +144,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         extendMainMenu(self.__class__)
 
         # Metemos las acciones de las dockers al menu panels
-        menuPanels = self.menuBar().findChild(QtGui.QMenu, "menuPanels")
-        if menuPanels:
-            for dock in self.dockers:
-                toggleAction = dock.toggleViewAction()
-                menuPanels.addAction(toggleAction)
-                self.addAction(toggleAction)
+        self.menuPanels = self.findChild(QtGui.QMenu, "menuPanels")
+        for dock in self.dockers:
+            toggleAction = dock.toggleViewAction()
+            self.menuPanels.addAction(toggleAction)
+            self.addAction(toggleAction)
 
+        self.menuRecentFiles = self.findChild(QtGui.QMenu, "menuRecentFiles")
+        
     def environmentVariables(self):
         env = {}
         for docker in self.dockers:
@@ -240,10 +242,10 @@ html_footer
         getattr(widget, callback, lambda : None)()
 
     def componentInstanceDispatcher(self, handler, *largs):
-        action = self.sender()
+        obj = self.sender()
         componentClass = None
-        for cmpClass, actions in self.customComponentActions.items():
-            if action in actions:
+        for cmpClass, objects in self.customComponentObjects.items():
+            if obj in objects:
                 componentClass = cmpClass
                 break
 
@@ -252,37 +254,36 @@ html_footer
             componentInstances = reduce(
                 lambda ai, ci: ai + ci.findChildren(componentClass),
                 componentInstances, [])
-        
+
         widget = self.application.focusWidget()
-        self.logger.debug("Trigger %s over %s" % (action, componentInstances))
+        self.logger.debug("Trigger %s over %s" % (obj, componentInstances))
 
         # TODO Tengo todas pero solo se lo aplico a la ultima que es la que generalmente esta en uso
-        # for componentInstance in componentInstances:
-        #    triggerAction(componentInstance, action)
         handler(componentInstances[-1], *largs)
 
     def updateMenuForEditor(self, editor):
-        def set_actions(instance, actions):
-            for action in actions:
-                action.setVisible(not hasattr(action, "testVisible") or \
-                    action.testVisible(instance))
-                action.setEnabled(not hasattr(action, "testEnabled") or \
-                    action.testEnabled(instance))
-                if action.isCheckable():
-                    action.setChecked(hasattr(action, "testChecked") and \
-                        action.testChecked(instance))
+        def set_objects(instance, objects):
+            for obj in objects:
+                if isinstance(obj, QtGui.QAction):
+                    obj.setVisible(not hasattr(obj, "testVisible") or \
+                        obj.testVisible(instance))
+                    obj.setEnabled(not hasattr(obj, "testEnabled") or \
+                        obj.testEnabled(instance))
+                    if obj.isCheckable():
+                        obj.setChecked(hasattr(obj, "testChecked") and \
+                            obj.testChecked(instance))
 
         # Primero las del editor
-        self.logger.debug("Update editor %s actions" % editor)
-        actions = self.customComponentActions.get(editor.__class__, [])
-        set_actions(editor, actions)
+        self.logger.debug("Update editor %s objects" % editor)
+        objects = self.customComponentObjects.get(editor.__class__, [])
+        set_objects(editor, objects)
 
         # Ahora sus children
         componentClass = self.application.findComponentsForClass(editor.__class__)
         for klass in componentClass:
             for componentInstance in editor.findChildren(klass):
-                actions = self.customComponentActions.get(klass, [])
-                set_actions(componentInstance, actions)
+                objects = self.customComponentObjects.get(klass, [])
+                set_objects(componentInstance, objects)
 
     def showMessage(self, *largs, **kwargs):
         self.popupMessage.showMessage(*largs, **kwargs)

@@ -11,77 +11,105 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.qt.helpers.base import text2objectname
 from prymatex.qt.helpers.actions import create_action
 
-def create_menu(parent, settings, dispatcher = None, separatorName = False, allMenus = False):
+import collections
+
+def create_menu(parent, settings, dispatcher = None, separatorName = False, allObjects = False):
     menu = QtGui.QMenu(settings["text"], parent)
     objectName = text2objectname(settings.get("name", settings["text"]), prefix = "menu")
-    
+
     menu.setObjectName(objectName)
     menu.menuAction().setObjectName(text2objectname(objectName, prefix = "action"))
-    
+
     # attrs
     if "icon" in settings:
         menu.setIcon(settings["icon"])
 
-    menus, actions = extend_menu(menu, 
+    # Action functions
+    menu.functionTriggered = menu.functionAboutToHide = menu.functionAboutToShow = None
+    if "triggered" in settings and isinstance(settings["triggered"], collections.Callable):
+        menu.functionTriggered = settings["triggered"]
+    if "aboutToHide" in settings and isinstance(settings["aboutToHide"], collections.Callable):
+        menu.functionAboutToHide = settings["aboutToHide"]
+    if "aboutToShow" in settings and isinstance(settings["aboutToShow"], collections.Callable):
+        menu.functionAboutToShow = settings["aboutToShow"]
+
+    # The signal dispatcher
+    def dispatch_signal(dispatcher, handler):
+        def _dispatch(*largs):
+            dispatcher(handler, *largs)
+        return _dispatch
+
+    if menu.functionTriggered is not None:
+        parent.connect(menu, QtCore.SIGNAL("triggered(QAction)"),
+            isinstance(dispatcher, collections.Callable) and \
+            dispatch_signal(dispatcher, menu.functionTriggered) or \
+            menu.functionTriggered)
+
+    if menu.functionAboutToHide is not None:
+        parent.connect(menu, QtCore.SIGNAL("aboutToHide()"),
+            isinstance(dispatcher, collections.Callable) and \
+            dispatch_signal(dispatcher, menu.functionAboutToHide) or \
+            menu.functionAboutToHide)
+
+    if menu.functionAboutToShow is not None:
+        parent.connect(menu, QtCore.SIGNAL("aboutToShow()"),
+            isinstance(dispatcher, collections.Callable) and \
+            dispatch_signal(dispatcher, menu.functionAboutToShow) or \
+            menu.functionAboutToShow)
+
+    # The signal dispatcher
+    if "testEnabled" in settings:
+        menu.testEnabled = settings["testEnabled"]
+    if "testVisible" in settings:
+        menu.testVisible = settings["testVisible"]
+
+    objects = extend_menu(menu,
         settings.get("items", []),
         dispatcher = dispatcher,
         separatorName = separatorName)
-        
-    actions = [ menu.menuAction() ] + actions
-    menus = [ menu ] + menus
 
-    if "testEnabled" in settings:
-        actions[0].testEnabled = settings["testEnabled"]
-    if "testVisible" in settings:
-        actions[0].testVisible = settings["testVisible"]
+    return allObjects and objects or menu
 
-    if not allMenus:
-        return menus[0], actions
-    return menus, actions
-
-def extend_menu(parent, settings, dispatcher = True, separatorName = False):
-    actions = []
-    menus = []
+def extend_menu(rootMenu, settings, dispatcher = True, separatorName = False):
+    collectedObjects = [ rootMenu ]
     for item in settings:
-        action = menu = None
+        objects = None
         if item == "-":
-            action = parent.addSeparator()
-            action.setObjectName(text2objectname("None", prefix = "separator"))
+            objects = rootMenu.addSeparator()
+            objects.setObjectName(text2objectname("None", prefix = "separator"))
         elif isinstance(item, str) and item.startswith("--"):
             name = item[item.rfind("-") + 1:]
-            action = parent.addSeparator()
-            action.setObjectName(text2objectname(name, prefix = "separator"))
+            objects = rootMenu.addSeparator()
+            objects.setObjectName(text2objectname(name, prefix = "separator"))
             if separatorName:
-                action.setText(name)
+                objects.setText(name)
         elif isinstance(item, dict) and 'items' in item:
-            menus, action = create_menu(parent, item, 
+            objects = create_menu(rootMenu.parent(), item,
                 dispatcher = dispatcher,
-                separatorName = separatorName, allMenus = True)
-            add_actions(parent, [ menus[0] ])
+                separatorName = separatorName, allObjects = True)
+            add_actions(rootMenu, [ objects[0] ])
         elif isinstance(item, dict):
-            action = create_action(parent, item, dispatcher = dispatcher)
-            add_actions(parent, [ action ])
+            objects = create_action(rootMenu.parent(), item, dispatcher = dispatcher)
+            add_actions(rootMenu, [ objects ])
         elif isinstance(item, QtGui.QAction):
-            parent.addAction(item)
-            action = item
+            rootMenu.addAction(item)
+            objects = item
         elif isinstance(item, QtGui.QMenu):
-            action = parent.addMenu(item)
+            objects = rootMenu.addMenu(item)
         elif isinstance(item, (tuple, list)):
-            actionGroup = QtGui.QActionGroup(menu)
+            actionGroup = QtGui.QActionGroup(rootMenu.parent())
             actionGroup.setExclusive(isinstance(item, tuple))
-            action = []
+            objects = []
             for i in item:
                 # TODO i puede ser mas configuracion
-                parent.addAction(i)
+                rootMenu.addAction(i)
                 i.setActionGroup(actionGroup)
-                action.append(i)
+                objects.append(i)
         else:
             raise Exception("%s" % item)
-        if action is not None:
-            getattr(actions, isinstance(action, (tuple, list)) and "extend" or "append")(action)
-        if menu is not None:
-            getattr(menus, isinstance(menu, (tuple, list)) and "extend" or "append")(menu)
-    return menus, actions
+        if objects is not None:
+            getattr(collectedObjects, isinstance(objects, (tuple, list)) and "extend" or "append")(objects)
+    return collectedObjects
 
 def add_actions(target, actions, insert_before=None):
     """Add actions to a menu"""

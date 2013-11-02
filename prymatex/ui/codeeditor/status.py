@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/codeeditor/status.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/codeeditor/status.ui'
 #
-# Created: Mon Oct 21 08:50:19 2013
-#      by: PyQt4 UI code generator 4.10
+# Created: Fri Nov  1 23:49:11 2013
+#      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
 

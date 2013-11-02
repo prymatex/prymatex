@@ -155,7 +155,7 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
         self.actionOrderFoldersFirst.setChecked(True)
         self.actionOrderByName.trigger()
         
-        self.projectOptionsMenu, _ = create_menu(self, optionsMenu)
+        self.projectOptionsMenu = create_menu(self, optionsMenu)
         self.pushButtonOptions.setMenu(self.projectOptionsMenu)
 
         #Connect context menu
@@ -198,8 +198,8 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
             self.extendFileSystemItemMenu(contextMenu, node)
             self.extendAddonsItemMenu(contextMenu, node)
             self.extendProjectBundleItemMenu(contextMenu, node)
-        # contextMenu, contextMenuActions = create_menu(contextMenu, self, useSeparatorName = True)
-        contextMenu, contextMenuActions = create_menu(self, contextMenu)
+        # contextMenu = create_menu(contextMenu, self, separatorName = True)
+        contextMenu = create_menu(self, contextMenu, separatorName = True)
         
         contextMenu.aboutToShow.connect(self.on_contextMenu_aboutToShow)
         contextMenu.aboutToHide.connect(self.on_contextMenu_aboutToHide)

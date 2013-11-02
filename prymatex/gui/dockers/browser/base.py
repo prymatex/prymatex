@@ -118,7 +118,7 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
             "items": [ self.actionSyncEditor, self.actionConnectEditor ]
         }
 
-        self.browserOptionsMenu, _ = create_menu(self, optionsMenu)
+        self.browserOptionsMenu = create_menu(self, optionsMenu)
         self.toolButtonOptions.setMenu(self.browserOptionsMenu)
 
     def event(self, event):

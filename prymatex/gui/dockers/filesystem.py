@@ -136,7 +136,7 @@ class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSys
                 self.actionDelete,
             ]
         }
-        self.fileSystemMenu, self.fileSystemMenuActions = create_menu(self, contextMenu)
+        self.fileSystemMenu = create_menu(self, contextMenu)
 
         #Setup Context Menu
         optionsMenu = {
@@ -154,7 +154,7 @@ class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSys
         self.actionOrderFoldersFirst.setChecked(True)
         self.actionOrderByName.trigger()
 
-        self.fileSystemOptionsMenu, _ = create_menu(self, optionsMenu)
+        self.fileSystemOptionsMenu = create_menu(self, optionsMenu)
         self.pushButtonOptions.setMenu(self.fileSystemOptionsMenu)
 
         #Connect context menu

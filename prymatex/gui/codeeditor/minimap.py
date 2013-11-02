@@ -58,7 +58,7 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
     
     @classmethod
     def contributeToMainMenu(cls):
-        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter")
+        baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter"
         menuEntry = {
             'name': 'miniMap',
             'text': "Mini Map",

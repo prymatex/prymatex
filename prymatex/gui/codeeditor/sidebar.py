@@ -121,7 +121,7 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         
     @classmethod
     def contributeToMainMenu(cls):
-        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter")
+        baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter"
         menuEntry = {
             'name': 'lineNumbers',
             'text': "Line Numbers",
@@ -207,7 +207,7 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
 
     @classmethod
     def contributeToMainMenu(cls):
-        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter")
+        baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter"
         menuEntry = {
             'name': 'bookmarks',
             'text': "Bookmarks",
@@ -287,7 +287,7 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     
     @classmethod
     def contributeToMainMenu(cls):
-        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter")
+        baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter"
         menuEntry = {
             'name': 'foldings',
             'text': 'Foldings',
@@ -374,7 +374,7 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
 
     @classmethod
     def contributeToMainMenu(cls):
-        baseMenu = ("view", cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter")
+        baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter"
         menuEntry = {
             'name': 'selection',
             'text': 'Selection',

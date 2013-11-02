@@ -40,7 +40,6 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
         for licence in resources.LICENSES:
             self.comboBoxLicence.addItem(licence)
 
-
     def setupComboKeywords(self):
         # Build project keywords
         self.comboBoxKeywords.setModel(
@@ -51,11 +50,9 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
             self.on_keywordsListModel_selectionChanged
         )
 
-
     def on_keywordsListModel_selectionChanged(self):
         currents = self.comboBoxKeywords.model().selectedItems()
         self.comboBoxKeywords.lineEdit().setText(", ".join(currents))
-        
 
     def setupComboTemplates(self):
         self.projectProxyModel = self.application.supportManager.projectProxyModel
@@ -75,14 +72,12 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
         self.comboBoxTemplate.setView(tableView)
         self.comboBoxTemplate.setModelColumn(0)
 
-
     def on_buttonChoose_pressed(self):
         directory = self.lineLocation.text()
         path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose Location for Project"), directory)
         if path:
             self.lineLocation.setText(path)
             self.lineProjectName.setText(os.path.basename(path))
-
 
     def on_buttonCreate_pressed(self):
         name = self.lineProjectName.text()
@@ -93,13 +88,11 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
         else:
             self.runCreateProject(name, location)
 
-
     def on_lineProjectName_textChanged(self, text):
         if self.checkBoxUseDefaultLocation.isChecked():
             projectPath = os.path.join(self.application.projectManager.workspaceDirectory, text)
             self.lineLocation.setText(projectPath)
         self.buttonCreate.setEnabled(bool(text.strip()))
-
 
     def on_lineLocation_textChanged(self, text):
         if text and not self.checkBoxUseDefaultLocation.isChecked():
@@ -112,7 +105,6 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
         if checked:
             projectPath = os.path.join(self.application.projectManager.workspaceDirectory, self.lineProjectName.text())
             self.lineLocation.setText(projectPath)
-
 
     def on_checkBoxAddToWorkingSet_toggled(self, checked):
         self.comboBoxWorkingSet.setEnabled(checked)

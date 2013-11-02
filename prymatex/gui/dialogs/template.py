@@ -103,4 +103,5 @@ class TemplateDialog(QtGui.QDialog, Ui_TemplateDialog, PMXBaseDialog):
         self.lineLocation.setText(fileDirectory)
         self.buttonCreate.setEnabled(False)
         if self.exec_() == self.Accepted:
+            self.application.openFile(self.fileCreated)
             return self.fileCreated

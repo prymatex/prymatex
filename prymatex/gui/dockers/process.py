@@ -56,7 +56,7 @@ class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
                 }
             ]
         }
-        self.processMenu, self.processMenuActions = create_menu(self, contextMenu)
+        self.processMenu = create_menu(self, contextMenu)
         
         self.tableViewProcess.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tableViewProcess.customContextMenuRequested.connect(self.showtableViewProcessContextMenu)
