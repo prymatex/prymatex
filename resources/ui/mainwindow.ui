@@ -29,54 +29,9 @@
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>&amp;File</string>
-    </property>
-    <widget class="QMenu" name="menuRecentFiles">
-     <property name="title">
-      <string>&amp;Recent Files</string>
-     </property>
-     <property name="icon">
-      <iconset>
-       <normaloff>:/icons/actions/document-open-recent.png</normaloff>:/icons/actions/document-open-recent.png</iconset>
-     </property>
-     <addaction name="actionOpenAllRecentFiles"/>
-     <addaction name="actionRemoveAllRecentFiles"/>
-    </widget>
-    <widget class="QMenu" name="menuNew">
-     <property name="title">
-      <string>New</string>
-     </property>
-     <property name="icon">
-      <iconset>
-       <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
-     </property>
-     <addaction name="actionNewEditor"/>
-     <addaction name="separator"/>
-     <addaction name="actionNewFromTemplate"/>
-     <addaction name="actionNewProject"/>
-    </widget>
-    <addaction name="menuNew"/>
-    <addaction name="actionOpen"/>
-    <addaction name="menuRecentFiles"/>
-    <addaction name="actionImportProject"/>
-    <addaction name="separator"/>
-    <addaction name="actionSave"/>
-    <addaction name="actionSaveAs"/>
-    <addaction name="actionSaveAll"/>
-    <addaction name="separator"/>
-    <addaction name="actionClose"/>
-    <addaction name="actionCloseAll"/>
-    <addaction name="actionCloseOthers"/>
-    <addaction name="separator"/>
-    <addaction name="actionSwitchProfile"/>
-    <addaction name="separator"/>
-    <addaction name="actionQuit"/>
-   </widget>
    <widget class="QMenu" name="menuNavigation">
     <property name="title">
      <string>&amp;Navigation</string>
@@ -109,7 +64,6 @@
     <addaction name="menuBundleEditor"/>
     <addaction name="separator"/>
    </widget>
-   <addaction name="menuFile"/>
    <addaction name="menuNavigation"/>
    <addaction name="menuBundles"/>
   </widget>

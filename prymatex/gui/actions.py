@@ -3,7 +3,7 @@
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.compat import getOpenFileNames
-from prymatex.qt.helpers import text2objectname, text2iconname
+from prymatex.qt.helpers import text2objectname, text2iconname, create_action
 
 from prymatex import resources
 from prymatex.core import exceptions
@@ -26,35 +26,20 @@ class MainWindowActions(object):
         
     # ------------ About To Show Menus
     def on_menuRecentFiles_aboutToShow(self):
-        self.menuRecentFiles.clear()
+        actions = self.menuRecentFiles.actions()[-3:]
+        # TODO Algo mejor para no estar creando y matando actions como bestia
+        for action in self.menuRecentFiles.actions():
+            if action not in actions:
+                self.menuRecentFiles.removeAction(action)
         for index, filePath in enumerate(self.application.fileManager.fileHistory, 1):
-            actionText = "%s (%s)\t&%d" % (self.application.fileManager.basename(filePath), filePath, index)
-            action = QtGui.QAction(actionText, self)
-            receiver = lambda file = filePath: self.application.openFile(file)
-            self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
+            action = create_action(self, {
+                "text": "%s (%s)\t&%d" % (self.application.fileManager.basename(filePath), filePath, index),
+                "triggered": lambda file = filePath: self.application.openFile(file)
+            })
             self.menuRecentFiles.addAction(action)
-        self.menuRecentFiles.addSeparator()
-        self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
-        self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
+        self.menuRecentFiles.addActions(actions)
 
     # ------------ File Actions
-    @QtCore.Slot()
-    def on_actionNewEditor_triggered(self):
-        self.addEmptyEditor()
-
-    @QtCore.Slot()
-    def on_actionNewFromTemplate_triggered(self):
-        filePath = self.templateDialog.createFile()
-
-        if filePath:
-            self.application.openFile(filePath)
-
-    @QtCore.Slot()
-    def on_actionNewProject_triggered(self):
-        projectDialog = self.findChild(QtGui.QDialog, "ProjectDialog")
-        projectDialog.createProject()
-
-    @QtCore.Slot()
     def on_actionOpen_triggered(self):
         filePath = self.currentEditor().filePath if self.currentEditor() is not None else None
         filePaths, selectedfilter = getOpenFileNames(
@@ -66,16 +51,6 @@ class MainWindowActions(object):
         for filePath in filePaths:
             editor = self.application.openFile(filePath, focus = focus)
 
-    @QtCore.Slot()
-    def on_actionOpenAllRecentFiles_triggered(self):
-        for filePath in self.application.fileManager.fileHistory:
-            self.application.openFile(filePath)
-
-    @QtCore.Slot()
-    def on_actionRemoveAllRecentFiles_triggered(self):
-        self.application.fileManager.clearFileHistory()
-
-    @QtCore.Slot()
     def on_actionImportProject_triggered(self):
         directory = QtGui.QFileDialog.getExistingDirectory(self, "Choose project location", self.application.fileManager.directory())
         if directory:
@@ -84,77 +59,35 @@ class MainWindowActions(object):
             except exceptions.LocationIsNotProject:
                 QtGui.QMessageBox.critical(self, "Critical", "A error has occurred.\n%s is not a valid project location." % directory)
 
-    @QtCore.Slot()
-    def on_actionSave_triggered(self):
-        self.saveEditor()
-
-    @QtCore.Slot()
-    def on_actionSaveAs_triggered(self):
-        self.saveEditor(saveAs = True)
-
-    @QtCore.Slot()
-    def on_actionSaveAll_triggered(self):
-        for w in self.editors():
-            self.saveEditor(editor = w)
-
-    @QtCore.Slot()
-    def on_actionClose_triggered(self):
-        self.closeEditor()
-
-    @QtCore.Slot()
-    def on_actionCloseAll_triggered(self):
-        for w in self.splitTabWidget.allWidgets():
-            self.closeEditor(editor = w)
-
-    @QtCore.Slot()
     def on_actionCloseOthers_triggered(self):
         current = self.currentEditor()
         for w in self.splitTabWidget.allWidgets():
             if w is not current:
                 self.closeEditor(editor = w)
     
-    @QtCore.Slot()
-    def on_actionQuit_triggered(self):
-        QtGui.QApplication.quit()
-    
-    @QtCore.Slot()
     def on_actionSwitchProfile_triggered(self):
         if self.profileDialog.switchProfile() == self.profileDialog.Accepted and\
             self.application.profileManager.defaultProfile() != self.application.currentProfile:
             self.application.restart()
 
-    # ------------ Edit Actions
-    @QtCore.Slot()
-    def on_actionFind_triggered(self):
-        self.statusBar().showIFind()
-
-    @QtCore.Slot()
-    def on_actionFindReplace_triggered(self):
-        self.statusBar().showFindReplace()
-    
     # ------------ Navigation Actions
-    @QtCore.Slot()
     def on_actionNextTab_triggered(self):
         self.splitTabWidget.focusNextTab()
 
-    @QtCore.Slot()
     def on_actionPreviousTab_triggered(self):
         self.splitTabWidget.focusPreviousTab()
 
-    @QtCore.Slot()
     def on_actionSelectTab_triggered(self):
         item = self.selectorDialog.select(self.tabSelectableModel, title=_("Select tab"))
         
         if item is not None:
             self.splitTabWidget.setCurrentWidget(item['data'])
     
-    @QtCore.Slot()
     def on_actionJumpToTabWindow_triggered(self):
         if self.currentEditor() is not None:
             self.currentEditor().setFocus()
     
     # ------------ Global navigation
-    @QtCore.Slot()
     def on_actionLocationBack_triggered(self):
         if self._editorHistory and self._editorHistoryIndex < len(self._editorHistory) - 1:
             self._editorHistoryIndex += 1
@@ -163,7 +96,6 @@ class MainWindowActions(object):
                 entry["editor"].restoreLocationMemento(entry["memento"])
             self.setCurrentEditor(entry["editor"])
         
-    @QtCore.Slot()
     def on_actionLocationForward_triggered(self):
         if self._editorHistoryIndex != 0:
             self._editorHistoryIndex -= 1
@@ -172,7 +104,6 @@ class MainWindowActions(object):
                 entry["editor"].restoreLocationMemento(entry["memento"])
             self.setCurrentEditor(entry["editor"])
     
-    @QtCore.Slot()
     def on_actionLastEditLocation_triggered(self):
         for index, entry in enumerate(self._editorHistory):
             if "memento" in entry:
@@ -205,6 +136,7 @@ class MainWindowActions(object):
     SCREENSHOT_FORMAT = 'png'
     
     def on_actionTakeScreenshot_triggered(self):
+        # TODO Mas moderno esto, que ya esta muy viejo
         pxm = QtGui.QPixmap.grabWindow(self.winId())
         import os
         from datetime import datetime
@@ -217,20 +149,85 @@ class MainWindowActions(object):
         except AttributeError as e:
             QtGui.QMessageBox.information(self, "Screenshoot", 
                 "%s saved" % fileName)
-        
-    def setMainWindowAsActionParent(self):
-        # Don't know if this brings side effects
-        for name in (name for name in dir(self) if name.startswith('action')):
-            obj = getattr(self, name)
-            if not isinstance(obj, QtGui.QAction):
-                continue
-            #print "Making %s available when menubar is hidden %s" % (obj.objectName(), obj.text())
-            self.addAction(obj)
-    
+
     @classmethod
     def contributeToMainMenu(cls):
         import prymatex
-        file_menu = {}
+        file_menu = {
+            "text": "&File",
+            "items": [{
+                "text": "New",
+                "items": [{
+                    "text": "Editor",
+                    "shortcut": resources.get_shortcut("_", "New"),
+                    "triggered": lambda mainWindow: mainWindow.addEmptyEditor(),
+                    "icon": resources.get_icon("tab-new"),
+                }, "-", {
+                    "text": "From template",
+                    "triggered": lambda mainWindow: mainWindow.templateDialog.createFile(),
+                    "icon": resources.get_icon("document-new"),
+                }, {
+                    "text": "Project",
+                    "triggered": lambda mainWindow: mainWindow.projectDialog.createProject(),
+                    "icon": resources.get_icon("project-development-new-template"),
+                }]
+            }, {
+                "text": "Open",
+                "shortcut": resources.get_shortcut("_", "Open"),
+                "icon": resources.get_icon("document-open"),
+                "triggered": cls.on_actionOpen_triggered
+            }, {
+                "text": "Recent files",
+                "aboutToShow": cls.on_menuRecentFiles_aboutToShow,
+                "items": ["-", {
+                    "text": "Open all recent files",
+                    "icon": resources.get_icon("document-open-recent"),
+                    "triggered": lambda mainWindow: [ mainWindow.application.openFile(path) 
+                        for path in mainWindow.application.fileManager.fileHistory ]
+                }, {
+                    "text": "Remove all recent files",
+                    "icon": resources.get_icon("edit-clear"),
+                    "triggered": lambda mainWindow: mainWindow.application.fileManager.clearFileHistory()
+                }]
+            }, {
+                "text": "Import project",
+                "triggered": cls.on_actionImportProject_triggered,
+                "icon": resources.get_icon("project-open"),
+            }, "-", {
+                "text": "Save",
+                "shortcut": resources.get_shortcut("_", "Save"),
+                "icon": resources.get_icon("document-save"),
+                "triggered": lambda mainWindow: mainWindow.saveEditor()
+            }, {
+                "text": "Save as",
+                "icon": resources.get_icon("document-save-as"),
+                "triggered": lambda mainWindow: mainWindow.saveEditor(saveAs = True)
+            }, {
+                "text": "Save all",
+                "icon": resources.get_icon("document-save-all"),
+                "triggered": lambda mainWindow: [ mainWindow.saveEditor(editor = editor) for editor in self.editors() ]
+            }, "-", {
+                "text": "Close",
+                "shortcut": resources.get_shortcut("_", "Close"),
+                "icon": resources.get_icon("tab-close"),
+                "triggered": lambda mainWindow: mainWindow.closeEditor()
+            }, {
+                "text": "Close all",
+                "triggered": lambda mainWindow: [ mainWindow.closeEditor(editor = editor) for editor in self.editors() ]
+            }, {
+                "text": "Close others",
+                "icon": resources.get_icon("tab-close-other")
+            }, "-", {
+                "text": "Switch profile",
+                "icon": resources.get_icon("system-switch-user")
+            }, "-", {
+                "text": "Quit",
+                "shortcut": resources.get_shortcut("_", "Quit"),
+                "icon": resources.get_icon("application-exit"),
+                "triggered": lambda mainWindow: mainWindow.application.quit()
+            }]
+        }
+
         # ------------- Edit menu
         def globalEditAction(text):
             objectName = text2objectname(text)
@@ -243,13 +240,13 @@ class MainWindowActions(object):
                 "data": objectName
             }
         edit_menu = {
-            'text': '&Edit',
+            "text": "&Edit",
             "items": [ globalEditAction(name) for name in ("&Undo", "&Redo") ] + ["-"] +
             [ globalEditAction(name) for name in ("Cu&t", "&Copy", "&Paste", "&Delete") ]
         }
         # ------------- View menu
         view_menu = {
-            'text': '&View',
+            "text": "&View",
             "items": [{
                 "text": "Panels",
                 "items": []

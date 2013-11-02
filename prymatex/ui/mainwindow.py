@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/mainwindow.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/mainwindow.ui'
 #
-# Created: Fri Nov  1 09:06:11 2013
-#      by: PyQt4 UI code generator 4.10
+# Created: Fri Nov  1 23:49:11 2013
+#      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -38,20 +38,8 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.splitTabWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 20))
         self.menubar.setObjectName(_fromUtf8("menubar"))
-        self.menuFile = QtGui.QMenu(self.menubar)
-        self.menuFile.setObjectName(_fromUtf8("menuFile"))
-        self.menuRecentFiles = QtGui.QMenu(self.menuFile)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-open-recent.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.menuRecentFiles.setIcon(icon)
-        self.menuRecentFiles.setObjectName(_fromUtf8("menuRecentFiles"))
-        self.menuNew = QtGui.QMenu(self.menuFile)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.menuNew.setIcon(icon1)
-        self.menuNew.setObjectName(_fromUtf8("menuNew"))
         self.menuNavigation = QtGui.QMenu(self.menubar)
         self.menuNavigation.setObjectName(_fromUtf8("menuNavigation"))
         self.menuBundles = QtGui.QMenu(self.menubar)
@@ -205,28 +193,6 @@ class Ui_MainWindow(object):
         self.actionLocationForward.setObjectName(_fromUtf8("actionLocationForward"))
         self.actionJumpToTabWindow = QtGui.QAction(MainWindow)
         self.actionJumpToTabWindow.setObjectName(_fromUtf8("actionJumpToTabWindow"))
-        self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
-        self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
-        self.menuNew.addAction(self.actionNewEditor)
-        self.menuNew.addSeparator()
-        self.menuNew.addAction(self.actionNewFromTemplate)
-        self.menuNew.addAction(self.actionNewProject)
-        self.menuFile.addAction(self.menuNew.menuAction())
-        self.menuFile.addAction(self.actionOpen)
-        self.menuFile.addAction(self.menuRecentFiles.menuAction())
-        self.menuFile.addAction(self.actionImportProject)
-        self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionSave)
-        self.menuFile.addAction(self.actionSaveAs)
-        self.menuFile.addAction(self.actionSaveAll)
-        self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionClose)
-        self.menuFile.addAction(self.actionCloseAll)
-        self.menuFile.addAction(self.actionCloseOthers)
-        self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionSwitchProfile)
-        self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionQuit)
         self.menuNavigation.addAction(self.actionNextTab)
         self.menuNavigation.addAction(self.actionPreviousTab)
         self.menuNavigation.addAction(self.actionSelectTab)
@@ -244,7 +210,6 @@ class Ui_MainWindow(object):
         self.menuBundleEditor.addAction(self.actionReloadBundles)
         self.menuBundles.addAction(self.menuBundleEditor.menuAction())
         self.menuBundles.addSeparator()
-        self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuNavigation.menuAction())
         self.menubar.addAction(self.menuBundles.menuAction())
 
@@ -252,9 +217,6 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        self.menuFile.setTitle(_translate("MainWindow", "&File", None))
-        self.menuRecentFiles.setTitle(_translate("MainWindow", "&Recent Files", None))
-        self.menuNew.setTitle(_translate("MainWindow", "New", None))
         self.menuNavigation.setTitle(_translate("MainWindow", "&Navigation", None))
         self.menuBundles.setTitle(_translate("MainWindow", "&Bundles", None))
         self.menuBundleEditor.setTitle(_translate("MainWindow", "Bundle &Editor", None))
