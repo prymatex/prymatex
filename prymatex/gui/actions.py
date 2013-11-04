@@ -83,7 +83,7 @@ class MainWindowActions(object):
         if item is not None:
             self.splitTabWidget.setCurrentWidget(item['data'])
     
-    def on_actionJumpToTabWindow_triggered(self):
+    def on_actionJumpToTab_triggered(self):
         if self.currentEditor() is not None:
             self.currentEditor().setFocus()
     
@@ -253,8 +253,42 @@ class MainWindowActions(object):
             }]
             
         }
-        navigation_menu = {}
-        bundles_menu = {}
+        navigation_menu = {
+            "text": "Navigation",
+            "items": [{
+                "text": "Next tab",
+                "shortcut": resources.get_shortcut("_", "NextChild"),
+                "icon": resources.get_icon("go-next-view"),
+                "triggered": cls.on_actionNextTab_triggered
+            }, {
+                "text": "Previous tab",
+                "shortcut": resources.get_shortcut("_", "PreviousChild"),
+                "icon": resources.get_icon("go-previous-view"),
+                "triggered": cls.on_actionPreviousTab_triggered
+            }, {
+                "text": "Select tab",
+                "triggered": cls.on_actionSelectTab_triggered
+            }, {
+                "text": "Jump to tab",
+                "shortcut": resources.get_shortcut("_", "JumpToTab", "F12"),
+                "triggered": cls.on_actionJumpToTab_triggered
+            }, "-", {
+                "text": "Last edit location",
+                "icon": resources.get_icon("go-last"),
+                "triggered": cls.on_actionPreviousTab_triggered
+            }, {
+                "text": "Go back location",
+                "shortcut": resources.get_shortcut("_", "GoBackLocation"),
+                "icon": resources.get_icon("go-previous"),
+                "triggered": cls.on_actionPreviousTab_triggered
+            }, {
+                "text": "Go forward location",
+                "shortcut": resources.get_shortcut("_", "GoForwardLocation"),
+                "icon": resources.get_icon("go-next"),
+                "triggered": cls.on_actionPreviousTab_triggered
+            }]
+        }
+        bundles_menu = {"text": "Bundles"}
         # ------------- Preferences menu
         preferences_menu = {
             "text": "&Preferences",
@@ -302,15 +336,8 @@ class MainWindowActions(object):
                 "triggered": lambda mainWindow: mainWindow.aboutDialog.exec_()
             }]
         }
-        return {
-            "file": file_menu,
-            "edit": edit_menu,
-            "view": view_menu,
-            "navigation": navigation_menu,
-            "bundles": bundles_menu,
-            "preferences": preferences_menu,
-            "help": help_menu
-        }
+        return [ file_menu, edit_menu, view_menu, navigation_menu,
+            bundles_menu, preferences_menu, help_menu ]
     
 def tabSelectableModelFactory(mainWindow):
     """ 

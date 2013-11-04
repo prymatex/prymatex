@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/mainwindow.ui'
 #
-# Created: Fri Nov  1 23:49:11 2013
+# Created: Mon Nov  4 16:35:23 2013
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -40,8 +40,6 @@ class Ui_MainWindow(object):
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 20))
         self.menubar.setObjectName(_fromUtf8("menubar"))
-        self.menuNavigation = QtGui.QMenu(self.menubar)
-        self.menuNavigation.setObjectName(_fromUtf8("menuNavigation"))
         self.menuBundles = QtGui.QMenu(self.menubar)
         self.menuBundles.setObjectName(_fromUtf8("menuBundles"))
         self.menuBundleEditor = QtGui.QMenu(self.menuBundles)
@@ -193,14 +191,6 @@ class Ui_MainWindow(object):
         self.actionLocationForward.setObjectName(_fromUtf8("actionLocationForward"))
         self.actionJumpToTabWindow = QtGui.QAction(MainWindow)
         self.actionJumpToTabWindow.setObjectName(_fromUtf8("actionJumpToTabWindow"))
-        self.menuNavigation.addAction(self.actionNextTab)
-        self.menuNavigation.addAction(self.actionPreviousTab)
-        self.menuNavigation.addAction(self.actionSelectTab)
-        self.menuNavigation.addAction(self.actionJumpToTabWindow)
-        self.menuNavigation.addSeparator()
-        self.menuNavigation.addAction(self.actionLastEditLocation)
-        self.menuNavigation.addAction(self.actionLocationBack)
-        self.menuNavigation.addAction(self.actionLocationForward)
         self.menuBundleEditor.addAction(self.actionShowBundleEditor)
         self.menuBundleEditor.addSeparator()
         self.menuBundleEditor.addAction(self.actionEditCommands)
@@ -210,14 +200,12 @@ class Ui_MainWindow(object):
         self.menuBundleEditor.addAction(self.actionReloadBundles)
         self.menuBundles.addAction(self.menuBundleEditor.menuAction())
         self.menuBundles.addSeparator()
-        self.menubar.addAction(self.menuNavigation.menuAction())
         self.menubar.addAction(self.menuBundles.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        self.menuNavigation.setTitle(_translate("MainWindow", "&Navigation", None))
         self.menuBundles.setTitle(_translate("MainWindow", "&Bundles", None))
         self.menuBundleEditor.setTitle(_translate("MainWindow", "Bundle &Editor", None))
         self.actionNewEditor.setText(_translate("MainWindow", "&Editor", None))

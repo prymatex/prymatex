@@ -32,19 +32,6 @@
      <height>20</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuNavigation">
-    <property name="title">
-     <string>&amp;Navigation</string>
-    </property>
-    <addaction name="actionNextTab"/>
-    <addaction name="actionPreviousTab"/>
-    <addaction name="actionSelectTab"/>
-    <addaction name="actionJumpToTabWindow"/>
-    <addaction name="separator"/>
-    <addaction name="actionLastEditLocation"/>
-    <addaction name="actionLocationBack"/>
-    <addaction name="actionLocationForward"/>
-   </widget>
    <widget class="QMenu" name="menuBundles">
     <property name="title">
      <string>&amp;Bundles</string>
@@ -64,7 +51,6 @@
     <addaction name="menuBundleEditor"/>
     <addaction name="separator"/>
    </widget>
-   <addaction name="menuNavigation"/>
    <addaction name="menuBundles"/>
   </widget>
   <action name="actionNewEditor">
