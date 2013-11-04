@@ -99,21 +99,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         elif isinstance(component, PMXBaseStatusBar):
             self.addStatusBar(component)
 
-    def addExtensionsToMainMenu(self, name, settings):
-        menus = actions = []
-        menuName = text2objectname(name, prefix = "menu")
-        parentMenu = self.findChild(QtGui.QMenu, menuName)
-        
-        if parentMenu is None:
-            # Es un nuevo menu
-            objects = create_menu(self, settings, dispatcher = self.componentInstanceDispatcher, allObjects = True)
-            add_actions(self.menubar, [ objects[0] ])
-            return objects
-        else:
-            if not isinstance(settings, list):
-                settings = [ settings ]
-            return extend_menu(parentMenu, settings, dispatcher = self.componentInstanceDispatcher)
-
     def initialize(self, application):
         PMXBaseComponent.initialize(self, application)
         # Dialogs
@@ -133,10 +118,33 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         # Build Main Menu
         def extendMainMenu(klass):
             menuExtensions = klass.contributeToMainMenu()
-            for name, settings in menuExtensions.items():
-                if settings:
-                    objects = self.addExtensionsToMainMenu(name, settings)
-                    self.customComponentObjects.setdefault(klass, []).extend(objects)
+            objects = []
+            if isinstance(menuExtensions, dict):
+                # Extend menus
+                for name, settings in menuExtensions.items():
+                    # Fix no list extensions
+                    if not isinstance(settings, list):
+                        settings = [ settings ]
+                    # Find parent menu
+                    parentMenu = self.findChild(QtGui.QMenu,
+                        text2objectname(name, prefix = "menu"))
+                    # Extend
+                    if parentMenu and settings:
+                        objects += extend_menu(parentMenu, settings, 
+                            dispatcher = self.componentInstanceDispatcher)
+            elif isinstance(menuExtensions, list):
+                # Create news menus
+                for settings in menuExtensions:
+                    # Create new menu
+                    if settings:
+                        objs = create_menu(self, settings, 
+                            dispatcher = self.componentInstanceDispatcher, 
+                            allObjects = True)
+                        add_actions(self.menubar, [ objs[0] ])
+                        objects += objs
+
+            # Store all new objects from creation or extension
+            self.customComponentObjects.setdefault(klass, []).extend(objects)
 
             for componentClass in application.pluginManager.findComponentsForClass(klass):
                 extendMainMenu(componentClass)

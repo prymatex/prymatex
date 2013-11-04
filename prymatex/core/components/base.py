@@ -24,8 +24,12 @@ class PMXBaseComponent(object):
 
     @classmethod
     def contributeToMainMenu(cls):
-        """Contributions to the main menu"""
-        return {}
+        """Contributions to the main menu
+        return list, the items in the list are new menu entries,
+        return dictionary, the keys are strings and the values are lists
+            keys define the name of te menu to be extended
+            values define the extensions to the found menu"""
+        pass
 
     def environmentVariables(self):
         """Return a dictionary with the defined variables of this component."""
