@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import collections
+
 # TODO: No son Mixin?
-# TODO: Simplificar un poco
 
 class PMXBaseComponent(object):
     def initialize(self, parent):
@@ -25,11 +26,10 @@ class PMXBaseComponent(object):
     @classmethod
     def contributeToMainMenu(cls):
         """Contributions to the main menu
-        return list, the items in the list are new menu entries,
-        return dictionary, the keys are strings and the values are lists
+        return OrderedDict, the keys are strings and the values are lists
             keys define the name of te menu to be extended
             values define the extensions to the found menu"""
-        pass
+        return collections.OrderedDict()
 
     def environmentVariables(self):
         """Return a dictionary with the defined variables of this component."""

@@ -19,18 +19,18 @@ from prymatex.core import PMXBaseComponent, PMXBaseDock, PMXBaseDialog, PMXBaseS
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import html
 
-from prymatex.gui.actions import MainWindowActions, tabSelectableModelFactory
+from prymatex.gui.mainmenu import MainMenuMixin, tabSelectableModelFactory
 from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.gui.processors import MainWindowCommandProcessor
 
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
 from prymatex.widgets.message import PopupMessageWidget
+from prymatex.widgets.splitter import SplitTabWidget
 
-from prymatex.ui.mainwindow import Ui_MainWindow
 from functools import reduce
 
-class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBaseComponent):
+class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
     """Prymatex main window"""
     # --------------------- Signals
     currentEditorChanged = QtCore.Signal(object)
@@ -58,16 +58,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         QtGui.QMainWindow.__init__(self)
         PMXBaseComponent.__init__(self)
 
-        self.setupUi(self)
-
-        self.setWindowIcon(resources.getIcon("prymatex"))
-
+        self.setupUi()
+        
         self.tabSelectableModel = tabSelectableModelFactory(self)
-
-        self.setupDockToolBars()
-        self.setupMenu()
-
-        self.setStatusBar(PMXStatusBar(self))
 
         # Connect Signals
         self.splitTabWidget.currentWidgetChanged.connect(self.on_currentWidgetChanged)
@@ -83,13 +76,27 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
 
         self.setAcceptDrops(True)
 
-        #self.setMainWindowAsActionParent()
         self.popupMessage = PopupMessageWidget(self)
 
         #Processor de comandos local a la main window
         self.commandProcessor = MainWindowCommandProcessor(self)
         self.bundleItem_handler = self.insertBundleItem
 
+    def setupUi(self):
+        self.setObjectName("MainWindow")
+        self.setWindowIcon(resources.getIcon("prymatex"))
+
+        self.setupDockToolBars()
+        
+        self.splitTabWidget = SplitTabWidget(self)
+        self.setCentralWidget(self.splitTabWidget)
+        
+        # Status and menu bars
+        self.setStatusBar(PMXStatusBar(self))
+        self.setMenuBar(QtGui.QMenuBar(self))
+        
+        self.resize(801, 600)
+        
     # ---------- Implements PMXBaseComponent's interface
     def addComponent(self, component):
         if isinstance(component, PMXBaseDock):
@@ -119,29 +126,26 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
         def extendMainMenu(klass):
             menuExtensions = klass.contributeToMainMenu()
             objects = []
-            if isinstance(menuExtensions, dict):
-                # Extend menus
-                for name, settings in menuExtensions.items():
-                    # Fix no list extensions
+            for name, settings in menuExtensions.items():
+                if not settings:
+                    continue
+
+                # Find parent menu
+                parentMenu = self.findChild(QtGui.QMenu,
+                    text2objectname(name, prefix = "menu"))
+                # Extend
+                if parentMenu:
+                    # Fix menu extensions
                     if not isinstance(settings, list):
                         settings = [ settings ]
-                    # Find parent menu
-                    parentMenu = self.findChild(QtGui.QMenu,
-                        text2objectname(name, prefix = "menu"))
-                    # Extend
-                    if parentMenu and settings:
-                        objects += extend_menu(parentMenu, settings, 
-                            dispatcher = self.componentInstanceDispatcher)
-            elif isinstance(menuExtensions, list):
-                # Create news menus
-                for settings in menuExtensions:
-                    # Create new menu
-                    if settings:
-                        objs = create_menu(self, settings, 
-                            dispatcher = self.componentInstanceDispatcher, 
-                            allObjects = True)
-                        add_actions(self.menubar, [ objs[0] ])
-                        objects += objs
+                    objects += extend_menu(parentMenu, settings,
+                        dispatcher = self.componentInstanceDispatcher)
+                else:
+                    objs = create_menu(self, settings,
+                        dispatcher = self.componentInstanceDispatcher,
+                        allObjects = True)
+                    add_actions(self.menuBar(), [ objs[0] ])
+                    objects += objs
 
             # Store all new objects from creation or extension
             self.customComponentObjects.setdefault(klass, []).extend(objects)
@@ -150,15 +154,19 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXBase
                 extendMainMenu(componentClass)
 
         extendMainMenu(self.__class__)
-
-        # Metemos las acciones de las dockers al menu panels
+        
+        # Load some menus as atters of the main window
         self.menuPanels = self.findChild(QtGui.QMenu, "menuPanels")
+        self.menuRecentFiles = self.findChild(QtGui.QMenu, "menuRecentFiles")
+        self.menuBundles = self.findChild(QtGui.QMenu, "menuBundles")
+        
+        # Metemos las acciones de las dockers al menu panels
         for dock in self.dockers:
             toggleAction = dock.toggleViewAction()
             self.menuPanels.addAction(toggleAction)
             self.addAction(toggleAction)
 
-        self.menuRecentFiles = self.findChild(QtGui.QMenu, "menuRecentFiles")
+        self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
         
     def environmentVariables(self):
         env = {}

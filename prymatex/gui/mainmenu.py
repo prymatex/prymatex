@@ -7,23 +7,15 @@ from prymatex.qt.helpers import text2objectname, text2iconname, create_action
 
 from prymatex import resources
 from prymatex.core import exceptions
+from prymatex.core.components import PMXBaseComponent
 from prymatex.models.selectable import selectableModelFactory
 
 from prymatex.utils.i18n import ugettext as _
 
-class MainWindowActions(object):
-    
+class MainMenuMixin(object):
+
     splitTabWidget = None #Overriden in GUI Setup
-    
-    def setupMenu(self):
-        #Recent files
-        self.actionFullscreen.setChecked(self.windowState() == QtCore.Qt.WindowFullScreen)
-        self.actionShowStatus.setChecked(self.statusBar().isVisible())
-        self.actionShowMenus.setChecked(self.menuBar().isVisible())
-        
-        #Bundles Menu
-        self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
-        
+
     # ------------ About To Show Menus
     def on_menuRecentFiles_aboutToShow(self):
         actions = self.menuRecentFiles.actions()[-3:]
@@ -43,8 +35,8 @@ class MainWindowActions(object):
     def on_actionOpen_triggered(self):
         filePath = self.currentEditor().filePath if self.currentEditor() is not None else None
         filePaths, selectedfilter = getOpenFileNames(
-            self, 
-            caption = "Open files", 
+            self,
+            caption = "Open files",
             basedir = self.application.fileManager.directory(filePath)
             )
         focus = len(filePaths) == 1
@@ -64,7 +56,7 @@ class MainWindowActions(object):
         for w in self.splitTabWidget.allWidgets():
             if w is not current:
                 self.closeEditor(editor = w)
-    
+
     def on_actionSwitchProfile_triggered(self):
         if self.profileDialog.switchProfile() == self.profileDialog.Accepted and\
             self.application.profileManager.defaultProfile() != self.application.currentProfile:
@@ -79,14 +71,14 @@ class MainWindowActions(object):
 
     def on_actionSelectTab_triggered(self):
         item = self.selectorDialog.select(self.tabSelectableModel, title=_("Select tab"))
-        
+
         if item is not None:
             self.splitTabWidget.setCurrentWidget(item['data'])
-    
+
     def on_actionJumpToTab_triggered(self):
         if self.currentEditor() is not None:
             self.currentEditor().setFocus()
-    
+
     # ------------ Global navigation
     def on_actionLocationBack_triggered(self):
         if self._editorHistory and self._editorHistoryIndex < len(self._editorHistory) - 1:
@@ -95,7 +87,7 @@ class MainWindowActions(object):
             if "memento" in entry:
                 entry["editor"].restoreLocationMemento(entry["memento"])
             self.setCurrentEditor(entry["editor"])
-        
+
     def on_actionLocationForward_triggered(self):
         if self._editorHistoryIndex != 0:
             self._editorHistoryIndex -= 1
@@ -103,7 +95,7 @@ class MainWindowActions(object):
             if "memento" in entry:
                 entry["editor"].restoreLocationMemento(entry["memento"])
             self.setCurrentEditor(entry["editor"])
-    
+
     def on_actionLastEditLocation_triggered(self):
         for index, entry in enumerate(self._editorHistory):
             if "memento" in entry:
@@ -112,29 +104,8 @@ class MainWindowActions(object):
                 self._editorHistoryIndex = index
                 break
 
-    # ------------ Bundles Actions
-    @QtCore.Slot()
-    def on_actionShowBundleEditor_triggered(self):
-        self.bundleEditorDialog.execEditor()
-
-    @QtCore.Slot()
-    def on_actionEditCommands_triggered(self):
-        self.bundleEditorDialog.execCommand()
-    
-    @QtCore.Slot()
-    def on_actionEditLanguages_triggered(self):
-        self.bundleEditorDialog.execLanguage()
-    
-    @QtCore.Slot()
-    def on_actionEditSnippets_triggered(self):
-        self.bundleEditorDialog.execSnippet()
-        
-    @QtCore.Slot()
-    def on_actionReloadBundles_triggered(self):
-        self.application.supportManager.reloadSupport(self.showMessage)
-        
     SCREENSHOT_FORMAT = 'png'
-    
+
     def on_actionTakeScreenshot_triggered(self):
         # TODO Mas moderno esto, que ya esta muy viejo
         pxm = QtGui.QPixmap.grabWindow(self.winId())
@@ -147,13 +118,14 @@ class MainWindowActions(object):
         try:
             self.currentEditor().showMessage("%s saved" % baseName)
         except AttributeError as e:
-            QtGui.QMessageBox.information(self, "Screenshoot", 
+            QtGui.QMessageBox.information(self, "Screenshoot",
                 "%s saved" % fileName)
 
     @classmethod
     def contributeToMainMenu(cls):
         import prymatex
-        file_menu = {
+        menu = PMXBaseComponent.contributeToMainMenu()
+        menu["file"] = {
             "text": "&File",
             "items": [{
                 "text": "New",
@@ -182,7 +154,7 @@ class MainWindowActions(object):
                 "items": ["-", {
                     "text": "Open all recent files",
                     "icon": resources.get_icon("document-open-recent"),
-                    "triggered": lambda mainWindow: [ mainWindow.application.openFile(path) 
+                    "triggered": lambda mainWindow: [ mainWindow.application.openFile(path)
                         for path in mainWindow.application.fileManager.fileHistory ]
                 }, {
                     "text": "Remove all recent files",
@@ -239,21 +211,23 @@ class MainWindowActions(object):
                 "triggered": cls.globalCallback,
                 "data": objectName
             }
-        edit_menu = {
+        menu["edit"] = {
             "text": "&Edit",
             "items": [ globalEditAction(name) for name in ("&Undo", "&Redo") ] + ["-"] +
             [ globalEditAction(name) for name in ("Cu&t", "&Copy", "&Paste", "&Delete") ]
         }
         # ------------- View menu
-        view_menu = {
+        menu["view"] = {
             "text": "&View",
             "items": [{
                 "text": "Panels",
                 "items": []
             }]
-            
+
         }
-        navigation_menu = {
+
+        # ------------- Navigation menu
+        menu["navigation"] = {
             "text": "Navigation",
             "items": [{
                 "text": "Next tab",
@@ -288,9 +262,37 @@ class MainWindowActions(object):
                 "triggered": cls.on_actionPreviousTab_triggered
             }]
         }
-        bundles_menu = {"text": "Bundles"}
+
+        # ------------- Bundles menu
+        menu["bundles"] = {
+            "text": "Bundles",
+            "items": [{
+                "text": "Bundle editor",
+                "items": [{
+                    "text": "Show bundle editor",
+                    "shortcut": resources.get_shortcut("_", "ShowBundleEditor", "Meta+Ctrl+Alt+B"),
+                    "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execEditor()
+                }, "-", {
+                    "text": "Edit commands",
+                    "shortcut": resources.get_shortcut("_", "ShowBundleEditor", "Meta+Ctrl+Alt+C"),
+                    "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execCommand()
+                }, {
+                    "text": "Edit languages",
+                    "shortcut": resources.get_shortcut("_", "ShowBundleEditor", "Meta+Ctrl+Alt+L"),
+                    "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execLanguage()
+                }, {
+                    "text": "Edit snippets",
+                    "shortcut": resources.get_shortcut("_", "ShowBundleEditor", "Meta+Ctrl+Alt+S"),
+                    "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execSnippet()
+                }, {
+                    "text": "Reload bundles",
+                    "triggered": lambda mainWindow: mainWindow.application.supportManager.reloadSupport(mainWindow.showMessage)
+                }]
+            }, "-"]
+        }
+
         # ------------- Preferences menu
-        preferences_menu = {
+        menu["preferences"] = {
             "text": "&Preferences",
             "items": [{
                 "text": "Show main menu",
@@ -309,8 +311,9 @@ class MainWindowActions(object):
                 "triggered": lambda mainWindow: mainWindow.settingsDialog.exec_()
             }]
         }
+
         # ------------- Help menu
-        help_menu = {
+        menu["help"] = {
             "text": "&Help",
             "items": [ {
                 "text": "Report bug",
@@ -336,17 +339,16 @@ class MainWindowActions(object):
                 "triggered": lambda mainWindow: mainWindow.aboutDialog.exec_()
             }]
         }
-        return [ file_menu, edit_menu, view_menu, navigation_menu,
-            bundles_menu, preferences_menu, help_menu ]
-    
+        return menu
+
 def tabSelectableModelFactory(mainWindow):
-    """ 
-    Shows select tab, and change to selected 
+    """
+    Shows select tab, and change to selected
     """
     def dataFunction():
-        return [dict(data = tab, 
-                template = "<table width='100%%'><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(file)s</small></td></tr></table>", 
-                display = { "name": tab.tabTitle(), "file": tab.filePath }, 
+        return [dict(data = tab,
+                template = "<table width='100%%'><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(file)s</small></td></tr></table>",
+                display = { "name": tab.tabTitle(), "file": tab.filePath },
                 image = tab.tabIcon()) for tab in mainWindow.splitTabWidget.allWidgets()]
 
     return selectableModelFactory(mainWindow,
