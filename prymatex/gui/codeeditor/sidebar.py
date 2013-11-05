@@ -126,7 +126,7 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             'name': 'lineNumbers',
             'text': "Line Numbers",
             'toggled': cls.on_actionShowLineNumbers_toggled,
-            'shortcut': 'F10',
+            'shortcut': resources.get_sequence("SideBar", "ShowLineNumbers", 'F10'),
             'testChecked': cls.on_actionShowLineNumbers_testChecked }
         return { baseMenu: menuEntry }
 
@@ -212,7 +212,7 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             'name': 'bookmarks',
             'text': "Bookmarks",
             'toggled': cls.on_actionShowBookmarks_toggled,
-            'shortcut': 'Alt+F10',
+            'shortcut': resources.get_sequence("SideBar", "ShowBookmarks", 'Alt+F10'),
             'testChecked': cls.on_actionShowBookmarks_testChecked }
         return { baseMenu: menuEntry} 
 
@@ -292,7 +292,7 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
             'name': 'foldings',
             'text': 'Foldings',
             'toggled': cls.on_actionShowFoldings_toggled,
-            'shortcut': 'Shift+F10',
+            'shortcut': resources.get_sequence("SideBar", "ShowFoldings", 'Shift+F10'),
             'testChecked': cls.on_actionShowFoldings_testChecked }
         return {baseMenu: menuEntry} 
 

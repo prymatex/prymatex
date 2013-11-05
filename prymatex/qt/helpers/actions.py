@@ -15,7 +15,7 @@ def toggle_actions(actions, enable):
             if action is not None:
                 action.setEnabled(enable)
 
-def create_action(parent, settings, dispatcher = None):
+def create_action(parent, settings, dispatcher = None, shortcut_handler=None):
     """Create a QAction"""
     text = settings.get("text")
     action = QtGui.QAction(text, parent)
@@ -23,11 +23,15 @@ def create_action(parent, settings, dispatcher = None):
     action.setObjectName(text2objectname(name, prefix = "action"))
     
     # attrs
-    if "icon" in settings and settings["icon"] is not None:
+    if "icon" in settings:
         action.setIcon(settings["icon"])
-    if "shortcut" in settings and settings["shortcut"] is not None:
-        action.setShortcut(settings["shortcut"])
-    if "tip" in settings and settings["tip"] is not None:
+    if "shortcut" in settings:
+        shortcut = settings["shortcut"]
+        if shortcut_handler is not None:
+            shortcut_handler(action, shortcut)
+        elif isinstance(shortcut, QtGui.QKeySequence):
+            action.setShortcut(shortcut)
+    if "tip" in settings:
         action.setToolTip(settings["tip"])
         action.setStatusTip(settings["tip"])
     if "data" in settings:

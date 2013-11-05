@@ -8,7 +8,7 @@ from prymatex.qt.helpers import keybinding
 
 from prymatex.resources.loader import getResource, setResource, getSection
 
-class ContextSequence(namedtuple(namedtuple("ContextSequence", "context name description default")):
+class ContextSequence(namedtuple("ContextSequence", "context name description default")):
     __slots__ = ()
     def key(self):
         sec = keybinding(self.name)
@@ -16,7 +16,7 @@ class ContextSequence(namedtuple(namedtuple("ContextSequence", "context name des
             keystr = getResource('%s.%s' % (self.context, self.name), 'Sequences')
             sec = QtGui.QKeySequence.fromString(keystr)
         if sec.isEmpty():
-            sec = QtGui.QKeySequence.fromString(default)
+            sec = QtGui.QKeySequence.fromString(self.default)
         return sec
 
     def setKey(self, keystr):

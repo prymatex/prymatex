@@ -13,7 +13,7 @@ from prymatex.qt.helpers.actions import create_action
 
 import collections
 
-def create_menu(parent, settings, dispatcher = None, separatorName = False, allObjects = False):
+def create_menu(parent, settings, dispatcher = None, separatorName = False, allObjects = False, shortcut_handler = None):
     menu = QtGui.QMenu(settings["text"], parent)
     objectName = text2objectname(settings.get("name", settings["text"]), prefix = "menu")
 
@@ -66,11 +66,12 @@ def create_menu(parent, settings, dispatcher = None, separatorName = False, allO
     objects = extend_menu(menu,
         settings.get("items", []),
         dispatcher = dispatcher,
-        separatorName = separatorName)
+        separatorName = separatorName,
+        shortcut_handler = shortcut_handler)
 
     return allObjects and objects or menu
 
-def extend_menu(rootMenu, settings, dispatcher = True, separatorName = False):
+def extend_menu(rootMenu, settings, dispatcher = None, separatorName = False, shortcut_handler = None):
     collectedObjects = [ rootMenu ]
     for item in settings:
         objects = None
@@ -86,11 +87,15 @@ def extend_menu(rootMenu, settings, dispatcher = True, separatorName = False):
         elif isinstance(item, dict) and 'items' in item:
             objects = create_menu(rootMenu.parent(), item,
                 dispatcher = dispatcher,
-                separatorName = separatorName, allObjects = True)
-            add_actions(rootMenu, [ objects[0] ])
+                separatorName = separatorName,
+                allObjects = True,
+                shortcut_handler = shortcut_handler)
+            add_actions(rootMenu, [ objects[0] ], item.get("before", None))
         elif isinstance(item, dict):
-            objects = create_action(rootMenu.parent(), item, dispatcher = dispatcher)
-            add_actions(rootMenu, [ objects ])
+            objects = create_action(rootMenu.parent(), item,
+                dispatcher = dispatcher, 
+                shortcut_handler = shortcut_handler)
+            add_actions(rootMenu, [ objects ], item.get("before", None))
         elif isinstance(item, QtGui.QAction):
             rootMenu.addAction(item)
             objects = item
@@ -113,29 +118,22 @@ def extend_menu(rootMenu, settings, dispatcher = True, separatorName = False):
 
 def add_actions(target, actions, before=None):
     """Add actions to a menu"""
-    previous_action = None
-    target_actions = list(target.actions())
-    if target_actions:
-        previous_action = target_actions[-1]
-        if previous_action.isSeparator():
-            previous_action = None
+    # Convert before to action
+    before_action = None
+    if before:
+        objectName = text2objectname(before, prefix = "actionMenu")
+        before_action = next((ta for ta in target.actions() if ta.objectName() == objectName), None)
     for action in actions:
-        if (action is None) and (previous_action is not None):
-            if before is None:
-                target.addSeparator()
-            else:
-                target.insertSeparator(before)
-        elif isinstance(action, QtGui.QMenu):
-            if before is None:
+        if isinstance(action, QtGui.QMenu):
+            if before_action is None:
                 target.addMenu(action)
             else:
-                target.insertMenu(before, action)
+                target.insertMenu(before_action, action)
         elif isinstance(action, QtGui.QAction):
-            if before is None:
+            if before_action is None:
                 target.addAction(action)
             else:
-                target.insertAction(before, action)
-        previous_action = action
+                target.insertAction(before_action, action)
 
 # Sections
 def _chunk_sections(items):

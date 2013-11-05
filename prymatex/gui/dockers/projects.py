@@ -13,7 +13,6 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.qt.helpers import create_menu, extend_menu_section
 from prymatex.qt.extensions import CheckableMessageBox, ReplaceRenameInputDialog
 
-
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.settings import pmxConfigPorperty
 
@@ -80,9 +79,9 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
     def contributeToMainMenu(cls):
         navigation = [
                 "-",
-                {'text': 'Go To Project File',
+                {'text': 'Go to project file',
                  'triggered': cls.on_actionGoToProjectFile_triggered,
-                 'shortcut': 'Meta+Ctrl+Shift+F',
+                 'shortcut': resources.get_sequence("Projects", "GoToProjectFiles", 'Meta+Ctrl+Shift+F'),
                  }
             ]
         return { "navigation": navigation}

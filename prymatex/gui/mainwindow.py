@@ -139,12 +139,14 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
                     if not isinstance(settings, list):
                         settings = [ settings ]
                     objects += extend_menu(parentMenu, settings,
-                        dispatcher = self.componentInstanceDispatcher)
+                        dispatcher = self.componentInstanceDispatcher,
+                        shortcut_handler = self.shortcutHandler)
                 else:
                     objs = create_menu(self, settings,
                         dispatcher = self.componentInstanceDispatcher,
-                        allObjects = True)
-                    add_actions(self.menuBar(), [ objs[0] ])
+                        allObjects = True,
+                        shortcut_handler = self.shortcutHandler)
+                    add_actions(self.menuBar(), [ objs[0] ], settings.get("before", None))
                     objects += objs
 
             # Store all new objects from creation or extension
@@ -168,6 +170,29 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
 
         self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
         
+    def componentInstanceDispatcher(self, handler, *largs):
+        obj = self.sender()
+        componentClass = None
+        for cmpClass, objects in self.customComponentObjects.items():
+            if obj in objects:
+                componentClass = cmpClass
+                break
+
+        componentInstances = [ self ]
+        for componentClass in self.application.componentHierarchyForClass(componentClass):
+            componentInstances = reduce(
+                lambda ai, ci: ai + ci.findChildren(componentClass),
+                componentInstances, [])
+
+        widget = self.application.focusWidget()
+        self.logger.debug("Trigger %s over %s" % (obj, componentInstances))
+
+        # TODO Tengo todas pero solo se lo aplico a la ultima que es la que generalmente esta en uso
+        handler(componentInstances[-1], *largs)
+
+    def shortcutHandler(self, action, sequence):
+        action.setShortcut(sequence.key())
+
     def environmentVariables(self):
         env = {}
         for docker in self.dockers:
@@ -256,26 +281,6 @@ html_footer
         action = self.sender()
         callback = action.data()
         getattr(widget, callback, lambda : None)()
-
-    def componentInstanceDispatcher(self, handler, *largs):
-        obj = self.sender()
-        componentClass = None
-        for cmpClass, objects in self.customComponentObjects.items():
-            if obj in objects:
-                componentClass = cmpClass
-                break
-
-        componentInstances = [ self ]
-        for componentClass in self.application.componentHierarchyForClass(componentClass):
-            componentInstances = reduce(
-                lambda ai, ci: ai + ci.findChildren(componentClass),
-                componentInstances, [])
-
-        widget = self.application.focusWidget()
-        self.logger.debug("Trigger %s over %s" % (obj, componentInstances))
-
-        # TODO Tengo todas pero solo se lo aplico a la ultima que es la que generalmente esta en uso
-        handler(componentInstances[-1], *largs)
 
     def updateMenuForEditor(self, editor):
         def set_objects(instance, objects):

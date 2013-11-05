@@ -377,27 +377,28 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     # ------------- Contributes to Main Menu
     @classmethod
     def contributeToMainMenu(cls):
-        edit = [
+        menu = PMXBaseStatusBar.contributeToMainMenu()
+        menu["edit"] = [
                 '-',
                 {'text': "Find",
-                 'shortcut': "Ctrl+F",
+                 'shortcut': resources.get_sequence("StatusBar", "Find", "Find"),
                  'triggered': cls.showIFind
                 },
                 {'text': "Replace",
-                 'shortcut': "Ctrl+R",
+                 'shortcut': resources.get_sequence("StatusBar", "Replace", "Replace"),
                  'triggered': cls.showFindReplace
                 }
             ]
-        text = [
-                {'text': 'Filter Through Command',
+        menu["text"] = [
+                {'text': 'Filter through command',
                  'triggered': cls.showCommand
                  }
             ]
-        navigation = [
+        menu["navigation"] = [
                 "-",
-                {'text': 'Go To &Line',
+                {'text': 'Go to &line',
                  'triggered': cls.showGoToLine,
-                 'shortcut': 'Meta+Ctrl+Shift+L',
+                 'shortcut': resources.get_sequence("StatusBar", "GoToLine", 'Meta+Ctrl+Shift+L'),
                  }
             ]
-        return { "edit": edit, "navigation": navigation, "text": text }
+        return menu

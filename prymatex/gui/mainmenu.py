@@ -125,13 +125,15 @@ class MainMenuMixin(object):
     def contributeToMainMenu(cls):
         import prymatex
         menu = PMXBaseComponent.contributeToMainMenu()
+
+        # ------------- File menu
         menu["file"] = {
             "text": "&File",
             "items": [{
                 "text": "New",
                 "items": [{
                     "text": "Editor",
-                    "shortcut": resources.get_shortcut("_", "New"),
+                    "shortcut": resources.get_sequence("_", "New"),
                     "triggered": lambda mainWindow: mainWindow.addEmptyEditor(),
                     "icon": resources.get_icon("tab-new"),
                 }, "-", {
@@ -145,7 +147,7 @@ class MainMenuMixin(object):
                 }]
             }, {
                 "text": "Open",
-                "shortcut": resources.get_shortcut("_", "Open"),
+                "shortcut": resources.get_sequence("_", "Open"),
                 "icon": resources.get_icon("document-open"),
                 "triggered": cls.on_actionOpen_triggered
             }, {
@@ -167,7 +169,7 @@ class MainMenuMixin(object):
                 "icon": resources.get_icon("project-open"),
             }, "-", {
                 "text": "Save",
-                "shortcut": resources.get_shortcut("_", "Save"),
+                "shortcut": resources.get_sequence("_", "Save"),
                 "icon": resources.get_icon("document-save"),
                 "triggered": lambda mainWindow: mainWindow.saveEditor()
             }, {
@@ -180,7 +182,7 @@ class MainMenuMixin(object):
                 "triggered": lambda mainWindow: [ mainWindow.saveEditor(editor = editor) for editor in self.editors() ]
             }, "-", {
                 "text": "Close",
-                "shortcut": resources.get_shortcut("_", "Close"),
+                "shortcut": resources.get_sequence("_", "Close"),
                 "icon": resources.get_icon("tab-close"),
                 "triggered": lambda mainWindow: mainWindow.closeEditor()
             }, {
@@ -194,7 +196,7 @@ class MainMenuMixin(object):
                 "icon": resources.get_icon("system-switch-user")
             }, "-", {
                 "text": "Quit",
-                "shortcut": resources.get_shortcut("_", "Quit"),
+                "shortcut": resources.get_sequence("_", "Quit"),
                 "icon": resources.get_icon("application-exit"),
                 "triggered": lambda mainWindow: mainWindow.application.quit()
             }]
@@ -206,16 +208,18 @@ class MainMenuMixin(object):
             iconName = text2iconname(text, prefix = "edit")
             return {
                 "text": text,
-                "shortcut": resources.get_shortcut("_", objectName),
+                "shortcut": resources.get_sequence("_", objectName),
                 "icon": resources.get_icon(iconName),
                 "triggered": cls.globalCallback,
                 "data": objectName
             }
+            
         menu["edit"] = {
             "text": "&Edit",
             "items": [ globalEditAction(name) for name in ("&Undo", "&Redo") ] + ["-"] +
             [ globalEditAction(name) for name in ("Cu&t", "&Copy", "&Paste", "&Delete") ]
         }
+        
         # ------------- View menu
         menu["view"] = {
             "text": "&View",
@@ -231,12 +235,12 @@ class MainMenuMixin(object):
             "text": "Navigation",
             "items": [{
                 "text": "Next tab",
-                "shortcut": resources.get_shortcut("_", "NextChild"),
+                "shortcut": resources.get_sequence("_", "NextChild"),
                 "icon": resources.get_icon("go-next-view"),
                 "triggered": cls.on_actionNextTab_triggered
             }, {
                 "text": "Previous tab",
-                "shortcut": resources.get_shortcut("_", "PreviousChild"),
+                "shortcut": resources.get_sequence("_", "PreviousChild"),
                 "icon": resources.get_icon("go-previous-view"),
                 "triggered": cls.on_actionPreviousTab_triggered
             }, {
@@ -244,7 +248,7 @@ class MainMenuMixin(object):
                 "triggered": cls.on_actionSelectTab_triggered
             }, {
                 "text": "Jump to tab",
-                "shortcut": resources.get_shortcut("_", "JumpToTab", "F12"),
+                "shortcut": resources.get_sequence("_", "JumpToTab", "F12"),
                 "triggered": cls.on_actionJumpToTab_triggered
             }, "-", {
                 "text": "Last edit location",
@@ -252,12 +256,12 @@ class MainMenuMixin(object):
                 "triggered": cls.on_actionPreviousTab_triggered
             }, {
                 "text": "Go back location",
-                "shortcut": resources.get_shortcut("_", "GoBackLocation"),
+                "shortcut": resources.get_sequence("_", "GoBackLocation"),
                 "icon": resources.get_icon("go-previous"),
                 "triggered": cls.on_actionPreviousTab_triggered
             }, {
                 "text": "Go forward location",
-                "shortcut": resources.get_shortcut("_", "GoForwardLocation"),
+                "shortcut": resources.get_sequence("_", "GoForwardLocation"),
                 "icon": resources.get_icon("go-next"),
                 "triggered": cls.on_actionPreviousTab_triggered
             }]
@@ -270,19 +274,19 @@ class MainMenuMixin(object):
                 "text": "Bundle editor",
                 "items": [{
                     "text": "Show bundle editor",
-                    "shortcut": resources.get_shortcut("_", "ShowBundleEditor", "Meta+Ctrl+Alt+B"),
+                    "shortcut": resources.get_sequence("_", "ShowBundleEditor", "Meta+Ctrl+Alt+B"),
                     "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execEditor()
                 }, "-", {
                     "text": "Edit commands",
-                    "shortcut": resources.get_shortcut("_", "ShowBundleEditor", "Meta+Ctrl+Alt+C"),
+                    "shortcut": resources.get_sequence("_", "ShowBundleEditor", "Meta+Ctrl+Alt+C"),
                     "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execCommand()
                 }, {
                     "text": "Edit languages",
-                    "shortcut": resources.get_shortcut("_", "ShowBundleEditor", "Meta+Ctrl+Alt+L"),
+                    "shortcut": resources.get_sequence("_", "ShowBundleEditor", "Meta+Ctrl+Alt+L"),
                     "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execLanguage()
                 }, {
                     "text": "Edit snippets",
-                    "shortcut": resources.get_shortcut("_", "ShowBundleEditor", "Meta+Ctrl+Alt+S"),
+                    "shortcut": resources.get_sequence("_", "ShowBundleEditor", "Meta+Ctrl+Alt+S"),
                     "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execSnippet()
                 }, {
                     "text": "Reload bundles",
