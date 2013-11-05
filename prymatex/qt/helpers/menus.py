@@ -111,7 +111,7 @@ def extend_menu(rootMenu, settings, dispatcher = True, separatorName = False):
             getattr(collectedObjects, isinstance(objects, (tuple, list)) and "extend" or "append")(objects)
     return collectedObjects
 
-def add_actions(target, actions, insert_before=None):
+def add_actions(target, actions, before=None):
     """Add actions to a menu"""
     previous_action = None
     target_actions = list(target.actions())
@@ -121,20 +121,20 @@ def add_actions(target, actions, insert_before=None):
             previous_action = None
     for action in actions:
         if (action is None) and (previous_action is not None):
-            if insert_before is None:
+            if before is None:
                 target.addSeparator()
             else:
-                target.insertSeparator(insert_before)
+                target.insertSeparator(before)
         elif isinstance(action, QtGui.QMenu):
-            if insert_before is None:
+            if before is None:
                 target.addMenu(action)
             else:
-                target.insertMenu(insert_before, action)
+                target.insertMenu(before, action)
         elif isinstance(action, QtGui.QAction):
-            if insert_before is None:
+            if before is None:
                 target.addAction(action)
             else:
-                target.insertAction(insert_before, action)
+                target.insertAction(before, action)
         previous_action = action
 
 # Sections

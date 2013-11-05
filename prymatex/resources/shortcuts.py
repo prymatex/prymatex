@@ -1,34 +1,40 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from collections import namedtuple
+
 from prymatex.qt import QtGui
 from prymatex.qt.helpers import keybinding
 
 from prymatex.resources.loader import getResource, setResource, getSection
 
-def get_shortcut(context, name, default = None):
-    """Get keyboard shortcut (key sequence string)"""
-    shortcut = keybinding(name)
-    if shortcut.isEmpty():
-        keystr = getResource('%s.%s' % (context, name), 'Shortcuts')
-        shortcut = QtGui.QKeySequence.fromString(keystr)
-    if shortcut.isEmpty():
-        shortcut = QtGui.QKeySequence.fromString(default)
-    return shortcut
+class ContextSequence(namedtuple(namedtuple("ContextSequence", "context name description default")):
+    __slots__ = ()
+    def key(self):
+        sec = keybinding(self.name)
+        if sec.isEmpty():
+            keystr = getResource('%s.%s' % (self.context, self.name), 'Sequences')
+            sec = QtGui.QKeySequence.fromString(keystr)
+        if sec.isEmpty():
+            sec = QtGui.QKeySequence.fromString(default)
+        return sec
 
-def set_shortcut(context, name, keystr):
-    """Set keyboard shortcut (key sequence string)"""
-    setResource('Shortcuts', '%s.%s' % (context, name), keystr)
+    def setKey(self, keystr):
+        setResource('Sequences', '%s.%s' % (self.context, self.name), keystr)
+
+def get_sequence(context, name, default = None, description = None):
+    """Get keyboard sequence"""
+    return ContextSequence(context, name, description, default)
     
-def iter_shortcuts():
+def iter_sequences():
     """Iterate over keyboard shortcuts"""
-    for option, value in getSection('Shortcuts').items():
+    for option, value in getSection('Sequences').items():
         context, name = option.split(".", 1)
         yield context, name, value
 
-def remove_deprecated_shortcuts(data):
+def remove_deprecated_sequences(data):
     """Remove deprecated shortcuts (shortcuts in CONF but not registered)"""
-    source = 'Shortcuts'
+    source = 'Sequences'
     options = [('%s.%s' % (context, name)).lower() for (context, name) in data]
     for option, _ in CONF.items(section, raw=CONF.raw):
         if option not in options:
@@ -36,6 +42,6 @@ def remove_deprecated_shortcuts(data):
             if len(CONF.items(section, raw=CONF.raw)) == 0:
                 CONF.remove_section(section)
 
-def reset_shortcuts():
+def reset_sequences():
     """Reset keyboard shortcuts to default values"""
-    CONF.remove_section('Shortcuts')
+    CONF.remove_section('Sequences')
