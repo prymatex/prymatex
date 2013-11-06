@@ -107,6 +107,9 @@ class PMXMacroProcessor(PMXMacroProcessor):
     def deleteBackward(self):
         self.editor.textCursor().deletePreviousChar()
 
+    def deleteForward(self):
+        self.editor.textCursor().deleteChar()
+        
     def insertNewline(self):
         self.editor.insertNewLine()
 
