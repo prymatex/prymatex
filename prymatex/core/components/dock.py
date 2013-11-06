@@ -5,7 +5,6 @@ from prymatex.qt import QtGui, QtCore
 
 from prymatex.core.components.base import PMXBaseComponent
 from prymatex.core.components.keyhelper import PMXBaseKeyHelper, PMXKeyHelperMixin
-from prymatex.core.components.addon import PMXBaseAddon
 
 __all__ = ["PMXBaseDock", "PMXBaseDockKeyHelper", "PMXBaseDockAddon"]
 
@@ -49,11 +48,10 @@ class PMXBaseDockKeyHelper(PMXBaseKeyHelper):
 #========================================
 # BASE ADDON
 #========================================
-class PMXBaseDockAddon(PMXBaseAddon):
+class PMXBaseDockAddon(PMXBaseComponent):
     def initialize(self, dock):
-        PMXBaseAddon.initialize(self, dock)
+        PMXBaseComponent.initialize(self, dock)
         self.dock = dock
-
 
     def finalize(self):
         pass

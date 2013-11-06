@@ -158,6 +158,10 @@ def setResource(section, name, value):
     global RESOURCES
     RESOURCES.setdefault(section, {})[name] = value
 
+def removeSection(name):
+    global RESOURCES
+    RESOURCES["name"] = {}
+
 def getSection(name):
     global RESOURCES
     return RESOURCES.setdefault(name, {})

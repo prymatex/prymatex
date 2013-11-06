@@ -6,7 +6,7 @@ from collections import namedtuple
 from prymatex.qt import QtGui
 from prymatex.qt.helpers import keybinding
 
-from prymatex.resources.loader import getResource, setResource, getSection
+from prymatex.resources.loader import getResource, setResource, getSection, removeSection
 
 class ContextSequence(namedtuple("ContextSequence", "context name description default")):
     __slots__ = ()
@@ -33,7 +33,7 @@ def iter_sequences():
         yield context, name, value
 
 def remove_deprecated_sequences(data):
-    """Remove deprecated shortcuts (shortcuts in CONF but not registered)"""
+    """Remove deprecated sequences"""
     source = 'Sequences'
     options = [('%s.%s' % (context, name)).lower() for (context, name) in data]
     for option, _ in CONF.items(section, raw=CONF.raw):
@@ -44,4 +44,4 @@ def remove_deprecated_sequences(data):
 
 def reset_sequences():
     """Reset keyboard shortcuts to default values"""
-    CONF.remove_section('Sequences')
+    removeSection('Sequences')

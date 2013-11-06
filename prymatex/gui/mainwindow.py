@@ -191,6 +191,7 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
         handler(componentInstances[-1], *largs)
 
     def shortcutHandler(self, action, sequence):
+        self.application.registerShortcut(action, sequence)
         action.setShortcut(sequence.key())
 
     def environmentVariables(self):
@@ -274,13 +275,6 @@ html_footer
         if not dock.isFloating():
             area = self.dockWidgetArea(dock)
             self.dockToolBars[area].show()
-
-    def globalCallback(self):
-        """Global callback"""
-        widget = self.application.focusWidget()
-        action = self.sender()
-        callback = action.data()
-        getattr(widget, callback, lambda : None)()
 
     def updateMenuForEditor(self, editor):
         def set_objects(instance, objects):

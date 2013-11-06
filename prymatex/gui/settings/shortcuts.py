@@ -11,7 +11,7 @@ class ShortcutsSettingsWidget(MultiDictTableEditorWidget, SettingsTreeNode):
     """Environment variables"""
     NAMESPACE = "general"
     TITLE = "Shortcuts"
-    ICON = resources.getIcon("code-variable")
+    ICON = resources.getIcon("configure-shortcuts")
 
     def __init__(self, settingGroup, profile = None, parent = None):
         MultiDictTableEditorWidget.__init__(self, parent)

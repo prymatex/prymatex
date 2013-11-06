@@ -14,9 +14,15 @@ from prymatex.utils.i18n import ugettext as _
 
 class MainMenuMixin(object):
 
-    splitTabWidget = None #Overriden in GUI Setup
+    # -------------- Global callback for copy, paste cut...
+    def globalCallback(self):
+        """Global callback"""
+        widget = self.application.focusWidget()
+        action = self.sender()
+        callback = action.data()
+        getattr(widget, callback, lambda : None)()
 
-    # ------------ About To Show Menus
+    # ------------ About to show recent files
     def on_menuRecentFiles_aboutToShow(self):
         actions = self.menuRecentFiles.actions()[-3:]
         # TODO Algo mejor para no estar creando y matando actions como bestia

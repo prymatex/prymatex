@@ -61,6 +61,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         #Connects
         self.aboutToQuit.connect(self.closePrymatex)
         self.componentInstances = {}
+        self.shortcuts = []
         
         self.replaceSysExceptHook()
 
@@ -500,38 +501,27 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
                 self.openDirectory(path)
 
     # --- Shortcuts
-    def register_shortcut(self, qaction_or_qshortcut, context, name,
-                          default=None):
+    def registerShortcut(self, qaction_or_qshortcut, sequence):
         """
-        Register QAction or QShortcut to Spyder main application,
-        with shortcut (context, name, default)
+        Register QAction or QShortcut to Prymatex main application,
+        with sequence
         """
-        self.shortcut_data.append( (qaction_or_qshortcut,
-                                    context, name, default) )
-        self.apply_shortcuts()
+        self.shortcuts.append( (qaction_or_qshortcut, sequence) )
 
-    def remove_deprecated_shortcuts(self):
-        """Remove deprecated shortcuts"""
-        data = [(context, name) for (qobject, context, name,
-                default) in self.shortcut_data]
-        remove_deprecated_shortcuts(data)
-        
-    def apply_shortcuts(self):
+    def applyShortcuts(self):
         """Apply shortcuts settings to all widgets/plugins"""
         toberemoved = []
-        for index, (qobject, context, name,
-                    default) in enumerate(self.shortcut_data):
-            keyseq = QKeySequence( get_shortcut(context, name, default) )
+        for index, (qobject, sequence) in enumerate(self.shortcuts):
             try:
                 if isinstance(qobject, QtGui.QAction):
-                    qobject.setShortcut(keyseq)
+                    qobject.setShortcut(sequence.key())
                 elif isinstance(qobject, QtGui.QShortcut):
-                    qobject.setKey(keyseq)
+                    qobject.setKey(sequence.key())
             except RuntimeError:
                 # Object has been deleted
                 toberemoved.append(index)
         for index in sorted(toberemoved, reverse=True):
-            self.shortcut_data.pop(index)
+            self.shortcuts.pop(index)
 
     def checkExternalAction(self, mainWindow, editor):
         if editor.isExternalChanged():

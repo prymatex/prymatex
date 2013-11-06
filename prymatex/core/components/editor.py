@@ -7,7 +7,6 @@ from prymatex.qt.helpers.icons import combine_icons
 from prymatex.core import exceptions
 from prymatex.core.components.base import PMXBaseComponent
 from prymatex.core.components.keyhelper import PMXBaseKeyHelper, PMXKeyHelperMixin
-from prymatex.core.components.addon import PMXBaseAddon
 
 from prymatex import resources
 
@@ -190,9 +189,9 @@ class PMXBaseEditorKeyHelper(PMXBaseKeyHelper):
 #======================================================================
 # Base Addon
 #======================================================================    
-class PMXBaseEditorAddon(PMXBaseAddon):
+class PMXBaseEditorAddon(PMXBaseComponent):
     def initialize(self, editor):
-        PMXBaseAddon.initialize(self, editor)
+        PMXBaseComponent.initialize(self, editor)
         self.editor = editor
 
     def finalize(self):

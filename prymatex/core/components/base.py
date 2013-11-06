@@ -31,10 +31,14 @@ class PMXBaseComponent(object):
             values define the extensions to the found menu"""
         return collections.OrderedDict()
 
+    def contributeToShortcuts(self):
+        return []
+        
     def environmentVariables(self):
         """Return a dictionary with the defined variables of this component."""
         return {}
 
+    # Save an restore component state
     def componentState(self):
         """Returns a Python dictionary containing the state of the component."""
         return {}
