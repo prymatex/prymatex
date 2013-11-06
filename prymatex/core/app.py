@@ -134,7 +134,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import GeneralSettingsWidget
-        return [GeneralSettingsWidget]
+        from prymatex.gui.settings.shortcuts import ShortcutsSettingsWidget
+
+        return [ GeneralSettingsWidget, ShortcutsSettingsWidget ]
 
     def loadGraphicalUserInterface(self):
         if not self.options.no_splash:
