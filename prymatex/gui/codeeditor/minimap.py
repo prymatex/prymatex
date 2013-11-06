@@ -61,17 +61,11 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter"
         menuEntry = {
             'name': 'miniMap',
-            'text': "Mini Map",
-            'toggled': cls.on_actionShowMiniMap_toggled,
-            'testChecked': cls.on_actionShowMiniMap_testChecked }
+            'text': "Minimap",
+            'toggled': lambda instance, checked: instance.setVisible(checked),
+            'testChecked': lambda instance: instance.isVisible() }
         return { baseMenu: menuEntry }
-
-    def on_actionShowMiniMap_toggled(self, checked):
-        self.setVisible(checked)
-
-    def on_actionShowMiniMap_testChecked(self):
-        return self.isVisible()    
-        
+    
     def on_editor_themeChanged(self):
         #Editor colours
         appStyle = """QPlainTextEdit {background-color: %s;

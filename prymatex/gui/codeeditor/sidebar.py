@@ -124,17 +124,11 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter"
         menuEntry = {
             'name': 'lineNumbers',
-            'text': "Line Numbers",
-            'toggled': cls.on_actionShowLineNumbers_toggled,
+            'text': "Line numbers",
             'shortcut': resources.get_sequence("SideBar", "ShowLineNumbers", 'F10'),
-            'testChecked': cls.on_actionShowLineNumbers_testChecked }
+            'toggled': lambda instance, checked: instance.setVisible(checked),
+            'testChecked': lambda instance: instance.isVisible() }
         return { baseMenu: menuEntry }
-
-    def on_actionShowLineNumbers_toggled(self, checked):
-        self.setVisible(checked)
-
-    def on_actionShowLineNumbers_testChecked(self):
-        return self.isVisible()
 
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
@@ -211,16 +205,10 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         menuEntry = {
             'name': 'bookmarks',
             'text': "Bookmarks",
-            'toggled': cls.on_actionShowBookmarks_toggled,
             'shortcut': resources.get_sequence("SideBar", "ShowBookmarks", 'Alt+F10'),
-            'testChecked': cls.on_actionShowBookmarks_testChecked }
+            'toggled': lambda instance, checked: instance.setVisible(checked),
+            'testChecked': lambda instance: instance.isVisible() }
         return { baseMenu: menuEntry} 
-
-    def on_actionShowBookmarks_toggled(self, checked):
-        self.setVisible(checked)
-            
-    def on_actionShowBookmarks_testChecked(self):
-        return self.isVisible()
             
     def paintEvent(self, event):
         font_metrics = QtGui.QFontMetrics(self.editor.font())
@@ -291,17 +279,11 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         menuEntry = {
             'name': 'foldings',
             'text': 'Foldings',
-            'toggled': cls.on_actionShowFoldings_toggled,
             'shortcut': resources.get_sequence("SideBar", "ShowFoldings", 'Shift+F10'),
-            'testChecked': cls.on_actionShowFoldings_testChecked }
+            'toggled': lambda instance, checked: instance.setVisible(checked),
+            'testChecked': lambda instance: instance.isVisible() }
         return {baseMenu: menuEntry} 
-
-    def on_actionShowFoldings_toggled(self, checked):
-        self.setVisible(checked)
-
-    def on_actionShowFoldings_testChecked(self):
-        return self.isVisible()
-        
+    
     def paintEvent(self, event):
         font_metrics = QtGui.QFontMetrics(self.editor.font())
         page_bottom = self.editor.viewport().height()
@@ -378,16 +360,10 @@ class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         menuEntry = {
             'name': 'selection',
             'text': 'Selection',
-            'toggled': cls.on_actionShowSelection_toggled,
-            'testChecked': cls.on_actionShowSelection_testChecked }
+            'toggled': lambda instance, checked: instance.setVisible(checked),
+            'testChecked': lambda instance: instance.isVisible() }
         return { baseMenu: menuEntry }
-
-    def on_actionShowSelection_toggled(self, checked):
-        self.setVisible(checked)
-
-    def on_actionShowSelection_testChecked(self):
-        return self.isVisible()
-        
+    
     def paintEvent(self, event):
         font_metrics = QtGui.QFontMetrics(self.editor.font())
         page_bottom = self.editor.viewport().height()
