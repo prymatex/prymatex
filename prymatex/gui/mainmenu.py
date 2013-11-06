@@ -184,8 +184,9 @@ class MainMenuMixin(object):
                 "triggered": lambda mainWindow: mainWindow.saveEditor(saveAs = True)
             }, {
                 "text": "Save all",
+                "shortcut": resources.get_sequence("_", "SaveAll", "Ctrl+Shift+S"),
                 "icon": resources.get_icon("document-save-all"),
-                "triggered": lambda mainWindow: [ mainWindow.saveEditor(editor = editor) for editor in self.editors() ]
+                "triggered": lambda mainWindow: [ mainWindow.saveEditor(editor = editor) for editor in mainWindow.editors() ]
             }, "-", {
                 "text": "Close",
                 "shortcut": resources.get_sequence("_", "Close"),
@@ -193,7 +194,8 @@ class MainMenuMixin(object):
                 "triggered": lambda mainWindow: mainWindow.closeEditor()
             }, {
                 "text": "Close all",
-                "triggered": lambda mainWindow: [ mainWindow.closeEditor(editor = editor) for editor in self.editors() ]
+                "shortcut": resources.get_sequence("_", "CloseAll", "Ctrl+Shift+W"),
+                "triggered": lambda mainWindow: [ mainWindow.closeEditor(editor = editor) for editor in mainWindow.editors() ]
             }, {
                 "text": "Close others",
                 "icon": resources.get_icon("tab-close-other")
@@ -233,7 +235,6 @@ class MainMenuMixin(object):
                 "text": "Panels",
                 "items": []
             }]
-
         }
 
         # ------------- Navigation menu
