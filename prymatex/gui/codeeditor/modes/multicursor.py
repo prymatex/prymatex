@@ -3,6 +3,8 @@
 
 from prymatex.qt import QtCore, QtGui
 
+from prymatex import resources
+
 from .base import CodeEditorBaseMode
 
 from prymatex.qt.helpers.keyevents import KEY_NUMBERS
@@ -11,43 +13,9 @@ from prymatex.gui.codeeditor.helpers import CodeEditorKeyHelper
 
 WIDTH_CHARACTER = '#'
 
-# ==================================
-# Helper for MultiCursor
-# ==================================
-class MultiCursorHelper(CodeEditorKeyHelper):
-    KEY = QtCore.Qt.Key_M
-    def __init__(self, multiCursorMode):
-        CodeEditorKeyHelper.__init__(self, multiCursorMode)
-        self.multiCursorMode = multiCursorMode
-
-    def accept(self, event, cursor = None):
-        control_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
-        meta_down = bool(event.modifiers() & QtCore.Qt.MetaModifier)
-        return event.key() == self.KEY and control_down and meta_down
-
-    def execute(self, event, cursor = None):
-        cursor = cursor or self.editor.textCursor()
-        flags = QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords
-        if not cursor.hasSelection():
-            text, start, end = self.editor.currentWord()
-            newCursor = QtGui.QTextCursor(cursor)
-            newCursor.setPosition(start)
-            newCursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-            self.multiCursorMode.addMergeCursor(newCursor)
-        else:
-            text = cursor.selectedText()
-            self.multiCursorMode.addMergeCursor(cursor)
-            if event.modifiers() & QtCore.Qt.ShiftModifier:
-                flags |= QtGui.QTextDocument.FindBackward
-            newCursor = self.editor.document().find(text, cursor, flags)
-            if not newCursor.isNull():
-                self.multiCursorMode.addMergeCursor(newCursor)
-                self.editor.centerCursor(newCursor)
-
 class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def __init__(self, parent = None):
         CodeEditorBaseMode.__init__(self, parent)
-        self.keyHelper = MultiCursorHelper(self)
         self.cursors = []
         self.selectedCursors = []
         self.draggedCursors = []
@@ -57,16 +25,12 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         CodeEditorBaseMode.initialize(self, editor)
         self.editor.installEventFilter(self)
         self.editor.viewport().installEventFilter(self)
-        # Helper
-        self.keyHelper.initialize(editor)
-        self.editor.addKeyHelper(self.keyHelper)
         # Formater
         editor.registerTextCharFormatBuilder("dragged", self.textCharFormat_dragged_builder)
         
     def eventFilter(self, obj, event):
         if self.isActive() and event.type() == QtCore.QEvent.KeyPress:
-            self.keyPressEvent(event)
-            return True
+            return self.keyPressEvent(event)
         elif self.isActive() and event.type() == QtCore.QEvent.MouseButtonRelease and event.modifiers() & QtCore.Qt.ControlModifier:
             self.mouseReleasePoint(event.pos(), event.modifiers() & QtCore.Qt.MetaModifier)
             return True
@@ -296,12 +260,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         return not self.cursors[0].atStart()
 
     def keyPressEvent(self, event):
-        if bool(event.modifiers() & QtCore.Qt.ControlModifier):
-            self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
-        if self.keyHelper.accept(event):
-            cursor = self.cursors[0] if event.modifiers() & QtCore.Qt.ShiftModifier else self.cursors[-1]
-            self.keyHelper.execute(event, cursor)
-        elif event.key() == QtCore.Qt.Key_Escape:
+        if event.key() == QtCore.Qt.Key_Escape:
             #Deprecated usar una lista de cursores ordenados para tomar de [0] y [-1]
             firstCursor = self.cursors[0]
             lastCursor = self.cursors[-1]
@@ -366,3 +325,30 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
                 self.editor.setTextCursor(cursor)
                 QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             cursor.endEditBlock()
+        return False
+
+    def findCursor(self, backward = False):
+        cursor = self.editor.textCursor()
+        flags = QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords
+        if not cursor.hasSelection():
+            text, start, end = self.editor.currentWord()
+            newCursor = self.editor.newCursorAtPosition(start, end)
+            self.addMergeCursor(newCursor)
+        else:
+            text = cursor.selectedText()
+            self.addMergeCursor(cursor)
+            if backward:
+                flags |= QtGui.QTextDocument.FindBackward
+            newCursor = self.editor.document().find(text, cursor, flags)
+            if not newCursor.isNull():
+                self.addMergeCursor(newCursor)
+                self.editor.centerCursor(newCursor)
+    
+    def contributeToShortcuts(self):
+        return [{
+            "sequence": resources.get_sequence("Multiedit", "FindForwardCursor", "Ctrl+Meta+M"),
+            "activated": lambda : self.findCursor()
+        }, {
+            "sequence": resources.get_sequence("Multiedit", "FindBackwardCursor", "Ctrl+Meta+Shift+M"),
+            "activated": lambda : self.findCursor(True)
+        }]

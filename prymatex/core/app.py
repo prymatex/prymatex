@@ -321,10 +321,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             # Configure
             self.currentProfile.configure(instance)
             
-            # Shortcuts
-            for settings in instance.contributeToShortcuts():
-                shortcut = create_shortcut(instance, settings, sequence_handler = self.registerShortcut)
-            
             # Add components
             componentClasses = self.pluginManager.findComponentsForClass(klass)
             for componentClass in componentClasses:
@@ -337,10 +333,15 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             return instance
         
         instance = buildComponentInstance(componentClass, componentParent)
+            
         # buildedObjects.reverse()
         # Initialize order is important, fist goes the internal components then the main component
         for ni, np in buildedObjects:
             ni.initialize(np)
+            # Shortcuts
+            for settings in ni.contributeToShortcuts():
+                create_shortcut(instance, settings, sequence_handler = self.registerShortcut)
+        
             
         self.componentInstances.setdefault(componentClass, []).append(instance)
         

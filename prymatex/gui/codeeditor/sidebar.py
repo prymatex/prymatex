@@ -159,12 +159,12 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
                     painter.fillRect(blockGeometry, self.invisibles)
                     painter.setFont(self.boldFont)
                     leftPosition = self.width() - (self.boldMetrics.width(numberText) + self.MARGIN)
-                    topPosition = blockGeometry.y() + self.boldMetrics.ascent() + self.boldMetrics.descent() - 2
+                    topPosition = blockGeometry.y() + self.boldMetrics.ascent()
                     painter.drawText(leftPosition, topPosition, numberText)
                     painter.setFont(self.normalFont)
                 else:
                     leftPosition = self.width() - (self.normalMetrics.width(numberText) + self.MARGIN)
-                    topPosition = blockGeometry.y() + self.normalMetrics.ascent() + self.normalMetrics.descent() - 2
+                    topPosition = blockGeometry.y() + self.normalMetrics.ascent()
                     painter.drawText(leftPosition, topPosition, numberText)
             
             block = block.next()
