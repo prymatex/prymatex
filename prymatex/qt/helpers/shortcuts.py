@@ -20,7 +20,9 @@ def create_shortcut(parent, settings, dispatcher = None, sequence_handler=None):
             sequence_handler(shortcut, sequence)
         elif isinstance(sequence, QtGui.QKeySequence):
             shortcut.setKey(sequence)
-    
+    if "context" in settings:
+        shortcut.setContext(settings["context"])
+        
     # Action functions
     shortcut.functionActivated = None
     if "activated" in settings and isinstance(settings["activated"], collections.Callable):
@@ -41,7 +43,5 @@ def create_shortcut(parent, settings, dispatcher = None, sequence_handler=None):
     # Test functions
     if "testEnabled" in settings and isinstance(settings["testEnabled"], collections.Callable):
         shortcut.testEnabled = settings["testEnabled"]
-    
-    shortcut.setContext(settings.get("context", QtCore.Qt.WidgetShortcut))
     
     return shortcut

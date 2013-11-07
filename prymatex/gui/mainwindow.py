@@ -1,4 +1,4 @@
-##!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import os
@@ -140,12 +140,12 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
                         settings = [ settings ]
                     objects += extend_menu(parentMenu, settings,
                         dispatcher = self.componentInstanceDispatcher,
-                        shortcut_handler = self.shortcutHandler)
+                        sequence_handler = self.sequenceHandler)
                 else:
                     objs = create_menu(self, settings,
                         dispatcher = self.componentInstanceDispatcher,
                         allObjects = True,
-                        shortcut_handler = self.shortcutHandler)
+                        sequence_handler = self.sequenceHandler)
                     add_actions(self.menuBar(), [ objs[0] ], settings.get("before", None))
                     objects += objs
 
@@ -190,7 +190,7 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
         # TODO Tengo todas pero solo se lo aplico a la ultima que es la que generalmente esta en uso
         handler(componentInstances[-1], *largs)
 
-    def shortcutHandler(self, action, sequence):
+    def sequenceHandler(self, action, sequence):
         self.application.registerShortcut(action, sequence)
 
     def environmentVariables(self):

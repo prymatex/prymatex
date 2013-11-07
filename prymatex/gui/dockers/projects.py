@@ -81,7 +81,7 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
                 "-",
                 {'text': 'Go to project file',
                  'triggered': cls.on_actionGoToProjectFile_triggered,
-                 'shortcut': resources.get_sequence("Projects", "GoToProjectFiles", 'Meta+Ctrl+Shift+F'),
+                 'sequence': resources.get_sequence("Projects", "GoToProjectFiles", 'Meta+Ctrl+Shift+F'),
                  }
             ]
         return { "navigation": navigation}

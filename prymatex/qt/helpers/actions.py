@@ -15,7 +15,7 @@ def toggle_actions(actions, enable):
             if action is not None:
                 action.setEnabled(enable)
 
-def create_action(parent, settings, dispatcher = None, shortcut_handler=None):
+def create_action(parent, settings, dispatcher = None, sequence_handler=None):
     """Create a QAction"""
     text = settings.get("text")
     action = QtGui.QAction(text, parent)
@@ -25,12 +25,12 @@ def create_action(parent, settings, dispatcher = None, shortcut_handler=None):
     # attrs
     if "icon" in settings:
         action.setIcon(settings["icon"])
-    if "shortcut" in settings:
-        shortcut = settings["shortcut"]
-        if shortcut_handler is not None:
-            shortcut_handler(action, shortcut)
-        elif isinstance(shortcut, QtGui.QKeySequence):
-            action.setShortcut(shortcut)
+    if "sequence" in settings:
+        sequence = settings["sequence"]
+        if sequence_handler is not None:
+            sequence_handler(action, sequence)
+        elif isinstance(sequence, QtGui.QKeySequence):
+            action.setShortcut(sequence)
     if "tip" in settings:
         action.setToolTip(settings["tip"])
         action.setStatusTip(settings["tip"])
@@ -38,7 +38,9 @@ def create_action(parent, settings, dispatcher = None, shortcut_handler=None):
         action.setData(settings["data"])
     if "menurole" in settings:
         action.setMenuRole(settings["menurole"])
-
+    if "context" in settings:
+        action.setShortcutContext(settings["context"])
+    
     # Action functions
     action.functionTriggered = action.functionToggled = None
     if "triggered" in settings and isinstance(settings["triggered"], collections.Callable):
@@ -73,17 +75,12 @@ def create_action(parent, settings, dispatcher = None, shortcut_handler=None):
     if "testVisible" in settings and isinstance(settings["testVisible"], collections.Callable):
         action.testVisible = settings["testVisible"]
     
-    #TODO: Hard-code all shortcuts and choose context=QtCore.Qt.WidgetShortcut
-    # (this will avoid calling shortcuts from another dockwidget
-    #  since the context thing doesn't work quite well with these widgets)
-    action.setShortcutContext(settings.get("context", QtCore.Qt.WindowShortcut))
-    
     return action
 
 
-def create_bookmark_action(parent, url, text, icon=None, shortcut=None):
+def create_bookmark_action(parent, url, text, icon=None, sequence=None):
     """Create bookmark action"""
-    return create_action( parent, {"text": text, "shortcut":shortcut, "icon":icon,
+    return create_action( parent, {"text": text, "sequence":sequence, "icon":icon,
                           "triggered":lambda u=url: programs.start_file(u)})
 
 

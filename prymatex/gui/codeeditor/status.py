@@ -381,11 +381,11 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         menu["edit"] = [
                 '-',
                 {'text': "Find",
-                 'shortcut': resources.get_sequence("StatusBar", "Find", "Find"),
+                 'sequence': resources.get_sequence("StatusBar", "Find", "Find"),
                  'triggered': cls.showIFind
                 },
                 {'text': "Replace",
-                 'shortcut': resources.get_sequence("StatusBar", "Replace", "Replace"),
+                 'sequence': resources.get_sequence("StatusBar", "Replace", "Replace"),
                  'triggered': cls.showFindReplace
                 }
             ]
@@ -398,7 +398,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
                 "-",
                 {'text': 'Go to &line',
                  'triggered': cls.showGoToLine,
-                 'shortcut': resources.get_sequence("StatusBar", "GoToLine", 'Meta+Ctrl+Shift+L'),
+                 'sequence': resources.get_sequence("StatusBar", "GoToLine", 'Meta+Ctrl+Shift+L'),
                  }
             ]
         return menu

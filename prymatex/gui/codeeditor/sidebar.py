@@ -125,7 +125,7 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         menuEntry = {
             'name': 'lineNumbers',
             'text': "Line numbers",
-            'shortcut': resources.get_sequence("SideBar", "ShowLineNumbers", 'F10'),
+            'sequence': resources.get_sequence("SideBar", "ShowLineNumbers", 'F10'),
             'toggled': lambda instance, checked: instance.setVisible(checked),
             'testChecked': lambda instance: instance.isVisible() }
         return { baseMenu: menuEntry }
@@ -205,7 +205,7 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         menuEntry = {
             'name': 'bookmarks',
             'text': "Bookmarks",
-            'shortcut': resources.get_sequence("SideBar", "ShowBookmarks", 'Alt+F10'),
+            'sequence': resources.get_sequence("SideBar", "ShowBookmarks", 'Alt+F10'),
             'toggled': lambda instance, checked: instance.setVisible(checked),
             'testChecked': lambda instance: instance.isVisible() }
         return { baseMenu: menuEntry} 
@@ -279,7 +279,7 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         menuEntry = {
             'name': 'foldings',
             'text': 'Foldings',
-            'shortcut': resources.get_sequence("SideBar", "ShowFoldings", 'Shift+F10'),
+            'sequence': resources.get_sequence("SideBar", "ShowFoldings", 'Shift+F10'),
             'toggled': lambda instance, checked: instance.setVisible(checked),
             'testChecked': lambda instance: instance.isVisible() }
         return {baseMenu: menuEntry} 

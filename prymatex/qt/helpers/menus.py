@@ -13,7 +13,7 @@ from prymatex.qt.helpers.actions import create_action
 
 import collections
 
-def create_menu(parent, settings, dispatcher = None, separatorName = False, allObjects = False, shortcut_handler = None):
+def create_menu(parent, settings, dispatcher = None, separatorName = False, allObjects = False, sequence_handler = None):
     menu = QtGui.QMenu(settings["text"], parent)
     objectName = text2objectname(settings.get("name", settings["text"]), prefix = "menu")
 
@@ -67,11 +67,11 @@ def create_menu(parent, settings, dispatcher = None, separatorName = False, allO
         settings.get("items", []),
         dispatcher = dispatcher,
         separatorName = separatorName,
-        shortcut_handler = shortcut_handler)
+        sequence_handler = sequence_handler)
 
     return allObjects and objects or menu
 
-def extend_menu(rootMenu, settings, dispatcher = None, separatorName = False, shortcut_handler = None):
+def extend_menu(rootMenu, settings, dispatcher = None, separatorName = False, sequence_handler = None):
     collectedObjects = [ rootMenu ]
     for item in settings:
         objects = None
@@ -89,12 +89,12 @@ def extend_menu(rootMenu, settings, dispatcher = None, separatorName = False, sh
                 dispatcher = dispatcher,
                 separatorName = separatorName,
                 allObjects = True,
-                shortcut_handler = shortcut_handler)
+                sequence_handler = sequence_handler)
             add_actions(rootMenu, [ objects[0] ], item.get("before", None))
         elif isinstance(item, dict):
             objects = create_action(rootMenu.parent(), item,
                 dispatcher = dispatcher, 
-                shortcut_handler = shortcut_handler)
+                sequence_handler = sequence_handler)
             add_actions(rootMenu, [ objects ], item.get("before", None))
         elif isinstance(item, QtGui.QAction):
             rootMenu.addAction(item)

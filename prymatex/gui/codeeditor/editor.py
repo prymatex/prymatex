@@ -1130,13 +1130,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 {'text': '&Mode',
                  'items': [{
                         'text': 'Freehanded',
-                        'shortcut': resources.get_sequence("Editor", "FreehandedMode", 'Meta+Alt+E')
+                        'sequence': resources.get_sequence("Editor", "FreehandedMode", 'Meta+Alt+E')
                     }, {
                         'text': 'Overwrite',
-                        'shortcut': resources.get_sequence("Editor", "OverwriteMode", 'Meta+Alt+O')
+                        'sequence': resources.get_sequence("Editor", "OverwriteMode", 'Meta+Alt+O')
                     }, {
                         'text': 'Multiedit',
-                        'shortcut': resources.get_sequence("Editor", "MultieditMode", 'Meta+Alt+M')
+                        'sequence': resources.get_sequence("Editor", "MultieditMode", 'Meta+Alt+M')
                     }
                 ]}
             ]
@@ -1144,11 +1144,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 '-',
                 {'text': "Zoom in",
                   'icon': resources.get_icon("zoom-in"),
-                  'shortcut': resources.get_sequence("Editor", "ZoomIn"),
+                  'sequence': resources.get_sequence("Editor", "ZoomIn"),
                   'triggered': cls.zoomIn},
                  {'text': "Zoom out",
                   'icon': resources.get_icon("zoom-out"),
-                  'shortcut': resources.get_sequence("Editor", "ZoomOut"),
+                  'sequence': resources.get_sequence("Editor", "ZoomOut"),
                   'triggered': cls.zoomOut},
                 '-',
                 {'name': 'leftGutter',
@@ -1187,48 +1187,48 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'items': [
                     {'text': '&Word',
                      'triggered': lambda editor: editor.selectWordCurrent(),
-                     'shortcut': resources.get_sequence("Editor", "SelectWord", 'Ctrl+Meta+W'),
+                     'sequence': resources.get_sequence("Editor", "SelectWord", 'Ctrl+Meta+W'),
                      },
                     {'text': '&Word under',
                      'triggered': lambda editor: editor.selectWordUnder(),
-                     'shortcut': resources.get_sequence("Editor", "SelectWordUnder", 'Ctrl+Meta+W'),
+                     'sequence': resources.get_sequence("Editor", "SelectWordUnder", 'Ctrl+Meta+W'),
                      },
                     {'text': '&Line',
                      'triggered': lambda editor: editor.selectLine(),
-                     'shortcut': resources.get_sequence("Editor", "SelectLine", 'Ctrl+Meta+L'),
+                     'sequence': resources.get_sequence("Editor", "SelectLine", 'Ctrl+Meta+L'),
                      },
                     {'text': '&Paragraph',
                      'triggered': lambda editor: editor.selectParagraph()
                      },
                     {'text': 'Enclosing &brackets',
                      'triggered': lambda editor: editor.selectEnclosingBrackets(),
-                     'shortcut': resources.get_sequence("Editor", "SelectEnclosingBrackets", 'Ctrl+Meta+B'),
+                     'sequence': resources.get_sequence("Editor", "SelectEnclosingBrackets", 'Ctrl+Meta+B'),
                      },
                     {'text': 'Current &scope',
                      'triggered': lambda editor: editor.selectCurrentScope(),
-                     'shortcut': resources.get_sequence("Editor", "SelectCurrentScope", 'Ctrl+Meta+S'),
+                     'sequence': resources.get_sequence("Editor", "SelectCurrentScope", 'Ctrl+Meta+S'),
                      },
                     {'text': '&All',
                      'triggered': lambda editor: editor.selectDocument(),
-                     'shortcut': resources.get_sequence("Editor", "SelectAll", 'Ctrl+A'),
+                     'sequence': resources.get_sequence("Editor", "SelectAll", 'Ctrl+A'),
                      }
                 ]},
                 {'text': 'Convert',
                  'items': [
                     {'text': 'Uppercase',
-                     'shortcut': resources.get_sequence("Editor", "ConvertUppercase", 'Ctrl+U'),
+                     'sequence': resources.get_sequence("Editor", "ConvertUppercase", 'Ctrl+U'),
                      'triggered': lambda editor: editor.convertToUppercase(),
                      },
                     {'text': 'Lowercase',
-                     'shortcut': resources.get_sequence("Editor", "ConvertLowercase", 'Ctrl+Shift+U'),
+                     'sequence': resources.get_sequence("Editor", "ConvertLowercase", 'Ctrl+Shift+U'),
                      'triggered': lambda editor: editor.convertToLowercase(),
                      },
                     {'text': 'Titlecase',
-                     'shortcut': resources.get_sequence("Editor", "ConvertTitlecase", 'Ctrl+Alt+U'),
+                     'sequence': resources.get_sequence("Editor", "ConvertTitlecase", 'Ctrl+Alt+U'),
                      'triggered': lambda editor: editor.convertToTitlecase(),
                      },
                     {'text': 'Opposite case',
-                     'shortcut': resources.get_sequence("Editor", "ConvertOppositeCase", 'Ctrl+G'),
+                     'sequence': resources.get_sequence("Editor", "ConvertOppositeCase", 'Ctrl+G'),
                      'triggered': lambda editor: editor.convertToOppositeCase(),
                      }, '-',
                     {'text': 'Tab to spaces',
@@ -1238,13 +1238,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                      'triggered': lambda editor: editor.convertSpacesToTabs(),
                      }, '-',
                     {'text': 'Transpose',
-                     'shortcut': resources.get_sequence("Editor", "ConvertTranspose", 'Ctrl+T'),
+                     'sequence': resources.get_sequence("Editor", "ConvertTranspose", 'Ctrl+T'),
                      'triggered': lambda editor: editor.convertTranspose(),
                      }
                 ]},
                 '-',
                 {'text': 'Select bundle item',
-                 'shortcut': resources.get_sequence("Editor", "SelectBundleItem", 'Meta+Ctrl+T'),
+                 'sequence': resources.get_sequence("Editor", "SelectBundleItem", 'Meta+Ctrl+T'),
                  'triggered': cls.on_actionSelectBundleItem_triggered,
                  },
                 {'text': 'Execute line/selection',
@@ -1255,28 +1255,28 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 "-",
                 {'text': 'Toggle bookmark',
                  'triggered': cls.toggleBookmark,
-                 'shortcut': resources.get_sequence("Editor", "ToggleBookmark", 'Meta+F12'),
+                 'sequence': resources.get_sequence("Editor", "ToggleBookmark", 'Meta+F12'),
                  },
                 {'text': 'Next bookmark',
                  'triggered': cls.bookmarkNext,
-                 'shortcut': resources.get_sequence("Editor", "NextBookmark", 'Meta+Alt+F12'),
+                 'sequence': resources.get_sequence("Editor", "NextBookmark", 'Meta+Alt+F12'),
                  },
                 {'text': 'Previous bookmark',
                  'triggered': cls.bookmarkPrevious,
-                 'shortcut': resources.get_sequence("Editor", "PreviousBookmark", 'Meta+Shift+F12'),
+                 'sequence': resources.get_sequence("Editor", "PreviousBookmark", 'Meta+Shift+F12'),
                  },
                 {'text': 'Remove all bookmarks',
                  'triggered': cls.removeAllBookmarks,
-                 'shortcut': resources.get_sequence("Editor", "RemoveAllBookmarks", 'Meta+Ctrl+F12'),
+                 'sequence': resources.get_sequence("Editor", "RemoveAllBookmarks", 'Meta+Ctrl+F12'),
                  },
                 "-",
                 {'text': 'Go to &symbol',
                  'triggered': cls.on_actionGoToSymbol_triggered,
-                 'shortcut': resources.get_sequence("Editor", "GoToSymbol", 'Meta+Ctrl+Shift+O'),
+                 'sequence': resources.get_sequence("Editor", "GoToSymbol", 'Meta+Ctrl+Shift+O'),
                  },
                 {'text': 'Go to &bookmark',
                  'triggered': cls.on_actionGoToBookmark_triggered,
-                 'shortcut': resources.get_sequence("Editor", "GoToBookmark", 'Meta+Ctrl+Shift+B'),
+                 'sequence': resources.get_sequence("Editor", "GoToBookmark", 'Meta+Ctrl+Shift+B'),
                  }
             ]
         return menu
@@ -1291,21 +1291,21 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     
     def contributeToShortcuts(self):
         return [
-            {'text': 'Line up',
-             'sequence': resources.get_sequence("Editor", "MoveLineUp", 'Meta+Ctrl+Up'),
+            {'sequence': resources.get_sequence("Editor", "MoveLineUp", 'Meta+Ctrl+Up'),
              'activated': self.moveUp,
+             'context': QtCore.Qt.WidgetShortcut
              },
-            {'text': 'Line down',
-             'sequence': resources.get_sequence("Editor", "MoveLineDown", 'Meta+Ctrl+Down'),
+            {'sequence': resources.get_sequence("Editor", "MoveLineDown", 'Meta+Ctrl+Down'),
              'activated': self.moveDown,
+             'context': QtCore.Qt.WidgetShortcut
              },
-            {'text': 'Column left',
-             'sequence': resources.get_sequence("Editor", "MoveColumnLeft", 'Meta+Ctrl+Left'),
+            {'sequence': resources.get_sequence("Editor", "MoveColumnLeft", 'Meta+Ctrl+Left'),
              'activated': self.moveLeft,
+             'context': QtCore.Qt.WidgetShortcut
              },
-            {'text': 'Column right',
-             'sequence': resources.get_sequence("Editor", "MoveColumnRight", 'Meta+Ctrl+Right'),
+            {'sequence': resources.get_sequence("Editor", "MoveColumnRight", 'Meta+Ctrl+Right'),
              'activated': self.moveRight,
+             'context': QtCore.Qt.WidgetShortcut
              }
         ]
 
