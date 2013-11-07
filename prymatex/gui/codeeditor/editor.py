@@ -1242,25 +1242,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                      'triggered': lambda editor: editor.convertTranspose(),
                      }
                 ]},
-                {'text': 'Move',
-                 'items': [
-                    {'text': 'Line up',
-                     'shortcut': resources.get_sequence("Editor", "MoveLineUp", 'Meta+Ctrl+Up'),
-                     'triggered': lambda editor: editor.moveUp(),
-                     },
-                    {'text': 'Line down',
-                     'shortcut': resources.get_sequence("Editor", "MoveLineDown", 'Meta+Ctrl+Down'),
-                     'triggered': lambda editor: editor.moveDown(),
-                     },
-                    {'text': 'Column left',
-                     'shortcut': resources.get_sequence("Editor", "MoveColumnLeft", 'Meta+Ctrl+Left'),
-                     'triggered': lambda editor: editor.moveLeft(),
-                     },
-                    {'text': 'Column right',
-                     'shortcut': resources.get_sequence("Editor", "MoveColumnRight", 'Meta+Ctrl+Right'),
-                     'triggered': lambda editor: editor.moveRight(),
-                     }
-                  ]},
                 '-',
                 {'text': 'Select bundle item',
                  'shortcut': resources.get_sequence("Editor", "SelectBundleItem", 'Meta+Ctrl+T'),
@@ -1299,7 +1280,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  }
             ]
         return menu
-
+    
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.theme import ThemeSettingsWidget
@@ -1307,6 +1288,26 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         from prymatex.gui.settings.edit import EditSettingsWidget
         from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
         return [ EditorSettingsWidget, ThemeSettingsWidget, EditSettingsWidget, AddonsSettingsWidgetFactory("editor") ]
+    
+    def contributeToShortcuts(self):
+        return [
+            {'text': 'Line up',
+             'sequence': resources.get_sequence("Editor", "MoveLineUp", 'Meta+Ctrl+Up'),
+             'activated': self.moveUp,
+             },
+            {'text': 'Line down',
+             'sequence': resources.get_sequence("Editor", "MoveLineDown", 'Meta+Ctrl+Down'),
+             'activated': self.moveDown,
+             },
+            {'text': 'Column left',
+             'sequence': resources.get_sequence("Editor", "MoveColumnLeft", 'Meta+Ctrl+Left'),
+             'activated': self.moveLeft,
+             },
+            {'text': 'Column right',
+             'sequence': resources.get_sequence("Editor", "MoveColumnRight", 'Meta+Ctrl+Right'),
+             'activated': self.moveRight,
+             }
+        ]
 
     # ------------------ Menu Actions
     def on_actionShowTabsAndSpaces_toggled(self, checked):

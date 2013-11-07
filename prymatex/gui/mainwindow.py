@@ -8,7 +8,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.qt.compat import getSaveFileName
 from prymatex.qt.helpers import text2objectname
 from prymatex.qt.helpers.widgets import center_widget
-from prymatex.qt.helpers.menus import create_menu, extend_menu, update_menu, add_actions
+from prymatex.qt.helpers.menus import create_menu, extend_menu, add_actions
 
 from prymatex import resources
 
@@ -192,7 +192,6 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
 
     def shortcutHandler(self, action, sequence):
         self.application.registerShortcut(action, sequence)
-        action.setShortcut(sequence.key())
 
     def environmentVariables(self):
         env = {}

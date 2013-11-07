@@ -10,6 +10,7 @@ import prymatex
 from prymatex import resources
 
 from prymatex.qt import QtGui, QtCore
+from prymatex.qt.helpers import create_shortcut
 
 from prymatex.core import config
 from prymatex.core.components import PMXBaseComponent, PMXBaseEditor
@@ -320,6 +321,10 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             # Configure
             self.currentProfile.configure(instance)
             
+            # Shortcuts
+            for settings in instance.contributeToShortcuts():
+                shortcut = create_shortcut(instance, settings, sequence_handler = self.registerShortcut)
+            
             # Add components
             componentClasses = self.pluginManager.findComponentsForClass(klass)
             for componentClass in componentClasses:
@@ -501,13 +506,17 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
                 self.openDirectory(path)
 
     # --- Shortcuts
-    def registerShortcut(self, qaction_or_qshortcut, sequence):
+    def registerShortcut(self, qobject, sequence):
         """
         Register QAction or QShortcut to Prymatex main application,
         with sequence
         """
-        self.shortcuts.append( (qaction_or_qshortcut, sequence) )
-
+        self.shortcuts.append( (qobject, sequence) )
+        if isinstance(qobject, QtGui.QAction):
+            qobject.setShortcut(sequence.key())
+        elif isinstance(qobject, QtGui.QShortcut):
+            qobject.setKey(sequence.key())
+            
     def applyShortcuts(self):
         """Apply shortcuts settings to all widgets/plugins"""
         toberemoved = []

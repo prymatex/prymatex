@@ -20,3 +20,4 @@ from .mimedata import *
 from .widgets import *
 from .textcursors import *
 from .fonts import *
+from .shortcuts import *
