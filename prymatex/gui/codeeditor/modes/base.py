@@ -14,6 +14,3 @@ class CodeEditorBaseMode(QtCore.QObject, PMXBaseEditorAddon):
 
     def inactive(self):
         pass
-
-    def eventFilter(self, obj, event):
-        return False

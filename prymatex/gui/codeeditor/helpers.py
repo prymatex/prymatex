@@ -246,32 +246,6 @@ class SmartIndentHelper(CodeEditorKeyHelper):
                 self.editor.setSyntax(syntax)
         self.editor.insertNewLine(cursor)
 
-class MultiCursorHelper(CodeEditorKeyHelper):
-    KEY = QtCore.Qt.Key_M
-    def accept(self, event, cursor = None):
-        control_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
-        meta_down = bool(event.modifiers() & QtCore.Qt.MetaModifier)
-        return event.key() == self.KEY and control_down and meta_down
-
-    def execute(self, event, cursor = None):
-        cursor = cursor or self.editor.textCursor()
-        flags = QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords
-        if not cursor.hasSelection():
-            text, start, end = self.editor.currentWord()
-            newCursor = QtGui.QTextCursor(cursor)
-            newCursor.setPosition(start)
-            newCursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-            self.editor.multiCursorMode.addMergeCursor(newCursor)
-        else:
-            text = cursor.selectedText()
-            self.editor.multiCursorMode.addMergeCursor(cursor)
-            if event.modifiers() & QtCore.Qt.ShiftModifier:
-                flags |= QtGui.QTextDocument.FindBackward
-            newCursor = self.editor.document().find(text, cursor, flags)
-            if not newCursor.isNull():
-                self.editor.multiCursorMode.addMergeCursor(newCursor)
-                self.editor.centerCursor(newCursor)
-
 class PrintEditorStatusHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_D
     def accept(self, event, cursor = None):

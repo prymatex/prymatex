@@ -7,7 +7,6 @@ from prymatex import resources
 
 from .base import CodeEditorBaseMode
 
-from prymatex.qt.helpers.keyevents import KEY_NUMBERS
 from prymatex.utils.lists import bisect_key
 from prymatex.gui.codeeditor.helpers import CodeEditorKeyHelper
 
@@ -17,17 +16,33 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def __init__(self, parent = None):
         CodeEditorBaseMode.__init__(self, parent)
         self.cursors = []
-        self.selectedCursors = []
         self.draggedCursors = []
         self.scursor = self.startPoint = self.doublePoint = None
 
+    # ------- Overrides
     def initialize(self, editor):
         CodeEditorBaseMode.initialize(self, editor)
         self.editor.installEventFilter(self)
         self.editor.viewport().installEventFilter(self)
         # Formater
         editor.registerTextCharFormatBuilder("dragged", self.textCharFormat_dragged_builder)
+    
+    def isActive(self):
+        return bool(self.cursors) or self.startPoint != None
+
+    def inactive(self, handled):
+        self.cursors = []
+        self.editor.modeChanged.emit("")
+        self.highlightEditor()
+        return handled
+    
+    # ------- Text char format builder
+    def textCharFormat_dragged_builder(self):
+        textCharFormat = self.editor.textCharFormat_selection_builder()
+        textCharFormat.setBackground(self.editor.colours['lineHighlight'])
+        return textCharFormat
         
+    # ------- Handle events
     def eventFilter(self, obj, event):
         if self.isActive() and event.type() == QtCore.QEvent.KeyPress:
             return self.keyPressEvent(event)
@@ -41,42 +56,6 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
             self.mouseMovePoint(event.pos(), event.modifiers() & QtCore.Qt.MetaModifier)
             return True
         return False
-
-    def textCharFormat_dragged_builder(self):
-        textCharFormat = self.editor.textCharFormat_selection_builder()
-        textCharFormat.setBackground(self.editor.colours['lineHighlight'])
-        return textCharFormat
-        
-    def isActive(self):
-        return bool(self.cursors) or self.startPoint != None
-
-    def inactive(self):
-        self.cursors = []
-        self.selectedCursors = []
-        self.editor.modeChanged.emit("")
-
-    def highlightEditor(self):
-        cursors = {}
-        self.editor.setExtraSelectionCursors("dragged", [c for c in [QtGui.QTextCursor(c) for c in self.draggedCursors] if c.hasSelection()])
-        self.editor.setExtraSelectionCursors("selection", [c for c in [QtGui.QTextCursor(c) for c in self.cursors] if c.hasSelection()])
-        cursorLines = []
-        for cursorLine in [QtGui.QTextCursor(c) for c in self.cursors]:
-            if all([c.block() != cursorLine.block() for c in cursorLines]):
-                cursorLine.clearSelection()
-                cursorLines.append(cursorLine)
-        self.editor.setExtraSelectionCursors("line", cursorLines)
-        self.editor.updateExtraSelections()
-
-    def isSelected(self, cursor):
-        return cursor in self.selectedCursors
-
-    def hasSelection(self):
-        return bool(self.selectedCursors)
-
-    def activeCursors(self):
-        if self.selectedCursors:
-            return self.selectedCursors
-        return self.cursors
 
     def mousePressPoint(self, point, remove = False):
         self.startPoint = point
@@ -111,6 +90,66 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.scursor = self.startPoint = self.doublePoint = None
         self.application.restoreOverrideCursor()
         self.highlightEditor()
+    
+        def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Escape:
+            #Deprecated usar una lista de cursores ordenados para tomar de [0] y [-1]
+            firstCursor = self.cursors[0]
+            lastCursor = self.cursors[-1]
+            self.editor.document().markContentsDirty(firstCursor.position(), lastCursor.position())
+            if lastCursor.hasSelection():
+                lastCursor.clearSelection()
+            self.editor.setTextCursor(lastCursor)
+            return self.inactive(True)
+        elif event.key() == QtCore.Qt.Key_Right:
+            if self.canMoveRight():
+                mode = QtGui.QTextCursor.KeepAnchor if bool(event.modifiers() & QtCore.Qt.ShiftModifier) else QtGui.QTextCursor.MoveAnchor
+                for cursor in self.activeCursors():
+                    if event.modifiers() & QtCore.Qt.ControlModifier:
+                        cursor.movePosition(QtGui.QTextCursor.NextWord, mode)
+                    else:
+                        cursor.movePosition(QtGui.QTextCursor.NextCharacter, mode)
+                self.editor.setTextCursor(self.editor.newCursorAtPosition(cursor.position()))
+                self.highlightEditor()
+                return True
+        elif event.key() == QtCore.Qt.Key_Left:
+            if self.canMoveLeft():
+                mode = QtGui.QTextCursor.KeepAnchor if bool(event.modifiers() & QtCore.Qt.ShiftModifier) else QtGui.QTextCursor.MoveAnchor
+                for cursor in self.activeCursors():
+                    if event.modifiers() & QtCore.Qt.ControlModifier:
+                        cursor.movePosition(QtGui.QTextCursor.PreviousWord, mode)
+                    else:
+                        cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, mode)
+                self.editor.setTextCursor(self.editor.newCursorAtPosition(cursor.position()))
+                self.highlightEditor()
+                return True
+        elif event.key() in [ QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown, QtCore.Qt.Key_End, QtCore.Qt.Key_Home]:
+            #Desactivados por ahora
+            pass
+        elif event.text():
+            cursor = self.editor.textCursor()
+            cursor.beginEditBlock()
+            for cursor in self.activeCursors():
+                self.editor.setTextCursor(cursor)
+                self.editor.keyPressEvent(event)
+            cursor.endEditBlock()
+            return True
+        return False
+
+    def highlightEditor(self):
+        cursors = {}
+        self.editor.setExtraSelectionCursors("dragged", [c for c in [QtGui.QTextCursor(c) for c in self.draggedCursors] if c.hasSelection()])
+        self.editor.setExtraSelectionCursors("selection", [c for c in [QtGui.QTextCursor(c) for c in self.cursors] if c.hasSelection()])
+        cursorLines = []
+        for cursorLine in [QtGui.QTextCursor(c) for c in self.cursors]:
+            if all([c.block() != cursorLine.block() for c in cursorLines]):
+                cursorLine.clearSelection()
+                cursorLines.append(cursorLine)
+        self.editor.setExtraSelectionCursors("line", cursorLines)
+        self.editor.updateExtraSelections()
+
+    def activeCursors(self):
+        return self.cursors
 
     def getPoints(self, start, end, hight):
         sx, ex = (start.x(), end.x()) if start.x() <= end.x() else (end.x(), start.x())
@@ -196,47 +235,36 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
                     break
                 elif (c_begin < new_begin < new_end < c_end):
                     #Recortar
-                    newCursor = QtGui.QTextCursor(self.editor.document())
                     if c.position() < new_begin:
-                        newCursor.setPosition(new_begin)
-                        newCursor.setPosition(c_begin, QtGui.QTextCursor.KeepAnchor)
-                        newCursors.append(newCursor)
-                        newCursor = QtGui.QTextCursor(self.editor.document())
-                        newCursor.setPosition(c_end)
-                        newCursor.setPosition(new_end, QtGui.QTextCursor.KeepAnchor)
-                        newCursors.append(newCursor)
+                        newCursors.append(
+                            self.editor.newCursorAtPosition(new_begin, c_begin))
+                        newCursors.append(
+                            self.editor.newCursorAtPosition(c_end, new_end))    
                     else:
-                        newCursor.setPosition(c_begin)
-                        newCursor.setPosition(new_begin, QtGui.QTextCursor.KeepAnchor)
-                        newCursors.append(newCursor)
-                        newCursor = QtGui.QTextCursor(self.editor.document())
-                        newCursor.setPosition(new_end)
-                        newCursor.setPosition(c_end, QtGui.QTextCursor.KeepAnchor)
-                        newCursors.append(newCursor)
+                        newCursors.append(
+                            self.editor.newCursorAtPosition(c_begin, new_begin))
+                        newCursors.append(
+                            self.editor.newCursorAtPosition(new_end, c_end))
                     removeCursor = c
                     break
                 elif c_begin <= new_begin <= c_end:
                     #Recorta por detras, quitar el actual y agregar uno con la seleccion mas chica
-                    newCursor = QtGui.QTextCursor(self.editor.document())
                     if c.position() > new_begin:
-                        newCursor.setPosition(c_begin)
-                        newCursor.setPosition(new_begin, QtGui.QTextCursor.KeepAnchor)
+                        newCursors.append(
+                            self.editor.newCursorAtPosition(c_begin, new_begin))
                     else:
-                        newCursor.setPosition(new_begin)
-                        newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
-                    newCursors.append(newCursor)
+                        newCursors.append(
+                            self.editor.newCursorAtPosition(new_begin, c.position()))
                     removeCursor = c
                     break
                 elif c_begin <= new_end <= c_end:
                     #Recorta por el frente, quitra el actual y agregar uno con la seleccion mas chica
-                    newCursor = QtGui.QTextCursor(self.editor.document())
                     if c.position() < new_end:
-                        newCursor.setPosition(c_end)
-                        newCursor.setPosition(new_end, QtGui.QTextCursor.KeepAnchor)
+                        newCursors.append(
+                            self.editor.newCursorAtPosition(c_end, new_end))
                     else:
-                        newCursor.setPosition(new_end)
-                        newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
-                    newCursors.append(newCursor)
+                        newCursors.append(
+                            self.editor.newCursorAtPosition(new_end, c.position()))
                     removeCursor = c
                     break
             if removeCursor is not None:
@@ -259,84 +287,18 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def canMoveLeft(self):
         return not self.cursors[0].atStart()
 
-    def keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key_Escape:
-            #Deprecated usar una lista de cursores ordenados para tomar de [0] y [-1]
-            firstCursor = self.cursors[0]
-            lastCursor = self.cursors[-1]
-            self.editor.document().markContentsDirty(firstCursor.position(), lastCursor.position())
-            if lastCursor.hasSelection():
-                lastCursor.clearSelection()
-            self.editor.setTextCursor(lastCursor)
-            self.inactive()
-            self.highlightEditor()
-            #Se termino la joda
-        elif event.modifiers() == QtCore.Qt.ControlModifier and event.key() in [ QtCore.Qt.Key_Z]:
-            QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
-        elif bool(event.modifiers() & QtCore.Qt.ControlModifier) and event.key() in KEY_NUMBERS:
-            #Seleccionamos cursores de la multiseleccion
-            index = KEY_NUMBERS.index(event.key())
-            if index == 0:
-                if bool(event.modifiers() & QtCore.Qt.MetaModifier) and self.selectedCursors:
-                    #Toggle
-                    self.selectedCursors = list(set(self.cursors).difference(self.selectedCursors))
-                else:
-                    #Remove
-                    self.selectedCursors = []
-            elif index <= len(self.cursors):
-                index = index - 1
-                cursor = self.cursors[index]
-                if bool(event.modifiers() & QtCore.Qt.MetaModifier):
-                    self.selectedCursors = [cursor]
-                elif cursor in self.selectedCursors:
-                    self.selectedCursors.remove(cursor)
-                else:
-                    self.selectedCursors.append(cursor)
-            self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
-        elif event.key() == QtCore.Qt.Key_Right:
-            if self.canMoveRight():
-                mode = QtGui.QTextCursor.KeepAnchor if bool(event.modifiers() & QtCore.Qt.ShiftModifier) else QtGui.QTextCursor.MoveAnchor
-                for cursor in self.activeCursors():
-                    if event.modifiers() & QtCore.Qt.ControlModifier:
-                        cursor.movePosition(QtGui.QTextCursor.NextWord, mode)
-                    else:
-                        cursor.movePosition(QtGui.QTextCursor.NextCharacter, mode)
-                self.editor.setTextCursor(self.editor.newCursorAtPosition(cursor.position()))
-                self.highlightEditor()
-        elif event.key() == QtCore.Qt.Key_Left:
-            if self.canMoveLeft():
-                mode = QtGui.QTextCursor.KeepAnchor if bool(event.modifiers() & QtCore.Qt.ShiftModifier) else QtGui.QTextCursor.MoveAnchor
-                for cursor in self.activeCursors():
-                    if event.modifiers() & QtCore.Qt.ControlModifier:
-                        cursor.movePosition(QtGui.QTextCursor.PreviousWord, mode)
-                    else:
-                        cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, mode)
-                self.editor.setTextCursor(self.editor.newCursorAtPosition(cursor.position()))
-                self.highlightEditor()
-        elif event.key() in [ QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown, QtCore.Qt.Key_End, QtCore.Qt.Key_Home]:
-            #Desactivados por ahora
-            pass
-        elif event.key() in [QtCore.Qt.Key_Insert]:
-            self.editor.setOverwriteMode(not self.editor.overwriteMode())
-        elif event.text():
-            cursor = self.editor.textCursor()
-            cursor.beginEditBlock()
-            for cursor in self.activeCursors():
-                self.editor.setTextCursor(cursor)
-                QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
-            cursor.endEditBlock()
-        return False
-
     def findCursor(self, backward = False):
-        cursor = self.editor.textCursor()
-        flags = QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords
+        if not self.isActive():
+            cursor = self.editor.textCursor()
+        else:
+            cursor = self.cursors[0] if backward else self.cursors[-1]
         if not cursor.hasSelection():
             text, start, end = self.editor.currentWord()
             newCursor = self.editor.newCursorAtPosition(start, end)
             self.addMergeCursor(newCursor)
         else:
             text = cursor.selectedText()
-            self.addMergeCursor(cursor)
+            flags = QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords
             if backward:
                 flags |= QtGui.QTextDocument.FindBackward
             newCursor = self.editor.document().find(text, cursor, flags)
