@@ -103,7 +103,6 @@ class TabbedTerminal(QtGui.QTabWidget):
             self.widget(index).setFont(font)
 
 class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
-    SHORTCUT = "F4"
     ICON = resources.getIcon("utilities-terminal")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     

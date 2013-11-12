@@ -13,8 +13,7 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.models.search import SearchTreeModel, LineTreeNode
 from prymatex.gui.dialogs.filesearch import PMXFileSearchDialog
 
-class PMXSearchDock(QtGui.QDockWidget, Ui_SearchDock, PMXBaseDock):
-    SHORTCUT = "Shift+F4"
+class SearchResultsDock(QtGui.QDockWidget, Ui_SearchDock, PMXBaseDock):
     ICON = resources.getIcon("edit-find-project")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     

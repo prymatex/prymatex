@@ -316,7 +316,8 @@ class MainMenuMixin(object):
             }, "-", {
                 "text": "Fullscreen",
                 "toggled": lambda mainWindow, checked: getattr(mainWindow, checked and "showFullScreen" or "showNormal")(),
-                "testChecked": lambda mainWindow: mainWindow.isFullScreen()
+                "testChecked": lambda mainWindow: mainWindow.isFullScreen(),
+                'sequence': resources.get_sequence("_", "ShowFullScreen", "Ctrl+Shift+F11")
             }, "-", {
                 "text": "Settings",
                 "triggered": lambda mainWindow: mainWindow.settingsDialog.exec_()

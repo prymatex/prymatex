@@ -205,7 +205,7 @@ class BackspaceRemoveBracesHelper(CodeEditorKeyHelper):
         if cursor.hasSelection(): return False
         self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor, direction = "left")
         return self.cursor1 is not None and self.cursor2 is not None and (self.cursor1.selectionStart() == self.cursor2.selectionEnd() or self.cursor1.selectionEnd() == self.cursor2.selectionStart())
-        
+
     def execute(self, event, cursor = None):
         cursor.beginEditBlock()
         self.cursor1.removeSelectedText()

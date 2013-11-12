@@ -70,7 +70,7 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
         self.application.supportManager.bundleItemTriggered.connect(self.on_bundleItemTriggered)
 
         center_widget(self, scale = (0.9, 0.8))
-        self.dockers = []
+        self.dockWidgets = []
         self.dialogs = []
         self.customComponentObjects = {}
 
@@ -140,12 +140,12 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
                         settings = [ settings ]
                     objects += extend_menu(parentMenu, settings,
                         dispatcher = self.componentInstanceDispatcher,
-                        sequence_handler = self.sequenceHandler)
+                        sequence_handler = self.application.registerShortcut)
                 else:
                     objs = create_menu(self, settings,
                         dispatcher = self.componentInstanceDispatcher,
                         allObjects = True,
-                        sequence_handler = self.sequenceHandler)
+                        sequence_handler = self.application.registerShortcut)
                     add_actions(self.menuBar(), [ objs[0] ], settings.get("before", None))
                     objects += objs
 
@@ -163,8 +163,17 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
         self.menuBundles = self.findChild(QtGui.QMenu, "menuBundles")
         
         # Metemos las acciones de las dockers al menu panels
-        for dock in self.dockers:
+        dockIndex = 1
+        for dock in self.dockWidgets:
             toggleAction = dock.toggleViewAction()
+            if dock.SEQUENCE:
+                sequence = dock.SEQUENCE
+            else:
+                sequence = resources.get_sequence("Docks", dock.objectName(), "Alt+%d" % dockIndex)
+                dockIndex += 1
+            self.application.registerShortcut(toggleAction, sequence)
+            if dock.ICON:
+                toggleAction.setIcon(dock.ICON)
             self.menuPanels.addAction(toggleAction)
             self.addAction(toggleAction)
 
@@ -190,12 +199,9 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
         # TODO Tengo todas pero solo se lo aplico a la ultima que es la que generalmente esta en uso
         handler(componentInstances[-1], *largs)
 
-    def sequenceHandler(self, action, sequence):
-        self.application.registerShortcut(action, sequence)
-
     def environmentVariables(self):
         env = {}
-        for docker in self.dockers:
+        for docker in self.dockWidgets:
             env.update(docker.environmentVariables())
         return env
 
@@ -265,7 +271,7 @@ html_footer
         titleBar.collpaseAreaRequest.connect(self.on_dockWidgetTitleBar_collpaseAreaRequest)
         dock.setTitleBarWidget(titleBar)
         dock.hide()
-        self.dockers.append(dock)
+        self.dockWidgets.append(dock)
 
     def addDialog(self, dialog):
         self.dialogs.append(dialog)
@@ -448,7 +454,7 @@ html_footer
                 openDocumentsOnQuit.append((editor.filePath, editor.cursorPosition()))
         state = {
             "self": QtGui.QMainWindow.saveState(self),
-            "dockers": dict([(dock.objectName(), dock.componentState()) for dock in self.dockers]),
+            "dockers": dict([(dock.objectName(), dock.componentState()) for dock in self.dockWidgets]),
             "documents": openDocumentsOnQuit,
             "geometry": self.saveGeometry(),
         }
@@ -456,7 +462,7 @@ html_footer
 
     def setComponentState(self, state):
         # Restore dockers
-        for dock in self.dockers:
+        for dock in self.dockWidgets:
             dockName = dock.objectName()
             if dockName in state["dockers"]:
                 dock.setComponentState(state["dockers"][dockName])

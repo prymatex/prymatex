@@ -7,7 +7,7 @@ from .filesystem import FileSystemDock
 from .browser import BrowserDock
 from .projects import ProjectsDock
 from .terminal import TerminalDock
-from .search import PMXSearchDock
+from .search import SearchResultsDock
 from .process import PMXProcessDock
 
 def registerPlugin(manager):
@@ -15,5 +15,5 @@ def registerPlugin(manager):
     manager.registerComponent(FileSystemDock)
     manager.registerComponent(TerminalDock)
     manager.registerComponent(BrowserDock)
-    manager.registerComponent(PMXSearchDock)
+    manager.registerComponent(SearchResultsDock)
     manager.registerComponent(PMXProcessDock)

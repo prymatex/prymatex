@@ -6,6 +6,8 @@ import os, sys, shutil
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers.menus import create_menu
 
+from prymatex import resources
+
 # FileSystem docker parents
 from prymatex.core import PMXBaseDock
 from prymatex.gui.dockers.fstasks import FileSystemTasks
@@ -16,9 +18,8 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.models.filesystem import SortFilterFileSystemProxyModel
 
-
 class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSystemDock):
-    SHORTCUT = "Shift+F8"
+    SEQUENCE = resources.get_sequence("Docks", "FileSystemDock", "Alt+Y")
     ICON = resources.getIcon("system-file-manager")
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
 

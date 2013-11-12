@@ -9,14 +9,12 @@ from prymatex.core.components.keyhelper import PMXBaseKeyHelper, PMXKeyHelperMix
 __all__ = ["PMXBaseDock", "PMXBaseDockKeyHelper", "PMXBaseDockAddon"]
 
 class PMXBaseDock(PMXBaseComponent, PMXKeyHelperMixin):
-    SHORTCUT = ""
-    ICON = QtGui.QIcon()
+    SEQUENCE = None
+    ICON = None
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def initialize(self, mainWindow):
         self.mainWindow = mainWindow
-        self.toggleViewAction().setShortcut(QtGui.QKeySequence(self.SHORTCUT))
-        self.toggleViewAction().setIcon(self.ICON)
 
     def runKeyHelper(self, event):
         runHelper = False
@@ -43,7 +41,6 @@ class PMXBaseDockKeyHelper(PMXBaseKeyHelper):
     
     def execute(self, event):
         PMXBaseKeyHelper.accept(self, event.key())
-
 
 #========================================
 # BASE ADDON

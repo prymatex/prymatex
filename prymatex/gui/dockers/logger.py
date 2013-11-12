@@ -12,9 +12,7 @@ from prymatex import resources
 from prymatex.ui.others.logwidget import Ui_LogWidget
 
 class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXBaseDock):
-    """Logging widget
-    """
-    SHORTCUT = "F12"
+    """Logging widget"""
     ICON = resources.getIcon("utilities-log-viewer")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     

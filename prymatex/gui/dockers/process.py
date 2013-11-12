@@ -15,7 +15,6 @@ from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 
 class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
-    SHORTCUT = "F7"
     ICON = resources.getIcon("application-x-executable-script")
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
