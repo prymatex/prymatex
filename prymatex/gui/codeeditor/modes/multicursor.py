@@ -91,7 +91,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.application.restoreOverrideCursor()
         self.highlightEditor()
     
-        def keyPressEvent(self, event):
+    def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Escape:
             #Deprecated usar una lista de cursores ordenados para tomar de [0] y [-1]
             firstCursor = self.cursors[0]

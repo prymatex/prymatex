@@ -375,6 +375,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         elif position > self.document().characterCount():
             position = self.document().characterCount()
         block = self.document().findBlock(position)
+        print(position, block.position())
         return self.blockUserData(block).tokenAtPosition(position - block.position())
 
     def scope(self, cursor = None):
@@ -387,7 +388,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         leftPath, rightPath = [], []
         if cursor.hasSelection():
             # If there is one or more selections: dyn.selection.
-            # TODO If there is a single zero-width selection: dyn.caret.mixed.columnarself.
+            # TODO If there is a single zero-width selection: dyn.caret.mixed.columnar.
             # TODO If there are multiple carets and/or selections: dyn.caret.mixed.
             leftPath.append("dyn.selection")
             rightPath.append("dyn.selection")
