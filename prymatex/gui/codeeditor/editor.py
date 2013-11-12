@@ -375,8 +375,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         elif position > self.document().characterCount():
             position = self.document().characterCount()
         block = self.document().findBlock(position)
-        print(position, block.position())
-        return self.blockUserData(block).tokenAtPosition(position - block.position())
+        return self.blockUserData(block).tokenAtPosition(position - block.position()) or self.basicScope()
 
     def scope(self, cursor = None):
         cursor = cursor or self.textCursor()
