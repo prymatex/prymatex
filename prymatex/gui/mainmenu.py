@@ -247,24 +247,31 @@ class MainMenuMixin(object):
                 }, "-", {
                     "text": "Single",
                     "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+1"),
+                    "triggered": lambda mainWindow: mainWindow.centralWidget().setLayout()
                 }, {
                     "text": "Columns: 2",
                     "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+2"),
+                    "triggered": lambda mainWindow: mainWindow.centralWidget().setLayout(columns = 2)
                 }, {
                     "text": "Columns: 3",
                     "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+3"),
+                    "triggered": lambda mainWindow: mainWindow.centralWidget().setLayout(columns = 3)
                 }, {
                     "text": "Columns: 4",
                     "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+4"),
+                    "triggered": lambda mainWindow: mainWindow.centralWidget().setLayout(columns = 4)
                 }, {
                     "text": "Rows: 2",
                     "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+8"),
+                    "triggered": lambda mainWindow: mainWindow.centralWidget().setLayout(rows = 2)
                 }, {
                     "text": "Rows: 3",
                     "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+9"),
+                    "triggered": lambda mainWindow: mainWindow.centralWidget().setLayout(rows = 3)
                 }, {
                     "text": "Grid: 4",
                     "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+5"),
+                    "triggered": lambda mainWindow: mainWindow.centralWidget().setLayout(columns = 2, rows = 2)
                 }]
             }, {
                 "text": "Groups",

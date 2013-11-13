@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 #------------------------------------------------------------------------------
 # Copyright (c) 2008, Riverbank Computing Limited
 # All rights reserved.
@@ -6,6 +9,7 @@
 # However, when used with the GPL version of PyQt the additional terms described in the PyQt GPL exception also apply
 
 #------------------------------------------------------------------------------
+import math
 
 from prymatex.qt import QtCore, QtGui
 
@@ -262,6 +266,17 @@ class SplitTabWidget(QtGui.QSplitter):
         if stab_w.count() > 1:
             self._split(self, stab_w, stab_w, stab, self._HS_EAST)
         
+    # ------ Layout
+    def setLayout(self, columns = 1, rows = 1):
+        assert columns != 0 and rows != 0, "Mmmmm"
+        
+        widgets = self.allWidgets()
+        widgets_len = len(widgets)
+        
+        widget_count = int(math.ceil(float(widgets_len) / (columns * rows)))
+        
+        print(widget_count)
+
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out _TabWidgets """
         
