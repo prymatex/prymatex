@@ -234,6 +234,69 @@ class MainMenuMixin(object):
             "items": [{
                 "text": "Panels",
                 "items": []
+            }, "-", {
+                "text": "Layout",
+                "items": [{
+                    "text": "Split horizontally",
+                    "icon": resources.getIcon("view-split-left-right")           
+                }, {
+                    "text": "Split vertically",
+                    "icon": resources.getIcon("view-split-top-bottom")    
+                }, "-", {
+                    "text": "Single",
+                    "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+1"),
+                }, {
+                    "text": "Columns: 2",
+                    "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+2"),
+                }, {
+                    "text": "Columns: 3",
+                    "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+3"),
+                }, {
+                    "text": "Columns: 4",
+                    "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+4"),
+                }, {
+                    "text": "Rows: 2",
+                    "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+8"),
+                }, {
+                    "text": "Rows: 3",
+                    "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+9"),
+                }, {
+                    "text": "Grid: 4",
+                    "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+5"),
+                }]
+            }, {
+                "text": "Groups",
+                "items": [{
+                    "text": "Move file to new group",
+                }, {
+                    "text": "New group",
+                }, {
+                    "text": "Close group",
+                }, "-", {
+                    "text": "Max Columns: 1",
+                }, {
+                    "text": "Max Columns: 2",
+                }, {
+                    "text": "Max Columns: 3",
+                }, {
+                    "text": "Max Columns: 4",
+                }, {
+                    "text": "Max Columns: 5",
+                }]
+            }, {
+                "text": "Focus group",
+                "items": [{
+                    "text": "Next",
+                }, {
+                    "text": "Previous",
+                }, "-"]
+            }, {
+                "text": "Move file to group",
+                "items": [{
+                    "text": "Next",
+                }, {
+                    "text": "Previous",
+                }, "-"]
             }]
         }
 

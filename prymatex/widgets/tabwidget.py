@@ -114,10 +114,10 @@ class _DragableTabBar(QtGui.QTabBar):
                         "icon": resources.getIcon("tab-close"),
                         "triggered": partial(tabWidget._close_widget, widget) 
                     },
-                    {   "text": "Close All",
+                    {   "text": "Close all",
                         "triggered": tabSplitter.closeAll
                     },
-                    {   "text": "Close Other",
+                    {   "text": "Close other",
                         "icon": resources.getIcon("tab-close-other"),
                         "triggered": partial(tabSplitter.closeAllExceptWidget, widget)
                     }
@@ -125,17 +125,17 @@ class _DragableTabBar(QtGui.QTabBar):
             }
 
             if self.parent().count() > 1:
-                tabMenu["items"].append("-")
-                tabMenu["items"].append({
-                    "text": "Split Horizontally",
-                    "icon": resources.getIcon("view-split-left-right")           
-                })
-                tabMenu["items"].append({
-                    "text": "Split Vertically",             
-                    "icon": resources.getIcon("view-split-top-bottom")             
-                })
+                tabMenu["items"].extend([
+                    "-", {
+                        "text": "Split horizontally",
+                        "icon": resources.getIcon("view-split-left-right")           
+                    }, {
+                        "text": "Split vertically",
+                        "icon": resources.getIcon("view-split-top-bottom")    
+                    }
+                ])
             tabMenu["items"].append("-")
-            # Create custom menu (
+            # Create custom menu
             tabMenu["items"].extend(widget.contributeToTabMenu())
             
             menu = create_menu(self, tabMenu)
