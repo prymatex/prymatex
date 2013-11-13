@@ -106,7 +106,7 @@ class _DragableTabBar(QtGui.QTabBar):
         if e.button() == QtCore.Qt.RightButton:
             widget = self.widgetAtPos(e.pos())
             tabWidget = self.parent()
-            tabSplitter = tabWidget.parent()
+            tabSplitter = tabWidget._root
             tabMenu = { 
                 "text": "Tab Menu",
                 "items": [

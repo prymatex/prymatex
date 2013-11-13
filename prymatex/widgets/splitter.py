@@ -253,12 +253,14 @@ class SplitTabWidget(QtGui.QSplitter):
     def splitHorizontally(self, widget = None):
         stab_w, stab = self._tab_widget(widget or self._current_widget)
         
-        self._split(self, stab_w, stab_w, stab, self._HS_SOUTH)
+        if stab_w.count() > 1:
+            self._split(self, stab_w, stab_w, stab, self._HS_SOUTH)
 
     def splitVertically(self, widget = None):
         stab_w, stab = self._tab_widget(widget or self._current_widget)
         
-        self._split(self, stab_w, stab_w, stab, self._HS_EAST)
+        if stab_w.count() > 1:
+            self._split(self, stab_w, stab_w, stab, self._HS_EAST)
         
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out _TabWidgets """
@@ -594,7 +596,9 @@ class SplitTabWidget(QtGui.QSplitter):
     def _split(self, dsplit_w, stab_w, dtab_w, stab, dhs):
         # Remove the tab from its current tab widget and create a new one
         # for it.
+        
         ticon, ttext, ttextcolor, twidg = self._remove_tab(stab_w, stab)
+
         new_tw = _TabWidget(dsplit_w)
         new_tw.addTab(twidg, ticon, ttext)
         new_tw.tabBar().setTabTextColor(0, ttextcolor)
@@ -607,10 +611,15 @@ class SplitTabWidget(QtGui.QSplitter):
             dspl, dspl_idx = dsplit_w._horizontal_split(dspl, dspl_idx, dhs)
         else:
             dspl, dspl_idx = dsplit_w._vertical_split(dspl, dspl_idx, dhs)
-
+        
         # Add the new tab widget in the right place.
         dspl.insertWidget(dspl_idx, new_tw)
-
+        
+        # Sizes
+        sizes = dspl.sizes()
+        new_size = sum(sizes) / len(sizes)
+        dspl.setSizes([new_size for _ in sizes])
+        
         dsplit_w._set_current_tab(new_tw, 0)
 
     def _horizontal_split(self, spl, idx, hs):
