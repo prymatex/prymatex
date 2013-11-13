@@ -237,11 +237,13 @@ class MainMenuMixin(object):
             }, "-", {
                 "text": "Layout",
                 "items": [{
-                    "text": "Split horizontally",
-                    "icon": resources.getIcon("view-split-left-right")           
-                }, {
                     "text": "Split vertically",
-                    "icon": resources.getIcon("view-split-top-bottom")    
+                    "icon": resources.getIcon("view-split-left-right"),
+                    "triggered": lambda mainWindow: mainWindow.centralWidget().splitVertically()
+                }, {
+                    "text": "Split horizontally",
+                    "icon": resources.getIcon("view-split-top-bottom"),
+                    "triggered": lambda mainWindow: mainWindow.centralWidget().splitHorizontally()
                 }, "-", {
                     "text": "Single",
                     "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+1"),
