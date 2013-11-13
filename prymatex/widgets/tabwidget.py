@@ -127,11 +127,13 @@ class _DragableTabBar(QtGui.QTabBar):
             if self.parent().count() > 1:
                 tabMenu["items"].extend([
                     "-", {
-                        "text": "Split horizontally",
-                        "icon": resources.getIcon("view-split-left-right")           
-                    }, {
                         "text": "Split vertically",
-                        "icon": resources.getIcon("view-split-top-bottom")    
+                        "icon": resources.getIcon("view-split-top-bottom"),
+                        "triggered": partial(tabSplitter.splitVertically, widget)   
+                    }, {
+                        "text": "Split horizontally",
+                        "icon": resources.getIcon("view-split-left-right"),
+                        "triggered": partial(tabSplitter.splitHorizontally, widget)
                     }
                 ])
             tabMenu["items"].append("-")

@@ -170,9 +170,7 @@ class SplitTabWidget(QtGui.QSplitter):
         # implementation).
         QtGui.QSplitter.restoreState(qsplitter, sp_qstate)
     
-    #===========================================================================
-    # Agregar widgets, quitarlos, y obtenerlos
-    #===========================================================================
+    # ------ Add, remove, get widgets
     def addTab(self, w):
         """ Add a new tab to the main tab widget. """
 
@@ -238,6 +236,7 @@ class SplitTabWidget(QtGui.QSplitter):
         """Return current widget."""
         return self._current_widget
 
+    # ------ Close widgets
     def closeAllExceptWidget(self, widget):
         count = 0
         for w in self.allWidgets():
@@ -250,6 +249,36 @@ class SplitTabWidget(QtGui.QSplitter):
     def closeAll(self):
         return self.closeAllExceptWidget(None)
 
+    # ------ Split
+    def splitHorizontally(self, widget = None):
+        stab_w, stab = self._tab_widget(widget or self._current_widget)
+        dsplit_w = stab_w.parent()
+
+        # Remove the tab from its current tab widget and create a new one for it.
+        ticon, ttext, ttextcolor, twidg = self._remove_tab(stab_w, stab)
+        new_tw = _TabWidget(dsplit_w)
+        new_tw.addTab(twidg, ticon, ttext)
+        new_tw.tabBar().setTabTextColor(0, ttextcolor)
+
+        # Get the splitter containing the destination tab widget.
+        dspl = stab_w.parent()
+        dspl_idx = dspl.indexOf(stab_w)
+
+        dspl, dspl_idx = dsplit_w._horizontal_split(dspl, dspl_idx, self._HS_EAST)
+
+        # Add the new tab widget in the right place.
+        dspl.insertWidget(dspl_idx, new_tw)
+
+        dsplit_w._set_current_tab(new_tw, 0)
+
+        dsplit_w._set_focus()
+
+    def splitVertically(self, widget = None):
+        # If widget is None then use the current widget
+        widget = widget or self._current_widget
+
+        tw, tidx = self._tab_widget(widget)
+        
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out _TabWidgets """
         

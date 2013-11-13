@@ -1112,11 +1112,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             menues.append("-")
         if self.filePath:
             menues.extend([
-                {   "text": "Path to Clipboard",
+                {   "text": "Path to clipboard",
                     "triggered": lambda editor = self: self.application.clipboard().setText(editor.filePath)  },
-                {   "text": "Name to Clipboard",
+                {   "text": "Name to clipboard",
                     "triggered": lambda editor = self: self.application.clipboard().setText(editor.application.fileManager.basename(editor.filePath))  },
-                {   "text": "Directory to Clipboard",
+                {   "text": "Directory to clipboard",
                     "triggered": lambda editor = self: self.application.clipboard().setText(editor.application.fileManager.dirname(editor.filePath))  },
                 ])
         return menues
