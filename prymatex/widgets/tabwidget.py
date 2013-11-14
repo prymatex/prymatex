@@ -60,7 +60,7 @@ class _TabWidget(QtGui.QTabWidget):
         """ Reimplemented to update the record of the current tab if it is removed. """
         
         self._still_needed()
-
+        print("chauchau")
         if self._root._current_tab_w is self and self._root._current_tab_idx == idx:
             self._root._current_tab_w = None
 

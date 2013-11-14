@@ -79,7 +79,6 @@ class SplitTabWidget(QtGui.QSplitter):
         self._current_tab_w = None
         self._current_tab_idx = -1
         self._current_widget = None
-        self._tabParentCreateRequest = None
 
     def saveState(self):
         """ Returns a Python object containing the saved state of the widget.
@@ -178,7 +177,7 @@ class SplitTabWidget(QtGui.QSplitter):
     def addTab(self, w):
         """ Add a new tab to the main tab widget. """
 
-        ch = self._tabParentCreateRequest
+        ch = self._current_tab_w
         if ch is None:
             # Find the first tab widget going down the left of the hierarchy.  This
             # will be the one in the top left corner.
@@ -279,35 +278,39 @@ class SplitTabWidget(QtGui.QSplitter):
         
         print("%d para cada grupo" % widget_count)
         for tw in self.findChildren(_TabWidget):
-            for index in range(tw.count()):
-                ticon, ttext, ttextcolor, twidg = self._remove_tab(tw, index)
+            while tw.count():
+                ticon, ttext, ttextcolor, twidg = self._remove_tab(tw, 0)
                 tab_ready[-1].addTab(twidg, ticon, ttext)
                 tab_ready[-1].tabBar().setTabTextColor(0, ttextcolor)
                 if tab_ready[-1].count() == widget_count:
                     tab_ready.append(_TabWidget(self))
-                
         
         print("listas", tab_ready)
         
         # Ok now do the thing
-        self.setOrientation(columns == 1 and QtCore.Qt.Horizontal or QtCore.Qt.Vertical)
         dcolumns = [ (self, 0) ]
         for _ in range(columns):
             if not tab_ready: return
             tab = tab_ready.pop(0)
             
+            print("Inserto columna %d", dcolumns[-1][1])
             dcolumns[-1][0].insertWidget(dcolumns[-1][1], tab)
             
-            dcolumns.append(
-                self._vertical_split(dcolumns[-1][0], dcolumns[-1][1], self._HS_EAST))
+            dspl, dspl_idx = self._vertical_split(dcolumns[-1][0], dcolumns[-1][1], self._HS_EAST)
+            if dspl_idx > 0:
+                dcolumns.append((dspl, dspl_idx))
+            else:
+                dcolumns[-1] = (dspl, dspl_idx)
         
         for dspl, dspl_idx in dcolumns:
-            for _ in range(rows - 1):
-                if not tab_ready: return
-                tab = tab_ready.pop(0)
+            if not tab_ready: return
+            tab = tab_ready.pop(0)
+
+            if dspl_idx > 0:
                 dspl, dspl_idx = self._horizontal_split(dspl, dspl_idx, self._HS_SOUTH)
-                
-                dspl.insertWidget(dspl_idx, tab)
+            print("Inserto fila en %d", dspl_idx)
+            dspl.insertWidget(dspl_idx, tab)
+            dspl_idx += 1
                 
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out _TabWidgets """
@@ -322,7 +325,7 @@ class SplitTabWidget(QtGui.QSplitter):
             self.currentWidgetChanged.emit(widget)
         
     def _tab_create_request(self, tabWidget):
-        self._tabParentCreateRequest = tabWidget
+        self._current_tab_w = tabWidget
         self.tabCreateRequest.emit()
         
     # ------ Manejo de las tabs, title, iconos, tootltip, color
