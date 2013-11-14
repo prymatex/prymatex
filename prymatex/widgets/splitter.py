@@ -275,8 +275,46 @@ class SplitTabWidget(QtGui.QSplitter):
         
         widget_count = int(math.ceil(float(widgets_len) / (columns * rows)))
         
-        print(widget_count)
+        tab_less = []
+        move_widgets = []
+        tab_ready = []
+        
+        for tw in self.findChildren(_TabWidget):
+            if tw.count() < widget_count:
+                tab_less.append(tw)
+                continue
+            for index in range(widget_count, tw.count()):
+                print("quitando los que sobran")
+                move_widgets.append(self._remove_tab(tw, index))
+            tab_ready.append(tw)
+        
+        while move_widgets:
+            tw = tab_less and tab_less.pop(0) or _TabWidget(self)
+            while tw.count() < widget_count and move_widgets:
+                ticon, ttext, ttextcolor, twidg = move_widgets.pop(0)
+                tw.addTab(twidg, ticon, ttext)
+                tw.tabBar().setTabTextColor(0, ttextcolor)
+            tab_ready.append(tw)
 
+        print(tab_ready, widget_count)
+        # Ok now do the thing
+        self.setOrientation(columns == 1 and QtCore.Qt.Horizontal or QtCore.Qt.Vertical)
+        dcolumns = [ (self, 0) ]
+        for _ in range(columns):
+            if not tab_ready: return
+            tab = tab_ready.pop(0)
+            dcolumns[-1][0].insertWidget(dcolumns[-1][1], tab)
+            dcolumns.append(
+                self._vertical_split(dcolumns[-1][0], dcolumns[-1][1], self._HS_EAST))
+        
+        for dspl, dspl_idx in dcolumns:
+            for _ in range(rows - 1):
+                if not tab_ready: return
+                tab = tab_ready.pop(0)
+                dspl, dspl_idx = self._horizontal_split(dspl, dspl_idx, self._HS_SOUTH)
+                print(dspl, dspl_idx)
+                dspl.insertWidget(dspl_idx, tab)
+        
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out _TabWidgets """
         
@@ -293,9 +331,7 @@ class SplitTabWidget(QtGui.QSplitter):
         self._tabParentCreateRequest = tabWidget
         self.tabCreateRequest.emit()
         
-    #===========================================================================
-    # Manejo de las tabs, title, iconos, tootltip, color
-    #===========================================================================
+    # ------ Manejo de las tabs, title, iconos, tootltip, color
     def setActiveIcon(self, w, icon=None):
         """ Set the active icon on a widget. """
 
@@ -614,7 +650,7 @@ class SplitTabWidget(QtGui.QSplitter):
         
         ticon, ttext, ttextcolor, twidg = self._remove_tab(stab_w, stab)
 
-        new_tw = _TabWidget(dsplit_w)
+        new_tw = _TabWidget(self)
         new_tw.addTab(twidg, ticon, ttext)
         new_tw.tabBar().setTabTextColor(0, ttextcolor)
 
