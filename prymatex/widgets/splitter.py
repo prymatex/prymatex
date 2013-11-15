@@ -270,26 +270,18 @@ class SplitTabWidget(QtGui.QSplitter):
         assert columns != 0 and rows != 0, "Mmmmm"
         
         tab_widgets = self.findChildren(_TabWidget)
-        
         widgets_count = sum([ tw.count() for tw in tab_widgets ])
-        
         widgets_tab_count = int(math.ceil(float(widgets_count) / (columns * rows)))
-        
-        def get_tab_widget(index):
-            while len(tab_widgets) <= index:
-                tab_widgets.append(_TabWidget(self))
-            return tab_widgets[index]
 
         index = 0
         while index < len(tab_widgets):
-            print(index, [ tw.count() for tw in tab_widgets])
             tw = tab_widgets[index]
+            tw.setParent(None)
             if tw.count() > widgets_tab_count:
-                tw2 = get_tab_widget(index + 1)
+                if len(tab_widgets) <= index + 1:
+                    tab_widgets.insert(index + 1, _TabWidget(self))
+                tw2 = tab_widgets[index + 1]
                 ticon, ttext, ttextcolor, twidg = self._remove_tab(tw, tw.count() - 1)
-                if not tw.count():
-                    tab_widgets.remove(tw)
-                    continue
                 tw2.insertTab(0, twidg, ticon, ttext)
                 tw2.tabBar().setTabTextColor(0, ttextcolor)
             elif tw.count() < widgets_tab_count:
@@ -299,29 +291,37 @@ class SplitTabWidget(QtGui.QSplitter):
                 ticon, ttext, ttextcolor, twidg = self._remove_tab(tw2, 0)
                 if not tw2.count():
                     tab_widgets.remove(tw2)
-                tw.insertTab(tw.count(), twidg, ticon, ttext)
+                tw.insertTab(tw.count() - 1, twidg, ticon, ttext)
                 tw.tabBar().setTabTextColor(0, ttextcolor)
             else:
                 index += 1
         
         tab_widgets = [ tw for tw in tab_widgets if tw.count() ]
-        print("listas", tab_widgets)
         
+        # Fix
+        if len(tab_widgets) < (columns * rows):
+            ticon, ttext, ttextcolor, twidg = self._remove_tab(tab_widgets[-1], tab_widgets[-1].count() - 1)
+            tw2 = _TabWidget(self)
+            tw2.addTab(twidg, ticon, ttext)
+            tw2.tabBar().setTabTextColor(0, ttextcolor)
+            tab_widgets.append(tw2)
+
+        # Clean the siplitter
+        while self.count():
+            self.widget(0).setParent(None)
+        self.setOrientation(QtCore.Qt.Horizontal)
+
         # Ok now do the thing
-        dcolumns = [ (self, 0) ]
+        dcolumns = [ (self, -1) ]
         for _ in range(columns):
             if not tab_widgets: return
             tab = tab_widgets.pop(0)
             
-            print("Inserto columna %d", dcolumns[-1][1])
-            dcolumns[-1][0].insertWidget(dcolumns[-1][1], tab)
-            
             dspl, dspl_idx = self._vertical_split(dcolumns[-1][0], dcolumns[-1][1], self._HS_EAST)
-            if dspl_idx > 0:
-                dcolumns.append((dspl, dspl_idx))
-            else:
-                dcolumns[-1] = (dspl, dspl_idx)
+            dspl.insertWidget(dspl_idx, tab)
+            dcolumns.append((dspl, dspl_idx))
         
+        dcolumns.pop(0)
         drows = [ [col] for col in dcolumns]
         for _ in range(rows):
             for drow in drows:
@@ -329,10 +329,13 @@ class SplitTabWidget(QtGui.QSplitter):
                 tab = tab_widgets.pop(0)
     
                 dspl, dspl_idx = self._horizontal_split(drow[-1][0], drow[-1][1], self._HS_SOUTH)
+                dspl_idx = abs(dspl_idx)
                 dspl.insertWidget(dspl_idx, tab)
-                drow.append((dspl, dspl_idx))
+                if dspl == drow[-1][0]:
+                    drow[-1] = (dspl, dspl_idx)
+                else:
+                    drow.append((dspl, dspl_idx))
 
-                
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out _TabWidgets """
         
@@ -684,12 +687,14 @@ class SplitTabWidget(QtGui.QSplitter):
         # Add the new tab widget in the right place.
         dspl.insertWidget(dspl_idx, new_tw)
         
-        # Sizes
+        self._fix_sizes(dspl)
+            
+        dsplit_w._set_current_tab(new_tw, 0)
+
+    def _fix_sizes(self, dspl):
         sizes = dspl.sizes()
         new_size = sum(sizes) / len(sizes)
         dspl.setSizes([new_size for _ in sizes])
-        
-        dsplit_w._set_current_tab(new_tw, 0)
 
     def _horizontal_split(self, spl, idx, hs):
         """ Returns a tuple of the splitter and index where the new tab widget
