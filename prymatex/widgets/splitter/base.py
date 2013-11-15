@@ -13,7 +13,7 @@ import math
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.widgets.tabwidget import _TabWidget, _DragableTabBar
+from .group import GroupWidget, DragableTabBar
 
 def createDisambiguatedTitles(addedTitles, newTitle):
     titleFormat = newTitle[0] + " (%s)"
@@ -25,8 +25,8 @@ def createDisambiguatedTitles(addedTitles, newTitle):
                 break
     return ([titleFormat % subTitle for subTitle in usedSubtitles[1:]], titleFormat % usedSubtitles[0])
 
-class SplitTabWidget(QtGui.QSplitter):
-    """ The SplitTabWidget class is a hierarchy of QSplitters the leaves of
+class SplitterWidget(QtGui.QSplitter):
+    """ The SplitterWidget class is a hierarchy of QSplitters the leaves of
     which are QTabWidgets.  Any tab may be moved around with the hierarchy
     automatically extended and reduced as required.
     """
@@ -57,7 +57,7 @@ class SplitTabWidget(QtGui.QSplitter):
         
     def __len__(self):
         count = 0
-        for tw in self.findChildren(_TabWidget):
+        for tw in self.findChildren(GroupWidget):
             count += tw.count()
         return count
         
@@ -96,7 +96,7 @@ class SplitTabWidget(QtGui.QSplitter):
         for i in range(qsplitter.count()):
             ch = qsplitter.widget(i)
 
-            if isinstance(ch, _TabWidget):
+            if isinstance(ch, GroupWidget):
                 # A tab widget state is a tuple of the current tab index and
                 # the list of individual tab states.
                 tab_states = []
@@ -140,7 +140,7 @@ class SplitTabWidget(QtGui.QSplitter):
             if isinstance(ch_state[0], int):
                 current_idx, tabs = ch_state
 
-                new_tab = _TabWidget(self)
+                new_tab = GroupWidget(self)
 
                 # Go through each tab and use the factory to restore the page.
                 for name, title in tabs:
@@ -184,12 +184,12 @@ class SplitTabWidget(QtGui.QSplitter):
             if self.count() > 0:
                 ch = self.widget(0)
     
-                while not isinstance(ch, _TabWidget):
+                while not isinstance(ch, GroupWidget):
                     assert isinstance(ch, QtGui.QSplitter)
                     ch = ch.widget(0)
             else:
                 # There is no tab widget so create one.
-                ch = _TabWidget(self)
+                ch = GroupWidget(self)
                 self.addWidget(ch)
 
         idx = ch.addTab(w, self.disambiguatedWidgetTitle(w))
@@ -210,7 +210,7 @@ class SplitTabWidget(QtGui.QSplitter):
             w.modificationChanged.disconnect(self._update_tab_status)
             self._remove_tab(tw, tidx)
             if tw.count() == 0 and self.count() > 0:
-                for tw in self.findChildren(_TabWidget):
+                for tw in self.findChildren(GroupWidget):
                     if tw.count() != 0:
                         break
                 (tw, tidx) = (tw, tw.count() - 1) if tw.count() != 0 else (None, -1)
@@ -222,7 +222,7 @@ class SplitTabWidget(QtGui.QSplitter):
         
     def allWidgets(self):
         widgets = []
-        for tw in self.findChildren(_TabWidget):
+        for tw in self.findChildren(GroupWidget):
             for index in range(tw.count()):
                 widgets.append(tw.widget(index))
         return widgets
@@ -269,7 +269,7 @@ class SplitTabWidget(QtGui.QSplitter):
     def setLayout(self, columns = 1, rows = 1):
         assert columns != 0 and rows != 0, "Mmmmm"
         
-        tab_widgets = self.findChildren(_TabWidget)
+        tab_widgets = self.findChildren(GroupWidget)
         widgets_count = sum([ tw.count() for tw in tab_widgets ])
         widgets_tab_count = int(math.ceil(float(widgets_count) / (columns * rows)))
 
@@ -279,7 +279,7 @@ class SplitTabWidget(QtGui.QSplitter):
             tw.setParent(None)
             if tw.count() > widgets_tab_count:
                 if len(tab_widgets) <= index + 1:
-                    tab_widgets.insert(index + 1, _TabWidget(self))
+                    tab_widgets.insert(index + 1, GroupWidget(self))
                 tw2 = tab_widgets[index + 1]
                 ticon, ttext, ttextcolor, twidg = self._remove_tab(tw, tw.count() - 1)
                 tw2.insertTab(0, twidg, ticon, ttext)
@@ -301,7 +301,7 @@ class SplitTabWidget(QtGui.QSplitter):
         # Fix
         if len(tab_widgets) < (columns * rows):
             ticon, ttext, ttextcolor, twidg = self._remove_tab(tab_widgets[-1], tab_widgets[-1].count() - 1)
-            tw2 = _TabWidget(self)
+            tw2 = GroupWidget(self)
             tw2.addTab(twidg, ticon, ttext)
             tw2.tabBar().setTabTextColor(0, ttextcolor)
             tab_widgets.append(tw2)
@@ -337,12 +337,12 @@ class SplitTabWidget(QtGui.QSplitter):
                     drow.append((dspl, dspl_idx))
 
     def _close_tab_request(self, w):
-        """ A close button was clicked in one of out _TabWidgets """
+        """ A close button was clicked in one of out GroupWidgets """
         
         self.tabCloseRequest.emit(w)
         
     def _tab_focus_changed(self, widget):
-        """ A close button was clicked in one of out _TabWidgets """
+        """ A close button was clicked in one of out GroupWidgets """
         
         if self._current_widget != widget:
             self._current_widget = widget
@@ -411,7 +411,7 @@ class SplitTabWidget(QtGui.QSplitter):
     
     def widgetsByTitle(self, title):
         widgets = []
-        for tw in self.findChildren(_TabWidget):
+        for tw in self.findChildren(GroupWidget):
             for index in range(tw.count()):
                 widget = tw.widget(index)
                 if widget.tabTitle() == title:
@@ -427,7 +427,7 @@ class SplitTabWidget(QtGui.QSplitter):
     def _tab_widget(self, w):
         """ Return the tab widget and index containing the given widget. """
 
-        for tw in self.findChildren(_TabWidget, None):
+        for tw in self.findChildren(GroupWidget, None):
             idx = tw.indexOf(w)
 
             if idx >= 0:
@@ -490,7 +490,7 @@ class SplitTabWidget(QtGui.QSplitter):
         if self._repeat_focus_changes:
             self.emit(QtCore.SIGNAL('focusChanged(QWidget *,QWidget *)'), old, new)
 
-        if isinstance(new, _DragableTabBar):
+        if isinstance(new, DragableTabBar):
             ntw = new.parent()
             ntidx = ntw.currentIndex()
         else:
@@ -515,7 +515,7 @@ class SplitTabWidget(QtGui.QSplitter):
         given widget.
         """
 
-        for tw in self.findChildren(_TabWidget, None):
+        for tw in self.findChildren(GroupWidget, None):
             for tidx in range(tw.count()):
                 w = tw.widget(tidx)
 
@@ -531,7 +531,7 @@ class SplitTabWidget(QtGui.QSplitter):
 
         if tidx < 0:
             # Find the tab widget logically to the left.
-            twlist = self.findChildren(_TabWidget, None)
+            twlist = self.findChildren(GroupWidget, None)
             i = twlist.index(tw)
             i -= 1
 
@@ -553,7 +553,7 @@ class SplitTabWidget(QtGui.QSplitter):
 
         if tidx >= tw.count():
             # Find the tab widget logically to the right.
-            twlist = self.findChildren(_TabWidget, None)
+            twlist = self.findChildren(GroupWidget, None)
             i = twlist.index(tw)
             i += 1
 
@@ -600,7 +600,7 @@ class SplitTabWidget(QtGui.QSplitter):
             return
         elif dhs != self._HS_OUTSIDE:
             dsplit_w = dtab_w.parent()
-            while not isinstance(dsplit_w, SplitTabWidget):
+            while not isinstance(dsplit_w, SplitterWidget):
                 dsplit_w = dsplit_w.parent()
 
         self._selected_tab_widget = None
@@ -658,7 +658,7 @@ class SplitTabWidget(QtGui.QSplitter):
         
         dsplit_w._set_focus()
 
-        # Signal that the tab's SplitTabWidget has changed, if necessary.
+        # Signal that the tab's SplitterWidget has changed, if necessary.
         if dsplit_w != self:
             self.currentWidgetChanged.emit(twidg)
         
@@ -671,7 +671,7 @@ class SplitTabWidget(QtGui.QSplitter):
         
         ticon, ttext, ttextcolor, twidg = self._remove_tab(stab_w, stab)
 
-        new_tw = _TabWidget(self)
+        new_tw = GroupWidget(self)
         new_tw.addTab(twidg, ticon, ttext)
         new_tw.tabBar().setTabTextColor(0, ttextcolor)
 
@@ -781,11 +781,11 @@ class SplitTabWidget(QtGui.QSplitter):
         else:
             cloned_rect = None
         
-        # Determine which visible SplitTabWidget, if any, is under the cursor
+        # Determine which visible SplitterWidget, if any, is under the cursor
         # (compensating for the cloned QTabBar that may be rendered over it).
         split_widget = None
         for top_widget in QtGui.qApp.topLevelWidgets():
-            for split_widget in top_widget.findChildren(SplitTabWidget, None):
+            for split_widget in top_widget.findChildren(SplitterWidget, None):
                 visible_region = split_widget.visibleRegion()
                 widget_pos = split_widget.mapFromGlobal(global_pos)
                 if cloned_rect and split_widget.geometry().contains(widget_pos):
@@ -811,7 +811,7 @@ class SplitTabWidget(QtGui.QSplitter):
 
         # Go through each tab widget.
         pos = split_widget.mapFromGlobal(global_pos)
-        for tw in split_widget.findChildren(_TabWidget, None):
+        for tw in split_widget.findChildren(GroupWidget, None):
             if tw.geometry().contains(tw.parent().mapFrom(split_widget, pos)):
                 break
         else:

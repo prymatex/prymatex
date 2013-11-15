@@ -59,7 +59,7 @@ class MainMenuMixin(object):
 
     def on_actionCloseOthers_triggered(self):
         current = self.currentEditor()
-        for w in self.splitTabWidget.allWidgets():
+        for w in self.centralWidget().allWidgets():
             if w is not current:
                 self.closeEditor(editor = w)
 
@@ -69,12 +69,6 @@ class MainMenuMixin(object):
             self.application.restart()
 
     # ------------ Navigation Actions
-    def on_actionNextTab_triggered(self):
-        self.splitTabWidget.focusNextTab()
-
-    def on_actionPreviousTab_triggered(self):
-        self.splitTabWidget.focusPreviousTab()
-
     def on_actionSelectTab_triggered(self):
         item = self.selectorDialog.select(self.tabSelectableModel, title=_("Select tab"))
 
@@ -316,12 +310,12 @@ class MainMenuMixin(object):
                 "text": "Next tab",
                 'sequence': resources.get_sequence("_", "NextChild"),
                 "icon": resources.get_icon("go-next-view"),
-                "triggered": cls.on_actionNextTab_triggered
+                "triggered": lambda mw: mw.centralWidget().focusNextTab()
             }, {
                 "text": "Previous tab",
                 'sequence': resources.get_sequence("_", "PreviousChild"),
                 "icon": resources.get_icon("go-previous-view"),
-                "triggered": cls.on_actionPreviousTab_triggered
+                "triggered": lambda mw: mw.centralWidget().focusPreviousTab()
             }, {
                 "text": "Select tab",
                 "triggered": cls.on_actionSelectTab_triggered
@@ -332,17 +326,17 @@ class MainMenuMixin(object):
             }, "-", {
                 "text": "Last edit location",
                 "icon": resources.get_icon("go-last"),
-                "triggered": cls.on_actionPreviousTab_triggered
+                "triggered": cls.on_actionLastEditLocation_triggered
             }, {
                 "text": "Go back location",
                 'sequence': resources.get_sequence("_", "GoBackLocation"),
                 "icon": resources.get_icon("go-previous"),
-                "triggered": cls.on_actionPreviousTab_triggered
+                "triggered": cls.on_actionLocationBack_triggered
             }, {
                 "text": "Go forward location",
                 'sequence': resources.get_sequence("_", "GoForwardLocation"),
                 "icon": resources.get_icon("go-next"),
-                "triggered": cls.on_actionPreviousTab_triggered
+                "triggered": cls.on_actionLocationForward_triggered
             }]
         }
 

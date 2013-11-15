@@ -26,7 +26,7 @@ from prymatex.gui.processors import MainWindowCommandProcessor
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
 from prymatex.widgets.message import PopupMessageWidget
-from prymatex.widgets.splitter import SplitTabWidget
+from prymatex.widgets.splitter import SplitterWidget
 
 from functools import reduce
 
@@ -63,10 +63,6 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
         self.tabSelectableModel = tabSelectableModelFactory(self)
 
         # Connect Signals
-        self.splitTabWidget.currentWidgetChanged.connect(self.on_currentWidgetChanged)
-        self.splitTabWidget.currentWidgetChanged.connect(self.setWindowTitleForEditor)
-        self.splitTabWidget.tabCloseRequest.connect(self.closeEditor)
-        self.splitTabWidget.tabCreateRequest.connect(self.addEmptyEditor)
         self.application.supportManager.bundleItemTriggered.connect(self.on_bundleItemTriggered)
 
         center_widget(self, scale = (0.9, 0.8))
@@ -88,9 +84,14 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
 
         self.setupDockToolBars()
         
-        self.splitTabWidget = SplitTabWidget(self)
-        self.setCentralWidget(self.splitTabWidget)
+        self.setCentralWidget(SplitterWidget(self))
         
+        self.centralWidget().currentWidgetChanged.connect(self.on_currentWidgetChanged)
+        self.centralWidget().currentWidgetChanged.connect(self.setWindowTitleForEditor)
+        self.centralWidget().tabCloseRequest.connect(self.closeEditor)
+        self.centralWidget().tabCreateRequest.connect(self.addEmptyEditor)
+        
+
         # Status and menu bars
         self.setStatusBar(PMXStatusBar(self))
         self.setMenuBar(QtGui.QMenuBar(self))
@@ -316,30 +317,30 @@ html_footer
 
     def removeEditor(self, editor):
         self.disconnect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_editor_newLocationMemento)
-        self.splitTabWidget.removeTab(editor)
+        self.centralWidget().removeTab(editor)
         # TODO Ver si el remove borra el editor y como acomoda el historial
         del editor
 
     def addEditor(self, editor, focus = True):
-        self.splitTabWidget.addTab(editor)
+        self.centralWidget().addTab(editor)
         self.connect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_editor_newLocationMemento)
         if focus:
             self.setCurrentEditor(editor)
 
     def findEditorForFile(self, filePath):
         # Find open editor for fileInfo
-        for editor in self.splitTabWidget.allWidgets():
+        for editor in self.centralWidget().allWidgets():
             if editor.filePath == filePath:
                 return editor
 
     def editors(self):
-        return self.splitTabWidget.allWidgets()
+        return self.centralWidget().allWidgets()
 
     def setCurrentEditor(self, editor):
-        self.splitTabWidget.setCurrentWidget(editor)
+        self.centralWidget().setCurrentWidget(editor)
 
     def currentEditor(self):
-        return self.splitTabWidget.currentWidget()
+        return self.centralWidget().currentWidget()
 
     def on_currentWidgetChanged(self, editor):
         #Update Menu

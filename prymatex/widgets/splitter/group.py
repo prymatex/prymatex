@@ -13,8 +13,8 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.qt.helpers.menus import create_menu
 from prymatex import resources
 
-class _TabWidget(QtGui.QTabWidget):
-    """ The _TabWidget class is a QTabWidget with a dragable tab bar. """
+class GroupWidget(QtGui.QTabWidget):
+    """ The GroupWidget class is a QTabWidget with a dragable tab bar. """
 
     def __init__(self, root, *args):
         """ Initialise the instance. """
@@ -29,7 +29,7 @@ class _TabWidget(QtGui.QTabWidget):
 
         # We explicitly pass the parent to the tab bar ctor to work round a bug
         # in PyQt v4.2 and earlier.
-        self.setTabBar(_DragableTabBar(self._root, self))
+        self.setTabBar(DragableTabBar(self._root, self))
 
         self.setTabsClosable(True)
         self.tabCloseRequested.connect(self._close_tab)        
@@ -72,8 +72,8 @@ class _TabWidget(QtGui.QTabWidget):
     def _close_widget(self, widget):
         self._root._close_tab_request(widget)
 
-class _DragableTabBar(QtGui.QTabBar):
-    """ The _DragableTabBar class is a QTabBar that can be dragged around. """
+class DragableTabBar(QtGui.QTabBar):
+    """ The DragableTabBar class is a QTabBar that can be dragged around. """
 
     def __init__(self, root, parent):
         """ Initialise the instance. """

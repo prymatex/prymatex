@@ -15,7 +15,7 @@ class SplashScreen(QtGui.QSplashScreen):
         
         self.textRect = QtCore.QRect(self.rect().x() + 100, self.rect().y() + 510, 260, 50)
         self.shadowTextRect = QtCore.QRect(self.rect().x() + 101, self.rect().y() + 511, 260, 50)
-        
+
     def drawContents(self, painter):
         #painter.fillRect(self.textRect, QtCore.Qt.red) test rect text
         painter.setPen(self.shadowColor)
