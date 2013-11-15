@@ -269,29 +269,49 @@ class SplitTabWidget(QtGui.QSplitter):
     def setLayout(self, columns = 1, rows = 1):
         assert columns != 0 and rows != 0, "Mmmmm"
         
-        widgets = self.allWidgets()
-        widgets_len = len(widgets)
+        tab_widgets = self.findChildren(_TabWidget)
         
-        widget_count = int(math.ceil(float(widgets_len) / (columns * rows)))
+        widgets_count = sum([ tw.count() for tw in tab_widgets ])
         
-        tab_ready = [ _TabWidget(self) ]
+        widgets_tab_count = int(math.ceil(float(widgets_count) / (columns * rows)))
         
-        print("%d para cada grupo" % widget_count)
-        for tw in self.findChildren(_TabWidget):
-            while tw.count():
-                ticon, ttext, ttextcolor, twidg = self._remove_tab(tw, 0)
-                tab_ready[-1].addTab(twidg, ticon, ttext)
-                tab_ready[-1].tabBar().setTabTextColor(0, ttextcolor)
-                if tab_ready[-1].count() == widget_count:
-                    tab_ready.append(_TabWidget(self))
+        def get_tab_widget(index):
+            while len(tab_widgets) <= index:
+                tab_widgets.append(_TabWidget(self))
+            return tab_widgets[index]
+
+        index = 0
+        while index < len(tab_widgets):
+            print(index, [ tw.count() for tw in tab_widgets])
+            tw = tab_widgets[index]
+            if tw.count() > widgets_tab_count:
+                tw2 = get_tab_widget(index + 1)
+                ticon, ttext, ttextcolor, twidg = self._remove_tab(tw, tw.count() - 1)
+                if not tw.count():
+                    tab_widgets.remove(tw)
+                    continue
+                tw2.insertTab(0, twidg, ticon, ttext)
+                tw2.tabBar().setTabTextColor(0, ttextcolor)
+            elif tw.count() < widgets_tab_count:
+                if len(tab_widgets) <= index + 1:
+                    break
+                tw2 = tab_widgets[index + 1]
+                ticon, ttext, ttextcolor, twidg = self._remove_tab(tw2, 0)
+                if not tw2.count():
+                    tab_widgets.remove(tw2)
+                tw.insertTab(tw.count(), twidg, ticon, ttext)
+                tw.tabBar().setTabTextColor(0, ttextcolor)
+            else:
+                index += 1
         
-        print("listas", tab_ready)
+        tab_widgets = [ tw for tw in tab_widgets if tw.count() ]
+        print("listas", tab_widgets)
         
         # Ok now do the thing
         dcolumns = [ (self, 0) ]
         for _ in range(columns):
-            if not tab_ready: return
-            tab = tab_ready.pop(0)
+            if not tab_widgets: return
+            tab = tab_widgets.pop(0)
             
             print("Inserto columna %d", dcolumns[-1][1])
             dcolumns[-1][0].insertWidget(dcolumns[-1][1], tab)
@@ -302,15 +322,16 @@ class SplitTabWidget(QtGui.QSplitter):
             else:
                 dcolumns[-1] = (dspl, dspl_idx)
         
-        for dspl, dspl_idx in dcolumns:
-            if not tab_ready: return
-            tab = tab_ready.pop(0)
+        drows = [ [col] for col in dcolumns]
+        for _ in range(rows):
+            for drow in drows:
+                if not tab_widgets: return
+                tab = tab_widgets.pop(0)
+    
+                dspl, dspl_idx = self._horizontal_split(drow[-1][0], drow[-1][1], self._HS_SOUTH)
+                dspl.insertWidget(dspl_idx, tab)
+                drow.append((dspl, dspl_idx))
 
-            if dspl_idx > 0:
-                dspl, dspl_idx = self._horizontal_split(dspl, dspl_idx, self._HS_SOUTH)
-            print("Inserto fila en %d", dspl_idx)
-            dspl.insertWidget(dspl_idx, tab)
-            dspl_idx += 1
                 
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out _TabWidgets """
