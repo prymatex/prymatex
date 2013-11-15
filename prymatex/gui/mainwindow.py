@@ -86,11 +86,12 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
         
         self.setCentralWidget(SplitterWidget(self))
         
+        # Splitter signals
         self.centralWidget().currentWidgetChanged.connect(self.on_currentWidgetChanged)
         self.centralWidget().currentWidgetChanged.connect(self.setWindowTitleForEditor)
+        self.centralWidget().layoutChanged.connect(self.on_splitter_layoutChanged)
         self.centralWidget().tabCloseRequest.connect(self.closeEditor)
         self.centralWidget().tabCreateRequest.connect(self.addEmptyEditor)
-        
 
         # Status and menu bars
         self.setStatusBar(PMXStatusBar(self))
@@ -162,6 +163,8 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
         self.menuPanels = self.findChild(QtGui.QMenu, "menuPanels")
         self.menuRecentFiles = self.findChild(QtGui.QMenu, "menuRecentFiles")
         self.menuBundles = self.findChild(QtGui.QMenu, "menuBundles")
+        self.menuFocusGroup = self.findChild(QtGui.QMenu, "menuFocusGroup")
+        self.menuMoveFileToGroup = self.findChild(QtGui.QMenu, "menuMoveFileToGroup")
         
         # Metemos las acciones de las dockers al menu panels
         dockIndex = 1
@@ -178,6 +181,7 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
             self.menuPanels.addAction(toggleAction)
             self.addAction(toggleAction)
 
+        # Metemos las acciones del support
         self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
         
     def componentInstanceDispatcher(self, handler, *largs):

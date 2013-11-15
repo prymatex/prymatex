@@ -1,14 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#------------------------------------------------------------------------------
-# Copyright (c) 2008, Riverbank Computing Limited
-# All rights reserved.
-#
-# This software is provided without warranty under the terms of the BSD license.
-# However, when used with the GPL version of PyQt the additional terms described in the PyQt GPL exception also apply
-
-#------------------------------------------------------------------------------
 import math
 
 from prymatex.qt import QtCore, QtGui
@@ -35,7 +27,8 @@ class SplitterWidget(QtGui.QSplitter):
     tabCloseRequest = QtCore.Signal(QtGui.QWidget)
     tabCreateRequest = QtCore.Signal()
     currentWidgetChanged = QtCore.Signal(QtGui.QWidget)
-    
+    layoutChanged = QtCore.Signal()
+
     # The different hotspots of a QTabWidget.  An non-negative value is a tab
     # index and the hotspot is to the left of it.
     _HS_NONE = -1
@@ -252,7 +245,7 @@ class SplitterWidget(QtGui.QSplitter):
     def closeAll(self):
         return self.closeAllExceptWidget(None)
 
-    # ------ Split
+    # ------ Layout, Split
     def splitHorizontally(self, widget = None):
         stab_w, stab = self._tab_widget(widget or self._current_widget)
         
@@ -265,7 +258,6 @@ class SplitterWidget(QtGui.QSplitter):
         if stab_w.count() > 1:
             self._split(self, stab_w, stab_w, stab, self._HS_EAST)
         
-    # ------ Layout
     def setLayout(self, columns = 1, rows = 1):
         assert columns != 0 and rows != 0, "Mmmmm"
         
@@ -314,7 +306,9 @@ class SplitterWidget(QtGui.QSplitter):
         # Ok now do the thing
         dcolumns = [ (self, -1) ]
         for _ in range(columns):
-            if not tab_widgets: return
+            if not tab_widgets:
+                self.layoutChanged.emit()
+                return
             tab = tab_widgets.pop(0)
             
             dspl, dspl_idx = self._vertical_split(dcolumns[-1][0], dcolumns[-1][1], self._HS_EAST)
@@ -325,7 +319,9 @@ class SplitterWidget(QtGui.QSplitter):
         drows = [ [col] for col in dcolumns]
         for _ in range(rows):
             for drow in drows:
-                if not tab_widgets: return
+                if not tab_widgets:
+                    self.layoutChanged.emit()
+                    return
                 tab = tab_widgets.pop(0)
     
                 dspl, dspl_idx = self._horizontal_split(drow[-1][0], drow[-1][1], self._HS_SOUTH)
@@ -688,7 +684,8 @@ class SplitterWidget(QtGui.QSplitter):
         dspl.insertWidget(dspl_idx, new_tw)
         
         self._fix_sizes(dspl)
-            
+        self.layoutChanged.emit()
+        
         dsplit_w._set_current_tab(new_tw, 0)
 
     def _fix_sizes(self, dspl):

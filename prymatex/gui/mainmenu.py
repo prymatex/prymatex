@@ -37,6 +37,10 @@ class MainMenuMixin(object):
             self.menuRecentFiles.addAction(action)
         self.menuRecentFiles.addActions(actions)
 
+    # ------------ Update groups actions
+    def on_splitter_layoutChanged(self):
+        print("Cabmio el layout")
+
     # ------------ File Actions
     def on_actionOpen_triggered(self):
         filePath = self.currentEditor().filePath if self.currentEditor() is not None else None

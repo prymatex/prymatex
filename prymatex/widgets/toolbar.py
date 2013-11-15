@@ -15,7 +15,7 @@ class DockWidgetToolBar(QtGui.QToolBar):
         QtCore.Qt.TopDockWidgetArea: QtCore.Qt.TopToolBarArea,
         QtCore.Qt.BottomDockWidgetArea: QtCore.Qt.BottomToolBarArea,
     }
-
+    
     def __init__(self, name, area, parent):
         QtGui.QToolBar.__init__(self, parent)
         assert isinstance(parent, QtGui.QMainWindow)
