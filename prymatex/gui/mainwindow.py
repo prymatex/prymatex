@@ -313,6 +313,28 @@ html_footer
     def showMessage(self, *largs, **kwargs):
         self.popupMessage.showMessage(*largs, **kwargs)
 
+    # ---------------- Create and manage groups
+    def addEmptyGroup(self):
+        pass
+        
+    def moveEditorToNewGroup(self):
+        pass
+
+    def closeGroup(self):
+        pass
+        
+    def nextGroup(self):
+        pass
+        
+    def previousGroup(self):
+        pass
+        
+    def moveEditorToNextGroup(self):
+        pass
+        
+    def moveEditorToPreviousGroup(self):
+        pass
+
     # ---------------- Create and manage editors
     def addEmptyEditor(self):
         editor = self.application.createEditorInstance(parent = self)
@@ -321,12 +343,12 @@ html_footer
 
     def removeEditor(self, editor):
         self.disconnect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_editor_newLocationMemento)
-        self.centralWidget().removeTab(editor)
+        self.centralWidget().removeTabWidget(editor)
         # TODO Ver si el remove borra el editor y como acomoda el historial
         del editor
 
     def addEditor(self, editor, focus = True):
-        self.centralWidget().addTab(editor)
+        self.centralWidget().addTabWidget(editor)
         self.connect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_editor_newLocationMemento)
         if focus:
             self.setCurrentEditor(editor)

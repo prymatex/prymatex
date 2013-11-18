@@ -282,35 +282,52 @@ class MainMenuMixin(object):
             }, {
                 "text": "Groups",
                 "items": [{
-                    "text": "Move file to new group",
+                    "text": "Move editor to new group",
+                    "triggered": lambda mainWindow: mainWindow.moveEditorToNewGroup()
                 }, {
                     "text": "New group",
+                    "triggered": lambda mainWindow: mainWindow.addEmptyGroup()
                 }, {
                     "text": "Close group",
+                    "triggered": lambda mainWindow: mainWindow.closeGroup()
                 }, "-", {
                     "text": "Max Columns: 1",
+                    "testChecked": lambda mainWindow: mainWindow.centralWidget().maxColumns() == 1,
+                    "toggled": lambda mainWindow, checked: checked and mainWindow.centralWidget().setMaxColumns(1)
                 }, {
                     "text": "Max Columns: 2",
+                    "testChecked": lambda mainWindow: mainWindow.centralWidget().maxColumns() == 2,
+                    "toggled": lambda mainWindow, checked: checked and mainWindow.centralWidget().setMaxColumns(2)
                 }, {
                     "text": "Max Columns: 3",
+                    "testChecked": lambda mainWindow: mainWindow.centralWidget().maxColumns() == 3,
+                    "toggled": lambda mainWindow, checked: checked and mainWindow.centralWidget().setMaxColumns(3)
                 }, {
                     "text": "Max Columns: 4",
+                    "testChecked": lambda mainWindow: mainWindow.centralWidget().maxColumns() == 4,
+                    "toggled": lambda mainWindow, checked: checked and mainWindow.centralWidget().setMaxColumns(4)
                 }, {
                     "text": "Max Columns: 5",
+                    "testChecked": lambda mainWindow: mainWindow.centralWidget().maxColumns() == 5,
+                    "toggled": lambda mainWindow, checked: checked and mainWindow.centralWidget().setMaxColumns(5)
                 }]
             }, {
                 "text": "Focus group",
                 "items": [{
                     "text": "Next",
+                    "triggered": lambda mainWindow: mainWindow.nextGroup()
                 }, {
                     "text": "Previous",
+                    "triggered": lambda mainWindow: mainWindow.previousGroup()
                 }, "-"]
             }, {
-                "text": "Move file to group",
+                "text": "Move editor to group",
                 "items": [{
                     "text": "Next",
+                    "triggered": lambda mainWindow: mainWindow.moveEditorToNextGroup()
                 }, {
                     "text": "Previous",
+                    "triggered": lambda mainWindow: mainWindow.moveEditorToPreviousGroup()
                 }, "-"]
             }]
         }

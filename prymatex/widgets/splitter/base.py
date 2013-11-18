@@ -59,7 +59,9 @@ class SplitterWidget(QtGui.QSplitter):
             w.hide()
             w.deleteLater()
         del w
-
+        
+        self._max_columns = None
+        
         self._repeat_focus_changes = True
         self._rband = None
         self._selected_tab_widget = None
@@ -161,11 +163,17 @@ class SplitterWidget(QtGui.QSplitter):
         # implementation).
         QtGui.QSplitter.restoreState(qsplitter, sp_qstate)
     
+    def setMaxColumns(self, columns):
+        self._max_columns = columns
+        
+    def maxColumns(self):
+        return self._max_columns
+    
     # ------ Add, remove, get widgets
-    def addTab(self, w):
+    def addTabWidget(self, widget, group = None):
         """ Add a new tab to the main tab widget. """
 
-        ch = self._current_tab_w
+        ch = group or self._current_tab_w
         if ch is None:
             # Find the first tab widget going down the left of the hierarchy.  This
             # will be the one in the top left corner.
@@ -180,10 +188,10 @@ class SplitterWidget(QtGui.QSplitter):
                 ch = GroupWidget(self)
                 self.addWidget(ch)
 
-        idx = ch.addTab(w, self.disambiguatedWidgetTitle(w))
-        self.setWidgetToolTip(w, w.tabToolTip())
-        self.setWidgetIcon(w, w.tabIcon())
-        w.modificationChanged.connect(self._update_tab_status)
+        idx = ch.addTab(widget, self.disambiguatedWidgetTitle(widget))
+        self.setWidgetToolTip(widget, widget.tabToolTip())
+        self.setWidgetIcon(widget, widget.tabIcon())
+        widget.modificationChanged.connect(self._update_tab_status)
 
         # If the tab has been added to the current tab widget then make it the
         # current tab.
@@ -191,11 +199,11 @@ class SplitterWidget(QtGui.QSplitter):
             self._set_current_tab(ch, idx)
             ch.tabBar().setFocus()
 
-    def removeTab(self, w):
+    def removeTabWidget(self, widget):
         """ Remove tab to the tab widget."""
-        tw, tidx = self._tab_widget(w)
+        tw, tidx = self._tab_widget(widget)
         if tw is not None:
-            w.modificationChanged.disconnect(self._update_tab_status)
+            widget.modificationChanged.disconnect(self._update_tab_status)
             self._remove_tab(tw, tidx)
             if tw.count() == 0 and self.count() > 0:
                 for tw in self.findChildren(GroupWidget):
@@ -208,6 +216,10 @@ class SplitterWidget(QtGui.QSplitter):
             if tw is not None:
                 tw.tabBar().setFocus()
 
+    # ------------- Add remove groups
+    def newGroup(self, widget):
+        
+        
     def allGroups(self):
         return self.findChildren(GroupWidget)[::-1]
 
