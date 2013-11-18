@@ -85,7 +85,7 @@ class MainMenuMixin(object):
         item = self.selectorDialog.select(self.tabSelectableModel, title=_("Select tab"))
 
         if item is not None:
-            self.splitTabWidget.setCurrentWidget(item['data'])
+            self.centralWidget().setCurrentWidget(item['data'])
 
     def on_actionJumpToTab_triggered(self):
         if self.currentEditor() is not None:
@@ -409,10 +409,14 @@ class MainMenuMixin(object):
                 "toggled": lambda mainWindow, checked: mainWindow.statusBar().setShown(checked),
                 "testChecked": lambda mainWindow: mainWindow.statusBar().isVisible()
             }, "-", {
-                "text": "Fullscreen",
+                "text": "Full screen",
                 "toggled": lambda mainWindow, checked: getattr(mainWindow, checked and "showFullScreen" or "showNormal")(),
                 "testChecked": lambda mainWindow: mainWindow.isFullScreen(),
-                'sequence': resources.get_sequence("_", "ShowFullScreen", "Ctrl+Shift+F11")
+                'sequence': resources.get_sequence("_", "ShowFullScreen", "F11")
+            }, {
+                "text": "Distraction free mode",
+                "toggled": lambda mainWindow, checked: getattr(mainWindow, checked and "showDistractionFreeMode" or "showNormal")(),
+                "sequence": resources.get_sequence("_", "ShowDistractionFreeMode", "Shift+F11")
             }, "-", {
                 "text": "Settings",
                 "triggered": lambda mainWindow: mainWindow.settingsDialog.exec_()
@@ -456,7 +460,7 @@ def tabSelectableModelFactory(mainWindow):
         return [dict(data = tab,
                 template = "<table width='100%%'><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(file)s</small></td></tr></table>",
                 display = { "name": tab.tabTitle(), "file": tab.filePath },
-                image = tab.tabIcon()) for tab in mainWindow.splitTabWidget.allWidgets()]
+                image = tab.tabIcon()) for tab in mainWindow.centralWidget().allWidgets()]
 
     return selectableModelFactory(mainWindow,
         dataFunction, filterFunction = lambda text, item: item["display"]["name"].find(text) != -1)

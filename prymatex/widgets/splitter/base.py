@@ -216,13 +216,6 @@ class SplitterWidget(QtGui.QSplitter):
             if tw is not None:
                 tw.tabBar().setFocus()
 
-    # ------------- Add remove groups
-    def newGroup(self, widget):
-        
-        
-    def allGroups(self):
-        return self.findChildren(GroupWidget)[::-1]
-
     def allWidgets(self):
         widgets = []
         for group in self.allGroups():
@@ -241,6 +234,10 @@ class SplitterWidget(QtGui.QSplitter):
     def currentWidget(self):
         """Return current widget."""
         return self._current_widget
+
+    # ------------- Add remove groups
+    def allGroups(self):
+        return self.findChildren(GroupWidget)[::-1]
 
     def setCurrentGroup(self, group):
         self._set_current_tab(group, group.currentIndex())
