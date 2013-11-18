@@ -43,19 +43,15 @@ class SplitterWidget(QtGui.QSplitter):
         """ Initialise the instance. """
 
         QtGui.QSplitter.__init__(self, *args)
-
         self.clear()
 
         QtCore.QObject.connect(QtGui.qApp, QtCore.SIGNAL('focusChanged(QWidget *,QWidget *)'), self._focus_changed)
         
     def __len__(self):
-        count = 0
-        for tw in self.findChildren(GroupWidget):
-            count += tw.count()
-        return count
-        
+        return sum([ tw.count() for tw in self.findChildren(GroupWidget)])
+
     def clear(self):
-        """ Restore the widget to its pristine state. """
+        """Restore the widget to its pristine state."""
 
         w = None
         for i in range(self.count()):
@@ -77,7 +73,6 @@ class SplitterWidget(QtGui.QSplitter):
         """ Returns a Python object containing the saved state of the widget.
         Widgets are saved only by their object name.
         """
-
         return self._save_qsplitter(self)
 
     def _save_qsplitter(self, qsplitter):
@@ -212,26 +207,35 @@ class SplitterWidget(QtGui.QSplitter):
             self._set_current_tab(tw, tidx)
             if tw is not None:
                 tw.tabBar().setFocus()
-        
+
+    def allGroups(self):
+        return self.findChildren(GroupWidget)[::-1]
+
     def allWidgets(self):
         widgets = []
-        for tw in self.findChildren(GroupWidget):
-            for index in range(tw.count()):
-                widgets.append(tw.widget(index))
+        for group in self.allGroups():
+            for index in range(group.count()):
+                widgets.append(group.widget(index))
         return widgets
 
-    def setCurrentWidget(self, w):
+    def setCurrentWidget(self, widget):
         """ Make the given widget current. """
 
-        tw, tidx = self._tab_widget(w)
+        tw, tidx = self._tab_widget(widget)
 
         if tw is not None:
             self._set_current_tab(tw, tidx)
-        
+    
     def currentWidget(self):
         """Return current widget."""
         return self._current_widget
 
+    def setCurrentGroup(self, group):
+        self._set_current_tab(group, group.currentIndex())
+
+    def currentGroup(self):
+        return self._current_tab_w
+    
     # ------ Close widgets
     def closeAllExceptWidget(self, widget):
         count = 0
@@ -263,6 +267,9 @@ class SplitterWidget(QtGui.QSplitter):
         
         tab_widgets = self.findChildren(GroupWidget)
         widgets_count = sum([ tw.count() for tw in tab_widgets ])
+        if widgets_count < (rows * columns):
+            return
+        
         widgets_tab_count = int(math.ceil(float(widgets_count) / (columns * rows)))
 
         index = 0
@@ -298,39 +305,38 @@ class SplitterWidget(QtGui.QSplitter):
             tw2.tabBar().setTabTextColor(0, ttextcolor)
             tab_widgets.append(tw2)
 
-        # Clean the siplitter
+        # Reset the siplitter
         while self.count():
             self.widget(0).setParent(None)
         self.setOrientation(QtCore.Qt.Horizontal)
-
+        
         # Ok now do the thing
-        dcolumns = [ (self, -1) ]
-        for _ in range(columns):
-            if not tab_widgets:
-                self.layoutChanged.emit()
-                return
-            tab = tab_widgets.pop(0)
-            
-            dspl, dspl_idx = self._vertical_split(dcolumns[-1][0], dcolumns[-1][1], self._HS_EAST)
+        dspl, dspl_idx = self, -1
+        dcolumns = []
+        while tab_widgets and len(dcolumns) < columns:
+            tab = tab_widgets.pop()
+            dspl, dspl_idx = self._vertical_split(dspl, dspl_idx, self._HS_EAST)
             dspl.insertWidget(dspl_idx, tab)
             dcolumns.append((dspl, dspl_idx))
         
-        dcolumns.pop(0)
         drows = [ [col] for col in dcolumns]
-        for _ in range(rows):
-            for drow in drows:
-                if not tab_widgets:
-                    self.layoutChanged.emit()
-                    return
-                tab = tab_widgets.pop(0)
-    
-                dspl, dspl_idx = self._horizontal_split(drow[-1][0], drow[-1][1], self._HS_SOUTH)
-                dspl_idx = abs(dspl_idx)
-                dspl.insertWidget(dspl_idx, tab)
-                if dspl == drow[-1][0]:
-                    drow[-1] = (dspl, dspl_idx)
-                else:
-                    drow.append((dspl, dspl_idx))
+        cindex = 0
+        while tab_widgets:
+            drow = drows[cindex]
+            tab = tab_widgets.pop()
+
+            dspl, dspl_idx = self._horizontal_split(drow[-1][0], drow[-1][1], self._HS_SOUTH)
+            dspl_idx = abs(dspl_idx)
+            dspl.insertWidget(dspl_idx, tab)
+            if dspl == drow[-1][0]:
+                drow[-1] = (dspl, dspl_idx)
+            else:
+                drow.append((dspl, dspl_idx))
+            cindex = (cindex + 1) % columns
+        
+        self.setCurrentWidget(self._current_widget)
+        self._set_focus()
+        self.layoutChanged.emit()
 
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out GroupWidgets """
@@ -423,7 +429,7 @@ class SplitterWidget(QtGui.QSplitter):
     def _tab_widget(self, w):
         """ Return the tab widget and index containing the given widget. """
 
-        for tw in self.findChildren(GroupWidget, None):
+        for tw in self.findChildren(GroupWidget):
             idx = tw.indexOf(w)
 
             if idx >= 0:
@@ -433,10 +439,6 @@ class SplitterWidget(QtGui.QSplitter):
 
     def _set_current_tab(self, tw, tidx):
         """ Set the new current tab. """
-
-        # Handle the trivial case.
-        if self._current_tab_w is tw and self._current_tab_idx == tidx:
-            return
 
         if tw is not None:
             tw.setCurrentIndex(tidx)

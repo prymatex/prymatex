@@ -39,7 +39,15 @@ class MainMenuMixin(object):
 
     # ------------ Update groups actions
     def on_splitter_layoutChanged(self):
-        print("Cabmio el layout")
+        for action in self.menuFocusGroup.actions()[3:]:
+            self.menuFocusGroup.removeAction(action)
+        for index, group in enumerate(self.centralWidget().allGroups(), 1):
+            action = create_action(self, {
+                "text": "Group %d" % index,
+                "sequence": resources.get_sequence("_", "Group %d" % index, "Ctrl+%d" % index).key(),
+                "triggered": lambda group = group: self.centralWidget().setCurrentGroup(group)
+            })
+            self.menuFocusGroup.addAction(action)
 
     # ------------ File Actions
     def on_actionOpen_triggered(self):
