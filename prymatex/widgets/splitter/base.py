@@ -67,7 +67,7 @@ class SplitterWidget(QtGui.QSplitter):
         self._selected_tab_widget = None
         self._selected_hotspot = self._HS_NONE
 
-        self._current_tab_w = None
+        self._current_group = None
         self._current_tab_idx = -1
         self._current_widget = None
 
@@ -173,31 +173,34 @@ class SplitterWidget(QtGui.QSplitter):
     def addTabWidget(self, widget, group = None):
         """ Add a new tab to the main tab widget. """
 
-        ch = group or self._current_tab_w
-        if ch is None:
-            # Find the first tab widget going down the left of the hierarchy.  This
+        group = group or self._current_group
+        
+        if group is None:
+            # Find the first group going down the left of the hierarchy.  This
             # will be the one in the top left corner.
             if self.count() > 0:
-                ch = self.widget(0)
+                group = self.widget(0)
     
-                while not isinstance(ch, GroupWidget):
-                    assert isinstance(ch, QtGui.QSplitter)
-                    ch = ch.widget(0)
+                while not isinstance(group, GroupWidget):
+                    assert isinstance(group, QtGui.QSplitter)
+                    group = group.widget(0)
             else:
-                # There is no tab widget so create one.
-                ch = GroupWidget(self)
-                self.addWidget(ch)
-
-        idx = ch.addTab(widget, self.disambiguatedWidgetTitle(widget))
+                # There is no group so create one.
+                group = GroupWidget(self)
+                self.addWidget(group)
+        
+        idx = group.addTab(widget, self.disambiguatedWidgetTitle(widget))
         self.setWidgetToolTip(widget, widget.tabToolTip())
         self.setWidgetIcon(widget, widget.tabIcon())
         widget.modificationChanged.connect(self._update_tab_status)
 
-        # If the tab has been added to the current tab widget then make it the
-        # current tab.
-        if ch is not self._current_tab_w:
-            self._set_current_tab(ch, idx)
-            ch.tabBar().setFocus()
+        # If the tab has been added to the current group then make it the current tab.
+        if group is not self._current_group:
+            self._set_current_tab(group, idx)
+            group.tabBar().setFocus()
+        if group.count() == 1:
+            # Is new group
+            self.layoutChanged.emit()
 
     def removeTabWidget(self, widget):
         """ Remove tab to the tab widget."""
@@ -206,6 +209,7 @@ class SplitterWidget(QtGui.QSplitter):
             widget.modificationChanged.disconnect(self._update_tab_status)
             self._remove_tab(tw, tidx)
             if tw.count() == 0 and self.count() > 0:
+                self.layoutChanged.emit()
                 for tw in self.findChildren(GroupWidget):
                     if tw.count() != 0:
                         break
@@ -237,13 +241,13 @@ class SplitterWidget(QtGui.QSplitter):
 
     # ------------- Add remove groups
     def allGroups(self):
-        return self.findChildren(GroupWidget)[::-1]
+        return filter(lambda group: group.count() != 0, self.findChildren(GroupWidget)[::-1])
 
     def setCurrentGroup(self, group):
         self._set_current_tab(group, group.currentIndex())
 
     def currentGroup(self):
-        return self._current_tab_w
+        return self._current_group
     
     # ------ Close widgets
     def closeAllExceptWidget(self, widget):
@@ -360,7 +364,7 @@ class SplitterWidget(QtGui.QSplitter):
             self.currentWidgetChanged.emit(widget)
         
     def _tab_create_request(self, tabWidget):
-        self._current_tab_w = tabWidget
+        self._current_group = tabWidget
         self.tabCreateRequest.emit()
         
     # ------ Manejo de las tabs, title, iconos, tootltip, color
@@ -453,17 +457,17 @@ class SplitterWidget(QtGui.QSplitter):
             tw.setCurrentIndex(tidx)
 
         # Save the new current widget.
-        self._current_tab_w = tw
+        self._current_group = tw
         self._current_tab_idx = tidx
         
-        self._tab_focus_changed(self._current_tab_w and self._current_tab_w.widget(self._current_tab_idx) or None)
+        self._tab_focus_changed(self._current_group and self._current_group.widget(self._current_tab_idx) or None)
 
     def _set_focus(self):
         """ Set the focus to an appropriate widget in the current tab. """
 
         # Only try and change the focus if the current focus isn't already a
         # child of the widget.
-        w = self._current_tab_w.widget(self._current_tab_idx)
+        w = self._current_group.widget(self._current_tab_idx)
         fw = self.window().focusWidget()
 
         if fw is not None and not w.isAncestorOf(fw):
@@ -931,7 +935,7 @@ class SplitterWidget(QtGui.QSplitter):
         raise NotImplementedError("Not implemented yet")
     
     def focusNextTab(self):
-        self._move_right(self._current_tab_w, self._current_tab_idx)
+        self._move_right(self._current_group, self._current_tab_idx)
     
     def focusPreviousTab(self):
-        self._move_left(self._current_tab_w, self._current_tab_idx)
+        self._move_left(self._current_group, self._current_tab_idx)

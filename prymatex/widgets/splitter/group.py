@@ -61,8 +61,8 @@ class GroupWidget(QtGui.QTabWidget):
         
         self._still_needed()
         
-        if self._root._current_tab_w is self and self._root._current_tab_idx == idx:
-            self._root._current_tab_w = None
+        if self._root._current_group is self and self._root._current_tab_idx == idx:
+            self._root._current_group = None
 
     def _close_tab(self, index):
         """ Close the current tab. """

@@ -164,7 +164,7 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
         self.menuRecentFiles = self.findChild(QtGui.QMenu, "menuRecentFiles")
         self.menuBundles = self.findChild(QtGui.QMenu, "menuBundles")
         self.menuFocusGroup = self.findChild(QtGui.QMenu, "menuFocusGroup")
-        self.menuMoveFileToGroup = self.findChild(QtGui.QMenu, "menuMoveFileToGroup")
+        self.menuMoveEditorToGroup = self.findChild(QtGui.QMenu, "menuMoveEditorToGroup")
         
         # Metemos las acciones de las dockers al menu panels
         dockIndex = 1
@@ -320,6 +320,9 @@ html_footer
     def moveEditorToNewGroup(self):
         pass
 
+    def moveEditorToGroup(self, group):
+        pass
+        
     def closeGroup(self):
         pass
         

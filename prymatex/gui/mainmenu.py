@@ -39,8 +39,11 @@ class MainMenuMixin(object):
 
     # ------------ Update groups actions
     def on_splitter_layoutChanged(self):
+        print("cambio el layout")
         for action in self.menuFocusGroup.actions()[3:]:
             self.menuFocusGroup.removeAction(action)
+        for action in self.menuMoveEditorToGroup.actions()[3:]:
+            self.menuMoveEditorToGroup.removeAction(action)
         for index, group in enumerate(self.centralWidget().allGroups(), 1):
             action = create_action(self, {
                 "text": "Group %d" % index,
@@ -48,6 +51,12 @@ class MainMenuMixin(object):
                 "triggered": lambda group = group: self.centralWidget().setCurrentGroup(group)
             })
             self.menuFocusGroup.addAction(action)
+            action = create_action(self, {
+                "text": "Group %d" % index,
+                "sequence": resources.get_sequence("_", "Group %d" % index, "Shift+Ctrl+%d" % index).key(),
+                "triggered": lambda group = group: self.centralWidget().moveEditorToGroup(group)
+            })
+            self.menuMoveEditorToGroup.addAction(action)
 
     # ------------ File Actions
     def on_actionOpen_triggered(self):
