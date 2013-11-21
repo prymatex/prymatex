@@ -146,7 +146,7 @@ class MainMenuMixin(object):
                 "items": [{
                     "text": "Editor",
                     'sequence': resources.get_sequence("_", "New"),
-                    "triggered": lambda mainWindow: mainWindow.addEmptyEditor(),
+                    "triggered": cls.addEmptyEditor,
                     "icon": resources.get_icon("tab-new"),
                 }, "-", {
                     "text": "From template",
@@ -207,7 +207,8 @@ class MainMenuMixin(object):
                 "icon": resources.get_icon("tab-close-other")
             }, "-", {
                 "text": "Switch profile",
-                "icon": resources.get_icon("system-switch-user")
+                "icon": resources.get_icon("system-switch-user"),
+                "triggered": cls.on_actionSwitchProfile_triggered
             }, "-", {
                 "text": "Quit",
                 'sequence': resources.get_sequence("_", "Quit"),
@@ -283,13 +284,13 @@ class MainMenuMixin(object):
                 "text": "Groups",
                 "items": [{
                     "text": "Move editor to new group",
-                    "triggered": lambda mainWindow: mainWindow.moveEditorToNewGroup()
+                    "triggered": cls.moveEditorToNewGroup
                 }, {
                     "text": "New group",
-                    "triggered": lambda mainWindow: mainWindow.addEmptyGroup()
+                    "triggered": cls.addEmptyGroup
                 }, {
                     "text": "Close group",
-                    "triggered": lambda mainWindow: mainWindow.closeGroup()
+                    "triggered": cls.closeGroup
                 }, "-", {
                     "text": "Max Columns: 1",
                     "testChecked": lambda mainWindow: mainWindow.centralWidget().maxColumns() == 1,
@@ -315,19 +316,19 @@ class MainMenuMixin(object):
                 "text": "Focus group",
                 "items": [{
                     "text": "Next",
-                    "triggered": lambda mainWindow: mainWindow.nextGroup()
+                    "triggered": cls.nextGroup
                 }, {
                     "text": "Previous",
-                    "triggered": lambda mainWindow: mainWindow.previousGroup()
+                    "triggered": cls.previousGroup
                 }, "-"]
             }, {
                 "text": "Move editor to group",
                 "items": [{
                     "text": "Next",
-                    "triggered": lambda mainWindow: mainWindow.moveEditorToNextGroup()
+                    "triggered": cls.moveEditorToNextGroup
                 }, {
                     "text": "Previous",
-                    "triggered": lambda mainWindow: mainWindow.moveEditorToPreviousGroup()
+                    "triggered": cls.moveEditorToPreviousGroup
                 }, "-"]
             }]
         }
