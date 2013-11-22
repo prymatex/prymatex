@@ -87,8 +87,7 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
         self.setCentralWidget(SplitterWidget(self))
         
         # Splitter signals
-        self.centralWidget().currentWidgetChanged.connect(self.on_currentWidgetChanged)
-        self.centralWidget().currentWidgetChanged.connect(self.setWindowTitleForEditor)
+        self.centralWidget().currentWidgetChanged.connect(self.on_splitter_currentWidgetChanged)
         self.centralWidget().layoutChanged.connect(self.on_splitter_layoutChanged)
         self.centralWidget().tabCloseRequest.connect(self.closeEditor)
         self.centralWidget().tabCreateRequest.connect(self.addEmptyEditor)
@@ -377,7 +376,7 @@ html_footer
     def currentEditor(self):
         return self.centralWidget().currentWidget()
 
-    def on_currentWidgetChanged(self, editor):
+    def on_splitter_currentWidgetChanged(self, editor):
         #Update Menu
         self.updateMenuForEditor(editor)
 
@@ -388,18 +387,19 @@ html_footer
         #Emitir señal de cambio
         self.currentEditorChanged.emit(editor)
 
+        # Build title
+        titleChunks = [ self.titleTemplate.safe_substitute(
+            **self.application.supportManager.environmentVariables()) ]
+
         if editor is not None:
             self.addEditorToHistory(editor)
             editor.setFocus()
             self.application.checkExternalAction(self, editor)
-
-    def setWindowTitleForEditor(self, editor):
-        #Set Window Title for editor, editor can be None
-        titleChunks = [ self.titleTemplate.safe_substitute(**self.application.supportManager.environmentVariables()) ]
-        if editor is not None:
             titleChunks.insert(0, editor.tabTitle())
+        
+        # Set window title
         self.setWindowTitle(" - ".join(titleChunks))
-
+    
     def saveEditor(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor()
         if editor.isExternalChanged():

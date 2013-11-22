@@ -251,43 +251,55 @@ class MainMenuMixin(object):
                 "text": "Panels",
                 "items": []
             }, "-", {
+                "text": "Show main menu",
+                "toggled": lambda mainWindow, checked: mainWindow.menuBar().setShown(checked),
+                "testChecked": lambda mainWindow: mainWindow.menuBar().isVisible()
+            }, {
+                "text": "Show status",
+                "toggled": lambda mainWindow, checked: mainWindow.statusBar().setShown(checked),
+                "testChecked": lambda mainWindow: mainWindow.statusBar().isVisible()
+            }, {
+                "text": "Show tabs",
+                "toggled": lambda mw, checked: mw.centralWidget().setShowTabs(checked),
+                "testChecked": lambda mw: mw.centralWidget().showTabs(),
+            }, "-", {
                 "text": "Layout",
                 "items": [{
                     "text": "Split vertically",
                     "icon": resources.getIcon("view-split-left-right"),
-                    "triggered": lambda mainWindow: mainWindow.centralWidget().splitVertically()
+                    "triggered": lambda mw: mw.centralWidget().splitVertically()
                 }, {
                     "text": "Split horizontally",
                     "icon": resources.getIcon("view-split-top-bottom"),
-                    "triggered": lambda mainWindow: mainWindow.centralWidget().splitHorizontally()
+                    "triggered": lambda mw: mw.centralWidget().splitHorizontally()
                 }, "-", {
                     "text": "Single",
                     "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+1"),
-                    "triggered": lambda mainWindow: mainWindow.centralWidget().setLayout()
+                    "triggered": lambda mw: mw.centralWidget().setLayout()
                 }, {
                     "text": "Columns: 2",
                     "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+2"),
-                    "triggered": lambda mainWindow: mainWindow.centralWidget().setLayout(columns = 2)
+                    "triggered": lambda mw: mw.centralWidget().setLayout(columns = 2)
                 }, {
                     "text": "Columns: 3",
                     "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+3"),
-                    "triggered": lambda mainWindow: mainWindow.centralWidget().setLayout(columns = 3)
+                    "triggered": lambda mw: mw.centralWidget().setLayout(columns = 3)
                 }, {
                     "text": "Columns: 4",
                     "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+4"),
-                    "triggered": lambda mainWindow: mainWindow.centralWidget().setLayout(columns = 4)
+                    "triggered": lambda mw: mw.centralWidget().setLayout(columns = 4)
                 }, {
                     "text": "Rows: 2",
                     "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+8"),
-                    "triggered": lambda mainWindow: mainWindow.centralWidget().setLayout(rows = 2)
+                    "triggered": lambda mw: mw.centralWidget().setLayout(rows = 2)
                 }, {
                     "text": "Rows: 3",
                     "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+9"),
-                    "triggered": lambda mainWindow: mainWindow.centralWidget().setLayout(rows = 3)
+                    "triggered": lambda mw: mw.centralWidget().setLayout(rows = 3)
                 }, {
                     "text": "Grid: 4",
                     "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+5"),
-                    "triggered": lambda mainWindow: mainWindow.centralWidget().setLayout(columns = 2, rows = 2)
+                    "triggered": lambda mw: mw.centralWidget().setLayout(columns = 2, rows = 2)
                 }]
             }, {
                 "text": "Groups",
@@ -410,15 +422,7 @@ class MainMenuMixin(object):
         # ------------- Preferences menu
         menu["preferences"] = {
             "text": "&Preferences",
-            "items": [{
-                "text": "Show main menu",
-                "toggled": lambda mainWindow, checked: mainWindow.menuBar().setShown(checked),
-                "testChecked": lambda mainWindow: mainWindow.menuBar().isVisible()
-            }, {
-                "text": "Show status",
-                "toggled": lambda mainWindow, checked: mainWindow.statusBar().setShown(checked),
-                "testChecked": lambda mainWindow: mainWindow.statusBar().isVisible()
-            }, "-", {
+            "items": [ {
                 "text": "Full screen",
                 "toggled": lambda mainWindow, checked: getattr(mainWindow, checked and "showFullScreen" or "showNormal")(),
                 "testChecked": lambda mainWindow: mainWindow.isFullScreen(),

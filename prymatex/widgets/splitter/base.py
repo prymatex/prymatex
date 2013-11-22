@@ -70,6 +70,7 @@ class SplitterWidget(QtGui.QSplitter):
         self._current_group = None
         self._current_tab_idx = -1
         self._current_widget = None
+        self._show_tabs = True
 
     def saveState(self):
         """ Returns a Python object containing the saved state of the widget.
@@ -130,7 +131,7 @@ class SplitterWidget(QtGui.QSplitter):
             if isinstance(ch_state[0], int):
                 current_idx, tabs = ch_state
 
-                new_tab = GroupWidget(self)
+                new_tab = self.groupFactory()
 
                 # Go through each tab and use the factory to restore the page.
                 for name, title in tabs:
@@ -169,6 +170,20 @@ class SplitterWidget(QtGui.QSplitter):
     def maxColumns(self):
         return self._max_columns
     
+    def showTabs(self):
+        return self._show_tabs
+    
+    def setShowTabs(self, show):
+        self._show_tabs = show
+        for group in self.allGroups():
+            group.tabBar().setVisible(self._show_tabs)
+
+    # ------ Group build
+    def groupFactory(self):
+        group = GroupWidget(self)
+        group.tabBar().setVisible(self._show_tabs)
+        return group
+
     # ------ Add, remove, get widgets
     def addTabWidget(self, widget, group = None):
         """ Add a new tab to the main tab widget. """
@@ -186,7 +201,7 @@ class SplitterWidget(QtGui.QSplitter):
                     group = group.widget(0)
             else:
                 # There is no group so create one.
-                group = GroupWidget(self)
+                group = self.groupFactory()
                 self.addWidget(group)
         
         idx = group.addTab(widget, self.disambiguatedWidgetTitle(widget))
@@ -290,7 +305,7 @@ class SplitterWidget(QtGui.QSplitter):
             tw.setParent(None)
             if tw.count() > widgets_tab_count:
                 if len(tab_widgets) <= index + 1:
-                    tab_widgets.insert(index + 1, GroupWidget(self))
+                    tab_widgets.insert(index + 1, self.groupFactory())
                 tw2 = tab_widgets[index + 1]
                 ticon, ttext, ttextcolor, twidg = self._remove_tab(tw, tw.count() - 1)
                 tw2.insertTab(0, twidg, ticon, ttext)
@@ -312,7 +327,7 @@ class SplitterWidget(QtGui.QSplitter):
         # Fix
         if len(tab_widgets) < (columns * rows):
             ticon, ttext, ttextcolor, twidg = self._remove_tab(tab_widgets[-1], tab_widgets[-1].count() - 1)
-            tw2 = GroupWidget(self)
+            tw2 = self.groupFactory()
             tw2.addTab(twidg, ticon, ttext)
             tw2.tabBar().setTabTextColor(0, ttextcolor)
             tab_widgets.append(tw2)
@@ -351,8 +366,7 @@ class SplitterWidget(QtGui.QSplitter):
         self.layoutChanged.emit()
 
     def moveWidgetToGroup(self, group, widget = None):
-        widget = widget or self._current_widget
-        source_group, source_idx = self._tab_widget(widget)
+        source_group, source_idx = self._tab_widget(widget or self._current_widget)
         ticon, ttext, ttextcolor, twidg = self._remove_tab(source_group, source_idx)
         
         index = group.addTab(twidg, ticon, ttext)
@@ -704,7 +718,7 @@ class SplitterWidget(QtGui.QSplitter):
         
         ticon, ttext, ttextcolor, twidg = self._remove_tab(stab_w, stab)
 
-        new_tw = GroupWidget(self)
+        new_tw = self.groupFactory()
         new_tw.addTab(twidg, ticon, ttext)
         new_tw.tabBar().setTabTextColor(0, ttextcolor)
 
