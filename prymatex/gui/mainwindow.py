@@ -6,9 +6,8 @@ from string import Template
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.compat import getSaveFileName
-from prymatex.qt.helpers import text2objectname
-from prymatex.qt.helpers.widgets import center_widget
-from prymatex.qt.helpers.menus import create_menu, extend_menu, add_actions
+from prymatex.qt.helpers import (text2objectname, create_menu, extend_menu,
+    add_actions, test_actions, center_widget)
 
 from prymatex import resources
 
@@ -182,7 +181,7 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
 
         # Metemos las acciones del support
         self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
-        
+
     def componentInstanceDispatcher(self, handler, *largs):
         obj = self.sender()
         componentClass = None
@@ -213,6 +212,16 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
     def contributeToSettings(cls):
         from prymatex.gui.settings.mainwindow import MainWindowSettingsWidget
         return [ MainWindowSettingsWidget ]
+
+    # ---------- Override QMainWindow
+    def show(self):
+        print("mostrar main")
+        QtGui.QMainWindow.show(self)
+        
+        # Test menu actions
+        objects = self.customComponentObjects[self.__class__]
+        test_actions(self, 
+            filter(lambda obj: isinstance(obj, QtGui.QAction), objects))
 
     # --------------- Bundle Items
     def on_bundleItemTriggered(self, bundleItem):
@@ -286,28 +295,19 @@ html_footer
             self.dockToolBars[area].show()
 
     def updateMenuForEditor(self, editor):
-        def set_objects(instance, objects):
-            for obj in objects:
-                if isinstance(obj, QtGui.QAction):
-                    obj.setVisible(not hasattr(obj, "testVisible") or \
-                        obj.testVisible(instance))
-                    obj.setEnabled(not hasattr(obj, "testEnabled") or \
-                        obj.testEnabled(instance))
-                    if obj.isCheckable():
-                        obj.setChecked(hasattr(obj, "testChecked") and \
-                            obj.testChecked(instance))
-
         # Primero las del editor
         self.logger.debug("Update editor %s objects" % editor)
         objects = self.customComponentObjects.get(editor.__class__, [])
-        set_objects(editor, objects)
+        test_actions(editor, 
+            filter(lambda obj: isinstance(obj, QtGui.QAction), objects))
 
         # Ahora sus children
         componentClass = self.application.findComponentsForClass(editor.__class__)
         for klass in componentClass:
             for componentInstance in editor.findChildren(klass):
                 objects = self.customComponentObjects.get(klass, [])
-                set_objects(componentInstance, objects)
+                test_actions(componentInstance, 
+                    filter(lambda obj: isinstance(obj, QtGui.QAction), objects))
 
     def showMessage(self, *largs, **kwargs):
         self.popupMessage.showMessage(*largs, **kwargs)

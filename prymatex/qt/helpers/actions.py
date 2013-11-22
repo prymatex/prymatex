@@ -15,6 +15,16 @@ def toggle_actions(actions, enable):
             if action is not None:
                 action.setEnabled(enable)
 
+def test_actions(instance, actions):
+    for action in actions:
+        action.setVisible(not hasattr(action, "testVisible") or \
+            action.testVisible(instance))
+        action.setEnabled(not hasattr(action, "testEnabled") or \
+            action.testEnabled(instance))
+        if action.isCheckable():
+            action.setChecked(hasattr(action, "testChecked") and \
+                action.testChecked(instance))
+
 def create_action(parent, settings, dispatcher = None, sequence_handler=None):
     """Create a QAction"""
     text = settings.get("text")

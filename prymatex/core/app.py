@@ -402,7 +402,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         #TODO: Testeame con mas de una
         for _ in range(1):
             self.mainWindow = self.createComponentInstance(PMXMainWindow)
-            self.mainWindow.show()
 
             self.currentProfile.restoreState(self.mainWindow)
 

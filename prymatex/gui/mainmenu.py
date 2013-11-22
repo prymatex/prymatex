@@ -252,12 +252,12 @@ class MainMenuMixin(object):
                 "items": []
             }, "-", {
                 "text": "Show main menu",
-                "toggled": lambda mainWindow, checked: mainWindow.menuBar().setShown(checked),
-                "testChecked": lambda mainWindow: mainWindow.menuBar().isVisible()
+                "toggled": lambda mw, checked: mw.menuBar().setShown(checked),
+                "testChecked": lambda mw: mw.menuBar().isVisible()
             }, {
                 "text": "Show status",
-                "toggled": lambda mainWindow, checked: mainWindow.statusBar().setShown(checked),
-                "testChecked": lambda mainWindow: mainWindow.statusBar().isVisible()
+                "toggled": lambda mw, checked: mw.statusBar().setShown(checked),
+                "testChecked": lambda mw: mw.statusBar().isVisible()
             }, {
                 "text": "Show tabs",
                 "toggled": lambda mw, checked: mw.centralWidget().setShowTabs(checked),
