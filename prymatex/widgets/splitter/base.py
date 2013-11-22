@@ -209,7 +209,6 @@ class SplitterWidget(QtGui.QSplitter):
             widget.modificationChanged.disconnect(self._update_tab_status)
             self._remove_tab(tw, tidx)
             if tw.count() == 0 and self.count() > 0:
-                self.layoutChanged.emit()
                 for tw in self.findChildren(GroupWidget):
                     if tw.count() != 0:
                         break
@@ -351,6 +350,29 @@ class SplitterWidget(QtGui.QSplitter):
         self._set_focus()
         self.layoutChanged.emit()
 
+    def moveWidgetToGroup(self, group, widget = None):
+        widget = widget or self._current_widget
+        source_group, source_idx = self._tab_widget(widget)
+        ticon, ttext, ttextcolor, twidg = self._remove_tab(source_group, source_idx)
+        
+        index = group.addTab(twidg, ticon, ttext)
+        group.tabBar().setTabTextColor(0, ttextcolor)
+        self._set_current_tab(group, index)
+        
+    def moveWidgetToNextGroup(self, widget = None):
+        widget = widget or self._current_widget
+        print("next", widget)
+        
+    def moveWidgetToPreviousGroup(self, widget = None):
+        widget = widget or self._current_widget
+        print("previous", widget)
+    
+    def focusNextTab(self):
+        self._move_right(self._current_group, self._current_tab_idx)
+    
+    def focusPreviousTab(self):
+        self._move_left(self._current_group, self._current_tab_idx)
+
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out GroupWidgets """
         
@@ -439,14 +461,14 @@ class SplitterWidget(QtGui.QSplitter):
         self.setWidgetIcon(sender, sender.tabIcon())
         self.setWidgetToolTip(sender, sender.tabToolTip())
 
-    def _tab_widget(self, w):
+    def _tab_widget(self, widget):
         """ Return the tab widget and index containing the given widget. """
 
-        for tw in self.findChildren(GroupWidget):
-            idx = tw.indexOf(w)
+        for group in self.findChildren(GroupWidget):
+            idx = group.indexOf(widget)
 
             if idx >= 0:
-                return (tw, idx)
+                return (group, idx)
 
         return (None, None)
 
@@ -776,6 +798,9 @@ class SplitterWidget(QtGui.QSplitter):
         text_color = tab_w.tabBar().tabTextColor(tab)
         w = tab_w.widget(tab)
         tab_w.removeTab(tab)
+        
+        if tab_w.count() == 0:
+            self.layoutChanged.emit()
 
         return (icon, text, text_color, w)
 
@@ -927,15 +952,4 @@ class SplitterWidget(QtGui.QSplitter):
                 return (tw, self._HS_AFTER_LAST_TAB, (gx, gy, w, h))
                 
         return miss
-
-    def moveCurrentTabLeft(self):
-        raise NotImplementedError("Not implemented yet")   
-
-    def moveCurrentTabRight(self):
-        raise NotImplementedError("Not implemented yet")
     
-    def focusNextTab(self):
-        self._move_right(self._current_group, self._current_tab_idx)
-    
-    def focusPreviousTab(self):
-        self._move_left(self._current_group, self._current_tab_idx)

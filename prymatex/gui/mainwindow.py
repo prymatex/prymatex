@@ -323,6 +323,12 @@ html_footer
     def moveEditorToGroup(self, group):
         pass
         
+    def setCurrentGroup(self, group):
+        self.centralWidget().setCurrentGroup(group)
+
+    def moveEditorToGroup(self, group):
+        self.centralWidget().moveWidgetToGroup(group, self.currentEditor())
+        
     def closeGroup(self):
         pass
         
@@ -333,10 +339,10 @@ html_footer
         pass
         
     def moveEditorToNextGroup(self):
-        pass
+        self.centralWidget().moveWidgetToNextGroup(self.currentEditor())
         
     def moveEditorToPreviousGroup(self):
-        pass
+        self.centralWidget().moveWidgetToPreviousGroup(self.currentEditor())
 
     # ---------------- Create and manage editors
     def addEmptyEditor(self):

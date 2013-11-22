@@ -48,13 +48,13 @@ class MainMenuMixin(object):
             action = create_action(self, {
                 "text": "Group %d" % index,
                 "sequence": resources.get_sequence("_", "Group %d" % index, "Ctrl+%d" % index).key(),
-                "triggered": lambda group = group: self.centralWidget().setCurrentGroup(group)
+                "triggered": lambda group = group: self.setCurrentGroup(group)
             })
             self.menuFocusGroup.addAction(action)
             action = create_action(self, {
                 "text": "Group %d" % index,
                 "sequence": resources.get_sequence("_", "Group %d" % index, "Shift+Ctrl+%d" % index).key(),
-                "triggered": lambda group = group: self.centralWidget().moveEditorToGroup(group)
+                "triggered": lambda group = group: self.moveEditorToGroup(group)
             })
             self.menuMoveEditorToGroup.addAction(action)
 
