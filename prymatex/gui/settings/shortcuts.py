@@ -1,28 +1,37 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from prymatex.qt import QtGui, QtCore
+
 import os
 
 from prymatex import resources
 from prymatex.models.settings import SettingsTreeNode
-from prymatex.widgets.multidicteditor import MultiDictTableEditorWidget
 
-class ShortcutsSettingsWidget(MultiDictTableEditorWidget, SettingsTreeNode):
+class ShortcutsSettingsWidget(QtGui.QWidget, SettingsTreeNode):
     """Environment variables"""
     NAMESPACE = "general"
     TITLE = "Shortcuts"
     ICON = resources.getIcon("configure-shortcuts")
 
     def __init__(self, settingGroup, profile = None, parent = None):
-        MultiDictTableEditorWidget.__init__(self, parent)
+        QtGui.QWidget.__init__(self, parent)
         SettingsTreeNode.__init__(self, "shortcuts", settingGroup, profile)
+        self.setupUi(self)
+        
+    def setupUi(self, Shortcuts):
+        self.verticalLayout_2 = QtGui.QVBoxLayout(Shortcuts)
+        self.verticalLayout_2.setSpacing(2)
+        self.verticalLayout_2.setMargin(0)
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.lineEditFilter = QtGui.QLineEdit(Shortcuts)
+        self.lineEditFilter.setReadOnly(True)
+        self.lineEditFilter.setObjectName("lineEditFilter")
+        self.verticalLayout_2.addWidget(self.lineEditFilter)
+        self.treeViewShortcuts = QtGui.QTreeView(Shortcuts)
+        self.treeViewShortcuts.setObjectName("treeViewShortcuts")
+        self.verticalLayout_2.addWidget(self.treeViewShortcuts)
+        QtCore.QMetaObject.connectSlotsByName(Shortcuts)
 
     def loadSettings(self):
         print(self.settingGroup)
-
-    def on_model_dictionaryChanged(self, dictionaryName):
-        data = self.model().dumpData(dictionaryName)
-        data = [{"variable": item[0],
-            "value": item[1],
-            "enabled": item[2]} for item in data]
-        print(data)

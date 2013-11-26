@@ -265,9 +265,9 @@ class PMXSupportBaseManager(object):
             self.messageHandler(message)
 
     #------------ LOAD ALL SUPPORT ----------------------------
-    def loadSupport(self, callback=None):
+    def loadSupport(self, messageHandler=None):
         # Install message handler
-        self.messageHandler = callback
+        self.messageHandler = messageHandler
         for namespace in self.namespaces.values():
             self.loadThemes(namespace)
             self.loadBundles(namespace)
@@ -372,10 +372,10 @@ class PMXSupportBaseManager(object):
         return bundleItem
 
     # -------------------- RELOAD SUPPORT
-    def reloadSupport(self, callback = None):
+    def reloadSupport(self, messageHandler = None):
         # Reload Implica ver en todos los espacios de nombre instalados por cambios en los items
         # Install message handler
-        self.messageHandler = callback
+        self.messageHandler = messageHandler
         self.logger.debug("Begin reload support.")
         for namespace in self.namespaces.values():
             print(namespace.name)

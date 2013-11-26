@@ -57,8 +57,9 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
         self.supportManager.bundleRemoved.connect(self.on_supportManager_bundleRemoved)
         self.supportManager.bundleItemAdded.connect(self.on_supportManager_bundleItemAdded)
         self.supportManager.bundleItemRemoved.connect(self.on_supportManager_bundleItemRemoved)
-
-
+        
+        self.messageHandler = None
+    
     @classmethod
     def contributeToSettings(cls):
         return []
@@ -92,7 +93,8 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
             self.keywordsListModel.removeItems(bundleItem.scopeName.split('.'))
 
     # -------------------- Load projects
-    def loadProjects(self):
+    def loadProjects(self, messageHandler = None):
+        self.messageHandler = messageHandler
         for path in self.knownProjects[:]:
             try:
                 ProjectTreeNode.loadProject(path, self)
@@ -100,6 +102,7 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
                 print(e)
                 self.knownProjects.remove(path)
                 self._settings.setValue('knownProjects', self.knownProjects)
+        self.messageHandler = None
 
     def isOpen(self, project):
         return True

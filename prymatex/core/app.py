@@ -141,6 +141,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         return [ GeneralSettingsWidget, ShortcutsSettingsWidget ]
 
     def loadGraphicalUserInterface(self):
+        self.showMessage = self.logger.info
         if not self.options.no_splash:
             from prymatex.widgets.splash import SplashScreen
             splash_image = resources.getImage('newsplash')
@@ -153,7 +154,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             splash.setFont(splashFont)
             splash.setMask(splash_image.mask())
             splash.show()
+            self.showMessage = splash.showMessage
         try:
+            
             # Build Managers
             self.pluginManager = self.buildPluginManager()  # WARN: FIST Plugin Manager
             self.storageManager = self.buildStorageManager()  # Persistence system Manager
@@ -163,21 +166,19 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             self.schedulerManager =  self.buildSchedulerManager()
             self.serverManager = self.buildServerManager()
 
-            #Connect all loads
-            self.projectManager.loadProjects()
+            # Load managers
+            self.projectManager.loadProjects(self.showMessage)
+            self.supportManager.loadSupport(self.showMessage)
+            self.profileManager.loadSettings(self.showMessage)
             
-            showMessage = splash.showMessage if not self.options.no_splash else (lambda message: message)
+            # Create the Main Window instance
+            self.mainWindow = self.buildMainWindow()
+            self.showMessage = self.mainWindow.showMessage
             
-            self.supportManager.loadSupport(showMessage)
-            self.profileManager.loadSettings()
-            
-            # Creates the Main Window
-            self.createMainWindow()
-
             if not self.options.no_splash:
                 splash.finish(self.mainWindow)
-            else:
-                self.mainWindow.show()
+
+            self.mainWindow.show()
             self.logger.info("Application startup")
         except KeyboardInterrupt:
             self.logger.critical("\nQuit signal catched during application startup. Quiting...")
@@ -395,22 +396,17 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         if editorClass:
             return self.createComponentInstance(editorClass, parent)
 
-    def createMainWindow(self):
+    def buildMainWindow(self):
         """Creates the windows"""
         from prymatex.gui.mainwindow import PMXMainWindow
 
-        #TODO: Testeame con mas de una
-        for _ in range(1):
-            self.mainWindow = self.createComponentInstance(PMXMainWindow)
+        mainWindow = self.createComponentInstance(PMXMainWindow)
 
-            self.currentProfile.restoreState(self.mainWindow)
+        self.currentProfile.restoreState(mainWindow)
 
-            if not self.mainWindow.editors():
-                self.mainWindow.addEmptyEditor()
-
-    def showMessage(self, message):
-        #Si tengo mainwindow vamos por este camino, sino hacerlo llegar de otra forma
-        self.mainWindow.showMessage(message)
+        if not mainWindow.editors():
+            mainWindow.addEmptyEditor()
+        return mainWindow
 
     def currentEditor(self):
         return self.mainWindow.currentEditor()
@@ -505,7 +501,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             else:
                 self.openDirectory(path)
 
-    # --- Shortcuts
+    # ------- Shortcuts
     def registerShortcut(self, qobject, sequence):
         """
         Register QAction or QShortcut to Prymatex main application,

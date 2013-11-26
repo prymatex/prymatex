@@ -141,6 +141,7 @@ class ProfileManager(QtCore.QObject, PMXBaseComponent):
     def registerSettingsWidget(self, widget):
         self.settingsTreeModel.addConfigNode(widget)
 
-
-    def loadSettings(self):
+    def loadSettings(self, messageHandler = None):
+        self.messageHandler = messageHandler
         self.settingsTreeModel.loadSettings()
+        self.messageHandler = None
