@@ -646,17 +646,20 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                     blockPattern = block
                     while blockPattern.isValid() and self.blockUserData(blockPattern).blank():
                         blockPattern = blockPattern.next()
-                    if blockPattern.isValid() and blockPattern.userData():
-                        indentLen = len(blockPattern.userData().indent)
+                    if blockPattern.isValid():
+                        indentLen = len(self.blockUserData(blockPattern).indent)
                         # TODO: Obtener este valor mas decoroso
+                        width = font_metrics.width(WIDTH_CHARACTER)
+                        height = font_metrics.height()
+                        padding = width + offset.x()
                         for s in range(0, indentLen // self.indentationWidth):
-                            positionX = (font_metrics.width(WIDTH_CHARACTER) * self.indentationWidth * s) + font_metrics.width(WIDTH_CHARACTER) + offset.x()
-                            painter.drawLine(positionX, positionY, positionX, positionY + font_metrics.height())
+                            positionX = (width * self.indentationWidth * s) + padding
+                            painter.drawLine(positionX, positionY, positionX, positionY + height)
 
             block = block.next()
 
         if self.showMarginLine:
-            pos_margin = self.fontMetrics().width(WIDTH_CHARACTER) * self.marginLineSpaces
+            pos_margin = font_metrics.width(WIDTH_CHARACTER) * self.marginLineSpaces
             painter.drawLine(pos_margin + offset.x(), 0, pos_margin + offset.x(), self.viewport().height())
 
         painter.end()

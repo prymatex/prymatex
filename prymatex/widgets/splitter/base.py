@@ -372,14 +372,25 @@ class SplitterWidget(QtGui.QSplitter):
         index = group.addTab(twidg, ticon, ttext)
         group.tabBar().setTabTextColor(0, ttextcolor)
         self._set_current_tab(group, index)
+        group.tabBar().setFocus()
+
+    def moveWidgetToNewGroup(self, widget = None):
+        # TODO: Dependiendo del numero de columnas maximo es horizontal o vertical 
+        self.splitHorizontally(widget or self._current_widget)
         
     def moveWidgetToNextGroup(self, widget = None):
-        widget = widget or self._current_widget
-        print("next", widget)
+        groups = self.allGroups()
+        index = groups.index(self._current_group) + 1
+        if index >= len(groups):
+            index = 0
+        self.moveWidgetToGroup(groups[index], widget)
         
     def moveWidgetToPreviousGroup(self, widget = None):
-        widget = widget or self._current_widget
-        print("previous", widget)
+        groups = self.allGroups()
+        index = groups.index(self._current_group) - 1
+        if index < 0:
+            index = len(groups) - 1
+        self.moveWidgetToGroup(groups[index], widget)
     
     def focusNextTab(self):
         self._move_right(self._current_group, self._current_tab_idx)

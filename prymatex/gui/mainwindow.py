@@ -317,11 +317,8 @@ html_footer
         pass
         
     def moveEditorToNewGroup(self):
-        pass
-
-    def moveEditorToGroup(self, group):
-        pass
-        
+        self.centralWidget().moveWidgetToNewGroup(self.currentEditor())
+    
     def setCurrentGroup(self, group):
         self.centralWidget().setCurrentGroup(group)
 
