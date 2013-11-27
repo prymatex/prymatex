@@ -34,4 +34,4 @@ class ShortcutsSettingsWidget(QtGui.QWidget, SettingsTreeNode):
         QtCore.QMetaObject.connectSlotsByName(Shortcuts)
 
     def loadSettings(self):
-        print(self.settingGroup)
+        self.treeViewShortcuts.setModel(self.application.shortcutsTreeModel)

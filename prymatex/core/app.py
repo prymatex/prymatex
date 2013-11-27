@@ -21,6 +21,8 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.zeromqt import ZmqSocket
 from prymatex.utils import six
 
+from prymatex.models.shortcuts import ShortcutsTreeModel
+
 class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     """The application instance.
     There can't be two apps running simultaneously, since configuration issues may occur.
@@ -62,7 +64,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         #Connects
         self.aboutToQuit.connect(self.closePrymatex)
         self.componentInstances = {}
-        self.shortcuts = []
+        self.shortcutsTreeModel = ShortcutsTreeModel(self)
         
         self.replaceSysExceptHook()
 
@@ -195,9 +197,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         self.exit(self.RESTART_CODE)
 
     def checkSingleInstance(self):
-        """
-        Checks if there's another instance using current profile
-        """
+        """Checks if there's another instance using current profile"""
         self.fileLock = os.path.join(self.currentProfile.PMX_PROFILE_PATH, 'prymatex.pid')
 
         if os.path.exists(self.fileLock):
@@ -503,30 +503,13 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
     # ------- Shortcuts
     def registerShortcut(self, qobject, sequence):
-        """
-        Register QAction or QShortcut to Prymatex main application,
+        """Register QAction or QShortcut to Prymatex main application,
         with sequence
         """
-        self.shortcuts.append( (qobject, sequence) )
-        if isinstance(qobject, QtGui.QAction):
-            qobject.setShortcut(sequence.key())
-        elif isinstance(qobject, QtGui.QShortcut):
-            qobject.setKey(sequence.key())
+        self.shortcutsTreeModel.registerShortcut(qobject, sequence)
             
     def applyShortcuts(self):
-        """Apply shortcuts settings to all widgets/plugins"""
-        toberemoved = []
-        for index, (qobject, sequence) in enumerate(self.shortcuts):
-            try:
-                if isinstance(qobject, QtGui.QAction):
-                    qobject.setShortcut(sequence.key())
-                elif isinstance(qobject, QtGui.QShortcut):
-                    qobject.setKey(sequence.key())
-            except RuntimeError:
-                # Object has been deleted
-                toberemoved.append(index)
-        for index in sorted(toberemoved, reverse=True):
-            self.shortcuts.pop(index)
+        self.shortcutsTreeModel.applyShortcuts()
 
     def checkExternalAction(self, mainWindow, editor):
         if editor.isExternalChanged():

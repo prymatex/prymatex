@@ -13,7 +13,7 @@ class ContextSequence(namedtuple("ContextSequence", "context name description de
     def key(self):
         sec = keybinding(self.name)
         if sec.isEmpty():
-            keystr = getResource('%s.%s' % (self.context, self.name), 'Sequences')
+            keystr = getResource(self.fullName(), 'Sequences')
             sec = QtGui.QKeySequence.fromString(keystr)
         if sec.isEmpty():
             sec = QtGui.QKeySequence.fromString(self.default)
@@ -21,6 +21,9 @@ class ContextSequence(namedtuple("ContextSequence", "context name description de
 
     def setKey(self, keystr):
         setResource('Sequences', '%s.%s' % (self.context, self.name), keystr)
+
+    def fullName(self):
+        return '%s.%s' % (self.context, self.name)
 
 def get_sequence(context, name, default = None, description = None):
     """Get keyboard sequence"""

@@ -45,15 +45,16 @@ class MainMenuMixin(object):
         for action in self.menuMoveEditorToGroup.actions()[3:]:
             self.menuMoveEditorToGroup.removeAction(action)
         for index, group in enumerate(self.centralWidget().allGroups(), 1):
+            # TODO: Estos shortcuts no son configurables
             action = create_action(self, {
                 "text": "Group %d" % index,
-                "sequence": resources.get_sequence("_", "Group %d" % index, "Ctrl+%d" % index).key(),
+                "sequence": resources.get_sequence("Global", "Group %d" % index, "Ctrl+%d" % index).key(),
                 "triggered": lambda group = group: self.setCurrentGroup(group)
             })
             self.menuFocusGroup.addAction(action)
             action = create_action(self, {
                 "text": "Group %d" % index,
-                "sequence": resources.get_sequence("_", "Group %d" % index, "Shift+Ctrl+%d" % index).key(),
+                "sequence": resources.get_sequence("Global", "Group %d" % index, "Shift+Ctrl+%d" % index).key(),
                 "triggered": lambda group = group: self.moveEditorToGroup(group)
             })
             self.menuMoveEditorToGroup.addAction(action)
@@ -154,7 +155,7 @@ class MainMenuMixin(object):
                 "text": "New",
                 "items": [{
                     "text": "Editor",
-                    'sequence': resources.get_sequence("_", "New"),
+                    'sequence': resources.get_sequence("Global", "New"),
                     "triggered": cls.addEmptyEditor,
                     "icon": resources.get_icon("tab-new"),
                 }, "-", {
@@ -168,7 +169,7 @@ class MainMenuMixin(object):
                 }]
             }, {
                 "text": "Open",
-                'sequence': resources.get_sequence("_", "Open"),
+                'sequence': resources.get_sequence("Global", "Open"),
                 "icon": resources.get_icon("document-open"),
                 "triggered": cls.on_actionOpen_triggered
             }, {
@@ -190,7 +191,7 @@ class MainMenuMixin(object):
                 "icon": resources.get_icon("project-open"),
             }, "-", {
                 "text": "Save",
-                'sequence': resources.get_sequence("_", "Save"),
+                'sequence': resources.get_sequence("Global", "Save"),
                 "icon": resources.get_icon("document-save"),
                 "triggered": lambda mainWindow: mainWindow.saveEditor()
             }, {
@@ -199,17 +200,17 @@ class MainMenuMixin(object):
                 "triggered": lambda mainWindow: mainWindow.saveEditor(saveAs = True)
             }, {
                 "text": "Save all",
-                'sequence': resources.get_sequence("_", "SaveAll", "Ctrl+Shift+S"),
+                'sequence': resources.get_sequence("Global", "SaveAll", "Ctrl+Shift+S"),
                 "icon": resources.get_icon("document-save-all"),
                 "triggered": lambda mainWindow: [ mainWindow.saveEditor(editor = editor) for editor in mainWindow.editors() ]
             }, "-", {
                 "text": "Close",
-                'sequence': resources.get_sequence("_", "Close"),
+                'sequence': resources.get_sequence("Global", "Close"),
                 "icon": resources.get_icon("tab-close"),
                 "triggered": lambda mainWindow: mainWindow.closeEditor()
             }, {
                 "text": "Close all",
-                'sequence': resources.get_sequence("_", "CloseAll", "Ctrl+Shift+W"),
+                'sequence': resources.get_sequence("Global", "CloseAll", "Ctrl+Shift+W"),
                 "triggered": lambda mainWindow: [ mainWindow.closeEditor(editor = editor) for editor in mainWindow.editors() ]
             }, {
                 "text": "Close others",
@@ -220,7 +221,7 @@ class MainMenuMixin(object):
                 "triggered": cls.on_actionSwitchProfile_triggered
             }, "-", {
                 "text": "Quit",
-                'sequence': resources.get_sequence("_", "Quit"),
+                'sequence': resources.get_sequence("Global", "Quit"),
                 "icon": resources.get_icon("application-exit"),
                 "triggered": lambda mainWindow: mainWindow.application.quit()
             }]
@@ -232,7 +233,7 @@ class MainMenuMixin(object):
             iconName = text2iconname(text, prefix = "edit")
             return {
                 "text": text,
-                'sequence': resources.get_sequence("_", objectName),
+                'sequence': resources.get_sequence("Global", objectName),
                 "icon": resources.get_icon(iconName),
                 "triggered": cls.globalCallback,
                 "data": objectName
@@ -274,31 +275,31 @@ class MainMenuMixin(object):
                     "triggered": lambda mw: mw.centralWidget().splitHorizontally()
                 }, "-", {
                     "text": "Single",
-                    "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+1"),
+                    "sequence": resources.get_sequence("Global", "LayoutSingle", "Shift+Alt+1"),
                     "triggered": lambda mw: mw.centralWidget().setLayout()
                 }, {
                     "text": "Columns: 2",
-                    "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+2"),
+                    "sequence": resources.get_sequence("Global", "Layout2Columns", "Shift+Alt+2"),
                     "triggered": lambda mw: mw.centralWidget().setLayout(columns = 2)
                 }, {
                     "text": "Columns: 3",
-                    "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+3"),
+                    "sequence": resources.get_sequence("Global", "Layout3Columns", "Shift+Alt+3"),
                     "triggered": lambda mw: mw.centralWidget().setLayout(columns = 3)
                 }, {
                     "text": "Columns: 4",
-                    "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+4"),
+                    "sequence": resources.get_sequence("Global", "Layout4Columns", "Shift+Alt+4"),
                     "triggered": lambda mw: mw.centralWidget().setLayout(columns = 4)
                 }, {
                     "text": "Rows: 2",
-                    "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+8"),
+                    "sequence": resources.get_sequence("Global", "Layout2Rows", "Shift+Alt+8"),
                     "triggered": lambda mw: mw.centralWidget().setLayout(rows = 2)
                 }, {
                     "text": "Rows: 3",
-                    "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+9"),
+                    "sequence": resources.get_sequence("Global", "Layout3Rows", "Shift+Alt+9"),
                     "triggered": lambda mw: mw.centralWidget().setLayout(rows = 3)
                 }, {
                     "text": "Grid: 4",
-                    "sequence": resources.get_sequence("_", "SaveAll", "Shift+Alt+5"),
+                    "sequence": resources.get_sequence("Global", "Layout4Grid", "Shift+Alt+5"),
                     "triggered": lambda mw: mw.centralWidget().setLayout(columns = 2, rows = 2)
                 }]
             }, {
@@ -359,12 +360,12 @@ class MainMenuMixin(object):
             "text": "Navigation",
             "items": [{
                 "text": "Next tab",
-                'sequence': resources.get_sequence("_", "NextChild"),
+                'sequence': resources.get_sequence("Global", "NextChild"),
                 "icon": resources.get_icon("go-next-view"),
                 "triggered": lambda mw: mw.centralWidget().focusNextTab()
             }, {
                 "text": "Previous tab",
-                'sequence': resources.get_sequence("_", "PreviousChild"),
+                'sequence': resources.get_sequence("Global", "PreviousChild"),
                 "icon": resources.get_icon("go-previous-view"),
                 "triggered": lambda mw: mw.centralWidget().focusPreviousTab()
             }, {
@@ -372,7 +373,7 @@ class MainMenuMixin(object):
                 "triggered": cls.on_actionSelectTab_triggered
             }, {
                 "text": "Jump to tab",
-                'sequence': resources.get_sequence("_", "JumpToTab", "F12"),
+                'sequence': resources.get_sequence("Global", "JumpToTab", "F12"),
                 "triggered": cls.on_actionJumpToTab_triggered
             }, "-", {
                 "text": "Last edit location",
@@ -380,12 +381,12 @@ class MainMenuMixin(object):
                 "triggered": cls.on_actionLastEditLocation_triggered
             }, {
                 "text": "Go back location",
-                'sequence': resources.get_sequence("_", "GoBackLocation"),
+                'sequence': resources.get_sequence("Global", "GoBackLocation"),
                 "icon": resources.get_icon("go-previous"),
                 "triggered": cls.on_actionLocationBack_triggered
             }, {
                 "text": "Go forward location",
-                'sequence': resources.get_sequence("_", "GoForwardLocation"),
+                'sequence': resources.get_sequence("Global", "GoForwardLocation"),
                 "icon": resources.get_icon("go-next"),
                 "triggered": cls.on_actionLocationForward_triggered
             }]
@@ -398,19 +399,19 @@ class MainMenuMixin(object):
                 "text": "Bundle editor",
                 "items": [{
                     "text": "Show bundle editor",
-                    'sequence': resources.get_sequence("_", "ShowBundleEditor", "Meta+Ctrl+Alt+B"),
+                    'sequence': resources.get_sequence("Global", "ShowBundleEditor", "Meta+Ctrl+Alt+B"),
                     "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execEditor()
                 }, "-", {
                     "text": "Edit commands",
-                    'sequence': resources.get_sequence("_", "ShowBundleEditor", "Meta+Ctrl+Alt+C"),
+                    'sequence': resources.get_sequence("Global", "EditCommands", "Meta+Ctrl+Alt+C"),
                     "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execCommand()
                 }, {
                     "text": "Edit languages",
-                    'sequence': resources.get_sequence("_", "ShowBundleEditor", "Meta+Ctrl+Alt+L"),
+                    'sequence': resources.get_sequence("Global", "EditLanguages", "Meta+Ctrl+Alt+L"),
                     "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execLanguage()
                 }, {
                     "text": "Edit snippets",
-                    'sequence': resources.get_sequence("_", "ShowBundleEditor", "Meta+Ctrl+Alt+S"),
+                    'sequence': resources.get_sequence("Global", "EditSnippets", "Meta+Ctrl+Alt+S"),
                     "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execSnippet()
                 }, {
                     "text": "Reload bundles",
@@ -426,11 +427,11 @@ class MainMenuMixin(object):
                 "text": "Full screen",
                 "toggled": lambda mainWindow, checked: getattr(mainWindow, checked and "showFullScreen" or "showNormal")(),
                 "testChecked": lambda mainWindow: mainWindow.isFullScreen(),
-                'sequence': resources.get_sequence("_", "ShowFullScreen", "F11")
+                'sequence': resources.get_sequence("Global", "ShowFullScreen", "F11")
             }, {
                 "text": "Distraction free mode",
                 "toggled": lambda mainWindow, checked: getattr(mainWindow, checked and "showDistractionFreeMode" or "showNormal")(),
-                "sequence": resources.get_sequence("_", "ShowDistractionFreeMode", "Shift+F11")
+                "sequence": resources.get_sequence("Global", "ShowDistractionFreeMode", "Shift+F11")
             }, "-", {
                 "text": "Settings",
                 "triggered": lambda mainWindow: mainWindow.settingsDialog.exec_()
