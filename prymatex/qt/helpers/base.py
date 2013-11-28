@@ -3,11 +3,10 @@
 
 import os, re
 
+import prymatex
+
 from prymatex.qt import QtCore, QtGui
 from prymatex.utils import text
-
-# Local import
-import prymatex
 
 # &Text Button name -> %{prefix}TextButtonName%{sufix}
 text2objectname = lambda source, sufix = "", prefix = "": \

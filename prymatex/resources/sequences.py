@@ -8,7 +8,9 @@ from prymatex.qt.helpers import keybinding
 
 from prymatex.resources.loader import getResource, setResource, getSection, removeSection
 
-class ContextSequence(namedtuple("ContextSequence", "context name description default")):
+from prymatex.utils import text
+
+class ContextSequence(namedtuple("ContextSequence", "context name default description")):
     __slots__ = ()
     def key(self):
         sec = keybinding(self.name)
@@ -27,7 +29,7 @@ class ContextSequence(namedtuple("ContextSequence", "context name description de
 
 def get_sequence(context, name, default = None, description = None):
     """Get keyboard sequence"""
-    return ContextSequence(context, name, description, default)
+    return ContextSequence(context, name, default, description or text.camelcase_to_text(name))
     
 def iter_sequences():
     """Iterate over keyboard shortcuts"""

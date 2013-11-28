@@ -15,15 +15,22 @@ class ContextTreeNode(TreeNodeBase):
     def keys(self):
         return None
 
+    def description(self):
+        return self.nodeName()
+        
 class ContextSequenceTreeNode(TreeNodeBase):
     def __init__(self, sequence, parent = None):
         TreeNodeBase.__init__(self, sequence.name, parent)
+        self.sequence = sequence
 
     def default(self):
-        return None
+        return self.sequence.default
         
     def keys(self):
-        return None
+        return self.sequence.key()
+    
+    def description(self):
+        return self.sequence.description
 
 class ShortcutsTreeModel(AbstractNamespaceTreeModel):
     def __init__(self, parent = None):
@@ -69,7 +76,7 @@ class ShortcutsTreeModel(AbstractNamespaceTreeModel):
         node = self.node(index)
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             if index.column() == 0:
-                return node.nodeName()
+                return node.description()
             elif index.column() == 1:
                 return node.default()
             elif index.column() == 2:
