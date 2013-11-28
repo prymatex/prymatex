@@ -7,7 +7,7 @@ import re
 import os
 import difflib
 
-from prymatex.utils import sourcecode
+from prymatex.utils import text, sourcecode
 
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import textcursor2tuple
@@ -390,25 +390,25 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         self.setTextCursor(self.newCursorAtPosition(*tupleCursor))
 
     def convertToUppercase(self, cursor = None):
-        self.__convert_text(cursor, sourcecode.upper_case)
+        self.__convert_text(cursor, text.upper_case)
         
     def convertToLowercase(self, cursor = None):
-        self.__convert_text(cursor, sourcecode.lower_case)
+        self.__convert_text(cursor, text.lower_case)
         
     def convertToTitlecase(self, cursor = None):
-        self.__convert_text(cursor, sourcecode.title_case)
+        self.__convert_text(cursor, text.title_case)
         
     def convertToOppositeCase(self, cursor = None):
-        self.__convert_text(cursor, sourcecode.opposite_case)
+        self.__convert_text(cursor, text.opposite_case)
     
     def convertSpacesToTabs(self, cursor = None):
-        self.__convert_text(cursor, sourcecode.spaces_to_tabs)
+        self.__convert_text(cursor, text.spaces_to_tabs)
         
     def convertTabsToSpaces(self, cursor = None):
-        self.__convert_text(cursor, sourcecode.tabs_to_spaces)
+        self.__convert_text(cursor, text.tabs_to_spaces)
         
     def convertTranspose(self, cursor = None):
-        self.__convert_text(cursor, sourcecode.transpose)
+        self.__convert_text(cursor, text.transpose)
 
     #------ Set and Get Text
     def setPlainText(self, text):

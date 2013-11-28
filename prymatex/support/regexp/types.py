@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from collections import namedtuple
 
 from prymatex.utils import six
-from prymatex.utils.sourcecode import asciify
+from prymatex.utils import text
 
 case_change = { 
     'none': 0, 
@@ -43,7 +43,7 @@ transform_function = {
     transform['kUpcase']: lambda x : x.upper(),
     transform['kDowncase']: lambda x : x.lower(),
     transform['kCapitalize']: lambda x : x.title(),
-    transform['kAsciify']: asciify,
+    transform['kAsciify']: text.asciify,
 }
 
 Memo = namedtuple("Memo", "identifier start end content")

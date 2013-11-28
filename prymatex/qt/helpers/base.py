@@ -4,15 +4,14 @@
 import os, re
 
 from prymatex.qt import QtCore, QtGui
-from prymatex.utils import sourcecode
+from prymatex.utils import text
 
 # Local import
 import prymatex
 
-def text2objectname(text, sufix = "", prefix = ""):
-    """&Text Button name -> %{prefix}TextButtonName%{sufix}"""
-    text = text.title() if " " in text else text[0].upper() + text[1:]
-    return prefix + ''.join(sourcecode.to_alphanumeric(text)) + sufix
+# &Text Button name -> %{prefix}TextButtonName%{sufix}
+text2objectname = lambda source, sufix = "", prefix = "": \
+    prefix + text.to_alphanumeric(text.text_to_camelcase(source)) + sufix
 
 def qapplication(translate=True):
     """Return QApplication instance creates it if it doesn't already exist"""

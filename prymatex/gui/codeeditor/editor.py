@@ -32,7 +32,7 @@ from .completer import (CodeEditorCompleter, WordsCompletionModel,
 from prymatex.support import (PMXSnippet, PMXMacro, PMXCommand, PMXSyntax,
     PMXDragCommand, PMXPreferenceSettings, PMXPreferenceMasterSettings)
 
-from prymatex.utils import sourcecode
+from prymatex.utils import text
 from prymatex.utils.i18n import ugettext as _
 from functools import reduce
 
@@ -267,20 +267,20 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             block.setUserData(userData)
         return userData
 
-    def processBlockUserData(self, text, block, userData):
+    def processBlockUserData(self, sourceText, block, userData):
         # Indent
-        indent = sourcecode.whiteSpace(text)
+        indent = text.white_space(sourceText)
         if indent != userData.indent:
             userData.indent = indent
         # Folding
         # TODO: Ver si lo puedo sacar del scope basico o hace falta tomar de algun lugar
         # Principio, fin de la linea
-        foldingMark = self.basicScope().settings.folding(text)
+        foldingMark = self.basicScope().settings.folding(sourceText)
         if foldingMark != userData.foldingMark:
             userData.foldingMark = foldingMark
         # Handlers
         for handler in self.__blockUserDataHandlers:
-            handler.processBlockUserData(text, block, userData)
+            handler.processBlockUserData(sourceText, block, userData)
 
     def on_blockCountChanged(self, newBlockCount):
         self.logger.debug("block Count changed")

@@ -7,7 +7,7 @@ from functools import reduce
 from prymatex.qt import QtCore, QtGui
 
 from prymatex import resources
-from prymatex.utils.sourcecode import asciify
+from prymatex.utils import text
 from prymatex.models.support import BundleItemTreeNode
 
 COMPLETER_CHARS = list(string.ascii_letters)
@@ -284,7 +284,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
                     self.popup().hide()
             else:
                 self.popup().hide()
-        elif asciify(event.text()) in COMPLETER_CHARS and not event.modifiers():
+        elif text.asciify(event.text()) in COMPLETER_CHARS and not event.modifiers():
             alreadyTyped, start, end = self.editor.currentWord(direction="left")
             if end - start >= self.editor.wordLengthToComplete:
                 self.explicitLaunch = False
