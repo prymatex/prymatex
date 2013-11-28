@@ -35,3 +35,6 @@ class ShortcutsSettingsWidget(QtGui.QWidget, SettingsTreeNode):
 
     def loadSettings(self):
         self.treeViewShortcuts.setModel(self.application.shortcutsTreeModel)
+
+    def showEvent(self, event):
+        print("show")
