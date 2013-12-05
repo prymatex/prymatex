@@ -15,10 +15,11 @@ import collections
 
 def create_menu(parent, settings, dispatcher = None, separatorName = False, allObjects = False, sequence_handler = None):
     menu = QtGui.QMenu(settings["text"], parent)
-    objectName = text2objectname(settings.get("name", settings["text"]), prefix = "menu")
-
-    menu.setObjectName(objectName)
-    menu.menuAction().setObjectName(text2objectname(objectName, prefix = "action"))
+    
+    menu.setObjectName(text2objectname(
+        settings.get("name", settings["text"]), prefix = "menu"))
+    menu.menuAction().setObjectName(text2objectname(
+        settings.get("name", settings["text"]), prefix = "actionMenu"))
 
     # attrs
     if "icon" in settings:

@@ -7,11 +7,9 @@ from prymatex.qt import QtGui, QtCore
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.codeeditor.sidebar import SideBarWidgetAddon
 
-WIDTH_CHARACTER = "#"
-
 class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignRight
-    WIDTH = 80
+    WIDTH = 100
     MINIMAP_MAX_OPACITY = 0.8
     MINIMAP_MIN_OPACITY = 0.1
     
@@ -31,13 +29,6 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         self.viewport().setCursor(QtCore.Qt.PointingHandCursor)
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
 
-        # Font
-        font = self.document().defaultFont()
-        font.setPixelSize(1)
-        self.setFont(font)
-
-        self.setTabStopWidth(4 * self.fontMetrics().width(WIDTH_CHARACTER))
-        
         self.lines_count = 0
         self.goe = QtGui.QGraphicsOpacityEffect()
         self.setGraphicsEffect(self.goe)
@@ -54,6 +45,14 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         editor.highlightChanged.connect(self.on_editor_highlightChanged)
         editor.document().contentsChange.connect(self.on_document_contentsChange)
         editor.updateRequest.connect(self.update_visible_area)
+        
+        # Setup font
+        font = editor.document().defaultFont()
+        font.setPointSize(int(self.width() / editor.marginLineSpaces))
+        self.setFont(font)
+
+        self.setTabStopWidth(4 * self.fontMetrics().width("#"))
+        
         self.on_editor_themeChanged()
     
     @classmethod

@@ -43,7 +43,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # ser un objeto factory, por ahora la fabricacion la hace el editor
     # en el factory method flyweightScopeDataFactory
     SCOPES = {}
-
+    
     # -------------------- Signals
     syntaxChanged = QtCore.Signal(object)
     themeChanged = QtCore.Signal()
