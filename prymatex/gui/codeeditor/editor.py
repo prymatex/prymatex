@@ -1250,8 +1250,28 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                      'sequence': resources.get_sequence("Editor", "ConvertTranspose", 'Ctrl+T'),
                      'triggered': lambda editor: editor.convertTranspose(),
                      }
-                ]},
-                '-',
+                ]}, '-',
+                {'text': 'Indentation',
+                 'items': [
+                    {'text': 'Indent using spaces',
+                     'toggled': lambda editor, checked: None,
+                     }, '-', ] + [
+                    {'text': 'Tab width: %d' % size,
+                     'toggled': lambda editor, checked: None,
+                     } for size in range(1, 9) ]
+                }, 
+                {'text': 'Line endings',
+                 'items': [
+                    {'text': 'Windows',
+                     'toggled': lambda editor, checked: None,
+                     },
+                    {'text': 'Unix',
+                     'toggled': lambda editor, checked: None,
+                     },
+                    {'text': 'Mac OS 9',
+                     'toggled': lambda editor, checked: None,
+                     },
+                ]}, '-',
                 {'text': 'Select bundle item',
                  'sequence': resources.get_sequence("Editor", "SelectBundleItem", 'Meta+Ctrl+T'),
                  'triggered': cls.on_actionSelectBundleItem_triggered,
