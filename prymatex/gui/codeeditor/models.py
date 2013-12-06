@@ -15,7 +15,7 @@ from prymatex.models.support import BundleItemTreeNode
 # Bookmark
 #=========================================================
 class BookmarkListModel(QtCore.QAbstractListModel): 
-    def __init__(self, editor): 
+    def __init__(self, editor):
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
         self.blocks = []
@@ -220,11 +220,21 @@ def bundleItemSelectableModelFactory(editor):
                     "name": bundleItem.name, 
                     "bundle": bundleItem.bundle.name,
                     "trigger": bundleItem.trigger()
-                }, 
+                },
+                match = bundleItem.name.upper(),
                 image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE)) for bundleItem in editor.application.supportManager.getActionItemsByScope(leftScope, rightScope)]
 
     # Filter function        
     def bundleItemFilter(text, item):
-        return not text or text.lower() in item["data"].name.lower()
+        if text:
+            j = 0
+            for l in text.upper():
+                if l == ' ':
+                    continue
+        
+                j = item["match"].find(l, j)
+                if j == -1:
+                    return False
+        return True
 
     return selectableModelFactory(editor, bundleItemData, filterFunction=bundleItemFilter)
