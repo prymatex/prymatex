@@ -48,31 +48,3 @@ def is_keyword(text):
     """Test if passed string is the name of a Python keyword"""
     import keyword
     return text in keyword.kwlist
-
-# ----------------- Text search -------------------------
-def subsearch(pattern, text, pstart = 0, tstart = 0, ignoreCase = False):
-    if not pattern or not text: []
-    if pstart == 0 and ignoreCase:
-        pattern = pattern.lower()
-        text = text.lower()
-    end = len(pattern)
-    begin = text.find(pattern, tstart)
-    while begin == -1 and end >= 0:
-        end -= 1
-        begin = text.find(pattern[:end], tstart)
-    if end <= 0:
-        return []
-    return [(pstart, pstart + end, begin, begin + end)] + \
-        subsearch(pattern[end:], text, pstart = end, tstart = begin + end)
-
-# ----------------- Text matching -------------------------
-def matching_blocks(text1, text2, ratio = 1.0, ignoreCase = False):
-    if ignoreCase:
-        matcher = difflib.SequenceMatcher(None, text1.lower(), text2.lower())
-    else:
-        matcher = difflib.SequenceMatcher(None, text1, text2)
-    if matcher.ratio() >= ratio:
-        print(text1, text2, list(matcher.get_grouped_opcodes()))
-        for matches in matcher.get_grouped_opcodes():
-            for match in [m for m in matches if m[0] == 'equal']:
-                yield match[1:]

@@ -7,7 +7,7 @@ from bisect import bisect
 from prymatex.qt import QtCore, QtGui
 
 from prymatex import resources
-from prymatex.utils import sourcecode
+from prymatex.utils import text
 from prymatex.models.selectable import selectableModelFactory
 from prymatex.models.support import BundleItemTreeNode
 
@@ -225,16 +225,7 @@ def bundleItemSelectableModelFactory(editor):
                 image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE)) for bundleItem in editor.application.supportManager.getActionItemsByScope(leftScope, rightScope)]
 
     # Filter function        
-    def bundleItemFilter(text, item):
-        if text:
-            j = 0
-            for l in text.upper():
-                if l == ' ':
-                    continue
-        
-                j = item["match"].find(l, j)
-                if j == -1:
-                    return False
-        return True
+    def bundleItemFilter(pattern, item):
+        return text.fuzzy_match(pattern.upper(), item["match"])
 
     return selectableModelFactory(editor, bundleItemData, filterFunction=bundleItemFilter)

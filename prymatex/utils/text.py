@@ -126,3 +126,30 @@ def asciify(text):
         return text.encode('ascii').decode()
     except UnicodeEncodeError:
         return unicodedata.normalize('NFKD', text.translate(char_mapper))
+        
+# ------------------ Search
+class FuzzyMatcher():
+    def __init__(self):
+        self.pattern = ''
+
+    def set_pattern(self, pattern):
+        self.pattern = '.*?'.join(map(re.escape, list(pattern)))
+
+    def score(self, string):
+        match = re.search(self.pattern, string)
+        if match is None:
+            return 0
+        else:
+            return 100.0 / ((1 + match.start()) * (match.end() - match.start() + 1))
+            
+def fuzzy_match(pattern, source):
+    if pattern:
+        j = 0
+        for l in pattern:
+            if l == ' ':
+                continue
+    
+            j = source.find(l, j)
+            if j == -1:
+                return False
+    return True

@@ -21,7 +21,7 @@ from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
 from prymatex import resources
 
 from prymatex.models.projects import ProjectTreeNode
-from prymatex.models.projects.lists import SelectableProjectFileModel
+from prymatex.models.projects.lists import SelectableProjectFileProxyModel
 
 class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsDock):
     SEQUENCE = resources.get_sequence("Docks", "ProjectsDock", "Alt+X")
@@ -49,14 +49,13 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
         self.setupTreeViewProjects()
         
         # Model for selector dialog
-        self.selectableProjectFileModel = SelectableProjectFileModel(self.projectManager, self.fileManager, parent = self)
+        self.selectableProjectFileModel = SelectableProjectFileProxyModel(self.projectManager, self.fileManager, parent = self)
         
         # Bundle Filter Dialog
         self.bundleFilterDialog = BundleFilterDialog(self)
         self.bundleFilterDialog.setWindowTitle("Select Related Bundles")
         self.bundleFilterDialog.setModel(self.projectManager.projectMenuProxyModel)
         self.bundleFilterDialog.setHelpVisible(False)
-        
         
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
@@ -66,7 +65,6 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
         self.propertiesDialog = self.mainWindow.findChild(QtGui.QDialog, "PropertiesDialog")
         self.setupPropertiesWidgets()
 
-    
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.project import ProjectSettingsWidget

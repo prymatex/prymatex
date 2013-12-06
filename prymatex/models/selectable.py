@@ -38,23 +38,24 @@ class SelectableModel(QtCore.QAbstractListModel, SelectableModelMixin):
     def __init__(self, dataFunction, parent = None): 
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.__dataFunction = dataFunction
+        self.__data = []
 
     def initialize(self, selector):
-        self.data = self.__dataFunction()
+        self.__data = self.__dataFunction()
 
     def item(self, index):
         if isinstance(index, QtCore.QModelIndex) and index.isValid():
-            return self.data[index.row()]
-        if isinstance(index, int) and index < len(self.data):
-            return self.data[index]
+            return self.__data[index.row()]
+        if isinstance(index, int) and index < len(self.__data):
+            return self.__data[index]
 
     def rowCount (self, parent = None):
-        return len(self.data)
+        return len(self.__data)
     
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
-        item = self.data[index.row()]
+        item = self.__data[index.row()]
         
         if role in [ QtCore.Qt.DisplayRole ]:
             display = item.get('display')
