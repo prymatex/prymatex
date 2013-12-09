@@ -1195,7 +1195,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 {'text': "Margin line",
                  "items": [{
                         "text": "None",
-                        "toggled": lambda ed: None
+                        'toggled': cls.on_actionMarginLine_toggled,
+                        'testChecked': lambda editor: bool(editor.getFlags() & editor.MarginLine)
                     }, "-", {
                         "text": "70",
                         "toggled": lambda ed: None
@@ -1212,23 +1213,22 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                         "text": "120",
                         "toggled": lambda ed: None
                     }]
+                }, 
+                {'text': "Highlight current line",
+                 'toggled': cls.on_actionHighlightCurrentLine_toggled,
+                 'testChecked': lambda editor: bool(editor.getFlags() & editor.HighlightCurrentLine) 
+                },
+                {'text': "Indent guide",
+                 'toggled': cls.on_actionIndentGuide_toggled,
+                 'testChecked': lambda editor: bool(editor.getFlags() & editor.IndentGuide) 
                 }, '-',
                 {'text': "Show tabs and spaces",
                  'toggled': cls.on_actionShowTabsAndSpaces_toggled,
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowTabsAndSpaces) },
                 {'text': "Show line and paragraph",
                  'toggled': cls.on_actionShowLineAndParagraphs_toggled,
-                 'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowLineAndParagraphs) },
-                "-",
-                {'text': "Highlight current line",
-                 'toggled': cls.on_actionHighlightCurrentLine_toggled,
-                 'testChecked': lambda editor: bool(editor.getFlags() & editor.HighlightCurrentLine) },
-                {'text': "Margin line",
-                 'toggled': cls.on_actionMarginLine_toggled,
-                 'testChecked': lambda editor: bool(editor.getFlags() & editor.MarginLine) },
-                {'text': "Indent guide",
-                 'toggled': cls.on_actionIndentGuide_toggled,
-                 'testChecked': lambda editor: bool(editor.getFlags() & editor.IndentGuide) },
+                 'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowLineAndParagraphs) 
+                }
             ]
         menu["text"] = {
             'before': 'bundles',

@@ -297,8 +297,10 @@ class CodeEditorCompleter(QtGui.QCompleter):
     def setCurrentRow(self, index):
         if QtGui.QCompleter.setCurrentRow(self, index):
             self.popup().setCurrentIndex(self.completionModel().index(index, 0))
-            return self.completionCount() > 1 or \
-                self.model().allowOneSuggestion(self.completionPrefix() == self.currentCompletion())
+            isPrefix = self.completionPrefix() == self.currentCompletion()
+            return not isPrefix or \
+                (self.completionCount() == 1 and self.model().allowOneSuggestion(isPrefix)) or \
+                self.explicitLaunch
         return False
 
     def setCompletionPrefix(self, prefix):

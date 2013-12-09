@@ -47,8 +47,6 @@ class Return( object ):
             # a,b,c = yield subCoroutine()
             self.value = args
 
-
-
 # Inherit your asynchronous calls,
 # like Sleep below.
 class AsynchronousCall( QtCore.QObject ):
@@ -78,8 +76,6 @@ class AsynchronousCall( QtCore.QObject ):
         # Wake up execution of the caller's task
         self.scheduler.schedule( self.task )
 
-
-
 # Asynchronous call example
 #
 # Usage:
@@ -102,8 +98,6 @@ class Sleep( AsynchronousCall ):
     def timerEvent( self, e ):
         QtCore.QObject.killTimer( self, self.timerId )
         self.wakeup( None )
-
-
 
 # Wait task, until it's done!
 #
@@ -166,7 +160,6 @@ class WaitFirstTask( AsynchronousCall ):
         if self.timeoutMs:
             self.timerId = QtCore.QObject.startTimer( self, self.timeoutMs )
 
-
     # tasks done signal
     def passParam( self, resReturn ):
         for t in self.tasks:
@@ -175,15 +168,12 @@ class WaitFirstTask( AsynchronousCall ):
         # expand Return to it's value
         self.wakeup( self.sender() )
 
-
     def timerEvent( self, e ):
         for t in self.tasks:
             t.done.disconnect( self.passParam )
 
         QtCore.QObject.killTimer( self, self.timerId )
         self.wakeup( None )
-
-
 
 # Exception with the coroutines stack
 class CoException( Exception ):
