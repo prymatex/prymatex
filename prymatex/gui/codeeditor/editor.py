@@ -1165,17 +1165,60 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'items': []},
                 {'name': 'rightGutter',
                  'text': 'Right gutter',
-                 'items': []},
-                '-',
+                 'items': []
+                }, '-',
+                {'text': "Word wrap",
+                 'toggled': cls.on_actionWordWrap_toggled,
+                 'testChecked': lambda editor: bool(editor.getFlags() & editor.WordWrap) 
+                },
+                {'text': "Word wrap column",
+                 "items": [{
+                        "text": "Automatic",
+                        "toggled": lambda ed: None
+                    }, "-", {
+                        "text": "70",
+                        "toggled": lambda ed: None
+                    }, {
+                        "text": "78",
+                        "toggled": lambda ed: None
+                    }, {
+                        "text": "80",
+                        "toggled": lambda ed: None
+                    }, {
+                        "text": "100",
+                        "toggled": lambda ed: None
+                    }, {
+                        "text": "120",
+                        "toggled": lambda ed: None
+                    }]
+                }, 
+                {'text': "Margin line",
+                 "items": [{
+                        "text": "None",
+                        "toggled": lambda ed: None
+                    }, "-", {
+                        "text": "70",
+                        "toggled": lambda ed: None
+                    }, {
+                        "text": "78",
+                        "toggled": lambda ed: None
+                    }, {
+                        "text": "80",
+                        "toggled": lambda ed: None
+                    }, {
+                        "text": "100",
+                        "toggled": lambda ed: None
+                    }, {
+                        "text": "120",
+                        "toggled": lambda ed: None
+                    }]
+                }, '-',
                 {'text': "Show tabs and spaces",
                  'toggled': cls.on_actionShowTabsAndSpaces_toggled,
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowTabsAndSpaces) },
                 {'text': "Show line and paragraph",
                  'toggled': cls.on_actionShowLineAndParagraphs_toggled,
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowLineAndParagraphs) },
-                {'text': "Word wrap",
-                 'toggled': cls.on_actionWordWrap_toggled,
-                 'testChecked': lambda editor: bool(editor.getFlags() & editor.WordWrap) },
                 "-",
                 {'text': "Highlight current line",
                  'toggled': cls.on_actionHighlightCurrentLine_toggled,
