@@ -69,7 +69,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     enableAutoCompletion = pmxConfigPorperty(default = True)
     wordLengthToComplete = pmxConfigPorperty(default = 3)
 
-    marginLineSpaces = pmxConfigPorperty(default = 80)
+    marginLineSize = pmxConfigPorperty(default = 80)
+    wordWrapSize = pmxConfigPorperty(valueType = int)
     tabStopSoft = pmxConfigPorperty(default = True)
     adjustIndentationOnPaste = pmxConfigPorperty(default = False)
 
@@ -194,8 +195,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.showMarginLine = True
         self.showIndentGuide = True
         self.showHighlightCurrentLine = True
-        
-        
+        print(self.wordWrapSize)
+
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
         self.syntaxHighlighter.setDocument(self.document())
@@ -440,7 +441,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             flags |= self.IndentGuide
         if self.showHighlightCurrentLine:
             flags |= self.HighlightCurrentLine
-        if options.wrapMode() & QtGui.QTextOption.WordWrap:
+        if options.wrapMode() & QtGui.QTextOption.WrapAtWordBoundaryOrAnywhere:
             flags |= self.WordWrap
         return flags
 
@@ -456,7 +457,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         else:
             oFlags &= ~QtGui.QTextOption.ShowLineAndParagraphSeparators
         if flags & self.WordWrap:
-            options.setWrapMode(QtGui.QTextOption.WordWrap)
+            options.setWrapMode(QtGui.QTextOption.WrapAtWordBoundaryOrAnywhere)
         else:
             options.setWrapMode(QtGui.QTextOption.NoWrap)
         options.setFlags(oFlags)
@@ -484,7 +485,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # -------------------- SideBars
     def updateViewportMargins(self):
         #self.setViewportMargins(self.leftBar.width(), 0, self.rightBar.width(), 0)
-        self.setViewportMargins(self.leftBar.width(), 0, 0, 0)
+        #self.setViewportMargins(self.leftBar.width(), 0, 0, 0)
+        print(self.wordWrapSize)
+        self.setViewportMargins(self.leftBar.width(), 0, self.rightBar.width(), 0)
 
     def updateSideBars(self, rect, dy):
         if dy:
@@ -662,7 +665,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             block = block.next()
 
         if self.showMarginLine:
-            pos_margin = characterWidth * self.marginLineSpaces
+            pos_margin = characterWidth * self.marginLineSize
             painter.drawLine(pos_margin + offset.x(), 0, pos_margin + offset.x(), self.viewport().height())
 
         painter.end()
@@ -1165,49 +1168,71 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'items': []
                 }, '-',
                 {'text': "Word wrap",
-                 "items": [{
+                 # TODO: Word wrap con un for
+                 "items": [({
                         "text": "Automatic",
                         'toggled': cls.on_actionWordWrap_toggled,
-                        'testChecked': lambda editor: bool(editor.getFlags() & editor.WordWrap) 
+                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap)  and \
+                            ed.wordWrapSize is None
                     }, "-", {
                         "text": "70",
-                        "toggled": lambda ed: None
+                        "toggled": lambda ed, checked: ed.on_actionWordWrap_toggled(checked, size = 70),
+                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap) and \
+                            ed.wordWrapSize == 70
                     }, {
                         "text": "78",
-                        "toggled": lambda ed: None
+                        "toggled": lambda ed, checked: ed.on_actionWordWrap_toggled(checked, size = 78),
+                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap) and \
+                            ed.wordWrapSize == 78
                     }, {
                         "text": "80",
-                        "toggled": lambda ed: None
+                        "toggled": lambda ed, checked: ed.on_actionWordWrap_toggled(checked, size = 80),
+                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap) and \
+                            ed.wordWrapSize == 80
                     }, {
                         "text": "100",
-                        "toggled": lambda ed: None
+                        "toggled": lambda ed, checked: ed.on_actionWordWrap_toggled(checked, size = 100),
+                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap) and \
+                            ed.wordWrapSize == 100
                     }, {
                         "text": "120",
-                        "toggled": lambda ed: None
-                    }]
+                        "toggled": lambda ed, checked: ed.on_actionWordWrap_toggled(checked, size = 120),
+                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap) and \
+                            ed.wordWrapSize == 120
+                    })]
                 }, 
                 {'text': "Margin line",
                 # TODO Margin line
-                 "items": [{
+                 "items": [({
                         "text": "None",
-                        'toggled': cls.on_actionMarginLine_toggled,
-                        'testChecked': lambda editor: bool(editor.getFlags() & editor.MarginLine)
+                        'toggled': lambda ed, checked: ed.on_actionMarginLine_toggled(not checked),
+                        'testChecked': lambda ed: not bool(ed.getFlags() & ed.MarginLine)
                     }, "-", {
                         "text": "70",
-                        "toggled": lambda ed: None
+                        "toggled": lambda ed, checked: ed.on_actionMarginLine_toggled(checked, size = 70),
+                        'testChecked': lambda ed: bool(ed.getFlags() & ed.MarginLine) and \
+                            ed.marginLineSize == 70
                     }, {
                         "text": "78",
-                        "toggled": lambda ed: None
+                        "toggled": lambda ed, checked: ed.on_actionMarginLine_toggled(checked, size = 78),
+                        'testChecked': lambda ed: bool(ed.getFlags() & ed.MarginLine) and \
+                            ed.marginLineSize == 78
                     }, {
                         "text": "80",
-                        "toggled": lambda ed: None
+                        "toggled": lambda ed, checked: ed.on_actionMarginLine_toggled(checked, size = 80),
+                        'testChecked': lambda ed: bool(ed.getFlags() & ed.MarginLine) and \
+                            ed.marginLineSize == 80
                     }, {
                         "text": "100",
-                        "toggled": lambda ed: None
+                        "toggled": lambda ed, checked: ed.on_actionMarginLine_toggled(checked, size = 100),
+                        'testChecked': lambda ed: bool(ed.getFlags() & ed.MarginLine) and \
+                            ed.marginLineSize == 100
                     }, {
                         "text": "120",
-                        "toggled": lambda ed: None
-                    }]
+                        "toggled": lambda ed, checked: ed.on_actionMarginLine_toggled(checked, size = 120),
+                        'testChecked': lambda ed: bool(ed.getFlags() & ed.MarginLine) and \
+                            ed.marginLineSize == 120
+                    })]
                 }, '-',
                 {'text': "Indent guide",
                  'toggled': cls.on_actionIndentGuide_toggled,
@@ -1395,7 +1420,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             flags = self.getFlags() & ~self.ShowLineAndParagraphs
         self.setFlags(flags)
 
-    def on_actionWordWrap_toggled(self, checked):
+    def on_actionWordWrap_toggled(self, checked, size = None):
+        self.wordWrapSize = size
         if checked:
             flags = self.getFlags() | self.WordWrap
         else:
@@ -1409,7 +1435,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             flags = self.getFlags() & ~self.HighlightCurrentLine
         self.setFlags(flags)
 
-    def on_actionMarginLine_toggled(self, checked):
+    def on_actionMarginLine_toggled(self, checked, size = None):
+        if isinstance(size, int):
+            self.marginLineSize = size
         if checked:
             flags = self.getFlags() | self.MarginLine
         else:

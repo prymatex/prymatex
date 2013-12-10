@@ -106,11 +106,24 @@ def extend_menu(rootMenu, settings, dispatcher = None, separatorName = False, se
             actionGroup = QtGui.QActionGroup(rootMenu.parent())
             actionGroup.setExclusive(isinstance(item, tuple))
             objects = []
-            for i in item:
-                # TODO i puede ser mas configuracion
-                rootMenu.addAction(i)
-                i.setActionGroup(actionGroup)
-                objects.append(i)
+            for action in item:
+                if isinstance(action, dict):
+                    action = create_action(rootMenu.parent(), action,
+                        dispatcher = dispatcher, 
+                        sequence_handler = sequence_handler)
+                if action == "-":
+                    action = rootMenu.addSeparator()
+                    action.setObjectName(text2objectname("None", prefix = "separator"))
+                elif isinstance(action, str) and action.startswith("--"):
+                    name = action[action.rfind("-") + 1:]
+                    action = rootMenu.addSeparator()
+                    action.setObjectName(text2objectname(name, prefix = "separator"))
+                    if separatorName:
+                        action.setText(name)
+                else:
+                    rootMenu.addAction(action)
+                    action.setActionGroup(actionGroup)
+                objects.append(action)
         else:
             raise Exception("%s" % item)
         if objects is not None:

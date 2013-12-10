@@ -53,7 +53,7 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
         for check, flag in self.checks:
             check.setChecked(bool(flags & flag))
 
-        self.spinBoxMarginLineSpace.setValue(self.settingGroup.value("marginLineSpaces"))
+        self.spinBoxMarginLineSpace.setValue(self.settingGroup.value("marginLineSize"))
         
         self.checkBoxLineNumbers.setChecked(self.lineNumberBarGroup.value("showLineNumbers"))
         self.checkBoxBookmarks.setChecked(self.bookmarksBarGroup.value("showBookmarks"))
@@ -74,7 +74,7 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
 
     @QtCore.Slot(int)
     def on_spinBoxMarginLineSpace_valueChanged(self, value):
-        self.settingGroup.setValue('marginLineSpaces', value)
+        self.settingGroup.setValue('marginLineSize', value)
 
     @QtCore.Slot(int)
     def on_comboBoxDefaultSyntax_activated(self, index):
