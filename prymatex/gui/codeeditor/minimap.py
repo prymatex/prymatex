@@ -9,7 +9,7 @@ from prymatex.gui.codeeditor.sidebar import SideBarWidgetAddon
 
 class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignRight
-    WIDTH = 100
+    WIDTH = 80
     MINIMAP_MAX_OPACITY = 0.8
     MINIMAP_MIN_OPACITY = 0.1
     
