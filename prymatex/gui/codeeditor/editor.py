@@ -1215,15 +1215,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                         "text": "120",
                         "toggled": lambda ed: None
                     }]
+                }, '-',
+                {'text': "Indent guide",
+                 'toggled': cls.on_actionIndentGuide_toggled,
+                 'testChecked': lambda editor: bool(editor.getFlags() & editor.IndentGuide) 
                 }, 
                 {'text': "Highlight current line",
                  'toggled': cls.on_actionHighlightCurrentLine_toggled,
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.HighlightCurrentLine) 
                 },
-                {'text': "Indent guide",
-                 'toggled': cls.on_actionIndentGuide_toggled,
-                 'testChecked': lambda editor: bool(editor.getFlags() & editor.IndentGuide) 
-                }, '-',
                 {'text': "Show tabs and spaces",
                  'toggled': cls.on_actionShowTabsAndSpaces_toggled,
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowTabsAndSpaces) },
