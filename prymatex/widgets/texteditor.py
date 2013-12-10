@@ -21,7 +21,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
     #------ Regular expresions
     # TODO Ver esto que no esta muy bien
     RE_WORD = re.compile(r"([A-Za-z_]+)", re.UNICODE)
-    
+
     def __init__(self, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
         
@@ -490,3 +490,10 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         size -= 1
         font.setPointSize(size)
         self.setFont(font)
+    
+    #------ Character width
+    CHARACTER = "#"
+    def characterWidth(self):
+        return self.fontMetrics().width(self.CHARACTER)
+    def characterHeight(self):
+        return self.fontMetrics().height()

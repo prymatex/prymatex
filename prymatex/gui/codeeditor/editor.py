@@ -36,8 +36,6 @@ from prymatex.utils import text
 from prymatex.utils.i18n import ugettext as _
 from functools import reduce
 
-WIDTH_CHARACTER = "#"
-
 class CodeEditor(TextEditWidget, PMXBaseEditor):
     # Aca vamos a guardar los scopes de los editores, quiza esto pueda
     # ser un objeto factory, por ahora la fabricacion la hace el editor
@@ -81,11 +79,13 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     @pmxConfigPorperty(default = 4)
     def tabWidth(self, size):
-        self.setTabStopWidth(size * self.fontMetrics().width(WIDTH_CHARACTER))
+        self.setTabStopWidth(size * self.characterWidth())
 
     @pmxConfigPorperty(default = ("Monospace", 9))
     def defaultFont(self, value):
         font = QtGui.QFont(*value)
+        font.setStyleStrategy(QtGui.QFont.ForceIntegerMetrics)
+        font.setStyleStrategy(QtGui.QFont.PreferAntialias)
         self.setFont(font)
 
     @pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
@@ -188,7 +188,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.syntaxChanged.connect(self.on_syntaxChanged)
         self.themeChanged.connect(self.highlightEditor)
         # TODO Algo mejor para acomodar el ancho del tabulador
-        self.fontChanged.connect(lambda editor = self: editor.setTabStopWidth(editor.tabWidth * editor.fontMetrics().width(WIDTH_CHARACTER)))
+        self.fontChanged.connect(lambda editor = self: editor.setTabStopWidth(editor.tabWidth * editor.characterWidth()))
         
         # By default
         self.showMarginLine = True
@@ -622,9 +622,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def paintEvent(self, event):
         TextEditWidget.paintEvent(self, event)
         page_bottom = self.viewport().height()
-        # TODO: los widgets se pueden hacer del fontMetric, que tal poner algo que me retorne directamente el ancho de un caracter?
-        #font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
-        font_metrics = self.fontMetrics()
+        
+        characterWidth = self.characterWidth()
+        characterHeight = self.characterHeight()
 
         painter = QtGui.QPainter(self.viewport())
         font = painter.font()
@@ -645,8 +645,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             if block.isVisible():
                 positionY = blockGeometry.top()
                 if self.isFolded(block):
-                    painter.drawPixmap(font_metrics.width(block.text()) + offset.x() + 5,
-                        positionY + font_metrics.ascent() + font_metrics.descent() - resources.getImage("foldingellipsis").height(),
+                    painter.drawPixmap(characterWidth * block.length() + offset.x() + 10,
+                        positionY + characterHeight - resources.getImage("foldingellipsis").height(),
                         resources.getImage("foldingellipsis"))
                 if self.showIndentGuide:
                     blockPattern = block
@@ -654,18 +654,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                         blockPattern = blockPattern.next()
                     if blockPattern.isValid():
                         indentLen = len(self.blockUserData(blockPattern).indent)
-                        # TODO: Obtener este valor mas decoroso
-                        width = font_metrics.width(WIDTH_CHARACTER)
-                        height = font_metrics.height()
-                        padding = width + offset.x()
+                        padding = characterWidth + offset.x()
                         for s in range(0, indentLen // self.indentationWidth):
-                            positionX = (width * self.indentationWidth * s) + padding
-                            painter.drawLine(positionX, positionY, positionX, positionY + height)
+                            positionX = (characterWidth * self.indentationWidth * s) + padding
+                            painter.drawLine(positionX, positionY, positionX, positionY + characterHeight)
 
             block = block.next()
 
         if self.showMarginLine:
-            pos_margin = font_metrics.width(WIDTH_CHARACTER) * self.marginLineSpaces
+            pos_margin = characterWidth * self.marginLineSpaces
             painter.drawLine(pos_margin + offset.x(), 0, pos_margin + offset.x(), self.viewport().height())
 
         painter.end()
@@ -1168,14 +1165,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'items': []
                 }, '-',
                 {'text': "Word wrap",
-                 'toggled': cls.on_actionWordWrap_toggled,
-                 'testChecked': lambda editor: bool(editor.getFlags() & editor.WordWrap) 
-                },
-                {'text': "Word wrap column",
-                # TODO Word wrap
                  "items": [{
                         "text": "Automatic",
-                        "toggled": lambda ed: None
+                        'toggled': cls.on_actionWordWrap_toggled,
+                        'testChecked': lambda editor: bool(editor.getFlags() & editor.WordWrap) 
                     }, "-", {
                         "text": "70",
                         "toggled": lambda ed: None
