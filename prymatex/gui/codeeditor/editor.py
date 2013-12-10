@@ -1172,6 +1172,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.WordWrap) 
                 },
                 {'text': "Word wrap column",
+                # TODO Word wrap
                  "items": [{
                         "text": "Automatic",
                         "toggled": lambda ed: None
@@ -1193,6 +1194,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                     }]
                 }, 
                 {'text': "Margin line",
+                # TODO Margin line
                  "items": [{
                         "text": "None",
                         'toggled': cls.on_actionMarginLine_toggled,
@@ -1295,6 +1297,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                      }
                 ]}, '-',
                 {'text': 'Indentation',
+                # TODO Set Indentation
                  'items': [
                     {'text': 'Indent using spaces',
                      'toggled': lambda editor, checked: None,
@@ -1306,12 +1309,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 {'text': 'Line endings',
                  'items': [
                     {'text': 'Windows',
+                    # TODO Set line ending window
                      'toggled': lambda editor, checked: None,
                      },
                     {'text': 'Unix',
+                    # TODO Set line ending unix
                      'toggled': lambda editor, checked: None,
                      },
                     {'text': 'Mac OS 9',
+                    # TODO Set line ending mac
                      'toggled': lambda editor, checked: None,
                      },
                 ]}, '-',

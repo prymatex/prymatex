@@ -342,7 +342,6 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             # Shortcuts
             for settings in ni.contributeToShortcuts():
                 create_shortcut(instance, settings, sequence_handler = self.registerShortcut)
-        
             
         self.componentInstances.setdefault(componentClass, []).append(instance)
         
