@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
+
 from __future__ import unicode_literals
 
 import re
@@ -1432,6 +1433,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def on_document_undoCommandAdded(self):
         cursor = self.textCursor()
+
         if not (cursor.atEnd() or cursor.atStart()):
             self.saveLocationMemento(self.newCursorAtPosition(cursor.position() - 1))
 

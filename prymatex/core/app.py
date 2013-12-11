@@ -478,10 +478,10 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             sourceFile = url.queryItemValue('url')
             position = (0, 0)
             line = url.queryItemValue('line')
-            if line:
+            if line.isdigit():
                 position = (int(line) - 1, position[1])
             column = url.queryItemValue('column')
-            if column:
+            if column.isdigit():
                 position = (position[0], int(column) - 1)
             if sourceFile:
                 filePath = QtCore.QUrl(sourceFile, QtCore.QUrl.TolerantMode).toLocalFile()

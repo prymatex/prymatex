@@ -193,6 +193,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
     def afterExecute(self, processor, context):
         outputHandler = self.getOutputHandler(context.outputType)
         
+        print(outputHandler)
         handlerFunction = getattr(processor, outputHandler, None)
         if handlerFunction is not None:
             handlerFunction(context, self.outputFormat)
