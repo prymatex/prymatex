@@ -187,7 +187,7 @@ class PMXDebugSnippetProcessor(PMXSnippetProcessor):
     def cursorPosition(self):
         return self.position
             
-    def selectHolder(self, holder):
+    def selectHolder(self):
         pass
 
     def insertText(self, text):

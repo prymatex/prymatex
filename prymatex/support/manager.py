@@ -1285,10 +1285,14 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
             return []
         return self.KEY_EQUIVALENTS[keyEquivalent]
 
-    # -------------- SYNTAXES
-    def getSyntaxesAsDictionary(self):
-        return self.SYNTAXES
+    # ------------- ACTION ITEMS INTERFACE
+    def getAllActionItems(self):
+        return reduce(lambda a, b: a + b, self.TAB_TRIGGERS.values() + self.KEY_EQUIVALENTS.values(), [])
 
+    # -------------- SYNTAXES
+    def getAllSyntaxes(self):
+        return self.SYNTAXES.values()
+        
     def getSyntaxes(self, sort=False):
         stxs = []
         for syntax in list(self.SYNTAXES.values()):

@@ -12,13 +12,13 @@ from tests.test_osextra import OsExtraTests
 
 def suite():
     return unittest.TestSuite([ 
-        unittest.makeSuite(KeySequencesTests, 'test'),
-        unittest.makeSuite(MenusTests, 'test'),
+        #unittest.makeSuite(KeySequencesTests, 'test'),
+        #unittest.makeSuite(MenusTests, 'test'),
         unittest.makeSuite(SupportTests, 'test'),
-        unittest.makeSuite(ScopeSelectorTests, 'test'),
-        unittest.makeSuite(RegexpTests, 'test'),
-        unittest.makeSuite(PlistTests, 'test'),
-        unittest.makeSuite(OsExtraTests, 'test')
+        #unittest.makeSuite(ScopeSelectorTests, 'test'),
+        #unittest.makeSuite(RegexpTests, 'test'),
+        #unittest.makeSuite(PlistTests, 'test'),
+        #unittest.makeSuite(OsExtraTests, 'test')
     ])
 
 if __name__ == '__main__':

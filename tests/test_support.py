@@ -32,18 +32,10 @@ class SupportTests(unittest.TestCase):
         self.manager.loadSupport(loadCallback)
 
     def test_snippet(self):
-        pythonClassSnippet = self.manager.getBundleItem('659D189C-EC3E-4C4E-9377-B7F5F5216CBD')
-        htmlInputSnippet = self.manager.getBundleItem('D8DCCC81-749A-4E2A-B4BC-D109D5799CAA')
-        htmlBodySnippet = self.manager.getBundleItem('4905D47B-A08B-11D9-A5A2-000D93C8BE28')
-        start = time()
-        processor = PMXDebugSnippetProcessor()
-        processor.env['TM_FILENAME'] = "cacho.html"
-        pythonClassSnippet.execute(processor)
-        htmlInputSnippet.execute(processor)
-        htmlBodySnippet.execute(processor)
-        print(processor.text)
-        print("Time:", time() - start)
-        
+        for actionItem in self.manager.getAllActionItems():
+            if actionItem.TYPE == "snippet":
+                print(actionItem.content)
+
     def test_syntax(self):
         syntax = self.manager.getSyntaxByScopeName('source.python')
         file = open(os.path.abspath('./prymatex/gui/codeeditor/editor.py'), 'r')
