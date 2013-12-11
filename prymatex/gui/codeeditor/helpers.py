@@ -166,20 +166,13 @@ class OverwriteHelper(CodeEditorKeyHelper):
         
 class TabIndentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Tab
-    def accept(self, event, cursor = None):
-        #Solo si el cursor tiene seleccion o usa soft Tab
-        return cursor.hasSelection() or self.editor.tabStopSoft
-        
     def execute(self, event, cursor = None):
         start, end = self.editor.selectionBlockStartEnd()
         if start != end:
             #Tiene seleccion en distintos bloques, es un indentar
             self.editor.indentBlocks()
         else:
-            #Insertar un numero multiplo de espacios a la posicion del cursor
-            # TODO Ayudar a resolver los tabs desde el editor
-            spaces = self.editor.tabWidth - (cursor.columnNumber() % self.editor.tabWidth)
-            cursor.insertText(spaces * ' ')
+            cursor.insertText(self.editor.tabKeyBehavior())
 
 class BacktabUnindentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Backtab

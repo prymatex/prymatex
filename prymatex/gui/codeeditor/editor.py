@@ -72,7 +72,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     marginLineSize = pmxConfigPorperty(default = 80)
     wordWrapSize = pmxConfigPorperty(valueType = int)
-    tabStopSoft = pmxConfigPorperty(default = True)
+    indentUsingSpaces = pmxConfigPorperty(default = True)
     adjustIndentationOnPaste = pmxConfigPorperty(default = False)
 
     @pmxConfigPorperty(default = 4)
@@ -190,7 +190,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.syntaxChanged.connect(self.on_syntaxChanged)
         self.themeChanged.connect(self.highlightEditor)
         # TODO Algo mejor para acomodar el ancho del tabulador
-        self.fontChanged.connect(lambda editor = self: editor.setTabStopWidth(editor.tabWidth * editor.characterWidth()))
+        self.fontChanged.connect(lambda ed = self: ed.setTabStopWidth(ed.tabWidth * ed.characterWidth()))
         
         # By default
         self.showMarginLine = True
@@ -425,8 +425,14 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return leftToken.settings, rightToken.settings
 
     # ------------ Obteniendo datos del editor
-    def tabKeyBehavior(self):
-        return self.tabStopSoft and ' ' * self.indentationWidth or '\t'
+    def tabKeyBehavior(self, cursor = None):
+        if not self.indentUsingSpaces:
+            return '\t'
+        else:
+            #Insertar un numero multiplo de espacios a la posicion del cursor
+            cursor = cursor or self.textCursor()
+            spaces = self.indentationWidth - (cursor.columnNumber() % self.indentationWidth)
+            return ' ' * spaces
 
     # Flags
     def getFlags(self):
@@ -810,7 +816,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 'TM_SCOPE': "%s" % rightScope,
                 'TM_LEFT_SCOPE': "%s" % leftScope,
                 'TM_MODE': self.syntax().name,
-                'TM_SOFT_TABS': self.tabStopSoft and 'YES' or 'NO',
+                'TM_SOFT_TABS': self.indentUsingSpaces and 'YES' or 'NO',
                 'TM_TAB_SIZE': self.tabWidth
         })
 
@@ -1055,7 +1061,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         cursor.beginEditBlock()
         while True:
             data = start.userData()
-            if self.tabStopSoft:
+            if self.indentUsingSpaces:
                 counter = self.tabWidth if len(data.indent) > self.tabWidth else len(data.indent)
             else:
                 counter = 1 if len(data.indent) else 0
@@ -1123,11 +1129,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         if self.filePath:
             menues.extend([
                 {   "text": "Path to clipboard",
-                    "triggered": lambda editor = self: self.application.clipboard().setText(editor.filePath)  },
+                    "triggered": lambda ed = self: self.application.clipboard().setText(ed.filePath)  },
                 {   "text": "Name to clipboard",
-                    "triggered": lambda editor = self: self.application.clipboard().setText(editor.application.fileManager.basename(editor.filePath))  },
+                    "triggered": lambda ed = self: self.application.clipboard().setText(ed.application.fileManager.basename(ed.filePath))  },
                 {   "text": "Directory to clipboard",
-                    "triggered": lambda editor = self: self.application.clipboard().setText(editor.application.fileManager.dirname(editor.filePath))  },
+                    "triggered": lambda ed = self: self.application.clipboard().setText(ed.application.fileManager.dirname(ed.filePath))  },
                 ])
         return menues
 
@@ -1195,18 +1201,18 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 }, '-',
                 {'text': "Indent guide",
                  'toggled': cls.on_actionIndentGuide_toggled,
-                 'testChecked': lambda editor: bool(editor.getFlags() & editor.IndentGuide) 
+                 'testChecked': lambda ed: bool(ed.getFlags() & ed.IndentGuide) 
                 }, 
                 {'text': "Highlight current line",
                  'toggled': cls.on_actionHighlightCurrentLine_toggled,
-                 'testChecked': lambda editor: bool(editor.getFlags() & editor.HighlightCurrentLine) 
+                 'testChecked': lambda ed: bool(ed.getFlags() & ed.HighlightCurrentLine) 
                 },
                 {'text': "Show tabs and spaces",
                  'toggled': cls.on_actionShowTabsAndSpaces_toggled,
-                 'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowTabsAndSpaces) },
+                 'testChecked': lambda ed: bool(ed.getFlags() & ed.ShowTabsAndSpaces) },
                 {'text': "Show line and paragraph",
                  'toggled': cls.on_actionShowLineAndParagraphs_toggled,
-                 'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowLineAndParagraphs) 
+                 'testChecked': lambda ed: bool(ed.getFlags() & ed.ShowLineAndParagraphs) 
                 }
             ]
         menu["text"] = {
@@ -1217,30 +1223,30 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 {'text': 'Select',
                  'items': [
                     {'text': '&Word',
-                     'triggered': lambda editor: editor.selectWordCurrent(),
+                     'triggered': lambda ed: ed.selectWordCurrent(),
                      'sequence': resources.get_sequence("Editor", "SelectWord", 'Ctrl+Meta+W'),
                      },
                     {'text': '&Word under',
-                     'triggered': lambda editor: editor.selectWordUnder(),
+                     'triggered': lambda ed: ed.selectWordUnder(),
                      'sequence': resources.get_sequence("Editor", "SelectWordUnder", 'Ctrl+Meta+W'),
                      },
                     {'text': '&Line',
-                     'triggered': lambda editor: editor.selectLine(),
+                     'triggered': lambda ed: ed.selectLine(),
                      'sequence': resources.get_sequence("Editor", "SelectLine", 'Ctrl+Meta+L'),
                      },
                     {'text': '&Paragraph',
-                     'triggered': lambda editor: editor.selectParagraph()
+                     'triggered': lambda ed: ed.selectParagraph()
                      },
                     {'text': 'Enclosing &brackets',
-                     'triggered': lambda editor: editor.selectEnclosingBrackets(),
+                     'triggered': lambda ed: ed.selectEnclosingBrackets(),
                      'sequence': resources.get_sequence("Editor", "SelectEnclosingBrackets", 'Ctrl+Meta+B'),
                      },
                     {'text': 'Current &scope',
-                     'triggered': lambda editor: editor.selectCurrentScope(),
+                     'triggered': lambda ed: ed.selectCurrentScope(),
                      'sequence': resources.get_sequence("Editor", "SelectCurrentScope", 'Ctrl+Meta+S'),
                      },
                     {'text': '&All',
-                     'triggered': lambda editor: editor.selectDocument(),
+                     'triggered': lambda ed: ed.selectDocument(),
                      'sequence': resources.get_sequence("Editor", "SelectAll", 'Ctrl+A'),
                      }
                 ]},
@@ -1248,40 +1254,42 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'items': [
                     {'text': 'Uppercase',
                      'sequence': resources.get_sequence("Editor", "ConvertUppercase", 'Ctrl+U'),
-                     'triggered': lambda editor: editor.convertToUppercase(),
+                     'triggered': lambda ed: ed.convertToUppercase(),
                      },
                     {'text': 'Lowercase',
                      'sequence': resources.get_sequence("Editor", "ConvertLowercase", 'Ctrl+Shift+U'),
-                     'triggered': lambda editor: editor.convertToLowercase(),
+                     'triggered': lambda ed: ed.convertToLowercase(),
                      },
                     {'text': 'Titlecase',
                      'sequence': resources.get_sequence("Editor", "ConvertTitlecase", 'Ctrl+Alt+U'),
-                     'triggered': lambda editor: editor.convertToTitlecase(),
+                     'triggered': lambda ed: ed.convertToTitlecase(),
                      },
                     {'text': 'Opposite case',
                      'sequence': resources.get_sequence("Editor", "ConvertOppositeCase", 'Ctrl+G'),
-                     'triggered': lambda editor: editor.convertToOppositeCase(),
+                     'triggered': lambda ed: ed.convertToOppositeCase(),
                      }, '-',
                     {'text': 'Tab to spaces',
-                     'triggered': lambda editor: editor.convertTabsToSpaces(),
+                     'triggered': lambda ed: ed.convertTabsToSpaces(),
                      },
                     {'text': 'Spaces to tabs',
-                     'triggered': lambda editor: editor.convertSpacesToTabs(),
+                     'triggered': lambda ed: ed.convertSpacesToTabs(),
                      }, '-',
                     {'text': 'Transpose',
                      'sequence': resources.get_sequence("Editor", "ConvertTranspose", 'Ctrl+T'),
-                     'triggered': lambda editor: editor.convertTranspose(),
+                     'triggered': lambda ed: ed.convertTranspose(),
                      }
                 ]}, '-',
                 {'text': 'Indentation',
                 # TODO Set Indentation
                  'items': [
                     {'text': 'Indent using spaces',
-                     'toggled': lambda editor, checked: None,
-                     }, '-', ] + [
+                     'toggled': lambda ed, checked: ed.on_actionIndentation_toggled(checked),
+                     'testChecked': lambda ed: ed.indentUsingSpaces
+                     }, '-', ] + [ tuple([
                     {'text': 'Tab width: %d' % size,
-                     'toggled': lambda editor, checked: None,
-                     } for size in range(1, 9) ]
+                     'toggled': lambda ed, checked, size = size: ed.on_actionIndentation_toggled(ed.indentUsingSpaces, size = size),
+                     'testChecked': lambda ed, size = size: (ed.indentUsingSpaces and ed.indentationWidth == size) or (not ed.indentUsingSpaces and ed.tabWidth == size)
+                     } for size in range(1, 9) ]) ]
                 }, 
                 {'text': 'Line endings',
                  'items': [tuple(
@@ -1295,7 +1303,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'triggered': cls.on_actionSelectBundleItem_triggered,
                  },
                 {'text': 'Execute line/selection',
-                 'triggered': lambda editor: editor.executeCommand(),
+                 'triggered': lambda ed: ed.executeCommand(),
                  }
             ]}
         menu["navigation"] = [
@@ -1357,6 +1365,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         ]
 
     # ------------------ Menu Actions
+    def on_actionIndentation_toggled(self, checked, size = None):
+        if size is None:
+          size = self.indentationWidth if self.indentUsingSpaces else self.tabWidth
+        self.indentUsingSpaces = checked
+        if self.indentUsingSpaces:
+            self.indentationWidth = size
+        else:
+            self.tabWidth = size
+
     def on_actionShowTabsAndSpaces_toggled(self, checked):
         if checked:
             flags = self.getFlags() | self.ShowTabsAndSpaces
@@ -1372,7 +1389,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setFlags(flags)
 
     def on_actionWordWrap_toggled(self, checked, size = None):
-        print("wrap", size)
         self.wordWrapSize = size
         if checked:
             flags = self.getFlags() | self.WordWrap

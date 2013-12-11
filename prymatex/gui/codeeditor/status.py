@@ -212,15 +212,15 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         else:
             action = menu.addAction("Other")
             action.setCheckable(True)
-        
+
         menu.addSeparator()
-        action = menu.addAction("Soft Tabs (Spaces)", lambda soft = not editor.tabStopSoft: self.setCurrentEditorTabSoft(soft))
+        action = menu.addAction("Soft Tabs (Spaces)", lambda soft = not editor.indentUsingSpaces: self.setCurrentEditorTabSoft(soft))
         action.setCheckable(True)        
-        action.setChecked(editor.tabStopSoft == True)
+        action.setChecked(editor.indentUsingSpaces == True)
         menu.popup(self.labelTabSize.mapToGlobal(point))
 
     def setCurrentEditorTabSoft(self, soft):
-        self.currentEditor.tabStopSoft = soft
+        self.currentEditor.indentUsingSpaces = soft
 
     def setCurrentEditorTabSize(self, size):
         self.currentEditor.tabWidth = size
@@ -228,7 +228,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
 
     def setTabSizeLabel(self, editor):
         #Tab Size
-        self.labelTabSize.setText("Soft Tab: %d" % editor.tabWidth if editor.tabStopSoft else "Hard Tab: %d" % editor.tabWidth)
+        self.labelTabSize.setText("Soft Tab: %d" % editor.tabWidth if editor.indentUsingSpaces else "Hard Tab: %d" % editor.tabWidth)
 
     # -------------- AutoConnect Command widget signals
     @QtCore.Slot()

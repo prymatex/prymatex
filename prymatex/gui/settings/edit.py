@@ -29,8 +29,8 @@ class EditSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Edit):
         self.checkBoxSmartHomeSmartEnd.setChecked(self.settingGroup.value("smartHomeSmartEnd"))
         self.checkBoxEnableAutoCompletion.setChecked(self.settingGroup.value("enableAutoCompletion"))
         self.checkBoxAdjustIndentationOnPaste.setChecked(self.settingGroup.value("adjustIndentationOnPaste"))
-        self.radioButtonSpaces.setChecked(self.settingGroup.value("tabStopSoft"))
-        self.radioButtonTabulators.setChecked(not self.settingGroup.value("tabStopSoft"))
+        self.radioButtonSpaces.setChecked(self.settingGroup.value("indentUsingSpaces"))
+        self.radioButtonTabulators.setChecked(not self.settingGroup.value("indentUsingSpaces"))
         
     def on_checkBoxRemoveTrailingSpaces_toggled(self, checked):
         self.settingGroup.setValue('removeTrailingSpaces', self.checkBoxRemoveTrailingSpaces.isChecked())
@@ -45,7 +45,7 @@ class EditSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Edit):
         self.settingGroup.setValue('enableAutoCompletion', self.checkBoxEnableAutoCompletion.isChecked())
 
     def on_radioButtonSpaces_toggled(self, checked):
-        self.settingGroup.setValue('tabStopSoft', checked)
+        self.settingGroup.setValue('indentUsingSpaces', checked)
     
     def on_checkBoxAdjustIndentationOnPaste_toggled(self, checked):
         self.settingGroup.setValue('adjustIndentationOnPaste', self.checkBoxAdjustIndentationOnPaste.isChecked())
