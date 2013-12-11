@@ -41,7 +41,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # ser un objeto factory, por ahora la fabricacion la hace el editor
     # en el factory method flyweightScopeDataFactory
     SCOPES = {}
-    
+    STANDARD_SIZES = (70, 78, 80, 100, 120)
     # -------------------- Signals
     syntaxChanged = QtCore.Signal(object)
     themeChanged = QtCore.Signal()
@@ -1168,71 +1168,29 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'items': []
                 }, '-',
                 {'text': "Word wrap",
-                 # TODO: Word wrap con un for
-                 "items": [({
+                 "items": [tuple([{
                         "text": "Automatic",
                         'toggled': cls.on_actionWordWrap_toggled,
                         'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap)  and \
                             ed.wordWrapSize is None
-                    }, "-", {
-                        "text": "70",
-                        "toggled": lambda ed, checked: ed.on_actionWordWrap_toggled(checked, size = 70),
+                    }, "-" ] + [ {
+                        "text": "%s" % size,
+                        "toggled": lambda ed, checked: ed.on_actionWordWrap_toggled(checked, size = size),
                         'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap) and \
-                            ed.wordWrapSize == 70
-                    }, {
-                        "text": "78",
-                        "toggled": lambda ed, checked: ed.on_actionWordWrap_toggled(checked, size = 78),
-                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap) and \
-                            ed.wordWrapSize == 78
-                    }, {
-                        "text": "80",
-                        "toggled": lambda ed, checked: ed.on_actionWordWrap_toggled(checked, size = 80),
-                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap) and \
-                            ed.wordWrapSize == 80
-                    }, {
-                        "text": "100",
-                        "toggled": lambda ed, checked: ed.on_actionWordWrap_toggled(checked, size = 100),
-                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap) and \
-                            ed.wordWrapSize == 100
-                    }, {
-                        "text": "120",
-                        "toggled": lambda ed, checked: ed.on_actionWordWrap_toggled(checked, size = 120),
-                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap) and \
-                            ed.wordWrapSize == 120
-                    })]
+                            ed.wordWrapSize == size
+                    } for size in cls.STANDARD_SIZES])]
                 }, 
                 {'text': "Margin line",
-                # TODO Margin line
-                 "items": [({
+                 "items": [tuple([{
                         "text": "None",
                         'toggled': lambda ed, checked: ed.on_actionMarginLine_toggled(not checked),
                         'testChecked': lambda ed: not bool(ed.getFlags() & ed.MarginLine)
-                    }, "-", {
-                        "text": "70",
-                        "toggled": lambda ed, checked: ed.on_actionMarginLine_toggled(checked, size = 70),
+                    }, "-" ] + [ {
+                        "text": "%s" % size,
+                        "toggled": lambda ed, checked: ed.on_actionMarginLine_toggled(checked, size = size),
                         'testChecked': lambda ed: bool(ed.getFlags() & ed.MarginLine) and \
-                            ed.marginLineSize == 70
-                    }, {
-                        "text": "78",
-                        "toggled": lambda ed, checked: ed.on_actionMarginLine_toggled(checked, size = 78),
-                        'testChecked': lambda ed: bool(ed.getFlags() & ed.MarginLine) and \
-                            ed.marginLineSize == 78
-                    }, {
-                        "text": "80",
-                        "toggled": lambda ed, checked: ed.on_actionMarginLine_toggled(checked, size = 80),
-                        'testChecked': lambda ed: bool(ed.getFlags() & ed.MarginLine) and \
-                            ed.marginLineSize == 80
-                    }, {
-                        "text": "100",
-                        "toggled": lambda ed, checked: ed.on_actionMarginLine_toggled(checked, size = 100),
-                        'testChecked': lambda ed: bool(ed.getFlags() & ed.MarginLine) and \
-                            ed.marginLineSize == 100
-                    }, {
-                        "text": "120",
-                        "toggled": lambda ed, checked: ed.on_actionMarginLine_toggled(checked, size = 120),
-                        'testChecked': lambda ed: bool(ed.getFlags() & ed.MarginLine) and \
-                            ed.marginLineSize == 120
-                    })]
+                            ed.marginLineSize == size
+                    } for size in cls.STANDARD_SIZES])]
                 }, '-',
                 {'text': "Indent guide",
                  'toggled': cls.on_actionIndentGuide_toggled,
