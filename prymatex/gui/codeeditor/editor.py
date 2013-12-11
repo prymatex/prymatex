@@ -1284,19 +1284,11 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                      } for size in range(1, 9) ]
                 }, 
                 {'text': 'Line endings',
-                 'items': [
-                    {'text': 'Windows',
-                    # TODO Set line ending window
-                     'toggled': lambda editor, checked: None,
-                     },
-                    {'text': 'Unix',
-                    # TODO Set line ending unix
-                     'toggled': lambda editor, checked: None,
-                     },
-                    {'text': 'Mac OS 9',
-                    # TODO Set line ending mac
-                     'toggled': lambda editor, checked: None,
-                     },
+                 'items': [tuple(
+                     [{'text': '%s' % name,
+                     'toggled': lambda ed, checked, eol_chars = eol_chars: ed.setEolChars(eol_chars),
+                     'testChecked': lambda ed, eol_chars = eol_chars: ed.lineSeparator() == eol_chars
+                     } for eol_chars, _, name in text.EOLS])
                 ]}, '-',
                 {'text': 'Select bundle item',
                  'sequence': resources.get_sequence("Editor", "SelectBundleItem", 'Meta+Ctrl+T'),

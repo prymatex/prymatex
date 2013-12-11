@@ -7,7 +7,7 @@ import re
 import os
 import difflib
 
-from prymatex.utils import text, sourcecode
+from prymatex.utils import text
 
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import textcursor2tuple
@@ -34,19 +34,16 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         self.eol_chars = None
 
     #------ EOL characters
-    def setEolChars(self, text):
-        """Set widget end-of-line (EOL) characters from text (analyzes text)"""
-        eol_chars = sourcecode.get_eol_chars(text)
+    def setEolChars(self, chars_or_text):
+        """Set widget end-of-line (EOL) characters from chars_or_text"""
+        eol_chars = text.get_eol_chars(chars_or_text)
         if eol_chars is not None and self.eol_chars is not None:
             self.document().setModified(True)
         self.eol_chars = eol_chars
 
     def lineSeparator(self):
         """Return line separator based on current EOL mode"""
-        if self.eol_chars is not None:
-            return self.eol_chars
-        else:
-            return os.linesep
+        return self.eol_chars if self.eol_chars is not None else os.linesep
 
     #------ Overrides
     def setFont(self, font):

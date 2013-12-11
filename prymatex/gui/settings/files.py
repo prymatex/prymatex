@@ -4,7 +4,7 @@
 from prymatex.qt import QtGui, QtCore
 from prymatex import resources
 
-from prymatex.utils import sourcecode, encoding
+from prymatex.utils import text, encoding
 
 from prymatex.ui.configure.files import Ui_Files
 from prymatex.models.settings import SettingsTreeNode
@@ -29,7 +29,7 @@ class FilesSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Files):
 
     def setupLineEndings(self):
         """Populate line endings"""
-        for _, os_name, description in sourcecode.EOLS:
+        for _, os_name, description in text.EOLS:
             self.comboBoxEndOfLine.addItem(description, os_name)
 
 

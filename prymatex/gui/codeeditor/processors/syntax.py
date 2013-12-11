@@ -5,7 +5,7 @@ from prymatex.support.processor import PMXSyntaxProcessor
 from prymatex.gui.codeeditor.userdata import CodeEditorTokenData
 
 
-class CodeEditorTokenSyntaxProcessor(PMXSyntaxProcessor):
+class CodeEditorSyntaxProcessor(PMXSyntaxProcessor):
     def __init__(self, editor):
         self.editor = editor
 
@@ -68,5 +68,3 @@ class CodeEditorTokenSyntaxProcessor(PMXSyntaxProcessor):
             )
             if not closeAll:
                 break
-
-CodeEditorSyntaxProcessor = CodeEditorTokenSyntaxProcessor

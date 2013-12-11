@@ -17,6 +17,8 @@ def toggle_actions(actions, enable):
 
 def test_actions(instance, actions):
     for action in actions:
+        # Prevent signals
+        action.blockSignals(True)
         action.setVisible(not hasattr(action, "testVisible") or \
             action.testVisible(instance))
         action.setEnabled(not hasattr(action, "testEnabled") or \
@@ -24,6 +26,7 @@ def test_actions(instance, actions):
         if action.isCheckable():
             action.setChecked(hasattr(action, "testChecked") and \
                 action.testChecked(instance))
+        action.blockSignals(False)
 
 def create_action(parent, settings, dispatcher = None, sequence_handler=None):
     """Create a QAction"""
