@@ -16,15 +16,15 @@ class PMXMacro(PMXBundleItem):
         for key in PMXMacro.KEYS:
             if key in dataHash or initialize:
                 setattr(self, key, dataHash.get(key, None))
-    
+
     def load(self, dataHash):
         PMXBundleItem.load(self, dataHash)
         self.__load_update(dataHash, True)
-    
+
     def update(self, dataHash):
         PMXBundleItem.update(self, dataHash)
         self.__load_update(dataHash, False)
-    
+
     def dump(self, allKeys = False):
         dataHash = PMXBundleItem.dump(self, allKeys)
         for key in PMXMacro.KEYS:
@@ -32,7 +32,7 @@ class PMXMacro(PMXBundleItem):
             if allKeys or value != None:
                 dataHash[key] = value
         return dataHash
-            
+
     def execute(self, processor):
         processor.startMacro(self)
         for command in self.commands:
