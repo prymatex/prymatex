@@ -17,22 +17,22 @@ class TextEditWidget(QtGui.QPlainTextEdit):
     #------ Signals
     extraSelectionChanged = QtCore.Signal()
     fontChanged = QtCore.Signal()
-    
+
     #------ Regular expresions
     # TODO Ver esto que no esta muy bien
     RE_WORD = re.compile(r"([A-Za-z_]+)", re.UNICODE)
 
     def __init__(self, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
-        
+
         # TODO: Buscar sobre este atributo en la documnetación
         #self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        
+
         self.__scopedExtraSelections = {}
         self.__updateExtraSelectionsOrder = []
         self.__textCharFormatBuilders = {}
         self.eol_chars = None
-        
+
     #------ EOL characters
     def setEolChars(self, text):
         """Set widget end-of-line (EOL) characters from text (analyzes text)"""
@@ -40,7 +40,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         if eol_chars is not None and self.eol_chars is not None:
             self.document().setModified(True)
         self.eol_chars = eol_chars
-        
+
     def lineSeparator(self):
         """Return line separator based on current EOL mode"""
         if self.eol_chars is not None:
@@ -66,11 +66,11 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         if start <= cursor.position() <= end:
             return word, start, end
         return "", cursor.position(), cursor.position()
-        
+
     def word(self, cursor = None, pattern = RE_WORD, direction = "both", search = False):
         cursor =  cursor or self.textCursor()
         wordUnderCursor, start, end = self.wordUnderCursor(cursor = cursor)
-        
+
         if pattern.match(wordUnderCursor):
             if direction == "both":
                 return wordUnderCursor, start, end
@@ -97,7 +97,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
                     lend = blockPosition + len(first_part[lmatch.start():])
                     if direction == "left":
                         return lmatch.group(0)[::-1], start, lend
-            
+
             if direction in ("right", "both"):
                 #Search right word
                 rstart = end
@@ -127,7 +127,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
 
     def selectionBlockStartEnd(self, cursor = None):
         cursor = cursor or self.textCursor()
-        return ( self.document().findBlock(cursor.selectionStart()), 
+        return ( self.document().findBlock(cursor.selectionStart()),
             self.document().findBlock(cursor.selectionEnd()))
 
     #------ Retrieve and set cursor position
@@ -213,7 +213,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
             self.setTextCursor(cursor)
             return True
         return False
-    
+
     def findAll(self, match, flags):
         cursors = []
         cursor = self.textCursor()
@@ -223,7 +223,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
             cursors.append(QtGui.QTextCursor(cursor))
             cursor = self.findMatchCursor(match, flags, findNext = True, cursor = cursor)
         return cursors
-            
+
     def replaceMatch(self, match, text, flags, allText = False):
         cursor = self.textCursor()
         cursor.beginEditBlock()
@@ -242,13 +242,13 @@ class TextEditWidget(QtGui.QPlainTextEdit):
             if not allText: break
         cursor.endEditBlock()
         return replaced
-        
+
     #------ Extra selections
     def registerTextCharFormatBuilder(self, scope, formatBuilder):
         # TODO Un poco mejor esto para soportar subscopes con puntos
         self.__updateExtraSelectionsOrder.append(scope)
         self.__textCharFormatBuilders[scope] = formatBuilder
-    
+
     def defaultTextCharFormatBuilder(self, scope):
         return QtGui.QTextCharFormat()
 
@@ -257,11 +257,11 @@ class TextEditWidget(QtGui.QPlainTextEdit):
 
     def setExtraSelectionCursors(self, scope, cursors):
         self.__scopedExtraSelections[scope] = self.__build_extra_selections(scope, cursors)
-    
+
     def updateExtraSelectionCursors(self, cursorsDict):
         for scope, cursors in cursorsDict.items():
             self.setExtraSelectionCursors(scope, cursors)
-    
+
     def updateExtraSelections(self):
         extraSelections = []
         for scope in self.__updateExtraSelectionsOrder:
@@ -269,20 +269,20 @@ class TextEditWidget(QtGui.QPlainTextEdit):
                 extraSelections.extend(self.__scopedExtraSelections[scope])
         self.setExtraSelections(extraSelections)
         self.extraSelectionChanged.emit()
-        
+
     def searchExtraSelections(self, scope):
         # TODO: Mejorar esta forma de obtener los cursores en un scope
         filterCursors = [scopedCursors[1] for scopedCursors in iter(self.__scopedExtraSelections.items()) if scopedCursors[0].startswith(scope)]
-        return reduce(lambda allCursors, cursors: allCursors + cursors, filterCursors, [])    
-    
+        return reduce(lambda allCursors, cursors: allCursors + cursors, filterCursors, [])
+
     def clearExtraSelectionCursors(self, scope):
         if scope in self.__scopedExtraSelections:
             del self.__scopedExtraSelections[scope]
-        
+
     def clearExtraSelections(self):
         self.__scopedExtraSelections.clear()
         self.updateExtraSelections()
-        
+
     def __build_extra_selections(self, scope, cursors):
         extraSelections = []
         for cursor in cursors:
@@ -295,7 +295,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
             selection.cursor = cursor
             extraSelections.append(selection)
         return extraSelections
-    
+
     #------ Move text
     def __move_line(self, cursor, moveType):
         cursor.beginEditBlock()
@@ -312,7 +312,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         cursor.setPosition(otherBlock.position() + column)
         cursor.endEditBlock()
         self.setTextCursor(cursor)
-        
+
     def __move_text(self, cursor, moveType):
         cursor.beginEditBlock()
         openRight = cursor.position() == cursor.selectionEnd()
@@ -325,57 +325,57 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         cursor = self.newCursorAtPosition(start, end) if openRight else self.newCursorAtPosition(end, start)
         cursor.endEditBlock()
         self.setTextCursor(cursor)
-        
+
     def moveUp(self, cursor = None):
         cursor = cursor or self.textCursor()
         if cursor.hasSelection():
             self.__move_text(cursor, QtGui.QTextCursor.Up)
         elif cursor.block() != self.document().firstBlock():
             self.__move_line(cursor, QtGui.QTextCursor.Up)
-        
+
     def moveDown(self, cursor = None):
         cursor = cursor or self.textCursor()
         if cursor.hasSelection():
             self.__move_text(cursor, QtGui.QTextCursor.Down)
         elif cursor.block() != self.document().lastBlock():
             self.__move_line(cursor, QtGui.QTextCursor.Down)
-        
+
     def moveLeft(self, cursor = None):
         cursor = cursor or self.textCursor()
         if cursor.hasSelection() and cursor.selectionStart() != 0:
             self.__move_text(cursor, QtGui.QTextCursor.Left)
-        
+
     def moveRight(self, cursor = None):
         cursor = cursor or self.textCursor()
         if cursor.hasSelection() and cursor.selectionEnd() != self.document().characterCount():
             self.__move_text(cursor, QtGui.QTextCursor.Right)
-        
+
     #------ Select Text
     def selectWordUnder(self, cursor = None):
         cursor = cursor or self.textCursor()
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
         self.setTextCursor(cursor)
-        
+
     def selectWordCurrent(self, cursor = None):
         cursor = cursor or self.textCursor()
         _, start, end = self.word(cursor = cursor)
         self.setTextCursor(self.newCursorAtPosition(start, end))
-        
+
     def selectLine(self, cursor = None):
         cursor = cursor or self.textCursor()
         cursor.select(QtGui.QTextCursor.LineUnderCursor)
         self.setTextCursor(cursor)
-        
+
     def selectParagraph(self, cursor = None):
         cursor = cursor or self.textCursor()
         cursor.select(QtGui.QTextCursor.BlockUnderCursor)
         self.setTextCursor(cursor)
-        
+
     def selectDocument(self, cursor = None):
         cursor = cursor or self.textCursor()
         cursor.select(QtGui.QTextCursor.Document)
         self.setTextCursor(cursor)
-        
+
     #------ Convert Text
     def __convert_text(self, cursor = None, convertFunction = lambda x: x):
         cursor = cursor or self.textCursor()
@@ -391,22 +391,22 @@ class TextEditWidget(QtGui.QPlainTextEdit):
 
     def convertToUppercase(self, cursor = None):
         self.__convert_text(cursor, text.upper_case)
-        
+
     def convertToLowercase(self, cursor = None):
         self.__convert_text(cursor, text.lower_case)
-        
+
     def convertToTitlecase(self, cursor = None):
         self.__convert_text(cursor, text.title_case)
-        
+
     def convertToOppositeCase(self, cursor = None):
         self.__convert_text(cursor, text.opposite_case)
-    
+
     def convertSpacesToTabs(self, cursor = None):
         self.__convert_text(cursor, text.spaces_to_tabs)
-        
+
     def convertTabsToSpaces(self, cursor = None):
         self.__convert_text(cursor, text.tabs_to_spaces)
-        
+
     def convertTranspose(self, cursor = None):
         self.__convert_text(cursor, text.transpose)
 
@@ -429,7 +429,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         """
         cursor = cursor or self.textCursor()
         return cursor.selectedText().replace("\u2029", self.lineSeparator())
-    
+
     def selectedText(self, cursor = None):
         """
         Return text selected text cursor
@@ -437,7 +437,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         """
         cursor = cursor or self.textCursor()
         return cursor.selectedText().replace("\u2029", '\n')
-    
+
     #------ Update Text
     def updatePlainText(self, text, cursor = None):
         if cursor:
@@ -446,28 +446,28 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         else:
             sourceText = self.toPlainText()
             sourceOffset = 0
-        
+
         def perform_action(code, cursor, text=""):
             def _nop():
                 pass
             def _action():
                 cursor.insertText(text)
             return _action if code in ["insert", "replace", "delete"] else _nop
-        
+
         sequenceMatcher = difflib.SequenceMatcher(None, sourceText, text)
         opcodes = sequenceMatcher.get_opcodes()
-        
+
         actions = [perform_action(
-                code[0], 
+                code[0],
                 self.newCursorAtPosition(code[1] + sourceOffset, code[2] + sourceOffset), text[code[3]:code[4]]
             ) for code in opcodes]
-        
+
         cursor = self.textCursor()
-        
+
         cursor.beginEditBlock()
         list(map(lambda action: action(), actions))
         cursor.endEditBlock()
-        
+
         self.ensureCursorVisible()
 
     #------ Text Zoom
@@ -490,7 +490,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         size -= 1
         font.setPointSize(size)
         self.setFont(font)
-    
+
     #------ Character width
     CHARACTER = "#"
     def characterWidth(self):

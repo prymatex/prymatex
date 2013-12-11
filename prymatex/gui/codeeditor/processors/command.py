@@ -9,14 +9,14 @@ class PMXCommandProcessor(PMXCommandProcessor):
         super(PMXCommandProcessor, self).__init__()
         self.editor = editor
         self.cursorWrapper = None
-    
+
     def startCommand(self, command):
         self.command = command
         self.__env = None
-    
+
     def endCommand(self, command):
         self.command = None
-    
+
     def environmentVariables(self):
         if self.__env is None:
             # TODO No es mejor que tambien el editor saque de la mainwindow para
@@ -29,18 +29,18 @@ class PMXCommandProcessor(PMXCommandProcessor):
             for env in envs:
                 self.__env.update(env)
         return self.__env
-    
+
     def shellVariables(self):
         leftSettings, rightSettings = self.editor.settings(self.cursorWrapper)
         return rightSettings.shellVariables
-    
+
     def configure(self, settings):
         self.asynchronous = settings.get("asynchronous", True)
         self.cursorWrapper = settings.get("cursorWrapper", self.editor.textCursor())
         self.disableIndent = settings.get("disableIndent", False)
         self.baseEnvironment = settings.get("environment", {})
         self.errorCommand = settings.get("errorCommand", False)
-    
+
     def formatAsXml(self, text, firstBlock, lastBlock, startIndex, endIndex):
         result = []
         block = firstBlock
@@ -67,7 +67,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
                 break
             block = block.next()
         return "\n".join(result)
-    
+
     # --------------------- Inputs
     def selection(self, inputFormat = None):
         if self.cursorWrapper.hasSelection():
@@ -79,32 +79,32 @@ class PMXCommandProcessor(PMXCommandProcessor):
                     self.cursorWrapper.selectionEnd() - lastBlock.position())
             else:
                 return text
-    
+
     def document(self, inputFormat = None):
         self.cursorWrapper.select(QtGui.QTextCursor.Document)
         return self.selection(inputFormat)
-    
+
     def line(self, inputFormat = None):
         self.cursorWrapper.select(QtGui.QTextCursor.LineUnderCursor)
         return self.selection(inputFormat)
-    
+
     def character(self, inputFormat = None):
         self.cursorWrapper.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
         return self.selection(inputFormat)
-    
+
     def scope(self, inputFormat = None):
         token = self.editor.tokenAtPosition(self.cursorWrapper.position())
         return token.chunk
-    
+
     def selectedText(self, inputFormat = None):
         return self.selection(inputFormat)
-    
+
     def word(self, inputFormat = None):
         word, start, end = self.editor.currentWord()
         self.cursorWrapper.setPosition(start)
         self.cursorWrapper.setPosition(end, QtGui.QTextCursor.KeepAnchor)
         return word
-    
+
     # ----------------- Before Running Command
     def saveModifiedFiles(self):
         ret = True
@@ -115,11 +115,11 @@ class PMXCommandProcessor(PMXCommandProcessor):
             if ret == False:
                 break
         return ret
-    
+
     def saveActiveFile(self):
         self.editor.mainWindow.saveEditor(editor = self.editor)
         return not (self.editor.isModified() or self.editor.isNew())
-    
+
     # ------------------- Outpus function
     def error(self, context, outputFormat = None):
         if self.errorCommand:
@@ -131,20 +131,20 @@ class PMXCommandProcessor(PMXCommandProcessor):
                 context.outputType,
                 errorCommand = True
             )
-    
+
     def discard(self, context, outputFormat = None):
         pass
-    
+
     def replaceSelectedText(self, context, outputFormat = None):
         print(context.outputValue)
         self.editor.updatePlainText(context.outputValue, cursor = self.cursorWrapper)
-    
+
     def replaceDocument(self, context, outputFormat = None):
         self.editor.updatePlainText(context.outputValue)
-    
+
     def replaceSelection(self, context, outputFormat = None):
         print("replaceSelection")
-    
+
     # ------------ Version 2
     def replaceInput(self, context, outputFormat = None):
         if outputFormat == "text":
@@ -153,20 +153,20 @@ class PMXCommandProcessor(PMXCommandProcessor):
             self.cursorWrapper.appendHtml(context.outputValue)
         elif outputFormat == "snippet":
             self.insertAsSnippet(context)
-    
+
     def insertText(self, context, outputFormat = None):
         self.cursorWrapper.insertText(context.outputValue)
-    
+
     def atCaret(self, context, outputFormat = None):
         print("atCaret")
-    
+
     def afterInput(self, context, outputFormat = None):
         print("afterInput")
-    
+
     def afterSelectedText(self, context, outputFormat = None):
         self.cursorWrapper.setPosition(self.cursorWrapper.selectionEnd())
         self.cursorWrapper.insertText(context.outputValue)
-    
+
     def insertAsSnippet(self, context, outputFormat = None):
         # Build Snippet
         snippet = self.editor.application.supportManager.buildAdHocSnippet(
@@ -176,33 +176,33 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.insertBundleItem(snippet,
             cursorWrapper = self.cursorWrapper,
             disableIndent = self.disableIndent)
-    
+
     def showAsHTML(self, context, outputFormat = None):
         self.editor.browserDock.setRunningContext(context)
-    
+
     def showAsTooltip(self, context, outputFormat = None):
         message = context.outputValue.strip()
         timeout = len(message) * 20
         if timeout > 2000:
             timeout = 2000
-        
+
         point = self.editor.cursorRect(self.cursorWrapper).bottomRight()
         point = self.editor.mapToGlobal(point)
         callbacks = {
             'copy': lambda s = message: QtGui.qApp.instance().clipboard().setText(s)
         }
-        
+
         self.editor.mainWindow.showMessage(message,
             frmt = outputFormat or "text", timeout = timeout, point = point,
             linkMap = callbacks)
-    
+
     def toolTip(self, context, outputFormat = None):
         self.showAsTooltip(context, outputFormat)
-    
+
     def createNewDocument(self, context, outputFormat = None):
         editor= self.editor.mainWindow.addEmptyEditor()
         editor.setPlainText(context.outputValue)
-    
+
     def newWindow(self, context, outputFormat = None):
         if outputFormat == "html":
             self.editor.browserDock.newRunningContext(context)
@@ -210,7 +210,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
             # TODO: Quiza una mejor forma de crear documentos con texto
             editor = self.editor.mainWindow.addEmptyEditor()
             editor.setPlainText(context.outputValue)
-    
+
     def openAsNewDocument(self, context, outputFormat = None):
         editor = self.editor.mainWindow.addEmptyEditor()
         editor.setPlainText(context.outputValue)

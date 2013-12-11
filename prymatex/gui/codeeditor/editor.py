@@ -1176,8 +1176,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                             ed.wordWrapSize is None
                     }, "-" ] + [ {
                         "text": "%s" % size,
-                        "toggled": lambda ed, checked: ed.on_actionWordWrap_toggled(checked, size = size),
-                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap) and \
+                        "toggled": lambda ed, checked, size = size: ed.on_actionWordWrap_toggled(checked, size = size),
+                        'testChecked': lambda ed, size = size: bool(ed.getFlags() & ed.WordWrap) and \
                             ed.wordWrapSize == size
                     } for size in cls.STANDARD_SIZES])]
                 }, 
@@ -1188,8 +1188,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                         'testChecked': lambda ed: not bool(ed.getFlags() & ed.MarginLine)
                     }, "-" ] + [ {
                         "text": "%s" % size,
-                        "toggled": lambda ed, checked: ed.on_actionMarginLine_toggled(checked, size = size),
-                        'testChecked': lambda ed: bool(ed.getFlags() & ed.MarginLine) and \
+                        "toggled": lambda ed, checked, size = size: ed.on_actionMarginLine_toggled(checked, size = size),
+                        'testChecked': lambda ed, size = size: bool(ed.getFlags() & ed.MarginLine) and \
                             ed.marginLineSize == size
                     } for size in cls.STANDARD_SIZES])]
                 }, '-',
@@ -1380,6 +1380,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setFlags(flags)
 
     def on_actionWordWrap_toggled(self, checked, size = None):
+        print("wrap", size)
         self.wordWrapSize = size
         if checked:
             flags = self.getFlags() | self.WordWrap
@@ -1395,6 +1396,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setFlags(flags)
 
     def on_actionMarginLine_toggled(self, checked, size = None):
+        print("margin", size)
         if isinstance(size, int):
             self.marginLineSize = size
         if checked:

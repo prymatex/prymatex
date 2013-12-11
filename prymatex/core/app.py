@@ -65,7 +65,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         self.aboutToQuit.connect(self.closePrymatex)
         self.componentInstances = {}
         self.shortcutsTreeModel = ShortcutsTreeModel(self)
-        
+
         self.replaceSysExceptHook()
 
     # ------ exception and logger handlers
@@ -110,18 +110,18 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         self.currentProfile = self.profileManager.currentProfile(self.options.profile)
         if self.currentProfile is None:
             return False
-        
+
         if self.options.reset_settings:
             self.currentProfile.clear()
-        
+
         # Prepare settings for application
         self.populateComponentClass(PrymatexApplication)
         self.currentProfile.configure(self)
 
         logger.config(self.options.verbose, self.currentProfile.PMX_LOG_PATH, self.options.log_pattern)
-        
+
         self.checkSingleInstance()
-        
+
         return True
 
     def installTranslator(self):
@@ -158,7 +158,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             splash.show()
             self.showMessage = splash.showMessage
         try:
-            
+
             # Build Managers
             self.pluginManager = self.buildPluginManager()  # WARN: FIST Plugin Manager
             self.storageManager = self.buildStorageManager()  # Persistence system Manager
@@ -172,11 +172,11 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             self.projectManager.loadProjects(self.showMessage)
             self.supportManager.loadSupport(self.showMessage)
             self.profileManager.loadSettings(self.showMessage)
-            
+
             # Create the Main Window instance
             self.mainWindow = self.buildMainWindow()
             self.showMessage = self.mainWindow.showMessage
-            
+
             if not self.options.no_splash:
                 splash.finish(self.mainWindow)
 
@@ -214,11 +214,11 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         from prymatex.managers.plugins import PluginManager
         #manager = self.createComponentInstance(PluginManager)
         self.populateComponentClass(PluginManager)
-        
+
         manager = PluginManager(self)
 
         self.currentProfile.configure(manager)
-        
+
         manager.initialize(self)
 
         manager.addPluginDirectory(config.PMX_PLUGINS_PATH)
@@ -232,12 +232,12 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
         #Prepare prymatex namespace
         manager.addNamespace('prymatex', config.PMX_SHARE_PATH)
-        
+
         #Prepare user namespace
         manager.addNamespace('user', config.PMX_HOME_PATH)
-        
+
         # Update environment
-        manager.updateEnvironment({  
+        manager.updateEnvironment({
             # TextMate Compatible :P
             'TM_APP_PATH': config.PMX_APP_PATH,
             'TM_SUPPORT_PATH': manager.environmentVariables()['PMX_SUPPORT_PATH'],
@@ -286,7 +286,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     # --------------------- Application events
     def closePrymatex(self):
         self.logger.debug("Close")
-        
+
         self.storageManager.close()
         self.currentProfile.saveState(self.mainWindow)
         if os.path.exists(self.fileLock):
@@ -321,7 +321,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
             # Configure
             self.currentProfile.configure(instance)
-            
+
             # Add components
             componentClasses = self.pluginManager.findComponentsForClass(klass)
             for componentClass in componentClasses:
@@ -332,9 +332,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
                 instance.addComponent(componentInstance)
             buildedObjects.append((instance, parent))
             return instance
-        
+
         instance = buildComponentInstance(componentClass, componentParent)
-            
+
         # buildedObjects.reverse()
         # Initialize order is important, fist goes the internal components then the main component
         for ni, np in buildedObjects:
@@ -342,18 +342,18 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             # Shortcuts
             for settings in ni.contributeToShortcuts():
                 create_shortcut(instance, settings, sequence_handler = self.registerShortcut)
-            
+
         self.componentInstances.setdefault(componentClass, []).append(instance)
-        
+
         return instance
 
     # ------------ Find Component
     def componentHierarchyForClass(self, componentClass):
         return self.pluginManager.componentHierarchyForClass(componentClass)
-    
+
     def findComponentsForClass(self, componentClass):
         return self.pluginManager.findComponentsForClass(componentClass)
-    
+
     # ------------ Create Zmq Sockets
     def zmqSocket(self, socketType, name, address='127.0.0.1', addressType='tcp', port = None):
         # TODO ver la variable aca, creo que merjor seria que la app genere environ pregunatando a los components
@@ -377,7 +377,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     def settingValue(self, settingPath):
         groupName, settingName = settingPath.split(".")
         return self.currentProfile.groupByName(groupName).value(settingName)
-        
+
     def registerSettingHook(self, settingPath, handler):
         groupName, settingName = settingPath.split(".")
         group = self.currentProfile.groupByName(groupName)
@@ -387,7 +387,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         groupName, settingName = settingPath.split(".")
         group = self.currentProfile.groupByName(groupName)
         group.removeHook(settingName, handler)
-        
+
     # ------------- Editors and mainWindow handle
     def createEditorInstance(self, filePath=None, parent=None):
         editorClass = filePath and self.pluginManager.findEditorClassForFile(filePath) or self.pluginManager.defaultEditor()
@@ -492,7 +492,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
             self.openFile(url.toLocalFile())
         else:
             QtGui.QDesktopServices.openUrl(url)
-            
+
     def openPath(self, path):
         if os.path.exists(path):
             if os.path.isfile(path):
@@ -506,7 +506,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         with sequence
         """
         self.shortcutsTreeModel.registerShortcut(qobject, sequence)
-            
+
     def applyShortcuts(self):
         self.shortcutsTreeModel.applyShortcuts()
 
@@ -541,7 +541,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         if mainWindow.currentEditor() == editor:
             self.checkExternalAction(mainWindow, editor)
 
-    
+
     def __str__(self):
         return '<PrymatexApplication at {} PID: {}>'.format(hash(self), os.getpid())
 
