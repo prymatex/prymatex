@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import re
 import operator
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, Qt
 
 from prymatex.core import PMXBaseEditor
 from prymatex.widgets.texteditor import TextEditWidget
@@ -196,7 +196,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.showMarginLine = True
         self.showIndentGuide = True
         self.showHighlightCurrentLine = True
-        print(self.wordWrapSize)
 
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
@@ -1173,29 +1172,29 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                  'items': []
                 }, '-',
                 {'text': "Word wrap",
-                 "items": [tuple([{
+                 "items": [{
                         "text": "Automatic",
                         'toggled': cls.on_actionWordWrap_toggled,
                         'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap)  and \
-                            ed.wordWrapSize is None
-                    }, "-" ] + [ {
+                            ed.wordWrapSize is Qt.QWIDGETSIZE_MAX
+                    }, "-" ] + [ tuple([ {
                         "text": "%s" % size,
-                        "toggled": lambda ed, checked, size = size: ed.on_actionWordWrap_toggled(checked, size = size),
-                        'testChecked': lambda ed, size = size: bool(ed.getFlags() & ed.WordWrap) and \
+                        "toggled": lambda ed, checked, size=size: ed.on_actionWordWrap_toggled(checked, size=size),
+                        'testChecked': lambda ed, size=size: bool(ed.getFlags() & ed.WordWrap) and \
                             ed.wordWrapSize == size
-                    } for size in cls.STANDARD_SIZES])]
+                    } for size in cls.STANDARD_SIZES]) ]
                 }, 
                 {'text': "Margin line",
-                 "items": [tuple([{
+                 "items": [{
                         "text": "None",
                         'toggled': lambda ed, checked: ed.on_actionMarginLine_toggled(not checked),
                         'testChecked': lambda ed: not bool(ed.getFlags() & ed.MarginLine)
-                    }, "-" ] + [ {
+                    }, "-" ] + [ tuple([ {
                         "text": "%s" % size,
                         "toggled": lambda ed, checked, size = size: ed.on_actionMarginLine_toggled(checked, size = size),
                         'testChecked': lambda ed, size = size: bool(ed.getFlags() & ed.MarginLine) and \
                             ed.marginLineSize == size
-                    } for size in cls.STANDARD_SIZES])]
+                    } for size in cls.STANDARD_SIZES]) ]
                 }, '-',
                 {'text': "Indent guide",
                  'toggled': cls.on_actionIndentGuide_toggled,
@@ -1278,7 +1277,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                      }
                 ]}, '-',
                 {'text': 'Indentation',
-                # TODO Set Indentation
                  'items': [
                     {'text': 'Indent using spaces',
                      'toggled': lambda ed, checked: ed.on_actionIndentation_toggled(checked),
@@ -1387,11 +1385,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             flags = self.getFlags() & ~self.ShowLineAndParagraphs
         self.setFlags(flags)
 
-    def on_actionWordWrap_toggled(self, checked, size = None):
-        self.wordWrapSize = size
+    def on_actionWordWrap_toggled(self, checked, size = Qt.QWIDGETSIZE_MAX):
         if checked:
             flags = self.getFlags() | self.WordWrap
+            self.wordWrapSize = size
+            if size != Qt.QWIDGETSIZE_MAX:
+                size = (size * self.characterWidth()) + 2
+            self.viewport().setMaximumWidth(size)
         else:
+            self.wordWrapSize = None
             flags = self.getFlags() & ~self.WordWrap
         self.setFlags(flags)
 

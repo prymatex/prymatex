@@ -64,8 +64,8 @@ class MainMenuMixin(object):
         filePath = self.currentEditor().filePath if self.currentEditor() is not None else None
         filePaths, selectedfilter = getOpenFileNames(
             self,
-            caption = "Open files",
-            basedir = self.application.fileManager.directory(filePath)
+            caption="Open files",
+            basedir=self.application.fileManager.directory(filePath)
             )
         focus = len(filePaths) == 1
         for filePath in filePaths:
