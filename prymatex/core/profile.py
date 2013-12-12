@@ -72,8 +72,8 @@ class PMXProfile(object):
         # Prepare configurable attributes
         for key, value in configurableClass.__dict__.items():
             if isinstance(value, pmxConfigPorperty):
-                # TODO: Migrar a un sistema de nombres explicito
-                value.name = key
+                if value.name is None:
+                    value.name = key
                 configurableClass._settings.addSetting(value)
 
     def configure(self, component):

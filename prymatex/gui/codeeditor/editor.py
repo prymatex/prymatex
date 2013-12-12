@@ -491,9 +491,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     # -------------------- SideBars
     def updateViewportMargins(self):
-        #self.setViewportMargins(self.leftBar.width(), 0, self.rightBar.width(), 0)
         #self.setViewportMargins(self.leftBar.width(), 0, 0, 0)
-        print(self.wordWrapSize)
         self.setViewportMargins(self.leftBar.width(), 0, self.rightBar.width(), 0)
 
     def updateSideBars(self, rect, dy):
@@ -1366,6 +1364,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     # ------------------ Menu Actions
     def on_actionIndentation_toggled(self, checked, size = None):
+        print("Aplicando a", self)
         if size is None:
           size = self.indentationWidth if self.indentUsingSpaces else self.tabWidth
         self.indentUsingSpaces = checked
@@ -1404,7 +1403,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setFlags(flags)
 
     def on_actionMarginLine_toggled(self, checked, size = None):
-        print("margin", size)
         if isinstance(size, int):
             self.marginLineSize = size
         if checked:

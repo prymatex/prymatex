@@ -88,7 +88,7 @@ class SettingsGroup(object):
 
     def addSetting(self, setting):
         self.settings[setting.name] = setting
-        if setting.tm_name != None and self.tmsettings.value(setting.tm_name) == None:
+        if setting.tm_name is not None and self.tmsettings.value(setting.tm_name) is None:
             self.tmsettings.setValue(setting.tm_name, setting.getDefault())
 
     def addListener(self, listener):
@@ -126,8 +126,10 @@ class SettingsGroup(object):
 
 class pmxConfigPorperty(object):
     """Configuration descriptor"""
-    def __init__(self, valueType = None, default = None, fset = None, tm_name = None):
+    def __init__(self, name = None, default = None, valueType = None,
+            fset = None, tm_name = None):
         assert valueType is not None or default is not None, "Not type and not default value"
+        self.name = name
         self.default = default
         self.valueType = valueType if valueType is not None else type(default)
         self.fset = fset
@@ -151,12 +153,14 @@ class pmxConfigPorperty(object):
         self.fset = function
         return self
 
-    def __get__(self, obj, objtype=None):
-        if obj is None:
-            return self
-        return self.value if hasattr(self, 'value') else self.default
+    def __get__(self, instance=None, owner=None):
+        if instance is None:
+            raise AttributeError(
+                "The '%s' attribute can only be accessed from %s instances."
+                % (self.name, owner.__name__))
+        return instance.__dict__.get(self.name, None) or self.getDefault()
 
-    def __set__(self, obj, value):
-        self.value = value
+    def __set__(self, instance, value):
+        instance.__dict__[self.name] = value
         if self.fset is not None:
-            self.fset(obj, value)
+            self.fset(instance, value)
