@@ -9,16 +9,16 @@ import sys, os, plistlib
 import prymatex
 from prymatex.utils.misc import get_home_dir
 
-#==============================================================================
+#============================================================================
 # Debug helpers
-#==============================================================================
+#============================================================================
 STDOUT = sys.stdout
 STDERR = sys.stderr
 DEBUG = True
 
-#==============================================================================
+#============================================================================
 # Configuration paths
-#==============================================================================
+#============================================================================
 USER_HOME_PATH = get_home_dir()
 PRYMATEX_HOME_NAME = ".prymatex"
 TEXTMATE_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
@@ -50,9 +50,9 @@ def get_textmate_preferences_user_path():
         plistlib.writePlist({"SelectedTheme": "bright"}, webpreview)
     return path
 
-#==============================================================================
+#============================================================================
 # Configuration paths
-#==============================================================================
+#============================================================================
 def get_conf_path(filename=None):
     """Return absolute path for configuration file with specified filename"""
     # TODO: Hacerlo para el profile
@@ -110,9 +110,9 @@ def get_module_source_path(modname, basename=None):
         srcpath = os.path.abspath(os.path.join(srcpath, basename))
     return srcpath
 
-#==============================================================================
+#============================================================================
 # Translations
-#==============================================================================
+#============================================================================
 def get_translation(modname, dirname=None):
     """Return translation callback for module *modname*"""
     if dirname is None:
@@ -145,9 +145,9 @@ def get_translation(modname, dirname=None):
 # Translation callback
 _ = get_translation("prymatex")
 
-#==============================================================================
+#============================================================================
 # Namespace Browser (Variable Explorer) configuration management
-#==============================================================================
+#============================================================================
 def get_supported_types():
     """Return a dictionnary containing types lists supported by the 
     namespace browser:

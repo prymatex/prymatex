@@ -160,11 +160,11 @@ class MainMenuMixin(object):
                     "icon": resources.get_icon("tab-new"),
                 }, "-", {
                     "text": "From template",
-                    "triggered": lambda mainWindow: mainWindow.templateDialog.createFile(),
+                    "triggered": lambda mw: mw.templateDialog.createFile(),
                     "icon": resources.get_icon("document-new"),
                 }, {
                     "text": "Project",
-                    "triggered": lambda mainWindow: mainWindow.projectDialog.createProject(),
+                    "triggered": lambda mw: mw.projectDialog.createProject(),
                     "icon": resources.get_icon("project-development-new-template"),
                 }]
             }, {
@@ -178,12 +178,12 @@ class MainMenuMixin(object):
                 "items": ["-", {
                     "text": "Open all recent files",
                     "icon": resources.get_icon("document-open-recent"),
-                    "triggered": lambda mainWindow: [ mainWindow.application.openFile(path)
-                        for path in mainWindow.application.fileManager.fileHistory ]
+                    "triggered": lambda mw: [ mw.application.openFile(path)
+                        for path in mw.application.fileManager.fileHistory ]
                 }, {
                     "text": "Remove all recent files",
                     "icon": resources.get_icon("edit-clear"),
-                    "triggered": lambda mainWindow: mainWindow.application.fileManager.clearFileHistory()
+                    "triggered": lambda mw: mw.application.fileManager.clearFileHistory()
                 }]
             }, {
                 "text": "Import project",
@@ -193,25 +193,25 @@ class MainMenuMixin(object):
                 "text": "Save",
                 'sequence': resources.get_sequence("Global", "Save"),
                 "icon": resources.get_icon("document-save"),
-                "triggered": lambda mainWindow: mainWindow.saveEditor()
+                "triggered": lambda mw: mw.saveEditor()
             }, {
                 "text": "Save as",
                 "icon": resources.get_icon("document-save-as"),
-                "triggered": lambda mainWindow: mainWindow.saveEditor(saveAs = True)
+                "triggered": lambda mw: mw.saveEditor(saveAs=True)
             }, {
                 "text": "Save all",
                 'sequence': resources.get_sequence("Global", "SaveAll", "Ctrl+Shift+S"),
                 "icon": resources.get_icon("document-save-all"),
-                "triggered": lambda mainWindow: [ mainWindow.saveEditor(editor = editor) for editor in mainWindow.editors() ]
+                "triggered": lambda mw: [ mw.saveEditor(editor=editor) for editor in mw.editors() ]
             }, "-", {
                 "text": "Close",
                 'sequence': resources.get_sequence("Global", "Close"),
                 "icon": resources.get_icon("tab-close"),
-                "triggered": lambda mainWindow: mainWindow.closeEditor()
+                "triggered": lambda mw: mw.closeEditor()
             }, {
                 "text": "Close all",
                 'sequence': resources.get_sequence("Global", "CloseAll", "Ctrl+Shift+W"),
-                "triggered": lambda mainWindow: [ mainWindow.closeEditor(editor = editor) for editor in mainWindow.editors() ]
+                "triggered": lambda mw: [ mw.closeEditor(editor=editor) for editor in mw.editors() ]
             }, {
                 "text": "Close others",
                 "icon": resources.get_icon("tab-close-other")
@@ -223,7 +223,7 @@ class MainMenuMixin(object):
                 "text": "Quit",
                 'sequence': resources.get_sequence("Global", "Quit"),
                 "icon": resources.get_icon("application-exit"),
-                "triggered": lambda mainWindow: mainWindow.application.quit()
+                "triggered": lambda mw: mw.application.quit()
             }]
         }
 
@@ -315,24 +315,24 @@ class MainMenuMixin(object):
                     "triggered": cls.closeGroup
                 }, "-", {
                     "text": "Max Columns: 1",
-                    "testChecked": lambda mainWindow: mainWindow.centralWidget().maxColumns() == 1,
-                    "toggled": lambda mainWindow, checked: checked and mainWindow.centralWidget().setMaxColumns(1)
+                    "testChecked": lambda mw: mw.centralWidget().maxColumns() == 1,
+                    "toggled": lambda mw, checked: checked and mw.centralWidget().setMaxColumns(1)
                 }, {
                     "text": "Max Columns: 2",
-                    "testChecked": lambda mainWindow: mainWindow.centralWidget().maxColumns() == 2,
-                    "toggled": lambda mainWindow, checked: checked and mainWindow.centralWidget().setMaxColumns(2)
+                    "testChecked": lambda mw: mw.centralWidget().maxColumns() == 2,
+                    "toggled": lambda mw, checked: checked and mw.centralWidget().setMaxColumns(2)
                 }, {
                     "text": "Max Columns: 3",
-                    "testChecked": lambda mainWindow: mainWindow.centralWidget().maxColumns() == 3,
-                    "toggled": lambda mainWindow, checked: checked and mainWindow.centralWidget().setMaxColumns(3)
+                    "testChecked": lambda mw: mw.centralWidget().maxColumns() == 3,
+                    "toggled": lambda mw, checked: checked and mw.centralWidget().setMaxColumns(3)
                 }, {
                     "text": "Max Columns: 4",
-                    "testChecked": lambda mainWindow: mainWindow.centralWidget().maxColumns() == 4,
-                    "toggled": lambda mainWindow, checked: checked and mainWindow.centralWidget().setMaxColumns(4)
+                    "testChecked": lambda mw: mw.centralWidget().maxColumns() == 4,
+                    "toggled": lambda mw, checked: checked and mw.centralWidget().setMaxColumns(4)
                 }, {
                     "text": "Max Columns: 5",
-                    "testChecked": lambda mainWindow: mainWindow.centralWidget().maxColumns() == 5,
-                    "toggled": lambda mainWindow, checked: checked and mainWindow.centralWidget().setMaxColumns(5)
+                    "testChecked": lambda mw: mw.centralWidget().maxColumns() == 5,
+                    "toggled": lambda mw, checked: checked and mw.centralWidget().setMaxColumns(5)
                 }]
             }, {
                 "text": "Focus group",
@@ -400,22 +400,22 @@ class MainMenuMixin(object):
                 "items": [{
                     "text": "Show bundle editor",
                     'sequence': resources.get_sequence("Global", "ShowBundleEditor", "Meta+Ctrl+Alt+B"),
-                    "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execEditor()
+                    "triggered": lambda mw: mw.bundleEditorDialog.execEditor()
                 }, "-", {
                     "text": "Edit commands",
                     'sequence': resources.get_sequence("Global", "EditCommands", "Meta+Ctrl+Alt+C"),
-                    "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execCommand()
+                    "triggered": lambda mw: mw.bundleEditorDialog.execCommand()
                 }, {
                     "text": "Edit languages",
                     'sequence': resources.get_sequence("Global", "EditLanguages", "Meta+Ctrl+Alt+L"),
-                    "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execLanguage()
+                    "triggered": lambda mw: mw.bundleEditorDialog.execLanguage()
                 }, {
                     "text": "Edit snippets",
                     'sequence': resources.get_sequence("Global", "EditSnippets", "Meta+Ctrl+Alt+S"),
-                    "triggered": lambda mainWindow: mainWindow.bundleEditorDialog.execSnippet()
+                    "triggered": lambda mw: mw.bundleEditorDialog.execSnippet()
                 }, {
                     "text": "Reload bundles",
-                    "triggered": lambda mainWindow: mainWindow.application.supportManager.reloadSupport(mainWindow.showMessage)
+                    "triggered": lambda mw: mw.application.supportManager.reloadSupport(mw.showMessage)
                 }]
             }, "-"]
         }
@@ -425,16 +425,16 @@ class MainMenuMixin(object):
             "text": "&Preferences",
             "items": [ {
                 "text": "Full screen",
-                "toggled": lambda mainWindow, checked: getattr(mainWindow, checked and "showFullScreen" or "showNormal")(),
-                "testChecked": lambda mainWindow: mainWindow.isFullScreen(),
+                "toggled": lambda mw, checked: getattr(mw, checked and "showFullScreen" or "showNormal")(),
+                "testChecked": lambda mw: mw.isFullScreen(),
                 'sequence': resources.get_sequence("Global", "ShowFullScreen", "F11")
             }, {
                 "text": "Distraction free mode",
-                "toggled": lambda mainWindow, checked: getattr(mainWindow, checked and "showDistractionFreeMode" or "showNormal")(),
+                "toggled": lambda mw, checked: getattr(mw, checked and "showDistractionFreeMode" or "showNormal")(),
                 "sequence": resources.get_sequence("Global", "ShowDistractionFreeMode", "Shift+F11")
             }, "-", {
                 "text": "Settings",
-                "triggered": lambda mainWindow: mainWindow.settingsDialog.exec_()
+                "triggered": lambda mw: mw.settingsDialog.exec_()
             }]
         }
 
@@ -443,26 +443,26 @@ class MainMenuMixin(object):
             "text": "&Help",
             "items": [ {
                 "text": "Report bug",
-                "triggered": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/issues?utf8=%E2%9C%93')
+                "triggered": lambda mw: mw.application.openUrl(prymatex.__source__ + '/issues?utf8=%E2%9C%93')
             }, {
                 "text": "Translate Prymatex",
-                "triggered": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/wiki')
+                "triggered": lambda mw: mw.application.openUrl(prymatex.__source__ + '/wiki')
             }, {
                 "text": "Project homepage",
-                "triggered": lambda mainWindow: mainWindow.application.openUrl(prymatex.__url__)
+                "triggered": lambda mw: mw.application.openUrl(prymatex.__url__)
             }, {
                 "text": "Read documentation",
-                "triggered": lambda mainWindow: mainWindow.application.openUrl(prymatex.__source__ + '/wiki')
+                "triggered": lambda mw: mw.application.openUrl(prymatex.__source__ + '/wiki')
             }, "-", {
                 "text": "Take screenshoot",
                 "icon": resources.get_icon("ksnapshot"),
                 "triggered": cls.on_actionTakeScreenshot_triggered
             }, {
                 "text": "About Qt",
-                "triggered": lambda mainWindow: mainWindow.application.aboutQt()
+                "triggered": lambda mw: mw.application.aboutQt()
             }, {
                 "text": "About Prymatex",
-                "triggered": lambda mainWindow: mainWindow.aboutDialog.exec_()
+                "triggered": lambda mw: mw.aboutDialog.exec_()
             }]
         }
         return menu
@@ -472,10 +472,12 @@ def tabSelectableModelFactory(mainWindow):
     Shows select tab, and change to selected
     """
     def dataFunction():
-        return [dict(data = tab,
-                template = "<table width='100%%'><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(file)s</small></td></tr></table>",
-                display = { "name": tab.tabTitle(), "file": tab.filePath },
-                image = tab.tabIcon()) for tab in mainWindow.centralWidget().allWidgets()]
+        return [dict(data=tab,
+                template="<table width='100%%'><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(file)s</small></td></tr></table>",
+                display={"name": tab.tabTitle(), "file": tab.filePath},
+                image=tab.tabIcon()) for tab in mainWindow.centralWidget().allWidgets()]
 
-    return selectableModelFactory(mainWindow,
-        dataFunction, filterFunction = lambda text, item: item["display"]["name"].find(text) != -1)
+    return selectableModelFactory(
+        mainWindow, dataFunction, 
+        filterFunction=lambda text, item: \
+            item["display"]["name"].find(text) != -1)

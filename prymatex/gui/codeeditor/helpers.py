@@ -61,8 +61,6 @@ class TabTriggerHelper(CodeEditorKeyHelper):
 
 class SmartTypingPairsHelper(CodeEditorKeyHelper):
     def accept(self, event, cursor = None):
-        # CHANGED: Aca uso editor.braces para no estar atacando los scopes
-        # por los settings.smartTypingPairs
         character = event.text()
         pairs = [pair for pair in self.editor.braces if character in pair]
         
