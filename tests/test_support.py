@@ -35,6 +35,18 @@ class SupportTests(unittest.TestCase):
         for actionItem in self.manager.getAllActionItems():
             if actionItem.TYPE == "snippet":
                 print(actionItem.content)
+                
+    def test_preferences(self):
+        for preference in self.manager.getAllPreferences():
+            if preference.settings.symbolTransformation:
+                print(preference.dump())
+                #print(u"%s" % preference.settings.symbolTransformation)
+                print(self.manager.readPlist(preference.currentSourcePath()))
+
+    def test_snippet(self):
+        for actionItem in self.manager.getAllActionItems():
+            if actionItem.TYPE == "snippet":
+                print(actionItem.content)
 
     def test_syntax(self):
         syntax = self.manager.getSyntaxByScopeName('source.python')
@@ -47,11 +59,6 @@ class SupportTests(unittest.TestCase):
         print("Time:", (time() - start)/1 )
         print("Hash:", processor.hashValue )
         file.close()
-            
-    def test_preferences(self):
-        settings = self.manager.getPreferenceSettings('text.html.textile markup.heading.textile')
-        for attr in dir(settings):
-            print(attr, getattr(settings, attr, None))
 
     def test_adhoc_snippet(self):
         snippet = 'def pepe(${3:self${2/([^,])?.*/(?1:, )/}${2:arg}}):\n\t${4/.+/"""/}${4:docstring for pepe}${4/.+/"""\n/}${4/.+/\t/}${0:pass}'

@@ -170,7 +170,7 @@ class TabIndentHelper(CodeEditorKeyHelper):
             #Tiene seleccion en distintos bloques, es un indentar
             self.editor.indentBlocks()
         else:
-            cursor.insertText(self.editor.tabKeyBehavior())
+            cursor.insertText(self.editor.tabKeyBehavior(cursor = cursor))
 
 class BacktabUnindentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Backtab

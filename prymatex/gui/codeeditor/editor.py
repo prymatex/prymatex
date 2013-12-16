@@ -427,11 +427,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def tabKeyBehavior(self, cursor = None):
         if not self.indentUsingSpaces:
             return '\t'
-        else:
-            #Insertar un numero multiplo de espacios a la posicion del cursor
-            cursor = cursor or self.textCursor()
-            spaces = self.indentationWidth - (cursor.columnNumber() % self.indentationWidth)
-            return ' ' * spaces
+        elif cursor is not None:
+            return ' ' * (self.indentationWidth - (cursor.columnNumber() % self.indentationWidth))
+        return ' ' * self.indentationWidth
 
     # Flags
     def getFlags(self):
@@ -735,23 +733,26 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         userData = self.blockUserData(block)
         _, settings = self.settings(cursor)
         indentMarks = settings.indent(block.text()[:positionInBlock])
+
+        indent = self.tabKeyBehavior()
+
         if settings.INDENT_INCREASE in indentMarks:
             self.logger.debug("Increase indent")
-            indent = userData.indent + self.tabKeyBehavior()
+            blockIndent = userData.indent + indent
         elif settings.INDENT_NEXTLINE in indentMarks:
             #TODO: Creo que este no es el correcto
             self.logger.debug("Increase next line indent")
-            indent = userData.indent + self.tabKeyBehavior()
+            blockIndent = userData.indent + indent
         elif settings.UNINDENT in indentMarks:
             self.logger.debug("Unindent")
-            indent = ""
+            blockIndent = ""
         elif settings.INDENT_DECREASE in indentMarks:
             self.logger.debug("Decrease indent")
-            indent = userData.indent[:-len(self.tabKeyBehavior())]
+            blockIndent = userData.indent[:-len(indent)]
         else:
             self.logger.debug("Preserve indent")
-            indent = userData.indent[:positionInBlock]
-        cursor.insertText("\n%s" % indent)
+            blockIndent = userData.indent[:positionInBlock]
+        cursor.insertText("\n%s" % blockIndent)
         self.ensureCursorVisible()
 
     # ------------ Bundle Items

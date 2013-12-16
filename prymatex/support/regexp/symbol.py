@@ -17,5 +17,3 @@ class SymbolTransformation(object):
                 transformation = node.replace({}, variables = {"s": text})
                 if transformation:
                     return transformation
-
-    

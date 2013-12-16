@@ -19,6 +19,14 @@ class ContextSequenceTreeNode(TreeNodeBase):
     def __init__(self, sequence, parent = None):
         TreeNodeBase.__init__(self, sequence.name, parent)
         self.sequence = sequence
+        self.qobjects = []
+
+    def registerObject(self, qobject):
+        if isinstance(qobject, QtGui.QAction):
+            qobject.setShortcut(self.sequence.key())
+        elif isinstance(qobject, QtGui.QShortcut):
+            qobject.setKey(self.sequence.key())
+        self.qobjects.append(qobject)
 
     def shortcut(self):
         return self.sequence.key()
@@ -29,23 +37,17 @@ class ContextSequenceTreeNode(TreeNodeBase):
 class ShortcutsTreeModel(AbstractNamespaceTreeModel):
     def __init__(self, parent = None):
         AbstractNamespaceTreeModel.__init__(self, separator = ".", parent = parent)
-        self.shortcuts = []
-    
-    def registerShortcut(self, qobject, sequence):
-        self.shortcuts.append( (qobject, sequence) )
-        if isinstance(qobject, QtGui.QAction):
-            qobject.setShortcut(sequence.key())
-        elif isinstance(qobject, QtGui.QShortcut):
-            qobject.setKey(sequence.key())
 
+    def registerShortcut(self, qobject, sequence):
         node = self.nodeForNamespace(sequence.fullName())
         if node is None:
-            self.insertNamespaceNode(sequence.context, ContextSequenceTreeNode(sequence))
-        else:
-            print("Agregar el objeto")
+            node = ContextSequenceTreeNode(sequence)
+            self.insertNamespaceNode(sequence.context, node)
+        node.registerObject(qobject)
 
     def applyShortcuts(self):
         """Apply shortcuts settings to all widgets/plugins"""
+        # TODO Usar los item del tree
         toberemoved = []
         for index, (qobject, sequence) in enumerate(self.shortcuts):
             try:
