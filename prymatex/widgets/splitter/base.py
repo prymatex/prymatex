@@ -363,6 +363,7 @@ class SplitterWidget(QtGui.QSplitter):
         
         self.setCurrentWidget(self._current_widget)
         self._set_focus()
+        self._fix_sizes(self)
         self.layoutChanged.emit()
 
     def moveWidgetToGroup(self, group, widget = None):
@@ -754,6 +755,11 @@ class SplitterWidget(QtGui.QSplitter):
         sizes = dspl.sizes()
         new_size = sum(sizes) / len(sizes)
         dspl.setSizes([new_size for _ in sizes])
+        # Fix childrens
+        if dspl.count() > 0:
+            group = dspl.widget(0)
+            if isinstance(group, QtGui.QSplitter):
+                self._fix_sizes(group)
 
     def _horizontal_split(self, spl, idx, hs):
         """ Returns a tuple of the splitter and index where the new tab widget
