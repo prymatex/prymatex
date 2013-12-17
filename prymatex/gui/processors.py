@@ -3,19 +3,19 @@
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex.support.processor import PMXCommandProcessor
+from prymatex.support.processor import CommandProcessorMixin
 
 #Este es un processor de commands para la Main Window
-class MainWindowCommandProcessor(PMXCommandProcessor):
+class MainWindowCommandProcessor(CommandProcessorMixin):
     def __init__(self, mainWindow):
-        super(PMXCommandProcessor, self).__init__()
+        super(MainWindowCommandProcessor, self).__init__()
         self.mainWindow = mainWindow
 
-    def startCommand(self, command):
+    def beginExecution(self, command):
         self.command = command
         self.__env = None
         
-    def endCommand(self, command):
+    def endExecution(self, command):
         self.command = None
         
     def environmentVariables(self):

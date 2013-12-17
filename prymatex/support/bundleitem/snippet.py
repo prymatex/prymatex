@@ -46,6 +46,6 @@ Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''
     def execute(self, processor):
         if not hasattr(self, 'snippet'):
             self.setSnippet(Snippet(self.content))
-        processor.startSnippet(self)
+        processor.beginExecution(self)
         SnippetHandler.execute(self, processor)
         processor.selectHolder()

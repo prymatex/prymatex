@@ -146,12 +146,12 @@ class SyntaxNode(object):
 
     def parse(self, text, processor = None):
         if processor:
-            processor.startParsing(self.name)
+            processor.beginExecution(self)
         stack = [( self, None )]
         for line in text.splitlines(True):
             self.parse_line(stack, line, processor)
         if processor:
-            processor.endParsing(self.name)
+            processor.endExecution(self)
     
     def parse_line(self, stack, line, processor):
         if processor:

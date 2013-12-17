@@ -8,7 +8,7 @@ from .base import CodeEditorBaseMode
 class CodeEditorSnippetMode(CodeEditorBaseMode):
     @property
     def snippet(self):
-        return self.editor.snippetProcessor.snippet
+        return self.editor.snippetProcessor.bundleItem
 
     def initialize(self, editor):
         CodeEditorBaseMode.initialize(self, editor)

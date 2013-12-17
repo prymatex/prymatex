@@ -2,45 +2,11 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtGui
-from prymatex.support.processor import PMXCommandProcessor
 
-class PMXCommandProcessor(PMXCommandProcessor):
-    def __init__(self, editor):
-        super(PMXCommandProcessor, self).__init__()
-        self.editor = editor
-        self.cursorWrapper = None
+from .base import CodeEditorBaseProcessor
+from prymatex.support.processor import CommandProcessorMixin
 
-    def startCommand(self, command):
-        self.command = command
-        self.__env = None
-
-    def endCommand(self, command):
-        self.command = None
-
-    def environmentVariables(self):
-        if self.__env is None:
-            # TODO No es mejor que tambien el editor saque de la mainwindow para
-            # preservar la composision?
-            self.__env = {}
-            envs = [ self.command.environmentVariables(),
-                self.editor.mainWindow.environmentVariables(),
-                self.editor.environmentVariables(),
-                self.baseEnvironment ]
-            for env in envs:
-                self.__env.update(env)
-        return self.__env
-
-    def shellVariables(self):
-        leftSettings, rightSettings = self.editor.settings(self.cursorWrapper)
-        return rightSettings.shellVariables
-
-    def configure(self, settings):
-        self.asynchronous = settings.get("asynchronous", True)
-        self.cursorWrapper = settings.get("cursorWrapper", self.editor.textCursor())
-        self.disableIndent = settings.get("disableIndent", False)
-        self.baseEnvironment = settings.get("environment", {})
-        self.errorCommand = settings.get("errorCommand", False)
-
+class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin):
     def formatAsXml(self, text, firstBlock, lastBlock, startIndex, endIndex):
         result = []
         block = firstBlock
@@ -67,7 +33,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
                 break
             block = block.next()
         return "\n".join(result)
-
+    
     # --------------------- Inputs
     def selection(self, inputFormat = None):
         if self.cursorWrapper.hasSelection():

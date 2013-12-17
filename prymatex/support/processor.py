@@ -6,12 +6,16 @@ def nop(self, *args):
 
 def return_true(self, *args):
     return True
-    
-######################### SyntaxProcessor #########################
 
-PMXSyntaxProcessor = type("PMXSyntaxProcessor", (object, ), {
-    "startParsing": nop,
-    "endParsing": nop,
+BaseProcessorMixin = type("BaseProcessorMixin", (object, ), {
+    "beginExecution": nop,
+    "endExecution": nop,
+    "environmentVariables": nop,
+    "shellVariables": nop,
+})    
+
+######################### SyntaxProcessor #########################
+SyntaxProcessorMixin = type("SyntaxProcessorMixin", (BaseProcessorMixin, ), {
     "openTag": nop,
     "closeTag": nop,
     "beginLine": nop,
@@ -19,11 +23,7 @@ PMXSyntaxProcessor = type("PMXSyntaxProcessor", (object, ), {
 })
 
 ######################### Command Processor #########################
-PMXCommandProcessor = type("PMXCommandProcessor", (object, ), {
-    "startCommand": nop,
-    "endCommand": nop,
-    "environmentVariables": nop,
-    "shellVariables": nop,
+CommandProcessorMixin = type("CommandProcessorMixin", (BaseProcessorMixin, ), {
     #Inputs
     "document": nop,
     "line": nop,
@@ -56,14 +56,10 @@ PMXCommandProcessor = type("PMXCommandProcessor", (object, ), {
 })
 
 ######################### Snipper Processor #########################
-PMXSnippetProcessor = type("PMXSnippetProcessor", (object, ), {
-    "startSnippet": nop,
-    "endSnippet": nop,
-    "startRender": nop,
+SnippetProcessorMixin = type("SnippetProcessorMixin", (BaseProcessorMixin, ), {
+    "beginRender": nop,
     "endRender": nop,
     "runShellScript": nop,
-    "environmentVariables": nop,
-    "shellVariables": nop,
     # cursor or caret
     "caretPosition": nop,
     # select
@@ -73,11 +69,7 @@ PMXSnippetProcessor = type("PMXSnippetProcessor", (object, ), {
 })
 
 ######################### Macro Processor #########################
-PMXMacroProcessor = type("PMXMacroProcessor", (object, ), {
-    "startMacro": nop,
-    "endMacro": nop,
-    "environmentVariables": nop,
-    "shellVariables": nop,
+MacroProcessorMixin = type("MacroProcessorMixin", (BaseProcessorMixin, ), {
     # Move
     "moveRight": nop,
     "moveLeft": nop,
@@ -110,7 +102,7 @@ PMXMacroProcessor = type("PMXMacroProcessor", (object, ), {
 })
     
 ############# Debugs Preocessors ###############
-class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
+class DebugSyntaxProcessor(SyntaxProcessorMixin):
     def __init__(self, showOutput = True, hashOutput = False):
         self.line_number = 0
         self.printable_line = ''
@@ -140,19 +132,19 @@ class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
         if self.showOutput:
             print('%s%s' % (self.line_marks, line))
 
-    def startParsing(self, name):
+    def beginExecution(self, syntax):
         if self.showOutput:
-            print('{%s' % name)
+            print('{%s' % syntax.name)
         if self.hashOutput:
-            self.hashValue = hash("%s:%d" % (name, self.hashValue))
+            self.hashValue = hash("%s:%d" % (syntax.name, self.hashValue))
             
-    def endParsing(self, name):
+    def endExecution(self, syntax):
         if self.showOutput:
-            print('}%s' % name)
+            print('}%s' % syntax.name)
         if self.hashOutput:
-            self.hashValue = hash("%s:%d" % (name, self.hashValue))
+            self.hashValue = hash("%s:%d" % (syntax.name, self.hashValue))
 
-class PMXDebugSnippetProcessor(PMXSnippetProcessor):
+class DebugSnippetProcessor(SnippetProcessorMixin):
     def __init__(self):
         self.snippet = None
         self.transformation = None
@@ -167,22 +159,13 @@ class PMXDebugSnippetProcessor(PMXSnippetProcessor):
     def environmentVariables(self, format = None):
         return self.env
     
-    def startSnippet(self, snippet):
+    def beginExecution(self, snippet):
         self.snippet = snippet
         self.text = ""
         self.position = 0
     
-    def endSnippet(self):
+    def endExecution(self, snippet):
         self.snippet = None
-    
-    def startTransformation(self, transformation):
-        self.transformation = True
-        self.capture = ""
-        
-    def endTransformation(self, transformation):
-        self.transformation = False
-        text = transformation.transform(self.capture)
-        self.insertText(text)
         
     def cursorPosition(self):
         return self.position

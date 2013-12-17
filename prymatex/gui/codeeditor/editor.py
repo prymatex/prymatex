@@ -19,8 +19,8 @@ from prymatex.models.support import BundleItemTreeNode
 from .userdata import CodeEditorBlockUserData, CodeEditorScopeData
 from .addons import CodeEditorAddon
 from .sidebar import CodeEditorSideBar, SideBarWidgetAddon
-from .processors import (PMXCommandProcessor, PMXSnippetProcessor,
-        PMXMacroProcessor)
+from .processors import (CodeEditorCommandProcessor, CodeEditorSnippetProcessor,
+        CodeEditorMacroProcessor)
 from .modes import CodeEditorBaseMode
 
 from .highlighter import PMXSyntaxHighlighter
@@ -147,9 +147,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.bookmarkSelectableModel = bookmarkSelectableModelFactory(self)
 
         #Processors
-        self.commandProcessor = PMXCommandProcessor(self)
-        self.macroProcessor = PMXMacroProcessor(self)
-        self.snippetProcessor = PMXSnippetProcessor(self)
+        self.commandProcessor = CodeEditorCommandProcessor(self)
+        self.macroProcessor = CodeEditorMacroProcessor(self)
+        self.snippetProcessor = CodeEditorSnippetProcessor(self)
 
         #Highlighter
         self.syntaxHighlighter = PMXSyntaxHighlighter(self)

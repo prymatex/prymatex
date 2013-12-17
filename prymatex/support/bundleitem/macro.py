@@ -34,9 +34,9 @@ class PMXMacro(PMXBundleItem):
         return dataHash
 
     def execute(self, processor):
-        processor.startMacro(self)
+        processor.beginExecution(self)
         for command in self.commands:
             name = command['command'][:-1]
             args = [command['argument']] if 'argument' in command else []
             getattr(processor, name, None)(*args)
-        processor.endMacro(self)
+        processor.endExecution(self)

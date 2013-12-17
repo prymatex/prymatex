@@ -134,14 +134,21 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         return environment
     
     def getInputText(self, processor):
-        def getInputTypeAndValue(inputType, format):
+        def getInputTypeAndValue(inputType, inputFormat, mode):
             if inputType is None or inputType == "none": return None, None
-            return inputType, getattr(processor, inputType)(format)
-        inputType, value = getInputTypeAndValue(self.input, self.inputFormat)
+            return inputType, getattr(processor, inputType)(inputFormat, mode)
+        
+        # -------- Try input
+        inputType, value = getInputTypeAndValue(self.input, self.inputFormat, mode = "input")
+        
+        # -------- Try fallback
         if value is None and self.fallbackInput is not None:
-            inputType, value = getInputTypeAndValue(self.fallbackInput, self.inputFormat)
+            inputType, value = getInputTypeAndValue(self.fallbackInput, self.inputFormat, mode = "fallback")
+        
+        # -------- Try standard
         if value is None and self.standardInput is not None:
-            inputType, value = getInputTypeAndValue(self.standardInput, self.inputFormat)
+            inputType, value = getInputTypeAndValue(self.standardInput, self.inputFormat, mode = "standard")
+        
         if inputType == 'selection' and value is None:
             value = processor.document(self.inputFormat)
             inputType = "document"
@@ -176,7 +183,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         self.executeCallback(processor, functools.partial(self.afterExecute, processor))
         
     def executeCallback(self, processor, callback):
-        processor.startCommand(self)
+        processor.beginExecution(self)
         if self.beforeExecute(processor):
             inputType, inputValue = self.getInputText(processor)
             self.manager.runSystemCommand(
@@ -201,7 +208,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         # Delete temp file
         if outputHandler != "error":
             context.removeTempFile()
-        processor.endCommand(self)
+        processor.endExecution(self)
 
 class PMXDragCommand(PMXCommand):
     KEYS = ( 'draggedFileExtensions', )

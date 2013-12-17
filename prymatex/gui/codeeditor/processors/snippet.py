@@ -2,61 +2,26 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtGui
-from prymatex.support.processor import PMXSnippetProcessor
 
-class PMXSnippetProcessor(PMXSnippetProcessor):
-    def __init__(self, editor):
-        self.editor = editor
-        self.cursorWrapper = self.snippet = None
-        self.tabreplacement = "\t"
-        self.indentation = ""
-        self.__env = None
+from .base import CodeEditorBaseProcessor
+from prymatex.support.processor import SnippetProcessorMixin
 
-    def environmentVariables(self):
-        if self.__env is None:
-            # TODO No es mejor que tambien el editor saque de la mainwindow para 
-            # preservar la composision?
-            self.__env = {}
-            envs = [ self.snippet.environmentVariables(),
-                self.editor.mainWindow.environmentVariables(),
-                self.editor.environmentVariables(),
-                self.baseEnvironment ]
-            for env in envs:
-                self.__env.update(env)
-        return self.__env
-
-    def shellVariables(self):
-        leftSettings, rightSettings = self.editor.settings(self.cursorWrapper)
-        return rightSettings.shellVariables
-
-    def startSnippet(self, snippet):
-        """Inicia el snippet"""
-        self.snippet = snippet
-        
-        self.tabreplacement = self.editor.tabKeyBehavior()
-        self.indentation = "" if self.disableIndent else self.editor.blockUserData(self.cursorWrapper.block()).indent
-        
-        self.__env = None
+class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin):
+    def beginExecution(self, snippet):
+        CodeEditorBaseProcessor.beginExecution(self, snippet)
         self.editor.modeChanged.emit("snippet")
 
-    def endSnippet(self, snippet):
-        """Termina el snippet"""
-        self.cursorWrapper = self.snippet = None
-        self.output = ""
+    def endExecution(self, snippet):
+        CodeEditorBaseProcessor.endExecution(self, snippet)
         self.editor.modeChanged.emit("")
 
-    def startRender(self):
+    def beginRender(self):
         self.output = ""
         self.__startPosition = self.caretPosition()
 
     def endRender(self):
         self.__endPosition = self.caretPosition()
         self.editor.updatePlainText(self.output, self.cursorWrapper)
-
-    def configure(self, settings):
-        self.cursorWrapper = settings.get("cursorWrapper", self.editor.textCursor())
-        self.disableIndent = settings.get("disableIndent", False)
-        self.baseEnvironment = settings.get("environment", {})
 
     def caretPosition(self):
         return self.cursorWrapper.selectionStart() + len(self.output)
@@ -67,7 +32,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.output += text.replace('\t', self.tabreplacement)
     
     def selectHolder(self):
-        start, end = self.snippet.currentPosition()
+        start, end = self.bundleItem.currentPosition()
         self.editor.setTextCursor(self.editor.newCursorAtPosition(start, end))
         #if hasattr(holder, 'options'):
         #    self.editor.showFlatPopupMenu(
@@ -103,4 +68,4 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
 
     def render(self, cursor):
         self.cursorWrapper = cursor
-        self.snippet.render(self)
+        self.bundleItem.render(self)

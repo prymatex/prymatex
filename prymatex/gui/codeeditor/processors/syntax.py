@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.support.processor import PMXSyntaxProcessor
+from .base import CodeEditorBaseProcessor
+from prymatex.support.processor import SyntaxProcessorMixin
 from prymatex.gui.codeeditor.userdata import CodeEditorTokenData
 
-
-class CodeEditorSyntaxProcessor(PMXSyntaxProcessor):
-    def __init__(self, editor):
-        self.editor = editor
-
+class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     # -------- Public api
     def tokens(self):
         return self.__tokens
@@ -20,8 +17,8 @@ class CodeEditorSyntaxProcessor(PMXSyntaxProcessor):
         return self.stackScopes
 
     # -------- START PARSING
-    def startParsing(self, scope):
-        self.setScopes([scope])
+    def beginExecution(self, syntax):
+        self.setScopes([ syntax.name ])
 
     # -------- BEGIN NEW LINE
     def beginLine(self, line):
@@ -32,13 +29,13 @@ class CodeEditorSyntaxProcessor(PMXSyntaxProcessor):
             self.openToken(0)
 
     # -------- OPEN TAG
-    def openTag(self, scope, position):
+    def openTag(self, scopeName, position):
         #Open token
         self.openToken(position)
-        self.stackScopes.append(scope)
+        self.stackScopes.append(scopeName)
 
     # -------- CLOSE TAG
-    def closeTag(self, scope, position):
+    def closeTag(self, scopeName, position):
         self.closeToken(position)
         self.stackScopes.pop()
 
@@ -47,7 +44,7 @@ class CodeEditorSyntaxProcessor(PMXSyntaxProcessor):
         self.closeToken(len(self.line), closeAll=True)
 
     # -------- END PARSING
-    def endParsing(self, scope):
+    def endExecution(self, syntax):
         pass
 
     # --------- Create tokens

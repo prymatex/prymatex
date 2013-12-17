@@ -2,45 +2,11 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtGui
-from prymatex.support import PMXMacroProcessor
 
-class PMXMacroProcessor(PMXMacroProcessor):
-    def __init__(self, editor):
-        super(PMXMacroProcessor, self).__init__()
-        self.editor = editor
-        self.__env = None
+from .base import CodeEditorBaseProcessor
+from prymatex.support.processor import MacroProcessorMixin
 
-    def startMacro(self, macro):
-        """docstring for startMacro"""
-        self.macro = macro
-        self.__env = None
-        
-    def endMacro(self, macro):
-        pass
-
-    def environmentVariables(self):
-        if self.__env is None:
-            # TODO No es mejor que tambien el editor saque de la mainwindow para 
-            # preservar la composision?
-            self.__env = {}
-            envs = [ self.macro.environmentVariables(),
-                self.editor.mainWindow.environmentVariables(),
-                self.editor.environmentVariables(),
-                self.baseEnvironment ]
-            for env in envs:
-                self.__env.update(env)
-        return self.__env
-        
-    def shellVariables(self):
-        leftSettings, rightSettings = self.editor.settings()
-        return rightSettings.shellVariables
-
-    def configure(self, settings):
-        # TODO self.cursorWrapper
-        self.tabTriggered = settings.get("tabTriggered", False)
-        self.disableIndent = settings.get("disableIndent", False)
-        self.baseEnvironment = settings.get("environment", {})
-
+class CodeEditorMacroProcessor(CodeEditorBaseProcessor, MacroProcessorMixin):
     # Move
     # QTextCursor::NoMove 0 Keep the cursor where it is 
     # QTextCursor::Start 1 Move to the start of the document. 

@@ -57,11 +57,11 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def asyncHighlightFunction(self):
         block = self.document().begin()
-        scopeName = self.syntax.scopeName
         
-        self.processor.startParsing(scopeName)
-        stack = [( self.syntax.grammar, None )]
+        self.processor.beginExecution(self.syntax)
+        scopeName = self.syntax.scopeName
         blockState = -1
+        stack = [( self.syntax.grammar, None )]
         while block.isValid():
             text = block.text() + "\n"
             userData = self.editor.blockUserData(block)
@@ -92,7 +92,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             block = block.next()
             yield
         self.document().markContentsDirty(0, self.document().characterCount())
-        self.processor.endParsing(self.syntax.scopeName)
+        self.processor.endExecution(self.syntax)
     
     @staticmethod
     def __build_userData_hash(scope, text, state):
@@ -111,7 +111,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         if userData.testStateHash(self.__build_userData_hash(self.syntax.scopeName, text, self.previousBlockState())):
             self.applyFormat(userData)
         else:
-            self.processor.startParsing(self.syntax.scopeName)
+            self.processor.beginExecution(self.syntax)
             if self.previousBlockState() == self.MULTI_LINE:
                 #Recupero una copia del stack y los scopes del user data
                 stack, scopes = self.editor.blockUserData(block.previous()).processorState()
@@ -128,7 +128,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
             # A parserar mi amor, vamos a parsear mi amor
             self.syntax.parseLine(stack, text, self.processor)
-            self.processor.endParsing(self.syntax.scopeName)
+            self.processor.endExecution(self.syntax)
             
             self.setupBlockUserData(text, block, userData)
             userData.setStateHash(self.__build_userData_hash(self.syntax.scopeName, text, self.previousBlockState()))
