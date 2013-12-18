@@ -20,7 +20,7 @@ from .userdata import CodeEditorBlockUserData, CodeEditorScopeData
 from .addons import CodeEditorAddon
 from .sidebar import CodeEditorSideBar, SideBarWidgetAddon
 from .processors import (CodeEditorCommandProcessor, CodeEditorSnippetProcessor,
-        CodeEditorMacroProcessor)
+        CodeEditorMacroProcessor, CodeEditorSyntaxProcessor)
 from .modes import CodeEditorBaseMode
 
 from .highlighter import PMXSyntaxHighlighter
@@ -150,6 +150,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.commandProcessor = CodeEditorCommandProcessor(self)
         self.macroProcessor = CodeEditorMacroProcessor(self)
         self.snippetProcessor = CodeEditorSnippetProcessor(self)
+        self.syntaxProcessor = CodeEditorSyntaxProcessor(self)
 
         #Highlighter
         self.syntaxHighlighter = PMXSyntaxHighlighter(self)
@@ -424,12 +425,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         return leftToken.settings, rightToken.settings
 
     # ------------ Obteniendo datos del editor
-    def tabKeyBehavior(self, cursor = None):
-        if not self.indentUsingSpaces:
-            return '\t'
-        elif cursor is not None:
-            return ' ' * (self.indentationWidth - (cursor.columnNumber() % self.indentationWidth))
-        return ' ' * self.indentationWidth
+    def tabKeyBehavior(self):
+        return ' ' * self.indentationWidth if self.indentUsingSpaces else '\t' 
 
     # Flags
     def getFlags(self):
@@ -472,19 +469,24 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     # ------------------- Syntax
     def syntax(self):
-        return self.syntaxHighlighter.syntax
+        return self.syntaxProcessor.bundleItem
 
     def setSyntax(self, syntax):
-        if self.syntaxHighlighter.syntax != syntax:
-            self.syntaxHighlighter.stop()
-            self.aboutToHighlightChange.emit()
+        if self.syntaxProcessor.bundleItem == syntax:
+            return
+        
+        if self.syntaxProcessor.bundleItem is not None:
+            self.syntaxProcessor.endExecution(self.syntaxProcessor.bundleItem)
+        self.syntaxHighlighter.stop()
+        self.aboutToHighlightChange.emit()
 
-            # Set syntax
-            self.syntaxHighlighter.setSyntax(syntax)
-            self.syntaxChanged.emit(syntax)
-
-            # Run
-            self.syntaxHighlighter.runAsyncHighlight(self.highlightChanged.emit)
+        # Set syntax
+        self.syntaxProcessor.beginExecution(syntax)
+        self.syntaxHighlighter.setSyntax(syntax)
+        self.syntaxChanged.emit(syntax)
+        
+        # Run
+        self.syntaxHighlighter.runAsyncHighlight(self.highlightChanged.emit)
 
     # -------------------- SideBars
     def updateViewportMargins(self):
@@ -732,6 +734,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         positionInBlock = cursor.positionInBlock()
         userData = self.blockUserData(block)
         _, settings = self.settings(cursor)
+
         indentMarks = settings.indent(block.text()[:positionInBlock])
 
         indent = self.tabKeyBehavior()

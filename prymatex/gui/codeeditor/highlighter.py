@@ -6,20 +6,16 @@ import re
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex.gui.codeeditor.processors import CodeEditorSyntaxProcessor
-
 class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     NO_STATE = -1
     SINGLE_LINE = 1
     MULTI_LINE = 2
     FORMAT_CACHE = {}
     
-    def __init__(self, editor, syntax = None, theme = None):
+    def __init__(self, editor):
         QtGui.QSyntaxHighlighter.__init__(self, editor)
         self.editor = editor
-        self.processor = CodeEditorSyntaxProcessor(editor)
-        self.syntax = syntax
-        self.theme = theme
+        self.syntax = self.theme = None
         self.__format_cache = None
         
         self.highlightTask = self.editor.application.schedulerManager.idleTask()
@@ -57,29 +53,26 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def asyncHighlightFunction(self):
         block = self.document().begin()
-        
-        self.processor.beginExecution(self.syntax)
+        processor = self.editor.syntaxProcessor
         scopeName = self.syntax.scopeName
-        blockState = -1
+
+        processor.beginParse(scopeName)
         stack = [( self.syntax.grammar, None )]
         while block.isValid():
             text = block.text() + "\n"
             userData = self.editor.blockUserData(block)
             
-            if not userData.testStateHash(self.__build_userData_hash(scopeName, text, blockState)):
-                self.syntax.parseLine(stack, text, self.processor)
+            if not userData.testStateHash(self.__build_userData_hash(scopeName, text, block.previous().userState())):
+                self.syntax.parseLine(stack, text, processor)
 
-                self.setupBlockUserData(text, block, userData)
-                userData.setStateHash(self.__build_userData_hash(scopeName, text, blockState))
+                self.setupBlockUserData(processor.tokens(), text, block, userData)
+                userData.setStateHash(self.__build_userData_hash(scopeName, text, block.previous().userState()))
 
                 # Store stack and state
-                blockState = len(stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
-                if blockState == self.MULTI_LINE:
-                    userData.setProcessorState((stack[:], self.processor.scopes()[:])) #Store copy
-                block.setUserState(blockState)
-            else:
-                blockState = block.userState()
-
+                block.setUserState(len(stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE)
+                if block.userState() == self.MULTI_LINE:
+                    userData.setProcessorState((stack[:], processor.scopes()[:])) #Store copy
+            
             formats = []
             for token in userData.tokens():
                 frange = QtGui.QTextLayout.FormatRange()
@@ -92,26 +85,27 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             block = block.next()
             yield
         self.document().markContentsDirty(0, self.document().characterCount())
-        self.processor.endExecution(self.syntax)
+        processor.endParse(scopeName)
     
     @staticmethod
     def __build_userData_hash(scope, text, state):
-        return hash("%s:%s:%s" % (scope, text, state))
+        return hash("%s:%s:%d" % (scope, text, state))
 
-    def setupBlockUserData(self, text, block, userData):
-        userData.setTokens(self.processor.tokens())
+    def setupBlockUserData(self, tokens, text, block, userData):
+        userData.setTokens(tokens)
         userData.setBlank(text.strip() == "")
         # Process by handlers
         self.editor.processBlockUserData(text, block, userData)
     
     def syncHighlightFunction(self, text):
         text += "\n"
+        processor = self.editor.syntaxProcessor
         block = self.currentBlock()
         userData = self.editor.blockUserData(block)
         if userData.testStateHash(self.__build_userData_hash(self.syntax.scopeName, text, self.previousBlockState())):
             self.applyFormat(userData)
         else:
-            self.processor.beginExecution(self.syntax)
+            processor.beginParse(self.syntax.scopeName)
             if self.previousBlockState() == self.MULTI_LINE:
                 #Recupero una copia del stack y los scopes del user data
                 stack, scopes = self.editor.blockUserData(block.previous()).processorState()
@@ -121,22 +115,22 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 else:
                     #Set copy, not original
                     stack = stack[:]
-                    self.processor.setScopes(scopes[:])
+                    processor.setScopes(scopes[:])
             else:
                 #Creo un stack y scopes nuevos
                 stack = [[ self.syntax.grammar, None ]]
 
             # A parserar mi amor, vamos a parsear mi amor
-            self.syntax.parseLine(stack, text, self.processor)
-            self.processor.endExecution(self.syntax)
+            self.syntax.parseLine(stack, text, processor)
+            processor.endParse(self.syntax.scopeName)
             
-            self.setupBlockUserData(text, block, userData)
+            self.setupBlockUserData(processor.tokens(), text, block, userData)
             userData.setStateHash(self.__build_userData_hash(self.syntax.scopeName, text, self.previousBlockState()))
             
             # Store stack and state
             blockState = len(stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
             if blockState == self.MULTI_LINE:
-                userData.setProcessorState((stack[:], self.processor.scopes()[:])) #Store copy
+                userData.setProcessorState((stack[:], processor.scopes()[:])) #Store copy
             self.setCurrentBlockState(blockState)
 
             self.applyFormat(userData)

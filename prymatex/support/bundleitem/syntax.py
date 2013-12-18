@@ -144,24 +144,20 @@ class SyntaxNode(object):
                 son._ex_contentName = son._contentNameFormater.expand(match)
         return (son, match)
 
-    def parse(self, text, processor = None):
-        if processor:
-            processor.beginExecution(self)
+    def parse(self, text, processor):
+        processor.beginParse(self.scopeName)
         stack = [( self, None )]
         for line in text.splitlines(True):
             self.parse_line(stack, line, processor)
-        if processor:
-            processor.endExecution(self)
+        processor.endParse(self.scopeName)
     
     def parse_line(self, stack, line, processor):
-        if processor:
-            processor.beginLine(line)
+        processor.beginLine(line)
         position = self.parse_source(0, stack, line, processor)
         # Fixed stack
         if stack and stack[-1][0].name is None and stack[-1][0].contentName is None:
             stack.pop()
-        if processor:
-            processor.endLine(line)
+        processor.endLine(line)
     
     def parse_source(self, position, stack, source, processor):
         top, match = stack[-1]
@@ -175,13 +171,11 @@ class SyntaxNode(object):
             if end_match and ( not pattern_match or pattern_match.start() >= end_match.start() ):
                 start_pos = end_match.start()
                 end_pos = end_match.end()
-                if top.contentName and processor:
+                if top.contentName:
                     processor.closeTag(top._ex_contentName, start_pos)
-                if processor:
-                    self.parse_captures('captures', top, end_match, processor)
-                if processor:
-                    self.parse_captures('endCaptures', top, end_match, processor)
-                if top.name and processor:
+                self.parse_captures('captures', top, end_match, processor)
+                self.parse_captures('endCaptures', top, end_match, processor)
+                if top.name:
                     processor.closeTag( top._ex_name, end_pos)
                 stack.pop()
                 top, match = stack[-1]
@@ -192,23 +186,20 @@ class SyntaxNode(object):
                 start_pos = pattern_match.start()
                 end_pos = pattern_match.end()
                 if pattern.begin:
-                    if pattern.name and processor:
+                    if pattern.name:
                         processor.openTag(pattern._ex_name, start_pos)
-                    if processor:
-                        self.parse_captures('captures', pattern, pattern_match, processor)
-                    if processor:
-                        self.parse_captures('beginCaptures', pattern, pattern_match, processor)
-                    if pattern.contentName and processor:
+                    self.parse_captures('captures', pattern, pattern_match, processor)
+                    self.parse_captures('beginCaptures', pattern, pattern_match, processor)
+                    if pattern.contentName:
                         processor.openTag(pattern._ex_contentName, end_pos)
                     top = pattern
                     match = pattern_match
                     stack.append((top, match))
                 elif pattern.match:
-                    if pattern.name and processor:
+                    if pattern.name:
                         processor.openTag(pattern._ex_name, start_pos)
-                    if processor:
-                        self.parse_captures('captures', pattern, pattern_match, processor)
-                    if pattern.name and processor:
+                    self.parse_captures('captures', pattern, pattern_match, processor)
+                    if pattern.name:
                         processor.closeTag(pattern._ex_name, end_pos)
             position = end_pos
         return position
@@ -341,7 +332,12 @@ class PMXSyntax(PMXBundleItem):
                          injector.injectionSelector ], self.manager.scopeFactory)
         return self._grammar
 
-    def parse(self, text, processor = None):
+    def execute(self, processor):
+        processor.beginExecution(self)
+        self.parse(processor.plainText(), processor)
+        processor.endExecution(self)
+
+    def parse(self, text, processor):
         self.grammar.parse(text, processor)
     
     def parseLine(self, stack, line, processor):

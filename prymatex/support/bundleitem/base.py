@@ -57,7 +57,8 @@ class PMXBundleItem(PMXManagedObject):
     
     # ---------------- The executor method
     def execute(self, processor):
-        pass
+        processor.beginExecution(self)
+        processor.endExecution(self)
 
     @classmethod
     def sourcePaths(cls, baseDirectory):
