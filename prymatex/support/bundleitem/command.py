@@ -135,8 +135,9 @@ echo Selection: "$TM_SELECTED_TEXT"''',
     
     def getInputText(self, processor):
         def getInputTypeAndValue(inputType, inputFormat, mode):
+            # TODO: Mode
             if inputType is None or inputType == "none": return None, None
-            return inputType, getattr(processor, inputType)(inputFormat, mode)
+            return inputType, getattr(processor, inputType)(inputFormat)
         
         # -------- Try input
         inputType, value = getInputTypeAndValue(self.input, self.inputFormat, mode = "input")

@@ -48,7 +48,8 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         
         # Setup font
         font = editor.document().defaultFont()
-        font.setPointSize(int(self.width() / editor.marginLineSize))
+        pointSize = int(self.width() / editor.marginLineSize)
+        font.setPointSize(pointSize or 1)
         self.setFont(font)
 
         # TODO El ancho del tabulador
