@@ -23,7 +23,7 @@ from .processors import (CodeEditorCommandProcessor, CodeEditorSnippetProcessor,
         CodeEditorMacroProcessor, CodeEditorSyntaxProcessor)
 from .modes import CodeEditorBaseMode
 
-from .highlighter import PMXSyntaxHighlighter
+from .highlighter import CodeEditorSyntaxHighlighter
 from .models import (SymbolListModel, BookmarkListModel,
         bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
         symbolSelectableModelFactory)
@@ -153,7 +153,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.syntaxProcessor = CodeEditorSyntaxProcessor(self)
 
         #Highlighter
-        self.syntaxHighlighter = PMXSyntaxHighlighter(self)
+        self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
 
         # TODO Quiza algo como que los modos se registren solos?
         self.codeEditorModes = []
@@ -482,7 +482,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
         # Set syntax
         self.syntaxProcessor.beginExecution(syntax)
-        self.syntaxHighlighter.setSyntax(syntax)
         self.syntaxChanged.emit(syntax)
         
         # Run

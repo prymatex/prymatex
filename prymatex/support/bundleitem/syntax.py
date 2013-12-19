@@ -154,9 +154,6 @@ class SyntaxNode(object):
     def parse_line(self, stack, line, processor):
         processor.beginLine(line)
         position = self.parse_source(0, stack, line, processor)
-        # Fixed stack
-        if stack and stack[-1][0].name is None and stack[-1][0].contentName is None:
-            stack.pop()
         processor.endLine(line)
     
     def parse_source(self, position, stack, source, processor):
@@ -202,6 +199,10 @@ class SyntaxNode(object):
                     if pattern.name:
                         processor.closeTag(pattern._ex_name, end_pos)
             position = end_pos
+            
+        # Fixed stack
+        if stack and stack[-1][0].name is None and stack[-1][0].contentName is None:
+            stack.pop()
         return position
 
 # ================

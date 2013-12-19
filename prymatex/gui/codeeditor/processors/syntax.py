@@ -9,49 +9,65 @@ def build_userData_hash(scope, text, state):
     return hash("%s:%s:%d" % (scope, text, state))
 
 class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
+    NO_STATE = -1
+    SINGLE_LINE = 1
+    MULTI_LINE = 2
+
+    def __init__(self, editor):
+        CodeEditorBaseProcessor.__init__(self, editor)
+        self.stack = []
+        self.scopes = []
+
+    def beginExecution(self, bundleItem):
+        CodeEditorBaseProcessor.beginExecution(self, bundleItem)
+        self.stack = [(bundleItem.grammar, None)]
+        self.beginParse(bundleItem.scopeName)
+
+    def endExecution(self, bundleItem):
+        self.endParse(bundleItem.scopeName)
+    
+    def restoreState(self, block):
+        if block.isValid():
+            stack, scopes = self.editor.blockUserData(block).processorState()
+            self.stack = stack[:]
+            self.scopes = scopes[:]
+
+    def saveState(self, block):
+        self.editor.blockUserData(block).setProcessorState((self.stack[:], self.scopes[:]))
+
     def blockUserData(self, block):
-        text = block.text() + "/n"
+        text = block.text() + "\n"
         userDataHash = build_userData_hash(self.bundleItem.scopeName, 
             text, block.previous().userState())
         userData = self.editor.blockUserData(block)
         if not userData.testStateHash(userDataHash):
-            self.bundleItem.parseLine(stack, text, self)
+            self.restoreState(block.previous())
+            self.bundleItem.parseLine(self.stack, text, self)
             
+            userData.setTokens(self.__tokens)
             userData.setBlank(text.strip() == "")
-            
             self.editor.processBlockUserData(text, block, userData)
 
             userData.setStateHash(userDataHash)
 
             # Store stack and state
-            block.setUserState(len(stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE)
-            userData.setProcessorState((stack[:], processor.scopes()[:])) #Store copy
-                    
+            block.setUserState(len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE)
+            self.saveState(block)
         return userData
-
-    # -------- Public api
-    def tokens(self):
-        return self.__tokens
-
-    def setScopes(self, scopes):
-        self.stackScopes = scopes
-
-    def scopes(self):
-        return self.stackScopes
 
     # -------- Parsing
     def beginParse(self, scopeName):
-        self.setScopes([ scopeName ])
+        self.scopes = [ scopeName ]
 
     def endParse(self, scopeName):
-        pass
+        self.scopes.pop()
 
     # -------- Line
     def beginLine(self, line):
         self.line = line
         self.__tokens = []
         self.__indexes = []
-        for _ in self.stackScopes:
+        for _ in self.scopes:
             self.openToken(0)
 
     def endLine(self, line):
@@ -61,11 +77,11 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     def openTag(self, scopeName, position):
         #Open token
         self.openToken(position)
-        self.stackScopes.append(scopeName)
+        self.scopes.append(scopeName)
 
     def closeTag(self, scopeName, position):
         self.closeToken(position)
-        self.stackScopes.pop()
+        self.scopes.pop()
 
     # --------- Create tokens
     def openToken(self, start):
@@ -76,7 +92,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         while self.__indexes:
             start, index = self.__indexes.pop()
             data = self.editor.flyweightScopeDataFactory(
-                tuple(self.stackScopes))
+                tuple(self.scopes))
             self.__tokens[index] = CodeEditorTokenData(
                 start=start,
                 end=end,
