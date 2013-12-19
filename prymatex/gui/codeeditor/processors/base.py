@@ -7,6 +7,9 @@ class CodeEditorBaseProcessor(object):
         self.cursorWrapper = None
         self.bundleItem = None
 
+    def type(self):
+        return self.bundleItem is not None and self.bundleItem.TYPE
+
     def configure(self, settings):
         self.asynchronous = settings.get("asynchronous", True)
         self.cursorWrapper = settings.get("cursorWrapper", 
@@ -22,9 +25,11 @@ class CodeEditorBaseProcessor(object):
     def beginExecution(self, bundleItem):
         self.bundleItem = bundleItem
         self.__env = None
+        self.editor.beginProcessor.emit(self)
 
     def endExecution(self, bundleItem):
         self.bundleItem = None
+        self.editor.endProcessor.emit(self)
 
     def environmentVariables(self):
         if self.__env is None:

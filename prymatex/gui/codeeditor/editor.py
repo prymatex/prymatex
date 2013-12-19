@@ -43,12 +43,17 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # en el factory method flyweightScopeDataFactory
     SCOPES = {}
     STANDARD_SIZES = (70, 78, 80, 100, 120)
+
     # -------------------- Signals
     syntaxChanged = QtCore.Signal(object)
     themeChanged = QtCore.Signal()
-    modeChanged = QtCore.Signal(str)
     blocksRemoved = QtCore.Signal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.Signal(QtGui.QTextBlock, int)
+    modeChanged = QtCore.Signal(str)
+    beginMode = QtCore.Signal(str)
+    endMode = QtCore.Signal(str)
+    beginProcessor = QtCore.Signal(object)
+    endProcessor = QtCore.Signal(object)
 
     aboutToHighlightChange = QtCore.Signal()
     highlightChanged = QtCore.Signal()
