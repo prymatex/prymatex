@@ -30,8 +30,7 @@ from .models import (SymbolListModel, BookmarkListModel,
 from .completer import (CodeEditorCompleter, WordsCompletionModel,
         TabTriggerItemsCompletionModel, SuggestionsCompletionModel)
 
-from prymatex.support import (PMXSnippet, PMXMacro, PMXCommand, PMXSyntax,
-    PMXDragCommand, PMXPreferenceSettings, PMXPreferenceMasterSettings)
+from prymatex.support import PreferenceMasterSettings
 
 from prymatex.utils import text
 from prymatex.utils.i18n import ugettext as _
@@ -270,7 +269,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             userData.indent = ""
 
             # Folding
-            userData.foldingMark = PMXPreferenceMasterSettings.FOLDING_NONE
+            userData.foldingMark = PreferenceMasterSettings.FOLDING_NONE
             userData.foldedLevel = 0
             userData.folded = False
 
@@ -769,16 +768,16 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def insertBundleItem(self, item, **processorSettings):
         """Inserta un bundle item"""
 
-        if item.TYPE == PMXSnippet.TYPE:
+        if item.type() == "snippet":
             self.snippetProcessor.configure(processorSettings)
             item.execute(self.snippetProcessor)
-        elif item.TYPE in ( PMXCommand.TYPE, PMXDragCommand.TYPE ):
+        elif item.type() in ( "command", "dragcommand" ):
             self.commandProcessor.configure(processorSettings)
             item.execute(self.commandProcessor)
-        elif item.TYPE == PMXMacro.TYPE:
+        elif item.type() == "macro":
             self.macroProcessor.configure(processorSettings)
             item.execute(self.macroProcessor)
-        elif item.TYPE == PMXSyntax.TYPE:
+        elif item.type() == "syntax":
             self.setSyntax(item)
 
     def selectBundleItem(self, items, **processorSettings):
@@ -867,9 +866,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         nest = 0
         while block.isValid():
             userData = self.blockUserData(block)
-            if userData.foldingMark == PMXPreferenceMasterSettings.FOLDING_START:
+            if userData.foldingMark == PreferenceMasterSettings.FOLDING_START:
                 nest += 1
-            elif userData.foldingMark == PMXPreferenceMasterSettings.FOLDING_STOP:
+            elif userData.foldingMark == PreferenceMasterSettings.FOLDING_STOP:
                 nest -= 1
             if nest == 0:
                 return block
@@ -887,16 +886,16 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             return self.document().lastBlock()
 
     def isFoldingStartMarker(self, block):
-        return self.blockUserData(block).foldingMark == PMXPreferenceMasterSettings.FOLDING_START
+        return self.blockUserData(block).foldingMark == PreferenceMasterSettings.FOLDING_START
 
     def isFoldingStopMarker(self, block):
-        return self.blockUserData(block).foldingMark == PMXPreferenceMasterSettings.FOLDING_STOP
+        return self.blockUserData(block).foldingMark == PreferenceMasterSettings.FOLDING_STOP
 
     def isFoldingIndentedBlockStart(self, block):
-        return self.blockUserData(block).foldingMark == PMXPreferenceMasterSettings.FOLDING_INDENTED_START
+        return self.blockUserData(block).foldingMark == PreferenceMasterSettings.FOLDING_INDENTED_START
 
     def isFoldingIndentedBlockIgnore(self, block):
-        return self.blockUserData(block).foldingMark == PMXPreferenceMasterSettings.FOLDING_INDENTED_IGNORE
+        return self.blockUserData(block).foldingMark == PreferenceMasterSettings.FOLDING_INDENTED_IGNORE
 
     def isFoldingMark(self, block):
         return self.isFoldingStartMarker(block) or self.isFoldingStopMarker(block) or self.isFoldingIndentedBlockStart(block)

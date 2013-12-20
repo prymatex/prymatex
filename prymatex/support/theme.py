@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import os
 from prymatex.utils import osextra
 
-from .base import PMXManagedObject
+from .base import ManagedObject
 
 """foreground, background, selection, invisibles, lineHighlight, caret, gutter
 prymatex add gutterForeground
@@ -85,7 +85,7 @@ class PMXThemeStyle(object):
             dataHash['settings'] = self.__settings
         return dataHash
 
-class PMXTheme(PMXManagedObject):
+class PMXTheme(ManagedObject):
     KEYS = ( 'name', 'comment', 'author', 'settings' )
     EXTENSION = 'tmTheme'
     PATTERNS = ( '*.tmTheme', )
@@ -106,13 +106,13 @@ class PMXTheme(PMXManagedObject):
                     setattr(self, key, value)
 
     def load(self, dataHash):
-        PMXManagedObject.load(self, dataHash)
+        ManagedObject.load(self, dataHash)
         self.defaultSettings = {}
         self.styles = []
         self.__load_update(dataHash, True)
         
     def update(self, dataHash):
-        PMXManagedObject.update(self, dataHash)
+        ManagedObject.update(self, dataHash)
         self.__load_update(dataHash, False)
 
     def setSettings(self, settings):
@@ -130,7 +130,7 @@ class PMXTheme(PMXManagedObject):
         return settings
     
     def dump(self):
-        dataHash = PMXManagedObject.dump(self)
+        dataHash = ManagedObject.dump(self)
         for key in PMXTheme.KEYS:
             value = getattr(self, key, None)
             if value is not None:

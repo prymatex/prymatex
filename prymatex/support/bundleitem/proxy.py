@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .base import PMXBundleItem
+from .base import BundleItem
    
-class PMXProxy(PMXBundleItem):
+class Proxy(BundleItem):
     KEYS = ( 'content', )
-    TYPE = 'proxy'
     FOLDER = 'Proxies'
     EXTENSION = 'tmProxy'
     PATTERNS = ('*.tmProxy', '*.plist')

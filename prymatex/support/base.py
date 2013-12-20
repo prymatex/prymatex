@@ -10,13 +10,18 @@ from prymatex.utils import six
 
 Source = namedtuple("Source", "name path mtime")
 
-class PMXManagedObject(object):
+class ManagedObject(object):
     PATTERNS = ()
     def __init__(self, uuid, manager):
         self.uuid = uuid
         self.manager = manager
         self.sources = {}
         self.pointer = None
+
+    @classmethod
+    def type(cls):
+        "Return a string based on class name"
+        return cls.__name__.lower()
 
     def uuidAsText(self):
         return six.text_type(self.uuid).upper()

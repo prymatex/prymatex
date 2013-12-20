@@ -5,7 +5,6 @@ import os
 from prymatex.utils import encoding
 
 class PMXStaticFile(object):
-    TYPE = 'staticfile'
     DEFAULTS = {
     'content': '''//
 //  ${TM_NEW_FILE_BASENAME}
@@ -17,7 +16,11 @@ class PMXStaticFile(object):
         self.path = path
         self.name = os.path.basename(path)
         self.parentItem = parentItem
-    
+
+    @classmethod    
+    def type(cls):
+        return cls.__name__.lower()
+
     def enabled(self):
         return self.parentItem.enabled()
     

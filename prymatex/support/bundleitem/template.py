@@ -12,13 +12,12 @@ import functools
 
 from prymatex.utils import osextra
 
-from .base import PMXBundleItem
+from .base import BundleItem
 from ..staticfile import PMXStaticFile
 
-class PMXTemplate(PMXBundleItem):
+class Template(BundleItem):
     KEYS = ( 'command', 'extension')
     FILE = 'info.plist'
-    TYPE = 'template'
     FOLDER = 'Templates'
     PATTERNS = ( '*', )
     DEFAULTS = {
@@ -33,28 +32,28 @@ fi"'''
 }
     
     def __load_update(self, dataHash, initialize):
-        for key in PMXTemplate.KEYS:
+        for key in Template.KEYS:
             if key in dataHash or initialize:
                 setattr(self, key, dataHash.get(key, None))
     
     def load(self, dataHash):
-        PMXBundleItem.load(self, dataHash)
+        BundleItem.load(self, dataHash)
         self.__load_update(dataHash, True)
     
     def update(self, dataHash):
-        PMXBundleItem.update(self, dataHash)
+        BundleItem.update(self, dataHash)
         self.__load_update(dataHash, False)
     
     def dump(self, allKeys = False):
-        dataHash = super(PMXTemplate, self).dump(allKeys)
-        for key in PMXTemplate.KEYS:
+        dataHash = super(Template, self).dump(allKeys)
+        for key in Template.KEYS:
             value = getattr(self, key, None)
             if allKeys or value != None:
                 dataHash[key] = value
         return dataHash
 
     def buildEnvironment(self, fileName, fileDirectory, localVars = False):
-        env = super(PMXTemplate, self).environmentVariables() if not localVars else {}
+        env = super(Template, self).environmentVariables() if not localVars else {}
         nameWithExtension = "{0}{1}{2}".format(fileName, os.path.extsep, self.extension) if self.extension else fileName
         env['TM_NEW_FILE'] = os.path.join(fileDirectory, nameWithExtension)
         env['TM_NEW_FILE_BASENAME'] = fileName

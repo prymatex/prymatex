@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .base import PMXBundleItem
+from .base import BundleItem
 
-class PMXMacro(PMXBundleItem):
+class Macro(BundleItem):
     KEYS = ( 'commands', )
-    TYPE = 'macro'
     FOLDER = 'Macros'
     EXTENSION = 'tmMacro'
     PATTERNS = ( '*.tmMacro', '*.plist')
@@ -13,21 +12,21 @@ class PMXMacro(PMXBundleItem):
         'name': 'untitled',
     }
     def __load_update(self, dataHash, initialize):
-        for key in PMXMacro.KEYS:
+        for key in Macro.KEYS:
             if key in dataHash or initialize:
                 setattr(self, key, dataHash.get(key, None))
 
     def load(self, dataHash):
-        PMXBundleItem.load(self, dataHash)
+        BundleItem.load(self, dataHash)
         self.__load_update(dataHash, True)
 
     def update(self, dataHash):
-        PMXBundleItem.update(self, dataHash)
+        BundleItem.update(self, dataHash)
         self.__load_update(dataHash, False)
 
     def dump(self, allKeys = False):
-        dataHash = PMXBundleItem.dump(self, allKeys)
-        for key in PMXMacro.KEYS:
+        dataHash = BundleItem.dump(self, allKeys)
+        for key in Macro.KEYS:
             value = getattr(self, key, None)
             if allKeys or value != None:
                 dataHash[key] = value

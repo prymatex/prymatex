@@ -5,12 +5,13 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.models.trees import FlatTreeProxyModel
 
 class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
+    bundleItemTypeOrder = ("bundle", "command", "dragcommand", "syntax",
+        "macro", "snippet", "preference", "template", "staticfile", "project")
     def __init__(self, manager, parent = None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)
         self.manager = manager
-        self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "staticfile", "syntax", "project"]
-        self.namespacesFilter = [ "prymatex", "user" ]
-        self.bundleItemTypesFilter = self.bundleItemTypeOrder[:]
+        self.namespacesFilter = ("prymatex", "user")
+        self.bundleItemTypesFilter = self.bundleItemTypeOrder
     
     def filterAcceptsRow(self, sourceRow, sourceParent):
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
@@ -21,10 +22,10 @@ class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
             if not any([node.hasSource(ns) for ns in self.namespacesFilter]):
                 return False
         if self.bundleItemTypesFilter:
-            if node.TYPE not in self.bundleItemTypesFilter:
+            if node.type() not in self.bundleItemTypesFilter:
                 return False
         regexp = self.filterRegExp()
-        if not (regexp.isEmpty() or node.TYPE == "bundle"):
+        if not (regexp.isEmpty() or node.type() == "bundle"):
             return regexp.indexIn(node.name) != -1
         return True
         
@@ -34,19 +35,19 @@ class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
     def lessThan(self, left, right):
         leftNode = self.sourceModel().node(left)
         rightNode = self.sourceModel().node(right)
-        if leftNode.TYPE == rightNode.TYPE:
+        if leftNode.type() == rightNode.type():
             print(rightNode.name, leftNode.name, rightNode.name > leftNode.name)
             return rightNode.name > leftNode.name
         else:
-            return self.bundleItemTypeOrder.index(rightNode.TYPE) > self.bundleItemTypeOrder.index(leftNode.TYPE)
+            return self.bundleItemTypeOrder.index(rightNode.type()) > self.bundleItemTypeOrder.index(leftNode.type())
     
     def setData(self, index, value, role):
         if role == QtCore.Qt.EditRole:  
             node = self.node(index)
             if node.name != value:
-                if node.TYPE == "bundle":
+                if node.type() == "bundle":
                     self.manager.updateBundle(node, self.namespacesFilter[-1], name = value)
-                elif node.TYPE == "staticfile":
+                elif node.type() == "staticfile":
                     self.manager.updateStaticFile(node, self.namespacesFilter[-1], name = value)
                 else:
                     self.manager.updateBundleItem(node, self.namespacesFilter[-1], name = value)
@@ -58,16 +59,16 @@ class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
     
     def setFilterNamespace(self, namespace):
         if namespace:
-            self.namespacesFilter = [ namespace ]
+            self.namespacesFilter = (namespace)
         else:
-            self.namespacesFilter = [ "prymatex", "user" ]
+            self.namespacesFilter = ("prymatex", "user")
         self.setFilterRegExp("")
     
     def setFilterBundleItemType(self, bundleItemType):
         if bundleItemType:
-            self.bundleItemTypesFilter = [ "bundle" ] + bundleItemType.split()
+            self.bundleItemTypesFilter = ("bundle") + tuple(bundleItemType.split())
         else:
-            self.bundleItemTypesFilter = self.bundleItemTypeOrder[:]
+            self.bundleItemTypesFilter = self.bundleItemTypeOrder
         self.setFilterRegExp("")
 
 class BundleItemTypeProxyModel(FlatTreeProxyModel):
@@ -78,7 +79,7 @@ class BundleItemTypeProxyModel(FlatTreeProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
         item = index.internalPointer()
-        return item.TYPE in self.tipos
+        return item.type() in self.tipos
         
     def comparableValue(self, index):
         node = self.sourceModel().node(index)

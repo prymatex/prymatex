@@ -7,13 +7,12 @@ import functools
 
 from prymatex.utils import osextra
 
-from .base import PMXBundleItem
+from .base import BundleItem
 from ..staticfile import PMXStaticFile
 
-class PMXProject(PMXBundleItem):
+class Project(BundleItem):
     KEYS = ( 'command', )
     FILE = 'info.plist'
-    TYPE = 'project'
     FOLDER = 'Projects'
     PATTERNS = ( '*', )
     DEFAULTS = {
@@ -26,28 +25,28 @@ class PMXProject(PMXBundleItem):
 fi"'''}
         
     def __load_update(self, dataHash, initialize):
-        for key in PMXProject.KEYS:
+        for key in Project.KEYS:
             if key in dataHash or initialize:
                 setattr(self, key, dataHash.get(key, None))
     
     def load(self, dataHash):
-        PMXBundleItem.load(self, dataHash)
+        BundleItem.load(self, dataHash)
         self.__load_update(dataHash, True)
     
     def update(self, dataHash):
-        PMXBundleItem.update(self, dataHash)
+        BundleItem.update(self, dataHash)
         self.__load_update(dataHash, False)
         
     def dump(self, allKeys = False):
-        dataHash = super(PMXProject, self).dump(allKeys)
-        for key in PMXProject.KEYS:
+        dataHash = super(Project, self).dump(allKeys)
+        for key in Project.KEYS:
             value = getattr(self, key)
             if value != None:
                 dataHash[key] = value
         return dataHash
 
     def buildEnvironment(self, projectName, projectLocation, localVars = False):
-        env = super(PMXProject, self).environmentVariables() if not localVars else {}
+        env = super(Project, self).environmentVariables() if not localVars else {}
         env['TM_NEW_PROJECT_NAME'] = projectName
         env['TM_NEW_PROJECT_LOCATION'] = projectLocation
         env['TM_NEW_PROJECT_BASENAME'] = os.path.basename(projectLocation)

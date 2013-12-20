@@ -8,7 +8,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.core import PMXBaseEditorAddon
 
 from prymatex.utils.lists import bisect_key
-from prymatex.support import PMXPreferenceSettings
+from prymatex.support import PreferenceSettings
 
 class CodeEditorAddon(QtCore.QObject, PMXBaseEditorAddon):
     def __init__(self, parent):
@@ -36,7 +36,7 @@ class SmartUnindentAddon(CodeEditorAddon):
             _, settings = self.editor.settings(cursor)
             indentMarks = settings.indent(block.text()[:positionInBlock])
             indentGuide = self.editor.findPreviousNoBlankBlock(block)
-            if PMXPreferenceSettings.INDENT_DECREASE in indentMarks and indentGuide is not None:
+            if PreferenceSettings.INDENT_DECREASE in indentMarks and indentGuide is not None:
                 previousBlock = self.editor.findPreviousLessIndentBlock(indentGuide)
                 if previousBlock is not None and block.userData().indent > previousBlock.userData().indent:
                     self.editor.unindentBlocks(cursor)

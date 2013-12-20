@@ -4,11 +4,10 @@ from __future__ import unicode_literals
 
 """Snippte's module"""
 from ..regexp import Snippet, SnippetHandler
-from .base import PMXBundleItem
+from .base import BundleItem
 
-class PMXSnippet(PMXBundleItem, SnippetHandler):
+class Snippet(BundleItem, SnippetHandler):
     KEYS = ( 'content', 'disableAutoIndent', 'inputPattern' )
-    TYPE = 'snippet'
     FOLDER = 'Snippets'
     EXTENSION = 'tmSnippet'
     PATTERNS = ('*.tmSnippet', '*.plist')
@@ -21,23 +20,23 @@ Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''
     }
     
     def __load_update(self, dataHash, initialize):
-        for key in PMXSnippet.KEYS:
+        for key in Snippet.KEYS:
             if key in dataHash or initialize:
                 setattr(self, key, dataHash.get(key, None))
     
     def load(self, dataHash):
-        PMXBundleItem.load(self, dataHash)
+        BundleItem.load(self, dataHash)
         self.__load_update(dataHash, True)
     
     def update(self, dataHash):
-        PMXBundleItem.update(self, dataHash)
+        BundleItem.update(self, dataHash)
         self.__load_update(dataHash, False)
         if 'content' in dataHash and hasattr(self, '_snippetNode'):
             delattr(self, '_snippetNode')
 
     def dump(self, allKeys = False):
-        dataHash = super(PMXSnippet, self).dump(allKeys)
-        for key in PMXSnippet.KEYS:
+        dataHash = super(Snippet, self).dump(allKeys)
+        for key in Snippet.KEYS:
             value = getattr(self, key)
             if value is not None:
                 dataHash[key] = value

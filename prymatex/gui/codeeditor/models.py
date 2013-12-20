@@ -214,15 +214,15 @@ def bundleItemSelectableModelFactory(editor):
     # Data function    
     def bundleItemData():
         leftScope, rightScope = editor.scope()
-        return [dict(data = bundleItem, 
-                template = "<table width='100%%'><tr><td>%(name)s - %(bundle)s</td><td align='right'>%(trigger)s</td></tr></table>",
-                display = { 
+        return [dict(data=bundleItem, 
+                template="<table width='100%%'><tr><td>%(name)s - %(bundle)s</td><td align='right'>%(trigger)s</td></tr></table>",
+                display={ 
                     "name": bundleItem.name, 
                     "bundle": bundleItem.bundle.name,
                     "trigger": bundleItem.trigger()
                 },
-                match = bundleItem.name.upper(),
-                image = resources.getIcon("bundle-item-%s" % bundleItem.TYPE)) for bundleItem in editor.application.supportManager.getActionItemsByScope(leftScope, rightScope)]
+                match=bundleItem.name.upper(),
+                image=resources.getIcon("bundle-item-%s" % bundleItem.type())) for bundleItem in editor.application.supportManager.getActionItemsByScope(leftScope, rightScope)]
 
     # Filter function        
     def bundleItemFilter(pattern, item):

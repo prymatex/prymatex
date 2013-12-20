@@ -8,7 +8,7 @@ import types
 
 from prymatex.utils import six
 
-from .base import PMXBundleItem
+from .base import BundleItem
 from ..regexp import compileRegexp, String
 
 # ==========================
@@ -245,10 +245,9 @@ class SyntaxProxyNode(object):
         else:
             return self.rootNode.findSyntax(self.__proxyName)
         
-class PMXSyntax(PMXBundleItem):
+class Syntax(BundleItem):
     KEYS = ( 'comment', 'firstLineMatch', 'scopeName', 'repository',
         'fileTypes', 'patterns', 'injectionSelector')
-    TYPE = 'syntax'
     FOLDER = 'Syntaxes'
     EXTENSION = 'tmLanguage'
     PATTERNS = ('*.tmLanguage', '*.plist')
@@ -278,8 +277,8 @@ class PMXSyntax(PMXBundleItem):
     }
 
     def load(self, dataHash):
-        super(PMXSyntax, self).load(dataHash)
-        for key in PMXSyntax.KEYS:
+        super(Syntax, self).load(dataHash)
+        for key in Syntax.KEYS:
             value = dataHash.get(key, None)
             if value is not None:
                 if key == 'firstLineMatch':
@@ -291,8 +290,8 @@ class PMXSyntax(PMXBundleItem):
             setattr(self, key, value)
     
     def dump(self, allKeys = False):
-        dataHash = super(PMXSyntax, self).dump(allKeys)
-        for key in PMXSyntax.KEYS:
+        dataHash = super(Syntax, self).dump(allKeys)
+        for key in Syntax.KEYS:
             value = getattr(self, key, None)
             if value is not None:
                 if key == 'firstLineMatch':
@@ -303,7 +302,7 @@ class PMXSyntax(PMXBundleItem):
         return dataHash
 
     def update(self, dataHash):
-        PMXBundleItem.update(self, dataHash)
+        BundleItem.update(self, dataHash)
         if hasattr(self, '_grammar'):
             delattr(self, '_grammar')
     

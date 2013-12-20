@@ -26,10 +26,10 @@ from __future__ import unicode_literals
 '''
 from prymatex.utils import osextra
 
-from .base import PMXBundleItem
+from .base import BundleItem
 from ..regexp import compileRegexp, SymbolTransformation
 
-class PMXPreferenceSettings(object):
+class PreferenceSettings(object):
     KEYS = (
         'completions', 'completionCommand', 'disableDefaultCompletion',
         'showInSymbolList', 'symbolTransformation', 'highlightPairs',
@@ -55,7 +55,7 @@ class PMXPreferenceSettings(object):
 
     def dump(self):
         dataHash = {}
-        for key in PMXPreferenceSettings.KEYS:
+        for key in PreferenceSettings.KEYS:
             value = getattr(self, key, None)
             if value != None:
                 if key in self.INDENT_KEYS or key in self.FOLDING_KEYS:
@@ -87,7 +87,7 @@ class PMXPreferenceSettings(object):
                     value = bool(int(value))
             setattr(self, key, value)
 
-class PMXPreferenceMasterSettings(object):
+class PreferenceMasterSettings(object):
     INDENT_INCREASE = 0
     INDENT_DECREASE = 1
     INDENT_NEXTLINE = 2
@@ -188,7 +188,7 @@ class PMXPreferenceMasterSettings(object):
         if not hasattr(self, "_indent_settings"):
             self._indent_settings = None
             for settings in self.settings:
-                if any([getattr(settings, indentKey) for indentKey in PMXPreferenceSettings.INDENT_KEYS]):
+                if any([getattr(settings, indentKey) for indentKey in PreferenceSettings.INDENT_KEYS]):
                     self._indent_settings = settings
                     break
         indent = []
@@ -215,7 +215,7 @@ class PMXPreferenceMasterSettings(object):
         if not hasattr(self, "_folding_settings"):
             self._folding_settings = None
             for settings in self.settings:
-                if any([getattr(settings, foldingKey) for foldingKey in PMXPreferenceSettings.FOLDING_KEYS]):
+                if any([getattr(settings, foldingKey) for foldingKey in PreferenceSettings.FOLDING_KEYS]):
                     self._folding_settings = settings
                     break
         if self._folding_settings is not None:
@@ -236,9 +236,8 @@ class PMXPreferenceMasterSettings(object):
                 return self.FOLDING_INDENTED_IGNORE
         return self.FOLDING_NONE
 
-class PMXPreference(PMXBundleItem):
+class Preference(BundleItem):
     KEYS = ( 'settings', )
-    TYPE = 'preference'
     FOLDER = 'Preferences'
     EXTENSION = 'tmPreferences'
     PATTERNS = ('*.tmPreferences', '*.plist')
@@ -246,16 +245,16 @@ class PMXPreference(PMXBundleItem):
         'name': 'untitled',
     }
     def load(self, dataHash):
-        PMXBundleItem.load(self, dataHash)
-        for key in PMXPreference.KEYS:
+        BundleItem.load(self, dataHash)
+        for key in Preference.KEYS:
             value = dataHash.get(key, None)
             if key == 'settings':
-                value = PMXPreferenceSettings(value or {}, self)
+                value = PreferenceSettings(value or {}, self)
             setattr(self, key, value)
 
     def update(self, dataHash):
-        PMXBundleItem.update(self, dataHash)
-        for key in PMXPreference.KEYS:
+        BundleItem.update(self, dataHash)
+        for key in Preference.KEYS:
             if key in dataHash:
                 value = dataHash.get(key)
                 if key == 'settings':
@@ -264,8 +263,8 @@ class PMXPreference(PMXBundleItem):
                     setattr(self, key, value)
 
     def dump(self, allKeys = False):
-        dataHash = PMXBundleItem.dump(self, allKeys)
-        for key in PMXPreference.KEYS:
+        dataHash = BundleItem.dump(self, allKeys)
+        for key in Preference.KEYS:
             value = getattr(self, key, None)
             if allKeys or value != None:
                 if key == 'settings' and value != None:
@@ -276,4 +275,4 @@ class PMXPreference(PMXBundleItem):
     @staticmethod
     def buildSettings(preferences):
         """El orden si importa, las preferences vienen ordenadas por score"""
-        return PMXPreferenceMasterSettings([p.settings for p in preferences])
+        return PreferenceMasterSettings([p.settings for p in preferences])

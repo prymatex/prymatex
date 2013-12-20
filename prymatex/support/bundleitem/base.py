@@ -6,23 +6,22 @@ from functools import reduce
 
 from prymatex.utils import osextra
 
-from ..base import PMXManagedObject
+from ..base import ManagedObject
 
-class PMXBundleItem(PMXManagedObject):
+class BundleItem(ManagedObject):
     KEYS = ( 'name', 'tabTrigger', 'keyEquivalent', 'scope', 'semanticClass' )
-    TYPE = ''
     EXTENSION = ''
     FOLDER = ''
     PATTERNS = ()
     DEFAULTS = {}
     
     def __init__(self, uuid, manager, bundle):
-        PMXManagedObject.__init__(self, uuid, manager)
+        ManagedObject.__init__(self, uuid, manager)
         self.bundle = bundle
 
     # ---------------- Load, update, dump
     def __load_update(self, dataHash, initialize):
-        for key in PMXBundleItem.KEYS:
+        for key in BundleItem.KEYS:
             if key in dataHash or initialize:
                 value = dataHash.get(key, None)
                 if key == "scope":
@@ -30,16 +29,16 @@ class PMXBundleItem(PMXManagedObject):
                 setattr(self, key, value)
 
     def load(self, dataHash):
-        PMXManagedObject.load(self, dataHash)
+        ManagedObject.load(self, dataHash)
         self.__load_update(dataHash, True)
 
     def update(self, dataHash):
-        PMXManagedObject.update(self, dataHash)
+        ManagedObject.update(self, dataHash)
         self.__load_update(dataHash, False)
     
     def dump(self, allKeys = False):
-        dataHash = PMXManagedObject.dump(self, allKeys)
-        for key in PMXBundleItem.KEYS:
+        dataHash = ManagedObject.dump(self, allKeys)
+        for key in BundleItem.KEYS:
             value = getattr(self, key, None)
             if allKeys or value is not None:
                 dataHash[key] = value

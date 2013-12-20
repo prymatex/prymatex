@@ -6,9 +6,9 @@ import os, re, shutil
 from prymatex.utils import osextra
 from prymatex.utils import programs
 
-from .base import PMXManagedObject
+from .base import ManagedObject
 
-class PMXBundle(PMXManagedObject):
+class Bundle(ManagedObject):
     KEYS = ('name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13',
             'description', 'contactName', 'requiredCommands', 'require' )
     FILE = 'info.plist'
@@ -19,29 +19,29 @@ class PMXBundle(PMXManagedObject):
         'name': 'Untitled'
     }
     def __init__(self, uuid, manager):
-        PMXManagedObject.__init__(self, uuid, manager)
+        ManagedObject.__init__(self, uuid, manager)
         self.populated = False
 
     # ---------------- Load, update, dump
     def __load_update(self, dataHash, initialize):
-        for key in PMXBundle.KEYS:
+        for key in Bundle.KEYS:
             if key in dataHash or initialize:
                 setattr(self, key, dataHash.get(key, None))
 
     def load(self, dataHash):
-        PMXManagedObject.load(self, dataHash)
+        ManagedObject.load(self, dataHash)
         self.__load_update(dataHash, True)
         # Remove cached values
         if hasattr(self, '_variables'):
             delattr(self, '_variables')
             
     def update(self, dataHash):
-        PMXManagedObject.update(self, dataHash)
+        ManagedObject.update(self, dataHash)
         self.__load_update(dataHash, False)
 
     def dump(self, allKeys = False):
-        dataHash = PMXManagedObject.dump(self, allKeys)
-        for key in PMXBundle.KEYS:
+        dataHash = ManagedObject.dump(self, allKeys)
+        for key in Bundle.KEYS:
             value = getattr(self, key, None)
             if allKeys or value is not None:
                 dataHash[key] = value

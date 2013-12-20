@@ -10,7 +10,7 @@ import subprocess
 from glob import glob
 from collections import namedtuple, OrderedDict
 
-from .bundle import PMXBundle
+from .bundle import Bundle
 from . import bundleitem 
 from . import scope
 from .theme import PMXTheme, PMXThemeStyle
@@ -49,16 +49,16 @@ class PMXSupportBaseManager(object):
     VAR_PREFIX = 'PMX'
     PROTECTEDNS = 0  # El primero es el protected
     DEFAULTNS = 1  # El segundo es el default
-    BUNDLEITEM_CLASSES = dict([ (cls.TYPE, cls) for cls in (
-        bundleitem.PMXSyntax,
-        bundleitem.PMXSnippet,
-        bundleitem.PMXMacro,
-        bundleitem.PMXCommand,
-        bundleitem.PMXDragCommand,
-        bundleitem.PMXProxy,
-        bundleitem.PMXPreference,
-        bundleitem.PMXTemplate,
-        bundleitem.PMXProject
+    BUNDLEITEM_CLASSES = dict([ (cls.type(), cls) for cls in (
+        bundleitem.Syntax,
+        bundleitem.Snippet,
+        bundleitem.Macro,
+        bundleitem.Command,
+        bundleitem.DragCommand,
+        bundleitem.Proxy,
+        bundleitem.Preference,
+        bundleitem.Template,
+        bundleitem.Project
     )])
 
     SETTINGS_CACHE = {}
@@ -216,7 +216,7 @@ class PMXSupportBaseManager(object):
                        'output': commandOutput}
         commandHash['name'] = name if name is not None else "Ad-Hoc command %s" % commandScript
 
-        command = bundleitem.PMXCommand(self.uuidgen(), self, bundle)
+        command = bundleitem.Command(self.uuidgen(), self, bundle)
         command.load(commandHash)
         return command
 
@@ -224,14 +224,14 @@ class PMXSupportBaseManager(object):
         snippetHash = {'content': snippetContent,
                        'tabTrigger': tabTrigger}
         snippetHash['name'] = name if name is not None else "Ad-Hoc snippet"
-        snippet = bundleitem.PMXSnippet(self.uuidgen(), self, bundle)
+        snippet = bundleitem.Snippet(self.uuidgen(), self, bundle)
         snippet.load(snippetHash)
         return snippet
 
     def buildAdHocSyntax(self, syntax, bundle, name=None):
         syntaxHash = syntax.copy()
         syntaxHash['name'] = name if name is not None else "Ad-Hoc syntax"
-        syntax = bundleitem.PMXSyntax(self.uuidgen(), self, bundle)
+        syntax = bundleitem.Syntax(self.uuidgen(), self, bundle)
         syntax.load(syntaxHash)
         return syntax
 
@@ -309,7 +309,7 @@ class PMXSupportBaseManager(object):
     #------------- LOAD BUNDLES ------------------
     def loadBundles(self, namespace):
         loadedBundles = set()
-        for sourceBundlePath in PMXBundle.sourcePaths(namespace.bundles):
+        for sourceBundlePath in Bundle.sourcePaths(namespace.bundles):
             try:
                 bundle = self.loadBundle(sourceBundlePath, namespace)
                 loadedBundles.add(bundle)
@@ -320,11 +320,11 @@ class PMXSupportBaseManager(object):
         return loadedBundles
 
     def loadBundle(self, sourceBundlePath, namespace):
-        data = self.readPlist(PMXBundle.dataFilePath(sourceBundlePath))
+        data = self.readPlist(Bundle.dataFilePath(sourceBundlePath))
         uuid = self.uuidgen(data.pop('uuid', None))
         bundle = self.getManagedObject(uuid)
         if bundle is None:
-            bundle = PMXBundle(uuid, self)
+            bundle = Bundle(uuid, self)
             bundle.load(data)
             bundle = self.addBundle(bundle)
             self.addManagedObject(bundle)
@@ -416,7 +416,7 @@ class PMXSupportBaseManager(object):
     # ---------------- RELOAD BUNDLES
     def reloadBundles(self, namespace):
         installedBundles = [bundle for bundle in self.getAllBundles() if bundle.hasSource(namespace.name)]
-        bundlePaths =  PMXBundle.sourcePaths(namespace.bundles)
+        bundlePaths =  Bundle.sourcePaths(namespace.bundles)
         for bundle in installedBundles:
             bundlePath = bundle.sourcePath(namespace.name)
             if bundlePath in bundlePaths:
@@ -453,19 +453,19 @@ class PMXSupportBaseManager(object):
             if not bundle.hasSource(namespace.name):
                 continue
             bundlePath = bundle.sourcePath(namespace.name)
-            bundleItemPaths = dict([ (klass.TYPE, klass.sourcePaths(bundlePath)) 
+            bundleItemPaths = dict([ (klass.type(), klass.sourcePaths(bundlePath)) 
                 for klass in self.BUNDLEITEM_CLASSES.values() ])
             print(bundleItemPaths)
             for bundleItem in self.findBundleItems(bundle=bundle):
                 if not bundleItem.hasSource(namespace.name):
                     continue
                 bundleItemPath = bundleItem.sourcePath(namespace.name)
-                if bundleItemPath in bundleItemPaths[bundleItem.TYPE]:
+                if bundleItemPath in bundleItemPaths[bundleItem.type()]:
                     if namespace.name == bundleItem.currentSourceName() and bundleItem.sourceChanged(namespace.name):
                         self.logger.debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, bundleItemPath))
-                        self.loadBundleItem(self.BUNDLEITEM_CLASSES[bundleItem.TYPE], bundleItemPath, namespace, bundle)
+                        self.loadBundleItem(self.BUNDLEITEM_CLASSES[bundleItem.type()], bundleItemPath, namespace, bundle)
                         self.modifyBundleItem(bundleItem)
-                    bundleItemPaths[bundleItem.TYPE].remove(bundleItemPath)
+                    bundleItemPaths[bundleItem.type()].remove(bundleItemPath)
                 else:
                     bundleItem.removeSource(namespace.name)
                     if not bundleItem.hasSources():
@@ -500,7 +500,7 @@ class PMXSupportBaseManager(object):
         testKeyEquivalent = bool('keyEquivalent' in attrs and bundleItem.keyEquivalent != attrs['keyEquivalent'])
         testTabTrigger = bool('tabTrigger' in attrs and bundleItem.tabTrigger != attrs['tabTrigger'])
         testScope = bool('scope' in attrs and bundleItem.scope != attrs['scope'])
-        testPreference = bool(bundleItem.TYPE == 'preference')
+        testPreference = bool(bundleItem.type() == 'preference')
 
         scopeSelectorItem = testScope and self.selectorFactory(bundleItem.scope) or None
         scopeSelectorAttr = testScope and self.selectorFactory(attrs['scope']) or None
@@ -643,11 +643,11 @@ class PMXSupportBaseManager(object):
         """
         namespace = self.safeNamespace(namespaceName)
         
-        bundleAttributes = PMXBundle.DEFAULTS.copy()
+        bundleAttributes = Bundle.DEFAULTS.copy()
         bundleAttributes.update(attrs)
         
         # Create Bundle
-        bundle = PMXBundle(self.uuidgen(), self)
+        bundle = Bundle(self.uuidgen(), self)
         bundle.load(bundleAttributes)
         bundle.addSource(namespace.name, bundle.createSourcePath(namespace.bundles))
         
@@ -1031,7 +1031,7 @@ class PMXSupportBaseManager(object):
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
-            bundleitem.PMXPreference.buildSettings(self.getPreferences(leftScope, rightScope)))
+            bundleitem.Preference.buildSettings(self.getPreferences(leftScope, rightScope)))
 
     # ----------------- TABTRIGGERS INTERFACE
     def getAllTabTriggerItems(self):
@@ -1222,11 +1222,11 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
             self.TAB_TRIGGERS.setdefault(item.tabTrigger, []).append(item)
         if item.keyEquivalent != None:
             self.KEY_EQUIVALENTS.setdefault(item.keyEquivalent, []).append(item)
-        if item.TYPE == 'preference':
+        if item.type() == 'preference':
             self.PREFERENCES.append(item)
-        elif item.TYPE == 'template':
+        elif item.type() == 'template':
             self.TEMPLATES.append(item)
-        elif item.TYPE == 'syntax':
+        elif item.type() == 'syntax':
             self.SYNTAXES[item.scopeName] = item
         return item
 

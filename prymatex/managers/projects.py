@@ -84,12 +84,12 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
                 self.removeProjectBundleMenu(project, bundle)
 
     def on_supportManager_bundleItemAdded(self, bundleItem):
-        if bundleItem.TYPE == "syntax":
+        if bundleItem.type() == "syntax":
             self.keywordsListModel.addItems(bundleItem.scopeName.split('.'))
 
 
     def on_supportManager_bundleItemRemoved(self, bundleItem):
-        if bundleItem.TYPE == "syntax":
+        if bundleItem.type() == "syntax":
             self.keywordsListModel.removeItems(bundleItem.scopeName.split('.'))
 
     # -------------------- Load projects

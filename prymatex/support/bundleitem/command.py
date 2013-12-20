@@ -9,7 +9,7 @@ import functools
 
 from prymatex.utils import programs
 
-from .base import PMXBundleItem
+from .base import BundleItem
 from ..regexp import compileRegexp
 
 # New commands
@@ -31,7 +31,7 @@ from ..regexp import compileRegexp
 #namespace output_format { enum type { text = 0, snippet, html, completion_list, snippet_no_auto_indent }; }
 #namespace output_caret { enum type { after_output = 0, select_output, interpolate_by_char, interpolate_by_line, heuristic }; }
 
-class PMXCommand(PMXBundleItem):
+class Command(BundleItem):
     KEYS = (    
         'input', 'fallbackInput', 'standardInput', 'inputFormat',               #Input
         #input [ "selection", "document", "scope", "line", "word", "character", "none" ]
@@ -51,7 +51,6 @@ class PMXCommand(PMXBundleItem):
         'columnCaptureRegister', 'disableOutputAutoIndent',
         'lineCaptureRegister', 'dontFollowNewOutput',
         'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' )
-    TYPE = 'command'
     FOLDER = 'Commands'
     EXTENSION = 'tmCommand'
     PATTERNS = ( '*.tmCommand', '*.plist' )
@@ -84,7 +83,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
     
     # ---------------- Load, update, dump
     def __load_update(self, dataHash, initialize):
-        for key in PMXCommand.KEYS:
+        for key in Command.KEYS:
             if key in dataHash or initialize:
                 value = dataHash.get(key, None)
                 if value is not None:
@@ -93,19 +92,19 @@ echo Selection: "$TM_SELECTED_TEXT"''',
                 setattr(self, key, value)
     
     def load(self, dataHash):
-        PMXBundleItem.load(self, dataHash)
+        BundleItem.load(self, dataHash)
         self.__load_update(dataHash, True)
         # Remove cached values
         if hasattr(self, '_variables'):
             delattr(self, '_variables')
     
     def update(self, dataHash):
-        PMXBundleItem.update(self, dataHash)
+        BundleItem.update(self, dataHash)
         self.__load_update(dataHash, False)
     
     def dump(self, allKeys = False):
-        dataHash = PMXBundleItem.dump(self, allKeys)
-        for key in PMXCommand.KEYS:
+        dataHash = BundleItem.dump(self, allKeys)
+        for key in Command.KEYS:
             value = getattr(self, key, None)
             if allKeys or value != None:
                 if key in ['capturePattern'] and value != None:
@@ -129,7 +128,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
     
     # ---------------- Environment Variables
     def environmentVariables(self):
-        environment = PMXBundleItem.environmentVariables(self)
+        environment = BundleItem.environmentVariables(self)
         environment.update(self.variables)
         return environment
     
@@ -211,7 +210,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
             context.removeTempFile()
         processor.endExecution(self)
 
-class PMXDragCommand(PMXCommand):
+class DragCommand(Command):
     KEYS = ( 'draggedFileExtensions', )
     TYPE = 'dragcommand'
     FOLDER = 'DragCommands'
@@ -224,21 +223,21 @@ class PMXDragCommand(PMXCommand):
 
     # ---------------- Load, update, dump
     def __load_update(self, dataHash, initialize):
-        for key in PMXDragCommand.KEYS:
+        for key in DragCommand.KEYS:
             if key in dataHash or initialize:
                 setattr(self, key, dataHash.get(key, None))
     
     def load(self, dataHash):
-        PMXCommand.load(self, dataHash)
+        Command.load(self, dataHash)
         self.__load_update(dataHash, True)
     
     def update(self, dataHash):
-        PMXCommand.update(self, dataHash)
+        Command.update(self, dataHash)
         self.__load_update(dataHash, False)
 
     def dump(self, allKeys = False):
-        dataHash = PMXCommand.dump(self, allKeys)
-        for key in PMXDragCommand.KEYS:
+        dataHash = Command.dump(self, allKeys)
+        for key in DragCommand.KEYS:
             value = getattr(self, key, None)
             if allKeys or value != None:
                 dataHash[key] = value

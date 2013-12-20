@@ -39,9 +39,8 @@ class BundleItemTreeNode(TreeNodeBase):
         if hasattr(self.__bundleItem, "keyEquivalent") and isinstance(self.__bundleItem.keyEquivalent, six.string_types):
             return keyequivalent2keysequence(self.__bundleItem.keyEquivalent)
     
-    @property
     def icon(self):
-        return resources.getIcon("bundle-item-%s" % self.TYPE)
+        return resources.getIcon("bundle-item-%s" % self.type())
     
     def trigger(self):
         trigger = []
@@ -83,7 +82,7 @@ class BundleItemTreeNode(TreeNodeBase):
             return self._action
     
     def buildTriggerItemAction(self, parent, receiver):
-        action = QtGui.QAction(self.icon, self.buildMenuTextEntry(), parent)
+        action = QtGui.QAction(self.icon(), self.buildMenuTextEntry(), parent)
         parent.connect(action, QtCore.SIGNAL('triggered()'), receiver)
         return action
     

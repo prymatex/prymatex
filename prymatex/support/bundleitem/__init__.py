@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
-__all__ = ( 'PMXSyntax', 'PMXSnippet', 'PMXMacro', 'PMXCommand', 'PMXDragCommand',
-  'PMXProxy', 'PMXPreference', 'PMXTemplate', 'PMXProject', 'PMXPreferenceSettings',
-  'PMXPreferenceMasterSettings' )
+__all__ = ( 'Syntax', 'Snippet', 'Macro', 'Command', 'DragCommand',
+  'Proxy', 'Preference', 'Template', 'Project', 'PreferenceSettings',
+  'PreferenceMasterSettings' )
 
-from .syntax import PMXSyntax
-from .snippet import PMXSnippet
-from .macro import PMXMacro
-from .command import PMXCommand, PMXDragCommand
-from .proxy import PMXProxy
-from .preference import PMXPreference, PMXPreferenceSettings, PMXPreferenceMasterSettings
-from .template import PMXTemplate
-from .project import PMXProject
+from .syntax import Syntax
+from .snippet import Snippet
+from .macro import Macro
+from .command import Command, DragCommand
+from .proxy import Proxy
+from .preference import Preference, PreferenceSettings, PreferenceMasterSettings
+from .template import Template
+from .project import Project
