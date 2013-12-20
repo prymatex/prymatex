@@ -29,10 +29,7 @@ class KeyEquivalentHelper(CodeEditorKeyHelper):
         return bool(self.items)
 
     def execute(self, event, cursor = None):
-        if len(self.items) == 1:
-            self.editor.insertBundleItem(self.items[0])
-        else:
-            self.editor.selectBundleItem(self.items)
+        self.editor.insertBundleItem(self.items)
 
 class TabTriggerHelper(CodeEditorKeyHelper):
     """When expanding tab triggers, the left scope is the scope to the left of
@@ -54,10 +51,7 @@ class TabTriggerHelper(CodeEditorKeyHelper):
 
     def execute(self, event, cursor = None):
         #Inserto los items
-        if len(self.items) == 1:
-            self.editor.insertBundleItem(self.items[0], cursorWrapper = self.triggerCursor)
-        else:
-            self.editor.selectBundleItem(self.items, cursorWrapper = self.triggerCursor)
+        self.editor.insertBundleItem(self.items, cursorWrapper = self.triggerCursor)
 
 class SmartTypingPairsHelper(CodeEditorKeyHelper):
     def accept(self, event, cursor = None):

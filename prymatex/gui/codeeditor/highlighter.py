@@ -47,7 +47,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def asyncHighlightFunction(self):
         block = self.document().begin()
-        processor = self.editor.syntaxProcessor
+        processor = self.editor.findProcessor("syntax")
         while block.isValid():
             userData = processor.blockUserData(block)
             
@@ -65,7 +65,8 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.document().markContentsDirty(0, self.document().characterCount())
 
     def syncHighlightFunction(self, text):
-        processor = self.editor.syntaxProcessor
+        # TODO: Obtener el processor en el init del editor
+        processor = self.editor.findProcessor("syntax")
         block = self.currentBlock()
         userData = processor.blockUserData(self.currentBlock())
         

@@ -1,14 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-class CodeEditorBaseProcessor(object):
+from prymatex.qt import QtCore
+
+class CodeEditorBaseProcessor(QtCore.QObject):
+    begin = QtCore.Signal()
+    end = QtCore.Signal()
+
     def __init__(self, editor):
+        QtCore.QObject.__init__(self, editor)
         self.editor = editor
         self.cursorWrapper = None
         self.bundleItem = None
 
-    def type(self):
-        return self.bundleItem is not None and self.bundleItem.TYPE
+    def currentType(self):
+        return self.bundleItem is not None and self.bundleItem.type() or ""
 
     def configure(self, settings):
         self.asynchronous = settings.get("asynchronous", True)
@@ -25,11 +31,11 @@ class CodeEditorBaseProcessor(object):
     def beginExecution(self, bundleItem):
         self.bundleItem = bundleItem
         self.__env = None
-        self.editor.beginProcessor.emit(self)
+        self.begin.emit()
 
     def endExecution(self, bundleItem):
+        self.end.emit()
         self.bundleItem = None
-        self.editor.endProcessor.emit(self)
 
     def environmentVariables(self):
         if self.__env is None:

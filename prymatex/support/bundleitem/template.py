@@ -13,7 +13,7 @@ import functools
 from prymatex.utils import osextra
 
 from .base import BundleItem
-from ..staticfile import PMXStaticFile
+from ..staticfile import StaticFile
 
 class Template(BundleItem):
     KEYS = ( 'command', 'extension')
@@ -98,6 +98,6 @@ fi"'''
         bundleItem.load(data)
         #Add files
         for templateFilePath in templateFilePaths:
-            templateFile = PMXStaticFile(templateFilePath, bundleItem)
+            templateFile = StaticFile(templateFilePath, bundleItem)
             templateFile = manager.addStaticFile(templateFile)
             bundleItem.files.append(templateFile)

@@ -4,7 +4,7 @@ import os
 
 from prymatex.utils import encoding
 
-class PMXStaticFile(object):
+class StaticFile(object):
     DEFAULTS = {
     'content': '''//
 //  ${TM_NEW_FILE_BASENAME}

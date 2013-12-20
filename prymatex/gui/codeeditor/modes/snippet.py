@@ -6,20 +6,29 @@ from prymatex.qt import QtCore, QtGui
 from .base import CodeEditorBaseMode
 
 class CodeEditorSnippetMode(CodeEditorBaseMode):
-    @property
-    def snippet(self):
-        return self.editor.snippetProcessor.bundleItem
+    def __init__(self, parent):
+        CodeEditorBaseMode.__init__(self, parent)
+        self._is_active = False
+        self.processor = None
 
     def initialize(self, editor):
         CodeEditorBaseMode.initialize(self, editor)
+        self.processor = editor.findProcessor("snippet")
+        self.processor.begin.connect(self.activate)
+        self.processor.end.connect(self.deactivate)
         editor.installEventFilter(self)
     
-    def isActive(self):
-        return self.snippet is not None
+    def activate(self):
+        # TODO Capturar el estado del completer y desactivarlo
+        self.editor.beginMode.emit("snippet")
+        CodeEditorBaseMode.activate(self)
 
-    def inactive(self, handled):
-        self.editor.snippetProcessor.endSnippet(self.snippet)
-        return handled
+    def deactivate(self):
+        # TODO Restaurar el estado del completer
+        self.editor.endMode.emit("snippet")
+        CodeEditorBaseMode.deactivate(self)
+        
+    isActive = lambda self: self._is_active
 
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress and self.isActive():
@@ -30,39 +39,45 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         cursor = self.editor.textCursor()
         if event.key() == QtCore.Qt.Key_Escape:
             self.logger.debug("Se termina el modo snippet")
-            return self.inactive(False)
+            self.processor.stop()
+            return False
         elif event.key() in [ QtCore.Qt.Key_Tab, QtCore.Qt.Key_Backtab ]:
             self.logger.debug("Camino entre los holders")
-            if not self.snippet.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
-                return self.inactive(False)
+            if not self.processor.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
+                self.processor.stop()
+                return False
 
             if event.key() == QtCore.Qt.Key_Tab:
-                ok = self.snippet.nextHolder()
+                ok = self.processor.nextHolder()
             else:
-                ok = self.snippet.previousHolder()
+                ok = self.processor.previousHolder()
             if not ok:
                 self.editor.showMessage("Snippet end")
-                self.editor.snippetProcessor.selectHolder()
-                self.inactive()
+                self.processor.selectHolder()
+                self.processor.stop()
             else:
-                self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (self.snippet.name, self.snippet.holderNumber(), len(self.snippet)))
-                self.editor.snippetProcessor.selectHolder()
+                # TODO Esto mandarlo al processor para eso esta
+                #self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (self.snippet.name, self.snippet.holderNumber(), len(self.snippet)))
+                self.processor.selectHolder()
             return True
         elif event.text():
             self.logger.debug("Con texto %s" % event.text())
-            if not self.snippet.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
-                return self.inactive(False)
+            if not self.processor.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
+                self.processor.stop()
+                return False
+
+            if self.processor.lastHolder() and not self.processor.hasHolderContent():
+                # Put text on last empty holder
+                self.processor.stop()
+                return False
             
-            if self.snippet.lastHolder() and not self.snippet.hasHolderContent():
-                # Put text on last empty holder, force snippet ends
-                return self.inactive(False)
-            
-            holderStart, holderEnd = self.snippet.currentPosition()
+            holderStart, holderEnd = self.processor.currentPosition()
             #Cuidado con los extremos del holder
             if not cursor.hasSelection():
                 if (event.key() == QtCore.Qt.Key_Backspace and cursor.position() == holderStart) or \
                 (event.key() == QtCore.Qt.Key_Delete and cursor.position() == holderEnd):
-                    return self.inactive(False)
+                    self.processor.stop()
+                    return False
 
             holderPosition = cursor.selectionStart() - holderStart
             positionBefore = cursor.selectionStart()
@@ -80,26 +95,26 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
             cursor.setPosition(holderEnd - length, QtGui.QTextCursor.KeepAnchor)
             selectedText = self.editor.selectedTextWithEol(cursor)
 
-            self.snippet.setHolderContent(selectedText)
+            self.processor.setHolderContent(selectedText)
             
-            # Wrap snippet
+            # Wrap
             wrapCursor = self.editor.newCursorAtPosition(
-                self.editor.snippetProcessor.startPosition(), self.editor.snippetProcessor.endPosition() - length
+                self.processor.startPosition(), self.processor.endPosition() - length
             )
             
-            #Insert snippet
-            self.editor.snippetProcessor.render(wrapCursor)
+            # Render
+            self.processor.render(wrapCursor)
             
             if selectedText:
-                newHolderStart, _ = self.snippet.currentPosition()
+                newHolderStart, _ = self.processor.currentPosition()
                 self.editor.setTextCursor(
                     self.editor.newCursorAtPosition(
                         newHolderStart + holderPosition + (positionAfter - positionBefore)
                     )
                 )
-            elif self.snippet.nextHolder():
+            elif self.processor.nextHolder():
                 # The holder is killed
-                self.editor.snippetProcessor.selectHolder()
+                self.processor.selectHolder()
 
             cursor.endEditBlock()
             return True

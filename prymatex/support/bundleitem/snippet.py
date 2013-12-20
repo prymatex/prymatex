@@ -3,7 +3,8 @@
 from __future__ import unicode_literals
 
 """Snippte's module"""
-from ..regexp import Snippet, SnippetHandler
+from ..regexp import Snippet as SnippetObject
+from ..regexp import SnippetHandler
 from .base import BundleItem
 
 class Snippet(BundleItem, SnippetHandler):
@@ -44,7 +45,12 @@ Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''
       
     def execute(self, processor):
         if not hasattr(self, 'snippet'):
-            self.setSnippet(Snippet(self.content))
+            self.setSnippet(SnippetObject(self.content))
         processor.beginExecution(self)
         SnippetHandler.execute(self, processor)
-        processor.selectHolder()
+        if not processor.managed():
+            processor.endExecution(self)
+        else:
+            # TODO: Solo si tiene holders sino un end esta bien tambien
+            processor.selectHolder()
+        

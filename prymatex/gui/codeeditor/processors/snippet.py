@@ -7,13 +7,9 @@ from .base import CodeEditorBaseProcessor
 from prymatex.support.processor import SnippetProcessorMixin
 
 class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin):
-    def beginExecution(self, snippet):
-        CodeEditorBaseProcessor.beginExecution(self, snippet)
-        self.editor.modeChanged.emit("snippet")
-
-    def endExecution(self, snippet):
-        CodeEditorBaseProcessor.endExecution(self, snippet)
-        self.editor.modeChanged.emit("")
+    # ---------- Override SnippetProcessorMixin API
+    def managed(self):
+        return True
 
     def beginRender(self):
         self.output = ""
@@ -29,7 +25,7 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
     def insertText(self, text):
         # Replace new lines and tabs
         text = text.replace('\n', '\n' + self.indentation)
-        self.output += text.replace('\t', self.tabreplacement)
+        self.output += text.replace('\t', self.tabKeyBehavior)
     
     def selectHolder(self):
         start, end = self.bundleItem.currentPosition()
@@ -40,6 +36,14 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         #        lambda index, holder = holder: self.setSnippetHolderOption(holder, index), 
         #        cursorPosition = True)
 
+    def runShellScript(self, script):
+        context = self.editor.application.supportManager.runSystemCommand(
+            shellCommand = script,
+            environment = self.environmentVariables(),
+            shellVariables = self.shellVariables()
+        )
+        return context.outputValue.strip()
+    
     def setSnippetHolderOption(self, holder, index):
         if index >= 0:
             holder.setOptionIndex(index)
@@ -52,20 +56,39 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
             if holder is not None:
                 self.selectHolder(holder)
     
-    def runShellScript(self, script):
-        context = self.editor.application.supportManager.runSystemCommand(
-            shellCommand = script,
-            environment = self.environmentVariables(),
-            shellVariables = self.shellVariables()
-        )
-        return context.outputValue.strip()
-    
     def endPosition(self):
         return self.__endPosition
 
     def startPosition(self):
         return self.__startPosition
 
+    # ---------- Public API
+    def stop(self):
+        self.endExecution(self.bundleItem)
+
     def render(self, cursor):
         self.cursorWrapper = cursor
         self.bundleItem.render(self)
+    
+    # ---------- Holder navigation
+    def nextHolder(self):
+        return self.bundleItem.nextHolder()
+
+    def previousHolder(self):
+        return self.bundleItem.previousHolder()
+    
+    def lastHolder(self):
+        return self.bundleItem.lastHolder()
+
+    def setHolder(self, start, end):
+        return self.bundleItem.setHolder(start, end)
+    
+    def hasHolderContent(self):
+        return self.bundleItem.hasHolderContent()
+        
+    def setHolderContent(self, content):
+        self.bundleItem.setHolderContent(content)
+
+    # -------------- Snippet position
+    def currentPosition(self):
+        return self.bundleItem.currentPosition()

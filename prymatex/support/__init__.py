@@ -2,4 +2,4 @@
 # -*- coding: utf-8 -*-
 
 from .bundleitem import *
-from .theme import PMXTheme
+from .theme import Theme

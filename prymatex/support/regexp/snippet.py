@@ -78,7 +78,7 @@ class SnippetHandler(object):
 
     def render(self, visitor):
         assert self.snippet is not None
-        visitor.startRender()
+        visitor.beginRender()
         self.snippet.render(visitor, self.memodict)
         visitor.endRender()
 

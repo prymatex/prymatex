@@ -27,6 +27,9 @@ class BundleItemTreeNode(TreeNodeBase):
     def __getattr__(self, name):
         return getattr(self.__bundleItem, name)
 
+    def __eq__(self, other):
+        return self.uuid == other.uuid
+        
     def bundleItem(self):
         return self.__bundleItem
 
@@ -102,14 +105,14 @@ class BundleItemTreeNode(TreeNodeBase):
         return self.isTextInputNeeded() or self.producingOutputText()
 
     def isTextInputNeeded(self):
-        if self.__bundleItem.TYPE == "command":
+        if self.__bundleItem.type() == "command":
             return self.__bundleItem.input not in [ "none" ]
         return True
 
     def producingOutputText(self):
         # TODO Esta mal este nombre, porque puede producir salida en nuevos documentos pero no requerir entrada
         output = True
-        if self.__bundleItem.TYPE == "command":
+        if self.__bundleItem.type() == "command":
             output = output and self.__bundleItem.output not in [ "discard", "showAsTooltip" ] and\
                 self.__bundleItem.output not in [ "showAsHTML" ] and\
                 self.__bundleItem.output not in [ "createNewDocument", "openAsNewDocument" ] and\

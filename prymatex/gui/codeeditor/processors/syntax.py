@@ -18,13 +18,33 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.stack = []
         self.scopes = []
 
+    def managed(self):
+        return True
+
     def beginExecution(self, bundleItem):
+        if self.bundleItem == bundleItem:
+            return
+
+        self.editor.syntaxHighlighter.stop()
+        self.editor.aboutToHighlightChange.emit()
+        
+        # ------------ Previous syntax
+        if self.bundleItem is not None:
+            self.endExecution(self.bundleItem)
+        
+        # Set syntax
         CodeEditorBaseProcessor.beginExecution(self, bundleItem)
         self.stack = [(bundleItem.grammar, None)]
         self.beginParse(bundleItem.scopeName)
 
+        self.editor.syntaxChanged.emit(bundleItem)
+        
+        # Run
+        self.editor.syntaxHighlighter.runAsyncHighlight(self.editor.highlightChanged.emit)
+
     def endExecution(self, bundleItem):
         self.endParse(bundleItem.scopeName)
+        CodeEditorBaseProcessor.endExecution(self, bundleItem)
     
     def restoreState(self, block):
         if block.isValid():

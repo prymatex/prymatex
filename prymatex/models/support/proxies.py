@@ -78,27 +78,27 @@ class BundleItemTypeProxyModel(FlatTreeProxyModel):
         
     def filterAcceptsRow(self, sourceRow, sourceParent):
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
-        item = index.internalPointer()
-        return item.type() in self.tipos
+        itemNode = self.sourceModel().node(index)
+        return itemNode.type() in self.tipos
         
     def comparableValue(self, index):
         node = self.sourceModel().node(index)
         return node.name.lower()
     
     def compareIndex(self, xindex, yindex):
-        xnode = xindex.internalPointer()
-        ynode = yindex.internalPointer()
+        xnode = self.sourceModel().node(xindex)
+        ynode = self.sourceModel().node(yindex)
         return cmp(xnode.name, ynode.name)
     
     def findItemIndex(self, item):
         for num, index in enumerate(self.indexMap()):
-            if index.internalPointer() == item:
+            if self.sourceModel().node(index) == item:
                 return num
     
     def getAllItems(self):
         items = []
         for index in self.indexMap():
-            items.append(index.internalPointer())
+            items.append(self.sourceModel().node(index))
         return items
 
 class BundleListModel(BundleItemTypeProxyModel):

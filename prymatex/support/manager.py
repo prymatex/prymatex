@@ -13,8 +13,8 @@ from collections import namedtuple, OrderedDict
 from .bundle import Bundle
 from . import bundleitem 
 from . import scope
-from .theme import PMXTheme, PMXThemeStyle
-from .staticfile import PMXStaticFile
+from .theme import Theme, ThemeStyle
+from .staticfile import StaticFile
 from .process import RunningContext
 
 from prymatex.utils import plist, osextra, six
@@ -281,7 +281,7 @@ class PMXSupportBaseManager(object):
     #-------------- LOAD THEMES ---------------------------
     def loadThemes(self, namespace):
         loadedThemes = set()
-        for sourceThemePath in PMXTheme.sourcePaths(namespace.themes):
+        for sourceThemePath in Theme.sourcePaths(namespace.themes):
             try:
                 theme = self.loadTheme(sourceThemePath, namespace)
                 self.showMessage("Loading theme\n%s" % theme.name)
@@ -293,11 +293,11 @@ class PMXSupportBaseManager(object):
         return loadedThemes
 
     def loadTheme(self, sourceThemePath, namespace):
-        data = self.readPlist(PMXTheme.dataFilePath(sourceThemePath))
+        data = self.readPlist(Theme.dataFilePath(sourceThemePath))
         uuid = self.uuidgen(data.pop('uuid', None))
         theme = self.getManagedObject(uuid)
         if theme is None:
-            theme = PMXTheme(uuid, self)
+            theme = Theme(uuid, self)
             theme.load(data)
             theme = self.addTheme(theme)
             self.addManagedObject(theme)
@@ -362,7 +362,7 @@ class PMXSupportBaseManager(object):
             bundleItem = self.addBundleItem(bundleItem)
             for staticPath in klass.staticFilePaths(sourceBundleItemPath):
                 # TODO: Ver que hacer con directorios
-                staticFile = PMXStaticFile(staticPath, bundleItem)
+                staticFile = StaticFile(staticPath, bundleItem)
                 staticFile = self.addStaticFile(staticFile)
                 bundleItem.addStaticFile(staticFile)
             self.addManagedObject(bundleItem)
@@ -392,7 +392,7 @@ class PMXSupportBaseManager(object):
     # ------------------ RELOAD THEMES
     def reloadThemes(self, namespace):
         installedThemes = [ theme for theme in self.getAllThemes() if theme.hasSource(namespace.name) ]
-        themePaths = PMXTheme.sourcePaths(namespace.themes)
+        themePaths = Theme.sourcePaths(namespace.themes)
         print(themePaths)
         for theme in installedThemes:
             themePath = theme.sourcePath(namespace.name)
@@ -855,7 +855,7 @@ class PMXSupportBaseManager(object):
             self.updateBundleItem(parentItem, namespace)
 
         path = osextra.path.ensure_not_exists(os.path.join(parentItem.path(namespace), "%s"), osextra.to_valid_name(name))
-        staticFile = PMXStaticFile(path, parentItem)
+        staticFile = StaticFile(path, parentItem)
         #No es la mejor forma pero es la forma de guardar el archivo
         staticFile = self.addStaticFile(staticFile)
         parentItem.addStaticFile(staticFile)
@@ -907,11 +907,11 @@ class PMXSupportBaseManager(object):
     def createTheme(self, namespaceName = None, **attrs):
         namespace = self.safeNamespace(namespaceName)
         
-        themeAttributes = PMXTheme.DEFAULTS.copy()
+        themeAttributes = Theme.DEFAULTS.copy()
         themeAttributes.update(attrs)
         
         # Create Bundle
-        theme = PMXTheme(self.uuidgen(), self)
+        theme = Theme(self.uuidgen(), self)
         theme.load(themeAttributes)
         theme.addSource(namespace.name, theme.createSourcePath(namespace.themes))
         

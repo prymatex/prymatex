@@ -48,11 +48,9 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     themeChanged = QtCore.Signal()
     blocksRemoved = QtCore.Signal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.Signal(QtGui.QTextBlock, int)
-    modeChanged = QtCore.Signal(str)
+    modeChanged = QtCore.Signal()
     beginMode = QtCore.Signal(str)
     endMode = QtCore.Signal(str)
-    beginProcessor = QtCore.Signal(object)
-    endProcessor = QtCore.Signal(object)
 
     aboutToHighlightChange = QtCore.Signal()
     highlightChanged = QtCore.Signal()
@@ -96,8 +94,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     @pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
     def defaultSyntax(self, uuid):
-        syntax = self.application.supportManager.getBundleItem(uuid)
-        self.setSyntax(syntax)
+        self.insertBundleItem(self.application.supportManager.getBundleItem(uuid))
 
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
     def defaultTheme(self, uuid):
@@ -151,10 +148,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.bookmarkSelectableModel = bookmarkSelectableModelFactory(self)
 
         #Processors
-        self.commandProcessor = CodeEditorCommandProcessor(self)
-        self.macroProcessor = CodeEditorMacroProcessor(self)
-        self.snippetProcessor = CodeEditorSnippetProcessor(self)
-        self.syntaxProcessor = CodeEditorSyntaxProcessor(self)
+        self.processors = [
+            CodeEditorSnippetProcessor(self),
+            CodeEditorCommandProcessor(self),
+            CodeEditorSyntaxProcessor(self),
+            CodeEditorMacroProcessor(self)
+        ]
 
         #Highlighter
         self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
@@ -196,6 +195,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.themeChanged.connect(self.highlightEditor)
         # TODO Algo mejor para acomodar el ancho del tabulador
         self.fontChanged.connect(lambda ed = self: ed.setTabStopWidth(ed.tabWidth * ed.characterWidth()))
+        self.beginMode.connect(lambda mode, ed = self: ed.modeChanged.emit())
+        self.endMode.connect(lambda mode, ed = self: ed.modeChanged.emit())
         
         # By default
         self.showMarginLine = True
@@ -353,7 +354,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         extension = self.application.fileManager.extension(filePath)
         syntax = self.application.supportManager.findSyntaxByFileType(extension)
         if syntax is not None:
-            self.setSyntax(syntax)
+            self.insertBundleItem(syntax)
         PMXBaseEditor.setFilePath(self, filePath)
 
     def tabTitle(self):
@@ -473,23 +474,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     # ------------------- Syntax
     def syntax(self):
-        return self.syntaxProcessor.bundleItem
-
-    def setSyntax(self, syntax):
-        if self.syntaxProcessor.bundleItem == syntax:
-            return
-        
-        if self.syntaxProcessor.bundleItem is not None:
-            self.syntaxProcessor.endExecution(self.syntaxProcessor.bundleItem)
-        self.syntaxHighlighter.stop()
-        self.aboutToHighlightChange.emit()
-
-        # Set syntax
-        self.syntaxProcessor.beginExecution(syntax)
-        self.syntaxChanged.emit(syntax)
-        
-        # Run
-        self.syntaxHighlighter.runAsyncHighlight(self.highlightChanged.emit)
+        return self.findProcessor("syntax").bundleItem
 
     # -------------------- SideBars
     def updateViewportMargins(self):
@@ -762,33 +747,31 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.ensureCursorVisible()
 
     # ------------ Bundle Items
+    def findProcessor(self, nameType):
+        for processor in self.processors:
+            if nameType in processor.allowedTypes():
+                return processor
+
     def bundleItemHandler(self):
         return self.insertBundleItem
 
-    def insertBundleItem(self, item, **processorSettings):
+    def insertBundleItem(self, item_or_list, **processorSettings):
         """Inserta un bundle item"""
+        def _insert(item):
+            processor = self.findProcessor(item.type())
+            processor.configure(processorSettings)
+            item.execute(processor)
+        
+        if isinstance(item_or_list, (list, tuple)):
+            syntax = any((item.type() == 'syntax' for item in item_or_list))
 
-        if item.type() == "snippet":
-            self.snippetProcessor.configure(processorSettings)
-            item.execute(self.snippetProcessor)
-        elif item.type() in ( "command", "dragcommand" ):
-            self.commandProcessor.configure(processorSettings)
-            item.execute(self.commandProcessor)
-        elif item.type() == "macro":
-            self.macroProcessor.configure(processorSettings)
-            item.execute(self.macroProcessor)
-        elif item.type() == "syntax":
-            self.setSyntax(item)
+            def insertBundleItem(index):
+                if index >= 0:
+                    _insert(item_or_list[index], **processorSettings)
 
-    def selectBundleItem(self, items, **processorSettings):
-        #Tengo mas de uno que hago?, muestro un menu
-        syntax = any([item.TYPE == 'syntax' for item in items])
-
-        def insertBundleItem(index):
-            if index >= 0:
-                self.insertBundleItem(items[index], **processorSettings)
-
-        self.showFlatPopupMenu(items, insertBundleItem, cursorPosition = not syntax)
+            self.showFlatPopupMenu(item_or_list, insertBundleItem, cursorPosition = not syntax)
+        else:
+            _insert(item_or_list)
 
     def executeCommand(self, commandScript = None, commandInput = "none", commandOutput = "insertText"):
         if commandScript is None:
@@ -1091,7 +1074,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
                 icon = QtGui.QIcon()
             elif isinstance(item,  BundleItemTreeNode):
                 title = "%s 	&%d" % (item.buildMenuTextEntry(False), index)
-                icon = item.icon
+                icon = item.icon()
             menu.addAction(icon, title)
 
         def menu_aboutToHide():

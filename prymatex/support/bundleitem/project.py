@@ -8,7 +8,7 @@ import functools
 from prymatex.utils import osextra
 
 from .base import BundleItem
-from ..staticfile import PMXStaticFile
+from ..staticfile import StaticFile
 
 class Project(BundleItem):
     KEYS = ( 'command', )
@@ -92,6 +92,6 @@ fi"'''}
         bundleItem.load(data)
         #Add files
         for projectFilePath in projectFilePaths:
-            projectFile = PMXStaticFile(projectFilePath, bundleItem)
+            projectFile = StaticFile(projectFilePath, bundleItem)
             projectFile = manager.addStaticFile(projectFile)
             project.files.append(projectFile)

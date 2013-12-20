@@ -8,9 +8,12 @@ from prymatex.core import PMXBaseEditorAddon
 class CodeEditorBaseMode(QtCore.QObject, PMXBaseEditorAddon):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
+        self._is_active = False
 
-    def isActive(self):
-        return False
+    def activate(self):
+        self._is_active = True
 
-    def inactive(self):
-        pass
+    def deactivate(self):
+        self._is_active = False
+    
+    isActive = lambda self: self._is_active

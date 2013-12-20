@@ -44,7 +44,7 @@ class BundleItemTreeModel(AbstractTreeModel):
             return node.name
         elif role == QtCore.Qt.DecorationRole:
             node = self.node(index)
-            return node.icon
+            return node.icon()
 
     def flags(self, index):
         if not index.isValid():  

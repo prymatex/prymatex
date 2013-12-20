@@ -334,8 +334,9 @@ class Syntax(BundleItem):
 
     def execute(self, processor):
         processor.beginExecution(self)
-        self.parse(processor.plainText(), processor)
-        processor.endExecution(self)
+        if not processor.managed():
+            self.parse(processor.plainText(), processor)
+            processor.endExecution(self)
 
     def parse(self, text, processor):
         self.grammar.parse(text, processor)

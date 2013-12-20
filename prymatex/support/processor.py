@@ -4,10 +4,10 @@
 def nop(self, *args):
     pass
 
-def return_true(self, *args):
-    return True
-
 BaseProcessorMixin = type("BaseProcessorMixin", (object, ), {
+    "currentType": lambda *largs: "",
+    "allowedTypes": classmethod(lambda cls: ()),
+    "managed": lambda *largs: False,
     "beginExecution": nop,
     "endExecution": nop,
     "environmentVariables": nop,
@@ -16,6 +16,7 @@ BaseProcessorMixin = type("BaseProcessorMixin", (object, ), {
 
 ######################### SyntaxProcessor #########################
 SyntaxProcessorMixin = type("SyntaxProcessorMixin", (BaseProcessorMixin, ), {
+    "allowedTypes": classmethod(lambda cls: ("syntax", )),
     "openTag": nop,
     "closeTag": nop,
     "beginLine": nop,
@@ -24,6 +25,7 @@ SyntaxProcessorMixin = type("SyntaxProcessorMixin", (BaseProcessorMixin, ), {
 
 ######################### Command Processor #########################
 CommandProcessorMixin = type("CommandProcessorMixin", (BaseProcessorMixin, ), {
+    "allowedTypes": classmethod(lambda cls: ("command", "dragcommand")),
     #Inputs
     "document": nop,
     "line": nop,
@@ -33,9 +35,9 @@ CommandProcessorMixin = type("CommandProcessorMixin", (BaseProcessorMixin, ), {
     #"selectedText": nop,
     "word": nop,
     # beforeRunningCommand
-    "saveActiveFile": return_true,
-    "saveModifiedFiles": return_true,
-    "nop": return_true,
+    "saveActiveFile": lambda *largs: True,
+    "saveModifiedFiles": lambda *largs: True,
+    "nop": lambda *largs: True,
     # Outpu functions
     "replaceInput": nop,
     "atCaret": nop,
@@ -57,6 +59,7 @@ CommandProcessorMixin = type("CommandProcessorMixin", (BaseProcessorMixin, ), {
 
 ######################### Snipper Processor #########################
 SnippetProcessorMixin = type("SnippetProcessorMixin", (BaseProcessorMixin, ), {
+    "allowedTypes": classmethod(lambda cls: ("snippet", )),
     "beginRender": nop,
     "endRender": nop,
     "runShellScript": nop,
@@ -70,6 +73,7 @@ SnippetProcessorMixin = type("SnippetProcessorMixin", (BaseProcessorMixin, ), {
 
 ######################### Macro Processor #########################
 MacroProcessorMixin = type("MacroProcessorMixin", (BaseProcessorMixin, ), {
+    "allowedTypes": classmethod(lambda cls: ("macro", )),
     # Move
     "moveRight": nop,
     "moveLeft": nop,

@@ -50,7 +50,7 @@ DEFAULT_SCOPE_SELECTORS = [('Comment', 'comment'),
                            ('Invalid', 'invalid')]
 
 
-class PMXThemeStyle(object):
+class ThemeStyle(object):
     KEYS = ( 'scope', 'name', 'settings' )
     def __init__(self, theme):
         self.theme = theme
@@ -60,7 +60,7 @@ class PMXThemeStyle(object):
         return self.__settings
 
     def __load_update(self, dataHash, initialize):
-        for key in PMXThemeStyle.KEYS:
+        for key in ThemeStyle.KEYS:
             if key in dataHash or initialize:
                 value = dataHash.get(key, None)
                 if key == 'settings':
@@ -85,13 +85,13 @@ class PMXThemeStyle(object):
             dataHash['settings'] = self.__settings
         return dataHash
 
-class PMXTheme(ManagedObject):
+class Theme(ManagedObject):
     KEYS = ( 'name', 'comment', 'author', 'settings' )
     EXTENSION = 'tmTheme'
     PATTERNS = ( '*.tmTheme', )
 
     def __load_update(self, dataHash, initialize):
-        for key in PMXTheme.KEYS:
+        for key in Theme.KEYS:
             if key in dataHash or initialize:
                 value = dataHash.get(key, None)
                 if key == 'settings':
@@ -131,7 +131,7 @@ class PMXTheme(ManagedObject):
     
     def dump(self):
         dataHash = ManagedObject.dump(self)
-        for key in PMXTheme.KEYS:
+        for key in Theme.KEYS:
             value = getattr(self, key, None)
             if value is not None:
                 dataHash[key] = value
@@ -143,7 +143,7 @@ class PMXTheme(ManagedObject):
     def createThemeStyle(self, settings):
         if 'name' not in settings or not settings['name']:
             settings['name'] = 'untitled'
-        style = self.manager.addThemeStyle(PMXThemeStyle(self))
+        style = self.manager.addThemeStyle(ThemeStyle(self))
         style.load(settings)
         self.styles.append(style)
         return style
