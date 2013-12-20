@@ -8,8 +8,8 @@ from .base import CodeEditorBaseMode
 class CodeEditorSnippetMode(CodeEditorBaseMode):
     def __init__(self, parent):
         CodeEditorBaseMode.__init__(self, parent)
-        self._is_active = False
         self.processor = None
+        self.enableCompletion = None
 
     def initialize(self, editor):
         CodeEditorBaseMode.initialize(self, editor)
@@ -17,21 +17,23 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         self.processor.begin.connect(self.activate)
         self.processor.end.connect(self.deactivate)
         editor.installEventFilter(self)
-    
+
     def activate(self):
-        # TODO Capturar el estado del completer y desactivarlo
+        # Capture completition state
+        self.enableCompletion = self.editor.enableAutoCompletion
+        self.editor.enableAutoCompletion = False
+
         self.editor.beginMode.emit("snippet")
         CodeEditorBaseMode.activate(self)
 
     def deactivate(self):
-        # TODO Restaurar el estado del completer
+        # Restore completition state
+        self.editor.enableAutoCompletion = self.enableCompletion
         self.editor.endMode.emit("snippet")
         CodeEditorBaseMode.deactivate(self)
-        
-    isActive = lambda self: self._is_active
 
     def eventFilter(self, obj, event):
-        if event.type() == QtCore.QEvent.KeyPress and self.isActive():
+        if self.isActive() and event.type() == QtCore.QEvent.KeyPress:
             return self.keyPressEvent(event)
         return False
 

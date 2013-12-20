@@ -282,15 +282,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def processBlockUserData(self, sourceText, block, userData):
         # Indent
-        indent = text.white_space(sourceText)
-        if indent != userData.indent:
-            userData.indent = indent
+        userData.indent = text.white_space(sourceText)
         # Folding
         # TODO: Ver si lo puedo sacar del scope basico o hace falta tomar de algun lugar
         # Principio, fin de la linea
-        foldingMark = self.basicScope().settings.folding(sourceText)
-        if foldingMark != userData.foldingMark:
-            userData.foldingMark = foldingMark
+        userData.foldingMark = self.basicScope().settings.folding(sourceText)
+        
         # Handlers
         for handler in self.__blockUserDataHandlers:
             handler.processBlockUserData(sourceText, block, userData)
@@ -755,23 +752,23 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def bundleItemHandler(self):
         return self.insertBundleItem
 
-    def insertBundleItem(self, item_or_list, **processorSettings):
+    def insertBundleItem(self, items, **processorSettings):
         """Inserta un bundle item"""
-        def _insert(item):
-            processor = self.findProcessor(item.type())
-            processor.configure(processorSettings)
-            item.execute(processor)
+        if not isinstance(items, (list, tuple)):
+            items = [ items ]
+
+        def _insert_item(index):
+            if index >= 0:
+                processor = self.findProcessor(items[index].type())
+                processor.configure(processorSettings)
+                items[index].execute(processor)
         
-        if isinstance(item_or_list, (list, tuple)):
-            syntax = any((item.type() == 'syntax' for item in item_or_list))
+        if len(items) > 1:
+            syntax = any((item.type() == 'syntax' for item in items))
 
-            def insertBundleItem(index):
-                if index >= 0:
-                    _insert(item_or_list[index], **processorSettings)
-
-            self.showFlatPopupMenu(item_or_list, insertBundleItem, cursorPosition = not syntax)
+            self.showFlatPopupMenu(items, _insert_item, cursorPosition = not syntax)
         else:
-            _insert(item_or_list)
+            _insert_item(0)
 
     def executeCommand(self, commandScript = None, commandInput = "none", commandOutput = "insertText"):
         if commandScript is None:

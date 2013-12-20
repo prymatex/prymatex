@@ -158,7 +158,9 @@ class pmxConfigPorperty(object):
             raise AttributeError(
                 "The '%s' attribute can only be accessed from %s instances."
                 % (self.name, owner.__name__))
-        return instance.__dict__.get(self.name, None) or self.getDefault()
+        if self.name in instance.__dict__:
+            return instance.__dict__[self.name]
+        return self.getDefault()
 
     def __set__(self, instance, value):
         instance.__dict__[self.name] = value
