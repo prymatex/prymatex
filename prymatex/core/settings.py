@@ -63,7 +63,7 @@ class SettingsGroup(object):
             self.qsettings.beginGroup(self.__groupName)
             self.qsettings.setValue(name, value)
             self.qsettings.endGroup()
-            if setting.tm_name != None:
+            if setting.tm_name is not None:
                 self.tmsettings.setValue(setting.tm_name, value)
             for listener in self.listeners:
                 setattr(listener, name, value)
@@ -119,7 +119,7 @@ class SettingsGroup(object):
 
     def sync(self):
         for key, setting in self.settings.items():
-            if setting.default == None and self.listeners:
+            if setting.default is None and self.listeners:
                 self.qsettings.beginGroup(self.__groupName)
                 self.qsettings.setValue(key, setting.getDefault())
                 self.qsettings.endGroup()

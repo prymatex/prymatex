@@ -106,8 +106,8 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         dataHash = BundleItem.dump(self, allKeys)
         for key in Command.KEYS:
             value = getattr(self, key, None)
-            if allKeys or value != None:
-                if key in ['capturePattern'] and value != None:
+            if allKeys or value is not None:
+                if key in ['capturePattern'] and value is not None:
                     value = str(value)
                 dataHash[key] = value
         return dataHash
@@ -239,6 +239,6 @@ class DragCommand(Command):
         dataHash = Command.dump(self, allKeys)
         for key in DragCommand.KEYS:
             value = getattr(self, key, None)
-            if allKeys or value != None:
+            if allKeys or value is not None:
                 dataHash[key] = value
         return dataHash

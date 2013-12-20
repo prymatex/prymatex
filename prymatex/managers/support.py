@@ -50,7 +50,7 @@ class BundleItemMenuGroup(QtCore.QObject):
                 menu.addSeparator()
                 continue
             item = self.manager.getBundleItem(uuid)
-            if item != None:
+            if item is not None:
                 action = item.triggerItemAction(parent)
                 menu.addAction(action)
             elif uuid in submenus:
@@ -449,7 +449,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
             return self.bundleItemCache.get(memoizedKey)
         tabTriggers = []
         for item in self.actionItemsProxyModel.getAllItems():
-            if item.tabTrigger != None:
+            if item.tabTrigger is not None:
                 tabTriggers.append(item)
         return self.bundleItemCache.setdefault(memoizedKey,
             tabTriggers)
@@ -474,7 +474,7 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
             return self.bundleItemCache[memoizedKey]
         keyCode = []
         for item in self.actionItemsProxyModel.getAllItems() + self.syntaxProxyModel.getAllItems():
-            if item.keyCode() != None:
+            if item.keyCode() is not None:
                 keyCode.append(item)
         return self.bundleItemCache.setdefault(memoizedKey,
             keyCode)

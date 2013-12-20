@@ -100,16 +100,16 @@ class SnippetHandler(object):
 
     def setHolder(self, start, end = None):
         '''Set the placeholder for position, where start > holder position > end'''
-        end = end != None and end or start
+        end = end is not None and end or start
         found = None
         for holder in self.holders:
             holderStart, holderEnd = holder.position(self.memodict)
             holderLength = holderEnd -holderStart
             if holderStart <= start <= end <= holderEnd and \
-                (found == None or holderLength < found):
+                (found is None or holderLength < found):
                 found = holderLength
                 self.holderIndex = self.holders.index(holder)
-        return found != None
+        return found is not None
 
     def nextHolder(self):
         if self.holderIndex < len(self.holders) - 1:

@@ -30,6 +30,9 @@ class BundleItemTreeNode(TreeNodeBase):
     def __eq__(self, other):
         return self.uuid == other.uuid
         
+    def __hash__(self):
+        return hash(self.uuid)
+    
     def bundleItem(self):
         return self.__bundleItem
 

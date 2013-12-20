@@ -16,17 +16,10 @@ class CodeEditorBaseProcessor(QtCore.QObject):
     def currentType(self):
         return self.bundleItem is not None and self.bundleItem.type() or ""
 
-    def configure(self, settings):
-        self.asynchronous = settings.get("asynchronous", True)
-        self.cursorWrapper = settings.get("cursorWrapper", 
+    def configure(self, **kwargs):
+        self.cursorWrapper = kwargs.get("cursorWrapper", 
             self.editor.textCursor())
-        self.disableIndent = settings.get("disableIndent", False)
-        self.baseEnvironment = settings.get("environment", {})
-        self.errorCommand = settings.get("errorCommand", False)
-        self.tabKeyBehavior = settings.get("tabKeyBehavior",
-            self.editor.tabKeyBehavior())
-        self.indentation = settings.get("indentation", 
-            self.editor.blockUserData(self.cursorWrapper.block()).indent)
+        self.baseEnvironment = kwargs.get("environment", {})
 
     def beginExecution(self, bundleItem):
         self.bundleItem = bundleItem

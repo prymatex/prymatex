@@ -57,7 +57,7 @@ class PreferenceSettings(object):
         dataHash = {}
         for key in PreferenceSettings.KEYS:
             value = getattr(self, key, None)
-            if value != None:
+            if value is not None:
                 if key in self.INDENT_KEYS or key in self.FOLDING_KEYS:
                     value = value.pattern
                 elif key == 'shellVariables':
@@ -74,7 +74,7 @@ class PreferenceSettings(object):
     def update(self, dataHash):
         for key in self.KEYS:
             value = dataHash.get(key, None)
-            if value != None:
+            if value is not None:
                 if key in self.INDENT_KEYS or key in self.FOLDING_KEYS:
                     value = compileRegexp( value )
                 elif key == 'shellVariables':
@@ -197,16 +197,16 @@ class PreferenceMasterSettings(object):
             #DecreasePattern evaluate line to decrease, no requiere del return
             #IncreaseOnlyNextLine on return indent nextline only
             #IgnoringLines evaluate line to unindent, no require el return
-            if self._indent_settings.decreaseIndentPattern != None and \
+            if self._indent_settings.decreaseIndentPattern is not None and \
                 self._indent_settings.decreaseIndentPattern.search(line):
                 indent.append(self.INDENT_DECREASE)
-            if self._indent_settings.increaseIndentPattern != None and \
+            if self._indent_settings.increaseIndentPattern is not None and \
                 self._indent_settings.increaseIndentPattern.search(line):
                 indent.append(self.INDENT_INCREASE)
-            if self._indent_settings.indentNextLinePattern != None and \
+            if self._indent_settings.indentNextLinePattern is not None and \
                 self._indent_settings.indentNextLinePattern.search(line):
                 indent.append(self.INDENT_NEXTLINE)
-            if self._indent_settings.unIndentedLinePattern != None and \
+            if self._indent_settings.unIndentedLinePattern is not None and \
                 self._indent_settings.unIndentedLinePattern.search(line):
                 indent.append(self.UNINDENT)
         return indent
@@ -223,9 +223,9 @@ class PreferenceMasterSettings(object):
                 if self._folding_settings.foldingStartMarker is not None else None
             stop_match = self._folding_settings.foldingStopMarker.search(line) \
                 if self._folding_settings.foldingStopMarker is not None else None
-            if start_match != None and stop_match == None:
+            if start_match is not None and stop_match is None:
                 return self.FOLDING_START
-            elif start_match == None and stop_match != None:
+            elif start_match is None and stop_match is not None:
                 return self.FOLDING_STOP
             # Ahora probamos los de indented
             if self._folding_settings.foldingIndentedBlockStart is not None and \
@@ -266,8 +266,8 @@ class Preference(BundleItem):
         dataHash = BundleItem.dump(self, allKeys)
         for key in Preference.KEYS:
             value = getattr(self, key, None)
-            if allKeys or value != None:
-                if key == 'settings' and value != None:
+            if allKeys or value is not None:
+                if key == 'settings' and value is not None:
                     value = value.dump()
                 dataHash[key] = value
         return dataHash

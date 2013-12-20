@@ -752,7 +752,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     def bundleItemHandler(self):
         return self.insertBundleItem
 
-    def insertBundleItem(self, items, **processorSettings):
+    def insertBundleItem(self, items, **kwargs):
         """Inserta un bundle item"""
         if not isinstance(items, (list, tuple)):
             items = [ items ]
@@ -760,7 +760,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         def _insert_item(index):
             if index >= 0:
                 processor = self.findProcessor(items[index].type())
-                processor.configure(processorSettings)
+                processor.configure(**kwargs)
                 items[index].execute(processor)
         
         if len(items) > 1:

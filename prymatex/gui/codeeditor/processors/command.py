@@ -7,6 +7,12 @@ from .base import CodeEditorBaseProcessor
 from prymatex.support.processor import CommandProcessorMixin
 
 class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin):
+    def configure(self, **kwargs):
+        CodeEditorBaseProcessor.configure(self, **kwargs)
+        self.asynchronous = kwargs.get("asynchronous", True)
+        self.disableIndent = kwargs.get("disableIndent", False)
+        self.errorCommand = kwargs.get("errorCommand", False)
+        
     def formatAsXml(self, text, firstBlock, lastBlock, startIndex, endIndex):
         result = []
         block = firstBlock

@@ -100,7 +100,7 @@ class BundleItemMenuTreeModel(AbstractTreeModel):
                 parent.appendChild(separatorNode)
             else:
                 item = self.manager.getBundleItem(uuid)
-                if item != None:
+                if item is not None:
                     if item in allActionItems:
                         allActionItems.remove(item)
                     bundleItemNode = BundleItemMenuTreeNode(item.name, BundleItemMenuTreeNode.ITEM, item, parent)
@@ -122,7 +122,7 @@ class BundleItemMenuTreeModel(AbstractTreeModel):
             if 'excludedItems' in bundle.mainMenu:
                 for uuid in bundle.mainMenu['excludedItems']:
                     item = self.manager.getBundleItem(uuid)
-                    if item != None:
+                    if item is not None:
                         if item in allActionItems:
                             allActionItems.remove(item)
                         self.excludedModel.appendExcludedItem(item)
@@ -217,7 +217,7 @@ class BundleItemMenuTreeModel(AbstractTreeModel):
         
         parentNode = self.node(parentIndex)
         
-        if dragNode.nodeParent() == None:
+        if dragNode.nodeParent() is None:
             #The node belongs to a exludeListModel
             if dragNode.nodeType == BundleItemMenuTreeNode.SEPARATOR:
                 #Make a copy of separator
