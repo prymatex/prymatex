@@ -17,7 +17,8 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         CodeEditorBaseMode.__init__(self, parent)
         self.cursors = []
         self.draggedCursors = []
-        self.scursor = self.startPoint = self.doublePoint = None
+        self.startPoint = self.doublePoint = None
+        self.setObjectName("CodeEditorSnippetMode")
 
     # ------- Overrides
     def initialize(self, editor):
@@ -27,15 +28,16 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         # Formater
         editor.registerTextCharFormatBuilder("dragged", self.textCharFormat_dragged_builder)
     
-    def isActive(self):
-        return bool(self.cursors) or self.startPoint != None
+    def activate(self):
+        CodeEditorBaseMode.activate(self)
+        self.editor.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
 
-    def inactive(self, handled):
-        self.cursors = []
-        self.editor.modeChanged.emit("")
+    def deactivate(self):
+        self.draggedCursors = self.cursors = []
         self.highlightEditor()
-        return handled
-    
+        self.editor.viewport().unsetCursor()
+        CodeEditorBaseMode.deactivate(self)
+
     # ------- Text char format builder
     def textCharFormat_dragged_builder(self):
         textCharFormat = self.editor.textCharFormat_selection_builder()
@@ -59,7 +61,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
 
     def mousePressPoint(self, point, remove = False):
         self.startPoint = point
-        self.application.setOverrideCursor(QtGui.QCursor(remove and QtCore.Qt.CrossCursor or QtCore.Qt.ArrowCursor))
+        self.activate()
 
     def mouseMovePoint(self, dragPoint, remove = False):
         self.draggedCursors = []
@@ -85,11 +87,15 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         for cursor in self.draggedCursors:
             multicursorAction(cursor)
 
+        if self.cursors and not self.isActive():
+            self.activate()
+        elif not self.cursors and self.isActive():
+            self.deactivate()
+
         #Clean last acction
         self.draggedCursors = []
-        self.scursor = self.startPoint = self.doublePoint = None
+        self.startPoint = self.doublePoint = None
         self.application.restoreOverrideCursor()
-        self.highlightEditor()
     
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Escape:
@@ -100,7 +106,8 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
             if lastCursor.hasSelection():
                 lastCursor.clearSelection()
             self.editor.setTextCursor(lastCursor)
-            return self.inactive(True)
+            self.deactivate()
+            return True
         elif event.key() == QtCore.Qt.Key_Right:
             if self.canMoveRight():
                 mode = QtGui.QTextCursor.KeepAnchor if bool(event.modifiers() & QtCore.Qt.ShiftModifier) else QtGui.QTextCursor.MoveAnchor
@@ -218,7 +225,6 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
             lastCursor = QtGui.QTextCursor(self.cursors[-1])
             lastCursor.clearSelection()
             self.editor.setTextCursor(lastCursor)
-            self.editor.modeChanged.emit("multicursor")
         self.highlightEditor()
 
     def removeBreakCursor(self, cursor):
