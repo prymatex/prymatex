@@ -148,7 +148,7 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
             elif index.column() == 1:
                 return suggestion.name
         elif role == QtCore.Qt.DecorationRole and index.column() == 0:
-            return suggestion.icon
+            return suggestion.icon()
         elif role == QtCore.Qt.ToolTipRole:
             return suggestion.name
 

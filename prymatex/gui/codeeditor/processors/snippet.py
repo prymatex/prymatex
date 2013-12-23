@@ -9,9 +9,9 @@ from prymatex.support.processor import SnippetProcessorMixin
 class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin):
     def configure(self, **kwargs):
         CodeEditorBaseProcessor.configure(self, **kwargs)
-        self.tabKeyBehavior = settings.get("tabKeyBehavior",
+        self.tabKeyBehavior = kwargs.get("tabKeyBehavior",
             self.editor.tabKeyBehavior())
-        self.indentation = settings.get("indentation", 
+        self.indentation = kwargs.get("indentation", 
             self.editor.blockUserData(self.cursorWrapper.block()).indent)
         
     # ---------- Override SnippetProcessorMixin API
