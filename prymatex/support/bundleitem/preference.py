@@ -65,7 +65,7 @@ class PreferenceSettings(object):
                 elif key == 'symbolTransformation':
                     value = "%s" % value
                 elif key == 'showInSymbolList':
-                    value = value and "1" or "0"
+                    value = value and 1 or 0
                 elif key == 'spellChecking':
                     value = value and "1" or "0"
                 dataHash[key] = value
@@ -82,7 +82,7 @@ class PreferenceSettings(object):
                 elif key == 'symbolTransformation':
                     value = SymbolTransformation(value)
                 elif key == 'showInSymbolList':
-                    value = bool(int(value))
+                    value = bool(value)
                 elif key == 'spellChecking':
                     value = bool(int(value))
             setattr(self, key, value)

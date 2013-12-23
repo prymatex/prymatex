@@ -294,7 +294,7 @@ class PMXSupportBaseManager(object):
 
     def loadTheme(self, sourceThemePath, namespace):
         data = self.readPlist(Theme.dataFilePath(sourceThemePath))
-        uuid = self.uuidgen(data.pop('uuid', None))
+        uuid = self.uuidgen(data.get('uuid'))
         theme = self.getManagedObject(uuid)
         if theme is None:
             theme = Theme(uuid, self)
@@ -321,7 +321,7 @@ class PMXSupportBaseManager(object):
 
     def loadBundle(self, sourceBundlePath, namespace):
         data = self.readPlist(Bundle.dataFilePath(sourceBundlePath))
-        uuid = self.uuidgen(data.pop('uuid', None))
+        uuid = self.uuidgen(data.get('uuid'))
         bundle = self.getManagedObject(uuid)
         if bundle is None:
             bundle = Bundle(uuid, self)
@@ -354,7 +354,7 @@ class PMXSupportBaseManager(object):
 
     def loadBundleItem(self, klass, sourceBundleItemPath, namespace, bundle):
         data = self.readPlist(klass.dataFilePath(sourceBundleItemPath))
-        uuid = self.uuidgen(data.pop('uuid', None))
+        uuid = self.uuidgen(data.get('uuid'))
         bundleItem = self.getManagedObject(uuid)
         if bundleItem is None:
             bundleItem = klass(uuid, self, bundle)

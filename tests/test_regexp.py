@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
+from __future__ import unicode_literals
 
 import unittest
 from prymatex.support.regexp import SymbolTransformation, String
@@ -22,11 +23,14 @@ class RegexpTests(unittest.TestCase):
     
     def test_symbol_transformation(self):
         sources = [
-            "class\s+([A-Za-z_][A-Za-z0-9_]*.+?\)?)(\:|$)/$1/g",
-            "def\s+([A-Za-z_][A-Za-z0-9_]*\()(?:(.{,40}?\))|((.{40}).+?\)))(\:)/$1(?2:$2)(?3:$4…\))/g",
+            "s/class\s+([A-Za-z_][A-Za-z0-9_]*.+?\)?)(\:|$)/$1/g",
+            "s/def\s+([A-Za-z_][A-Za-z0-9_]*\()(?:(.{,40}?\))|((.{40}).+?\)))(\:)/$1(?2:$2)(?3:$4…\))/g",
+            "s/^\\s*/CSS: /; s/\\s+/ /g",
+            "s/\\/\\*\\*\\s*(.*?)\\s*\\*\\//** $1 **/; s/\\/\\*.*?\\*\\*\\//./; s/\\/\\*[^\\*].*?[^\\*]\\*\\///"
         ]
         for s in sources:
             trans = SymbolTransformation(s)
+            print(u"%s" % trans)
             print(trans.transform("    def apply(self, pattern, text, flags):"))
             
     def test_transformation(self):

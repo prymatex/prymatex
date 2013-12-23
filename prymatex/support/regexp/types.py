@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from collections import namedtuple
 
+import re
 from prymatex.utils import six
 from prymatex.utils import text
 
@@ -354,6 +355,14 @@ class VariableTransformationType(object):
     
     def render(self, visitor, memodict, holders = None, match = None):
         visitor.insertText(self.replace(memodict, holders, match, visitor.environmentVariables()))
+        
+#struct variable_transform_t { std::string name; regexp::pattern_t pattern; nodes_t format; regexp_options::type options; WATCH_LEAKS(parser::variable_transform_t); };
+class SymbolTransformationType(VariableTransformationType):
+    def __str__(self):
+        return "%s/%s/%s/%s" % (self.name, 
+            self.pattern.pattern,
+            "".join([ "%s" % frmt for frmt in self.format]),
+            "".join(self.options))
 
 #struct code_t { std::string code; WATCH_LEAKS(parser::code_t); };
 class CodeType(object):

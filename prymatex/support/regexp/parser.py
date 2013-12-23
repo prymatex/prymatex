@@ -97,16 +97,16 @@ class Parser(object):
             options.append(self.source[self.it - 1])
         return True
 
-    def parse_format_symbol(self, stopChars, nodes):
+    def parse_symbol(self, stopChars, nodes):
         backtrack = self.it
         
         while self.it != self.last:
-            if self.source[self.it] == "s" and self.it != self.last and self.source[self.it + 1] == "/":
-                self.parse_char("s")
-                self.parse_char("/")
-                res = types.VariableTransformationType("s")
+            name = []
+            if self.parse_until("/", name):
+                res = types.SymbolTransformationType(name.pop())
                 regexp = []
-                if self.parse_until("/", regexp) and self.parse_format_string("/", res.format) and self.parse_regexp_options(res.options) and self.parse_char(";"):
+                if self.parse_until("/", regexp) and self.parse_format_string("/", res.format) and self.parse_regexp_options(res.options) and (self.parse_char(";") or self.it == self.last):
+                    #print(regexp)
                     res.pattern = compileRegexp(regexp.pop(), res.options)
                     nodes.append(res)
                     continue
@@ -326,9 +326,9 @@ class Parser(object):
         self.it = backtrack
         return False
 
-def parse_format_symbol(source):
+def parse_symbol(source):
     nodes = []
-    Parser(source).parse_format_symbol("", nodes)
+    Parser(source).parse_symbol("", nodes)
     return nodes
 
 def parse_format_string(source):

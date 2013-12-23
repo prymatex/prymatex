@@ -8,7 +8,7 @@ import timeit
 from pprint import pprint
 
 from prymatex.support.manager import PMXSupportPythonManager
-from prymatex.support.processor import PMXDebugSnippetProcessor, PMXDebugSyntaxProcessor
+from prymatex.support.processor import DebugSnippetProcessor, DebugSyntaxProcessor
 
 TEXT = """#!/usr/bin/env python
 import pepe
@@ -38,10 +38,12 @@ class SupportTests(unittest.TestCase):
                 
     def test_preferences(self):
         for preference in self.manager.getAllPreferences():
-            if preference.settings.symbolTransformation:
-                print(preference.dump())
-                #print(u"%s" % preference.settings.symbolTransformation)
-                print(self.manager.readPlist(preference.currentSourcePath()))
+            sourcePath = preference.currentSourcePath()
+            dataHash = self.manager.readPlist(sourcePath)
+            print("En:", sourcePath)
+            print("Entra:", dataHash)
+            print("Sale:", preference.dump())
+            self.assertEqual(preference.dump(), dataHash, 'Lo que sale no es igual a lo que entra')
 
     def test_snippet(self):
         for actionItem in self.manager.getAllActionItems():
@@ -51,7 +53,7 @@ class SupportTests(unittest.TestCase):
     def test_syntax(self):
         syntax = self.manager.getSyntaxByScopeName('source.python')
         file = open(os.path.abspath('./prymatex/gui/codeeditor/editor.py'), 'r')
-        processor = PMXDebugSyntaxProcessor(showOutput = False, hashOutput = True)
+        processor = DebugSyntaxProcessor(showOutput = False, hashOutput = True)
         text = file.read()
         start = time()
         for _ in range(1):
@@ -64,7 +66,7 @@ class SupportTests(unittest.TestCase):
         snippet = 'def pepe(${3:self${2/([^,])?.*/(?1:, )/}${2:arg}}):\n\t${4/.+/"""/}${4:docstring for pepe}${4/.+/"""\n/}${4/.+/\t/}${0:pass}'
         bundle = self.manager.getBundleItem('659D189C-EC3E-4C4E-9377-B7F5F5216CBD').bundle
         snippet = self.manager.buildAdHocSnippet(snippet, bundle = bundle)
-        processor = PMXDebugSnippetProcessor()
+        processor = DebugSnippetProcessor()
         snippet.execute(processor)
         print(processor.text)
         
