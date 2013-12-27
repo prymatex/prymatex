@@ -189,27 +189,8 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     def showTabSizeContextMenu(self, point):
         editor = self.currentEditor
         #Setup Context Menu
-        menu = QtGui.QMenu(self)
-        menu.setObjectName('tabSizeMenu')
-        
-        for size in [2, 4, 8]:
-            action = menu.addAction("%d" % size, lambda size = size: self.setCurrentEditorTabSize(size))
-            action.setCheckable(True)
-            action.setChecked(editor.tabWidth == size)
-        
-        if editor.tabWidth not in [2,4,8]:
-            action = menu.addAction("Other (%d)" % editor.tabWidth)
-            action.setCheckable(True)
-            action.setChecked(True)
-        else:
-            action = menu.addAction("Other")
-            action.setCheckable(True)
-
-        menu.addSeparator()
-        action = menu.addAction("Soft Tabs (Spaces)", lambda soft = not editor.indentUsingSpaces: self.setCurrentEditorTabSoft(soft))
-        action.setCheckable(True)        
-        action.setChecked(editor.indentUsingSpaces == True)
-        menu.popup(self.labelIndentation.mapToGlobal(point))
+        menuIndentation = self.mainWindow.findChild(QtGui.QMenu, "menuIndentation")
+        menuIndentation.popup(self.labelIndentation.mapToGlobal(point))
 
     def setCurrentEditorTabSoft(self, soft):
         self.currentEditor.indentUsingSpaces = soft
@@ -220,7 +201,10 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
 
     def setTabSizeLabel(self, editor):
         #Tab Size
-        self.labelIndentation.setText("Soft Tab: %d" % editor.tabWidth if editor.indentUsingSpaces else "Hard Tab: %d" % editor.tabWidth)
+        if editor.indentUsingSpaces:
+            self.labelIndentation.setText("Spaces: %d" % editor.indentationWidth)
+        else:
+            self.labelIndentation.setText("Tab width: %d" % editor.tabWidth)
 
     # -------------- AutoConnect Command widget signals
     @QtCore.Slot()

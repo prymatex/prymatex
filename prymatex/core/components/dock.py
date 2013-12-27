@@ -14,6 +14,7 @@ class PMXBaseDock(PMXBaseComponent, PMXKeyHelperMixin):
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def initialize(self, mainWindow):
+        PMXBaseComponent.initialize(self, mainWindow)
         self.mainWindow = mainWindow
 
     def runKeyHelper(self, event):

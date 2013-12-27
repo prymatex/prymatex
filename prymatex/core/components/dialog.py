@@ -10,6 +10,7 @@ __all__ = ["PMXBaseDialog"]
 # TODO: separar estos dialogos de los que se pueden generar desde el servidor remoto?
 class PMXBaseDialog(PMXBaseComponent):
     def initialize(self, mainWindow):
+        PMXBaseComponent.initialize(self, mainWindow)
         self.mainWindow = mainWindow
         
     def setParameters(self, parameters):

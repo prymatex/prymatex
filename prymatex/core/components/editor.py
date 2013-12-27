@@ -19,6 +19,7 @@ class PMXBaseEditor(PMXBaseComponent, PMXKeyHelperMixin):
     UNTITLED_FILE_TEMPLATE = "Untitled {CREATION_COUNTER}"
     
     def initialize(self, mainWindow):
+        PMXBaseComponent.initialize(self, mainWindow)
         self.mainWindow = mainWindow
         self.filePath = None
         self.project = None
