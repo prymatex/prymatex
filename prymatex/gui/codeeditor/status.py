@@ -97,8 +97,8 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.comboBoxSyntaxes.view().setAutoScroll(False)
         
         # Connect tab size context menu
-        self.labelTabSize.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.labelTabSize.customContextMenuRequested.connect(self.showTabSizeContextMenu)
+        self.labelIndentation.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.labelIndentation.customContextMenuRequested.connect(self.showTabSizeContextMenu)
         
         # Create bundle menu
         self.menuBundle = QtGui.QMenu(self)
@@ -157,7 +157,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         if self.currentEditor is not None:
             model = self.comboBoxSyntaxes.model()
             node = model.node(model.createIndex(index, 0))
-            self.currentEditor.setSyntax(node)
+            self.currentEditor.insertBundleItem(node)
 
     @QtCore.Slot(int)
     def on_comboBoxTabSize_activated(self, index):
@@ -175,10 +175,9 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     def on_cursorPositionChanged(self, editor = None):
         editor = editor or self.currentEditor
         cursor = editor.textCursor()
-        line = cursor.blockNumber() + 1
-        column = cursor.columnNumber() + 1
-        selection = cursor.selectionEnd() - cursor.selectionStart()
-        self.labelLineColumn.setText("Line: %5d Column: %5d Selection: %5d" % (line, column, selection))
+        self.labelPosition.setText("Line: %5d Column: %5d Selection: %5d" % (
+            cursor.blockNumber() + 1, cursor.columnNumber() + 1, 
+            cursor.selectionEnd() - cursor.selectionStart()))
         #Set index of current symbol
         self.comboBoxSymbols.setCurrentIndex(self.comboBoxSymbols.model().findBlockIndex(cursor.block()))
 
@@ -210,7 +209,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         action = menu.addAction("Soft Tabs (Spaces)", lambda soft = not editor.indentUsingSpaces: self.setCurrentEditorTabSoft(soft))
         action.setCheckable(True)        
         action.setChecked(editor.indentUsingSpaces == True)
-        menu.popup(self.labelTabSize.mapToGlobal(point))
+        menu.popup(self.labelIndentation.mapToGlobal(point))
 
     def setCurrentEditorTabSoft(self, soft):
         self.currentEditor.indentUsingSpaces = soft
@@ -221,7 +220,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
 
     def setTabSizeLabel(self, editor):
         #Tab Size
-        self.labelTabSize.setText("Soft Tab: %d" % editor.tabWidth if editor.indentUsingSpaces else "Hard Tab: %d" % editor.tabWidth)
+        self.labelIndentation.setText("Soft Tab: %d" % editor.tabWidth if editor.indentUsingSpaces else "Hard Tab: %d" % editor.tabWidth)
 
     # -------------- AutoConnect Command widget signals
     @QtCore.Slot()

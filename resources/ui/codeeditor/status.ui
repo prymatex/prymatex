@@ -425,7 +425,7 @@ p, li { white-space: pre-wrap; }
        <number>0</number>
       </property>
       <item>
-       <widget class="QLabel" name="labelLineColumn">
+       <widget class="QLabel" name="labelPosition">
         <property name="maximumSize">
          <size>
           <width>250</width>
@@ -433,7 +433,41 @@ p, li { white-space: pre-wrap; }
          </size>
         </property>
         <property name="text">
-         <string>Line: 0 Column: 0 Selection: 0</string>
+         <string>Position</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelIndentation">
+        <property name="maximumSize">
+         <size>
+          <width>80</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Indentation</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelLineEnding">
+        <property name="text">
+         <string>Ending</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelEncoding">
+        <property name="text">
+         <string>Encoding</string>
         </property>
        </widget>
       </item>
@@ -462,16 +496,6 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBoxSyntaxes">
-        <property name="maximumSize">
-         <size>
-          <width>250</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QToolButton" name="toolButtonMenuBundle">
         <property name="icon">
          <iconset theme="applications-system">
@@ -487,20 +511,24 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="labelTabSize">
+       <widget class="QComboBox" name="comboBoxSyntaxes">
         <property name="maximumSize">
          <size>
-          <width>80</width>
+          <width>300</width>
           <height>16777215</height>
          </size>
-        </property>
-        <property name="text">
-         <string>Tab Size</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBoxSymbols"/>
+       <widget class="QComboBox" name="comboBoxSymbols">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

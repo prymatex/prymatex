@@ -228,7 +228,7 @@ class SmartIndentHelper(CodeEditorKeyHelper):
         if self.editor.document().blockCount() == 1:
             syntax = self.application.supportManager.findSyntaxByFirstLine(cursor.block().text()[:cursor.columnNumber()])
             if syntax is not None:
-                self.editor.setSyntax(syntax)
+                self.editor.insertBundleItem(syntax)
         self.editor.insertNewLine(cursor)
 
 class PrintEditorStatusHelper(CodeEditorKeyHelper):
