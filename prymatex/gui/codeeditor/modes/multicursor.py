@@ -114,7 +114,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         if self.draggedCursors:
             for cursor in self.draggedCursors:
                 multicursorAction(cursor)
-        else:
+        elif self.startPoint is not None:
             multicursorAction(self.editor.newCursorAtPosition(self.startPoint))
 
         if self.cursors and not self.isActive():
