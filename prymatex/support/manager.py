@@ -177,6 +177,9 @@ class PMXSupportBaseManager(object):
             # Generate
             return uuidmodule.uuid3(uuidmodule.NAMESPACE_DNS, uuid)
 
+    def uuidtotext(self, uuid):
+        return six.text_type(uuid).upper()
+    
     #--------------- Run system commands --------------------
     def runSystemCommand(self, **attrs):
         """Synchronous run system command"""

@@ -106,7 +106,6 @@ class Parser(object):
                 res = types.SymbolTransformationType(name.pop())
                 regexp = []
                 if self.parse_until("/", regexp) and self.parse_format_string("/", res.format) and self.parse_regexp_options(res.options) and (self.parse_char(";") or self.it == self.last):
-                    #print(regexp)
                     res.pattern = compileRegexp(regexp.pop(), res.options)
                     nodes.append(res)
                     continue

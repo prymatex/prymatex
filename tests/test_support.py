@@ -31,19 +31,24 @@ class SupportTests(unittest.TestCase):
             #print message
         self.manager.loadSupport(loadCallback)
 
-    def test_snippet(self):
-        for actionItem in self.manager.getAllActionItems():
-            if actionItem.TYPE == "snippet":
-                print(actionItem.content)
+    def test_bundleitems(self):
+        for bundleitem in self.manager.getAllActionItems():
+            sourcePath = bundleitem.currentSourcePath()
+            dataHash = self.manager.readPlist(sourcePath)
+            if bundleitem.dump() != dataHash:
+                print("En:", sourcePath)
+                print("Entra:", dataHash)
+                print("Sale:", bundleitem.dump())
                 
     def test_preferences(self):
         for preference in self.manager.getAllPreferences():
             sourcePath = preference.currentSourcePath()
             dataHash = self.manager.readPlist(sourcePath)
-            print("En:", sourcePath)
-            print("Entra:", dataHash)
-            print("Sale:", preference.dump())
-            self.assertEqual(preference.dump(), dataHash, 'Lo que sale no es igual a lo que entra')
+            if preference.dump() != dataHash:
+                print("En:", sourcePath)
+                print("Entra:", dataHash)
+                print("Sale:", preference.dump())
+            #    self.assertEqual(preference.dump(), dataHash, 'Lo que sale no es igual a lo que entra')
 
     def test_snippet(self):
         for actionItem in self.manager.getAllActionItems():

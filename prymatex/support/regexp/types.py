@@ -259,7 +259,7 @@ class PlaceholderTransformType(PlaceholderTypeMixin):
 
     def __str__(self):
         return "${%s/%s/%s/%s}" % (self.index, 
-            self.pattern.pattern, 
+            escapeCharacters(self.pattern.pattern, "/"), 
             "".join([ "%s" % frmt for frmt in self.format]),
             "".join(self.options))
     
@@ -333,7 +333,7 @@ class VariableTransformationType(object):
     
     def __str__(self):
         return "${%s/%s/%s/%s}" % (self.name, 
-            self.pattern.pattern, 
+            escapeCharacters(self.pattern.pattern, "/"),
             "".join([ "%s" % frmt for frmt in self.format]),
             "".join(self.options))
     
@@ -360,7 +360,7 @@ class VariableTransformationType(object):
 class SymbolTransformationType(VariableTransformationType):
     def __str__(self):
         return "%s/%s/%s/%s" % (self.name, 
-            self.pattern.pattern,
+            escapeCharacters(self.pattern.pattern, "/"),
             "".join([ "%s" % frmt for frmt in self.format]),
             "".join(self.options))
 

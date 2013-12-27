@@ -107,8 +107,8 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         for key in Command.KEYS:
             value = getattr(self, key, None)
             if allKeys or value is not None:
-                if key in ['capturePattern'] and value is not None:
-                    value = str(value)
+                if key == 'capturePattern' and value is not None:
+                    value = value.pattern
                 dataHash[key] = value
         return dataHash
     

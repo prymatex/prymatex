@@ -14,9 +14,9 @@ def suite():
     return unittest.TestSuite([ 
         #unittest.makeSuite(KeySequencesTests, 'test'),
         #unittest.makeSuite(MenusTests, 'test'),
-        #unittest.makeSuite(SupportTests, 'test_preferences'),
+        unittest.makeSuite(SupportTests, 'test_bundleitems'),
         #unittest.makeSuite(ScopeSelectorTests, 'test'),
-        unittest.makeSuite(RegexpTests, 'test_symbol_transformation'),
+        #unittest.makeSuite(RegexpTests, 'test_symbol_transformation'),
         #unittest.makeSuite(PlistTests, 'test'),
         #unittest.makeSuite(OsExtraTests, 'test')
     ])

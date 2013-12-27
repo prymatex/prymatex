@@ -32,6 +32,8 @@ from ..regexp import compileRegexp, SymbolTransformation
 class PreferenceSettings(object):
     KEYS = (
         'completions', 'completionCommand', 'disableDefaultCompletion',
+        'disableIndentCorrections', 'indentOnPaste',
+        'characterClass', 'bold', 'italic', 'underline',
         'showInSymbolList', 'symbolTransformation', 'highlightPairs',
         'smartTypingPairs', 'shellVariables', 'spellChecking', 'softWrap',
         'indentedSoftWrap', 'foldingIndentedBlockStart',
@@ -67,7 +69,7 @@ class PreferenceSettings(object):
                 elif key == 'showInSymbolList':
                     value = value and 1 or 0
                 elif key == 'spellChecking':
-                    value = value and "1" or "0"
+                    value = value and 1 or 0
                 dataHash[key] = value
         return dataHash
 
@@ -82,7 +84,7 @@ class PreferenceSettings(object):
                 elif key == 'symbolTransformation':
                     value = SymbolTransformation(value)
                 elif key == 'showInSymbolList':
-                    value = bool(value)
+                    value = bool(int(value))
                 elif key == 'spellChecking':
                     value = bool(int(value))
             setattr(self, key, value)

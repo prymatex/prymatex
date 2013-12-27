@@ -24,7 +24,7 @@ class ManagedObject(object):
         return cls.__name__.lower()
 
     def uuidAsText(self):
-        return six.text_type(self.uuid).upper()
+        return self.manager.uuidtotext(self.uuid)
 
     # ----------- Load from dictionary
     def load(self, dataHash):

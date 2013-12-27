@@ -9,7 +9,7 @@ from prymatex.utils import osextra
 from ..base import ManagedObject
 
 class BundleItem(ManagedObject):
-    KEYS = ( 'name', 'tabTrigger', 'keyEquivalent', 'scope', 'semanticClass' )
+    KEYS = ( 'name', 'tabTrigger', 'keyEquivalent', 'scope', 'semanticClass', 'bundleUUID' )
     EXTENSION = ''
     FOLDER = ''
     PATTERNS = ()
@@ -26,6 +26,8 @@ class BundleItem(ManagedObject):
                 value = dataHash.get(key, None)
                 if key == "scope":
                     self.selector = self.manager.selectorFactory(value)
+                elif key == "bundleUUID" and value is not None:
+                    value = self.manager.uuidgen(value)
                 setattr(self, key, value)
 
     def load(self, dataHash):
@@ -41,6 +43,8 @@ class BundleItem(ManagedObject):
         for key in BundleItem.KEYS:
             value = getattr(self, key, None)
             if allKeys or value is not None:
+                if key == "bundleUUID" and value is not None:
+                    value = self.manager.uuidtotext(value)
                 dataHash[key] = value
         return dataHash
 
