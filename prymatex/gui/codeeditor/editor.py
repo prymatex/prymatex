@@ -1078,7 +1078,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             callback(activeActionIndex)
         menu.aboutToHide.connect(menu_aboutToHide)
 
-        point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight()) if cursorPosition else self.mainWindow.cursor().pos()
+        if cursorPosition:
+            cursor = self.newCursorAtPosition(self.textCursor().selectionStart())
+            point = self.viewport().mapToGlobal(
+                self.cursorRect(cursor).bottomLeft())
+        else:
+            point = self.mainWindow.cursor().pos()
         menu.popup(point)
 
     # Default Context Menus
