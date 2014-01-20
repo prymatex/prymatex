@@ -89,5 +89,5 @@ class DockWidgetToolBar(QtGui.QToolBar):
         
     def hideDockWidgets(self, excludeAction = None):
         for dockWidget in self.dockWidgets():
-            if excludeAction == None or (excludeAction != None and excludeAction != dockWidget.toggleViewAction()):
+            if excludeAction is None or (excludeAction is not None and excludeAction != dockWidget.toggleViewAction()):
                 dockWidget.hide()

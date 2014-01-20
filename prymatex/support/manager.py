@@ -30,11 +30,11 @@ def compare(obj, keys, tests):
         return True
     key = keys[0]
     value = getattr(obj, key, None)
-    if value == None or key not in tests:
+    if value is None or key not in tests:
         return False
-    elif isinstance(value, str):
+    elif isinstance(value, six.string_types):
         return value.find(tests[key]) != -1 and compare(obj, keys[1:], tests)
-    elif isinstance(value, (int)):
+    elif isinstance(value, six.integer_types):
         return value == tests[key] and compare(obj, keys[1:], tests)
     else:
         return value == tests[key] and compare(obj, keys[1:], tests)

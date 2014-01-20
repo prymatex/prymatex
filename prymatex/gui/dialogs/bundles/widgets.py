@@ -31,7 +31,11 @@ class BundleItemEditorBaseWidget(QtGui.QWidget):
         #The bundle item
         self.bundleItem = None
         self.changes = {}
-        
+    
+    @classmethod
+    def type(cls):
+        return cls.TYPE
+
     def isChanged(self):
         dataHash = self.bundleItem.dataHash()
         return len(dataHash) != len(self.changes) or \
@@ -39,7 +43,7 @@ class BundleItemEditorBaseWidget(QtGui.QWidget):
     
     def title(self):
         if self.bundleItem is not None:
-            return 'Edit %s: "%s"' % (self.TYPE, self.bundleItem.name)
+            return 'Edit %s: "%s"' % (self.type(), self.bundleItem.name)
         return 'No item selected'
     
     def getName(self):

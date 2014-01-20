@@ -100,14 +100,14 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
                          widgets.ProjectEditorWidget(self),
                          widgets.NoneEditorWidget(self) ]
         for editor in self.editors:
-            self.indexes[editor.TYPE] = self.stackedWidget.addWidget(editor)
+            self.indexes[editor.type()] = self.stackedWidget.addWidget(editor)
 
     # ----------------- Toolbar create and delete bundle items
     def getBundleForIndex(self, index):
         if not index.isValid():
             return self.manager.getDefaultBundle()
         bundle = self.proxyTreeModel.node(index)
-        while bundle.TYPE != 'bundle':
+        while bundle.type() != 'bundle':
             bundle = bundle.nodeParent()
         return bundle
 
@@ -150,7 +150,7 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         index = self.treeView.currentIndex()
         if index.isValid():
             template = self.proxyTreeModel.node(index)
-            if template.TYPE == 'staticfile':
+            if template.type() == 'staticfile':
                 template = template.nodeParent()
         self.manager.createStaticFile(template, self.namespace)
 
@@ -172,9 +172,9 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         index = self.treeView.currentIndex()
         if index.isValid():
             item = self.proxyTreeModel.node(index)
-            if item.TYPE == 'bundle':
+            if item.type() == 'bundle':
                 self.manager.deleteBundle(item)
-            elif item.TYPE == 'staticfile':
+            elif item.type() == 'staticfile':
                 self.manager.deleteStaticFile(item)
             else:
                 self.manager.deleteBundleItem(item)
@@ -216,7 +216,7 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         
         def conditionalEnabledStaticFile():
             node = self.proxyTreeModel.node(self.treeView.currentIndex())
-            self.staticFileAction.setEnabled(not node.isRootNode() and (node.TYPE in ["template", "staticfile", "project"]))
+            self.staticFileAction.setEnabled(not node.isRootNode() and (node.type() in ["template", "staticfile", "project"]))
         self.toolbarMenu.aboutToShow.connect(conditionalEnabledStaticFile)
         
         self.pushButtonAdd.setMenu(self.toolbarMenu)
@@ -253,8 +253,8 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
         return self.editors[self.BASE_EDITOR]
 
     def getEditorForTreeItem(self, treeItem):
-        if not treeItem.isRootNode() and treeItem.TYPE in self.indexes:
-            index = self.indexes[treeItem.TYPE]
+        if not treeItem.isRootNode() and treeItem.type() in self.indexes:
+            index = self.indexes[treeItem.type()]
             return self.editors[index]
 
     def on_bundleTreeModel_rowsInserted(self, parent, start, end):
@@ -317,9 +317,9 @@ class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
     def saveChanges(self):
         current = self.stackedWidget.currentWidget()
         if current.isChanged():
-            if current.TYPE == "bundle":
+            if current.type() == "bundle":
                 self.manager.updateBundle(current.bundleItem, self.namespace, **current.changes)
-            elif current.TYPE == "staticfile":
+            elif current.type() == "staticfile":
                 self.manager.updateStaticFile(current.bundleItem, self.namespace, **current.changes)
             else:
                 self.manager.updateBundleItem(current.bundleItem, self.namespace, **current.changes)

@@ -146,7 +146,7 @@ class SpellCheckerAddon(CodeEditorAddon):
     def on_editor_keyPressEvent(self, event):
         '''Dynamically connect dependant on pyenchant import'''
         assert self.dictionary is not None
-        if not event.modifiers() and event.key() in [ QtCore.Qt.Key_Space ] and self.currentSpellTask == None:
+        if not event.modifiers() and event.key() in [ QtCore.Qt.Key_Space ] and self.currentSpellTask is None:
             cursor = self.editor.textCursor()
             block = cursor.block()
             self.cleanCursorsForBlock(block)
