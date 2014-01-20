@@ -263,8 +263,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.__blockUserDataHandlers.append(handler)
 
     def blockUserData(self, block):
-        userData = block.userData()
-        if not userData:
+        if block.userData() is None:
             userData = CodeEditorBlockUserData()
             # Indent and content
             userData.indent = ""
@@ -278,7 +277,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             for handler in self.__blockUserDataHandlers:
                 handler.contributeToBlockUserData(userData)
             block.setUserData(userData)
-        return userData
+        return block.userData()
 
     def processBlockUserData(self, sourceText, block, userData):
         # Indent

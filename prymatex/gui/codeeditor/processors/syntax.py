@@ -5,7 +5,7 @@ from .base import CodeEditorBaseProcessor
 from prymatex.support.processor import SyntaxProcessorMixin
 from prymatex.gui.codeeditor.userdata import CodeEditorTokenData
 
-def build_userData_hash(scope, text, state):
+def build_userData_revision(scope, text, state):
     return hash("%s:%s:%d" % (scope, text, state))
 
 class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
@@ -57,10 +57,12 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
 
     def blockUserData(self, block):
         text = block.text() + "\n"
-        userDataHash = build_userData_hash(self.bundleItem.scopeName, 
+        revision = build_userData_revision(self.bundleItem.scopeName, 
             text, block.previous().userState())
+
         userData = self.editor.blockUserData(block)
-        if not userData.testStateHash(userDataHash):
+        if block.revision() != revision:
+
             self.restoreState(block.previous())
             self.bundleItem.parseLine(self.stack, text, self)
             
@@ -68,7 +70,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
             userData.setBlank(text.strip() == "")
             self.editor.processBlockUserData(text, block, userData)
 
-            userData.setStateHash(userDataHash)
+            block.setRevision(revision)
 
             # Store stack and state
             block.setUserState(len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE)
@@ -111,12 +113,10 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     def closeToken(self, end, closeAll=False):
         while self.__indexes:
             start, index = self.__indexes.pop()
-            data = self.editor.flyweightScopeDataFactory(
-                tuple(self.scopes))
             self.__tokens[index] = CodeEditorTokenData(
                 start=start,
                 end=end,
-                data=data,
+                data=self.editor.flyweightScopeDataFactory(tuple(self.scopes)),
                 chunk=self.line[start:end]
             )
             if not closeAll:

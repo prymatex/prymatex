@@ -25,19 +25,12 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
 
     def __init__(self):
         QtGui.QTextBlockUserData.__init__(self)
-        self.__stateHash = None
         
         self.__blank = True
         self.__tokens = []
         self.__ranges = None
 
         self.__cache = {}
-
-    def setStateHash(self, stateHash):
-        self.__stateHash = stateHash
-
-    def testStateHash(self, stateHash):
-        return self.__stateHash == stateHash
 
     def setTokens(self, tokens):
         self.__tokens = tokens
