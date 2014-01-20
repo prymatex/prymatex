@@ -42,7 +42,6 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
                 ok = self.processor.previousHolder()
             if not ok:
                 self.editor.showMessage("Snippet end")
-                self.processor.selectHolder()
                 self.processor.stop()
             else:
                 # TODO Esto mandarlo al processor para eso esta
@@ -101,6 +100,7 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
                         newHolderStart + holderPosition + (positionAfter - positionBefore)
                     )
                 )
+            # TODO Esto mejor no, asi se queda igual en el holder aunque no tenga nada
             elif self.processor.nextHolder():
                 # The holder is killed
                 self.processor.selectHolder()

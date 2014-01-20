@@ -13,7 +13,8 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
             self.editor.tabKeyBehavior())
         self.indentation = kwargs.get("indentation", 
             self.editor.blockUserData(self.cursorWrapper.block()).indent)
-        
+        self.backward = False
+
     # ---------- Override SnippetProcessorMixin API
     def managed(self):
         return True
@@ -37,11 +38,9 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
     def selectHolder(self):
         start, end = self.bundleItem.currentPosition()
         self.editor.setTextCursor(self.editor.newCursorAtPosition(start, end))
-        #if hasattr(holder, 'options'):
-        #    self.editor.showFlatPopupMenu(
-        #        holder.options, 
-        #        lambda index, holder = holder: self.setSnippetHolderOption(holder, index), 
-        #        cursorPosition = True)
+        choices = self.bundleItem.holderChoices()
+        if choices:
+            self.editor.showFlatPopupMenu(choices, self.setHolderChoiceIndex)
 
     def runShellScript(self, script):
         context = self.editor.application.supportManager.runSystemCommand(
@@ -51,18 +50,15 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         )
         return context.outputValue.strip()
     
-    def setSnippetHolderOption(self, holder, index):
-        if index >= 0:
-            holder.setOptionIndex(index)
-            # Wrap snippet
-            wrapCursor = self.editor.newCursorAtPosition(
-                self.startPosition(), self.endPosition())
-            #Insert snippet
-            self.render(wrapCursor)
-            holder = self.nextHolder(holder)
-            if holder is not None:
-                self.selectHolder(holder)
-    
+    def setHolderChoiceIndex(self, index):
+        if index != -1:
+            self.bundleItem.setHolderContent(index)
+            self.render(self.cursorWrapper)
+            if self.nextHolder():
+                self.selectHolder()
+        elif self.backward and self.previousHolder() or self.nextHolder():
+            self.selectHolder()
+
     def endPosition(self):
         return self.__endPosition
 
@@ -79,9 +75,11 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
     
     # ---------- Holder navigation
     def nextHolder(self):
+        self.backward = False
         return self.bundleItem.nextHolder()
 
     def previousHolder(self):
+        self.backward = True
         return self.bundleItem.previousHolder()
     
     def lastHolder(self):

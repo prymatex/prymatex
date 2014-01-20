@@ -144,5 +144,8 @@ class SnippetHandler(object):
     def lastHolderFixed(self):
         return self.snippet.lastHolderFixed()
 
+    def holderChoices(self):
+        return getattr(self.__current_holder(), "choices", [])
+        
     def __len__(self):
         return len(self.snippet)

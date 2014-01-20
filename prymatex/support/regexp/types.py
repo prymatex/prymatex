@@ -157,7 +157,7 @@ class PlaceholderTypeMixin(object):
     def setContent(self, text, memodict):
         memodict.set(self, memodict.get_or_create(self)._replace(content = text))
         return True
-
+    
     def position(self, memodict):
         memo = memodict.get_or_create(self)
         return memo.start, memo.end

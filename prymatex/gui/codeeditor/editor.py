@@ -1065,12 +1065,12 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             if isinstance(item, dict):
                 title = "%s 	&%d" % (item["title"], index)
                 icon = resources.getIcon(item["image"]) if "image" in item else QtGui.QIcon()
-            elif isinstance(item,  str):
-                title = "%s 	&%d" % (item, index)
-                icon = QtGui.QIcon()
             elif isinstance(item,  BundleItemTreeNode):
                 title = "%s 	&%d" % (item.buildMenuTextEntry(False), index)
                 icon = item.icon()
+            else:
+                title = "%s 	&%d" % (item, index)
+                icon = QtGui.QIcon()
             menu.addAction(icon, title)
 
         def menu_aboutToHide():
