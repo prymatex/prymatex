@@ -427,13 +427,15 @@ class MainMenuMixin(object):
                 "text": "Full screen",
                 "toggled": lambda mw, checked: getattr(mw, checked and "showFullScreen" or "showNormal")(),
                 "testChecked": lambda mw: mw.isFullScreen(),
-                'sequence': resources.get_sequence("Global", "ShowFullScreen", "F11")
+                "icon": resources.get_icon("view-fullscreen"),
+                "sequence": resources.get_sequence("Global", "ShowFullScreen", "F11")
             }, {
                 "text": "Distraction free mode",
                 "toggled": lambda mw, checked: getattr(mw, checked and "showDistractionFreeMode" or "showNormal")(),
                 "sequence": resources.get_sequence("Global", "ShowDistractionFreeMode", "Shift+F11")
             }, "-", {
                 "text": "Settings",
+                "icon": resources.get_icon("configure"),
                 "triggered": lambda mw: mw.settingsDialog.exec_()
             }]
         }
@@ -442,28 +444,31 @@ class MainMenuMixin(object):
         menu["help"] = {
             "text": "&Help",
             "items": [ {
-                "text": "Report bug",
-                "triggered": lambda mw: mw.application.openUrl(prymatex.__source__ + '/issues?utf8=%E2%9C%93')
-            }, {
-                "text": "Translate Prymatex",
+                "text": "Read documentation",
+                "icon": resources.get_icon("help-contents"),
                 "triggered": lambda mw: mw.application.openUrl(prymatex.__source__ + '/wiki')
             }, {
                 "text": "Project homepage",
                 "triggered": lambda mw: mw.application.openUrl(prymatex.__url__)
-            }, {
-                "text": "Read documentation",
+            }, "-", {
+                "text": "Translate Prymatex",
+                "icon": resources.get_icon("applications-development-translation"),
                 "triggered": lambda mw: mw.application.openUrl(prymatex.__source__ + '/wiki')
             }, "-", {
+                "text": "Report bug",
+                "icon": resources.get_icon("tools-report-bug"),
+                "triggered": lambda mw: mw.application.openUrl(prymatex.__source__ + '/issues?utf8=%E2%9C%93')
+            },  {
                 "text": "Take screenshoot",
                 "icon": resources.get_icon("ksnapshot"),
                 "triggered": cls.on_actionTakeScreenshot_triggered
+            }, "-", {
+                "text": "About Prymatex",
+                "triggered": lambda mw: mw.aboutDialog.exec_()
             }, {
                 "text": "About Qt",
                 "triggered": lambda mw: mw.application.aboutQt()
-            }, {
-                "text": "About Prymatex",
-                "triggered": lambda mw: mw.aboutDialog.exec_()
-            }]
+            }, ]
         }
         return menu
 
