@@ -6,10 +6,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.delegates.items import HtmlItemDelegate
 from prymatex.core.components import PMXBaseDialog
 
-from prymatex.ui.dialogs.selector import Ui_SelectorDialog
-
-
-class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog, PMXBaseDialog):
+class SelectorDialog(QtGui.QDialog, PMXBaseDialog):
     '''
     This dialog allow the user to search through commands, snippets and macros in the current scope easily.
     An instance is hold in the main window and triggered with an action.
@@ -18,7 +15,7 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog, PMXBaseDialog):
     def __init__(self, parent = None):
         QtGui.QDialog.__init__(self, parent)
         PMXBaseDialog.__init__(self)
-        self.setupUi(self)
+        self.setupUi()
         
         self.model = None
         self.sortTimer = QtCore.QTimer(self)
@@ -28,10 +25,31 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog, PMXBaseDialog):
         self.lineFilter.installEventFilter(self)
         self.listItems.installEventFilter(self)
         
-        self.setWindowFlags(QtCore.Qt.Dialog)
         self.listItems.setItemDelegate(HtmlItemDelegate(self.listItems))
         self.listItems.setResizeMode(QtGui.QListView.Adjust)
 
+    def setupUi(self):
+        self.setObjectName("SelectorDialog")
+        self.verticalLayout = QtGui.QVBoxLayout(self)
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setMargin(0)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.lineFilter = QtGui.QLineEdit(self)
+        self.lineFilter.setObjectName("lineFilter")
+        self.lineFilter.setMinimumWidth(500)
+        self.verticalLayout.addWidget(self.lineFilter)
+        self.listItems = QtGui.QListView(self)
+        self.listItems.setAlternatingRowColors(True)
+        self.listItems.setUniformItemSizes(True)
+        self.listItems.setObjectName("listItems")
+        self.verticalLayout.addWidget(self.listItems)
+        # Popup
+        self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)
+
+    def setCurrentRow(self, row):
+        index = self.model.index(0, row)
+        self.listItems.setVisible(index.isValid())
+        self.listItems.setCurrentIndex(index)
 
     def setModel(self, model):
         if self.model != model:
@@ -44,8 +62,7 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog, PMXBaseDialog):
         else:
             self.lineFilter.clear()
             self.lineFilter.setFocus()
-        self.listItems.setCurrentIndex(self.model.index(0, 0))
-
+        self.setCurrentRow(0)
 
     def select(self, model, title = "Select item"):
         """ @param items: List of rows, each row has a list of columns, and each column is a dict with "title", "image", "tooltip"
@@ -61,7 +78,6 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog, PMXBaseDialog):
         self.sortTimer.stop()
         
         return self.selected
-    
     
     def eventFilter(self, obj, event):
         '''Filters lineEdit key strokes to select model items'''
@@ -85,11 +101,9 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog, PMXBaseDialog):
                 return True
         return QtGui.QWidget.eventFilter(self, obj, event)
 
-
     def on_sortTimer_timeout(self):
         self.model.sort(0)
-        self.listItems.setCurrentIndex(self.model.index(0, 0))
-        
+        self.setCurrentRow(0)
         
     # Not autoconnect, connect on model's needs
     def on_lineFilter_textChanged(self, text):
@@ -97,18 +111,15 @@ class SelectorDialog(QtGui.QDialog, Ui_SelectorDialog, PMXBaseDialog):
         if self.model.isSortable() and not self.sortTimer.isActive():
             self.sortTimer.start(self.TIMEOUT_SORT)
         else:
-            self.listItems.setCurrentIndex(self.model.index(0, 0))
-
+            self.setCurrentRow(0)
 
     def on_listItems_activated(self, index):
         self.selected = self.model.item(index)
         self.accept()
 
-
     def on_listItems_doubleClicked(self, index):
         self.selected = self.model.item(index)
         self.accept()
-
 
     def on_lineFilter_returnPressed(self):
         indexes = self.listItems.selectedIndexes()
