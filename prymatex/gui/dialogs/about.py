@@ -20,10 +20,13 @@ informationHtml = '''<style>dt {{ font-weight: bold; }}</style><dl>
 <dt>Qt</dt><dd>{qt_version}</dd>'''
 
 if API == "pyqt":
-    informationHtml += '<dt>Sip</dt><dd>{sip_version}</dd><dt>PyQt4</dt><dd>{pyqt_version}</dd>'
+    informationHtml += '''<dt>Sip</dt><dd>{sip_version}</dd>
+<dt>PyQt4</dt><dd>{pyqt_version}</dd>'''
 else:
     informationHtml += '<dt>PySide</dt><dd>{pyside_version}</dd>'
-informationHtml += '<dt>Ponyguruma Regex Library</dt><dd>{pony_version}</dd><dt>ZMQ Version</dt><dd>{zmq_version}</dd></dl>'
+informationHtml += '''<dt>Ponyguruma</dt><dd>{pony_version}</dd>
+<dt>Regex</dt><dd>{regex_version}</dd>
+<dt>ZMQ Version</dt><dd>{zmq_version}</dd></dl>'''
 
 class AboutDialog(QtGui.QDialog, Ui_AboutDialog, PMXBaseDialog):
     def __init__(self, parent = None):
@@ -41,26 +44,35 @@ class AboutDialog(QtGui.QDialog, Ui_AboutDialog, PMXBaseDialog):
             'commandline': ' '.join(sys.argv) ,
             'python_version': "%d.%d.%d %s" % sys.version_info[:4],
             'pmx_version': prymatex.__version__,
-            'zmq_version': self.getZMQVersion(),
-            'pony_version': self.getPonygurumaVersion(),
+            'zmq_version': self.zmqVersion(),
+            'pony_version': self.ponygurumaVersion(),
+            'regex_version': self.regexVersion(),
             'qt_version': qt_version_str,
             'sip_version': sip_version_str,
             'pyqt_version': pyqt_version_str,
             'pyside_version': pyside_version_str
         }))
 
-    def getZMQVersion(self):
+    def zmqVersion(self):
         try:
             import zmq
-            return zmq.__version__ #@UndefinedVariable
+            return zmq.__version__
         except ImportError:
             return "Not installed"
         return "Error"
 
-    def getPonygurumaVersion(self):
+    def ponygurumaVersion(self):
         try:
             import ponyguruma
             return '.'.join(map(str, ponyguruma.VERSION))
         except ImportError:
-            return "Not installed."
+            return "Not installed"
+        return "Error"
+
+    def regexVersion(self):
+        try:
+            import regex
+            return regex.__version__
+        except ImportError:
+            return "Not installed"
         return "Error"
