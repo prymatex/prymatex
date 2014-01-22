@@ -45,7 +45,7 @@ class SelectorDialog(QtGui.QDialog, PMXBaseDialog):
         self.verticalLayout.setObjectName("verticalLayout")
         self.lineFilter = QtGui.QLineEdit(self)
         self.lineFilter.setObjectName("lineFilter")
-        self.lineFilter.setMinimumWidth(500)
+        self.lineFilter.setMinimumWidth(600)
         self.verticalLayout.addWidget(self.lineFilter)
         self.listItems = QtGui.QListView(self)
         self.listItems.setAlternatingRowColors(True)

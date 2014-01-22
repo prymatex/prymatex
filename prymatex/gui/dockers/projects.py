@@ -75,8 +75,11 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
     @classmethod
     def contributeToMainMenu(cls):
         navigation = [
-                "-",
                 {'text': 'Go to project file',
+                 'triggered': cls.on_actionGoToProjectFile_triggered,
+                 'sequence': resources.get_sequence("Projects", "GoToProjectFiles", 'Meta+Ctrl+Shift+F'),
+                 },
+                {'text': 'Go to project symbol',
                  'triggered': cls.on_actionGoToProjectFile_triggered,
                  'sequence': resources.get_sequence("Projects", "GoToProjectFiles", 'Meta+Ctrl+Shift+F'),
                  }

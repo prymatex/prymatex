@@ -86,9 +86,9 @@ class CodeEditorBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
             self.tableViewBookmarks.setModel(None)
         
     def on_tableViewBookmarks_activated(self, index):
-        block = index.internalPointer()
-        self.mainWindow.currentEditor().goToBlock(block)
+        cursor = index.internalPointer()
+        self.mainWindow.currentEditor().setTextCursor(block)
     
     def on_tableViewBookmarks_doubleClicked(self, index):
-        block = index.internalPointer()
-        self.mainWindow.currentEditor().goToBlock(block)
+        cursor = index.internalPointer()
+        self.mainWindow.currentEditor().setTextCursor(cursor)

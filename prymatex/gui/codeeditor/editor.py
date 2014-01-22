@@ -962,25 +962,30 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.setTextCursor(cursor)
 
     # ---------- Bookmarks and gotos
-    def toggleBookmark(self, block = None):
-        block = block or self.textCursor().block()
-        self.bookmarkListModel.toggleBookmark(block)
+    def toggleBookmark(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        self.bookmarkListModel.toggleBookmark(cursor)
 
-    def removeAllBookmarks(self):
+    def bookmarkNext(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        cursor = self.bookmarkListModel.nextBookmark(cursor)
+        if cursor is not None:
+            self.setTextCursor(cursor)
+
+    def bookmarkPrevious(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        cursor = self.bookmarkListModel.previousBookmark(cursor)
+        print(cursor)
+        if cursor is not None:
+            self.setTextCursor(cursor)
+
+    def clearBookmarks(self):
         self.bookmarkListModel.removeAllBookmarks()
 
-    def bookmarkNext(self, block = None):
-        block = block or self.textCursor().block()
-        block = self.bookmarkListModel.nextBookmark(block)
-        if block is not None:
-            self.goToBlock(block)
+    def selectAllBookmarks(self):
+        pass
 
-    def bookmarkPrevious(self, block = None):
-        block = block or self.textCursor().block()
-        block = self.bookmarkListModel.previousBookmark(block)
-        if block is not None:
-            self.goToBlock(block)
-
+    # ----------------- Goto
     def goToBlock(self, block):
         cursor = self.textCursor()
         cursor.setPosition(block.position())
@@ -1295,22 +1300,30 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             ]}
         menu["navigation"] = [
                 "-",
-                {'text': 'Toggle bookmark',
-                 'triggered': cls.toggleBookmark,
-                 'sequence': resources.get_sequence("Editor", "ToggleBookmark", 'Meta+F12'),
-                 },
-                {'text': 'Next bookmark',
-                 'triggered': cls.bookmarkNext,
-                 'sequence': resources.get_sequence("Editor", "NextBookmark", 'Meta+Alt+F12'),
-                 },
-                {'text': 'Previous bookmark',
-                 'triggered': cls.bookmarkPrevious,
-                 'sequence': resources.get_sequence("Editor", "PreviousBookmark", 'Meta+Shift+F12'),
-                 },
-                {'text': 'Remove all bookmarks',
-                 'triggered': cls.removeAllBookmarks,
-                 'sequence': resources.get_sequence("Editor", "RemoveAllBookmarks", 'Meta+Ctrl+F12'),
-                 },
+                {'text': 'Bookmarks',
+                 'icon': resources.get_icon("bookmarks"),
+                 'items': [
+                    {'text': 'Toggle bookmark',
+                     'triggered': cls.toggleBookmark,
+                     'sequence': resources.get_sequence("Editor", "ToggleBookmark", 'Ctrl+F2'),
+                     },
+                    {'text': 'Next bookmark',
+                     'triggered': cls.bookmarkNext,
+                     'sequence': resources.get_sequence("Editor", "NextBookmark", 'F2'),
+                     },
+                    {'text': 'Previous bookmark',
+                     'triggered': cls.bookmarkPrevious,
+                     'sequence': resources.get_sequence("Editor", "PreviousBookmark", 'Shift+F2'),
+                     },
+                    {'text': 'Clear bookmarks',
+                     'triggered': cls.clearBookmarks,
+                     'sequence': resources.get_sequence("Editor", "ClearBookmarks", 'Ctrl+Shift+F2'),
+                     },
+                    {'text': 'Select all bookmarks',
+                     'triggered': cls.selectAllBookmarks,
+                     'sequence': resources.get_sequence("Editor", "SelectAllBookmarks", 'Alt+F2'),
+                     }
+                ]},
                 "-",
                 {'text': 'Go to &symbol',
                  'triggered': cls.on_actionGoToSymbol_triggered,

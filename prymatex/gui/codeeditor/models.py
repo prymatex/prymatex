@@ -8,6 +8,7 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex import resources
 from prymatex.utils import text
+from prymatex.utils.lists import bisect_key
 from prymatex.models.selectable import selectableModelFactory
 from prymatex.models.support import BundleItemTreeNode
 
@@ -18,17 +19,15 @@ class BookmarkListModel(QtCore.QAbstractListModel):
     def __init__(self, editor):
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
-        self.blocks = []
+        self.bookmarks = []
         # Connect
         self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
 
-    def __contains__(self, block):
-        return block in self.blocks
+    def __contains__(self, cursor):
+        return cursor in self.bookmarks
 
     # -------- Signals
     def on_editor_blocksRemoved(self):
-        # FIXME: Nunca es None el userdata
-        #self.blocks = [ block for block in self.blocks if self.editor.blockUserData(block) is not None ]
         self.layoutChanged.emit()
 
     def on_document_contentsChange(self, position, removed, added):
@@ -36,60 +35,55 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         
     # --------- List Model api
     def index(self, row, column = 0, parent = None):
-        if 0 <= row < len(self.blocks):
-            return self.createIndex(row, column, self.blocks[row])
+        if 0 <= row < len(self.bookmarks):
+            return self.createIndex(row, column, self.bookmarks[row])
         else:
             return QtCore.QModelIndex()
 
     def rowCount(self, parent = None):
-        return len(self.blocks)
+        return len(self.bookmarks)
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
-        block = self.blocks[index.row()]
+        cursor = self.bookmarks[index.row()]
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole ]:
-            return "%d - %s" % (block.blockNumber() + 1, block.text().strip())
+            block =  cursor.block()
+            return "L%d, C%d - %s" % (block.blockNumber() + 1,
+                cursor.columnNumber(), cursor.hasSelection() and cursor.selectedText() or block.text().strip())
         elif role == QtCore.Qt.DecorationRole:
-            return resources.getIcon('bookmarkflag')
+            return resources.getIcon('bookmarks')
 
     # ----------- Public api
     def lineNumbers(self):
-        return [block.lineNumber() for block in self.blocks]
+        return [cursor.block().lineCount() for cursor in self.bookmarks]
 
-    def toggleBookmark(self, block):
-        try:
-            index = self.blocks.index(block)
+    def toggleBookmark(self, cursor):
+        if cursor in self.bookmarks:
+            index = self.bookmarks.index(cursor)
             self.beginRemoveRows(QtCore.QModelIndex(), index, index)
-            self.blocks.remove(block)
+            self.bookmarks.remove(cursor)
             self.endRemoveRows()
-        except ValueError:
-            indexes = [block.blockNumber() for block in self.blocks]
-            index = bisect(indexes, block.blockNumber())
-            self.beginInsertRows(QtCore.QModelIndex(), index, index)
-            self.blocks.insert(index, block)
+        else:
+            position = bisect_key(self.bookmarks, cursor, lambda cursor: cursor.position())
+            self.beginInsertRows(QtCore.QModelIndex(), position, position)
+            self.bookmarks.insert(position, cursor)
             self.endInsertRows()
 
     def removeAllBookmarks(self):
-        self.beginRemoveRows(QtCore.QModelIndex(), 0, len(self.blocks))
-        self.blocks = []
+        self.beginRemoveRows(QtCore.QModelIndex(), 0, len(self.bookmarks))
+        self.bookmarks = []
         self.endRemoveRows()
     
-    def nextBookmark(self, block):
-        if not len(self.blocks): return None
-        indexes = [block.blockNumber() for block in self.blocks]
-        index = bisect(indexes, block.blockNumber())
-        if index == len(self.blocks):
-            index = 0
-        return self.blocks[index]
+    def nextBookmark(self, cursor):
+        if self.bookmarks:
+            position = bisect_key(self.bookmarks, cursor, lambda cursor: cursor.position()) % len(self.bookmarks)
+            return self.bookmarks[position]
 
-    def previousBookmark(self, block):
-        if not len(self.blocks): return None
-        indexes = [block.blockNumber() for block in self.blocks]
-        index = bisect(indexes, block.blockNumber()) if block not in self.blocks else bisect(indexes, block.blockNumber() - 1)
-        if index == 0:
-            index = len(self.blocks)
-        return self.blocks[index - 1]
+    def previousBookmark(self, cursor):
+        if self.bookmarks:
+            position = bisect_key(self.bookmarks, cursor, lambda cursor: cursor.position()) % len(self.bookmarks)
+            return self.bookmarks[position - (cursor in self.bookmarks and 2 or 1)]
 
 #=========================================================
 # Bookmark Selectable Model
@@ -97,8 +91,9 @@ class BookmarkListModel(QtCore.QAbstractListModel):
 def bookmarkSelectableModelFactory(editor):
     # Data function    
     def bookmarkData():
-        return [dict(display = block.text(), image = resources.getIcon('bookmarkflag')) 
-            for block in editor.bookmarkListModel.blocks]
+        return [dict(display = editor.bookmarkListModel.data(editor.bookmarkListModel.index(row)),
+                image = resources.getIcon('bookmarks')) 
+            for row in range(len(editor.bookmarkListModel.bookmarks))]
 
     return selectableModelFactory(editor, bookmarkData, 
         filterFunction = lambda text, item: item["display"].find(text) != -1)

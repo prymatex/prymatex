@@ -371,7 +371,6 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
                  }
             ]
         menu["navigation"] = [
-                "-",
                 {'text': 'Go to &line',
                  'triggered': cls.showGoToLine,
                  'sequence': resources.get_sequence("StatusBar", "GoToLine", 'Meta+Ctrl+Shift+L'),

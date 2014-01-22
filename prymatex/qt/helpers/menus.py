@@ -10,6 +10,7 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.qt.helpers.base import text2objectname
 from prymatex.qt.helpers.actions import create_action
+from prymatex.utils import six
 
 import collections
 
@@ -79,7 +80,7 @@ def extend_menu(rootMenu, settings, dispatcher = None, separatorName = False, se
         if item == "-":
             objects = rootMenu.addSeparator()
             objects.setObjectName(text2objectname("None", prefix = "separator"))
-        elif isinstance(item, str) and item.startswith("--"):
+        elif isinstance(item, six.string_types) and item.startswith("--"):
             name = item[item.rfind("-") + 1:]
             objects = rootMenu.addSeparator()
             objects.setObjectName(text2objectname(name, prefix = "separator"))
