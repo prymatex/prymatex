@@ -28,6 +28,15 @@ class SelectorDialog(QtGui.QDialog, PMXBaseDialog):
         self.listItems.setItemDelegate(HtmlItemDelegate(self.listItems))
         self.listItems.setResizeMode(QtGui.QListView.Adjust)
 
+    def showEvent(self, event):
+        # TODO Poner el widget en un lugar referente al widget que lo 
+        # esta llamando o sobre el que se aplica
+        QtGui.QDialog.showEvent(self, event)
+        screen = self.application.desktop().screen()
+        point = screen.rect().center() - self.rect().center()
+        point.setY(point.y() * 0.5)
+        self.move(point)
+    
     def setupUi(self):
         self.setObjectName("SelectorDialog")
         self.verticalLayout = QtGui.QVBoxLayout(self)
