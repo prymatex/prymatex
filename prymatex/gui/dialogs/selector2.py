@@ -5,6 +5,7 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.delegates.items import HtmlItemDelegate
 from prymatex.core.components import PMXBaseDialog
+from prymatex.widgets.selector import SelectorWidget
 
 class SelectorDialog(QtGui.QDialog, PMXBaseDialog):
     '''
@@ -16,21 +17,23 @@ class SelectorDialog(QtGui.QDialog, PMXBaseDialog):
         QtGui.QDialog.__init__(self, parent)
         PMXBaseDialog.__init__(self)
         self.setupUi()
-        
         self.model = None
+        
+        # Timer
         self.sortTimer = QtCore.QTimer(self)
-        self.sortTimer.timeout.connect(self.on_sortTimer_timeout)
         self.sortTimer.setSingleShot(True)
         
+        # Event filter
         self.lineFilter.installEventFilter(self)
         self.listItems.installEventFilter(self)
         
-        self.listItems.setItemDelegate(HtmlItemDelegate(self.listItems))
-        self.listItems.setResizeMode(QtGui.QListView.Adjust)
-        
+        # Connect
+        self.sortTimer.timeout.connect(self.on_sortTimer_timeout)
+        self.listItems.activated.connect(self.on_listItems_triggered)
+        self.listItems.doubleClicked.connect(self.on_listItems_triggered)
         self.lineFilter.returnPressed.connect(self.on_lineFilter_returnPressed)
         self.lineFilter.textChanged.connect(self.on_lineFilter_textChanged)
-
+            
     def showEvent(self, event):
         # TODO Poner el widget en un lugar referente al widget que lo 
         # esta llamando o sobre el que se aplica
@@ -54,14 +57,17 @@ class SelectorDialog(QtGui.QDialog, PMXBaseDialog):
         self.listItems.setAlternatingRowColors(True)
         self.listItems.setUniformItemSizes(True)
         self.listItems.setObjectName("listItems")
+        self.listItems.setItemDelegate(HtmlItemDelegate(self.listItems))
         self.verticalLayout.addWidget(self.listItems)
         # Popup
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)
 
     def setCurrentRow(self, row):
         index = self.model.index(0, row)
-        self.listItems.setVisible(index.isValid())
+        #self.listItems.setVisible(index.isValid())
         self.listItems.setCurrentIndex(index)
+        #self.listItems.resizeColumnsToContents()
+        self.adjustSize()
 
     def setModel(self, model):
         if self.model != model:
@@ -84,8 +90,10 @@ class SelectorDialog(QtGui.QDialog, PMXBaseDialog):
         self.selected = None
         
         model.initialize(self)
-        self.setModel(model)
-        
+        #self.setModel(model)
+        self.completer = QtGui.QCompleter(model, self)
+        self.completer.setCompletionMode(QtGui.QCompleter.PopupCompletion)
+        self.lineFilter.setCompleter(self.completer)
         self.exec_()
         self.sortTimer.stop()
         
@@ -106,35 +114,34 @@ class SelectorDialog(QtGui.QDialog, PMXBaseDialog):
                     self.listItems.event(event)
                     obj.setFocus()
                     return True
-        elif obj is self.listItems:
-            if event.type() == QtCore.QEvent.KeyPress:
-                self.lineFilter.setFocus()
-                self.lineFilter.event(event)
-                return True
+        #elif obj is self.listItems:
+        #    if event.type() == QtCore.QEvent.KeyPress:
+        #        self.lineFilter.setFocus()
+        #        self.lineFilter.event(event)
+        #        return True
         return QtGui.QWidget.eventFilter(self, obj, event)
 
+    # ------ Signals
     def on_sortTimer_timeout(self):
         self.model.sort(0)
         self.setCurrentRow(0)
     
-    def on_listItems_activated(self, index):
+    def on_listItems_triggered(self, index):
         self.selected = self.model.item(index)
         self.accept()
 
-    def on_listItems_doubleClicked(self, index):
-        self.selected = self.model.item(index)
-        self.accept()
-
-    # Line edit signals
     def on_lineFilter_returnPressed(self):
         indexes = self.listItems.selectedIndexes()
         if indexes:
-            self.selected = self.model.item(indexes[0])
-            self.accept()
+            self.on_listItems_triggered(indexes[0])
 
+    # Not autoconnect, connect on model's needs
     def on_lineFilter_textChanged(self, text):
-        self.model.setFilterString(text)
-        if self.model.isSortable() and not self.sortTimer.isActive():
-            self.sortTimer.start(self.TIMEOUT_SORT)
-        else:
-            self.setCurrentRow(0)
+        self.completer.setCompletionPrefix(text)
+        self.completer.complete()
+        #self.model.setFilterString(text)
+        #if self.model.isSortable() and not self.sortTimer.isActive():
+        #    self.sortTimer.start(self.TIMEOUT_SORT)
+        #else:
+        #    self.setCurrentRow(0)
+

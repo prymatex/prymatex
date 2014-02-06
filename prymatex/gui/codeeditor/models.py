@@ -55,6 +55,9 @@ class BookmarkListModel(QtCore.QAbstractListModel):
             return resources.getIcon('bookmarks')
 
     # ----------- Public api
+    def bookmark(self, row):
+        return self.bookmarks[row]
+
     def lineNumbers(self):
         return [cursor.block().lineCount() for cursor in self.bookmarks]
 
@@ -91,8 +94,9 @@ class BookmarkListModel(QtCore.QAbstractListModel):
 def bookmarkSelectableModelFactory(editor):
     # Data function    
     def bookmarkData():
-        return [dict(display = editor.bookmarkListModel.data(editor.bookmarkListModel.index(row)),
-                image = resources.getIcon('bookmarks')) 
+        return [dict(bookmark=editor.bookmarkListModel.bookmark(row),
+                display=editor.bookmarkListModel.data(editor.bookmarkListModel.index(row)),
+                image=resources.getIcon('bookmarks')) 
             for row in range(len(editor.bookmarkListModel.bookmarks))]
 
     return selectableModelFactory(editor, bookmarkData, 

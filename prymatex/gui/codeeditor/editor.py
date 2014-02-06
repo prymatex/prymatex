@@ -145,7 +145,6 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.symbolListModel = SymbolListModel(self)
         self.bundleItemSelectableModel = bundleItemSelectableModelFactory(self)
         self.symbolSelectableModel = symbolSelectableModelFactory(self)
-        self.bookmarkSelectableModel = bookmarkSelectableModelFactory(self)
 
         #Processors
         self.processors = [
@@ -1437,9 +1436,10 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
             self.goToBlock(item['data'])
 
     def on_actionGoToBookmark_triggered(self):
-        item = self.selectorDialog.select(self.bookmarkSelectableModel, title=_("Select Bookmark"))
+        bookmarkSelectableModel = bookmarkSelectableModelFactory(self)
+        item = self.selectorDialog.select(bookmarkSelectableModel, title=_("Select Bookmark"))
         if item is not None:
-            self.goToBlock(item['data'])
+            self.setTextCursor(item['bookmark'])
 
     # ---------------------- Navigation API
     def restoreLocationMemento(self, memento):

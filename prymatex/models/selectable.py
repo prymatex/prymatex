@@ -12,7 +12,7 @@ from prymatex.qt import QtCore, QtGui
 class SelectableModelMixin(object):
     def initialize(self, selector):
         self.selector = selector
-        
+
     def item(self, index):
         pass
 
@@ -29,13 +29,13 @@ class SelectableModelMixin(object):
 
     def filterString(self):
         pass
-    
+
 #=========================================================
 # Selectable Model
 #=========================================================
-class SelectableModel(QtCore.QAbstractListModel, SelectableModelMixin):
+class SelectableModel(QtCore.QAbstractTableModel, SelectableModelMixin):
     DEFALUT_TEMPLATE = "%s"
-    def __init__(self, dataFunction, parent = None): 
+    def __init__(self, dataFunction, parent = None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.__dataFunction = dataFunction
         self.__data = []
@@ -51,13 +51,16 @@ class SelectableModel(QtCore.QAbstractListModel, SelectableModelMixin):
 
     def rowCount (self, parent = None):
         return len(self.__data)
-    
+
+    def columnCount (self, parent = None):
+        return 1
+
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
         item = self.__data[index.row()]
-        
-        if role in [ QtCore.Qt.DisplayRole ]:
+
+        if role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
             display = item.get('display')
             if isinstance(display, dict):
                 template = item.get('template') or self.DEFALUT_TEMPLATE
@@ -82,28 +85,28 @@ class SelectableProxyModel(QtGui.QSortFilterProxyModel, SelectableModelMixin):
 
     def filterAcceptsRow(self, sourceRow, sourceParent):
         if not self.__filterFunction: return True
-        return self.__filterFunction(self.__filterString, 
+        return self.__filterFunction(self.__filterString,
             self.sourceModel().item(sourceRow))
 
     def lessThan(self, left, right):
         if not self.__sortFunction: return True
-        return self.__sortFunction(self.sourceModel().item(left), 
+        return self.__sortFunction(self.sourceModel().item(left),
             self.sourceModel().item(right))
-    
+
     def item(self, index):
         return self.sourceModel().item(self.mapToSource(index))
-    
+
     # --------- Sort
     def setSortFunction(self, sortFunction):
         self.__sortFunction = sortFunction
 
     def isSortable(self):
         return self.__sortFunction is not None
-        
+
     # --------- Filter
     def setFilterFunction(self, filterFunction):
         self.__filterFunction = filterFunction
-        
+
     def isFilterable(self):
         return self.__filterString is not None
 
@@ -114,8 +117,8 @@ class SelectableProxyModel(QtGui.QSortFilterProxyModel, SelectableModelMixin):
 
     def filterString(self):
         return self.__filterString
-        
-def selectableModelFactory(parent, dataFunction, 
+
+def selectableModelFactory(parent, dataFunction,
     filterFunction = None, sortFunction = None):
     model = SelectableModel(dataFunction, parent = parent)
     if filterFunction or sortFunction:

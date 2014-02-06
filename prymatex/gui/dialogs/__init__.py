@@ -4,6 +4,7 @@
 from .project import ProjectDialog
 from .about import AboutDialog
 from .selector import SelectorDialog
+#from .selector2 import SelectorDialog
 from .settings import SettingsDialog
 from .bundles import BundleEditorDialog
 from .profile import ProfileDialog
