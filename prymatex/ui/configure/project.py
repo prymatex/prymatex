@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/project.ui'
 #
-# Created: Tue Jul 30 11:11:59 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Thu Feb  6 11:11:17 2014
+#      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Project(object):
     def setupUi(self, Project):
@@ -64,10 +73,10 @@ class Ui_Project(object):
         QtCore.QMetaObject.connectSlotsByName(Project)
 
     def retranslateUi(self, Project):
-        Project.setWindowTitle(QtGui.QApplication.translate("Project", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.label1.setText(QtGui.QApplication.translate("Project", "Name:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("Project", "Description:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label3.setText(QtGui.QApplication.translate("Project", "Keywords:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_3.setText(QtGui.QApplication.translate("Project", "Licence:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label2.setText(QtGui.QApplication.translate("Project", "Location:", None, QtGui.QApplication.UnicodeUTF8))
+        Project.setWindowTitle(_translate("Project", "Form", None))
+        self.label1.setText(_translate("Project", "Name:", None))
+        self.label.setText(_translate("Project", "Description:", None))
+        self.label3.setText(_translate("Project", "Keywords:", None))
+        self.label_3.setText(_translate("Project", "Licence:", None))
+        self.label2.setText(_translate("Project", "Location:", None))
 

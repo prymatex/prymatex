@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/theme.ui'
 #
-# Created: Tue Jul 30 11:12:00 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Thu Feb  6 11:09:59 2014
+#      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_FontTheme(object):
     def setupUi(self, FontTheme):
@@ -161,17 +170,17 @@ class Ui_FontTheme(object):
         QtCore.QMetaObject.connectSlotsByName(FontTheme)
 
     def retranslateUi(self, FontTheme):
-        FontTheme.setWindowTitle(QtGui.QApplication.translate("FontTheme", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBoxFont_2.setTitle(QtGui.QApplication.translate("FontTheme", "Font", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxAntialias.setText(QtGui.QApplication.translate("FontTheme", "Anti alias", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBoxTheme.setTitle(QtGui.QApplication.translate("FontTheme", "Theme", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_6.setText(QtGui.QApplication.translate("FontTheme", "Invisibles:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_4.setText(QtGui.QApplication.translate("FontTheme", "Background:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_10.setText(QtGui.QApplication.translate("FontTheme", "Gutter background:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_5.setText(QtGui.QApplication.translate("FontTheme", "Selection:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_3.setText(QtGui.QApplication.translate("FontTheme", "Foreground:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_7.setText(QtGui.QApplication.translate("FontTheme", "Caret:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_8.setText(QtGui.QApplication.translate("FontTheme", "Line highlight:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_11.setText(QtGui.QApplication.translate("FontTheme", "Gutter foreground:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_9.setText(QtGui.QApplication.translate("FontTheme", "Scope selector:", None, QtGui.QApplication.UnicodeUTF8))
+        FontTheme.setWindowTitle(_translate("FontTheme", "Form", None))
+        self.groupBoxFont_2.setTitle(_translate("FontTheme", "Font", None))
+        self.checkBoxAntialias.setText(_translate("FontTheme", "Anti alias", None))
+        self.groupBoxTheme.setTitle(_translate("FontTheme", "Theme", None))
+        self.label_6.setText(_translate("FontTheme", "Invisibles:", None))
+        self.label_4.setText(_translate("FontTheme", "Background:", None))
+        self.label_10.setText(_translate("FontTheme", "Gutter background:", None))
+        self.label_5.setText(_translate("FontTheme", "Selection:", None))
+        self.label_3.setText(_translate("FontTheme", "Foreground:", None))
+        self.label_7.setText(_translate("FontTheme", "Caret:", None))
+        self.label_8.setText(_translate("FontTheme", "Line highlight:", None))
+        self.label_11.setText(_translate("FontTheme", "Gutter foreground:", None))
+        self.label_9.setText(_translate("FontTheme", "Scope selector:", None))
 

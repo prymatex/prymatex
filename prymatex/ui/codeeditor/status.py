@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/codeeditor/status.ui'
 #
-# Created: Fri Dec 27 10:24:37 2013
+# Created: Thu Feb  6 11:09:59 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!

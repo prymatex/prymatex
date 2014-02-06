@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/edit.ui'
 #
-# Created: Tue Jul 30 11:12:00 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Thu Feb  6 11:09:59 2014
+#      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Edit(object):
     def setupUi(self, Edit):
@@ -118,19 +127,19 @@ class Ui_Edit(object):
         QtCore.QMetaObject.connectSlotsByName(Edit)
 
     def retranslateUi(self, Edit):
-        Edit.setWindowTitle(QtGui.QApplication.translate("Edit", "Edit", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox_2.setTitle(QtGui.QApplication.translate("Edit", "Misc", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxAutoBrackets.setText(QtGui.QApplication.translate("Edit", "Auto brackets", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxRemoveTrailingSpaces.setText(QtGui.QApplication.translate("Edit", "Remove trailing spaces while editing", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox_5.setTitle(QtGui.QApplication.translate("Edit", "Indentation", None, QtGui.QApplication.UnicodeUTF8))
-        self.radioButtonTabulators.setText(QtGui.QApplication.translate("Edit", "Tabulators", None, QtGui.QApplication.UnicodeUTF8))
-        self.radioButtonSpaces.setText(QtGui.QApplication.translate("Edit", "Spaces", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("Edit", "Tab width:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_4.setText(QtGui.QApplication.translate("Edit", "Indentation width:", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxAdjustIndentationOnPaste.setText(QtGui.QApplication.translate("Edit", "Adjust indentation of code pasted from the clipboard", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox_3.setTitle(QtGui.QApplication.translate("Edit", "Text Cursor", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxSmartHomeSmartEnd.setText(QtGui.QApplication.translate("Edit", "Smart home and smart end", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox_4.setTitle(QtGui.QApplication.translate("Edit", "Auto Completion", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxEnableAutoCompletion.setText(QtGui.QApplication.translate("Edit", "Enable auto completion", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("Edit", "Minimal word length to complete:", None, QtGui.QApplication.UnicodeUTF8))
+        Edit.setWindowTitle(_translate("Edit", "Edit", None))
+        self.groupBox_2.setTitle(_translate("Edit", "Misc", None))
+        self.checkBoxAutoBrackets.setText(_translate("Edit", "Auto brackets", None))
+        self.checkBoxRemoveTrailingSpaces.setText(_translate("Edit", "Remove trailing spaces while editing", None))
+        self.groupBox_5.setTitle(_translate("Edit", "Indentation", None))
+        self.radioButtonTabulators.setText(_translate("Edit", "Tabulators", None))
+        self.radioButtonSpaces.setText(_translate("Edit", "Spaces", None))
+        self.label_2.setText(_translate("Edit", "Tab width:", None))
+        self.label_4.setText(_translate("Edit", "Indentation width:", None))
+        self.checkBoxAdjustIndentationOnPaste.setText(_translate("Edit", "Adjust indentation of code pasted from the clipboard", None))
+        self.groupBox_3.setTitle(_translate("Edit", "Text Cursor", None))
+        self.checkBoxSmartHomeSmartEnd.setText(_translate("Edit", "Smart home and smart end", None))
+        self.groupBox_4.setTitle(_translate("Edit", "Auto Completion", None))
+        self.checkBoxEnableAutoCompletion.setText(_translate("Edit", "Enable auto completion", None))
+        self.label.setText(_translate("Edit", "Minimal word length to complete:", None))
 

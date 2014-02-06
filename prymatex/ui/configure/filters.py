@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/filters.ui'
 #
-# Created: Tue Jul 30 11:12:00 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Thu Feb  6 11:09:58 2014
+#      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_FiltersWidget(object):
     def setupUi(self, FiltersWidget):
@@ -44,8 +53,8 @@ class Ui_FiltersWidget(object):
         QtCore.QMetaObject.connectSlotsByName(FiltersWidget)
 
     def retranslateUi(self, FiltersWidget):
-        FiltersWidget.setWindowTitle(QtGui.QApplication.translate("FiltersWidget", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonAdd.setText(QtGui.QApplication.translate("FiltersWidget", "Add", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonEdit.setText(QtGui.QApplication.translate("FiltersWidget", "Edit", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonRemove.setText(QtGui.QApplication.translate("FiltersWidget", "Remove", None, QtGui.QApplication.UnicodeUTF8))
+        FiltersWidget.setWindowTitle(_translate("FiltersWidget", "Form", None))
+        self.pushButtonAdd.setText(_translate("FiltersWidget", "Add", None))
+        self.pushButtonEdit.setText(_translate("FiltersWidget", "Edit", None))
+        self.pushButtonRemove.setText(_translate("FiltersWidget", "Remove", None))
 

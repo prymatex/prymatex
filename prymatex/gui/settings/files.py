@@ -22,28 +22,23 @@ class FilesSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Files):
         self.loadEncodings()
         self.setupLineEndings()
 
-
     def loadSettings(self):
         print(self.settingGroup.value('defaultEncoding'))
-
 
     def setupLineEndings(self):
         """Populate line endings"""
         for _, os_name, description in text.EOLS:
             self.comboBoxEndOfLine.addItem(description, os_name)
 
-
     @QtCore.Slot(int)
     def on_comboBoxLineEnding_activated(self, index):
         data = self.comboBoxLineEnding.itemData(index)
         self.settingGroup.setValue('defaultEndOfLine', data)
 
-
     @QtCore.Slot(int)
     def on_comboBoxEncoding_activated(self, index):
         data = self.comboBoxEncoding.itemData(index)
         self.settingGroup.setValue('defaultEncoding', data)
-
 
     def loadEncodings(self):
         """Populate ComboBoxEncoding"""

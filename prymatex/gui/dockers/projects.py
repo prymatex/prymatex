@@ -67,9 +67,7 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
 
     @classmethod
     def contributeToSettings(cls):
-        from prymatex.gui.settings.project import ProjectSettingsWidget
-        from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
-        return [ ProjectSettingsWidget, AddonsSettingsWidgetFactory("project") ]
+        return [ ]
     
     # Contributes to Main Menu
     @classmethod

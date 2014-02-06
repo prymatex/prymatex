@@ -29,7 +29,7 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
     #Settings
     SETTINGS_GROUP = 'ProjectManager'
 
-    workspaceDirectory  = pmxConfigPorperty(default = os.path.join(get_home_dir(), "workspace"))  #Eclipse muejejeje
+    defaultDirectory  = pmxConfigPorperty(default = os.path.join(get_home_dir(), "projects"))
     knownProjects = pmxConfigPorperty(default = [])
 
     VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
@@ -62,7 +62,9 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
     
     @classmethod
     def contributeToSettings(cls):
-        return []
+        from prymatex.gui.settings.projects import ProjectSettingsWidget
+        from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
+        return [ ProjectSettingsWidget, AddonsSettingsWidgetFactory("general.projects") ]
 
     def convertToValidPath(self, name):
         #TODO: este y el del manager de bundles pasarlos a utils

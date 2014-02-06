@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/files.ui'
 #
-# Created: Tue Jul 30 11:12:00 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Thu Feb  6 11:09:58 2014
+#      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Files(object):
     def setupUi(self, Files):
@@ -82,14 +91,14 @@ class Ui_Files(object):
         QtCore.QMetaObject.connectSlotsByName(Files)
 
     def retranslateUi(self, Files):
-        Files.setWindowTitle(QtGui.QApplication.translate("Files", "Files", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox_3.setTitle(QtGui.QApplication.translate("Files", "Source", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("Files", "File history:", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox.setTitle(QtGui.QApplication.translate("Files", "File format", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelEncoding.setText(QtGui.QApplication.translate("Files", "Encoding:", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelEndOfLine.setText(QtGui.QApplication.translate("Files", "End of line:", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBox.setText(QtGui.QApplication.translate("Files", "Automatic end of line detection", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox_2.setTitle(QtGui.QApplication.translate("Files", "Automatic cleanups", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBox_2.setText(QtGui.QApplication.translate("Files", "Remove trailing spaces", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBox_3.setText(QtGui.QApplication.translate("Files", "Append newline at end of file on save", None, QtGui.QApplication.UnicodeUTF8))
+        Files.setWindowTitle(_translate("Files", "Files", None))
+        self.groupBox_3.setTitle(_translate("Files", "Source", None))
+        self.label.setText(_translate("Files", "File history:", None))
+        self.groupBox.setTitle(_translate("Files", "File format", None))
+        self.labelEncoding.setText(_translate("Files", "Encoding:", None))
+        self.labelEndOfLine.setText(_translate("Files", "End of line:", None))
+        self.checkBox.setText(_translate("Files", "Automatic end of line detection", None))
+        self.groupBox_2.setTitle(_translate("Files", "Automatic cleanups", None))
+        self.checkBox_2.setText(_translate("Files", "Remove trailing spaces", None))
+        self.checkBox_3.setText(_translate("Files", "Append newline at end of file on save", None))
 
