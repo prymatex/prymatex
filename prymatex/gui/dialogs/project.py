@@ -103,7 +103,7 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
         self.lineLocation.setEnabled(not checked)
         self.buttonChoose.setEnabled(not checked)
         if checked:
-            projectPath = os.path.join(self.application.projectManager.workspaceDirectory, self.lineProjectName.text())
+            projectPath = os.path.join(self.application.projectManager.defaultDirectory, self.lineProjectName.text())
             self.lineLocation.setText(projectPath)
 
     def on_checkBoxAddToWorkingSet_toggled(self, checked):
@@ -170,7 +170,7 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
         self.comboBoxKeywords.lineEdit().setText("")
         self.application.projectManager.keywordsListModel.unselectAllItems()
         self.buttonCreate.setEnabled(not directory is None and not name is None)
-        self.lineLocation.setText(directory or self.application.projectManager.workspaceDirectory)
+        self.lineLocation.setText(directory or self.application.projectManager.defaultDirectory)
         self.checkBoxUseTemplate.setChecked(False)
         if self.exec_() == self.Accepted:
             return self.projectCreated
