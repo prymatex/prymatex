@@ -62,7 +62,7 @@ class SideBarWidgetAddon(PMXBaseEditorAddon):
             if blockPosition.y() < ys and (blockPosition.y() + fh) > ys:
                 break
             block = block.next()
-        return block
+        return self.editor.newCursorAtPosition(block.position())
 
 #=======================================
 # SideBar Widgets
