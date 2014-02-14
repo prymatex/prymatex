@@ -244,6 +244,8 @@ class SyntaxProxyNode(object):
             return self.rootNode
         else:
             return self.rootNode.findSyntax(self.__proxyName)
+        print("%s not found in %s" % (self.__proxyName, self.rootNode))
+        return SyntaxNode({})
         
 class Syntax(BundleItem):
     KEYS = ( 'comment', 'firstLineMatch', 'scopeName', 'repository',
