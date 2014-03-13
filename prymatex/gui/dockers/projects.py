@@ -182,7 +182,11 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
             "items": [
                 {   "text": "New",
                     "items": [
-                        self.actionNewFolder, self.actionNewFile, "-", self.actionNewFromTemplate, self.actionNewProject,
+                        self.actionNewFolder, 
+                        self.actionNewFile, 
+                        "-", 
+                        self.actionNewFromTemplate, 
+                        self.actionNewProject,
                     ]
                 },
                 "--refresh",
@@ -235,14 +239,15 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
         # TODO Quiza sea mejor ponerle un type y controlar contra una cadena
         if isinstance(node, ProjectTreeNode):
             extend_menu_section(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
-            #extend_menu_section(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
             #extend_menu_section(menu, [self.actionBashInit], section = "interact")
             extend_menu_section(menu, [self.actionProjectBundles, self.actionSelectRelatedBundles], section = "bundles")
         else:
             extend_menu_section(menu, [self.actionCut, self.actionCopy, self.actionPaste], section = "handlepaths", position = 0)
         if node.isfile:
             extend_menu_section(menu, self.actionOpen, section = "open", position = 0)
-
+        if node.isdir or isinstance(node, ProjectTreeNode):
+            extend_menu_section(menu, [self.actionGoDown], section = "refresh")
+            
         #El final
         extend_menu_section(menu, ["--properties", self.actionProperties], section = -1)
 
@@ -286,7 +291,7 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
         
     def currentDirectory(self):
         return self.application.fileManager.directory(self.currentPath())
-
+    
     #================================================
     # Actions Create, Delete, Rename objects
     #================================================      
@@ -454,6 +459,21 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
                     self.application.fileManager.copy(srcPath, dstPath)
             self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
 
+    @QtCore.Slot()
+    def on_actionGoDown_triggered(self):
+        directory = self.currentNode()
+        index = self.projectTreeProxyModel.indexForPath(directory.path())
+        self.treeViewProjects.setRootIndex(index)
+    
+    #================================================
+    # Navigation
+    #================================================
+    @QtCore.Slot()
+    def on_pushButtonGoUp_pressed(self):
+        index = self.treeViewProjects.rootIndex()
+        parentIndex = self.projectTreeProxyModel.parent(index)
+        self.treeViewProjects.setRootIndex(parentIndex)
+    
     #================================================
     # Custom filters
     #================================================

@@ -46,6 +46,76 @@
        </spacer>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButtonGoPrevious">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Go previous place</string>
+        </property>
+        <property name="icon">
+         <iconset theme="go-previous">
+          <normaloff/>
+         </iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonGoNext">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Go next place</string>
+        </property>
+        <property name="icon">
+         <iconset theme="go-next">
+          <normaloff/>
+         </iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonGoUp">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Go up one level</string>
+        </property>
+        <property name="icon">
+         <iconset theme="go-up">
+          <normaloff/>
+         </iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pushButtonSync">
         <property name="maximumSize">
          <size>
@@ -379,6 +449,14 @@
    </property>
    <property name="toolTip">
     <string>Choose bundles related to this project</string>
+   </property>
+  </action>
+  <action name="actionGoDown">
+   <property name="icon">
+    <iconset theme="go-down"/>
+   </property>
+   <property name="text">
+    <string>Go Down</string>
    </property>
   </action>
  </widget>

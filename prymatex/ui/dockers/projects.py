@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dockers/projects.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dockers/projects.ui'
 #
-# Created: Tue Jul 30 11:12:01 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Thu Mar 13 16:37:59 2014
+#      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_ProjectsDock(object):
     def setupUi(self, ProjectsDock):
@@ -30,6 +39,32 @@ class Ui_ProjectsDock(object):
         self.buttonsLayout.setObjectName(_fromUtf8("buttonsLayout"))
         spacerItem = QtGui.QSpacerItem(10, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.buttonsLayout.addItem(spacerItem)
+        self.pushButtonGoPrevious = QtGui.QPushButton(self.dockWidgetContents)
+        self.pushButtonGoPrevious.setMaximumSize(QtCore.QSize(24, 24))
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("go-previous"))
+        self.pushButtonGoPrevious.setIcon(icon)
+        self.pushButtonGoPrevious.setFlat(True)
+        self.pushButtonGoPrevious.setObjectName(_fromUtf8("pushButtonGoPrevious"))
+        self.buttonsLayout.addWidget(self.pushButtonGoPrevious)
+        self.pushButtonGoNext = QtGui.QPushButton(self.dockWidgetContents)
+        self.pushButtonGoNext.setMaximumSize(QtCore.QSize(24, 24))
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("go-next"))
+        self.pushButtonGoNext.setIcon(icon)
+        self.pushButtonGoNext.setFlat(True)
+        self.pushButtonGoNext.setObjectName(_fromUtf8("pushButtonGoNext"))
+        self.buttonsLayout.addWidget(self.pushButtonGoNext)
+        self.pushButtonGoUp = QtGui.QPushButton(self.dockWidgetContents)
+        self.pushButtonGoUp.setMaximumSize(QtCore.QSize(24, 24))
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("go-up"))
+        self.pushButtonGoUp.setIcon(icon)
+        self.pushButtonGoUp.setFlat(True)
+        self.pushButtonGoUp.setObjectName(_fromUtf8("pushButtonGoUp"))
+        self.buttonsLayout.addWidget(self.pushButtonGoUp)
+        self.line = QtGui.QFrame(self.dockWidgetContents)
+        self.line.setFrameShape(QtGui.QFrame.VLine)
+        self.line.setFrameShadow(QtGui.QFrame.Sunken)
+        self.line.setObjectName(_fromUtf8("line"))
+        self.buttonsLayout.addWidget(self.line)
         self.pushButtonSync = QtGui.QPushButton(self.dockWidgetContents)
         self.pushButtonSync.setMaximumSize(QtCore.QSize(24, 24))
         icon = QtGui.QIcon.fromTheme(_fromUtf8("folder-sync"))
@@ -159,46 +194,54 @@ class Ui_ProjectsDock(object):
         self.actionPaste.setObjectName(_fromUtf8("actionPaste"))
         self.actionSelectRelatedBundles = QtGui.QAction(ProjectsDock)
         self.actionSelectRelatedBundles.setObjectName(_fromUtf8("actionSelectRelatedBundles"))
+        self.actionGoDown = QtGui.QAction(ProjectsDock)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("go-down"))
+        self.actionGoDown.setIcon(icon)
+        self.actionGoDown.setObjectName(_fromUtf8("actionGoDown"))
 
         self.retranslateUi(ProjectsDock)
         QtCore.QMetaObject.connectSlotsByName(ProjectsDock)
 
     def retranslateUi(self, ProjectsDock):
-        ProjectsDock.setWindowTitle(QtGui.QApplication.translate("ProjectsDock", "Projects", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonSync.setToolTip(QtGui.QApplication.translate("ProjectsDock", "Sync folder with current editor file path", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionNewFile.setText(QtGui.QApplication.translate("ProjectsDock", "File", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionNewFolder.setText(QtGui.QApplication.translate("ProjectsDock", "Folder", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionNewFromTemplate.setText(QtGui.QApplication.translate("ProjectsDock", "From Template", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionNewFromTemplate.setToolTip(QtGui.QApplication.translate("ProjectsDock", "From Template", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionDelete.setText(QtGui.QApplication.translate("ProjectsDock", "Delete", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionNewProject.setText(QtGui.QApplication.translate("ProjectsDock", "Project", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionCloseProject.setText(QtGui.QApplication.translate("ProjectsDock", "Close", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionOpenProject.setText(QtGui.QApplication.translate("ProjectsDock", "Open", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionProperties.setText(QtGui.QApplication.translate("ProjectsDock", "Properties", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionRefresh.setText(QtGui.QApplication.translate("ProjectsDock", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionRefresh.setShortcut(QtGui.QApplication.translate("ProjectsDock", "F5", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionOpen.setText(QtGui.QApplication.translate("ProjectsDock", "Open", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionOpenSystemEditor.setText(QtGui.QApplication.translate("ProjectsDock", "System Editor", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionRename.setText(QtGui.QApplication.translate("ProjectsDock", "Rename", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionRename.setToolTip(QtGui.QApplication.translate("ProjectsDock", "Rename", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionRename.setShortcut(QtGui.QApplication.translate("ProjectsDock", "F2", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionOrderByName.setText(QtGui.QApplication.translate("ProjectsDock", "By Name", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionOrderBySize.setText(QtGui.QApplication.translate("ProjectsDock", "By Size", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionOrderByDate.setText(QtGui.QApplication.translate("ProjectsDock", "By Date", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionOrderByType.setText(QtGui.QApplication.translate("ProjectsDock", "By Type", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionOrderDescending.setText(QtGui.QApplication.translate("ProjectsDock", "Descending", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionOrderFoldersFirst.setText(QtGui.QApplication.translate("ProjectsDock", "Folders First", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionSetInTerminal.setText(QtGui.QApplication.translate("ProjectsDock", "Set In Terminal", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionRemove.setText(QtGui.QApplication.translate("ProjectsDock", "Remove", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionProjectBundles.setText(QtGui.QApplication.translate("ProjectsDock", "Project Bundles", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionProjectBundles.setToolTip(QtGui.QApplication.translate("ProjectsDock", "Bundles inside this project", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionBashInit.setText(QtGui.QApplication.translate("ProjectsDock", "Bash Init", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionCopy.setText(QtGui.QApplication.translate("ProjectsDock", "&Copy", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionCopy.setShortcut(QtGui.QApplication.translate("ProjectsDock", "Ctrl+C", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionCut.setText(QtGui.QApplication.translate("ProjectsDock", "Cu&t", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionCut.setShortcut(QtGui.QApplication.translate("ProjectsDock", "Ctrl+X", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionPaste.setText(QtGui.QApplication.translate("ProjectsDock", "&Paste", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionPaste.setShortcut(QtGui.QApplication.translate("ProjectsDock", "Ctrl+V", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionSelectRelatedBundles.setText(QtGui.QApplication.translate("ProjectsDock", "Select Related Bundles", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionSelectRelatedBundles.setToolTip(QtGui.QApplication.translate("ProjectsDock", "Choose bundles related to this project", None, QtGui.QApplication.UnicodeUTF8))
+        ProjectsDock.setWindowTitle(_translate("ProjectsDock", "Projects", None))
+        self.pushButtonGoPrevious.setToolTip(_translate("ProjectsDock", "Go previous place", None))
+        self.pushButtonGoNext.setToolTip(_translate("ProjectsDock", "Go next place", None))
+        self.pushButtonGoUp.setToolTip(_translate("ProjectsDock", "Go up one level", None))
+        self.pushButtonSync.setToolTip(_translate("ProjectsDock", "Sync folder with current editor file path", None))
+        self.actionNewFile.setText(_translate("ProjectsDock", "File", None))
+        self.actionNewFolder.setText(_translate("ProjectsDock", "Folder", None))
+        self.actionNewFromTemplate.setText(_translate("ProjectsDock", "From Template", None))
+        self.actionNewFromTemplate.setToolTip(_translate("ProjectsDock", "From Template", None))
+        self.actionDelete.setText(_translate("ProjectsDock", "Delete", None))
+        self.actionNewProject.setText(_translate("ProjectsDock", "Project", None))
+        self.actionCloseProject.setText(_translate("ProjectsDock", "Close", None))
+        self.actionOpenProject.setText(_translate("ProjectsDock", "Open", None))
+        self.actionProperties.setText(_translate("ProjectsDock", "Properties", None))
+        self.actionRefresh.setText(_translate("ProjectsDock", "Refresh", None))
+        self.actionRefresh.setShortcut(_translate("ProjectsDock", "F5", None))
+        self.actionOpen.setText(_translate("ProjectsDock", "Open", None))
+        self.actionOpenSystemEditor.setText(_translate("ProjectsDock", "System Editor", None))
+        self.actionRename.setText(_translate("ProjectsDock", "Rename", None))
+        self.actionRename.setToolTip(_translate("ProjectsDock", "Rename", None))
+        self.actionRename.setShortcut(_translate("ProjectsDock", "F2", None))
+        self.actionOrderByName.setText(_translate("ProjectsDock", "By Name", None))
+        self.actionOrderBySize.setText(_translate("ProjectsDock", "By Size", None))
+        self.actionOrderByDate.setText(_translate("ProjectsDock", "By Date", None))
+        self.actionOrderByType.setText(_translate("ProjectsDock", "By Type", None))
+        self.actionOrderDescending.setText(_translate("ProjectsDock", "Descending", None))
+        self.actionOrderFoldersFirst.setText(_translate("ProjectsDock", "Folders First", None))
+        self.actionSetInTerminal.setText(_translate("ProjectsDock", "Set In Terminal", None))
+        self.actionRemove.setText(_translate("ProjectsDock", "Remove", None))
+        self.actionProjectBundles.setText(_translate("ProjectsDock", "Project Bundles", None))
+        self.actionProjectBundles.setToolTip(_translate("ProjectsDock", "Bundles inside this project", None))
+        self.actionBashInit.setText(_translate("ProjectsDock", "Bash Init", None))
+        self.actionCopy.setText(_translate("ProjectsDock", "&Copy", None))
+        self.actionCopy.setShortcut(_translate("ProjectsDock", "Ctrl+C", None))
+        self.actionCut.setText(_translate("ProjectsDock", "Cu&t", None))
+        self.actionCut.setShortcut(_translate("ProjectsDock", "Ctrl+X", None))
+        self.actionPaste.setText(_translate("ProjectsDock", "&Paste", None))
+        self.actionPaste.setShortcut(_translate("ProjectsDock", "Ctrl+V", None))
+        self.actionSelectRelatedBundles.setText(_translate("ProjectsDock", "Select Related Bundles", None))
+        self.actionSelectRelatedBundles.setToolTip(_translate("ProjectsDock", "Choose bundles related to this project", None))
+        self.actionGoDown.setText(_translate("ProjectsDock", "Go Down", None))
 
