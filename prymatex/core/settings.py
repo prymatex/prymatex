@@ -195,14 +195,17 @@ class JSettingsGroup(object):
             value = item.toPython(self.value(key))
             if value is None:
                 value = item.getDefault()
-            setattr(obj, key, value)
+            else:
+                print(key, value)
+            #setattr(obj, key, value)
 
     def sync(self):
-        print(self.settings)
         for key, item in self.configurableItems.items():
             if item.default is None and self.listeners:
                 self.settings[key] = item.getDefault()
-
+            self.settings[key] = item.toPython(self.value(key))
+        print(self.settings)
+        
 SettingsGroup = QSettingsGroup
 
 class pmxConfigPorperty(object):

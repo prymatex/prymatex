@@ -55,37 +55,50 @@ class PrymatexProfile(object):
             if 'SETTINGS_GROUP' in configurableClass.__dict__ \
             else configurableClass.__name__
 
+    #Deprecated
     def groupByName(self, name):
         if name not in self.GROUPS:
             self.GROUPS[name] = SettingsGroup(
                 name,
                 self.qsettings,
                 self.tmsettings)
+        return self.GROUPS[name]
+
+    def jgroupByName(self, name):
+        if name not in self.JGROUPS:
             self.JGROUPS[name] = JSettingsGroup(
                 name,
                 self.settings.setdefault(name, {}),
                 self.tmsettings)
-        return self.GROUPS[name]
+        return self.JGROUPS[name]
 
+    #Deprecated
     def groupByClass(self, configurableClass):
         return self.groupByName(self.__group_name(configurableClass))
 
+    def jgroupByClass(self, configurableClass):
+        return self.jgroupByName(self.__group_name(configurableClass))
+        
     def registerConfigurable(self, configurableClass):
         # Prepare class group
         # TODO: Una forma de obtener y setear los valores en las settings
         # Las configurableClass tiene que tener esos metodos
         configurableClass._settings = self.groupByClass(configurableClass)
+        _settings = self.jgroupByClass(configurableClass)
         # Prepare configurable attributes
         for key, value in configurableClass.__dict__.items():
             if isinstance(value, ConfigurableItem):
                 if value.name is None:
                     value.name = key
                 configurableClass._settings.addConfigurableItem(value)
+                _settings.addConfigurableItem(value)
 
     def configure(self, component):
-        settings = self.groupByClass(component.__class__)
-        settings.addListener(component)
-        settings.configure(component)
+        settingsGroup = self.groupByClass(component.__class__)
+        settingsGroup.addListener(component)
+        settingsGroup.configure(component)
+        settingsGroup = self.jgroupByClass(component.__class__)
+        settingsGroup.configure(component)
 
     def saveState(self, component):
         self.state.setValue(component.objectName(), component.componentState())
