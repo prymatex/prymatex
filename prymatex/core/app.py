@@ -15,7 +15,7 @@ from prymatex.qt.helpers import create_shortcut
 from prymatex.core import config
 from prymatex.core.components import PMXBaseComponent, PMXBaseEditor
 from prymatex.core import logger, exceptions
-from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.settings import ConfigurableItem
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.zeromqt import ZmqSocket
@@ -31,18 +31,18 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
     # ---------------------- Settings
     SETTINGS_GROUP = "Global"
 
-    @pmxConfigPorperty(valueType = str)
+    @ConfigurableItem(valueType = str)
     def qtStyle(self, styleName):
         if styleName:
             self.setStyle(styleName)
 
-    @pmxConfigPorperty(default = "default")
+    @ConfigurableItem(default = "default")
     def qtStyleSheet(self, styleSheetName):
         if styleSheetName in resources.STYLESHEETS:
             self.setStyleSheet(resources.STYLESHEETS[styleSheetName])
 
-    askAboutExternalDeletions = pmxConfigPorperty(default=False)
-    askAboutExternalChanges = pmxConfigPorperty(default=False)
+    askAboutExternalDeletions = ConfigurableItem(default=False)
+    askAboutExternalChanges = ConfigurableItem(default=False)
 
     RESTART_CODE = 1000
 
@@ -289,6 +289,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
         self.storageManager.close()
         self.currentProfile.saveState(self.mainWindow)
+        self.currentProfile.sync()
         if os.path.exists(self.fileLock):
             os.unlink(self.fileLock)
 

@@ -10,7 +10,7 @@ except ImportError:
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.core.profile import PMXProfile as PrymatexProfile
+from prymatex.core.profile import PrymatexProfile
 from prymatex.core.config import PMX_HOME_PATH
 from prymatex.core import PMXBaseComponent
 

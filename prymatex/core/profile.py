@@ -10,14 +10,14 @@ from prymatex.core.config import (PMX_APP_PATH,
                                   get_textmate_preferences_user_path)
 
 from prymatex.core.settings import (TextMateSettings, SettingsGroup,
-                                    pmxConfigPorperty)
+                                    ConfigurableItem, JSettingsGroup)
 
 PRYMATEX_SETTINGS_NAME = "settings.ini"
 PRYMATEX_STATE_NAME = "state.ini"
 TEXTMATE_SETTINGS_NAME = "com.macromates.textmate.plist"
 
 
-class PMXProfile(object):
+class PrymatexProfile(object):
     PMX_SETTING_NAME = PRYMATEX_SETTINGS_NAME
     PMX_STATE_NAME = PRYMATEX_STATE_NAME
     TM_SETTINGS_NAME = TEXTMATE_SETTINGS_NAME
@@ -33,7 +33,9 @@ class PMXProfile(object):
         self.PMX_SCREENSHOT_PATH = os.path.join(
             self.PMX_PROFILE_PATH, 'screenshot')
         self.GROUPS = {}
-
+        self.JGROUPS = {}
+        self.settings = {}
+        
         self.qsettings = QtCore.QSettings(
             os.path.join(self.PMX_PROFILE_PATH, self.PMX_SETTING_NAME),
             QtCore.QSettings.IniFormat)
@@ -59,6 +61,10 @@ class PMXProfile(object):
                 name,
                 self.qsettings,
                 self.tmsettings)
+            self.JGROUPS[name] = JSettingsGroup(
+                name,
+                self.settings.setdefault(name, {}),
+                self.tmsettings)
         return self.GROUPS[name]
 
     def groupByClass(self, configurableClass):
@@ -71,10 +77,10 @@ class PMXProfile(object):
         configurableClass._settings = self.groupByClass(configurableClass)
         # Prepare configurable attributes
         for key, value in configurableClass.__dict__.items():
-            if isinstance(value, pmxConfigPorperty):
+            if isinstance(value, ConfigurableItem):
                 if value.name is None:
                     value.name = key
-                configurableClass._settings.addSetting(value)
+                configurableClass._settings.addConfigurableItem(value)
 
     def configure(self, component):
         settings = self.groupByClass(component.__class__)
@@ -106,3 +112,5 @@ class PMXProfile(object):
         for group in self.GROUPS.values():
             group.sync()
         self.qsettings.sync()
+        for group in self.JGROUPS.values():
+            group.sync()

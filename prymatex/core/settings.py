@@ -40,7 +40,7 @@ class TextMateSettings(object):
     def sync(self):
         plist.writePlist(self.settings, self.file)
 
-class SettingsGroup(object):
+class QSettingsGroup(object):
     def __init__(self, name, qsettings, tmsettings):
         self.__groupName = name
         self.qsettings = qsettings
@@ -91,6 +91,8 @@ class SettingsGroup(object):
         if setting.tm_name is not None and self.tmsettings.value(setting.tm_name) is None:
             self.tmsettings.setValue(setting.tm_name, setting.getDefault())
 
+    addConfigurableItem = addSetting
+    
     def addListener(self, listener):
         self.listeners.append(listener)
     
@@ -123,6 +125,85 @@ class SettingsGroup(object):
                 self.qsettings.beginGroup(self.__groupName)
                 self.qsettings.setValue(key, setting.getDefault())
                 self.qsettings.endGroup()
+
+class JSettingsGroup(object):
+    def __init__(self, name, settings, tmsettings):
+        self.__groupName = name
+        self.settings = settings
+        self.tmsettings = tmsettings
+        # Listener classes
+        self.listeners = []
+        # Setting attrs
+        self.configurableItems = {}
+        # Hooks
+        self.hooks = {}
+        # Dialogs
+        self.dialogs = []
+
+    def groupName(self):
+        return self.__groupName
+
+    def setValue(self, name, value):
+        item = self.configurableItems.get(name)
+        if item:
+            self.settings[name] = value
+            if item.tm_name is not None:
+                self.tmsettings.setValue(item.tm_name, value)
+            for listener in self.listeners:
+                setattr(listener, name, value)
+            for hookFunction in self.hooks.get(name, []):
+                hookFunction(value)
+
+    def value(self, name, default = None):
+        item = self.configurableItems.get(name)
+        if item:
+            value = item.toPython(self.settings.get(name, default))
+            if value is None:
+                value = item.getDefault()
+            return value
+
+    def hasValue(self, name):
+        value = self.settings.get(name)
+        return name in self.configurableItems and value is not None
+
+    def addConfigurableItem(self, item):
+        self.configurableItems[item.name] = item
+        if item.tm_name is not None and self.tmsettings.value(item.tm_name) is None:
+            self.tmsettings.setValue(item.tm_name, item.getDefault())
+
+    def addListener(self, listener):
+        self.listeners.append(listener)
+    
+    def removeListener(self, listener):
+        self.listeners.remove(listener)
+
+    def addHook(self, name, handler):
+        hooks = self.hooks.setdefault(name, [])
+        if handler not in hooks:
+            hooks.append(handler)
+
+    def removeHook(self, name, handler):
+        hooks = self.hooks.setdefault(name, [])
+        if handler in hooks:
+            hooks.remove(handler)
+
+    def addDialog(self, dialog):
+        self.dialogs.append(dialog)
+
+    def configure(self, obj):
+        for key, item in self.configurableItems.items():
+            value = item.toPython(self.value(key))
+            if value is None:
+                value = item.getDefault()
+            setattr(obj, key, value)
+
+    def sync(self):
+        print(self.settings)
+        for key, item in self.configurableItems.items():
+            if item.default is None and self.listeners:
+                self.settings[key] = item.getDefault()
+
+SettingsGroup = QSettingsGroup
 
 class pmxConfigPorperty(object):
     """Configuration descriptor"""
@@ -166,3 +247,5 @@ class pmxConfigPorperty(object):
         instance.__dict__[self.name] = value
         if self.fset is not None:
             self.fset(instance, value)
+
+ConfigurableItem = pmxConfigPorperty
