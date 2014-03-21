@@ -11,10 +11,12 @@ from prymatex.utils.modmap import get_keymap_table
 def keybinding(name):
     """Return keybinding"""
     ks = getattr(QtGui.QKeySequence, name, None)
-    if ks:
-        return QtGui.QKeySequence.keyBindings(ks)[0]
+    if ks is not None:
+        bindings = QtGui.QKeySequence.keyBindings(ks)
+        if bindings:
+            return bindings[0]
     return QtGui.QKeySequence.mnemonic(name)
-    
+
 #======================
 # Key Equivalents
 #======================
@@ -103,7 +105,7 @@ def _keyboard_layout_qtkeys(character):
     keys.append(code)
     return keys
 
-@memoized    
+@memoized
 def keyequivalent2keysequence(nemonic):
     nemonic = list(nemonic)
     sequence = []
