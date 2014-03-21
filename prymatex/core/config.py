@@ -17,19 +17,27 @@ STDERR = sys.stderr
 DEBUG = True
 
 #============================================================================
+# Configuration names
+#============================================================================
+PMX_HOME_NAME = ".prymatex"
+PMX_BUNDLES_NAME = "Bundles"
+PMX_THEMES_NAME = "Themes"
+PMX_PLUGINS_NAME = "Plugins"
+PMX_PROFILES_NAME = "Profiles"
+TM_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
+TM_PREFERENCE_NAMES = ["Library", "Preferences"]
+
+#============================================================================
 # Configuration paths
 #============================================================================
 USER_HOME_PATH = get_home_dir()
-PRYMATEX_HOME_NAME = ".prymatex"
-TEXTMATE_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
-TEXTMATE_PREFERENCE_NAMES = ["Library", "Preferences"]
 
 def get_prymatex_home_path():
-    path = os.path.join(USER_HOME_PATH, PRYMATEX_HOME_NAME)
+    path = os.path.join(USER_HOME_PATH, PMX_HOME_NAME)
     if not os.path.exists(path):
         os.makedirs(path)
     #Create extra paths
-    for extra in ['Bundles', 'Themes', 'Plugins']:
+    for extra in (PMX_BUNDLES_NAME, PMX_THEMES_NAME, PMX_PLUGINS_NAME, PMX_PROFILES_NAME):
         extraPath = os.path.join(path, extra)
         if not os.path.exists(extraPath):
             os.makedirs(extraPath, 0o700)
@@ -38,14 +46,15 @@ def get_prymatex_home_path():
 PMX_APP_PATH = os.path.dirname(prymatex.__file__)
 PMX_SHARE_PATH = os.path.join(PMX_APP_PATH, 'share')
 PMX_HOME_PATH = get_prymatex_home_path()
-PMX_PLUGINS_PATH = os.path.join(PMX_HOME_PATH, 'Plugins')
+PMX_PROFILES_PATH = os.path.join(PMX_HOME_PATH, PMX_PROFILES_NAME)
+PMX_PLUGINS_PATH = os.path.join(PMX_HOME_PATH, PMX_PLUGINS_NAME)
 
 def get_textmate_preferences_user_path():
-    path = os.path.join(USER_HOME_PATH, *TEXTMATE_PREFERENCE_NAMES)
+    path = os.path.join(USER_HOME_PATH, *TM_PREFERENCE_NAMES)
     if not os.path.exists(path):
         os.makedirs(path)
     #Create extra files
-    webpreview = os.path.join(path, TEXTMATE_WEBPREVIEW_NAME)
+    webpreview = os.path.join(path, TM_WEBPREVIEW_NAME)
     if not os.path.exists(webpreview):
         plistlib.writePlist({"SelectedTheme": "bright"}, webpreview)
     return path
@@ -57,7 +66,7 @@ def get_conf_path(filename=None):
     """Return absolute path for configuration file with specified filename"""
     # TODO: Hacerlo para el profile
     from prymatex.utils.misc import get_home_dir
-    conf_dir = os.path.join(get_home_dir(), PRYMATEX_HOME_NAME)
+    conf_dir = os.path.join(get_home_dir(), PMX_HOME_NAME)
     if not os.path.isdir(conf_dir):
         os.mkdir(conf_dir)
     if filename is None:

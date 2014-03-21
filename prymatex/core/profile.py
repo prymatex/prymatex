@@ -12,8 +12,8 @@ from prymatex.core.config import (PMX_APP_PATH,
 from prymatex.core.settings import (TextMateSettings, SettingsGroup,
                                     ConfigurableItem, JSettingsGroup)
 
-PRYMATEX_SETTINGS_NAME = "settings.ini"
-PRYMATEX_STATE_NAME = "state.ini"
+PRYMATEX_SETTINGS_NAME = "settings.json"
+PRYMATEX_STATE_NAME = "state.json"
 TEXTMATE_SETTINGS_NAME = "com.macromates.textmate.plist"
 
 
