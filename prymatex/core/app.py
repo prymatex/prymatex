@@ -31,7 +31,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     # ---------------------- Settings
     SETTINGS_GROUP = "Global"
 
-    @ConfigurableItem(valueType = str)
+    @ConfigurableItem()
     def qtStyle(self, styleName):
         if styleName:
             self.setStyle(styleName)

@@ -73,7 +73,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     wordLengthToComplete = pmxConfigPorperty(default = 3)
 
     marginLineSize = pmxConfigPorperty(default = 80)
-    wordWrapSize = pmxConfigPorperty(valueType = int)
+    wordWrapSize = pmxConfigPorperty()
     indentUsingSpaces = pmxConfigPorperty(default = True)
     adjustIndentationOnPaste = pmxConfigPorperty(default = False)
 
@@ -196,7 +196,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.fontChanged.connect(lambda ed = self: ed.setTabStopWidth(ed.tabWidth * ed.characterWidth()))
         self.beginMode.connect(lambda mode, ed = self: ed.modeChanged.emit())
         self.endMode.connect(lambda mode, ed = self: ed.modeChanged.emit())
-        
+
         # By default
         self.showMarginLine = True
         self.showIndentGuide = True
@@ -285,7 +285,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         # TODO: Ver si lo puedo sacar del scope basico o hace falta tomar de algun lugar
         # Principio, fin de la linea
         userData.foldingMark = self.basicScope().settings.folding(sourceText)
-        
+
         # Handlers
         for handler in self.__blockUserDataHandlers:
             handler.processBlockUserData(sourceText, block, userData)
@@ -426,7 +426,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # ------------ Obteniendo datos del editor
     def tabKeyBehavior(self):
-        return ' ' * self.indentationWidth if self.indentUsingSpaces else '\t' 
+        return ' ' * self.indentationWidth if self.indentUsingSpaces else '\t'
 
     # Flags
     def getFlags(self):
@@ -612,7 +612,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def paintEvent(self, event):
         TextEditWidget.paintEvent(self, event)
         page_bottom = self.viewport().height()
-        
+
         characterWidth = self.characterWidth()
         characterHeight = self.characterHeight()
 
@@ -760,7 +760,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 processor = self.findProcessor(items[index].type())
                 processor.configure(**kwargs)
                 items[index].execute(processor)
-        
+
         if len(items) > 1:
             syntax = any((item.type() == 'syntax' for item in items))
 
@@ -821,7 +821,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             environment['TM_INPUT_START_LINE'] = start.blockNumber() + 1
             environment['TM_INPUT_START_LINE_INDEX'] = cursor.selectionStart() - start.position()
         return environment
-    
+
     # ---------- Completer
     def showCompleter(self, suggestions, alreadyTyped=None, caseInsensitive=True, callback = None):
         self.suggestionsCompletionModel.setSuggestions(suggestions)
@@ -956,7 +956,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor = cursor or self.textCursor()
         block = cursor.block()
         token = self.tokenAtPosition(cursor.position())
-        cursor = self.newCursorAtPosition(block.position() + token.start, 
+        cursor = self.newCursorAtPosition(block.position() + token.start,
             block.position() + token.end)
         self.setTextCursor(cursor)
 
@@ -1178,7 +1178,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                         'testChecked': lambda ed, size=size: bool(ed.getFlags() & ed.WordWrap) and \
                             ed.wordWrapSize == size
                     } for size in cls.STANDARD_SIZES]) ]
-                }, 
+                },
                 {'text': "Margin line",
                  "items": [{
                         "text": "None",
@@ -1193,18 +1193,18 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 }, '-',
                 {'text': "Indent guide",
                  'toggled': cls.on_actionIndentGuide_toggled,
-                 'testChecked': lambda ed: bool(ed.getFlags() & ed.IndentGuide) 
-                }, 
+                 'testChecked': lambda ed: bool(ed.getFlags() & ed.IndentGuide)
+                },
                 {'text': "Highlight current line",
                  'toggled': cls.on_actionHighlightCurrentLine_toggled,
-                 'testChecked': lambda ed: bool(ed.getFlags() & ed.HighlightCurrentLine) 
+                 'testChecked': lambda ed: bool(ed.getFlags() & ed.HighlightCurrentLine)
                 },
                 {'text': "Show tabs and spaces",
                  'toggled': cls.on_actionShowTabsAndSpaces_toggled,
                  'testChecked': lambda ed: bool(ed.getFlags() & ed.ShowTabsAndSpaces) },
                 {'text': "Show line and paragraph",
                  'toggled': cls.on_actionShowLineAndParagraphs_toggled,
-                 'testChecked': lambda ed: bool(ed.getFlags() & ed.ShowLineAndParagraphs) 
+                 'testChecked': lambda ed: bool(ed.getFlags() & ed.ShowLineAndParagraphs)
                 }
             ]
         menu["text"] = {
@@ -1281,7 +1281,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                      'toggled': lambda ed, checked, size = size: ed.on_actionIndentation_toggled(ed.indentUsingSpaces, size = size),
                      'testChecked': lambda ed, size = size: (ed.indentUsingSpaces and ed.indentationWidth == size) or (not ed.indentUsingSpaces and ed.tabWidth == size)
                      } for size in range(1, 9) ]) ]
-                }, 
+                },
                 {'text': 'Line endings',
                  'items': [tuple(
                      [{'text': '%s' % name,
@@ -1334,7 +1334,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                  }
             ]
         return menu
-    
+
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.theme import ThemeSettingsWidget
@@ -1342,7 +1342,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         from prymatex.gui.settings.edit import EditSettingsWidget
         from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
         return [ EditorSettingsWidget, ThemeSettingsWidget, EditSettingsWidget, AddonsSettingsWidgetFactory("editor") ]
-    
+
     def contributeToShortcuts(self):
         return [
             {'sequence': resources.get_sequence("Editor", "MoveLineUp", 'Meta+Ctrl+Up'),

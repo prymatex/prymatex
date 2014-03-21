@@ -2,15 +2,13 @@
 #-*- encoding: utf-8 -*-
 
 import os
-import shutil
 
 from prymatex.qt import QtCore
 
-from prymatex.core.config import (PMX_APP_PATH,
-                                  get_textmate_preferences_user_path)
+from prymatex.core.config import get_textmate_preferences_user_path
 
 from prymatex.core.settings import (TextMateSettings, SettingsGroup,
-                                    ConfigurableItem, JSettingsGroup)
+                                    ConfigurableItem)
 
 PRYMATEX_SETTINGS_NAME = "settings.json"
 PRYMATEX_STATE_NAME = "state.json"
@@ -32,13 +30,8 @@ class PrymatexProfile(object):
         self.PMX_CACHE_PATH = os.path.join(self.PMX_PROFILE_PATH, 'cache')
         self.PMX_SCREENSHOT_PATH = os.path.join(
             self.PMX_PROFILE_PATH, 'screenshot')
-        self.GROUPS = {}
-        self.JGROUPS = {}
+        self.settingsGroups = {}
         self.settings = {}
-        
-        self.qsettings = QtCore.QSettings(
-            os.path.join(self.PMX_PROFILE_PATH, self.PMX_SETTING_NAME),
-            QtCore.QSettings.IniFormat)
 
         self.tmsettings = TextMateSettings(
             os.path.join(self.PMX_PREFERENCES_PATH, self.TM_SETTINGS_NAME))
@@ -55,49 +48,32 @@ class PrymatexProfile(object):
             if 'SETTINGS_GROUP' in configurableClass.__dict__ \
             else configurableClass.__name__
 
-    #Deprecated
     def groupByName(self, name):
-        if name not in self.GROUPS:
-            self.GROUPS[name] = SettingsGroup(
-                name,
-                self.qsettings,
-                self.tmsettings)
-        return self.GROUPS[name]
-
-    def jgroupByName(self, name):
-        if name not in self.JGROUPS:
-            self.JGROUPS[name] = JSettingsGroup(
+        if name not in self.settingsGroups:
+            self.settingsGroups[name] = SettingsGroup(
                 name,
                 self.settings.setdefault(name, {}),
                 self.tmsettings)
-        return self.JGROUPS[name]
+        return self.settingsGroups[name]
 
-    #Deprecated
     def groupByClass(self, configurableClass):
         return self.groupByName(self.__group_name(configurableClass))
 
-    def jgroupByClass(self, configurableClass):
-        return self.jgroupByName(self.__group_name(configurableClass))
-        
     def registerConfigurable(self, configurableClass):
         # Prepare class group
         # TODO: Una forma de obtener y setear los valores en las settings
         # Las configurableClass tiene que tener esos metodos
         configurableClass._settings = self.groupByClass(configurableClass)
-        _settings = self.jgroupByClass(configurableClass)
         # Prepare configurable attributes
         for key, value in configurableClass.__dict__.items():
             if isinstance(value, ConfigurableItem):
                 if value.name is None:
                     value.name = key
                 configurableClass._settings.addConfigurableItem(value)
-                _settings.addConfigurableItem(value)
 
     def configure(self, component):
         settingsGroup = self.groupByClass(component.__class__)
         settingsGroup.addListener(component)
-        settingsGroup.configure(component)
-        settingsGroup = self.jgroupByClass(component.__class__)
         settingsGroup.configure(component)
 
     def saveState(self, component):
@@ -110,20 +86,20 @@ class PrymatexProfile(object):
             component.setComponentState(state)
 
     def setValue(self, name, value):
-        self.qsettings.setValue(name, value)
+        self.settings[name] = value
 
     def value(self, name, default=None):
         if hasattr(self, name):
             return getattr(self, name)
-        return self.qsettings.value(name, default)
+        return self.settings.get(name, default)
 
     def clear(self):
-        self.qsettings.clear()
+        self.settings.clear()
 
     def sync(self):
         #Save capture values from qt
-        for group in self.GROUPS.values():
-            group.sync()
-        self.qsettings.sync()
-        for group in self.JGROUPS.values():
-            group.sync()
+        for group in self.settingsGroups.values():
+            groupName = group.groupName()
+            if not self.settings[groupName]:
+                self.settings.pop(groupName)
+        print(self.settings)
