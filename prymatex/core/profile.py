@@ -2,6 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 import os
+import json
 
 from prymatex.qt import QtCore
 
@@ -102,4 +103,5 @@ class PrymatexProfile(object):
             groupName = group.groupName()
             if not self.settings[groupName]:
                 self.settings.pop(groupName)
-        print(self.settings)
+        print(json.dumps(self.settings, sort_keys=True,
+            indent=2, separators=(',', ': ')))
