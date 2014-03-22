@@ -3,14 +3,19 @@
 
 import os
 import logging
+
 from datetime import datetime
+
+from .config import (PMX_LOG_FORMAT, PMX_LOG_DATE_FORMAT,
+    PMX_LOG_DATETIME_FORMAT, DEBUG)
 
 LOGGING_LEVELS = [
     logging.CRITICAL,
     logging.ERROR,
     logging.WARNING,
     logging.INFO,
-    logging.DEBUG
+    logging.DEBUG,
+    logging.NOTSET
 ]
 
 class NameFilter(logging.Filter):
@@ -25,21 +30,21 @@ def config(verbose, directory, namePattern=None):
     # Prepara logging
 
     # File name
-    filename = os.path.join(directory, '%s-%s.log' % (
-        logging.getLevelName(level), datetime.now().strftime('%d-%m-%Y')))
-    logging.basicConfig(filename=filename, level=level)
+    filename = os.path.join(directory, 
+        '%s.log' % datetime.now().strftime(PMX_LOG_DATE_FORMAT))
+    logging.basicConfig(filename=filename, level= DEBUG and logging.DEBUG or logging.WARNING)
 
     # Console handler
-    ch = logging.StreamHandler()
-    formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
-    ch.setFormatter(formatter)
-    ch.setLevel(level)
+    console = logging.StreamHandler()
+    formatter = logging.Formatter(PMX_LOG_FORMAT, PMX_LOG_DATETIME_FORMAT)
+    console.setFormatter(formatter)
+    console.setLevel(level)
 
     if namePattern:
         #Solo al de consola
-        ch.addFilter(NameFilter(namePattern))
+        console.addFilter(NameFilter(namePattern))
 
-    logging.root.addHandler(ch)
+    logging.root.addHandler(console)
 
 def getLogger(*largs, **kwargs):
     return logging.getLogger(*largs, **kwargs)

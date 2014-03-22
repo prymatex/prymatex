@@ -17,6 +17,14 @@ STDERR = sys.stderr
 DEBUG = True
 
 #============================================================================
+# Logging
+#============================================================================
+PMX_LOG_FORMAT = "%(asctime)s %(name)s:%(lineno)-4d %(levelname)-8s %(message)s"
+PMX_LOG_TIME_FORMAT = '%H:%M:%S'
+PMX_LOG_DATE_FORMAT = '%Y-%m-%d'
+PMX_LOG_DATETIME_FORMAT = "%s %s" % (PMX_LOG_DATE_FORMAT, PMX_LOG_TIME_FORMAT)
+
+#============================================================================
 # Configuration names
 #============================================================================
 PMX_HOME_NAME = ".prymatex"
