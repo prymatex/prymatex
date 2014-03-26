@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.core.components.base import PrymatexComponent
+from prymatex.core.components.base import PrymatexComponentWidget
 
 # TODO: separar estos dialogos de los que se pueden generar desde el servidor remoto?
-class PrymatexDialog(PrymatexComponent):
+class PrymatexDialog(PrymatexComponentWidget):
     def __init__(self, **kwargs):
         super(PrymatexDialog, self).__init__(**kwargs)
         

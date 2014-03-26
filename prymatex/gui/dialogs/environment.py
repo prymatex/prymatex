@@ -2,15 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui
-from prymatex.core.components import PMXBaseDialog
+from prymatex.core.components import PrymatexDialog
 
 from prymatex.widgets.multidicteditor import MultiDictTableEditorWidget
 
-class EnvironmentDialog(QtGui.QDialog, PMXBaseDialog):
-    def __init__(self, parent):
-        """docstring for __init__"""
-        QtGui.QDialog.__init__(self, parent)
-        PMXBaseDialog.__init__(self)
+class EnvironmentDialog(PrymatexDialog, QtGui.QDialog):
+    def __init__(self, **kwargs):
+        super(EnvironmentDialog, self).__init__(**kwargs)
         self.setObjectName("EnvironmentDialog")
         self.verticalLayout = QtGui.QVBoxLayout(self)
         self.verticalLayout.setObjectName("verticalLayout")

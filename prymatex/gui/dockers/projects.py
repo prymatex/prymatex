@@ -5,7 +5,7 @@ import os
 import codecs
 
 # Project Docker parents
-from prymatex.core import PMXBaseDock
+from prymatex.core import PrymatexDock
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dockers.fstasks import FileSystemTasks
 
@@ -23,7 +23,7 @@ from prymatex import resources
 from prymatex.models.projects import ProjectTreeNode
 from prymatex.models.projects.lists import SelectableProjectFileProxyModel
 
-class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsDock):
+class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWidget):
     SEQUENCE = resources.get_sequence("Docks", "ProjectsDock", "Alt+X")
     ICON = resources.getIcon("project-development")
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
@@ -38,9 +38,8 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
         self.selectableProjectFileModel.setBaseFilters(filters)
         self.projectTreeProxyModel.setFilterRegExp(",".join(filters))
     
-    def __init__(self, parent):
-        QtGui.QDockWidget.__init__(self, parent)
-        PMXBaseDock.__init__(self)
+    def __init__(self, **kwargs):
+        super(ProjectsDock, self).__init__(**kwargs)
         self.setupUi(self)
         self.projectManager = self.application.projectManager
         self.fileManager = self.application.fileManager
@@ -57,8 +56,8 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
         self.bundleFilterDialog.setModel(self.projectManager.projectMenuProxyModel)
         self.bundleFilterDialog.setHelpVisible(False)
         
-    def initialize(self, mainWindow):
-        PMXBaseDock.initialize(self, mainWindow)
+    def initialize(self, **kwargs):
+        super(ProjectsDock, self).initialize(**kwargs)
         self.projectDialog = self.mainWindow.findChild(QtGui.QDialog, "ProjectDialog")
         self.templateDialog = self.mainWindow.findChild(QtGui.QDialog, "TemplateDialog")
         self.bundleEditorDialog = self.mainWindow.findChild(QtGui.QDialog, "BundleEditorDialog")
@@ -106,7 +105,7 @@ class ProjectsDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_ProjectsD
             [self.projectTreeProxyModel.indexForPath(path) for path in state["expanded"]]))
 
     def environmentVariables(self):
-        environment = PMXBaseDock.environmentVariables(self)
+        environment = PrymatexDock.environmentVariables(self)
         indexes = self.treeViewProjects.selectedIndexes()
         if indexes:
             node = self.currentNode()

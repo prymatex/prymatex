@@ -210,7 +210,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     # -------------------- Managers
     def buildPluginManager(self):
         from prymatex.managers.plugins import PluginManager
-        #manager = self.createComponentInstance(PluginManager)
+        #manager = self.createComponentInstance(PluginManager, self)
         self.populateComponentClass(PluginManager)
 
         manager = PluginManager(self)
@@ -226,7 +226,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     def buildSupportManager(self):
         from prymatex.managers.support import SupportManager
-        manager = self.createComponentInstance(SupportManager)
+        manager = self.createComponentInstance(SupportManager, self)
 
         #Prepare prymatex namespace
         manager.addNamespace('prymatex', config.PMX_SHARE_PATH)
@@ -260,18 +260,18 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     def buildFileManager(self):
         from prymatex.managers.files import FileManager
-        manager = self.createComponentInstance(FileManager)
+        manager = self.createComponentInstance(FileManager, self)
 
         manager.fileSytemChanged.connect(self.on_fileManager_fileSytemChanged)
         return manager
 
     def buildProjectManager(self):
         from prymatex.managers.projects import ProjectManager
-        return self.createComponentInstance(ProjectManager)
+        return self.createComponentInstance(ProjectManager, self)
 
     def buildStorageManager(self):
         from prymatex.managers.storage import StorageManager
-        return self.createComponentInstance(StorageManager)
+        return self.createComponentInstance(StorageManager, self)
 
     def buildSchedulerManager(self):
         from prymatex.utils import coroutines
@@ -309,12 +309,12 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     # ------------------- Create components
     def createComponentInstance(self, componentClass, componentParent = None):
-        componentParent = componentParent or self
         if not hasattr(componentClass, 'application') or componentClass.application != self:
             self.populateComponentClass(componentClass)
 
         buildedObjects = []
         def buildComponentInstance(klass, parent):
+            print(klass)
             instance = klass(parent = parent)
 
             # Configure
@@ -336,7 +336,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         # buildedObjects.reverse()
         # Initialize order is important, fist goes the internal components then the main component
         for ni, np in buildedObjects:
-            ni.initialize(parent = self)
+            print(ni, np)
+            ni.initialize(parent = np)
             # Shortcuts
             for settings in ni.contributeToShortcuts():
                 create_shortcut(instance, settings, sequence_handler = self.registerShortcut)

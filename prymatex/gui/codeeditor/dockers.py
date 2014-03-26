@@ -3,22 +3,21 @@
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex.core import PMXBaseDock
+from prymatex.core import PrymatexDock
 
 from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.codeeditor.editor import CodeEditor
 
-class CodeEditorSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
+class CodeEditorSymbolsDock(PrymatexDock, QtGui.QDockWidget):
     SHORTCUT = "Ctrl+7"
     ICON = resources.getIcon("code-class")
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
-    def __init__(self, parent):
-        QtGui.QDockWidget.__init__(self, parent)
+    def __init__(self, **kwargs):
+        super(CodeEditorSymbolsDock, self).__init__(**kwargs)
         self.setWindowTitle(_("Symbols"))
         self.setObjectName(_("SymbolsDock"))
-        PMXBaseDock.__init__(self)
         self.tableViewSymbols = QtGui.QTableView()
         self.tableViewSymbols.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.tableViewSymbols.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
@@ -31,9 +30,9 @@ class CodeEditorSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
         self.tableViewSymbols.doubleClicked.connect(self.on_tableViewSymbols_doubleClicked)
         self.setWidget(self.tableViewSymbols)
 
-    def initialize(self, mainWindow):
-        PMXBaseDock.initialize(self, mainWindow)
-        mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+    def initialize(self, **kwargs):
+        super(CodeEditorSymbolsDock, self).initialize(**kwargs)
+        self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
 
     def on_mainWindow_currentEditorChanged(self, editor):
         if isinstance(editor, CodeEditor):
@@ -52,14 +51,13 @@ class CodeEditorSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
         self.mainWindow.currentEditor().goToBlock(block)
         self.mainWindow.currentEditor().setFocus()
         
-class CodeEditorBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
+class CodeEditorBookmarksDock(PrymatexDock, QtGui.QDockWidget):
     SHORTCUT = resources.get_sequence("Docks", "FileSystemDock", "Alt+M")
     ICON = resources.getIcon("bookmarks-organize")
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
-    def __init__(self, mainWindow):
-        QtGui.QDockWidget.__init__(self, mainWindow)
-        PMXBaseDock.__init__(self)
+    def __init__(self, **kwargs):
+        super(CodeEditorBookmarksDock, self).__init__(**kwargs)
         self.setWindowTitle(_("Bookmarks"))
         self.setObjectName(_("BookmarksDock"))
         self.tableViewBookmarks = QtGui.QTableView()
@@ -74,9 +72,9 @@ class CodeEditorBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
         self.tableViewBookmarks.doubleClicked.connect(self.on_tableViewBookmarks_doubleClicked)
         self.setWidget(self.tableViewBookmarks)
         
-    def initialize(self, mainWindow):
-        PMXBaseDock.initialize(self, mainWindow)
-        mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+    def initialize(self, **kwargs):
+        super(CodeEditorBookmarksDock, self).initialize(**kwargs)
+        self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
 
     def on_mainWindow_currentEditorChanged(self, editor):
         if isinstance(editor, CodeEditor):

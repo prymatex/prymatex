@@ -3,16 +3,16 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.core import PMXBaseStatusBar
+from prymatex.core import PrymatexStatusBar
 
 from prymatex import resources
 from prymatex.gui.codeeditor.editor import CodeEditor
 from prymatex.ui.codeeditor.status import Ui_CodeEditorStatus
 
-class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
-    def __init__(self, parent = None):
-        QtGui.QWidget.__init__(self, parent)
-        PMXBaseStatusBar.__init__(self)
+class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
+    def __init__(self, **kwargs):
+        super(CodeEditorStatus, self).__init__(**kwargs)
+
         self.currentEditor = None
         
         self.setupUi(self)
@@ -24,8 +24,8 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.setupWidgetFindReplace()
         self.setupEvents()
     
-    def initialize(self, mainWindow):
-        PMXBaseStatusBar.initialize(self, mainWindow)
+    def initialize(self, **kwargs):
+        super(CodeEditorStatus, self).initialize(**kwargs)
         self.hideAllWidgets()
 
     def hideAllWidgets(self):
@@ -353,7 +353,7 @@ class CodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     # ------------- Contributes to Main Menu
     @classmethod
     def contributeToMainMenu(cls):
-        menu = PMXBaseStatusBar.contributeToMainMenu()
+        menu = PrymatexStatusBar.contributeToMainMenu()
         menu["edit"] = [
                 '-',
                 {'text': "Find",
