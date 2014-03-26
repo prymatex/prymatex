@@ -7,7 +7,7 @@ import mimetypes
 from subprocess import Popen, PIPE, STDOUT
 
 from prymatex.qt import QtCore, QtGui, QtWebKit
-from prymatex.core import PMXBaseDock
+from prymatex.core import PrymatexDock
 
 from prymatex import resources
 from prymatex.qt.helpers import create_menu
@@ -21,7 +21,7 @@ from .network import setGlobalApplicationProxy
 #=======================================================================
 # Browser Dock
 #=======================================================================
-class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
+class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
     ICON = resources.getIcon("internet-web-browser")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
@@ -77,9 +77,8 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
             QtWebKit.QWebSettings.JavascriptEnabled,
             flags & self.JavascriptEnabled)
 
-    def __init__(self, parent):
-        QtGui.QDockWidget.__init__(self, parent)
-        PMXBaseDock.__init__(self)
+    def __init__(self, **kwargs):
+        super(BrowserDock, self).__init__(**kwargs)
         self.setupUi(self)
         self.setupToolBar()
         
@@ -100,8 +99,8 @@ class BrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.updateTimer = QtCore.QTimer()
         self.updateTimer.timeout.connect(self.updateHtmlCurrentEditorContent)
     
-    def initialize(self, mainWindow):
-        PMXBaseDock.initialize(self, mainWindow)
+    def initialize(self, **kwargs):
+        super(BrowserDock, self).__init__(**kwargs)
         self.on_tabWebView_webViewNewRequested()
 
     @classmethod

@@ -9,7 +9,7 @@ from prymatex.qt.helpers.menus import create_menu
 from prymatex import resources
 
 # FileSystem docker parents
-from prymatex.core import PMXBaseDock
+from prymatex.core import PrymatexDock
 from prymatex.gui.dockers.fstasks import FileSystemTasks
 from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
 
@@ -18,7 +18,7 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.models.filesystem import SortFilterFileSystemProxyModel
 
-class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSystemDock):
+class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDockWidget):
     SEQUENCE = resources.get_sequence("Docks", "FileSystemDock", "Alt+Y")
     ICON = resources.getIcon("system-file-manager")
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
@@ -32,9 +32,8 @@ class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSys
     _pushButtonHistoryBack = []
     _pushButtonHistoryForward = []
 
-    def __init__(self, parent = None):
-        QtGui.QDockWidget.__init__(self, parent)
-        PMXBaseDock.__init__(self)
+    def __init__(self, **kwargs):
+        super(FileSystemDock, self).__init__(**kwargs)
         self.setupUi(self)
 
         self.fileManager = self.application.fileManager
@@ -56,8 +55,8 @@ class FileSystemDock(QtGui.QDockWidget, PMXBaseDock, FileSystemTasks, Ui_FileSys
 
         self.setupButtons()
 
-    def initialize(self, mainWindow):
-        PMXBaseDock.initialize(self, mainWindow)
+    def initialize(self, **kwargs):
+        super(FileSystemDock, self).initialize(**kwargs)
         self.templateDialog = self.mainWindow.findChild(QtGui.QDialog, "TemplateDialog")
 
     def eventFilter(self, obj, event):

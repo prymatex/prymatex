@@ -9,7 +9,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex import resources
 
 from prymatex.core import config
-from prymatex.core import PMXBaseDock
+from prymatex.core import PrymatexDock
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.misc import get_home_dir
@@ -102,7 +102,7 @@ class TabbedTerminal(QtGui.QTabWidget):
         for index in range(self.count()):
             self.widget(index).setFont(font)
 
-class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
+class TerminalDock(PrymatexDock, QtGui.QDockWidget):
     ICON = resources.getIcon("utilities-terminal")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
@@ -130,9 +130,8 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
     synchronizeEditor = pmxConfigPorperty(default = False)
     bufferSize = pmxConfigPorperty(default = 300)
         
-    def __init__(self, parent):
-        QtGui.QDockWidget.__init__(self, parent)
-        PMXBaseDock.__init__(self)
+    def __init__(self, **kwargs):
+        super(TerminalDock, self).__init__(**kwargs)
         self.setWindowTitle(_("Terminal"))
         self.setObjectName(_("TerminalDock"))
         self.tabTerminals = TabbedTerminal(self)
@@ -147,8 +146,8 @@ class TerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.backend.started.connect(self.tabTerminals.newTerminal)
         self.backend.start()
 
-    def initialize(self, mainWindow):
-        PMXBaseDock.initialize(self, mainWindow)
+    def initialize(self, **kwargs):
+        super(TerminalDock, self).initialize(**kwargs)
         self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
 
     # ---------------- Settings hooks
