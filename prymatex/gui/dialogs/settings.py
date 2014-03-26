@@ -2,15 +2,14 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui
-from prymatex.core.components import PMXBaseDialog
+from prymatex.core.components import PrymatexDialog
 
 from prymatex.ui.dialogs.treewidget import Ui_TreeWidgetDialog
 
-class SettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseDialog):
+class SettingsDialog(PrymatexDialog, Ui_TreeWidgetDialog, QtGui.QDialog):
     """Settings dialog, it's hold by the application under configdialog property"""
-    def __init__(self, parent = None):
-        QtGui.QDialog.__init__(self, parent)
-        PMXBaseDialog.__init__(self)
+    def __init__(self, **kwargs):
+        super(SettingsDialog, self).__init__(**kwargs)
         self.setupUi(self)
         self.setObjectName("SettingsDialog")
         
@@ -19,11 +18,9 @@ class SettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseDialog):
         self.stackedWidget = QtGui.QStackedWidget(self.splitter)
         self.widgetsLayout.addWidget(self.stackedWidget)
 
-
-    def initialize(self, mainWindow):
-        PMXBaseDialog.initialize(self, mainWindow)
+    def initialize(self, **kwargs):
+        super(SettingsDialog, self).initialize(**kwargs)
         self.selectFirstIndex()
-
 
     def selectFirstIndex(self):
         firstIndex = self.treeView.model().index(0, 0)

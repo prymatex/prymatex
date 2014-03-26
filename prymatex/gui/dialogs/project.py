@@ -6,17 +6,16 @@ import os
 from prymatex.qt import QtCore, QtGui
 from prymatex import resources
 
-from prymatex.core.components import PMXBaseDialog
+from prymatex.core.components import PrymatexDialog
 from prymatex.core import exceptions
 
 from prymatex.utils.i18n import ugettext as _
 
 from prymatex.ui.dialogs.project import Ui_ProjectDialog
 
-class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
-    def __init__(self, parent = None):
-        QtGui.QDialog.__init__(self, parent)
-        PMXBaseDialog.__init__(self)
+class ProjectDialog(QtGui.QDialog, PrymatexDialog, Ui_ProjectDialog):
+    def __init__(self, **kwargs):
+        super(ProjectDialog, self).__init__(**kwargs)
         self.setupUi(self)
 
         model = QtGui.QFileSystemModel(self)
@@ -32,8 +31,8 @@ class ProjectDialog(QtGui.QDialog, PMXBaseDialog, Ui_ProjectDialog):
         self.projectCreated = None
         self.userEnvironment = {}
 
-    def initialize(self, mainWindow):
-        PMXBaseDialog.initialize(self, mainWindow)
+    def initialize(self, **kwargs):
+        super(ProjectDialog, self).initialize(**kwargs)
         self.environmentDialog = self.mainWindow.findChild(QtGui.QDialog, "EnvironmentDialog")
 
     def setupComboLicences(self):

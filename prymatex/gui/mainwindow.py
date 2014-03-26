@@ -13,7 +13,7 @@ from prymatex import resources
 
 from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core import PMXBaseComponent, PMXBaseDock, PMXBaseDialog, PMXBaseStatusBar
+from prymatex.core import PrymatexComponentWidget, PrymatexDock, PrymatexDialog, PrymatexStatusBar
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import html
@@ -29,7 +29,7 @@ from prymatex.widgets.splitter import SplitterWidget
 
 from functools import reduce
 
-class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
+class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWindow):
     """Prymatex main window"""
     # --------------------- Signals
     currentEditorChanged = QtCore.Signal(object)
@@ -49,13 +49,12 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
     _editorHistoryIndex = 0
 
     # Constructor
-    def __init__(self, parent = None):
+    def __init__(self, **kwargs):
         """The main window
         @param parent: The QObject parent, in this case it should be the QApp
         @param files_to_open: The set of files to be opened when the window is shown in the screen.
         """
-        QtGui.QMainWindow.__init__(self)
-        PMXBaseComponent.__init__(self)
+        super(PrymatexMainWindow, self).__init__(**kwargs)
 
         self.setupUi()
         
@@ -99,15 +98,15 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
         
     # ---------- Implements PMXBaseComponent's interface
     def addComponent(self, component):
-        if isinstance(component, PMXBaseDock):
+        if isinstance(component, PrymatexDock):
             self.addDock(component, component.PREFERED_AREA)
-        elif isinstance(component, PMXBaseDialog):
+        elif isinstance(component, PrymatexDialog):
             self.addDialog(component)
-        elif isinstance(component, PMXBaseStatusBar):
+        elif isinstance(component, PrymatexStatusBar):
             self.addStatusBar(component)
 
-    def initialize(self, application):
-        PMXBaseComponent.initialize(self, application)
+    def initialize(self, **kwargs):
+        super(PrymatexMainWindow, self).initialize(**kwargs)
         # Dialogs
         self.selectorDialog = self.findChild(QtGui.QDialog, "SelectorDialog")
         self.aboutDialog = self.findChild(QtGui.QDialog, "AboutDialog")
@@ -125,35 +124,36 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
         # Build Main Menu
         def extendMainMenu(klass):
             menuExtensions = klass.contributeToMainMenu()
-            objects = []
-            for name, settings in menuExtensions.items():
-                if not settings:
-                    continue
+            if menuExtensions is not None:
+                objects = []
+                for name, settings in menuExtensions.items():
+                    if not settings:
+                        continue
+    
+                    # Find parent menu
+                    parentMenu = self.findChild(QtGui.QMenu, 
+                        text2objectname(name, prefix = "menu"))
+                    # Extend
+                    if parentMenu is not None:
+                        # Fix menu extensions
+                        if not isinstance(settings, list):
+                            settings = [ settings ]
+                        objects += extend_menu(parentMenu, settings,
+                            dispatcher = self.componentInstanceDispatcher,
+                            sequence_handler = self.application.registerShortcut)
+                    else:
+                        objs = create_menu(self, settings,
+                            dispatcher = self.componentInstanceDispatcher,
+                            allObjects = True,
+                            sequence_handler = self.application.registerShortcut)
+                        add_actions(self.menuBar(), [ objs[0] ], settings.get("before", None))
+                        objects += objs
 
-                # Find parent menu
-                parentMenu = self.findChild(QtGui.QMenu,
-                    text2objectname(name, prefix = "menu"))
-                # Extend
-                if parentMenu:
-                    # Fix menu extensions
-                    if not isinstance(settings, list):
-                        settings = [ settings ]
-                    objects += extend_menu(parentMenu, settings,
-                        dispatcher = self.componentInstanceDispatcher,
-                        sequence_handler = self.application.registerShortcut)
-                else:
-                    objs = create_menu(self, settings,
-                        dispatcher = self.componentInstanceDispatcher,
-                        allObjects = True,
-                        sequence_handler = self.application.registerShortcut)
-                    add_actions(self.menuBar(), [ objs[0] ], settings.get("before", None))
-                    objects += objs
+                # Store all new objects from creation or extension
+                self.customComponentObjects.setdefault(klass, []).extend(objects)
 
-            # Store all new objects from creation or extension
-            self.customComponentObjects.setdefault(klass, []).extend(objects)
-
-            for componentClass in application.pluginManager.findComponentsForClass(klass):
-                extendMainMenu(componentClass)
+                for componentClass in self.application.pluginManager.findComponentsForClass(klass):
+                    extendMainMenu(componentClass)
 
         extendMainMenu(self.__class__)
         
@@ -168,7 +168,7 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
         dockIndex = 1
         for dock in self.dockWidgets:
             toggleAction = dock.toggleViewAction()
-            if dock.SEQUENCE:
+            if dock.SEQUENCE is not None:
                 sequence = dock.SEQUENCE
             else:
                 sequence = resources.get_sequence("Docks", dock.objectName(), "Alt+%d" % dockIndex)
@@ -215,7 +215,6 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
 
     # ---------- Override QMainWindow
     def show(self):
-        print("mostrar main")
         QtGui.QMainWindow.show(self)
         
         # Test menu actions

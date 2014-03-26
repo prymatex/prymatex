@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtGui
-from prymatex.core.components import PMXBaseDialog
+import os
+
+from prymatex.qt import QtCore, QtGui
+from prymatex.core.components import PrymatexDialog
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.ui.dialogs.profile import Ui_ProfileDialog
@@ -15,27 +17,27 @@ RENAME_MESSAGE = """Rename the profile %s to:"""
 
 CREATE_MESSAGE = """Enter new profile name:"""
 
-class ProfileDialog(QtGui.QDialog, Ui_ProfileDialog, PMXBaseDialog):
-
-    def __init__(self, parent = None):
-        QtGui.QDialog.__init__(self, parent)
-        PMXBaseDialog.__init__(self)
+class ProfileDialog(PrymatexDialog, Ui_ProfileDialog, QtGui.QDialog):
+    
+    def __init__(self, **kwargs):
+        super(ProfileDialog, self).__init__(**kwargs)
         self.setupUi(self)
 
     def setProfileManager(self, manager):
         self.manager = manager
         self.listViewProfiles.setModel(self.manager.profilesListModel)
         self.checkDontAsk.setChecked(self.manager.dontAsk())
-
-    def initialize(self, mainWindow):
+        
+    def initialize(self, **kwargs):
+        super(ProfileDialog, self).initialize(**kwargs)
         self.setProfileManager(self.application.profileManager)
-
+    
     def on_checkDontAsk_clicked(self):
         self.manager.setDontAsk(self.checkDontAsk.isChecked())
-
+        
     def on_buttonExit_pressed(self):
         QtGui.QApplication.exit(0)
-
+        
     def on_buttonStartPrymatex_pressed(self):
         self.accept()
 
@@ -65,7 +67,7 @@ class ProfileDialog(QtGui.QDialog, Ui_ProfileDialog, PMXBaseDialog):
         if result != QtGui.QMessageBox.Discard:
             self.manager.deleteProfile(profile, result == QtGui.QMessageBox.Yes)
 
-
+            
     def switchProfile(self, title="Switch profile"):
         currentProfileName = self.manager.defaultProfile().PMX_PROFILE_NAME
         self.setWindowTitle(title)

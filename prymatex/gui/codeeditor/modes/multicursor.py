@@ -24,8 +24,8 @@ def build_point_matrix(start, end, hight):
     yield ( (sx, ey), (ex, ey) )
 
 class CodeEditorMultiCursorMode(CodeEditorBaseMode):
-    def __init__(self, parent = None):
-        CodeEditorBaseMode.__init__(self, parent)
+    def __init__(self, **kwargs):
+        super(CodeEditorMultiCursorMode, self).__init__(**kwargs)
         self.cursors = []
         self.draggedCursors = []
         self.startPoint = self.doublePoint = None
@@ -33,14 +33,14 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.setObjectName("CodeEditorSnippetMode")
 
     # ------- Overrides
-    def initialize(self, editor):
-        CodeEditorBaseMode.initialize(self, editor)
+    def initialize(self, **kwargs):
+	super(CodeEditorMultiCursorMode, self).initialize(**kwargs)
         self.editor.installEventFilter(self)
         self.editor.viewport().installEventFilter(self)
         self.standardCursor = self.editor.viewport().cursor()
         # Formater
-        editor.registerTextCharFormatBuilder("dragged", self.textCharFormat_dragged_builder)
-        editor.registerTextCharFormatBuilder("multicursor", self.textCharFormat_multicursor_builder)
+        self.editor.registerTextCharFormatBuilder("dragged", self.textCharFormat_dragged_builder)
+        self.editor.registerTextCharFormatBuilder("multicursor", self.textCharFormat_multicursor_builder)
     
     def activate(self):
         CodeEditorBaseMode.activate(self)

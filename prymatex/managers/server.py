@@ -5,7 +5,7 @@ import os, sys
 import zmq
 
 from prymatex.qt import QtCore, QtGui
-from prymatex.core import PMXBaseComponent
+from prymatex.core import PrymatexComponent
 
 from prymatex import resources
 from prymatex.utils.importlib import import_from_directory
@@ -13,11 +13,9 @@ from prymatex.utils import plist
 from prymatex.utils import six
 
 # TODO: por ahora este nombre esta bien, pero algo mas orientado a Prymatex server taria bueno
-class ServerManager(QtCore.QObject, PMXBaseComponent):
-    def __init__(self, application):
-        QtCore.QObject.__init__(self, application)
-        PMXBaseComponent.__init__(self)
-
+class ServerManager(PrymatexComponent, QtCore.QObject):
+    def __init__(self, **kwargs):
+        super(ServerManager, self).__init__(**kwargs)
         self.dialogs = {}
         self.instances = {}
 

@@ -6,7 +6,7 @@ import hashlib
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.core import PMXBaseComponent
+from prymatex.core import PrymatexComponent
 from prymatex.utils import encoding
 
 class ManagedStorageMixin(object):
@@ -48,11 +48,10 @@ class SingleFileStorage(ManagedStorageMixin):
 class MemoryStorage(dict, ManagedStorageMixin):
     pass
 
-class StorageManager(QtCore.QObject, PMXBaseComponent):
-    def __init__(self, application):
-        QtCore.QObject.__init__(self, application)
-        PMXBaseComponent.__init__(self)
-        self.cacheDirectory = application.currentProfile.value('PMX_CACHE_PATH')
+class StorageManager(PrymatexComponent, QtCore.QObject):
+    def __init__(self, **kwargs):
+        super(StorageManager, self).__init__(**kwargs)
+        self.cacheDirectory = self.application.currentProfile.value('PMX_CACHE_PATH')
         self.storages = []
 
     def buildFileName(self, text):

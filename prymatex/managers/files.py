@@ -17,12 +17,12 @@ from prymatex.utils import osextra
 from prymatex.utils.decorators import deprecated
 from prymatex.utils import encoding
 
-from prymatex.core import PMXBaseComponent
+from prymatex.core import PrymatexComponent
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.utils.misc import get_home_dir
 from prymatex.core import exceptions
 
-class FileManager(QtCore.QObject, PMXBaseComponent):
+class FileManager(PrymatexComponent, QtCore.QObject):
     """A File Manager"""
     # ------------ Signals
     fileCreated = QtCore.Signal(str)
@@ -54,9 +54,8 @@ class FileManager(QtCore.QObject, PMXBaseComponent):
     MOVED   = 1<<3
     CHANGED = 1<<4
 
-    def __init__(self, application):
-        QtCore.QObject.__init__(self, application)
-        PMXBaseComponent.__init__(self)
+    def __init__(self, **kwargs):
+        super(FileManager, self).__init__(**kwargs)
         
         self.last_directory = get_home_dir()
         self.fileWatcher = QtCore.QFileSystemWatcher()

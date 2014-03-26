@@ -6,7 +6,7 @@ import fnmatch
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.core import PMXBaseComponent
+from prymatex.core import PrymatexComponent
 from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.utils.misc import get_home_dir
@@ -19,7 +19,7 @@ from prymatex.core.exceptions import ProjectExistsException, FileException
 
 from prymatex.utils.i18n import ugettext as _
 
-class ProjectManager(QtCore.QObject, PMXBaseComponent):
+class ProjectManager(PrymatexComponent, QtCore.QObject):
     #Signals
     projectAdded = QtCore.Signal(object)
     projectRemoved = QtCore.Signal(object)
@@ -34,11 +34,10 @@ class ProjectManager(QtCore.QObject, PMXBaseComponent):
 
     VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
 
-    def __init__(self, application):
-        QtCore.QObject.__init__(self)
-        PMXBaseComponent.__init__(self)
-        self.fileManager = application.fileManager
-        self.supportManager = application.supportManager
+    def __init__(self, **kwargs):
+        super(ProjectManager, self).__init__(**kwargs)
+        self.fileManager = self.application.fileManager
+        self.supportManager = self.application.supportManager
 
         self.projectTreeModel = ProjectTreeModel(self)
         self.keywordsListModel = CheckableListModel(self)

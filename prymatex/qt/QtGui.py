@@ -8,3 +8,9 @@ if os.environ['QT_API'] == 'pyqt':
     from PyQt4.QtGui import *
 else:
     from PySide.QtGui import *
+
+#####################################################
+# Monkey patching
+#####################################################
+QApplication._app__init__ = QApplication.__init__
+QApplication.__init__ = lambda self, **kwargs: QApplication._app__init__(self, kwargs.get("argv", []))

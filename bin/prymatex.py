@@ -28,7 +28,7 @@ def runPrymatexApplication(options, files):
         if prymatexAppInstance is not None:
             prymatexAppInstance.unloadGraphicalUserInterface()
             del prymatexAppInstance
-        prymatexAppInstance = PrymatexApplication()
+        prymatexAppInstance = PrymatexApplication(argv = sys.argv)
         if not prymatexAppInstance.applyOptions(instanceOptions):
             return 0
         prymatexAppInstance.loadGraphicalUserInterface()

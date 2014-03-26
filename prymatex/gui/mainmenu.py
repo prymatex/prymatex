@@ -14,6 +14,10 @@ from prymatex.utils.i18n import ugettext as _
 
 class MainMenuMixin(object):
 
+    # Constructor
+    def __init__(self, **kwargs):
+        super(MainMenuMixin, self).__init__(**kwargs)
+
     # -------------- Global callback for copy, paste cut...
     def globalCallback(self):
         """Global callback"""
@@ -146,7 +150,8 @@ class MainMenuMixin(object):
     @classmethod
     def contributeToMainMenu(cls):
         import prymatex
-        menu = PMXBaseComponent.contributeToMainMenu()
+	import collections
+        menu = collections.OrderedDict()
 
         # ------------- File menu
         menu["file"] = {

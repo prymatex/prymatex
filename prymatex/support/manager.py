@@ -63,7 +63,8 @@ class PMXSupportBaseManager(object):
 
     SETTINGS_CACHE = {}
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        super(PMXSupportBaseManager, self).__init__(**kwargs)
         self.namespaces = OrderedDict()
         
         self.ready = False
