@@ -150,7 +150,7 @@ class MainMenuMixin(object):
     @classmethod
     def contributeToMainMenu(cls):
         import prymatex
-	import collections
+        import collections
         menu = collections.OrderedDict()
 
         # ------------- File menu

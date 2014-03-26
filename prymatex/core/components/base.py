@@ -26,7 +26,7 @@ class PrymatexComponent(object):
 
     @classmethod
     def contributeToMainMenu(cls):
-	if hasattr(super(PrymatexComponent, cls), 'contributeToMainMenu'):
+        if hasattr(super(PrymatexComponent, cls), 'contributeToMainMenu'):
             return super(PrymatexComponent, cls).contributeToMainMenu()
 
     def contributeToShortcuts(self):

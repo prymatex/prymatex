@@ -3,7 +3,7 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.delegates.items import HtmlItemDelegate
+from prymatex.qt.extensions import HtmlItemDelegate
 from prymatex.core.components import PMXBaseDialog
 
 class SelectorDialog(QtGui.QDialog, PMXBaseDialog):

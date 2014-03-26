@@ -34,7 +34,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
 
     # ------- Overrides
     def initialize(self, **kwargs):
-	super(CodeEditorMultiCursorMode, self).initialize(**kwargs)
+        super(CodeEditorMultiCursorMode, self).initialize(**kwargs)
         self.editor.installEventFilter(self)
         self.editor.viewport().installEventFilter(self)
         self.standardCursor = self.editor.viewport().cursor()
