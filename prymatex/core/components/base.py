@@ -39,7 +39,6 @@ class PrymatexComponent(object):
     # Save an restore component state
     def componentState(self):
         """Returns a Python dictionary containing the state of the component."""
-        # ---------- MainWindow State
         state = {
             "components": dict([(component.objectName(), component.componentState()) 
                 for component in self.components()])
@@ -48,7 +47,11 @@ class PrymatexComponent(object):
 
     def setComponentState(self, componentState):
         """Restore the state from the given state (returned by a previous call to saveState())."""
-        pass
+        for component in self.components():
+            componentName = component.objectName()
+            if componentName in componentState["components"]:
+                component.setComponentState(componentState["components"][componentName])
+
 
 Key_Any = 0
 class PrymatexKeyHelper(PrymatexComponent):
