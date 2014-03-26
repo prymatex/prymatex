@@ -13,7 +13,7 @@ from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import create_shortcut
 
 from prymatex.core import config
-from prymatex.core.components import PrymatexComponent, PMXBaseEditor
+from prymatex.core.components import PrymatexComponent, PrymatexEditor
 from prymatex.core import logger, exceptions
 from prymatex.core.settings import ConfigurableItem
 
@@ -213,7 +213,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         #manager = self.createComponentInstance(PluginManager, self)
         self.populateComponentClass(PluginManager)
 
-        manager = PluginManager(self)
+        manager = PluginManager(parent = self)
 
         self.currentProfile.configure(manager)
 
@@ -306,7 +306,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     def populateComponentClass(self, componentClass):
         self.extendComponent(componentClass)
-        self.registerConfigurable(componentClass)
+        if issubclass(componentClass, PrymatexComponent):
+            self.registerConfigurable(componentClass)
 
     # ------------------- Create components
     def createComponentInstance(self, componentClass, componentParent = None):
@@ -324,7 +325,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             componentClasses = self.pluginManager.findComponentsForClass(klass)
             for componentClass in componentClasses:
                 # Filter editors, editors create explicit
-                if issubclass(componentClass, PMXBaseEditor):
+                if issubclass(componentClass, PrymatexEditor):
                     continue
                 componentInstance = buildComponentInstance(componentClass, instance)
                 instance.addComponent(componentInstance)
@@ -336,10 +337,11 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         # buildedObjects.reverse()
         # Initialize order is important, fist goes the internal components then the main component
         for ni, np in buildedObjects:
-            ni.initialize(parent = np)
-            # Shortcuts
-            for settings in ni.contributeToShortcuts():
-                create_shortcut(instance, settings, sequence_handler = self.registerShortcut)
+            if isinstance(ni, PrymatexComponent):
+                ni.initialize(parent = np)
+                # Shortcuts
+                for settings in ni.contributeToShortcuts():
+                    create_shortcut(instance, settings, sequence_handler = self.registerShortcut)
 
         self.componentInstances.setdefault(componentClass, []).append(instance)
 
@@ -389,9 +391,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     # ------------- Editors and mainWindow handle
     def createEditorInstance(self, filePath=None, parent=None):
         editorClass = filePath and self.pluginManager.findEditorClassForFile(filePath) or self.pluginManager.defaultEditor()
-
-        if editorClass:
-            return self.createComponentInstance(editorClass, parent)
+        return self.createComponentInstance(editorClass, parent)
 
     def buildMainWindow(self):
         """Creates the windows"""
@@ -450,7 +450,9 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         elif self.fileManager.exists(filePath):
             mainWindow = mainWindow or self.mainWindow
             editor = self.createEditorInstance(filePath, mainWindow)
-
+            # TODO el dialogo de no tengo editor para ese tipo de archivo
+            if editor is None:
+                return
             def on_editorReady(mainWindow, editor, cursorPosition, focus):
                 def editorReady(openResult):
                     if cursorPosition is not None:

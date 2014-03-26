@@ -22,8 +22,8 @@ class TextEditWidget(QtGui.QPlainTextEdit):
     # TODO Ver esto que no esta muy bien
     RE_WORD = re.compile(r"([A-Za-z_]+)", re.UNICODE)
 
-    def __init__(self, parent = None):
-        QtGui.QPlainTextEdit.__init__(self, parent)
+    def __init__(self, **kwargs):
+        super(TextEditWidget, self).__init__(**kwargs)
 
         # TODO: Buscar sobre este atributo en la documnetación
         #self.setAttribute(QtCore.Qt.WA_DeleteOnClose)

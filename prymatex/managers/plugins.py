@@ -15,7 +15,7 @@ from prymatex.qt import QtGui, QtCore
 
 from prymatex import resources
 from prymatex.utils import osextra
-from prymatex.core import PMXBaseComponent, PMXBaseEditor
+from prymatex.core import PrymatexComponent, PrymatexEditor
 from prymatex.utils.importlib import import_module, import_from_directory
 
 from prymatex.gui.mainwindow import PrymatexMainWindow
@@ -45,16 +45,15 @@ class PluginDescriptor(object):
         for key, value in entry.items():
             setattr(self, key, value)
         
-class PluginManager(QtCore.QObject, PMXBaseComponent):
+class PluginManager(PrymatexComponent, QtCore.QObject):
     
     #=========================================================
     # Settings
     #=========================================================
     SETTINGS_GROUP = 'PluginManager'
     
-    def __init__(self, application):
-        QtCore.QObject.__init__(self, application)
-        PMXBaseComponent.__init__(self)
+    def __init__(self, **kwargs):
+        super(PluginManager, self).__init__(**kwargs)
 
         self.directories = []
         
@@ -62,6 +61,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         self.plugins = {}
         
         self.components = {}
+        self.defaultComponent = QtGui.QPlainTextEdit
         
     @classmethod
     def contributeToSettings(cls):
@@ -72,10 +72,12 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         self.directories.append(directory)
 
     # ------------- Cargando clases
-    def registerComponent(self, componentClass, componentBase = PrymatexMainWindow):
+    def registerComponent(self, componentClass, componentBase = PrymatexMainWindow, default = False):
         self.application.populateComponentClass(componentClass)
         componentClass.plugin = self.currentPluginDescriptor
         self.components.setdefault(componentBase, []).append(componentClass)
+        if default:
+            self.defaultComponent = componentClass
     
     # ------------ Handle component classes
     def findComponentsForClass(self, klass):
@@ -95,14 +97,13 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
     # ------------ Handle editor classes
     def findEditorClassForFile(self, filePath):
         mimetype = self.application.fileManager.mimeType(filePath)
-        editors = [cmp for cmp in self.components.get(PrymatexMainWindow, []) if issubclass(cmp, PMXBaseEditor)]
+        editors = [cmp for cmp in self.components.get(PrymatexMainWindow, []) if issubclass(cmp, PrymatexEditor)]
         for Klass in editors:
             if Klass.acceptFile(filePath, mimetype):
                 return Klass
     
     def defaultEditor(self):
-        editors = [cmp for cmp in self.components.get(PrymatexMainWindow, []) if issubclass(cmp, PMXBaseEditor)]
-        return editors[0]
+        return self.defaultComponent
 
     # ---------- Load plugins
     def loadResources(self, pluginDirectory, pluginEntry):

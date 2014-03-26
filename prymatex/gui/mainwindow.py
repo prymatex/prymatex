@@ -13,7 +13,8 @@ from prymatex import resources
 
 from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core import PrymatexComponentWidget, PrymatexDock, PrymatexDialog, PrymatexStatusBar
+from prymatex.core import (PrymatexComponentWidget, PrymatexComponent,
+	PrymatexDock, PrymatexDialog, PrymatexStatusBar)
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import html
@@ -82,7 +83,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWind
 
         self.setupDockToolBars()
         
-        self.setCentralWidget(SplitterWidget(self))
+        self.setCentralWidget(SplitterWidget(parent = self))
         
         # Splitter signals
         self.centralWidget().currentWidgetChanged.connect(self.on_splitter_currentWidgetChanged)
@@ -96,7 +97,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWind
         
         self.resize(801, 600)
         
-    # ---------- Implements PMXBaseComponent's interface
+    # ---------- Implements PrymatexComponentWidget
     def addComponent(self, component):
         if isinstance(component, PrymatexDock):
             self.addDock(component, component.PREFERED_AREA)
@@ -123,7 +124,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWind
 
         # Build Main Menu
         def extendMainMenu(klass):
-            menuExtensions = klass.contributeToMainMenu()
+            menuExtensions = issubclass(klass, PrymatexComponent) and klass.contributeToMainMenu() or None
             if menuExtensions is not None:
                 objects = []
                 for name, settings in menuExtensions.items():
@@ -343,7 +344,6 @@ html_footer
     def addEmptyEditor(self):
         editor = self.application.createEditorInstance(parent = self)
         self.addEditor(editor)
-        return editor
 
     def removeEditor(self, editor):
         self.disconnect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_editor_newLocationMemento)
@@ -479,14 +479,14 @@ html_footer
 
     # ---------- MainWindow State
     def componentState(self):
-        componentState = PMXBaseComponent.componentState(self)
+        componentState = {}
 
         # Store open documents
         openDocumentsOnQuit = []
         for editor in self.editors():
             if not editor.isNew():
                 openDocumentsOnQuit.append((editor.filePath, editor.cursorPosition()))
-        componentState["documents"] = QtGui.QMainWindow.saveState(self).toBase64().data().decode()
+        componentState["documents"] = openDocumentsOnQuit
 
         # Store geometry
         componentState["geometry"] = self.saveGeometry().toBase64().data().decode()
@@ -497,10 +497,8 @@ html_footer
         return componentState
 
     def setComponentState(self, componentState):
-        PMXBaseComponent.setComponentState(self, componentState)
-
         # Restore open documents
-        for doc in state["documents"]:
+        for doc in componentState["documents"]:
             self.application.openFile(*doc, mainWindow = self)
         
         # Restore geometry

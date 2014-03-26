@@ -72,13 +72,11 @@ class SettingsGroup(object):
                 hookFunction(value)
 
     def value(self, name, default = None):
-        item = self.configurableItems.get(name)
-        if item:
-            value = self.settings.get(name, default)
-            if value is None:
-                value = item.getDefault()
-            return value
-
+        value = self.settings.get(name, default)
+        if value is None and name in self.configurableItems:
+            value = self.configurableItems.get(name).getDefault()
+        return value
+	
     def hasValue(self, name):
         value = self.settings.get(name)
         return name in self.configurableItems and value is not None

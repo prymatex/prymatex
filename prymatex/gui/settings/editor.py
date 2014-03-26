@@ -10,7 +10,7 @@ from prymatex.gui.codeeditor.editor import CodeEditor
 from prymatex.gui.codeeditor.sidebar import (LineNumberSideBarAddon, BookmarkSideBarAddon,
                                 FoldingSideBarAddon, SelectionSideBarAddon)
 
-class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
+class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtGui.QWidget):
     TITLE = "Editor"
     ICON = resources.getIcon("accessories-text-editor")
 
@@ -30,12 +30,12 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
         for check, flag in self.checks:
             check.clicked.connect(self.on_editorFlags_clicked)
 
-        # Default addons groups
+        # Get addons groups from profile
         self.bookmarksBarGroup = profile.groupByClass(BookmarkSideBarAddon)
         self.lineNumberBarGroup = profile.groupByClass(LineNumberSideBarAddon)
         self.foldingBarGroup = profile.groupByClass(FoldingSideBarAddon)
         self.selectionBarGroup = profile.groupByClass(SelectionSideBarAddon)
-
+	
     def loadSettings(self):
         SettingsTreeNode.loadSettings(self)
         self.comboBoxDefaultSyntax.setModel(self.application.supportManager.syntaxProxyModel)
@@ -55,10 +55,10 @@ class EditorSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Editor):
 
         self.spinBoxMarginLineSpace.setValue(self.settingGroup.value("marginLineSize"))
 
-        self.checkBoxLineNumbers.setChecked(self.lineNumberBarGroup.value("showLineNumbers"))
-        self.checkBoxBookmarks.setChecked(self.bookmarksBarGroup.value("showBookmarks"))
-        self.checkBoxFolding.setChecked(self.foldingBarGroup.value("showFolding"))
-        self.checkBoxSelection.setChecked(self.selectionBarGroup.value("showSelection"))
+        self.checkBoxLineNumbers.setChecked(self.lineNumberBarGroup.value("showLineNumbers", False))
+        self.checkBoxBookmarks.setChecked(self.bookmarksBarGroup.value("showBookmarks", False))
+        self.checkBoxFolding.setChecked(self.foldingBarGroup.value("showFolding", False))
+        self.checkBoxSelection.setChecked(self.selectionBarGroup.value("showSelection", False))
 
     def on_checkBoxLineNumbers_clicked(self, checked):
         self.lineNumberBarGroup.setValue('showLineNumbers', self.checkBoxLineNumbers.isChecked())

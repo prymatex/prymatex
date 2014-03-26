@@ -125,9 +125,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.setFlags(flags)
 
     # --------------------- init
-    def __init__(self, parent = None):
-        TextEditWidget.__init__(self, parent)
-        PrymatexEditor.__init__(self)
+    def __init__(self, **kwargs):
+        super(CodeEditor, self).__init__(**kwargs)
 
         self.__blockUserDataHandlers = []
 
@@ -602,15 +601,15 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # ------------ Override event handlers
     def focusInEvent(self, event):
         # TODO No es para este evento pero hay que poner en alugn lugar el update de las side bars
-        TextEditWidget.focusInEvent(self, event)
+        super(CodeEditor, self).focusInEvent(event)
         self.updateSideBarsGeometry()
 
     def resizeEvent(self, event):
-        TextEditWidget.resizeEvent(self, event)
+        super(CodeEditor, self).resizeEvent(event)
         self.updateSideBarsGeometry()
 
     def paintEvent(self, event):
-        TextEditWidget.paintEvent(self, event)
+        super(CodeEditor, self).paintEvent(event)
         page_bottom = self.viewport().height()
 
         characterWidth = self.characterWidth()
@@ -689,22 +688,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             TextEditWidget.mouseReleaseEvent(self, event)
 
     # -------------------- Keyboard Events
-    def runKeyHelper(self, event):
-        #Intento con los helpers
-        cursor = self.textCursor()
-        for helper in self.findHelpers(event.key()):
-            #Buscar Entre los helpers
-            if helper.accept(event, cursor):
-                helper.execute(event, cursor)
-                return True
-        return False
-
     def keyPressEvent(self, event):
         """This method is called whenever a key is pressed.
         The key code is stored in event.key()"""
 
         if not ((self.enableAutoCompletion and self.completer.pre_key_event(event))
-            or self.runKeyHelper(event)):
+            or self.runKeyHelper(event.key(), event = event, cursor = self.textCursor())):
             TextEditWidget.keyPressEvent(self, event)
 
             if self.enableAutoCompletion:

@@ -39,10 +39,9 @@ class SplitterWidget(QtGui.QSplitter):
     _HS_WEST = -6
     _HS_OUTSIDE = -7
 
-    def __init__(self, *args):
+    def __init__(self, **kwargs):
         """ Initialise the instance. """
-
-        QtGui.QSplitter.__init__(self, *args)
+        super(SplitterWidget, self).__init__(**kwargs)
         self.clear()
 
         QtCore.QObject.connect(QtGui.qApp, QtCore.SIGNAL('focusChanged(QWidget *,QWidget *)'), self._focus_changed)

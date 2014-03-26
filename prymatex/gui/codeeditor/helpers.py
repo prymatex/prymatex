@@ -4,18 +4,18 @@
 # https://github.com/textmate/textmate/blob/master/Applications/TextMate/about/Changes.md
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.core import PMXBaseEditorKeyHelper
+from prymatex.core import PrymatexEditorKeyHelper
 from prymatex.qt.helpers import debug_key
 
-class CodeEditorKeyHelper(QtCore.QObject, PMXBaseEditorKeyHelper):
-    def __init__(self, parent = None):
-        QtCore.QObject.__init__(self, parent)
+class CodeEditorKeyHelper(PrymatexEditorKeyHelper, QtCore.QObject):
+    def __init__(self, **kwargs):
+        super(PrymatexEditorKeyHelper, self).__init__(**kwargs)
         
-    def accept(self, event, cursor):
-        return PMXBaseEditorKeyHelper.accept(self, event)
+    def accept(self, key, **kwargs):
+        return super(PrymatexEditorKeyHelper, self).accept(key, **kwargs)
 
-    def execute(self, event, cursor):
-        PMXBaseEditorKeyHelper.accept(self, event)
+    def execute(self, **kwargs):
+        super(PrymatexEditorKeyHelper, self).execute(**kwargs)
 
 class KeyEquivalentHelper(CodeEditorKeyHelper):
     def accept(self, event, cursor = None):

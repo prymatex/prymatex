@@ -4,17 +4,16 @@
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.qt.extensions import HtmlItemDelegate
-from prymatex.core.components import PMXBaseDialog
+from prymatex.core.components import PrymatexDialog
 
-class SelectorDialog(QtGui.QDialog, PMXBaseDialog):
+class SelectorDialog(PrymatexDialog, QtGui.QDialog):
     '''
     This dialog allow the user to search through commands, snippets and macros in the current scope easily.
     An instance is hold in the main window and triggered with an action.
     '''
     TIMEOUT_SORT = 2000
-    def __init__(self, parent = None):
-        QtGui.QDialog.__init__(self, parent)
-        PMXBaseDialog.__init__(self)
+    def __init__(self, **kwargs):
+        super(PrymatexDialog, self).__init__(**kwargs)
         self.setupUi()
         
         self.model = None
