@@ -2,44 +2,35 @@
 #-*- encoding: utf-8 -*-
 
 import os
-import json
 
 from prymatex.qt import QtCore
+from prymatex.utils import json
 
-from prymatex.core.config import get_textmate_preferences_user_path
+from prymatex.core.config import (TM_PREFERENCES_PATH,
+    PMX_SETTINGS_NAME, PMX_STATE_NAME, TM_SETTINGS_NAME)
 
 from prymatex.core.settings import (TextMateSettings, SettingsGroup,
                                     ConfigurableItem)
-
-PRYMATEX_SETTINGS_NAME = "settings.json"
-PRYMATEX_STATE_NAME = "state.json"
-TEXTMATE_SETTINGS_NAME = "com.macromates.textmate.plist"
-
-
 class PrymatexProfile(object):
-    PMX_SETTING_NAME = PRYMATEX_SETTINGS_NAME
-    PMX_STATE_NAME = PRYMATEX_STATE_NAME
-    TM_SETTINGS_NAME = TEXTMATE_SETTINGS_NAME
-    PMX_PREFERENCES_PATH = get_textmate_preferences_user_path()
-
     def __init__(self, name, path, default=True):
         self.PMX_PROFILE_NAME = name
         self.PMX_PROFILE_PATH = path
         self.PMX_PROFILE_DEFAULT = default
+        self.PMX_SETTINGS_PATH = os.path.join(self.PMX_PROFILE_PATH, PMX_SETTINGS_NAME)
+        self.PMX_STATE_PATH = os.path.join(self.PMX_PROFILE_PATH, PMX_STATE_NAME)
         self.PMX_TMP_PATH = os.path.join(self.PMX_PROFILE_PATH, 'tmp')
         self.PMX_LOG_PATH = os.path.join(self.PMX_PROFILE_PATH, 'log')
         self.PMX_CACHE_PATH = os.path.join(self.PMX_PROFILE_PATH, 'cache')
-        self.PMX_SCREENSHOT_PATH = os.path.join(
-            self.PMX_PROFILE_PATH, 'screenshot')
+        self.PMX_SCREENSHOT_PATH = os.path.join(self.PMX_PROFILE_PATH, 'screenshot')
+
+        self.settings = json.read_file(self.PMX_SETTINGS_PATH) or {}
+        self.state = json.read_file(self.PMX_STATE_PATH) or {}
+
         self.settingsGroups = {}
-        self.settings = {}
+        
 
         self.tmsettings = TextMateSettings(
-            os.path.join(self.PMX_PREFERENCES_PATH, self.TM_SETTINGS_NAME))
-
-        self.state = QtCore.QSettings(
-            os.path.join(self.PMX_PROFILE_PATH, self.PMX_STATE_NAME),
-            QtCore.QSettings.IniFormat)
+            os.path.join(TM_PREFERENCES_PATH, TM_SETTINGS_NAME))
 
     # ------------------------ Setting Groups
     def __group_name(self, configurableClass):
@@ -78,13 +69,12 @@ class PrymatexProfile(object):
         settingsGroup.configure(component)
 
     def saveState(self, component):
-        self.state.setValue(component.objectName(), component.componentState())
-        self.state.sync()
+        self.state[component.objectName()] = component.componentState()
 
     def restoreState(self, component):
-        state = self.state.value(component.objectName())
-        if state:
-            component.setComponentState(state)
+        componentState = self.state.get(component.objectName())
+        if componentState is not None:
+            component.setComponentState(componentState)
 
     def setValue(self, name, value):
         self.settings[name] = value
@@ -103,5 +93,5 @@ class PrymatexProfile(object):
             groupName = group.groupName()
             if not self.settings[groupName]:
                 self.settings.pop(groupName)
-        print(json.dumps(self.settings, sort_keys=True,
-            indent=2, separators=(',', ': ')))
+        json.write_file(self.settings, self.PMX_SETTINGS_PATH)
+        json.write_file(self.state, self.PMX_STATE_PATH)

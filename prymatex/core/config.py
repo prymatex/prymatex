@@ -32,6 +32,9 @@ PMX_BUNDLES_NAME = "Bundles"
 PMX_THEMES_NAME = "Themes"
 PMX_PLUGINS_NAME = "Plugins"
 PMX_PROFILES_NAME = "Profiles"
+PMX_SETTINGS_NAME = "settings.json"
+PMX_STATE_NAME = "state.json"
+TM_SETTINGS_NAME = "com.macromates.textmate.plist"
 TM_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
 TM_PREFERENCE_NAMES = ["Library", "Preferences"]
 
@@ -66,6 +69,8 @@ def get_textmate_preferences_user_path():
     if not os.path.exists(webpreview):
         plistlib.writePlist({"SelectedTheme": "bright"}, webpreview)
     return path
+
+TM_PREFERENCES_PATH = get_textmate_preferences_user_path()
 
 #============================================================================
 # Configuration paths

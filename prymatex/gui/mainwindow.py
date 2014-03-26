@@ -479,31 +479,35 @@ html_footer
 
     # ---------- MainWindow State
     def componentState(self):
-        #Documentos abiertos
+        componentState = PMXBaseComponent.componentState(self)
+
+        # Store open documents
         openDocumentsOnQuit = []
         for editor in self.editors():
             if not editor.isNew():
                 openDocumentsOnQuit.append((editor.filePath, editor.cursorPosition()))
-        state = {
-            "self": QtGui.QMainWindow.saveState(self),
-            "dockers": dict([(dock.objectName(), dock.componentState()) for dock in self.dockWidgets]),
-            "documents": openDocumentsOnQuit,
-            "geometry": self.saveGeometry(),
-        }
-        return state
+        componentState["documents"] = QtGui.QMainWindow.saveState(self).toBase64().data().decode()
 
-    def setComponentState(self, state):
-        # Restore dockers
-        for dock in self.dockWidgets:
-            dockName = dock.objectName()
-            if dockName in state["dockers"]:
-                dock.setComponentState(state["dockers"][dockName])
+        # Store geometry
+        componentState["geometry"] = self.saveGeometry().toBase64().data().decode()
 
-        # Restore Main window
-        self.restoreGeometry(state["geometry"])
+        # Store self
+        componentState["self"] = QtGui.QMainWindow.saveState(self).toBase64().data().decode()
+
+        return componentState
+
+    def setComponentState(self, componentState):
+        PMXBaseComponent.setComponentState(self, componentState)
+
+        # Restore open documents
         for doc in state["documents"]:
             self.application.openFile(*doc, mainWindow = self)
-        QtGui.QMainWindow.restoreState(self, state["self"])
+        
+        # Restore geometry
+        self.restoreGeometry(QtCore.QByteArray.fromBase64(componentState["geometry"].encode()))
+        
+        # Restore self
+        QtGui.QMainWindow.restoreState(self, QtCore.QByteArray.fromBase64(componentState["self"].encode()))
 
     # ------------ Drag and Drop
     def dragEnterEvent(self, event):
