@@ -18,7 +18,7 @@ from prymatex.utils import osextra
 from prymatex.core import PMXBaseComponent, PMXBaseEditor
 from prymatex.utils.importlib import import_module, import_from_directory
 
-from prymatex.gui.mainwindow import PMXMainWindow as MainWindow
+from prymatex.gui.mainwindow import PrymatexMainWindow
 
 PLUGIN_EXTENSION = 'pmxplugin'
 PLUGIN_DESCRIPTOR_FILE = 'info.json'
@@ -72,7 +72,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
         self.directories.append(directory)
 
     # ------------- Cargando clases
-    def registerComponent(self, componentClass, componentBase = MainWindow):
+    def registerComponent(self, componentClass, componentBase = PrymatexMainWindow):
         self.application.populateComponentClass(componentClass)
         componentClass.plugin = self.currentPluginDescriptor
         self.components.setdefault(componentBase, []).append(componentClass)
@@ -83,7 +83,7 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
     
     def componentHierarchyForClass(self, klass):
         hierarchy = [ ]
-        while klass != MainWindow:
+        while klass != PrymatexMainWindow:
             hierarchy.append(klass)
             parent = [p_children for p_children in iter(self.components.items()) if klass in p_children[1]]
             if len(parent) != 1:
@@ -95,13 +95,13 @@ class PluginManager(QtCore.QObject, PMXBaseComponent):
     # ------------ Handle editor classes
     def findEditorClassForFile(self, filePath):
         mimetype = self.application.fileManager.mimeType(filePath)
-        editors = [cmp for cmp in self.components.get(MainWindow, []) if issubclass(cmp, PMXBaseEditor)]
+        editors = [cmp for cmp in self.components.get(PrymatexMainWindow, []) if issubclass(cmp, PMXBaseEditor)]
         for Klass in editors:
             if Klass.acceptFile(filePath, mimetype):
                 return Klass
     
     def defaultEditor(self):
-        editors = [cmp for cmp in self.components.get(MainWindow, []) if issubclass(cmp, PMXBaseEditor)]
+        editors = [cmp for cmp in self.components.get(PrymatexMainWindow, []) if issubclass(cmp, PMXBaseEditor)]
         return editors[0]
 
     # ---------- Load plugins

@@ -13,7 +13,7 @@ from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import create_shortcut
 
 from prymatex.core import config
-from prymatex.core.components import PMXBaseComponent, PMXBaseEditor
+from prymatex.core.components import PrymatexComponent, PMXBaseEditor
 from prymatex.core import logger, exceptions
 from prymatex.core.settings import pmxConfigPorperty
 
@@ -23,7 +23,7 @@ from prymatex.utils import six
 
 from prymatex.models.shortcuts import ShortcutsTreeModel
 
-class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
+class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     """The application instance.
     There can't be two apps running simultaneously, since configuration issues may occur.
     The application loads the Support."""
@@ -46,11 +46,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
     RESTART_CODE = 1000
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         """Inicialización de la aplicación."""
-        #TODO: Pasar los argumentos a la QApplication
-        QtGui.QApplication.__init__(self, [])
-        PMXBaseComponent.__init__(self)
+        super(PrymatexApplication, self).__init__(**kwargs)
 
         # Some init's
         self.setApplicationName(prymatex.__name__.title())
@@ -219,7 +217,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
         self.currentProfile.configure(manager)
 
-        manager.initialize(self)
+        manager.initialize(parent = self)
 
         manager.addPluginDirectory(config.PMX_PLUGINS_PATH)
 
@@ -317,7 +315,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
         buildedObjects = []
         def buildComponentInstance(klass, parent):
-            instance = klass(parent)
+            instance = klass(parent = parent)
 
             # Configure
             self.currentProfile.configure(instance)
@@ -338,7 +336,7 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
         # buildedObjects.reverse()
         # Initialize order is important, fist goes the internal components then the main component
         for ni, np in buildedObjects:
-            ni.initialize(np)
+            ni.initialize(parent = self)
             # Shortcuts
             for settings in ni.contributeToShortcuts():
                 create_shortcut(instance, settings, sequence_handler = self.registerShortcut)
@@ -397,9 +395,9 @@ class PrymatexApplication(QtGui.QApplication, PMXBaseComponent):
 
     def buildMainWindow(self):
         """Creates the windows"""
-        from prymatex.gui.mainwindow import PMXMainWindow
+        from prymatex.gui.mainwindow import PrymatexMainWindow
 
-        mainWindow = self.createComponentInstance(PMXMainWindow)
+        mainWindow = self.createComponentInstance(PrymatexMainWindow)
 
         self.currentProfile.restoreState(mainWindow)
 

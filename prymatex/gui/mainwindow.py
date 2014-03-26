@@ -13,7 +13,7 @@ from prymatex import resources
 
 from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core import PMXBaseComponent, PMXBaseDock, PMXBaseDialog, PMXBaseStatusBar
+from prymatex.core import PrymatexComponent, PrymatexDock, PrymatexDialog, PrymatexStatusBar
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import html
@@ -29,7 +29,7 @@ from prymatex.widgets.splitter import SplitterWidget
 
 from functools import reduce
 
-class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
+class PrymatexMainWindow(PrymatexComponent, MainMenuMixin, QtGui.QMainWindow):
     """Prymatex main window"""
     # --------------------- Signals
     currentEditorChanged = QtCore.Signal(object)
@@ -49,13 +49,12 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
     _editorHistoryIndex = 0
 
     # Constructor
-    def __init__(self, parent = None):
+    def __init__(self, **kwargs):
         """The main window
         @param parent: The QObject parent, in this case it should be the QApp
         @param files_to_open: The set of files to be opened when the window is shown in the screen.
         """
-        QtGui.QMainWindow.__init__(self)
-        PMXBaseComponent.__init__(self)
+        super(PrymatexMainWindow, self).__init__(**kwargs)
 
         self.setupUi()
         
@@ -99,15 +98,15 @@ class PMXMainWindow(QtGui.QMainWindow, MainMenuMixin, PMXBaseComponent):
         
     # ---------- Implements PMXBaseComponent's interface
     def addComponent(self, component):
-        if isinstance(component, PMXBaseDock):
+        if isinstance(component, PrymatexDock):
             self.addDock(component, component.PREFERED_AREA)
-        elif isinstance(component, PMXBaseDialog):
+        elif isinstance(component, PrymatexDialog):
             self.addDialog(component)
-        elif isinstance(component, PMXBaseStatusBar):
+        elif isinstance(component, PrymatexStatusBar):
             self.addStatusBar(component)
 
-    def initialize(self, application):
-        PMXBaseComponent.initialize(self, application)
+    def initialize(self, parent = None, **kwargs):
+        super(PrymatexMainWindow, self).initialize(**kwargs)
         # Dialogs
         self.selectorDialog = self.findChild(QtGui.QDialog, "SelectorDialog")
         self.aboutDialog = self.findChild(QtGui.QDialog, "AboutDialog")

@@ -7,7 +7,7 @@ import uuid as uuidmodule
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.core import PMXBaseComponent
+from prymatex.core import PrymatexComponent
 from prymatex.core.settings import pmxConfigPorperty
 
 from prymatex.support.manager import PMXSupportBaseManager
@@ -142,7 +142,7 @@ class BundleItemMenuGroup(QtCore.QObject):
     def on_manager_bundleRemoved(self, bundle):
         self.removeFromContainers(self.menus[bundle])
 
-class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
+class SupportManager(PrymatexComponent, PMXSupportBaseManager, QtCore.QObject):
     #Signals for bundle
     bundleAdded = QtCore.Signal(object)
     bundleRemoved = QtCore.Signal(object)
@@ -177,12 +177,9 @@ class SupportManager(QtCore.QObject, PMXSupportBaseManager, PMXBaseComponent):
         
     SETTINGS_GROUP = 'SupportManager'
     
-    def __init__(self, application):
-        QtCore.QObject.__init__(self, application)
-        PMXSupportBaseManager.__init__(self)
-        PMXBaseComponent.__init__(self)
+    def __init__(self, **kwargs):
+        super(SupportManager, self).__init__(**kwargs)
 
-        self.application = application
         self.bundleTreeModel = BundleItemTreeModel(self)
         self.themeListModel = ThemeListModel(self)
         self.themeStylesTableModel = ThemeStylesTableModel(self)
