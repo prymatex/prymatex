@@ -100,7 +100,7 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
         self.updateTimer.timeout.connect(self.updateHtmlCurrentEditorContent)
     
     def initialize(self, **kwargs):
-        super(BrowserDock, self).__init__(**kwargs)
+        super(BrowserDock, self).initialize(**kwargs)
         self.on_tabWebView_webViewNewRequested()
 
     @classmethod

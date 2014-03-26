@@ -3,11 +3,11 @@
 
 from prymatex.qt import QtCore
 
-from prymatex.core import PMXBaseEditorAddon
+from prymatex.core import PrymatexEditorAddon
 
-class CodeEditorBaseMode(QtCore.QObject, PMXBaseEditorAddon):
-    def __init__(self, parent):
-        QtCore.QObject.__init__(self, parent)
+class CodeEditorBaseMode(PrymatexEditorAddon, QtCore.QObject):
+    def __init__(self, **kwargs):
+        super(CodeEditorBaseMode, self).__init__(**kwargs)
         self._is_active = False
         self._completion_state = False
 

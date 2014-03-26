@@ -6,18 +6,18 @@ from prymatex.qt import QtCore, QtGui
 from .base import CodeEditorBaseMode
 
 class CodeEditorSnippetMode(CodeEditorBaseMode):
-    def __init__(self, parent):
-        CodeEditorBaseMode.__init__(self, parent)
+    def __init__(self, **kwargs):
+        super(CodeEditorSnippetMode, self).__init__(**kwargs)
         self.processor = None
         self.enableCompletion = None
         self.setObjectName("CodeEditorSnippetMode")
 
-    def initialize(self, editor):
-        CodeEditorBaseMode.initialize(self, editor)
-        self.processor = editor.findProcessor("snippet")
+    def initialize(self, **kwargs):
+        super(CodeEditorSnippetMode, self).initialize(**kwargs)
+        self.processor = self.editor.findProcessor("snippet")
         self.processor.begin.connect(self.activate)
         self.processor.end.connect(self.deactivate)
-        editor.installEventFilter(self)
+        self.editor.installEventFilter(self)
 
     def eventFilter(self, obj, event):
         if self.isActive() and event.type() == QtCore.QEvent.KeyPress:

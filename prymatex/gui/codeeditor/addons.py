@@ -5,24 +5,25 @@ import re
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.core import PMXBaseEditorAddon
+from prymatex.core import PrymatexEditorAddon
 
 from prymatex.utils.lists import bisect_key
 from prymatex.support import PreferenceSettings
 
-class CodeEditorAddon(QtCore.QObject, PMXBaseEditorAddon):
-    def __init__(self, parent):
-        QtCore.QObject.__init__(self, parent)
+class CodeEditorAddon(PrymatexEditorAddon, QtCore.QObject):
+    def __init__(self, **kwargs):
+        super(CodeEditorAddon, self).__init__(**kwargs)
 
-    def initialize(self, editor):
-        PMXBaseEditorAddon.initialize(self, editor)
+    def initialize(self, **kwargs):
+        super(CodeEditorAddon, self).initialize(**kwargs)
 
-    def contributeToContextMenu(self, cursor):
-        return PMXBaseEditorAddon.contributeToContextMenu(self)
+    # TODO: Esto es parte de PrymatexComponentWidget
+    def contributeToContextMenu(self, **kwargs):
+        return super(CodeEditorAddon, self).contributeToContextMenu(**kwargs)
 
 class SmartUnindentAddon(CodeEditorAddon):
-    def initialize(self, editor):
-        CodeEditorAddon.initialize(self, editor)
+    def initialize(self, **kwargs):
+        super(SmartUnindentAddon, self).initialize(**kwargs)
         # TODO No usar esta señal porque el user data no esta listo
         #self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
@@ -42,8 +43,8 @@ class SmartUnindentAddon(CodeEditorAddon):
                     self.editor.unindentBlocks(cursor)
 
 class SpellCheckerAddon(CodeEditorAddon):
-    def __init__(self, parent):
-        CodeEditorAddon.__init__(self, parent)
+    def __init__(self, **kwargs):
+        super(SpellCheckerAddon, self).__init__(**kwargs)
         self.spellingOnType = False
         self.wordCursors = []
         self.currentSpellTask = None
@@ -57,8 +58,8 @@ class SpellCheckerAddon(CodeEditorAddon):
         except Exception as e:
             self.dictionary = None
 
-    def initialize(self, editor):
-        CodeEditorAddon.initialize(self, editor)
+    def initialize(self, **kwargs):
+        super(SpellCheckerAddon, self).initialize(**kwargs)
         if self.dictionary is not None:
             self.editor.registerTextCharFormatBuilder("spell", self.textCharFormat_spell_builder)
             #self.editor.syntaxReady.connect(self.on_editor_syntaxReady)
@@ -89,7 +90,7 @@ class SpellCheckerAddon(CodeEditorAddon):
                 ]}
         return { 'edit': menuEntry }
 
-    def contributeToContextMenu(self, cursor):
+    def contributeToContextMenu(self, cursor = None):
         items = []
         cursors = [c for c in self.wordCursors if c.selectionStart() <= cursor.selectionStart() <= cursor.selectionEnd() <= c.selectionEnd()]
         if cursors:
@@ -155,12 +156,12 @@ class SpellCheckerAddon(CodeEditorAddon):
         self.editor.highlightEditor()
         
 class HighlightCurrentSelectionAddon(CodeEditorAddon):
-    def initialize(self, editor):
-        CodeEditorAddon.initialize(self, editor)
-        editor.registerTextCharFormatBuilder("selection.extra", 
+    def initialize(self, **kwargs):
+        super(HighlightCurrentSelectionAddon, self).initialize(**kwargs)
+        self.editor.registerTextCharFormatBuilder("selection.extra", 
             self.textCharFormat_extraSelection_builder)
-        editor.selectionChanged.connect(self.findHighlightCursors)
-        editor.cursorPositionChanged.connect(self.findHighlightCursors)
+        self.editor.selectionChanged.connect(self.findHighlightCursors)
+        self.editor.cursorPositionChanged.connect(self.findHighlightCursors)
 
     def textCharFormat_extraSelection_builder(self):
         frmt = QtGui.QTextCharFormat()

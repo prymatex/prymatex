@@ -6,7 +6,7 @@ from prymatex.qt import QtGui, QtCore
 from prymatex import resources
 
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core import PMXBaseEditorAddon
+from prymatex.core import PrymatexEditorAddon
 
 class CodeEditorSideBar(QtGui.QWidget):
     updateRequest = QtCore.Signal()
@@ -44,7 +44,7 @@ class CodeEditorSideBar(QtGui.QWidget):
 #========================================
 # BASE EDITOR SIDEBAR ADDON
 #========================================
-class SideBarWidgetAddon(PMXBaseEditorAddon):
+class SideBarWidgetAddon(PrymatexEditorAddon):
     ALIGNMENT = None
 
     def translatePosition(self, position):
@@ -67,7 +67,7 @@ class SideBarWidgetAddon(PMXBaseEditorAddon):
 #=======================================
 # SideBar Widgets
 #=======================================
-class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
+class LineNumberSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
     ALIGNMENT = QtCore.Qt.AlignLeft
     MARGIN = 2
 
@@ -75,12 +75,12 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
     def showLineNumbers(self, value):
         self.setVisible(value)
     
-    def __init__(self, parent):
-        QtGui.QWidget.__init__(self, parent)
+    def __init__(self, **kwargs):
+        super(LineNumberSideBarAddon, self).__init__(**kwargs)
         self.setObjectName(self.__class__.__name__)
 
-    def initialize(self, editor):
-        SideBarWidgetAddon.initialize(self, editor)
+    def initialize(self, **kwargs):
+        super(LineNumberSideBarAddon, self).initialize(**kwargs)
         
         self.__update_colours()
         self.__update_fonts()
@@ -172,22 +172,22 @@ class LineNumberSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         painter.end()
         QtGui.QWidget.paintEvent(self, event)
 
-class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
+class BookmarkSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
     @pmxConfigPorperty(default = False)
     def showBookmarks(self, value):
         self.setVisible(value)
     
-    def __init__(self, parent):
-        QtGui.QWidget.__init__(self, parent)
+    def __init__(self, **kwargs):
+        super(BookmarkSideBarAddon, self).__init__(**kwargs)
         self.bookmarkflagImage = resources.getImage("bookmarkflag")
         self.imagesHeight = self.bookmarkflagImage.height()
         self.setFixedWidth(self.bookmarkflagImage.width())
         self.setObjectName(self.__class__.__name__)
         
-    def initialize(self, editor):
-        SideBarWidgetAddon.initialize(self, editor)
+    def initialize(self, **kwargs):
+        super(BookmarkSideBarAddon, self).initialize(**kwargs)
         self.background = self.editor.colours['gutterBackground']
         self.foreground = self.editor.colours['gutterForeground']
         self.invisibles = self.editor.colours['invisibles']
@@ -246,15 +246,15 @@ class BookmarkSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         self.editor.toggleBookmark(block)
         self.repaint(self.rect())
             
-class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
+class FoldingSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
     @pmxConfigPorperty(default = True)
     def showFolding(self, value):
         self.setVisible(value)
 
-    def __init__(self, parent):
-        QtGui.QWidget.__init__(self, parent)
+    def __init__(self, **kwargs):
+        super(FoldingSideBarAddon, self).__init__(**kwargs)
         self.foldingcollapsedImage = resources.getImage("foldingcollapsed")
         self.foldingtopImage = resources.getImage("foldingtop")
         self.foldingbottomImage = resources.getImage("foldingbottom")
@@ -262,8 +262,8 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         self.setFixedWidth(self.foldingbottomImage.width())
         self.setObjectName(self.__class__.__name__)
 
-    def initialize(self, editor):
-        SideBarWidgetAddon.initialize(self, editor)
+    def initialize(self, **kwargs):
+        super(FoldingSideBarAddon, self).initialize(**kwargs)
         self.background = self.editor.colours['gutterBackground']
         self.invisibles = self.editor.colours['invisibles']
         self.editor.themeChanged.connect(self.updateColours)
@@ -329,20 +329,20 @@ class FoldingSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
         else:
             self.editor.codeFoldingFold(block)
 
-class SelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
+class SelectionSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
     ALIGNMENT = QtCore.Qt.AlignRight
     
     @pmxConfigPorperty(default = False)
     def showSelection(self, value):
         self.setVisible(value)
     
-    def __init__(self, parent):
-        QtGui.QWidget.__init__(self, parent)
+    def __init__(self, **kwargs):
+        super(SelectionSideBarAddon, self).__init__(**kwargs)
         self.setFixedWidth(10)
         self.setObjectName(self.__class__.__name__)
         
-    def initialize(self, editor):
-        SideBarWidgetAddon.initialize(self, editor)
+    def initialize(self, **kwargs):
+        super(SelectionSideBarAddon, self).initialize(**kwargs)
         self.background = self.editor.colours['gutterBackground']
         self.editor.themeChanged.connect(self.updateColours)
         self.editor.extraSelectionChanged.connect(self.on_editor_extraSelectionChanged)

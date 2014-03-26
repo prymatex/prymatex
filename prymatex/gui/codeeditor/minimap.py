@@ -7,7 +7,7 @@ from prymatex.qt import QtGui, QtCore
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.codeeditor.sidebar import SideBarWidgetAddon
 
-class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
+class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
     ALIGNMENT = QtCore.Qt.AlignRight
     WIDTH = 80
     MINIMAP_MAX_OPACITY = 0.8
@@ -17,8 +17,8 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
     def showMiniMap(self, value):
         self.setVisible(value)
     
-    def __init__(self, parent):
-        QtGui.QPlainTextEdit.__init__(self, parent)
+    def __init__(self, **kwargs):
+        super(MiniMapAddon, self).__init__(**kwargs)
 
         self.setWordWrapMode(QtGui.QTextOption.NoWrap)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
@@ -39,21 +39,21 @@ class MiniMapAddon(QtGui.QPlainTextEdit, SideBarWidgetAddon):
         self.slider.show()
         self.setFixedWidth(self.WIDTH)
 
-    def initialize(self, editor):
-        SideBarWidgetAddon.initialize(self, editor)
-        editor.themeChanged.connect(self.on_editor_themeChanged)
-        editor.highlightChanged.connect(self.on_editor_highlightChanged)
-        editor.document().contentsChange.connect(self.on_document_contentsChange)
-        editor.updateRequest.connect(self.update_visible_area)
+    def initialize(self, **kwargs):
+        super(MiniMapAddon, self).initialize(**kwargs)
+        self.editor.themeChanged.connect(self.on_editor_themeChanged)
+        self.editor.highlightChanged.connect(self.on_editor_highlightChanged)
+        self.editor.document().contentsChange.connect(self.on_document_contentsChange)
+        self.editor.updateRequest.connect(self.update_visible_area)
         
         # Setup font
-        font = editor.document().defaultFont()
-        pointSize = int(self.width() / editor.marginLineSize)
+        font = self.editor.document().defaultFont()
+        pointSize = int(self.width() / self.editor.marginLineSize)
         font.setPointSize(pointSize or 1)
         self.setFont(font)
 
         # TODO El ancho del tabulador
-        self.setTabStopWidth(editor.tabStopWidth())
+        self.setTabStopWidth(self.editor.tabStopWidth())
         
         self.on_editor_themeChanged()
     

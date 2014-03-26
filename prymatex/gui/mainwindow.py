@@ -133,7 +133,6 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWind
                     # Find parent menu
                     parentMenu = self.findChild(QtGui.QMenu, 
                         text2objectname(name, prefix = "menu"))
-                    print(klass, name, parentMenu)
                     # Extend
                     if parentMenu is not None:
                         # Fix menu extensions
@@ -169,7 +168,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWind
         dockIndex = 1
         for dock in self.dockWidgets:
             toggleAction = dock.toggleViewAction()
-            if dock.SEQUENCE:
+            if dock.SEQUENCE is not None:
                 sequence = dock.SEQUENCE
             else:
                 sequence = resources.get_sequence("Docks", dock.objectName(), "Alt+%d" % dockIndex)
@@ -216,7 +215,6 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWind
 
     # ---------- Override QMainWindow
     def show(self):
-        print("mostrar main")
         QtGui.QMainWindow.show(self)
         
         # Test menu actions

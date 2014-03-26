@@ -314,7 +314,6 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
         buildedObjects = []
         def buildComponentInstance(klass, parent):
-            print(klass)
             instance = klass(parent = parent)
 
             # Configure
@@ -336,7 +335,6 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         # buildedObjects.reverse()
         # Initialize order is important, fist goes the internal components then the main component
         for ni, np in buildedObjects:
-            print(ni, np)
             ni.initialize(parent = np)
             # Shortcuts
             for settings in ni.contributeToShortcuts():

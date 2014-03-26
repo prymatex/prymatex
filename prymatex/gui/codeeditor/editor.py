@@ -8,7 +8,7 @@ import operator
 
 from prymatex.qt import QtCore, QtGui, Qt
 
-from prymatex.core import PMXBaseEditor
+from prymatex.core import PrymatexEditor
 from prymatex.widgets.texteditor import TextEditWidget
 
 from prymatex import resources
@@ -36,7 +36,7 @@ from prymatex.utils import text
 from prymatex.utils.i18n import ugettext as _
 from functools import reduce
 
-class CodeEditor(TextEditWidget, PMXBaseEditor):
+class CodeEditor(PrymatexEditor, TextEditWidget):
     # Aca vamos a guardar los scopes de los editores, quiza esto pueda
     # ser un objeto factory, por ahora la fabricacion la hace el editor
     # en el factory method flyweightScopeDataFactory
@@ -127,7 +127,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # --------------------- init
     def __init__(self, parent = None):
         TextEditWidget.__init__(self, parent)
-        PMXBaseEditor.__init__(self)
+        PrymatexEditor.__init__(self)
 
         self.__blockUserDataHandlers = []
 
@@ -202,8 +202,8 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.showIndentGuide = True
         self.showHighlightCurrentLine = True
 
-    def initialize(self, mainWindow):
-        PMXBaseEditor.initialize(self, mainWindow)
+    def initialize(self, **kwargs):
+        super(CodeEditor, self).initialize(**kwargs)
         self.syntaxHighlighter.setDocument(self.document())
 
         # Get dialogs
@@ -216,7 +216,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     # ----------- Override from PMXBaseComponent
     def addComponent(self, component):
-        PMXBaseEditor.addComponent(self, component)
+        PrymatexEditor.addComponent(self, component)
         if isinstance(component, SideBarWidgetAddon):
             self.addSideBarWidget(component)
         elif isinstance(component, CodeEditorBaseMode):
@@ -306,18 +306,18 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
 
     def open(self, filePath):
         """ Custom open for large files """
-        PMXBaseEditor.open(self, filePath)
+        PrymatexEditor.open(self, filePath)
         content = self.application.fileManager.readFile(filePath)
         self.setPlainText(content)
 
     def close(self):
-        PMXBaseEditor.close(self)
+        PrymatexEditor.close(self)
         # Stp'highlighter
         self.syntaxHighlighter.stop()
         TextEditWidget.close(self)
 
     def reload(self):
-        PMXBaseEditor.reload(self)
+        PrymatexEditor.reload(self)
         content = self.application.fileManager.readFile(self.filePath)
         self.updatePlainText(content)
 
@@ -350,15 +350,15 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         syntax = self.application.supportManager.findSyntaxByFileType(extension)
         if syntax is not None:
             self.insertBundleItem(syntax)
-        PMXBaseEditor.setFilePath(self, filePath)
+        PrymatexEditor.setFilePath(self, filePath)
 
     def tabTitle(self):
         #Podemos marcar de otra forma cuando algo cambia :P
-        return PMXBaseEditor.tabTitle(self)
+        return PrymatexEditor.tabTitle(self)
 
     def fileFilters(self):
         return [ "%s (%s)" % (self.syntax().bundle.name, " ".join(["*." + ft for ft in self.syntax().fileTypes])) ]
-        #return PMXBaseEditor.fileFilters(self)
+        #return PrymatexEditor.fileFilters(self)
 
     # ---------------------- Scopes
     def setBasicScope(self, scopeStack):
@@ -777,7 +777,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
         self.insertBundleItem(command)
 
     def environmentVariables(self):
-        environment = PMXBaseEditor.environmentVariables(self)
+        environment = PrymatexEditor.environmentVariables(self)
         cursor = self.textCursor()
         block = cursor.block()
         line = block.text()
