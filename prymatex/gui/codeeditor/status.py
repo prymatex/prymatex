@@ -353,7 +353,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
     # ------------- Contributes to Main Menu
     @classmethod
     def contributeToMainMenu(cls):
-        menu = PrymatexStatusBar.contributeToMainMenu()
+        menu = {}
         menu["edit"] = [
                 '-',
                 {'text': "Find",

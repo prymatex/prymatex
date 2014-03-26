@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import collections
-
 #http://pyqt.sourceforge.net/Docs/PyQt5/multiinheritance.html#ref-cooperative-multiinheritance
 
 class PrymatexComponent(object):
@@ -28,11 +26,8 @@ class PrymatexComponent(object):
 
     @classmethod
     def contributeToMainMenu(cls):
-        """Contributions to the main menu
-        return OrderedDict, the keys are strings and the values are lists
-            keys define the name of te menu to be extended
-            values define the extensions to the found menu"""
-        return collections.OrderedDict()
+	if hasattr(super(PrymatexComponent, cls), 'contributeToMainMenu'):
+            return super(PrymatexComponent, cls).contributeToMainMenu()
 
     def contributeToShortcuts(self):
         return []

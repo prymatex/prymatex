@@ -142,7 +142,7 @@ class AbstractNamespaceTreeModel(AbstractTreeModel):
         node = self.rootNode
         for name in namespace.split(self.separator):
             if not name:
-                raise Exception("No path for" % namespace)
+                raise Exception("No path for %s" % namespace)
             childNode = node.findChildByName(name)
             if childNode is None and createProxy:
                 childNode = self.treeNodeFactory(name, node)

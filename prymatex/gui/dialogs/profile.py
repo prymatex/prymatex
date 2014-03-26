@@ -4,7 +4,7 @@
 import os
 
 from prymatex.qt import QtCore, QtGui
-from prymatex.core.components import PMXBaseDialog
+from prymatex.core.components import PrymatexDialog
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.profile import PMXProfile
@@ -18,11 +18,10 @@ RENAME_MESSAGE = """Rename the profile %s to:"""
 
 CREATE_MESSAGE = """Enter new profile name:"""
 
-class ProfileDialog(QtGui.QDialog, Ui_ProfileDialog, PMXBaseDialog):
+class ProfileDialog(PrymatexDialog, Ui_ProfileDialog, QtGui.QDialog):
     
-    def __init__(self, parent = None):
-        QtGui.QDialog.__init__(self, parent)
-        PMXBaseDialog.__init__(self)
+    def __init__(self, **kwargs):
+        super(ProfileDialog, self).__init__(**kwargs)
         self.setupUi(self)
 
     def setProfileManager(self, manager):
@@ -30,7 +29,8 @@ class ProfileDialog(QtGui.QDialog, Ui_ProfileDialog, PMXBaseDialog):
         self.listViewProfiles.setModel(self.manager.profilesListModel)
         self.checkDontAsk.setChecked(self.manager.dontAsk())
         
-    def initialize(self, mainWindow):
+    def initialize(self, **kwargs):
+        super(ProfileDialog, self).initialize(**kwargs)
         self.setProfileManager(self.application.profileManager)
     
     def on_checkDontAsk_clicked(self):

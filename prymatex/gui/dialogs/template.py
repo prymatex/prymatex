@@ -4,17 +4,16 @@
 import os
 
 from prymatex.qt import QtCore, QtGui
-from prymatex.core.components import PMXBaseDialog
+from prymatex.core.components import PrymatexDialog
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.dialogs.environment import EnvironmentDialog
 
 from prymatex.ui.dialogs.template import Ui_TemplateDialog
 
-class TemplateDialog(QtGui.QDialog, Ui_TemplateDialog, PMXBaseDialog):
-    def __init__(self, parent = None):
-        QtGui.QDialog.__init__(self, parent)
-        PMXBaseDialog.__init__(self)
+class TemplateDialog(PrymatexDialog, Ui_TemplateDialog, QtGui.QDialog):
+    def __init__(self, **kwargs):
+        super(TemplateDialog, self).__init__(**kwargs)
         self.setupUi(self)
         self.application = QtGui.QApplication.instance()
         self.setupComboTemplates()
@@ -30,8 +29,8 @@ class TemplateDialog(QtGui.QDialog, Ui_TemplateDialog, PMXBaseDialog):
         self.fileCreated = None
         self.userEnvironment = {}
     
-    def initialize(self, mainWindow):
-        PMXBaseDialog.initialize(self, mainWindow)
+    def initialize(self, **kwargs):
+        super(TemplateDialog, self).initialize(**kwargs)
         self.environmentDialog = self.mainWindow.findChild(QtGui.QDialog, "EnvironmentDialog")
     
     def setupComboTemplates(self):

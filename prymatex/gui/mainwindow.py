@@ -13,7 +13,7 @@ from prymatex import resources
 
 from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core import PrymatexComponent, PrymatexDock, PrymatexDialog, PrymatexStatusBar
+from prymatex.core import PrymatexComponentWidget, PrymatexDock, PrymatexDialog, PrymatexStatusBar
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import html
@@ -29,7 +29,7 @@ from prymatex.widgets.splitter import SplitterWidget
 
 from functools import reduce
 
-class PrymatexMainWindow(PrymatexComponent, MainMenuMixin, QtGui.QMainWindow):
+class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWindow):
     """Prymatex main window"""
     # --------------------- Signals
     currentEditorChanged = QtCore.Signal(object)
@@ -105,7 +105,7 @@ class PrymatexMainWindow(PrymatexComponent, MainMenuMixin, QtGui.QMainWindow):
         elif isinstance(component, PrymatexStatusBar):
             self.addStatusBar(component)
 
-    def initialize(self, parent = None, **kwargs):
+    def initialize(self, **kwargs):
         super(PrymatexMainWindow, self).initialize(**kwargs)
         # Dialogs
         self.selectorDialog = self.findChild(QtGui.QDialog, "SelectorDialog")
@@ -124,35 +124,37 @@ class PrymatexMainWindow(PrymatexComponent, MainMenuMixin, QtGui.QMainWindow):
         # Build Main Menu
         def extendMainMenu(klass):
             menuExtensions = klass.contributeToMainMenu()
-            objects = []
-            for name, settings in menuExtensions.items():
-                if not settings:
-                    continue
+            if menuExtensions is not None:
+                objects = []
+                for name, settings in menuExtensions.items():
+                    if not settings:
+                        continue
+    
+                    # Find parent menu
+                    parentMenu = self.findChild(QtGui.QMenu, 
+                        text2objectname(name, prefix = "menu"))
+                    print(klass, name, parentMenu)
+                    # Extend
+                    if parentMenu is not None:
+                        # Fix menu extensions
+                        if not isinstance(settings, list):
+                            settings = [ settings ]
+                        objects += extend_menu(parentMenu, settings,
+                            dispatcher = self.componentInstanceDispatcher,
+                            sequence_handler = self.application.registerShortcut)
+                    else:
+                        objs = create_menu(self, settings,
+                            dispatcher = self.componentInstanceDispatcher,
+                            allObjects = True,
+                            sequence_handler = self.application.registerShortcut)
+                        add_actions(self.menuBar(), [ objs[0] ], settings.get("before", None))
+                        objects += objs
 
-                # Find parent menu
-                parentMenu = self.findChild(QtGui.QMenu,
-                    text2objectname(name, prefix = "menu"))
-                # Extend
-                if parentMenu:
-                    # Fix menu extensions
-                    if not isinstance(settings, list):
-                        settings = [ settings ]
-                    objects += extend_menu(parentMenu, settings,
-                        dispatcher = self.componentInstanceDispatcher,
-                        sequence_handler = self.application.registerShortcut)
-                else:
-                    objs = create_menu(self, settings,
-                        dispatcher = self.componentInstanceDispatcher,
-                        allObjects = True,
-                        sequence_handler = self.application.registerShortcut)
-                    add_actions(self.menuBar(), [ objs[0] ], settings.get("before", None))
-                    objects += objs
+                # Store all new objects from creation or extension
+                self.customComponentObjects.setdefault(klass, []).extend(objects)
 
-            # Store all new objects from creation or extension
-            self.customComponentObjects.setdefault(klass, []).extend(objects)
-
-            for componentClass in application.pluginManager.findComponentsForClass(klass):
-                extendMainMenu(componentClass)
+                for componentClass in self.application.pluginManager.findComponentsForClass(klass):
+                    extendMainMenu(componentClass)
 
         extendMainMenu(self.__class__)
         

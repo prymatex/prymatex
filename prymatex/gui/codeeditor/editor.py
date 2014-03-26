@@ -1132,7 +1132,7 @@ class CodeEditor(TextEditWidget, PMXBaseEditor):
     # Contributes to Main Menu
     @classmethod
     def contributeToMainMenu(cls):
-        menu = PMXBaseEditor.contributeToMainMenu()
+        menu = {}
         menu["edit"] = [
                 '-',
                 {'text': '&Mode',

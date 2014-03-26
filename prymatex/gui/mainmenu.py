@@ -150,7 +150,8 @@ class MainMenuMixin(object):
     @classmethod
     def contributeToMainMenu(cls):
         import prymatex
-        menu = PMXBaseComponent.contributeToMainMenu()
+	import collections
+        menu = collections.OrderedDict()
 
         # ------------- File menu
         menu["file"] = {
