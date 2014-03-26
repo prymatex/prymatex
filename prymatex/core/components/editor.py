@@ -5,38 +5,34 @@ from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers.icons import combine_icons
 
 from prymatex.core import exceptions
-from prymatex.core.components.base import PMXBaseComponent
-from prymatex.core.components.keyhelper import PMXBaseKeyHelper, PMXKeyHelperMixin
+from prymatex.core.components.base import (PrymatexComponentWidget, 
+    PrymatexKeyHelper, PrymatexAddon, Key_Any)
 
 from prymatex import resources
 
-__all__ = ["PMXBaseEditor", "PMXBaseEditorKeyHelper", "PMXBaseEditorAddon"]
-
-class PMXBaseEditor(PMXBaseComponent, PMXKeyHelperMixin):
+class PrymatexEditor(PrymatexComponentWidget):
     """Every editor should extend this class in order to guarantee it'll be able to be place in tab.
     """
     CREATION_COUNTER = 0
     UNTITLED_FILE_TEMPLATE = "Untitled {CREATION_COUNTER}"
     
-    def initialize(self, mainWindow):
-        PMXBaseComponent.initialize(self, mainWindow)
-        self.mainWindow = mainWindow
+    def __init__(self, **kwargs):
+        super(PrymatexEditor, self).__init__(**kwargs)
+    
+    def initialize(self, parent = None, **kwargs):
+        super(PrymatexEditor, self).initialize(**kwargs)
+        self.mainWindow = parent
         self.filePath = None
         self.project = None
         self.externalAction = None
         if not hasattr(self, "modificationChanged"):
             self.modificationChanged = QtCore.Signal(bool)
     
-    def addComponent(self, component):
-        PMXBaseComponent.addComponent(self, component)
-        if isinstance(component, PMXBaseKeyHelper):
-            self.addKeyHelper(component)
-    
     @property
     def creationCounter(self):
         if not hasattr(self, "_creationCounter"):
-            PMXBaseEditor.CREATION_COUNTER += 1
-            setattr(self, "_creationCounter", PMXBaseEditor.CREATION_COUNTER)
+            PrymatexEditor.CREATION_COUNTER += 1
+            setattr(self, "_creationCounter", PrymatexEditor.CREATION_COUNTER)
         return self._creationCounter
     
     def open(self, filePath):
@@ -57,8 +53,8 @@ class PMXBaseEditor(PMXBaseComponent, PMXKeyHelperMixin):
     
     def close(self):
         """ Close editor """
-        if self.filePath is None and self.creationCounter == PMXBaseEditor.CREATION_COUNTER:
-            PMXBaseEditor.CREATION_COUNTER -= 1
+        if self.filePath is None and self.creationCounter == PrymatexEditor.CREATION_COUNTER:
+            PrymatexEditor.CREATION_COUNTER -= 1
         elif self.filePath is not None:
             self.application.fileManager.closeFile(self.filePath)
 
@@ -159,41 +155,43 @@ class PMXBaseEditor(PMXBaseComponent, PMXKeyHelperMixin):
         can provide custom actions to the menu through this callback'''
         return []
     
-    def runKeyHelper(self, event):
-        runHelper = False
-        for helper in self.findHelpers(event.key()):
-            runHelper = helper.accept(event)
-            if runHelper:
-                helper.execute(event)
-                break
-        return runHelper
-
     # ---------- For Plugin Manager administrator
     @classmethod
     def acceptFile(cls, filePath, mimetype):
         return True
 
 #======================================================================
-# Base Helper
+# Key Helper
 #======================================================================    
-class PMXBaseEditorKeyHelper(PMXBaseKeyHelper):
-    def initialize(self, editor):
-        PMXBaseKeyHelper.initialize(self, editor)
-        self.editor = editor
+class PrymatexEditorKeyHelper(PrymatexKeyHelper):
+    def __init__(self, **kwargs):
+        super(PrymatexEditorKeyHelper, self).__init__(**kwargs)
 
-    def accept(self, event):
-        return PMXBaseKeyHelper.accept(self, event.key())
+    def initialize(self, parent = None, **kwargs):
+        super(PrymatexEditorKeyHelper, self).initialize(**kwargs)
+        self.editor = parent
 
-    def execute(self, event):
-        PMXBaseKeyHelper.accept(self, event.key())
+    def accept(self, key = Key_Any, **kwargs):
+        return super(PrymatexEditorKeyHelper, self).accept(key, **kwargs)
+
+    def execute(self, **kwargs):
+        super(PrymatexEditorKeyHelper, self).execute(**kwargs)
+
 
 #======================================================================
-# Base Addon
+# Addon
 #======================================================================    
-class PMXBaseEditorAddon(PMXBaseComponent):
-    def initialize(self, editor):
-        PMXBaseComponent.initialize(self, editor)
-        self.editor = editor
+class PrymatexEditorAddon(PrymatexAddon):
+    def __init__(self, **kwargs):
+        super(PrymatexEditorAddon, self).__init__(**kwargs)
+
+    def initialize(self, parent = None, **kwargs):
+        super(PrymatexEditorAddon, self).initialize(**kwargs)
+        self.editor = parent
 
     def finalize(self):
         pass
+
+PMXBaseEditor = PrymatexEditor
+PMXBaseEditorKeyHelper = PrymatexEditorKeyHelper
+PMXBaseEditorAddon = PrymatexEditorAddon

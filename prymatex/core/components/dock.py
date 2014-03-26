@@ -3,19 +3,20 @@
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex.core.components.base import PMXBaseComponent
-from prymatex.core.components.keyhelper import PMXBaseKeyHelper, PMXKeyHelperMixin
+from prymatex.core.components.base import (PrymatexComponentWidget, 
+    PrymatexKeyHelper, PrymatexAddon, Key_Any)
 
-__all__ = ["PMXBaseDock", "PMXBaseDockKeyHelper", "PMXBaseDockAddon"]
-
-class PMXBaseDock(PMXBaseComponent, PMXKeyHelperMixin):
+class PrymatexDock(PrymatexComponentWidget):
     SEQUENCE = None
     ICON = None
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
-    def initialize(self, mainWindow):
-        PMXBaseComponent.initialize(self, mainWindow)
-        self.mainWindow = mainWindow
+    def __init__(self, **kwargs):
+        super(PrymatexDock, self).__init__(**kwargs)
+    
+    def initialize(self, parent = None, **kwargs):
+        super(PrymatexDock, self).initialize(**kwargs)
+        self.mainWindow = parent
 
     def runKeyHelper(self, event):
         runHelper = False
@@ -30,26 +31,34 @@ class PMXBaseDock(PMXBaseComponent, PMXKeyHelperMixin):
 #======================================================================
 # Base Helper
 #======================================================================    
-class PMXBaseDockKeyHelper(PMXBaseKeyHelper):
-    def initialize(self, dock):
-        PMXBaseKeyHelper.initialize(self, dock)
-        self.dock = dock
+class PrymatexDockKeyHelper(PrymatexKeyHelper):
+    def __init__(self, **kwargs):
+        super(PrymatexDockKeyHelper, self).__init__(**kwargs)
 
+    def initialize(self, parent = None, **kwargs):
+        super(PrymatexDockKeyHelper, self).initialize(**kwargs)
+        self.dock = parent
 
-    def accept(self, event):
-        return PMXBaseKeyHelper.accept(self, event.key())
+    def accept(self, key = Key_Any, **kwargs):
+        return super(PrymatexDockKeyHelper, self).accept(key, **kwargs)
 
-    
-    def execute(self, event):
-        PMXBaseKeyHelper.accept(self, event.key())
+    def execute(self, **kwargs):
+        super(PrymatexDockKeyHelper, self).execute(**kwargs)
 
 #========================================
 # BASE ADDON
 #========================================
-class PMXBaseDockAddon(PMXBaseComponent):
-    def initialize(self, dock):
-        PMXBaseComponent.initialize(self, dock)
-        self.dock = dock
+class PrymatexDockAddon(PrymatexAddon):
+    def __init__(self, **kwargs):
+        super(PrymatexDockAddon, self).__init__(**kwargs)
+
+    def initialize(self, parent = None, **kwargs):
+        super(PrymatexDockAddon, self).initialize(**kwargs)
+        self.dock = parent
 
     def finalize(self):
         pass
+
+PMXBaseDock = PrymatexDock
+PMXBaseDockKeyHelper = PrymatexDockKeyHelper
+PMXBaseDockAddon = PrymatexDockAddon

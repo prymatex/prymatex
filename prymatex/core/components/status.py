@@ -3,14 +3,14 @@
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex.core.components.base import PMXBaseComponent
+from prymatex.core.components.base import PrymatexComponentWidget
 
-__all__ = ["PMXBaseStatusBar"]
-
-class PMXBaseStatusBar(PMXBaseComponent):    
-    def initialize(self, mainWindow):
-        PMXBaseComponent.initialize(self, mainWindow)
-        self.mainWindow = mainWindow
+class PrymatexStatusBar(PrymatexComponentWidget):    
+    def initialize(self, parent = None, **kwargs):
+        super(PrymatexStatusBar, self).initialize(**kwargs)
+        self.mainWindow = parent
 
     def acceptEditor(self, editor):
         return False
+
+PMXBaseStatusBar = PrymatexStatusBar

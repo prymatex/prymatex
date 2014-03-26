@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.delegates.items import HtmlItemDelegate
+from prymatex.qt.extensions import HtmlItemDelegate
 
 class PluginItemDelegate(HtmlItemDelegate):
 
