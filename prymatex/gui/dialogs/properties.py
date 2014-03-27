@@ -3,17 +3,16 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.core.components import PMXBaseDialog
+from prymatex.core.components import PrymatexDialog
 
 from prymatex.ui.dialogs.treewidget import Ui_TreeWidgetDialog
 from prymatex.models.properties import (PropertyTreeNode, PropertiesTreeModel,
     PropertiesProxyModel)
 
-class PropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseDialog):
+class PropertiesDialog(PrymatexDialog, Ui_TreeWidgetDialog, QtGui.QDialog):
     """Properties dialog, it's hold by the project docker"""
-    def __init__(self, parent = None):
-        QtGui.QDialog.__init__(self, parent)
-        PMXBaseDialog.__init__(self)
+    def __init__(self, **kwargs):
+        super(PropertiesDialog, self).__init__(**kwargs)
         self.setupUi(self)
         self.setObjectName("PropertiesDialog")
         

@@ -4,7 +4,7 @@
 from prymatex.qt import QtCore, QtGui
 from prymatex import resources
 
-from prymatex.core.components import PMXBaseDialog
+from prymatex.core.components import PrymatexDialog
 
 # UI
 from prymatex.ui.support.editor import Ui_BundleEditorDialog
@@ -12,12 +12,11 @@ from prymatex.ui.support.editor import Ui_BundleEditorDialog
 from prymatex.gui.dialogs.bundles import widgets
 from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
 
-class BundleEditorDialog(QtGui.QDialog, Ui_BundleEditorDialog, PMXBaseDialog):
+class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtGui.QDialog):
     BASE_EDITOR = -1 #El ultimo es el editor base, no tiene nada
     
-    def __init__(self, parent = None):
-        QtGui.QDialog.__init__(self, parent)
-        PMXBaseDialog.__init__(self)
+    def __init__(self, **kwargs):
+        super(BundleEditorDialog, self).__init__(**kwargs)
         self.setupUi(self)
         self.namespace = None
         

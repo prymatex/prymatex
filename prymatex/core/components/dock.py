@@ -58,7 +58,3 @@ class PrymatexDockAddon(PrymatexAddon):
 
     def finalize(self):
         pass
-
-PMXBaseDock = PrymatexDock
-PMXBaseDockKeyHelper = PrymatexDockKeyHelper
-PMXBaseDockAddon = PrymatexDockAddon

@@ -14,7 +14,7 @@ class PrymatexComponent(object):
         pass
 
     def components(self):
-        return []
+        return filter(lambda ch: isinstance(ch, PrymatexComponent), self.children())
  
     def addComponent(self, component):
         pass
@@ -39,11 +39,13 @@ class PrymatexComponent(object):
     # Save an restore component state
     def componentState(self):
         """Returns a Python dictionary containing the state of the component."""
-        state = {
-            "components": dict([(component.objectName(), component.componentState()) 
-                for component in self.components()])
-        }
-        return state
+        components = {}
+        for component in self.components():
+            componentState = component.componentState()
+            if componentState:
+                components[component.objectName()] = componentState
+        
+        return components and {"components": components } or {}
 
     def setComponentState(self, componentState):
         """Restore the state from the given state (returned by a previous call to saveState())."""
@@ -55,19 +57,15 @@ class PrymatexComponent(object):
 
 Key_Any = 0
 class PrymatexKeyHelper(PrymatexComponent):
-    def __init__(self, **kwargs):
-        super(PrymatexKeyHelper, self).__init__(**kwargs)
-
     KEY = Key_Any
-    def accept(self, key = Key_Any, **kwargs):
-        return self.KEY == key
+    def accept(self, **kwargs):
+        return True
     
     def execute(self, **kwargs):
         pass
 
 class PrymatexAddon(PrymatexComponent):
-    def __init__(self, **kwargs):
-        super(PrymatexAddon, self).__init__(**kwargs)
+    pass
 
 class PrymatexComponentWidget(PrymatexComponent):
     def __init__(self, **kwargs):
@@ -105,10 +103,8 @@ class PrymatexComponentWidget(PrymatexComponent):
     def runKeyHelper(self, key = Key_Any, **kwargs):
         runHelper = False
         for helper in self.findHelpers(key):
-            runHelper = helper.accept(key = key, **kwargs)
+            runHelper = helper.accept(**kwargs)
             if runHelper:
                 helper.execute(**kwargs)
                 break
         return runHelper
-
-PMXBaseComponent = PrymatexComponent

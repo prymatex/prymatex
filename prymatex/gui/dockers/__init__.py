@@ -8,7 +8,7 @@ from .browser import BrowserDock
 from .projects import ProjectsDock
 from .terminal import TerminalDock
 from .search import SearchResultsDock
-from .process import PMXProcessDock
+from .process import ExternalProcessDock
 
 def registerPlugin(manager):
     manager.registerComponent(ProjectsDock)
@@ -16,4 +16,4 @@ def registerPlugin(manager):
     manager.registerComponent(TerminalDock)
     manager.registerComponent(BrowserDock)
     manager.registerComponent(SearchResultsDock)
-    manager.registerComponent(PMXProcessDock)
+    manager.registerComponent(ExternalProcessDock)

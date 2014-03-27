@@ -12,5 +12,3 @@ class PrymatexStatusBar(PrymatexComponentWidget):
 
     def acceptEditor(self, editor):
         return False
-
-PMXBaseStatusBar = PrymatexStatusBar

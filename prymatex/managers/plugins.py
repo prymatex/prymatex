@@ -95,12 +95,18 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
         return hierarchy
         
     # ------------ Handle editor classes
-    def findEditorClassForFile(self, filePath):
-        mimetype = self.application.fileManager.mimeType(filePath)
-        editors = [cmp for cmp in self.components.get(PrymatexMainWindow, []) if issubclass(cmp, PrymatexEditor)]
-        for Klass in editors:
-            if Klass.acceptFile(filePath, mimetype):
-                return Klass
+    def findEditorClassByName(self, name):
+        editors = (cmp for cmp in self.components.get(PrymatexMainWindow, []) if issubclass(cmp, PrymatexEditor))
+        for klass in editors:
+            if name == klass.__name__:
+                return klass
+
+    def findEditorClassForFile(self, filepath):
+        mimetype = self.application.fileManager.mimeType(filepath)
+        editors = (cmp for cmp in self.components.get(PrymatexMainWindow, []) if issubclass(cmp, PrymatexEditor))
+        for klass in editors:
+            if klass.acceptFile(filepath, mimetype):
+                return klass
     
     def defaultEditor(self):
         return self.defaultComponent

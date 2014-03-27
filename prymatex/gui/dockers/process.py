@@ -9,20 +9,19 @@ from prymatex.utils import osextra
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import create_menu
 
-from prymatex.core import PMXBaseDock
+from prymatex.core import PrymatexDock
 
 from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 
-class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
+class ExternalProcessDock(PrymatexDock, QtGui.QDockWidget):
     ICON = resources.getIcon("application-x-executable-script")
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
-    def __init__(self, parent):
-        QtGui.QDockWidget.__init__(self, parent)
+    def __init__(self, **kwargs):
+        super(ExternalProcessDock, self).__init__(**kwargs)
         self.setWindowTitle(_("External process"))
         self.setObjectName(_("ExternalProcessDock"))
-        PMXBaseDock.__init__(self)
         self.processTableModel = self.application.supportManager.processTableModel
         self.tableViewProcess = QtGui.QTableView()
         self.tableViewProcess.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)

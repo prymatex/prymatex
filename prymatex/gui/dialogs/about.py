@@ -7,7 +7,7 @@ import prymatex
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt import API, qt_version_str, pyqt_version_str, sip_version_str, pyside_version_str
 from prymatex import resources
-from prymatex.core.components import PMXBaseDialog
+from prymatex.core.components import PrymatexDialog
 
 from prymatex.ui.about import Ui_AboutDialog
 
@@ -28,10 +28,9 @@ informationHtml += '''<dt>Ponyguruma</dt><dd>{pony_version}</dd>
 <dt>Regex</dt><dd>{regex_version}</dd>
 <dt>ZMQ Version</dt><dd>{zmq_version}</dd></dl>'''
 
-class AboutDialog(QtGui.QDialog, Ui_AboutDialog, PMXBaseDialog):
-    def __init__(self, parent = None):
-        QtGui.QDialog.__init__(self, parent)
-        PMXBaseDialog.__init__(self)
+class AboutDialog(PrymatexDialog, Ui_AboutDialog, QtGui.QDialog):
+    def __init__(self, **kwargs):
+        super(AboutDialog, self).__init__(**kwargs)
         self.setupUi(self)
         self.labelLogo.setPixmap(resources.getImage("logo"))
         self.textInformation.setReadOnly(True)

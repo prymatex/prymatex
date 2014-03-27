@@ -4,21 +4,14 @@
 # https://github.com/textmate/textmate/blob/master/Applications/TextMate/about/Changes.md
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.core import PrymatexEditorKeyHelper
+from prymatex.core import PrymatexEditorKeyHelper, Key_Any
 from prymatex.qt.helpers import debug_key
 
 class CodeEditorKeyHelper(PrymatexEditorKeyHelper, QtCore.QObject):
-    def __init__(self, **kwargs):
-        super(PrymatexEditorKeyHelper, self).__init__(**kwargs)
-        
-    def accept(self, key, **kwargs):
-        return super(PrymatexEditorKeyHelper, self).accept(key, **kwargs)
-
-    def execute(self, **kwargs):
-        super(PrymatexEditorKeyHelper, self).execute(**kwargs)
+    pass
 
 class KeyEquivalentHelper(CodeEditorKeyHelper):
-    def accept(self, event, cursor = None):
+    def accept(self, event = None, cursor = None, **kwargs):
         keyseq = int(event.modifiers()) + event.key()
         if keyseq not in self.application.supportManager.getAllKeyEquivalentCodes():
             return False
@@ -28,7 +21,7 @@ class KeyEquivalentHelper(CodeEditorKeyHelper):
             keyseq, leftScope, rightScope)
         return bool(self.items)
 
-    def execute(self, event, cursor = None):
+    def execute(self, event = None, cursor = None, **kwargs):
         self.editor.insertBundleItem(self.items)
 
 class TabTriggerHelper(CodeEditorKeyHelper):
@@ -37,7 +30,7 @@ class TabTriggerHelper(CodeEditorKeyHelper):
     that to the right of the potential tab trigger.
     """
     KEY = QtCore.Qt.Key_Tab
-    def accept(self, event, cursor = None):
+    def accept(self, event = None, cursor = None, **kwargs):
         if cursor.hasSelection(): return False
 
         trigger = self.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
@@ -49,12 +42,12 @@ class TabTriggerHelper(CodeEditorKeyHelper):
             trigger, leftScope, rightScope)
         return bool(self.items)
 
-    def execute(self, event, cursor = None):
+    def execute(self, event = None, cursor = None, **kwargs):
         #Inserto los items
         self.editor.insertBundleItem(self.items, cursorWrapper = self.triggerCursor)
 
 class SmartTypingPairsHelper(CodeEditorKeyHelper):
-    def accept(self, event, cursor = None):
+    def accept(self, event = None, cursor = None, **kwargs):
         character = event.text()
         pairs = [pair for pair in self.editor.braces if character in pair]
         
@@ -101,7 +94,7 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
         word, wordStart, wordEnd = self.editor.currentWord()
         return not (wordStart <= cursor.position() < wordEnd)
         
-    def execute(self, event, cursor = None):
+    def execute(self, event = None, cursor = None, **kwargs):
         cursor.beginEditBlock()
         if self.skip:
             # Skip
@@ -138,13 +131,13 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
 
 class MoveCursorToHomeHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Home
-    def accept(self, event, cursor = None):
+    def accept(self, event = None, cursor = None, **kwargs):
         #Solo si el cursor no esta al final de la indentacion
         block = cursor.block()
         self.newPosition = block.position() + len(block.userData().indent)
         return self.newPosition != cursor.position()
         
-    def execute(self, event, cursor = None):
+    def execute(self, event = None, cursor = None, **kwargs):
         #Lo muevo al final de la indentacion
         cursor = self.editor.textCursor()
         cursor.setPosition(self.newPosition, event.modifiers() == QtCore.Qt.ShiftModifier and QtGui.QTextCursor.KeepAnchor or QtGui.QTextCursor.MoveAnchor)
@@ -152,13 +145,13 @@ class MoveCursorToHomeHelper(CodeEditorKeyHelper):
 
 class OverwriteHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Insert
-    def execute(self, event, cursor = None):
+    def execute(self, event = None, cursor = None, **kwargs):
         self.editor.setOverwriteMode(not self.editor.overwriteMode())
         self.editor.modeChanged.emit()
         
 class TabIndentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Tab
-    def execute(self, event, cursor = None):
+    def execute(self, event = None, cursor = None, **kwargs):
         start, end = self.editor.selectionBlockStartEnd()
         if start != end:
             #Tiene seleccion en distintos bloques, es un indentar
@@ -169,29 +162,29 @@ class TabIndentHelper(CodeEditorKeyHelper):
 class BacktabUnindentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Backtab
     #Siempre se come esta pulsacion solo que no unindenta si la linea ya esta al borde
-    def execute(self, event, cursor = None):
+    def execute(self, event = None, cursor = None, **kwargs):
         self.editor.unindentBlocks()
 
 class BackspaceUnindentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Backspace
-    def accept(self, event, cursor = None):
+    def accept(self, event = None, cursor = None, **kwargs):
         if cursor.hasSelection(): return False
         lineText = cursor.block().text()
         return lineText[:cursor.columnNumber()].endswith(self.editor.tabKeyBehavior())
         
-    def execute(self, event, cursor = None):
+    def execute(self, event = None, cursor = None, **kwargs):
         counter = cursor.columnNumber() % self.editor.tabWidth or self.editor.tabWidth
         for _ in range(counter):
             cursor.deletePreviousChar()
 
 class BackspaceRemoveBracesHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Backspace
-    def accept(self, event, cursor = None):
+    def accept(self, event = None, cursor = None, **kwargs):
         if cursor.hasSelection(): return False
         self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor, direction = "left")
         return self.cursor1 is not None and self.cursor2 is not None and (self.cursor1.selectionStart() == self.cursor2.selectionEnd() or self.cursor1.selectionEnd() == self.cursor2.selectionStart())
 
-    def execute(self, event, cursor = None):
+    def execute(self, event = None, cursor = None, **kwargs):
         cursor.beginEditBlock()
         self.cursor1.removeSelectedText()
         self.cursor2.removeSelectedText()
@@ -199,24 +192,24 @@ class BackspaceRemoveBracesHelper(CodeEditorKeyHelper):
         
 class DeleteUnindentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Delete
-    def accept(self, event, cursor = None):
+    def accept(self, event = None, cursor = None, **kwargs):
         if cursor.hasSelection(): return False
         lineText = cursor.block().text()
         return lineText[cursor.columnNumber():].startswith(self.editor.tabKeyBehavior())
         
-    def execute(self, event, cursor = None):
+    def execute(self, event = None, cursor = None, **kwargs):
         counter = cursor.columnNumber() % self.editor.tabWidth or self.editor.tabWidth
         for _ in range(counter):
             cursor.deleteChar()
 
 class DeleteRemoveBracesHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Delete
-    def accept(self, event, cursor = None):
+    def accept(self, event = None, cursor = None, **kwargs):
         if cursor.hasSelection(): return False
         self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor, direction = "right")
         return self.cursor1 is not None and self.cursor2 is not None and (self.cursor1.selectionStart() == self.cursor2.selectionEnd() or self.cursor1.selectionEnd() == self.cursor2.selectionStart())
         
-    def execute(self, event, cursor = None):
+    def execute(self, event = None, cursor = None, **kwargs):
         cursor.beginEditBlock()
         self.cursor1.removeSelectedText()
         self.cursor2.removeSelectedText()
@@ -224,7 +217,7 @@ class DeleteRemoveBracesHelper(CodeEditorKeyHelper):
         
 class SmartIndentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Return
-    def execute(self, event, cursor = None):
+    def execute(self, event = None, cursor = None, **kwargs):
         if self.editor.document().blockCount() == 1:
             syntax = self.application.supportManager.findSyntaxByFirstLine(cursor.block().text()[:cursor.columnNumber()])
             if syntax is not None:
@@ -233,12 +226,12 @@ class SmartIndentHelper(CodeEditorKeyHelper):
 
 class PrintEditorStatusHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_D
-    def accept(self, event, cursor = None):
+    def accept(self, event = None, cursor = None, **kwargs):
         control_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
         meta_down = bool(event.modifiers() & QtCore.Qt.MetaModifier)
         return control_down and control_down
         
-    def execute(self, event, cursor = None):
+    def execute(self, event = None, cursor = None, **kwargs):
         #Aca lo que queramos hacer
         userData = self.editor.blockUserData(cursor.block())
         print(userData.tokens())

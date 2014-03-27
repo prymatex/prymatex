@@ -11,8 +11,6 @@ from prymatex.core.components.base import (PrymatexComponentWidget,
 from prymatex import resources
 
 class PrymatexEditor(PrymatexComponentWidget):
-    """Every editor should extend this class in order to guarantee it'll be able to be place in tab.
-    """
     CREATION_COUNTER = 0
     UNTITLED_FILE_TEMPLATE = "Untitled {CREATION_COUNTER}"
     
@@ -164,34 +162,15 @@ class PrymatexEditor(PrymatexComponentWidget):
 # Key Helper
 #======================================================================    
 class PrymatexEditorKeyHelper(PrymatexKeyHelper):
-    def __init__(self, **kwargs):
-        super(PrymatexEditorKeyHelper, self).__init__(**kwargs)
-
     def initialize(self, parent = None, **kwargs):
         super(PrymatexEditorKeyHelper, self).initialize(**kwargs)
         self.editor = parent
-
-    def accept(self, key = Key_Any, **kwargs):
-        return super(PrymatexEditorKeyHelper, self).accept(key, **kwargs)
-
-    def execute(self, **kwargs):
-        super(PrymatexEditorKeyHelper, self).execute(**kwargs)
-
 
 #======================================================================
 # Addon
 #======================================================================    
 class PrymatexEditorAddon(PrymatexAddon):
-    def __init__(self, **kwargs):
-        super(PrymatexEditorAddon, self).__init__(**kwargs)
-
     def initialize(self, parent = None, **kwargs):
         super(PrymatexEditorAddon, self).initialize(**kwargs)
         self.editor = parent
 
-    def finalize(self):
-        pass
-
-PMXBaseEditor = PrymatexEditor
-PMXBaseEditorKeyHelper = PrymatexEditorKeyHelper
-PMXBaseEditorAddon = PrymatexEditorAddon

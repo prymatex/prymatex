@@ -20,5 +20,3 @@ class PrymatexDialog(PrymatexComponentWidget):
     
     def execModal(self):
         pass
-        
-PMXBaseDialog = PrymatexDialog

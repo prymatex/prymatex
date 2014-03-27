@@ -7,7 +7,6 @@ from prymatex.qt.helpers import text2objectname, text2iconname, create_action
 
 from prymatex import resources
 from prymatex.core import exceptions
-from prymatex.core.components import PMXBaseComponent
 from prymatex.models.selectable import selectableModelFactory
 
 from prymatex.utils.i18n import ugettext as _

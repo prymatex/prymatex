@@ -479,14 +479,11 @@ html_footer
 
     # ---------- MainWindow State
     def componentState(self):
-        componentState = {}
+        componentState = super(PrymatexMainWindow, self).componentState()
 
-        # Store open documents
-        openDocumentsOnQuit = []
-        for editor in self.editors():
-            if not editor.isNew():
-                openDocumentsOnQuit.append((editor.filePath, editor.cursorPosition()))
-        componentState["documents"] = openDocumentsOnQuit
+        componentState["editors"] = [ 
+            { "name": editor.__class__.__name__,
+              "self": editor.componentState() } for editor in self.editors() ]
 
         # Store geometry
         componentState["geometry"] = self.saveGeometry().toBase64().data().decode()
@@ -497,10 +494,16 @@ html_footer
         return componentState
 
     def setComponentState(self, componentState):
-        # Restore open documents
-        for doc in componentState["documents"]:
-            self.application.openFile(*doc, mainWindow = self)
+        super(PrymatexMainWindow, self).setComponentState(componentState)
         
+        # Restore open documents
+        for editorState in componentState["editors"]:
+            editor = self.application.createEditorInstance(
+                name = editorState["name"], 
+                parent = self)
+            editor.setComponentState(editorState["self"])
+            self.addEditor(editor)
+
         # Restore geometry
         self.restoreGeometry(QtCore.QByteArray.fromBase64(componentState["geometry"].encode()))
         
