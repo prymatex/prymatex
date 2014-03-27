@@ -42,6 +42,10 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWind
     def windowTitleTemplate(self, titleTemplate):
          self.titleTemplate = Template(titleTemplate)
 
+    @pmxConfigPorperty(default = False)
+    def showTabsIfMoreThanOne(self, value):
+        self.centralWidget().setShowTabs(not value)
+
     @pmxConfigPorperty(default = True)
     def showMenuBar(self, value):
         self.menuBar().setShown(value)

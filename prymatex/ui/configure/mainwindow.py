@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/mainwindow.ui'
 #
-# Created: Thu Feb  6 11:09:58 2014
+# Created: Thu Mar 27 13:10:50 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -41,16 +41,16 @@ class Ui_MainWindow(object):
         self.label_2 = QtGui.QLabel(self.groupBox_2)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.formLayout_2.setWidget(0, QtGui.QFormLayout.LabelRole, self.label_2)
-        self.comboBoxTabTemplate = QtGui.QComboBox(self.groupBox_2)
-        self.comboBoxTabTemplate.setEditable(True)
-        self.comboBoxTabTemplate.setObjectName(_fromUtf8("comboBoxTabTemplate"))
-        self.formLayout_2.setWidget(0, QtGui.QFormLayout.FieldRole, self.comboBoxTabTemplate)
-        self.labelTabVisibility = QtGui.QLabel(self.groupBox_2)
-        self.labelTabVisibility.setObjectName(_fromUtf8("labelTabVisibility"))
-        self.formLayout_2.setWidget(3, QtGui.QFormLayout.LabelRole, self.labelTabVisibility)
-        self.comboBoxTabVisibility = QtGui.QComboBox(self.groupBox_2)
-        self.comboBoxTabVisibility.setObjectName(_fromUtf8("comboBoxTabVisibility"))
-        self.formLayout_2.setWidget(3, QtGui.QFormLayout.FieldRole, self.comboBoxTabVisibility)
+        self.comboBoxTitleTemplate = QtGui.QComboBox(self.groupBox_2)
+        self.comboBoxTitleTemplate.setEditable(True)
+        self.comboBoxTitleTemplate.setObjectName(_fromUtf8("comboBoxTitleTemplate"))
+        self.formLayout_2.setWidget(0, QtGui.QFormLayout.FieldRole, self.comboBoxTitleTemplate)
+        self.checkBoxShowTabsIfMoreThanOne = QtGui.QCheckBox(self.groupBox_2)
+        font = QtGui.QFont()
+        font.setItalic(False)
+        self.checkBoxShowTabsIfMoreThanOne.setFont(font)
+        self.checkBoxShowTabsIfMoreThanOne.setObjectName(_fromUtf8("checkBoxShowTabsIfMoreThanOne"))
+        self.formLayout_2.setWidget(3, QtGui.QFormLayout.SpanningRole, self.checkBoxShowTabsIfMoreThanOne)
         self.verticalLayout.addWidget(self.groupBox_2)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
@@ -62,5 +62,5 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "General", None))
         self.groupBox_2.setTitle(_translate("MainWindow", "Interface", None))
         self.label_2.setText(_translate("MainWindow", "Title template:", None))
-        self.labelTabVisibility.setText(_translate("MainWindow", "Tab visibilty:", None))
+        self.checkBoxShowTabsIfMoreThanOne.setText(_translate("MainWindow", "Show tabs only if there are more than one", None))
 

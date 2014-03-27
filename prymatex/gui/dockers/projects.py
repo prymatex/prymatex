@@ -483,7 +483,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
                                 text = self.customFilters)
         if accepted:
             #Save and set filters
-            self.settings.setValue('customFilters', filters)
+            self._settings.setValue('customFilters', filters)
             self.projectTreeProxyModel.setFilterRegExp(filters)
             
     #================================================

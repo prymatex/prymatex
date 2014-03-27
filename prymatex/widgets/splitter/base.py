@@ -233,6 +233,13 @@ class SplitterWidget(QtGui.QSplitter):
             if tw is not None:
                 tw.tabBar().setFocus()
 
+    def tabWidgetCount(self):
+        count = 0
+        for group in self.allGroups():
+            count += group.count()
+        return count
+
+    # TODO Migrar a TabWidget en lugar de solo Widget para no confundir
     def allWidgets(self):
         widgets = []
         for group in self.allGroups():

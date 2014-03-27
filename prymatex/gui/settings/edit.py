@@ -32,21 +32,27 @@ class EditSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Edit):
         self.radioButtonSpaces.setChecked(self.settingGroup.value("indentUsingSpaces"))
         self.radioButtonTabulators.setChecked(not self.settingGroup.value("indentUsingSpaces"))
 
+    @QtCore.Slot(bool)
     def on_checkBoxRemoveTrailingSpaces_clicked(self, checked):
         self.settingGroup.setValue('removeTrailingSpaces', self.checkBoxRemoveTrailingSpaces.isChecked())
 
+    @QtCore.Slot(bool)
     def on_checkBoxAutoBrackets_clicked(self, checked):
         self.settingGroup.setValue('autoBrackets', self.checkBoxAutoBrackets.isChecked())
 
+    @QtCore.Slot(bool)
     def on_checkBoxSmartHomeSmartEnd_clicked(self, checked):
         self.settingGroup.setValue('smartHomeSmartEnd', self.checkBoxSmartHomeSmartEnd.isChecked())
 
+    @QtCore.Slot(bool)
     def on_checkBoxEnableAutoCompletion_clicked(self, checked):
         self.settingGroup.setValue('enableAutoCompletion', self.checkBoxEnableAutoCompletion.isChecked())
 
+    @QtCore.Slot(bool)
     def on_radioButtonSpaces_clicked(self, checked):
         self.settingGroup.setValue('indentUsingSpaces', checked)
 
+    @QtCore.Slot(bool)
     def on_checkBoxAdjustIndentationOnPaste_clicked(self, checked):
         self.settingGroup.setValue('adjustIndentationOnPaste', self.checkBoxAdjustIndentationOnPaste.isChecked())
 
