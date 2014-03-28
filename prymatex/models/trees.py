@@ -6,7 +6,8 @@ from prymatex.qt import QtCore
 from prymatex.utils.lists import bisect_key
 
 class TreeNodeBase(object):
-    def __init__(self, nodeName, nodeParent = None):
+    def __init__(self, nodeName = "", nodeParent = None, **kwargs):
+        super(TreeNodeBase, self).__init__(**kwargs)
         self.__nodeName = nodeName
         self.__nodeParent = nodeParent
         self.__children = []
