@@ -18,9 +18,9 @@ class MainWindowSettingsWidget(SettingsTreeNode, Ui_MainWindow, QtGui.QWidget):
     
     def loadSettings(self):
         super(MainWindowSettingsWidget, self).loadSettings()
-        print("show:", self.settingGroup.value("showTabsIfMoreThanOne"))
-        self.checkBoxShowTabsIfMoreThanOne.setValue(self.settingGroup.value("showTabsIfMoreThanOne", False))
+        print("show:", self.settings.value("showTabsIfMoreThanOne"))
+        self.checkBoxShowTabsIfMoreThanOne.setValue(self.settings.value("showTabsIfMoreThanOne", False))
         
     @QtCore.Slot(bool)
     def on_checkBoxShowTabsIfMoreThanOne_clicked(self, checked):
-        self.settingGroup.setValue('showTabsIfMoreThanOne', self.checkBoxShowTabsIfMoreThanOne.isChecked())
+        self.settings.setValue('showTabsIfMoreThanOne', self.checkBoxShowTabsIfMoreThanOne.isChecked())

@@ -41,7 +41,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
 
         self.projectTreeModel = ProjectTreeModel(self)
         self.keywordsListModel = CheckableListModel(self)
-        self.propertiesTreeModel = PropertiesTreeModel(self)
+        self.propertiesTreeModel = PropertiesTreeModel(parent = self)
 
         self.projectTreeProxyModel = ProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
@@ -49,7 +49,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         self.projectMenuProxyModel = ProjectMenuProxyModel(self)
         self.projectMenuProxyModel.setSourceModel(self.application.supportManager.bundleProxyModel)
 
-        self.propertiesProxyModel = PropertiesProxyModel(self)
+        self.propertiesProxyModel = PropertiesProxyModel(parent = self)
         self.propertiesProxyModel.setSourceModel(self.propertiesTreeModel)
 
         self.supportManager.bundleAdded.connect(self.on_supportManager_bundleAdded)

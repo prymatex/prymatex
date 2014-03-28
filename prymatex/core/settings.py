@@ -59,11 +59,11 @@ class SettingsGroup(object):
     def setValue(self, name, value):
         item = self.configurableItems.get(name)
         if item:
-            print("hola")
-            #if value == item.getDefault():
-            #    self.settings.pop(name)
-            #else:
-            self.settings[name] = value
+            # If default value then pop from settings
+            if value == item.getDefault():
+                self.settings.pop(name)
+            else:
+                self.settings[name] = value
             if item.tm_name is not None:
                 self.tmsettings.setValue(item.tm_name, value)
             for listener in self.listeners:

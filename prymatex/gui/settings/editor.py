@@ -14,9 +14,8 @@ class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtGui.QWidget):
     TITLE = "Editor"
     ICON = resources.getIcon("accessories-text-editor")
 
-    def __init__(self, settingGroup, profile = None, parent = None):
-        QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "editor", settingGroup, profile)
+    def __init__(self, **kwargs):
+        super(EditorSettingsWidget, self).__init__(nodeName = "editor", **kwargs)
         self.setupUi(self)
 
         self.checks = [(self.checkBoxWrapLines, CodeEditor.WordWrap),
@@ -31,17 +30,17 @@ class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtGui.QWidget):
             check.clicked.connect(self.on_editorFlags_clicked)
 
         # Get addons groups from profile
-        self.bookmarksBarGroup = profile.groupByClass(BookmarkSideBarAddon)
-        self.lineNumberBarGroup = profile.groupByClass(LineNumberSideBarAddon)
-        self.foldingBarGroup = profile.groupByClass(FoldingSideBarAddon)
-        self.selectionBarGroup = profile.groupByClass(SelectionSideBarAddon)
+        self.bookmarksBarGroup = self.profile.groupByClass(BookmarkSideBarAddon)
+        self.lineNumberBarGroup = self.profile.groupByClass(LineNumberSideBarAddon)
+        self.foldingBarGroup = self.profile.groupByClass(FoldingSideBarAddon)
+        self.selectionBarGroup = self.profile.groupByClass(SelectionSideBarAddon)
 	
     def loadSettings(self):
-        SettingsTreeNode.loadSettings(self)
+        super(EditorSettingsWidget, self).loadSettings()
         self.comboBoxDefaultSyntax.setModel(self.application.supportManager.syntaxProxyModel)
         self.comboBoxDefaultSyntax.setModelColumn(0)
 
-        uuid = self.settingGroup.value('defaultSyntax')
+        uuid = self.settings.value('defaultSyntax')
         syntax = self.application.supportManager.getBundleItem(uuid)
         index = self.comboBoxDefaultSyntax.model().findItemIndex(syntax)
         # TODO Ver porque no esta el valor
@@ -49,11 +48,11 @@ class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtGui.QWidget):
             self.comboBoxDefaultSyntax.setCurrentIndex(index)
 
         # Flags
-        flags = int(self.settingGroup.value('defaultFlags'))
+        flags = int(self.settings.value('defaultFlags'))
         for check, flag in self.checks:
             check.setChecked(bool(flags & flag))
 
-        self.spinBoxMarginLineSpace.setValue(self.settingGroup.value("marginLineSize"))
+        self.spinBoxMarginLineSpace.setValue(self.settings.value("marginLineSize"))
 
         self.checkBoxLineNumbers.setChecked(self.lineNumberBarGroup.value("showLineNumbers", False))
         self.checkBoxBookmarks.setChecked(self.bookmarksBarGroup.value("showBookmarks", False))
@@ -74,17 +73,17 @@ class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtGui.QWidget):
 
     @QtCore.Slot(int)
     def on_spinBoxMarginLineSpace_valueChanged(self, value):
-        self.settingGroup.setValue('marginLineSize', value)
+        self.settings.setValue('marginLineSize', value)
 
     @QtCore.Slot(int)
     def on_comboBoxDefaultSyntax_activated(self, index):
         model = self.comboBoxDefaultSyntax.model()
         node = model.mapToSource(model.createIndex(index, 0))
-        self.settingGroup.setValue('defaultSyntax', str(node.internalPointer().uuid).upper())
+        self.settings.setValue('defaultSyntax', str(node.internalPointer().uuid).upper())
 
     def on_editorFlags_clicked(self, checked):
         flags = 0
         for check, flag in self.checks:
             if check.isChecked():
                 flags |= flag
-        self.settingGroup.setValue('defaultFlags', flags)
+        self.settings.setValue('defaultFlags', flags)

@@ -9,17 +9,16 @@ from prymatex.models.settings import SettingsTreeNode
 
 from prymatex.models.plugins import PluginsTableModel
 
-class PluginsSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Plugins):
+class PluginsSettingsWidget(SettingsTreeNode, Ui_Plugins, QtGui.QWidget):
     TITLE = "Plugins"
     ICON = resources.getIcon("preferences-plugin-script")
     NAMESPACE = "general"
     
-    def __init__(self, settingGroup, profile = None, parent = None):
-        QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "plugins", settingGroup, profile)
+    def __init__(self, **kwargs):
+        super(PluginsSettingsWidget, self).__init__(nodeName = "plugins", **kwargs)
         self.setupUi(self)
         
     def loadSettings(self):
-        SettingsTreeNode.loadSettings(self)
-        self.model = PluginsTableModel(self.application.pluginManager)
-        self.listViewPlugins.setModel(self.model)
+        super(PluginsSettingsWidget, self).loadSettings()
+        self.pluginManager = PluginsTableModel(self.application.pluginManager)
+        self.listViewPlugins.setModel(self.pluginManager)

@@ -8,15 +8,14 @@ import os
 from prymatex import resources
 from prymatex.models.settings import SettingsTreeNode
 
-class ShortcutsSettingsWidget(QtGui.QWidget, SettingsTreeNode):
+class ShortcutsSettingsWidget(SettingsTreeNode, QtGui.QWidget):
     """Environment variables"""
     NAMESPACE = "general"
     TITLE = "Shortcuts"
     ICON = resources.getIcon("configure-shortcuts")
 
-    def __init__(self, settingGroup, profile = None, parent = None):
-        QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "shortcuts", settingGroup, profile)
+    def __init__(self, **kwargs):
+        super(ShortcutsSettingsWidget, self).__init__(nodeName = "shortcuts", **kwargs)
         self.setupUi(self)
         
     def setupUi(self, Shortcuts):
@@ -34,7 +33,5 @@ class ShortcutsSettingsWidget(QtGui.QWidget, SettingsTreeNode):
         QtCore.QMetaObject.connectSlotsByName(Shortcuts)
 
     def loadSettings(self):
+        super(ShortcutsSettingsWidget, self).loadSettings()
         self.treeViewShortcuts.setModel(self.application.shortcutsTreeModel)
-
-    def showEvent(self, event):
-        print("show")

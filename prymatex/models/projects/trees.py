@@ -19,8 +19,7 @@ __all__ = [ 'ProjectTreeModel', 'ProjectTreeProxyModel', 'FileSystemProxyModel',
 #=========================================
 class ProjectTreeModel(AbstractTreeModel):  
     def __init__(self, projectManager):
-        #projectManager is a qObject
-        AbstractTreeModel.__init__(self, projectManager)
+        super(ProjectTreeModel, self).__init__(parent = projectManager)
         self.projectManager = projectManager
         self.fileManager = projectManager.fileManager
 

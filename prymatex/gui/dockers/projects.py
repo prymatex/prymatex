@@ -127,7 +127,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
         
         for propertyClass in [ProjectPropertiesWidget, EnvironmentPropertiesWidget, ResoucePropertiesWidget]:
             self.application.extendComponent(propertyClass)
-            self.application.projectManager.registerPropertyWidget(propertyClass(self.propertiesDialog))
+            self.application.projectManager.registerPropertyWidget(propertyClass(parent = self.propertiesDialog))
 
     def setupTreeViewProjects(self):
         self.treeViewProjects.setModel(self.projectTreeProxyModel)

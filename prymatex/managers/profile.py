@@ -48,8 +48,8 @@ class ProfileManager(PrymatexComponent, QtCore.QObject):
             self.createProfile(self.DEFAULT_PROFILE_NAME, default = True)
 
         # Setting models        
-        self.settingsTreeModel = SettingsTreeModel(self)
-        self.sortFilterSettingsProxyModel = SortFilterSettingsProxyModel(self)
+        self.settingsTreeModel = SettingsTreeModel(parent = self)
+        self.sortFilterSettingsProxyModel = SortFilterSettingsProxyModel(parent = self)
         self.sortFilterSettingsProxyModel.setSourceModel(self.settingsTreeModel)
 
     # --------------- Profile

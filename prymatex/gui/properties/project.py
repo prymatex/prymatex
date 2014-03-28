@@ -7,14 +7,13 @@ from prymatex import resources
 from prymatex.models.properties import PropertyTreeNode
 from prymatex.ui.configure.project import Ui_Project
 
-class ProjectPropertiesWidget(QtGui.QWidget, PropertyTreeNode, Ui_Project):
+class ProjectPropertiesWidget(PropertyTreeNode, Ui_Project, QtGui.QWidget):
     """ Project Settings """
     NAMESPACE = ""
     TITLE = "Project"
 
-    def __init__(self, parent = None):
-        QtGui.QWidget.__init__(self, parent)
-        PropertyTreeNode.__init__(self, "project")
+    def __init__(self, **kwargs):
+        super(ProjectPropertiesWidget, self).__init__(nodeName = "project", **kwargs)
         self.setupUi(self)
         self.projectNode = None
         self.setupComboLicences()

@@ -51,8 +51,8 @@ class ProxyConfigureTreeNode(ConfigureTreeNode, QtGui.QWidget):
         self.setObjectName(self.nodeName().title() + " Widget")
 
 class ConfigureTreeModelBase(AbstractNamespaceTreeModel):
-    def __init__(self, parent = None):
-        AbstractNamespaceTreeModel.__init__(self, separator = ".", parent = parent)
+    def __init__(self, **kwargs):
+        super(ConfigureTreeModelBase, self).__init__(separator = ".", **kwargs)
 
     def data(self, index, role):
         node = self.node(index)
@@ -78,9 +78,6 @@ class ConfigureTreeModelBase(AbstractNamespaceTreeModel):
 # Proxies
 #=========================================
 class SortFilterConfigureProxyModel(QtGui.QSortFilterProxyModel):
-    def __init__(self, parent = None):
-        QtGui.QSortFilterProxyModel.__init__(self, parent)
-    
     def filterAcceptsRow(self, sourceRow, sourceParent):
         sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = self.sourceModel().node(sIndex)

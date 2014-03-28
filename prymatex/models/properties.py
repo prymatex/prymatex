@@ -10,9 +10,6 @@ from prymatex.models.configure import SortFilterConfigureProxyModel
 # Properties Tree Node
 #=========================================
 class PropertyTreeNode(ConfigureTreeNode):
-    def __init__(self, name, parent = None):
-        ConfigureTreeNode.__init__(self, name, parent)
-
     def acceptFileSystemItem(self, fileSystemItem):
         return True
         
@@ -34,13 +31,13 @@ class ProxyPropertyTreeNode(ProxyConfigureTreeNode):
 
 class PropertiesTreeModel(ConfigureTreeModelBase):
     def treeNodeFactory(self, nodeName, nodeParent = None):
-        return ProxyPropertyTreeNode(nodeName, nodeParent)
-
+        return ProxyPropertyTreeNode(
+            nodeName = nodeName, nodeParent = nodeParent)
 
 # Proxy for namespaced models
 class PropertiesProxyModel(SortFilterConfigureProxyModel):
-    def __init__(self, parent = None):
-        SortFilterConfigureProxyModel.__init__(self, parent)
+    def __init__(self, **kwargs):
+        super(PropertiesProxyModel, self).__init__(**kwargs)
         self.fileSystemItem = None
     
     def filterAcceptsRow(self, sourceRow, sourceParent):

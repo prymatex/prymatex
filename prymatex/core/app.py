@@ -300,7 +300,9 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self.currentProfile.registerConfigurable(componentClass)
         for settingClass in componentClass.contributeToSettings():
             self.extendComponent(settingClass)
-            settingWidget = settingClass(componentClass._settings, profile = self.currentProfile)
+            settingWidget = settingClass(
+                settings = componentClass._settings,
+                profile = self.currentProfile)
             componentClass._settings.addDialog(settingWidget)
             self.profileManager.registerSettingsWidget(settingWidget)
 

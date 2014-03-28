@@ -10,7 +10,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.models.properties import PropertyTreeNode
 from prymatex.ui.configure.resource import Ui_ResouceWidget
 
-class ResoucePropertiesWidget(QtGui.QWidget, PropertyTreeNode, Ui_ResouceWidget):
+class ResoucePropertiesWidget(PropertyTreeNode, Ui_ResouceWidget, QtGui.QWidget):
     """Resouce"""
     NAMESPACE = ""
     TITLE = "Resouce"
@@ -20,9 +20,8 @@ class ResoucePropertiesWidget(QtGui.QWidget, PropertyTreeNode, Ui_ResouceWidget)
         ( stat.S_IROTH, stat.S_IWOTH, stat.S_IXOTH ),
         )
 
-    def __init__(self, parent = None):
-        QtGui.QWidget.__init__(self, parent)
-        PropertyTreeNode.__init__(self, "resouce")
+    def __init__(self, **kwargs):
+        super(ResoucePropertiesWidget, self).__init__(nodeName = "resouce", **kwargs)
         self.setupUi(self)
         self.fileSystemItem = None
 

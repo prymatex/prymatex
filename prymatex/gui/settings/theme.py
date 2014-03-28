@@ -14,32 +14,31 @@ from prymatex.support.theme import DEFAULT_THEME_SETTINGS, DEFAULT_SCOPE_SELECTO
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.delegates.theme import FontStyleDelegate, ColorDelegate
 
-class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
+class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
     """Changes font and theme"""
     NAMESPACE = "editor"
     TITLE = "Appearance"
     ICON = resources.getIcon("fill-color")
 
-    def __init__(self, settingGroup, profile = None, parent=None):
-        QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "theme", settingGroup, profile)
+    def __init__(self, **kwargs):
+        super(ThemeSettingsWidget, self).__init__(nodeName = "theme", **kwargs)
         self.setupUi(self)
         self.setupTableView()
         self.setupPushButton()
 
     def loadSettings(self):
-        SettingsTreeNode.loadSettings(self)
+        super(ThemeSettingsWidget, self).loadSettings()
         # Set models
         self.comboBoxThemes.setModel(self.application.supportManager.themeListModel)
         self.tableViewStyles.setModel(self.application.supportManager.themeStyleProxyModel)
         
-        currentThemeUUID = self.settingGroup.value('defaultTheme')
+        currentThemeUUID = self.settings.value('defaultTheme')
         currentTheme = self.application.supportManager.getTheme(currentThemeUUID)
         if currentTheme is not None:
             self.updateUi(currentTheme)
         
         # Font
-        font = self.settingGroup.value('defaultFont')
+        font = self.settings.value('defaultFont')
         self.fontComboBoxName.setCurrentFont(QtGui.QFont(*font))
         self.spinBoxFontSize.setValue(font[1])
         #self.checkBoxAntialias.setChecked(test_font_strategy(font, QtGui.QFont.PreferAntialias))
@@ -56,7 +55,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
         if self.checkBoxAntialias.isChecked():
             pass
             #font.setStyleStrategy(font.styleStrategy() | QtGui.QFont.PreferAntialias)
-        self.settingGroup.setValue('defaultFont', 
+        self.settings.setValue('defaultFont', 
             ( self.fontComboBoxName.currentFont().family(), 
               self.spinBoxFontSize.value())
         )
@@ -66,7 +65,7 @@ class ThemeSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_FontTheme):
     def on_comboBoxThemes_activated(self, index):
         theme = self.comboBoxThemes.model().themeForIndex(index)
         self.updateUi(theme)
-        self.settingGroup.setValue('defaultTheme', str(theme.uuid))
+        self.settings.setValue('defaultTheme', str(theme.uuid))
         message = "<b>%s</b> theme set " % theme.name
         if theme.author is not None:
             message += "<i>(by %s)</i>" % theme.author

@@ -14,8 +14,8 @@ from prymatex.models.support.lists import BundleItemExcludedListModel
 # Bundle Tree Model
 #====================================================
 class BundleItemTreeModel(AbstractTreeModel): 
-    def __init__(self, manager, parent = None):
-        AbstractTreeModel.__init__(self, parent)
+    def __init__(self, manager = None, **kwargs):
+        super(BundleItemTreeModel, self).__init__(**kwargs)
         self.manager = manager
         self.manager.bundleChanged.connect(self.on_manager_bundleItemChanged)
         self.manager.bundleItemChanged.connect(self.on_manager_bundleItemChanged)
@@ -85,8 +85,8 @@ class BundleItemTreeModel(AbstractTreeModel):
 class BundleItemMenuTreeModel(AbstractTreeModel):
     menuChanged = QtCore.Signal()
     
-    def __init__(self, manager, parent = None):
-        AbstractTreeModel.__init__(self, parent)
+    def __init__(self, manager, **kwargs):
+        super(BundleItemMenuTreeModel, self).__init__(**kwargs)
         self.excludedModel = BundleItemExcludedListModel(manager, self)
         self.manager = manager
     

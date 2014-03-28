@@ -7,19 +7,18 @@ from prymatex import resources
 from prymatex.ui.configure.general import Ui_General
 from prymatex.models.settings import SettingsTreeNode
 
-class GeneralSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_General):
+class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtGui.QWidget):
     TITLE = "General"
     ICON = resources.getIcon("preferences-other")
 
-    def __init__(self, settingGroup, profile = None, parent = None):
-        QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "general", settingGroup, profile)
+    def __init__(self, **kwargs):
+        super(GeneralSettingsWidget, self).__init__(nodeName = "general", **kwargs)
         self.setupUi(self)
 
     def loadSettings(self):
-        SettingsTreeNode.loadSettings(self)
-        currentStyleName = self.settingGroup.value('qtStyle')
-        currentStyleSheetName = self.settingGroup.value('qtStyleSheet')
+        super(GeneralSettingsWidget, self).loadSettings()
+        currentStyleName = self.settings.value('qtStyle')
+        currentStyleSheetName = self.settings.value('qtStyleSheet')
         for index, styleName in enumerate(QtGui.QStyleFactory.keys()):
             self.comboBoxQtStyle.addItem(styleName, styleName)
             if currentStyleName and styleName == currentStyleName:
@@ -32,22 +31,22 @@ class GeneralSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_General):
 
         checks = ( self.checkBoxAskAboutExternalDeletions, self.checkBoxAskAboutExternalChanges )
         [ check.blockSignals(True) for check in checks ]
-        self.checkBoxAskAboutExternalDeletions.setChecked(self.settingGroup.value('askAboutExternalDeletions'))
-        self.checkBoxAskAboutExternalChanges.setChecked(self.settingGroup.value('askAboutExternalChanges'))
+        self.checkBoxAskAboutExternalDeletions.setChecked(self.settings.value('askAboutExternalDeletions'))
+        self.checkBoxAskAboutExternalChanges.setChecked(self.settings.value('askAboutExternalChanges'))
         [ check.blockSignals(False) for check in checks ]
 
     @QtCore.Slot(int)
     def on_checkBoxAskAboutExternalDeletions_stateChanged(self, state):
-        self.settingGroup.setValue('askAboutExternalDeletions', state == QtCore.Qt.Checked)
+        self.settings.setValue('askAboutExternalDeletions', state == QtCore.Qt.Checked)
         
     @QtCore.Slot(int)
     def on_checkBoxAskAboutExternalChanges_stateChanged(self, state):
-        self.settingGroup.setValue('askAboutExternalChanges', state == QtCore.Qt.Checked)
+        self.settings.setValue('askAboutExternalChanges', state == QtCore.Qt.Checked)
         
     @QtCore.Slot(str)
     def on_comboBoxQtStyle_activated(self, styleName):
-        self.settingGroup.setValue('qtStyle', styleName)
+        self.settings.setValue('qtStyle', styleName)
 
     @QtCore.Slot(str)
     def on_comboBoxQtStyleSheet_activated(self, styleSheetName):
-        self.settingGroup.setValue('qtStyleSheet', styleSheetName)
+        self.settings.setValue('qtStyleSheet', styleSheetName)

@@ -6,13 +6,12 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.models.properties import PropertyTreeNode
 from prymatex.widgets.multidicteditor import MultiDictTableEditorWidget
 
-class EnvironmentPropertiesWidget(MultiDictTableEditorWidget, PropertyTreeNode):
+class EnvironmentPropertiesWidget(PropertyTreeNode, MultiDictTableEditorWidget):
     """Environment variables"""
     NAMESPACE = ""
     TITLE = "Variables"
-    def __init__(self, parent = None):
-        MultiDictTableEditorWidget.__init__(self, parent)
-        PropertyTreeNode.__init__(self, "environment")
+    def __init__(self, **kwargs):
+        super(EnvironmentPropertiesWidget, self).__init__(nodeName = "environment", **kwargs)
         self.project = None
         self.model().dictionaryChanged.connect(self.on_model_dictionaryChanged)
         

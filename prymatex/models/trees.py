@@ -70,8 +70,8 @@ class TreeNodeBase(object):
         return 0
 
 class AbstractTreeModel(QtCore.QAbstractItemModel):  
-    def __init__(self, parent = None):
-        QtCore.QAbstractItemModel.__init__(self, parent)
+    def __init__(self, **kwargs):
+        super(AbstractTreeModel, self).__init__(**kwargs)
         self.rootNode = self.treeNodeFactory("root", None)
 
     def treeNodeFactory(self, nodeName, nodeParent):
@@ -133,8 +133,8 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
         return True
         
 class AbstractNamespaceTreeModel(AbstractTreeModel):  
-    def __init__(self, separator = ".", parent = None):
-        AbstractTreeModel.__init__(self, parent)
+    def __init__(self, separator = ".", **kwargs):
+        super(AbstractNamespaceTreeModel, self).__init__(**kwargs)
         self.separator = separator
         
     def nodeForNamespace(self, namespace, createProxy = False):

@@ -9,21 +9,19 @@ from prymatex.utils import text, encoding
 from prymatex.ui.configure.files import Ui_Files
 from prymatex.models.settings import SettingsTreeNode
 
-class FilesSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Files):
+class FilesSettingsWidget(SettingsTreeNode, Ui_Files, QtGui.QWidget):
     NAMESPACE = "general"
     TITLE = "Files"
     ICON = resources.getIcon("drive-harddisk")
 
-
-    def __init__(self, settingGroup, profile = None, parent = None):
-        QtGui.QWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "files", settingGroup, profile)
+    def __init__(self, **kwargs):
+        super(FilesSettingsWidget, self).__init__(nodeName = "files", **kwargs)
         self.setupUi(self)
         self.loadEncodings()
         self.setupLineEndings()
 
     def loadSettings(self):
-        print(self.settingGroup.value('defaultEncoding'))
+        super(FilesSettingsWidget, self).loadSettings()
 
     def setupLineEndings(self):
         """Populate line endings"""
@@ -33,12 +31,12 @@ class FilesSettingsWidget(QtGui.QWidget, SettingsTreeNode, Ui_Files):
     @QtCore.Slot(int)
     def on_comboBoxLineEnding_activated(self, index):
         data = self.comboBoxLineEnding.itemData(index)
-        self.settingGroup.setValue('defaultEndOfLine', data)
+        self.settings.setValue('defaultEndOfLine', data)
 
     @QtCore.Slot(int)
     def on_comboBoxEncoding_activated(self, index):
         data = self.comboBoxEncoding.itemData(index)
-        self.settingGroup.setValue('defaultEncoding', data)
+        self.settings.setValue('defaultEncoding', data)
 
     def loadEncodings(self):
         """Populate ComboBoxEncoding"""

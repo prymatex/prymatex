@@ -7,12 +7,12 @@ from prymatex.models.configure import ConfigureTreeNode, ProxyConfigureTreeNode,
 from prymatex.models.configure import SortFilterConfigureProxyModel as SortFilterSettingsProxyModel
 
 class SettingsTreeNode(ConfigureTreeNode):
-    def __init__(self, group = None, **kwargs):
+    def __init__(self, settings = None, profile = None, **kwargs):
         super(SettingsTreeNode, self).__init__(**kwargs)
-        self.settingGroup = group
+        self.settings = settings
+        self.profile = profile
 
     def loadSettings(self):
-        print("cargando")
         for node in self.childNodes():
             node.loadSettings()
 

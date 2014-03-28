@@ -7,20 +7,20 @@ from prymatex import resources
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.widgets.multidicteditor import MultiDictTableEditorWidget
 
-class VariablesSettingsWidget(MultiDictTableEditorWidget, SettingsTreeNode):
+class VariablesSettingsWidget(SettingsTreeNode, MultiDictTableEditorWidget):
     """Environment variables"""
     NAMESPACE = "general"
     TITLE = "Variables"
     ICON = resources.getIcon("code-variable")
 
-    def __init__(self, settingGroup, profile = None, parent = None):
-        MultiDictTableEditorWidget.__init__(self, parent)
-        SettingsTreeNode.__init__(self, "environment", settingGroup, profile)
+    def __init__(self, **kwargs):
+        super(VariablesSettingsWidget, self).__init__(nodeName = "environment", **kwargs)
         self.model().dictionaryChanged.connect(self.on_model_dictionaryChanged)
 
     def loadSettings(self):
+        super(VariablesSettingsWidget, self).loadSettings()
         values = [ (value["variable"], value["value"], value["enabled"]) 
-            for value in self.settingGroup.value("shellVariables")]
+            for value in self.settings.value("shellVariables")]
         self.addTuples('user', values, editable = True, selectable=True)
         self.addDictionary('prymatex', self.application.supportManager.environment)
         self.addDictionary('system', os.environ, visible = False)
@@ -30,4 +30,4 @@ class VariablesSettingsWidget(MultiDictTableEditorWidget, SettingsTreeNode):
         data = [{"variable": item[0],
             "value": item[1],
             "enabled": item[2]} for item in data]
-        self.settingGroup.setValue("shellVariables", data)
+        self.settings.setValue("shellVariables", data)
