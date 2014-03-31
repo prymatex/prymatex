@@ -45,9 +45,9 @@ class ConfigureTreeNode(TreeNodeBase):
         self.__icon = icon
 
 # Proxy for namespaced models
-class ProxyConfigureTreeNode(ConfigureTreeNode, QtGui.QWidget):
+class ConfigureTreeProxyNode(ConfigureTreeNode, QtGui.QWidget):
     def __init__(self, **kwarg):
-        super(ProxyConfigureTreeNode, self).__init__(**kwarg)
+        super(ConfigureTreeProxyNode, self).__init__(**kwarg)
         self.setObjectName(self.nodeName().title() + " Widget")
 
 class ConfigureTreeModelBase(AbstractNamespaceTreeModel):
@@ -73,7 +73,6 @@ class ConfigureTreeModelBase(AbstractNamespaceTreeModel):
     def configNodes(self):
         return self.__collect_nodes(self.rootNode)
 
-        
 #=========================================
 # Proxies
 #=========================================

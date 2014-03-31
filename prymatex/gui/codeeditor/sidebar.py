@@ -62,7 +62,7 @@ class SideBarWidgetAddon(PrymatexEditorAddon):
             if blockPosition.y() < ys and (blockPosition.y() + fh) > ys:
                 break
             block = block.next()
-        return self.editor.newCursorAtPosition(block.position())
+        return block
 
 #=======================================
 # SideBar Widgets
@@ -243,7 +243,8 @@ class BookmarkSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         
     def mousePressEvent(self, event):
         block = self.translatePosition(event.pos())
-        self.editor.toggleBookmark(block)
+        cursor = self.editor.newCursorAtPosition(block.position())
+        self.editor.toggleBookmark(cursor)
         self.repaint(self.rect())
             
 class FoldingSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):

@@ -11,15 +11,7 @@ from prymatex.utils.lists import bisect_key
 from prymatex.support import PreferenceSettings
 
 class CodeEditorAddon(PrymatexEditorAddon, QtCore.QObject):
-    def __init__(self, **kwargs):
-        super(CodeEditorAddon, self).__init__(**kwargs)
-
-    def initialize(self, **kwargs):
-        super(CodeEditorAddon, self).initialize(**kwargs)
-
-    # TODO: Esto es parte de PrymatexComponentWidget
-    def contributeToContextMenu(self, **kwargs):
-        return super(CodeEditorAddon, self).contributeToContextMenu(**kwargs)
+    pass
 
 class SmartUnindentAddon(CodeEditorAddon):
     def initialize(self, **kwargs):

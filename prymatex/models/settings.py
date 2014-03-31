@@ -3,7 +3,7 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.models.configure import ConfigureTreeNode, ProxyConfigureTreeNode, ConfigureTreeModelBase
+from prymatex.models.configure import ConfigureTreeNode, ConfigureTreeProxyNode, ConfigureTreeModelBase
 from prymatex.models.configure import SortFilterConfigureProxyModel as SortFilterSettingsProxyModel
 
 class SettingsTreeNode(ConfigureTreeNode):
@@ -13,18 +13,18 @@ class SettingsTreeNode(ConfigureTreeNode):
         self.profile = profile
 
     def loadSettings(self):
-        for node in self.childNodes():
-            node.loadSettings()
+        for settingsNode in self.childNodes():
+            settingsNode.loadSettings()
 
 # Proxy for namespaced models
-class ProxySettingsTreeNode(ProxyConfigureTreeNode):
+class SettingsTreeProxyNode(ConfigureTreeProxyNode):
     def loadSettings(self):
-        for node in self.childNodes():
-            node.loadSettings()
+        for proxyNode in self.childNodes():
+            proxyNode.loadSettings()
 
 class SettingsTreeModel(ConfigureTreeModelBase):
     def treeNodeFactory(self, nodeName, nodeParent = None):
-        return ProxySettingsTreeNode(
+        return SettingsTreeProxyNode(
             nodeName = nodeName, nodeParent = nodeParent)
 
     def loadSettings(self):

@@ -60,7 +60,7 @@ class SettingsGroup(object):
         item = self.configurableItems.get(name)
         if item:
             # If default value then pop from settings
-            if value == item.getDefault():
+            if name in self.settings and value == item.getDefault():
                 self.settings.pop(name)
             else:
                 self.settings[name] = value

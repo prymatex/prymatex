@@ -1101,7 +1101,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor = self.cursorForPosition(point)
         items = ["-"]
         for addon in self.addons():
-            items += component.contributeToContextMenu(cursor)
+            items += addon.contributeToContextMenu(cursor = cursor)
 
         if len(items) > 1:
             actions = extend_menu(menu, items)

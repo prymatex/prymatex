@@ -3,7 +3,7 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.models.configure import ConfigureTreeNode, ProxyConfigureTreeNode, ConfigureTreeModelBase
+from prymatex.models.configure import ConfigureTreeNode, ConfigureTreeProxyNode, ConfigureTreeModelBase
 from prymatex.models.configure import SortFilterConfigureProxyModel
 
 #=========================================
@@ -19,7 +19,7 @@ class PropertyTreeNode(ConfigureTreeNode):
     def saveChanges(self):
         pass
 
-class ProxyPropertyTreeNode(ProxyConfigureTreeNode):
+class PropertyTreeProxyNode(ConfigureTreeProxyNode):
     def acceptFileSystemItem(self, fileSystemItem):
         return True
         
@@ -31,7 +31,7 @@ class ProxyPropertyTreeNode(ProxyConfigureTreeNode):
 
 class PropertiesTreeModel(ConfigureTreeModelBase):
     def treeNodeFactory(self, nodeName, nodeParent = None):
-        return ProxyPropertyTreeNode(
+        return PropertyTreeProxyNode(
             nodeName = nodeName, nodeParent = nodeParent)
 
 # Proxy for namespaced models

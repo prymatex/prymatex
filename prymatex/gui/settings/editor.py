@@ -59,15 +59,19 @@ class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtGui.QWidget):
         self.checkBoxFolding.setChecked(self.foldingBarGroup.value("showFolding", False))
         self.checkBoxSelection.setChecked(self.selectionBarGroup.value("showSelection", False))
 
+    @QtCore.Slot(bool)
     def on_checkBoxLineNumbers_clicked(self, checked):
         self.lineNumberBarGroup.setValue('showLineNumbers', self.checkBoxLineNumbers.isChecked())
 
+    @QtCore.Slot(bool)
     def on_checkBoxBookmarks_clicked(self, checked):
         self.bookmarksBarGroup.setValue('showBookmarks', self.checkBoxBookmarks.isChecked())
 
+    @QtCore.Slot(bool)
     def on_checkBoxFolding_clicked(self, checked):
         self.foldingBarGroup.setValue('showFolding', self.checkBoxFolding.isChecked())
 
+    @QtCore.Slot(bool)
     def on_checkBoxSelection_clicked(self, checked):
         self.selectionBarGroup.setValue('showSelection', self.checkBoxSelection.isChecked())
 

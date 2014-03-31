@@ -14,7 +14,7 @@ from prymatex import resources
 from prymatex.core import exceptions
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core import (PrymatexComponentWidget, PrymatexComponent,
-	PrymatexDock, PrymatexDialog, PrymatexStatusBar)
+    PrymatexDock, PrymatexDialog, PrymatexStatusBar)
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import html

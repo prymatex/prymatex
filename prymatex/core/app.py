@@ -156,7 +156,6 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             splash.show()
             self.showMessage = splash.showMessage
         try:
-
             # Build Managers
             self.pluginManager = self.buildPluginManager()  # WARN: FIST Plugin Manager
             self.storageManager = self.buildStorageManager()  # Persistence system Manager
@@ -166,14 +165,20 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             self.schedulerManager =  self.buildSchedulerManager()
             self.serverManager = self.buildServerManager()
 
-            # Load managers
-            self.projectManager.loadProjects(self.showMessage)
+            # Load Bundles
             self.supportManager.loadSupport(self.showMessage)
-            self.profileManager.loadSettings(self.showMessage)
-
-            # Create the Main Window instance
+            
+            # Load Projects
+            self.projectManager.loadProjects(self.showMessage)
+            
+            # Create Main Window
             self.mainWindow = self.buildMainWindow()
+            
+            # Change messages handler
             self.showMessage = self.mainWindow.showMessage
+
+            # Load settings
+            self.profileManager.loadSettings(self.showMessage)
 
             if not self.options.no_splash:
                 splash.finish(self.mainWindow)
@@ -181,7 +186,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             self.mainWindow.show()
             self.logger.info("Application startup")
         except KeyboardInterrupt:
-            self.logger.critical("\nQuit signal catched during application startup. Quiting...")
+            self.logger.critical("Quit signal catched during application startup. Quiting...")
             self.quit()
 
     def unloadGraphicalUserInterface(self):

@@ -28,6 +28,7 @@ class PrymatexComponent(object):
     def contributeToMainMenu(cls):
         if hasattr(super(PrymatexComponent, cls), 'contributeToMainMenu'):
             return super(PrymatexComponent, cls).contributeToMainMenu()
+        return {}
 
     def contributeToShortcuts(self):
         return []
@@ -54,7 +55,6 @@ class PrymatexComponent(object):
             if componentName in componentState["components"]:
                 component.setComponentState(componentState["components"][componentName])
 
-
 Key_Any = 0
 class PrymatexKeyHelper(PrymatexComponent):
     KEY = Key_Any
@@ -65,50 +65,24 @@ class PrymatexKeyHelper(PrymatexComponent):
         pass
 
 class PrymatexAddon(PrymatexComponent):
-    def contributeToContextMenu(self):
-        pass
+    def contributeToContextMenu(self, **kwargs):
+        if hasattr(super(PrymatexAddon, self), 'contributeToContextMenu'):
+            return super(PrymatexAddon, self).contributeToContextMenu(**kwargs)
+        return []
 
 class PrymatexComponentWidget(PrymatexComponent):
     def addons(self):
         return filter(lambda ch: isinstance(ch, PrymatexAddon), self.children())
-    
+
     def keyHelpers(self):
         return filter(lambda ch: isinstance(ch, PrymatexKeyHelper), self.children())
-                
-    def addComponent(self, component):
-        super(PrymatexComponentWidget, self).addComponent(component)
-        if isinstance(component, PrymatexKeyHelper):
-            self.addKeyHelper(component)
-    
-    @property
-    def keyHelpers(self):
-        try:
-            return self._keyHelpers
-        except AttributeError:
-            self._keyHelpers = {}
-            return self._keyHelpers
-            
-    def addKeyHelper(self, helper):
-        try:
-            self.keyHelpers.setdefault(helper.KEY, []).append(helper)
-        except:
-            self.keyHelpers = { helper.KEY: [ helper ]}
 
     def keyHelpersByClass(self, klass):
-        return [keyHelper for keyHelper in self.keyHelpers[klass.KEY] if isinstance(keyHelper, klass)]
-        
-    def findHelpers(self, key):
-        helpers = []
-        if Key_Any in self.keyHelpers:
-            helpers += self.keyHelpers[Key_Any]
-        helpers += self.keyHelpers.get(key, [])
-        return helpers
+        return filter(lambda keyHelper: isinstance(keyHelper, klass), self.keyHelpers())
 
     def runKeyHelper(self, key = Key_Any, **kwargs):
-        runHelper = False
-        for helper in self.findHelpers(key):
-            runHelper = helper.accept(**kwargs)
-            if runHelper:
-                helper.execute(**kwargs)
-                break
-        return runHelper
+        for keyHelper in self.keyHelpers():
+            if keyHelper.KEY == key and keyHelper.accept(**kwargs):
+                keyHelper.execute(**kwargs)
+                return True
+        return False
