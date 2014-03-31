@@ -83,7 +83,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWind
 
     def setupUi(self):
         self.setObjectName("MainWindow")
-        self.setWindowIcon(resources.getIcon("prymatex"))
+        self.setWindowIcon(resources.get_icon("prymatex"))
 
         self.setupDockToolBars()
         

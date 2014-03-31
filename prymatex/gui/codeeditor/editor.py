@@ -496,7 +496,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cr = self.contentsRect()
         self.leftBar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.leftBar.width(), cr.height()))
         rightBarPosition = cr.right() - self.rightBar.width()
-        if self.application.platform == "win32" and self.verticalScrollBar().isVisible():
+        if self.verticalScrollBar().isVisible():
             rightBarPosition -= self.verticalScrollBar().width()
         self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
 
@@ -644,8 +644,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 positionY = blockGeometry.top()
                 if self.isFolded(block):
                     painter.drawPixmap(characterWidth * block.length() + offset.x() + 10,
-                        positionY + characterHeight - resources.getImage("foldingellipsis").height(),
-                        resources.getImage("foldingellipsis"))
+                        positionY + characterHeight - resources.get_image("foldingellipsis").height(),
+                        resources.get_image("foldingellipsis"))
                 if self.showIndentGuide:
                     blockPattern = block
                     while blockPattern.isValid() and self.blockUserData(blockPattern).blank():
@@ -1066,7 +1066,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         for index, item in enumerate(menuItems, 1):
             if isinstance(item, dict):
                 title = "%s 	&%d" % (item["title"], index)
-                icon = resources.getIcon(item["image"]) if "image" in item else QtGui.QIcon()
+                icon = resources.get_icon(item["image"]) if "image" in item else QtGui.QIcon()
             elif isinstance(item,  BundleItemTreeNode):
                 title = "%s 	&%d" % (item.buildMenuTextEntry(False), index)
                 icon = item.icon()

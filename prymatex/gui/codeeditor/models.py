@@ -52,7 +52,7 @@ class BookmarkListModel(QtCore.QAbstractListModel):
             return "L%d, C%d - %s" % (block.blockNumber() + 1,
                 cursor.columnNumber(), cursor.hasSelection() and cursor.selectedText() or block.text().strip())
         elif role == QtCore.Qt.DecorationRole:
-            return resources.getIcon('bookmarks')
+            return resources.get_icon('bookmarks')
 
     # ----------- Public api
     def bookmark(self, row):
@@ -96,7 +96,7 @@ def bookmarkSelectableModelFactory(editor):
     def bookmarkData():
         return [dict(bookmark=editor.bookmarkListModel.bookmark(row),
                 display=editor.bookmarkListModel.data(editor.bookmarkListModel.index(row)),
-                image=resources.getIcon('bookmarks')) 
+                image=resources.get_icon('bookmarks')) 
             for row in range(len(editor.bookmarkListModel.bookmarks))]
 
     return selectableModelFactory(editor, bookmarkData, 
@@ -107,12 +107,12 @@ def bookmarkSelectableModelFactory(editor):
 #=========================================================
 class SymbolListModel(QtCore.QAbstractListModel): 
     ICONS = {
-        "class": resources.getIcon("symbol-class"),
-        "block": resources.getIcon("symbol-block"),
-        "context": resources.getIcon("symbol-context"),
-        "function": resources.getIcon("symbol-function"),
-        "typedef": resources.getIcon("symbol-typedef"),
-        "variable": resources.getIcon("symbol-variable")
+        "class": resources.get_icon("symbol-class"),
+        "block": resources.get_icon("symbol-block"),
+        "context": resources.get_icon("symbol-context"),
+        "function": resources.get_icon("symbol-function"),
+        "typedef": resources.get_icon("symbol-typedef"),
+        "variable": resources.get_icon("symbol-variable")
     }
     def __init__(self, editor): 
         QtCore.QAbstractListModel.__init__(self, editor)
@@ -184,7 +184,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
                 return userData.symbol
             elif role == QtCore.Qt.DecorationRole:
                 #userData.rootGroup(pos)
-                return resources.getIcon("scope-root-entity")
+                return resources.get_icon("scope-root-entity")
 
 
     # ------------- Public api
@@ -201,7 +201,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
 def symbolSelectableModelFactory(editor):
     # Data function    
     def symbolData():
-        return [dict(data = block, display = editor.blockUserData(block).symbol, image = resources.getIcon("symbol-class")) for block in editor.symbolListModel.blocks]
+        return [dict(data = block, display = editor.blockUserData(block).symbol, image = resources.get_icon("symbol-class")) for block in editor.symbolListModel.blocks]
 
     return selectableModelFactory(editor, symbolData, 
         filterFunction = lambda text, item: item["display"].find(text) != -1)
@@ -221,7 +221,7 @@ def bundleItemSelectableModelFactory(editor):
                     "trigger": bundleItem.trigger()
                 },
                 match=bundleItem.name.upper(),
-                image=resources.getIcon("bundle-item-%s" % bundleItem.type())) for bundleItem in editor.application.supportManager.getActionItemsByScope(leftScope, rightScope)]
+                image=resources.get_icon("bundle-item-%s" % bundleItem.type())) for bundleItem in editor.application.supportManager.getActionItemsByScope(leftScope, rightScope)]
 
     # Filter function        
     def bundleItemFilter(pattern, item):

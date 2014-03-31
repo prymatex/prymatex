@@ -116,7 +116,7 @@ class WordsCompletionModel(CompletionBaseModel):
         if role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
             return suggestion
         elif role == QtCore.Qt.DecorationRole:
-            return resources.getIcon('insert-text')
+            return resources.get_icon('insert-text')
 
     def insertCompletion(self, index):
         suggestion = self.suggestions[index.row()]
@@ -189,7 +189,7 @@ class SuggestionsCompletionModel(CompletionBaseModel):
                 return suggestion['title']
         elif role == QtCore.Qt.DecorationRole:
             if index.column() == 0 and 'image' in suggestion:
-                return resources.getIcon(suggestion['image'])
+                return resources.get_icon(suggestion['image'])
         elif role == QtCore.Qt.ToolTipRole:
             if 'tool_tip' in suggestion:
                 if 'tool_tip_format' in suggestion:

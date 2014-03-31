@@ -12,7 +12,7 @@ from prymatex.gui.codeeditor.sidebar import (LineNumberSideBarAddon, BookmarkSid
 
 class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtGui.QWidget):
     TITLE = "Editor"
-    ICON = resources.getIcon("accessories-text-editor")
+    ICON = resources.get_icon("accessories-text-editor")
 
     def __init__(self, **kwargs):
         super(EditorSettingsWidget, self).__init__(nodeName = "editor", **kwargs)

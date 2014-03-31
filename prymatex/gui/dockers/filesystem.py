@@ -20,7 +20,7 @@ from prymatex.models.filesystem import SortFilterFileSystemProxyModel
 
 class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDockWidget):
     SEQUENCE = resources.get_sequence("Docks", "FileSystemDock", "Alt+Y")
-    ICON = resources.getIcon("system-file-manager")
+    ICON = resources.get_icon("system-file-manager")
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
 
     # ----------- Settings

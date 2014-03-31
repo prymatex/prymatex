@@ -13,7 +13,7 @@ from prymatex.gui.dockers.browser import BrowserDock
 class NetworkSettingsWidget(SettingsTreeNode, Ui_Browser, QtGui.QWidget):
     """Setup browser"""
     TITLE = "Browser"
-    ICON = resources.getIcon("internet-web-browser")
+    ICON = resources.get_icon("internet-web-browser")
 
     def __init__(self, **kwargs):
         super(NetworkSettingsWidget, self).__init__(nodeName = "browser", **kwargs)

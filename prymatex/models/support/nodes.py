@@ -46,7 +46,7 @@ class BundleItemTreeNode(TreeNodeBase):
             return keyequivalent2keysequence(self.__bundleItem.keyEquivalent)
     
     def icon(self):
-        return resources.getIcon("bundle-item-%s" % self.type())
+        return resources.get_icon("bundle-item-%s" % self.type())
     
     def trigger(self):
         trigger = []

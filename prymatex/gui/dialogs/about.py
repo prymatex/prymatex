@@ -32,7 +32,7 @@ class AboutDialog(PrymatexDialog, Ui_AboutDialog, QtGui.QDialog):
     def __init__(self, **kwargs):
         super(AboutDialog, self).__init__(**kwargs)
         self.setupUi(self)
-        self.labelLogo.setPixmap(resources.getImage("logo"))
+        self.labelLogo.setPixmap(resources.get_image("logo"))
         self.textInformation.setReadOnly(True)
         self.fillVersionInfo()
         

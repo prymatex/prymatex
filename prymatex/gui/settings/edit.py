@@ -10,7 +10,7 @@ from prymatex.models.settings import SettingsTreeNode
 class EditSettingsWidget(SettingsTreeNode, Ui_Edit, QtGui.QWidget):
     NAMESPACE = "editor"
     TITLE = "Edit"
-    ICON = resources.getIcon("document-edit")
+    ICON = resources.get_icon("document-edit")
 
     def __init__(self, **kwargs):
         super(EditSettingsWidget, self).__init__(nodeName = "edit", **kwargs)

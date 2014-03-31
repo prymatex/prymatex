@@ -27,15 +27,15 @@ class ResourceProvider():
     def __init__(self, resources):
         self.resources = resources
 
-    def getImage(self, index, size = None, default = None):
+    def get_image(self, index, size = None, default = None):
         if index in self.resources:
             return QtGui.QPixmap(self.resources[index])
-        return resources.getImage(index, size, default)
+        return resources.get_image(index, size, default)
         
-    def getIcon(self, index, size = None, default = None):
+    def get_icon(self, index, size = None, default = None):
         if index in self.resources:
             return QtGui.QIcon(self.resources[index])
-        return resources.getIcon(index, size, default)
+        return resources.get_icon(index, size, default)
 
 class PluginDescriptor(object):
     name = ""

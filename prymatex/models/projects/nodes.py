@@ -41,7 +41,7 @@ class FileSystemTreeNode(TreeNodeBase):
         return os.path.join(self.nodeParent().relpath(), self.nodeName())
     
     def icon(self):
-        return resources.getIcon(self.path())
+        return resources.get_icon(self.path())
     
     def type(self):
         if self.isproject:
@@ -155,7 +155,7 @@ class ProjectTreeNode(FileSystemTreeNode):
         
     def icon(self):
         if self.manager.isOpen(self):
-            return resources.getIcon("project-development")
+            return resources.get_icon("project-development")
 
     # --------------- Bundle Menu
     def addBundleMenu(self, bundle):

@@ -98,7 +98,7 @@ class NoneEditorWidget(BundleItemEditorBaseWidget):
         self.label = QtGui.QLabel(widget)
         self.label.setEnabled(False)
         self.label.setText("")
-        self.label.setPixmap(resources.getImage("prymo"))
+        self.label.setPixmap(resources.get_image("prymo"))
         self.label.setScaledContents(True)
         self.label.setObjectName("labelPrymo")
         self.gridLayout.addWidget(self.label, 1, 1, 1, 1)

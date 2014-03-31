@@ -11,7 +11,7 @@ def AddonsSettingsWidgetFactory(namespace):
     class AddonsSettingsWidget(SettingsTreeNode, Ui_Addons, QtGui.QWidget):
         TITLE = "Addons"
         NAMESPACE = namespace
-        ICON = resources.getIcon("preferences-plugin")
+        ICON = resources.get_icon("preferences-plugin")
         
         def __init__(self, **kwargs):
             super(AddonsSettingsWidget, self).__init__(nodeName = "addons", **kwargs)

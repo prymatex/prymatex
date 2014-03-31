@@ -11,7 +11,7 @@ from prymatex.models.settings import SettingsTreeNode
 from prymatex.utils.i18n import ugettext as _
 
 class SupportSettingsWidget(SettingsTreeNode, Ui_Support, QtGui.QWidget):
-    ICON = resources.getIcon('gear')
+    ICON = resources.get_icon('gear')
     TITLE = "Support"
     def __init__(self, **kwargs):
         super(SupportSettingsWidget, self).__init__(nodeName = "support", **kwargs)

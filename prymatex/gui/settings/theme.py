@@ -18,7 +18,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
     """Changes font and theme"""
     NAMESPACE = "editor"
     TITLE = "Appearance"
-    ICON = resources.getIcon("fill-color")
+    ICON = resources.get_icon("fill-color")
 
     def __init__(self, **kwargs):
         super(ThemeSettingsWidget, self).__init__(nodeName = "theme", **kwargs)

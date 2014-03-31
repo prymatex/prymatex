@@ -144,7 +144,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self.showMessage = self.logger.info
         if not self.options.no_splash:
             from prymatex.widgets.splash import SplashScreen
-            splash_image = resources.getImage('newsplash')
+            splash_image = resources.get_image('newsplash')
             splash = SplashScreen(splash_image)
             splash.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.SplashScreen)
 

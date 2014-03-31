@@ -25,7 +25,7 @@ from prymatex.models.projects.lists import SelectableProjectFileProxyModel
 
 class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWidget):
     SEQUENCE = resources.get_sequence("Docks", "ProjectsDock", "Alt+X")
-    ICON = resources.getIcon("project-development")
+    ICON = resources.get_icon("project-development")
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
 
     #=======================================================================

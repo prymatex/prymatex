@@ -27,7 +27,7 @@ class ProfilesListModel(QtCore.QAbstractListModel):
         elif role == QtCore.Qt.ToolTipRole:
             return profile.PMX_PROFILE_PATH
         elif role == QtCore.Qt.DecorationRole:
-            return resources.getIcon("user-identity")
+            return resources.get_icon("user-identity")
 
     def setData(self, index, data, role):
         profile = self.__profiles[index.row()]

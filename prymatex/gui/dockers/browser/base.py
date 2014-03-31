@@ -22,7 +22,7 @@ from .network import setGlobalApplicationProxy
 # Browser Dock
 #=======================================================================
 class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
-    ICON = resources.getIcon("internet-web-browser")
+    ICON = resources.get_icon("internet-web-browser")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
     # ------------------ Web Settings

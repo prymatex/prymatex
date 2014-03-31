@@ -11,7 +11,7 @@ from prymatex.models.settings import SettingsTreeNode
 class ProjectSettingsWidget(SettingsTreeNode, Ui_Projects, QtGui.QWidget):
     NAMESPACE = "general"
     TITLE = "Projects"
-    ICON = resources.getIcon("project-development")
+    ICON = resources.get_icon("project-development")
     
     def __init__(self, **kwargs):
         super(ProjectSettingsWidget, self).__init__(nodeName = "projects", **kwargs)

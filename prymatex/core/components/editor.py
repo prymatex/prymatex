@@ -69,11 +69,11 @@ class PrymatexEditor(PrymatexComponentWidget):
     def tabIcon(self):
         baseIcon = QtGui.QIcon()
         if self.filePath is not None:
-            baseIcon = resources.getIcon(self.filePath)
+            baseIcon = resources.get_icon(self.filePath)
         if self.isModified():
-            baseIcon = resources.getIcon("document-save")
+            baseIcon = resources.get_icon("document-save")
         if self.externalAction is not None:
-            importantIcon = resources.getIcon("emblem-important")
+            importantIcon = resources.get_icon("emblem-important")
             baseIcon = combine_icons(baseIcon, importantIcon, 0.8)
         return baseIcon
     

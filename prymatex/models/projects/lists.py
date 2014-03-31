@@ -47,7 +47,7 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
         if role == QtCore.Qt.DisplayRole:
             return "<table><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(path)s</small></td></tr></table>" % item
         elif role == QtCore.Qt.DecorationRole:
-            return resources.getIcon(item["path"])
+            return resources.get_icon(item["path"])
         elif role == QtCore.Qt.ToolTipRole:
             return None
 

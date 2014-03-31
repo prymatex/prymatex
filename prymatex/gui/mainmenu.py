@@ -271,11 +271,11 @@ class MainMenuMixin(object):
                 "text": "Layout",
                 "items": [{
                     "text": "Split vertically",
-                    "icon": resources.getIcon("view-split-left-right"),
+                    "icon": resources.get_icon("view-split-left-right"),
                     "triggered": lambda mw: mw.centralWidget().splitVertically()
                 }, {
                     "text": "Split horizontally",
-                    "icon": resources.getIcon("view-split-top-bottom"),
+                    "icon": resources.get_icon("view-split-top-bottom"),
                     "triggered": lambda mw: mw.centralWidget().splitHorizontally()
                 }, "-", {
                     "text": "Single",

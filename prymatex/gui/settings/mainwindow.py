@@ -10,7 +10,7 @@ from prymatex.models.settings import SettingsTreeNode
 class MainWindowSettingsWidget(SettingsTreeNode, Ui_MainWindow, QtGui.QWidget):
     TITLE = "Main Window"
     NAMESPACE = "general"
-    ICON = resources.getIcon("preferences-system-windows-actions")
+    ICON = resources.get_icon("preferences-system-windows-actions")
     
     def __init__(self, **kwargs):
         super(MainWindowSettingsWidget, self).__init__(nodeName = "mainwindow", **kwargs)

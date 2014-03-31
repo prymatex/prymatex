@@ -11,7 +11,7 @@ class VariablesSettingsWidget(SettingsTreeNode, MultiDictTableEditorWidget):
     """Environment variables"""
     NAMESPACE = "general"
     TITLE = "Variables"
-    ICON = resources.getIcon("code-variable")
+    ICON = resources.get_icon("code-variable")
 
     def __init__(self, **kwargs):
         super(VariablesSettingsWidget, self).__init__(nodeName = "environment", **kwargs)

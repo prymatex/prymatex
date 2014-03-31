@@ -12,7 +12,7 @@ from prymatex.models.settings import SettingsTreeNode
 class FilesSettingsWidget(SettingsTreeNode, Ui_Files, QtGui.QWidget):
     NAMESPACE = "general"
     TITLE = "Files"
-    ICON = resources.getIcon("drive-harddisk")
+    ICON = resources.get_icon("drive-harddisk")
 
     def __init__(self, **kwargs):
         super(FilesSettingsWidget, self).__init__(nodeName = "files", **kwargs)

@@ -111,14 +111,14 @@ class DragableTabBar(QtGui.QTabBar):
                 "text": "Tab Menu",
                 "items": [
                     {   "text": "Close",
-                        "icon": resources.getIcon("tab-close"),
+                        "icon": resources.get_icon("tab-close"),
                         "triggered": partial(tabWidget._close_widget, widget) 
                     },
                     {   "text": "Close all",
                         "triggered": tabSplitter.closeAll
                     },
                     {   "text": "Close other",
-                        "icon": resources.getIcon("tab-close-other"),
+                        "icon": resources.get_icon("tab-close-other"),
                         "triggered": partial(tabSplitter.closeAllExceptWidget, widget)
                     }
                 ]
@@ -128,11 +128,11 @@ class DragableTabBar(QtGui.QTabBar):
                 tabMenu["items"].extend([
                     "-", {
                         "text": "Split vertically",
-                        "icon": resources.getIcon("view-split-left-right"),
+                        "icon": resources.get_icon("view-split-left-right"),
                         "triggered": partial(tabSplitter.splitVertically, widget)   
                     }, {
                         "text": "Split horizontally",
-                        "icon": resources.getIcon("view-split-top-bottom"),
+                        "icon": resources.get_icon("view-split-top-bottom"),
                         "triggered": partial(tabSplitter.splitHorizontally, widget)
                     }
                 ])

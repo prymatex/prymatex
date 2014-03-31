@@ -12,7 +12,7 @@ from prymatex.widgets.pmxterm.schemes import ColorScheme
 
 class TerminalSettingsWidget(SettingsTreeNode, Ui_Terminal, QtGui.QWidget):
     TITLE = "Terminal"
-    ICON = resources.getIcon("utilities-terminal")
+    ICON = resources.get_icon("utilities-terminal")
 
     def __init__(self, **kwargs):
         super(TerminalSettingsWidget, self).__init__(nodeName = "terminal", **kwargs)

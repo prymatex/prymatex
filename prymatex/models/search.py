@@ -28,7 +28,7 @@ class GroupTreeNode(TreeNodeBase):
         return os.path.join(self.directory)
     
     def icon(self):
-        return resources.getIcon(self.path())
+        return resources.get_icon(self.path())
 
 class FileFoundTreeNode(TreeNodeBase):
     def __init__(self, name, path, parent = None):
@@ -40,7 +40,7 @@ class FileFoundTreeNode(TreeNodeBase):
         return os.path.join(self.__path)
     
     def icon(self):
-        return resources.getIcon(self.path())
+        return resources.get_icon(self.path())
 
 class DirectoryTreeNode(TreeNodeBase):
     def __init__(self, name, parent = None):
@@ -51,7 +51,7 @@ class DirectoryTreeNode(TreeNodeBase):
         return os.path.join(self.nodeParent().path(), self.nodeName())
     
     def icon(self):
-        return resources.getIcon(self.path())
+        return resources.get_icon(self.path())
 
 class LineTreeNode(TreeNodeBase):
     def __init__(self, lineNumber, lineContent, parent = None):
@@ -64,7 +64,7 @@ class LineTreeNode(TreeNodeBase):
         return self.nodeParent().path()
     
     def icon(self):
-        return resources.getIcon(self.path())
+        return resources.get_icon(self.path())
 
 class SearchTreeModel(AbstractNamespaceTreeModel):
     def __init__(self, parent = None):

@@ -12,9 +12,9 @@ class ExternalProcessTableModel(QtCore.QAbstractTableModel):
     STATES_STRING = {0: "NotRunning",
                      1: "Starting",
                      2: "Running" }
-    STATES_ICONS = {0: resources.getIcon("porcess-not-running"),
-                    1: resources.getIcon("porcess-starting"),
-                    2: resources.getIcon("porcess-running") }
+    STATES_ICONS = {0: resources.get_icon("porcess-not-running"),
+                    1: resources.get_icon("porcess-starting"),
+                    2: resources.get_icon("porcess-running") }
                     
     def __init__(self, manager, parent = None): 
         QtCore.QAbstractTableModel.__init__(self, parent)

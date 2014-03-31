@@ -9,7 +9,7 @@ from prymatex.models.settings import SettingsTreeNode
 
 class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtGui.QWidget):
     TITLE = "General"
-    ICON = resources.getIcon("preferences-other")
+    ICON = resources.get_icon("preferences-other")
 
     def __init__(self, **kwargs):
         super(GeneralSettingsWidget, self).__init__(nodeName = "general", **kwargs)

@@ -15,7 +15,7 @@ from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 
 class ExternalProcessDock(PrymatexDock, QtGui.QDockWidget):
-    ICON = resources.getIcon("application-x-executable-script")
+    ICON = resources.get_icon("application-x-executable-script")
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def __init__(self, **kwargs):

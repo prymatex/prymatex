@@ -103,7 +103,7 @@ class TabbedTerminal(QtGui.QTabWidget):
             self.widget(index).setFont(font)
 
 class TerminalDock(PrymatexDock, QtGui.QDockWidget):
-    ICON = resources.getIcon("utilities-terminal")
+    ICON = resources.get_icon("utilities-terminal")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
     # ------------------ Settings

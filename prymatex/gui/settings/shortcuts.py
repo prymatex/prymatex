@@ -12,7 +12,7 @@ class ShortcutsSettingsWidget(SettingsTreeNode, QtGui.QWidget):
     """Environment variables"""
     NAMESPACE = "general"
     TITLE = "Shortcuts"
-    ICON = resources.getIcon("configure-shortcuts")
+    ICON = resources.get_icon("configure-shortcuts")
 
     def __init__(self, **kwargs):
         super(ShortcutsSettingsWidget, self).__init__(nodeName = "shortcuts", **kwargs)
