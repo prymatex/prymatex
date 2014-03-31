@@ -65,12 +65,16 @@ class PrymatexKeyHelper(PrymatexComponent):
         pass
 
 class PrymatexAddon(PrymatexComponent):
-    pass
+    def contributeToContextMenu(self):
+        pass
 
 class PrymatexComponentWidget(PrymatexComponent):
-    def __init__(self, **kwargs):
-        super(PrymatexComponentWidget, self).__init__(**kwargs)
-
+    def addons(self):
+        return filter(lambda ch: isinstance(ch, PrymatexAddon), self.children())
+    
+    def keyHelpers(self):
+        return filter(lambda ch: isinstance(ch, PrymatexKeyHelper), self.children())
+                
     def addComponent(self, component):
         super(PrymatexComponentWidget, self).addComponent(component)
         if isinstance(component, PrymatexKeyHelper):
