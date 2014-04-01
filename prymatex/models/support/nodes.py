@@ -11,6 +11,9 @@ from prymatex.models.trees import TreeNodeBase
 
 from prymatex.utils import six
 
+from prymatex.support.bundleitem.theme import DEFAULT_THEME_SETTINGS
+from prymatex.support import scope
+
 #====================================================
 # Bundle Tree Node
 #====================================================
@@ -22,6 +25,8 @@ class BundleItemTreeNode(TreeNodeBase):
     def __init__(self, bundleItem, nodeParent = None):
         TreeNodeBase.__init__(self, bundleItem.name, nodeParent)
         self.__bundleItem = bundleItem
+        self.__settings = None             # Settings cache
+        self.STYLES_CACHE = {}
 
     # ----------- Bundle Item attrs assessors -----------
     def __getattr__(self, name):
@@ -97,13 +102,40 @@ class BundleItemTreeNode(TreeNodeBase):
             dataHash['keyEquivalent'] = keysequence2keyequivalent(int(dataHash['keySequence']))
         else:
             dataHash['keyEquivalent'] = None
+        if 'settings' in dataHash:
+            self.__settings = None  # Clean settings cache
+            fontStyle = dataHash['settings'].pop('fontStyle', None)
+            settings = dict([(key_value2[0], color2rgba(key_value2[1])) for key_value2 in dataHash['settings'].items()])
+            if fontStyle is not None:
+                settings['fontStyle'] = " ".join(fontStyle)
+            dataHash['settings'] = settings
         self.__bundleItem.update(dataHash)
-    
+
     def dataHash(self):
         dataHash = self.dump(allKeys = True)
         dataHash["keySequence"] = self.keySequence()
         return dataHash
-    
+
+    # ----------- Theme decoration -----------
+    def clearCache(self):
+        self.STYLES_CACHE = {}
+
+    def getStyle(self, scopePath = scope.none):
+        if scopePath in self.STYLES_CACHE:
+            return self.STYLES_CACHE[scopePath]
+        base = dict([(key_value[0], rgba2color(key_value[1])) for key_value in DEFAULT_THEME_SETTINGS.items() if key_value[1].startswith('#')])
+
+        styles = []
+        for style in self.__bundleItem.settings:
+            rank = []
+            if style.scopeSelector.does_match(scopePath, rank):
+                styles.append((rank.pop(), style))
+        styles.sort(key = lambda t: t[0])
+        for style in styles:
+            base.update(style[1].settings())
+        self.STYLES_CACHE[scopePath] = base
+        return base
+
     def isEditorNeeded(self):
         return self.isTextInputNeeded() or self.producingOutputText()
 
@@ -135,63 +167,6 @@ class BundleItemMenuTreeNode(TreeNodeBase):
         self.nodeType = nodeType
 
 #====================================================
-# Theme Table Row
-#====================================================
-class ThemeTableRow(object):
-    """Theme and Style decorator"""
-    def __init__(self, themeItem):
-        self.__themeItem = themeItem
-        self.__settings = None             # Settings cache
-        self.STYLES_CACHE = {}
-
-    # ----------- Theme attrs assessors -----------
-    def __getattr__(self, name):
-        return getattr(self.__themeItem, name)
-
-    def themeItem(self):
-        return self.__themeItem
-
-    # ----------- Theme decoration -----------
-    def settings(self):
-        if self.__settings is None:
-            settings = self.__themeItem.settings()
-            self.__settings = dict([(key_value4[0], rgba2color(key_value4[1])) for key_value4 in [key_value for key_value in iter(settings.items()) if key_value[1].startswith('#')]])
-    
-            # Fonts
-            self.__settings['fontStyle'] = settings['fontStyle'].split() if 'fontStyle' in settings else []
-        return self.__settings
-
-    def update(self, dataHash):
-        if 'settings' in dataHash:
-            self.__settings = None  # Clean settings cache
-            fontStyle = dataHash['settings'].pop('fontStyle', None)
-            settings = dict([(key_value2[0], color2rgba(key_value2[1])) for key_value2 in dataHash['settings'].items()])
-            if fontStyle is not None:
-                settings['fontStyle'] = " ".join(fontStyle)
-            dataHash['settings'] = settings
-        self.__themeItem.update(dataHash)
-    
-    def clearCache(self):
-        self.STYLES_CACHE = {}
-
-    def getStyle(self, scopePath = None):
-        if scopePath in self.STYLES_CACHE:
-            return self.STYLES_CACHE[scopePath]
-        base = {}
-        base.update(self.settings())
-        if scopePath is not None:
-            styles = []
-            for style in self.styles:
-                rank = []
-                if style.scopeSelector.does_match(scopePath, rank):
-                    styles.append((rank.pop(), style))
-            styles.sort(key = lambda t: t[0])
-            for style in styles:
-                base.update(style[1].settings())
-        self.STYLES_CACHE[scopePath] = base
-        return base
-
-#====================================================
 # Themes Styles Row
 #====================================================
 class ThemeStyleTableRow(object):
@@ -211,7 +186,7 @@ class ThemeStyleTableRow(object):
     def settings(self):
         if self.__settings is None:
             settings = self.__styleItem.settings()
-            self.__settings = dict([(key_value5[0], rgba2color(key_value5[1])) for key_value5 in [key_value1 for key_value1 in settings.items() if key_value1[1].startswith('#')]])
+            self.__settings = dict([(key_value[0], rgba2color(key_value[1])) for key_value in settings.items() if key_value[1].startswith('#')])
         
             # Fonts
             self.__settings['fontStyle'] = settings['fontStyle'].split() if 'fontStyle' in settings else []

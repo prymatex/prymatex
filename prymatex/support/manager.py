@@ -13,7 +13,7 @@ from collections import namedtuple, OrderedDict
 from .bundle import Bundle
 from . import bundleitem 
 from . import scope
-from .theme import Theme, ThemeStyle
+#from .theme import Theme, ThemeStyle
 from .staticfile import StaticFile
 from .process import RunningContext
 
@@ -44,7 +44,7 @@ def compare(obj, keys, tests):
 # This objects contains the basic functions for items handling
 # Every set of items lives inside a namespace
 # ======================================================
-class PMXSupportBaseManager(object):
+class SupportBaseManager(object):
     ELEMENTS = ('bundles', 'support', 'themes')
     VAR_PREFIX = 'PMX'
     PROTECTEDNS = 0  # El primero es el protected
@@ -58,13 +58,14 @@ class PMXSupportBaseManager(object):
         bundleitem.Proxy,
         bundleitem.Preference,
         bundleitem.Template,
-        bundleitem.Project
+        bundleitem.Project,
+        bundleitem.Theme
     )])
 
     SETTINGS_CACHE = {}
 
     def __init__(self, **kwargs):
-        super(PMXSupportBaseManager, self).__init__(**kwargs)
+        super(SupportBaseManager, self).__init__(**kwargs)
         self.namespaces = OrderedDict()
         
         self.ready = False
@@ -121,7 +122,7 @@ class PMXSupportBaseManager(object):
         namespace = self.addNamespace(project.namespaceName, path)
         #Ya esta listo tengo que cargar este namespace
         if self.ready:
-            self.loadThemes(namespace)
+            #self.loadThemes(namespace)
             for bundle in self.loadBundles(namespace):
                 if bundle.enabled():
                     self.populateBundle(bundle)
@@ -273,7 +274,7 @@ class PMXSupportBaseManager(object):
         # Install message handler
         self.messageHandler = messageHandler
         for namespace in self.namespaces.values():
-            self.loadThemes(namespace)
+            #self.loadThemes(namespace)
             self.loadBundles(namespace)
         for bundle in self.getAllBundles():
             if bundle.enabled():
@@ -384,7 +385,7 @@ class PMXSupportBaseManager(object):
         for namespace in self.namespaces.values():
             print(namespace.name)
             self.logger.debug("Search in %s, %s." % (namespace.name, namespace.basedir))
-            self.reloadThemes(namespace)
+            #self.reloadThemes(namespace)
             self.reloadBundles(namespace)
         for bundle in self.getAllBundles():
             if bundle.enabled():
@@ -1180,7 +1181,7 @@ class PMXSupportBaseManager(object):
 #===================================================
 # PYTHON MANAGER
 #===================================================
-class PMXSupportPythonManager(PMXSupportBaseManager):
+class PMXSupportPythonManager(SupportBaseManager):
     BUNDLES = {}
     BUNDLE_ITEMS = {}
     THEMES = {}

@@ -29,11 +29,11 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
     def loadSettings(self):
         super(ThemeSettingsWidget, self).loadSettings()
         # Set models
-        self.comboBoxThemes.setModel(self.application.supportManager.themeListModel)
+        self.comboBoxThemes.setModel(self.application.supportManager.themeProxyModel)
         self.tableViewStyles.setModel(self.application.supportManager.themeStyleProxyModel)
         
         currentThemeUUID = self.settings.value('defaultTheme')
-        currentTheme = self.application.supportManager.getTheme(currentThemeUUID)
+        currentTheme = self.application.supportManager.getBundleItem(currentThemeUUID)
         if currentTheme is not None:
             self.updateUi(currentTheme)
         
@@ -73,7 +73,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
 
     def updateUi(self, theme):
         self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.model().findIndex(theme))    
-        settings = theme.settings()
+        settings = theme.getStyle()
         self.pushButtonForeground.setStyleSheet("background-color: " + color2rgba(settings['foreground'])[:7])
         self.pushButtonBackground.setStyleSheet("background-color: " + color2rgba(settings['background'])[:7])
         self.pushButtonSelection.setStyleSheet("background-color: " + color2rgba(settings['selection'])[:7])
@@ -143,7 +143,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
 
     def on_pushButtonColor_pressed(self, element):
         theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
-        settings = theme.settings()
+        settings = theme.getStyle()
         color, ok = QtGui.QColorDialog.getRgba(settings[element].rgba(), self)
         if ok:
             self.application.supportManager.updateTheme(theme, settings = { element: color })

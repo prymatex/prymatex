@@ -98,9 +98,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
     def defaultTheme(self, uuid):
-        theme = self.application.supportManager.getTheme(uuid)
+        theme = self.application.supportManager.getBundleItem(uuid)
+        if theme is None:
+            # Load default
+            theme = self.application.supportManager.getBundleItem("766026CB-703D-4610-B070-8DE07D967C5F")
 
-        self.colours = theme.settings()
+        self.colours = theme.getStyle()
 
         #Set color for QPlainTextEdit
         appStyle = """QPlainTextEdit {background-color: %s;
@@ -784,7 +787,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         leftScope, rightScope = self.scope(cursor)
         current_word, start, end = self.currentWord()
 
-        theme = self.application.supportManager.getTheme(self.defaultTheme)
+        theme = self.application.supportManager.getBundleItem(self.defaultTheme)
 
         # Build environment
         environment.update({

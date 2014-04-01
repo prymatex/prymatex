@@ -10,15 +10,14 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.core import PrymatexComponent
 from prymatex.core.settings import pmxConfigPorperty
 
-from prymatex.support.manager import PMXSupportBaseManager
+from prymatex.support.manager import SupportBaseManager
 from prymatex.support.process import RunningContext
 
 from prymatex.utils import encoding
 
 from prymatex.models.process import ExternalProcessTableModel
 from prymatex.models.support import (BundleItemTreeModel, BundleItemTreeNode,
-                                    ThemeListModel, ThemeStylesTableModel, 
-                                    ThemeTableRow, ThemeStyleTableRow)
+                                    ThemeListModel, ThemeStylesTableModel, ThemeStyleTableRow)
 from prymatex.models.support import (BundleItemProxyTreeModel, BundleItemTypeProxyModel, 
                                     ThemeStyleProxyTableModel, BundleListModel, 
                                     SyntaxListModel, TemplateListModel, ProjectListModel)
@@ -142,7 +141,7 @@ class BundleItemMenuGroup(QtCore.QObject):
     def on_manager_bundleRemoved(self, bundle):
         self.removeFromContainers(self.menus[bundle])
 
-class SupportManager(PrymatexComponent, PMXSupportBaseManager, QtCore.QObject):
+class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     #Signals for bundle
     bundleAdded = QtCore.Signal(object)
     bundleRemoved = QtCore.Signal(object)
@@ -221,6 +220,10 @@ class SupportManager(PrymatexComponent, PMXSupportBaseManager, QtCore.QObject):
         self.dragcommandProxyModel = BundleItemTypeProxyModel("dragcommand", self)
         self.dragcommandProxyModel.setSourceModel(self.bundleTreeModel)
         
+        #THEMES
+        self.themeProxyModel = BundleItemTypeProxyModel("theme", self)
+        self.themeProxyModel.setSourceModel(self.bundleTreeModel)
+        
         #BUNDLEMENUGROUP
         self.bundleMenuGroup = BundleItemMenuGroup(self)
 
@@ -243,13 +246,13 @@ class SupportManager(PrymatexComponent, PMXSupportBaseManager, QtCore.QObject):
         return self.application.storageManager.singleFileStorage("support-plist")
         
     def buildBundleItemStorage(self):
-        return PMXSupportBaseManager.buildBundleItemStorage(self)
+        return SupportBaseManager.buildBundleItemStorage(self)
         
     #---------------------------------------------------
     # Environment
     #---------------------------------------------------
     def environmentVariables(self):
-        environment = PMXSupportBaseManager.environmentVariables(self)
+        environment = SupportBaseManager.environmentVariables(self)
         #Extend wiht the user shell variables
         for var in self.shellVariables:
             if var['enabled']:
@@ -259,14 +262,14 @@ class SupportManager(PrymatexComponent, PMXSupportBaseManager, QtCore.QObject):
     # Override loadSupport for emit signals
     def loadSupport(self, *largs, **kwargs):
         self.bundleProxyTreeModel.setDynamicSortFilter(True)
-        PMXSupportBaseManager.loadSupport(self, *largs, **kwargs)
+        SupportBaseManager.loadSupport(self, *largs, **kwargs)
         #self.bundleProxyTreeModel.sort(0, QtCore.Qt.AscendingOrder)
 
     def runSystemCommand(self, **attrs):
         if attrs.get("asynchronous", False):
             return self.runQtProcessCommand(**attrs)
         else:
-            return PMXSupportBaseManager.runSystemCommand(self, **attrs)
+            return SupportBaseManager.runSystemCommand(self, **attrs)
             
     #Interface
     def runQtProcessCommand(self, **attrs):
@@ -305,10 +308,10 @@ class SupportManager(PrymatexComponent, PMXSupportBaseManager, QtCore.QObject):
             context.process.start(context.shellCommand, QtCore.QIODevice.ReadOnly)
 
     def buildAdHocCommand(self, *largs, **kwargs):
-        return BundleItemTreeNode(PMXSupportBaseManager.buildAdHocCommand(self, *largs, **kwargs))
+        return BundleItemTreeNode(SupportBaseManager.buildAdHocCommand(self, *largs, **kwargs))
 
     def buildAdHocSnippet(self, *largs, **kwargs):
-        return BundleItemTreeNode(PMXSupportBaseManager.buildAdHocSnippet(self, *largs, **kwargs))
+        return BundleItemTreeNode(SupportBaseManager.buildAdHocSnippet(self, *largs, **kwargs))
 
     #---------------------------------------------------
     # MANAGED OBJECTS OVERRIDE INTERFACE

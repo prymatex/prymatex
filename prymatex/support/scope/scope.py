@@ -86,14 +86,12 @@ class Selector(object):
 
     # ------- Matching 
     def does_match(self, context, rank = None):
-        #assert isinstance(rank, list)
-        
         if isinstance(context, Scope):
             context = Context(context, context)
-            
-        if not self.selector or context.left == wildcard or context.right == wildcard:
-            if rank is not None:
-                rank.append(0)
-            return True
-            
-        return self.selector.does_match(context.left.path, context.right.path, rank)
+
+        if self.selector:
+            return context.left == wildcard or context.right == wildcard or self.selector.does_match(context.left.path, context.right.path, rank)
+        if rank is not None:        
+            rank.append(0)
+        return True
+
