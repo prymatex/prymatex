@@ -80,9 +80,9 @@ class PrymatexComponentWidget(PrymatexComponent):
     def keyHelpersByClass(self, klass):
         return filter(lambda keyHelper: isinstance(keyHelper, klass), self.keyHelpers())
 
-    def runKeyHelper(self, key = Key_Any, **kwargs):
+    def runKeyHelper(self, key, **kwargs):
         for keyHelper in self.keyHelpers():
-            if keyHelper.KEY == key and keyHelper.accept(**kwargs):
+            if keyHelper.KEY in ( key, Key_Any ) and keyHelper.accept(**kwargs):
                 keyHelper.execute(**kwargs)
                 return True
         return False
