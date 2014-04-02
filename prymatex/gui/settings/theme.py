@@ -9,7 +9,7 @@ from prymatex import resources
 from prymatex.ui.configure.theme import Ui_FontTheme
 from prymatex.utils.i18n import ugettext as _
 
-from prymatex.support.theme import DEFAULT_THEME_SETTINGS, DEFAULT_SCOPE_SELECTORS
+from prymatex.support.bundleitem.theme import DEFAULT_THEME_SETTINGS, DEFAULT_SCOPE_SELECTORS
 
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.delegates.theme import FontStyleDelegate, ColorDelegate

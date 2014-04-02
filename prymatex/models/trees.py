@@ -248,7 +248,7 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
     def flags(self, index):
         if self.sourceModel() is None or not index.isValid():  
             return QtCore.Qt.NoItemFlags
-        flags = self.sourceModel().flags(self.modelIndex(index))
+        flags = self.sourceModel().flags(self.mapToSource(index))
         #Strip all writable flags and make sure we can select it
         return (flags & ~(QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsUserCheckable)) | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
         
@@ -265,13 +265,6 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
 
     def rowCount(self, parent):
         return len(self.__indexMap)
-
-    def modelIndex(self, proxyIndex):
-        if proxyIndex.isValid():
-            row = proxyIndex.row()
-            if row < len(self.__indexMap):
-                return self.__indexMap[row]
-        return QtCore.QModelIndex()
     
     # --------------- Source model handler
     def on_sourceModel_dataChanged(self, topLeft, bottomRight):

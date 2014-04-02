@@ -17,10 +17,10 @@ from prymatex.utils import encoding
 
 from prymatex.models.process import ExternalProcessTableModel
 from prymatex.models.support import (BundleItemTreeModel, BundleItemTreeNode,
-                                    ThemeListModel, ThemeStylesTableModel, ThemeStyleTableRow)
+    ThemeStylesTableModel, ThemeStyleTableRow)
 from prymatex.models.support import (BundleItemProxyTreeModel, BundleItemTypeProxyModel, 
-                                    ThemeStyleProxyTableModel, BundleListModel, 
-                                    SyntaxListModel, TemplateListModel, ProjectListModel)
+    ThemeStyleProxyTableModel, BundleListModel, SyntaxListModel,
+    TemplateListModel, ProjectListModel)
 
 class BundleItemMenuGroup(QtCore.QObject):
     def __init__(self, manager):
@@ -180,7 +180,6 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         super(SupportManager, self).__init__(**kwargs)
 
         self.bundleTreeModel = BundleItemTreeModel(self)
-        self.themeListModel = ThemeListModel(self)
         self.themeStylesTableModel = ThemeStylesTableModel(self)
         self.processTableModel = ExternalProcessTableModel(self)
         
@@ -398,26 +397,6 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     
     def removeStaticFile(self, file):
         pass
-    
-    #---------------------------------------------------
-    # THEME OVERRIDE INTERFACE
-    #---------------------------------------------------
-    def addTheme(self, theme):
-        themeRow = ThemeTableRow(theme)
-        self.themeListModel.appendTheme(themeRow)
-        self.themeAdded.emit(themeRow)
-        return themeRow
-    
-    def modifyTheme(self, theme):
-        theme.clearCache()
-        self.themeChanged.emit(theme)
-        
-    def removeTheme(self, theme):
-        self.themeListModel.removeTheme(theme)
-        self.themeRemoved.emit(theme)
-            
-    def getAllThemes(self):
-        return self.themeListModel.nodes()
     
     #---------------------------------------------------
     # THEME STYLE OVERRIDE INTERFACE

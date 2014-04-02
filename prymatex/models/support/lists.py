@@ -8,52 +8,6 @@ from prymatex.utils.lists import bisect_key
 from prymatex.models.mimes import PyMimeData
 from prymatex.models.support.nodes import BundleItemMenuTreeNode
 
-#====================================================
-# Themes List Model
-#====================================================
-class ThemeListModel(QtCore.QAbstractListModel):
-    def __init__(self, manager, parent = None):
-        QtCore.QAbstractListModel.__init__(self, parent)
-        self.manager = manager
-        self.themes = []
-        
-    def index(self, row, column = 0, parent = None):
-        if not (0 <= row < len(self.themes)):
-            return QtCore.QModelIndex()
-        return self.createIndex(row, column, self.themes[row])
-    
-    def rowCount (self, parent = None):
-        return len(self.themes)
-
-    def data (self, index, role = QtCore.Qt.DisplayRole):
-        if not index.isValid():
-            return None
-        theme = self.themes[index.row()]
-        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole ]:
-            return theme.name
-
-    def findIndex(self, theme):
-        return self.themes.index(theme)
-        
-    def themeForIndex(self, index):
-        return self.themes[index]
-        
-    # -------------------- Functions -----------------------
-    def appendTheme(self, theme):
-        index = bisect_key(self.themes, theme, lambda t: t.name)
-        self.beginInsertRows(QtCore.QModelIndex(), index, index)
-        self.themes.insert(index, theme)
-        self.endInsertRows()
-
-    def removeTheme(self, theme):
-        index = self.themes.index(theme)
-        self.beginRemoveRows(QtCore.QModelIndex(), index, index)
-        self.themes.remove(style)
-        self.endRemoveRows()
-        
-    def getAllItems(self):
-        return self.themes
-        
 #===============================================
 # Bundle Excluded Menu List Model
 #===============================================

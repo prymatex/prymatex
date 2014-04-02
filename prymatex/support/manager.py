@@ -13,7 +13,6 @@ from collections import namedtuple, OrderedDict
 from .bundle import Bundle
 from . import bundleitem 
 from . import scope
-#from .theme import Theme, ThemeStyle
 from .staticfile import StaticFile
 from .process import RunningContext
 
@@ -274,7 +273,6 @@ class SupportBaseManager(object):
         # Install message handler
         self.messageHandler = messageHandler
         for namespace in self.namespaces.values():
-            #self.loadThemes(namespace)
             self.loadBundles(namespace)
         for bundle in self.getAllBundles():
             if bundle.enabled():
@@ -282,34 +280,6 @@ class SupportBaseManager(object):
         # Uninstall message handler
         self.messageHandler = None
         self.ready = True
-
-    #-------------- LOAD THEMES ---------------------------
-    def loadThemes(self, namespace):
-        loadedThemes = set()
-        for sourceThemePath in Theme.sourcePaths(namespace.themes):
-            try:
-                theme = self.loadTheme(sourceThemePath, namespace)
-                self.showMessage("Loading theme\n%s" % theme.name)
-                loadedThemes.add(theme)
-            except Exception as ex:
-                import traceback
-                print("Error in laod theme %s (%s)" % (sourceThemePath, ex))
-                traceback.print_exc()
-        return loadedThemes
-
-    def loadTheme(self, sourceThemePath, namespace):
-        data = self.readPlist(Theme.dataFilePath(sourceThemePath))
-        uuid = self.uuidgen(data.get('uuid'))
-        theme = self.getManagedObject(uuid)
-        if theme is None:
-            theme = Theme(uuid, self)
-            theme.load(data)
-            theme = self.addTheme(theme)
-            self.addManagedObject(theme)
-        else:
-            theme.load(data)
-        theme.addSource(namespace.name, sourceThemePath)
-        return theme
 
     #------------- LOAD BUNDLES ------------------
     def loadBundles(self, namespace):
@@ -385,7 +355,6 @@ class SupportBaseManager(object):
         for namespace in self.namespaces.values():
             print(namespace.name)
             self.logger.debug("Search in %s, %s." % (namespace.name, namespace.basedir))
-            #self.reloadThemes(namespace)
             self.reloadBundles(namespace)
         for bundle in self.getAllBundles():
             if bundle.enabled():
@@ -393,30 +362,6 @@ class SupportBaseManager(object):
         # Uninstall message handler
         self.messageHandler = None
         self.logger.debug("End reload support.")
-
-    # ------------------ RELOAD THEMES
-    def reloadThemes(self, namespace):
-        installedThemes = [ theme for theme in self.getAllThemes() if theme.hasSource(namespace.name) ]
-        themePaths = Theme.sourcePaths(namespace.themes)
-        print(themePaths)
-        for theme in installedThemes:
-            themePath = theme.sourcePath(namespace.name)
-            if themePath in themePaths:
-                if namespace.name == theme.currentSourceName() and theme.sourceChanged(namespace.name):
-                    self.loadTheme(themePath, namespace)
-                    self.modifyTheme(theme)
-                themePaths.remove(themePath)
-            else:
-                theme.removeSource(namespace)
-                if not theme.hasSources():
-                    self.logger.debug("Theme %s removed." % theme.name)
-                    self.removeManagedObject(theme)
-                    self.removeTheme(theme)
-                else:
-                    theme.setDirty()
-        for path in themePaths:
-            self.logger.debug("New theme %s." % path)
-            self.loadTheme(path, namespace)
 
     # ---------------- RELOAD BUNDLES
     def reloadBundles(self, namespace):
@@ -885,101 +830,6 @@ class SupportBaseManager(object):
             self.deleteBundleItem(parentItem)
         self.removeStaticFile(staticFile)
 
-    # ------------- THEME INTERFACE
-    def addTheme(self, theme):
-        return theme
-
-    def modifyTheme(self, theme):
-        pass
-
-    def removeTheme(self, theme):
-        pass
-
-    def getAllThemes(self):
-        return []
-
-    # ------------------ THEME CRUD
-    def findThemes(self, **attrs):
-        """
-        Retorna todos los themes que complan las condiciones en attrs
-        """
-        items = []
-        for item in self.getAllThemes():
-            if compare(item, list(attrs.keys()), attrs):
-                items.append(item)
-        return items
-
-    def createTheme(self, namespaceName = None, **attrs):
-        namespace = self.safeNamespace(namespaceName)
-        
-        themeAttributes = Theme.DEFAULTS.copy()
-        themeAttributes.update(attrs)
-        
-        # Create Bundle
-        theme = Theme(self.uuidgen(), self)
-        theme.load(themeAttributes)
-        theme.addSource(namespace.name, theme.createSourcePath(namespace.themes))
-        
-        self.saveManagedObject(theme, namespace)
-        
-        theme = self.addTheme(theme)
-        self.addManagedObject(theme)
-        return theme
-
-    def readTheme(self, **attrs):
-        """
-        Retorna un bundle item por sus atributos
-        """
-        items = self.findThemes(**attrs)
-        if len(items) > 1:
-            raise Exception("More than one theme")
-        return items[0]
-
-    def getTheme(self, uuid):
-        return self.getManagedObject(uuid)
-
-    def ensureThemeIsSafe(self, theme, namespace):
-        """Ensure the theme is safe"""
-        if self.isProtected(theme) and not self.isSafe(theme):
-            #Safe theme
-            theme.addSource(namespace.name, theme.createSourcePath(namespace.themes))
-            theme.setCurrentSource(namespace.name)
-            self.saveManagedObject(theme, namespace)
-            self.logger.debug("Add namespace '%s' in source %s for theme." % (namespace.name, theme.sourcePath(namespace.name)))
-        return theme
-        
-    def updateTheme(self, theme, namespaceName = None, **attrs):
-        """Actualiza un themes"""
-        namespace = self.safeNamespace(namespaceName)
-        
-        theme = self.ensureThemeIsSafe(theme, namespace)
-
-        moveSource = not self.isProtected(theme) and "name" in attrs
-        
-        # Do update and save
-        theme.update(attrs)
-        self.saveManagedObject(theme, namespace)
-        self.modifyTheme(theme)
-        if moveSource:
-            pass
-            #path = osextra.path.ensure_not_exists(os.path.join(os.path.dirname(theme.path(namespace)), "%s.tmTheme"), osextra.to_valid_name(attrs["name"]))
-            #theme.relocateSource(namespace, path)
-        return theme
-
-    def deleteTheme(self, theme):
-        """Elimina un theme por su uuid"""
-        
-        for namespace in self.namespaces.values():
-            if not theme.hasSource(namespace.name):
-                continue
-            #Si el espacio de nombres es distinto al protegido lo elimino
-            if namespace.protected:
-                self.setDeleted(theme.uuid)
-            else:
-                self.deleteManagedObject(theme, namespace)
-        self.removeManagedObject(theme)
-        self.removeTheme(bundle)
-
     # ----------------- THEMESTYLE INTERFACE
     def addThemeStyle(self, style):
         return style
@@ -1184,7 +1034,6 @@ class SupportBaseManager(object):
 class PMXSupportPythonManager(SupportBaseManager):
     BUNDLES = {}
     BUNDLE_ITEMS = {}
-    THEMES = {}
     SYNTAXES = {}
     TAB_TRIGGERS = {}
     KEY_EQUIVALENTS = {}
@@ -1243,20 +1092,6 @@ class PMXSupportPythonManager(SupportBaseManager):
 
     def getAllBundleItems(self):
         return list(self.BUNDLE_ITEMS.values())
-
-    # -------------- THEME INTERFACE
-    def addTheme(self, theme):
-        self.THEMES[theme.uuid] = theme
-        return theme
-
-    def modifyTheme(self, theme):
-        pass
-
-    def removeTheme(self, theme):
-        self.THEMES.pop(theme.uuid)
-
-    def getAllThemes(self):
-        return list(self.THEMES.values())
 
     # ------------ PREFERENCES INTERFACE
     def getAllPreferences(self):
