@@ -34,6 +34,7 @@ class PreferenceSettings(object):
         'completions', 'completionCommand', 'disableDefaultCompletion',
         'disableIndentCorrections', 'indentOnPaste',
         'characterClass', 'bold', 'italic', 'underline',
+        'background', 'fontName', 'fontSize', 'foreground',
         'showInSymbolList', 'symbolTransformation', 'highlightPairs',
         'smartTypingPairs', 'shellVariables', 'spellChecking', 'softWrap',
         'indentedSoftWrap', 'foldingIndentedBlockStart',
