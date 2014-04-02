@@ -42,7 +42,7 @@ class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtGui.QWidget):
 
         uuid = self.settings.value('defaultSyntax')
         syntax = self.application.supportManager.getBundleItem(uuid)
-        index = self.comboBoxDefaultSyntax.model().findItemIndex(syntax)
+        index = self.comboBoxDefaultSyntax.model().nodeIndex(syntax).row()
         # TODO Ver porque no esta el valor
         if index:
             self.comboBoxDefaultSyntax.setCurrentIndex(index)

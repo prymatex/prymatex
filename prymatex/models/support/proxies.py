@@ -73,7 +73,7 @@ class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
 
 class BundleItemTypeProxyModel(FlatTreeProxyModel):
     def __init__(self, tipos, parent = None):
-        FlatTreeProxyModel.__init__(self, parent)
+        super(BundleItemTypeProxyModel, self).__init__(parent)
         self.tipos = tipos if isinstance(tipos, list) else [ tipos ]
         
     def filterAcceptsRow(self, sourceRow, sourceParent):
@@ -90,17 +90,6 @@ class BundleItemTypeProxyModel(FlatTreeProxyModel):
         ynode = self.sourceModel().node(yindex)
         return cmp(xnode.name, ynode.name)
     
-    def findItemIndex(self, item):
-        for num, index in enumerate(self.indexMap()):
-            if self.sourceModel().node(index) == item:
-                return num
-    
-    def getAllItems(self):
-        items = []
-        for index in self.indexMap():
-            items.append(self.sourceModel().node(index))
-        return items
-
 class BundleListModel(BundleItemTypeProxyModel):
     def __init__(self, parent = None):
         BundleItemTypeProxyModel.__init__(self, 'bundle', parent)

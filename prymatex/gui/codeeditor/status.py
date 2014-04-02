@@ -183,7 +183,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
 
     def on_syntaxChanged(self, syntax):
         model = self.comboBoxSyntaxes.model()
-        index = model.findItemIndex(syntax)
+        index = model.nodeIndex(syntax).row()
         self.comboBoxSyntaxes.setCurrentIndex(index)
 
     def showTabSizeContextMenu(self, point):

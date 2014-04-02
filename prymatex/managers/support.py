@@ -357,7 +357,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         self.bundleRemoved.emit(bundle)
     
     def getAllBundles(self):
-        return self.bundleProxyModel.getAllItems()
+        return self.bundleProxyModel.nodes()
     
     def getDefaultBundle(self):
         return self.getBundle(self.defaultBundleForNewBundleItems)
@@ -417,7 +417,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         self.themeRemoved.emit(theme)
             
     def getAllThemes(self):
-        return self.themeListModel.getAllItems()
+        return self.themeListModel.nodes()
     
     #---------------------------------------------------
     # THEME STYLE OVERRIDE INTERFACE
@@ -438,7 +438,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
-            self.preferenceProxyModel.getAllItems())
+            list(self.preferenceProxyModel.nodes()))
 
     #---------------------------------------------------
     # TABTRIGGERS OVERRIDE INTERFACE
@@ -448,7 +448,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         tabTriggers = []
-        for item in self.actionItemsProxyModel.getAllItems():
+        for item in self.actionItemsProxyModel.nodes():
             if item.tabTrigger is not None:
                 tabTriggers.append(item)
         return self.bundleItemCache.setdefault(memoizedKey,
@@ -459,7 +459,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         items = []
-        for item in self.actionItemsProxyModel.getAllItems():
+        for item in self.actionItemsProxyModel.nodes():
             if item.tabTrigger == tabTrigger:
                 items.append(item)
         return self.bundleItemCache.setdefault(memoizedKey,
@@ -473,7 +473,10 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache[memoizedKey]
         keyCode = []
-        for item in self.actionItemsProxyModel.getAllItems() + self.syntaxProxyModel.getAllItems():
+        for item in self.actionItemsProxyModel.nodes():
+            if item.keyCode() is not None:
+                keyCode.append(item)
+        for item in self.syntaxProxyModel.nodes():
             if item.keyCode() is not None:
                 keyCode.append(item)
         return self.bundleItemCache.setdefault(memoizedKey,
@@ -484,10 +487,10 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         items = []
-        for item in self.actionItemsProxyModel.getAllItems():
+        for item in self.actionItemsProxyModel.nodes():
             if item.keyCode() == keyCode:
                 items.append(item)
-        for syntax in self.syntaxProxyModel.getAllItems():
+        for syntax in self.syntaxProxyModel.nodes():
             if syntax.keyCode() == keyCode:
                 items.append(syntax)
         return self.bundleItemCache.setdefault(memoizedKey,
@@ -498,7 +501,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     #---------------------------------------------------
     def getAllBundleItemsByFileExtension(self, path):
         items = []
-        for item in self.dragcommandProxyModel.getAllItems():
+        for item in self.dragcommandProxyModel.nodes():
             if any([fnmatch.fnmatch(path, "*.%s" % extension) for extension in item.draggedFileExtensions]):
                 items.append(item)
         return items
@@ -507,10 +510,10 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     # ACTION ITEMS OVERRIDE INTERFACE
     #---------------------------------------------------
     def getAllActionItems(self):
-        return self.actionItemsProxyModel.getAllItems()
+        return self.actionItemsProxyModel.nodes()
     
     #---------------------------------------------------
     # SYNTAXES OVERRIDE INTERFACE
     #---------------------------------------------------
     def getAllSyntaxes(self):
-        return self.syntaxProxyModel.getAllItems()
+        return self.syntaxProxyModel.nodes()

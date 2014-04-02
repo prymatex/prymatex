@@ -63,7 +63,8 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
     # ---------------------- Themes
     @QtCore.Slot(int)
     def on_comboBoxThemes_activated(self, index):
-        theme = self.comboBoxThemes.model().themeForIndex(index)
+        modelIndex = self.comboBoxThemes.model().index(index)
+        theme = self.comboBoxThemes.model().node(modelIndex)
         self.updateUi(theme)
         self.settings.setValue('defaultTheme', str(theme.uuid))
         message = "<b>%s</b> theme set " % theme.name
@@ -72,7 +73,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
         self.application.showMessage(message)
 
     def updateUi(self, theme):
-        self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.model().findIndex(theme))    
+        self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.model().nodeIndex(theme).row())    
         settings = theme.getStyle()
         self.pushButtonForeground.setStyleSheet("background-color: " + color2rgba(settings['foreground'])[:7])
         self.pushButtonBackground.setStyleSheet("background-color: " + color2rgba(settings['background'])[:7])
@@ -121,7 +122,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
                 self.application.supportManager.updateThemeStyle(style, scope = scopeText)
 
     def on_pushButtonAdd_pressed(self):
-        theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
+        theme = self.comboBoxThemes.model().node(self.comboBoxThemes.currentIndex())
         self.application.supportManager.createThemeStyle(theme, scope = str(self.comboBoxScope.currentText()))
 
     def on_pushButtonRemove_pressed(self):
@@ -142,7 +143,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
         self.pushButtonGutterForeground.pressed.connect(lambda element='gutterForeground': self.on_pushButtonColor_pressed(element))
 
     def on_pushButtonColor_pressed(self, element):
-        theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
+        theme = self.comboBoxThemes.model().node(self.comboBoxThemes.currentIndex())
         settings = theme.getStyle()
         color, ok = QtGui.QColorDialog.getRgba(settings[element].rgba(), self)
         if ok:

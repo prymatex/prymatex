@@ -185,9 +185,6 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
         self.__indexMap = []
         self.__sourceModel = None
 
-    def indexMap(self):
-        return self.__indexMap
-    
     def sourceModel(self):
         return self.__sourceModel
         
@@ -204,11 +201,21 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
     
     def node(self, index):
         sIndex = self.mapToSource(index)
-        node = self.__sourceModel.node(sIndex)
+        node = self.sourceModel().node(sIndex)
         #El root node no puede estar en un flat proxy porque sino no es flat
         if not node.isRootNode():
             return node
         
+    def nodeIndex(self, node):
+        for num, index in enumerate(self.__indexMap):
+            if self.sourceModel().node(index) == node:
+                return self.index(num)
+        return QtCore.QModelIndex()
+
+    def nodes(self):
+        for index in self.__indexMap:
+            yield self.sourceModel().node(index)
+
     def filterAcceptsRow(self, sourceRow, sourceParent):
         return True
         
@@ -225,30 +232,30 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
         return self.__indexMap[proxyIndex.row()]
 
     def mapFromSource(self, sourceIndex):
-        return self.index(self.__indexMap.index(sourceIndex), 0)
+        return self.index(self.__indexMap.index(sourceIndex))
             
     def columnCount(self, parent):
         return 1
 
     def data(self, index, role):
-        if self.__sourceModel is None:
+        if self.sourceModel() is None:
             return QtCore.QVariant()
         
         sIndex = self.mapToSource(index)
         
-        return self.__sourceModel.data(sIndex, role)
+        return self.sourceModel().data(sIndex, role)
 
     def flags(self, index):
-        if self.__sourceModel is None or not index.isValid():  
+        if self.sourceModel() is None or not index.isValid():  
             return QtCore.Qt.NoItemFlags
-        flags = self.__sourceModel.flags(self.modelIndex(index))
+        flags = self.sourceModel().flags(self.modelIndex(index))
         #Strip all writable flags and make sure we can select it
         return (flags & ~(QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsUserCheckable)) | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
         
     def hasChildren(self, index):
         return False
 
-    def index(self, row, column, parent = QtCore.QModelIndex()):
+    def index(self, row, column = 0, parent = QtCore.QModelIndex()):
         if self.hasIndex(row, column, parent):
             return self.createIndex(row, column)
         return QtCore.QModelIndex()
@@ -273,7 +280,7 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
     
     def on_sourceModel_rowsInserted(self, parent, start, end):
         for i in range(start, end + 1):
-            sIndex = self.__sourceModel.index(i, 0, parent)
+            sIndex = self.sourceModel().index(i, 0, parent)
             if self.filterAcceptsRow(i, parent):
                 self.beginInsertRows(QtCore.QModelIndex(), len(self.__indexMap), len(self.__indexMap))
                 self.__indexMap.append(sIndex)
