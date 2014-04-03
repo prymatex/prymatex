@@ -85,3 +85,6 @@
 [submodule "prymatex/share/Bundles/themes.tmbundle"]
 	path = prymatex/share/Bundles/themes.tmbundle
 	url = https://github.com/prymatex/themes.tmbundle.git
+[submodule "prymatex/share/Bundles/bundle-support.tmbundle"]
+	path = prymatex/share/Bundles/bundle-support.tmbundle
+	url = https://github.com/prymatex/bundle-support.tmbundle.git

@@ -29,7 +29,6 @@ PMX_LOG_DATETIME_FORMAT = "%s %s" % (PMX_LOG_DATE_FORMAT, PMX_LOG_TIME_FORMAT)
 #============================================================================
 PMX_HOME_NAME = ".prymatex"
 PMX_BUNDLES_NAME = "Bundles"
-PMX_THEMES_NAME = "Themes"
 PMX_PLUGINS_NAME = "Plugins"
 PMX_PROFILES_NAME = "Profiles"
 PMX_SETTINGS_NAME = "settings.json"
@@ -48,7 +47,7 @@ def get_prymatex_home_path():
     if not os.path.exists(path):
         os.makedirs(path)
     #Create extra paths
-    for extra in (PMX_BUNDLES_NAME, PMX_THEMES_NAME, PMX_PLUGINS_NAME, PMX_PROFILES_NAME):
+    for extra in (PMX_BUNDLES_NAME, PMX_PLUGINS_NAME, PMX_PROFILES_NAME):
         extraPath = os.path.join(path, extra)
         if not os.path.exists(extraPath):
             os.makedirs(extraPath, 0o700)

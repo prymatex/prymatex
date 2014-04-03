@@ -64,7 +64,7 @@ class Bundle(ManagedObject):
                         if os.path.exists(location):
                             self._variables[program["variable"]] = location
                             break
-        return self._variables
+        return self._variables.copy()
 
     # ------------------ Environment variables
     def environmentVariables(self):
