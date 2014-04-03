@@ -21,7 +21,7 @@ from prymatex.utils import encoding
 
 from functools import reduce
 
-Namespace = namedtuple("Namespace", "name basedir protected bundles support themes")
+Namespace = namedtuple("Namespace", "name basedir protected bundles support")
 
 # ------- Tool function for compare bundle items by attributes
 def compare(obj, keys, tests):
@@ -39,12 +39,12 @@ def compare(obj, keys, tests):
         return value == tests[key] and compare(obj, keys[1:], tests)
 
 # ======================================================
-# Manager of Bundles, Bundle Items and Themes
+# Manager of Bundles, Bundle Items
 # This objects contains the basic functions for items handling
 # Every set of items lives inside a namespace
 # ======================================================
 class SupportBaseManager(object):
-    ELEMENTS = ('bundles', 'support', 'themes')
+    ELEMENTS = ('bundles', 'support')
     VAR_PREFIX = 'PMX'
     PROTECTEDNS = 0  # El primero es el protected
     DEFAULTNS = 1  # El segundo es el default
@@ -121,7 +121,6 @@ class SupportBaseManager(object):
         namespace = self.addNamespace(project.namespaceName, path)
         #Ya esta listo tengo que cargar este namespace
         if self.ready:
-            #self.loadThemes(namespace)
             for bundle in self.loadBundles(namespace):
                 if bundle.enabled():
                     self.populateBundle(bundle)
