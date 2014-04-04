@@ -18,7 +18,6 @@ from prymatex.core import logger, exceptions
 from prymatex.core.settings import ConfigurableItem
 
 from prymatex.utils.i18n import ugettext as _
-from prymatex.utils.zeromqt import ZmqSocket
 from prymatex.utils import six
 
 from prymatex.models.shortcuts import ShortcutsTreeModel
@@ -162,8 +161,12 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             self.supportManager = self.buildSupportManager()  # Support Manager
             self.fileManager = self.buildFileManager()  # File Manager
             self.projectManager = self.buildProjectManager()  # Project Manager
-            self.schedulerManager =  self.buildSchedulerManager()
-            self.serverManager = self.buildServerManager()
+            try:
+                # TODO: mas bonito
+                self.schedulerManager =  self.buildSchedulerManager()
+                self.serverManager = self.buildServerManager()
+            except:
+                pass
 
             # Load Bundles
             self.supportManager.loadSupport(self.showMessage)
@@ -358,25 +361,6 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     def findComponentsForClass(self, componentClass):
         return self.pluginManager.findComponentsForClass(componentClass)
-
-    # ------------ Create Zmq Sockets
-    def zmqSocket(self, socketType, name, address='127.0.0.1', addressType='tcp', port = None):
-        # TODO ver la variable aca, creo que merjor seria que la app genere environ pregunatando a los components
-        # que esta genera
-        socket = ZmqSocket(socketType)
-        if addressType == "ipc":
-            addr = "ipc://%s" % tempfile.mkstemp(prefix="pmx")[1]
-            socket.bind(addr)
-        elif addressType == "tcp":
-            addr = "tcp://%s" % address
-            if isinstance(port, int):
-                addr += ":%d" % port
-                socket.bind(addr)
-            else:
-                port = socket.bind_to_random_port(addr)
-                addr += ":%d" % port
-        self.supportManager.addToEnvironment("PMX_" + name.upper() + "_ADDRESS", addr)
-        return socket
 
     # ------------- Settings access
     def settingValue(self, settingPath):

@@ -11,6 +11,7 @@ from prymatex import resources
 from prymatex.utils.importlib import import_from_directory
 from prymatex.utils import plist
 from prymatex.utils import six
+from prymatex.utils.zeromqt import ZmqSocket
 
 # TODO: por ahora este nombre esta bien, pero algo mas orientado a Prymatex server taria bueno
 class ServerManager(PrymatexComponent, QtCore.QObject):
@@ -20,9 +21,16 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
         self.instances = {}
 
         #Create socket
-        self.socket = self.application.zmqSocket(zmq.REP, "Dialog", addressType='ipc')
+        self.socket = ZmqSocket(zmq.REP)
+        #TODO: temfile crear via utils
+        self.address = "ipc://%s" % tempfile.mkstemp(prefix="pmx")[1]
+        self.socket.bind(address)
         self.socket.readyRead.connect(self.socketReadyRead)
-    
+
+    def environmentVariables(self):
+        """Return a dictionary with the defined variables of this component."""
+        return { "PMX_DIALOG_ADDRESS": self.address }    
+
     @QtCore.Slot()
     def socketReadyRead(self):
         command = self.socket.recv_json()

@@ -157,7 +157,6 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
             if pluginId in self.plugins:
                 del self.plugins[pluginId]
             traceback.print_exc()
-            raise reason
         self.currentPluginDescriptor = None
         
     def hasDependenciesResolved(self, pluginEntry):
