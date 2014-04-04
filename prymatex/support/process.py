@@ -38,7 +38,8 @@ class RunningContext(object):
 
     def __unicode__(self):
         return self.TEMPLATE.format(
-            itemName = self.bundleItem.name,
+            itemName = hasattr(self, "bundleItem") and \
+                self.bundleItem.name or "None item",
             asynchronous = self.asynchronous,
             workingDirectory = self.workingDirectory,
             inputType = self.inputType,
@@ -51,7 +52,8 @@ class RunningContext(object):
 
     def __str__(self):
         return self.TEMPLATE.format(
-            itemName = self.bundleItem.name,
+            itemName = hasattr(self, "bundleItem") and \
+                self.bundleItem.name or "None item",
             asynchronous = self.asynchronous,
             workingDirectory = self.workingDirectory,
             inputType = self.inputType,

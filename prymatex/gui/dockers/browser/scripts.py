@@ -33,6 +33,7 @@ class SystemWrapper(QtCore.QObject):
     outputString = QtCore.Property(str, outputString)
 
     def contextReady(self, context):
+        print(context)
         self.context = context
 
 #=======================================================================

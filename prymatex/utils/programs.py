@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*
 
 """Running programs utilities
 This code was adapted from spyderlib original developed by Pierre Raybaut
@@ -14,7 +14,7 @@ import subprocess
 import imp
 import re
 
-from prymatex.utils import encoding
+from . import encoding
 
 def is_program_installed(basename):
     """Return program absolute path if installed in PATH
@@ -47,7 +47,6 @@ def run_program(name, args=[], cwd=None):
         raise RuntimeError("Program %s was not found" % name)
     subprocess.Popen([path]+args, cwd=cwd)
 
-
 def start_file(filename):
     """Generalized os.startfile for all platforms supported by Qt
     (this function is simply wrapping QDesktopServices.openUrl)
@@ -57,7 +56,6 @@ def start_file(filename):
     url = QUrl()
     url.setUrl(filename)
     return QDesktopServices.openUrl(url)
-
 
 def python_script_exists(package=None, module=None):
     """Return absolute path if Python script exists (otherwise, return None)

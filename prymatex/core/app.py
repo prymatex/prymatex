@@ -243,7 +243,6 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         manager.updateEnvironment({
             # TextMate Compatible :P
             'TM_APP_PATH': config.PMX_APP_PATH,
-            'TM_SUPPORT_PATH': manager.environmentVariables()['PMX_SUPPORT_PATH'],
             'TM_BUNDLES_PATH': manager.environmentVariables()['PMX_BUNDLES_PATH'],
             'TM_PID': self.applicationPid(),
             #Prymatex

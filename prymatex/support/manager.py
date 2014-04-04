@@ -16,12 +16,13 @@ from . import scope
 from .staticfile import StaticFile
 from .process import RunningContext
 
+from prymatex.core import config
 from prymatex.utils import plist, osextra, six
 from prymatex.utils import encoding
 
 from functools import reduce
 
-Namespace = namedtuple("Namespace", "name basedir protected bundles support")
+Namespace = namedtuple("Namespace", "name basedir protected bundles")
 
 # ------- Tool function for compare bundle items by attributes
 def compare(obj, keys, tests):
@@ -44,7 +45,6 @@ def compare(obj, keys, tests):
 # Every set of items lives inside a namespace
 # ======================================================
 class SupportBaseManager(object):
-    ELEMENTS = ('bundles', 'support')
     VAR_PREFIX = 'PMX'
     PROTECTEDNS = 0  # El primero es el protected
     DEFAULTNS = 1  # El segundo es el default
@@ -77,14 +77,11 @@ class SupportBaseManager(object):
         
     # ------------ Namespaces ----------------------
     def addNamespace(self, name, path):
-        directories = dict(
-            [ (element, os.path.join(path, element.title())) for element in self.ELEMENTS ]
-        )
         namespace = Namespace(
             name = name, 
             basedir = path,
             protected = len(self.namespaces) == 0,
-            **directories)
+            bundles = os.path.join(path, config.PMX_BUNDLES_NAME))
         self.namespaces[name] = namespace
         return namespace
 
@@ -130,14 +127,12 @@ class SupportBaseManager(object):
         environment = self.environment.copy()
         # TODO: Esto no puede durar mucho es costoso
         for namespace in self.namespaces.values():
-            for element in self.ELEMENTS:
-                elementDirectory = getattr(namespace, element)
-                if os.path.exists(elementDirectory):
-                    variableName = [ self.VAR_PREFIX, element.upper(), 'PATH' ]
-                    if not namespace.protected:
-                        variableName.insert(1, namespace.name.upper())
-                    variableName = "_".join(variableName)
-                    environment[variableName] = elementDirectory
+            if os.path.exists(namespace.bundles):
+                variableName = [ self.VAR_PREFIX, 'BUNDLES', 'PATH' ]
+                if not namespace.protected:
+                    variableName.insert(1, namespace.name.upper())
+                variableName = "_".join(variableName)
+                environment[variableName] = namespace.bundles
         return environment
 
     def addToEnvironment(self, name, value):
@@ -149,7 +144,6 @@ class SupportBaseManager(object):
     #----------- Paths for namespaces --------------------
     def namespaceElementPath(self, namespace, element, create = False):
         assert namespace in self.namespaces, "The %s namespace is not registered" % namespace
-        assert element in self.ELEMENTS, "The %s namespace is not registered" % namespace
         path = os.path.join(self.namespaces[namespace]["dirname"], element)
         if element not in self.namespaces[namespace] and create:
             os.makedirs(path)
