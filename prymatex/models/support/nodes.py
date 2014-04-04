@@ -25,7 +25,6 @@ class BundleItemTreeNode(TreeNodeBase):
     def __init__(self, bundleItem, nodeParent = None):
         TreeNodeBase.__init__(self, bundleItem.name, nodeParent)
         self.__bundleItem = bundleItem
-        self.__settings = None             # Settings cache
         self.STYLES_CACHE = {}
 
     # ----------- Bundle Item attrs assessors -----------
@@ -100,14 +99,14 @@ class BundleItemTreeNode(TreeNodeBase):
     def update(self, dataHash):
         if 'keySequence' in dataHash and isinstance(dataHash['keySequence'], QtGui.QKeySequence):
             dataHash['keyEquivalent'] = keysequence2keyequivalent(int(dataHash['keySequence']))
-        else:
-            dataHash['keyEquivalent'] = None
-        if 'settings' in dataHash:
-            self.__settings = None  # Clean settings cache
-            fontStyle = dataHash['settings'].pop('fontStyle', None)
-            settings = dict([(key_value2[0], color2rgba(key_value2[1])) for key_value2 in dataHash['settings'].items()])
-            if fontStyle is not None:
-                settings['fontStyle'] = " ".join(fontStyle)
+        if 'settings' in dataHash and isinstance(dataHash['settings'], dict):
+            settings = {}
+            for key, value in dataHash['settings'].items():
+                if isinstance(value, QtGui.QColor):
+                    value = color2rgba(value)
+                if key == 'fontStyle':
+                    settings[key] = " ".join(value)
+                settings[key] = value
             dataHash['settings'] = settings
         self.__bundleItem.update(dataHash)
 
@@ -185,19 +184,22 @@ class ThemeStyleTableRow(object):
     # ----------- Item decoration -----------
     def settings(self):
         if self.__settings is None:
-            settings = self.__styleItem.settings()
-            self.__settings = dict([(key_value[0], rgba2color(key_value[1])) for key_value in settings.items() if key_value[1].startswith('#')])
-        
-            # Fonts
-            self.__settings['fontStyle'] = settings['fontStyle'].split() if 'fontStyle' in settings else []
+            # Build cache
+            self.__settings = {}
+            for key, value in self.__styleItem.settings().items():
+                if value.startswith('#'):
+                    self.__settings[key] = rgba2color(value)
+                if key == 'fontStyle':
+                    self.__settings[key] = value.split()
         return self.__settings
     
     def update(self, dataHash):
-        if 'settings' in dataHash:
-            self.__settings = None              # Clean cache
-            fontStyle = dataHash['settings'].pop('fontStyle', None)
-            settings = dict([(key_value2[0], color2rgba(key_value2[1])) for key_value2 in dataHash['settings'].items()])
-            if fontStyle is not None:
-                settings['fontStyle'] = " ".join(fontStyle)
-            dataHash['settings'] = settings
+        self.__settings = None              # Clean cache
+        settings = {}
+        for key, value in dataHash['settings'].items():
+            if isinstance(value, QtCore.QColor):
+                value = color2rgba(value)
+            if key == 'fontStyle':
+                settings[key] = " ".join(value)
+        dataHash['settings'] = settings
         self.__styleItem.update(dataHash)

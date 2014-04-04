@@ -23,11 +23,10 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
     def data(self, index, role):
         if not index.isValid(): 
             return QtCore.QVariant() 
+        column = index.column()
+        style = self.styles[index.row()]
+        settings = style.settings()
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.EditRole ]:
-            row = index.row()
-            column = index.column()
-            style = self.styles[row]
-            settings = self.styles[row].settings()
             if column == 0:
                 return style.name
             elif column == 1 and 'foreground' in settings:
@@ -36,11 +35,7 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
                 return settings['background']
             elif column == 3 and 'fontStyle' in settings:
                 return settings['fontStyle']
-        elif role == QtCore.Qt.FontRole:
-            row = index.row()
-            column = index.column()
-            style = self.styles[row]
-            settings = self.styles[row].settings()
+        elif role == QtCore.Qt.FontRole and 'fontStyle' in settings:
             if column == 0:
                 font = QtGui.QFont()
                 if 'bold' in settings['fontStyle']:
@@ -51,17 +46,9 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
                     font.setItalic(True)
                 return font
         elif role is QtCore.Qt.ForegroundRole:
-            row = index.row()
-            column = index.column()
-            style = self.styles[row]
-            settings = self.styles[row].settings()
             if column == 0 and 'foreground' in settings:
                 return settings['foreground']
         elif role is QtCore.Qt.BackgroundColorRole:
-            row = index.row()
-            column = index.column()
-            style = self.styles[row]
-            settings = self.styles[row].settings()
             if column == 0 and 'background' in settings:
                 return settings['background']
             elif column == 1 and 'foreground' in settings:
