@@ -762,7 +762,9 @@ class SupportBaseManager(object):
         if moveSource:
             # Para mover hay que renombrar el item
             bundleItemSourcePath = bundleItem.currentSourcePath()
-            bundleItemDestinyPath = bundleItem.createSourcePath(bundleItem.bundle.sourcePath(namespace.name))
+            bundleItemDestinyPath = bundleItem.createSourcePath(
+                bundleItem.bundle.sourcePath(namespace.name))
+            print(bundleItemSourcePath, bundleItemDestinyPath)
             shutil.move(bundleItemSourcePath, bundleItemDestinyPath)
             bundleItem.setSourcePath(namespace.name, bundleItemDestinyPath)
         return bundleItem

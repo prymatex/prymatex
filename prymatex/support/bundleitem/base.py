@@ -69,4 +69,6 @@ class BundleItem(ManagedObject):
         return reduce(lambda x, y: x + glob(y), patterns, [])
     
     def createSourcePath(self, baseDirectory):
-        return osextra.path.ensure_not_exists(os.path.join(baseDirectory, self.FOLDER, "%%s.%s" % self.EXTENSION), osextra.to_valid_name(self.name))
+        return osextra.path.ensure_not_exists(
+            os.path.join(baseDirectory, self.FOLDER, "%%s.%s" % self.EXTENSION), 
+            osextra.to_valid_name(self.name))
