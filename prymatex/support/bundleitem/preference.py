@@ -152,18 +152,15 @@ class PreferenceMasterSettings(object):
     @property
     def shellVariables(self):
         shellVariables = []
-        variableNames = set()
+        takenNames = set()
         for settings in self.settings:
-            if settings.shellVariables:
-                # Only if not has all variables
-                if all([ name not in variableNames for name, _ in settings.shellVariables]):
-                    context = settings.bundle.variables
-                    for name, value in settings.shellVariables:
-                        value = osextra.path.expand_shell_variables( value,
-                            context = context)
-                        shellVariables.append((name, value))
-                        context[name] = value
-                        variableNames.add(name)
+            variables = settings.shellVariables
+            if variables is not None:
+                names = [ variable[0] for variable in variables if variable[0].startswith("TM_") ]
+                if not any([ name in takenNames for name in names ]):
+                    shellVariables.extend(settings.bundle.variables.items())
+                    shellVariables.extend(variables)
+                    takenNames.update(names)
         return shellVariables
 
     @property
