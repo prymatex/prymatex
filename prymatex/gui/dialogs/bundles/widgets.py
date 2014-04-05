@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import ast
-from pprint import pformat
+from prymatex import resources
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex import resources
+from prymatex.utils import json
 
 from prymatex.ui.support.snippet import Ui_Snippet
 from prymatex.ui.support.command import Ui_Command
@@ -20,11 +19,10 @@ from prymatex.ui.support.macro import Ui_Macro
 from prymatex.ui.support.project import Ui_Project
 from prymatex.models.support import BundleItemMenuTreeModel
 
-TABWIDTH = 20
-
 class BundleItemEditorBaseWidget(QtGui.QWidget):
     '''Base class for editors'''
     TYPE = ''
+    TABWIDTH = 20
 
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
@@ -120,7 +118,7 @@ class SnippetEditorWidget(BundleItemEditorBaseWidget, Ui_Snippet):
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
-        self.content.setTabStopWidth(TABWIDTH)
+        self.content.setTabStopWidth(self.TABWIDTH)
 
     @QtCore.Slot()
     def on_content_textChanged(self):
@@ -195,8 +193,6 @@ class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
         self.labelInputOption.setVisible(False)
         self.comboBoxFallbackInput.setVisible(False)
 
-        self.command.setTabStopWidth(TABWIDTH)
-
         self.menuCommandTemplates = QtGui.QMenu()
         
         #for name, templateText in self.COMMAND_TEMPLATES.items():
@@ -205,7 +201,8 @@ class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
         #    self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
         # TODO Este menu ponerlo como menu contextual    
         # self.pushButtonOptions.setMenu(self.menuCommandTemplates)
-
+        self.command.setTabStopWidth(self.TABWIDTH)
+        
     @QtCore.Slot()
     def on_command_textChanged(self):
         self.changes['command'] = self.command.toPlainText()
@@ -300,7 +297,6 @@ class TemplateEditorWidget(BundleItemEditorBaseWidget, Ui_Template):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
         self.comboBoxOutput.addItem("Insert as Text", "insertText")
-        self.command.setTabStopWidth(TABWIDTH)
 
     @QtCore.Slot()
     def on_command_textChanged(self):
@@ -328,7 +324,7 @@ class StaticFileEditorWidget(BundleItemEditorBaseWidget, Ui_TemplateFile):
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
-        self.content.setTabStopWidth(TABWIDTH)
+        self.content.setTabStopWidth(self.TABWIDTH)
 
     @QtCore.Slot()
     def on_content_textChanged(self):
@@ -357,7 +353,6 @@ class DragCommandEditorWidget(BundleItemEditorBaseWidget, Ui_DragCommand):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
         self.comboBoxOutput.addItem("Insert as Snippet", "insertAsSnippet")
-        self.command.setTabStopWidth(TABWIDTH)
     
     @QtCore.Slot()
     def on_command_textChanged(self):
@@ -382,19 +377,14 @@ class LanguageEditorWidget(BundleItemEditorBaseWidget, Ui_Language):
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
-        self.content.setTabStopWidth(TABWIDTH)
+        self.content.setTabStopWidth(self.TABWIDTH)
 
     def isChanged(self):
         return False
 
     @QtCore.Slot()
     def on_content_textChanged(self):
-        #Convertir a dict
-        try:
-            grammar = self.command.toPlainText()
-            self.changes['grammar'] = ast.literal_eval(grammar)
-        except:
-            pass
+        self.changes['grammar'] = json.loads(self.content.toPlainText())
     
     def getKeySequence(self):
         return super(LanguageEditorWidget, self).getKeySequence() or ""
@@ -411,7 +401,7 @@ class LanguageEditorWidget(BundleItemEditorBaseWidget, Ui_Language):
             "keyEquivalent": self.changes.pop("keyEquivalent"),
             "grammar": self.changes
         }
-        self.content.setPlainText(pformat(self.changes["grammar"]))
+        self.content.setPlainText(json.dumps(self.changes["grammar"]))
     
 class PreferenceEditorWidget(BundleItemEditorBaseWidget, Ui_Preference):
     TYPE = 'preference'
@@ -419,24 +409,17 @@ class PreferenceEditorWidget(BundleItemEditorBaseWidget, Ui_Preference):
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
-        self.settings.setTabStopWidth(TABWIDTH)
     
     @QtCore.Slot()
     def on_settings_textChanged(self):
-        #Convertir a dict
-        try:
-            settings = self.settings.toPlainText()
-            self.changes['settings'] = ast.literal_eval(settings)
-        except:
-            # Un mensaje de error estaria bueno no? :)
-            pass
+        self.changes['settings'] = json.loads(self.settings.toPlainText())
 
     def getScope(self):
         return super(PreferenceEditorWidget, self).getScope() or ""
     
     def edit(self, bundleItem):
         BundleItemEditorBaseWidget.edit(self, bundleItem)
-        self.settings.setPlainText(pformat(self.changes['settings']))
+        self.settings.setPlainText(json.dumps(self.changes['settings']))
 
 class MacroEditorWidget(BundleItemEditorBaseWidget, Ui_Macro):
     TYPE = 'macro'
@@ -444,13 +427,12 @@ class MacroEditorWidget(BundleItemEditorBaseWidget, Ui_Macro):
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
-        self.argument.setTabStopWidth(TABWIDTH)
     
     def on_listActionWidget_itemClicked(self, item):
         index = self.listActionWidget.indexFromItem(item)
         row = index.row()
         if 'argument' in self.changes["commands"][row]:
-            self.argument.setPlainText(pformat(self.changes["commands"][row]['argument']))
+            self.argument.setPlainText(json.dumps(self.changes["commands"][row]['argument']))
         else:
             self.argument.clear()
 
@@ -500,7 +482,6 @@ class ProjectEditorWidget(BundleItemEditorBaseWidget, Ui_Project):
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
-        self.command.setTabStopWidth(TABWIDTH)
 
     @QtCore.Slot()
     def on_command_textChanged(self):

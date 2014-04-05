@@ -14,24 +14,18 @@ from types import GeneratorType
 
 from prymatex.qt import QtCore
 
-
 # Reduce scheduler overhead
 # Iterate in the Task.run, while calling subcoroutines
 MAX_TASK_ITERATIONS = 3
 
-
 # Scheduler longIteration signal warning
 MAX_ITERATION_TIME = datetime.timedelta( milliseconds = 300 )
-
 
 # Average scheduler runtime between qt loops
 AVERAGE_SCHEDULER_TIME = datetime.timedelta( milliseconds = 30 )
 
-
 # Max scheduler iterations between qt loops
 MAX_SCHEDULER_ITERATIONS = 10
-
-
 
 # Usage: 
 #   yield Return( v1, v2, .. )
@@ -53,12 +47,10 @@ class AsynchronousCall( QtCore.QObject ):
     def handle( self ):
         raise Exception( 'Not Implemented' )
     
-
     # will be called by scheduler, before handle()
     def setContext( self, task, scheduler ):
         self.task = task
         self.scheduler = scheduler
-
 
     # continue execution
     def wakeup( self, result = None ):
@@ -86,12 +78,10 @@ class Sleep( AsynchronousCall ):
         # save params for the future use
         self.ms = ms
 
-
     def handle( self ):
         # QtCore.QObject is the QT library class. SytemCall inherits QtCore.QObject.
         # QtCore.QObject.timerEvent will be called after self.ms milliseconds
         self.timerId = QtCore.QObject.startTimer( self, self.ms )
-
 
     # This is overloaded QtCore.QObject.timerEvent
     # and will be called by the Qt event loop.
@@ -109,7 +99,6 @@ class WaitTask( AsynchronousCall ):
         # save params for the future use
         self.waitTask = waitTask
 
-
     def handle( self ):
         if self.waitTask.state == Task.RUNNING:
             # When task is done, it emits signal done(Return)
@@ -123,11 +112,9 @@ class WaitTask( AsynchronousCall ):
         else:
             raise Exception( 'Unknown %s state %d' % (self.waitTask, self.waitTask.state) )
 
-
     def passParam( self, resReturn ):
         # expand Return to it's value
         self.wakeup( resReturn.value )
-
 
 
 # Wait, until first task is done or Exception!
@@ -141,7 +128,6 @@ class WaitFirstTask( AsynchronousCall ):
         self.tasks = iterableTasks
         assert self.tasks
         self.timeoutMs = timeoutMs
-
 
     def handle( self ):
         connected = []
@@ -182,7 +168,6 @@ class CoException( Exception ):
         self.tb = deque()
         # original Exception
         self.orig = orig
-
     
     def updateStack( self, preformatted = None ):
         if preformatted:
@@ -196,7 +181,6 @@ class CoException( Exception ):
             else:
                 self.tb.appendleft( traceback.format_tb( sys.exc_info()[2] )[0] )
 
-
     def __repr__( self ):
         res = ''
         for l in self.tb:
@@ -204,7 +188,6 @@ class CoException( Exception ):
         strExc = str(self.orig)
         res += strExc + '\n' + '-' * len(strExc) + '\n\n'
         return res
-
 
     def __str__( self ):
         return self.__repr__()
@@ -251,7 +234,6 @@ class Task( QtCore.QObject ):
         # Do not route exceptions to Scheduler
         self.emitUnhandled = False    # emits done with unhandled exception as Return.value
 
-
     def isReady(self):
         return self.state in [ Task.DONE, Task.EXCEPTION ]
 
@@ -264,12 +246,10 @@ class Task( QtCore.QObject ):
     def setEmitUnhandled( self, val = True ):
         self.emitUnhandled = val
 
-
     def formatBacktrace( self ):
         # TODO: implement full trace
         return 'File "%s", line %d' % \
                (self.coroutine.gi_code.co_filename, self.coroutine.gi_frame.f_lineno)
-
 
     def val( self ):
         if self.state == Task.DONE:
@@ -278,7 +258,6 @@ class Task( QtCore.QObject ):
             return self.exception.orig
         else:
             assert False, "Can't get result. State: %d" % self.state
-
 
     # Run a task until it hits the next yield statement
     def run( self ):
@@ -392,7 +371,6 @@ class Scheduler( QtCore.QObject ):
         self.timerId = None
         self.printCoException = True
 
-
     # Schedule coroutine as Task
     def newTask( self, coroutine, parent = None ):
         if parent is None:
@@ -421,13 +399,11 @@ class Scheduler( QtCore.QObject ):
         if self.timerId is None:
             self.timerId = self.startTimer( 0 )
 
-
     def taskDestroyed( self, task ):
         self.tasks -= 1
 
         if not self.tasks:
             self.done.emit()
-
 
     def checkRuntime( self, task ):
         t = datetime.datetime.now()
@@ -445,14 +421,12 @@ class Scheduler( QtCore.QObject ):
         
         return False
 
-
     # Show coroutines stack
     def formatException( self ):
         assert isinstance( self.task, Task )
         assert isinstance( self.task.exception, CoException )
 
         return '\nUNHANDLED COROUTINE EXCEPTION BACKTRACE (self.printCoException is True)!\n%s' % self.task.exception
-
 
     # The scheduler loop!
     def timerEvent( self, e ):
@@ -507,13 +481,11 @@ class Scheduler( QtCore.QObject ):
         self.task = None
 
 
-
 class WaitTasksTimeout( Exception ):
     """ When workers coroutines works too long """
     def __init__( tasks, maxTimeoutMs ):
         Exception.__init__( '%d tasks (%s) works longer, then %d ms.' % \
                             (len(tasks), tasks, maxTimeoutMs) )
-
 
 
 # Wait until many tasks done
@@ -533,7 +505,6 @@ def coWaitTasks( tasks, maxTimeoutMs, breakFunc = lambda tasks, t: False ):
             break
 
 
-
 # paramsList - list( *argv1, *argv2, ... )
 # will start coTask( *argv1 ), coTask( *argv2 )... and returns tasks set
 def coMassiveStart( coTask, tasksParams, serialTimeoutMs = 0, emitUnhandled = True ):
@@ -550,19 +521,16 @@ def coMassiveStart( coTask, tasksParams, serialTimeoutMs = 0, emitUnhandled = Tr
     yield Return( tasks )
 
 
-
 if __name__ == '__main__':
     import sys
     import random
     from prymatex.qt.QtGui import QApplication
-
 
     def valueReturner( name ):
         print('%s valueReturner()' % name)
         v = 'valueReturner!'
         yield Return( v )
         print('never print it')
-
 
     def multipleValueReturner( name ):
         print('%s multipleValueReturner()' % name)
@@ -574,7 +542,6 @@ if __name__ == '__main__':
             raise Exception( 'multipleValueReturner ooops!' )
 
         yield Return( v1, v2 )
-
 
     def subcoroutinesTest( name ):
 
@@ -598,11 +565,9 @@ if __name__ == '__main__':
             # signal done test
             yield Return( name, v, v1, v2 )
 
-
     class TaskReturnValueTest( QtCore.QObject ):
         def slotDone( self, res ):
             print('slotDone():', res.value)
-
 
     a = QApplication( sys.argv )
     s = Scheduler( a )
