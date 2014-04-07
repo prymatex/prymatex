@@ -50,10 +50,11 @@ class PrymatexComponent(object):
 
     def setComponentState(self, componentState):
         """Restore the state from the given state (returned by a previous call to saveState())."""
-        for component in self.components():
-            componentName = component.objectName()
-            if componentName in componentState["components"]:
-                component.setComponentState(componentState["components"][componentName])
+        if "components" in componentState:
+            for component in self.components():
+                componentName = component.objectName()
+                if componentName in componentState["components"]:
+                    component.setComponentState(componentState["components"][componentName])
 
 Key_Any = 0
 class PrymatexKeyHelper(PrymatexComponent):
