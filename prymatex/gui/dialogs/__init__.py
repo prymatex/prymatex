@@ -12,7 +12,7 @@ from .template import TemplateDialog
 from .properties import PropertiesDialog
 from .environment import EnvironmentDialog
 
-def registerPlugin(manager):
+def registerPlugin(manager, descriptor):
     manager.registerComponent(ProjectDialog)
     manager.registerComponent(AboutDialog)
     manager.registerComponent(SelectorDialog)
