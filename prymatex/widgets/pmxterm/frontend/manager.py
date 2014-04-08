@@ -4,14 +4,12 @@ from __future__ import unicode_literals
 
 import os
 import sys
-import zmq
 import time
 import json
 import ast
 import signal
 
 from prymatex.qt import QtCore
-from prymatex.utils.zeromqt import ZmqSocket
 from prymatex.utils import encoding
 
 from .session import Session
@@ -51,10 +49,14 @@ class Backend(QtCore.QObject):
 
     #------------ Sockets
     def startMultiplexer(self, address):
+        import zmq
+        from prymatex.utils.zeromqt import ZmqSocket
         self.multiplexer = ZmqSocket(zmq.REQ, self)
         self.multiplexer.connect(address)
     
     def startNotifier(self, address):
+        import zmq
+        from prymatex.utils.zeromqt import ZmqSocket
         self.notifier = ZmqSocket(zmq.SUB, self)
         self.notifier.readyRead.connect(self.notifier_readyRead)
         self.notifier.subscribe(b"") #All

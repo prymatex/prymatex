@@ -32,7 +32,7 @@ class PrymatexEditor(PrymatexComponentWidget):
             PrymatexEditor.CREATION_COUNTER += 1
             setattr(self, "_creationCounter", PrymatexEditor.CREATION_COUNTER)
         return self._creationCounter
-    
+
     def open(self, filePath):
         """ Open file """
         self.application.fileManager.openFile(filePath)
@@ -141,13 +141,6 @@ class PrymatexEditor(PrymatexComponentWidget):
     def restoreLocationMemento(self, memento):
         pass
     
-    #------------ Cursor positions as tuple
-    def setCursorPosition(self, cursorPosition):
-        pass
-
-    def cursorPosition(self):
-        return (0, 0)
-
     def contributeToTabMenu(self):
         ''' When an editor is right clicked on it's tab, the editor
         can provide custom actions to the menu through this callback'''

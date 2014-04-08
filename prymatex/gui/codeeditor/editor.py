@@ -164,9 +164,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         #Completer
         self.completer = CodeEditorCompleter(self)
-        self.completer.addModel(WordsCompletionModel(self))
-        self.completer.addModel(TabTriggerItemsCompletionModel(self))
-        self.suggestionsCompletionModel = SuggestionsCompletionModel(self)
+        self.completer.addModel(WordsCompletionModel(parent = self))
+        self.completer.addModel(TabTriggerItemsCompletionModel(parent = self))
+        self.suggestionsCompletionModel = SuggestionsCompletionModel(parent = self)
         self.completer.addModel(self.suggestionsCompletionModel)
 
         #Block Count

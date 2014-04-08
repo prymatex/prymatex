@@ -16,12 +16,15 @@ COMPLETER_CHARS = list(string.ascii_letters)
 # Completer Base Model
 # ===================================
 class CompletionBaseModel(QtCore.QAbstractTableModel):
-    def __init__(self, editor):
-        QtCore.QAbstractTableModel.__init__(self, editor)
-        self.editor = editor
+    def __init__(self, **kwargs):
+        super(CompletionBaseModel, self).__init__(**kwargs)
         self.ready = False
         self.prefix = ""
+        self.editor = None
         self.suggestions = []
+
+    def setEditor(self, editor):
+        self.editor = editor
 
     def isReady(self):
         return self.ready
@@ -70,11 +73,15 @@ class CompletionBaseModel(QtCore.QAbstractTableModel):
 # Custom completer models
 # ===================================
 class WordsCompletionModel(CompletionBaseModel):
-    def __init__(self, editor):
-        CompletionBaseModel.__init__(self, editor)
-        self.editor.registerBlockUserDataHandler(self)
+    def __init__(self, **kwargs):
+        super(WordsCompletionModel, self).__init__(**kwargs)
         self.words = []
 
+    def setEditor(self, editor):
+        #TODO: Que pasa si ya tiene bloques
+        super(WordsCompletionModel, self).setEditor(editor)
+        self.editor.registerBlockUserDataHandler(self)
+        
     # -------------------- Process User Data
     def contributeToBlockUserData(self, userData):
         userData.words = set()
@@ -160,8 +167,8 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
         self.editor.insertBundleItem(suggestion)
 
 class SuggestionsCompletionModel(CompletionBaseModel):
-    def __init__(self, editor):
-        CompletionBaseModel.__init__(self, editor)
+    def __init__(self, **kwargs):
+        super(SuggestionsCompletionModel, self).__init__(**kwargs)
         self.callback = None
     
     def clear(self):
@@ -216,7 +223,7 @@ class SuggestionsCompletionModel(CompletionBaseModel):
 # ===================================
 class CodeEditorCompleter(QtGui.QCompleter):
     def __init__(self, editor):
-        QtGui.QCompleter.__init__(self, editor)
+        super(CodeEditorCompleter, self).__init__(parent = editor)
         self.editor = editor
         self.startCursorPosition = None
         self.explicitLaunch = False
@@ -317,9 +324,18 @@ class CodeEditorCompleter(QtGui.QCompleter):
             #self.setCaseSensitivity(model.caseSensitivity())
         QtGui.QCompleter.setModel(self, model)
     
+    def insertModel(self, position, completionModel):
+        self.completionModels.insert(position, completionModel)
+        completionModel.setEditor(self.editor)
+        
     def addModel(self, completionModel):
         self.completionModels.append(completionModel)
+        completionModel.setEditor(self.editor)
     
+    def removeModel(self, completionModel):
+        self.completionModels.remove(completionModel)
+        completionModel.setEditor(None)
+
     def nextModel(self, model = None):
         if model is None:
             model = self.completionModels[-1]
