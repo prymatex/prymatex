@@ -135,7 +135,7 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
             registerPluginFunction = getattr(pluginEntry["module"], registerFunction)
             if isinstance(registerPluginFunction, collections.Callable):
                 self.currentPluginDescriptor = self.plugins[pluginId] = PluginDescriptor(pluginEntry)
-                registerPluginFunction(self)
+                registerPluginFunction(self, self.currentPluginDescriptor)
         except Exception as reason:
             # On exception remove entry
             if pluginId in self.plugins:
@@ -151,7 +151,7 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
             registerPluginFunction = getattr(pluginEntry["module"], "registerPlugin")
             if isinstance(registerPluginFunction, collections.Callable):
                 self.currentPluginDescriptor = self.plugins[pluginId] = PluginDescriptor(pluginEntry)
-                registerPluginFunction(self)
+                registerPluginFunction(self, self.currentPluginDescriptor)
         except (ImportError, AttributeError) as reason:
             # On exception remove entry
             if pluginId in self.plugins:

@@ -7,7 +7,7 @@ from . import helpers, addons, sidebar, minimap, modes
 from .status import CodeEditorStatus
 from prymatex.widgets.texteditor import TextEditWidget
 
-def registerPlugin(manager):
+def registerPlugin(manager, descriptor):
     manager.registerComponent(CodeEditor, default = True)
     manager.registerComponent(CodeEditorStatus)
     manager.registerComponent(CodeEditorSymbolsDock)

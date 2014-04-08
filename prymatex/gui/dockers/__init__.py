@@ -10,7 +10,7 @@ from .terminal import TerminalDock
 from .search import SearchResultsDock
 from .process import ExternalProcessDock
 
-def registerPlugin(manager):
+def registerPlugin(manager, descriptor):
     manager.registerComponent(ProjectsDock)
     manager.registerComponent(FileSystemDock)
     manager.registerComponent(TerminalDock)
