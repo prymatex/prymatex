@@ -111,13 +111,29 @@ class PrymatexEditor(PrymatexComponentWidget):
         
     def isEmpty(self):
         return True
-        
+    
     def isModified(self):
         return False
     
     def setModified(self, modified):
-        pass
+        pass 
+    
+    def isLoading(self):
+        """Returns true if the editor is still loading from disk, and not ready for use."""
+        return False
 
+    def isDirty(self):
+        """Returns true if there are any unsaved modifications to the buffer."""
+        return not self.isScratch() and self.isModified()
+    
+    def isReadOnly(self):
+        """Returns true if the editor may not be modified."""
+        return False
+    
+    def isScratch(self):
+        """Returns true if the editor is a scratch editor. Scratch editors never report as being dirty."""
+        return self.filePath is None
+        
     def setExternalAction(self, action):
         self.externalAction = action
         self.modificationChanged.emit(False)
