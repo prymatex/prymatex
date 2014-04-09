@@ -158,7 +158,7 @@ class PreferenceMasterSettings(object):
             if variables is not None:
                 names = [ variable[0] for variable in variables if variable[0].startswith("TM_") ]
                 if not any([ name in takenNames for name in names ]):
-                    shellVariables.extend(settings.bundle.variables.items())
+                    shellVariables.extend(settings.preference.variables().items())
                     shellVariables.extend(variables)
                     takenNames.update(names)
         return shellVariables

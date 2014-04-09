@@ -18,7 +18,7 @@ from ..regexp import compileRegexp
 #outputCaret [ afterOutput ]
 #outputFormat [ html ]
 #outputLocation [ newWindow ]
-#requiredCommands [ 
+#requiredCommands [
 #    {'command': git,
 #     'locations': [ "/usr/local/git/bin/git", "/opt/local/bin/git", "/usr/local/bin/git" ] },
 #     'variable': TM_GIT
@@ -32,7 +32,7 @@ from ..regexp import compileRegexp
 #namespace output_caret { enum type { after_output = 0, select_output, interpolate_by_char, interpolate_by_line, heuristic }; }
 
 class Command(BundleItem):
-    KEYS = (    
+    KEYS = (
         'input', 'fallbackInput', 'standardInput', 'inputFormat',               #Input
         #input [ "selection", "document", "scope", "line", "word", "character", "none" ]
         #inputFormat [ "text", "xml" ]
@@ -80,7 +80,10 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         206: 'showAsTooltip',
         207: 'createNewDocument'
     }
-    
+    def __init__(self, *largs, **kwargs):
+        super(Command, self).__init__(*largs, **kwargs)
+        self._variables = None
+
     # ---------------- Load, update, dump
     def __load_update(self, dataHash, initialize):
         for key in Command.KEYS:
@@ -90,18 +93,17 @@ echo Selection: "$TM_SELECTED_TEXT"''',
                     if key == 'capturePattern':
                         value = compileRegexp(value)
                 setattr(self, key, value)
-    
+
     def load(self, dataHash):
         BundleItem.load(self, dataHash)
         self.__load_update(dataHash, True)
         # Remove cached values
-        if hasattr(self, '_variables'):
-            delattr(self, '_variables')
-    
+        self._variables = None
+
     def update(self, dataHash):
         BundleItem.update(self, dataHash)
         self.__load_update(dataHash, False)
-    
+
     def dump(self, allKeys = False):
         dataHash = BundleItem.dump(self, allKeys)
         for key in Command.KEYS:
@@ -111,12 +113,11 @@ echo Selection: "$TM_SELECTED_TEXT"''',
                     value = value.pattern
                 dataHash[key] = value
         return dataHash
-    
+
     # ---------------- Variables
-    @property
     def variables(self):
-        if not hasattr(self, '_variables'):
-            self._variables = {}
+        if self._variables is None:
+            self._variables = self.bundle.variables()
             for program in self.requiredCommands or []:
                 if not programs.is_program_installed(program["command"]):
                     # Search in locations
@@ -124,31 +125,31 @@ echo Selection: "$TM_SELECTED_TEXT"''',
                         if os.path.exists(location):
                             self._variables[program["variable"]] = location
                             break
-        return self._variables
-    
+        return self._variables.copy()
+
     # ---------------- Environment Variables
     def environmentVariables(self):
         environment = BundleItem.environmentVariables(self)
-        environment.update(self.variables)
+        environment.update(self.variables())
         return environment
-    
+
     def getInputText(self, processor):
         def getInputTypeAndValue(inputType, inputFormat, mode):
             # TODO: Mode
             if inputType is None or inputType == "none": return None, None
             return inputType, getattr(processor, inputType)(inputFormat)
-        
+
         # -------- Try input
         inputType, value = getInputTypeAndValue(self.input, self.inputFormat, mode = "input")
-        
+
         # -------- Try fallback
         if value is None and self.fallbackInput is not None:
             inputType, value = getInputTypeAndValue(self.fallbackInput, self.inputFormat, mode = "fallback")
-        
+
         # -------- Try standard
         if value is None and self.standardInput is not None:
             inputType, value = getInputTypeAndValue(self.standardInput, self.inputFormat, mode = "standard")
-        
+
         if inputType == 'selection' and value is None:
             value = processor.document(self.inputFormat)
             inputType = "document"
@@ -163,7 +164,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
             return self.linuxCommand
         else:
             return self.command
-    
+
     def getOutputHandler(self, code):
         if self.output != 'showAsHTML' and code in self.EXIT_CODES:
             return self.EXIT_CODES[code]
@@ -171,7 +172,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
             return "error"
         else:
             return self.output or self.outputLocation
-    
+
     def beforeExecute(self, processor):
         beforeMethod = None
         if self.beforeRunningCommand is not None:
@@ -181,7 +182,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
 
     def execute(self, processor):
         self.executeCallback(processor, functools.partial(self.afterExecute, processor))
-        
+
     def executeCallback(self, processor, callback):
         processor.beginExecution(self)
         if self.beforeExecute(processor):
@@ -199,7 +200,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
 
     def afterExecute(self, processor, context):
         outputHandler = self.getOutputHandler(context.outputType)
-        
+
         print(outputHandler)
         handlerFunction = getattr(processor, outputHandler, None)
         if handlerFunction is not None:
@@ -226,11 +227,11 @@ class DragCommand(Command):
         for key in DragCommand.KEYS:
             if key in dataHash or initialize:
                 setattr(self, key, dataHash.get(key, None))
-    
+
     def load(self, dataHash):
         Command.load(self, dataHash)
         self.__load_update(dataHash, True)
-    
+
     def update(self, dataHash):
         Command.update(self, dataHash)
         self.__load_update(dataHash, False)

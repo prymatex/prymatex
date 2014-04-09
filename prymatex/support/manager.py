@@ -317,7 +317,7 @@ class SupportBaseManager(object):
                         import traceback
                         print("Error in bundle item %s (%s)" % (sourceBundleItemPath, e))
                         traceback.print_exc()
-        bundle.populate()
+        bundle.setPopulated(True)
         self.populatedBundle(bundle)
 
     def loadBundleItem(self, klass, sourceBundleItemPath, namespace, bundle):
@@ -668,7 +668,7 @@ class SupportBaseManager(object):
             self.setDisabled(bundle.uuid)
         else:
             self.setEnabled(bundle.uuid)
-            if not bundle.populated:
+            if not bundle.isPopulated():
                 self.populateBundle(bundle)
         self.modifyBundle(bundle)
 

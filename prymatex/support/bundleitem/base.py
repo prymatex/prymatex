@@ -16,6 +16,7 @@ class BundleItem(ManagedObject):
     DEFAULTS = {}
     
     def __init__(self, uuid, manager, bundle):
+        
         ManagedObject.__init__(self, uuid, manager)
         self.bundle = bundle
 
@@ -50,6 +51,9 @@ class BundleItem(ManagedObject):
 
     def enabled(self):
         return self.bundle.enabled()
+
+    def variables(self):
+        return self.bundle.variables()
 
     # ---------------- Environment Variables
     def environmentVariables(self):

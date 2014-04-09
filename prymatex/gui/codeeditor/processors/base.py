@@ -45,4 +45,4 @@ class CodeEditorBaseProcessor(QtCore.QObject):
 
     def shellVariables(self):
         leftSettings, rightSettings = self.editor.settings(self.cursorWrapper)
-        return rightSettings.shellVariables
+        return rightSettings.shellVariables + list(self.bundleItem.variables().items())

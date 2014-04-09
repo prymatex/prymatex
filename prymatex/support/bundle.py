@@ -20,7 +20,14 @@ class Bundle(ManagedObject):
     }
     def __init__(self, uuid, manager):
         ManagedObject.__init__(self, uuid, manager)
-        self.populated = False
+        self._populated = False
+        self._variables = None
+
+    def setPopulated(self, populated):
+        self._populated = populated
+
+    def isPopulated(self):
+        return self._populated
 
     # ---------------- Load, update, dump
     def __load_update(self, dataHash, initialize):
@@ -32,9 +39,8 @@ class Bundle(ManagedObject):
         ManagedObject.load(self, dataHash)
         self.__load_update(dataHash, True)
         # Remove cached values
-        if hasattr(self, '_variables'):
-            delattr(self, '_variables')
-            
+        self._variables = None
+
     def update(self, dataHash):
         ManagedObject.update(self, dataHash)
         self.__load_update(dataHash, False)
@@ -48,9 +54,8 @@ class Bundle(ManagedObject):
         return dataHash
 
     # ---------------- Variables
-    @property
     def variables(self):
-        if not hasattr(self, '_variables'):
+        if self._variables is None:
             self._variables = {}
             for name, source in self.sources.items():
                 supportPath = os.path.join(source.path, self.SUPPORT)
@@ -70,11 +75,8 @@ class Bundle(ManagedObject):
     def environmentVariables(self):
         environment = self.manager.environmentVariables()
         environment['TM_BUNDLE_PATH'] = self.currentSourcePath()
-        environment.update(self.variables)
+        environment.update(self.variables())
         return environment
-
-    def populate(self):
-        self.populated = True
 
     # --------------- Source Handlers
     def createSourcePath(self, baseDirectory):

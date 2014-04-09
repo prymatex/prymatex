@@ -54,7 +54,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     aboutToHighlightChange = QtCore.Signal()
     highlightChanged = QtCore.Signal()
-
+    
     # ------------------ Flags
     ShowTabsAndSpaces     = 1<<0
     ShowLineAndParagraphs = 1<<1
@@ -174,8 +174,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         #Connect context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
-
-        self.completerTask = self.application.schedulerManager.idleTask()
 
         #Register text formaters
         self.registerTextCharFormatBuilder("line", self.textCharFormat_line_builder)
@@ -826,11 +824,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # ---------- Completer
     def showCompleter(self, suggestions, alreadyTyped=None, caseInsensitive=True, callback = None):
         self.suggestionsCompletionModel.setSuggestions(suggestions)
-        self.suggestionsCompletionModel.setCallback(callback)
+        self.suggestionsCompletionModel.setCompletionCallback(callback)
         alreadyTyped, start, end = self.currentWord(direction="left")
         self.completer.setCaseSensitivity( QtCore.Qt.CaseInsensitive and \
             caseInsensitive or QtCore.Qt.CaseSensitive)
-        #self.completer.setActivatedCallback(callback)
         self.completer.complete(self.cursorRect(),
             model = self.suggestionsCompletionModel,
             prefix = alreadyTyped)
