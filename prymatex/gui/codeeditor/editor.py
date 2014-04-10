@@ -701,13 +701,17 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def keyPressEvent(self, event):
         """This method is called whenever a key is pressed.
         The key code is stored in event.key()"""
-
-        if not ((self.enableAutoCompletion and self.completer.pre_key_event(event))
-            or self.runKeyHelper(event.key(), event = event, cursor = self.textCursor())):
+        
+        # Completer
+        if self.enableAutoCompletion and self.completer.pre_key_event(event):
+            return
+        
+        if not self.runKeyHelper(event.key(), event = event, cursor = self.textCursor()):
             TextEditWidget.keyPressEvent(self, event)
 
-            if self.enableAutoCompletion:
-                self.completer.post_key_event(event)
+        # Completer
+        if self.enableAutoCompletion:
+            self.completer.post_key_event(event)
 
     # ------------ Insert API
     def insertNewLine(self, cursor = None):

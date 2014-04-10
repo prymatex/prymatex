@@ -222,13 +222,12 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.startCursorPosition = None
         self.explicitLaunch = False
         
-        # Popup table view
-        self.setPopup(QtGui.QTableView())
-
         # Models
         self.completionModels = [ ]
 
-        # Config popup table view
+        # Popup table view
+        self.setPopup(QtGui.QTableView())
+        self.popup().installEventFilter(self)
         self.popup().setAlternatingRowColors(True)
         #self.popup().setWordWrap(False)
         self.popup().verticalHeader().setVisible(False)
@@ -239,7 +238,8 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.popup().setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.popup().setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 
-        self.connect(self, QtCore.SIGNAL('activated(QModelIndex)'), self.insertCompletion)
+        self.activated[QtCore.QModelIndex].connect(self.activatedCompletion)
+        self.highlighted[QtCore.QModelIndex].connect(self.highlightedCompletion)
 
         self.setWidget(self.editor)
     
@@ -300,10 +300,15 @@ class CodeEditorCompleter(QtGui.QCompleter):
                 self.explicitLaunch = False
                 self.complete(self.editor.cursorRect(), prefix = alreadyTyped)
 
-    def insertCompletion(self, index):
+    def activatedCompletion(self, index):
+        print("activated")
         sIndex = self.completionModel().mapToSource(index)
-        self.model().completionCallback(self.model().suggestion(sIndex))
-    
+        suggestion = self.model().suggestion(sIndex)
+        self.model().completionCallback(suggestion)
+        
+    def highlightedCompletion(self, index):
+        print("highlighted")
+        
     def setCurrentRow(self, index):
         if QtGui.QCompleter.setCurrentRow(self, index):
             self.popup().setCurrentIndex(self.completionModel().index(index, 0))
