@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
+
 import os
 import shelve
 import hashlib
@@ -9,43 +10,64 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.core import PrymatexComponent
 from prymatex.utils import encoding
 
-class ManagedStorageMixin(object):
+class ManagedStorage(object):
     def setManager(self, manager):
         self.manager = manager
 
-    def sync(self):
-        pass
+    def make_key(self, key):
+        return key
 
-    def close(self):
-        pass
+    def add(self, key, value):
+        raise NotImplementedError('subclasses of ManagedStorage must provide an add() method')
 
-class SingleFileStorage(ManagedStorageMixin):
-    def __init__(self, path):
-        self.path = path
-        self.objs = shelve.open(self.path)
+    def get(self, key, default=None):
+        raise NotImplementedError('subclasses of ManagedStorage must provide a get() method')
 
-    def build_key(self, key):
-        return str(hash(key))
+    def setdefault(self, key, default = None):
+        raise NotImplementedError('subclasses of ManagedStorage must provide a setdefault() method')
+
+    def set(self, key, value):
+        raise NotImplementedError('subclasses of ManagedStorage must provide a set() method')
+
+    def delete(self, key):
+        raise NotImplementedError('subclasses of ManagedStorage must provide a delete() method')
+
+    def has_key(self, key):
+        return self.get(key) is not None
 
     def __contains__(self, key):
-        return self.build_key(key) in self.objs
+        # This is a separate method, rather than just a copy of has_key(),
+        # so that it always has the same functionality as has_key(), even
+        # if a subclass overrides it.
+        return self.has_key(key)
 
-    def get(self, key):
-        return self.objs[self.build_key(key)]
+    def clear(self):
+        raise NotImplementedError('subclasses of ManagedStorage must provide a clear() method')
 
-    def set(self, key, item):
-        self.objs[self.build_key(key)] = item
+    def close(self, **kwargs):
+        pass
 
-    def setdefault(self, key, item):
-        return self.objs.setdefault(self.build_key(key), item)
+class SingleFileStorage(ManagedStorage):
+    def __init__(self, path):
+        self.path = path
+        self.objs = shelve.open(self.path, protocol = 2)
 
-    def sync(self):
-        self.objs.sync()
+    def make_key(self, key):
+        return str(hash(key))
+
+    def get(self, key, default = None):
+        return self.objs.get(self.make_key(key), default)
+
+    def setdefault(self, key, default = None):
+        return self.objs.setdefault(self.make_key(key), default)
+
+    def set(self, key, value):
+        self.objs.set(self.make_key(key), value)
 
     def close(self):
         self.objs.close()
 
-class MemoryStorage(dict, ManagedStorageMixin):
+class MemoryStorage(dict, ManagedStorage):
     pass
 
 class StorageManager(PrymatexComponent, QtCore.QObject):
@@ -73,10 +95,6 @@ class StorageManager(PrymatexComponent, QtCore.QObject):
         storage = MemoryStorage()
         self.__add_storage(storage)
         return storage
-
-    def sync(self):
-        for storage in self.storages:
-            storage.sync()
 
     def close(self):
         for storage in self.storages:

@@ -19,6 +19,7 @@ from .process import RunningContext
 from prymatex.core import config
 from prymatex.utils import plist, osextra, six
 from prymatex.utils import encoding
+from prymatex.utils.decorators import printtime, printparams
 
 from functools import reduce
 
@@ -320,6 +321,8 @@ class SupportBaseManager(object):
         bundle.setPopulated(True)
         self.populatedBundle(bundle)
 
+    @printtime
+    @printparams
     def loadBundleItem(self, klass, sourceBundleItemPath, namespace, bundle):
         data = self.readPlist(klass.dataFilePath(sourceBundleItemPath))
         uuid = self.uuidgen(data.get('uuid'))

@@ -35,7 +35,7 @@ def printtime(function):
             func_name = '.'.join([function.__self__.__class__.__name__, function.__func__.__name__]) 
         else:
             func_name = function.__name__
-        print("%s tomσ %.7f s" % (func_name, time() - t0))
+        print("%s took %.7f s" % (func_name, time() - t0))
         return retval
     return wrapped
 
