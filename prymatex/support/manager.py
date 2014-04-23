@@ -321,8 +321,6 @@ class SupportBaseManager(object):
         bundle.setPopulated(True)
         self.populatedBundle(bundle)
 
-    @printtime
-    @printparams
     def loadBundleItem(self, klass, sourceBundleItemPath, namespace, bundle):
         data = self.readPlist(klass.dataFilePath(sourceBundleItemPath))
         uuid = self.uuidgen(data.get('uuid'))

@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from glob import glob
-from functools import reduce
+import glob
 from collections import namedtuple
 
 from prymatex.support import scripts
@@ -105,5 +104,10 @@ class ManagedObject(object):
     
     @classmethod
     def sourcePaths(cls, baseDirectory):
-        patterns = map(lambda pattern: os.path.join(baseDirectory, pattern), cls.PATTERNS)
-        return reduce(lambda x, y: x + glob(y), patterns, [])
+        sourcePatterns = map(
+            lambda pattern: os.path.join(baseDirectory, pattern),
+            cls.PATTERNS
+        )
+        for sourcePattern in sourcePatterns:
+            for sourcePath in glob.iglob(sourcePattern):
+                yield sourcePath

@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from glob import glob
-from functools import reduce
+import glob
 
 from prymatex.utils import osextra
 
@@ -69,9 +68,14 @@ class BundleItem(ManagedObject):
 
     @classmethod
     def sourcePaths(cls, baseDirectory):
-        patterns = map(lambda pattern: os.path.join(baseDirectory, cls.FOLDER, pattern), cls.PATTERNS)
-        return reduce(lambda x, y: x + glob(y), patterns, [])
-    
+        sourcePatterns = map(
+            lambda pattern: os.path.join(baseDirectory, cls.FOLDER, pattern),
+            cls.PATTERNS
+        )
+        for sourcePattern in sourcePatterns:
+            for sourcePath in glob.iglob(sourcePattern):
+                yield sourcePath
+
     def createSourcePath(self, baseDirectory):
         return osextra.path.ensure_not_exists(
             os.path.join(baseDirectory, self.FOLDER, "%%s.%s" % self.EXTENSION), 

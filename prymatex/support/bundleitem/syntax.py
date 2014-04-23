@@ -312,7 +312,6 @@ class Syntax(BundleItem):
     def grammar(self):
         if not hasattr(self, '_grammar'):
             # Build grammar
-            
             dataHash = {
                 'repository': self.repository,
                 'name': self.scopeName,
