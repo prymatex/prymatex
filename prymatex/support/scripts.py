@@ -68,11 +68,12 @@ def shebang_command(shebang, environment):
                     return ("%s %s") % (value, " ".join(shebangParts[1:]))
     return " ".join(shebangParts[1:])
 
-def ensureShellScript(script, environment, variables):
+def prepareShellScript(script, environment, variables):
     scriptLines = script.splitlines()
     
     # Shebang
     shellScript = [ getShellShebang(environment) ]
+    
     # Agregar las variables
     for variable in variables:
         shellScript.append('export %s="%s"' % variable)
@@ -82,9 +83,9 @@ def ensureShellScript(script, environment, variables):
     
     if has_shebang(scriptLines[0]):
         command = shebang_command(scriptLines[0], environment)
-        shellScript.append("%(env)s %(command)s - <<SCRIPT" % {"env": ENV, "command": command})
+        shellScript.append("%(env)s %(command)s <(cat <<SCRIPT" % {"env": ENV, "command": command})
         shellScript.extend(scriptLines[1:])
-        shellScript.append("SCRIPT")
+        shellScript.append("SCRIPT)")
     else:
         shellScript.extend(scriptLines)
     return "\n".join(shellScript)
@@ -96,9 +97,9 @@ def ensureUnixEnvironment(environment):
     return dict(map(lambda item: (encoding.force_str(item[0]), encoding.force_str(item[1])), environment.items()))
 
 def prepareUnixShellScript(script, environment, variables):
-    script = ensureShellScript(script, environment, variables)
-    tmpFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
-    return tmpFile, ensureUnixEnvironment(environment), tmpFile
+    script = prepareShellScript(script, environment, variables)
+    scriptFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
+    return scriptFile
     
 #============================
 # WINDOWS
@@ -107,10 +108,9 @@ def ensureWindowsEnvironment(environment):
     return dict(map(lambda item: (encoding.to_fs(item[0]), encoding.to_fs(item[1])), environment.items()))
 
 def prepareWindowsShellScript(script, environment, variables):
-    environment = ensureWindowsEnvironment(environment)
-    script = ensureShellScript(script, environment, variables)
-    tmpFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
-    return tmpFile, environment, tmpFile
+    script = prepareShellScript(script, environment, variables)
+    scriptFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
+    return scriptFile
     
 #============================
 # CYGWIN
@@ -127,25 +127,37 @@ def ensureCygwinEnvironment(environment):
 
 def prepareCygwinShellScript(script, environment, variables):
     cygwinPath = environment.get("PMX_CYGWIN_PATH", PMX_CYGWIN_PATH)
-    environment = ensureCygwinEnvironment(environment)
 
-    script = ensureShellScript(script, environment, variables)
-    tmpFile = makeExecutableTempFile(script, environment.get("PMX_TMP_PATH"))
-    command = '%s\\bin\\env.exe "%s"' % (cygwinPath, tmpFile)
-    return command, environment, tmpFile
+    script = prepareShellScript(script, environment, variables)
+    scriptFile = makeExecutableTempFile(script, environment.get("PMX_TMP_PATH"))
+    #TODO: Ver de pasarle en env correcto al script
+    command = '%s\\bin\\env.exe "%s"' % (cygwinPath, scriptFile)
+    return scriptFile
 
-def prepareShellScript(script, environment, variables):
-    #Aca entran las variables de prymatex, tengo que armar el environment con os.environ
-
-    # Build final environment
-    env = os.environ.copy()
-    env.update(environment)
-
-    if sys.platform == "win32" and "PMX_CYGWIN_PATH" in env:
-        return prepareCygwinShellScript(script, env, variables)
+def buildShellScriptContext(script, environment, variables):
+    scriptEnvironment = os.environ.copy()
+    scriptEnvironment.update(environment)
+    
+    if sys.platform == "win32" and "PMX_CYGWIN_PATH" in scriptEnvironment:
+        scriptEnvironment = ensureCygwinEnvironment(scriptEnvironment)
+        scriptFile = prepareCygwinShellScript(
+                        script, 
+                        scriptEnvironment,
+                        variables)
+        return scriptFile, scriptEnvironment
     elif sys.platform == "win32":
-        return prepareWindowsShellScript(script, env, variables)
-    return prepareUnixShellScript(script, env, variables)
+        scriptEnvironment = ensureWindowsEnvironment(scriptEnvironment)
+        scriptFile = prepareWindowsShellScript(
+                    script,
+                    scriptEnvironment,
+                    variables)
+        return scriptFile, scriptEnvironment
+    scriptEnvironment = ensureUnixEnvironment(scriptEnvironment)
+    scriptFile = prepareUnixShellScript(
+        script, 
+        scriptEnvironment,
+        variables)
+    return scriptFile, scriptEnvironment
 
 def makeExecutableTempFile(content, directory):
     # TODO: Mejorara la generacion de temp, se borra no se borra que onda

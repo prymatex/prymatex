@@ -202,13 +202,14 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         outputHandler = self.getOutputHandler(context.outputType)
 
         print(outputHandler)
+        print(context.outputValue)
         handlerFunction = getattr(processor, outputHandler, None)
         if handlerFunction is not None:
             handlerFunction(context, self.outputFormat)
         # TODO: Ver que pasa con el outputCaret
         # Delete temp file
         if outputHandler != "error":
-            context.removeTempFile()
+            context.removeScriptFile()
         processor.endExecution(self)
 
 class DragCommand(Command):

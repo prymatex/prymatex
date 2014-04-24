@@ -281,30 +281,36 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         self.processTableModel.appendProcess(context.process, description = context.description())
 
         environment = QtCore.QProcessEnvironment()
-        for key, value in context.environment.items():
+        for key, value in context.scriptFileEnvironment.items():
             environment.insert(key, value)
 
         context.process.setProcessEnvironment(environment)
 
         def onQProcessFinished(context):
-            def runCallback(exitCode):
+            def _finished(exitCode, exitStatus):
                 self.processTableModel.removeProcess(context.process)
                 context.errorValue = encoding.from_fs(context.process.readAllStandardError())
                 context.outputValue = encoding.from_fs(context.process.readAllStandardOutput())
                 context.outputType = exitCode
                 context.callback(context)
-            return runCallback
+            return _finished
 
-        context.process.finished[int].connect(onQProcessFinished(context))
+        context.process.finished[int, QtCore.QProcess.ExitStatus].connect(
+            onQProcessFinished(context)
+        )
         
-        if context.inputValue is not None:
-            context.process.start(context.shellCommand, QtCore.QIODevice.ReadWrite)
-            #if not context.process.waitForStarted():
-            #    raise Exception("No puedo correr")
-            context.process.write(encoding.to_fs(context.inputValue))
-            context.process.closeWriteChannel()
-        else:
-            context.process.start(context.shellCommand, QtCore.QIODevice.ReadOnly)
+        def onQProcessStarted(context):
+            def _started():
+                if context.inputValue is not None:
+                    context.process.write(encoding.to_fs(context.inputValue))
+                context.process.closeWriteChannel()
+            return _started
+        
+        context.process.started.connect(onQProcessStarted(context))
+        
+        context.process.start(context.scriptFilePath)
+        
+        return context
 
     def buildAdHocCommand(self, *largs, **kwargs):
         return BundleItemTreeNode(SupportBaseManager.buildAdHocCommand(self, *largs, **kwargs))

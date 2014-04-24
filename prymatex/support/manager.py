@@ -184,21 +184,17 @@ class SupportBaseManager(object):
         if context.workingDirectory is not None:
             os.chdir(context.workingDirectory)
 
-        context.process = subprocess.Popen(context.shellCommand, 
+        context.process = subprocess.Popen(context.scriptFilePath, 
             stdin = subprocess.PIPE, stdout = subprocess.PIPE, 
-            stderr = subprocess.PIPE, env = context.environment)
+            stderr = subprocess.PIPE, env = context.scriptFileEnvironment)
 
-        if context.inputValue is not None:
-            context.process.stdin.write(encoding.to_fs(context.inputValue))
-        context.process.stdin.close()
-        try:
-            context.outputValue = encoding.from_fs(context.process.stdout.read())
-            context.errorValue = encoding.from_fs(context.process.stderr.read())
-        except IOError as e:
-            context.errorValue =  six.text_type(e)
-        context.process.stdout.close()
-        context.process.stderr.close()
-        context.outputType = context.process.wait()
+        print(encoding.to_fs(context.inputValue))
+        outputValue, errorValue =  context.process.communicate(
+            encoding.to_fs(context.inputValue))
+        
+        context.outputValue = encoding.from_fs(outputValue)
+        context.errorValue = encoding.from_fs(errorValue)
+        context.outputType = context.process.returncode
 
         if context.workingDirectory is not None:
             os.chdir(origWD)

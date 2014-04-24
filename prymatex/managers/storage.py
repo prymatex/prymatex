@@ -62,7 +62,7 @@ class SingleFileStorage(ManagedStorage):
         return self.objs.setdefault(self.make_key(key), default)
 
     def set(self, key, value):
-        self.objs.set(self.make_key(key), value)
+        self.objs[self.make_key(key)] = value
 
     def close(self):
         self.objs.close()

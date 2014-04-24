@@ -15,26 +15,50 @@ class RunningContext(object):
     OutputValue: {outputValue}
     ErrorValue: {errorValue}
     """
+    shellCommand = None
+    environment = None
+    shellVariables = None
+    asynchronous = False
+    workingDirectory = None
+    inputType = None
+    inputValue = None
+    outputType = None
+    outputValue = None
+    process = None
+    errorValue = None
+    callback = None
+    
     def __init__(self, **attrs):
-        # Before run attr
-        self.shellCommand, self.environment, self.tempFile = scripts.prepareShellScript(
-            attrs.pop("shellCommand"), 
-            attrs.pop("environment", {}),
-            attrs.pop("shellVariables", []))
+        
+        # Command
+        self.shellCommand = attrs.pop("shellCommand")
+        
+        # Environment
+        self.environment = attrs.pop("environment", {})
+        
+        # Variables
+        self.shellVariables = attrs.pop("shellVariables", [])
 
+        # Asynchronous ?
         self.asynchronous = attrs.pop("asynchronous", False)
+        
+        # Has Working Directory ?
         self.workingDirectory = attrs.pop("workingDirectory", None)
+        
+        # Has Input ?
         self.inputValue = attrs.pop("inputValue", None)
+        
+        # Has Callback ?
         self.callback = attrs.pop("callback", None)
         
-        # After run attrs
-        self.process = self.errorValue = self.outputValue = self.outputType = None
-        
+        self.scriptFilePath, self.scriptFileEnvironment = scripts.buildShellScriptContext(
+            self.shellCommand, self.environment, self.shellVariables)
+
         for key, value in attrs.items():
             setattr(self, key, value)
             
     def __delete__(self):
-        self.removeTempFile()
+        self.removeScriptFile()
 
     def __unicode__(self):
         return self.TEMPLATE.format(
@@ -70,6 +94,6 @@ class RunningContext(object):
     def description(self):
         return hasattr(self, "bundleItem") and self.bundleItem.name or "No Name"
         
-    def removeTempFile(self):
-        if os.path.exists(self.tempFile):
-            scripts.deleteFile(self.tempFile)
+    def removeScriptFile(self):
+        if os.path.exists(self.scriptFilePath):
+            scripts.deleteFile(self.scriptFilePath)
