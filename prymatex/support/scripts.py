@@ -83,9 +83,10 @@ def prepareShellScript(script, environment, variables):
     
     if has_shebang(scriptLines[0]):
         command = shebang_command(scriptLines[0], environment)
-        shellScript.append("%(env)s %(command)s <(cat <<SCRIPT" % {"env": ENV, "command": command})
+        shellScript.append("%(env)s %(command)s <(cat <<'SCRIPT'" % {"env": ENV, "command": command})
         shellScript.extend(scriptLines[1:])
-        shellScript.append("SCRIPT)")
+        shellScript.append("SCRIPT")
+        shellScript.append(")")
     else:
         shellScript.extend(scriptLines)
     return "\n".join(shellScript)
