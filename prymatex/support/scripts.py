@@ -29,6 +29,7 @@ http://en.wikipedia.org/wiki/Dennis_Ritchie
 """
 
 def getShellShebang(environment):
+    return "#!/bin/bash"
     return "#!%s" % environment.get("SHELL", SH)
 
 def has_shebang(line):
@@ -82,11 +83,24 @@ def prepareShellScript(script, environment, variables):
     shellScript.append(". $TM_SUPPORT_PATH/lib/bash_init.sh")
     
     if has_shebang(scriptLines[0]):
+        # Build fake shebang
+        shellScript.append('exec %s $@' % ENV)
+        shebang = makeExecutableTempFile(
+            "\n".join(shellScript),
+            environment.get('PMX_TMP_PATH'),
+            prefix="shebang"
+        )
         command = shebang_command(scriptLines[0], environment)
-        shellScript.append("%(env)s %(command)s <(cat <<'SCRIPT'" % {"env": ENV, "command": command})
-        shellScript.extend(scriptLines[1:])
-        shellScript.append("SCRIPT")
-        shellScript.append(")")
+        #shellScript.append("%(env)s %(command)s <( <<'SCRIPT'" % {"env": ENV, "command": command})
+        shellScript = [ "#!%(shebang)s %(command)s" % { 
+            "shebang": shebang,
+            "command": command } ]
+
+        #shellScript.extend(scriptLines[1:])
+        shellScript.extend(scriptLines)
+        
+        #shellScript.append("SCRIPT")
+        #shellScript.append(")")
     else:
         shellScript.extend(scriptLines)
     return "\n".join(shellScript)
@@ -160,10 +174,10 @@ def buildShellScriptContext(script, environment, variables):
         variables)
     return scriptFile, scriptEnvironment
 
-def makeExecutableTempFile(content, directory):
+def makeExecutableTempFile(content, directory, prefix="script"):
     # TODO: Mejorara la generacion de temp, se borra no se borra que onda
     #tempFile = tempfile.NamedTemporaryFile(prefix='pmx', dir = directory)
-    descriptor, name = tempfile.mkstemp(prefix='pmx', dir = directory)
+    descriptor, name = tempfile.mkstemp(prefix=prefix, dir = directory)
     tempFile = os.fdopen(descriptor, 'w+')
     tempFile.write(six.PY3 and content or encoding.to_fs(content))
     tempFile.close()

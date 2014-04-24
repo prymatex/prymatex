@@ -49,19 +49,15 @@ def from_fs(string):
     """
     Return a unicode version of string decoded using the file system encoding.
     """
-    if not isinstance(string, six.string_types): # string is a QByteArray
-        string = six.text_type(string, FS_ENCODING)
-    elif not isinstance(string, six.text_type):
-        try:
-            return string.decode(FS_ENCODING)
-        except (UnicodeError, TypeError):
-            pass
+    try:
+        return six.string_types(string).decode(FS_ENCODING)
+    except (UnicodeError, TypeError):
+        pass
     return string
 
 def to_fs(unic):
     """
-    Return a byte string version of unic encoded using the file
-    system encoding.
+    Return a byte string version of unic encoded using the file system encoding.
     """
     try:
         return six.text_type(unic).encode(FS_ENCODING)

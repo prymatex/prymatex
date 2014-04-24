@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 import fnmatch
 from bisect import bisect
@@ -289,8 +290,12 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         def onQProcessFinished(context):
             def _finished(exitCode, exitStatus):
                 self.processTableModel.removeProcess(context.process)
-                context.errorValue = encoding.from_fs(context.process.readAllStandardError())
-                context.outputValue = encoding.from_fs(context.process.readAllStandardOutput())
+                context.errorValue = encoding.from_fs(
+                    "%s" % context.process.readAllStandardError()
+                )
+                context.outputValue = encoding.from_fs(
+                    "%s" % context.process.readAllStandardOutput()
+                )
                 context.outputType = exitCode
                 context.callback(context)
             return _finished
