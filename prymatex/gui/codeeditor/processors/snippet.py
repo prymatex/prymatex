@@ -9,10 +9,11 @@ from prymatex.support.processor import SnippetProcessorMixin
 class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin):
     def configure(self, **kwargs):
         CodeEditorBaseProcessor.configure(self, **kwargs)
+        self.snippetWrapper = QtGui.QTextCursor(self.textCursor)
         self.tabKeyBehavior = kwargs.get("tabKeyBehavior",
             self.editor.tabKeyBehavior())
         self.indentation = kwargs.get("indentation", 
-            self.editor.blockUserData(self.cursorWrapper.block()).indent)
+            self.editor.blockUserData(self.snippetWrapper.block()).indent)
         self.backward = False
 
     # ---------- Override SnippetProcessorMixin API
@@ -25,10 +26,10 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
 
     def endRender(self):
         self.__endPosition = self.caretPosition()
-        self.editor.updatePlainText(self.output, self.cursorWrapper)
+        self.editor.updatePlainText(self.output, self.snippetWrapper)
 
     def caretPosition(self):
-        return self.cursorWrapper.selectionStart() + len(self.output)
+        return self.snippetWrapper.selectionStart() + len(self.output)
 
     def insertText(self, text):
         # Replace new lines and tabs
@@ -53,7 +54,7 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
     def setHolderChoiceIndex(self, index):
         if index != -1:
             self.bundleItem.setHolderContent(index)
-            self.render(self.cursorWrapper)
+            self.render(self.snippetWrapper)
             if self.nextHolder():
                 self.selectHolder()
         elif self.backward and self.previousHolder() or self.nextHolder():
@@ -70,7 +71,7 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         self.endExecution(self.bundleItem)
 
     def render(self, cursor):
-        self.cursorWrapper = cursor
+        self.snippetWrapper = cursor
         self.bundleItem.render(self)
     
     # ---------- Holder navigation

@@ -44,7 +44,7 @@ class TabTriggerHelper(CodeEditorKeyHelper):
 
     def execute(self, event = None, cursor = None, **kwargs):
         #Inserto los items
-        self.editor.insertBundleItem(self.items, cursorWrapper = self.triggerCursor)
+        self.editor.insertBundleItem(self.items, textCursor = self.triggerCursor)
 
 class SmartTypingPairsHelper(CodeEditorKeyHelper):
     def accept(self, event = None, cursor = None, **kwargs):

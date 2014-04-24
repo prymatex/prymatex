@@ -10,14 +10,14 @@ class CodeEditorBaseProcessor(QtCore.QObject):
     def __init__(self, editor):
         QtCore.QObject.__init__(self, editor)
         self.editor = editor
-        self.cursorWrapper = None
+        self.textCursor = None
         self.bundleItem = None
 
     def currentType(self):
         return self.bundleItem is not None and self.bundleItem.type() or ""
 
     def configure(self, **kwargs):
-        self.cursorWrapper = kwargs.get("cursorWrapper", 
+        self.textCursor = kwargs.get("textCursor", 
             self.editor.textCursor())
         self.baseEnvironment = kwargs.get("environment", {})
 
@@ -44,5 +44,5 @@ class CodeEditorBaseProcessor(QtCore.QObject):
         return self.__env
 
     def shellVariables(self):
-        leftSettings, rightSettings = self.editor.settings(self.cursorWrapper)
+        leftSettings, rightSettings = self.editor.settings(self.textCursor)
         return rightSettings.shellVariables + list(self.bundleItem.variables().items())

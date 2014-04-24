@@ -53,7 +53,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
     #------ Retrieve text
     def wordUnderCursor(self, cursor = None):
         #Como cambio el cursor hago una copia
-        cursor =  QtGui.QTextCursor(cursor or self.textCursor())
+        cursor = cursor is not None and QtGui.QTextCursor(cursor) or self.textCursor()
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
         return cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
 

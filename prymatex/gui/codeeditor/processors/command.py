@@ -9,6 +9,7 @@ from prymatex.support.processor import CommandProcessorMixin
 class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin):
     def configure(self, **kwargs):
         CodeEditorBaseProcessor.configure(self, **kwargs)
+        self.inputWrapper = QtGui.QTextCursor(self.textCursor)
         self.asynchronous = kwargs.get("asynchronous", True)
         self.disableIndent = kwargs.get("disableIndent", False)
         self.errorCommand = kwargs.get("errorCommand", False)
@@ -42,30 +43,30 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
     
     # --------------------- Inputs
     def selection(self, inputFormat = None):
-        if self.cursorWrapper.hasSelection():
-            text = self.editor.selectedTextWithEol(self.cursorWrapper)
+        if self.inputWrapper.hasSelection():
+            text = self.editor.selectedTextWithEol(self.inputWrapper)
             if inputFormat == "xml":
                 firstBlock, lastBlock = self.editor.selectionBlockStartEnd()
                 return self.formatAsXml(text, firstBlock, lastBlock,
-                    self.cursorWrapper.selectionStart() - firstBlock.position(),
-                    self.cursorWrapper.selectionEnd() - lastBlock.position())
+                    self.inputWrapper.selectionStart() - firstBlock.position(),
+                    self.inputWrapper.selectionEnd() - lastBlock.position())
             else:
                 return text
 
     def document(self, inputFormat = None):
-        self.cursorWrapper.select(QtGui.QTextCursor.Document)
+        self.inputWrapper.select(QtGui.QTextCursor.Document)
         return self.selection(inputFormat)
 
     def line(self, inputFormat = None):
-        self.cursorWrapper.select(QtGui.QTextCursor.LineUnderCursor)
+        self.inputWrapper.select(QtGui.QTextCursor.LineUnderCursor)
         return self.selection(inputFormat)
 
     def character(self, inputFormat = None):
-        self.cursorWrapper.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
+        self.inputWrapper.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
         return self.selection(inputFormat)
 
     def scope(self, inputFormat = None):
-        token = self.editor.tokenAtPosition(self.cursorWrapper.position())
+        token = self.editor.tokenAtPosition(self.inputWrapper.position())
         return token.chunk
 
     def selectedText(self, inputFormat = None):
@@ -73,8 +74,8 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
 
     def word(self, inputFormat = None):
         word, start, end = self.editor.currentWord()
-        self.cursorWrapper.setPosition(start)
-        self.cursorWrapper.setPosition(end, QtGui.QTextCursor.KeepAnchor)
+        self.inputWrapper.setPosition(start)
+        self.inputWrapper.setPosition(end, QtGui.QTextCursor.KeepAnchor)
         return word
 
     # ----------------- Before Running Command
@@ -109,7 +110,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
 
     def replaceSelectedText(self, context, outputFormat = None):
         print(context.outputValue)
-        self.editor.updatePlainText(context.outputValue, cursor = self.cursorWrapper)
+        self.editor.updatePlainText(context.outputValue, cursor = self.inputWrapper)
 
     def replaceDocument(self, context, outputFormat = None):
         self.editor.updatePlainText(context.outputValue)
@@ -120,14 +121,14 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
     # ------------ Version 2
     def replaceInput(self, context, outputFormat = None):
         if outputFormat == "text":
-            self.cursorWrapper.insertText(context.outputValue)
+            self.inputWrapper.insertText(context.outputValue)
         elif outputFormat == "html":
-            self.cursorWrapper.appendHtml(context.outputValue)
+            self.inputWrapper.appendHtml(context.outputValue)
         elif outputFormat == "snippet":
             self.insertAsSnippet(context)
 
     def insertText(self, context, outputFormat = None):
-        self.cursorWrapper.insertText(context.outputValue)
+        self.inputWrapper.insertText(context.outputValue)
 
     def atCaret(self, context, outputFormat = None):
         print("atCaret")
@@ -136,8 +137,8 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
         print("afterInput")
 
     def afterSelectedText(self, context, outputFormat = None):
-        self.cursorWrapper.setPosition(self.cursorWrapper.selectionEnd())
-        self.cursorWrapper.insertText(context.outputValue)
+        self.inputWrapper.setPosition(self.inputWrapper.selectionEnd())
+        self.inputWrapper.insertText(context.outputValue)
 
     def insertAsSnippet(self, context, outputFormat = None):
         # Build Snippet
@@ -146,7 +147,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
             tabTrigger = context.bundleItem.tabTrigger)
         # Insert snippet
         self.editor.insertBundleItem(snippet,
-            cursorWrapper = self.cursorWrapper,
+            textCursor = self.textCursor,
             disableIndent = self.disableIndent)
 
     def showAsHTML(self, context, outputFormat = None):
@@ -158,7 +159,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
         if timeout > 2000:
             timeout = 2000
 
-        point = self.editor.cursorRect(self.cursorWrapper).bottomRight()
+        point = self.editor.cursorRect(self.inputWrapper).bottomRight()
         point = self.editor.mapToGlobal(point)
         callbacks = {
             'copy': lambda s = message: QtGui.qApp.instance().clipboard().setText(s)
