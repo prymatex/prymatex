@@ -50,9 +50,9 @@ def from_fs(string):
     Return a unicode version of string decoded using the file system encoding.
     """
     try:
-        return six.string_types(string).decode(FS_ENCODING)
-    except (UnicodeError, TypeError):
-        pass
+        return six.text_type(string, FS_ENCODING)
+    except (UnicodeError, TypeError) as e:
+        print(e)
     return string
 
 def to_fs(unic):

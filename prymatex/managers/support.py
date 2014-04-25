@@ -290,12 +290,12 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         def onQProcessFinished(context):
             def _finished(exitCode, exitStatus):
                 self.processTableModel.removeProcess(context.process)
-                context.errorValue = encoding.from_fs(
-                    "%s" % context.process.readAllStandardError()
-                )
-                context.outputValue = encoding.from_fs(
-                    "%s" % context.process.readAllStandardOutput()
-                )
+                errorValue = context.process.readAllStandardError()
+                print(dir(errorValue))
+                context.errorValue = encoding.from_fs(errorValue)
+                outputValue = context.process.readAllStandardOutput()
+                print(dir(outputValue))
+                context.outputValue = encoding.from_fs(outputValue)
                 context.outputType = exitCode
                 context.callback(context)
             return _finished
