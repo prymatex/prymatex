@@ -56,17 +56,18 @@ def shebang_patch(shebang, environment):
 
 def shebang_command(shebang, environment):
     shebangParts = shebang.split()
+    print(shebangParts)
     if shebangParts[0].startswith("env") and len(shebangParts) > 1:
         envKey = shebangParts[1].upper()
         patchValue = environment.get("TM_%s" % envKey, environment.get( "PMX_%s" % envKey))
         if patchValue:
             return "%s %s" % (patchValue, " ".join(shebangParts[2:]))
     else:
-        #No portable shebang
+        # No portable shebang
         for key, value in environment.items():
-            for prefix in [ "TM_", "PMX_" ]:
+            for prefix in ( "TM_", "PMX_" ):
                 if key.startswith(prefix) and key[len(prefix):].lower() in shebang:
-                    return ("%s %s") % (value, " ".join(shebangParts[1:]))
+                    return ("%s %s") % (value, " ".join(shebangParts[2:]))
     return " ".join(shebangParts[1:])
 
 def prepareShellScript(script, environment, variables):

@@ -499,9 +499,9 @@ html_footer
 
     def setComponentState(self, componentState):
         super(PrymatexMainWindow, self).setComponentState(componentState)
-        
+
         # Restore open documents
-        for editorState in componentState["editors"]:
+        for editorState in componentState.get("editors", []):
             editor = self.application.createEditorInstance(
                 name = editorState["name"], 
                 parent = self)
@@ -509,10 +509,12 @@ html_footer
             self.addEditor(editor)
 
         # Restore geometry
-        self.restoreGeometry(hex_to_qbytearray(componentState["geometry"]))
-        
+        if "geometry" in componentState:
+            self.restoreGeometry(hex_to_qbytearray(componentState["geometry"]))
+
         # Restore self
-        QtGui.QMainWindow.restoreState(self, hex_to_qbytearray(componentState["self"]))
+        if "self" in componentState:
+            QtGui.QMainWindow.restoreState(self, hex_to_qbytearray(componentState["self"]))
 
     # ------------ Drag and Drop
     def dragEnterEvent(self, event):

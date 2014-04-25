@@ -833,7 +833,7 @@ class SupportBaseManager(object):
     def createThemeStyle(self, theme, namespaceName = None, **attrs):
         namespace = self.safeNamespace(namespaceName)
         
-        theme = self.ensureThemeIsSafe(theme, namespace)
+        theme = self.ensureBundleItemIsSafe(theme, namespace)
         
         style = theme.createThemeStyle(attrs)
 
@@ -844,18 +844,18 @@ class SupportBaseManager(object):
     def updateThemeStyle(self, style, namespaceName = None, **attrs):
         namespace = self.safeNamespace(namespaceName)
         
-        theme = self.ensureThemeIsSafe(style.theme, namespace)
+        theme = self.ensureBundleItemIsSafe(style.theme, namespace)
         
         # Do update and save
         style.update(attrs)
         self.saveManagedObject(theme, namespace)
-        self.modifyTheme(theme)
+        self.modifyBundleItem(theme)
         return style
 
     def deleteThemeStyle(self, style, namespaceName = None):
         namespace = self.safeNamespace(namespaceName)
         
-        theme = self.ensureThemeIsSafe(style.theme, namespace)
+        theme = self.ensureBundleItemIsSafe(style.theme, namespace)
         theme.removeThemeStyle(style)
         self.saveManagedObject(theme, namespace)
         self.removeThemeStyle(style)

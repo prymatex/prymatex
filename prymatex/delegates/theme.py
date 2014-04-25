@@ -59,10 +59,10 @@ class FontStyleDelegate(QtGui.QStyledItemDelegate):
             button.setCheckable(True)
             button.setMaximumWidth(30)
             layout.addWidget(button)
-        
-        buttons[0].setChecked('bold' in flags)
-        buttons[1].setChecked('italic' in flags)
-        buttons[2].setChecked('underline' in flags)
+        if flags:
+            buttons[0].setChecked('bold' in flags)
+            buttons[1].setChecked('italic' in flags)
+            buttons[2].setChecked('underline' in flags)
         
         layout.buttons = buttons
         return layout
