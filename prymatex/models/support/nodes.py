@@ -196,7 +196,7 @@ class ThemeStyleTableRow(object):
     def update(self, dataHash):
         self.__settings = None              # Clean cache
         settings = {}
-        for key, value in dataHash['settings'].items():
+        for key, value in dataHash.get('settings', {}).items():
             if isinstance(value, QtGui.QColor):
                 value = color2rgba(value)
             if key == 'fontStyle':

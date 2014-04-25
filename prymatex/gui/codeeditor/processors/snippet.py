@@ -13,7 +13,7 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         self.tabKeyBehavior = kwargs.get("tabKeyBehavior",
             self.editor.tabKeyBehavior())
         self.indentation = kwargs.get("indentation", 
-            self.editor.blockUserData(self.snippetWrapper.block()).indent)
+            self.editor.indentation())
         self.backward = False
 
     # ---------- Override SnippetProcessorMixin API

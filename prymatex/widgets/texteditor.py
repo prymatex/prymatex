@@ -110,6 +110,15 @@ class TextEditWidget(QtGui.QPlainTextEdit):
                 return line[start - blockPosition : end - blockPosition], start, end
         return "", cursor.position(), cursor.position()
 
+    def indentation(self, cursor = None, direction = "left"):
+        cursor =  cursor or self.textCursor()
+        sourceText = cursor.block().text()
+        if direction == "left":
+            sourceText = sourceText[:cursor.columnNumber()]
+        elif direction == "right":
+            sourceText = sourceText[cursor.columnNumber():]
+        return text.white_space(sourceText)
+        
     #------ Retrieve cursors and blocks
     def newCursorAtPosition(self, position, anchor = None):
         cursor = QtGui.QTextCursor(self.document())

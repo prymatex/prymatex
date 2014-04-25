@@ -262,10 +262,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.__blockUserDataHandlers.append(handler)
 
     def blockUserData(self, block):
+        # TODO: If block not is valid ?
         if block.userData() is None:
             userData = CodeEditorBlockUserData()
             # Indent and content
-            userData.indent = ""
+            userData.indentation = ""
 
             # Folding
             userData.foldingMark = PreferenceMasterSettings.FOLDING_NONE
@@ -280,7 +281,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def processBlockUserData(self, sourceText, block, userData):
         # Indent
-        userData.indent = text.white_space(sourceText)
+        userData.indentation = text.white_space(sourceText)
         # Folding
         # TODO: Ver si lo puedo sacar del scope basico o hace falta tomar de algun lugar
         # Principio, fin de la linea
@@ -652,7 +653,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                     while blockPattern.isValid() and self.blockUserData(blockPattern).blank():
                         blockPattern = blockPattern.next()
                     if blockPattern.isValid():
-                        indentLen = len(self.blockUserData(blockPattern).indent)
+                        indentLen = len(self.blockUserData(blockPattern).indentation)
                         padding = characterWidth + offset.x()
                         for s in range(0, indentLen // self.indentationWidth):
                             positionX = (characterWidth * self.indentationWidth * s) + padding
@@ -721,26 +722,26 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         userData = self.blockUserData(block)
         _, settings = self.settings(cursor)
 
-        indentMarks = settings.indent(block.text()[:positionInBlock])
+        indentationFlags = settings.indentationFlags(block.text()[:positionInBlock])
 
-        indent = self.tabKeyBehavior()
+        indentation = self.tabKeyBehavior()
 
-        if settings.INDENT_INCREASE in indentMarks:
-            self.logger.debug("Increase indent")
-            blockIndent = userData.indent + indent
-        elif settings.INDENT_NEXTLINE in indentMarks:
+        if settings.INDENT_INCREASE in indentationFlags:
+            self.logger.debug("Increase indentation")
+            blockIndent = userData.indentation + indentation
+        elif settings.INDENT_NEXTLINE in indentationFlags:
             #TODO: Creo que este no es el correcto
-            self.logger.debug("Increase next line indent")
-            blockIndent = userData.indent + indent
-        elif settings.UNINDENT in indentMarks:
+            self.logger.debug("Increase next line indentation")
+            blockIndent = userData.indentation + indentation
+        elif settings.UNINDENT in indentationFlags:
             self.logger.debug("Unindent")
             blockIndent = ""
-        elif settings.INDENT_DECREASE in indentMarks:
-            self.logger.debug("Decrease indent")
-            blockIndent = userData.indent[:-len(indent)]
+        elif settings.INDENT_DECREASE in indentationFlags:
+            self.logger.debug("Decrease indentation")
+            blockIndent = userData.indentation[:-len(indentation)]
         else:
-            self.logger.debug("Preserve indent")
-            blockIndent = userData.indent[:positionInBlock]
+            self.logger.debug("Preserve indentation")
+            blockIndent = userData.indentation[:positionInBlock]
         cursor.insertText("\n%s" % blockIndent)
         self.ensureCursorVisible()
 
@@ -856,10 +857,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def _find_indented_block_fold_close(self, block):
         assert self.isFoldingIndentedBlockStart(block), "Block isn't folding indented start"
-        indent = self.blockUserData(block).indent
-        indentedBlock = self.findIndentedBlock(block, indent = indent, comparison = operator.le)
-        while self.isFoldingIndentedBlockIgnore(indentedBlock):
-            indentedBlock = self.findIndentedBlock(indentedBlock, indent = indent, comparison = operator.le)
+        indentation = self.blockUserData(block).indentation
+        indentedBlock = self.findIndentedBlock(block, indentation = indentation, comparison = operator.le)
+        while indentedBlock.isValid() and self.isFoldingIndentedBlockIgnore(indentedBlock):
+            indentedBlock = self.findIndentedBlock(indentedBlock, indentation = indentation, comparison = operator.le)
         if indentedBlock.isValid():
             return self.findNoBlankBlock(indentedBlock, "up")
         else:
@@ -1023,11 +1024,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             block = block.next() if direction == "down" else block.previous()
         return block
 
-    def findIndentedBlock(self, block, indent = None, direction = "down", comparison = operator.eq):
-        """ Return equal indent block """
-        indent = indent if indent is not None else self.blockUserData(block).indent
+    def findIndentedBlock(self, block, indentation = None, direction = "down", comparison = operator.eq):
+        """ Return equal indentation block """
+        indentation = indentation if indentation is not None else self.blockUserData(block).indentation
         block = self.findNoBlankBlock(block, direction)
-        while block.isValid() and not comparison(self.blockUserData(block).indent, indent):
+        while block.isValid() and not comparison(self.blockUserData(block).indentation, indentation):
             block = self.findNoBlankBlock(block, direction)
         return block
 
@@ -1051,9 +1052,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         while True:
             data = start.userData()
             if self.indentUsingSpaces:
-                counter = self.tabWidth if len(data.indent) > self.tabWidth else len(data.indent)
+                counter = self.tabWidth if len(data.indentation) > self.tabWidth else len(data.indentation)
             else:
-                counter = 1 if len(data.indent) else 0
+                counter = 1 if len(data.indentation) else 0
             if counter > 0:
                 cursor.setPosition(start.position())
                 for _ in range(counter):
