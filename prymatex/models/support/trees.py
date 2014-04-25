@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtGui, QtCore
-from prymatex.qt.helpers import keyequivalent2keysequence, keysequence2keyequivalent
 
 from prymatex.models.mimes import PyMimeData
 

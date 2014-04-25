@@ -3,7 +3,7 @@
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.compat import getOpenFileNames
-from prymatex.qt.helpers import text2objectname, text2iconname, create_action
+from prymatex.qt.helpers import text2objectname, text_to_iconname, create_action
 
 from prymatex import resources
 from prymatex.core import exceptions
@@ -234,7 +234,7 @@ class MainMenuMixin(object):
         # ------------- Edit menu
         def globalEditAction(text):
             objectName = text2objectname(text)
-            iconName = text2iconname(text, prefix = "edit")
+            iconName = text_to_iconname(text, prefix = "edit")
             return {
                 "text": text,
                 'sequence': resources.get_sequence("Global", objectName),

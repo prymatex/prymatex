@@ -4,7 +4,7 @@
 import unittest
 
 from prymatex.qt import QtGui, QtCore
-from prymatex.qt.helpers.keysequences import (keysequence2keyequivalent, keyequivalent2keysequence)
+from prymatex.qt.helpers.keysequences import (keysequence_to_keyequivalent, keyequivalent_to_keysequence)
 
 class KeySequencesTests(unittest.TestCase):
     def setUp(self):
@@ -13,11 +13,11 @@ class KeySequencesTests(unittest.TestCase):
             ('@&', QtCore.Qt.META + QtCore.Qt.SHIFT + QtCore.Qt.Key_Ampersand ), 
             ('@~)', QtCore.Qt.META + QtCore.Qt.SHIFT + QtCore.Qt.ALT + QtCore.Qt.Key_ParenRight )]
 
-    def test_keysequence2keyequivalent(self):
+    def test_keysequence_to_keyequivalent(self):
         for keyeq, keysec in self.keyTestData:
-            self.assertEqual(set(keyeq), set(keysequence2keyequivalent(keysec)))
+            self.assertEqual(set(keyeq), set(keysequence_to_keyequivalent(keysec)))
     
-    def test_keyequivalent2keysequence(self):
+    def test_keyequivalent_to_keysequence(self):
         for keyeq, keysec in self.keyTestData:
-            self.assertEqual(keyequivalent2keysequence(keyeq), keysec)
+            self.assertEqual(keyequivalent_to_keysequence(keyeq), keysec)
         

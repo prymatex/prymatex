@@ -96,8 +96,7 @@ def prepareShellScript(script, environment, variables):
             "shebang": shebang,
             "command": command } ]
 
-        #shellScript.extend(scriptLines[1:])
-        shellScript.extend(scriptLines)
+        shellScript.extend(scriptLines[1:])
         
         #shellScript.append("SCRIPT")
         #shellScript.append(")")

@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from prymatex.qt import QtGui, QtCore
-from prymatex.qt.helpers import keyequivalent2keysequence, keysequence2keyequivalent, rgba2color, color2rgba
+from prymatex.qt.helpers import keyequivalent_to_keysequence, keysequence_to_keyequivalent, rgba2color, color2rgba
 
 from prymatex import resources
 
@@ -43,11 +43,11 @@ class BundleItemTreeNode(TreeNodeBase):
     # ----------- Bundle Item decoration -----------
     def keySequence(self):
         if hasattr(self.__bundleItem, "keyEquivalent") and isinstance(self.__bundleItem.keyEquivalent, six.string_types):
-            return keyequivalent2keysequence(self.__bundleItem.keyEquivalent)
+            return keyequivalent_to_keysequence(self.__bundleItem.keyEquivalent)
     
     def keyCode(self):
         if hasattr(self.__bundleItem, "keyEquivalent") and isinstance(self.__bundleItem.keyEquivalent, six.string_types):
-            return keyequivalent2keysequence(self.__bundleItem.keyEquivalent)
+            return keyequivalent_to_keysequence(self.__bundleItem.keyEquivalent)
     
     def icon(self):
         return resources.get_icon("bundle-item-%s" % self.type())
@@ -98,7 +98,7 @@ class BundleItemTreeNode(TreeNodeBase):
     
     def update(self, dataHash):
         if 'keySequence' in dataHash and isinstance(dataHash['keySequence'], QtGui.QKeySequence):
-            dataHash['keyEquivalent'] = keysequence2keyequivalent(int(dataHash['keySequence']))
+            dataHash['keyEquivalent'] = keysequence_to_keyequivalent(int(dataHash['keySequence']))
         if 'settings' in dataHash and isinstance(dataHash['settings'], dict):
             settings = {}
             for key, value in dataHash['settings'].items():

@@ -10,7 +10,7 @@ import difflib
 from prymatex.utils import text
 
 from prymatex.qt import QtGui, QtCore
-from prymatex.qt.helpers import textcursor2tuple
+from prymatex.qt.helpers import textcursor_to_tuple
 from functools import reduce
 
 class TextEditWidget(QtGui.QPlainTextEdit):
@@ -376,7 +376,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
     #------ Convert Text
     def __convert_text(self, cursor = None, convertFunction = lambda x: x):
         cursor = cursor or self.textCursor()
-        tupleCursor = textcursor2tuple(cursor)
+        tupleCursor = textcursor_to_tuple(cursor)
         cursor.beginEditBlock()
         if not cursor.hasSelection():
             word, start, end = self.word(cursor = cursor)

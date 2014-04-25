@@ -7,7 +7,7 @@ from string import Template
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.compat import getSaveFileName
 from prymatex.qt.helpers import (text2objectname, create_menu, extend_menu,
-    add_actions, test_actions, center_widget)
+    add_actions, test_actions, center_widget, qbytearray_to_hex, hex_to_qbytearray)
 
 from prymatex import resources
 
@@ -490,10 +490,10 @@ html_footer
               "self": editor.componentState() } for editor in self.editors() ]
 
         # Store geometry
-        componentState["geometry"] = self.saveGeometry().toBase64().data().decode()
+        componentState["geometry"] = qbytearray_to_hex(self.saveGeometry())
 
         # Store self
-        componentState["self"] = QtGui.QMainWindow.saveState(self).toBase64().data().decode()
+        componentState["self"] = qbytearray_to_hex(QtGui.QMainWindow.saveState(self))
 
         return componentState
 
@@ -509,10 +509,10 @@ html_footer
             self.addEditor(editor)
 
         # Restore geometry
-        self.restoreGeometry(QtCore.QByteArray.fromBase64(componentState["geometry"].encode()))
+        self.restoreGeometry(hex_to_qbytearray(componentState["geometry"]))
         
         # Restore self
-        QtGui.QMainWindow.restoreState(self, QtCore.QByteArray.fromBase64(componentState["self"].encode()))
+        QtGui.QMainWindow.restoreState(self, hex_to_qbytearray(componentState["self"]))
 
     # ------------ Drag and Drop
     def dragEnterEvent(self, event):

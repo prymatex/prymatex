@@ -5,9 +5,9 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.utils import text
 
-__all__ = [ "combine_icons", "get_std_icon", "text2iconname" ]
+__all__ = [ "combine_icons", "get_std_icon", "text_to_iconname" ]
 
-def text2iconname(source, sufix = "", prefix = ""):
+def text_to_iconname(source, sufix = "", prefix = ""):
     """&Text Button name -> %{prefix}-text-button-name-%{sufix}"""
     source = [ text.to_alphanumeric(chunk) for chunk in text.lower_case(source).split() ]
     if prefix:

@@ -54,7 +54,7 @@ def _keyboard_layout_keys(key):
 * Alt -> ~
 """
 @memoized
-def keysequence2keyequivalent(sequence):
+def keysequence_to_keyequivalent(sequence):
     nemonic = []
     if sequence & QtCore.Qt.CTRL:
         nemonic.append("^")
@@ -106,7 +106,7 @@ def _keyboard_layout_qtkeys(character):
     return keys
 
 @memoized
-def keyequivalent2keysequence(nemonic):
+def keyequivalent_to_keysequence(nemonic):
     nemonic = list(nemonic)
     sequence = []
     if "^" in nemonic:
