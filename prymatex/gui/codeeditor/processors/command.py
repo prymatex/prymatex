@@ -14,69 +14,74 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
         self.disableIndent = kwargs.get("disableIndent", False)
         self.errorCommand = kwargs.get("errorCommand", False)
         
-    def formatAsXml(self, text, firstBlock, lastBlock, startIndex, endIndex):
-        result = []
-        block = firstBlock
-        for line in text.splitlines(True):
-            userData = self.editor.blockUserData(block)
-            if block == firstBlock and block == lastBlock:
-                ranges = userData.ranges(start = startIndex, end = endIndex)
-            elif block == firstBlock:
-                ranges = userData.ranges(start = startIndex)
-            elif block == lastBlock:
-                ranges = userData.ranges(end = endIndex)
-            else:
-                ranges = userData.ranges()
-            lineXML = ""
-            start = ranges.pop(0)
-            token = userData.tokenAtPosition(start)
-            for index in ranges:
-                lineXML += token.scope.to_xml(line[start:index])
-                token = userData.tokenAtPosition(index)
-                start = index
-            # TODO Ver si esta bien esto del replace
-            result.append(lineXML.replace('\n', ''))
-            if block == lastBlock:
-                break
-            block = block.next()
-        return "\n".join(result)
+    def _format_input(self, source, f):
+        if f == "xml":
+            # TODO Terminar la salida en XML
+            firstBlock, lastBlock = self.editor.selectionBlockStartEnd(self.inputWrapper)
+            startIndex = self.inputWrapper.selectionStart() - firstBlock.position()
+            endIndex = self.inputWrapper.selectionEnd() - lastBlock.position()
+            result = []
+            block = firstBlock
+            for line in source.splitlines(True):
+                userData = self.editor.blockUserData(block)
+                if block == firstBlock and block == lastBlock:
+                    ranges = userData.ranges(start = startIndex, end = endIndex)
+                elif block == firstBlock:
+                    ranges = userData.ranges(start = startIndex)
+                elif block == lastBlock:
+                    ranges = userData.ranges(end = endIndex)
+                else:
+                    ranges = userData.ranges()
+                lineXML = ""
+                start = ranges.pop(0)
+                token = userData.tokenAtPosition(start)
+                for index in ranges:
+                    lineXML += token.scope.to_xml(line[start:index])
+                    token = userData.tokenAtPosition(index)
+                    start = index
+                result.append(lineXML)
+                if block == lastBlock:
+                    break
+                block = block.next()
+            return self.editor.lineSeparator().join(result)
+        return source
     
     # --------------------- Inputs
-    def selection(self, inputFormat = None):
-        if self.inputWrapper.hasSelection():
-            text = self.editor.selectedTextWithEol(self.inputWrapper)
-            if inputFormat == "xml":
-                firstBlock, lastBlock = self.editor.selectionBlockStartEnd()
-                return self.formatAsXml(text, firstBlock, lastBlock,
-                    self.inputWrapper.selectionStart() - firstBlock.position(),
-                    self.inputWrapper.selectionEnd() - lastBlock.position())
-            else:
-                return text
+    def _get_input(self, inputMode):
+        source = self.editor.selectedTextWithEol(self.inputWrapper)
+        if inputMode == "fallback":
+            self.textCursor = self.inputWrapper
+        return source
 
-    def document(self, inputFormat = None):
+    def selection(self, inputFormat = None, inputMode = None):
+        return self._format_input(self._get_input(inputMode), inputFormat)
+
+    def document(self, inputFormat = None, inputMode = None):
         self.inputWrapper.select(QtGui.QTextCursor.Document)
-        return self.selection(inputFormat)
+        return self._format_input(self._get_input(inputMode), inputFormat)
 
-    def line(self, inputFormat = None):
+    def line(self, inputFormat = None, inputMode = None):
         self.inputWrapper.select(QtGui.QTextCursor.LineUnderCursor)
-        return self.selection(inputFormat)
+        return self._format_input(self._get_input(inputMode), inputFormat)
 
-    def character(self, inputFormat = None):
+    def character(self, inputFormat = None, inputMode = None):
         self.inputWrapper.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
-        return self.selection(inputFormat)
+        return self._format_input(self._get_input(inputMode), inputFormat)
 
-    def scope(self, inputFormat = None):
+    def scope(self, inputFormat = None, inputMode = None):
         token = self.editor.tokenAtPosition(self.inputWrapper.position())
-        return token.chunk
+        self.inputWrapper.setPosition(token.start)
+        self.inputWrapper.setPosition(token.end, QtGui.QTextCursor.KeepAnchor)
+        return self._format_input(self._get_input(inputMode), inputFormat)
 
-    def selectedText(self, inputFormat = None):
-        return self.selection(inputFormat)
+    def selectedText(self, inputFormat = None, inputMode = None):
+        return self._format_input(self._get_input(inputMode), inputFormat)
 
-    def word(self, inputFormat = None):
-        word, start, end = self.editor.currentWord()
+    def word(self, inputFormat = None, inputMode = None):
+        _, start, end = self.editor.currentWord()
         self.inputWrapper.setPosition(start)
         self.inputWrapper.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-        return word
+        return self._format_input(self._get_input(inputMode), inputFormat)
 
     # ----------------- Before Running Command
     def saveModifiedFiles(self):
@@ -109,7 +114,6 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
         pass
 
     def replaceSelectedText(self, context, outputFormat = None):
-        print(context.outputValue)
         self.editor.updatePlainText(context.outputValue, cursor = self.inputWrapper)
 
     def replaceDocument(self, context, outputFormat = None):

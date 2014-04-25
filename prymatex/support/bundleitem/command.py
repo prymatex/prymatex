@@ -134,28 +134,24 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         return environment
 
     def getInputText(self, processor):
-        def getInputTypeAndValue(inputType, inputFormat, mode):
-            # TODO: Mode
-            if inputType is None or inputType == "none": return None, None
-            return inputType, getattr(processor, inputType)(inputFormat)
+        def getInputTypeAndValue(inputType, inputFormat, inputMode):
+            if inputType in (None, False, "none"): return None, None
+            return inputType, getattr(processor, inputType)(inputFormat = inputFormat, inputMode = inputMode)
 
         # -------- Try input
-        inputType, value = getInputTypeAndValue(self.input, self.inputFormat, mode = "input")
+        inputType, inputValue = getInputTypeAndValue(self.input, self.inputFormat, "input")
 
         # -------- Try fallback
-        if value is None and self.fallbackInput is not None:
-            inputType, value = getInputTypeAndValue(self.fallbackInput, self.inputFormat, mode = "fallback")
+        if not inputValue:
+            fallbackInput = self.fallbackInput or (self.input == 'selection' and 'document')
+            inputType, inputValue = getInputTypeAndValue(fallbackInput, self.inputFormat, "fallback")
 
         # -------- Try standard
-        if value is None and self.standardInput is not None:
-            inputType, value = getInputTypeAndValue(self.standardInput, self.inputFormat, mode = "standard")
-
-        if inputType == 'selection' and value is None:
-            value = processor.document(self.inputFormat)
-            inputType = "document"
-        elif value is None:
-            inputType = None
-        return inputType, value
+        if not inputValue:
+            inputType, inputValue = getInputTypeAndValue(self.standardInput, self.inputFormat, "standard")
+        
+        print(inputValue)
+        return inputType, inputValue
 
     def systemCommand(self):
         if self.winCommand is not None and sys.platform.count("win"):
@@ -201,8 +197,6 @@ echo Selection: "$TM_SELECTED_TEXT"''',
     def afterExecute(self, processor, context):
         outputHandler = self.getOutputHandler(context.outputType)
 
-        print(outputHandler)
-        print(context.outputValue)
         handlerFunction = getattr(processor, outputHandler, None)
         if handlerFunction is not None:
             handlerFunction(context, self.outputFormat)

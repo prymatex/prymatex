@@ -293,11 +293,9 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
                 self.processTableModel.removeProcess(context.process)
                 errorValue = qbytearray_to_text(
                     context.process.readAllStandardError())
-                print(dir(errorValue))
                 context.errorValue = encoding.from_fs(errorValue)
                 outputValue = qbytearray_to_text(
                     context.process.readAllStandardOutput())
-                print(dir(outputValue))
                 context.outputValue = encoding.from_fs(outputValue)
                 context.outputType = exitCode
                 context.callback(context)

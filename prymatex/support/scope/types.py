@@ -28,6 +28,8 @@ class ScopeType(object):
         ret = self.anchor_to_previous and "> " or ""
         return ret + ".".join(self.atoms)
 
+    __unicode__ = __str__
+    
     def __repr__(self):
         return "%s anchor_to_previous:%s\n[%s]" % (self.__class__.__name__, self.anchor_to_previous, "\n".join([repr(a) for a in self.atoms]))
 
@@ -66,11 +68,13 @@ class PathType(object):
         ret += self.anchor_to_eol and " $" or ""
         return ret
 
+    __unicode__ = __str__
+    
     def to_open_xml(self):
-        return "".join(["<" + scope + ">" for scope in self.scopes])
+        return "".join(("<%s>" % scope for scope in self.scopes))
 
     def to_close_xml(self):
-        return "".join(["</" + scope + ">" for scope in self.scopes[::-1]])
+        return "".join(("</%s>" % scope for scope in self.scopes[::-1]))
                 
     def rootGroup(self):
         for scope in self.scopes[::-1]:
@@ -155,6 +159,8 @@ class GroupType(object):
     def __str__(self):
         return "(%s)" % self.selector
 
+    __unicode__ = __str__
+
     def __repr__(self):
         return "%s\n[%s]" % (self.__class__.__name__, repr(self.selector))
 
@@ -171,6 +177,8 @@ class FilterType(object):
 
     def __str__(self):
         return "%s:%s" % (self.fltr, self.selector)
+
+    __unicode__ = __str__
 
     def __repr__(self):
         return "%s fltr:%s\n[%s]" % (self.__class__.__name__, self.fltr, repr(self.selector))
@@ -206,7 +214,9 @@ class ExpressionType(object):
         ret += self.negate and "-" or ""
         ret += str(self.selector)
         return ret
-    
+
+    __unicode__ = __str__
+
     def __repr__(self):
         return "%s op:%s negate:%s\n[%s]" % (self.__class__.__name__, self.op, self.negate, repr(self.selector))
     
@@ -219,7 +229,9 @@ class CompositeType(object):
     
     def __str__(self):
         return " ".join([str(c) for c in self.expressions])
-    
+
+    __unicode__ = __str__
+
     def __repr__(self):
         return "%s\n[%s]" % (self.__class__.__name__, "\n".join([repr(e) for e in self.expressions]))
             
@@ -280,6 +292,8 @@ class SelectorType(object):
         
     def __str__(self):
         return  ", ".join([str(c) for c in self.composites])
+
+    __unicode__ = __str__
 
     def __repr__(self):
         return "%s\n[%s]" % (self.__class__.__name__, "\n".join([repr(c) for c in self.composites]))

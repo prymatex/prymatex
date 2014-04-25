@@ -216,11 +216,11 @@ class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
         if value == 'selection':
             self.labelInputOption.setVisible(True)
             self.comboBoxFallbackInput.setVisible(True)
-            index = self.comboBoxFallbackInput.findData(self.changes["fallbackInput"] or "document")
+            index = self.comboBoxFallbackInput.findData(self.changes.get("fallbackInput", "document"))
             if index != -1:
                 self.comboBoxFallbackInput.setCurrentIndex(index)
         else:
-            self.changes.pop('fallbackInput', None)
+            self.changes.pop("fallbackInput", None)
             self.labelInputOption.setVisible(False)
             self.comboBoxFallbackInput.setVisible(False)
     
