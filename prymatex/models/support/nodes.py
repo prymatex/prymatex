@@ -197,7 +197,7 @@ class ThemeStyleTableRow(object):
         self.__settings = None              # Clean cache
         settings = {}
         for key, value in dataHash['settings'].items():
-            if isinstance(value, QtCore.QColor):
+            if isinstance(value, QtGui.QColor):
                 value = color2rgba(value)
             if key == 'fontStyle':
                 settings[key] = " ".join(value)
