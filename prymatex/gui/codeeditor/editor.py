@@ -438,7 +438,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def tabKeyBehavior(self):
         return ' ' * self.indentationWidth if self.indentUsingSpaces else '\t'
 
-    # Flags
+    def blockIndentation(self, block):
+        return self.blockUserData(block).indentation
+
+    # ------------ Flags
     def getFlags(self):
         flags = 0
         options = self.document().defaultTextOption()
@@ -719,29 +722,29 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor = cursor or self.textCursor()
         block = cursor.block()
         positionInBlock = cursor.positionInBlock()
-        userData = self.blockUserData(block)
         _, settings = self.settings(cursor)
 
         indentationFlags = settings.indentationFlags(block.text()[:positionInBlock])
 
-        indentation = self.tabKeyBehavior()
+        tab_behavior = self.tabKeyBehavior()
+        indentation = self.blockIndentation(block)
 
         if settings.INDENT_INCREASE in indentationFlags:
             self.logger.debug("Increase indentation")
-            blockIndent = userData.indentation + indentation
+            blockIndent = indentation + tab_behavior
         elif settings.INDENT_NEXTLINE in indentationFlags:
             #TODO: Creo que este no es el correcto
             self.logger.debug("Increase next line indentation")
-            blockIndent = userData.indentation + indentation
+            blockIndent = indentation + tab_behavior
         elif settings.UNINDENT in indentationFlags:
             self.logger.debug("Unindent")
             blockIndent = ""
         elif settings.INDENT_DECREASE in indentationFlags:
             self.logger.debug("Decrease indentation")
-            blockIndent = userData.indentation[:-len(indentation)]
+            blockIndent = indentation[:-len(tab_behavior)]
         else:
             self.logger.debug("Preserve indentation")
-            blockIndent = userData.indentation[:positionInBlock]
+            blockIndent = indentation[:positionInBlock]
         cursor.insertText("\n%s" % blockIndent)
         self.ensureCursorVisible()
 
@@ -1026,9 +1029,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def findIndentedBlock(self, block, indentation = None, direction = "down", comparison = operator.eq):
         """ Return equal indentation block """
-        indentation = indentation if indentation is not None else self.blockUserData(block).indentation
+        indentation = indentation if indentation is not None else self.blockIndentation(block)
         block = self.findNoBlankBlock(block, direction)
-        while block.isValid() and not comparison(self.blockUserData(block).indentation, indentation):
+        while block.isValid() and not comparison(self.blockIndentation(block), indentation):
             block = self.findNoBlankBlock(block, direction)
         return block
 
@@ -1050,11 +1053,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         start, end = self.selectionBlockStartEnd(cursor)
         cursor.beginEditBlock()
         while True:
-            data = start.userData()
+            indentation_len = len(self.blockIndentation(start))
             if self.indentUsingSpaces:
-                counter = self.tabWidth if len(data.indentation) > self.tabWidth else len(data.indentation)
+                counter = self.tabWidth if indentation_len > self.tabWidth else indentation_len
             else:
-                counter = 1 if len(data.indentation) else 0
+                counter = 1 if indentation_len else 0
             if counter > 0:
                 cursor.setPosition(start.position())
                 for _ in range(counter):

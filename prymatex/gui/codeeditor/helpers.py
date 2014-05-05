@@ -134,7 +134,7 @@ class MoveCursorToHomeHelper(CodeEditorKeyHelper):
     def accept(self, event = None, cursor = None, **kwargs):
         #Solo si el cursor no esta al final de la indentacion
         block = cursor.block()
-        self.newPosition = block.position() + len(block.userData().indent)
+        self.newPosition = block.position() + len(self.editor.blockIndentation(block))
         return self.newPosition != cursor.position()
         
     def execute(self, event = None, cursor = None, **kwargs):
