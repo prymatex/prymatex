@@ -218,7 +218,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     # -------------------- Managers
     def buildPluginManager(self):
         from prymatex.managers.plugins import PluginManager
-        #manager = self.createComponentInstance(PluginManager, self)
+        #manager = self.createComponentInstance(PluginManager, parent = self)
         self.populateComponentClass(PluginManager)
 
         manager = PluginManager(parent = self)
@@ -234,7 +234,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     def buildSupportManager(self):
         from prymatex.managers.support import SupportManager
-        manager = self.createComponentInstance(SupportManager, self)
+        manager = self.createComponentInstance(SupportManager, parent = self)
 
         #Prepare prymatex namespace
         manager.addNamespace('prymatex', config.PMX_SHARE_PATH)
@@ -266,18 +266,18 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     def buildFileManager(self):
         from prymatex.managers.files import FileManager
-        manager = self.createComponentInstance(FileManager, self)
+        manager = self.createComponentInstance(FileManager, parent = self)
 
         manager.fileSytemChanged.connect(self.on_fileManager_fileSytemChanged)
         return manager
 
     def buildProjectManager(self):
         from prymatex.managers.projects import ProjectManager
-        return self.createComponentInstance(ProjectManager, self)
+        return self.createComponentInstance(ProjectManager, parent = self)
 
     def buildStorageManager(self):
         from prymatex.managers.storage import StorageManager
-        return self.createComponentInstance(StorageManager, self)
+        return self.createComponentInstance(StorageManager, parent = self)
 
     def buildSchedulerManager(self):
         from prymatex.utils import coroutines
@@ -285,7 +285,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     def buildServerManager(self):
         from prymatex.managers.server import ServerManager
-        return self.createComponentInstance(ServerManager, self)
+        return self.createComponentInstance(ServerManager, parent = self)
 
     # --------------------- Application events
     def closePrymatex(self):
@@ -318,13 +318,13 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             self.registerConfigurable(componentClass)
 
     # ------------------- Create components
-    def createComponentInstance(self, componentClass, componentParent = None):
+    def createComponentInstance(self, componentClass, **kwargs):
         if not hasattr(componentClass, 'application') or componentClass.application != self:
             self.populateComponentClass(componentClass)
 
         buildedObjects = []
-        def buildComponentInstance(klass, parent):
-            instance = klass(parent = parent)
+        def buildComponentInstance(klass, **kwargs):
+            instance = klass(**kwargs)
 
             # Configure
             self.currentProfile.configure(instance)
@@ -335,12 +335,12 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                 # Filter editors, editors create explicit
                 if issubclass(componentClass, PrymatexEditor):
                     continue
-                componentInstance = buildComponentInstance(componentClass, instance)
+                componentInstance = buildComponentInstance(componentClass, parent = instance)
                 instance.addComponent(componentInstance)
-            buildedObjects.append((instance, parent))
+            buildedObjects.append((instance, kwargs.get("parent", None)))
             return instance
 
-        instance = buildComponentInstance(componentClass, componentParent)
+        instance = buildComponentInstance(componentClass, **kwargs)
 
         # buildedObjects.reverse()
         # Initialize order is important, fist goes the internal components then the main component
@@ -378,15 +378,18 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         group.removeHook(settingName, handler)
 
     # ------------- Editors and mainWindow handle
-    def createEditorInstance(self, name = None, filepath=None, parent=None):
+    def createEditorInstance(self, class_name = None, file_path=None, parent=None):
         editorClass = None
-        if name is not None:
-            editorClass = self.pluginManager.findEditorClassByName(name)
-        elif filepath is not None:
-            editorClass = self.pluginManager.findEditorClassForFile(filepath)
+        if class_name is not None:
+            editorClass = self.pluginManager.findEditorClassByName(class_name)
+        elif file_path is not None:
+            editorClass = self.pluginManager.findEditorClassForFile(file_path)
         if editorClass is None:
             editorClass = self.pluginManager.defaultEditor()
-        return self.createComponentInstance(editorClass, parent)
+        return self.createComponentInstance(editorClass, 
+            parent = parent, 
+            file_path = file_path
+        )
 
     def buildMainWindow(self):
         """Creates the windows"""

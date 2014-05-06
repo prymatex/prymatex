@@ -503,7 +503,7 @@ html_footer
         # Restore open documents
         for editorState in componentState.get("editors", []):
             editor = self.application.createEditorInstance(
-                name = editorState["name"], 
+                class_name = editorState["name"], 
                 parent = self)
             editor.setComponentState(editorState["self"])
             self.addEditor(editor)
