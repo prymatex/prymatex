@@ -437,17 +437,17 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     # ---- Open (file, directory, url, canelones)
     def openFile(self, filepath, cursorPosition=None, focus=True, mainWindow=None, useTasks=True):
         """Open a editor in current window"""
-        filepath = self.fileManager.normcase(filepath)
+        file_path = self.fileManager.normcase(filepath)
 
-        if self.fileManager.isOpen(filepath):
-            mainWindow, editor = self.findEditorForFile(filepath)
+        if self.fileManager.isOpen(file_path):
+            mainWindow, editor = self.findEditorForFile(file_path)
             if editor is not None:
                 mainWindow.setCurrentEditor(editor)
                 if cursorPosition is not None:
                     editor.setCursorPosition(cursorPosition)
-        elif self.fileManager.exists(filepath):
+        elif self.fileManager.exists(file_path):
             mainWindow = mainWindow or self.mainWindow
-            editor = self.createEditorInstance(filepath = filepath, parent = mainWindow)
+            editor = self.createEditorInstance(file_path = file_path, parent = mainWindow)
             # TODO el dialogo de no tengo editor para ese tipo de archivo
             if editor is None:
                 return
@@ -459,12 +459,12 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                     mainWindow.addEditor(editor, focus)
                 return editorReady
             if useTasks and inspect.isgeneratorfunction(editor.open):
-                task = self.schedulerManager.newTask(editor.open(filepath))
+                task = self.schedulerManager.newTask(editor.open(file_path))
                 task.done.connect(on_editorReady(mainWindow, editor, cursorPosition, focus))
             elif inspect.isgeneratorfunction(editor.open):
-                on_editorReady(mainWindow, editor, cursorPosition, focus)(list(editor.open(filepath)))
+                on_editorReady(mainWindow, editor, cursorPosition, focus)(list(editor.open(file_path)))
             else:
-                on_editorReady(mainWindow, editor, cursorPosition, focus)(editor.open(filepath))
+                on_editorReady(mainWindow, editor, cursorPosition, focus)(editor.open(file_path))
 
     def openDirectory(self, directoryPath):
         raise NotImplementedError("Directory contents should be opened as files here")
