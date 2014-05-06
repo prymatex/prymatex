@@ -319,15 +319,15 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def reload(self):
         PrymatexEditor.reload(self)
-        content = self.application.fileManager.readFile(self.filePath)
+        content = self.application.fileManager.readFile(self.filePath())
         self.updatePlainText(content)
 
     def componentState(self):
         """Returns a Python dictionary containing the state of the editor."""
         state = super(CodeEditor, self).componentState()
         
-        if self.filePath is not None:
-            state["file"] = self.filePath
+        if self.filePath() is not None:
+            state["file"] = self.filePath()
         else:
             state["text"] = self.toPlainTextWithEol()
 
@@ -425,7 +425,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # TODO Attribute scope cache
         attrScope = self.application.supportManager.attributeScopes(
-            self.filePath, self.project and self.project.directory)
+            self.filePath(), self.project and self.project.directory)
         return leftToken.scope + lcs + attrScope, rightToken.scope + rcs + attrScope
 
     def settings(self, cursor = None):
@@ -814,9 +814,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             environment['TM_CURRENT_WORD'] = current_word
         if self.filePath is not None:
             self.logger.debug("Add file path to environment")
-            environment['TM_FILEPATH'] = self.filePath
-            environment['TM_FILENAME'] = self.application.fileManager.basename(self.filePath)
-            environment['TM_DIRECTORY'] = self.application.fileManager.dirname(self.filePath)
+            environment['TM_FILEPATH'] = self.filePath()
+            environment['TM_FILENAME'] = self.application.fileManager.basename(self.filePath())
+            environment['TM_DIRECTORY'] = self.application.fileManager.dirname(self.filePath())
         if self.project is not None:
             self.logger.debug("Add project to environment")
             environment.update(self.project.environmentVariables())
@@ -1123,14 +1123,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         if bundleMenu is not None:
             menues.append(bundleMenu)
             menues.append("-")
-        if self.filePath:
+        if self.filePath() is not None:
             menues.extend([
                 {   "text": "Path to clipboard",
-                    "triggered": lambda ed = self: self.application.clipboard().setText(ed.filePath)  },
+                    "triggered": lambda ed = self: self.application.clipboard().setText(ed.filePath())  },
                 {   "text": "Name to clipboard",
-                    "triggered": lambda ed = self: self.application.clipboard().setText(ed.application.fileManager.basename(ed.filePath))  },
+                    "triggered": lambda ed = self: self.application.clipboard().setText(ed.application.fileManager.basename(ed.filePath()))  },
                 {   "text": "Directory to clipboard",
-                    "triggered": lambda ed = self: self.application.clipboard().setText(ed.application.fileManager.dirname(ed.filePath))  },
+                    "triggered": lambda ed = self: self.application.clipboard().setText(ed.application.fileManager.dirname(ed.filePath()))  },
                 ])
         return menues
 
