@@ -4,7 +4,6 @@
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers.icons import combine_icons
 
-from prymatex.core import exceptions
 from prymatex.core.components.base import (PrymatexComponentWidget, 
     PrymatexKeyHelper, PrymatexAddon, Key_Any)
 
@@ -14,18 +13,17 @@ class PrymatexEditor(PrymatexComponentWidget):
     CREATION_COUNTER = 0
     UNTITLED_FILE_TEMPLATE = "Untitled {CREATION_COUNTER}"
     
-    def __init__(self, **kwargs):
+    def __init__(self, file_path = None, **kwargs):
         super(PrymatexEditor, self).__init__(**kwargs)
-    
+        self._file_path = file_path
+        self._project = None
+        self._external_action = None
+        self._title = ""
+
     def initialize(self, parent = None, **kwargs):
         super(PrymatexEditor, self).initialize(**kwargs)
         self.mainWindow = parent
-        self.filePath = None
-        self.project = None
-        self.externalAction = None
-        if not hasattr(self, "modificationChanged"):
-            self.modificationChanged = QtCore.Signal(bool)
-    
+
     @property
     def creationCounter(self):
         if not hasattr(self, "_creationCounter"):
@@ -33,72 +31,73 @@ class PrymatexEditor(PrymatexComponentWidget):
             setattr(self, "_creationCounter", PrymatexEditor.CREATION_COUNTER)
         return self._creationCounter
 
-    def open(self, filePath):
+    def open(self, file_path):
         """ Open file """
-        self.application.fileManager.openFile(filePath)
-        self.setFilePath(filePath)
+        self.application.fileManager.openFile(file_path)
+        self.setFilePath(file_path)
 
-    def save(self, filePath):
+    def save(self, file_path):
         """ Save content of editor in a file """
-        self.application.fileManager.writeFile(filePath, self.toPlainText())
-        if filePath != self.filePath:
-            if self.filePath is not None:
-                self.application.fileManager.closeFile(self.filePath)
-                self.application.fileManager.openFile(filePath)
-            self.setFilePath(filePath)
+        self.application.fileManager.writeFile(file_path, self.toPlainText())
+        if file_path != self._file_path:
+            if self._file_path is not None:
+                self.application.fileManager.closeFile(self._file_path)
+                self.application.fileManager.openFile(file_path)
+            self.setFilePath(file_path)
         self.setModified(False)
         self.setExternalAction(None)
     
     def close(self):
         """ Close editor """
-        if self.filePath is None and self.creationCounter == PrymatexEditor.CREATION_COUNTER:
+        if self._file_path is None and self.creationCounter == PrymatexEditor.CREATION_COUNTER:
             PrymatexEditor.CREATION_COUNTER -= 1
-        elif self.filePath is not None:
-            self.application.fileManager.closeFile(self.filePath)
+        elif self._file_path is not None:
+            self.application.fileManager.closeFile(self._file_path)
 
     def reload(self):
         """ Reload current file """
         self.setModified(False)
         self.setExternalAction(None)
-        
-    def setFilePath(self, filePath):
-        self.filePath = filePath
-        self.project = self.application.projectManager.findProjectForPath(filePath)
-        self.modificationChanged.emit(False)
 
-    def tabIcon(self):
+    def filePath(self):
+        return self._file_path
+    
+    def setFilePath(self, file_path):
+        self._file_path = file_path
+        self._project = self.application.projectManager.findProjectForPath(self._file_path)
+        self.emit(QtCore.SIGNAL("modificationChanged"), False)
+
+    def icon(self):
         baseIcon = QtGui.QIcon()
-        if self.filePath is not None:
-            baseIcon = resources.get_icon(self.filePath)
+        if self._file_path is not None:
+            baseIcon = resources.get_icon(self._file_path)
         if self.isModified():
             baseIcon = resources.get_icon("document-save")
-        if self.externalAction is not None:
+        if self._external_action is not None:
             importantIcon = resources.get_icon("emblem-important")
             baseIcon = combine_icons(baseIcon, importantIcon, 0.8)
         return baseIcon
     
-    def tabTitles(self):
-        if self.filePath is not None:
-            return self.application.fileManager.fullsplit(self.filePath)[::-1]
-        return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creationCounter).split()
+    def documentTitle(self):
+        return self._title
 
-    def setTabTitle(self, title):
-        self._tabTitle = title
+    def setDocumentTitle(self, title):
+        self._title = title
 
     def tabTitle(self):
         if hasattr(self, "_tabTitle"):
             return self._tabTitle
-        if self.filePath is not None:
-            return self.application.fileManager.basename(self.filePath)
+        if self._file_path is not None:
+            return self.application.fileManager.basename(self._file_path)
         return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creationCounter)
 
     def tabToolTip(self):
-        if self.filePath is not None:
-            return self.filePath
+        if self._file_path is not None:
+            return self._file_path
         return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creationCounter)
     
     def fileDirectory(self):
-        return self.application.fileManager.dirname(self.filePath)
+        return self.application.fileManager.dirname(self._file_path)
     
     def fileName(self):
         return self.tabTitle()
@@ -107,7 +106,7 @@ class PrymatexEditor(PrymatexComponentWidget):
         return []
     
     def isNew(self):
-        return self.filePath is None
+        return self._file_path is None
         
     def isEmpty(self):
         return True
@@ -132,18 +131,21 @@ class PrymatexEditor(PrymatexComponentWidget):
     
     def isScratch(self):
         """Returns true if the editor is a scratch editor. Scratch editors never report as being dirty."""
-        return self.filePath is None
+        return self._file_path is None
+        
+    def externalAction(self):
+        return self._external_action
         
     def setExternalAction(self, action):
-        self.externalAction = action
-        self.modificationChanged.emit(False)
+        self._external_action = action
+        self.emit(QtCore.SIGNAL("modificationChanged"), False)
 
     def isExternalChanged(self):
-        return self.externalAction == self.application.fileManager.CHANGED
+        return self._external_action == self.application.fileManager.CHANGED
 
     def isExternalDeleted(self):
         # FIXME: Rename or move files make produces bogus behavior 
-        return self.externalAction == self.application.fileManager.DELETED    
+        return self._external_action == self.application.fileManager.DELETED    
 
     #------------ Bundle Item Handler
     def bundleItemHandler(self):
@@ -151,7 +153,6 @@ class PrymatexEditor(PrymatexComponentWidget):
         
     #------------ Global navigation api
     def saveLocationMemento(self, memento):
-        # TODO Ver que va a pasar con esto de emitir señales y no heredar de qobject
         self.emit(QtCore.SIGNAL("newLocationMemento"), memento)
         
     def restoreLocationMemento(self, memento):
@@ -164,7 +165,7 @@ class PrymatexEditor(PrymatexComponentWidget):
     
     # ---------- For Plugin Manager administrator
     @classmethod
-    def acceptFile(cls, filePath, mimetype):
+    def acceptFile(cls, file_path, mimetype):
         return True
 
 #======================================================================

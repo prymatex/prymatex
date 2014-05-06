@@ -205,7 +205,7 @@ class SplitterWidget(QtGui.QSplitter):
         
         idx = group.addTab(widget, self.disambiguatedWidgetTitle(widget))
         self.setWidgetToolTip(widget, widget.tabToolTip())
-        self.setWidget_icon(widget, widget.tabIcon())
+        self.setWidget_icon(widget, widget.icon())
         widget.modificationChanged.connect(self._update_tab_status)
 
         # If the tab has been added to the current group then make it the current tab.
@@ -490,7 +490,7 @@ class SplitterWidget(QtGui.QSplitter):
     def _update_tab_status(self, changed = None):
         sender = self.sender()
         self.setWidgetTitle(sender, sender.tabTitle())
-        self.setWidget_icon(sender, sender.tabIcon())
+        self.setWidget_icon(sender, sender.icon())
         self.setWidgetToolTip(sender, sender.tabToolTip())
 
     def _tab_widget(self, widget):
