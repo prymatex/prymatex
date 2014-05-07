@@ -10,26 +10,24 @@ from prymatex.core.components.base import (PrymatexComponentWidget,
 from prymatex import resources
 
 class PrymatexEditor(PrymatexComponentWidget):
-    CREATION_COUNTER = 0
-    UNTITLED_FILE_TEMPLATE = "Untitled {CREATION_COUNTER}"
+    CREATION_COUNTER = 1
+    UNTITLED_FILE_TEMPLATE = "Untitled {number}"
     
     def __init__(self, file_path = None, **kwargs):
         super(PrymatexEditor, self).__init__(**kwargs)
         self._file_path = file_path
         self._project = None
         self._external_action = None
-        self._title = ""
+        self._creation_counter = PrymatexEditor.CREATION_COUNTER
+        # if not has file_path create default title
+        if not file_path:
+            self._title = self.UNTITLED_FILE_TEMPLATE.format(
+                number = self._creation_counter)
+            PrymatexEditor.CREATION_COUNTER += 1
 
     def initialize(self, parent = None, **kwargs):
         super(PrymatexEditor, self).initialize(**kwargs)
         self.mainWindow = parent
-
-    @property
-    def creationCounter(self):
-        if not hasattr(self, "_creationCounter"):
-            PrymatexEditor.CREATION_COUNTER += 1
-            setattr(self, "_creationCounter", PrymatexEditor.CREATION_COUNTER)
-        return self._creationCounter
 
     def open(self, file_path):
         """ Open file """
@@ -49,7 +47,7 @@ class PrymatexEditor(PrymatexComponentWidget):
     
     def close(self):
         """ Close editor """
-        if self._file_path is None and self.creationCounter == PrymatexEditor.CREATION_COUNTER:
+        if self.isNew() and self._creation_counter == PrymatexEditor.CREATION_COUNTER:
             PrymatexEditor.CREATION_COUNTER -= 1
         elif self._file_path is not None:
             self.application.fileManager.closeFile(self._file_path)
@@ -59,12 +57,16 @@ class PrymatexEditor(PrymatexComponentWidget):
         self.setModified(False)
         self.setExternalAction(None)
 
+    def project(self):
+        return self._project
+
     def filePath(self):
         return self._file_path
     
     def setFilePath(self, file_path):
         self._file_path = file_path
         self._project = self.application.projectManager.findProjectForPath(self._file_path)
+        self._title = self.application.fileManager.basename(file_path)
         self.emit(QtCore.SIGNAL("modificationChanged"), False)
 
     def icon(self):
@@ -78,23 +80,14 @@ class PrymatexEditor(PrymatexComponentWidget):
             baseIcon = combine_icons(baseIcon, importantIcon, 0.8)
         return baseIcon
     
-    def documentTitle(self):
+    def title(self):
         return self._title
 
-    def setDocumentTitle(self, title):
+    def setTitle(self, title):
         self._title = title
 
-    def tabTitle(self):
-        if hasattr(self, "_tabTitle"):
-            return self._tabTitle
-        if self._file_path is not None:
-            return self.application.fileManager.basename(self._file_path)
-        return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creationCounter)
-
-    def tabToolTip(self):
-        if self._file_path is not None:
-            return self._file_path
-        return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creationCounter)
+    def tooltip(self):
+        return self.documentTitle()
     
     def fileDirectory(self):
         return self.application.fileManager.dirname(self._file_path)

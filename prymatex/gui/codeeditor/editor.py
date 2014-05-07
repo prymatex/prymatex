@@ -362,9 +362,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             self.insertBundleItem(syntax)
         PrymatexEditor.setFilePath(self, filePath)
 
-    def tabTitle(self):
+    def title(self):
         #Podemos marcar de otra forma cuando algo cambia :P
-        return PrymatexEditor.tabTitle(self)
+        return PrymatexEditor.title(self)
 
     def fileFilters(self):
         return [ "%s (%s)" % (self.syntax().bundle.name, " ".join(["*." + ft for ft in self.syntax().fileTypes])) ]
@@ -425,7 +425,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # TODO Attribute scope cache
         attrScope = self.application.supportManager.attributeScopes(
-            self.filePath(), self.project and self.project.directory)
+            self.filePath(), self.project() and self.project().directory)
         return leftToken.scope + lcs + attrScope, rightToken.scope + rcs + attrScope
 
     def settings(self, cursor = None):
@@ -812,14 +812,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         if current_word:
             self.logger.debug("Add current word to environment")
             environment['TM_CURRENT_WORD'] = current_word
-        if self.filePath is not None:
+        if self.filePath():
             self.logger.debug("Add file path to environment")
             environment['TM_FILEPATH'] = self.filePath()
             environment['TM_FILENAME'] = self.application.fileManager.basename(self.filePath())
             environment['TM_DIRECTORY'] = self.application.fileManager.dirname(self.filePath())
-        if self.project is not None:
+        if self.project():
             self.logger.debug("Add project to environment")
-            environment.update(self.project.environmentVariables())
+            environment.update(self.project().environmentVariables())
         if cursor.hasSelection():
             self.logger.debug("Add selection to environment")
             environment['TM_SELECTED_TEXT'] = self.selectedTextWithEol(cursor)

@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import math
 
 from prymatex.qt import QtCore, QtGui
 
 from .group import GroupWidget, DragableTabBar
 
-def createDisambiguatedTitles(addedTitles, newTitle):
+def createDisambiguatedTitles(addedTitles, newTitle, sep = os.sep):
+    newTitle = newTitle.split(sep)
     titleFormat = newTitle[0] + " (%s)"
     usedSubtitles = [ newTitle[1] ]
     for addedTitle in addedTitles:
+        addedTitle = addedTitle.split(sep)
         for index in range(1, len(addedTitle)):
             if addedTitle[index] not in usedSubtitles:
                 usedSubtitles.append(addedTitle[index])
@@ -204,7 +207,7 @@ class SplitterWidget(QtGui.QSplitter):
                 self.addWidget(group)
         
         idx = group.addTab(widget, self.disambiguatedWidgetTitle(widget))
-        self.setWidgetToolTip(widget, widget.tabToolTip())
+        self.setWidgetToolTip(widget, widget.tooltip())
         self.setWidget_icon(widget, widget.icon())
         widget.modificationChanged.connect(self._update_tab_status)
 
@@ -470,10 +473,11 @@ class SplitterWidget(QtGui.QSplitter):
 
     def disambiguatedWidgetTitle(self, widget):  
         #Buscar todas las tabs con el mismo nombre
-        newWidgetTitle = widget.tabTitle()
+        newWidgetTitle = widget.title()
         addedWidgets = self.widgetsByTitle(newWidgetTitle)
         if addedWidgets:
-            addedTitles, newWidgetTitle = createDisambiguatedTitles([widget.tabTitles() for widget in addedWidgets], widget.tabTitles())
+            addedTitles, newWidgetTitle = createDisambiguatedTitles(
+			(widget.filePath() for widget in addedWidgets), widget.filePath())
             for widget, title in zip(addedWidgets, addedTitles):
                 self.setWidgetTitle(widget, title)
         return newWidgetTitle
@@ -483,15 +487,15 @@ class SplitterWidget(QtGui.QSplitter):
         for tw in self.findChildren(GroupWidget):
             for index in range(tw.count()):
                 widget = tw.widget(index)
-                if widget.tabTitle() == title:
+                if widget.title() == title:
                     widgets.append(widget)
         return widgets
 
     def _update_tab_status(self, changed = None):
         sender = self.sender()
-        self.setWidgetTitle(sender, sender.tabTitle())
+        self.setWidgetTitle(sender, sender.title())
         self.setWidget_icon(sender, sender.icon())
-        self.setWidgetToolTip(sender, sender.tabToolTip())
+        self.setWidgetToolTip(sender, sender.tooltip())
 
     def _tab_widget(self, widget):
         """ Return the tab widget and index containing the given widget. """

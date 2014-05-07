@@ -364,7 +364,7 @@ html_footer
     def findEditorForFile(self, filePath):
         # Find open editor for fileInfo
         for editor in self.centralWidget().allWidgets():
-            if editor.filePath == filePath:
+            if editor.filePath() == filePath:
                 return editor
 
     def editors(self):
@@ -395,7 +395,7 @@ html_footer
             self.addEditorToHistory(editor)
             editor.setFocus()
             self.application.checkExternalAction(self, editor)
-            titleChunks.insert(0, editor.tabTitle())
+            titleChunks.insert(0, editor.title())
         
         # Set window title
         self.setWindowTitle(" - ".join(titleChunks))
@@ -405,7 +405,7 @@ html_footer
         if editor.isExternalChanged():
             message = "The file '%s' has been changed on the file system, Do you want save the file with other name?"
             result = QtGui.QMessageBox.question(editor, _("File changed"),
-                _(message) % editor.filePath,
+                _(message) % editor.filePath(),
                 buttons = QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                 defaultButton = QtGui.QMessageBox.Yes)
             if result == QtGui.QMessageBox.Yes:
@@ -415,17 +415,17 @@ html_footer
             fileName = editor.fileName()
             fileFilters = editor.fileFilters()
             # TODO Armar el archivo destino y no solo el basedir
-            filePath, _ = getSaveFileName(
+            file_path, _ = getSaveFileName(
                 self,
                 caption = "Save file as" if saveAs else "Save file",
                 basedir = fileDirectory,
                 filters = fileFilters
             )
         else:
-            filePath = editor.filePath
+            file_path = editor.filePath()
 
-        if filePath:
-            editor.save(filePath)
+        if file_path:
+            editor.save(file_path)
 
     def closeEditor(self, editor = None, cancel = False):
         editor = editor or self.currentEditor()
@@ -435,7 +435,7 @@ html_footer
         if editor is None: return
         while editor and editor.isModified():
             response = QtGui.QMessageBox.question(self, "Save",
-                "Save %s" % editor.tabTitle(),
+                "Save %s" % editor.title(),
                 buttons = buttons,
                 defaultButton = QtGui.QMessageBox.Ok)
             if response == QtGui.QMessageBox.Ok:
@@ -470,7 +470,7 @@ html_footer
         for editor in self.editors():
             while editor and editor.isModified():
                 response = QtGui.QMessageBox.question(self, "Save",
-                    "Save %s" % editor.tabTitle(),
+                    "Save %s" % editor.title(),
                     buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel,
                     defaultButton = QtGui.QMessageBox.Ok)
                 if response == QtGui.QMessageBox.Ok:
