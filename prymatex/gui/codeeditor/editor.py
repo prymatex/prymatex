@@ -326,10 +326,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         """Returns a Python dictionary containing the state of the editor."""
         state = super(CodeEditor, self).componentState()
         
-        if self.filePath() is not None:
-            state["file"] = self.filePath()
-        else:
-            state["text"] = self.toPlainTextWithEol()
+        state["text"] = self.toPlainTextWithEol()
 
         #Bookmarks
         state['bookmarks'] = self.bookmarkListModel.lineNumbers()
@@ -341,9 +338,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def setComponentState(self, componentState):
         """Restore the state from the given state (returned by a previous call to state())."""
-        if "file" in componentState:
-            self.open(componentState["file"])
-        else:
+        if "text" in componentState:
             self.setPlainText(componentState["text"])
 
     def isModified(self):

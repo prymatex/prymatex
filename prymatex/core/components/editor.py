@@ -83,9 +83,6 @@ class PrymatexEditor(PrymatexComponentWidget):
     def title(self):
         return self._title
 
-    def setTitle(self, title):
-        self._title = title
-
     def tooltip(self):
         return self.documentTitle()
     
@@ -93,7 +90,7 @@ class PrymatexEditor(PrymatexComponentWidget):
         return self.application.fileManager.dirname(self._file_path)
     
     def fileName(self):
-        return self.tabTitle()
+        return self.application.fileManager.basename(self._file_path)
         
     def fileFilters(self):
         return []

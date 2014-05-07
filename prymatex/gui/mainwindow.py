@@ -412,7 +412,7 @@ html_footer
                 saveAs = True
         if editor.isNew() or saveAs:
             fileDirectory = self.application.fileManager.directory(self.projectsDock.currentPath()) if editor.isNew() else editor.fileDirectory()
-            fileName = editor.fileName()
+            fileName = editor.title()
             fileFilters = editor.fileFilters()
             # TODO Armar el archivo destino y no solo el basedir
             file_path, _ = getSaveFileName(
@@ -485,9 +485,14 @@ html_footer
     def componentState(self):
         componentState = super(PrymatexMainWindow, self).componentState()
 
-        componentState["editors"] = [ 
-            { "name": editor.__class__.__name__,
-              "self": editor.componentState() } for editor in self.editors() ]
+        componentState["editors"] = []
+        for editor in self.editors():
+            editorState = editor.componentState()
+            editorState["name"] = editor.__class__.__name__
+            editorState["modified"] = editor.isModified()
+            if not editor.isNew():
+                editorState["file"] = editor.filePath()
+            componentState["editors"].append(editorState)
 
         # Store geometry
         componentState["geometry"] = qbytearray_to_hex(self.saveGeometry())
@@ -503,9 +508,11 @@ html_footer
         # Restore open documents
         for editorState in componentState.get("editors", []):
             editor = self.application.createEditorInstance(
-                class_name = editorState["name"], 
+                class_name = editorState["name"],
+                file_path = editorState.get("file"),
                 parent = self)
-            editor.setComponentState(editorState["self"])
+            editor.setComponentState(editorState)
+            editor.setModified(editorState.get("modified", False))
             self.addEditor(editor)
 
         # Restore geometry
