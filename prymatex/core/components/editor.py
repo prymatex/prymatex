@@ -19,11 +19,13 @@ class PrymatexEditor(PrymatexComponentWidget):
         self._project = None
         self._external_action = None
         self._creation_counter = PrymatexEditor.CREATION_COUNTER
-        # if not has file_path create default title
-        if not file_path:
-            self._title = self.UNTITLED_FILE_TEMPLATE.format(
-                number = self._creation_counter)
-            PrymatexEditor.CREATION_COUNTER += 1
+	self._title = self.UNTITLED_FILE_TEMPLATE.format(
+            number = self._creation_counter)
+
+        # if not has file_path increase the cration counter
+        PrymatexEditor.CREATION_COUNTER = not file_path and \
+        PrymatexEditor.CREATION_COUNTER + 1 or \
+        PrymatexEditor.CREATION_COUNTER
 
     def initialize(self, parent = None, **kwargs):
         super(PrymatexEditor, self).initialize(**kwargs)

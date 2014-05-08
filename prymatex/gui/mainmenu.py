@@ -64,15 +64,18 @@ class MainMenuMixin(object):
 
     # ------------ File Actions
     def on_actionOpen_triggered(self):
-        filePath = self.currentEditor().filePath if self.currentEditor() is not None else None
-        filePaths, selectedfilter = getOpenFileNames(
+        current_editor = self.currentEditor()
+        file_path = current_editor and current_editor.filePath() or None
+        selected_paths, selected_filter = getOpenFileNames(
             self,
             caption="Open files",
-            basedir=self.application.fileManager.directory(filePath)
+            basedir=self.application.fileManager.directory(file_path)
+        )
+        for file_path in selected_paths:
+            self.application.openFile(
+                file_path,
+                focus = selected_paths[-1] == file_path   # Focus on last editor
             )
-        focus = len(filePaths) == 1
-        for filePath in filePaths:
-            editor = self.application.openFile(filePath, focus = focus)
 
     def on_actionImportProject_triggered(self):
         directory = QtGui.QFileDialog.getExistingDirectory(self, "Choose project location", self.application.fileManager.directory())
@@ -483,7 +486,7 @@ def tabSelectableModelFactory(mainWindow):
     def dataFunction():
         return [dict(data=tab,
                 template="<table width='100%%'><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(file)s</small></td></tr></table>",
-                display={"name": tab.tabTitle(), "file": tab.filePath},
+                display={"name": tab.tabTitle(), "file": tab.filePath()},
                 image=tab.tabIcon()) for tab in mainWindow.centralWidget().allWidgets()]
 
     return selectableModelFactory(
