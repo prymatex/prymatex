@@ -4,28 +4,22 @@
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers.icons import combine_icons
 
+from prymatex import resources
+
 from prymatex.core.components.base import (PrymatexComponentWidget, 
     PrymatexKeyHelper, PrymatexAddon, Key_Any)
 
-from prymatex import resources
+from prymatex.utils.decorators import deprecated
 
 class PrymatexEditor(PrymatexComponentWidget):
-    CREATION_COUNTER = 1
-    UNTITLED_FILE_TEMPLATE = "Untitled {number}"
+    UNTITLED_FILE_TEMPLATE = "Untitled"
     
     def __init__(self, file_path = None, **kwargs):
         super(PrymatexEditor, self).__init__(**kwargs)
         self._file_path = file_path
         self._project = None
         self._external_action = None
-        self._creation_counter = PrymatexEditor.CREATION_COUNTER
-	self._title = self.UNTITLED_FILE_TEMPLATE.format(
-            number = self._creation_counter)
-
-        # if not has file_path increase the cration counter
-        PrymatexEditor.CREATION_COUNTER = not file_path and \
-        PrymatexEditor.CREATION_COUNTER + 1 or \
-        PrymatexEditor.CREATION_COUNTER
+        self._title = self.UNTITLED_FILE_TEMPLATE
 
     def initialize(self, parent = None, **kwargs):
         super(PrymatexEditor, self).initialize(**kwargs)
@@ -49,9 +43,7 @@ class PrymatexEditor(PrymatexComponentWidget):
     
     def close(self):
         """ Close editor """
-        if self.isNew() and self._creation_counter == PrymatexEditor.CREATION_COUNTER:
-            PrymatexEditor.CREATION_COUNTER -= 1
-        elif self._file_path is not None:
+        if self._file_path is not None:
             self.application.fileManager.closeFile(self._file_path)
 
     def reload(self):
@@ -97,8 +89,12 @@ class PrymatexEditor(PrymatexComponentWidget):
     def fileFilters(self):
         return []
     
+    def hasFile(self):
+        return bool(self._file_path)
+        
+    @deprecated
     def isNew(self):
-        return self._file_path is None
+        return not self.hasFile()
         
     def isEmpty(self):
         return True

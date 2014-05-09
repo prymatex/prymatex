@@ -135,7 +135,7 @@ def loadPrymatexResources(resourcesPath, preferedThemeName = "oxygen"):
 
 def installCustomFromThemeMethod():
     #Install fromTheme custom function
-    from prymatex.resources.icons import get_icon
+    from .icons import get_icon
     QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
     QtGui.QIcon.fromTheme = staticmethod(get_icon)
             

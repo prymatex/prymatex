@@ -206,10 +206,10 @@ class SplitterWidget(QtGui.QSplitter):
                 group = self.groupFactory()
                 self.addWidget(group)
         
-        idx = group.addTab(widget, self.disambiguatedWidgetTitle(widget))
+        idx = group.addTab(widget, self._disambiguate_title(widget))
         self.setWidgetToolTip(widget, widget.tooltip())
-        self.setWidget_icon(widget, widget.icon())
-        widget.modificationChanged.connect(self._update_tab_status)
+        self.setWidgetIcon(widget, widget.icon())
+        self.connect(widget, QtCore.SIGNAL("modificationChanged"), self._update_tab_status)
 
         # If the tab has been added to the current group then make it the current tab.
         if group is not self._current_group:
@@ -223,7 +223,7 @@ class SplitterWidget(QtGui.QSplitter):
         """ Remove tab to the tab widget."""
         tw, tidx = self._tab_widget(widget)
         if tw is not None:
-            widget.modificationChanged.disconnect(self._update_tab_status)
+            self.disconnect(widget, QtCore.SIGNAL("modificationChanged"), self._update_tab_status)
             self._remove_tab(tw, tidx)
             if tw.count() == 0 and self.count() > 0:
                 for tw in self.findChildren(GroupWidget):
@@ -463,7 +463,15 @@ class SplitterWidget(QtGui.QSplitter):
         if tw is not None:
             tw.setTabText(idx, title)
 
-    def setWidget_icon(self, w, icon):
+    def widgetTitle(self, w):
+        """ Set the title for the given widget. """
+
+        tw, idx = self._tab_widget(w)
+
+        if tw is not None:
+            return tw.tabText(idx)
+            
+    def setWidgetIcon(self, w, icon):
         """ Set the active icon on a widget. """
 
         tw, tidx = self._tab_widget(w)
@@ -471,18 +479,47 @@ class SplitterWidget(QtGui.QSplitter):
         if tw is not None:
             tw.setTabIcon(tidx, icon)
 
-    def disambiguatedWidgetTitle(self, widget):  
-        #Buscar todas las tabs con el mismo nombre
-        newWidgetTitle = widget.title()
-        addedWidgets = self.widgetsByTitle(newWidgetTitle)
-        if addedWidgets:
-            addedTitles, newWidgetTitle = createDisambiguatedTitles(
-			(widget.filePath() for widget in addedWidgets), widget.filePath())
-            for widget, title in zip(addedWidgets, addedTitles):
-                self.setWidgetTitle(widget, title)
-        return newWidgetTitle
+    def _disambiguate_title(self, newWidget):  
+        #Search all widgets with the same title
+        def title_from_file(widget):
+            subTitles = widget.filePath().split(os.sep)[::-1]
+            for subTitle in subTitles[1:]:
+                title = "%s (%s)" % (widget.title(), subTitle)
+                if not self._has_tab_title(title):
+                    return title
+        
+        def title_from_counter(widget):
+            c = 1
+            while True:
+                title = "%s %d" % (widget.title(), c)
+                if not self._has_tab_title(title):
+                    return title
+                c += 1
+        
+        if not newWidget.hasFile():
+            return title_from_counter(newWidget)
+        
+        newWidgetTitle = newWidget.title()
+        addedWidgets = self._widgets_by_title(newWidgetTitle)
+        
+        if not addedWidgets:
+            return newWidgetTitle
+
+        for addedWidget in addedWidgets:
+            if addedWidget.hasFile():
+                self.setWidgetTitle(addedWidget, title_from_file(addedWidget))
+            else:
+                self.setWidgetTitle(addedWidget, title_from_counter(addedWidget))
+        return title_from_file(newWidget)
     
-    def widgetsByTitle(self, title):
+    def _has_tab_title(self, title):
+        for tw in self.findChildren(GroupWidget):
+            for index in range(tw.count()):
+                if tw.tabText(index) == title:
+                    return True
+        return False
+    
+    def _widgets_by_title(self, title):
         widgets = []
         for tw in self.findChildren(GroupWidget):
             for index in range(tw.count()):
@@ -493,8 +530,8 @@ class SplitterWidget(QtGui.QSplitter):
 
     def _update_tab_status(self, changed = None):
         sender = self.sender()
-        self.setWidgetTitle(sender, sender.title())
-        self.setWidget_icon(sender, sender.icon())
+        self.setWidgetTitle(sender, self._disambiguate_title(sender))
+        self.setWidgetIcon(sender, sender.icon())
         self.setWidgetToolTip(sender, sender.tooltip())
 
     def _tab_widget(self, widget):

@@ -13,4 +13,4 @@ else:
 # Monkey patching
 #####################################################
 QApplication._app__init__ = QApplication.__init__
-QApplication.__init__ = lambda self, **kwargs: QApplication._app__init__(self, kwargs.get("argv", []))
+QApplication.__init__ = lambda self, *largs, **kwargs: QApplication._app__init__(self, kwargs.get("argv", []))
