@@ -13,24 +13,13 @@ class PMXStatusBar(QtGui.QStatusBar):
         QtGui.QStatusBar.__init__(self, mainWindow)
         mainWindow.currentEditorChanged.connect(self.on_currentEditorChanged)
         self.statusBars = []
-        self.activeBars = []
 
     def addPermanentWidget(self, widget):
         self.statusBars.append(widget)
         QtGui.QStatusBar.addPermanentWidget(self, widget, 1)
     
     def on_currentEditorChanged(self, editor):
-        self.activeBars = []
-        if editor is None:
-            #Propagate and hide
-            list(map(lambda bar: bar.setCurrentEditor(editor), self.activeBars))
-            self.hide()
-        else:
-            for bar in self.statusBars:
-                if bar.acceptEditor(editor):
-                    self.activeBars.append(bar)
-                    bar.setCurrentEditor(editor)
-                    bar.setVisible(True)
-                else:
-                    bar.setVisible(False)
-            self.show()
+        for bar in self.statusBars:
+            bar.setCurrentEditor(editor)
+            bar.setVisible(bar.acceptEditor(editor))
+        self.show()
