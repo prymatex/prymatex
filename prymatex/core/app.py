@@ -378,7 +378,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         group.removeHook(settingName, handler)
 
     # ------------- Editors and mainWindow handle
-    def createEditorInstance(self, class_name = None, file_path=None, parent=None):
+    def createEditorInstance(self, class_name = None, file_path=None, 
+        cursor_position = None, parent=None):
         editorClass = None
         if class_name is not None:
             editorClass = self.pluginManager.findEditorClassByName(class_name)
@@ -386,10 +387,20 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             editorClass = self.pluginManager.findEditorClassForFile(file_path)
         if editorClass is None:
             editorClass = self.pluginManager.defaultEditor()
-        return self.createComponentInstance(editorClass, 
+        #TODO: Y si no tengo editorClass ?
+        editor = self.createComponentInstance(editorClass, 
             parent = parent, 
             file_path = file_path
         )
+        if file_path:
+            editor.open(file_path)
+        if cursor_position:
+            editor.setCursorPosition(cursor_position)
+        return editor
+
+    def deleteEditorInstance(self, editor):
+        editor.close()
+        editor.deleteLater()
 
     def buildMainWindow(self):
         """Creates the windows"""
@@ -435,7 +446,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         # Send some singal? Don't think so yet, this is intended to be set at startup
 
     # ---- Open (file, directory, url, canelones)
-    def openFile(self, filepath, cursorPosition=None, focus=True, mainWindow=None, useTasks=True):
+    def openFile(self, filepath, cursorPosition=None, focus=True, mainWindow=None):
         """Open a editor in current window"""
         file_path = self.fileManager.normcase(filepath)
 
@@ -447,24 +458,15 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                     editor.setCursorPosition(cursorPosition)
         elif self.fileManager.exists(file_path):
             mainWindow = mainWindow or self.mainWindow
-            editor = self.createEditorInstance(file_path = file_path, parent = mainWindow)
+            editor = self.createEditorInstance(
+                file_path = file_path,
+                cursor_position = cursorPosition,
+                parent = mainWindow,
+                )
             # TODO el dialogo de no tengo editor para ese tipo de archivo
-            if editor is None:
-                return
-            def on_editorReady(mainWindow, editor, cursorPosition, focus):
-                def editorReady(openResult):
-                    if cursorPosition is not None:
-                        editor.setCursorPosition(cursorPosition)
-                    mainWindow.tryCloseEmptyEditor()
-                    mainWindow.addEditor(editor, focus)
-                return editorReady
-            if useTasks and inspect.isgeneratorfunction(editor.open):
-                task = self.schedulerManager.newTask(editor.open(file_path))
-                task.done.connect(on_editorReady(mainWindow, editor, cursorPosition, focus))
-            elif inspect.isgeneratorfunction(editor.open):
-                on_editorReady(mainWindow, editor, cursorPosition, focus)(list(editor.open(file_path)))
-            else:
-                on_editorReady(mainWindow, editor, cursorPosition, focus)(editor.open(file_path))
+            if editor:
+                mainWindow.tryCloseEmptyEditor()
+                mainWindow.addEditor(editor, focus)
 
     def openDirectory(self, directoryPath):
         raise NotImplementedError("Directory contents should be opened as files here")

@@ -444,8 +444,8 @@ html_footer
                 break
             elif response == QtGui.QMessageBox.Cancel:
                 raise exceptions.UserCancelException()
-        editor.close()
         self.removeEditor(editor)
+        self.application.deleteEditorInstance(editor)
 
     def tryCloseEmptyEditor(self, editor = None):
         editor = editor or self.currentEditor()
@@ -490,7 +490,7 @@ html_footer
             editorState = editor.componentState()
             editorState["name"] = editor.__class__.__name__
             editorState["modified"] = editor.isModified()
-            if not editor.isNew():
+            if editor.hasFile():
                 editorState["file"] = editor.filePath()
             componentState["editors"].append(editorState)
 

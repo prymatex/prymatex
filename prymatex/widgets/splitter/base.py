@@ -8,18 +8,6 @@ from prymatex.qt import QtCore, QtGui
 
 from .group import GroupWidget, DragableTabBar
 
-def createDisambiguatedTitles(addedTitles, newTitle, sep = os.sep):
-    newTitle = newTitle.split(sep)
-    titleFormat = newTitle[0] + " (%s)"
-    usedSubtitles = [ newTitle[1] ]
-    for addedTitle in addedTitles:
-        addedTitle = addedTitle.split(sep)
-        for index in range(1, len(addedTitle)):
-            if addedTitle[index] not in usedSubtitles:
-                usedSubtitles.append(addedTitle[index])
-                break
-    return ([titleFormat % subTitle for subTitle in usedSubtitles[1:]], titleFormat % usedSubtitles[0])
-
 class SplitterWidget(QtGui.QSplitter):
     """ The SplitterWidget class is a hierarchy of QSplitters the leaves of
     which are QTabWidgets.  Any tab may be moved around with the hierarchy
@@ -209,7 +197,7 @@ class SplitterWidget(QtGui.QSplitter):
         idx = group.addTab(widget, self._disambiguate_title(widget))
         self.setWidgetToolTip(widget, widget.tooltip())
         self.setWidgetIcon(widget, widget.icon())
-        self.connect(widget, QtCore.SIGNAL("modificationChanged"), self._update_tab_status)
+        QtCore.QObject.connect(widget, QtCore.SIGNAL('modificationChanged(bool)'), self._update_tab_status)
 
         # If the tab has been added to the current group then make it the current tab.
         if group is not self._current_group:
@@ -223,7 +211,7 @@ class SplitterWidget(QtGui.QSplitter):
         """ Remove tab to the tab widget."""
         tw, tidx = self._tab_widget(widget)
         if tw is not None:
-            self.disconnect(widget, QtCore.SIGNAL("modificationChanged"), self._update_tab_status)
+            QtCore.QObject.disconnect(widget, QtCore.SIGNAL('modificationChanged(bool)'), self._update_tab_status)
             self._remove_tab(tw, tidx)
             if tw.count() == 0 and self.count() > 0:
                 for tw in self.findChildren(GroupWidget):
