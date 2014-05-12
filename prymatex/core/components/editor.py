@@ -78,7 +78,7 @@ class PrymatexEditor(PrymatexComponentWidget):
         return self._title
 
     def tooltip(self):
-        return self.documentTitle()
+        return self.hasFile() and self.filePath() or self.title()
     
     def fileDirectory(self):
         return self.application.fileManager.dirname(self._file_path)

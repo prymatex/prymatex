@@ -494,10 +494,11 @@ class SplitterWidget(QtGui.QSplitter):
             return newWidgetTitle
 
         for addedWidget in addedWidgets:
-            if addedWidget.hasFile():
-                self.setWidgetTitle(addedWidget, title_from_file(addedWidget))
-            else:
-                self.setWidgetTitle(addedWidget, title_from_counter(addedWidget))
+            if self.widgetTitle(addedWidget) == addedWidget.title():
+                self.setWidgetTitle(addedWidget, 
+                    addedWidget.hasFile() and \
+                    title_from_file(addedWidget) or\
+                    title_from_counter(addedWidget))
         return title_from_file(newWidget)
     
     def _has_tab_title(self, title):
