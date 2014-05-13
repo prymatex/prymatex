@@ -414,7 +414,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
     
     def on_mainWindow_currentEditorChanged(self, editor):
         if editor is not None and not editor.isNew():
-            index = self.projectTreeProxyModel.indexForPath(editor.filePath)
+            index = self.projectTreeProxyModel.indexForPath(editor.filePath())
             self.treeViewProjects.setCurrentIndex(index)
 
     @QtCore.Slot()
