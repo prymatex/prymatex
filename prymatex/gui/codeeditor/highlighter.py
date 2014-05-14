@@ -10,11 +10,12 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     FORMAT_CACHE = {}
     
     def __init__(self, editor):
-        QtGui.QSyntaxHighlighter.__init__(self, editor)
+        super(CodeEditorSyntaxHighlighter, self).__init__(editor)
         self.editor = editor
         self.theme = None
         self.__format_cache = None
         
+        self.editor.aboutToClose.connect(self.stop)        
         self.highlightTask = self.editor.application.schedulerManager.idleTask()
 
     def stop(self):

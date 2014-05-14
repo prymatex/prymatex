@@ -51,6 +51,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     modeChanged = QtCore.Signal()
     beginMode = QtCore.Signal(str)
     endMode = QtCore.Signal(str)
+    aboutToClose = QtCore.Signal()
 
     aboutToHighlightChange = QtCore.Signal()
     highlightChanged = QtCore.Signal()
@@ -102,7 +103,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         if theme is None:
             # Load default
             theme = self.application.supportManager.getBundleItem("766026CB-703D-4610-B070-8DE07D967C5F")
-
+        
         self.colours = theme.getStyle()
 
         #Set color for QPlainTextEdit
@@ -307,15 +308,13 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def open(self, filePath):
         """ Custom open for large files """
-        PrymatexEditor.open(self, filePath)
+        super(CodeEditor, self).open(filePath)
         content = self.application.fileManager.readFile(filePath)
         self.setPlainText(content)
 
     def close(self):
-        PrymatexEditor.close(self)
-        # Stp'highlighter
-        self.syntaxHighlighter.stop()
-        TextEditWidget.close(self)
+        self.aboutToClose.emit()
+        super(CodeEditor, self).close()
 
     def reload(self):
         PrymatexEditor.reload(self)
