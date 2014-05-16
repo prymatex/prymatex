@@ -15,8 +15,7 @@ This value isn't guaranteed to be unique, but collisions are very unlikely,
 so it's sufficient for generating the development version numbers.
 """
     if path is None:
-        import prymatex
-        repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(prymatex.__file__)))
+        repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     else:
         repo_dir = path
     git_log = subprocess.Popen('git log --pretty=format:%ct --quiet -1 HEAD',
@@ -66,9 +65,7 @@ __url__ = "http://github.com/prymatex/prymatex"
 __source__ = "http://github.com/prymatex/prymatex"
 __license__ = "GPL2"
 __version__ = get_version() # Dynamically calculate the version
-if 'GIT' in __version__:
-    __version__ = ' '.join(__version__.split(' ')[:-1])
-    
+
 #-----------------------------------
 # DOC
 #-----------------------------------
