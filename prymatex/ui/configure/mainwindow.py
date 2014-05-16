@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/mainwindow.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/configure/mainwindow.ui'
 #
-# Created: Thu Mar 27 13:10:50 2014
+# Created: Fri May 16 17:31:45 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,11 +26,26 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(451, 333)
+        MainWindow.resize(451, 166)
         self.verticalLayout = QtGui.QVBoxLayout(MainWindow)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.groupBox_3 = QtGui.QGroupBox(MainWindow)
+        self.groupBox_3.setObjectName(_fromUtf8("groupBox_3"))
+        self.formLayout_3 = QtGui.QFormLayout(self.groupBox_3)
+        self.formLayout_3.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
+        self.formLayout_3.setLabelAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.formLayout_3.setMargin(6)
+        self.formLayout_3.setSpacing(2)
+        self.formLayout_3.setObjectName(_fromUtf8("formLayout_3"))
+        self.checkBoxAskAboutModifiedEditors = QtGui.QCheckBox(self.groupBox_3)
+        font = QtGui.QFont()
+        font.setItalic(False)
+        self.checkBoxAskAboutModifiedEditors.setFont(font)
+        self.checkBoxAskAboutModifiedEditors.setObjectName(_fromUtf8("checkBoxAskAboutModifiedEditors"))
+        self.formLayout_3.setWidget(0, QtGui.QFormLayout.SpanningRole, self.checkBoxAskAboutModifiedEditors)
+        self.verticalLayout.addWidget(self.groupBox_3)
         self.groupBox_2 = QtGui.QGroupBox(MainWindow)
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
         self.formLayout_2 = QtGui.QFormLayout(self.groupBox_2)
@@ -60,6 +75,8 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "General", None))
+        self.groupBox_3.setTitle(_translate("MainWindow", "Behavior", None))
+        self.checkBoxAskAboutModifiedEditors.setText(_translate("MainWindow", "Ask about modified editors on exit? or save state for next opening", None))
         self.groupBox_2.setTitle(_translate("MainWindow", "Interface", None))
         self.label_2.setText(_translate("MainWindow", "Title template:", None))
         self.checkBoxShowTabsIfMoreThanOne.setText(_translate("MainWindow", "Show tabs only if there are more than one", None))

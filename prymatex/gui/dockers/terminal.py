@@ -148,7 +148,7 @@ class TerminalDock(PrymatexDock, QtGui.QDockWidget):
 
     def initialize(self, **kwargs):
         super(TerminalDock, self).initialize(**kwargs)
-        self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+        self.mainWindow().currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
 
     # ---------------- Settings hooks
     def on_defaultTheme_changed(self, themeUUID):

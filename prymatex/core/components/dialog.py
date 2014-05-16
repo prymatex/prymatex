@@ -7,7 +7,10 @@ from prymatex.core.components.base import PrymatexComponentWidget
 class PrymatexDialog(PrymatexComponentWidget):
     def initialize(self, parent = None, **kwargs):
         super(PrymatexDialog, self).initialize(**kwargs)
-        self.mainWindow = parent
+        self._main_window = parent
+        
+    def mainWindow(self):
+        return self._main_window
         
     def setParameters(self, parameters):
         pass

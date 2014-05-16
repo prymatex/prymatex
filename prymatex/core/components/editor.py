@@ -23,7 +23,10 @@ class PrymatexEditor(PrymatexComponentWidget):
 
     def initialize(self, parent = None, **kwargs):
         super(PrymatexEditor, self).initialize(**kwargs)
-        self.mainWindow = parent
+        self._main_window = parent
+        
+    def mainWindow(self):
+        return self._main_window
 
     def open(self, file_path):
         """ Open file """

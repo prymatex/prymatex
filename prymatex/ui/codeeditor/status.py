@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/codeeditor/status.ui'
+# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/codeeditor/status.ui'
 #
-# Created: Thu Feb  6 11:09:59 2014
+# Created: Fri May 16 17:46:21 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_CodeEditorStatus(object):
     def setupUi(self, CodeEditorStatus):
         CodeEditorStatus.setObjectName(_fromUtf8("CodeEditorStatus"))
-        CodeEditorStatus.resize(629, 192)
+        CodeEditorStatus.resize(629, 196)
         self.verticalLayout = QtGui.QVBoxLayout(CodeEditorStatus)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -174,7 +174,6 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonFindNext.setObjectName(_fromUtf8("pushButtonFindNext"))
         self.gridLayout.addWidget(self.pushButtonFindNext, 0, 3, 1, 1)
         self.groupBox = QtGui.QGroupBox(self.widgetFindReplace)
-        self.groupBox.setTitle(_fromUtf8(""))
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
         self.horizontalLayout_6 = QtGui.QHBoxLayout(self.groupBox)
         self.horizontalLayout_6.setSpacing(2)
@@ -242,7 +241,11 @@ class Ui_CodeEditorStatus(object):
         self.toolButtonMenuBundle.setObjectName(_fromUtf8("toolButtonMenuBundle"))
         self.horizontalLayout_2.addWidget(self.toolButtonMenuBundle)
         self.comboBoxSyntaxes = QtGui.QComboBox(self.widgetStatus)
-        self.comboBoxSyntaxes.setMaximumSize(QtCore.QSize(300, 16777215))
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.comboBoxSyntaxes.sizePolicy().hasHeightForWidth())
+        self.comboBoxSyntaxes.setSizePolicy(sizePolicy)
         self.comboBoxSyntaxes.setObjectName(_fromUtf8("comboBoxSyntaxes"))
         self.horizontalLayout_2.addWidget(self.comboBoxSyntaxes)
         self.comboBoxSymbols = QtGui.QComboBox(self.widgetStatus)

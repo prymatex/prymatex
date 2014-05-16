@@ -32,9 +32,9 @@ class CodeEditorSymbolsDock(PrymatexDock, QtGui.QDockWidget):
 
     def initialize(self, **kwargs):
         super(CodeEditorSymbolsDock, self).initialize(**kwargs)
-        self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+        self.window().currentEditorChanged.connect(self.on_window_currentEditorChanged)
 
-    def on_mainWindow_currentEditorChanged(self, editor):
+    def on_window_currentEditorChanged(self, editor):
         if isinstance(editor, CodeEditor):
             self.tableViewSymbols.setModel(editor.symbolListModel)
         elif editor is None:
@@ -43,13 +43,13 @@ class CodeEditorSymbolsDock(PrymatexDock, QtGui.QDockWidget):
 
     def on_tableViewSymbols_activated(self, index):
         block = index.internalPointer()
-        self.mainWindow.currentEditor().goToBlock(block)
-        self.mainWindow.currentEditor().setFocus()
+        self.window().currentEditor().goToBlock(block)
+        self.window().currentEditor().setFocus()
     
     def on_tableViewSymbols_doubleClicked(self, index):
         block = index.internalPointer()
-        self.mainWindow.currentEditor().goToBlock(block)
-        self.mainWindow.currentEditor().setFocus()
+        self.window().currentEditor().goToBlock(block)
+        self.window().currentEditor().setFocus()
         
 class CodeEditorBookmarksDock(PrymatexDock, QtGui.QDockWidget):
     SHORTCUT = resources.get_sequence("Docks", "FileSystemDock", "Alt+M")
@@ -74,9 +74,9 @@ class CodeEditorBookmarksDock(PrymatexDock, QtGui.QDockWidget):
         
     def initialize(self, **kwargs):
         super(CodeEditorBookmarksDock, self).initialize(**kwargs)
-        self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+        self.window().currentEditorChanged.connect(self.on_window_currentEditorChanged)
 
-    def on_mainWindow_currentEditorChanged(self, editor):
+    def on_window_currentEditorChanged(self, editor):
         if isinstance(editor, CodeEditor):
             self.tableViewBookmarks.setModel(editor.bookmarkListModel)
         elif editor is None:
@@ -85,8 +85,8 @@ class CodeEditorBookmarksDock(PrymatexDock, QtGui.QDockWidget):
         
     def on_tableViewBookmarks_activated(self, index):
         cursor = index.internalPointer()
-        self.mainWindow.currentEditor().setTextCursor(block)
+        self.window().currentEditor().setTextCursor(block)
     
     def on_tableViewBookmarks_doubleClicked(self, index):
         cursor = index.internalPointer()
-        self.mainWindow.currentEditor().setTextCursor(cursor)
+        self.window().currentEditor().setTextCursor(cursor)

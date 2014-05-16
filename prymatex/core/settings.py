@@ -56,6 +56,9 @@ class SettingsGroup(object):
     def groupName(self):
         return self.__groupName
 
+    def default(self, name):
+        return self.configurableItems.get(name).getDefault()
+
     def setValue(self, name, value):
         item = self.configurableItems.get(name)
         if item:

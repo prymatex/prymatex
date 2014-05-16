@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dockers/projects.ui'
 #
-# Created: Thu Mar 13 16:37:59 2014
+# Created: Fri May 16 17:31:45 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -67,7 +67,7 @@ class Ui_ProjectsDock(object):
         self.buttonsLayout.addWidget(self.line)
         self.pushButtonSync = QtGui.QPushButton(self.dockWidgetContents)
         self.pushButtonSync.setMaximumSize(QtCore.QSize(24, 24))
-        icon = QtGui.QIcon.fromTheme(_fromUtf8("folder-sync"))
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("sync-synchronizing"))
         self.pushButtonSync.setIcon(icon)
         self.pushButtonSync.setCheckable(True)
         self.pushButtonSync.setFlat(True)

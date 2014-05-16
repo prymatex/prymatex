@@ -36,7 +36,7 @@ class CodeEditorBaseProcessor(QtCore.QObject):
             # preservar la composision?
             self.__env = {}
             envs = [ self.bundleItem.environmentVariables(),
-                self.editor.mainWindow.environmentVariables(),
+                self.editor.mainWindow().environmentVariables(),
                 self.editor.environmentVariables(),
                 self.baseEnvironment ]
             for env in envs:

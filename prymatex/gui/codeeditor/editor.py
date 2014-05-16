@@ -95,16 +95,19 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     @pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
     def defaultSyntax(self, uuid):
-        self.insertBundleItem(self.application.supportManager.getBundleItem(uuid))
+        self._default_syntax = self.application.supportManager.getBundleItem(uuid)
+        if self._default_syntax is None:
+            # Load original default syntax
+            self._default_syntax = self.application.supportManager.getBundleItem(self._settings.default("defaultSyntax"))
 
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
     def defaultTheme(self, uuid):
-        theme = self.application.supportManager.getBundleItem(uuid)
-        if theme is None:
-            # Load default
-            theme = self.application.supportManager.getBundleItem("766026CB-703D-4610-B070-8DE07D967C5F")
+        self._default_theme = self.application.supportManager.getBundleItem(uuid)
+        if self._default_theme is None:
+            # Load original default theme
+            self._default_theme = self.application.supportManager.getBundleItem(self._settings.default("defaultTheme"))
         
-        self.colours = theme.getStyle()
+        self.colours = self._default_theme.getStyle()
 
         #Set color for QPlainTextEdit
         appStyle = """QPlainTextEdit {background-color: %s;
@@ -118,7 +121,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.syntaxHighlighter.stop()
         self.aboutToHighlightChange.emit()
 
-        self.syntaxHighlighter.setTheme(theme)
+        self.syntaxHighlighter.setTheme(self._default_theme)
         self.themeChanged.emit()
 
         # Run
@@ -172,15 +175,26 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         #Block Count
         self.lastBlockCount = self.document().blockCount()
-        #Connect context menu
-        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(self.showEditorContextMenu)
-
+        
         #Register text formaters
         self.registerTextCharFormatBuilder("line", self.textCharFormat_line_builder)
         self.registerTextCharFormatBuilder("selection", self.textCharFormat_selection_builder)
         self.registerTextCharFormatBuilder("brace", self.textCharFormat_brace_builder)
 
+        # By default
+        self.showMarginLine = True
+        self.showIndentGuide = True
+        self.showHighlightCurrentLine = True
+        
+        # Connect context menu
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        
+        # Connect Signals
+        self.customContextMenuRequested.connect(self.showEditorContextMenu)
+
+        self.cursorPositionChanged.connect(self.setCurrentBraces)
+        self.cursorPositionChanged.connect(self.highlightEditor)
+        
         # Sidebars signals
         self.rightBar.updateRequest.connect(self.updateViewportMargins)
         self.leftBar.updateRequest.connect(self.updateViewportMargins)
@@ -193,27 +207,22 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.updateRequest.connect(self.updateSideBars)
         self.syntaxChanged.connect(self.on_syntaxChanged)
         self.themeChanged.connect(self.highlightEditor)
+        
         # TODO Algo mejor para acomodar el ancho del tabulador
         self.fontChanged.connect(lambda ed = self: ed.setTabStopWidth(ed.tabWidth * ed.characterWidth()))
         self.beginMode.connect(lambda mode, ed = self: ed.modeChanged.emit())
         self.endMode.connect(lambda mode, ed = self: ed.modeChanged.emit())
 
-        # By default
-        self.showMarginLine = True
-        self.showIndentGuide = True
-        self.showHighlightCurrentLine = True
-
     def initialize(self, **kwargs):
         super(CodeEditor, self).initialize(**kwargs)
         self.syntaxHighlighter.setDocument(self.document())
 
+        # Default syntax
+        self.insertBundleItem(self._default_syntax)
+        
         # Get dialogs
-        self.selectorDialog = self.mainWindow.findChild(QtGui.QDialog, "SelectorDialog")
-        self.browserDock = self.mainWindow.findChild(QtGui.QDockWidget, "BrowserDock")
-
-        # Ultimo en conectar esta señal, para poder hacer el update
-        self.cursorPositionChanged.connect(self.setCurrentBraces)
-        self.cursorPositionChanged.connect(self.highlightEditor)
+        self.selectorDialog = self.mainWindow().findChild(QtGui.QDialog, "SelectorDialog")
+        self.browserDock = self.mainWindow().findChild(QtGui.QDockWidget, "BrowserDock")
 
     # ----------- Override from PMXBaseComponent
     def addComponent(self, component):
@@ -242,13 +251,13 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
 
     def showMessage(self, *largs, **kwargs):
-        self.application.showMessage(*largs, **kwargs)
+        self.mainWindow().showMessage(*largs, **kwargs)
 
     def setPlainText(self, text):
         from time import time
         self.syntaxHighlighter.stop()
         self.aboutToHighlightChange.emit()
-        TextEditWidget.setPlainText(self, text)
+        super(CodeEditor, self).setPlainText(text)
         self.highlightTime = time()
         def highlightReady(editor):
             def _ready():
@@ -311,7 +320,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         super(CodeEditor, self).open(filePath)
         content = self.application.fileManager.readFile(filePath)
         self.setPlainText(content)
-
+        
     def close(self):
         self.aboutToClose.emit()
         super(CodeEditor, self).close()
@@ -337,8 +346,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def setComponentState(self, componentState):
         """Restore the state from the given state (returned by a previous call to state())."""
-        if "text" in componentState:
-            self.setPlainText(componentState["text"])
+        #if "text" in componentState:
+        #    self.setPlainText(componentState["text"])
+        pass
 
     def isModified(self):
         return self.document().isModified()
@@ -350,11 +360,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.document().setModified(modified)
 
     def setFilePath(self, filePath):
+        super(CodeEditor, self).setFilePath(filePath)
         extension = self.application.fileManager.extension(filePath)
         syntax = self.application.supportManager.findSyntaxByFileType(extension)
         if syntax is not None:
             self.insertBundleItem(syntax)
-        PrymatexEditor.setFilePath(self, filePath)
 
     def title(self):
         #Podemos marcar de otra forma cuando algo cambia :P
@@ -508,7 +518,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         leftChar = cursor.document().characterAt(cursor.position() - 1)
         rightChar = cursor.document().characterAt(cursor.position())
-
+        
         self._currentBraces = (None, None, None, None)
 
         # TODO si no hay para uno no hay para ninguno, quitar el que esta si el findTypingPair retorna None
@@ -1087,7 +1097,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             point = self.viewport().mapToGlobal(
                 self.cursorRect(cursor).bottomLeft())
         else:
-            point = self.mainWindow.cursor().pos()
+            point = self.mainWindow().cursor().pos()
         menu.popup(point)
 
     # Default Context Menus

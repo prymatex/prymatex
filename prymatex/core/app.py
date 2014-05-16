@@ -58,12 +58,15 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
         resources.loadPrymatexResources(config.PMX_SHARE_PATH)
 
-        #Connects
+        # Connects
         self.aboutToQuit.connect(self.closePrymatex)
         self.componentInstances = {}
         self.shortcutsTreeModel = ShortcutsTreeModel(self)
 
         self.replaceSysExceptHook()
+    
+        # Windows
+        self._main_windows = []
 
     # ------ exception and logger handlers
     def getLogger(self, *largs, **kwargs):
@@ -175,18 +178,18 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             self.projectManager.loadProjects(self.showMessage)
             
             # Create Main Window
-            self.mainWindow = self.buildMainWindow()
+            main_window = self.buildMainWindow()
             
             # Change messages handler
-            self.showMessage = self.mainWindow.showMessage
+            self.showMessage = main_window.showMessage
 
             # Load settings
             self.profileManager.loadSettings(self.showMessage)
 
             if not self.options.no_splash:
-                splash.finish(self.mainWindow)
+                splash.finish(main_window)
 
-            self.mainWindow.show()
+            main_window.show()
             self.logger.info("Application startup")
         except KeyboardInterrupt:
             self.logger.critical("Quit signal catched during application startup. Quiting...")
@@ -196,8 +199,9 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         #TODO: ver como dejar todo lindo y ordenado para terminar correctamente
         #if self.zmqContext is not None:
         #    self.zmqContext.destroy()
-        self.mainWindow.close()
-        del self.mainWindow
+        for main_window in self.mainWindows():
+            main_window.close()
+            main_window.deleteLater()
 
     def restart(self):
         self.exit(self.RESTART_CODE)
@@ -292,7 +296,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self.logger.debug("Close")
 
         self.storageManager.close()
-        self.currentProfile.saveState(self.mainWindow)
+        for main_window in self.mainWindows():
+            self.currentProfile.saveState(main_window)
         self.currentProfile.sync()
         if os.path.exists(self.fileLock):
             os.unlink(self.fileLock)
@@ -377,7 +382,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         group = self.currentProfile.groupByName(groupName)
         group.removeHook(settingName, handler)
 
-    # ------------- Editors and mainWindow handle
+    # ------------- Editors and windows handle
     def createEditorInstance(self, class_name = None, file_path=None, 
         cursor_position = None, parent=None):
         editorClass = None
@@ -402,24 +407,31 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         editor.close()
         editor.deleteLater()
 
+    def findEditorForFile(self, filepath):
+        for main_window in self.mainWindows():
+            editor = main_window.findEditorForFile(filepath)
+            if editor:
+                return main_window, editor
+
+    def mainWindows(self):
+        return self._main_windows
+        
     def buildMainWindow(self):
         """Creates the windows"""
         from prymatex.gui.mainwindow import PrymatexMainWindow
 
-        mainWindow = self.createComponentInstance(PrymatexMainWindow)
+        main_window = self.createComponentInstance(PrymatexMainWindow)
 
-        self.currentProfile.restoreState(mainWindow)
+        self.currentProfile.restoreState(main_window)
 
-        if not mainWindow.editors():
-            mainWindow.addEmptyEditor()
-        return mainWindow
+        if not main_window.editors():
+            main_window.addEmptyEditor()
+        self._main_windows.append(main_window)
+        return main_window
 
-    def currentEditor(self):
-        return self.mainWindow.currentEditor()
-
-    def findEditorForFile(self, filepath):
-        #Para cada mainwindow buscar el editor
-        return self.mainWindow, self.mainWindow.findEditorForFile(filepath)
+    def currentWindow(self):
+        # TODO Aca retornar la window actual
+        return self._main_windows[0]
 
     def canBeHandled(self, filepath):
         #from prymatex.utils.pyqtdebug import ipdb_set_trace
@@ -446,27 +458,27 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         # Send some singal? Don't think so yet, this is intended to be set at startup
 
     # ---- Open (file, directory, url, canelones)
-    def openFile(self, filepath, cursorPosition=None, focus=True, mainWindow=None):
+    def openFile(self, filepath, cursorPosition=None, focus=True, main_window=None):
         """Open a editor in current window"""
         file_path = self.fileManager.normcase(filepath)
 
         if self.fileManager.isOpen(file_path):
-            mainWindow, editor = self.findEditorForFile(file_path)
+            main_window, editor = self.findEditorForFile(file_path)
             if editor is not None:
-                mainWindow.setCurrentEditor(editor)
+                main_window.setCurrentEditor(editor)
                 if cursorPosition is not None:
                     editor.setCursorPosition(cursorPosition)
         elif self.fileManager.exists(file_path):
-            mainWindow = mainWindow or self.mainWindow
+            main_window = main_window or self.currentWindow()
             editor = self.createEditorInstance(
                 file_path = file_path,
                 cursor_position = cursorPosition,
-                parent = mainWindow,
+                parent = main_window,
                 )
             # TODO el dialogo de no tengo editor para ese tipo de archivo
             if editor:
-                mainWindow.tryCloseEmptyEditor()
-                mainWindow.addEditor(editor, focus)
+                main_window.tryCloseEmptyEditor()
+                main_window.addEditor(editor, focus)
 
     def openDirectory(self, directoryPath):
         raise NotImplementedError("Directory contents should be opened as files here")
@@ -487,7 +499,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                 filePath = QtCore.QUrl(sourceFile, QtCore.QUrl.TolerantMode).toLocalFile()
                 self.openFile(filePath, cursorPosition = position)
             else:
-                self.currentEditor().setCursorPosition(position)
+                self.currentWindow().currentEditor().setCursorPosition(position)
         elif url.scheme() == "file":
             self.openFile(url.toLocalFile())
         else:
@@ -510,7 +522,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     def applyShortcuts(self):
         self.shortcutsTreeModel.applyShortcuts()
 
-    def checkExternalAction(self, mainWindow, editor):
+    def checkExternalAction(self, main_window, editor):
         if editor.isExternalChanged():
             message = "The file '%s' has been changed on the file system, Do you want to replace the editor contents with these changes?"
             result = QtGui.QMessageBox.question(editor, _("File changed"),
@@ -531,16 +543,15 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                                                 buttons=QtGui.QMessageBox.Save | QtGui.QMessageBox.Close,
                                                 defaultButton=QtGui.QMessageBox.Close) if self.askAboutExternalDeletions else QtGui.QMessageBox.Close
             if result == QtGui.QMessageBox.Close:
-                mainWindow.closeEditor(editor)
+                main_window.closeEditor(editor)
             elif result == QtGui.QMessageBox.Save:
-                mainWindow.saveEditor(editor)
+                main_window.saveEditor(editor)
 
     def on_fileManager_fileSytemChanged(self, filePath, change):
-        mainWindow, editor = self.findEditorForFile(filePath)
+        main_window, editor = self.findEditorForFile(filePath)
         editor.setExternalAction(change)
-        if mainWindow.currentEditor() == editor:
-            self.checkExternalAction(mainWindow, editor)
-
+        if main_window.currentEditor() == editor:
+            self.checkExternalAction(main_window, editor)
 
     def __str__(self):
         return '<PrymatexApplication at {} PID: {}>'.format(hash(self), os.getpid())

@@ -7,9 +7,12 @@ from prymatex.support.processor import CommandProcessorMixin
 
 #Este es un processor de commands para la Main Window
 class MainWindowCommandProcessor(CommandProcessorMixin):
-    def __init__(self, mainWindow):
+    def __init__(self, main_window):
         super(MainWindowCommandProcessor, self).__init__()
-        self.mainWindow = mainWindow
+        self._main_window = main_window
+
+    def mainWindow(self):
+        return self._main_window
 
     def beginExecution(self, command):
         self.command = command
@@ -22,14 +25,14 @@ class MainWindowCommandProcessor(CommandProcessorMixin):
         if self.__env is None:
             self.__env = {}
             envs = [ self.command.environmentVariables(),
-                self.mainWindow.environmentVariables(),
+                self.window().environmentVariables(),
                 self.baseEnvironment ]
             for env in envs:
                 self.__env.update(env)
         return self.__env
         
     def shellVariables(self):
-        settings = self.mainWindow.application.supportManager.getPreferenceSettings()
+        settings = self.window().application.supportManager.getPreferenceSettings()
         return settings.shellVariables
 
     def configure(self, settings):
@@ -40,18 +43,18 @@ class MainWindowCommandProcessor(CommandProcessorMixin):
     # ------------ Before Running Command
     def saveModifiedFiles(self):
         ret = True
-        for editor in self.mainWindow.editors():
+        for editor in self.window().editors():
             if editor.isModified():
-                self.mainWindow.saveEditor(editor = editor)
+                self.window().saveEditor(editor = editor)
                 ret = ret and not editor.isModified()
             if ret == False:
                 break
         return ret
     
     def saveActiveFile(self):
-        editor = self.mainWindow.currentEditor()
+        editor = self.window().currentEditor()
         if editor is not None:
-            self.mainWindow.saveEditor(editor = editor)
+            self.window().saveEditor(editor = editor)
             return not (editor.isModified() or editor.isNew())
         return True
     
@@ -61,7 +64,7 @@ class MainWindowCommandProcessor(CommandProcessorMixin):
             raise Exception(context.errorValue)
         else:
             print(context.workingDirectory)
-            self.mainWindow.showErrorInBrowser(
+            self.window().showErrorInBrowser(
                 context.description(),
                 context.errorValue,
                 context.outputType,
@@ -69,29 +72,29 @@ class MainWindowCommandProcessor(CommandProcessorMixin):
             )
 
     def showAsHTML(self, context, outputFormat = None):
-        self.mainWindow.browserDock.setRunningContext(context)
+        self.window().browserDock.setRunningContext(context)
 
     def showAsTooltip(self, context, outputFormat = None):
         message = context.outputValue.strip()
         timeout = len(message) * 20
 
-        self.mainWindow.showMessage(message, timeout = timeout)
+        self.window().showMessage(message, timeout = timeout)
     
     def toolTip(self, context, outputFormat = None):
         print("toolTip")
 
     def createNewDocument(self, context, outputFormat = None):
-        editor = self.mainWindow.addEmptyEditor()
+        editor = self.window().addEmptyEditor()
         editor.setPlainText(context.outputValue)
         
     def newWindow(self, context, outputFormat = None):
         if outputFormat == "html":
-            self.mainWindow.browserDock.newRunningContext(context)
+            self.window().browserDock.newRunningContext(context)
         elif outputFormat == "text":
             # TODO: Quiza una mejor forma de crear documentos con texto
-            editor = self.mainWindow.addEmptyEditor()
+            editor = self.window().addEmptyEditor()
             editor.setPlainText(context.outputValue)
 
     def openAsNewDocument(self, context, outputFormat = None):
-        editor = self.mainWindow.addEmptyEditor()
+        editor = self.window().addEmptyEditor()
         editor.setPlainText(context.outputValue)

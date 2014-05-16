@@ -58,10 +58,10 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
         
     def initialize(self, **kwargs):
         super(ProjectsDock, self).initialize(**kwargs)
-        self.projectDialog = self.mainWindow.findChild(QtGui.QDialog, "ProjectDialog")
-        self.templateDialog = self.mainWindow.findChild(QtGui.QDialog, "TemplateDialog")
-        self.bundleEditorDialog = self.mainWindow.findChild(QtGui.QDialog, "BundleEditorDialog")
-        self.propertiesDialog = self.mainWindow.findChild(QtGui.QDialog, "PropertiesDialog")
+        self.projectDialog = self.mainWindow().findChild(QtGui.QDialog, "ProjectDialog")
+        self.templateDialog = self.mainWindow().findChild(QtGui.QDialog, "TemplateDialog")
+        self.bundleEditorDialog = self.mainWindow().findChild(QtGui.QDialog, "BundleEditorDialog")
+        self.propertiesDialog = self.mainWindow().findChild(QtGui.QDialog, "PropertiesDialog")
         self.setupPropertiesWidgets()
 
     @classmethod
@@ -85,7 +85,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
     
     # ------------------ Menu Actions
     def on_actionGoToProjectFile_triggered(self):
-        filePath = self.mainWindow.selectorDialog.select(self.selectableProjectFileModel, title=_("Select Project File"))
+        filePath = self.mainWindow().selectorDialog.select(self.selectableProjectFileModel, title=_("Select Project File"))
         if filePath is not None:
             index = self.projectTreeProxyModel.indexForPath(filePath)
             self.treeViewProjects.setCurrentIndex(index)
@@ -230,7 +230,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
             }
             
             env.update(node.project().environmentVariables())
-            self.mainWindow.insertBundleItem(action.bundleTreeNode, environment = env)
+            self.mainWindow().insertBundleItem(action.bundleTreeNode, environment = env)
     
     def extendFileSystemItemMenu(self, menu, node):
         extend_menu_section(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete, self.actionRename])
@@ -406,11 +406,11 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
     def on_pushButtonSync_toggled(self, checked):
         if checked:
             #Conectar señal
-            self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
-            self.on_mainWindow_currentEditorChanged(self.mainWindow.currentEditor())
+            self.mainWindow().currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+            self.on_mainWindow_currentEditorChanged(self.mainWindow().currentEditor())
         else:
             #Desconectar señal
-            self.mainWindow.currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
+            self.mainWindow().currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
     
     def on_mainWindow_currentEditorChanged(self, editor):
         if editor is not None and not editor.isNew():

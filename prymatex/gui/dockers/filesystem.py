@@ -57,7 +57,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
 
     def initialize(self, **kwargs):
         super(FileSystemDock, self).initialize(**kwargs)
-        self.templateDialog = self.mainWindow.findChild(QtGui.QDialog, "TemplateDialog")
+        self.templateDialog = self.mainWindow().findChild(QtGui.QDialog, "TemplateDialog")
 
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
@@ -353,17 +353,17 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
     def on_pushButtonSync_toggled(self, checked):
         if checked:
             #Conectar señal
-            self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
-            self.on_mainWindow_currentEditorChanged(self.mainWindow.currentEditor())
+            self.mainWindow().currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+            self.on_mainWindow_currentEditorChanged(self.mainWindow().currentEditor())
         else:
             #Desconectar señal
-            self.mainWindow.currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
+            self.mainWindow().currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
 
     @QtCore.Slot()
     def on_actionSetInTerminal_triggered(self):
         path = self.currentPath()
         directory = self.application.fileManager.getDirectory(path)
-        self.mainWindow.terminal.chdir(directory)
+        self.mainWindow().terminal.chdir(directory)
 
     # ----- Sort and order Actions
     @QtCore.Slot()
@@ -393,7 +393,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
     @QtCore.Slot()
     def on_actionConvertIntoProject_triggered(self):
         _base, name = os.path.split(self.currentPath())
-        self.mainWindow.componentByName("projectdialog").createProject(directory = self.currentPath(), name = name)
+        self.mainWindow().componentByName("projectdialog").createProject(directory = self.currentPath(), name = name)
 
     def on_mainWindow_currentEditorChanged(self, editor):
         if editor is not None and not editor.isNew():
