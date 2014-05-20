@@ -86,16 +86,16 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
     # ----------------- Before Running Command
     def saveModifiedFiles(self):
         ret = True
-        for editor in self.editor.mainWindow.editors():
+        for editor in self.editor.mainWindow().editors():
             if editor.isModified():
-                self.editor.mainWindow.saveEditor(editor = editor)
+                self.editor.mainWindow().saveEditor(editor = editor)
                 ret = ret and not editor.isModified()
             if ret == False:
                 break
         return ret
 
     def saveActiveFile(self):
-        self.editor.mainWindow.saveEditor(editor = self.editor)
+        self.editor.mainWindow().saveEditor(editor = self.editor)
         return not (self.editor.isModified() or self.editor.isNew())
 
     # ------------------- Outpus function
@@ -103,7 +103,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
         if self.errorCommand:
             raise Exception(context.errorValue)
         else:
-            self.editor.mainWindow.showErrorInBrowser(
+            self.editor.mainWindow().showErrorInBrowser(
                 context.description(),
                 context.errorValue,
                 context.outputType,
@@ -169,7 +169,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
             'copy': lambda s = message: QtGui.qApp.instance().clipboard().setText(s)
         }
 
-        self.editor.mainWindow.showMessage(message,
+        self.editor.mainWindow().showMessage(message,
             frmt = outputFormat or "text", timeout = timeout, point = point,
             linkMap = callbacks)
 
@@ -177,7 +177,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
         self.showAsTooltip(context, outputFormat)
 
     def createNewDocument(self, context, outputFormat = None):
-        editor= self.editor.mainWindow.addEmptyEditor()
+        editor= self.editor.mainWindow().addEmptyEditor()
         editor.setPlainText(context.outputValue)
 
     def newWindow(self, context, outputFormat = None):
@@ -185,9 +185,9 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
             self.editor.browserDock.newRunningContext(context)
         elif outputFormat == "text":
             # TODO: Quiza una mejor forma de crear documentos con texto
-            editor = self.editor.mainWindow.addEmptyEditor()
+            editor = self.editor.mainWindow().addEmptyEditor()
             editor.setPlainText(context.outputValue)
 
     def openAsNewDocument(self, context, outputFormat = None):
-        editor = self.editor.mainWindow.addEmptyEditor()
+        editor = self.editor.mainWindow().addEmptyEditor()
         editor.setPlainText(context.outputValue)
