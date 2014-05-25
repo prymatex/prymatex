@@ -329,10 +329,10 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
         buildedObjects = []
         def buildComponentInstance(klass, **kwargs):
-            instance = klass(**kwargs)
+            component = klass(**kwargs)
 
             # Configure
-            self.currentProfile.configure(instance)
+            self.currentProfile.configure(component)
 
             # Add components
             componentClasses = self.pluginManager.findComponentsForClass(klass)
@@ -340,12 +340,12 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                 # Filter editors, editors create explicit
                 if issubclass(componentClass, PrymatexEditor):
                     continue
-                componentInstance = buildComponentInstance(componentClass, parent = instance)
-                instance.addComponent(componentInstance)
-            buildedObjects.append((instance, kwargs.get("parent", None)))
-            return instance
+                subComponent = buildComponentInstance(componentClass, parent = component)
+                component.addComponent(subComponent)
+            buildedObjects.append((component, kwargs.get("parent", None)))
+            return component
 
-        instance = buildComponentInstance(componentClass, **kwargs)
+        component = buildComponentInstance(componentClass, **kwargs)
 
         # buildedObjects.reverse()
         # Initialize order is important, fist goes the internal components then the main component
@@ -354,12 +354,15 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                 ni.initialize(parent = np)
                 # Shortcuts
                 for settings in ni.contributeToShortcuts():
-                    create_shortcut(instance, settings, sequence_handler = self.registerShortcut)
+                    create_shortcut(component, settings, sequence_handler = self.registerShortcut)
 
-        self.componentInstances.setdefault(componentClass, []).append(instance)
+        self.componentInstances.setdefault(componentClass, []).append(component)
 
-        return instance
+        return component
 
+    def deleteComponentInstance(self, component):
+        component.deleteLater()
+        
     # ------------ Find Component
     def componentHierarchyForClass(self, componentClass):
         return self.pluginManager.componentHierarchyForClass(componentClass)
@@ -405,7 +408,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     def deleteEditorInstance(self, editor):
         editor.close()
-        editor.deleteLater()
+        self.deleteComponentInstance(editor)
 
     def findEditorForFile(self, filepath):
         for main_window in self.mainWindows():
