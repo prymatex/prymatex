@@ -17,9 +17,12 @@ from __future__ import unicode_literals, absolute_import
 
 import re
 import subprocess
+import logging
 
 from . import six
 from . import encoding
+
+logger = logging.getLogger(__name__)
 
 #install xmodmap
 def cmd_keymap_table():

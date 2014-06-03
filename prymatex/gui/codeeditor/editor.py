@@ -346,9 +346,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def setComponentState(self, componentState):
         """Restore the state from the given state (returned by a previous call to state())."""
-        #if "text" in componentState:
-        #    self.setPlainText(componentState["text"])
-        pass
+        if not self.hasFile() and "text" in componentState:
+            self.setPlainText(componentState["text"])
 
     def isModified(self):
         return self.document().isModified()
