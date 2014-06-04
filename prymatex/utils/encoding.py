@@ -45,25 +45,21 @@ def getfilesystemencoding():
 
 FS_ENCODING = getfilesystemencoding()
 
-def from_fs(string):
-    """
-    Return a unicode version of string decoded using the file system encoding.
-    """
+def from_fs(byteString):
+    """Return a unicode version of string decoded using the file system encoding."""
     try:
-        return six.text_type(string, FS_ENCODING)
+        return six.text_type(byteString, FS_ENCODING)
     except (UnicodeError, TypeError) as e:
         print(e)
-    return string
+    return byteString
 
-def to_fs(unic):
-    """
-    Return a byte string version of unic encoded using the file system encoding.
-    """
+def to_fs(strString):
+    """Return a byte string version of unic encoded using the file system encoding."""
     try:
-        return six.text_type(unic).encode(FS_ENCODING)
+        return six.binary_type(strString, FS_ENCODING)
     except (UnicodeError, TypeError) as ex:
         pass
-    return unic
+    return strString
 
 #------------------------------------------------------------------------------
 #  Functions for encoding and decoding *text data* itself, usually originating

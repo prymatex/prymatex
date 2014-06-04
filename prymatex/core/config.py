@@ -4,9 +4,12 @@
 """
 Application configuration based on Qt's QSettings module.
 """
-import sys, os, plistlib
+import sys
+import os
+import plistlib
 
 import prymatex
+from prymatex.utils import six
 from prymatex.utils.misc import get_home_dir
 
 #============================================================================
@@ -151,15 +154,15 @@ def get_translation(modname, dirname=None):
         _trans = gettext.translation(modname, locale_path, codeset="utf-8")
         lgettext = _trans.lgettext
         def translate_gettext(x):
-            if isinstance(x, str):
+            if isinstance(x, six.string_types):
                 x = x.encode("utf-8")
-            return str(lgettext(x), "utf-8")
+            return lgettext(x)
         return translate_gettext
     except IOError as _e:  # analysis:ignore
         #print "Not using translations (%s)" % _e
         def translate_dumb(x):
-            if not isinstance(x, str):
-                return str(x, "utf-8")
+            if not isinstance(x, six.string_types):
+                return x
             return x
         return translate_dumb
 
@@ -178,7 +181,7 @@ def get_supported_types():
     get_remote_data function in spyderlib/widgets/externalshell/monitor.py
     get_internal_shell_filter method in namespacebrowser.py"""
     from datetime import date
-    editable_types = [int, int, float, list, dict, tuple, str, str, date]
+    editable_types = six.string_types + six.integer_types + (float, list, dict, tuple, date)
     try:
         from numpy import ndarray, matrix
         editable_types += [ndarray, matrix]

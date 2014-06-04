@@ -24,20 +24,21 @@ from . import encoding
 
 logger = logging.getLogger(__name__)
 
-#install xmodmap
 def cmd_keymap_table():
     try:
         return encoding.from_fs(subprocess.Popen(
                ['xmodmap','-pk'], stdout = subprocess.PIPE).communicate()[0])
     except:
-        return ""
+        logger.warn("Prymatex preserve the original shortcuts of Textmate. For better translation of this shortcuts is recommended install xmodmap")
+    return ""
 
 def cmd_modifier_map():
     try:
         return encoding.from_fs(subprocess.Popen(
                ['xmodmap','-pm'], stdout=subprocess.PIPE).communicate()[0])
     except:
-        return ""
+        logger.warn("Prymatex preserve the original shortcuts of Textmate. For better translation of this shortcuts is recommended install xmodmap")
+    return ""
 
 def get_keymap_table():
     keymap = {}
