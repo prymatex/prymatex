@@ -171,7 +171,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
         self.treeViewFileSystem.setAnimated(True)
 
     @QtCore.Slot(str)
-    def on_comboBoxLocation_currentIndexChanged(self, text):
+    def on_comboBoxLocation_activated(self, text):
         path = self.fileManager.expandVars(text)
         #TODO: Mostrar un error cuando sea None
         if path is not None:
