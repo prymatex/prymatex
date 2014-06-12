@@ -25,14 +25,14 @@ class MainWindowCommandProcessor(CommandProcessorMixin):
         if self.__env is None:
             self.__env = {}
             envs = [ self.command.environmentVariables(),
-                self.window().environmentVariables(),
+                self.mainWindow().environmentVariables(),
                 self.baseEnvironment ]
             for env in envs:
                 self.__env.update(env)
         return self.__env
         
     def shellVariables(self):
-        settings = self.window().application.supportManager.getPreferenceSettings()
+        settings = self.mainWindow().application.supportManager.getPreferenceSettings()
         return settings.shellVariables
 
     def configure(self, settings):
@@ -43,18 +43,18 @@ class MainWindowCommandProcessor(CommandProcessorMixin):
     # ------------ Before Running Command
     def saveModifiedFiles(self):
         ret = True
-        for editor in self.window().editors():
+        for editor in self.mainWindow().editors():
             if editor.isModified():
-                self.window().saveEditor(editor = editor)
+                self.mainWindow().saveEditor(editor = editor)
                 ret = ret and not editor.isModified()
             if ret == False:
                 break
         return ret
     
     def saveActiveFile(self):
-        editor = self.window().currentEditor()
+        editor = self.mainWindow().currentEditor()
         if editor is not None:
-            self.window().saveEditor(editor = editor)
+            self.mainWindow().saveEditor(editor = editor)
             return not (editor.isModified() or editor.isNew())
         return True
     
@@ -64,7 +64,7 @@ class MainWindowCommandProcessor(CommandProcessorMixin):
             raise Exception(context.errorValue)
         else:
             print(context.workingDirectory)
-            self.window().showErrorInBrowser(
+            self.mainWindow().showErrorInBrowser(
                 context.description(),
                 context.errorValue,
                 context.outputType,
@@ -72,29 +72,29 @@ class MainWindowCommandProcessor(CommandProcessorMixin):
             )
 
     def showAsHTML(self, context, outputFormat = None):
-        self.window().browserDock.setRunningContext(context)
+        self.mainWindow().browserDock.setRunningContext(context)
 
     def showAsTooltip(self, context, outputFormat = None):
         message = context.outputValue.strip()
         timeout = len(message) * 20
 
-        self.window().showMessage(message, timeout = timeout)
+        self.mainWindow().showMessage(message, timeout = timeout)
     
     def toolTip(self, context, outputFormat = None):
         print("toolTip")
 
     def createNewDocument(self, context, outputFormat = None):
-        editor = self.window().addEmptyEditor()
+        editor = self.mainWindow().addEmptyEditor()
         editor.setPlainText(context.outputValue)
         
     def newWindow(self, context, outputFormat = None):
         if outputFormat == "html":
-            self.window().browserDock.newRunningContext(context)
+            self.mainWindow().browserDock.newRunningContext(context)
         elif outputFormat == "text":
             # TODO: Quiza una mejor forma de crear documentos con texto
-            editor = self.window().addEmptyEditor()
+            editor = self.mainWindow().addEmptyEditor()
             editor.setPlainText(context.outputValue)
 
     def openAsNewDocument(self, context, outputFormat = None):
-        editor = self.window().addEmptyEditor()
+        editor = self.mainWindow().addEmptyEditor()
         editor.setPlainText(context.outputValue)
