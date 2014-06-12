@@ -13,7 +13,8 @@ class Scope(object):
 
     @classmethod
     def factory(cls, sources):
-        return cls(PathType.factory(sources))
+        # Fast parsing
+        return cls(PathType.factory(isinstance(sources, six.string_types) and sources.split() or sources))
     
     def __str__(self):
         return six.text_type(self.path)

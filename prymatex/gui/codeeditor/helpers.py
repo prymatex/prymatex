@@ -48,8 +48,9 @@ class TabTriggerHelper(CodeEditorKeyHelper):
 
 class SmartTypingPairsHelper(CodeEditorKeyHelper):
     def accept(self, event = None, cursor = None, **kwargs):
+        settings, _ = self.editor.settings(cursor)
         character = event.text()
-        pairs = [pair for pair in self.editor.braces if character in pair]
+        pairs = [pair for pair in settings.smartTypingPairs if character in pair]
         
         #Si no tengo nada retorno
         if not pairs: return False
@@ -59,18 +60,19 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
         self.cursor1 = self.cursor2 = None
         
         isOpen = character == self.pair[0]
-        if isOpen and cursor.hasSelection():
-            #El cursor tiene seleccion, veamos si es un brace de apertura y tiene seleccionado un brace de apertura 
-            selectedText = cursor.selectedText()
-            if any([selectedText == pair[0] for pair in self.editor.braces]):
-                self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor)
+        if isOpen:
+            if cursor.hasSelection():
+                #El cursor tiene seleccion, veamos si es un brace de apertura y tiene seleccionado un brace de apertura 
+                selectedText = cursor.selectedText()
+                if any([selectedText == pair[0] for pair in settings.smartTypingPairs]):
+                    self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor)
             return True
         
         isClose = character == self.pair[1]
         if isClose:
             if cursor.hasSelection():
                 selectedText = cursor.selectedText()
-                if any([selectedText == pair[1] for pair in self.editor.braces]):
+                if any([selectedText == pair[1] for pair in settings.smartTypingPairs]):
                     self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor)
                 return True
             else:
