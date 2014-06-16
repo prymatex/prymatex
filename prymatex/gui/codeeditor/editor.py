@@ -792,7 +792,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         block = cursor.block()
         line = block.text()
 
-        # TODO un shortcut para esto de obtener el path
         leftScope, rightScope = self.scope(cursor)
         current_word, start, end = self.currentWord()
 

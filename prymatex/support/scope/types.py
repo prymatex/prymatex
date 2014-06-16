@@ -64,7 +64,7 @@ class PathType(object):
     
     def __str__(self):
         ret = self.anchor_to_bol and "^ " or ""
-        ret += " ".join([str(s) for s in self.scopes])
+        ret += " ".join(("%s" % scope for scope in self.scopes))
         ret += self.anchor_to_eol and " $" or ""
         return ret
 
@@ -212,7 +212,7 @@ class ExpressionType(object):
     def __str__(self):
         ret = self.op is not None and "%s " % self.op or ""
         ret += self.negate and "-" or ""
-        ret += str(self.selector)
+        ret += "%s" % self.selector
         return ret
 
     __unicode__ = __str__
@@ -228,7 +228,7 @@ class CompositeType(object):
         self.expressions = []
     
     def __str__(self):
-        return " ".join([str(c) for c in self.expressions])
+        return " ".join(("%s" % expression for expression in self.expressions))
 
     __unicode__ = __str__
 
@@ -291,7 +291,7 @@ class SelectorType(object):
         self.composites = []
         
     def __str__(self):
-        return  ", ".join([str(c) for c in self.composites])
+        return  ", ".join(["%s" % c for c in self.composites])
 
     __unicode__ = __str__
 
