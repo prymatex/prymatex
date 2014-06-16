@@ -395,7 +395,10 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             editorClass = self.pluginManager.findEditorClassForFile(file_path)
         if editorClass is None:
             editorClass = self.pluginManager.defaultEditor()
-        #TODO: Y si no tengo editorClass ?
+
+        # Exists file ?
+        if file_path and not self.fileManager.isfile(file_path):
+            file_path = None
         editor = self.createComponentInstance(editorClass, 
             parent = parent, 
             file_path = file_path

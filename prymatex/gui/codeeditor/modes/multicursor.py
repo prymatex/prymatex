@@ -50,7 +50,6 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.draggedCursors = self.cursors = []
         self.editor.viewport().setCursor(self.standardCursor)
         CodeEditorBaseMode.deactivate(self)
-        self.highlightEditor()
 
     # ------- Text char format builders
     def textCharFormat_dragged_builder(self):
@@ -332,27 +331,34 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         return not self.cursors[0].atStart()
 
     def findCursor(self, backward = False):
+        # Get leader cursor
         if not self.isActive():
             cursor = self.editor.textCursor()
         else:
             cursor = self.cursors[0] if backward else self.cursors[-1]
-        if not cursor.hasSelection():
-            text, start, end = self.editor.currentWord()
-            newCursor = self.editor.newCursorAtPosition(start, end)
-        else:
+            
+        # Build new cursor
+        if cursor.hasSelection():
             text = cursor.selectedText()
             flags = QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords
             if backward:
                 flags |= QtGui.QTextDocument.FindBackward
-            newCursor = self.editor.document().find(text, cursor, flags)
-        if not newCursor.isNull():
-            self.addMergeCursor(newCursor)
-            self.editor.centerCursor(newCursor)
+            new_cursor = self.editor.document().find(text, cursor, flags)
+        else:
+            text, start, end = self.editor.currentWord()
+            new_cursor = self.editor.newCursorAtPosition(start, end)
+        
+        if not self.isActive() and cursor.hasSelection():
+            # The first time also add the leader cursor if has selection
+            self.addMergeCursor(cursor)
+        if not new_cursor.isNull():
+            self.addMergeCursor(new_cursor)
+            self.editor.centerCursor(new_cursor)
+
+        if self.cursors and not self.isActive():
             self.activate()
-            
-            # Muestro los nuevos cursores
-            self.highlightEditor()
-    
+        self.highlightEditor()
+
     def contributeToShortcuts(self):
         return [{
             "sequence": resources.get_sequence("Multiedit", "FindForwardCursor", "Ctrl+Meta+M"),
