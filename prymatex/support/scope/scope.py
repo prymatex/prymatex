@@ -8,8 +8,13 @@ from .parser import Parser
 from .types import PathType, ScopeType
 
 class Scope(object):
-    def __init__(self, path):
-        self.path = isinstance(path, PathType) and path or Parser.path(path)
+    def __init__(self, path = ""):
+        if isinstance(path, (tuple, list)):
+            self.path = PathType.factory(path)
+        elif isinstance(path, PathType):
+            self.path = path
+        elif path:
+            self.path = Parser.path(path)
 
     @classmethod
     def factory(cls, sources):
@@ -87,6 +92,11 @@ class Selector(object):
 
     # ------- Matching 
     def does_match(self, context, rank = None):
+        if not context:
+            if rank is not None:        
+                rank.append(0)
+            return False
+
         if isinstance(context, Scope):
             context = Context(context, context)
 

@@ -230,14 +230,14 @@ class SupportBaseManager(object):
         return syntax
 
     #--------------- Scopes selectors and context --------------
-    def scopeFactory(self, data):
-        return scope.Scope.factory(isinstance(data, six.string_types) and data.split() or data)
+    def scopeFactory(self, source):
+        return scope.Scope(source)
         
     def selectorFactory(self, selector):
         return scope.Selector(selector)
         
     def contextFactory(self, leftScope, rightScope = None):
-        return scope.Context(leftScope, rightScope or leftScope)
+        return scope.Context(leftScope, rightScope)
     
     # ------------------ SCOPE ATTRIBUTES
     def attributeScopes(self, filePath, projectDirectory = None):
@@ -873,7 +873,7 @@ class SupportBaseManager(object):
         return self.bundleItemCache.setdefault(memoizedKey,
             self.__sort_filter_items(self.getAllPreferences(), leftScope, rightScope))
 
-    def getPreferenceSettings(self, leftScope = scope.none, rightScope = scope.none):
+    def getPreferenceSettings(self, leftScope, rightScope = None):
         memoizedKey = ("getPreferenceSettings", None, leftScope, rightScope)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)

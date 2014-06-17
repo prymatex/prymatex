@@ -12,7 +12,6 @@ from prymatex.models.trees import TreeNodeBase
 from prymatex.utils import six
 
 from prymatex.support.bundleitem.theme import DEFAULT_THEME_SETTINGS
-from prymatex.support import scope
 
 #====================================================
 # Bundle Tree Node
@@ -119,7 +118,7 @@ class BundleItemTreeNode(TreeNodeBase):
     def clearCache(self):
         self.STYLES_CACHE = {}
 
-    def getStyle(self, scopePath = scope.none):
+    def getStyle(self, scopePath = None):
         if scopePath in self.STYLES_CACHE:
             return self.STYLES_CACHE[scopePath]
         base = dict([(key_value[0], rgba2color(key_value[1])) for key_value in DEFAULT_THEME_SETTINGS.items() if key_value[1].startswith('#')])
