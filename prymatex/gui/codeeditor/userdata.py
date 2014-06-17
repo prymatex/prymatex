@@ -7,19 +7,11 @@ from prymatex.qt import QtGui
 
 from functools import reduce
 
-CodeEditorScopeData = namedtuple("CodeEditorScopeData", [ "scope", "settings", "group" ])
-
-class CodeEditorTokenData(namedtuple('CodeEditorTokenData', 'start end data chunk')):
+class CodeEditorTokenData(namedtuple('CodeEditorTokenData', 'start end scope chunk')):
         __slots__ = ()
         @property
-        def scope(self):
-            return self.data.scope
-        @property
-        def settings(self):
-            return self.data.settings
-        @property
         def group(self):
-            return self.data.group
+            return self.scope.rootGroupName()
 
 class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
 

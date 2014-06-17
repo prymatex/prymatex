@@ -16,7 +16,7 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.qt.helpers.menus import extend_menu
 from prymatex.models.support import BundleItemTreeNode
 
-from .userdata import CodeEditorBlockUserData, CodeEditorScopeData
+from .userdata import CodeEditorBlockUserData
 from .addons import CodeEditorAddon
 from .sidebar import CodeEditorSideBar, SideBarWidgetAddon
 from .processors import (CodeEditorCommandProcessor, CodeEditorSnippetProcessor,
@@ -39,7 +39,7 @@ from functools import reduce
 class CodeEditor(PrymatexEditor, TextEditWidget):
     # Aca vamos a guardar los scopes de los editores, quiza esto pueda
     # ser un objeto factory, por ahora la fabricacion la hace el editor
-    # en el factory method flyweightScopeDataFactory
+    # en el factory method flyweightScopeFactory
     SCOPES = {}
     STANDARD_SIZES = (70, 78, 80, 100, 120)
 
@@ -242,7 +242,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def on_syntaxChanged(self, syntax):
         # Set the basic scope
-        self.setBasicScope(( syntax.scopeName, ))
+        self.setRootScope( syntax.scopeName )
 
         self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
 
@@ -289,9 +289,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         # Indent
         userData.indentation = text.white_space(sourceText)
         # Folding
-        # TODO: Ver si lo puedo sacar del scope basico o hace falta tomar de algun lugar
-        # Principio, fin de la linea
-        userData.foldingMark = self.basicScope().settings.folding(sourceText)
+        userData.foldingMark = self.settings().folding(sourceText)
 
         # Handlers
         for handler in self.__blockUserDataHandlers:
@@ -370,21 +368,20 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         #return PrymatexEditor.fileFilters(self)
 
     # ---------------------- Scopes
-    def setBasicScope(self, scopeStack):
-        self.__basicScope = self.flyweightScopeDataFactory(scopeStack)
+    def setRootScope(self, scopeName):
+        # New scope
+        self.__rootScope = self.flyweightScopeFactory(scopeName)
 
-    def basicScope(self):
-        return self.__basicScope
+    def rootScope(self):
+        # Clone scope
+        return self.__rootScope.clone()
 
     @classmethod
-    def flyweightScopeDataFactory(cls, path):
-        if path in cls.SCOPES:
-            return cls.SCOPES[path]
-        scope = cls.application.supportManager.scopeFactory(path)
-        return cls.SCOPES.setdefault(path, CodeEditorScopeData(
-                scope = scope,
-                settings = cls.application.supportManager.getPreferenceSettings(scope, scope),
-                group = scope.rootGroupName()))
+    def flyweightScopeFactory(cls, scopeName):
+        if scopeName in cls.SCOPES:
+            return cls.SCOPES[scopeName].clone()
+        scope = cls.application.supportManager.scopeFactory(scopeName)
+        return cls.SCOPES.setdefault(scopeName, scope)
 
     def tokenAtPosition(self, position):
         if position < 0:
@@ -392,7 +389,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         elif position > self.document().characterCount():
             position = self.document().characterCount()
         block = self.document().findBlock(position)
-        return self.blockUserData(block).tokenAtPosition(position - block.position()) or self.basicScope()
+        return self.blockUserData(block).tokenAtPosition(position - block.position())
 
     def scope(self, cursor = None):
         cursor = cursor or self.textCursor()
@@ -431,7 +428,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor = cursor or self.textCursor()
         leftToken, rightToken = (self.tokenAtPosition(cursor.selectionStart() - 1),
             self.tokenAtPosition(cursor.selectionEnd()))
-        return leftToken.settings, rightToken.settings
+        if leftToken and rightToken:
+            return self.application.supportManager.getPreferenceSettings(leftToken.scope, leftToken.scope)
+        return self.application.supportManager.getPreferenceSettings(self.rootScope(), self.rootScope())
 
     # ------------ Obteniendo datos del editor
     def tabKeyBehavior(self):
@@ -508,7 +507,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def setCurrentBraces(self, cursor = None):
         cursor = QtGui.QTextCursor(cursor) if cursor is not None else QtGui.QTextCursor(self.textCursor())
         cursor.clearSelection()
-        _, settings = self.settings(cursor)
+        settings = self.settings(cursor)
         openBraces = [pair[0] for pair in settings.highlightPairs]
         closeBraces = [pair[1] for pair in settings.highlightPairs]
 
@@ -722,7 +721,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor = cursor or self.textCursor()
         block = cursor.block()
         positionInBlock = cursor.positionInBlock()
-        _, settings = self.settings(cursor)
+        settings = self.settings(cursor)
 
         indentationFlags = settings.indentationFlags(block.text()[:positionInBlock])
 
@@ -945,7 +944,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # -------------- Add select text functions
     def selectEnclosingBrackets(self, cursor = None):
         cursor = cursor or self.textCursor()
-        _, settings = self.settings(cursor)
+        settings = self.settings(cursor)
         flags = QtGui.QTextDocument.FindFlags()
         flags |= QtGui.QTextDocument.FindBackward
         foundCursors = [(self.document().find(openBrace_closeBrace[0], cursor.selectionStart(), flags), openBrace_closeBrace[1]) for openBrace_closeBrace in settings.highlightPairs]

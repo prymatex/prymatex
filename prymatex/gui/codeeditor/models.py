@@ -129,10 +129,9 @@ class SymbolListModel(QtCore.QAbstractListModel):
 
     def processBlockUserData(self, text, block, userData):
         symbol = None
-        for token in userData.tokens():
-            if token.settings.showInSymbolList:
-                symbol = token.settings.transformSymbol(token.chunk)
-                break
+        settings = self.editor.settings()
+        if settings.showInSymbolList:
+            symbol = settings.transformSymbol(token.chunk)
         
         if userData.symbol != symbol:
             userData.symbol = symbol

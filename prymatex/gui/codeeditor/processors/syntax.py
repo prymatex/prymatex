@@ -16,7 +16,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     def __init__(self, editor):
         CodeEditorBaseProcessor.__init__(self, editor)
         self.stack = []
-        self.scopes = []
+        self.scope = None
 
     def managed(self):
         return True
@@ -43,17 +43,15 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.editor.syntaxHighlighter.runAsyncHighlight(self.editor.highlightChanged.emit)
 
     def endExecution(self, bundleItem):
-        self.endParse(bundleItem.scopeName)
+        #self.endParse(bundleItem.scopeName)
         CodeEditorBaseProcessor.endExecution(self, bundleItem)
     
     def restoreState(self, block):
         if block.isValid():
-            stack, scopes = self.editor.blockUserData(block).processorState()
-            self.stack = stack[:]
-            self.scopes = scopes[:]
+            self.stack, self.scope = self.editor.blockUserData(block).processorState()
 
     def saveState(self, block):
-        self.editor.blockUserData(block).setProcessorState((self.stack[:], self.scopes[:]))
+        self.editor.blockUserData(block).setProcessorState((self.stack[:], self.scope.clone()))
 
     def blockUserData(self, block):
         text = block.text() + "\n"
@@ -79,17 +77,17 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
 
     # -------- Parsing
     def beginParse(self, scopeName):
-        self.scopes = [ scopeName ]
+        self.scope = self.editor.flyweightScopeFactory(scopeName)
 
     def endParse(self, scopeName):
-        self.scopes.pop()
+        self.scope.pop_scope()
 
     # -------- Line
     def beginLine(self, line):
         self.line = line
         self.__tokens = []
         self.__indexes = []
-        for _ in self.scopes:
+        for _ in range(self.scope.size()):
             self.openToken(0)
 
     def endLine(self, line):
@@ -99,11 +97,11 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     def openTag(self, scopeName, position):
         #Open token
         self.openToken(position)
-        self.scopes.append(scopeName)
+        self.scope.push_scope(scopeName)
 
     def closeTag(self, scopeName, position):
         self.closeToken(position)
-        self.scopes.pop()
+        self.scope.pop_scope()
 
     # --------- Create tokens
     def openToken(self, start):
@@ -116,7 +114,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
             self.__tokens[index] = CodeEditorTokenData(
                 start=start,
                 end=end,
-                data=self.editor.flyweightScopeDataFactory(tuple(self.scopes)),
+                scope=self.scope.clone(),
                 chunk=self.line[start:end]
             )
             if not closeAll:
