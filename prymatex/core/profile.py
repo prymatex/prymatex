@@ -51,7 +51,7 @@ class PrymatexProfile(object):
     def groupByClass(self, configurableClass):
         return self.groupByName(self.__group_name(configurableClass))
 
-    def registerConfigurable(self, configurableClass):
+    def addConfigurableClass(self, configurableClass):
         # Prepare class group
         # TODO: Una forma de obtener y setear los valores en las settings
         # Las configurableClass tiene que tener esos metodos
@@ -63,18 +63,22 @@ class PrymatexProfile(object):
                     value.name = key
                 configurableClass._settings.addConfigurableItem(value)
 
-    def configure(self, component):
-        settingsGroup = self.groupByClass(component.__class__)
-        settingsGroup.addListener(component)
-        settingsGroup.configure(component)
+    def registerConfigurableInstance(self, configurable):
+        settingsGroup = self.groupByClass(configurable.__class__)
+        settingsGroup.addListener(configurable)
+        settingsGroup.configure(configurable)
 
-    def saveState(self, component):
-        self.state[component.objectName()] = component.componentState()
+    def unregisterConfigurableInstance(self, configurable):
+        settingsGroup = self.groupByClass(configurable.__class__)
+        settingsGroup.removeListener(configurable)
+        
+    def saveState(self, configurable):
+        self.state[configurable.objectName()] = configurable.componentState()
 
-    def restoreState(self, component):
-        componentState = self.state.get(component.objectName())
+    def restoreState(self, configurable):
+        componentState = self.state.get(configurable.objectName())
         if componentState is not None:
-            component.setComponentState(componentState)
+            configurable.setComponentState(componentState)
 
     def setValue(self, name, value):
         self.settings[name] = value

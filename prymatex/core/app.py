@@ -116,7 +116,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
         # Prepare settings for application
         self.populateComponentClass(PrymatexApplication)
-        self.currentProfile.configure(self)
+        self.currentProfile.registerConfigurableInstance(self)
 
         logger.config(self.options.verbose, self.currentProfile.PMX_LOG_PATH, self.options.log_pattern)
 
@@ -227,7 +227,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
         manager = PluginManager(parent = self)
 
-        self.currentProfile.configure(manager)
+        self.currentProfile.registerConfigurableInstance(manager)
 
         manager.initialize(parent = self)
 
@@ -307,20 +307,19 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         componentClass.application = self
         componentClass.logger = self.getLogger('.'.join([componentClass.__module__, componentClass.__name__]))
 
-    def registerConfigurable(self, componentClass):
-        self.currentProfile.registerConfigurable(componentClass)
-        for settingClass in componentClass.contributeToSettings():
-            self.extendComponent(settingClass)
-            settingWidget = settingClass(
-                settings = componentClass._settings,
-                profile = self.currentProfile)
-            componentClass._settings.addDialog(settingWidget)
-            self.profileManager.registerSettingsWidget(settingWidget)
-
     def populateComponentClass(self, componentClass):
         self.extendComponent(componentClass)
         if issubclass(componentClass, PrymatexComponent):
-            self.registerConfigurable(componentClass)
+            # Add configurable class to the current profile 
+            self.currentProfile.addConfigurableClass(componentClass)
+            # Add settings widgets
+            for settingClass in componentClass.contributeToSettings():
+                self.extendComponent(settingClass)
+                settingWidget = settingClass(
+                    settings = componentClass._settings,
+                    profile = self.currentProfile)
+                componentClass._settings.addDialog(settingWidget)
+                self.profileManager.registerSettingsWidget(settingWidget)
 
     # ------------------- Create components
     def createComponentInstance(self, componentClass, **kwargs):
@@ -331,8 +330,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         def buildComponentInstance(klass, **kwargs):
             component = klass(**kwargs)
 
-            # Configure
-            self.currentProfile.configure(component)
+            # Add configurable instance and configure
+            self.currentProfile.registerConfigurableInstance(component)
 
             # Add components
             componentClasses = self.pluginManager.findComponentsForClass(klass)
@@ -361,6 +360,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         return component
 
     def deleteComponentInstance(self, component):
+        self.currentProfile.unregisterConfigurableInstance(component)
         component.deleteLater()
         
     # ------------ Find Component
