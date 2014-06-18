@@ -90,11 +90,11 @@ class WordsCompletionModel(CompletionBaseModel):
         return QtGui.QCompleter.CaseSensitivelySortedModel
 
     def fillModel(self, callback):
-        leftSettings, rightSettings = self.editor.settings()
+        settings = self.editor.settings()
         self.suggestions = set(self.words)
         if self.prefix in self.suggestions:
             self.suggestions.remove(self.prefix)
-        self.suggestions.update(rightSettings.completions)
+        self.suggestions.update(settings.completions)
         if self.suggestions:
             self.suggestions = sorted(list(self.suggestions))
             callback(self)

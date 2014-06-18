@@ -22,14 +22,14 @@ if API == 'pyqt':
         # that PyQt is outdated and won't be supported by Prymatex
         pass
     try:
-        from PyQt4.QtCore import QT_VERSION_STR as qt_version_str
-        from PyQt4.pyqtconfig import Configuration
-        cfg = Configuration()
-        sip_version_str = cfg.sip_version_str
-        pyqt_version_str = cfg.pyqt_version_str
-        del cfg
+        from PyQt4.QtCore import qVersion, PYQT_VERSION_STR
+        pyqt_version_str = PYQT_VERSION_STR
+        qt_version_str = qVersion()
+        import sipconfig
+        sip_version_str = sipconfig.Configuration().sip_version_str
     except ImportError as ex:
         print(ex)
+        sip_version_str = 'unknown'
         # Switching to PySide
         API = os.environ['QT_API'] = 'pyside'
         API_NAME = 'PySide'

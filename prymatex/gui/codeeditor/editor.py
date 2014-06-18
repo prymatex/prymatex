@@ -395,34 +395,35 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor = cursor or self.textCursor()
         leftToken, rightToken = (self.tokenAtPosition(cursor.selectionStart() - 1),
             self.tokenAtPosition(cursor.selectionEnd()))
+        if leftToken and rightToken:
+            leftScope, rightScope = leftToken.scope.clone(), rightToken.scope.clone()
+        else:
+            leftScope, rightScope = self.rootScope().clone(), self.rootScope().clone()
         # Cursor scope
         leftCursor = self.newCursorAtPosition(cursor.selectionStart())
         rightCursor = self.newCursorAtPosition(cursor.selectionEnd())
-        leftPath, rightPath = [], []
         if cursor.hasSelection():
             # If there is one or more selections: dyn.selection.
             # TODO If there is a single zero-width selection: dyn.caret.mixed.columnar.
             # TODO If there are multiple carets and/or selections: dyn.caret.mixed.
-            leftPath.append("dyn.selection")
-            rightPath.append("dyn.selection")
+            leftScope.push_scope("dyn.selection")
+            rightScope.push_scope("dyn.selection")
         # When there is only a single caret or a single continuous selection
         # the left scope may contain: dyn.caret.begin.line or dyn.caret.begin.document
         if leftCursor.atBlockStart():
-            leftPath.append("dyn.caret.begin.line")
+            leftScope.push_scope("dyn.caret.begin.line")
         if leftCursor.atStart():
-            leftPath.append("dyn.caret.begin.document")
+            leftScope.push_scope("dyn.caret.begin.document")
         # Likewise the right scope may contain: dyn.caret.end.line or dyn.caret.end.document.
         if rightCursor.atBlockEnd():
-            rightPath.append("dyn.caret.end.line")
+            rightScope.push_scope("dyn.caret.end.line")
         if rightCursor.atEnd():
-            rightPath.append("dyn.caret.end.document")
-        lcs, rcs = (self.application.supportManager.scopeFactory(leftPath),
-            self.application.supportManager.scopeFactory(rightPath))
-
+            rightScope.push_scope("dyn.caret.end.document")
+        
         # TODO Attribute scope cache
-        attrScope = self.application.supportManager.attributeScopes(
-            self.filePath(), self.project() and self.project().directory)
-        return leftToken.scope + lcs + attrScope, rightToken.scope + rcs + attrScope
+        #attrScope = self.application.supportManager.attributeScopes(
+        #    self.filePath(), self.project() and self.project().directory)
+        return leftScope, rightScope
 
     def settings(self, cursor = None):
         cursor = cursor or self.textCursor()

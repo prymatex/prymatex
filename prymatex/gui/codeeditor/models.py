@@ -131,7 +131,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
         symbol = None
         settings = self.editor.settings()
         if settings.showInSymbolList:
-            symbol = settings.transformSymbol(token.chunk)
+            symbol = settings.transformSymbol(text)
         
         if userData.symbol != symbol:
             userData.symbol = symbol
