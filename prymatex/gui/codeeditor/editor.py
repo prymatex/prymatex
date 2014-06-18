@@ -37,10 +37,6 @@ from prymatex.utils.i18n import ugettext as _
 from functools import reduce
 
 class CodeEditor(PrymatexEditor, TextEditWidget):
-    # Aca vamos a guardar los scopes de los editores, quiza esto pueda
-    # ser un objeto factory, por ahora la fabricacion la hace el editor
-    # en el factory method flyweightScopeFactory
-    SCOPES = {}
     STANDARD_SIZES = (70, 78, 80, 100, 120)
 
     # -------------------- Signals
@@ -242,8 +238,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def on_syntaxChanged(self, syntax):
         # Set the basic scope
-        self.setRootScope( syntax.scopeName )
-
         self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
 
     def showMessage(self, *largs, **kwargs):
@@ -368,20 +362,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         #return PrymatexEditor.fileFilters(self)
 
     # ---------------------- Scopes
-    def setRootScope(self, scopeName):
-        # New scope
-        self.__rootScope = self.flyweightScopeFactory(scopeName)
+    def setRootScope(self, scope):
+        self.__rootScope = scope
 
     def rootScope(self):
-        # Clone scope
         return self.__rootScope.clone()
-
-    @classmethod
-    def flyweightScopeFactory(cls, scopeName):
-        if scopeName in cls.SCOPES:
-            return cls.SCOPES[scopeName].clone()
-        scope = cls.application.supportManager.scopeFactory(scopeName)
-        return cls.SCOPES.setdefault(scopeName, scope)
 
     def tokenAtPosition(self, position):
         if position < 0:

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import sys
-base_node_type = unicode if sys.version < '3' else str
 
 from .parser import Parser
 
@@ -9,19 +8,19 @@ ROOTS = ( "comment", "constant", "entity", "invalid", "keyword", "markup",
 "meta", "storage", "string", "support", "variable" )            
 
 class Scope(object):
-    class Node(base_node_type):
-        def __new__(cls, string, parent):
-            return super(Scope.Node, cls).__new__(cls, string)
+    class Node(tuple):
+        def __new__(cls, iter, parent):
+            return super(Scope.Node, cls).__new__(cls, iter)
 
-        def __init__(self, string, parent):
+        def __init__(self, iter, parent):
             self.parent = parent
 
         def is_auxiliary_scope(self):
-            return self.startswith("attr.") or self.startswith("dyn.") 
+            return self[0] in ("attr", "dyn")
 
         def number_of_atoms(self):
-    	        return self.count(".")
-
+    	        return len(self)
+        
     def __init__(self, source = None):
         self.node = None
         if isinstance(source, Scope.Node):
@@ -40,11 +39,9 @@ class Scope(object):
         return cls(source)
 
     def __hash__(self):
-        return id(self.node)
+        return hash("%s" % self)
 
     def __eq__(self, rhs):
-        if hash(self) == hash(rhs):
-            return True
         n1, n2 = self.node, rhs.node
         while n1 and n2 and n1 == n2:
             n1 = n1.parent
@@ -61,7 +58,7 @@ class Scope(object):
         res = []
         n = self.node
         while n is not None:
-            res.append("%s" % n)
+            res.append(".".join(n))
             n = n.parent
         return " ".join(res[::-1])
     
@@ -76,7 +73,7 @@ class Scope(object):
         return self.node is None
 
     def push_scope(self, atom):
-        self.node = Scope.Node(atom, self.node)
+        self.node = Scope.Node(atom.split("."), self.node)
     
     def pop_scope(self):
         assert(self.node is not None)
@@ -84,7 +81,7 @@ class Scope(object):
 
     def back(self):
         assert(self.node is not None)
-        return self.node
+        return ".".join(self.node)
 
     def size(self):
         res = 0
@@ -138,15 +135,24 @@ class Context(object):
         else:
             return "(left '%s', right '%s')" % (self.left, self.right)
 
+    # --------- Python 2
+    __unicode__ = __str__
+    
 class Selector(object):
     def __init__(self, source = None):
         self._selector = None
         if source is not None:
             self._selector = Parser.selector(source)
 
+    def __repr__(self):
+        return repr(self._selector)
+        
     def __str__(self):
         return self._selector and "%s" % self._selector or ""
 
+    # --------- Python 2
+    __unicode__ = __str__
+    
     # ------- Matching 
     def does_match(self, context, rank = None):
         if not isinstance(context, Context):

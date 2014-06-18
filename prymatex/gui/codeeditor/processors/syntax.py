@@ -43,7 +43,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.editor.syntaxHighlighter.runAsyncHighlight(self.editor.highlightChanged.emit)
 
     def endExecution(self, bundleItem):
-        #self.endParse(bundleItem.scopeName)
+        self.endParse(bundleItem.scopeName)
         CodeEditorBaseProcessor.endExecution(self, bundleItem)
     
     def restoreState(self, block):
@@ -77,7 +77,8 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
 
     # -------- Parsing
     def beginParse(self, scopeName):
-        self.scope = self.editor.flyweightScopeFactory(scopeName)
+        self.scope = self.editor.application.supportManager.scopeFactory(scopeName)
+        self.editor.setRootScope(self.scope.clone())
 
     def endParse(self, scopeName):
         self.scope.pop_scope()

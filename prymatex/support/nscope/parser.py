@@ -41,7 +41,7 @@ class Parser(object):
                 self.it += 1
             if not self.parse_char("."):
                 break
-        res.atoms = self.source[frm:self.it]
+        res.atoms = tuple(self.source[frm:self.it].split("."))
         
         return frm != self.it
 

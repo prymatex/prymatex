@@ -4,10 +4,11 @@
 from functools import reduce
 
 def prefix_match(lhs, rhs):
+
     if len(lhs) > len(rhs):
         return False
-    
-    for l, r in zip(lhs.split("."), rhs.split(".")):
+
+    for l, r in zip(lhs, rhs):
         if l != r and l != "*":
             return False
 
@@ -16,16 +17,16 @@ def prefix_match(lhs, rhs):
 class ScopeType(object):
     def __init__(self):
         self.anchor_to_previous = False
-        self.atoms = ""
+        self.atoms = ()
 
     def __str__(self):
         ret = self.anchor_to_previous and "> " or ""
-        return ret + self.atoms
+        return ret + ".".join(self.atoms)
 
     __unicode__ = __str__
     
     def __repr__(self):
-        return "%s anchor_to_previous:%s\n[%s]" % (self.__class__.__name__, self.anchor_to_previous, self.atoms)
+        return "%s anchor_to_previous:%s\n[%s]" % (self.__class__.__name__, self.anchor_to_previous, ".".join(self.atoms))
 
     def __hash__(self):
         return hash(self.anchor_to_previous) + hash(self.atoms)
@@ -109,7 +110,7 @@ class PathType(object):
             if rank is not None:
                 power += node.number_of_atoms()
 
-            isRedundantNonBOLMatch = self.anchor_to_bol and node.parent and sel_index - 1 == -1
+            isRedundantNonBOLMatch = self.anchor_to_bol and node.parent is not None and sel_index - 1 == -1
             if not isRedundantNonBOLMatch and prefix_match(sel.atoms, node):
                 if sel.anchor_to_previous:
                     if btSelector_index == -1:
@@ -123,7 +124,7 @@ class PathType(object):
                 if rank is not None:
                     score = reduce(
                         lambda s, k: s + (1.0 / pow(2, power - k)),
-                        range(sel.atoms.count("."), -1, -1),
+                        range(len(sel.atoms), -1, -1),
                         score
                     )
 
@@ -293,7 +294,6 @@ class SelectorType(object):
     def __hash__(self):
         return hash(self.composites)
     
-    # Listo
     def does_match(self, lhs, rhs, rank = None):
         if rank is not None:
             res = False
