@@ -68,7 +68,7 @@ class WordsCompletionModel(CompletionBaseModel):
     def contributeToBlockUserData(self, userData):
         userData.words = set()
 
-    def processBlockUserData(self, text, block, userData):
+    def processBlockUserData(self, text, cursor, block, userData):
         words = set(
             reduce(lambda w1, w2: w1 + w2,
                 map(lambda token: self.editor.RE_WORD.findall(token.chunk),

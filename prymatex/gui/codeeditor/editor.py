@@ -282,12 +282,16 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def processBlockUserData(self, sourceText, block, userData):
         # Indent
         userData.indentation = text.white_space(sourceText)
+        
+        # Build cursor from block
+        cursor = self.newCursorAtPosition(block.position() + len(userData.indentation))
+        
         # Folding
-        userData.foldingMark = self.settings().folding(sourceText)
-
+        userData.foldingMark = self.settings(cursor).folding(sourceText)
+        
         # Handlers
         for handler in self.__blockUserDataHandlers:
-            handler.processBlockUserData(sourceText, block, userData)
+            handler.processBlockUserData(sourceText, cursor, block, userData)
 
     def on_blockCountChanged(self, newBlockCount):
         self.logger.debug("block Count changed")

@@ -117,7 +117,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
     def __init__(self, editor): 
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
-        self.blocks = []
+        self.symbols = []
         self.editor.registerBlockUserDataHandler(self)
         #Connects
         self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
@@ -127,57 +127,56 @@ class SymbolListModel(QtCore.QAbstractListModel):
     def contributeToBlockUserData(self, userData):
         userData.symbol = None
 
-    def processBlockUserData(self, text, block, userData):
+    def processBlockUserData(self, text, cursor, block, userData):
         symbol = None
-        settings = self.editor.settings()
+        settings = self.editor.settings(cursor)
         if settings.showInSymbolList:
             symbol = settings.transformSymbol(text)
         
         if userData.symbol != symbol:
             userData.symbol = symbol
-            if block in self.blocks:
-                index = self.blocks.index(block)
+            if cursor in self.symbols:
+                index = self.symbols.index(cursor)
                 if symbol is None:
                     self.beginRemoveRows(QtCore.QModelIndex(), index, index)
-                    self.blocks.remove(block)
+                    self.symbols.remove(cursor)
                     self.endRemoveRows()
                 else:
                     self.dataChanged.emit(self.index(index), self.index(index))
             else:
-                indexes = [ b.blockNumber() for b in self.blocks ]
-                index = bisect(indexes, block.blockNumber())
-                self.beginInsertRows(QtCore.QModelIndex(), index, index)
-                self.blocks.insert(index, block)
+                position = bisect_key(self.symbols, cursor, lambda cursor: cursor.position())
+                self.beginInsertRows(QtCore.QModelIndex(), position, position)
+                self.symbols.insert(position, cursor)
                 self.endInsertRows()
 
     # ----------- Signals
     def on_editor_blocksRemoved(self):
-        def validSymbolBlock(block):
-            return bool(self.editor.blockUserData(block).symbol)
-        self.blocks = list(filter(validSymbolBlock, self.blocks))
+        def validSymbolBlock(cursor):
+            return bool(self.editor.blockUserData(cursor.block()).symbol)
+        self.symbols = list(filter(validSymbolBlock, self.symbols))
         self.layoutChanged.emit()
 
     def on_editor_aboutToHighlightChange(self):
-        for block in self.blocks:
-            self.editor.blockUserData(block).symbol = None
-        self.blocks = []
+        for cursor in self.symbols:
+            self.editor.blockUserData(cursor.block()).symbol = None
+        self.symbols = []
         self.layoutChanged.emit()
 
     # ----------- Model api
     def index(self, row, column = 0, parent = None):
-        if 0 <= row < len(self.blocks):
-            return self.createIndex(row, column, self.blocks[row])
+        if 0 <= row < len(self.symbols):
+            return self.createIndex(row, column, self.symbols[row])
         else:
             return QtCore.QModelIndex()
 
     def rowCount(self, parent = None):
-        return len(self.blocks)
+        return len(self.symbols)
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
-        if not index.isValid() or index.row() >= len(self.blocks):
+        if not index.isValid() or index.row() >= len(self.symbols):
             return None
         
-        userData = self.editor.blockUserData(self.blocks[index.row()])
+        userData = self.editor.blockUserData(self.symbols[index.row()].block())
         if userData:
             if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
                 return userData.symbol
@@ -185,14 +184,12 @@ class SymbolListModel(QtCore.QAbstractListModel):
                 #userData.rootGroup(pos)
                 return resources.get_icon("scope-root-entity")
 
-
     # ------------- Public api
     def findBlockIndex(self, block):
-        indexes = [b.blockNumber() for b in self.blocks]
-        blockIndex = bisect(indexes, block.blockNumber()) - 1
-        if blockIndex == -1:
-            blockIndex = 0
-        return blockIndex
+        position = bisect_key(self.symbols, block, lambda cursor: cursor.block().position()) - 1
+        if position == -1:
+            position = 0
+        return position
     
 #=========================================================
 # Bookmark Selectable Model
