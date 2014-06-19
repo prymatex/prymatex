@@ -187,9 +187,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         # Connect Signals
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
 
-        self.cursorPositionChanged.connect(self.setCurrentBraces)
-        self.cursorPositionChanged.connect(self.highlightEditor)
-        
         # Sidebars signals
         self.rightBar.updateRequest.connect(self.updateViewportMargins)
         self.leftBar.updateRequest.connect(self.updateViewportMargins)
@@ -200,9 +197,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         # Editor signals
         self.blockCountChanged.connect(self.on_blockCountChanged)
         self.updateRequest.connect(self.updateSideBars)
-        self.syntaxChanged.connect(self.on_syntaxChanged)
         self.themeChanged.connect(self.highlightEditor)
-        
+        self.cursorPositionChanged.connect(self.highlightEditor)
+        self.cursorPositionChanged.connect(self.setCurrentBraces)
+
+        self.syntaxChanged.connect(lambda syntax, editor=self: 
+            editor.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
+        )
+
         # TODO Algo mejor para acomodar el ancho del tabulador
         self.fontChanged.connect(lambda ed = self: ed.setTabStopWidth(ed.tabWidth * ed.characterWidth()))
         self.beginMode.connect(lambda mode, ed = self: ed.modeChanged.emit())
@@ -218,7 +220,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         # Get dialogs
         self.selectorDialog = self.mainWindow().findChild(QtGui.QDialog, "SelectorDialog")
         self.browserDock = self.mainWindow().findChild(QtGui.QDockWidget, "BrowserDock")
-
+        
     # ----------- Override from PMXBaseComponent
     def addComponent(self, component):
         PrymatexEditor.addComponent(self, component)
@@ -235,10 +237,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def addCodeEditorMode(self, codeEditorMode):
         self.codeEditorModes.append(codeEditorMode)
-
-    def on_syntaxChanged(self, syntax):
-        # Set the basic scope
-        self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
 
     def showMessage(self, *largs, **kwargs):
         self.mainWindow().showMessage(*largs, **kwargs)
@@ -366,12 +364,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         #return PrymatexEditor.fileFilters(self)
 
     # ---------------------- Scopes
-    def setRootScope(self, scope):
-        self.__rootScope = scope
-
-    def rootScope(self):
-        return self.__rootScope.clone()
-
     def tokenAtPosition(self, position):
         if position < 0:
             position = 0
@@ -384,10 +376,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor = cursor or self.textCursor()
         leftToken, rightToken = (self.tokenAtPosition(cursor.selectionStart() - 1),
             self.tokenAtPosition(cursor.selectionEnd()))
-        if leftToken and rightToken:
-            leftScope, rightScope = leftToken.scope.clone(), rightToken.scope.clone()
-        else:
-            leftScope, rightScope = self.rootScope().clone(), self.rootScope().clone()
+        leftScope, rightScope = leftToken.scope.clone(), rightToken.scope.clone()
         # Cursor scope
         leftCursor = self.newCursorAtPosition(cursor.selectionStart())
         rightCursor = self.newCursorAtPosition(cursor.selectionEnd())
@@ -418,9 +407,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor = cursor or self.textCursor()
         leftToken, rightToken = (self.tokenAtPosition(cursor.selectionStart() - 1),
             self.tokenAtPosition(cursor.selectionEnd()))
-        if leftToken and rightToken:
-            return self.application.supportManager.getPreferenceSettings(leftToken.scope, leftToken.scope)
-        return self.application.supportManager.getPreferenceSettings(self.rootScope(), self.rootScope())
+        return self.application.supportManager.getPreferenceSettings(leftToken.scope, leftToken.scope)
 
     # ------------ Obteniendo datos del editor
     def tabKeyBehavior(self):

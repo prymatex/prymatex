@@ -78,7 +78,6 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     # -------- Parsing
     def beginParse(self, scopeName):
         self.scope = self.editor.application.supportManager.scopeFactory(scopeName)
-        self.editor.setRootScope(self.scope.clone())
 
     def endParse(self, scopeName):
         self.scope.pop_scope()
