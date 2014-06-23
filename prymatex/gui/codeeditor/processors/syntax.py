@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from .base import CodeEditorBaseProcessor
+
+from prymatex.support import Scope
 from prymatex.support.processor import SyntaxProcessorMixin
-from prymatex.gui.codeeditor.userdata import CodeEditorTokenData
+from prymatex.gui.codeeditor.userdata import CodeEditorToken
 
 def build_userData_revision(scope, text, state):
     return hash("%s:%s:%d" % (scope, text, state))
@@ -77,7 +79,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
 
     # -------- Parsing
     def beginParse(self, scopeName):
-        self.scope = self.editor.application.supportManager.scopeFactory(scopeName)
+        self.scope = Scope(scopeName)
 
     def endParse(self, scopeName):
         self.scope.pop_scope()
@@ -111,7 +113,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     def closeToken(self, end, closeAll=False):
         while self.__indexes:
             start, index = self.__indexes.pop()
-            self.__tokens[index] = CodeEditorTokenData(
+            self.__tokens[index] = CodeEditorToken(
                 start=start,
                 end=end,
                 scope=self.scope.clone(),

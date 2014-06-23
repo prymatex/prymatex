@@ -4,14 +4,15 @@
 from collections import namedtuple
 
 from prymatex.qt import QtGui
+from prymatex.support import Scope
 
-from functools import reduce
-
-class CodeEditorTokenData(namedtuple('CodeEditorTokenData', 'start end scope chunk')):
+class CodeEditorToken(namedtuple('CodeEditorToken', 'start end scope chunk')):
         __slots__ = ()
         @property
         def group(self):
             return self.scope.rootGroupName()
+
+_empty_token = CodeEditorToken(0,0,Scope(),"")
 
 class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
 
@@ -52,12 +53,13 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
         return self.__blank
         
     def lastToken(self):
-        return self.__tokens[-1]
+        return self.__tokens and self.__tokens[-1] or _empty_token
     
     def tokenAtPosition(self, pos):
         for token in self.__tokens[::-1]:
             if token.start <= pos < token.end:
                 return token
+	return _empty_token
 
     # ------------------- Cache Handle
     def processorState(self):
