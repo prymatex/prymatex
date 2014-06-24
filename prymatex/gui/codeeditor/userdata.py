@@ -59,7 +59,7 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
         for token in self.__tokens[::-1]:
             if token.start <= pos < token.end:
                 return token
-	return _empty_token
+        return _empty_token
 
     # ------------------- Cache Handle
     def processorState(self):

@@ -80,8 +80,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 self.setFormat(token.start, token.end - token.start, frmt)
 
     def highlightFormat(self, scope):
-        scopeHash = hash(scope)
-        if scopeHash not in self.__format_cache:
+        if scope not in self.__format_cache:
             frmt = QtGui.QTextCharFormat()
             settings = self.theme.getStyle(scope)
             if 'foreground' in settings:
@@ -95,5 +94,5 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                     frmt.setFontUnderline(True)
                 if 'italic' in settings['fontStyle']:
                     frmt.setFontItalic(True)
-            self.__format_cache[scopeHash] = frmt 
-        return self.__format_cache[scopeHash]
+            self.__format_cache[scope] = frmt
+        return self.__format_cache[scope]

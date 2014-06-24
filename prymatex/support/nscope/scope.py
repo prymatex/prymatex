@@ -3,6 +3,7 @@
 import sys
 
 from .parser import Parser
+from .auxiliary import auxiliary as auxiliary_scoping
 
 ROOTS = ( "comment", "constant", "entity", "invalid", "keyword", "markup",
 "meta", "storage", "string", "support", "variable" )            
@@ -14,13 +15,14 @@ class Scope(object):
 
         def __init__(self, iter, parent):
             self.parent = parent
+            self._hash = None
 
         def is_auxiliary_scope(self):
             return self[0] in ("attr", "dyn")
 
         def number_of_atoms(self):
-    	        return len(self)
-        
+            return len(self)
+
     def __init__(self, source = None):
         self.node = None
         if isinstance(source, Scope.Node):
@@ -34,12 +36,12 @@ class Scope(object):
             for atom in source.split():
                 self.push_scope(atom)
 
-    @classmethod
-    def factory(cls, source):
-        return cls(source)
-
     def __hash__(self):
-        return hash("%s" % self)
+        if self.node is None:
+            return hash("")
+        if self.node._hash is None:
+            self.node._hash = hash("%s" % self)
+        return self.node._hash
 
     def __eq__(self, rhs):
         n1, n2 = self.node, rhs.node
@@ -69,6 +71,12 @@ class Scope(object):
     def clone(self):
         return Scope(self)
 
+    def auxiliary(self, dynamics, file_path):
+        s = self.clone()
+        for dyn in dynamics:
+            s.push_scope(dyn)
+        return auxiliary_scoping(s, file_path)
+        
     def empty(self):
         return self.node is None
 
@@ -106,14 +114,50 @@ class Scope(object):
                 if atom in ROOTS:
                     return atom
                 node = node.parent
-
+    
+    @staticmethod
+    def shared_prefix(lhs, rhs):
+        lhsSize, rhsSize = lhs.size(), rhs.size()
+        n1, n2 = lhs.node, rhs.node
+        for i in range(rhsSize, lhsSize):
+            n1 = n1.parent
+        for i in range(lhsSize, rhsSize):
+            n2 = n2.parent
+    
+        while n1 and n2 and n1 == n2:
+            n1 = n1.parent
+            n2 = n2.parent
+        
+        return Scope(n1)
+    
+    @staticmethod
+    def xml_difference(frm, to, open_string = "<", close_string = ">"):
+        fromScopes, toScopes = [], []
+        tmp = Scope(frm)
+        while not tmp.empty():
+            fromScopes.append(tmp.back())
+            tmp.pop_scope()
+        tmp = Scope(to)
+        while not tmp.empty():
+            toScopes.append(tmp.back())
+            tmp.pop_scope()
+        
+        fromIter, toIter = len(fromScopes) - 1, len(toScopes) - 1
+        while fromIter != -1 and toIter != -1 and fromScopes[fromIter] == toScopes[toIter]:
+            fromIter -= 1
+            toIter -= 1
+        
+        res = ""
+        for it in range(fromIter + 1):
+            res += (open_string + "/" + fromScopes[it] + close_string)
+    
+        while toIter != -1:
+            res += (open_string + toScopes[toIter] + close_string)
+            toIter -= 1
+    
+        return res
+    
 wildcard = Scope("x-any")
-
-def shared_prefix(lhs, rhs):
-    return ""
-
-def xml_difference(frm, to, open = "<", close = ">"):
-    return ""
 
 class Context(object):
     def __init__(self, left = None, right = None):
