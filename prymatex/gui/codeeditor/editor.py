@@ -377,7 +377,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         leftToken, rightToken = (self.tokenAtPosition(cursor.selectionStart() - 1),
             self.tokenAtPosition(cursor.selectionEnd()))
         # Cursor scope
-	leftScope, rightScope = [], []
+        leftScope, rightScope = [], []
         leftCursor = self.newCursorAtPosition(cursor.selectionStart())
         rightCursor = self.newCursorAtPosition(cursor.selectionEnd())
         if cursor.hasSelection():
