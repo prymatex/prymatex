@@ -12,11 +12,23 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def __init__(self, editor):
         super(CodeEditorSyntaxHighlighter, self).__init__(editor)
         self.editor = editor
+        self.processor = editor.findProcessor("syntax")
         self.theme = None
         self.__format_cache = None
         
+        # Visible area
+        self.visible_start = self.editor.firstVisibleBlock().blockNumber()
+        self.visible_end = self.visible_start + 50
+        self.editor.updateRequest.connect(self.on_editor_updateRequest)
+        
+        # The task
         self.editor.aboutToClose.connect(self.stop)        
         self.highlightTask = self.editor.application.schedulerManager.idleTask()
+
+    def on_editor_updateRequest(self, rect, dy):
+        if dy:
+            self.visible_start = self.editor.firstVisibleBlock().blockNumber()
+            self.visible_end = self.visible_start + 50
 
     def stop(self):
         self.stopAsyncHighlight()
@@ -48,9 +60,8 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def asyncHighlightFunction(self):
         block = self.document().begin()
-        processor = self.editor.findProcessor("syntax")
         while block.isValid():
-            userData = processor.blockUserData(block)
+            userData = self.processor.blockUserData(block)
             
             formats = []
             for token in userData.tokens():
@@ -62,14 +73,13 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
             block.layout().setAdditionalFormats(formats)
             block = block.next()
+            if self.visible_start <= block.blockNumber() <= self.visible_end:
+                self.document().markContentsDirty(block.position(), block.length())
             yield
-        self.document().markContentsDirty(0, self.document().characterCount())
 
     def syncHighlightFunction(self, text):
-        # TODO: Obtener el processor en el init del editor
-        processor = self.editor.findProcessor("syntax")
         block = self.currentBlock()
-        userData = processor.blockUserData(self.currentBlock())
+        userData = self.processor.blockUserData(self.currentBlock())
         
         self.applyFormat(userData)
 
