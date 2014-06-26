@@ -6,6 +6,35 @@ import re
 
 from prymatex.qt import QtGui, QtCore
 
+def _highlight_function(document, processor):
+    block = document.begin()
+    start, end, theme = (yield)
+    position = None
+    length = 0
+    while block.isValid():
+        userData = processor.blockUserData(block)
+        
+        formats = []
+        for token in userData.tokens():
+            frange = QtGui.QTextLayout.FormatRange()
+            frange.start = token.start
+            frange.length = token.end - token.start
+            frange.format = theme.textCharFormat(token.scope)
+            formats.append(frange)
+
+        block.layout().setAdditionalFormats(formats)
+        if start <= block.blockNumber() <= end:
+            if position is None:
+                positon = block.position()
+                length = 0
+            length += block.length()
+        elif position is not None:
+            document.markContentsDirty(position, length)
+            position = None
+        else:
+            start, end, theme = (yield)
+        block = block.next()
+
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     FORMAT_CACHE = {}
     
@@ -68,7 +97,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 frange = QtGui.QTextLayout.FormatRange()
                 frange.start = token.start
                 frange.length = token.end - token.start
-                frange.format = self.highlightFormat(token.scope)
+                frange.format = self.theme.textCharFormat(token.scope)
                 formats.append(frange)
 
             block.layout().setAdditionalFormats(formats)
@@ -85,24 +114,6 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def applyFormat(self, userData):
         for token in userData.tokens():
-            frmt = self.highlightFormat(token.scope)
+            frmt = self.theme.textCharFormat(token.scope)
             if frmt is not None:
                 self.setFormat(token.start, token.end - token.start, frmt)
-
-    def highlightFormat(self, scope):
-        if scope not in self.__format_cache:
-            frmt = QtGui.QTextCharFormat()
-            settings = self.theme.getStyle(scope)
-            if 'foreground' in settings:
-                frmt.setForeground(settings['foreground'])
-            if 'background' in settings:
-                frmt.setBackground(settings['background'])
-            if 'fontStyle' in settings:
-                if 'bold' in settings['fontStyle']:
-                    frmt.setFontWeight(QtGui.QFont.Bold)
-                if 'underline' in settings['fontStyle']:
-                    frmt.setFontUnderline(True)
-                if 'italic' in settings['fontStyle']:
-                    frmt.setFontItalic(True)
-            self.__format_cache[scope] = frmt
-        return self.__format_cache[scope]

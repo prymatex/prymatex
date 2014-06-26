@@ -24,7 +24,7 @@ class BundleItemTreeNode(TreeNodeBase):
     def __init__(self, bundleItem, nodeParent = None):
         TreeNodeBase.__init__(self, bundleItem.name, nodeParent)
         self.__bundleItem = bundleItem
-        self.STYLES_CACHE = {}
+        self._format_cache = {}
 
     # ----------- Bundle Item attrs assessors -----------
     def __getattr__(self, name):
@@ -116,23 +116,38 @@ class BundleItemTreeNode(TreeNodeBase):
 
     # ----------- Theme decoration -----------
     def clearCache(self):
-        self.STYLES_CACHE = {}
+        self._format_cache = {}
 
-    def getStyle(self, scopePath = None):
-        if scopePath in self.STYLES_CACHE:
-            return self.STYLES_CACHE[scopePath]
+    def getStyle(self, scope = None):
         base = dict([(key_value[0], rgba2color(key_value[1])) for key_value in DEFAULT_THEME_SETTINGS.items() if key_value[1].startswith('#')])
 
         styles = []
         for style in self.__bundleItem.settings:
             rank = []
-            if style.scopeSelector.does_match(scopePath, rank):
+            if style.scopeSelector.does_match(scope, rank):
                 styles.append((rank.pop(), style))
         styles.sort(key = lambda t: t[0])
         for style in styles:
             base.update(style[1].settings())
-        self.STYLES_CACHE[scopePath] = base
         return base
+
+    def textCharFormat(self, scope = None):
+        if scope not in self._format_cache:
+            frmt = QtGui.QTextCharFormat()
+            settings = self.getStyle(scope)
+            if 'foreground' in settings:
+                frmt.setForeground(settings['foreground'])
+            if 'background' in settings:
+                frmt.setBackground(settings['background'])
+            if 'fontStyle' in settings:
+                if 'bold' in settings['fontStyle']:
+                    frmt.setFontWeight(QtGui.QFont.Bold)
+                if 'underline' in settings['fontStyle']:
+                    frmt.setFontUnderline(True)
+                if 'italic' in settings['fontStyle']:
+                    frmt.setFontItalic(True)
+            self._format_cache[scope] = frmt
+        return self._format_cache[scope]
 
     def isEditorNeeded(self):
         return self.isTextInputNeeded() or self.producingOutputText()

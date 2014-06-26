@@ -104,16 +104,17 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             self._default_theme = self.application.supportManager.getBundleItem(self._settings.default("defaultTheme"))
         
         self.colours = self._default_theme.getStyle()
+        self.setCurrentCharFormat(self._default_theme.textCharFormat())
 
         #Set color for QPlainTextEdit
-        appStyle = """QPlainTextEdit {background-color: %s;
-        color: %s;
-        selection-background-color: %s; }""" % (
-            self.colours['background'].name(),
-            self.colours['foreground'].name(),
-            self.colours['selection'].name())
+        #appStyle = """QPlainTextEdit {background-color: %s;
+        #color: %s;
+        #selection-background-color: %s; }""" % (
+        #    self.colours['background'].name(),
+        #    self.colours['foreground'].name(),
+        #    self.colours['selection'].name())
 
-        self.setStyleSheet(appStyle)
+        #self.setStyleSheet(appStyle)
         self.syntaxHighlighter.stop()
         self.aboutToHighlightChange.emit()
 
@@ -1464,4 +1465,3 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                     self.application.openFile(filePath)
         elif event.mimeData().hasText():
             self.textCursor().insertText(event.mimeData().text())
-
