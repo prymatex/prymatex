@@ -232,7 +232,7 @@ class BookmarkSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
                 painter.fillRect(blockGeometry, self.invisibles)
 
             # Draw the line number right justified at the y position of the line.
-            if block.isVisible() and block in self.editor.bookmarkListModel:
+            if block.isVisible() and self.editor.bookmarkListModel.bookmarksCount(block) > 0:
                 positionY = blockGeometry.top() + ((blockGeometry.height() - self.imagesHeight) / 2)
                 painter.drawPixmap(0, positionY, self.bookmarkflagImage)
 

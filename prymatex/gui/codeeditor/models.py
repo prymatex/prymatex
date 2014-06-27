@@ -23,9 +23,6 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         # Connect
         self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
 
-    def __contains__(self, cursor):
-        return cursor in self.bookmarks
-
     # -------- Signals
     def on_editor_blocksRemoved(self):
         self.layoutChanged.emit()
@@ -87,6 +84,9 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         if self.bookmarks:
             position = bisect_key(self.bookmarks, cursor, lambda cursor: cursor.position()) % len(self.bookmarks)
             return self.bookmarks[position - (cursor in self.bookmarks and 2 or 1)]
+
+    def bookmarksCount(self, block):
+        return len([c for c in self.bookmarks if c.block() == block])
 
 #=========================================================
 # Bookmark Selectable Model

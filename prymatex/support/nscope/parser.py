@@ -19,7 +19,7 @@ class Parser(object):
         self.last = len(source)
 
     def ws(self):
-        while self.it != self.last and self.source[self.it] in (" ", "\t"):
+        while self.it != self.last and self.source[self.it] in (" ", "\t", "\n"):
             self.it += 1
         return True
 
