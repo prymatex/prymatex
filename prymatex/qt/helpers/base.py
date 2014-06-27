@@ -12,7 +12,7 @@ from prymatex.utils import text
 text2objectname = lambda source, sufix = "", prefix = "": \
     prefix + text.to_alphanumeric(text.text_to_camelcase(source)) + sufix
 
-def qapplication(translate=True):
+def qapplication(translate=False):
     """Return QApplication instance creates it if it doesn't already exist"""
     app = QtGui.QApplication.instance()
     if not app:

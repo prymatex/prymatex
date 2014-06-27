@@ -3,7 +3,8 @@
 from __future__ import unicode_literals
 
 from prymatex.qt import QtGui, QtCore
-from prymatex.qt.helpers import keyequivalent_to_keysequence, keysequence_to_keyequivalent, rgba2color, color2rgba
+from prymatex.qt.helpers import (keyequivalent_to_keysequence,
+    keysequence_to_keyequivalent, rgba2color, color2rgba, qapplication)
 
 from prymatex import resources
 
@@ -25,6 +26,9 @@ class BundleItemTreeNode(TreeNodeBase):
         TreeNodeBase.__init__(self, bundleItem.name, nodeParent)
         self.__bundleItem = bundleItem
         self._format_cache = {}
+        self._palette_cache = {}
+        self._style_base = { key_value[0]: rgba2color(key_value[1]) \
+            for key_value in DEFAULT_THEME_SETTINGS.items() if key_value[1].startswith('#') }
 
     # ----------- Bundle Item attrs assessors -----------
     def __getattr__(self, name):
@@ -117,24 +121,62 @@ class BundleItemTreeNode(TreeNodeBase):
     # ----------- Theme decoration -----------
     def clearCache(self):
         self._format_cache = {}
+        self._palette_cache = {}
 
-    def getStyle(self, scope = None):
-        base = dict([(key_value[0], rgba2color(key_value[1])) for key_value in DEFAULT_THEME_SETTINGS.items() if key_value[1].startswith('#')])
-
+    def style(self, scope = None):
         styles = []
         for style in self.__bundleItem.settings:
             rank = []
             if style.scopeSelector.does_match(scope, rank):
                 styles.append((rank.pop(), style))
         styles.sort(key = lambda t: t[0])
-        for style in styles:
-            base.update(style[1].settings())
-        return base
-
+        style = self._style_base.copy()
+        for s in styles:
+            style.update(s[1].settings())
+        return style
+    getStyle = style
+    
+    def palette(self, scope = None):
+        if scope not in self._palette_cache:
+            palette = qapplication().palette()
+            settings = self.style(scope)
+            if 'foreground' in settings:
+                #QPalette::WindowText	0	A general foreground color.
+                palette.setColor(QtGui.QPalette.WindowText, settings['foreground'])
+                #QPalette::Text	6	The foreground color used with Base. This is usually the same as the WindowText, in which case it must provide good contrast with Window and Base.
+                palette.setColor(QtGui.QPalette.Text, settings['foreground'])
+            if 'background' in settings:
+                #QPalette::Window	10	A general background color.
+                palette.setColor(QtGui.QPalette.Window, settings['background'])
+                #QPalette::Base	9	Used mostly as the background color for text entry widgets, but can also be used for other painting - such as the background of combobox drop down lists and toolbar handles. It is usually white or another light color.
+                palette.setColor(QtGui.QPalette.Base, settings['background'])
+            if 'selection' in settings:
+                #QPalette::Highlight	12	A color to indicate a selected item or the current item. By default, the highlight color is Qt::darkBlue.
+                palette.setColor(QtGui.QPalette.Highlight, settings['selection'])
+            if 'lineHighlight' in settings:
+                #QPalette::AlternateBase	16	Used as the alternate background color in views with alternating row colors (see QAbstractItemView::setAlternatingRowColors()).
+                palette.setColor(QtGui.QPalette.AlternateBase, settings['lineHighlight'])
+            if 'caret' in settings:
+                #QPalette::HighlightedText	13	A text color that contrasts with Highlight. By default, the highlighted text color is Qt::white.
+                palette.setColor(QtGui.QPalette.HighlightedText, settings['caret'])
+            if 'gutterBackground' in settings:
+                #QPalette::ToolTipBase	18	Used as the background color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
+                palette.setColor(QtGui.QPalette.ToolTipBase, settings['gutterBackground'])
+            if 'gutterForeground' in settings:
+                #QPalette::ToolTipText	19	Used as the foreground color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
+                palette.setColor(QtGui.QPalette.ToolTipText, settings['gutterForeground'])
+            #QPalette::Button	1	The general button background color. This background can be different from Window as some styles require a different background color for buttons.
+            #QPalette::ButtonText	8	A foreground color used with the Button color.
+            #QPalette::BrightText	7	A text color that is very different from WindowText, and contrasts well with e.g. Dark. Typically used for text that needs to be drawn where Text or WindowText would give poor contrast, such as on pressed push buttons. Note that text colors can be used for things other than just words; text colors are usually used for text, but it's quite common to use the text color roles for lines, icons, etc.
+            #QPalette::Link	14	A text color used for unvisited hyperlinks. By default, the link color is Qt::blue.
+            #QPalette::LinkVisited	15	A text color used for already visited hyperlinks. By default, the linkvisited color is Qt::magenta.
+            self._palette_cache[scope] = palette
+        return self._palette_cache[scope]
+        
     def textCharFormat(self, scope = None):
         if scope not in self._format_cache:
             frmt = QtGui.QTextCharFormat()
-            settings = self.getStyle(scope)
+            settings = self.style(scope)
             if 'foreground' in settings:
                 frmt.setForeground(settings['foreground'])
             if 'background' in settings:

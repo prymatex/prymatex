@@ -102,19 +102,16 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         if self._default_theme is None:
             # Load original default theme
             self._default_theme = self.application.supportManager.getBundleItem(self._settings.default("defaultTheme"))
-        
-        self.colours = self._default_theme.getStyle()
+
+        # Deprecated        
+        self.colours = self._default_theme.style()
+
         self.setCurrentCharFormat(self._default_theme.textCharFormat())
 
-        #Set color for QPlainTextEdit
-        #appStyle = """QPlainTextEdit {background-color: %s;
-        #color: %s;
-        #selection-background-color: %s; }""" % (
-        #    self.colours['background'].name(),
-        #    self.colours['foreground'].name(),
-        #    self.colours['selection'].name())
-
-        #self.setStyleSheet(appStyle)
+        palette = self._default_theme.palette()
+        self.setPalette(palette)
+        self.viewport().setPalette(palette)
+        
         self.syntaxHighlighter.stop()
         self.aboutToHighlightChange.emit()
 
@@ -199,9 +196,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.blockCountChanged.connect(self.on_blockCountChanged)
         self.updateRequest.connect(self.updateSideBars)
         self.themeChanged.connect(self.highlightEditor)
-        self.cursorPositionChanged.connect(self.highlightEditor)
+        
         self.cursorPositionChanged.connect(self.setCurrentBraces)
-
+        self.cursorPositionChanged.connect(self.highlightEditor)
+        
         self.syntaxChanged.connect(lambda syntax, editor=self: 
             editor.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
         )
