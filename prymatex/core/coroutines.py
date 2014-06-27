@@ -192,7 +192,6 @@ class CoException( Exception ):
     def __str__( self ):
         return self.__repr__()
 
-
 class Runnable(QtCore.QObject):
     # States
     NEW = 0
@@ -237,16 +236,16 @@ class Task( Runnable ):
     # Do not emmited with exception, if emitUnhandled is False. Pass exceptions to main loop.
     done = QtCore.Signal( Return )
     
-    def __init__( self, coroutine, parent = None ):
+    def __init__( self, coroutine, parent = None, **kwargs):
         super(Task, self).__init__(parent)
         
-        self.stack = deque()          # stack for subcoroutines
-        self.coroutine = coroutine    # task coroutine / top subcoroutine
-        self.sendval = None           # value to send into coroutine
-        self.exception = None         # save exceptions here
-        self.result = Return( None )  # default return value
+        self.stack = deque()                          # stack for subcoroutines
+        self.coroutine = coroutine                    # task coroutine / top subcoroutine
+        self.sendval = kwargs.get("sendval", None)    # value to send into coroutine
+        self.exception = None                         # save exceptions here
+        self.result = Return( None )                  # default return value
         # Do not route exceptions to Scheduler
-        self.emitUnhandled = False    # emits done with unhandled exception as Return.value
+        self.emitUnhandled = False                    # emits done with unhandled exception as Return.value
 
     # Do not pass exceptions to scheduler.
     #
@@ -259,7 +258,7 @@ class Task( Runnable ):
         return 'File "%s", line %d' % \
                (self.coroutine.gi_code.co_filename, self.coroutine.gi_frame.f_lineno)
 
-    def val( self ):
+    def value( self ):
         if self.state == Runnable.DONE:
             return self.result.value
         if self.state == Runnable.EXCEPTION:
@@ -350,12 +349,28 @@ class Task( Runnable ):
                 del self.coroutine
                 self.coroutine = self.stack.pop()
 
-class Worker( Runnable ):
+class Worker(Runnable):
     started = QtCore.Signal()
     finished = QtCore.Signal()
-    def __init__( self, parent = None):
-        super(Worker, self).__init__(parent)
+
+    def __init__(self, scheduler, fn, *args, **kwargs):
+        super(Worker, self).__init__(scheduler)
         
+        self.task = None
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+
+    def send(self, sendval):
+        self.task.sendval = sendval
+
+    def start(self, **kwargs):
+        self.started.emit()
+        self.task = self.scheduler.task(self.fn(*self.args, **self.kwargs), **kwargs)
+        self.task.done.connect(self.finished.emit)
+        if "callback" in kwargs:
+            self.task.done.connect(kwargs["callback"])
+
 class Scheduler( QtCore.QObject ):
     longIteration = QtCore.Signal( datetime.timedelta, Task )
     done = QtCore.Signal()
@@ -371,9 +386,10 @@ class Scheduler( QtCore.QObject ):
         self.printCoException = True
 
     # Schedule coroutine as Task
-    def task( self, coroutine):
-        t = Task( coroutine, self )  
-        t.destroyed.connect( self._task_destroyed )
+    def task( self, coroutine, **kwargs):
+        kwargs.setdefault("parent", self)
+        t = Task(coroutine, **kwargs)
+        t.destroyed.connect(self._task_destroyed)
         self.tasks += 1
 
         t.state = Task.RUNNING
@@ -381,20 +397,17 @@ class Scheduler( QtCore.QObject ):
         return t
 
     # Build a worker for the callable, fn, to be executed as fn(*args **kwargs)
-    def worker( self, fn, *args, **kwargs ):
-        w = Worker( coroutine, self)  
-        w.destroyed.connect( self._worker_destroyed )
+    def worker(self, fn, *args, **kwargs):
+        w = Worker(self, fn, *args, **kwargs)
+        w.destroyed.connect(self._worker_destroyed)
         self.workers += 1
-
-        w.state = Worker.NEW
-        self.schedule( t )
         return w
 
     def schedule( self, t ):
         self.ready.appendleft( t )
 
         if self.timerId is None:
-            self.timerId = self.startTimer( 0 )
+            self.timerId = self.startTimer(0)
 
     def _task_destroyed( self, task ):
         self.tasks -= 1
