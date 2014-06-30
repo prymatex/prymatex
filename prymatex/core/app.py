@@ -164,12 +164,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             self.supportManager = self.buildSupportManager()  # Support Manager
             self.fileManager = self.buildFileManager()  # File Manager
             self.projectManager = self.buildProjectManager()  # Project Manager
-            try:
-                # TODO: mas bonito
-                self.schedulerManager =  self.buildSchedulerManager()
-                self.serverManager = self.buildServerManager()
-            except:
-                pass
+            self.schedulerManager =  self.buildSchedulerManager()
+            self.serverManager = self.buildServerManager()
 
             # Load Bundles
             self.supportManager.loadSupport(self.showMessage)
@@ -284,8 +280,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         return self.createComponentInstance(StorageManager, parent = self)
 
     def buildSchedulerManager(self):
-        from prymatex.utils import coroutines
-        return coroutines.Scheduler(self)
+        from prymatex.managers.coroutines import SchedulerManager
+        return self.createComponentInstance(SchedulerManager, parent = self)
 
     def buildServerManager(self):
         from prymatex.managers.server import ServerManager
@@ -536,10 +532,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                                                 buttons=QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                                                 defaultButton=QtGui.QMessageBox.Yes) if self.askAboutExternalChanges else QtGui.QMessageBox.Yes
             if result == QtGui.QMessageBox.Yes:
-                if inspect.isgeneratorfunction(editor.reload):
-                    task = self.schedulerManager.newTask(editor.reload())
-                else:
-                    editor.reload()
+                editor.reload()
             elif result == QtGui.QMessageBox.No:
                 pass
         elif editor.isExternalDeleted():

@@ -25,7 +25,7 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
     def initialize(self, selector):
         SelectableModelMixin.initialize(self, selector)
         selector.finished.connect(self.on_selector_finished)
-        self.projectFileTask = self.projectManager.application.schedulerManager.newTask(self.__run_project_search())
+        self.projectFileTask = self.projectManager.application.schedulerManager.task(self.__run_project_search())
 
     def setBaseFilters(self, baseFilters):
         self.__baseFilters = baseFilters

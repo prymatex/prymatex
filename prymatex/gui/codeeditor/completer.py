@@ -400,4 +400,4 @@ class CodeEditorCompleter(QtGui.QCompleter):
         def _fill():
             for model in self.completionModels:
                 yield model.fillModel(_go)
-        self.completerTask = self.editor.application.schedulerManager.newTask(_fill())
+        self.completerTask = self.editor.application.schedulerManager.task(_fill())

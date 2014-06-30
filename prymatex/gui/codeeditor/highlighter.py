@@ -43,69 +43,43 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.editor = editor
         self.processor = editor.findProcessor("syntax")
         self.theme = None
-        self.__format_cache = None
         
-        # Visible area
-        self.visible_start = self.editor.firstVisibleBlock().blockNumber()
-        self.visible_end = self.visible_start + 50
         self.editor.updateRequest.connect(self.on_editor_updateRequest)
+        self.editor.themeChanged.connect(self.on_editor_themeChanged)
         
         # The task
         self.editor.aboutToClose.connect(self.stop)        
-        self.highlightTask = self.editor.application.schedulerManager.idleTask()
+        self.highlightWorker = self.editor.application.schedulerManager.worker(
+            _highlight_function,
+            self.document(), self.processor)
+        self.highlightWorker.started.connect(self.on_worker_started)
+        self.highlightWorker.finished.connect(self.on_worker_finished)
 
     def on_editor_updateRequest(self, rect, dy):
-        if dy:
-            self.visible_start = self.editor.firstVisibleBlock().blockNumber()
-            self.visible_end = self.visible_start + 50
+        self.highlightWorker.send(self._worker_data)
 
-    def stop(self):
-        self.stopAsyncHighlight()
-        self.stopSyncHighlight()
-
-    def stopSyncHighlight(self):
-        self.highlightBlock = lambda text: None
+    def on_editor_themeChanged(self, theme):
+        self.theme = theme
+        self.highlightWorker.send(self._worker_data)
     
-    def startSyncHighlight(self):
+    def on_worker_started(self):
+        self.highlightBlock = lambda text: None
+
+    def on_worker_finished(self):
         self.highlightBlock = self.syncHighlightFunction
-        
-    def stopAsyncHighlight(self):
-        if self.highlightTask.isRunning():
-            self.highlightTask.cancel()
+
+    def _worker_data(self):
+        # Visible area
+        visible_start = self.editor.firstVisibleBlock().blockNumber()
+        visible_end = self.visible_start + 50
+        return visible_start, visible_end, self.theme
         
     def runAsyncHighlight(self, callback):
         #Cuidado si estoy corriendo la tarea no correrla nuevamente
-        if not self.highlightTask.isRunning():
-            self.stopSyncHighlight()
-            self.highlightTask = self.editor.application.schedulerManager.newTask(self.asyncHighlightFunction())
-            def on_highlightReady():
-                self.startSyncHighlight()
-                callback()
-            self.highlightTask.done.connect(on_highlightReady)
+        if not self.highlightWorker.running():
+            self.highlightWorker.start(callback = callback,
+		sendval = self._worker_data())
     
-    def setTheme(self, theme):
-        self.__format_cache = self.FORMAT_CACHE.setdefault(theme.uuidAsText(), {})
-        self.theme = theme
-
-    def asyncHighlightFunction(self):
-        block = self.document().begin()
-        while block.isValid():
-            userData = self.processor.blockUserData(block)
-            
-            formats = []
-            for token in userData.tokens():
-                frange = QtGui.QTextLayout.FormatRange()
-                frange.start = token.start
-                frange.length = token.end - token.start
-                frange.format = self.theme.textCharFormat(token.scope)
-                formats.append(frange)
-
-            block.layout().setAdditionalFormats(formats)
-            block = block.next()
-            if self.visible_start <= block.blockNumber() <= self.visible_end:
-                self.document().markContentsDirty(block.position(), block.length())
-            yield
-
     def syncHighlightFunction(self, text):
         block = self.currentBlock()
         userData = self.processor.blockUserData(self.currentBlock())

@@ -371,12 +371,12 @@ class Worker(Runnable):
         if "callback" in kwargs:
             self.task.done.connect(kwargs["callback"])
 
-class Scheduler( QtCore.QObject ):
+class SchedulerManager( QtCore.QObject ):
     longIteration = QtCore.Signal( datetime.timedelta, Task )
     done = QtCore.Signal()
 
     def __init__( self, parent = None ):
-        super(Scheduler, self).__init__(parent)
+        super(SchedulerManager, self).__init__(parent)
 
         self._current_task = None
         self.tasks = 0

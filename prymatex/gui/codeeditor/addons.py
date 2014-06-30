@@ -131,7 +131,7 @@ class SpellCheckerAddon(CodeEditorAddon):
         print(cursor.selectedText())
         
     def on_editor_syntaxReady(self):
-        self.currentSpellTask = self.application.scheduler.newTask(self.spellCheckAllDocument())
+        self.currentSpellTask = self.application.scheduler.task(self.spellCheckAllDocument())
         def on_spellReady():
             self.currentSpellTask = None
         self.currentSpellTask.done.connect(on_spellReady)

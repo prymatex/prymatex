@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import zmq
-from zmq import FD, LINGER, IDENTITY, SUBSCRIBE, UNSUBSCRIBE, EVENTS, \
-                POLLIN, POLLOUT, POLLERR, NOBLOCK, ZMQError, EAGAIN
+from zmq import (FD, LINGER, IDENTITY, SUBSCRIBE, UNSUBSCRIBE, EVENTS,
+                POLLIN, POLLOUT, POLLERR, NOBLOCK, ZMQError, EAGAIN,
+                REP)
                 
 from prymatex.qt import QtCore
 

@@ -41,7 +41,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # -------------------- Signals
     syntaxChanged = QtCore.Signal(object)
-    themeChanged = QtCore.Signal()
+    themeChanged = QtCore.Signal(object)
     blocksRemoved = QtCore.Signal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.Signal(QtGui.QTextBlock, int)
     modeChanged = QtCore.Signal()
@@ -116,7 +116,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.aboutToHighlightChange.emit()
 
         self.syntaxHighlighter.setTheme(self._default_theme)
-        self.themeChanged.emit()
+        self.themeChanged.emit(self._default_theme)
 
         # Run
         self.syntaxHighlighter.runAsyncHighlight(self.highlightChanged.emit)
