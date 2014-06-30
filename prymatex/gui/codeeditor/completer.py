@@ -262,12 +262,20 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.editor = editor
         self.startCursorPosition = None
         self.explicitLaunch = False
-        
-        self.completerTask = self.editor.application.schedulerManager.idleTask()
-        
+
         # Models
         self.completionModels = [ ]
 
+        def _go(model):
+            #TODO: Aca hacer magia con ponderaciones de modelos
+            if self.model() is None and self.trySetModel(model):
+                self.complete()
+        def _fill():
+            for model in self.completionModels:
+                yield model.fillModel(_go)
+
+        self.completerWorker = self.editor.application.schedulerManager.worker(_fill)
+        
         # Popup table view
         self.setPopup(QtGui.QTableView())
         self.popup().setAlternatingRowColors(True)
@@ -389,15 +397,8 @@ class CodeEditorCompleter(QtGui.QCompleter):
         return False
 
     def runCompleter(self, rect, prefix):
-        self.completerTask.cancel()
+        self.completerWorker.stop()
         self.setCompletionPrefix(prefix)
         self.startCursorPosition = self.editor.textCursor().position() - len(prefix)
         self.setModel(None)
-        def _go(model):
-            #TODO: Aca hacer magia con ponderaciones de modelos
-            if self.model() is None and self.trySetModel(model):
-                self.complete(rect)
-        def _fill():
-            for model in self.completionModels:
-                yield model.fillModel(_go)
-        self.completerTask = self.editor.application.schedulerManager.task(_fill())
+        self.completerWorker.start()

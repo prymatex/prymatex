@@ -112,14 +112,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.setPalette(palette)
         self.viewport().setPalette(palette)
         
-        self.syntaxHighlighter.stop()
-        self.aboutToHighlightChange.emit()
-
-        self.syntaxHighlighter.setTheme(self._default_theme)
         self.themeChanged.emit(self._default_theme)
-
-        # Run
-        self.syntaxHighlighter.runAsyncHighlight(self.highlightChanged.emit)
 
     @pmxConfigPorperty(default = MarginLine | IndentGuide | HighlightCurrentLine)
     def defaultFlags(self, flags):
@@ -155,6 +148,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         #Highlighter
         self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
+        self.syntaxHighlighter.aboutToHighlightChange.connect(self.aboutToHighlightChange.emit)
+        self.syntaxHighlighter.highlightChanged.connect(self.highlightChanged.emit)
 
         # TODO Quiza algo como que los modos se registren solos?
         self.codeEditorModes = []
@@ -243,16 +238,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def setPlainText(self, text):
         from time import time
         self.syntaxHighlighter.stop()
-        self.aboutToHighlightChange.emit()
         super(CodeEditor, self).setPlainText(text)
         self.highlightTime = time()
         def highlightReady(editor):
             def _ready():
-                editor.highlightChanged.emit()
                 self.logger.info("Time %f" % (time() - self.highlightTime))
             return _ready
-        self.syntaxHighlighter.runAsyncHighlight(highlightReady(self))
-        #self.syntaxHighlighter.runAsyncHighlight(lambda editor = self: editor.highlightChanged.emit())
+        self.syntaxHighlighter.start(highlightReady(self))
+        #self.syntaxHighlighter.start(lambda editor = self: editor.highlightChanged.emit())
 
     # --------------- Block User Data
     def registerBlockUserDataHandler(self, handler):

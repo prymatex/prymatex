@@ -275,9 +275,12 @@ class Task( Runnable ):
                     self.exception = None
                 elif self.state == Runnable.CANCELED:
                     self.coroutine.close()
+                elif self.coroutine.gi_frame is not None and self.coroutine.gi_frame.f_lasti == -1:
+                    # just-started generator
+                    self.result = self.coroutine.send(None)
                 else:
                     # save result into self to protect from gc
-                    self.result = self.coroutine.send( self.sendval )
+                    self.result = self.coroutine.send(self.sendval)
 
                 # simple trap? (yield)
                 if self.result is None:
@@ -356,20 +359,35 @@ class Worker(Runnable):
     def __init__(self, scheduler, fn, *args, **kwargs):
         super(Worker, self).__init__(scheduler)
         
+        self.scheduler = scheduler
         self.task = None
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
 
     def send(self, sendval):
-        self.task.sendval = sendval
+        if self.running():
+            self.task.sendval = sendval
+        else:
+            self.start(sendval = sendval)
 
     def start(self, **kwargs):
+        self.state = Runnable.RUNNING
         self.started.emit()
         self.task = self.scheduler.task(self.fn(*self.args, **self.kwargs), **kwargs)
-        self.task.done.connect(self.finished.emit)
-        if "callback" in kwargs:
+        self.task.done.connect(self.on_task_done)
+        if "callback" in kwargs and kwargs["callback"]:
             self.task.done.connect(kwargs["callback"])
+
+    def on_task_done(self):
+        self.state = Runnable.DONE
+        self.finished.emit()
+
+    def stop(self):
+        if self.task and self.task.running():
+            self.task.cancel()
+        self.state = Runnable.CANCELED
+        self.finished.emit()
 
 class SchedulerManager( QtCore.QObject ):
     longIteration = QtCore.Signal( datetime.timedelta, Task )

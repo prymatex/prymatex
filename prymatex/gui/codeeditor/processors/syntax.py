@@ -27,9 +27,6 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         if self.bundleItem == bundleItem:
             return
 
-        self.editor.syntaxHighlighter.stop()
-        self.editor.aboutToHighlightChange.emit()
-        
         # ------------ Previous syntax
         if self.bundleItem is not None:
             self.endExecution(self.bundleItem)
@@ -42,7 +39,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.editor.syntaxChanged.emit(bundleItem)
         
         # Run
-        self.editor.syntaxHighlighter.runAsyncHighlight(self.editor.highlightChanged.emit)
+        self.editor.syntaxHighlighter.start()
 
     def endExecution(self, bundleItem):
         self.endParse(bundleItem.scopeName)
