@@ -6,38 +6,37 @@ import re
 
 from prymatex.qt import QtGui, QtCore
 
-def _highlight_function(document, processor):
-    try:
-        block = document.begin()
-        start, end, theme = (yield)
-        position = None
-        length = 0
-        while block.isValid():
-            userData = processor.blockUserData(block)
-            
-            formats = []
-            for token in userData.tokens():
-                frange = QtGui.QTextLayout.FormatRange()
-                frange.start = token.start
-                frange.length = token.end - token.start
-                frange.format = theme.textCharFormat(token.scope)
-                formats.append(frange)
-    
-            block.layout().setAdditionalFormats(formats)
-            if start <= block.blockNumber() <= end:
-                if position is None:
-                    position = block.position()
-                    length = 0
-                length += block.length()
-            elif position is not None:
-                document.markContentsDirty(position, length)
-                position = None
-            else:
-                start, end, theme = (yield)
-            block = block.next()
-    finally:
-        print("Se termino")
+def _highlight_function(document, processor, theme):
+    block = document.begin()
+    start, end = (yield)
+    position = None
+    length = 0
+    while block.isValid():
+        userData = processor.blockUserData(block)
+        
+        formats = []
+        for token in userData.tokens():
+            frange = QtGui.QTextLayout.FormatRange()
+            frange.start = token.start
+            frange.length = token.end - token.start
+            frange.format = theme.textCharFormat(token.scope)
+            formats.append(frange)
 
+        block.layout().setAdditionalFormats(formats)
+        if start <= block.blockNumber() <= end:
+            if position is None:
+                position = block.position()
+                length = 0
+            length += block.length()
+        elif position is not None:
+            document.markContentsDirty(position, length)
+            position = None
+        else:
+            start, end = (yield)
+        block = block.next()
+    if position is not None:
+        document.markContentsDirty(position, length)
+            
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     aboutToHighlightChange = QtCore.Signal()
     highlightChanged = QtCore.Signal()
@@ -46,49 +45,45 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         super(CodeEditorSyntaxHighlighter, self).__init__(editor)
         self.editor = editor
         self.processor = editor.findProcessor("syntax")
-	#self.theme = editor.defaultTheme()
         self.theme = None
+        self.highlightTask = None
 
         self.editor.updateRequest.connect(self.on_editor_updateRequest)
-        self.editor.themeChanged.connect(self.on_editor_themeChanged)
-        
-        # The task
-        self.highlightWorker = self.editor.application.schedulerManager.worker(
-            _highlight_function,
-            self.editor.document(), self.processor)
-        self.highlightWorker.started.connect(self.on_worker_started)
-        self.highlightWorker.finished.connect(self.on_worker_finished)
         self.editor.aboutToClose.connect(self.stop)
 
     def on_editor_updateRequest(self, rect, dy):
-        if dy:
-            self.highlightWorker.send(self._worker_data())
-
-    def on_editor_themeChanged(self, theme):
-	self.theme = theme
-        self.highlightWorker.send(self._worker_data())
-
-    def on_worker_started(self):
-        self.aboutToHighlightChange.emit()
-        self.highlightBlock = lambda text: None
-
-    def on_worker_finished(self):
-        self.highlightChanged.emit()
+        if dy and self.running():
+            self.highlightTask.sendval = self._task_data()
+    
+    def _on_worker_finished(self):
         self.highlightBlock = self.syncHighlightFunction
+        self.highlightChanged.emit()
+
+    def setTheme(self, theme):
+        self.theme = theme
+
+    def running(self):
+        return self.highlightTask and self.highlightTask.running()
 
     def stop(self):
-        self.highlightWorker.stop()
+        if self.running():
+            self.highlightTask.cancel()
+        self.highlightBlock = lambda text: None
 
     def start(self, callback = None):
-        if self.highlightWorker.running():
-            self.highlightWorker.stop()
-        self.highlightWorker.start(callback = callback,
-            sendval = self._worker_data())
+        # The task
+        self.aboutToHighlightChange.emit()
+        self.highlightTask = self.editor.application.schedulerManager.task(
+            _highlight_function(self.editor.document(), self.processor, self.theme),
+            sendval = self._task_data())
+        self.highlightTask.finished.connect(self._on_worker_finished)
+        if callback:
+            self.highlightTask.done.connect(callback)
 
-    def _worker_data(self):
+    def _task_data(self):
         # Visible area
         start = self.editor.firstVisibleBlock().blockNumber()
-        return start, start + 50, self.theme
+        return start, start + 50
     
     def syncHighlightFunction(self, text):
         block = self.currentBlock()

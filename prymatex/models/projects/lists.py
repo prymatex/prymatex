@@ -18,14 +18,14 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
         QtCore.QAbstractListModel.__init__(self, parent)
         self.fileManager = fileManager
         self.projectManager = projectManager
-        self.projectFileWorker = self.projectManager.application.schedulerManager.worker(self.__run_project_search)
+        self.projectFileTask = None
         self.__files = []
         self.__baseFilters = []
 
     def initialize(self, selector):
         SelectableModelMixin.initialize(self, selector)
         selector.finished.connect(self.on_selector_finished)
-        self.projectFileTask.start()
+        self.projectFileTask = self.projectManager.application.schedulerManager.worker(self.__run_project_search())
 
     def setBaseFilters(self, baseFilters):
         self.__baseFilters = baseFilters
@@ -34,7 +34,8 @@ class SelectableProjectFileModel(QtCore.QAbstractListModel, SelectableModelMixin
         return True
 
     def on_selector_finished(self, result):
-        self.projectFileTask.cancel()
+        if self.projectFileTask and self.projectFileTask.running():
+            self.projectFileTask.cancel()
         self.selector.finished.disconnect(self.on_selector_finished)
         
     def rowCount(self, parent = None):

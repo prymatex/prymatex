@@ -235,7 +235,8 @@ class Task( Runnable ):
     # Emmited on Exception with Exception as Return.value, if emitUnhandled set.
     # Do not emmited with exception, if emitUnhandled is False. Pass exceptions to main loop.
     done = QtCore.Signal( Return )
-    
+    finished = QtCore.Signal()
+
     def __init__( self, coroutine, parent = None, **kwargs):
         super(Task, self).__init__(parent)
         
@@ -310,6 +311,7 @@ class Task( Runnable ):
 
             except StopIteration:
                 if self.state == Runnable.CANCELED:
+                    self.finished.emit()
                     raise
 
                 # old exceptions handled
@@ -322,6 +324,7 @@ class Task( Runnable ):
                 # end of task?
                 if not self.stack:
                     self.state = Runnable.DONE
+                    self.finished.emit()
                     self.done.emit( self.result )
                     raise
 
@@ -352,43 +355,6 @@ class Task( Runnable ):
                 del self.coroutine
                 self.coroutine = self.stack.pop()
 
-class Worker(Runnable):
-    started = QtCore.Signal()
-    finished = QtCore.Signal()
-
-    def __init__(self, scheduler, fn, *args, **kwargs):
-        super(Worker, self).__init__(scheduler)
-        
-        self.scheduler = scheduler
-        self.task = None
-        self.fn = fn
-        self.args = args
-        self.kwargs = kwargs
-
-    def send(self, sendval):
-        if self.running():
-            self.task.sendval = sendval
-        else:
-            self.start(sendval = sendval)
-
-    def start(self, **kwargs):
-        self.state = Runnable.RUNNING
-        self.started.emit()
-        self.task = self.scheduler.task(self.fn(*self.args, **self.kwargs), **kwargs)
-        self.task.done.connect(self.on_task_done)
-        if "callback" in kwargs and kwargs["callback"]:
-            self.task.done.connect(kwargs["callback"])
-
-    def on_task_done(self):
-        self.state = Runnable.DONE
-        self.finished.emit()
-
-    def stop(self):
-        if self.task and self.task.running():
-            self.task.cancel()
-        self.state = Runnable.CANCELED
-        self.finished.emit()
-
 class SchedulerManager( QtCore.QObject ):
     longIteration = QtCore.Signal( datetime.timedelta, Task )
     done = QtCore.Signal()
@@ -398,7 +364,6 @@ class SchedulerManager( QtCore.QObject ):
 
         self._current_task = None
         self.tasks = 0
-        self.workers = 0
         self.ready = deque()
         self.timerId = None
         self.printCoException = True
@@ -414,13 +379,6 @@ class SchedulerManager( QtCore.QObject ):
         self.schedule( t )
         return t
 
-    # Build a worker for the callable, fn, to be executed as fn(*args **kwargs)
-    def worker(self, fn, *args, **kwargs):
-        w = Worker(self, fn, *args, **kwargs)
-        w.destroyed.connect(self._worker_destroyed)
-        self.workers += 1
-        return w
-
     def schedule( self, t ):
         self.ready.appendleft( t )
 
@@ -432,9 +390,6 @@ class SchedulerManager( QtCore.QObject ):
 
         if not self.tasks:
             self.done.emit()
-
-    def _worker_destroyed( self, worker ):
-        self.worker -= 1
 
     def checkRuntime( self, task ):
         t = datetime.datetime.now()

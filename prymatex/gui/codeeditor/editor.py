@@ -112,6 +112,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.setPalette(palette)
         self.viewport().setPalette(palette)
         
+        self.syntaxHighlighter.stop()
+        self.syntaxHighlighter.setTheme(self._default_theme)
+        self.syntaxHighlighter.start()
         self.themeChanged.emit(self._default_theme)
 
     @pmxConfigPorperty(default = MarginLine | IndentGuide | HighlightCurrentLine)
@@ -206,7 +209,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def initialize(self, **kwargs):
         super(CodeEditor, self).initialize(**kwargs)
-        self.syntaxHighlighter.setDocument(self.document())
+        #self.syntaxHighlighter.setDocument(self.document())
 
         # Default syntax
         self.insertBundleItem(self._default_syntax)
