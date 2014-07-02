@@ -18,7 +18,7 @@ from prymatex.utils.decorators import deprecated
 from prymatex.utils import encoding
 
 from prymatex.core import PrymatexComponent
-from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.settings import ConfigurableItem
 from prymatex.utils.misc import get_home_dir
 from prymatex.core import exceptions
 
@@ -40,12 +40,12 @@ class FileManager(PrymatexComponent, QtCore.QObject):
     # ------------- Settings
     SETTINGS_GROUP = 'FileManager'
 
-    fileHistory = pmxConfigPorperty(default = [])
-    fileHistoryLength = pmxConfigPorperty(default = 10)
-    defaultEncoding = pmxConfigPorperty(default = 'utf_8')
-    defaultEndOfLine = pmxConfigPorperty(default = 'unix')
-    detectEndOfLine = pmxConfigPorperty(default = False)
-    removeTrailingSpaces = pmxConfigPorperty(default = False)
+    fileHistory = ConfigurableItem(default = [])
+    fileHistoryLength = ConfigurableItem(default = 10)
+    defaultEncoding = ConfigurableItem(default = 'utf_8')
+    defaultEndOfLine = ConfigurableItem(default = 'unix')
+    detectEndOfLine = ConfigurableItem(default = False)
+    removeTrailingSpaces = ConfigurableItem(default = False)
 
     # ---------------- Constants
     CREATED = 1<<0
