@@ -39,8 +39,8 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.editor.viewport().installEventFilter(self)
         self.standardCursor = self.editor.viewport().cursor()
         # Formater
-        self.editor.registerTextCharFormatBuilder("dragged", self.textCharFormat_dragged_builder)
-        self.editor.registerTextCharFormatBuilder("multicursor", self.textCharFormat_multicursor_builder)
+        self.editor.registerTextCharFormat("dyn.caret.mixed.dragged", self.textCharFormat_dragged_builder())
+        self.editor.registerTextCharFormat("dyn.caret.mixed", self.textCharFormat_multicursor_builder())
     
     def activate(self):
         CodeEditorBaseMode.activate(self)
@@ -179,18 +179,18 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def highlightEditor(self):
         # Dragged
         dragged = (c for c in (QtGui.QTextCursor(c) for c in self.draggedCursors) if c.hasSelection())
-        self.editor.setExtraSelectionCursors("dragged", [c for c in [QtGui.QTextCursor(c) for c in self.draggedCursors] if c.hasSelection()])
+        self.editor.setExtraSelectionCursors("dyn.caret.mixed.dragged", [c for c in [QtGui.QTextCursor(c) for c in self.draggedCursors] if c.hasSelection()])
         
         # Selection
         selection = (c for c in (QtGui.QTextCursor(c) for c in self.cursors) if c.hasSelection())
-        self.editor.setExtraSelectionCursors("selection", selection)
+        self.editor.setExtraSelectionCursors("dyn.selection", selection)
         
         # Multicursor
         def build_multicursor(cursors):
             for cursor in cursors:
                 cursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
                 yield cursor
-        self.editor.setExtraSelectionCursors("multicursor", build_multicursor((QtGui.QTextCursor(c) for c in self.cursors if not c.hasSelection())))
+        self.editor.setExtraSelectionCursors("dyn.caret.mixed", build_multicursor((QtGui.QTextCursor(c) for c in self.cursors if not c.hasSelection())))
 
         # Lines
         def build_cursor_lines(cursors):
@@ -200,7 +200,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
                     cursor.clearSelection()
                     lines.add(cursor.block().position())
                     yield cursor
-        self.editor.setExtraSelectionCursors("line", 
+        self.editor.setExtraSelectionCursors("dyn.lineHighlight", 
             build_cursor_lines((QtGui.QTextCursor(c) for c in self.cursors)))
 
         self.editor.updateExtraSelections()

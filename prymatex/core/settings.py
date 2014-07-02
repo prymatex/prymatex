@@ -114,7 +114,7 @@ class SettingsGroup(object):
             if value is not None:
                 setattr(obj, name, value)
 
-class pmxConfigPorperty(object):
+class ConfigurableItem(object):
     """Configuration descriptor"""
     def __init__(self, name = None, default = None, fset = None,
             tm_name = None):
@@ -144,4 +144,4 @@ class pmxConfigPorperty(object):
         if self.fset is not None:
             self.fset(instance, value)
 
-ConfigurableItem = pmxConfigPorperty
+pmxConfigPorperty = ConfigurableItem

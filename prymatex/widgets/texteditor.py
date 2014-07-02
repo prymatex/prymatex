@@ -30,7 +30,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
 
         self.__scopedExtraSelections = {}
         self.__updateExtraSelectionsOrder = []
-        self.__textCharFormatBuilders = {}
+        self.__textCharFormat = {}
         self.eol_chars = None
 
     #------ EOL characters
@@ -250,13 +250,15 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         return replaced
 
     #------ Extra selections
-    def registerTextCharFormatBuilder(self, scope, formatBuilder):
+    def registerTextCharFormat(self, scope, frmt):
         # TODO Un poco mejor esto para soportar subscopes con puntos
         self.__updateExtraSelectionsOrder.append(scope)
-        self.__textCharFormatBuilders[scope] = formatBuilder
+        self.__textCharFormat[scope] = frmt
 
-    def defaultTextCharFormatBuilder(self, scope):
-        return QtGui.QTextCharFormat()
+    def textCharFormat(self, scope):
+        if scope in self.__textCharFormat:
+            return self.__textCharFormat[scope]
+        return super(TextEditWidget, self).currentCharFormat()
 
     def extendExtraSelectionCursors(self, scope, cursors):
         self.__scopedExtraSelections.setdefault(scope, []).extend(self.__build_extra_selections(scope, cursors))
@@ -293,11 +295,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         extraSelections = []
         for cursor in cursors:
             selection = QtGui.QTextEdit.ExtraSelection()
-            if scope in self.__textCharFormatBuilders:
-                # TODO: un FORMAT_CACHE
-                selection.format = self.__textCharFormatBuilders[scope]()
-            else:
-                selection.format = self.defaultTextCharFormatBuilder(scope)
+            selection.format = self.textCharFormat(scope)
             selection.cursor = cursor
             extraSelections.append(selection)
         return extraSelections

@@ -15,7 +15,7 @@ from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
 
 from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
-from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.settings import ConfigurableItem
 from prymatex.models.filesystem import SortFilterFileSystemProxyModel
 
 class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDockWidget):
@@ -25,7 +25,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
 
     # ----------- Settings
     SETTINGS_GROUP = 'FileSystem'
-    @pmxConfigPorperty(default = '')
+    @ConfigurableItem(default = '')
     def customFilters(self, filters):
         self.fileSystemProxyModel.setFilterRegExp(filters)
 

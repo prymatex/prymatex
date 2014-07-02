@@ -8,7 +8,7 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import PrymatexComponent
 from prymatex.core import exceptions
-from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.settings import ConfigurableItem
 from prymatex.utils.misc import get_home_dir
 from prymatex.models.lists import CheckableListModel
 from prymatex.models.projects import (ProjectTreeNode, ProjectTreeModel,
@@ -29,8 +29,8 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
     #Settings
     SETTINGS_GROUP = 'ProjectManager'
 
-    defaultDirectory  = pmxConfigPorperty(default = os.path.join(get_home_dir(), "projects"))
-    knownProjects = pmxConfigPorperty(default = [])
+    defaultDirectory  = ConfigurableItem(default = os.path.join(get_home_dir(), "projects"))
+    knownProjects = ConfigurableItem(default = [])
 
     VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
 

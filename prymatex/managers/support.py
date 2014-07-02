@@ -10,7 +10,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.qt.helpers import qbytearray_to_text
 
 from prymatex.core import PrymatexComponent
-from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.settings import ConfigurableItem
 
 from prymatex.support.manager import SupportBaseManager
 from prymatex.support.process import RunningContext
@@ -162,19 +162,19 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     themeChanged = QtCore.Signal(object)
     
     #Settings
-    shellVariables = pmxConfigPorperty(default = [], tm_name = 'OakShelVariables')
+    shellVariables = ConfigurableItem(default = [], tm_name = 'OakShelVariables')
     
-    @pmxConfigPorperty(default = [], tm_name = 'OakBundleManagerDeletedBundles')
+    @ConfigurableItem(default = [], tm_name = 'OakBundleManagerDeletedBundles')
     def deleted(self, deleted):
         self.deletedObjects = [uuidmodule.UUID(uuid) for uuid in deleted]
         
-    @pmxConfigPorperty(default = [], tm_name = 'OakBundleManagerDeletedBundles')
+    @ConfigurableItem(default = [], tm_name = 'OakBundleManagerDeletedBundles')
     def disabled(self, disabled):
         self.disabledObjects = [uuidmodule.UUID(uuid) for uuid in disabled]
     
     #http://manual.macromates.com/en/expert_preferences.html
     #When you create a new item in the bundle editor without having selected a bundle first, then the bundle with the UUID held by this defaults key is used as the target
-    defaultBundleForNewBundleItems = pmxConfigPorperty(default = 'B7BC3FFD-6E4B-11D9-91AF-000D93589AF6', tm_name = 'OakDefaultBundleForNewBundleItems')
+    defaultBundleForNewBundleItems = ConfigurableItem(default = 'B7BC3FFD-6E4B-11D9-91AF-000D93589AF6', tm_name = 'OakDefaultBundleForNewBundleItems')
         
     SETTINGS_GROUP = 'SupportManager'
     

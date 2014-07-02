@@ -10,7 +10,7 @@ from prymatex import resources
 
 from prymatex.core import config
 from prymatex.core import PrymatexDock
-from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.settings import ConfigurableItem
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.misc import get_home_dir
 from prymatex.utils import six
@@ -109,16 +109,16 @@ class TerminalDock(PrymatexDock, QtGui.QDockWidget):
     # ------------------ Settings
     SETTINGS_GROUP = 'Terminal'
 
-    @pmxConfigPorperty(default = "default")
+    @ConfigurableItem(default = "default")
     def defaultScheme(self, name):
         if not self.editorTheme:
             self.tabTerminals.setColorScheme(name)
     
-    @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
+    @ConfigurableItem(default = QtGui.QFont("Monospace", 9))
     def defaultFont(self, font):
         self.tabTerminals.setFont(font)
 
-    @pmxConfigPorperty(default = False)
+    @ConfigurableItem(default = False)
     def editorTheme(self, value):
         if value:
             self.application.registerSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
@@ -127,8 +127,8 @@ class TerminalDock(PrymatexDock, QtGui.QDockWidget):
             self.application.unregisterSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
             self.tabTerminals.setColorScheme(self._settings.value("defaultScheme"))
 
-    synchronizeEditor = pmxConfigPorperty(default = False)
-    bufferSize = pmxConfigPorperty(default = 300)
+    synchronizeEditor = ConfigurableItem(default = False)
+    bufferSize = ConfigurableItem(default = 300)
         
     def __init__(self, **kwargs):
         super(TerminalDock, self).__init__(**kwargs)

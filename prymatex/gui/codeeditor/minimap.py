@@ -4,7 +4,7 @@ import sys
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.settings import ConfigurableItem
 from prymatex.gui.codeeditor.sidebar import SideBarWidgetAddon
 
 class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
@@ -13,7 +13,7 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
     MINIMAP_MAX_OPACITY = 0.8
     MINIMAP_MIN_OPACITY = 0.1
     
-    @pmxConfigPorperty(default = True)
+    @ConfigurableItem(default = True)
     def showMiniMap(self, value):
         self.setVisible(value)
     

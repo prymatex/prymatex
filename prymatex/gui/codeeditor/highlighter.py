@@ -34,8 +34,7 @@ def _highlight_function(document, processor, theme):
         else:
             start, end = (yield)
         block = block.next()
-    if position is not None:
-        document.markContentsDirty(position, length)
+    document.markContentsDirty(0, document.characterCount())
             
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     aboutToHighlightChange = QtCore.Signal()
@@ -74,7 +73,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         # The task
         self.aboutToHighlightChange.emit()
         self.highlightTask = self.editor.application.schedulerManager.task(
-            _highlight_function(self.editor.document(), self.processor, self.theme),
+            _highlight_function(self.document(), self.processor, self.theme),
             sendval = self._task_data())
         self.highlightTask.finished.connect(self._on_worker_finished)
         if callback:

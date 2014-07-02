@@ -12,7 +12,7 @@ from prymatex.qt.helpers import (text2objectname, create_menu, extend_menu,
 from prymatex import resources
 
 from prymatex.core import exceptions
-from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.settings import ConfigurableItem
 from prymatex.core import (PrymatexComponentWidget, PrymatexComponent,
     PrymatexDock, PrymatexDialog, PrymatexStatusBar)
 
@@ -38,15 +38,15 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWind
     # --------------------- Settings
     SETTINGS_GROUP = 'MainWindow'
 
-    @pmxConfigPorperty(default = "$PMX_APP_NAME ($PMX_VERSION)")
+    @ConfigurableItem(default = "$PMX_APP_NAME ($PMX_VERSION)")
     def windowTitleTemplate(self, titleTemplate):
          self.titleTemplate = Template(titleTemplate)
 
-    @pmxConfigPorperty(default = False)
+    @ConfigurableItem(default = False)
     def showTabsIfMoreThanOne(self, value):
         self.centralWidget().setShowTabs(not value)
 
-    @pmxConfigPorperty(default = True)
+    @ConfigurableItem(default = True)
     def showMenuBar(self, value):
         self.menuBar().setShown(value)
 

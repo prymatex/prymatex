@@ -12,7 +12,7 @@ from prymatex.core import PrymatexDock
 from prymatex import resources
 from prymatex.qt.helpers import create_menu
 from prymatex.ui.dockers.browser import Ui_BrowserDock
-from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.settings import ConfigurableItem
 
 from .tabwebview import TabbedWebView
 from .webview import WebView
@@ -41,22 +41,22 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
     # -------------- Settings
     SETTINGS_GROUP = "Browser"
     
-    updateInterval = pmxConfigPorperty(default = 3000)
-    homePage = pmxConfigPorperty(default = "https://github.com/prymatex")
+    updateInterval = ConfigurableItem(default = 3000)
+    homePage = ConfigurableItem(default = "https://github.com/prymatex")
     
-    @pmxConfigPorperty(default = NoProxy)
+    @ConfigurableItem(default = NoProxy)
     def proxyType(self, value):
         if value == self.NoProxy:
             setGlobalApplicationProxy()
         elif value == self.SystemProxy:
             setGlobalApplicationProxy(os.environ.get('http_proxy'))
     
-    @pmxConfigPorperty(default = os.environ.get('http_proxy', ''))
+    @ConfigurableItem(default = os.environ.get('http_proxy', ''))
     def proxyAddress(self, value):
         if self.proxyType == self.ManualProxy:
             setGlobalApplicationProxy(value)
 
-    @pmxConfigPorperty(default = DeveloperExtrasEnabled | PluginsEnabled | JavascriptEnabled | AutoLoadImages)
+    @ConfigurableItem(default = DeveloperExtrasEnabled | PluginsEnabled | JavascriptEnabled | AutoLoadImages)
     def defaultWebSettings(self, flags):
         QtWebKit.QWebSettings.globalSettings().setAttribute(
             QtWebKit.QWebSettings.DeveloperExtrasEnabled,

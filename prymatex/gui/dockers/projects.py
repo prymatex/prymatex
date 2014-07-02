@@ -14,7 +14,7 @@ from prymatex.qt.helpers import create_menu, extend_menu_section
 from prymatex.qt.extensions import CheckableMessageBox, ReplaceRenameInputDialog
 
 from prymatex.utils.i18n import ugettext as _
-from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.settings import ConfigurableItem
 
 from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
 
@@ -32,7 +32,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
     # Settings
     #=======================================================================
     SETTINGS_GROUP = 'Projects'
-    @pmxConfigPorperty(default = '')
+    @ConfigurableItem(default = '')
     def customFilters(self, filters):
         filters = [p.strip() for p in filters.split(",")]
         self.selectableProjectFileModel.setBaseFilters(filters)

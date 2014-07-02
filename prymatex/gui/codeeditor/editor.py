@@ -111,7 +111,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         palette = self._default_theme.palette()
         self.setPalette(palette)
         self.viewport().setPalette(palette)
-        
+
+        #Register text formaters
+        self.registerTextCharFormat("dyn.lineHighlight", self.textCharFormat_line_builder())
+        self.registerTextCharFormat("dyn.selection", self.textCharFormat_selection_builder())
+        self.registerTextCharFormat("dyn.highlightPairs", self.textCharFormat_brace_builder())        
+
         self.syntaxHighlighter.stop()
         self.syntaxHighlighter.setTheme(self._default_theme)
         self.syntaxHighlighter.start()
@@ -167,11 +172,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         #Block Count
         self.lastBlockCount = self.document().blockCount()
         
-        #Register text formaters
-        self.registerTextCharFormatBuilder("line", self.textCharFormat_line_builder)
-        self.registerTextCharFormatBuilder("selection", self.textCharFormat_selection_builder)
-        self.registerTextCharFormatBuilder("brace", self.textCharFormat_brace_builder)
-
         # By default
         self.showMarginLine = True
         self.showIndentGuide = True
@@ -209,7 +209,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def initialize(self, **kwargs):
         super(CodeEditor, self).initialize(**kwargs)
-        #self.syntaxHighlighter.setDocument(self.document())
+        self.syntaxHighlighter.setDocument(self.document())
 
         # Default syntax
         self.insertBundleItem(self._default_syntax)
@@ -575,10 +575,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor = self.textCursor()
         cursor.clearSelection()
         if self.showHighlightCurrentLine:
-            self.setExtraSelectionCursors("line", [ cursor ])
+            self.setExtraSelectionCursors("dyn.lineHighlight", [ cursor ])
         else:
-            self.clearExtraSelectionCursors("line")
-        self.setExtraSelectionCursors("brace", [cursor for cursor in list(self._currentPairs) if cursor is not None])
+            self.clearExtraSelectionCursors("dyn.lineHighlight")
+        self.setExtraSelectionCursors("dyn.highlightPairs", [cursor for cursor in list(self._currentPairs) if cursor is not None])
         self.updateExtraSelections()
 
     # ------------ Override event handlers

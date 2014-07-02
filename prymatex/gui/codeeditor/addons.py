@@ -150,8 +150,8 @@ class SpellCheckerAddon(CodeEditorAddon):
 class HighlightCurrentSelectionAddon(CodeEditorAddon):
     def initialize(self, **kwargs):
         super(HighlightCurrentSelectionAddon, self).initialize(**kwargs)
-        self.editor.registerTextCharFormatBuilder("selection.extra", 
-            self.textCharFormat_extraSelection_builder)
+        self.editor.registerTextCharFormat("dyn.selection.extra", 
+            self.textCharFormat_extraSelection_builder())
         self.editor.selectionChanged.connect(self.findHighlightCursors)
         self.editor.cursorPositionChanged.connect(self.findHighlightCursors)
 
@@ -168,6 +168,6 @@ class HighlightCurrentSelectionAddon(CodeEditorAddon):
                 cursor.selectedText(), 
                 QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords
             ) if cursor.hasSelection() and cursor.selectedText().strip() != '' else []
-        self.editor.setExtraSelectionCursors("selection.extra", cursors)
+        self.editor.setExtraSelectionCursors("dyn.selection.extra", cursors)
         self.editor.updateExtraSelections()
         

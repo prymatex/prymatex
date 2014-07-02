@@ -5,7 +5,7 @@ from prymatex.qt import QtGui, QtCore
 
 from prymatex import resources
 
-from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.settings import ConfigurableItem
 from prymatex.core import PrymatexEditorAddon
 
 class CodeEditorSideBar(QtGui.QWidget):
@@ -71,7 +71,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
     ALIGNMENT = QtCore.Qt.AlignLeft
     MARGIN = 2
 
-    @pmxConfigPorperty(default = True)
+    @ConfigurableItem(default = True)
     def showLineNumbers(self, value):
         self.setVisible(value)
     
@@ -175,7 +175,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
 class BookmarkSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
-    @pmxConfigPorperty(default = False)
+    @ConfigurableItem(default = False)
     def showBookmarks(self, value):
         self.setVisible(value)
     
@@ -250,7 +250,7 @@ class BookmarkSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
 class FoldingSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
-    @pmxConfigPorperty(default = True)
+    @ConfigurableItem(default = True)
     def showFolding(self, value):
         self.setVisible(value)
 
@@ -333,7 +333,7 @@ class FoldingSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
 class SelectionSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
     ALIGNMENT = QtCore.Qt.AlignRight
     
-    @pmxConfigPorperty(default = False)
+    @ConfigurableItem(default = False)
     def showSelection(self, value):
         self.setVisible(value)
     
