@@ -12,7 +12,7 @@ from prymatex.core import PrymatexEditor
 from prymatex.widgets.texteditor import TextEditWidget
 
 from prymatex import resources
-from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.settings import ConfigurableItem
 from prymatex.qt.helpers.menus import extend_menu
 from prymatex.models.support import BundleItemTreeNode
 
@@ -63,40 +63,40 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # ------------------- Settings
     SETTINGS_GROUP = 'CodeEditor'
 
-    removeTrailingSpaces = pmxConfigPorperty(default = False)
-    autoBrackets = pmxConfigPorperty(default = True)
-    smartHomeSmartEnd = pmxConfigPorperty(default = True)
-    enableAutoCompletion = pmxConfigPorperty(default = True)
-    wordLengthToComplete = pmxConfigPorperty(default = 3)
+    removeTrailingSpaces = ConfigurableItem(default = False)
+    autoBrackets = ConfigurableItem(default = True)
+    smartHomeSmartEnd = ConfigurableItem(default = True)
+    enableAutoCompletion = ConfigurableItem(default = True)
+    wordLengthToComplete = ConfigurableItem(default = 3)
 
-    marginLineSize = pmxConfigPorperty(default = 80)
-    wordWrapSize = pmxConfigPorperty()
-    indentUsingSpaces = pmxConfigPorperty(default = True)
-    adjustIndentationOnPaste = pmxConfigPorperty(default = False)
+    marginLineSize = ConfigurableItem(default = 80)
+    wordWrapSize = ConfigurableItem()
+    indentUsingSpaces = ConfigurableItem(default = True)
+    adjustIndentationOnPaste = ConfigurableItem(default = False)
 
-    @pmxConfigPorperty(default = 4)
+    @ConfigurableItem(default = 4)
     def indentationWidth(self, size):
         self.repaint()
 
-    @pmxConfigPorperty(default = 4)
+    @ConfigurableItem(default = 4)
     def tabWidth(self, size):
         self.setTabStopWidth(size * self.characterWidth())
 
-    @pmxConfigPorperty(default = ("Monospace", 10))
+    @ConfigurableItem(default = ("Monospace", 10))
     def defaultFont(self, value):
         font = QtGui.QFont(*value)
         font.setStyleStrategy(QtGui.QFont.ForceIntegerMetrics)
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
         self.setFont(font)
 
-    @pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
+    @ConfigurableItem(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
     def defaultSyntax(self, uuid):
         self._default_syntax = self.application.supportManager.getBundleItem(uuid)
         if self._default_syntax is None:
             # Load original default syntax
             self._default_syntax = self.application.supportManager.getBundleItem(self._settings.default("defaultSyntax"))
 
-    @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
+    @ConfigurableItem(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
     def defaultTheme(self, uuid):
         self._default_theme = self.application.supportManager.getBundleItem(uuid)
         if self._default_theme is None:
@@ -117,7 +117,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.syntaxHighlighter.start()
         self.themeChanged.emit(self._default_theme)
 
-    @pmxConfigPorperty(default = MarginLine | IndentGuide | HighlightCurrentLine)
+    @ConfigurableItem(default = MarginLine | IndentGuide | HighlightCurrentLine)
     def defaultFlags(self, flags):
         self.setFlags(flags)
 
