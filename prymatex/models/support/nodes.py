@@ -136,60 +136,66 @@ class BundleItemTreeNode(TreeNodeBase):
         return style
     getStyle = style
     
-    def palette(self, scope = None):
-        if scope not in self._palette_cache:
-            palette = qapplication().palette()
-            settings = self.style(scope)
-            if 'foreground' in settings:
-                #QPalette::WindowText	0	A general foreground color.
-                palette.setColor(QtGui.QPalette.WindowText, settings['foreground'])
-                #QPalette::Text	6	The foreground color used with Base. This is usually the same as the WindowText, in which case it must provide good contrast with Window and Base.
-                palette.setColor(QtGui.QPalette.Text, settings['foreground'])
-            if 'background' in settings:
-                #QPalette::Window	10	A general background color.
-                palette.setColor(QtGui.QPalette.Window, settings['background'])
-                #QPalette::Base	9	Used mostly as the background color for text entry widgets, but can also be used for other painting - such as the background of combobox drop down lists and toolbar handles. It is usually white or another light color.
-                palette.setColor(QtGui.QPalette.Base, settings['background'])
-            if 'selection' in settings:
-                #QPalette::Highlight	12	A color to indicate a selected item or the current item. By default, the highlight color is Qt::darkBlue.
-                palette.setColor(QtGui.QPalette.Highlight, settings['selection'])
-            if 'lineHighlight' in settings:
-                #QPalette::AlternateBase	16	Used as the alternate background color in views with alternating row colors (see QAbstractItemView::setAlternatingRowColors()).
-                palette.setColor(QtGui.QPalette.AlternateBase, settings['lineHighlight'])
-            if 'caret' in settings:
-                #QPalette::HighlightedText	13	A text color that contrasts with Highlight. By default, the highlighted text color is Qt::white.
-                palette.setColor(QtGui.QPalette.HighlightedText, settings['caret'])
-            if 'gutterBackground' in settings:
-                #QPalette::ToolTipBase	18	Used as the background color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
-                palette.setColor(QtGui.QPalette.ToolTipBase, settings['gutterBackground'])
-            if 'gutterForeground' in settings:
-                #QPalette::ToolTipText	19	Used as the foreground color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
-                palette.setColor(QtGui.QPalette.ToolTipText, settings['gutterForeground'])
-            #QPalette::Button	1	The general button background color. This background can be different from Window as some styles require a different background color for buttons.
-            #QPalette::ButtonText	8	A foreground color used with the Button color.
-            #QPalette::BrightText	7	A text color that is very different from WindowText, and contrasts well with e.g. Dark. Typically used for text that needs to be drawn where Text or WindowText would give poor contrast, such as on pressed push buttons. Note that text colors can be used for things other than just words; text colors are usually used for text, but it's quite common to use the text color roles for lines, icons, etc.
-            #QPalette::Link	14	A text color used for unvisited hyperlinks. By default, the link color is Qt::blue.
-            #QPalette::LinkVisited	15	A text color used for already visited hyperlinks. By default, the linkvisited color is Qt::magenta.
-            self._palette_cache[scope] = palette
-        return self._palette_cache[scope]
+    def palette(self, scope = None, cache = True):
+        if cache and scope in self._palette_cache:
+            return self._palette_cache[scope]
         
-    def textCharFormat(self, scope = None):
-        if scope not in self._format_cache:
-            frmt = QtGui.QTextCharFormat()
-            settings = self.style(scope)
-            if 'foreground' in settings:
-                frmt.setForeground(settings['foreground'])
-            if 'background' in settings:
-                frmt.setBackground(settings['background'])
-            if 'fontStyle' in settings:
-                if 'bold' in settings['fontStyle']:
-                    frmt.setFontWeight(QtGui.QFont.Bold)
-                if 'underline' in settings['fontStyle']:
-                    frmt.setFontUnderline(True)
-                if 'italic' in settings['fontStyle']:
-                    frmt.setFontItalic(True)
-            self._format_cache[scope] = frmt
-        return self._format_cache[scope]
+        palette = qapplication().palette()
+        settings = self.style(scope)
+        if 'foreground' in settings:
+            #QPalette::WindowText	0	A general foreground color.
+            palette.setColor(QtGui.QPalette.WindowText, settings['foreground'])
+            #QPalette::Text	6	The foreground color used with Base. This is usually the same as the WindowText, in which case it must provide good contrast with Window and Base.
+            palette.setColor(QtGui.QPalette.Text, settings['foreground'])
+        if 'background' in settings:
+            #QPalette::Window	10	A general background color.
+            palette.setColor(QtGui.QPalette.Window, settings['background'])
+            #QPalette::Base	9	Used mostly as the background color for text entry widgets, but can also be used for other painting - such as the background of combobox drop down lists and toolbar handles. It is usually white or another light color.
+            palette.setColor(QtGui.QPalette.Base, settings['background'])
+        if 'selection' in settings:
+            #QPalette::Highlight	12	A color to indicate a selected item or the current item. By default, the highlight color is Qt::darkBlue.
+            palette.setColor(QtGui.QPalette.Highlight, settings['selection'])
+        if 'lineHighlight' in settings:
+            #QPalette::AlternateBase	16	Used as the alternate background color in views with alternating row colors (see QAbstractItemView::setAlternatingRowColors()).
+            palette.setColor(QtGui.QPalette.AlternateBase, settings['lineHighlight'])
+        if 'caret' in settings:
+            #QPalette::HighlightedText	13	A text color that contrasts with Highlight. By default, the highlighted text color is Qt::white.
+            palette.setColor(QtGui.QPalette.HighlightedText, settings['caret'])
+        if 'gutterBackground' in settings:
+            #QPalette::ToolTipBase	18	Used as the background color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
+            palette.setColor(QtGui.QPalette.ToolTipBase, settings['gutterBackground'])
+        if 'gutterForeground' in settings:
+            #QPalette::ToolTipText	19	Used as the foreground color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
+            palette.setColor(QtGui.QPalette.ToolTipText, settings['gutterForeground'])
+        #QPalette::Button	1	The general button background color. This background can be different from Window as some styles require a different background color for buttons.
+        #QPalette::ButtonText	8	A foreground color used with the Button color.
+        #QPalette::BrightText	7	A text color that is very different from WindowText, and contrasts well with e.g. Dark. Typically used for text that needs to be drawn where Text or WindowText would give poor contrast, such as on pressed push buttons. Note that text colors can be used for things other than just words; text colors are usually used for text, but it's quite common to use the text color roles for lines, icons, etc.
+        #QPalette::Link	14	A text color used for unvisited hyperlinks. By default, the link color is Qt::blue.
+        #QPalette::LinkVisited	15	A text color used for already visited hyperlinks. By default, the linkvisited color is Qt::magenta.
+        if not cache:
+            return palette
+        return self._palette_cache.setdefault(scope, palette)
+        
+    def textCharFormat(self, scope = None, cache = True):
+        if cache and scope in self._format_cache:
+            return self._format_cache[scope]
+
+        frmt = QtGui.QTextCharFormat()
+        settings = self.style(scope)
+        if 'foreground' in settings:
+            frmt.setForeground(settings['foreground'])
+        if 'background' in settings:
+            frmt.setBackground(settings['background'])
+        if 'fontStyle' in settings:
+            if 'bold' in settings['fontStyle']:
+                frmt.setFontWeight(QtGui.QFont.Bold)
+            if 'underline' in settings['fontStyle']:
+                frmt.setFontUnderline(True)
+            if 'italic' in settings['fontStyle']:
+                frmt.setFontItalic(True)
+        if not cache:
+            return frmt
+        return self._format_cache.setdefault(scope, frmt)
 
     def isEditorNeeded(self):
         return self.isTextInputNeeded() or self.producingOutputText()

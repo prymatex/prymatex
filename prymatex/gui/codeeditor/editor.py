@@ -111,11 +111,21 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         palette = self._default_theme.palette()
         self.setPalette(palette)
         self.viewport().setPalette(palette)
+        self.completer.setPalette(palette)
 
-        #Register text formaters
-        self.registerTextCharFormat("dyn.lineHighlight", self.textCharFormat_line_builder())
-        self.registerTextCharFormat("dyn.selection", self.textCharFormat_selection_builder())
-        self.registerTextCharFormat("dyn.highlightPairs", self.textCharFormat_brace_builder())        
+        # Register lineHighlight textCharFormat
+        textCharFormat = QtGui.QTextCharFormat()
+        textCharFormat.setBackground(palette.alternateBase().color())
+        textCharFormat.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
+        self.registerTextCharFormat("dyn.lineHighlight", textCharFormat)
+        
+        # Register highlightPairs textCharFormat
+        textCharFormat = QtGui.QTextCharFormat()
+        textCharFormat.setFontUnderline(True)
+        textCharFormat.setBackground(palette.alternateBase().color())
+        textCharFormat.setUnderlineColor(palette.text().color())
+        textCharFormat.setBackground(QtCore.Qt.transparent)
+        self.registerTextCharFormat("dyn.highlightPairs", textCharFormat)
 
         self.syntaxHighlighter.stop()
         self.syntaxHighlighter.setTheme(self._default_theme)
@@ -448,10 +458,13 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.showIndentGuide = bool(flags & self.IndentGuide)
         self.showHighlightCurrentLine = bool(flags & self.HighlightCurrentLine)
 
-    # ------------------- Syntax
+    # ------------------- Current Syntax and Theme
     def syntax(self):
         return self.findProcessor("syntax").bundleItem
 
+    def theme(self):
+        return self.syntaxHighlighter.theme
+        
     # -------------------- SideBars
     def updateViewportMargins(self):
         #self.setViewportMargins(self.leftBar.width(), 0, 0, 0)
@@ -552,25 +565,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return self.beforeBrace(cursor) and self.afterBrace(cursor)
 
     #-------------------- Highlight Editor
-    def textCharFormat_line_builder(self):
-        textCharFormat = QtGui.QTextCharFormat()
-        textCharFormat.setBackground(self.colours['lineHighlight'])
-        textCharFormat.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
-        return textCharFormat
-
-    def textCharFormat_brace_builder(self):
-        textCharFormat = QtGui.QTextCharFormat()
-        textCharFormat.setForeground(self.colours['caret'])
-        textCharFormat.setFontUnderline(True)
-        textCharFormat.setUnderlineColor(self.colours['foreground'])
-        textCharFormat.setBackground(QtCore.Qt.transparent)
-        return textCharFormat
-
-    def textCharFormat_selection_builder(self):
-        textCharFormat = QtGui.QTextCharFormat()
-        textCharFormat.setBackground(self.colours['selection'])
-        return textCharFormat
-
     def highlightEditor(self):
         cursor = self.textCursor()
         cursor.clearSelection()
@@ -603,7 +597,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         font.setBold(True)
         painter.setFont(font)
 
-        painter.setPen(self.colours['selection'])
+        painter.setPen(self.palette().highlight().color())
         block = self.firstVisibleBlock()
         offset = self.contentOffset()
         while block.isValid() and self.blockUserData(block):

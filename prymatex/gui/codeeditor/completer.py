@@ -35,7 +35,7 @@ class CompletionBaseModel(QtCore.QAbstractTableModel):
         #QCompleter.CaseSensitivelySortedModel
         #QCompleter.CaseInsensitivelySortedModel
         return QtGui.QCompleter.UnsortedModel
-    
+
     def caseSensitivity(self):
         #QtCore.Qt.CaseInsensitive
         #QtCore.Qt.CaseSensitive
@@ -284,6 +284,9 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.highlighted[QtCore.QModelIndex].connect(self.highlightedCompletion)
 
         self.setWidget(self.editor)
+
+    def setPalette(self, palette):
+        self.popup().setPalette(palette)
 
     def fixPopupView(self):
         self.popup().resizeColumnsToContents()

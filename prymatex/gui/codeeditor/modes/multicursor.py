@@ -53,14 +53,16 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
 
     # ------- Text char format builders
     def textCharFormat_dragged_builder(self):
-        textCharFormat = self.editor.textCharFormat_selection_builder()
-        textCharFormat.setBackground(self.editor.colours['lineHighlight'])
+        palette = self.editor.palette()
+        textCharFormat = QtGui.QTextCharFormat()
+        textCharFormat.setBackground(palette.alternateBase().color())
         return textCharFormat
     
     def textCharFormat_multicursor_builder(self):
+        palette = self.editor.palette()
         textCharFormat = QtGui.QTextCharFormat()
-        textCharFormat.setBackground(self.editor.colours['caret'])
-        textCharFormat.setForeground(self.editor.colours['background'])
+        textCharFormat.setBackground(palette.highlightedText().color())
+        textCharFormat.setForeground(palette.base().color())
         return textCharFormat
         
     # ------- Handle events
