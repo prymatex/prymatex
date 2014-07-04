@@ -12,16 +12,13 @@ except ImportError:
     import simplejson as json
 
 from prymatex.qt import QtGui, QtCore
-
 from prymatex import resources
 from prymatex.utils import osextra
+from prymatex.core import config
 from prymatex.core import PrymatexComponent, PrymatexEditor
 from prymatex.utils.importlib import import_module, import_from_directory
 
 from prymatex.gui.mainwindow import PrymatexMainWindow
-
-PLUGIN_EXTENSION = 'pmxplugin'
-PLUGIN_DESCRIPTOR_FILE = 'info.json'
 
 class ResourceProvider():
     def __init__(self, resources):
@@ -55,7 +52,7 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
         super(PluginManager, self).__init__(**kwargs)
 
-        self.directories = []
+        self.namespaces = {}
         
         self.currentPluginDescriptor = None
         self.plugins = {}
@@ -68,8 +65,9 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
         from prymatex.gui.settings.plugins import PluginsSettingsWidget
         return [ PluginsSettingsWidget ]
 
-    def addPluginDirectory(self, directory):
-        self.directories.append(directory)
+    def addNamespace(self, name, base_path):
+        #TODO Validar que existe el base_path + PMX_PLUGINS_NAME
+        self.namespaces[name] = os.path.join(base_path, config.PMX_PLUGINS_NAME)
 
     # ------------- Cargando clases
     def registerComponent(self, componentClass, componentBase = PrymatexMainWindow, default = False):
@@ -167,11 +165,11 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
         self.loadCoreModule('prymatex.gui.dockers', 'org.prymatex.dockers')
         self.loadCoreModule('prymatex.gui.dialogs', 'org.prymatex.dialogs')
         loadLaterEntries = []
-        for directory in self.directories:
+        for name, directory in self.namespaces.items():
             if not os.path.isdir(directory):
                 continue
-            for pluginPath in glob(os.path.join(directory, '*.%s' % PLUGIN_EXTENSION)):
-                pluginDescriptorPath = os.path.join(pluginPath, PLUGIN_DESCRIPTOR_FILE)
+            for pluginPath in glob(os.path.join(directory, config.PMX_PLUGIN_GLOB)):
+                pluginDescriptorPath = os.path.join(pluginPath, config.PMX_PLUGIN_DESCRIPTOR_NAME)
                 if os.path.isdir(pluginPath) and os.path.isfile(pluginDescriptorPath):
                     descriptorFile = open(pluginDescriptorPath, 'r')
                     pluginEntry = json.load(descriptorFile)

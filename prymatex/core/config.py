@@ -39,6 +39,8 @@ PMX_STATE_NAME = "state.json"
 TM_SETTINGS_NAME = "com.macromates.textmate.plist"
 TM_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
 TM_PREFERENCE_NAMES = ["Library", "Preferences"]
+PMX_PLUGIN_GLOB = '*.pmxplugin'
+PMX_PLUGIN_DESCRIPTOR_NAME = 'info.json'
 
 #============================================================================
 # Configuration paths
@@ -92,7 +94,6 @@ def get_conf_path(filename=None):
 def get_module_path(modname):
     """Return module *modname* base path"""
     return os.path.abspath(os.path.dirname(sys.modules[modname].__file__))
-
 
 def get_module_data_path(modname, relpath=None, attr_name='DATAPATH'):
     """Return module *modname* data path

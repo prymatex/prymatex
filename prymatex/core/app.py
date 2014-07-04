@@ -159,11 +159,11 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             self.showMessage = splash.showMessage
         try:
             # Build Managers
-            self.pluginManager = self.buildPluginManager()  # WARN: FIST Plugin Manager
-            self.storageManager = self.buildStorageManager()  # Persistence system Manager
-            self.supportManager = self.buildSupportManager()  # Support Manager
-            self.fileManager = self.buildFileManager()  # File Manager
-            self.projectManager = self.buildProjectManager()  # Project Manager
+            self.pluginManager = self.buildPluginManager()      # WARN: FIST Plugin Manager
+            self.storageManager = self.buildStorageManager()    # Persistence system Manager
+            self.supportManager = self.buildSupportManager()    # Support Manager
+            self.fileManager = self.buildFileManager()          # File Manager
+            self.projectManager = self.buildProjectManager()    # Project Manager
             self.schedulerManager =  self.buildSchedulerManager()
             self.serverManager = self.buildServerManager()
 
@@ -227,8 +227,10 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
         manager.initialize(parent = self)
 
-        manager.addPluginDirectory(config.PMX_PLUGINS_PATH)
+        manager.addNamespace('prymatex', config.PMX_SHARE_PATH)
 
+        manager.addNamespace('user', config.PMX_HOME_PATH)
+        
         manager.loadPlugins()
         return manager
 

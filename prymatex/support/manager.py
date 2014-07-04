@@ -23,7 +23,7 @@ from prymatex.utils.decorators import printtime, printparams
 
 from functools import reduce
 
-Namespace = namedtuple("Namespace", "name basedir protected bundles")
+Namespace = namedtuple("Namespace", "name protected bundles")
 
 # ------- Tool function for compare bundle items by attributes
 def compare(obj, keys, tests):
@@ -77,12 +77,11 @@ class SupportBaseManager(object):
         self.plistFileCache = self.buildPlistFileStorage()
         
     # ------------ Namespaces ----------------------
-    def addNamespace(self, name, path):
+    def addNamespace(self, name, base_path):
         namespace = Namespace(
             name = name, 
-            basedir = path,
             protected = len(self.namespaces) == 0,
-            bundles = os.path.join(path, config.PMX_BUNDLES_NAME))
+            bundles = os.path.join(base_path, config.PMX_BUNDLES_NAME))
         self.namespaces[name] = namespace
         return namespace
 
@@ -141,15 +140,6 @@ class SupportBaseManager(object):
 
     def updateEnvironment(self, env):
         self.environment.update(env)
-
-    #----------- Paths for namespaces --------------------
-    def namespaceElementPath(self, namespace, element, create = False):
-        assert namespace in self.namespaces, "The %s namespace is not registered" % namespace
-        path = os.path.join(self.namespaces[namespace]["dirname"], element)
-        if element not in self.namespaces[namespace] and create:
-            os.makedirs(path)
-            self.addNamespaceElement(namespace, element, path)
-        return path, os.path.exists(path)
 
     #--------------- Plist --------------------
     def readPlist(self, path):
@@ -343,8 +333,7 @@ class SupportBaseManager(object):
         self.messageHandler = messageHandler
         self.logger.debug("Begin reload support.")
         for namespace in self.namespaces.values():
-            print(namespace.name)
-            self.logger.debug("Search in %s, %s." % (namespace.name, namespace.basedir))
+            self.logger.debug("Search in %s, %s." % (namespace.name, namespace.bundles))
             self.reloadBundles(namespace)
         for bundle in self.getAllBundles():
             if bundle.enabled():
