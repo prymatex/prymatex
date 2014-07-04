@@ -88,3 +88,6 @@
 [submodule "prymatex/share/Bundles/bundle-support.tmbundle"]
 	path = prymatex/share/Bundles/bundle-support.tmbundle
 	url = https://github.com/prymatex/bundle-support.tmbundle.git
+[submodule "prymatex/share/Plugins/codeintel.pmxplugin"]
+	path = prymatex/share/Plugins/codeintel.pmxplugin
+	url = https://github.com/prymatex/codeintel.pmxplugin.git
