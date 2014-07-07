@@ -121,8 +121,8 @@ class TerminalDock(PrymatexDock, QtGui.QDockWidget):
     @ConfigurableItem(default = False)
     def editorTheme(self, value):
         if value:
+            # Trigger on register
             self.application.registerSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
-            self.on_defaultTheme_changed(self.application.settingValue("CodeEditor.defaultTheme"))
         else:
             self.application.unregisterSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
             self.tabTerminals.setColorScheme(self._settings.value("defaultScheme"))
@@ -152,7 +152,7 @@ class TerminalDock(PrymatexDock, QtGui.QDockWidget):
 
     # ---------------- Settings hooks
     def on_defaultTheme_changed(self, themeUUID):
-        theme = self.application.supportManager.getTheme(themeUUID)
+        theme = self.application.supportManager.getBundleItem(themeUUID)
         scheme = ColorScheme(theme.name)
         
         # Foreground and background

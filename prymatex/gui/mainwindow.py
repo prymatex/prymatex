@@ -186,7 +186,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWind
 
         # Metemos las acciones del support
         self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
-
+        
     def componentInstanceDispatcher(self, handler, *largs):
         obj = self.sender()
         componentClass = None

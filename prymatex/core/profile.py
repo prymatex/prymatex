@@ -10,7 +10,7 @@ from prymatex.core.config import (TM_PREFERENCES_PATH,
     PMX_SETTINGS_NAME, PMX_STATE_NAME, TM_SETTINGS_NAME)
 
 from prymatex.core.settings import (TextMateSettings, SettingsGroup,
-                                    ConfigurableItem)
+                                    ConfigurableItem, ConfigurableHook)
 class PrymatexProfile(object):
     def __init__(self, name, path, default=True):
         self.PMX_PROFILE_NAME = name
@@ -62,15 +62,26 @@ class PrymatexProfile(object):
                 if value.name is None:
                     value.name = key
                 configurableClass._settings.addConfigurableItem(value)
+            elif isinstance(value, ConfigurableHook):
+                configurableClass._settings.addConfigurableHook(value)
 
     def registerConfigurableInstance(self, configurable):
         settingsGroup = self.groupByClass(configurable.__class__)
         settingsGroup.addListener(configurable)
         settingsGroup.configure(configurable)
+        # Register hooks
+        for path, hook in settingsGroup.configurableHooks.items():
+            handler = hook.fset.__get__(
+                configurable, configurable.__class__)
+            self.registerSettingHook(path, handler)
+            handler(self.settingValue(path))
 
     def unregisterConfigurableInstance(self, configurable):
         settingsGroup = self.groupByClass(configurable.__class__)
         settingsGroup.removeListener(configurable)
+        # Unregister hooks
+        for path, hook in settingsGroup.configurableHooks.items():
+            self.unregisterSettingHook(path, hook.fset)
         
     def saveState(self, configurable):
         self.state[configurable.objectName()] = configurable.componentState()
@@ -88,6 +99,21 @@ class PrymatexProfile(object):
             return getattr(self, name)
         return self.settings.get(name, default)
 
+    # -------------- Hooks
+    def settingValue(self, settingPath):
+        groupName, settingName = settingPath.split(".")
+        return self.groupByName(groupName).value(settingName)
+
+    def registerSettingHook(self, settingPath, handler):
+        groupName, settingName = settingPath.split(".")
+        group = self.groupByName(groupName)
+        group.addHook(settingName, handler)
+
+    def unregisterSettingHook(self, settingPath, handler):
+        groupName, settingName = settingPath.split(".")
+        group = self.groupByName(groupName)
+        group.removeHook(settingName, handler)
+        
     def clear(self):
         self.settings.clear()
 

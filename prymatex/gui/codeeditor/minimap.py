@@ -55,7 +55,7 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
         # TODO El ancho del tabulador
         self.setTabStopWidth(self.editor.tabStopWidth())
         
-        self.on_editor_themeChanged()
+        self.on_editor_themeChanged(self.editor.theme())
     
     @classmethod
     def contributeToMainMenu(cls):
@@ -67,17 +67,9 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
             'testChecked': lambda instance: instance.isVisible() }
         return { baseMenu: menuEntry }
     
-    def on_editor_themeChanged(self):
-        #Editor colours
-        appStyle = """QPlainTextEdit {background-color: %s;
-        color: %s;
-        border: 0px;
-        selection-background-color: %s; }""" % (
-            self.editor.colours['background'].name(), 
-            self.editor.colours['foreground'].name(), 
-            self.editor.colours['selection'].name())
-        self.setStyleSheet(appStyle)
-        self.slider.setStyleSheet("background: %s;" % self.editor.colours['selection'].name())
+    def on_editor_themeChanged(self, theme):
+        self.setPalette(theme.palette())
+        self.viewport().setPalette(theme.palette())
 
     def on_editor_highlightChanged(self):
         block = self.editor.document().begin()

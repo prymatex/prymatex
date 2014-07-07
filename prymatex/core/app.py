@@ -370,18 +370,13 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     # ------------- Settings access
     def settingValue(self, settingPath):
-        groupName, settingName = settingPath.split(".")
-        return self.currentProfile.groupByName(groupName).value(settingName)
+        return self.currentProfile.settingValue(settingPath)
 
     def registerSettingHook(self, settingPath, handler):
-        groupName, settingName = settingPath.split(".")
-        group = self.currentProfile.groupByName(groupName)
-        group.addHook(settingName, handler)
+        self.currentProfile.registerSettingHook(settingPath, handler)
 
     def unregisterSettingHook(self, settingPath, handler):
-        groupName, settingName = settingPath.split(".")
-        group = self.currentProfile.groupByName(groupName)
-        group.removeHook(settingName, handler)
+        self.currentProfile.unregisterSettingHook(settingPath, handler)
 
     # ------------- Editors and windows handle
     def createEditorInstance(self, class_name = None, file_path=None, 

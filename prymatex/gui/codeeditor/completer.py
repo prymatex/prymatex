@@ -287,6 +287,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
 
     def setPalette(self, palette):
         self.popup().setPalette(palette)
+        self.popup().viewport().setPalette(palette)
 
     def fixPopupView(self):
         self.popup().resizeColumnsToContents()

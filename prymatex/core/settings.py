@@ -48,6 +48,8 @@ class SettingsGroup(object):
         self.listeners = []
         # Setting attrs
         self.configurableItems = {}
+        # Setting hooks
+        self.configurableHooks = {}
         # Hooks
         self.hooks = {}
         # Dialogs
@@ -88,6 +90,9 @@ class SettingsGroup(object):
         self.configurableItems[item.name] = item
         if item.tm_name is not None and self.tmsettings.value(item.tm_name) is None:
             self.tmsettings.setValue(item.tm_name, item.getDefault())
+        
+    def addConfigurableHook(self, hook):
+        self.configurableHooks[hook.path] = hook
 
     def addListener(self, listener):
         self.listeners.append(listener)
@@ -96,6 +101,7 @@ class SettingsGroup(object):
         self.listeners.remove(listener)
 
     def addHook(self, name, handler):
+        # Add hook
         hooks = self.hooks.setdefault(name, [])
         if handler not in hooks:
             hooks.append(handler)
@@ -143,5 +149,14 @@ class ConfigurableItem(object):
         instance.__dict__[self.name] = value
         if self.fset is not None:
             self.fset(instance, value)
+            
+class ConfigurableHook(object):
+    def __init__(self, path, fset = None):
+        self.path = path
+        self.fset = fset
+
+    def __call__(self, function):
+        self.fset = function
+        return self
 
 pmxConfigPorperty = ConfigurableItem

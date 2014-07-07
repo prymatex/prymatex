@@ -14,7 +14,7 @@ from prymatex.qt.helpers import create_menu, extend_menu_section
 from prymatex.qt.extensions import CheckableMessageBox, ReplaceRenameInputDialog
 
 from prymatex.utils.i18n import ugettext as _
-from prymatex.core.settings import ConfigurableItem
+from prymatex.core.settings import ConfigurableItem, ConfigurableHook
 
 from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
 
@@ -37,6 +37,12 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
         filters = [p.strip() for p in filters.split(",")]
         self.selectableProjectFileModel.setBaseFilters(filters)
         self.projectTreeProxyModel.setFilterRegExp(",".join(filters))
+    
+    @ConfigurableHook("CodeEditor.defaultTheme")
+    def defaultTheme(self, themeUUID):
+        theme = self.application.supportManager.getBundleItem(themeUUID)
+        self.treeViewProjects.setPalette(theme.palette())
+        self.treeViewProjects.viewport().setPalette(theme.palette())
     
     def __init__(self, **kwargs):
         super(ProjectsDock, self).__init__(**kwargs)
