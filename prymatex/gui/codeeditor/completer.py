@@ -4,7 +4,7 @@
 import string
 from functools import reduce
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, Qt
 
 from prymatex import resources
 from prymatex.utils import text
@@ -129,7 +129,10 @@ class WordsCompletionModel(CompletionBaseModel):
             return suggestion
         elif role == QtCore.Qt.DecorationRole:
             return resources.get_icon('insert-text')
-
+        elif role == QtCore.Qt.ToolTipRole:
+            return suggestion
+        elif role == QtCore.Qt.MatchRole:
+            return suggestion
 
 class TabTriggerItemsCompletionModel(CompletionBaseModel):
     def __init__(self, **kwargs):
@@ -172,6 +175,8 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
             return suggestion.icon()
         elif role == QtCore.Qt.ToolTipRole:
             return suggestion.name
+        elif role == QtCore.Qt.MatchRole:
+            return suggestion.tabTrigger
 
     def isReady(self):
         return bool(self.triggers)
@@ -184,6 +189,11 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
         self.editor.insertBundleItem(trigger)
 
 class SuggestionsCompletionModel(CompletionBaseModel):
+    #display The title to display in the suggestions list
+    #insert Snippet to insert after selection
+    #image An image name, see the :images option
+    #match Typed text to filter on (defaults to display)
+
     def __init__(self, **kwargs):
         super(SuggestionsCompletionModel, self).__init__(**kwargs)
         self.suggestions = []
@@ -236,10 +246,12 @@ class SuggestionsCompletionModel(CompletionBaseModel):
             if index.column() == 0 and 'image' in suggestion:
                 return resources.get_icon(suggestion['image'])
         elif role == QtCore.Qt.ToolTipRole:
-            if 'tool_tip' in suggestion:
-                if 'tool_tip_format' in suggestion:
-                    print(suggestion["tool_tip_format"])
-                return suggestion['tool_tip']
+            if 'tooltip' in suggestion:
+                if 'tooltip_format' in suggestion:
+                    print(suggestion["tooltip_format"])
+                return suggestion['tooltip']
+        elif role == QtCore.Qt.MatchRole:
+            return suggestion['display']
 
     def fillModel(self, callback):
         pass
@@ -267,6 +279,9 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.completionModels = [ ]
 
         self.completerTask = None
+        
+        # Role
+        self.setCompletionRole(QtCore.Qt.MatchRole)
         
         # Popup table view
         self.setPopup(QtGui.QTableView())

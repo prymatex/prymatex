@@ -15,3 +15,4 @@ else:
     __version__ = PySide.QtCore.__version__
     from PySide.QtCore import *
     
+Qt.MatchRole = Qt.UserRole + 1

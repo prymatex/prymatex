@@ -146,14 +146,14 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
                     self.sendResult(suggestion)
                 else:
                     self.sendResult({})
-            self.application.currentEditor().showCompleter( suggestions = suggestions["suggestions"], 
-                                                        alreadyTyped = kwargs.get("alreadyTyped"), 
-                                                        caseInsensitive = kwargs.get("caseInsensitive", True),
+            self.application.currentEditor().runCompleter( suggestions = suggestions["suggestions"], 
+                                                        already_typed = kwargs.get("alreadyTyped"), 
+                                                        case_insensitive = kwargs.get("caseInsensitive", True),
                                                         callback = sendSelectedSuggestion)
         else:
-            self.application.currentEditor().showCompleter( suggestions = suggestions["suggestions"], 
-                                                        alreadyTyped = kwargs.get("alreadyTyped"), 
-                                                        caseInsensitive = kwargs.get("caseInsensitive", True))
+            self.application.currentEditor().runCompleter( suggestions = suggestions["suggestions"], 
+                                                        already_typed = kwargs.get("alreadyTyped"), 
+                                                        case_insensitive = kwargs.get("caseInsensitive", True))
             self.sendResult()
     
     def defaults(self, **kwargs):
