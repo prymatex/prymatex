@@ -796,13 +796,13 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         case_insensitive=True, disable_auto_insert = True, api_completions_only = True,
         next_completion_if_showing = False, auto_complete_commit_on_tab = True):
         self.suggestionsCompletionModel.setSuggestions(suggestions)
-        self.suggestionsCompletionModel.setCompletionCallback(callback)
+        if callback is not None:
+            self.suggestionsCompletionModel.setCompletionCallback(callback)
         alreadyTyped, start, end = self.currentWord(direction="left")
         self.completer.setCaseSensitivity( QtCore.Qt.CaseInsensitive and \
             caseInsensitive or QtCore.Qt.CaseSensitive)
-        #self.completer.complete(self.cursorRect(),
-        #    model = self.suggestionsCompletionModel,
-        #    prefix = alreadyTyped)
+        self.completer.runCompleter(self.cursorRect(),
+            prefix = alreadyTyped)
 
     # ---------- Folding
     def _find_block_fold_peer(self, block, direction = "down"):

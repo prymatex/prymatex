@@ -229,7 +229,7 @@ class SuggestionsCompletionModel(CompletionBaseModel):
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
-        suggestion = self.suggestion(index)
+        suggestion = self.suggestions[index.row()]
         if role == QtCore.Qt.DisplayRole:
             if 'display' in suggestion:
                 return suggestion['display']
