@@ -204,10 +204,9 @@ class SuggestionsCompletionModel(CompletionBaseModel):
         def callback(suggestion):
             currentWord, start, end = self.editor.currentWord()
             cursor = self.editor.newCursorAtPosition(start, end)
-            if 'display' in suggestion:
-                cursor.insertText(suggestion['display'])
-            elif 'title' in suggestion:
-                cursor.insertText(suggestion['title'])
+            snippet = suggestion.get('insert') or suggestion.get('display') or suggestion.get('title')
+            if snippet:
+                self.editor.insertSnippet(snippet, textCursor = cursor)
         self.setCompletionCallback(callback)
 
     def setCompletionCallback(self, callback):

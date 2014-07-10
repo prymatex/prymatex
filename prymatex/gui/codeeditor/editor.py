@@ -738,13 +738,16 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         else:
             _insert_item(0)
 
-    def executeCommand(self, commandScript = None, commandInput = "none", commandOutput = "insertText"):
-        if commandScript is None:
-            commandScript = self.textCursor().selectedText() if self.textCursor().hasSelection() else self.textCursor().block().text()
+    def insertSnippet(self, snippetContent, commandInput = "none", commandOutput = "insertText", **kwargs):
+        snippet = self.application.supportManager.buildAdHocSnippet(
+            snippetContent, self.syntax().bundle)
+        self.insertBundleItem(snippet, **kwargs)
+        
+    def insertCommand(self, commandScript, commandInput = "none", commandOutput = "insertText", **kwargs):
         command = self.application.supportManager.buildAdHocCommand(
             commandScript, self.syntax().bundle,
             commandInput=commandInput, commandOutput=commandOutput)
-        self.insertBundleItem(command)
+        self.insertBundleItem(command, **kwargs)
 
     def environmentVariables(self):
         environment = PrymatexEditor.environmentVariables(self)
