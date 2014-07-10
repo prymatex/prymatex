@@ -4,7 +4,7 @@
 import zmq
 from zmq import (FD, LINGER, IDENTITY, SUBSCRIBE, UNSUBSCRIBE, EVENTS,
                 POLLIN, POLLOUT, POLLERR, NOBLOCK, ZMQError, EAGAIN,
-                REP)
+                REP, REQ, SUB)
                 
 from prymatex.qt import QtCore
 

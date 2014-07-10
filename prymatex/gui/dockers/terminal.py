@@ -139,7 +139,7 @@ class TerminalDock(PrymatexDock, QtGui.QDockWidget):
         
         # Manager
         self.backendManager = BackendManager(parent = self)
-        self.application.aboutToQuit.connect(self.backendManager.closeAll)
+        self.application.aboutToQuit.connect(self.backendManager.stopAll)
         
         # Local Backend
         self.backend = self.backendManager.localBackend()

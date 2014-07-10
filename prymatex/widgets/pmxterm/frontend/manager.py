@@ -39,6 +39,8 @@ class Backend(QtCore.QObject):
         self.name = name
         self.sessions = {}
         self._state = self.NotRunning
+        self.multiplexer = None
+        self.notifier = None
 
     def _set_state(self, state):
         self._state = state
@@ -49,15 +51,13 @@ class Backend(QtCore.QObject):
 
     #------------ Sockets
     def startMultiplexer(self, address):
-        import zmq
-        from prymatex.utils.zeromqt import ZmqSocket
-        self.multiplexer = ZmqSocket(zmq.REQ, self)
+        from prymatex.utils.zeromqt import ZmqSocket, REQ
+        self.multiplexer = ZmqSocket(REQ, self)
         self.multiplexer.connect(address)
     
     def startNotifier(self, address):
-        import zmq
-        from prymatex.utils.zeromqt import ZmqSocket
-        self.notifier = ZmqSocket(zmq.SUB, self)
+        from prymatex.utils.zeromqt import ZmqSocket, SUB
+        self.notifier = ZmqSocket(SUB, self)
         self.notifier.readyRead.connect(self.notifier_readyRead)
         self.notifier.subscribe(b"") #All
         self.notifier.connect(address)
@@ -86,7 +86,7 @@ class Backend(QtCore.QObject):
         self._set_state(self.Running)
         self.started.emit()
         
-    def close(self):
+    def stop(self):
         self.execute("proc_buryall")
         self._set_state(self.NotRunning)
         self.finished.emit(0)
@@ -116,8 +116,8 @@ class LocalBackend(Backend):
         self.process.readyReadStandardOutput.connect(self.backend_start_readyReadStandardOutput)
         self.process.start(sys.executable, args)
 
-    def close(self):
-        Backend.close(self)
+    def stop(self):
+        Backend.stop(self)
         os.kill(self.process.pid(), signal.SIGTERM)
         self.process.waitForFinished()
         
@@ -171,9 +171,10 @@ class BackendManager(QtCore.QObject):
         QtCore.QObject.__init__(self, parent)
         self.backends = []
     
-    def closeAll(self):
+    def stopAll(self):
         for backend in self.backends:
-            backend.close()
+            if backend.state() == Backend.Running:
+                backend.stop()
     
     def backend(self, name, connectionString):
         data = ast.literal_eval(connectionString)
