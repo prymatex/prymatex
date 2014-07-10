@@ -416,8 +416,9 @@ class CodeEditorCompleter(QtGui.QCompleter):
         def _go(model):
             if self.model() is None and self.trySetModel(model):
                 self.complete(rect)
-        self.completerTasks = self.editor.application.schedulerManager.tasks(
-            lambda model: model.fillModel(_go), self.completionModels)
         if model is not None:
             _go(model)
+        self.completerTasks = self.editor.application.schedulerManager.tasks(
+            lambda model: model.fillModel(_go), self.completionModels)
+        
 
