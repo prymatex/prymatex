@@ -192,6 +192,12 @@ class CoException( Exception ):
     def __str__( self ):
         return self.__repr__()
 
+class WaitTasksTimeout( Exception ):
+    """ When tasks coroutines works too long """
+    def __init__( tasks, maxTimeoutMs ):
+        Exception.__init__( '%d tasks (%s) works longer, then %d ms.' % \
+                            (len(tasks), tasks, maxTimeoutMs) )
+
 class Runnable(QtCore.QObject):
     # States
     NEW = 0
@@ -363,7 +369,7 @@ class SchedulerManager( QtCore.QObject ):
         super(SchedulerManager, self).__init__(parent)
 
         self._current_task = None
-        self.tasks = 0
+        self._tasks = 0
         self.ready = deque()
         self.timerId = None
         self.printCoException = True
@@ -373,7 +379,7 @@ class SchedulerManager( QtCore.QObject ):
         kwargs.setdefault("parent", self)
         t = Task(coroutine, **kwargs)
         t.destroyed.connect(self._task_destroyed)
-        self.tasks += 1
+        self._tasks += 1
 
         t.state = Task.RUNNING
         self.schedule( t )
@@ -386,10 +392,23 @@ class SchedulerManager( QtCore.QObject ):
             self.timerId = self.startTimer(0)
 
     def _task_destroyed( self, task ):
-        self.tasks -= 1
+        self._tasks -= 1
 
-        if not self.tasks:
+        if not self._tasks:
             self.done.emit()
+
+    # paramsList - list( *argv1, *argv2, ... )
+    # will start coTask( *argv1 ), coTask( *argv2 )... and returns tasks set
+    def tasks(self, coTask, tasksParams, emitUnhandled=True):
+        tasks = set()
+        for argv in tasksParams:
+            t = self.task(coTask(argv))
+            if emitUnhandled:
+                t.setEmitUnhandled()
+    
+            tasks.add(t)
+
+        return tasks
 
     def checkRuntime( self, task ):
         t = datetime.datetime.now()
@@ -466,14 +485,6 @@ class SchedulerManager( QtCore.QObject ):
 
         self._current_task = None
 
-
-class WaitTasksTimeout( Exception ):
-    """ When tasks coroutines works too long """
-    def __init__( tasks, maxTimeoutMs ):
-        Exception.__init__( '%d tasks (%s) works longer, then %d ms.' % \
-                            (len(tasks), tasks, maxTimeoutMs) )
-
-
 # Wait until many tasks done
 def coWaitTasks( tasks, maxTimeoutMs, breakFunc = lambda tasks, t: False ):
     """ Wait until all coroutines from tasks 
@@ -491,20 +502,6 @@ def coWaitTasks( tasks, maxTimeoutMs, breakFunc = lambda tasks, t: False ):
             break
 
 
-# paramsList - list( *argv1, *argv2, ... )
-# will start coTask( *argv1 ), coTask( *argv2 )... and returns tasks set
-def coMassiveStart( coTask, tasksParams, serialTimeoutMs = 0, emitUnhandled = True ):
-    scheduler = QtCore.QCoreApplication.instance().scheduler
-    tasks = set()
-    for argv in tasksParams:
-        t = scheduler.task( coTask(*argv) )
-        if emitUnhandled:
-            t.setEmitUnhandled()
-
-        tasks.add( t )
-        yield Sleep( serialTimeoutMs )
-
-    yield Return( tasks )
 
 
 if __name__ == '__main__':

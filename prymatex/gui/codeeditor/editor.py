@@ -802,7 +802,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.completer.setCaseSensitivity( QtCore.Qt.CaseInsensitive and \
             caseInsensitive or QtCore.Qt.CaseSensitive)
         self.completer.runCompleter(self.cursorRect(),
-            prefix = alreadyTyped)
+            prefix = alreadyTyped, 
+            model = self.suggestionsCompletionModel)
 
     # ---------- Folding
     def _find_block_fold_peer(self, block, direction = "down"):

@@ -278,7 +278,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
         # Models
         self.completionModels = [ ]
 
-        self.completerTask = None
+        self.completerTasks = [ ]
         
         # Role
         self.setCompletionRole(QtCore.Qt.MatchRole)
@@ -407,17 +407,17 @@ class CodeEditorCompleter(QtGui.QCompleter):
                 break
         return False
 
-    def runCompleter(self, rect, prefix):
-        if self.completerTask and self.completerTask.running():
-            self.completerTask.cancel()
+    def runCompleter(self, rect, prefix, model = None):
+        for completerTask in self.completerTasks:
+            completerTask.cancel()
         self.setCompletionPrefix(prefix)
         self.startCursorPosition = self.editor.textCursor().position() - len(prefix)
         self.setModel(None)
         def _go(model):
-            #TODO: Aca hacer magia con ponderaciones de modelos
             if self.model() is None and self.trySetModel(model):
                 self.complete(rect)
-        def _fill():
-            for model in self.completionModels:
-                yield model.fillModel(_go)
-        self.completerTask = self.editor.application.schedulerManager.task(_fill())
+        self.completerTasks = self.editor.application.schedulerManager.tasks(
+            lambda model: model.fillModel(_go), self.completionModels)
+        if model is not None:
+            _go(model)
+
