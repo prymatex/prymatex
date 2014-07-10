@@ -63,20 +63,24 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
         self.viewport().setPalette(theme.palette())
         self.slider.setPalette(theme.palette())
 
-    def on_editor_highlightChanged(self):
-        block = self.editor.document().begin()
+    def _apply_aditional_formats(self, block, line_count):
+        position = block.position()
         length = 0
-        while block.isValid():
-            miniFormats = []
+        while block.isValid() and line_count:
             miniBlock = self.document().findBlockByNumber(block.blockNumber())
-            for frmt in block.layout().additionalFormats():
-                miniFormats.append(frmt)
-            miniBlock.layout().setAdditionalFormats(miniFormats)
+            miniBlock.layout().setAdditionalFormats(
+                block.layout().additionalFormats())
             length += block.length()
             block = block.next()
+            line_count -= 1
 
-        self.document().markContentsDirty(0, length)
+        self.document().markContentsDirty(position, length)
         self._update_font()
+        
+    def on_editor_highlightChanged(self):
+        block = self.editor.document().begin()
+        line_count = self.editor.document().lineCount()
+        self._apply_aditional_formats(block, line_count)
         
     def on_document_contentsChange(self, position, charsRemoved, charsAdded):
         cursor = QtGui.QTextCursor(self.document())
@@ -85,14 +89,8 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
             cursor.setPosition(position + charsRemoved, QtGui.QTextCursor.KeepAnchor)
         text = self.editor.document().toPlainText()[position: position + charsAdded]
         cursor.insertText(text)
-        miniFormats = []
-        for frmt in self.editor.document().findBlock(position).layout().additionalFormats():
-            miniFormats.append(frmt)
-            
-        miniBlock = self.document().findBlock(position)
-        miniBlock.layout().setAdditionalFormats(miniFormats)
-        self.document().markContentsDirty(miniBlock.position(), miniBlock.length())
-        self._update_font()
+        block = self.editor.document().findBlock(position)
+        self._apply_aditional_formats(block, len(text.split()))
     
     def update_visible_area(self):
         if not self.slider.pressed:
