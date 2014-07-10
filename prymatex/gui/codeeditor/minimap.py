@@ -46,15 +46,6 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
         self.editor.updateRequest.connect(self.update_visible_area)
         
-        # Setup font
-        font = self.editor.document().defaultFont()
-        pointSize = int(self.width() / self.editor.marginLineSize)
-        font.setPointSize(pointSize or 1)
-        self.setFont(font)
-
-        # TODO El ancho del tabulador
-        self.setTabStopWidth(self.editor.tabStopWidth())
-        
         self.on_editor_themeChanged(self.editor.theme())
     
     @classmethod
@@ -70,18 +61,23 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
     def on_editor_themeChanged(self, theme):
         self.setPalette(theme.palette())
         self.viewport().setPalette(theme.palette())
+        self.slider.setPalette(theme.palette())
 
     def on_editor_highlightChanged(self):
         block = self.editor.document().begin()
         length = 0
         while block.isValid():
+            miniFormats = []
             miniBlock = self.document().findBlockByNumber(block.blockNumber())
-            miniBlock.layout().setAdditionalFormats(block.layout().additionalFormats())
+            for frmt in block.layout().additionalFormats():
+                miniFormats.append(frmt)
+            miniBlock.layout().setAdditionalFormats(miniFormats)
             length += block.length()
             block = block.next()
 
         self.document().markContentsDirty(0, length)
-    
+        self._update_font()
+        
     def on_document_contentsChange(self, position, charsRemoved, charsAdded):
         cursor = QtGui.QTextCursor(self.document())
         cursor.setPosition(position)
@@ -89,10 +85,14 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
             cursor.setPosition(position + charsRemoved, QtGui.QTextCursor.KeepAnchor)
         text = self.editor.document().toPlainText()[position: position + charsAdded]
         cursor.insertText(text)
-        block = self.editor.document().findBlock(position)
+        miniFormats = []
+        for frmt in self.editor.document().findBlock(position).layout().additionalFormats():
+            miniFormats.append(frmt)
+            
         miniBlock = self.document().findBlock(position)
-        miniBlock.layout().setAdditionalFormats(block.layout().additionalFormats())
+        miniBlock.layout().setAdditionalFormats(miniFormats)
         self.document().markContentsDirty(miniBlock.position(), miniBlock.length())
+        self._update_font()
     
     def update_visible_area(self):
         if not self.slider.pressed:
@@ -107,6 +107,15 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
             self.setTextCursor(cursor)
             self.slider.move_slider(rect.y())
             self.slider.update_position()
+
+    def _update_font(self):
+
+        self.setTabStopWidth(self.editor.tabStopWidth())
+
+        font = self.editor.document().defaultFont()
+        pointSize = int(self.width() / self.editor.marginLineSize)
+        font.setPointSize(pointSize or 1)
+        self.setFont(font)
 
     def enterEvent(self, event):
         self.animation.setDuration(300)
