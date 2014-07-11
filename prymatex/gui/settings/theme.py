@@ -74,25 +74,22 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
 
     def updateUi(self, theme):
         self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.model().nodeIndex(theme).row())    
-        settings = theme.getStyle()
-        self.pushButtonForeground.setStyleSheet("background-color: " + color2rgba(settings['foreground'])[:7])
-        self.pushButtonBackground.setStyleSheet("background-color: " + color2rgba(settings['background'])[:7])
-        self.pushButtonSelection.setStyleSheet("background-color: " + color2rgba(settings['selection'])[:7])
-        self.pushButtonInvisibles.setStyleSheet("background-color: " + color2rgba(settings['invisibles'])[:7])
-        self.pushButtonLineHighlight.setStyleSheet("background-color: " + color2rgba(settings['lineHighlight'])[:7])
-        self.pushButtonCaret.setStyleSheet("background-color: " + color2rgba(settings['caret'])[:7])
-        self.pushButtonGutterBackground.setStyleSheet("background-color: " + color2rgba(settings['gutterBackground'])[:7])
-        self.pushButtonGutterForeground.setStyleSheet("background-color: " + color2rgba(settings['gutterForeground'])[:7])
+        palette = theme.palette()
+        # Filter theme proxy model
         self.application.supportManager.themeStyleProxyModel.setFilterRegExp(str(theme.uuid))
 
-        #Set color for table view
-        tableStyle = """QTableView {background-color: %s;
-        color: %s;
-        selection-background-color: %s; }""" % (settings['background'].name(), settings['foreground'].name(), settings['selection'].name())
-        self.tableViewStyles.setStyleSheet(tableStyle)
+        # Set color for table view
+        self.tableViewStyles.setPalette(palette)
+        self.tableViewStyles.viewport().setPalette(palette)
         self.tableViewStyles.resizeColumnsToContents()
         self.tableViewStyles.resizeRowsToContents()
         self.tableViewStyles.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
+        
+        # Set color for buttons
+        for button, name, role in self.buttons:
+            p = button.palette()
+            p.setColor(QtGui.QPalette.Button, palette.color(role))
+            button.setPalette(p)
 
     # --------------------- TableView
     def setupTableView(self):
@@ -133,14 +130,20 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
 
     # -------------------- Colors Push Button
     def setupPushButton(self):
-        self.pushButtonForeground.pressed.connect(lambda element='foreground': self.on_pushButtonColor_pressed(element))
-        self.pushButtonBackground.pressed.connect(lambda element='background': self.on_pushButtonColor_pressed(element))
-        self.pushButtonSelection.pressed.connect(lambda element='selection': self.on_pushButtonColor_pressed(element))
-        self.pushButtonInvisibles.pressed.connect(lambda element='invisibles': self.on_pushButtonColor_pressed(element))
-        self.pushButtonLineHighlight.pressed.connect(lambda element='lineHighlight': self.on_pushButtonColor_pressed(element))
-        self.pushButtonCaret.pressed.connect(lambda element='caret': self.on_pushButtonColor_pressed(element))
-        self.pushButtonGutterBackground.pressed.connect(lambda element='gutterBackground': self.on_pushButtonColor_pressed(element))
-        self.pushButtonGutterForeground.pressed.connect(lambda element='gutterForeground': self.on_pushButtonColor_pressed(element))
+        self.buttons = ( # Object, textmate name, Qt Role
+            (self.pushButtonForeground, 'foreground', QtGui.QPalette.WindowText),
+            (self.pushButtonBackground, 'background', QtGui.QPalette.Window),
+            (self.pushButtonSelection, 'selection', QtGui.QPalette.Highlight),
+            (self.pushButtonInvisibles, 'invisibles', QtGui.QPalette.HighlightedText),
+            (self.pushButtonLineHighlight, 'lineHighlight', QtGui.QPalette.AlternateBase),
+            (self.pushButtonCaret, 'caret', QtGui.QPalette.BrightText),
+            (self.pushButtonGutterBackground, 'gutterBackground', QtGui.QPalette.ToolTipBase),
+            (self.pushButtonGutterForeground, 'gutterForeground', QtGui.QPalette.ToolTipText)
+        )
+        for button, name, role in self.buttons:
+            button.setAutoFillBackground(True)
+            button.setFlat(True)
+            button.pressed.connect(lambda element=name: self.on_pushButtonColor_pressed(element))
 
     def on_pushButtonColor_pressed(self, element):
         theme = self.comboBoxThemes.model().node(self.comboBoxThemes.currentIndex())
