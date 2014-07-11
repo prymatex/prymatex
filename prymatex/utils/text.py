@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import re
 import string
 import unicodedata
+from . import six
 
 # ---------- Translation dictionary.
 # Translation entries are added to this dictionary as needed.
@@ -71,7 +72,7 @@ class unaccented_map(dict):
         if ch is not None:
             return ch
         try:
-            de = unicodedata.decomposition(chr(key))
+            de = unicodedata.decomposition(six.PY3 and chr(key) or unichr(key))
             p1, p2 = [int(x, 16) for x in de.split(None, 1)]
             if p2 == 0x308:
                 ch = self.CHAR_REPLACEMENT.get(key)
