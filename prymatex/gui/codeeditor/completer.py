@@ -186,7 +186,7 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
         currentWord, start, end = self.editor.currentWord()
         cursor = self.editor.newCursorAtPosition(start, end)
         cursor.removeSelectedText()
-        self.editor.insertBundleItem(trigger)
+        self.editor.insertBundleItem(trigger, textCursor = cursor)
 
 class SuggestionsCompletionModel(CompletionBaseModel):
     #display The title to display in the suggestions list
@@ -201,13 +201,6 @@ class SuggestionsCompletionModel(CompletionBaseModel):
 
     def setSuggestions(self, suggestions):
         self.suggestions = suggestions
-        def callback(suggestion):
-            currentWord, start, end = self.editor.currentWord()
-            cursor = self.editor.newCursorAtPosition(start, end)
-            snippet = suggestion.get('insert') or suggestion.get('display') or suggestion.get('title')
-            if snippet:
-                self.editor.insertSnippet(snippet, textCursor = cursor)
-        self.setCompletionCallback(callback)
 
     def setCompletionCallback(self, callback):
         self.completionCallback = callback
@@ -303,6 +296,13 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.popup().setPalette(palette)
         self.popup().viewport().setPalette(palette)
 
+    def isVisible(self):
+        return self.popup().isVisible()
+    
+    def hide(self):
+        print("hide message")
+        return self.popup().hide()
+
     def fixPopupView(self):
         self.popup().resizeColumnsToContents()
         self.popup().resizeRowsToContents()
@@ -312,9 +312,10 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.popup().setMinimumWidth(width)
     
     def pre_key_event(self, event):
-        if self.popup().isVisible():
+        if self.isVisible():
             if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab):
                 event.ignore()
+                print("hide key")
                 return True
             elif event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
                 #Proximo modelo
@@ -323,9 +324,9 @@ class CodeEditorCompleter(QtGui.QCompleter):
                     self.explicitLaunch = True
                     return not self.explicitLaunch
                 else:
-                    self.popup().hide()
+                    self.hide()
             elif event.key() in (QtCore.Qt.Key_Space, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
-                self.popup().hide()
+                self.hide()
         elif event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
             alreadyTyped, start, end = self.editor.currentWord(direction="left")
             self.explicitLaunch = True
@@ -333,7 +334,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
         return False
 
     def post_key_event(self, event):
-        if self.popup().isVisible():
+        if self.isVisible():
             maxPosition = self.startCursorPosition + len(self.completionPrefix()) + 1
             cursor = self.editor.textCursor()
             
@@ -343,9 +344,9 @@ class CodeEditorCompleter(QtGui.QCompleter):
                 if not self.setCurrentRow(0) and self.trySetNextModel():
                     self.complete(self.editor.cursorRect())
                 elif self.model() is None:
-                    self.popup().hide()
+                    self.hide()
             else:
-                self.popup().hide()
+                self.hide()
         elif text.asciify(event.text()) in COMPLETER_CHARS:
             alreadyTyped, start, end = self.editor.currentWord(direction="left")
             if end - start >= self.editor.wordLengthToComplete:

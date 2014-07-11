@@ -795,12 +795,18 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return environment
 
     # ---------- Completer
+    def defaultCompletionCallback(self, suggestion):
+        currentWord, start, end = self.currentWord()
+        cursor = self.newCursorAtPosition(start, end)
+        snippet = suggestion.get('insert') or suggestion.get('display') or suggestion.get('title')
+        self.insertSnippet(snippet, textCursor = cursor)
+
     def runCompleter(self, suggestions, already_typed=None, callback = None, 
         case_insensitive=True, disable_auto_insert = True, api_completions_only = True,
         next_completion_if_showing = False, auto_complete_commit_on_tab = True):
         self.suggestionsCompletionModel.setSuggestions(suggestions)
-        if callback is not None:
-            self.suggestionsCompletionModel.setCompletionCallback(callback)
+        self.suggestionsCompletionModel.setCompletionCallback(callback or
+            self.defaultCompletionCallback)
         alreadyTyped, start, end = self.currentWord(direction="left")
         self.completer.setCaseSensitivity( QtCore.Qt.CaseInsensitive and \
             caseInsensitive or QtCore.Qt.CaseSensitive)
