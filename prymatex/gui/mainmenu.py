@@ -24,7 +24,7 @@ class MainMenuMixin(object):
         action = self.sender()
         callback = action.data()
         getattr(widget, callback, lambda : None)()
-
+        
     # ------------ About to show recent files
     def on_menuRecentFiles_aboutToShow(self):
         actions = self.menuRecentFiles.actions()[-3:]

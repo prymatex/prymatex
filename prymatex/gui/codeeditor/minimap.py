@@ -35,8 +35,8 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
         self.goe.setOpacity(self.MINIMAP_MIN_OPACITY)
         self.animation = QtCore.QPropertyAnimation(self.goe, "opacity")
         
-        self.slider = SliderArea(self)
-        self.slider.show()
+        #self.slider = SliderArea(self)
+        #self.slider.show()
         self.setFixedWidth(self.WIDTH)
 
     def initialize(self, **kwargs):
@@ -44,7 +44,7 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
         self.editor.themeChanged.connect(self.on_editor_themeChanged)
         self.editor.highlightChanged.connect(self.on_editor_highlightChanged)
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
-        self.editor.updateRequest.connect(self.update_visible_area)
+        #self.editor.updateRequest.connect(self.update_visible_area)
         
         self.on_editor_themeChanged(self.editor.theme())
     
@@ -61,7 +61,7 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
     def on_editor_themeChanged(self, theme):
         self.setPalette(theme.palette())
         self.viewport().setPalette(theme.palette())
-        self.slider.setPalette(theme.palette())
+        #self.slider.setPalette(theme.palette())
 
     def _apply_aditional_formats(self, block, line_count):
         position = block.position()
@@ -134,7 +134,7 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
 
     def resizeEvent(self, event):
         QtGui.QPlainTextEdit.resizeEvent(self, event)
-        self.slider.update_position()
+        #self.slider.update_position()
 
     def scroll_area(self, pos_parent, pos_slider):
         pos_parent.setY(pos_parent.y() - pos_slider.y())
@@ -154,9 +154,9 @@ class SliderArea(QtGui.QFrame):
         self.setMouseTracking(True)
         self.setCursor(QtCore.Qt.OpenHandCursor)
 
-        self.goe = QtGui.QGraphicsOpacityEffect()
-        self.setGraphicsEffect(self.goe)
-        self.goe.setOpacity(parent.MINIMAP_MAX_OPACITY / 2)
+        #self.goe = QtGui.QGraphicsOpacityEffect()
+        #self.setGraphicsEffect(self.goe)
+        #self.goe.setOpacity(parent.MINIMAP_MAX_OPACITY / 2)
 
         self.pressed = False
         self.__scroll_margins = None
