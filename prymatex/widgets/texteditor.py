@@ -11,16 +11,13 @@ from prymatex.utils import text
 
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import textcursor_to_tuple
+from prymatex.core import config
 from functools import reduce
 
 class TextEditWidget(QtGui.QPlainTextEdit):
     #------ Signals
     extraSelectionChanged = QtCore.Signal()
     fontChanged = QtCore.Signal()
-
-    #------ Regular expresions
-    # TODO Ver esto que no esta muy bien
-    RE_WORD = re.compile(r"([A-Za-z_]+)", re.UNICODE)
 
     def __init__(self, **kwargs):
         super(TextEditWidget, self).__init__(**kwargs)
@@ -51,21 +48,22 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         self.fontChanged.emit()
 
     #------ Retrieve text
-    def wordUnderCursor(self, cursor = None):
+    def currentWord(self):
+        return self.wordUnderCursor(self.textCursor(), search = True)
+        
+    def currentText(self):
+        return self.textUnderCursor(self.textCursor(), search = True)
+
+    def wordUnderCursor(self, cursor = None, pattern = config.RE_WORD,
+        direction = "both", search = False):
         #Como cambio el cursor hago una copia
-        cursor = cursor is not None and QtGui.QTextCursor(cursor) or self.textCursor()
+        cursor = QtGui.QTextCursor(cursor or self.textCursor())
+        character = self.document().characterAt(cursor.position() - 1)
+        if search and pattern.match(character) is not None:
+            cursor.movePosition(QtGui.QTextCursor.Left)
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
-        return cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
-
-    def currentWord(self, direction = "both"):
-        cursor = self.textCursor()
-        return self.word(cursor = cursor, direction = direction, search = False)
-
-    def word(self, cursor = None, pattern = RE_WORD, direction = "both", search = True):
-        cursor =  cursor or self.textCursor()
-        wordUnderCursor, start, end = self.wordUnderCursor(cursor = cursor)
-
-        if pattern.match(wordUnderCursor):
+        if cursor.hasSelection() and pattern.match(cursor.selectedText()):
+            wordUnderCursor, start, end = cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
             if direction == "both":
                 return wordUnderCursor, start, end
             elif direction == "left":
@@ -74,6 +72,16 @@ class TextEditWidget(QtGui.QPlainTextEdit):
             elif direction == "right":
                 index = end - cursor.position()
                 return wordUnderCursor[len(wordUnderCursor) - index:], end - index, end
+        return "", cursor.position(), cursor.position()
+            
+    def textUnderCursor(self, cursor = None, pattern = config.RE_WORD,
+        direction = "both", search = False):
+        cursor = QtGui.QTextCursor(cursor or self.textCursor())
+        wordUnderCursor, start, end = self.wordUnderCursor(cursor = cursor,
+            pattern = pattern, direction = direction, search = search)
+
+        if wordUnderCursor:
+            return wordUnderCursor, start, end
         elif search:
             columnNumber = cursor.columnNumber()
             line = cursor.block().text()
@@ -96,14 +104,14 @@ class TextEditWidget(QtGui.QPlainTextEdit):
                 #Search right word
                 rstart = end
                 rmatch = pattern.search(last_part)
-                if rmatch is not None and (rmatch.start() == 0 or direction == "right"):
-                    rstart = blockPosition + len(first_part) + len(last_part[:rmatch.start()])
-                    end = blockPosition + len(first_part) + len(first_part[:rmatch.end()])
+                if rmatch is not None:
+                    rstart = blockPosition + len(first_part)
+                    end = blockPosition + len(first_part) + len(last_part[:rmatch.end()])
                     if direction == "right":
                         return last_part[:rmatch.start()], rstart, end
 
             # Si estamos aca es porque es both
-            if lmatch is not None and lmatch.start() == 0:
+            if lmatch is not None:
                 return line[start - blockPosition : end - blockPosition], start, end
         return "", cursor.position(), cursor.position()
 
@@ -359,7 +367,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
 
     def selectWordCurrent(self, cursor = None):
         cursor = cursor or self.textCursor()
-        _, start, end = self.word(cursor = cursor)
+        _, start, end = self.currentWord(cursor = cursor)
         self.setTextCursor(self.newCursorAtPosition(start, end))
 
     def selectLine(self, cursor = None):
@@ -383,7 +391,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         tupleCursor = textcursor_to_tuple(cursor)
         cursor.beginEditBlock()
         if not cursor.hasSelection():
-            word, start, end = self.word(cursor = cursor)
+            word, start, end = self.currentWord(cursor = cursor)
             self.newCursorAtPosition(start, end).insertText(convertFunction(word))
         else:
             cursor.insertText(convertFunction(cursor.selectedText()))

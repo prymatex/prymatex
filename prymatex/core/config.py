@@ -4,6 +4,7 @@
 """
 Application configuration based on Qt's QSettings module.
 """
+import re
 import sys
 import os
 import plistlib
@@ -43,6 +44,11 @@ PMX_PLUGIN_GLOB = '*.pmxplugin'
 PMX_PLUGIN_DESCRIPTOR_NAME = 'info.json'
 
 #============================================================================
+# Regular expresions
+#============================================================================
+RE_WORD = re.compile(r"[A-Za-z_]+", re.UNICODE)
+
+#============================================================================
 # Configuration paths
 #============================================================================
 USER_HOME_PATH = get_home_dir()
@@ -76,9 +82,6 @@ def get_textmate_preferences_user_path():
 
 TM_PREFERENCES_PATH = get_textmate_preferences_user_path()
 
-#============================================================================
-# Configuration paths
-#============================================================================
 def get_conf_path(filename=None):
     """Return absolute path for configuration file with specified filename"""
     # TODO: Hacerlo para el profile

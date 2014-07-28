@@ -756,6 +756,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         line = block.text()
 
         leftScope, rightScope = self.scope(cursor)
+        current_text, start, end = self.currentText()
         current_word, start, end = self.currentWord()
 
         theme = self.application.supportManager.getBundleItem(self.defaultTheme)
@@ -777,6 +778,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         if current_word:
             self.logger.debug("Add current word to environment")
             environment['TM_CURRENT_WORD'] = current_word
+        if current_text:
+            self.logger.debug("Add current text to environment")
+            environment['TM_CURRENT_TEXT'] = current_text
         if self.filePath():
             self.logger.debug("Add file path to environment")
             environment['TM_FILEPATH'] = self.filePath()

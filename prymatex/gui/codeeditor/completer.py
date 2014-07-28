@@ -6,6 +6,7 @@ from functools import reduce
 
 from prymatex.qt import QtCore, QtGui, Qt
 
+from prymatex.core import config
 from prymatex import resources
 from prymatex.utils import text
 from prymatex.models.support import BundleItemTreeNode
@@ -71,7 +72,7 @@ class WordsCompletionModel(CompletionBaseModel):
     def processBlockUserData(self, text, cursor, block, userData):
         words = set(
             reduce(lambda w1, w2: w1 + w2,
-                map(lambda token: self.editor.RE_WORD.findall(token.chunk),
+                map(lambda token: config.RE_WORD.findall(token.chunk),
                     userData.tokens()[::-1]
                 )
         , []))
@@ -328,7 +329,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
             elif event.key() in (QtCore.Qt.Key_Space, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
                 self.hide()
         elif event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
-            alreadyTyped, start, end = self.editor.currentWord(direction="left")
+            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left")
             self.explicitLaunch = True
             self.runCompleter(self.editor.cursorRect(), alreadyTyped)
         return False
@@ -348,7 +349,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
             else:
                 self.hide()
         elif text.asciify(event.text()) in COMPLETER_CHARS:
-            alreadyTyped, start, end = self.editor.currentWord(direction="left")
+            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left")
             if end - start >= self.editor.wordLengthToComplete:
                 self.explicitLaunch = False
                 self.runCompleter(self.editor.cursorRect(), alreadyTyped)
