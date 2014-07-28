@@ -59,12 +59,9 @@ class TextEditWidget(QtGui.QPlainTextEdit):
 
     def currentWord(self, direction = "both"):
         cursor = self.textCursor()
-        word, start, end = self.word(cursor = cursor, direction = direction, search = True)
-        if start <= cursor.position() <= end:
-            return word, start, end
-        return "", cursor.position(), cursor.position()
+        return self.word(cursor = cursor, direction = direction, search = False)
 
-    def word(self, cursor = None, pattern = RE_WORD, direction = "both", search = False):
+    def word(self, cursor = None, pattern = RE_WORD, direction = "both", search = True):
         cursor =  cursor or self.textCursor()
         wordUnderCursor, start, end = self.wordUnderCursor(cursor = cursor)
 
@@ -89,24 +86,24 @@ class TextEditWidget(QtGui.QPlainTextEdit):
                 #Search left word
                 lend = start
                 lmatch = pattern.search(first_part)
-                if lmatch:
+                if lmatch is not None:
                     start = blockPosition + len(first_part[lmatch.end():])
                     lend = blockPosition + len(first_part[lmatch.start():])
                     if direction == "left":
-                        return lmatch.group(0)[::-1], start, lend
+                        return first_part[:lmatch.end()][::-1], start, lend
 
             if direction in ("right", "both"):
                 #Search right word
                 rstart = end
                 rmatch = pattern.search(last_part)
-                if rmatch and ( rmatch.start() == 0 or direction == "right"):
+                if rmatch is not None and (rmatch.start() == 0 or direction == "right"):
                     rstart = blockPosition + len(first_part) + len(last_part[:rmatch.start()])
                     end = blockPosition + len(first_part) + len(first_part[:rmatch.end()])
                     if direction == "right":
-                        return rmatch.group(0), rstart, end
+                        return last_part[:rmatch.start()], rstart, end
 
             # Si estamos aca es porque es both
-            if lmatch and lmatch.start() == 0:
+            if lmatch is not None and lmatch.start() == 0:
                 return line[start - blockPosition : end - blockPosition], start, end
         return "", cursor.position(), cursor.position()
 

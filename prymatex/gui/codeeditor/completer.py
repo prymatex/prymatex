@@ -411,7 +411,9 @@ class CodeEditorCompleter(QtGui.QCompleter):
         for completerTask in self.completerTasks:
             completerTask.cancel()
         self.setCompletionPrefix(prefix)
-        self.startCursorPosition = self.editor.textCursor().position() - len(prefix)
+        self.startCursorPosition = self.editor.textCursor().position()
+        if prefix:
+            self.startCursorPosition -= len(prefix)
         self.setModel(None)
         def _go(model):
             if self.model() is None and self.trySetModel(model):

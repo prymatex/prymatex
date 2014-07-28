@@ -807,11 +807,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.suggestionsCompletionModel.setSuggestions(suggestions)
         self.suggestionsCompletionModel.setCompletionCallback(callback or
             self.defaultCompletionCallback)
-        alreadyTyped, start, end = self.currentWord(direction="left")
         self.completer.setCaseSensitivity( QtCore.Qt.CaseInsensitive and \
             caseInsensitive or QtCore.Qt.CaseSensitive)
         self.completer.runCompleter(self.cursorRect(),
-            prefix = alreadyTyped, 
+            prefix = already_typed or self.currentWord()[0], 
             model = self.suggestionsCompletionModel)
 
     # ---------- Folding
