@@ -281,6 +281,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.popup().setAlternatingRowColors(True)
         #self.popup().setWordWrap(False)
         self.popup().verticalHeader().setVisible(False)
+        self.popup().horizontalHeader().setStretchLastSection(True)
         self.popup().horizontalHeader().setVisible(False)
         self.popup().setShowGrid(False)
         self.popup().setMinimumHeight(200)
@@ -305,12 +306,12 @@ class CodeEditorCompleter(QtGui.QCompleter):
         return self.popup().hide()
 
     def fixPopupView(self):
-        self.popup().resizeColumnsToContents()
-        self.popup().resizeRowsToContents()
         width = self.popup().verticalScrollBar().sizeHint().width()
         for columnIndex in range(self.model().columnCount()):
             width += self.popup().sizeHintForColumn(columnIndex)
         self.popup().setMinimumWidth(width)
+        self.popup().resizeColumnsToContents()
+        self.popup().resizeRowsToContents()
     
     def pre_key_event(self, event):
         if self.isVisible():
@@ -371,6 +372,8 @@ class CodeEditorCompleter(QtGui.QCompleter):
         return False
 
     def setCompletionPrefix(self, prefix):
+        if self.model() is not None:
+            self.fixPopupView()
         for model in self.completionModels:
             model.setCompletionPrefix(prefix)
         QtGui.QCompleter.setCompletionPrefix(self, prefix)
