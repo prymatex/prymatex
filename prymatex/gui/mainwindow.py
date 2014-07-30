@@ -25,7 +25,7 @@ from prymatex.gui.processors import MainWindowCommandProcessor
 
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
-from prymatex.widgets.message import PopupMessageWidget
+from prymatex.widgets.message import ToolTipLabel
 from prymatex.widgets.splitter import SplitterWidget
 
 from functools import reduce
@@ -75,7 +75,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWind
 
         self.setAcceptDrops(True)
 
-        self.popupMessage = PopupMessageWidget(self)
+        self.toolTipLabel = ToolTipLabel(self)
 
         #Processor de comandos local a la main window
         self.commandProcessor = MainWindowCommandProcessor(self)
@@ -314,7 +314,7 @@ html_footer
                     filter(lambda obj: isinstance(obj, QtGui.QAction), objects))
 
     def showMessage(self, *largs, **kwargs):
-        self.popupMessage.showMessage(*largs, **kwargs)
+        self.toolTipLabel.showMessage(*largs, **kwargs)
 
     # ---------------- Create and manage groups
     def addEmptyGroup(self):
