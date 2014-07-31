@@ -11,12 +11,7 @@ from prymatex.models.selectable import selectableModelFactory
 
 from prymatex.utils.i18n import ugettext as _
 
-class MainMenuMixin(object):
-
-    # Constructor
-    def __init__(self, **kwargs):
-        super(MainMenuMixin, self).__init__(**kwargs)
-
+class MainWindowActionsMixin(object):
     # -------------- Global callback for copy, paste cut...
     def globalCallback(self):
         """Global callback"""

@@ -3,13 +3,14 @@
 
 import os
 from string import Template
+from functools import reduce
+
+from prymatex import resources
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.compat import getSaveFileName
 from prymatex.qt.helpers import (text2objectname, create_menu, extend_menu,
     add_actions, test_actions, center_widget, qbytearray_to_hex, hex_to_qbytearray)
-
-from prymatex import resources
 
 from prymatex.core import exceptions
 from prymatex.core.settings import ConfigurableItem
@@ -19,18 +20,17 @@ from prymatex.core import (PrymatexComponentWidget, PrymatexComponent,
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import html
 
-from prymatex.gui.mainmenu import MainMenuMixin, tabSelectableModelFactory
-from prymatex.gui.statusbar import PrymatexMainWindow
-from prymatex.gui.processors import MainWindowCommandProcessor
-
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
 from prymatex.widgets.message import ToolTipLabel
 from prymatex.widgets.splitter import SplitterWidget
 
-from functools import reduce
+from .menubar import PrymatexMainMenuBar
+from .statusbar import PrymatexMainStatusBar
+from .processors import PrymatexMainCommandProcessor
+from .actions import MainWindowActionsMixin, tabSelectableModelFactory
 
-class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWindow):
+class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.QMainWindow):
     """Prymatex main window"""
     # --------------------- Signals
     currentEditorChanged = QtCore.Signal(object)
@@ -78,7 +78,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWind
         self.toolTipLabel = ToolTipLabel(self)
 
         #Processor de comandos local a la main window
-        self.commandProcessor = MainWindowCommandProcessor(self)
+        self.commandProcessor = PrymatexMainCommandProcessor(self)
         self.bundleItem_handler = self.insertBundleItem
 
     def setupUi(self):
@@ -96,8 +96,8 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWind
         self.centralWidget().tabCreateRequest.connect(self.addEmptyEditor)
 
         # Status and menu bars
-        self.setStatusBar(PrymatexMainWindow(self))
-        self.setMenuBar(QtGui.QMenuBar(self))
+        self.setStatusBar(PrymatexMainStatusBar(self))
+        self.setMenuBar(PrymatexMainMenuBar(self))
         
         self.resize(801, 600)
         

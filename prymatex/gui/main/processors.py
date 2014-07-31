@@ -6,9 +6,9 @@ from prymatex.qt import QtGui, QtCore
 from prymatex.support.processor import CommandProcessorMixin
 
 #Este es un processor de commands para la Main Window
-class MainWindowCommandProcessor(CommandProcessorMixin):
+class PrymatexMainCommandProcessor(CommandProcessorMixin):
     def __init__(self, main_window):
-        super(MainWindowCommandProcessor, self).__init__()
+        super(PrymatexMainCommandProcessor, self).__init__()
         self._main_window = main_window
 
     def mainWindow(self):

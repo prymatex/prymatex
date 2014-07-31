@@ -18,7 +18,7 @@ from prymatex.core import config
 from prymatex.core import PrymatexComponent, PrymatexEditor
 from prymatex.utils.importlib import import_module, import_from_directory
 
-from prymatex.gui.mainwindow import PrymatexMainWindow
+from prymatex.gui.main import PrymatexMainWindow
 
 class ResourceProvider():
     def __init__(self, resources):

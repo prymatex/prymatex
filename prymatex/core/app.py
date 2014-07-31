@@ -417,7 +417,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         
     def buildMainWindow(self):
         """Creates the windows"""
-        from prymatex.gui.mainwindow import PrymatexMainWindow
+        from prymatex.gui.main import PrymatexMainWindow
 
         main_window = self.createComponentInstance(PrymatexMainWindow)
 

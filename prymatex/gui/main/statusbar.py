@@ -1,12 +1,10 @@
 # encoding: utf-8
 
-"""This module contains the main window status bar definition and widgets.
-Some of the widgets defined here are"""
+"""This module contains the main window status bar definition and widgets."""
 
-from prymatex.qt import QtCore, QtGui
-from prymatex.utils.i18n import ugettext as _
+from prymatex.qt import QtGui
 
-class PrymatexMainWindow(QtGui.QStatusBar):
+class PrymatexMainStatusBar(QtGui.QStatusBar):
     def __init__(self, mainWindow):
         QtGui.QStatusBar.__init__(self, mainWindow)
         mainWindow.currentEditorChanged.connect(self.on_currentEditorChanged)
