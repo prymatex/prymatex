@@ -332,39 +332,48 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
 
     @QtCore.Slot()
     def on_actionDelete_triggered(self):
-        # TODO: Cuidado porque si van cambiando los index puede ser que esto no se comporte como se espera
-        # es mejor unos maps antes para pasarlos a path
-        for index in self.treeViewProjects.selectedIndexes():
-            treeNode = self.projectTreeProxyModel.node(index)
-            if treeNode.isproject:
+        indexes = self.treeViewProjects.selectedIndexes()
+        projects = []
+        paths = []
+
+        for index in indexes:
+            node = self.projectTreeProxyModel.node(index)
+            if node.isproject:
                 #Es proyecto
                 question = CheckableMessageBox.questionFactory(self,
                     "Delete project",
-                    "Are you sure you want to delete project '%s' from the workspace?" % treeNode.name,
+                    "Are you sure you want to delete project '%s' from the workspace?" % node.name,
                     "Delete project contents on disk (cannot be undone)",
-                    QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
-                    QtGui.QMessageBox.Ok
+                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel,
+                    QtGui.QMessageBox.Yes
                 )
-                question.setDetailedText("Project location:\n%s" % treeNode.path())
+                question.setDetailedText("Project location:\n%s" % node.path())
                 ret = question.exec_()
-                if ret == QtGui.QMessageBox.Ok:
-                    self.application.projectManager.deleteProject(treeNode, removeFiles = question.isChecked())
+                if ret == QtGui.QMessageBox.Yes:
+                    projects.append((node, question.isChecked()))
+                elif ret == QtGui.QMessageBox.Cancel:
+                    return
             else:
-                self.deletePath(treeNode.path())
+                paths.append(node)
+        
+        # TODO Que pasa con los proyectos y si un path es subpath de otro?
+        for node in paths:
+            self.deletePath(node.path())
+        for index in indexes:
             self.projectTreeProxyModel.refresh(index.parent())
 
     @QtCore.Slot()
     def on_actionRemove_triggered(self):
-        treeNode = self.currentNode()
-        if treeNode.isproject:
+        node = self.currentNode()
+        if node.isproject:
             ret = QtGui.QMessageBox.question(self,
                 "Remove project",
-                "Are you sure you want to remove project '%s' from the workspace?" % treeNode.name,
+                "Are you sure you want to remove project '%s' from the workspace?" % node.name,
                 QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
                 QtGui.QMessageBox.Ok
             )
             if ret == QtGui.QMessageBox.Ok:
-                self.application.projectManager.removeProject(treeNode)
+                self.application.projectManager.removeProject(node)
 
     @QtCore.Slot()
     def on_actionRename_triggered(self):
