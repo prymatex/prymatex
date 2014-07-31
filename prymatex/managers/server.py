@@ -7,7 +7,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.core import PrymatexComponent
 
 from prymatex import resources
-from prymatex.utils.importlib import import_from_directory
+from prymatex.utils.importlib import import_from_directories
 from prymatex.utils import plist
 from prymatex.utils import six
 
@@ -52,8 +52,7 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
             raise reason
 
     def loadDialogClass(self, moduleName, directory):
-        # module = import_from_directory(directory, moduleName) if directory is not None else import_module(moduleName)
-        module = import_from_directory(directory, moduleName)
+        module = import_from_directories([ directory ], moduleName)
         dialogClass = getattr(module, 'dialogClass')
         self.application.populateComponentClass(dialogClass)
         return dialogClass

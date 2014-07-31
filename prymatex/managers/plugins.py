@@ -16,7 +16,7 @@ from prymatex import resources
 from prymatex.utils import osextra
 from prymatex.core import config
 from prymatex.core import PrymatexComponent, PrymatexEditor
-from prymatex.utils.importlib import import_module, import_from_directory
+from prymatex.utils.importlib import import_module, import_from_directories
 
 from prymatex.gui.main import PrymatexMainWindow
 
@@ -126,10 +126,11 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
         pluginId = pluginEntry.get("id")
         packageName = pluginEntry.get("package")
         registerFunction = pluginEntry.get("register", "registerPlugin")
+        pluginDirectories = pluginEntry.get("paths")
         pluginDirectory = pluginEntry.get("path")
         self.loadResources(pluginDirectory, pluginEntry)
         try:
-            pluginEntry["module"] = import_from_directory(pluginDirectory, packageName)
+            pluginEntry["module"] = import_from_directories(pluginDirectories, packageName)
             registerPluginFunction = getattr(pluginEntry["module"], registerFunction)
             if isinstance(registerPluginFunction, collections.Callable):
                 self.currentPluginDescriptor = self.plugins[pluginId] = PluginDescriptor(pluginEntry)
@@ -174,7 +175,14 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
                     descriptorFile = open(pluginDescriptorPath, 'r')
                     pluginEntry = json.load(descriptorFile)
                     descriptorFile.close()
+                    # Load paths
                     pluginEntry["path"] = pluginPath
+                    paths = [ pluginPath ]
+                    for path in pluginEntry.get("paths", []):
+                        if not os.path.isabs(path):
+                            path = os.path.abspath(os.path.join(pluginPath, path))
+                        paths.append(path)
+                    pluginEntry["paths"] = paths
                     if self.hasDependenciesResolved(pluginEntry):
                         self.loadPlugin(pluginEntry)
                     else:

@@ -91,3 +91,6 @@
 [submodule "prymatex/share/Plugins/codeintel.pmxplugin"]
 	path = prymatex/share/Plugins/codeintel.pmxplugin
 	url = https://github.com/prymatex/codeintel.pmxplugin.git
+[submodule "prymatex/share/Plugins/python.pmxplugin"]
+	path = prymatex/share/Plugins/python.pmxplugin
+	url = https://github.com/prymatex/python.pmxplugin.git

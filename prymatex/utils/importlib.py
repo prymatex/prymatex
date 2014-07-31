@@ -129,14 +129,15 @@ def import_module(name, package=None):
 
     return sys.modules[name]
 
-def import_from_directory(directory, name):
+def import_from_directories(directories, name, remove = False):
     """Import a module from directory"""
-    sys.path.insert(1, directory)
+    sys.path = sys.path[:1] + directories + sys.path[1:]
     try:
         module = import_module(name)
     except ImportError as reason:
         print(reason)
         raise reason
     finally:
-        del sys.path[1]
+        if remove:
+            del sys.path[1:len(directories) + 1]
     return module
