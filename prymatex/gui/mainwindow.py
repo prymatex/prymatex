@@ -20,7 +20,7 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import html
 
 from prymatex.gui.mainmenu import MainMenuMixin, tabSelectableModelFactory
-from prymatex.gui.statusbar import PMXStatusBar
+from prymatex.gui.statusbar import PrymatexMainWindow
 from prymatex.gui.processors import MainWindowCommandProcessor
 
 from prymatex.widgets.docker import DockWidgetTitleBar
@@ -96,7 +96,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainMenuMixin, QtGui.QMainWind
         self.centralWidget().tabCreateRequest.connect(self.addEmptyEditor)
 
         # Status and menu bars
-        self.setStatusBar(PMXStatusBar(self))
+        self.setStatusBar(PrymatexMainWindow(self))
         self.setMenuBar(QtGui.QMenuBar(self))
         
         self.resize(801, 600)

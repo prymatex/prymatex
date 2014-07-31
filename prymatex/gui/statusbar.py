@@ -6,7 +6,7 @@ Some of the widgets defined here are"""
 from prymatex.qt import QtCore, QtGui
 from prymatex.utils.i18n import ugettext as _
 
-class PMXStatusBar(QtGui.QStatusBar):
+class PrymatexMainWindow(QtGui.QStatusBar):
     def __init__(self, mainWindow):
         QtGui.QStatusBar.__init__(self, mainWindow)
         mainWindow.currentEditorChanged.connect(self.on_currentEditorChanged)
