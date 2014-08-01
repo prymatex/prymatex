@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 import re
 import sys
@@ -8,7 +9,6 @@ import stat
 import tempfile
 import codecs
 
-from prymatex.utils import six
 from prymatex.utils import encoding
 from prymatex.utils import osextra
 from prymatex.utils import programs
@@ -179,7 +179,7 @@ def makeExecutableTempFile(content, directory, prefix="script"):
     #tempFile = tempfile.NamedTemporaryFile(prefix='pmx', dir = directory)
     descriptor, name = tempfile.mkstemp(prefix=prefix, dir = directory)
     tempFile = os.fdopen(descriptor, 'w+')
-    tempFile.write(six.PY3 and content or encoding.to_fs(content))
+    tempFile.write(encoding.to_fs(content))
     tempFile.close()
     os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
     return name
@@ -204,7 +204,7 @@ def ensurePath(path, name, suffix = 0):
     if suffix == 0 and not os.path.exists(path % name):
         return path % name
     else:
-        newPath = path % (name + "_" + six.u(suffix))
+        newPath = path % ("%s_%s" % (name, suffix))
         if not os.path.exists(newPath):
             return newPath
         else:

@@ -15,21 +15,6 @@ from . import six
 
 PREFERRED_ENCODING = locale.getpreferredencoding()
 
-def transcode(text, input = PREFERRED_ENCODING, output = PREFERRED_ENCODING):
-    """Transcode a text string"""
-    try:
-        return text.decode("cp437").encode("cp1252")
-    except UnicodeError:
-        try:
-            return text.decode("cp437").encode(output)
-        except UnicodeError:
-            return text
-
-#------------------------------------------------------------------------------
-#  Functions for encoding and decoding bytes that come from
-#  the *file system*.
-#------------------------------------------------------------------------------
-
 # The default encoding for file paths and environment variables should be set
 # to match the default encoding that the OS is using.
 def getfilesystemencoding():
@@ -45,21 +30,15 @@ def getfilesystemencoding():
 
 FS_ENCODING = getfilesystemencoding()
 
-def from_fs(byteString):
-    """Return a unicode version of string decoded using the file system encoding."""
+def transcode(text, input = PREFERRED_ENCODING, output = PREFERRED_ENCODING):
+    """Transcode a text string"""
     try:
-        return six.text_type(byteString, FS_ENCODING)
-    except (UnicodeError, TypeError) as e:
-        print(e)
-    return byteString
-
-def to_fs(strString):
-    """Return a byte string version of unic encoded using the file system encoding."""
-    try:
-        return six.binary_type(strString, FS_ENCODING)
-    except (UnicodeError, TypeError) as ex:
-        pass
-    return strString
+        return text.decode("cp437").encode("cp1252")
+    except UnicodeError:
+        try:
+            return text.decode("cp437").encode(output)
+        except UnicodeError:
+            return text
 
 #------------------------------------------------------------------------------
 #  Functions for encoding and decoding *text data* itself, usually originating
@@ -244,14 +223,7 @@ If strings_only is True, don't convert (some) non-string-like objects.
             # SafeText at the end.
             s = s.decode(encoding, errors)
     except UnicodeDecodeError as e:
-        if not isinstance(s, Exception):
-            raise DjangoUnicodeDecodeError(s, *e.args)
-        else:
-            # If we get to here, the caller has passed in an Exception
-            # subclass populated with non-ASCII bytestring data without a
-            # working unicode method. Try to handle this without raising a
-            # further exception by individually forcing the exception args
-            # to unicode.
+        if isinstance(s, Exception):
             s = ' '.join([force_text(arg, encoding, strings_only,
                     errors) for arg in s])
     return s
@@ -302,9 +274,6 @@ if six.PY3:
 else:
     smart_str = smart_bytes
     force_str = force_bytes
-    # backwards compatibility for Python 2
-    smart_unicode = smart_text
-    force_unicode = force_text
 
 smart_str.__doc__ = """\
 Apply smart_text in Python 3 and smart_bytes in Python 2.
@@ -315,3 +284,14 @@ This is suitable for writing to sys.stdout (for instance).
 force_str.__doc__ = """\
 Apply force_text in Python 3 and force_bytes in Python 2.
 """
+
+#------------------------------------------------------------------------------
+#  Functions for encoding and decoding bytes that come from
+#  the *file system*.
+#------------------------------------------------------------------------------
+def from_fs(string):
+    return six.text_type(string, FS_ENCODING)
+
+def to_fs(string):
+    """Return a string version of unic encoded using the file system encoding."""
+    return smart_str(string, encoding = FS_ENCODING)
