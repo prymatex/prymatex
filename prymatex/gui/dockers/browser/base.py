@@ -123,7 +123,7 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
         if event.type() == QtCore.QEvent.KeyPress:
             if event.key() == QtCore.Qt.Key_Escape:
                 self.close()
-                self.mainWindow.currentEditor().setFocus()
+                self.mainWindow().currentEditor().setFocus()
                 return True
             elif event.key() == QtCore.Qt.Key_L and event.modifiers() == QtCore.Qt.ControlModifier:
                 self.lineUrl.setFocus()
@@ -257,9 +257,9 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
     #=======================================================================
     def updateHtmlCurrentEditorContent(self):
         # TODO Resolver url, asegurar que sea html para no hacer cochinadas
-        editor = self.currentEditor if self.currentEditor is not None else self.mainWindow.currentEditor()
+        editor = self.currentEditor if self.currentEditor is not None else self.mainWindow().currentEditor()
         content = editor.toPlainText()
-        url = QtCore.QUrl.fromUserInput(editor.filePath)
+        url = QtCore.QUrl.fromUserInput(editor.filePath())
         
         self.tabWebView.currentWebView().settings().clearMemoryCaches()
         
@@ -274,7 +274,7 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
         self.tabWebView.currentWebView().page().setLinkDelegationPolicy(QtWebKit.QWebPage.DelegateAllLinks)
 
     def connectCurrentEditor(self):
-        self.currentEditor = self.mainWindow.currentEditor()
+        self.currentEditor = self.mainWindow().currentEditor()
         self.connect(self.currentEditor, QtCore.SIGNAL("close()"), self.disconnectCurrentEditor)
         
     def disconnectCurrentEditor(self):
