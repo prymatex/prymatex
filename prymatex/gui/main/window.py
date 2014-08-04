@@ -13,7 +13,7 @@ from prymatex.qt.helpers import (text2objectname, create_menu, extend_menu,
     add_actions, test_actions, center_widget, qbytearray_to_hex, hex_to_qbytearray)
 
 from prymatex.core import exceptions
-from prymatex.core.settings import ConfigurableItem
+from prymatex.core.settings import (ConfigurableItem, ConfigurableHook)
 from prymatex.core import (PrymatexComponentWidget, PrymatexComponent,
     PrymatexDock, PrymatexDialog, PrymatexStatusBar)
 
@@ -49,6 +49,12 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
     @ConfigurableItem(default = True)
     def showMenuBar(self, value):
         self.menuBar().setShown(value)
+
+    @ConfigurableHook("CodeEditor.defaultTheme")
+    def defaultTheme(self, themeUUID):
+        theme = self.application.supportManager.getBundleItem(themeUUID)
+        self.notifier.setPalette(theme.palette())
+
 
     _editorHistory = []
     _editorHistoryIndex = 0
