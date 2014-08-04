@@ -245,8 +245,15 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def addCodeEditorMode(self, codeEditorMode):
         self.codeEditorModes.append(codeEditorMode)
 
+    # -------------------- Notifications
     def showMessage(self, *largs, **kwargs):
-        self.mainWindow().showMessage(*largs, **kwargs)
+        return self.mainWindow().showMessage(*largs, **kwargs)
+    
+    def showTooltip(self, *largs, **kwargs):
+        return self.mainWindow().showTooltip(*largs, **kwargs)
+    
+    def showStatus(self, *largs, **kwargs):
+        return self.mainWindow().showStatus(*largs, **kwargs)
 
     def setPlainText(self, text):
         from time import time

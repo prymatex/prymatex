@@ -55,7 +55,6 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
         theme = self.application.supportManager.getBundleItem(themeUUID)
         self.notifier.setPalette(theme.palette())
 
-
     _editorHistory = []
     _editorHistoryIndex = 0
 
@@ -85,7 +84,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
         self.notifier.setBackgroundRole(QtGui.QPalette.Window)
         self.notifier.setForegroundRole(QtGui.QPalette.WindowText)
         font = self.font()
-        font.setPointSize(font.pointSize() * 0.80)
+        font.setPointSize(font.pointSize() * 0.8)
         self.notifier.setFont(font)
         
         #Processor de comandos local a la main window
@@ -324,12 +323,22 @@ html_footer
                 test_actions(componentInstance, 
                     filter(lambda obj: isinstance(obj, QtGui.QAction), objects))
 
+    # -------------- Notifications
     def showMessage(self, *largs, **kwargs):
-        self.notifier.message(*largs, **kwargs).show()
+        message = self.notifier.message(*largs, **kwargs)
+        message.show()
+        return message
 
     def showTooltip(self, *largs, **kwargs):
-        self.notifier.tooltip(*largs, **kwargs).show()
+        tooltip = self.notifier.tooltip(*largs, **kwargs)
+        tooltip.show()
+        return tooltip
         
+    def showStatus(self, *largs, **kwargs):
+        status = self.notifier.status(*largs, **kwargs)
+        status.show()
+        return status
+
     # ---------------- Create and manage groups
     def addEmptyGroup(self):
         pass
