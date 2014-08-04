@@ -169,9 +169,9 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
             'copy': lambda s = message: QtGui.qApp.instance().clipboard().setText(s)
         }
 
-        self.editor.mainWindow().showMessage(message,
+        self.editor.mainWindow().showTooltip(message,
             frmt = outputFormat or "text", timeout = timeout, point = point,
-            linkMap = callbacks)
+            links = callbacks)
 
     def toolTip(self, context, outputFormat = None):
         self.showAsTooltip(context, outputFormat)

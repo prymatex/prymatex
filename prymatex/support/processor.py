@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-def nop(self, *args):
+def nop(self, *args, **kwargs):
     pass
 
 BaseProcessorMixin = type("BaseProcessorMixin", (object, ), {
@@ -32,7 +32,7 @@ CommandProcessorMixin = type("CommandProcessorMixin", (BaseProcessorMixin, ), {
     "character": nop,
     "scope": nop,
     "selection": nop,
-    #"selectedText": nop,
+    "selectedText": nop,
     "word": nop,
     # beforeRunningCommand
     "saveActiveFile": lambda *largs: True,

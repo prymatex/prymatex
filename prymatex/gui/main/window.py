@@ -22,7 +22,7 @@ from prymatex.utils import html
 
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
-from prymatex.widgets.message import ToolTipLabel
+from prymatex.widgets.notification import OverlayNotifier
 from prymatex.widgets.splitter import SplitterWidget
 
 from .menubar import PrymatexMainMenuBar
@@ -75,8 +75,13 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
 
         self.setAcceptDrops(True)
 
-        self.toolTipLabel = ToolTipLabel(self)
-
+        self.notifier = OverlayNotifier(self)
+        self.notifier.setBackgroundRole(QtGui.QPalette.Window)
+        self.notifier.setForegroundRole(QtGui.QPalette.WindowText)
+        font = self.font()
+        font.setPointSize(font.pointSize() * 0.80)
+        self.notifier.setFont(font)
+        
         #Processor de comandos local a la main window
         self.commandProcessor = PrymatexMainCommandProcessor(self)
         self.bundleItem_handler = self.insertBundleItem
@@ -314,8 +319,11 @@ html_footer
                     filter(lambda obj: isinstance(obj, QtGui.QAction), objects))
 
     def showMessage(self, *largs, **kwargs):
-        self.toolTipLabel.showMessage(*largs, **kwargs)
+        self.notifier.message(*largs, **kwargs).show()
 
+    def showTooltip(self, *largs, **kwargs):
+        self.notifier.tooltip(*largs, **kwargs).show()
+        
     # ---------------- Create and manage groups
     def addEmptyGroup(self):
         pass

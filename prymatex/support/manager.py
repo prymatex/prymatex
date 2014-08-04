@@ -855,14 +855,15 @@ class SupportBaseManager(object):
         raise NotImplementedError
 
     #----------------- PREFERENCES ---------------------
-    def getPreferences(self, leftScope, rightScope = None):
+    def getPreferences(self, leftScope = None, rightScope = None):
         memoizedKey = ("getPreferences", None, leftScope, rightScope)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
             self.__sort_filter_items(self.getAllPreferences(), leftScope, rightScope))
 
-    def getPreferenceSettings(self, leftScope, rightScope = None):
+    def getPreferenceSettings(self, leftScope = None, rightScope = None):
+        # If leftScope == rightScope == None then return base settings
         memoizedKey = ("getPreferenceSettings", None, leftScope, rightScope)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)

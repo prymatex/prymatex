@@ -78,7 +78,7 @@ class PrymatexMainCommandProcessor(CommandProcessorMixin):
         message = context.outputValue.strip()
         timeout = len(message) * 20
 
-        self.mainWindow().showMessage(message, timeout = timeout)
+        self.mainWindow().showTooltip(message, timeout = timeout)
     
     def toolTip(self, context, outputFormat = None):
         print("toolTip")
