@@ -5,8 +5,9 @@ import collections
 from prymatex.qt import QtCore, QtGui
 
 class Notification(QtGui.QWidget):
-    aboutToClose = QtCore.pyqtSignal()
-    def __init__(self, content, parent, timeout=None, icon=None, links=None):
+    aboutToClose = QtCore.Signal()
+    contentChanged = QtCore.Signal()
+    def __init__(self, text, parent, timeout=None, icon=None, links=None):
         super(Notification, self).__init__(parent)
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -28,7 +29,7 @@ class Notification(QtGui.QWidget):
             self.horizontalLayout.addWidget(self.pixmap)
 
         self.label = QtGui.QLabel(self)
-        self.label.setText(content)
+        self.label.setText(text)
         self.label.setAutoFillBackground(True)
         self.horizontalLayout.addWidget(self.label)
         
@@ -61,7 +62,12 @@ class Notification(QtGui.QWidget):
             self.timeoutTimer.setInterval(timeout)
             self.animationIn.finished.connect(self.timeoutTimer.start)
             self.timeoutTimer.timeout.connect(self.close)
-    
+            
+    def setText(self, text):
+        self.label.setText(text)
+        self.adjustSize()
+        self.contentChanged.emit()
+
     def applyStyle(self, background, foreground, padding = 5, border = 1,
             radius = 5):
 
@@ -97,6 +103,10 @@ class Notification(QtGui.QWidget):
         self.setWindowOpacity(0.0)
         super(Notification, self).show()
         self.animationIn.start()
+    
+    def hide(self):
+        self.animationOut.finished.connect(super(Notification, self).hide)
+        self.animationOut.start()
     
     def close(self):
         self.aboutToClose.emit()
@@ -147,6 +157,7 @@ class OverlayNotifier(QtCore.QObject):
     def _remove_notification(self):
         notification = self.sender()
         notification.aboutToClose.disconnect(self._remove_notification)
+        notification.contentChanged.disconnect(self._fix_positions)
         self.notifications.remove(notification)
         self._fix_positions()
         
@@ -194,6 +205,7 @@ class OverlayNotifier(QtCore.QObject):
         kwargs.setdefault("timeout", self.timeout)
         notification = self._notification(*args, **kwargs)
         notification.aboutToClose.connect(self._remove_notification)
+        notification.contentChanged.connect(self._fix_positions)
         self.notifications.insert(0, notification)
         self._fix_positions()
         return notification
@@ -201,6 +213,7 @@ class OverlayNotifier(QtCore.QObject):
     def status(self, *args, **kwargs):
         notification = self._notification(*args, **kwargs)
         notification.aboutToClose.connect(self._remove_notification)
+        notification.contentChanged.connect(self._fix_positions)
         self.notifications.insert(0, notification)
         self._fix_positions()
         return notification
