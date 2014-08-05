@@ -62,6 +62,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self.aboutToQuit.connect(self.closePrymatex)
         self.componentInstances = {}
         self.shortcutsTreeModel = ShortcutsTreeModel(self)
+        self.shortcutsTreeModel.loadStandardSequences()
 
         self.replaceSysExceptHook()
     

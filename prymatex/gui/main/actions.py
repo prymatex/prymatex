@@ -230,11 +230,12 @@ class MainWindowActionsMixin(object):
         }
 
         # ------------- Edit menu
-        def globalEditAction(text):
+        def globalEditAction(mnemonic):
+            text = mnemonic.replace("&", "")
             objectName = text2objectname(text)
             iconName = text_to_iconname(text, prefix = "edit")
             return {
-                "text": text,
+                "text": mnemonic,
                 'sequence': resources.get_sequence("Global", objectName),
                 "icon": resources.get_icon(iconName),
                 "triggered": cls.globalCallback,
@@ -359,7 +360,7 @@ class MainWindowActionsMixin(object):
 
         # ------------- Navigation menu
         menu["navigation"] = {
-            "text": "Navigation",
+            "text": "&Navigation",
             "items": [{
                 "text": "Next tab",
                 'sequence': resources.get_sequence("Global", "NextChild"),
@@ -396,7 +397,7 @@ class MainWindowActionsMixin(object):
 
         # ------------- Bundles menu
         menu["bundles"] = {
-            "text": "Bundles",
+            "text": "&Bundles",
             "items": [{
                 "text": "Bundle editor",
                 "items": [{
