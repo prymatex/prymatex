@@ -225,6 +225,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # Default syntax
         self.insertBundleItem(self._default_syntax)
+        # TODO self.insertBundleItem(self._default_theme)
         
         # Get dialogs
         self.selectorDialog = self.mainWindow().findChild(QtGui.QDialog, "SelectorDialog")
@@ -337,11 +338,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def componentState(self):
         """Returns a Python dictionary containing the state of the editor."""
         state = super(CodeEditor, self).componentState()
-        
-        state["text"] = self.toPlainTextWithEol()
+        if self.isModified():
+            state["text"] = self.toPlainTextWithEol()
 
         #Bookmarks
         state['bookmarks'] = self.bookmarkListModel.lineNumbers()
+        
+        #Syntax
+        state['syntax'] = self.syntax().uuidAsText()
 
         #UserDatas
         state['data'] = []
@@ -350,9 +354,13 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def setComponentState(self, componentState):
         """Restore the state from the given state (returned by a previous call to componentState())."""
-        if not self.hasFile() and "text" in componentState:
+        if "text" in componentState:
             self.setPlainText(componentState["text"])
-
+        uuid = componentState.get("syntax")
+        if uuid is not None:
+            syntax = self.application.supportManager.getBundleItem(uuid)
+            self.insertBundleItem(syntax)
+        
     def isModified(self):
         return self.document().isModified()
 
