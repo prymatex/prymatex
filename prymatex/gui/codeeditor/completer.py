@@ -70,29 +70,25 @@ class WordsCompletionModel(CompletionBaseModel):
         userData.words = set()
 
     def processBlockUserData(self, text, cursor, block, userData):
-        words = set(
+        userData.words = set(
             reduce(lambda w1, w2: w1 + w2,
                 map(lambda token: config.RE_WORD.findall(token.chunk),
                     userData.tokens()[::-1]
                 )
         , []))
 
-        if userData.words != words:
-            #Quitar las palabras anteriores
-            for word in userData.words.difference(words):
-                self.words.remove(word)
-
-            #Agregar las palabras nuevas
-            self.words.extend(words)
-
-            userData.words = words
-
     def modelSorting(self):
         return QtGui.QCompleter.CaseSensitivelySortedModel
 
     def fillModel(self, callback):
+        # TODO Palabras mas proximas al cursor o mas utilizadas
+        self.suggestions = set()
+        block = self.editor.document().begin()
+        while block.isValid():
+            self.suggestions.update(self.editor.blockUserData(block).words)
+            block = block.next()
+
         settings = self.editor.settings()
-        self.suggestions = set(self.words)
         if self.prefix in self.suggestions:
             self.suggestions.remove(self.prefix)
         self.suggestions.update(settings.completions)
@@ -133,6 +129,7 @@ class WordsCompletionModel(CompletionBaseModel):
         elif role == QtCore.Qt.ToolTipRole:
             return suggestion
         elif role == QtCore.Qt.MatchRole:
+            #return text.fuzzy_match(self.prefix, suggestion) and self.prefix or suggestion
             return suggestion
 
 class TabTriggerItemsCompletionModel(CompletionBaseModel):
@@ -426,5 +423,3 @@ class CodeEditorCompleter(QtGui.QCompleter):
             _go(model)
         self.completerTasks = self.editor.application.schedulerManager.tasks(
             lambda model: model.fillModel(_go), self.completionModels)
-        
-
