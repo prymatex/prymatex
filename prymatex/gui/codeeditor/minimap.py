@@ -9,9 +9,9 @@ from prymatex.gui.codeeditor.sidebar import SideBarWidgetAddon
 
 class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
     ALIGNMENT = QtCore.Qt.AlignRight
-    WIDTH = 80
-    MINIMAP_MAX_OPACITY = 0.8
-    MINIMAP_MIN_OPACITY = 0.1
+    WIDTH = 100
+    MAX_OPACITY = 0.8
+    MIN_OPACITY = 0.2
     
     @ConfigurableItem(default = True)
     def showMiniMap(self, value):
@@ -32,7 +32,7 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
         self.lines_count = 0
         self.goe = QtGui.QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.goe)
-        self.goe.setOpacity(self.MINIMAP_MIN_OPACITY)
+        self.goe.setOpacity(self.MIN_OPACITY)
         self.animation = QtCore.QPropertyAnimation(self.goe, "opacity")
         
         self.slider = SliderArea(self)
@@ -41,13 +41,10 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
 
     def initialize(self, **kwargs):
         super(MiniMapAddon, self).initialize(**kwargs)
-        #self.editor.themeChanged.connect(self.on_editor_themeChanged)
         self.editor.highlightChanged.connect(self.on_editor_highlightChanged)
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
         self.editor.updateRequest.connect(self.update_visible_area)
         
-        #self.on_editor_themeChanged(self.editor.theme())
-    
     @classmethod
     def contributeToMainMenu(cls):
         baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter"
@@ -58,17 +55,17 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
             'testChecked': lambda instance: instance.isVisible() }
         return { baseMenu: menuEntry }
     
-    def on_editor_themeChanged(self, theme):
-        palette = theme.palette()
+    def setPalette(self, palette):
+        super(MiniMapAddon, self).setPalette(palette)
         appStyle = """QPlainTextEdit {background-color: %s;
 color: %s;
-border: 0px;
+border: 0;
 selection-background-color: %s; }""" % (
-            palette.color(QtGui.QPalette.Window).name(),
-            palette.color(QtGui.QPalette.WindowText).name(),
+            palette.color(QtGui.QPalette.Base).name(),
+            palette.color(QtGui.QPalette.Text).name(),
             palette.color(QtGui.QPalette.HighlightedText).name())
         self.setStyleSheet(appStyle)
-        self.slider.setStyleSheet("background: %s;" % palette.color(QtGui.QPalette.HighlightedText).name())
+        self.slider.setPalette(palette)
 
     def _apply_aditional_formats(self, block, line_count):
         position = block.position()
@@ -124,14 +121,14 @@ selection-background-color: %s; }""" % (
 
     def enterEvent(self, event):
         self.animation.setDuration(300)
-        self.animation.setStartValue(self.MINIMAP_MIN_OPACITY)
-        self.animation.setEndValue(self.MINIMAP_MAX_OPACITY)
+        self.animation.setStartValue(self.MIN_OPACITY)
+        self.animation.setEndValue(self.MAX_OPACITY)
         self.animation.start()
 
     def leaveEvent(self, event):
         self.animation.setDuration(300)
-        self.animation.setStartValue(self.MINIMAP_MAX_OPACITY)
-        self.animation.setEndValue(self.MINIMAP_MIN_OPACITY)
+        self.animation.setStartValue(self.MAX_OPACITY)
+        self.animation.setEndValue(self.MIN_OPACITY)
         self.animation.start()
 
     def mousePressEvent(self, event):
@@ -161,12 +158,16 @@ class SliderArea(QtGui.QFrame):
         self.setMouseTracking(True)
         self.setCursor(QtCore.Qt.OpenHandCursor)
 
-        #self.goe = QtGui.QGraphicsOpacityEffect()
-        #self.setGraphicsEffect(self.goe)
-        #self.goe.setOpacity(parent.MINIMAP_MAX_OPACITY / 2)
+        self.goe = QtGui.QGraphicsOpacityEffect(self)
+        self.setGraphicsEffect(self.goe)
+        self.goe.setOpacity(parent.MAX_OPACITY / 2)
 
         self.pressed = False
         self.__scroll_margins = None
+
+    def setPalette(self, palette):
+        super(SliderArea, self).setPalette(palette)
+        self.setStyleSheet("background: %s;" % palette.color(QtGui.QPalette.HighlightedText).name())
 
     def update_position(self):
         line_height = self.parent().cursorRect().height()

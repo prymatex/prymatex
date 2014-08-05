@@ -324,12 +324,10 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         if not hasattr(componentClass, 'application') or componentClass.application != self:
             self.populateComponentClass(componentClass)
 
+        # ------------------- Build
         buildedObjects = []
         def buildComponentInstance(klass, **kwargs):
             component = klass(**kwargs)
-
-            # Add configurable instance and configure
-            self.currentProfile.registerConfigurableInstance(component)
 
             # Add components
             componentClasses = self.pluginManager.findComponentsForClass(klass)
@@ -344,8 +342,12 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
         component = buildComponentInstance(componentClass, **kwargs)
 
-        # buildedObjects.reverse()
-        # Initialize order is important, fist goes the internal components then the main component
+        # ------------------- Configure
+        for ni, _ in buildedObjects[::-1]:
+            self.currentProfile.registerConfigurableInstance(ni)
+        self.currentProfile.registerConfigurableInstance(component)
+
+        # ------------------- Initialize
         for ni, np in buildedObjects:
             if isinstance(ni, PrymatexComponent):
                 ni.initialize(parent = np)
@@ -353,6 +355,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                 for settings in ni.contributeToShortcuts():
                     create_shortcut(component, settings, sequence_handler = self.registerShortcut)
 
+        # -------------------- Store
         self.componentInstances.setdefault(componentClass, []).append(component)
 
         return component

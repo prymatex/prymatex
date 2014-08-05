@@ -18,8 +18,12 @@ class CodeEditorSideBar(QtGui.QWidget):
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.horizontalLayout.setSpacing(0)
         self.horizontalLayout.setMargin(0)
-        self.setAutoFillBackground(True)
-        
+
+    def setPalette(self, palette):
+        super(CodeEditorSideBar, self).setPalette(palette)
+        for index in range(self.horizontalLayout.count()):
+            self.horizontalLayout.itemAt(index).widget().setPalette(palette)
+
     def addWidget(self, widget):
         self.horizontalLayout.addWidget(widget)
         widget.installEventFilter(self)
@@ -39,6 +43,7 @@ class CodeEditorSideBar(QtGui.QWidget):
         return width
 
     def scroll(self, *largs):
+        # TODO Solo si el widget es scrolleable
         for index in range(self.horizontalLayout.count()):
             self.horizontalLayout.itemAt(index).widget().scroll(*largs)
 
