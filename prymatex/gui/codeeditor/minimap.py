@@ -30,23 +30,23 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
 
         self.lines_count = 0
-        self.goe = QtGui.QGraphicsOpacityEffect()
+        self.goe = QtGui.QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.goe)
         self.goe.setOpacity(self.MINIMAP_MIN_OPACITY)
         self.animation = QtCore.QPropertyAnimation(self.goe, "opacity")
         
-        #self.slider = SliderArea(self)
-        #self.slider.show()
+        self.slider = SliderArea(self)
+        self.slider.show()
         self.setFixedWidth(self.WIDTH)
 
     def initialize(self, **kwargs):
         super(MiniMapAddon, self).initialize(**kwargs)
-        self.editor.themeChanged.connect(self.on_editor_themeChanged)
+        #self.editor.themeChanged.connect(self.on_editor_themeChanged)
         self.editor.highlightChanged.connect(self.on_editor_highlightChanged)
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
-        #self.editor.updateRequest.connect(self.update_visible_area)
+        self.editor.updateRequest.connect(self.update_visible_area)
         
-        self.on_editor_themeChanged(self.editor.theme())
+        #self.on_editor_themeChanged(self.editor.theme())
     
     @classmethod
     def contributeToMainMenu(cls):
@@ -59,9 +59,16 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
         return { baseMenu: menuEntry }
     
     def on_editor_themeChanged(self, theme):
-        self.setPalette(theme.palette())
-        self.viewport().setPalette(theme.palette())
-        #self.slider.setPalette(theme.palette())
+        palette = theme.palette()
+        appStyle = """QPlainTextEdit {background-color: %s;
+color: %s;
+border: 0px;
+selection-background-color: %s; }""" % (
+            palette.color(QtGui.QPalette.Window).name(),
+            palette.color(QtGui.QPalette.WindowText).name(),
+            palette.color(QtGui.QPalette.HighlightedText).name())
+        self.setStyleSheet(appStyle)
+        self.slider.setStyleSheet("background: %s;" % palette.color(QtGui.QPalette.HighlightedText).name())
 
     def _apply_aditional_formats(self, block, line_count):
         position = block.position()
@@ -134,7 +141,7 @@ class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
 
     def resizeEvent(self, event):
         QtGui.QPlainTextEdit.resizeEvent(self, event)
-        #self.slider.update_position()
+        self.slider.update_position()
 
     def scroll_area(self, pos_parent, pos_slider):
         pos_parent.setY(pos_parent.y() - pos_slider.y())

@@ -18,6 +18,7 @@ class CodeEditorSideBar(QtGui.QWidget):
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.horizontalLayout.setSpacing(0)
         self.horizontalLayout.setMargin(0)
+        self.setAutoFillBackground(True)
         
     def addWidget(self, widget):
         self.horizontalLayout.addWidget(widget)

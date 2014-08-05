@@ -112,6 +112,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.setPalette(palette)
         self.viewport().setPalette(palette)
         self.completer.setPalette(palette)
+        self.leftBar.setPalette(palette)
+        self.rightBar.setPalette(palette)
 
         # Register lineHighlight textCharFormat
         textCharFormat = QtGui.QTextCharFormat()
