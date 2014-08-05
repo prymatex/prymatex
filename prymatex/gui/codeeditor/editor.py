@@ -810,7 +810,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # ---------- Completer
     def defaultCompletionCallback(self, suggestion):
         currentWord, start, end = self.currentWord()
-        cursor = self.newCursorAtPosition(start, end)
+        cursor = self.newCursorAtPosition(start, end) \
+            if currentWord is not None else self.textCursor()
         snippet = suggestion.get('insert') or suggestion.get('display') or suggestion.get('title')
         self.insertSnippet(snippet, textCursor = cursor)
 
@@ -946,7 +947,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 cursor.setPosition(closeCursor.selectionStart(), QtGui.QTextCursor.KeepAnchor)
                 self.setTextCursor(cursor)
 
-    def selectCurrentScope(self, cursor = None):
+    def selectScope(self, cursor = None):
         cursor = cursor or self.textCursor()
         block = cursor.block()
         token = self.tokenAtPosition(cursor.position())
@@ -1208,12 +1209,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 {'text': 'Select',
                  'items': [
                     {'text': '&Word',
-                     'triggered': lambda ed: ed.selectWordCurrent(),
+                     'triggered': lambda ed: ed.selectWord(),
                      'sequence': resources.get_sequence("Editor", "SelectWord", 'Ctrl+Meta+W'),
                      },
-                    {'text': '&Word under',
-                     'triggered': lambda ed: ed.selectWordUnder(),
-                     'sequence': resources.get_sequence("Editor", "SelectWordUnder", 'Ctrl+Meta+W'),
+                    {'text': '&Text',
+                     'triggered': lambda ed: ed.selectText(),
+                     'sequence': resources.get_sequence("Editor", "SelectText", 'Ctrl+Meta+T'),
                      },
                     {'text': '&Line',
                      'triggered': lambda ed: ed.selectLine(),
@@ -1226,9 +1227,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                      'triggered': lambda ed: ed.selectEnclosingBrackets(),
                      'sequence': resources.get_sequence("Editor", "SelectEnclosingBrackets", 'Ctrl+Meta+B'),
                      },
-                    {'text': 'Current &scope',
-                     'triggered': lambda ed: ed.selectCurrentScope(),
-                     'sequence': resources.get_sequence("Editor", "SelectCurrentScope", 'Ctrl+Meta+S'),
+                    {'text': '&Scope',
+                     'triggered': lambda ed: ed.selectScope(),
+                     'sequence': resources.get_sequence("Editor", "SelectScope", 'Ctrl+Meta+S'),
                      },
                     {'text': '&All',
                      'triggered': lambda ed: ed.selectDocument(),

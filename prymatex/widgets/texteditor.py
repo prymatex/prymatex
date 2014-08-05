@@ -72,7 +72,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
             elif direction == "right":
                 index = end - cursor.position()
                 return wordUnderCursor[len(wordUnderCursor) - index:], end - index, end
-        return "", cursor.position(), cursor.position()
+        return None, -1, -1
             
     def textUnderCursor(self, cursor = None, pattern = config.RE_WORD,
         direction = "both", search = False):
@@ -113,7 +113,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
             # Si estamos aca es porque es both
             if lmatch is not None:
                 return line[start - blockPosition : end - blockPosition], start, end
-        return "", cursor.position(), cursor.position()
+        return None, -1, -1
 
     def indentation(self, cursor = None, direction = "left"):
         cursor =  cursor or self.textCursor()
@@ -360,15 +360,17 @@ class TextEditWidget(QtGui.QPlainTextEdit):
             self.__move_text(cursor, QtGui.QTextCursor.Right)
 
     #------ Select Text
-    def selectWordUnder(self, cursor = None):
+    def selectText(self, cursor = None):
         cursor = cursor or self.textCursor()
-        cursor.select(QtGui.QTextCursor.WordUnderCursor)
-        self.setTextCursor(cursor)
+        text, start, end = self.textUnderCursor(cursor, search = True)
+        if text:
+            self.setTextCursor(self.newCursorAtPosition(start, end))
 
-    def selectWordCurrent(self, cursor = None):
+    def selectWord(self, cursor = None):
         cursor = cursor or self.textCursor()
-        _, start, end = self.currentWord(cursor = cursor)
-        self.setTextCursor(self.newCursorAtPosition(start, end))
+        word, start, end = self.wordUnderCursor(cursor, search = True)
+        if word:
+            self.setTextCursor(self.newCursorAtPosition(start, end))
 
     def selectLine(self, cursor = None):
         cursor = cursor or self.textCursor()
