@@ -6,7 +6,7 @@
 class PrymatexComponent(object):
     def __init__(self, **kwargs):
         super(PrymatexComponent, self).__init__(**kwargs)
-        self.__components = []
+        self._components = []
 
     def initialize(self, **kwargs):
         pass
@@ -15,10 +15,10 @@ class PrymatexComponent(object):
         pass
 
     def components(self):
-        return self.__components
+        return self._components
  
     def addComponent(self, component):
-        self.__components.append(component)
+        self._components.append(component)
 
     @classmethod
     def contributeToSettings(cls):

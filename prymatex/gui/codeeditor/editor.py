@@ -193,16 +193,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def initialize(self, **kwargs):
         super(CodeEditor, self).initialize(**kwargs)
-        self.syntaxHighlighter.setDocument(self.document())
 
-        # Default syntax
-        #self.insertBundleItem(self._default_syntax)
-        #self.insertBundleItem(self._default_theme)
-        
         # Get dialogs
         self.selectorDialog = self.mainWindow().findChild(QtGui.QDialog, "SelectorDialog")
         self.browserDock = self.mainWindow().findChild(QtGui.QDockWidget, "BrowserDock")
-        
+
     # OVERRIDE: PrymatexEditor.addComponent()
     def addComponent(self, component):
         PrymatexEditor.addComponent(self, component)

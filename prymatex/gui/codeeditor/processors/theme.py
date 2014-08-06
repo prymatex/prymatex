@@ -11,7 +11,7 @@ class CodeEditorThemeProcessor(CodeEditorBaseProcessor, ThemeProcessorMixin):
             return
 
         self.editor.syntaxHighlighter.stop()
-	CodeEditorBaseProcessor.beginExecution(self, bundleItem)
+        CodeEditorBaseProcessor.beginExecution(self, bundleItem)
 
         theme = self.editor.application.supportManager.getBundleItem(bundleItem.uuid)        
 

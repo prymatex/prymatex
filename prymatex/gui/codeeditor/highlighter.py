@@ -42,11 +42,11 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def __init__(self, editor):
         super(CodeEditorSyntaxHighlighter, self).__init__(editor)
+        self.setDocument(editor.document())
         self.editor = editor
         self.processor = editor.findProcessor("syntax")
         self.theme = None
         self.highlightTask = None
-
         self.editor.updateRequest.connect(self.on_editor_updateRequest)
         self.editor.aboutToClose.connect(self.stop)
 
