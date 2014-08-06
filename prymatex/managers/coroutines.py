@@ -13,6 +13,7 @@ from collections import deque
 from types import GeneratorType
 
 from prymatex.qt import QtCore
+from prymatex.core import PrymatexComponent
 
 # Reduce scheduler overhead
 # Iterate in the Task.run, while calling subcoroutines
@@ -361,12 +362,12 @@ class Task( Runnable ):
                 del self.coroutine
                 self.coroutine = self.stack.pop()
 
-class SchedulerManager( QtCore.QObject ):
+class SchedulerManager(PrymatexComponent, QtCore.QObject):
     longIteration = QtCore.Signal( datetime.timedelta, Task )
     done = QtCore.Signal()
 
-    def __init__( self, parent = None ):
-        super(SchedulerManager, self).__init__(parent)
+    def __init__( self, **kwargs):
+        super(SchedulerManager, self).__init__(**kwargs)
 
         self._current_task = None
         self._tasks = 0

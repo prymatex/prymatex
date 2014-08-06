@@ -65,7 +65,6 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
         @param files_to_open: The set of files to be opened when the window is shown in the screen.
         """
         super(PrymatexMainWindow, self).__init__(**kwargs)
-
         self.setupUi()
         
         self.tabSelectableModel = tabSelectableModelFactory(self)

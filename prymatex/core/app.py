@@ -326,7 +326,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             self.populateComponentClass(componentClass)
 
         # ------------------- Build
-        buildedObjects = []
+        buildedInstances = []
         def buildComponentInstance(klass, **kwargs):
             component = klass(**kwargs)
 
@@ -338,23 +338,22 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                     continue
                 subComponent = buildComponentInstance(componentClass, parent = component)
                 component.addComponent(subComponent)
-            buildedObjects.append((component, kwargs.get("parent", None)))
+            buildedInstances.append(component)
             return component
 
         component = buildComponentInstance(componentClass, **kwargs)
 
-        # ------------------- Configure
-        for ni, _ in buildedObjects[::-1]:
-            self.currentProfile.registerConfigurableInstance(ni)
+        # ------------------- Configure Bottom-up
+        for instance in buildedInstances[::-1]:
+            self.currentProfile.registerConfigurableInstance(instance)
         self.currentProfile.registerConfigurableInstance(component)
 
-        # ------------------- Initialize
-        for ni, np in buildedObjects:
-            if isinstance(ni, PrymatexComponent):
-                ni.initialize(parent = np)
-                # Shortcuts
-                for settings in ni.contributeToShortcuts():
-                    create_shortcut(component, settings, sequence_handler = self.registerShortcut)
+        # ------------------- Initialize Top-down
+        for instance in buildedInstances:
+            instance.initialize()
+            # Shortcuts
+            for settings in instance.contributeToShortcuts():
+                create_shortcut(component, settings, sequence_handler = self.registerShortcut)
 
         # -------------------- Store
         self.componentInstances.setdefault(componentClass, []).append(component)
