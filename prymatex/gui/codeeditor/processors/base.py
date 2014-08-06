@@ -32,14 +32,9 @@ class CodeEditorBaseProcessor(QtCore.QObject):
 
     def environmentVariables(self):
         if self.__env is None:
-            # TODO No es mejor que tambien el editor saque de la mainwindow para
-            # preservar la composision?
             self.__env = {}
-            envs = [ self.bundleItem.environmentVariables(),
-                self.editor.mainWindow().environmentVariables(),
-                self.editor.environmentVariables(),
-                self.baseEnvironment ]
-            for env in envs:
+            for env in (self.bundleItem.environmentVariables(),
+                self.editor.environmentVariables(), self.baseEnvironment):
                 self.__env.update(env)
         return self.__env
 
