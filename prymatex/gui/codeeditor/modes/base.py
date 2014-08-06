@@ -11,6 +11,12 @@ class CodeEditorBaseMode(PrymatexEditorAddon, QtCore.QObject):
         self._is_active = False
         self._completion_state = False
 
+    def setPalette(self, palette):
+        pass
+        
+    def setFont(self, font):
+        pass
+
     def activate(self):
         self._is_active = True
         # Capture and disable completition

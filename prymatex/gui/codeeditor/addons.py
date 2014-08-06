@@ -11,7 +11,11 @@ from prymatex.utils.lists import bisect_key
 from prymatex.support import PreferenceSettings
 
 class CodeEditorAddon(PrymatexEditorAddon, QtCore.QObject):
-    pass
+    def setPalette(self, palette):
+        pass
+        
+    def setFont(self, font):
+        pass
 
 class SmartUnindentAddon(CodeEditorAddon):
     def initialize(self, **kwargs):
@@ -150,17 +154,15 @@ class SpellCheckerAddon(CodeEditorAddon):
 class HighlightCurrentSelectionAddon(CodeEditorAddon):
     def initialize(self, **kwargs):
         super(HighlightCurrentSelectionAddon, self).initialize(**kwargs)
-        self.editor.registerTextCharFormat("dyn.selection.extra", 
-            self.textCharFormat_extraSelection_builder())
         self.editor.selectionChanged.connect(self.findHighlightCursors)
         self.editor.cursorPositionChanged.connect(self.findHighlightCursors)
 
-    def textCharFormat_extraSelection_builder(self):
-        frmt = QtGui.QTextCharFormat()
-        color = QtGui.QColor(self.editor.colours['selection'])
+    def setPalette(self, palette):
+        textCharFormat = QtGui.QTextCharFormat()
+        color = palette.highlight().color()
         color.setAlpha(128)
-        frmt.setBackground(color)
-        return frmt
+        textCharFormat.setBackground(color)
+        self.editor.registerTextCharFormat("dyn.selection.extra", textCharFormat)
     
     def findHighlightCursors(self):
         cursor = self.editor.textCursor()

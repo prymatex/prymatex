@@ -8,7 +8,11 @@ from prymatex.core import PrymatexEditorKeyHelper, Key_Any
 from prymatex.qt.helpers import debug_key
 
 class CodeEditorKeyHelper(PrymatexEditorKeyHelper, QtCore.QObject):
-    pass
+    def setPalette(self, palette):
+        pass
+        
+    def setFont(self, font):
+        pass
 
 class KeyEquivalentHelper(CodeEditorKeyHelper):
     def accept(self, event = None, cursor = None, **kwargs):

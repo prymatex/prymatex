@@ -169,6 +169,7 @@ class BundleItemTreeNode(TreeNodeBase):
             #QPalette::BrightText	7	A text color that is very different from WindowText, and contrasts well with e.g. Dark. Typically used for text that needs to be drawn where Text or WindowText would give poor contrast, such as on pressed push buttons. Note that text colors can be used for things other than just words; text colors are usually used for text, but it's quite common to use the text color roles for lines, icons, etc.
             palette.setColor(QtGui.QPalette.BrightText, settings['caret'])
         if 'gutterBackground' in settings:
+            print("color back")
             #QPalette::ToolTipBase	18	Used as the background color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
             palette.setColor(QtGui.QPalette.ToolTipBase, settings['gutterBackground'])
         if 'gutterForeground' in settings:

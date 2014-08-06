@@ -63,9 +63,7 @@ class BundleItem(ManagedObject):
     
     # ---------------- The executor method
     def execute(self, processor):
-        processor.beginExecution(self)
-        if not processor.managed():
-            processor.endExecution(self)
+        raise NotImplementedError()
 
     @classmethod
     def sourcePaths(cls, baseDirectory):

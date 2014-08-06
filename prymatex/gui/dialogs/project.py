@@ -13,7 +13,7 @@ from prymatex.utils.i18n import ugettext as _
 
 from prymatex.ui.dialogs.project import Ui_ProjectDialog
 
-class ProjectDialog(QtGui.QDialog, PrymatexDialog, Ui_ProjectDialog):
+class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtGui.QDialog):
     def __init__(self, **kwargs):
         super(ProjectDialog, self).__init__(**kwargs)
         self.setupUi(self)

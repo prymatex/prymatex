@@ -6,7 +6,8 @@
 class PrymatexComponent(object):
     def __init__(self, **kwargs):
         super(PrymatexComponent, self).__init__(**kwargs)
-        
+        self.__components = []
+
     def initialize(self, **kwargs):
         pass
     
@@ -14,10 +15,10 @@ class PrymatexComponent(object):
         pass
 
     def components(self):
-        return filter(lambda ch: isinstance(ch, PrymatexComponent), self.children())
+        return self.__components
  
     def addComponent(self, component):
-        pass
+        self.__components.append(component)
 
     @classmethod
     def contributeToSettings(cls):
@@ -72,11 +73,18 @@ class PrymatexAddon(PrymatexComponent):
         return []
 
 class PrymatexComponentWidget(PrymatexComponent):
+    def __init__(self, **kwargs):
+        super(PrymatexComponentWidget, self).__init__(**kwargs)
+        self._main_window = kwargs.get("parent")
+
+    def mainWindow(self):
+        return self._main_window
+        
     def addons(self):
-        return filter(lambda ch: isinstance(ch, PrymatexAddon), self.children())
+        return filter(lambda ch: isinstance(ch, PrymatexAddon), self.components())
 
     def keyHelpers(self):
-        return filter(lambda ch: isinstance(ch, PrymatexKeyHelper), self.children())
+        return filter(lambda ch: isinstance(ch, PrymatexKeyHelper), self.components())
 
     def keyHelpersByClass(self, klass):
         return filter(lambda keyHelper: isinstance(keyHelper, klass), self.keyHelpers())

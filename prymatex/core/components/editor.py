@@ -21,13 +21,6 @@ class PrymatexEditor(PrymatexComponentWidget):
         self._external_action = None
         self._title = self.UNTITLED_FILE_TEMPLATE
 
-    def initialize(self, parent = None, **kwargs):
-        super(PrymatexEditor, self).initialize(**kwargs)
-        self._main_window = parent
-        
-    def mainWindow(self):
-        return self._main_window
-
     def open(self, file_path):
         """ Open file """
         self.application.fileManager.openFile(file_path)
@@ -163,15 +156,14 @@ class PrymatexEditor(PrymatexComponentWidget):
 # Key Helper
 #======================================================================    
 class PrymatexEditorKeyHelper(PrymatexKeyHelper):
-    def initialize(self, parent = None, **kwargs):
-        super(PrymatexEditorKeyHelper, self).initialize(**kwargs)
-        self.editor = parent
+    def __init__(self, **kwargs):
+        super(PrymatexEditorKeyHelper, self).__init__(**kwargs)
+        self.editor = kwargs.get("parent")
 
 #======================================================================
 # Addon
 #======================================================================    
 class PrymatexEditorAddon(PrymatexAddon):
-    def initialize(self, parent = None, **kwargs):
-        super(PrymatexEditorAddon, self).initialize(**kwargs)
-        self.editor = parent
-
+    def __init__(self, **kwargs):
+        super(PrymatexEditorAddon, self).__init__(**kwargs)
+        self.editor = kwargs.get("parent")

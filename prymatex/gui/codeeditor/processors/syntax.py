@@ -34,11 +34,13 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         
         # Set syntax
         CodeEditorBaseProcessor.beginExecution(self, bundleItem)
-        self.stack = [(bundleItem.grammar, None)]
-        self.beginParse(bundleItem.scopeName)
+        syntax = self.editor.application.supportManager.getBundleItem(bundleItem.uuid)
+
+        self.stack = [(syntax.grammar, None)]
+        self.beginParse(syntax.scopeName)
         
         self.editor.syntaxHighlighter.start()
-        self.editor.syntaxChanged.emit(bundleItem)
+        self.editor.syntaxChanged.emit(syntax)
 
     def endExecution(self, bundleItem):
         self.endParse(bundleItem.scopeName)

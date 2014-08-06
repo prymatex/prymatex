@@ -30,7 +30,7 @@ class CompletionBaseModel(QtCore.QAbstractTableModel):
 
     def allowOneSuggestion(self, isPrefix):
         return not isPrefix
-
+    
     def modelSorting(self):
         #QCompleter.UnsortedModel
         #QCompleter.CaseSensitivelySortedModel
@@ -327,7 +327,8 @@ class CodeEditorCompleter(QtGui.QCompleter):
             elif event.key() in (QtCore.Qt.Key_Space, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
                 self.hide()
         elif event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
-            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left")
+            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
+            print(alreadyTyped, start, end)
             self.explicitLaunch = True
             self.runCompleter(self.editor.cursorRect(), alreadyTyped)
         return False
@@ -347,7 +348,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
             else:
                 self.hide()
         elif text.asciify(event.text()) in COMPLETER_CHARS:
-            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left")
+            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
             if end - start >= self.editor.wordLengthToComplete:
                 self.explicitLaunch = False
                 self.runCompleter(self.editor.cursorRect(), alreadyTyped)

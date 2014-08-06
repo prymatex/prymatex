@@ -12,7 +12,12 @@ BaseProcessorMixin = type("BaseProcessorMixin", (object, ), {
     "endExecution": nop,
     "environmentVariables": nop,
     "shellVariables": nop,
-})    
+})
+
+######################### ThemeProcessor #########################
+ThemeProcessorMixin = type("SyntaxProcessorMixin", (BaseProcessorMixin, ), {
+    "allowedTypes": classmethod(lambda cls: ("theme", ))
+})
 
 ######################### SyntaxProcessor #########################
 SyntaxProcessorMixin = type("SyntaxProcessorMixin", (BaseProcessorMixin, ), {

@@ -95,45 +95,16 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         if self._default_syntax is None:
             # Load original default syntax
             self._default_syntax = self.application.supportManager.getBundleItem(self._settings.default("defaultSyntax"))
-
+        self.insertBundleItem(self._default_syntax)
+        
     @ConfigurableItem(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
     def defaultTheme(self, uuid):
         self._default_theme = self.application.supportManager.getBundleItem(uuid)
         if self._default_theme is None:
             # Load original default theme
             self._default_theme = self.application.supportManager.getBundleItem(self._settings.default("defaultTheme"))
-
-        # Deprecated        
-        self.colours = self._default_theme.style()
-
-        self.setCurrentCharFormat(self._default_theme.textCharFormat())
-
-        palette = self._default_theme.palette()
-        self.setPalette(palette)
-        self.viewport().setPalette(palette)
-        self.completer.setPalette(palette)
-        self.leftBar.setPalette(palette)
-        self.rightBar.setPalette(palette)
-
-        # Register lineHighlight textCharFormat
-        textCharFormat = QtGui.QTextCharFormat()
-        textCharFormat.setBackground(palette.alternateBase().color())
-        textCharFormat.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
-        self.registerTextCharFormat("dyn.lineHighlight", textCharFormat)
+        self.insertBundleItem(self._default_theme)
         
-        # Register highlightPairs textCharFormat
-        textCharFormat = QtGui.QTextCharFormat()
-        textCharFormat.setFontUnderline(True)
-        textCharFormat.setBackground(palette.alternateBase().color())
-        textCharFormat.setUnderlineColor(palette.text().color())
-        textCharFormat.setBackground(QtCore.Qt.transparent)
-        self.registerTextCharFormat("dyn.highlightPairs", textCharFormat)
-
-        self.syntaxHighlighter.stop()
-        self.syntaxHighlighter.setTheme(self._default_theme)
-        self.syntaxHighlighter.start()
-        self.themeChanged.emit(self._default_theme)
-
     @ConfigurableItem(default = MarginLine | IndentGuide | HighlightCurrentLine)
     def defaultFlags(self, flags):
         self.setFlags(flags)
@@ -225,14 +196,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.syntaxHighlighter.setDocument(self.document())
 
         # Default syntax
-        self.insertBundleItem(self._default_syntax)
-        # TODO self.insertBundleItem(self._default_theme)
+        #self.insertBundleItem(self._default_syntax)
+        #self.insertBundleItem(self._default_theme)
         
         # Get dialogs
         self.selectorDialog = self.mainWindow().findChild(QtGui.QDialog, "SelectorDialog")
         self.browserDock = self.mainWindow().findChild(QtGui.QDockWidget, "BrowserDock")
         
-    # ----------- Override from PMXBaseComponent
+    # OVERRIDE: PrymatexEditor.addComponent()
     def addComponent(self, component):
         PrymatexEditor.addComponent(self, component)
         if isinstance(component, SideBarWidgetAddon):
@@ -259,6 +230,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def showStatus(self, *largs, **kwargs):
         return self.mainWindow().showStatus(*largs, **kwargs)
 
+    # OVERRIDE: TextEditWidget.setPlainText()
     def setPlainText(self, text):
         from time import time
         self.syntaxHighlighter.stop()
@@ -593,16 +565,49 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.setExtraSelectionCursors("dyn.highlightPairs", [cursor for cursor in list(self._currentPairs) if cursor is not None])
         self.updateExtraSelections()
 
-    # ------------ Override event handlers
+    # OVERRIDE: TextEditWidget.setPalette()
+    def setPalette(self, palette):
+        super(CodeEditor, self).setPalette(palette)
+        self.viewport().setPalette(palette)
+        self.completer.setPalette(palette)
+        self.leftBar.setPalette(palette)
+        self.rightBar.setPalette(palette)
+        
+        # Register lineHighlight textCharFormat
+        textCharFormat = QtGui.QTextCharFormat()
+        textCharFormat.setBackground(palette.alternateBase().color())
+        textCharFormat.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
+        self.registerTextCharFormat("dyn.lineHighlight", textCharFormat)
+        
+        # Register highlightPairs textCharFormat
+        textCharFormat = QtGui.QTextCharFormat()
+        textCharFormat.setFontUnderline(True)
+        textCharFormat.setBackground(palette.alternateBase().color())
+        textCharFormat.setUnderlineColor(palette.text().color())
+        textCharFormat.setBackground(QtCore.Qt.transparent)
+        self.registerTextCharFormat("dyn.highlightPairs", textCharFormat)
+
+        for component in self.components():
+            component.setPalette(palette)
+
+    # OVERRIDE: TextEditWidget.setFont()
+    def setFont(self, font):
+        super(CodeEditor, self).setFont(font)
+        for component in self.components():
+            component.setFont(font)
+
+    # OVERRIDE: TextEditWidget.focusInEvent()
     def focusInEvent(self, event):
         # TODO No es para este evento pero hay que poner en alugn lugar el update de las side bars
         super(CodeEditor, self).focusInEvent(event)
         self.updateSideBarsGeometry()
 
+    # OVERRIDE: TextEditWidget.resizeEvent()
     def resizeEvent(self, event):
         super(CodeEditor, self).resizeEvent(event)
         self.updateSideBarsGeometry()
 
+    # OVERRIDE: TextEditWidget.paintEvent()
     def paintEvent(self, event):
         super(CodeEditor, self).paintEvent(event)
         page_bottom = self.viewport().height()
@@ -651,7 +656,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         painter.end()
 
-    # ----------------- Mouse Events
+    # OVERRIDE: TextEditWidget.wheelEvent()
     def wheelEvent(self, event):
         if event.modifiers() == QtCore.Qt.ControlModifier:
             if event.delta() == 120:
@@ -662,6 +667,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         else:
             TextEditWidget.wheelEvent(self, event)
 
+    # OVERRIDE: TextEditWidget.mouseReleaseEvent()
     def mouseReleaseEvent(self, event):
         freehanded = False
         if freehanded:
@@ -682,7 +688,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         else:
             TextEditWidget.mouseReleaseEvent(self, event)
 
-    # -------------------- Keyboard Events
+    # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
         """This method is called whenever a key is pressed.
         The key code is stored in event.key()"""

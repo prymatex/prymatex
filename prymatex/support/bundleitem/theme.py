@@ -120,7 +120,12 @@ class Theme(BundleItem):
     #        if key not in settings:
     #            settings[key] = color
     #    return settings
-    
+
+    def execute(self, processor):
+        processor.beginExecution(self)
+        if not processor.managed():
+            processor.endExecution(self)    
+
     def dump(self, allKeys = False):
         dataHash = super(Theme, self).dump(allKeys)
         for key in Theme.KEYS:

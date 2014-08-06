@@ -10,27 +10,19 @@ class PrymatexDock(PrymatexComponentWidget):
     SEQUENCE = None
     ICON = None
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
-    
-    def initialize(self, parent = None, **kwargs):
-        super(PrymatexDock, self).initialize(**kwargs)
-        self._main_window = parent
-        
-    def mainWindow(self):
-        return self._main_window
 
 #======================================================================
 # Base Helper
 #======================================================================    
 class PrymatexDockKeyHelper(PrymatexKeyHelper):
-    def initialize(self, parent = None, **kwargs):
-        super(PrymatexDockKeyHelper, self).initialize(**kwargs)
-        self.dock = parent
+     def __init__(self, **kwargs):
+        super(PrymatexDockKeyHelper, self).__init__(**kwargs)
+        self.dock = kwargs.get("parent")
 
 #========================================
 # BASE ADDON
 #========================================
 class PrymatexDockAddon(PrymatexAddon):
-    def initialize(self, parent = None, **kwargs):
-        super(PrymatexDockAddon, self).initialize(**kwargs)
-        self.dock = parent
-
+    def __init__(self, **kwargs):
+        super(PrymatexDockAddon, self).__init__(**kwargs)
+        self.dock = kwargs.get("parent")

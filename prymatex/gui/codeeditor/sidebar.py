@@ -19,11 +19,6 @@ class CodeEditorSideBar(QtGui.QWidget):
         self.horizontalLayout.setSpacing(0)
         self.horizontalLayout.setMargin(0)
 
-    def setPalette(self, palette):
-        super(CodeEditorSideBar, self).setPalette(palette)
-        for index in range(self.horizontalLayout.count()):
-            self.horizontalLayout.itemAt(index).widget().setPalette(palette)
-
     def addWidget(self, widget):
         self.horizontalLayout.addWidget(widget)
         widget.installEventFilter(self)
@@ -52,6 +47,12 @@ class CodeEditorSideBar(QtGui.QWidget):
 #========================================
 class SideBarWidgetAddon(PrymatexEditorAddon):
     ALIGNMENT = None
+
+    def setPalette(self, palette):
+        super(SideBarWidgetAddon, self).setPalette(palette)
+        
+    def setFont(self, font):
+        super(SideBarWidgetAddon, self).setFont(font)
 
     def translatePosition(self, position):
         font_metrics = QtGui.QFontMetrics(self.editor.font())
@@ -84,46 +85,32 @@ class LineNumberSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
     def __init__(self, **kwargs):
         super(LineNumberSideBarAddon, self).__init__(**kwargs)
         self.setObjectName(self.__class__.__name__)
+        #self.setFont(self.font())
 
     def initialize(self, **kwargs):
         super(LineNumberSideBarAddon, self).initialize(**kwargs)
         
-        self.__update_colours()
-        self.__update_fonts()
-        
         # Connect signals
-        self.editor.themeChanged.connect(self.on_editor_themeChanged)
+        self.editor.fontChanged.connect(self._update_width)
         self.editor.blockCountChanged.connect(self.on_editor_blockCountChanged)
-        self.editor.fontChanged.connect(self.on_editor_fontChanged)
-    
-    def __update_colours(self):
-        self.background = self.editor.colours['gutterBackground']
-        self.foreground = self.editor.colours['gutterForeground']
-        self.invisibles = self.editor.colours['invisibles']
-        
-    def __update_fonts(self):
-        self.normalFont = QtGui.QFont(self.editor.font())
-        self.boldFont = QtGui.QFont(self.editor.font())
+
+    def setFont(self, font):
+        super(LineNumberSideBarAddon, self).setFont(font)
+        self.normalFont = QtGui.QFont(font)
+        self.boldFont = QtGui.QFont(font)
         self.boldFont.setBold(True)
         self.normalMetrics = QtGui.QFontMetrics(self.normalFont)
         self.boldMetrics = QtGui.QFontMetrics(self.boldFont)
-        self.__update_width()
 
-    def __update_width(self, lineCount = None):
+    def _update_width(self, lineCount = None):
         lineCount = lineCount or self.editor.document().lineCount()
-        width = self.boldMetrics.width(str(lineCount)) + self.MARGIN * 2
+        width = self.boldMetrics.width("%s" % lineCount) + self.MARGIN * 2
         if self.width() != width:
             self.setFixedWidth(width)
             self.editor.updateViewportMargins()
-        
-    def on_editor_themeChanged(self):
-        self.__update_colours()
 
     def on_editor_blockCountChanged(self, newBlockCount):
-        self.__update_width(newBlockCount)
-
-    def on_editor_fontChanged(self):
-        self.__update_fonts()
+        self._update_width(newBlockCount)
         
     @classmethod
     def contributeToMainMenu(cls):
@@ -141,8 +128,8 @@ class LineNumberSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         current_block = self.editor.textCursor().block()
         
         painter = QtGui.QPainter(self)
-        painter.setPen(self.foreground)
-        painter.fillRect(self.rect(), self.background)
+        painter.setPen(self.palette().toolTipText().color())
+        painter.fillRect(self.rect(), self.palette().toolTipBase().color())
         painter.setFont(self.normalFont)
         
         block = self.editor.firstVisibleBlock()
@@ -162,7 +149,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
             if block.isVisible():
                 numberText = str(line_count)
                 if block == current_block:
-                    painter.fillRect(blockGeometry, self.invisibles)
+                    painter.fillRect(blockGeometry, self.palette().linkVisited().color())
                     painter.setFont(self.boldFont)
                     leftPosition = self.width() - (self.boldMetrics.width(numberText) + self.MARGIN)
                     topPosition = blockGeometry.y() + self.boldMetrics.ascent()
@@ -191,19 +178,6 @@ class BookmarkSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         self.imagesHeight = self.bookmarkflagImage.height()
         self.setFixedWidth(self.bookmarkflagImage.width())
         self.setObjectName(self.__class__.__name__)
-        
-    def initialize(self, **kwargs):
-        super(BookmarkSideBarAddon, self).initialize(**kwargs)
-        self.background = self.editor.colours['gutterBackground']
-        self.foreground = self.editor.colours['gutterForeground']
-        self.invisibles = self.editor.colours['invisibles']
-        self.editor.themeChanged.connect(self.updateColours)
-        
-    def updateColours(self):
-        self.background = self.editor.colours['gutterBackground']
-        self.foreground = self.editor.colours['gutterForeground']
-        self.invisibles = self.editor.colours['invisibles']
-        self.repaint(self.rect())
 
     @classmethod
     def contributeToMainMenu(cls):
@@ -222,7 +196,7 @@ class BookmarkSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         current_block = self.editor.textCursor().block()
         
         painter = QtGui.QPainter(self)
-        painter.fillRect(self.rect(), self.background)
+        painter.fillRect(self.rect(), self.palette().toolTipBase().color())
 
         block = self.editor.firstVisibleBlock()
         offset = self.editor.contentOffset()
@@ -235,7 +209,7 @@ class BookmarkSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
                 break
             
             if block == current_block:
-                painter.fillRect(blockGeometry, self.invisibles)
+                painter.fillRect(blockGeometry, self.palette().linkVisited().color())
 
             # Draw the line number right justified at the y position of the line.
             if block.isVisible() and self.editor.bookmarkListModel.bookmarksCount(block) > 0:
@@ -269,17 +243,6 @@ class FoldingSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         self.setFixedWidth(self.foldingbottomImage.width())
         self.setObjectName(self.__class__.__name__)
 
-    def initialize(self, **kwargs):
-        super(FoldingSideBarAddon, self).initialize(**kwargs)
-        self.background = self.editor.colours['gutterBackground']
-        self.invisibles = self.editor.colours['invisibles']
-        self.editor.themeChanged.connect(self.updateColours)
-        
-    def updateColours(self):
-        self.background = self.editor.colours['gutterBackground']
-        self.invisibles = self.editor.colours['invisibles']
-        self.repaint(self.rect())
-    
     @classmethod
     def contributeToMainMenu(cls):
         baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter"
@@ -297,7 +260,7 @@ class FoldingSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         current_block = self.editor.textCursor().block()
         
         painter = QtGui.QPainter(self)
-        painter.fillRect(self.rect(), self.background)
+        painter.fillRect(self.rect(), self.palette().toolTipBase().color())
 
         block = self.editor.firstVisibleBlock()
         offset = self.editor.contentOffset()
@@ -311,7 +274,7 @@ class FoldingSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
                 break
 
             if block == current_block:
-                painter.fillRect(blockGeometry, self.invisibles)
+                painter.fillRect(blockGeometry, self.palette().linkVisited().color())
 
             # Draw the line number right justified at the y position of the line.
             if block.isVisible():
@@ -350,14 +313,8 @@ class SelectionSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         
     def initialize(self, **kwargs):
         super(SelectionSideBarAddon, self).initialize(**kwargs)
-        self.background = self.editor.colours['gutterBackground']
-        self.editor.themeChanged.connect(self.updateColours)
         self.editor.extraSelectionChanged.connect(self.on_editor_extraSelectionChanged)
         
-    def updateColours(self):
-        self.background = self.editor.colours['gutterBackground']
-        self.update()
-    
     def on_editor_extraSelectionChanged(self):
         self.update()
 
@@ -385,7 +342,7 @@ class SelectionSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         rectHeight = round(rectRelation) if rectRelation >= 1 else 1
 
         painter = QtGui.QPainter(self)
-        painter.fillRect(self.rect(), self.background)
+        painter.fillRect(self.rect(), self.palette().toolTipText().color())
 
         offset = self.editor.contentOffset()
 
@@ -393,7 +350,7 @@ class SelectionSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
             y = round(extra.cursor.block().blockNumber() * rectRelation)
             if rectRelation == lineHeight:
                 y += offset.y()
-            painter.fillRect(0, y, 10, rectHeight, self.editor.colours['selection'])
+            painter.fillRect(0, y, 10, rectHeight, self.palette().highlight().color())
 
         painter.end()
         QtGui.QWidget.paintEvent(self, event)
