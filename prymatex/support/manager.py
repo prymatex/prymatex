@@ -12,7 +12,7 @@ from collections import namedtuple, OrderedDict
 
 from .bundle import Bundle
 from . import bundleitem 
-from . import nscope as scope
+from . import scope
 from .staticfile import StaticFile
 from .process import RunningContext
 

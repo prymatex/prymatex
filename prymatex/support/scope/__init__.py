@@ -1,3 +1,3 @@
+#!/usr/bin/env python
 
-from .scope import wildcard, none, Scope, Context, Selector
-from .attributes import attributes
+from .scope import Scope, Context, Selector
