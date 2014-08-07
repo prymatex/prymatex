@@ -3,6 +3,7 @@
 import collections
 
 from prymatex.qt import QtCore, QtGui
+from prymatex.utils import html
 
 class Notification(QtGui.QWidget):
     aboutToClose = QtCore.Signal()
@@ -178,7 +179,7 @@ class OverlayNotifier(QtCore.QObject):
         links={}, widget = None):
         if title:
             title = "%s:\n" % title if frmt == "text" else "<h4>%s</h4>" % title
-        message = title + message
+        message = html.escape(title + message)
         if frmt == "text" and links:
             message = "<pre>%s</pre>" % message
         if links:

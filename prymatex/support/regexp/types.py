@@ -338,21 +338,30 @@ class VariableTransformationType(object):
             "".join(self.options))
     
     def replace(self, memodict, holders = None, match = None, variables = None):
-        text = ""
         if holders and self.name in holders:
             value = holders[self.name].replace(memodict, holders, match, variables)
         elif match and self.name.isdigit():
             value = match.group(int(self.name))
         else:
             value = variables.get(self.name, "")
+        text = ""
         match = self.pattern.search(value)
         while match:
-            text += "".join([ frmt.replace(memodict, holders, match, variables) for frmt in self.format])
+            case = case_change['none']
+            for frmt in self.format:
+                if isinstance(frmt, six.integer_types):
+                    case = frmt
+                    continue
+                value = frmt.replace(memodict, holders, match, variables)
+                # Apply case and append to result
+                text += case_function[case](value)
+                if case in [case_change['upper_next'], case_change['lower_next']]:
+                    case = case_change['none']
             if 'g' not in self.options:
                 break
             match = self.pattern.search(value, match.end())
         return text
-    
+
     def render(self, visitor, memodict, holders = None, match = None):
         visitor.insertText(self.replace(memodict, holders, match, visitor.environmentVariables()))
         
