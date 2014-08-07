@@ -117,7 +117,15 @@ echo Selection: "$TM_SELECTED_TEXT"''',
     # ---------------- Variables
     def variables(self):
         if self._variables is None:
-            self._variables = self.bundle.variables()
+            self._variables = {}
+            for r in self.require or []:
+                bundle = self.manager.getBundle(r["uuid"])
+                if bundle is not None:
+                    self._variables.update(bundle.variables())
+                    support = bundle.supportPath()
+                    if support is not None:
+                        self._variables["TM_%s_BUNDLE_SUPPORT" % r["name"].upper()] = support
+            self._variables.update(self.bundle.variables())
             for program in self.requiredCommands or []:
                 if not programs.is_program_installed(program["command"]):
                     # Search in locations
@@ -125,6 +133,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
                         if os.path.exists(location):
                             self._variables[program["variable"]] = location
                             break
+            
         return self._variables.copy()
 
     # ---------------- Environment Variables
@@ -170,10 +179,13 @@ echo Selection: "$TM_SELECTED_TEXT"''',
             return self.output or self.outputLocation
 
     def beforeExecute(self, processor):
-        beforeMethod = None
+        # Has requirements
+        # TODO: Avisar al processor porque no corremos
+        if any([self.manager.getBundle(r["uuid"]) is None for r in self.require or []]):
+            return False
+        # Before running command
         if self.beforeRunningCommand is not None:
-            beforeMethod = getattr(processor, self.beforeRunningCommand)
-            return beforeMethod()
+            return getattr(processor, self.beforeRunningCommand)()
         return True
 
     def execute(self, processor):

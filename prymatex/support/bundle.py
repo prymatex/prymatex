@@ -53,15 +53,27 @@ class Bundle(ManagedObject):
                 dataHash[key] = value
         return dataHash
 
+    def supportPath(self):
+        for name, source in self.sources.items():
+            supportPath = os.path.join(source.path, self.SUPPORT)
+            if os.path.exists(supportPath):
+                return supportPath
+
     # ---------------- Variables
     def variables(self):
         if self._variables is None:
             self._variables = {}
-            for name, source in self.sources.items():
-                supportPath = os.path.join(source.path, self.SUPPORT)
-                if os.path.exists(supportPath):
-                    self._variables['TM_BUNDLE_SUPPORT'] = supportPath
-                    break
+            for r in self.require or []:
+                bundle = self.manager.getBundle(r["uuid"])
+                # TODO: Recursivo ?
+                if bundle is not None:
+                    self._variables.update(bundle.variables())
+                    support = bundle.supportPath()
+                    if support is not None:
+                        self._variables["TM_%s_BUNDLE_SUPPORT" % r["name"].upper()] = support
+            support = self.supportPath()
+            if support is not None:
+                self._variables['TM_BUNDLE_SUPPORT'] = support
             for program in self.requiredCommands or []:
                 if not programs.is_program_installed(program["command"]):
                     # Search in locations

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtGui
+from prymatex.utils import html
 
 from .base import CodeEditorBaseProcessor
 from prymatex.support.processor import CommandProcessorMixin
@@ -158,7 +159,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
         self.editor.browserDock.setRunningContext(context)
 
     def showAsTooltip(self, context, outputFormat = None):
-        message = context.outputValue.strip()
+        message = html.escape(context.outputValue.strip())
         timeout = len(message) * 20
         if timeout > 2000:
             timeout = 2000

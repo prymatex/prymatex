@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtGui, QtCore
+from prymatex.utils import html
 
 from prymatex.support.processor import CommandProcessorMixin
 
@@ -75,7 +76,7 @@ class PrymatexMainCommandProcessor(CommandProcessorMixin):
         self.mainWindow().browserDock.setRunningContext(context)
 
     def showAsTooltip(self, context, outputFormat = None):
-        message = context.outputValue.strip()
+        message = html.escape(context.outputValue.strip())
         timeout = len(message) * 20
 
         self.mainWindow().showTooltip(message, timeout = timeout)
