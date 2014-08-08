@@ -27,6 +27,9 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
     def endRender(self):
         self.__endPosition = self.caretPosition()
         self.editor.updatePlainText(self.output, self.snippetWrapper)
+        self.snippetWrapper = self.editor.newCursorAtPosition(
+                self.__startPosition, self.__endPosition
+        )
 
     def caretPosition(self):
         return self.snippetWrapper.selectionStart() + len(self.output)
@@ -54,24 +57,17 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
     def setHolderChoiceIndex(self, index):
         if index != -1:
             self.bundleItem.setHolderContent(index)
-            self.render(self.snippetWrapper)
+            self.render()
             if self.nextHolder():
                 self.selectHolder()
         elif self.backward and self.previousHolder() or self.nextHolder():
             self.selectHolder()
 
-    def endPosition(self):
-        return self.__endPosition
-
-    def startPosition(self):
-        return self.__startPosition
-
     # ---------- Public API
     def stop(self):
         self.endExecution(self.bundleItem)
 
-    def render(self, cursor):
-        self.snippetWrapper = cursor
+    def render(self):
         self.bundleItem.render(self)
     
     # ---------- Holder navigation

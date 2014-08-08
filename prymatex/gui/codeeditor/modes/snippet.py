@@ -86,13 +86,8 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
 
             self.processor.setHolderContent(selectedText)
             
-            # Wrap
-            wrapCursor = self.editor.newCursorAtPosition(
-                self.processor.startPosition(), self.processor.endPosition() - length
-            )
-            
             # Render
-            self.processor.render(wrapCursor)
+            self.processor.render()
             
             if selectedText:
                 newHolderStart, _ = self.processor.currentPosition()
