@@ -792,7 +792,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             'TM_CURRENT_THEME_PATH': theme.currentSourcePath(),
             'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
             'TM_SCOPE': "%s" % rightScope,
-            'TM_LEFT_SCOPE': "%s" % leftScope,
+            'TM_SCOPE_LEFT': "%s" % leftScope,
             'TM_MODE': self.syntax().name,
             'TM_SOFT_TABS': self.indentUsingSpaces and 'YES' or 'NO',
             'TM_TAB_SIZE': self.tabWidth
