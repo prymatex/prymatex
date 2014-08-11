@@ -66,6 +66,10 @@ selection-background-color: %s; }""" % (
         self.setStyleSheet(appStyle)
         self.slider.setPalette(palette)
 
+    def setFont(self, font):
+        font.setPointSize(1)
+        super(MiniMapAddon, self).setFont(font)
+        
     def _apply_aditional_formats(self, block, line_count):
         position = block.position()
         length = 0
@@ -78,8 +82,7 @@ selection-background-color: %s; }""" % (
             line_count -= 1
 
         self.document().markContentsDirty(position, length)
-        self._update_font()
-        
+
     def on_editor_highlightChanged(self):
         block = self.editor.document().begin()
         line_count = self.editor.document().lineCount()
@@ -108,15 +111,6 @@ selection-background-color: %s; }""" % (
             self.setTextCursor(cursor)
             self.slider.move_slider(rect.y())
             self.slider.update_position()
-
-    def _update_font(self):
-
-        self.setTabStopWidth(self.editor.tabStopWidth())
-
-        font = self.editor.document().defaultFont()
-        pointSize = int(self.width() / self.editor.marginLineSize)
-        font.setPointSize(pointSize or 1)
-        self.setFont(font)
 
     def enterEvent(self, event):
         self.animation.setDuration(300)

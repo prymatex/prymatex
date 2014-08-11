@@ -146,9 +146,12 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
             button.pressed.connect(lambda element=name: self.on_pushButtonColor_pressed(element))
 
     def on_pushButtonColor_pressed(self, element):
-        theme = self.comboBoxThemes.model().node(self.comboBoxThemes.currentIndex())
+        model = self.comboBoxThemes.model()
+        sIndex = model.index(self.comboBoxThemes.currentIndex())
+        theme = model.node(sIndex)
         settings = theme.getStyle()
         color, ok = QtGui.QColorDialog.getRgba(settings[element].rgba(), self)
         if ok:
-            self.application.supportManager.updateTheme(theme, settings = { element: color })
+            # TODO No pasar None, mejorar el uso del namespace default
+            self.application.supportManager.updateBundleItem(theme, None, settings={element:color})
             self.updateUi(theme)

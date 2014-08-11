@@ -1,4 +1,0 @@
-pygments
-pyzmq
-regex
--e git+https://github.com/prymatex/ponyguruma.git#egg=ponyguruma
