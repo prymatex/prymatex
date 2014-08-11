@@ -3,6 +3,7 @@
 
 import os, re, shutil
 
+from prymatex.core import config
 from prymatex.utils import osextra
 from prymatex.utils import programs
 
@@ -13,7 +14,6 @@ class Bundle(ManagedObject):
             'description', 'contactName', 'requiredCommands', 'require' )
     FILE = 'info.plist'
     TYPE = 'bundle'
-    SUPPORT = 'Support'
     PATTERNS = ( '*.tmbundle', )
     DEFAULTS = {
         'name': 'Untitled'
@@ -55,7 +55,7 @@ class Bundle(ManagedObject):
 
     def supportPath(self):
         for name, source in self.sources.items():
-            supportPath = os.path.join(source.path, self.SUPPORT)
+            supportPath = os.path.join(source.path, config.PMX_SUPPORT_NAME)
             if os.path.exists(supportPath):
                 return supportPath
 

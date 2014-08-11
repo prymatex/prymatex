@@ -35,6 +35,7 @@ PMX_HOME_NAME = ".prymatex"
 PMX_BUNDLES_NAME = "Bundles"
 PMX_PLUGINS_NAME = "Plugins"
 PMX_PROFILES_NAME = "Profiles"
+PMX_SUPPORT_NAME = 'Support'
 PMX_SETTINGS_NAME = "settings.json"
 PMX_STATE_NAME = "state.json"
 TM_SETTINGS_NAME = "com.macromates.textmate.plist"
@@ -58,7 +59,7 @@ def get_prymatex_home_path():
     if not os.path.exists(path):
         os.makedirs(path)
     #Create extra paths
-    for extra in (PMX_BUNDLES_NAME, PMX_PLUGINS_NAME, PMX_PROFILES_NAME):
+    for extra in (PMX_BUNDLES_NAME, PMX_PLUGINS_NAME, PMX_PROFILES_NAME, PMX_SUPPORT_NAME):
         extraPath = os.path.join(path, extra)
         if not os.path.exists(extraPath):
             os.makedirs(extraPath, 0o700)
