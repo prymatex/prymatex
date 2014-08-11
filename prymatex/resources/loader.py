@@ -105,6 +105,14 @@ def loadStyles(resourcesPath):
         name = os.path.splitext(styleFileName)[0]
         styles[name] = os.path.join(stylesPath, styleFileName)
     return {"Styles": styles}
+    
+def loadGlyphs(resourcesPath):
+    glyphs = {}
+    glyphsPath = os.path.join(resourcesPath, "Glyphs")
+    for glyphFileName in os.listdir(glyphsPath):
+        name = os.path.splitext(glyphFileName)[0]
+        glyphs[name] = os.path.join(glyphsPath, glyphFileName)
+    return {"Glyphs": glyphs}
 
 def loadPrymatexResources(resourcesPath, preferedThemeName = "oxygen"):
     global RESOURCES, RESOURCES_READY
@@ -125,10 +133,15 @@ def loadPrymatexResources(resourcesPath, preferedThemeName = "oxygen"):
                 QtGui.QIcon.setThemeName(themeName)
                 if QtGui.QIcon.hasThemeIcon(THEME_ICON_TEST):
                     break
+
         # Load Icons and Images
         RESOURCES.update(loadResources(resourcesPath, STATICMAPPING))
+
         # Load Styles
         RESOURCES.update(loadStyles(resourcesPath))
+        
+        # Load Styles
+        RESOURCES.update(loadGlyphs(resourcesPath))
 
         installCustomFromThemeMethod()
         RESOURCES_READY = True

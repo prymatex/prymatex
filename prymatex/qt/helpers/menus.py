@@ -25,7 +25,7 @@ def create_menu(parent, settings, dispatcher = None, separatorName = False,
 
     icon = settings.get("icon")
     if icon is None and icon_resolver is not None:
-        icon = icon_resolver(text_to_iconname(text, prefix="icon"))
+        icon = icon_resolver(text_to_iconname(text))
     if icon is not None:
         menu.setIcon(icon)
     
