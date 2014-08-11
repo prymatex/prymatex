@@ -10,7 +10,9 @@ from prymatex.utils import text
 
 # &Text Button name -> %{prefix}TextButtonName%{sufix}
 text2objectname = lambda source, sufix = "", prefix = "": \
-    prefix + text.to_alphanumeric(text.text_to_camelcase(source)) + sufix
+    prefix + text.to_alphanumeric(text.text_to_camelcase(source.replace("&", ""))) + sufix
+
+text_to_objectname = text2objectname
 
 def qapplication(translate=False):
     """Return QApplication instance creates it if it doesn't already exist"""

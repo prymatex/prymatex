@@ -9,7 +9,7 @@ from prymatex import resources
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.compat import getSaveFileName
-from prymatex.qt.helpers import (text2objectname, create_menu, extend_menu,
+from prymatex.qt.helpers import (text_to_objectname, create_menu, extend_menu,
     add_actions, test_actions, center_widget, qbytearray_to_hex, hex_to_qbytearray)
 
 from prymatex.core import exceptions
@@ -146,7 +146,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
     
                     # Find parent menu
                     parentMenu = self.findChild(QtGui.QMenu, 
-                        text2objectname(name, prefix = "menu"))
+                        text_to_objectname(name, prefix = "menu"))
                     # Extend
                     if parentMenu is not None:
                         # Fix menu extensions
@@ -154,12 +154,14 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
                             settings = [ settings ]
                         objects += extend_menu(parentMenu, settings,
                             dispatcher = self.componentInstanceDispatcher,
-                            sequence_handler = self.application.registerShortcut)
+                            sequence_handler = self.application.registerShortcut,
+                            icon_resolver = resources.get_icon)
                     else:
                         objs = create_menu(self, settings,
                             dispatcher = self.componentInstanceDispatcher,
                             allObjects = True,
-                            sequence_handler = self.application.registerShortcut)
+                            sequence_handler = self.application.registerShortcut,
+                            icon_resolver = resources.get_icon)
                         add_actions(self.menuBar(), [ objs[0] ], settings.get("before", None))
                         objects += objs
 

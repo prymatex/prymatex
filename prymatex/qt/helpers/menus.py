@@ -8,24 +8,27 @@ Handle dictionary's menu format
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.qt.helpers.base import text2objectname
+from prymatex.qt.helpers.base import text_to_objectname
+from prymatex.qt.helpers.icons import text_to_iconname
 from prymatex.qt.helpers.actions import create_action
 from prymatex.utils import six
 
 import collections
 
-def create_menu(parent, settings, dispatcher = None, separatorName = False, allObjects = False, sequence_handler = None):
-    menu = QtGui.QMenu(settings["text"], parent)
+def create_menu(parent, settings, dispatcher = None, separatorName = False, 
+    allObjects = False, sequence_handler = None, icon_resolver = None):
+    text = settings["text"]
+    menu = QtGui.QMenu(text, parent)
     
-    menu.setObjectName(text2objectname(
-        settings.get("name", settings["text"]), prefix = "menu"))
-    menu.menuAction().setObjectName(text2objectname(
-        settings.get("name", settings["text"]), prefix = "actionMenu"))
+    menu.setObjectName(text_to_objectname(text, prefix = "menu"))
+    menu.menuAction().setObjectName(text_to_objectname(text, prefix = "actionMenu"))
 
-    # attrs
-    if "icon" in settings:
-        menu.setIcon(settings["icon"])
-
+    icon = settings.get("icon")
+    if icon is None and icon_resolver is not None:
+        icon = icon_resolver(text_to_iconname(text, prefix="icon"))
+    if icon is not None:
+        menu.setIcon(icon)
+    
     # Action functions
     menu.functionTriggered = menu.functionAboutToHide = menu.functionAboutToShow = None
     if "triggered" in settings and isinstance(settings["triggered"], collections.Callable):
@@ -69,21 +72,23 @@ def create_menu(parent, settings, dispatcher = None, separatorName = False, allO
         settings.get("items", []),
         dispatcher = dispatcher,
         separatorName = separatorName,
-        sequence_handler = sequence_handler)
+        sequence_handler = sequence_handler, 
+        icon_resolver = icon_resolver)
 
     return allObjects and objects or menu
 
-def extend_menu(rootMenu, settings, dispatcher = None, separatorName = False, sequence_handler = None):
+def extend_menu(rootMenu, settings, dispatcher = None, separatorName = False, 
+    sequence_handler = None, icon_resolver = None):
     collectedObjects = [ rootMenu ]
     for item in settings:
         objects = None
         if item == "-":
             objects = rootMenu.addSeparator()
-            objects.setObjectName(text2objectname("None", prefix = "separator"))
+            objects.setObjectName(text_to_objectname("None", prefix = "separator"))
         elif isinstance(item, six.string_types) and item.startswith("--"):
             name = item[item.rfind("-") + 1:]
             objects = rootMenu.addSeparator()
-            objects.setObjectName(text2objectname(name, prefix = "separator"))
+            objects.setObjectName(text_to_objectname(name, prefix = "separator"))
             if separatorName:
                 objects.setText(name)
         elif isinstance(item, dict) and 'items' in item:
@@ -91,12 +96,14 @@ def extend_menu(rootMenu, settings, dispatcher = None, separatorName = False, se
                 dispatcher = dispatcher,
                 separatorName = separatorName,
                 allObjects = True,
-                sequence_handler = sequence_handler)
+                sequence_handler = sequence_handler, 
+                icon_resolver = icon_resolver)
             add_actions(rootMenu, [ objects[0] ], item.get("before", None))
         elif isinstance(item, dict):
             objects = create_action(rootMenu.parent(), item,
                 dispatcher = dispatcher, 
-                sequence_handler = sequence_handler)
+                sequence_handler = sequence_handler, 
+                icon_resolver = icon_resolver)
             add_actions(rootMenu, [ objects ], item.get("before", None))
         elif isinstance(item, QtGui.QAction):
             rootMenu.addAction(item)
@@ -111,14 +118,15 @@ def extend_menu(rootMenu, settings, dispatcher = None, separatorName = False, se
                 if isinstance(action, dict):
                     action = create_action(rootMenu.parent(), action,
                         dispatcher = dispatcher, 
-                        sequence_handler = sequence_handler)
+                        sequence_handler = sequence_handler,
+                        icon_resolver = icon_resolver)
                 if action == "-":
                     action = rootMenu.addSeparator()
-                    action.setObjectName(text2objectname("None", prefix = "separator"))
+                    action.setObjectName(text_to_objectname("None", prefix = "separator"))
                 elif isinstance(action, str) and action.startswith("--"):
                     name = action[action.rfind("-") + 1:]
                     action = rootMenu.addSeparator()
-                    action.setObjectName(text2objectname(name, prefix = "separator"))
+                    action.setObjectName(text_to_objectname(name, prefix = "separator"))
                     if separatorName:
                         action.setText(name)
                 else:
@@ -136,7 +144,7 @@ def add_actions(target, actions, before=None):
     # Convert before to action
     before_action = None
     if before:
-        objectName = text2objectname(before, prefix = "actionMenu")
+        objectName = text_to_objectname(before, prefix = "actionMenu")
         before_action = next((ta for ta in target.actions() if ta.objectName() == objectName), None)
     for action in actions:
         if isinstance(action, QtGui.QMenu):

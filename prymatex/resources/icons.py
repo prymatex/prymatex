@@ -28,7 +28,7 @@ def get_icon(index, size = None, default = None):
         icon = QtGui.QIcon(getResource("notfound", ["Icons"]))
     if size is not None:
         size = size if isinstance(size, (tuple, list)) else (size, size)
-        icon = QtGui.QIcon( icon.pixmap(*size) )
+        icon = QtGui.QIcon(icon.pixmap(*size))
     return icon
 
 @memoized

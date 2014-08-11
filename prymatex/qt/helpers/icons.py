@@ -9,7 +9,8 @@ __all__ = [ "combine_icons", "get_std_icon", "text_to_iconname" ]
 
 def text_to_iconname(source, sufix = "", prefix = ""):
     """&Text Button name -> %{prefix}-text-button-name-%{sufix}"""
-    source = [ text.to_alphanumeric(chunk) for chunk in text.lower_case(source).split() ]
+    source = [ text.to_alphanumeric(chunk) for chunk in text.lower_case(
+        source.replace("&", "")).split() ]
     if prefix:
         source.insert(0, prefix)
     if sufix:

@@ -3,7 +3,8 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.qt.helpers.base import text2objectname
+from prymatex.qt.helpers.base import text_to_objectname
+from prymatex.qt.helpers.icons import text_to_iconname
 
 from prymatex.utils import programs
 import collections
@@ -28,29 +29,35 @@ def test_actions(instance, actions):
                 action.testChecked(instance))
         action.blockSignals(False)
 
-def create_action(parent, settings, dispatcher = None, sequence_handler=None):
+def create_action(parent, settings, dispatcher = None, sequence_handler=None, icon_resolver = None):
     """Create a QAction"""
     text = settings.get("text")
     action = QtGui.QAction(text, parent)
-    name = settings.get("name", text)
-    action.setObjectName(text2objectname(name, prefix = "action"))
+    action.setObjectName(text_to_objectname(text, prefix="action"))
     
-    # attrs
-    if "icon" in settings:
-        action.setIcon(settings["icon"])
+    icon = settings.get("icon")
+    if icon is None and icon_resolver is not None:
+        icon = icon_resolver(text_to_iconname(text, prefix="icon"))
+    if icon is not None:
+        action.setIcon(icon)
+
     if "sequence" in settings:
         sequence = settings["sequence"]
         if sequence_handler is not None:
             sequence_handler(action, sequence)
         elif isinstance(sequence, QtGui.QKeySequence):
             action.setShortcut(sequence)
+
     if "tip" in settings:
         action.setToolTip(settings["tip"])
         action.setStatusTip(settings["tip"])
+
     if "data" in settings:
         action.setData(settings["data"])
+
     if "menurole" in settings:
         action.setMenuRole(settings["menurole"])
+
     if "context" in settings:
         action.setShortcutContext(settings["context"])
     

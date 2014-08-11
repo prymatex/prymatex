@@ -114,9 +114,8 @@ class LineNumberSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         
     @classmethod
     def contributeToMainMenu(cls):
-        baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter"
+        baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter"
         menuEntry = {
-            'name': 'lineNumbers',
             'text': "Line numbers",
             'sequence': resources.get_sequence("SideBar", "ShowLineNumbers", 'F10'),
             'toggled': lambda instance, checked: instance.setVisible(checked),
@@ -181,9 +180,8 @@ class BookmarkSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
 
     @classmethod
     def contributeToMainMenu(cls):
-        baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter"
+        baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter"
         menuEntry = {
-            'name': 'bookmarks',
             'text': "Bookmarks",
             'sequence': resources.get_sequence("SideBar", "ShowBookmarks", 'Alt+F10'),
             'toggled': lambda instance, checked: instance.setVisible(checked),
@@ -245,9 +243,8 @@ class FoldingSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
 
     @classmethod
     def contributeToMainMenu(cls):
-        baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter"
+        baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter"
         menuEntry = {
-            'name': 'foldings',
             'text': 'Foldings',
             'sequence': resources.get_sequence("SideBar", "ShowFoldings", 'Shift+F10'),
             'toggled': lambda instance, checked: instance.setVisible(checked),
@@ -320,9 +317,8 @@ class SelectionSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
 
     @classmethod
     def contributeToMainMenu(cls):
-        baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "rightGutter" or "leftGutter"
+        baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter"
         menuEntry = {
-            'name': 'selection',
             'text': 'Selection',
             'toggled': lambda instance, checked: instance.setVisible(checked),
             'testChecked': lambda instance: instance.isVisible() }

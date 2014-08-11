@@ -3,7 +3,7 @@
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.compat import getOpenFileNames
-from prymatex.qt.helpers import text2objectname, text_to_iconname, create_action
+from prymatex.qt.helpers import text_to_objectname, text_to_iconname, create_action
 
 from prymatex import resources
 from prymatex.core import exceptions
@@ -130,7 +130,8 @@ class MainWindowActionsMixin(object):
     SCREENSHOT_FORMAT = 'png'
 
     def on_actionTakeScreenshot_triggered(self):
-        # TODO Mas moderno esto, que ya esta muy viejo
+        from prymatex.resources import icons
+        print(icons.NOTFOUND)
         pxm = QtGui.QPixmap.grabWindow(self.winId())
         import os
         from datetime import datetime
@@ -157,7 +158,7 @@ class MainWindowActionsMixin(object):
                 "text": "New",
                 "items": [{
                     "text": "Editor",
-                    'sequence': resources.get_sequence("Global", "New"),
+                    "sequence": resources.get_sequence("Global", "New"),
                     "triggered": cls.addEmptyEditor,
                     "icon": resources.get_icon("tab-new"),
                 }, "-", {
@@ -230,13 +231,12 @@ class MainWindowActionsMixin(object):
         }
 
         # ------------- Edit menu
-        def globalEditAction(mnemonic):
-            text = mnemonic.replace("&", "")
-            objectName = text2objectname(text)
-            iconName = text_to_iconname(text, prefix = "edit")
+        def globalEditAction(text):
+            objectName = text_to_objectname(text)
+            iconName = text_to_iconname(text, prefix = "icon")
             return {
-                "text": mnemonic,
-                'sequence': resources.get_sequence("Global", objectName),
+                "text": text,
+                "sequence": resources.get_sequence("Global", objectName),
                 "icon": resources.get_icon(iconName),
                 "triggered": cls.globalCallback,
                 "data": objectName
