@@ -170,7 +170,7 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
             if not os.path.isdir(directory):
                 continue
             for pluginPath in glob(os.path.join(directory, config.PMX_PLUGIN_GLOB)):
-                pluginDescriptorPath = os.path.join(pluginPath, config.PMX_PLUGIN_DESCRIPTOR_NAME)
+                pluginDescriptorPath = os.path.join(pluginPath, config.PMX_DESCRIPTOR_NAME)
                 if os.path.isdir(pluginPath) and os.path.isfile(pluginDescriptorPath):
                     descriptorFile = open(pluginDescriptorPath, 'r')
                     pluginEntry = json.load(descriptorFile)

@@ -4,7 +4,6 @@
 import os
 import string
 import shutil
-import hashlib
 import uuid as uuidmodule
 import subprocess
 from glob import glob
@@ -109,13 +108,13 @@ class SupportBaseManager(object):
         return self.namespaces.get(name)
 
     def addProjectNamespace(self, project):
-        #TODO: Asegurar que no esta ya cargado eso del md5 es medio trucho
-        path = project.projectPath
+        # TODO Un nombre mas pulenta
         project.namespaceName = project.name
+        counter = 1
         while project.namespaceName in self.namespaces:
-            #Crear valores random
-            project.namespaceName = project.namespaceName + hashlib.md5(project.namespaceName + path).hexdigest()[:7]
-        namespace = self.addNamespace(project.namespaceName, path)
+            project.namespaceName = "%s%d" % (project.namespaceName, counter)
+            counter += 1
+        namespace = self.addNamespace(project.namespaceName, project.projectPath)
         #Ya esta listo tengo que cargar este namespace
         if self.ready:
             for bundle in self.loadBundles(namespace):

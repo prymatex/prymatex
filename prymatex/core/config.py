@@ -38,11 +38,11 @@ PMX_PROFILES_NAME = "Profiles"
 PMX_SUPPORT_NAME = 'Support'
 PMX_SETTINGS_NAME = "settings.json"
 PMX_STATE_NAME = "state.json"
+PMX_DESCRIPTOR_NAME = 'info.json'
 TM_SETTINGS_NAME = "com.macromates.textmate.plist"
 TM_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
 TM_PREFERENCE_NAMES = ["Library", "Preferences"]
 PMX_PLUGIN_GLOB = '*.pmxplugin'
-PMX_PLUGIN_DESCRIPTOR_NAME = 'info.json'
 
 #============================================================================
 # Regular expresions

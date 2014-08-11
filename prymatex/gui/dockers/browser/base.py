@@ -108,7 +108,16 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
         from prymatex.gui.settings.browser import NetworkSettingsWidget
         from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
         return [ NetworkSettingsWidget, AddonsSettingsWidgetFactory("browser") ]
-        
+    
+    def environmentVariables(self):
+        environment = PrymatexDock.environmentVariables(self)
+        environment.update({
+            "PMX_FTP_PROXY": self.proxyAddress,
+            "PMX_HTTP_PROXY": self.proxyAddress,
+            "PMX_HTTPS_PROXY": self.proxyAddress
+        })
+        return environment
+
     def setupToolBar(self):
         #Setup Context Menu
         optionsMenu = { 

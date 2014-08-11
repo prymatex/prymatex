@@ -6,6 +6,8 @@ import codecs
 
 from prymatex.qt import QtCore, QtGui
 
+from prymatex.core import config
+
 from prymatex.models.trees import TreeNodeBase
 from prymatex.models.configure import ConfigureTreeNode
 
@@ -59,12 +61,10 @@ class ProjectTreeNode(FileSystemTreeNode):
     KEYS = [    'name', 'description', 'licence', 'keywords', 
                 'currentDocument', 'metaData', 'openDocuments',
                 'shellVariables', 'bundleMenu' ]
-    FILE = 'info.plist'
-    FOLDER = '.pmxproject'
     
     def __init__(self, directory, dataHash):
         self.directory = directory
-        self.projectPath = os.path.join(self.path(), self.FOLDER)
+        self.projectPath = os.path.join(self.path(), config.PMX_HOME_NAME)
         FileSystemTreeNode.__init__(self, dataHash.get("name"))
         self.workingSet = None
         self.manager = None
@@ -105,7 +105,7 @@ class ProjectTreeNode(FileSystemTreeNode):
         
         if not os.path.exists(path):
             os.makedirs(path)
-        filePath = os.path.join(self.projectPath, self.FILE)
+        filePath = os.path.join(self.projectPath, config.PMX_DESCRIPTOR_NAME)
         plist.writePlist(self.dataHash(), filePath)
 
     def delete(self, removeFiles = False):
@@ -127,8 +127,8 @@ class ProjectTreeNode(FileSystemTreeNode):
 
     @classmethod
     def loadProject(cls, path, manager):
-        projectPath = os.path.join(path, cls.FOLDER)
-        fileInfo = os.path.join(projectPath, cls.FILE)
+        projectPath = os.path.join(path, config.PMX_HOME_NAME)
+        fileInfo = os.path.join(projectPath, config.PMX_DESCRIPTOR_NAME)
         if not os.path.isfile(fileInfo):
             raise exceptions.FileNotExistsException(fileInfo)
         try:
