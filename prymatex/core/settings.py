@@ -45,7 +45,7 @@ class SettingsGroup(object):
         self.settings = settings
         self.tmsettings = tmsettings
         # Listener classes
-        self.listeners = []
+        self.listeners = set()
         # Setting attrs
         self.configurableItems = {}
         # Setting hooks
@@ -95,7 +95,7 @@ class SettingsGroup(object):
         self.configurableHooks[hook.path] = hook
 
     def addListener(self, listener):
-        self.listeners.append(listener)
+        self.listeners.add(listener)
 
     def removeListener(self, listener):
         self.listeners.remove(listener)

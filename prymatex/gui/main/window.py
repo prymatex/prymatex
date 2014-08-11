@@ -374,8 +374,7 @@ html_footer
     def removeEditor(self, editor):
         self.disconnect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_editor_newLocationMemento)
         self.centralWidget().removeTabWidget(editor)
-        # TODO Ver si el remove borra el editor y como acomoda el historial
-        del editor
+        # TODO Clean history ?
 
     def addEditor(self, editor, focus = True):
         self.centralWidget().addTabWidget(editor)

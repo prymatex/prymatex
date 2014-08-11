@@ -346,7 +346,6 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         # ------------------- Configure Bottom-up
         for instance in buildedInstances[::-1]:
             self.currentProfile.registerConfigurableInstance(instance)
-        self.currentProfile.registerConfigurableInstance(component)
 
         # ------------------- Initialize Top-down
         for instance in buildedInstances:
