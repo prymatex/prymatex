@@ -77,7 +77,6 @@ def loadIconThemes(resourcesPath):
             descriptor = os.path.join(themePath, theme_name, "index.theme")
             if os.path.exists(descriptor):
                 icon_themes[theme_name] = IconTheme(theme_name, os.path.join(themePath, theme_name))
-    print(icon_themes)
     return {"IconThemes": icon_themes}
 
 def installCustomFromThemeMethod():

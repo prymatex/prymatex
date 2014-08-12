@@ -8,6 +8,7 @@ from prymatex.qt import QtGui, QtCore
 from .styles import loadStylesheets
 from .icons import loadIconThemes, loadIcons
 from .images import loadImages
+from .fonts import loadGlyphs
 
 STANDARD_ICON_NAME = [name for name in dir(QtGui.QStyle) if name.startswith('SP_') ]
 
@@ -39,13 +40,6 @@ STATICMAPPING = (
     (os.path.normcase("/bullets/orange.png"), "scope-root-variable"),
     (os.path.normcase("/bullets/darkgreen.png"), "scope-root-none"),
     
-    #Editor Sidebar
-    #(os.path.normcase("/sidebar/folding-top.png"), "folding-top"),
-    #(os.path.normcase("/sidebar/folding-bottom.png"), "folding-bottom"),
-    #(os.path.normcase("/sidebar/folding-collapsed.png"), "folding-collapsed"),
-    #(os.path.normcase("/sidebar/folding-ellipsis.png"), "folding-ellipsis"),
-    #(os.path.normcase("/sidebar/bookmark-flag.png"), "bookmark-flag"),
-    
     #Bundles
     (os.path.normcase("/bundles/bundle.png"), "bundle-item-bundle"),
     (os.path.normcase("/bundles/templates.png"), "bundle-item-template"),
@@ -70,20 +64,11 @@ def loadResources(resourcesPath):
     resources.update(loadIcons(resourcesPath, STATICMAPPING))
     # Load Images
     resources.update(loadImages(resourcesPath, STATICMAPPING))
-    # Load Styles
+    # Load Stylesheets
     resources.update(loadStylesheets(resourcesPath))
-    # Load Styles
+    # Load Glyphs
     resources.update(loadGlyphs(resourcesPath))
     return resources
-
-def loadGlyphs(resourcesPath):
-    glyphs = {}
-    glyphsPath = os.path.join(resourcesPath, "Glyphs")
-    if os.path.exists(glyphsPath):
-        for glyphFileName in os.listdir(glyphsPath):
-            name = os.path.splitext(glyphFileName)[0]
-            glyphs[name] = os.path.join(glyphsPath, glyphFileName)
-    return {"Glyphs": glyphs}
 
 #===============================================================
 # FUNCTIONS

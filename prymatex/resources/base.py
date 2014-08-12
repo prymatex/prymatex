@@ -36,7 +36,7 @@ def loadPrymatexResources(resourcesPath):
     from .loader import loadResources
     from .icons import installCustomFromThemeMethod
     if not RESOURCES_READY:
-        RESOURCES=loadResources(resourcesPath)
+        RESOURCES = loadResources(resourcesPath)
         installCustomFromThemeMethod()
         RESOURCES_READY = True
 
