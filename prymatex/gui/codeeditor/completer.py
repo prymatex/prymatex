@@ -28,8 +28,8 @@ class CompletionBaseModel(QtCore.QAbstractTableModel):
     def setEditor(self, editor):
         self.editor = editor
 
-    def allowOneSuggestion(self, isPrefix):
-        return not isPrefix
+    def allowOneSuggestion(self, index):
+        return False
     
     def modelSorting(self):
         #QCompleter.UnsortedModel
@@ -48,7 +48,10 @@ class CompletionBaseModel(QtCore.QAbstractTableModel):
     def isReady(self):
         raise NotImplemented
     
-    def insertCompletion(self, index):
+    def activatedCompletion(self, index):
+        raise NotImplemented
+
+    def highlightedCompletion(self, index):
         raise NotImplemented
 
 # ===================================
@@ -99,12 +102,16 @@ class WordsCompletionModel(CompletionBaseModel):
     def isReady(self):
         return bool(self.suggestions)
 
-    def insertCompletion(self, index):
+    def activatedCompletion(self, index):
         suggestion = self.suggestions[index.row()]
         currentWord, start, end = self.editor.currentWord()
         cursor = self.editor.newCursorAtPosition(start, end)
         cursor.insertText(suggestion)
         
+    def highlightedCompletion(self, index):
+        suggestion = self.suggestions[index.row()]
+        print(suggestion)
+
     # -------------- Model overrite methods
     def columnCount(self, parent = None):
         return 1
@@ -143,7 +150,7 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
         if self.triggers:
             callback(self)
 
-    def allowOneSuggestion(self, isPrefix):
+    def allowOneSuggestion(self, index):
         return True
         
     # -------------- Model overrite methods
@@ -179,13 +186,17 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
     def isReady(self):
         return bool(self.triggers)
 
-    def insertCompletion(self, index):
+    def activatedCompletion(self, index):
         trigger = self.triggers[index.row()]
         currentWord, start, end = self.editor.currentWord()
         cursor = self.editor.newCursorAtPosition(start, end)
         cursor.removeSelectedText()
         self.editor.insertBundleItem(trigger, textCursor = cursor)
 
+    def highlightedCompletion(self, index):
+        trigger = self.triggers[index.row()]
+        print(trigger)
+        
 class SuggestionsCompletionModel(CompletionBaseModel):
     #display The title to display in the suggestions list
     #insert Snippet to insert after selection
@@ -249,11 +260,15 @@ class SuggestionsCompletionModel(CompletionBaseModel):
     def isReady(self):
         return bool(self.suggestions)
 
-    def insertCompletion(self, index):
+    def activatedCompletion(self, index):
         self.completionCallback(self.suggestions[index.row()])
 
-    def allowOneSuggestion(self, isPrefix):
-        return self.callback is not None
+    def highlightedCompletion(self, index):
+        suggestion = self.suggestions[index.row()]
+        print(suggestion)
+
+    def allowOneSuggestion(self, index):
+        return self.completionCallback is not None
 
 # ===================================
 # Completer
@@ -263,7 +278,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
         super(CodeEditorCompleter, self).__init__(parent = editor)
         self.editor = editor
         self.startCursorPosition = None
-        self.explicitLaunch = False
+        self.explicit_launch = False
 
         # Models
         self.completionModels = [ ]
@@ -281,7 +296,6 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.popup().horizontalHeader().setStretchLastSection(True)
         self.popup().horizontalHeader().setVisible(False)
         self.popup().setShowGrid(False)
-        self.popup().setMinimumHeight(200)
         self.popup().setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.popup().setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.popup().setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
@@ -296,41 +310,44 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.popup().viewport().setPalette(palette)
 
     def isVisible(self):
-        return self.popup().isVisible()
-    
+        return self.completionMode() == QtGui.QCompleter.PopupCompletion and self.popup().isVisible()
+
     def hide(self):
-        print("hide message")
-        return self.popup().hide()
+        if self.completionMode() == QtGui.QCompleter.PopupCompletion:
+            self.popup().hide()
+        self.startCursorPosition = None
 
     def fixPopupView(self):
-        width = self.popup().verticalScrollBar().sizeHint().width()
-        for columnIndex in range(self.model().columnCount()):
-            width += self.popup().sizeHintForColumn(columnIndex)
-        self.popup().setMinimumWidth(width)
-        self.popup().resizeColumnsToContents()
-        self.popup().resizeRowsToContents()
+        if self.completionMode() == QtGui.QCompleter.PopupCompletion:
+            width = self.popup().verticalScrollBar().sizeHint().width()
+            for columnIndex in range(self.model().columnCount()):
+                width += self.popup().sizeHintForColumn(columnIndex)
+            self.popup().setMinimumWidth(width)
+            self.popup().resizeColumnsToContents()
+            self.popup().resizeRowsToContents()
     
     def pre_key_event(self, event):
+        print("entrando", self.isVisible())
         if self.isVisible():
             if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab):
+                print("ignorando")
                 event.ignore()
-                print("hide key")
                 return True
             elif event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
                 #Proximo modelo
                 if self.trySetNextModel():
                     self.complete(self.editor.cursorRect())
-                    self.explicitLaunch = True
-                    return not self.explicitLaunch
+                    self.explicit_launch = True
+                    return not self.explicit_launch
                 else:
                     self.hide()
             elif event.key() in (QtCore.Qt.Key_Space, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
                 self.hide()
         elif event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
             alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-            print(alreadyTyped, start, end)
-            self.explicitLaunch = True
-            self.runCompleter(self.editor.cursorRect(), alreadyTyped)
+            self.explicit_launch = True
+            self.setCompletionPrefix(alreadyTyped)
+            self.runCompleter(self.editor.cursorRect())
         return False
 
     def post_key_event(self, event):
@@ -350,26 +367,29 @@ class CodeEditorCompleter(QtGui.QCompleter):
         elif text.asciify(event.text()) in COMPLETER_CHARS:
             alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
             if end - start >= self.editor.wordLengthToComplete:
-                self.explicitLaunch = False
-                self.runCompleter(self.editor.cursorRect(), alreadyTyped)
+                self.explicit_launch = False
+                self.setCompletionPrefix(alreadyTyped)
+                self.runCompleter(self.editor.cursorRect())
 
     def activatedCompletion(self, index):
         sIndex = self.completionModel().mapToSource(index)
-        self.model().insertCompletion(sIndex)
+        self.model().activatedCompletion(sIndex)
         
     def highlightedCompletion(self, index):
-        pass
+        sIndex = self.completionModel().mapToSource(index)
+        self.model().highlightedCompletion(sIndex)
         
     def setCurrentRow(self, index):
-        if QtGui.QCompleter.setCurrentRow(self, index):
+        if not QtGui.QCompleter.setCurrentRow(self, index):
+            return False
+        if self.completionMode() == QtGui.QCompleter.PopupCompletion:
             self.popup().setCurrentIndex(self.completionModel().index(index, 0))
-            isPrefix = self.completionPrefix() == self.currentCompletion()
-            return not isPrefix or \
-                (self.completionCount() == 1 and self.model().allowOneSuggestion(isPrefix)) or \
-                self.explicitLaunch
-        return False
+        if self.completionCount() == 1:
+            return self.model().allowOneSuggestion(self.currentIndex())
+        return True
 
     def setCompletionPrefix(self, prefix):
+        self.startCursorPosition = self.editor.textCursor().position() - len(prefix or "")
         if self.model() is not None:
             self.fixPopupView()
         for model in self.completionModels:
@@ -383,6 +403,8 @@ class CodeEditorCompleter(QtGui.QCompleter):
         QtGui.QCompleter.setModel(self, model)
 
     def trySetModel(self, model):
+        if model not in self.completionModels:
+            return False
         self.setModel(model)
         if self.setCurrentRow(0):
             self.fixPopupView()
@@ -399,7 +421,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
         completionModel.setEditor(None)
 
     def trySetNextModel(self):
-        current = model = self.model()
+        current = model = self.model() or self.completionModels[-1]
         while True:
             index = (self.completionModels.index(model) + 1) % len(self.completionModels)
             model = self.completionModels[index]
@@ -409,18 +431,18 @@ class CodeEditorCompleter(QtGui.QCompleter):
                 break
         return False
 
-    def runCompleter(self, rect, prefix, model = None):
-        for completerTask in self.completerTasks:
-            completerTask.cancel()
-        self.setCompletionPrefix(prefix)
-        self.startCursorPosition = self.editor.textCursor().position()
-        if prefix:
-            self.startCursorPosition -= len(prefix)
-        self.setModel(None)
-        def _go(model):
-            if self.model() is None and self.trySetModel(model):
-                self.complete(rect)
-        if model is not None:
-            _go(model)
-        self.completerTasks = self.editor.application.schedulerManager.tasks(
-            lambda model: model.fillModel(_go), self.completionModels)
+    def runCompleter(self, rect, model = None):
+        if self.isVisible() and model is not None and self.trySetModel(model):
+            self.complete(rect)
+        elif not self.isVisible():
+            for completerTask in self.completerTasks:
+                completerTask.cancel()
+            self.setModel(None)
+            def _go(model):
+                # First win
+                if self.model() is None and self.trySetModel(model):
+                    self.complete(rect)
+            if model is not None:
+                _go(model)
+            self.completerTasks = self.editor.application.schedulerManager.tasks(
+                lambda model: model.fillModel(_go), self.completionModels)

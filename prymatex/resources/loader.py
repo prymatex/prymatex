@@ -10,8 +10,6 @@ from .icons import loadIconThemes, loadIcons
 from .images import loadImages
 from .fonts import loadGlyphs
 
-STANDARD_ICON_NAME = [name for name in dir(QtGui.QStyle) if name.startswith('SP_') ]
-
 STATICMAPPING = (
     # Process
     (os.path.normcase("/bullets/red.png"), "porcess-not-running"),

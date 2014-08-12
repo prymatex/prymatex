@@ -22,6 +22,7 @@ from .base import buildResourceKey
 
 __fileIconProvider = QtGui.QFileIconProvider()
 
+STANDARD_ICON_NAME = [name for name in dir(QtGui.QStyle) if name.startswith('SP_') ]
 NOTFOUND = set()
 
 def get_icon(index, size = None, default = None):
