@@ -48,9 +48,8 @@ Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''
             self.setSnippet(SnippetObject(self.content))
         processor.beginExecution(self)
         SnippetHandler.execute(self, processor)
-        if not processor.managed():
-            processor.endExecution(self)
-        else:
-            # TODO: Solo si tiene holders sino un end esta bien tambien
+        if processor.managed() and self.hasHolders():
             processor.selectHolder()
+        else:
+            processor.endExecution(self)
         

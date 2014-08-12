@@ -141,6 +141,9 @@ class SnippetHandler(object):
     def hasHolderContent(self):
         return self.__current_holder().hasContent(self.memodict)
         
+    def hasHolders(self):
+        return bool(self.holders)
+
     def lastHolderFixed(self):
         return self.snippet.lastHolderFixed()
 

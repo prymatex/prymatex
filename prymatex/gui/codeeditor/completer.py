@@ -327,10 +327,8 @@ class CodeEditorCompleter(QtGui.QCompleter):
             self.popup().resizeRowsToContents()
     
     def pre_key_event(self, event):
-        print("entrando", self.isVisible())
         if self.isVisible():
             if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab):
-                print("ignorando")
                 event.ignore()
                 return True
             elif event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
