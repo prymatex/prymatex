@@ -8,12 +8,17 @@
 
 import os
 
+from collections import namedtuple
+
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import get_std_icon
 
-from prymatex.resources.loader import getResource
 from prymatex.utils.decorators.memoize import memoized
 from prymatex.utils import six
+from prymatex.utils import osextra
+
+from .base import getResource
+from .base import buildResourceKey
 
 __fileIconProvider = QtGui.QFileIconProvider()
 
@@ -56,3 +61,44 @@ def __get_icon(index):
         #Icon by int index in fileicon provider
         return __fileIconProvider.icon(index)
     
+IconTheme = namedtuple("IconTheme", "name path")
+
+def loadIconThemes(resourcesPath):
+    icon_themes = {}
+    themePaths = set(QtGui.QIcon.themeSearchPaths())
+    if os.path.exists("/usr/share/icons"):
+        themePaths.add("/usr/share/icons")
+    themePaths.add(os.path.join(resourcesPath, "IconThemes"))
+    themeNames = [ ]
+    for themePath in themePaths:
+        if not os.path.exists(themePath):
+            continue
+        for theme_name in os.listdir(themePath):
+            descriptor = os.path.join(themePath, theme_name, "index.theme")
+            if os.path.exists(descriptor):
+                icon_themes[theme_name] = IconTheme(theme_name, os.path.join(themePath, theme_name))
+    print(icon_themes)
+    return {"IconThemes": icon_themes}
+
+def installCustomFromThemeMethod():
+    #Install fromTheme custom function
+    from .icons import get_icon
+    QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
+    QtGui.QIcon.fromTheme = staticmethod(get_icon)
+
+def loadIcons(resourcesPath, staticMapping = []):
+    icons = {}
+    iconsPath = os.path.join(resourcesPath, "Icons")
+    if os.path.exists(iconsPath):
+        for dirpath, dirnames, filenames in os.walk(iconsPath):
+            for filename in filenames:
+                iconPath = os.path.join(dirpath, filename)
+                staticNames = [path_names for path_names in staticMapping if iconPath.endswith(path_names[0])]
+                if staticNames:
+                    for name in staticNames:
+                        icons[name[1]] = iconPath
+                else:
+                    name = buildResourceKey(filename, osextra.path.fullsplit(dirpath), icons)
+                    icons[name] = iconPath
+    return { "Icons": icons }
+

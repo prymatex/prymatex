@@ -37,8 +37,9 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     @ConfigurableItem(default = "default")
     def qtStyleSheet(self, styleSheetName):
-        if styleSheetName in resources.STYLESHEETS:
-            self.setStyleSheet(resources.STYLESHEETS[styleSheetName])
+        styleSheet = resources.getResource(styleSheetName, ["Stylesheets"])
+        if styleSheet is not None:
+            self.setStyleSheet(styleSheet.content)
 
     askAboutExternalDeletions = ConfigurableItem(default=False)
     askAboutExternalChanges = ConfigurableItem(default=False)

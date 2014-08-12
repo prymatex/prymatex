@@ -67,6 +67,7 @@ selection-background-color: %s; }""" % (
         self.slider.setPalette(palette)
 
     def setFont(self, font):
+        font = QtGui.QFont(font)
         font.setPointSize(1)
         super(MiniMapAddon, self).setFont(font)
         

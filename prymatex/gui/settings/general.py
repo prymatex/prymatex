@@ -24,7 +24,7 @@ class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtGui.QWidget):
             if currentStyleName and styleName == currentStyleName:
                 self.comboBoxQtStyle.setCurrentIndex(index)
 
-        for index, styleSheetName in enumerate(resources.STYLESHEETS.keys()):
+        for index, styleSheetName in enumerate(resources.getSection("Stylesheets").keys()):
             self.comboBoxQtStyleSheet.addItem(styleSheetName, styleSheetName)
             if currentStyleSheetName and styleSheetName == currentStyleSheetName:
                 self.comboBoxQtStyleSheet.setCurrentIndex(index)

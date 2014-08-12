@@ -5,12 +5,10 @@ import os, sys
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex.utils.decorators.memoize import memoized
+from .styles import loadStylesheets
+from .icons import loadIconThemes, loadIcons
+from .images import loadImages
 
-RESOURCES = {}
-RESOURCES_READY = False
-
-THEME_ICON_TEST = "folder-sync"
 STANDARD_ICON_NAME = [name for name in dir(QtGui.QStyle) if name.startswith('SP_') ]
 
 STATICMAPPING = (
@@ -42,11 +40,11 @@ STATICMAPPING = (
     (os.path.normcase("/bullets/darkgreen.png"), "scope-root-none"),
     
     #Editor Sidebar
-    (os.path.normcase("/sidebar/folding-top.png"), "foldingtop"),
-    (os.path.normcase("/sidebar/folding-bottom.png"), "foldingbottom"),
-    (os.path.normcase("/sidebar/folding-collapsed.png"), "foldingcollapsed"),
-    (os.path.normcase("/sidebar/folding-ellipsis.png"), "foldingellipsis"),
-    (os.path.normcase("/sidebar/bookmark-flag.png"), "bookmarkflag"),
+    #(os.path.normcase("/sidebar/folding-top.png"), "folding-top"),
+    #(os.path.normcase("/sidebar/folding-bottom.png"), "folding-bottom"),
+    #(os.path.normcase("/sidebar/folding-collapsed.png"), "folding-collapsed"),
+    #(os.path.normcase("/sidebar/folding-ellipsis.png"), "folding-ellipsis"),
+    #(os.path.normcase("/sidebar/bookmark-flag.png"), "bookmark-flag"),
     
     #Bundles
     (os.path.normcase("/bundles/bundle.png"), "bundle-item-bundle"),
@@ -64,120 +62,28 @@ STATICMAPPING = (
     (os.path.normcase("/bullets/red.png"), "editor-mode"),
 )
 
-#===============================================================
-# LOAD
-#===============================================================
-def buildResourceKey(filename, namePrefixes, installedKeys):
-    resourceKey, _ = os.path.splitext(filename)
-    index = -1
-    while resourceKey in installedKeys and index:
-        newKey = "-".join(namePrefixes[index:] + [resourceKey])
-        if newKey == resourceKey:
-            raise Exception("Esto no puede ocurrir")
-        index -= 1
-        resourceKey = newKey
-    return resourceKey
-
-def loadResources(resourcesPath, staticMapping = []):
-    from prymatex.utils import osextra
-    def loadSourcePath(sourcePath):
-        sections ={}
-        for dirpath, dirnames, filenames in os.walk(sourcePath):
-            for filename in filenames:
-                iconPath = os.path.join(dirpath, filename)
-                staticNames = [path_names for path_names in staticMapping if iconPath.endswith(path_names[0])]
-                if staticNames:
-                    for name in staticNames:
-                        sections[name[1]] = iconPath
-                else:
-                    name = buildResourceKey(filename, osextra.path.fullsplit(dirpath), sections)
-                    sections[name] = iconPath
-        return sections
+def loadResources(resourcesPath):
     resources = {}
-    for section in [ "Icons", "Images" ]:
-        resources[section] = loadSourcePath(os.path.join(resourcesPath, section))
+    # Load Icons Themes
+    resources.update(loadIconThemes(resourcesPath))
+    # Load Icons
+    resources.update(loadIcons(resourcesPath, STATICMAPPING))
+    # Load Images
+    resources.update(loadImages(resourcesPath, STATICMAPPING))
+    # Load Styles
+    resources.update(loadStylesheets(resourcesPath))
+    # Load Styles
+    resources.update(loadGlyphs(resourcesPath))
     return resources
 
-def loadStyles(resourcesPath):
-    styles = {}
-    stylesPath = os.path.join(resourcesPath, "Styles")
-    for styleFileName in os.listdir(stylesPath):
-        name = os.path.splitext(styleFileName)[0]
-        styles[name] = os.path.join(stylesPath, styleFileName)
-    return {"Styles": styles}
-    
 def loadGlyphs(resourcesPath):
     glyphs = {}
     glyphsPath = os.path.join(resourcesPath, "Glyphs")
-    for glyphFileName in os.listdir(glyphsPath):
-        name = os.path.splitext(glyphFileName)[0]
-        glyphs[name] = os.path.join(glyphsPath, glyphFileName)
+    if os.path.exists(glyphsPath):
+        for glyphFileName in os.listdir(glyphsPath):
+            name = os.path.splitext(glyphFileName)[0]
+            glyphs[name] = os.path.join(glyphsPath, glyphFileName)
     return {"Glyphs": glyphs}
-
-def loadPrymatexResources(resourcesPath, preferedThemeName = "oxygen"):
-    global RESOURCES, RESOURCES_READY
-    if not RESOURCES_READY:
-        # Test default theme:
-        if not QtGui.QIcon.hasThemeIcon(THEME_ICON_TEST):
-            themePaths = QtGui.QIcon.themeSearchPaths()
-            if os.path.exists("/usr/share/icons") and "/usr/share/icons" not in themePaths:
-                themePaths.append("/usr/share/icons")
-            themePaths.append(os.path.join(resourcesPath, "IconThemes"))
-            themeNames = [ preferedThemeName ]
-            for themePath in themePaths:
-                if os.path.exists(themePath):
-                    themeNames.extend(os.listdir(themePath))
-            # Set and test
-            QtGui.QIcon.setThemeSearchPaths( themePaths )
-            for themeName in themeNames:
-                QtGui.QIcon.setThemeName(themeName)
-                if QtGui.QIcon.hasThemeIcon(THEME_ICON_TEST):
-                    break
-
-        # Load Icons and Images
-        RESOURCES.update(loadResources(resourcesPath, STATICMAPPING))
-
-        # Load Styles
-        RESOURCES.update(loadStyles(resourcesPath))
-        
-        # Load Styles
-        RESOURCES.update(loadGlyphs(resourcesPath))
-
-        installCustomFromThemeMethod()
-        RESOURCES_READY = True
-
-def installCustomFromThemeMethod():
-    #Install fromTheme custom function
-    from .icons import get_icon
-    QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
-    QtGui.QIcon.fromTheme = staticmethod(get_icon)
-            
-def registerImagePath(name, path):
-    global RESOURCES
-    external = RESOURCES.setdefault("External", {})
-    external[name] = path
-
-def getResource(name, sections = None):
-    global RESOURCES
-    if sections is not None:
-        sections = sections if isinstance(sections, (list, tuple)) else (sections, )
-    else:
-        sections = list(RESOURCES.keys())
-    for section in sections:
-        if section in RESOURCES and name in RESOURCES[section]:
-            return RESOURCES[section].get(name)
-
-def setResource(section, name, value):
-    global RESOURCES
-    RESOURCES.setdefault(section, {})[name] = value
-
-def removeSection(name):
-    global RESOURCES
-    RESOURCES["name"] = {}
-
-def getSection(name):
-    global RESOURCES
-    return RESOURCES.setdefault(name, {})
 
 #===============================================================
 # FUNCTIONS

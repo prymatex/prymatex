@@ -173,7 +173,7 @@ class BookmarkSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
     
     def __init__(self, **kwargs):
         super(BookmarkSideBarAddon, self).__init__(**kwargs)
-        self.bookmarkflagImage = resources.get_image("bookmarkflag")
+        self.bookmarkflagImage = resources.get_image("bookmark-flag")
         self.imagesHeight = self.bookmarkflagImage.height()
         self.setFixedWidth(self.bookmarkflagImage.width())
         self.setObjectName(self.__class__.__name__)
@@ -234,9 +234,9 @@ class FoldingSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
 
     def __init__(self, **kwargs):
         super(FoldingSideBarAddon, self).__init__(**kwargs)
-        self.foldingcollapsedImage = resources.get_image("foldingcollapsed")
-        self.foldingtopImage = resources.get_image("foldingtop")
-        self.foldingbottomImage = resources.get_image("foldingbottom")
+        self.foldingcollapsedImage = resources.get_image("folding-collapsed")
+        self.foldingtopImage = resources.get_image("folding-top")
+        self.foldingbottomImage = resources.get_image("folding-bottom")
         self.imagesHeight = self.foldingcollapsedImage.height()
         self.setFixedWidth(self.foldingbottomImage.width())
         self.setObjectName(self.__class__.__name__)

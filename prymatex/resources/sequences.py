@@ -6,7 +6,7 @@ from collections import namedtuple
 from prymatex.qt import QtGui
 from prymatex.qt.helpers import keybinding
 
-from prymatex.resources.loader import getResource, setResource, getSection, removeSection
+from prymatex.resources.base import getResource, setResource, getSection, removeSection
 
 from prymatex.utils import text
 
