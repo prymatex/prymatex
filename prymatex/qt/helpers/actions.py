@@ -4,11 +4,11 @@
 import collections
 
 from prymatex.qt import QtCore, QtGui
-
-from prymatex.qt.helpers.base import text_to_objectname
-from prymatex.qt.helpers.icons import text_to_iconname
-
 from prymatex.utils import programs
+
+from .base import text_to_objectname
+from .icons import text_to_iconname
+from .keysequences import text_to_sequencesname
 
 def toggle_actions(actions, enable):
     """Enable/disable actions"""
@@ -39,15 +39,14 @@ def create_action(parent, settings, dispatcher = None, sequence_handler=None, ic
     icon = settings.get("icon", text_to_iconname(text))
     if icon_handler is not None:
         icon_handler(action, icon)
-    elif isinstance(icon, QtGui.QIcon):
+    elif isinstance(icon, QtGui.QIcon) and not icon.isNull():
         action.setIcon(icon)
 
-    if "sequence" in settings:
-        sequence = settings["sequence"]
-        if sequence_handler is not None:
-            sequence_handler(action, sequence)
-        elif isinstance(sequence, QtGui.QKeySequence):
-            action.setShortcut(sequence)
+    sequence = settings.get("sequence", text_to_sequencesname(text))
+    if sequence_handler is not None:
+        sequence_handler(action, sequence)
+    elif isinstance(sequence, QtGui.QKeySequence) and not sequence.isEmpty():
+        action.setShortcut(sequence)
 
     if "tip" in settings:
         action.setToolTip(settings["tip"])

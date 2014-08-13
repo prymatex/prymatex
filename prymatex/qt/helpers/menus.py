@@ -26,7 +26,7 @@ def create_menu(parent, settings, dispatcher = None, separatorName = False,
     icon = settings.get("icon", text_to_iconname(text))
     if icon_handler is not None:
         icon_handler(menu, icon)
-    elif isinstance(icon, QtGui.QIcon):
+    elif isinstance(icon, QtGui.QIcon) and not icon.isNull():
         menu.setIcon(icon)
     
     # Action functions

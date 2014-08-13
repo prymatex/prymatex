@@ -180,12 +180,12 @@ class MainWindowActionsMixin(object):
                 "aboutToShow": cls.on_menuRecentFiles_aboutToShow,
                 "items": ["-", {
                     "text": "Open all recent files",
-                    "icon": resources.get_icon("document-open-recent"),
+                    "icon": "document-open-recent",
                     "triggered": lambda mw: [ mw.application.openFile(path)
                         for path in mw.application.fileManager.fileHistory ]
                 }, {
                     "text": "Remove all recent files",
-                    "icon": resources.get_icon("edit-clear"),
+                    "icon": "edit-clear",
                     "triggered": lambda mw: mw.application.fileManager.clearFileHistory()
                 }]
             }, {
@@ -194,38 +194,36 @@ class MainWindowActionsMixin(object):
                 "icon": resources.get_icon("project-open"),
             }, "-", {
                 "text": "Save",
-                "sequence": "Save",
                 "icon": "document-save",
                 "triggered": lambda mw: mw.saveEditor()
             }, {
                 "text": "Save as",
-                "icon": resources.get_icon("document-save-as"),
+                "icon": "document-save-as",
                 "triggered": lambda mw: mw.saveEditor(saveAs=True)
             }, {
                 "text": "Save all",
-                'sequence': resources.get_sequence("Global", "SaveAll", "Ctrl+Shift+S"),
-                "icon": resources.get_icon("document-save-all"),
+                "sequence": ("Global", "SaveAll", "Ctrl+Shift+S"),
+                "icon": "document-save-all",
                 "triggered": lambda mw: [ mw.saveEditor(editor=editor) for editor in mw.editors() ]
             }, "-", {
                 "text": "Close",
-                'sequence': resources.get_sequence("Global", "Close"),
-                "icon": resources.get_icon("tab-close"),
+                "icon": "tab-close",
                 "triggered": lambda mw: mw.closeEditor()
             }, {
                 "text": "Close all",
-                'sequence': resources.get_sequence("Global", "CloseAll", "Ctrl+Shift+W"),
+                "sequence": ("Global", "CloseAll", "Ctrl+Shift+W"),
                 "triggered": lambda mw: [ mw.closeEditor(editor=editor) for editor in mw.editors() ]
             }, {
                 "text": "Close others",
-                "icon": resources.get_icon("tab-close-other")
+                "icon": "tab-close-other"
             }, "-", {
                 "text": "Switch profile",
-                "icon": resources.get_icon("system-switch-user"),
+                "icon": "system-switch-user",
                 "triggered": cls.on_actionSwitchProfile_triggered
             }, "-", {
                 "text": "Quit",
-                'sequence': resources.get_sequence("Global", "Quit"),
-                "icon": resources.get_icon("application-exit"),
+                "sequence": "Quit",
+                "icon": "application-exit",
                 "triggered": lambda mw: mw.application.quit()
             }]
         }

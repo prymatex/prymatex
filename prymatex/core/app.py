@@ -518,7 +518,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     def registerIcon(self, qobject, icon):
         if not isinstance(icon, QtGui.QIcon):
             icon = resources.get_icon(icon)
-        qobject.setIcon(icon)
+        if not icon.isNull():
+            qobject.setIcon(icon)
 
     # ------- Shortcuts
     def registerShortcut(self, qobject, sequence):
@@ -529,7 +530,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             if not isinstance(sequence, (tuple, list)):
                 sequence = ("Global", sequence)
             sequence = resources.get_sequence(*sequence)
-        self.shortcutsTreeModel.registerShortcut(qobject, sequence)
+        if not sequence.isEmpty():
+            self.shortcutsTreeModel.registerShortcut(qobject, sequence)
 
     def applyShortcuts(self):
         self.shortcutsTreeModel.applyShortcuts()

@@ -7,6 +7,9 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.utils.decorators.memoize import memoized
 from prymatex.utils.modmap import get_keymap_table
+from .base import text_to_objectname
+
+text_to_sequencesname = text_to_objectname
 
 def keybinding(name):
     """Return keybinding"""

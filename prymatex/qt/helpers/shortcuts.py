@@ -3,7 +3,7 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.qt.helpers.base import text2objectname
+from .base import text_to_objectname
 
 import collections
 
@@ -11,15 +11,22 @@ def create_shortcut(parent, settings, dispatcher = None, sequence_handler=None):
     """Create a QAction"""
     shortcut = QtGui.QShortcut(parent)
     name = settings.get("name", "None")
-    shortcut.setObjectName(text2objectname(name, prefix = "shortcut"))
+    shortcut.setObjectName(text_to_objectname(name, prefix = "shortcut"))
     
     # attrs
+    sequence = settings.get("sequence", name)
+    if sequence_handler is not None:
+        sequence_handler(shortcut, sequence)
+    elif isinstance(sequence, QtGui.QKeySequence) and not sequence.isEmpty():
+        shortcut.setShortcut(sequence)
+
     if "sequence" in settings:
         sequence = settings["sequence"]
         if sequence_handler is not None:
             sequence_handler(shortcut, sequence)
         elif isinstance(sequence, QtGui.QKeySequence):
             shortcut.setKey(sequence)
+
     if "context" in settings:
         shortcut.setContext(settings["context"])
         
