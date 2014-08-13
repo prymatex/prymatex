@@ -29,7 +29,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
     #Settings
     SETTINGS_GROUP = 'ProjectManager'
 
-    defaultDirectory  = ConfigurableItem(default = os.path.join(get_home_dir(), "projects"))
+    defaultDirectory  = ConfigurableItem(default = os.path.join(get_home_dir(), "Projects"))
     knownProjects = ConfigurableItem(default = [])
 
     VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
