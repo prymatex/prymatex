@@ -155,13 +155,13 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
                         objects += extend_menu(parentMenu, settings,
                             dispatcher = self.componentInstanceDispatcher,
                             sequence_handler = self.application.registerShortcut,
-                            icon_resolver = resources.get_icon)
+                            icon_handler = self.application.registerIcon)
                     else:
                         objs = create_menu(self, settings,
                             dispatcher = self.componentInstanceDispatcher,
                             allObjects = True,
                             sequence_handler = self.application.registerShortcut,
-                            icon_resolver = resources.get_icon)
+                            icon_handler = self.application.registerIcon)
                         add_actions(self.menuBar(), [ objs[0] ], settings.get("before", None))
                         objects += objs
 

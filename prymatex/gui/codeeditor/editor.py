@@ -1160,11 +1160,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         menu["view"] = [
                 '-',
                 {'text': "Zoom in",
-                  'icon': resources.get_icon("zoom-in"),
                   'sequence': resources.get_sequence("Editor", "ZoomIn"),
                   'triggered': cls.zoomIn},
                  {'text': "Zoom out",
-                  'icon': resources.get_icon("zoom-out"),
                   'sequence': resources.get_sequence("Editor", "ZoomOut"),
                   'triggered': cls.zoomOut},
                 '-',

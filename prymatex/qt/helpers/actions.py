@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import collections
+
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.qt.helpers.base import text_to_objectname
 from prymatex.qt.helpers.icons import text_to_iconname
 
 from prymatex.utils import programs
-import collections
 
 def toggle_actions(actions, enable):
     """Enable/disable actions"""
@@ -29,16 +30,16 @@ def test_actions(instance, actions):
                 action.testChecked(instance))
         action.blockSignals(False)
 
-def create_action(parent, settings, dispatcher = None, sequence_handler=None, icon_resolver = None):
+def create_action(parent, settings, dispatcher = None, sequence_handler=None, icon_handler=None):
     """Create a QAction"""
     text = settings.get("text")
     action = QtGui.QAction(text, parent)
     action.setObjectName(text_to_objectname(text, prefix="action"))
     
-    icon = settings.get("icon")
-    if icon is None and icon_resolver is not None:
-        icon = icon_resolver(text_to_iconname(text))
-    if icon is not None:
+    icon = settings.get("icon", text_to_iconname(text))
+    if icon_handler is not None:
+        icon_handler(action, icon)
+    elif isinstance(icon, QtGui.QIcon):
         action.setIcon(icon)
 
     if "sequence" in settings:

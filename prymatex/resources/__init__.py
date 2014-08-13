@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.resources.base import *
-from prymatex.resources.loader import *
-from prymatex.resources.icons import *
-from prymatex.resources.images import *
-from prymatex.resources.styles import *
-from prymatex.resources.fonts import *
-from prymatex.resources.files import *
-from prymatex.resources.sequences import *
+from .base import *
+from .loader import *
+from .icons import *
+from .images import *
+from .styles import *
+from .fonts import *
+from .files import *
+from .sequences import *

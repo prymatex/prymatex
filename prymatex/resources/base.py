@@ -61,9 +61,16 @@ def setResource(section, name, value):
 
 def removeSection(name):
     global RESOURCES
-    RESOURCES["name"] = {}
+    if name in RESOURCES:
+        del RESOURCES[name]
 
 def getSection(name):
     global RESOURCES
     return RESOURCES.setdefault(name, {})
+
+# New names
+find_resource = getResource
+set_resource = setResource
+get_section = getSection
+del_section = removeSection
 

@@ -17,7 +17,7 @@ from prymatex.utils.decorators.memoize import memoized
 from prymatex.utils import six
 from prymatex.utils import osextra
 
-from .base import getResource
+from .base import find_resource
 from .base import buildResourceKey
 
 __fileIconProvider = QtGui.QFileIconProvider()
@@ -30,8 +30,9 @@ def get_icon(index, size = None, default = None):
     if icon is None and default is not None:
         icon = default
     elif icon is None:
+        # TODO Quitar esto luego de tener identificados todos
         NOTFOUND.add(index)
-        icon = QtGui.QIcon(getResource("notfound", ["Icons"]))
+        icon = QtGui.QIcon(find_resource("notfound", ["Icons"]))
     if size is not None:
         size = size if isinstance(size, (tuple, list)) else (size, size)
         icon = QtGui.QIcon(icon.pixmap(*size))
@@ -53,7 +54,7 @@ def __get_icon(index):
             return QtGui.QIcon._fromTheme(index)
         else: 
             #Try icon in the prymatex's resources
-            path = getResource(index, ["Icons", "External"])
+            path = find_resource(index, ["Icons", "External"])
             if path is not None:
                 return QtGui.QIcon(path)
         #Standard Icon

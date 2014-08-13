@@ -513,12 +513,22 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                 self.openFile(path)
             else:
                 self.openDirectory(path)
+                
+    # ------- Icons
+    def registerIcon(self, qobject, icon):
+        if not isinstance(icon, QtGui.QIcon):
+            icon = resources.get_icon(icon)
+        qobject.setIcon(icon)
 
     # ------- Shortcuts
     def registerShortcut(self, qobject, sequence):
         """Register QAction or QShortcut to Prymatex main application,
         with sequence
         """
+        if not isinstance(sequence, resources.ContextSequence):
+            if not isinstance(sequence, (tuple, list)):
+                sequence = ("Global", sequence)
+            sequence = resources.get_sequence(*sequence)
         self.shortcutsTreeModel.registerShortcut(qobject, sequence)
 
     def applyShortcuts(self):

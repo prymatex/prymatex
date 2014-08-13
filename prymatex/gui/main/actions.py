@@ -194,8 +194,8 @@ class MainWindowActionsMixin(object):
                 "icon": resources.get_icon("project-open"),
             }, "-", {
                 "text": "Save",
-                'sequence': resources.get_sequence("Global", "Save"),
-                "icon": resources.get_icon("document-save"),
+                "sequence": "Save",
+                "icon": "document-save",
                 "triggered": lambda mw: mw.saveEditor()
             }, {
                 "text": "Save as",
