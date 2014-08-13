@@ -7,9 +7,6 @@ from .base import CodeEditorBaseProcessor
 from prymatex.support.processor import SnippetProcessorMixin
 
 class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin):
-    GoForward = 0
-    GoBackward = 1
-
     def configure(self, **kwargs):
         CodeEditorBaseProcessor.configure(self, **kwargs)
         self.snippetWrapper = QtGui.QTextCursor(self.textCursor)
@@ -25,9 +22,13 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
 
     def beginExecution(self, bundleItem):
         super(CodeEditorSnippetProcessor, self).beginExecution(bundleItem)
-        self.navigation = self.GoForward
+        self.status = self.editor.showStatus("Snippet: %s" % bundleItem.name)
         self.render()
-        
+
+    def endExecution(self, bundleItem):
+        super(CodeEditorSnippetProcessor, self).endExecution(bundleItem)
+        self.status.close()
+
     def beginRender(self):
         self.output = ""
         self.__startPosition = self.caretPosition()
@@ -37,7 +38,7 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         self.editor.updatePlainText(self.output, self.snippetWrapper)
         self.snippetWrapper = self.editor.newCursorAtPosition(
             self.__startPosition, self.__endPosition)
-        # End or select holder
+        # Select holder
         self.selectHolder()
         
     def caretPosition(self):
@@ -51,10 +52,15 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
     def selectHolder(self):
         start, end = self.bundleItem.currentPosition()
         self.editor.setTextCursor(self.editor.newCursorAtPosition(start, end))
+        self.status.setText("Snippet: %s Holder: %d" % (self.bundleItem.name, self.bundleItem.holderNumber()))
+        
+        # Choices
         choices = self.bundleItem.holderChoices()
         if choices:
             self.editor.showFlatPopupMenu(choices, self.setHolderChoiceIndex)
-
+        if self.lastHolder() and not self.hasHolderContent():
+            self.stop()
+            
     def runShellScript(self, script):
         context = self.editor.application.supportManager.runSystemCommand(
             shellCommand = script,
@@ -66,11 +72,8 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
     def setHolderChoiceIndex(self, index):
         if index != -1:
             self.bundleItem.setHolderContent(index)
-            self.render()
-            if self.nextHolder():
-                self.selectHolder()
-        elif self.backward and self.previousHolder() or self.nextHolder():
-            self.selectHolder()
+        self.backward and self.previousHolder() or self.nextHolder()
+        self.render()
 
     # ---------- Public API
     def stop(self):
@@ -78,25 +81,34 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
 
     def render(self):
         self.bundleItem.render(self)
-    
+
     # ---------- Holder navigation
     def nextHolder(self):
-        self.navigation = self.GoForward
-        return self.bundleItem.nextHolder()
+        self.backward = False
+        if self.bundleItem.nextHolder():
+            self.selectHolder()
+        else:
+            self.stop()
 
     def previousHolder(self):
-        self.navigation = self.GoBackward
-        return self.bundleItem.previousHolder()
-    
+        self.backward = True
+        if self.bundleItem.previousHolder():
+            self.selectHolder()
+        else:
+            self.stop()
+
     def lastHolder(self):
         return self.bundleItem.lastHolder()
 
     def setHolder(self, start, end):
-        return self.bundleItem.setHolder(start, end)
-    
+        if not self.bundleItem.setHolder(start, end):
+            self.stop()
+            return False
+        return True
+
     def hasHolderContent(self):
         return self.bundleItem.hasHolderContent()
-        
+
     def setHolderContent(self, content):
         self.bundleItem.setHolderContent(content)
 

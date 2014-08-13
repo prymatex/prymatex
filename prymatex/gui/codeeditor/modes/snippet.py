@@ -27,38 +27,18 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
     def keyPressEvent(self, event):
         cursor = self.editor.textCursor()
         if event.key() == QtCore.Qt.Key_Escape:
-            self.logger.debug("Se termina el modo snippet")
             self.processor.stop()
             return False
-        elif event.key() in [ QtCore.Qt.Key_Tab, QtCore.Qt.Key_Backtab ]:
-            self.logger.debug("Camino entre los holders")
-            if not self.processor.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
-                self.processor.stop()
-                return False
-
+        elif event.key() in [ QtCore.Qt.Key_Tab, QtCore.Qt.Key_Backtab ] and \
+            self.processor.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
             if event.key() == QtCore.Qt.Key_Tab:
-                ok = self.processor.nextHolder()
+                self.processor.nextHolder()
             else:
-                ok = self.processor.previousHolder()
-            if not ok:
-                self.editor.showMessage("Snippet end")
-                self.processor.stop()
-            else:
-                # TODO Esto mandarlo al processor para eso esta
-                #self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (self.snippet.name, self.snippet.holderNumber(), len(self.snippet)))
-                self.processor.selectHolder()
+                self.processor.previousHolder()
             return True
-        elif event.text():
-            self.logger.debug("Con texto %s" % event.text())
-            if not self.processor.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
-                self.processor.stop()
-                return False
+        elif event.text() and \
+            self.processor.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
 
-            if self.processor.lastHolder() and not self.processor.hasHolderContent():
-                # Put text on last empty holder
-                self.processor.stop()
-                return False
-            
             holderStart, holderEnd = self.processor.currentPosition()
             #Cuidado con los extremos del holder
             if not cursor.hasSelection():

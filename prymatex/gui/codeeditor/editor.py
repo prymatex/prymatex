@@ -689,7 +689,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         The key code is stored in event.key()"""
         
         # Completer
-        print(self.enableAutoCompletion)
         if self.enableAutoCompletion and self.completer.pre_key_event(event):
             return
         

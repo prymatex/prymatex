@@ -56,50 +56,42 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
         character = event.text()
         pairs = [pair for pair in settings.smartTypingPairs if character in pair]
         
-        #Si no tengo nada retorno
+        # No pairs
         if not pairs: return False
+
         self.pair = pairs[0]
         
-        self.skip = False
+        self.insert = self.replace = self.wrap = self.skip = False
         self.cursor1 = self.cursor2 = None
         
-        isOpen = character == self.pair[0]
-        if isOpen:
-            if cursor.hasSelection():
-                #El cursor tiene seleccion, veamos si es un brace de apertura y tiene seleccionado un brace de apertura 
-                selectedText = cursor.selectedText()
-                if any([selectedText == pair[0] for pair in settings.smartTypingPairs]):
-                    self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor)
-            return True
-        
         isClose = character == self.pair[1]
+        isOpen = character == self.pair[0]
+        meta_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
         if isClose:
+            cursor1, cursor2 = self.editor.currentBracesPairs(cursor, direction = "right")
+            self.skip = cursor1 and cursor2 and \
+                character == cursor2.selectedText() and \
+                self.pair[0] != self.pair[1]
+        elif meta_down and isOpen:
             if cursor.hasSelection():
+                self.wrap = True
                 selectedText = cursor.selectedText()
-                if any([selectedText == pair[1] for pair in settings.smartTypingPairs]):
+                self.replace = any([selectedText == pair[0] for pair in settings.smartTypingPairs])
+                if self.replace:
                     self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor)
-                return True
             else:
-                #Es un caracter de cierre, veamos si tengo que saltarme algo hacia la derecha
-                cursor1, cursor2 = self.editor.currentBracesPairs(cursor, direction = "right")
-                self.skip = cursor1 and cursor2 and \
-                    character == cursor2.selectedText() and \
-                    self.pair[0] != self.pair[1]
-                return self.skip
+                self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor)
+                if self.cursor1 is not None and self.cursor2 is not None:
+                    self.insert = True
+                    if cursor.position() == self.cursor1.selectionStart():
+                        self.cursor1.setPosition(self.cursor1.selectionStart())
+                        self.cursor2.setPosition(self.cursor2.selectionEnd())
+                    else:
+                        self.cursor1.setPosition(self.cursor1.selectionEnd())
+                        self.cursor2.setPosition(self.cursor2.selectionStart())
 
-        meta_down = bool(event.modifiers() & QtCore.Qt.MetaModifier)
-        if meta_down and isOpen:
-            self.cursor1, self.cursor2 = self.editor.currentBracesPairs(cursor)
-            if self.cursor1 is not None and self.cursor2 is not None:
-                if cursor.position() == self.cursor1.selectionStart():
-                    self.cursor1.setPosition(self.cursor1.selectionStart())
-                    self.cursor2.setPosition(self.cursor2.selectionEnd())
-                else:
-                    self.cursor1.setPosition(self.cursor1.selectionEnd())
-                    self.cursor2.setPosition(self.cursor2.selectionStart())
-                return True
         word, wordStart, wordEnd = self.editor.currentWord()
-        return not (wordStart <= cursor.position() < wordEnd)
+        return not (wordStart <= cursor.position() < wordEnd) and (self.wrap or self.skip or self.insert)
         
     def execute(self, event = None, cursor = None, **kwargs):
         cursor.beginEditBlock()
@@ -107,9 +99,8 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
             # Skip
             cursor.movePosition(QtGui.QTextCursor.NextCharacter)
             self.editor.setTextCursor(cursor)
-        elif cursor.hasSelection():
-            # Wrap
-            if self.cursor2 is not None and self.cursor1 is not None:
+        elif self.wrap:
+            if self.replace:
                 self.cursor1.insertText(self.pair[0])
                 self.cursor2.insertText(self.pair[1])
             else:
@@ -124,7 +115,7 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
                     cursor.setPosition(position - len(text) + 2)
                     cursor.setPosition(position + 2, QtGui.QTextCursor.KeepAnchor)
                 self.editor.setTextCursor(cursor)
-        elif self.cursor1 is not None and self.cursor2 is not None:
+        elif self.insert:
             # Surround
             self.cursor1.insertText(self.pair[0])
             self.cursor2.insertText(self.pair[1])
