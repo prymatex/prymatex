@@ -7,6 +7,9 @@ from .base import CodeEditorBaseProcessor
 from prymatex.support.processor import SnippetProcessorMixin
 
 class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin):
+    GoForward = 0
+    GoBackward = 1
+
     def configure(self, **kwargs):
         CodeEditorBaseProcessor.configure(self, **kwargs)
         self.snippetWrapper = QtGui.QTextCursor(self.textCursor)
@@ -20,6 +23,11 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
     def managed(self):
         return True
 
+    def beginExecution(self, bundleItem):
+        super(CodeEditorSnippetProcessor, self).beginExecution(bundleItem)
+        self.navigation = self.GoForward
+        self.render()
+        
     def beginRender(self):
         self.output = ""
         self.__startPosition = self.caretPosition()
@@ -28,9 +36,10 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         self.__endPosition = self.caretPosition()
         self.editor.updatePlainText(self.output, self.snippetWrapper)
         self.snippetWrapper = self.editor.newCursorAtPosition(
-                self.__startPosition, self.__endPosition
-        )
-
+            self.__startPosition, self.__endPosition)
+        # End or select holder
+        self.selectHolder()
+        
     def caretPosition(self):
         return self.snippetWrapper.selectionStart() + len(self.output)
 
@@ -72,11 +81,11 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
     
     # ---------- Holder navigation
     def nextHolder(self):
-        self.backward = False
+        self.navigation = self.GoForward
         return self.bundleItem.nextHolder()
 
     def previousHolder(self):
-        self.backward = True
+        self.navigation = self.GoBackward
         return self.bundleItem.previousHolder()
     
     def lastHolder(self):

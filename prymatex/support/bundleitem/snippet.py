@@ -44,12 +44,11 @@ Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''
         return dataHash
       
     def execute(self, processor):
-        if not hasattr(self, 'snippet'):
+        if not self.hasSnippet():
             self.setSnippet(SnippetObject(self.content))
+        self.reset()
         processor.beginExecution(self)
-        SnippetHandler.execute(self, processor)
-        if processor.managed() and self.hasHolders():
-            processor.selectHolder()
-        else:
+        if not processor.managed():
+            SnippetHandler.render(self, processor)
             processor.endExecution(self)
         

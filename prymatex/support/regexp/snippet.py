@@ -63,7 +63,12 @@ class Visitor(object):
 class SnippetHandler(object):
     def __init__(self):
         self.snippet = None
-        self.holders = [ ]
+        self.holders = None
+        self.holderIndex = None
+        self.memodict = None
+        
+    def hasSnippet(self):
+        return self.snippet is not None
 
     def setSnippet(self, snippet):
         self.snippet = snippet
@@ -71,10 +76,9 @@ class SnippetHandler(object):
         taborder.append(taborder.pop(0))
         self.holders = [ snippet.placeholders[key] for key in taborder ]
 
-    def execute(self, visitor):
+    def reset(self):
         self.memodict = types.Memodict()
         self.holderIndex = 0
-        self.render(visitor)
 
     def render(self, visitor):
         assert self.snippet is not None
@@ -140,10 +144,7 @@ class SnippetHandler(object):
 
     def hasHolderContent(self):
         return self.__current_holder().hasContent(self.memodict)
-        
-    def hasHolders(self):
-        return bool(self.holders)
-
+    
     def lastHolderFixed(self):
         return self.snippet.lastHolderFixed()
 

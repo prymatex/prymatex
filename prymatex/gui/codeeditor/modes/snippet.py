@@ -73,7 +73,6 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
             
             #Insert Text
             cursor.beginEditBlock()
-            print("snippet keyPressEvent")
             self.editor.keyPressEvent(event)
             positionAfter = cursor.position()
             charactersAfter = cursor.document().characterCount()

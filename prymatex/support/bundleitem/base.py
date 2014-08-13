@@ -15,8 +15,7 @@ class BundleItem(ManagedObject):
     DEFAULTS = {}
     
     def __init__(self, uuid, manager, bundle):
-        
-        ManagedObject.__init__(self, uuid, manager)
+        super(BundleItem, self).__init__(uuid, manager)
         self.bundle = bundle
 
     # ---------------- Load, update, dump

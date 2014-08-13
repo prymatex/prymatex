@@ -12,6 +12,7 @@ Source = namedtuple("Source", "name path mtime")
 class ManagedObject(object):
     PATTERNS = ()
     def __init__(self, uuid, manager):
+        super(ManagedObject, self).__init__()
         self.uuid = uuid
         self.manager = manager
         self.sources = {}
