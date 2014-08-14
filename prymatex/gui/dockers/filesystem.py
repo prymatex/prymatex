@@ -19,8 +19,8 @@ from prymatex.core.settings import ConfigurableItem
 from prymatex.models.filesystem import SortFilterFileSystemProxyModel
 
 class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDockWidget):
-    SEQUENCE = resources.get_sequence("Docks", "FileSystemDock", "Alt+Y")
-    ICON = resources.get_icon("system-file-manager")
+    SEQUENCE = ("Docks", "FileSystemDock", "Alt+Y")
+    ICON = "dock-system-file"
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
 
     # ----------- Settings

@@ -3,6 +3,8 @@
 
 import os
 
+from prymatex.utils import osextra
+
 RESOURCES = {}
 RESOURCES_READY = False
 
@@ -20,16 +22,8 @@ LICENSES = [
     'Other'
 ]
 
-def buildResourceKey(filename, namePrefixes, installedKeys):
-    resourceKey, _ = os.path.splitext(filename)
-    index = -1
-    while resourceKey in installedKeys and index:
-        newKey = "-".join(namePrefixes[index:] + [resourceKey])
-        if newKey == resourceKey:
-            raise Exception("Esto no puede ocurrir")
-        index -= 1
-        resourceKey = newKey
-    return resourceKey
+def buildResourceKey(path):
+    return "/".join(osextra.path.fullsplit(path))
 
 def loadPrymatexResources(resourcesPath):
     global RESOURCES, RESOURCES_READY

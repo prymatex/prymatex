@@ -92,7 +92,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
 
     def setupUi(self):
         self.setObjectName("MainWindow")
-        self.setWindowIcon(resources.get_icon("prymatex"))
+        self.setWindowIcon(resources.get_icon("icon-prymatex"))
 
         self.setupDockToolBars()
         
@@ -184,14 +184,15 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
         dockIndex = 1
         for dock in self.dockWidgets:
             toggleAction = dock.toggleViewAction()
-            if dock.SEQUENCE is not None:
-                sequence = dock.SEQUENCE
-            else:
-                sequence = resources.get_sequence("Docks", dock.objectName(), "Alt+%d" % dockIndex)
+            sequence = dock.SEQUENCE
+            if sequence is None:
+                sequence = ("Docks", dock.objectName(), "Alt+%d" % dockIndex)
                 dockIndex += 1
             self.application.registerShortcut(toggleAction, sequence)
-            if dock.ICON:
-                toggleAction.setIcon(dock.ICON)
+            icon = dock.ICON
+            if icon is None:
+                icon = 'dock'
+            self.application.registerIcon(toggleAction, icon)
             self.menuPanels.addAction(toggleAction)
             self.addAction(toggleAction)
 

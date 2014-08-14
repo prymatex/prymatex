@@ -15,7 +15,6 @@ from prymatex.qt.helpers import get_std_icon
 
 from prymatex.utils.decorators.memoize import memoized
 from prymatex.utils import six
-from prymatex.utils import osextra
 
 from .base import find_resource
 from .base import buildResourceKey
@@ -23,31 +22,22 @@ from .base import buildResourceKey
 __fileIconProvider = QtGui.QFileIconProvider()
 
 STANDARD_ICON_NAME = [name for name in dir(QtGui.QStyle) if name.startswith('SP_') ]
-NOTFOUND = set()
+ICONNAMES = set()
 
-def get_icon(index, size = None, default = None):
+def get_icon(index, fallback = QtGui.QIcon()):
     icon = __get_icon(index)
-    if icon is None and default is not None:
-        icon = default
-    elif icon is None:
-        # TODO Quitar esto luego de tener identificados todos
-        NOTFOUND.add(index)
-        icon = QtGui.QIcon(find_resource("notfound", ["Icons"]))
-    if size is not None:
-        size = size if isinstance(size, (tuple, list)) else (size, size)
-        icon = QtGui.QIcon(icon.pixmap(*size))
-    return icon
+    return icon.isNull() and fallback or icon
 
 @memoized
 def __get_icon(index):
-    '''
-    Makes the best effort to find an icon for an index.
+    '''Makes the best effort to find an icon for an index.
     Index can be a path, a Qt resource path, an integer.
-    @return: QIcon instance or None if no icon could be retrieved
-    '''
+    @return: QIcon instance'''
     if isinstance(index, six.string_types):
+        ICONNAMES.add(index)
         if os.path.exists(index) and os.path.isabs(index):
             #File path Icon
+            ICONNAMES.remove(index)
             return __fileIconProvider.icon(QtCore.QFileInfo(index))
         elif QtGui.QIcon.hasThemeIcon(index):
             #Theme Icon
@@ -62,7 +52,7 @@ def __get_icon(index):
     elif isinstance(index, six.integer_types):
         #Icon by int index in fileicon provider
         return __fileIconProvider.icon(index)
-    
+
 IconTheme = namedtuple("IconTheme", "name path")
 
 def loadIconThemes(resourcesPath):
@@ -82,24 +72,17 @@ def loadIconThemes(resourcesPath):
     return {"IconThemes": icon_themes}
 
 def installCustomFromThemeMethod():
-    #Install fromTheme custom function
-    from .icons import get_icon
     QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
     QtGui.QIcon.fromTheme = staticmethod(get_icon)
 
-def loadIcons(resourcesPath, staticMapping = []):
+def loadIcons(resourcesPath):
     icons = {}
     iconsPath = os.path.join(resourcesPath, "Icons")
     if os.path.exists(iconsPath):
         for dirpath, dirnames, filenames in os.walk(iconsPath):
             for filename in filenames:
                 iconPath = os.path.join(dirpath, filename)
-                staticNames = [path_names for path_names in staticMapping if iconPath.endswith(path_names[0])]
-                if staticNames:
-                    for name in staticNames:
-                        icons[name[1]] = iconPath
-                else:
-                    name = buildResourceKey(filename, osextra.path.fullsplit(dirpath), icons)
-                    icons[name] = iconPath
+                name = buildResourceKey(iconPath[len(iconsPath):])
+                print(name)
+                icons[name] = iconPath
     return { "Icons": icons }
-

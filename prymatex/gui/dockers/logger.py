@@ -11,9 +11,9 @@ from prymatex.core import PMXBaseDock
 from prymatex import resources
 from prymatex.ui.others.logwidget import Ui_LogWidget
 
-class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXBaseDock):
+class LoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXBaseDock):
     """Logging widget"""
-    ICON = resources.get_icon("utilities-log-viewer")
+    ICON = "dock-log-viewer"
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
     def __init__(self, parent = None):

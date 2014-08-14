@@ -131,7 +131,8 @@ class MainWindowActionsMixin(object):
 
     def on_actionTakeScreenshot_triggered(self):
         from prymatex.resources import icons
-        print(icons.NOTFOUND)
+        from pprint import pprint
+        pprint(icons.ICONNAMES)
         pxm = QtGui.QPixmap.grabWindow(self.winId())
         import os
         from datetime import datetime
@@ -158,56 +159,47 @@ class MainWindowActionsMixin(object):
                 "text": "New",
                 "items": [{
                     "text": "Editor",
-                    "sequence": resources.get_sequence("Global", "New"),
+                    "sequence": "New",
                     "triggered": cls.addEmptyEditor,
-                    "icon": resources.get_icon("tab-new"),
+                    "icon": "new-editor",
                 }, "-", {
                     "text": "From template",
                     "triggered": lambda mw: mw.templateDialog.createFile(),
-                    "icon": resources.get_icon("document-new"),
+                    "icon": "new-from-template",
                 }, {
                     "text": "Project",
                     "triggered": lambda mw: mw.projectDialog.createProject(),
-                    "icon": resources.get_icon("project-development-new-template"),
+                    "icon": "new-project",
                 }]
             }, {
                 "text": "Open",
-                'sequence': resources.get_sequence("Global", "Open"),
-                "icon": resources.get_icon("document-open"),
                 "triggered": cls.on_actionOpen_triggered
             }, {
                 "text": "Recent files",
                 "aboutToShow": cls.on_menuRecentFiles_aboutToShow,
                 "items": ["-", {
                     "text": "Open all recent files",
-                    "icon": "document-open-recent",
                     "triggered": lambda mw: [ mw.application.openFile(path)
                         for path in mw.application.fileManager.fileHistory ]
                 }, {
                     "text": "Remove all recent files",
-                    "icon": "edit-clear",
                     "triggered": lambda mw: mw.application.fileManager.clearFileHistory()
                 }]
             }, {
                 "text": "Import project",
                 "triggered": cls.on_actionImportProject_triggered,
-                "icon": resources.get_icon("project-open"),
             }, "-", {
                 "text": "Save",
-                "icon": "document-save",
                 "triggered": lambda mw: mw.saveEditor()
             }, {
                 "text": "Save as",
-                "icon": "document-save-as",
                 "triggered": lambda mw: mw.saveEditor(saveAs=True)
             }, {
                 "text": "Save all",
                 "sequence": ("Global", "SaveAll", "Ctrl+Shift+S"),
-                "icon": "document-save-all",
                 "triggered": lambda mw: [ mw.saveEditor(editor=editor) for editor in mw.editors() ]
             }, "-", {
                 "text": "Close",
-                "icon": "tab-close",
                 "triggered": lambda mw: mw.closeEditor()
             }, {
                 "text": "Close all",
@@ -215,29 +207,22 @@ class MainWindowActionsMixin(object):
                 "triggered": lambda mw: [ mw.closeEditor(editor=editor) for editor in mw.editors() ]
             }, {
                 "text": "Close others",
-                "icon": "tab-close-other"
+                "tirgger": cls.on_actionCloseOthers_triggered
             }, "-", {
                 "text": "Switch profile",
-                "icon": "system-switch-user",
                 "triggered": cls.on_actionSwitchProfile_triggered
             }, "-", {
                 "text": "Quit",
-                "sequence": "Quit",
-                "icon": "application-exit",
                 "triggered": lambda mw: mw.application.quit()
             }]
         }
 
         # ------------- Edit menu
         def globalEditAction(text):
-            objectName = text_to_objectname(text)
-            iconName = text_to_iconname(text, prefix = "icon")
             return {
                 "text": text,
-                "sequence": resources.get_sequence("Global", objectName),
-                "icon": resources.get_icon(iconName),
                 "triggered": cls.globalCallback,
-                "data": objectName
+                "data": text_to_objectname(text)
             }
             
         menu["edit"] = {
@@ -268,39 +253,37 @@ class MainWindowActionsMixin(object):
                 "text": "Layout",
                 "items": [{
                     "text": "Split vertically",
-                    "icon": resources.get_icon("view-split-left-right"),
                     "triggered": lambda mw: mw.centralWidget().splitVertically()
                 }, {
                     "text": "Split horizontally",
-                    "icon": resources.get_icon("view-split-top-bottom"),
                     "triggered": lambda mw: mw.centralWidget().splitHorizontally()
                 }, "-", {
                     "text": "Single",
-                    "sequence": resources.get_sequence("Global", "LayoutSingle", "Shift+Alt+1"),
+                    "sequence": ("Global", "LayoutSingle", "Shift+Alt+1"),
                     "triggered": lambda mw: mw.centralWidget().setLayout()
                 }, {
                     "text": "Columns: 2",
-                    "sequence": resources.get_sequence("Global", "Layout2Columns", "Shift+Alt+2"),
+                    "sequence": ("Global", "Layout2Columns", "Shift+Alt+2"),
                     "triggered": lambda mw: mw.centralWidget().setLayout(columns = 2)
                 }, {
                     "text": "Columns: 3",
-                    "sequence": resources.get_sequence("Global", "Layout3Columns", "Shift+Alt+3"),
+                    "sequence": ("Global", "Layout3Columns", "Shift+Alt+3"),
                     "triggered": lambda mw: mw.centralWidget().setLayout(columns = 3)
                 }, {
                     "text": "Columns: 4",
-                    "sequence": resources.get_sequence("Global", "Layout4Columns", "Shift+Alt+4"),
+                    "sequence": ("Global", "Layout4Columns", "Shift+Alt+4"),
                     "triggered": lambda mw: mw.centralWidget().setLayout(columns = 4)
                 }, {
                     "text": "Rows: 2",
-                    "sequence": resources.get_sequence("Global", "Layout2Rows", "Shift+Alt+8"),
+                    "sequence": ("Global", "Layout2Rows", "Shift+Alt+8"),
                     "triggered": lambda mw: mw.centralWidget().setLayout(rows = 2)
                 }, {
                     "text": "Rows: 3",
-                    "sequence": resources.get_sequence("Global", "Layout3Rows", "Shift+Alt+9"),
+                    "sequence": ("Global", "Layout3Rows", "Shift+Alt+9"),
                     "triggered": lambda mw: mw.centralWidget().setLayout(rows = 3)
                 }, {
                     "text": "Grid: 4",
-                    "sequence": resources.get_sequence("Global", "Layout4Grid", "Shift+Alt+5"),
+                    "sequence": ("Global", "Layout4Grid", "Shift+Alt+5"),
                     "triggered": lambda mw: mw.centralWidget().setLayout(columns = 2, rows = 2)
                 }]
             }, {
@@ -361,34 +344,27 @@ class MainWindowActionsMixin(object):
             "text": "&Navigation",
             "items": [{
                 "text": "Next tab",
-                'sequence': resources.get_sequence("Global", "NextChild"),
-                "icon": resources.get_icon("go-next-view"),
+                "sequence": "NextChild",
                 "triggered": lambda mw: mw.centralWidget().focusNextTab()
             }, {
                 "text": "Previous tab",
-                'sequence': resources.get_sequence("Global", "PreviousChild"),
-                "icon": resources.get_icon("go-previous-view"),
+                "sequence": "PreviousChild",
                 "triggered": lambda mw: mw.centralWidget().focusPreviousTab()
             }, {
                 "text": "Select tab",
                 "triggered": cls.on_actionSelectTab_triggered
             }, {
                 "text": "Jump to tab",
-                'sequence': resources.get_sequence("Global", "JumpToTab", "F12"),
+                "sequence": ("Global", "JumpToTab", "F12"),
                 "triggered": cls.on_actionJumpToTab_triggered
             }, "-", {
                 "text": "Last edit location",
-                "icon": resources.get_icon("go-last"),
                 "triggered": cls.on_actionLastEditLocation_triggered
             }, {
                 "text": "Go back location",
-                'sequence': resources.get_sequence("Global", "GoBackLocation"),
-                "icon": resources.get_icon("go-previous"),
                 "triggered": cls.on_actionLocationBack_triggered
             }, {
                 "text": "Go forward location",
-                'sequence': resources.get_sequence("Global", "GoForwardLocation"),
-                "icon": resources.get_icon("go-next"),
                 "triggered": cls.on_actionLocationForward_triggered
             }]
         }
@@ -400,19 +376,19 @@ class MainWindowActionsMixin(object):
                 "text": "Bundle editor",
                 "items": [{
                     "text": "Show bundle editor",
-                    'sequence': resources.get_sequence("Global", "ShowBundleEditor", "Meta+Ctrl+Alt+B"),
+                    "sequence": ("Global", "ShowBundleEditor", "Meta+Ctrl+Alt+B"),
                     "triggered": lambda mw: mw.bundleEditorDialog.execEditor()
                 }, "-", {
                     "text": "Edit commands",
-                    'sequence': resources.get_sequence("Global", "EditCommands", "Meta+Ctrl+Alt+C"),
+                    "sequence": ("Global", "EditCommands", "Meta+Ctrl+Alt+C"),
                     "triggered": lambda mw: mw.bundleEditorDialog.execCommand()
                 }, {
                     "text": "Edit languages",
-                    'sequence': resources.get_sequence("Global", "EditLanguages", "Meta+Ctrl+Alt+L"),
+                    "sequence": ("Global", "EditLanguages", "Meta+Ctrl+Alt+L"),
                     "triggered": lambda mw: mw.bundleEditorDialog.execLanguage()
                 }, {
                     "text": "Edit snippets",
-                    'sequence': resources.get_sequence("Global", "EditSnippets", "Meta+Ctrl+Alt+S"),
+                    "sequence": ("Global", "EditSnippets", "Meta+Ctrl+Alt+S"),
                     "triggered": lambda mw: mw.bundleEditorDialog.execSnippet()
                 }, {
                     "text": "Reload bundles",
@@ -428,15 +404,13 @@ class MainWindowActionsMixin(object):
                 "text": "Full screen",
                 "toggled": lambda mw, checked: getattr(mw, checked and "showFullScreen" or "showNormal")(),
                 "testChecked": lambda mw: mw.isFullScreen(),
-                "icon": resources.get_icon("view-fullscreen"),
-                "sequence": resources.get_sequence("Global", "ShowFullScreen", "F11")
+                "sequence": ("Global", "ShowFullScreen", "F11")
             }, {
                 "text": "Distraction free mode",
                 "toggled": lambda mw, checked: getattr(mw, checked and "showDistractionFreeMode" or "showNormal")(),
-                "sequence": resources.get_sequence("Global", "ShowDistractionFreeMode", "Shift+F11")
+                "sequence": ("Global", "ShowDistractionFreeMode", "Shift+F11")
             }, "-", {
                 "text": "Settings",
-                "icon": resources.get_icon("configure"),
                 "triggered": lambda mw: mw.settingsDialog.exec_()
             }]
         }
@@ -446,22 +420,18 @@ class MainWindowActionsMixin(object):
             "text": "&Help",
             "items": [ {
                 "text": "Read documentation",
-                "icon": resources.get_icon("help-contents"),
                 "triggered": lambda mw: mw.application.openUrl(prymatex.__source__ + '/wiki')
             }, {
                 "text": "Project homepage",
                 "triggered": lambda mw: mw.application.openUrl(prymatex.__url__)
             }, "-", {
                 "text": "Translate Prymatex",
-                "icon": resources.get_icon("applications-development-translation"),
                 "triggered": lambda mw: mw.application.openUrl(prymatex.__source__ + '/wiki')
             }, "-", {
                 "text": "Report bug",
-                "icon": resources.get_icon("tools-report-bug"),
                 "triggered": lambda mw: mw.application.openUrl(prymatex.__source__ + '/issues?utf8=%E2%9C%93')
             },  {
                 "text": "Take screenshoot",
-                "icon": resources.get_icon("ksnapshot"),
                 "triggered": cls.on_actionTakeScreenshot_triggered
             }, "-", {
                 "text": "About Prymatex",

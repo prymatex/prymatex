@@ -5,7 +5,6 @@ import os
 
 from prymatex.qt import QtGui
 from prymatex.qt.helpers import get_std_icon
-from prymatex.utils import osextra
 from prymatex.utils.decorators.memoize import memoized
 
 from .base import getResource, buildResourceKey
@@ -30,19 +29,14 @@ def __get_image(index):
         #Standard Icon
         return get_std_icon(index).pixmap(32)
 
-def loadImages(resourcesPath, staticMapping = []):
+def loadImages(resourcesPath):
     images = {}
     imagesPath = os.path.join(resourcesPath, "Images")
     if os.path.exists(imagesPath):
         for dirpath, dirnames, filenames in os.walk(imagesPath):
             for filename in filenames:
                 iconPath = os.path.join(dirpath, filename)
-                staticNames = [path_names for path_names in staticMapping if iconPath.endswith(path_names[0])]
-                if staticNames:
-                    for name in staticNames:
-                        images[name[1]] = iconPath
-                else:
-                    name = buildResourceKey(filename, osextra.path.fullsplit(dirpath), images)
-                    images[name] = iconPath
+                name = buildResourceKey(iconPath[len(imagesPath):])
+                images[name] = iconPath
     return { "Images": images }
 

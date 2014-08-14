@@ -40,4 +40,5 @@ def get_std_icon(name):
         name = 'SP_' + name
     standardIconName = getattr(QtGui.QStyle, name, None)
     if standardIconName is not None:
-        return QtGui.QWidget().style().standardIcon( standardIconName )
+        return QtGui.QWidget().style().standardIcon(standardIconName)
+    return QtGui.QIcon()
