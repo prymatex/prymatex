@@ -22,13 +22,16 @@ class CompletionBaseModel(QtCore.QAbstractTableModel):
         self.editor = None
         self.prefix = None
 
+    def completionPrefix(self):
+        return self._prefix
+        
     def setCompletionPrefix(self, prefix):
-        self.prefix = prefix
+        self._prefix = prefix
 
     def setEditor(self, editor):
         self.editor = editor
 
-    def allowOneSuggestion(self, index):
+    def setCurrentRow(self, index, completion_count):
         return False
     
     def modelSorting(self):
@@ -138,7 +141,11 @@ class WordsCompletionModel(CompletionBaseModel):
         elif role == QtCore.Qt.MatchRole:
             #return text.fuzzy_match(self.prefix, suggestion) and self.prefix or suggestion
             return suggestion
-
+    
+    def setCurrentRow(self, index, completion_count):
+        suggestion = self.suggestions[index.row()]
+        return suggestion != self.completionPrefix()
+        
 class TabTriggerItemsCompletionModel(CompletionBaseModel):
     def __init__(self, **kwargs):
         super(TabTriggerItemsCompletionModel, self).__init__(**kwargs)
@@ -149,10 +156,7 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
         self.triggers = self.editor.application.supportManager.getAllTabTriggerItemsByScope(leftScope, rightScope)
         if self.triggers:
             callback(self)
-
-    def allowOneSuggestion(self, index):
-        return True
-        
+    
     # -------------- Model overrite methods
     def columnCount(self, parent = None):
         return 2
@@ -197,6 +201,9 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
         trigger = self.triggers[index.row()]
         print(trigger)
         
+    def setCurrentRow(self, index, completion_count):
+        return True
+
 class SuggestionsCompletionModel(CompletionBaseModel):
     #display The title to display in the suggestions list
     #insert Snippet to insert after selection
@@ -267,8 +274,10 @@ class SuggestionsCompletionModel(CompletionBaseModel):
         suggestion = self.suggestions[index.row()]
         print(suggestion)
 
-    def allowOneSuggestion(self, index):
-        return self.completionCallback is not None
+    def setCurrentRow(self, index, completion_count):
+        suggestion = self.suggestions[index.row()]
+        print(completion_count)
+        return suggestion.get('insert') != self.completionPrefix()
 
 # ===================================
 # Completer
@@ -370,21 +379,19 @@ class CodeEditorCompleter(QtGui.QCompleter):
                 self.runCompleter(self.editor.cursorRect())
 
     def activatedCompletion(self, index):
-        sIndex = self.completionModel().mapToSource(index)
-        self.model().activatedCompletion(sIndex)
+        self.model().activatedCompletion(self.completionModel().mapToSource(index))
         
     def highlightedCompletion(self, index):
-        sIndex = self.completionModel().mapToSource(index)
-        self.model().highlightedCompletion(sIndex)
+        self.model().highlightedCompletion(self.completionModel().mapToSource(index))
         
     def setCurrentRow(self, index):
         if not QtGui.QCompleter.setCurrentRow(self, index):
             return False
+        cIndex = self.completionModel().index(index, 0)
         if self.completionMode() == QtGui.QCompleter.PopupCompletion:
-            self.popup().setCurrentIndex(self.completionModel().index(index, 0))
-        if self.completionCount() == 1:
-            return self.model().allowOneSuggestion(self.currentIndex())
-        return True
+            self.popup().setCurrentIndex(cIndex)
+        return self.model().setCurrentRow(
+            self.completionModel().mapToSource(cIndex), self.completionCount())
 
     def setCompletionPrefix(self, prefix):
         self.startCursorPosition = self.editor.textCursor().position() - len(prefix or "")
