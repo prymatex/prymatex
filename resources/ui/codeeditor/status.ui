@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>629</width>
-    <height>196</height>
+    <height>219</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,9 +35,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="dialog-close">
-          <normaloff/>
-         </iconset>
+         <iconset theme="close"/>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -116,9 +114,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="dialog-close">
-          <normaloff/>
-         </iconset>
+         <iconset theme="close"/>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -173,9 +169,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="dialog-close">
-          <normaloff/>
-         </iconset>
+         <iconset theme="close"/>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -205,9 +199,7 @@ p, li { white-space: pre-wrap; }
          <string>Next</string>
         </property>
         <property name="icon">
-         <iconset theme="go-down-search">
-          <normaloff/>
-         </iconset>
+         <iconset theme="go-down"/>
         </property>
        </widget>
       </item>
@@ -217,9 +209,7 @@ p, li { white-space: pre-wrap; }
          <string>Previous</string>
         </property>
         <property name="icon">
-         <iconset theme="go-up-search">
-          <normaloff/>
-         </iconset>
+         <iconset theme="go-up"/>
         </property>
        </widget>
       </item>
@@ -261,9 +251,7 @@ p, li { white-space: pre-wrap; }
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="dialog-close">
-          <normaloff/>
-         </iconset>
+         <iconset theme="close"/>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -308,12 +296,18 @@ p, li { white-space: pre-wrap; }
         <property name="text">
          <string>Replace</string>
         </property>
+        <property name="icon">
+         <iconset theme="replace"/>
+        </property>
        </widget>
       </item>
       <item row="1" column="4">
        <widget class="QPushButton" name="pushButtonReplaceAll">
         <property name="text">
          <string>Replace &amp;All</string>
+        </property>
+        <property name="icon">
+         <iconset theme="replace-all"/>
         </property>
        </widget>
       </item>
@@ -323,9 +317,7 @@ p, li { white-space: pre-wrap; }
          <string>Previous</string>
         </property>
         <property name="icon">
-         <iconset theme="go-up-search">
-          <normaloff/>
-         </iconset>
+         <iconset theme="go-up"/>
         </property>
        </widget>
       </item>
@@ -342,9 +334,7 @@ p, li { white-space: pre-wrap; }
          <string>Next</string>
         </property>
         <property name="icon">
-         <iconset theme="go-down-search">
-          <normaloff/>
-         </iconset>
+         <iconset theme="go-down"/>
         </property>
        </widget>
       </item>
@@ -400,9 +390,7 @@ p, li { white-space: pre-wrap; }
             <string>Find All</string>
            </property>
            <property name="icon">
-            <iconset theme="edit-find">
-             <normaloff/>
-            </iconset>
+            <iconset theme="find-all"/>
            </property>
           </widget>
          </item>
@@ -495,9 +483,7 @@ p, li { white-space: pre-wrap; }
       <item>
        <widget class="QToolButton" name="toolButtonMenuBundle">
         <property name="icon">
-         <iconset theme="applications-system">
-          <normaloff/>
-         </iconset>
+         <iconset theme="cog"/>
         </property>
         <property name="popupMode">
          <enum>QToolButton::MenuButtonPopup</enum>

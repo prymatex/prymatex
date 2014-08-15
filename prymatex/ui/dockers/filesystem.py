@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/filesystem.ui'
 #
-# Created: Fri Aug 15 10:27:00 2014
+# Created: Fri Aug 15 11:23:05 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -67,7 +67,7 @@ class Ui_FileSystemDock(object):
         self.buttonsLayout.addWidget(self.line)
         self.pushButtonSync = QtGui.QPushButton(self.dockWidgetContents)
         self.pushButtonSync.setMaximumSize(QtCore.QSize(24, 24))
-        icon = QtGui.QIcon.fromTheme(_fromUtf8("folder-sync"))
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("sync"))
         self.pushButtonSync.setIcon(icon)
         self.pushButtonSync.setCheckable(True)
         self.pushButtonSync.setFlat(True)
@@ -76,7 +76,7 @@ class Ui_FileSystemDock(object):
         self.pushButtonCollapseAll = QtGui.QPushButton(self.dockWidgetContents)
         self.pushButtonCollapseAll.setMaximumSize(QtCore.QSize(24, 24))
         self.pushButtonCollapseAll.setText(_fromUtf8(""))
-        icon = QtGui.QIcon.fromTheme(_fromUtf8("view-list-tree"))
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("collapse-all"))
         self.pushButtonCollapseAll.setIcon(icon)
         self.pushButtonCollapseAll.setFlat(True)
         self.pushButtonCollapseAll.setObjectName(_fromUtf8("pushButtonCollapseAll"))
@@ -84,7 +84,7 @@ class Ui_FileSystemDock(object):
         self.pushButtonCustomFilters = QtGui.QPushButton(self.dockWidgetContents)
         self.pushButtonCustomFilters.setMaximumSize(QtCore.QSize(24, 24))
         self.pushButtonCustomFilters.setText(_fromUtf8(""))
-        icon = QtGui.QIcon.fromTheme(_fromUtf8("view-filter"))
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("custom-filters"))
         self.pushButtonCustomFilters.setIcon(icon)
         self.pushButtonCustomFilters.setFlat(True)
         self.pushButtonCustomFilters.setObjectName(_fromUtf8("pushButtonCustomFilters"))
@@ -92,7 +92,7 @@ class Ui_FileSystemDock(object):
         self.pushButtonOptions = QtGui.QPushButton(self.dockWidgetContents)
         self.pushButtonOptions.setMaximumSize(QtCore.QSize(45, 24))
         self.pushButtonOptions.setText(_fromUtf8(""))
-        icon = QtGui.QIcon.fromTheme(_fromUtf8("configure"))
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("options"))
         self.pushButtonOptions.setIcon(icon)
         self.pushButtonOptions.setFlat(True)
         self.pushButtonOptions.setObjectName(_fromUtf8("pushButtonOptions"))

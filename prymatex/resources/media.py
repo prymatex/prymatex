@@ -91,7 +91,7 @@ def set_icon_theme(theme_name):
         _media_from_theme = glyph.icon
 
 def load_media(resourcesPath):
-    resources = { "Images": {}, "Icons": {}, "Themes": {}, "Mapping": {}, "Glyhps": {}, "External": {} }
+    resources = { "Images": {}, "Icons": {}, "Themes": {}, "Mapping": {}, "Glyphs": {}, "External": {} }
     # Load Icons
     iconsPath = os.path.join(resourcesPath, "Media", "Icons")
     if os.path.exists(iconsPath):
@@ -131,8 +131,8 @@ def load_media(resourcesPath):
             name = os.path.splitext(glyphFileName)[0]
             glyphPath = os.path.join(glyphsPath, glyphFileName)
             gly = glyph.QtGlyph.initGlyph(glyphPath)
-            resources["Glyhps"][gly.name()] = gly
-            resources["Themes"][gly.name()] = IconTheme(name, "glyph", glyphPath)
+            resources["Glyphs"][gly.name()] = gly
+            resources["Themes"][gly.name()] = IconTheme(gly.name(), "glyph", glyphPath)
     
     # Load Mapping
     mappingsPath = os.path.join(resourcesPath, "Media", "Mapping")

@@ -127,7 +127,7 @@
          <string>Sync folder with current editor file path</string>
         </property>
         <property name="icon">
-         <iconset theme="sync-synchronizing"/>
+         <iconset theme="sync"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -149,9 +149,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="view-list-tree">
-          <normaloff/>
-         </iconset>
+         <iconset theme="collapse-all"/>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -170,9 +168,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="view-filter">
-          <normaloff/>
-         </iconset>
+         <iconset theme="custom-filters"/>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -191,9 +187,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="configure">
-          <normaloff/>
-         </iconset>
+         <iconset theme="options"/>
         </property>
         <property name="flat">
          <bool>true</bool>

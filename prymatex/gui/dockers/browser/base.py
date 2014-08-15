@@ -186,8 +186,8 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
     # ------------ TabbedWebView signals
     def on_tabWebView_currentWebViewChanged(self, webView):
         history = webView.page().history()
-        self.buttonBack.setEnabled(history.canGoBack())
-        self.buttonNext.setEnabled(history.canGoForward())
+        self.pushButtonGoPrevious.setEnabled(history.canGoBack())
+        self.pushButtonGoNext.setEnabled(history.canGoForward())
         self.lineUrl.setText(webView.url().toString())
     
     def on_tabWebView_webViewNewRequested(self):
@@ -211,12 +211,12 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
         webView = self.tabWebView.currentWebView()
         
         history = webView.page().history()
-        self.buttonBack.setEnabled(history.canGoBack())
-        self.buttonNext.setEnabled(history.canGoForward())
+        self.pushButtonGoPrevious.setEnabled(history.canGoBack())
+        self.pushButtonGoNext.setEnabled(history.canGoForward())
 
         webView.setUrl(QtCore.QUrl.fromUserInput(self.lineUrl.text()))
 
-    def on_buttonStop_clicked(self):
+    def on_pushButtonStop_clicked(self):
         """Stop loading the page"""
         self.tabWebView.currentWebView().stop()
 
@@ -224,12 +224,12 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
         """Reload the web page"""
         self.tabWebView.currentWebView().reload()
 
-    def on_buttonBack_clicked(self):
+    def on_pushButtonGoPrevious_clicked(self):
         """Back button clicked, go one page back"""
         page = self.tabWebView.currentWebView().page()
         history = page.history()
         history.back()
-        self.buttonBack.setEnabled(history.canGoBack())
+        self.pushButtonGoPrevious.setEnabled(history.canGoBack())
     
     def on_buttonNext_clicked(self):
         """Next button clicked, go to next page"""
@@ -251,15 +251,15 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
         #History
         webView = self.tabWebView.currentWebView()
         history = webView.page().history()
-        self.buttonBack.setEnabled(history.canGoBack())
-        self.buttonNext.setEnabled(history.canGoForward())
+        self.pushButtonGoPrevious.setEnabled(history.canGoBack())
+        self.pushButtonGoNext.setEnabled(history.canGoForward())
         
         #Line Location
         self.lineUrl.setText(url.toString())
         
     def on_webView_loadProgress(self, load):
         """Page load progress"""
-        self.buttonStop.setEnabled(load != 100)
+        self.pushButtonStop.setEnabled(load != 100)
     
     #=======================================================================
     # Browser Auto update for current Editor

@@ -27,7 +27,7 @@
        <number>2</number>
       </property>
       <item>
-       <widget class="QPushButton" name="buttonBack">
+       <widget class="QPushButton" name="pushButtonGoPrevious">
         <property name="maximumSize">
          <size>
           <width>24</width>
@@ -51,7 +51,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="buttonNext">
+       <widget class="QPushButton" name="pushButtonGoNext">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -81,7 +81,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="buttonReload">
+       <widget class="QPushButton" name="pushButtonReload">
         <property name="maximumSize">
          <size>
           <width>24</width>
@@ -95,9 +95,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="view-refresh">
-          <normaloff/>
-         </iconset>
+         <iconset theme="reload"/>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -108,7 +106,7 @@
        <widget class="QLineEdit" name="lineUrl"/>
       </item>
       <item>
-       <widget class="QPushButton" name="buttonStop">
+       <widget class="QPushButton" name="pushButtonStop">
         <property name="maximumSize">
          <size>
           <width>24</width>
@@ -122,9 +120,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="dialog-close">
-          <normaloff/>
-         </iconset>
+         <iconset theme="stop"/>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -141,9 +137,7 @@
       <item>
        <widget class="QToolButton" name="toolButtonOptions">
         <property name="icon">
-         <iconset theme="configure">
-          <normaloff/>
-         </iconset>
+         <iconset theme="options"/>
         </property>
         <property name="popupMode">
          <enum>QToolButton::MenuButtonPopup</enum>
