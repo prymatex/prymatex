@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dockers/browser.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/browser.ui'
 #
-# Created: Tue Jul 30 11:12:00 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Fri Aug 15 10:27:00 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_BrowserDock(object):
     def setupUi(self, BrowserDock):
@@ -97,13 +106,13 @@ class Ui_BrowserDock(object):
         QtCore.QMetaObject.connectSlotsByName(BrowserDock)
 
     def retranslateUi(self, BrowserDock):
-        BrowserDock.setWindowTitle(QtGui.QApplication.translate("BrowserDock", "Web Browser", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonBack.setToolTip(QtGui.QApplication.translate("BrowserDock", "Back", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonNext.setToolTip(QtGui.QApplication.translate("BrowserDock", "Next", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonReload.setToolTip(QtGui.QApplication.translate("BrowserDock", "Reload", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonStop.setToolTip(QtGui.QApplication.translate("BrowserDock", "Stop", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionSyncEditor.setText(QtGui.QApplication.translate("BrowserDock", "Sync Editor", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionSyncEditor.setToolTip(QtGui.QApplication.translate("BrowserDock", "Sync browser with current editor content", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionConnectEditor.setText(QtGui.QApplication.translate("BrowserDock", "Connect Editor", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionConnectEditor.setToolTip(QtGui.QApplication.translate("BrowserDock", "Connect browser with current editor", None, QtGui.QApplication.UnicodeUTF8))
+        BrowserDock.setWindowTitle(_translate("BrowserDock", "Web Browser", None))
+        self.buttonBack.setToolTip(_translate("BrowserDock", "Back", None))
+        self.buttonNext.setToolTip(_translate("BrowserDock", "Next", None))
+        self.buttonReload.setToolTip(_translate("BrowserDock", "Reload", None))
+        self.buttonStop.setToolTip(_translate("BrowserDock", "Stop", None))
+        self.actionSyncEditor.setText(_translate("BrowserDock", "Sync Editor", None))
+        self.actionSyncEditor.setToolTip(_translate("BrowserDock", "Sync browser with current editor content", None))
+        self.actionConnectEditor.setText(_translate("BrowserDock", "Connect Editor", None))
+        self.actionConnectEditor.setToolTip(_translate("BrowserDock", "Connect browser with current editor", None))
 

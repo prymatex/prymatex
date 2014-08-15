@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/others/tabchoose.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/others/tabchoose.ui'
 #
-# Created: Tue Jul 30 11:11:59 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Fri Aug 15 10:26:58 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_ChooseTab(object):
     def setupUi(self, ChooseTab):
@@ -44,7 +53,7 @@ class Ui_ChooseTab(object):
         QtCore.QMetaObject.connectSlotsByName(ChooseTab)
 
     def retranslateUi(self, ChooseTab):
-        ChooseTab.setWindowTitle(QtGui.QApplication.translate("ChooseTab", "Dialog", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushOpen.setText(QtGui.QApplication.translate("ChooseTab", "OK", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushCancel.setText(QtGui.QApplication.translate("ChooseTab", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
+        ChooseTab.setWindowTitle(_translate("ChooseTab", "Dialog", None))
+        self.pushOpen.setText(_translate("ChooseTab", "OK", None))
+        self.pushCancel.setText(_translate("ChooseTab", "Cancel", None))
 

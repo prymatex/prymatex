@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
+from prymatex.qt import QtGui, QtCore
 
 from prymatex.utils import osextra
 
@@ -28,16 +28,14 @@ def buildResourceKey(path):
 def loadPrymatexResources(resourcesPath):
     global RESOURCES, RESOURCES_READY
     from .loader import loadResources
-    from .icons import installCustomFromThemeMethod
+    from .media import get_icon
     if not RESOURCES_READY:
         RESOURCES = loadResources(resourcesPath)
-        installCustomFromThemeMethod()
-        RESOURCES_READY = True
 
-def registerImagePath(name, path):
-    global RESOURCES
-    external = RESOURCES.setdefault("External", {})
-    external[name] = path
+        # Install
+        QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
+        QtGui.QIcon.fromTheme = staticmethod(get_icon)
+        RESOURCES_READY = True
 
 def getResource(name, sections = None):
     global RESOURCES

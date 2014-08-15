@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/others/logwidget.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/others/logwidget.ui'
 #
-# Created: Tue Jul 30 11:11:59 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Fri Aug 15 10:26:58 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_LogWidget(object):
     def setupUi(self, LogWidget):
@@ -63,7 +72,7 @@ class Ui_LogWidget(object):
         QtCore.QMetaObject.connectSlotsByName(LogWidget)
 
     def retranslateUi(self, LogWidget):
-        LogWidget.setWindowTitle(QtGui.QApplication.translate("LogWidget", "Log", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEdit.setToolTip(QtGui.QApplication.translate("LogWidget", "Filter debugging output", None, QtGui.QApplication.UnicodeUTF8))
+        LogWidget.setWindowTitle(_translate("LogWidget", "Log", None))
+        self.lineEdit.setToolTip(_translate("LogWidget", "Filter debugging output", None))
 
 import resources_rc

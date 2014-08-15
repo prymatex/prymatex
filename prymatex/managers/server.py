@@ -161,7 +161,7 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
     def images(self, parameters = ""):
         data = plist.readPlistFromString(parameters)
         for name, path in data["register"].items():
-            resources.registerImagePath(name, path)
+            resources.set_resource("External", name, path)
         self.sendResult()
     
     def alert(self, **kwargs):

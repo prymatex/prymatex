@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/general.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/configure/general.ui'
 #
-# Created: Thu Feb  6 11:09:58 2014
-#      by: PyQt4 UI code generator 4.10.3
+# Created: Fri Aug 15 10:26:59 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -49,6 +49,12 @@ class Ui_General(object):
         self.comboBoxQtStyleSheet = QtGui.QComboBox(self.groupBox_2)
         self.comboBoxQtStyleSheet.setObjectName(_fromUtf8("comboBoxQtStyleSheet"))
         self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.comboBoxQtStyleSheet)
+        self.label_4 = QtGui.QLabel(self.groupBox_2)
+        self.label_4.setObjectName(_fromUtf8("label_4"))
+        self.formLayout.setWidget(3, QtGui.QFormLayout.LabelRole, self.label_4)
+        self.comboBoxIconTheme = QtGui.QComboBox(self.groupBox_2)
+        self.comboBoxIconTheme.setObjectName(_fromUtf8("comboBoxIconTheme"))
+        self.formLayout.setWidget(3, QtGui.QFormLayout.FieldRole, self.comboBoxIconTheme)
         self.verticalLayout.addWidget(self.groupBox_2)
         self.groupBox_3 = QtGui.QGroupBox(General)
         self.groupBox_3.setObjectName(_fromUtf8("groupBox_3"))
@@ -75,7 +81,8 @@ class Ui_General(object):
         General.setWindowTitle(_translate("General", "General", None))
         self.groupBox_2.setTitle(_translate("General", "Interface", None))
         self.label_2.setText(_translate("General", "Qt style:", None))
-        self.label_3.setText(_translate("General", "Qt style sheet:", None))
+        self.label_3.setText(_translate("General", "Qt stylesheet:", None))
+        self.label_4.setText(_translate("General", "Icon theme:", None))
         self.groupBox_3.setTitle(_translate("General", "External actions", None))
         self.checkBoxAskAboutExternalDeletions.setText(_translate("General", "Ask about external file deletions? or remove editor", None))
         self.checkBoxAskAboutExternalChanges.setText(_translate("General", "Ask about external file changes? or replace editor content", None))

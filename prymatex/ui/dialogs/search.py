@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/search.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dialogs/search.ui'
 #
-# Created: Tue Jul 30 11:11:59 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Fri Aug 15 10:26:59 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_SearchDialog(object):
     def setupUi(self, SearchDialog):
@@ -148,19 +157,19 @@ class Ui_SearchDialog(object):
         QtCore.QMetaObject.connectSlotsByName(SearchDialog)
 
     def retranslateUi(self, SearchDialog):
-        SearchDialog.setWindowTitle(QtGui.QApplication.translate("SearchDialog", "Search", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox.setTitle(QtGui.QApplication.translate("SearchDialog", "Search", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("SearchDialog", "Containing text", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_3.setText(QtGui.QApplication.translate("SearchDialog", "File name patterns", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBoxFilePatterns.setItemText(0, QtGui.QApplication.translate("SearchDialog", "*.*", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxRecursive.setText(QtGui.QApplication.translate("SearchDialog", "Recursive", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxHidden.setText(QtGui.QApplication.translate("SearchDialog", "Hidden", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxFollowLinks.setText(QtGui.QApplication.translate("SearchDialog", "Follow links", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox_2.setTitle(QtGui.QApplication.translate("SearchDialog", "Scope", None, QtGui.QApplication.UnicodeUTF8))
-        self.radioButtonWorkspace.setText(QtGui.QApplication.translate("SearchDialog", "Workspace", None, QtGui.QApplication.UnicodeUTF8))
-        self.radioButtonWorkingSet.setText(QtGui.QApplication.translate("SearchDialog", "Working set", None, QtGui.QApplication.UnicodeUTF8))
-        self.radioButton.setText(QtGui.QApplication.translate("SearchDialog", "Location", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonChoose.setText(QtGui.QApplication.translate("SearchDialog", "Ch&oose", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonSearch.setText(QtGui.QApplication.translate("SearchDialog", "&Search", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonCancel.setText(QtGui.QApplication.translate("SearchDialog", "C&ancel", None, QtGui.QApplication.UnicodeUTF8))
+        SearchDialog.setWindowTitle(_translate("SearchDialog", "Search", None))
+        self.groupBox.setTitle(_translate("SearchDialog", "Search", None))
+        self.label.setText(_translate("SearchDialog", "Containing text", None))
+        self.label_3.setText(_translate("SearchDialog", "File name patterns", None))
+        self.comboBoxFilePatterns.setItemText(0, _translate("SearchDialog", "*.*", None))
+        self.checkBoxRecursive.setText(_translate("SearchDialog", "Recursive", None))
+        self.checkBoxHidden.setText(_translate("SearchDialog", "Hidden", None))
+        self.checkBoxFollowLinks.setText(_translate("SearchDialog", "Follow links", None))
+        self.groupBox_2.setTitle(_translate("SearchDialog", "Scope", None))
+        self.radioButtonWorkspace.setText(_translate("SearchDialog", "Workspace", None))
+        self.radioButtonWorkingSet.setText(_translate("SearchDialog", "Working set", None))
+        self.radioButton.setText(_translate("SearchDialog", "Location", None))
+        self.buttonChoose.setText(_translate("SearchDialog", "Ch&oose", None))
+        self.buttonSearch.setText(_translate("SearchDialog", "&Search", None))
+        self.buttonCancel.setText(_translate("SearchDialog", "C&ancel", None))
 

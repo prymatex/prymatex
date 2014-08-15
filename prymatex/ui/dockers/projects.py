@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/mnt/datos/workspace/Prymatex/prymatex/resources/ui/dockers/projects.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/projects.ui'
 #
-# Created: Fri May 16 17:31:45 2014
-#      by: PyQt4 UI code generator 4.10.3
+# Created: Fri Aug 15 10:27:00 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 

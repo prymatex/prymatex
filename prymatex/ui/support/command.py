@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/support/command.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/support/command.ui'
 #
-# Created: Tue Jul 30 11:11:58 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Fri Aug 15 10:26:58 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Command(object):
     def setupUi(self, Command):
@@ -111,15 +120,15 @@ class Ui_Command(object):
         QtCore.QMetaObject.connectSlotsByName(Command)
 
     def retranslateUi(self, Command):
-        Command.setWindowTitle(QtGui.QApplication.translate("Command", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("Command", "Command:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_3.setText(QtGui.QApplication.translate("Command", "Input:", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelInputOption.setText(QtGui.QApplication.translate("Command", "or", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_5.setText(QtGui.QApplication.translate("Command", "format", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_4.setText(QtGui.QApplication.translate("Command", "Output:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_6.setText(QtGui.QApplication.translate("Command", "format", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxAutoScrollOutput.setText(QtGui.QApplication.translate("Command", "Scroll for new output", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_7.setText(QtGui.QApplication.translate("Command", "Caret:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_8.setText(QtGui.QApplication.translate("Command", "Match:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("Command", "Save:", None, QtGui.QApplication.UnicodeUTF8))
+        Command.setWindowTitle(_translate("Command", "Form", None))
+        self.label_2.setText(_translate("Command", "Command:", None))
+        self.label_3.setText(_translate("Command", "Input:", None))
+        self.labelInputOption.setText(_translate("Command", "or", None))
+        self.label_5.setText(_translate("Command", "format", None))
+        self.label_4.setText(_translate("Command", "Output:", None))
+        self.label_6.setText(_translate("Command", "format", None))
+        self.checkBoxAutoScrollOutput.setText(_translate("Command", "Scroll for new output", None))
+        self.label_7.setText(_translate("Command", "Caret:", None))
+        self.label_8.setText(_translate("Command", "Match:", None))
+        self.label.setText(_translate("Command", "Save:", None))
 

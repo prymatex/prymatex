@@ -19,15 +19,21 @@ class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtGui.QWidget):
         super(GeneralSettingsWidget, self).loadSettings()
         currentStyleName = self.settings.value('qtStyle')
         currentStyleSheetName = self.settings.value('qtStyleSheet')
+        currentIconTheme = self.settings.value('iconTheme')
         for index, styleName in enumerate(QtGui.QStyleFactory.keys()):
             self.comboBoxQtStyle.addItem(styleName, styleName)
             if currentStyleName and styleName == currentStyleName:
                 self.comboBoxQtStyle.setCurrentIndex(index)
 
-        for index, styleSheetName in enumerate(resources.getSection("Stylesheets").keys()):
+        for index, styleSheetName in enumerate(resources.get_section("Stylesheets").keys()):
             self.comboBoxQtStyleSheet.addItem(styleSheetName, styleSheetName)
             if currentStyleSheetName and styleSheetName == currentStyleSheetName:
                 self.comboBoxQtStyleSheet.setCurrentIndex(index)
+
+        for index, theme in enumerate(resources.get_section("Themes").values()):
+            self.comboBoxIconTheme.addItem(theme.name, theme.name)
+            if currentIconTheme and theme.name == currentIconTheme:
+                self.comboBoxIconTheme.setCurrentIndex(index)
 
         checks = ( self.checkBoxAskAboutExternalDeletions, self.checkBoxAskAboutExternalChanges )
         [ check.blockSignals(True) for check in checks ]
@@ -50,3 +56,7 @@ class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtGui.QWidget):
     @QtCore.Slot(str)
     def on_comboBoxQtStyleSheet_activated(self, styleSheetName):
         self.settings.setValue('qtStyleSheet', styleSheetName)
+        
+    @QtCore.Slot(str)
+    def on_comboBoxIconTheme_activated(self, iconThemeName):
+        self.settings.setValue('iconTheme', iconThemeName)

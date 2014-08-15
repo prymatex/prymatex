@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/support/editor.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/support/editor.ui'
 #
-# Created: Fri Aug  2 11:12:55 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Fri Aug 15 10:26:58 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_BundleEditorDialog(object):
     def setupUi(self, BundleEditorDialog):
@@ -124,12 +133,12 @@ class Ui_BundleEditorDialog(object):
         QtCore.QMetaObject.connectSlotsByName(BundleEditorDialog)
 
     def retranslateUi(self, BundleEditorDialog):
-        BundleEditorDialog.setWindowTitle(QtGui.QApplication.translate("BundleEditorDialog", "Bundle Editor", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonFilter.setText(QtGui.QApplication.translate("BundleEditorDialog", "Filter", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelTitle.setText(QtGui.QApplication.translate("BundleEditorDialog", "No item selected", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelActivation.setText(QtGui.QApplication.translate("BundleEditorDialog", "Name:", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelScopeSelector.setText(QtGui.QApplication.translate("BundleEditorDialog", "Scope Selector:", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelActivation_3.setText(QtGui.QApplication.translate("BundleEditorDialog", "Tab Trigger:", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelActivation_4.setText(QtGui.QApplication.translate("BundleEditorDialog", "Key Equivalent:", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelActivation_5.setText(QtGui.QApplication.translate("BundleEditorDialog", "Semantic Class:", None, QtGui.QApplication.UnicodeUTF8))
+        BundleEditorDialog.setWindowTitle(_translate("BundleEditorDialog", "Bundle Editor", None))
+        self.pushButtonFilter.setText(_translate("BundleEditorDialog", "Filter", None))
+        self.labelTitle.setText(_translate("BundleEditorDialog", "No item selected", None))
+        self.labelActivation.setText(_translate("BundleEditorDialog", "Name:", None))
+        self.labelScopeSelector.setText(_translate("BundleEditorDialog", "Scope Selector:", None))
+        self.labelActivation_3.setText(_translate("BundleEditorDialog", "Tab Trigger:", None))
+        self.labelActivation_4.setText(_translate("BundleEditorDialog", "Key Equivalent:", None))
+        self.labelActivation_5.setText(_translate("BundleEditorDialog", "Semantic Class:", None))
 

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/spelling.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dialogs/spelling.ui'
 #
-# Created: Tue Jul 30 11:11:59 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Fri Aug 15 10:26:59 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_SpellingDialog(object):
     def setupUi(self, SpellingDialog):
@@ -66,10 +75,10 @@ class Ui_SpellingDialog(object):
         QtCore.QMetaObject.connectSlotsByName(SpellingDialog)
 
     def retranslateUi(self, SpellingDialog):
-        SpellingDialog.setWindowTitle(QtGui.QApplication.translate("SpellingDialog", "Spelling", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("SpellingDialog", "This word was not found in the spelling dictionary.", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonChange.setText(QtGui.QApplication.translate("SpellingDialog", "Change", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonFindNext.setText(QtGui.QApplication.translate("SpellingDialog", "Find Next", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonIgnore.setText(QtGui.QApplication.translate("SpellingDialog", "Ignore", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonLearn.setText(QtGui.QApplication.translate("SpellingDialog", "Learn", None, QtGui.QApplication.UnicodeUTF8))
+        SpellingDialog.setWindowTitle(_translate("SpellingDialog", "Spelling", None))
+        self.label.setText(_translate("SpellingDialog", "This word was not found in the spelling dictionary.", None))
+        self.pushButtonChange.setText(_translate("SpellingDialog", "Change", None))
+        self.pushButtonFindNext.setText(_translate("SpellingDialog", "Find Next", None))
+        self.pushButtonIgnore.setText(_translate("SpellingDialog", "Ignore", None))
+        self.pushButtonLearn.setText(_translate("SpellingDialog", "Learn", None))
 

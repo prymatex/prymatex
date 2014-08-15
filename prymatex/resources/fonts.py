@@ -31,12 +31,4 @@ def get_family(families):
     else:
         print("Warning: None of the following fonts is installed: %r" % families)
         return QtGui.QFont().family()
-        
-def loadGlyphs(resourcesPath):
-    glyphs = {}
-    glyphsPath = os.path.join(resourcesPath, "Glyphs")
-    if os.path.exists(glyphsPath):
-        for glyphFileName in os.listdir(glyphsPath):
-            name = os.path.splitext(glyphFileName)[0]
-            glyphs[name] = os.path.join(glyphsPath, glyphFileName)
-    return {"Glyphs": glyphs}
+

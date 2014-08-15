@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/dialogs/project.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dialogs/project.ui'
 #
-# Created: Tue Jul 30 11:11:59 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Fri Aug 15 10:26:59 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_ProjectDialog(object):
     def setupUi(self, ProjectDialog):
@@ -138,15 +147,15 @@ class Ui_ProjectDialog(object):
         ProjectDialog.setTabOrder(self.buttonChoose, self.buttonCreate)
 
     def retranslateUi(self, ProjectDialog):
-        self.label1.setText(QtGui.QApplication.translate("ProjectDialog", "Name:", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxUseDefaultLocation.setText(QtGui.QApplication.translate("ProjectDialog", "Use default location", None, QtGui.QApplication.UnicodeUTF8))
-        self.label2.setText(QtGui.QApplication.translate("ProjectDialog", "Location:", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonChoose.setText(QtGui.QApplication.translate("ProjectDialog", "Ch&oose", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("ProjectDialog", "Description:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label3.setText(QtGui.QApplication.translate("ProjectDialog", "Keywords:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_3.setText(QtGui.QApplication.translate("ProjectDialog", "Licence:", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxUseTemplate.setText(QtGui.QApplication.translate("ProjectDialog", "Use template", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("ProjectDialog", "Template:", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonCreate.setText(QtGui.QApplication.translate("ProjectDialog", "&Create", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonCancel.setText(QtGui.QApplication.translate("ProjectDialog", "C&ancel", None, QtGui.QApplication.UnicodeUTF8))
+        self.label1.setText(_translate("ProjectDialog", "Name:", None))
+        self.checkBoxUseDefaultLocation.setText(_translate("ProjectDialog", "Use default location", None))
+        self.label2.setText(_translate("ProjectDialog", "Location:", None))
+        self.buttonChoose.setText(_translate("ProjectDialog", "Ch&oose", None))
+        self.label.setText(_translate("ProjectDialog", "Description:", None))
+        self.label3.setText(_translate("ProjectDialog", "Keywords:", None))
+        self.label_3.setText(_translate("ProjectDialog", "Licence:", None))
+        self.checkBoxUseTemplate.setText(_translate("ProjectDialog", "Use template", None))
+        self.label_2.setText(_translate("ProjectDialog", "Template:", None))
+        self.buttonCreate.setText(_translate("ProjectDialog", "&Create", None))
+        self.buttonCancel.setText(_translate("ProjectDialog", "C&ancel", None))
 

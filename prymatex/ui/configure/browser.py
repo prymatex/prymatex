@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/likewise-open/SUPTRIB/dvanhaaster/Workspace/prymatex/resources/ui/configure/browser.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/configure/browser.ui'
 #
-# Created: Thu Feb  6 11:09:58 2014
-#      by: PyQt4 UI code generator 4.10.3
+# Created: Fri Aug 15 10:26:59 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 

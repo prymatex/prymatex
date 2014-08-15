@@ -41,6 +41,10 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         if styleSheet is not None:
             self.setStyleSheet(styleSheet.content)
 
+    @ConfigurableItem(default = QtGui.QIcon.themeName())
+    def iconTheme(self, iconThemeName):
+        resources.set_icon_theme(iconThemeName)
+            
     askAboutExternalDeletions = ConfigurableItem(default=False)
     askAboutExternalChanges = ConfigurableItem(default=False)
 
