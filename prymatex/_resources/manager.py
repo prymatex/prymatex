@@ -8,7 +8,7 @@ from prymatex.qt.helpers import get_std_icon
 from prymatex.utils import text
 from prymatex.utils import six
 
-from .media import load_media
+from .media import load_media, default_media_mapper
 from .stylesheets import load_stylesheets
 from .sequences import ContextSequence
 
@@ -18,8 +18,8 @@ class Resource(dict):
     def __init__(self, name, path):
         self._name = name
         self._path = path
-        self._mapper = {}
-        self._from_theme = QtGui.QIcon._fromTheme
+        self._mapper = default_media_mapper
+        self._from_theme = QtGui.QIcon.fromTheme
 
     def name(self):
         return self._name
@@ -49,7 +49,6 @@ class Resource(dict):
         if index in self._mapper:
             index = self._mapper[index]
         if isinstance(index, six.string_types):
-    
             if os.path.exists(index) and os.path.isabs(index):
                 return _fileIconProvider.icon(QtCore.QFileInfo(index))
     	
@@ -70,6 +69,19 @@ class Resource(dict):
         description = description or text.camelcase_to_text(name)
         return ContextSequence(self, context, name, default, description)
     
+    def set_theme(self, name):
+        self._mapper = self.find_source(name, ["Mapping"]) or default_media_mapper
+        theme = self.find_source(name, ["Themes"])
+        if theme:
+            if theme.type == "pix":
+                # Pixmap
+                QtGui.QIcon.setThemeName(theme.name)
+                self._from_theme = QtGui.QIcon._fromTheme
+            elif theme.type == "glyph":
+                # Glyph
+                glyph = self.find_source(name, ["Glyphs"])
+                self._from_theme = glyph.icon
+
 class ResourceProvider(object):
     def __init__(self, resources):
         self.resources = resources
@@ -79,39 +91,40 @@ class ResourceProvider(object):
                 
     def get_image(self, index, fallback = None):
         fallback = fallback or QtGui.QPixmap()
-        for resource in self.resources:
-            image = resource.get_icon(index)
+        for res in self.resources:
+            image = res.get_icon(index)
             if not image.isNull():
                 return image
         return fallback
     
     def get_icon(self, index, fallback = None):
         fallback = fallback or QtGui.QIcon()
-        for resource in self.resources:
-            icon = resource.get_icon(index)
+        for res in self.resources:
+            icon = res.get_icon(index)
             if not icon.isNull():
                 return icon
         return fallback
 
     def get_sequence(self, context, name, default = None, description = None):
         sequence = QtGui.QKeySequence()
-        for resource in self.resources:
-            sequence = resource.get_sequence(context, name, default, description)
+        for res in self.resources:
+            sequence = res.get_sequence(context, name, default, description)
             if not sequence.isEmpty():
                 return sequence
         return sequence
 
     def _section(self, name):
         section = {}
-        for resource in reversed(self.resources):
-            section.update(resource[name])
+        for res in reversed(self.resources):
+            section.update(res[name])
         return section
         
     def get_themes(self):
         return self._section("Themes")
 
     def set_theme(self, name):
-        print(name)
+        for res in self.resources:
+            res.set_theme(name)
 
     def get_stylesheets(self):
         return self._section("StyleSheets")
@@ -123,13 +136,24 @@ class ResourceManager(object):
         self.providers = {}
         
     def add_source(self, name, path):
-        resource = Resource(name, path)
-        resource.update(load_media(path))
-        resource.update(load_stylesheets(path))
-        self.resources[name] = resource
+        res = Resource(name, path)
+        res.update(load_media(path))
+        res.update(load_stylesheets(path))
+        self.resources[name] = res
 
     def get_provider(self, sources):
         if sources not in self.providers:
             resources = [ self.resources[name] for name in sources ]
             self.providers[sources] = ResourceProvider(resources)
         return self.providers[sources]
+
+    def install_icon_handler(self):
+        QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
+        QtGui.QIcon.fromTheme = self.icon_from_theme
+
+    def icon_from_theme(self, index):
+        for res in self.resources.values():
+            icon = res.get_icon(index)
+            if not icon.isNull():
+                return icon
+        return QtGui.QIcon()

@@ -179,11 +179,11 @@ class MainWindowActionsMixin(object):
                 "aboutToShow": cls.on_menuRecentFiles_aboutToShow,
                 "items": ["-", {
                     "text": "Open all recent files",
-                    "triggered": lambda mw: [ mw.application.openFile(path)
-                        for path in mw.application.fileManager.fileHistory ]
+                    "triggered": lambda mw: [ mw.application().openFile(path)
+                        for path in mw.application().fileManager.fileHistory ]
                 }, {
                     "text": "Remove all recent files",
-                    "triggered": lambda mw: mw.application.fileManager.clearFileHistory()
+                    "triggered": lambda mw: mw.application().fileManager.clearFileHistory()
                 }]
             }, {
                 "text": "Import project",
@@ -213,7 +213,7 @@ class MainWindowActionsMixin(object):
                 "triggered": cls.on_actionSwitchProfile_triggered
             }, "-", {
                 "text": "Quit",
-                "triggered": lambda mw: mw.application.quit()
+                "triggered": lambda mw: mw.application().quit()
             }]
         }
 
@@ -392,7 +392,7 @@ class MainWindowActionsMixin(object):
                     "triggered": lambda mw: mw.bundleEditorDialog.execSnippet()
                 }, {
                     "text": "Reload bundles",
-                    "triggered": lambda mw: mw.application.supportManager.reloadSupport(mw.showMessage)
+                    "triggered": lambda mw: mw.application().supportManager.reloadSupport(mw.showMessage)
                 }]
             }, "-"]
         }
@@ -420,16 +420,16 @@ class MainWindowActionsMixin(object):
             "text": "&Help",
             "items": [ {
                 "text": "Read documentation",
-                "triggered": lambda mw: mw.application.openUrl(prymatex.__source__ + '/wiki')
+                "triggered": lambda mw: mw.application().openUrl(prymatex.__source__ + '/wiki')
             }, {
                 "text": "Project homepage",
-                "triggered": lambda mw: mw.application.openUrl(prymatex.__url__)
+                "triggered": lambda mw: mw.application().openUrl(prymatex.__url__)
             }, "-", {
                 "text": "Translate Prymatex",
-                "triggered": lambda mw: mw.application.openUrl(prymatex.__source__ + '/wiki')
+                "triggered": lambda mw: mw.application().openUrl(prymatex.__source__ + '/wiki')
             }, "-", {
                 "text": "Report bug",
-                "triggered": lambda mw: mw.application.openUrl(prymatex.__source__ + '/issues?utf8=%E2%9C%93')
+                "triggered": lambda mw: mw.application().openUrl(prymatex.__source__ + '/issues?utf8=%E2%9C%93')
             },  {
                 "text": "Take screenshoot",
                 "triggered": cls.on_actionTakeScreenshot_triggered
@@ -438,7 +438,7 @@ class MainWindowActionsMixin(object):
                 "triggered": lambda mw: mw.aboutDialog.exec_()
             }, {
                 "text": "About Qt",
-                "triggered": lambda mw: mw.application.aboutQt()
+                "triggered": lambda mw: mw.application().aboutQt()
             }, ]
         }
         return menu

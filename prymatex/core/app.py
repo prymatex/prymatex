@@ -8,7 +8,7 @@ import tempfile
 from functools import partial
 
 import prymatex
-from prymatex import resources
+from prymatex import _resources as res
 
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import create_shortcut
@@ -62,7 +62,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self.setOrganizationName(prymatex.__author__)
         self.platform = sys.platform
 
-        resources.loadPrymatexResources(config.PMX_SHARE_PATH)
+        #resources.loadPrymatexResources(config.PMX_SHARE_PATH)
 
         # Connects
         self.aboutToQuit.connect(self.closePrymatex)
@@ -115,6 +115,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self.resourceManager = ResourceManager()
         for ns, path in config.NAMESPACES:
             self.resourceManager.add_source(ns, path)
+        self.resourceManager.install_icon_handler()
         
         # Prepare profile
         from prymatex.managers.profile import ProfileManager
@@ -132,7 +133,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self.currentProfile.registerConfigurableInstance(self)
 
         logger.config(self.options.verbose, self.currentProfile.PMX_LOG_PATH, self.options.log_pattern)
-
+        
         self.checkSingleInstance()
 
         return True
@@ -159,7 +160,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self.showMessage = self.logger().info
         if not self.options.no_splash:
             from prymatex.widgets.splash import SplashScreen
-            splash_image = resources.get_image('newsplash')
+            splash_image = self.resources().get_image('newsplash')
             splash = SplashScreen(splash_image)
             splash.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.SplashScreen)
 
@@ -529,7 +530,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         """Register QAction or QShortcut to Prymatex main application,
         with sequence
         """
-        if not isinstance(sequence, resources.ContextSequence):
+        if not isinstance(sequence, res.ContextSequence):
             if not isinstance(sequence, (tuple, list)):
                 sequence = ("Global", sequence)
             sequence = componentClass.resources().get_sequence(*sequence)

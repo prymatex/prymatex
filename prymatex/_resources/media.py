@@ -36,16 +36,15 @@ def load_media(resourcesPath):
                 resources["Images"][name] = imagePath
                 
     # Load Themes
-    themesPath = os.path.join(resourcesPath, "Media", "Themes")
-    if os.path.exists(themesPath):
-        themePaths = [ themesPath ] + QtGui.QIcon.themeSearchPaths()
-        for themePath in themePaths:
-            if not os.path.exists(themePath):
-                continue
-            for name in os.listdir(themePath):
-                descriptor = os.path.join(themePath, name, "index.theme")
-                if os.path.exists(descriptor):
-                    resources["Themes"][name] = IconTheme(name, "pix", os.path.join(themePath, name))
+    themesPaths = [ os.path.join(resourcesPath, "Media", "Themes") ] + \
+        [ "/usr/share/icons" ] + QtGui.QIcon.themeSearchPaths()
+    for themesPath in themesPaths:
+        if not os.path.exists(themesPath):
+            continue
+        for name in os.listdir(themesPath):
+            descriptor = os.path.join(themesPath, name, "index.theme")
+            if os.path.exists(descriptor):
+                resources["Themes"][name] = IconTheme(name, "pix", os.path.join(themesPath, name))
     
     # Load Glyphs
     glyphsPath = os.path.join(resourcesPath, "Media", "Glyphs")
@@ -66,3 +65,27 @@ def load_media(resourcesPath):
             resources["Mapping"][name] = json.loads(file_content)
 
     return resources
+
+default_media_mapper = {
+    "bundle-item-bundle": ":/bundles/bundle.png",
+    "bundle-item-command": ":/bundles/commands.png",
+    "bundle-item-dragcommand": ":/bundles/drag-commands.png",
+    "bundle-item-macro": ":/bundles/macros.png",
+    "bundle-item-preference": ":/bundles/preferences.png",
+    "bundle-item-project": ":/bundles/project.png",
+    "bundle-item-proxy": ":/bundles/template-files.png",
+    "bundle-item-snippet": ":/bundles/snippets.png",
+    "bundle-item-syntax": ":/bundles/languages.png",
+    "bundle-item-template": ":/bundles/templates.png",
+    "bundle-item-staticfile": ":/bundles/template-files.png",
+    "editor-mode": ":/bullets/red.png",
+    "porcess-not-running": ":/bullets/red.png",
+    "porcess-running": ":/bullets/green.png",
+    "porcess-starting": ":/bullets/yellow.png",
+    "symbol-block": ":/bullets/green.png",
+    "symbol-class": ":/bullets/blue.png",
+    "symbol-context": ":/bullets/yellow.png",
+    "symbol-function": ":/bullets/ligthblue.png",
+    "symbol-typedef": ":/bullets/brown.png",
+    "symbol-variable": ":/bullets/red.png",
+}
