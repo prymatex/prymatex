@@ -15,7 +15,7 @@ class MainWindowActionsMixin(object):
     # -------------- Global callback for copy, paste cut...
     def globalCallback(self):
         """Global callback"""
-        widget = self.application.focusWidget()
+        widget = self.application().focusWidget()
         action = self.sender()
         callback = action.data()
         getattr(widget, callback, lambda : None)()
@@ -27,10 +27,10 @@ class MainWindowActionsMixin(object):
         for action in self.menuRecentFiles.actions():
             if action not in actions:
                 self.menuRecentFiles.removeAction(action)
-        for index, filePath in enumerate(self.application.fileManager.fileHistory, 1):
+        for index, filePath in enumerate(self.application().fileManager.fileHistory, 1):
             action = create_action(self, {
-                "text": "%s (%s)\t&%d" % (self.application.fileManager.basename(filePath), filePath, index),
-                "triggered": lambda file = filePath: self.application.openFile(file)
+                "text": "%s (%s)\t&%d" % (self.application().fileManager.basename(filePath), filePath, index),
+                "triggered": lambda file = filePath: self.application().openFile(file)
             })
             self.menuRecentFiles.addAction(action)
         self.menuRecentFiles.addActions(actions)
@@ -64,19 +64,19 @@ class MainWindowActionsMixin(object):
         selected_paths, selected_filter = getOpenFileNames(
             self,
             caption="Open files",
-            basedir=self.application.fileManager.directory(file_path)
+            basedir=self.application().fileManager.directory(file_path)
         )
         for file_path in selected_paths:
-            self.application.openFile(
+            self.application().openFile(
                 file_path,
                 focus = selected_paths[-1] == file_path   # Focus on last editor
             )
 
     def on_actionImportProject_triggered(self):
-        directory = QtGui.QFileDialog.getExistingDirectory(self, "Choose project location", self.application.fileManager.directory())
+        directory = QtGui.QFileDialog.getExistingDirectory(self, "Choose project location", self.application().fileManager.directory())
         if directory:
             try:
-                self.application.projectManager.importProject(directory)
+                self.application().projectManager.importProject(directory)
             except exceptions.LocationIsNotProject:
                 QtGui.QMessageBox.critical(self, "Critical", "A error has occurred.\n%s is not a valid project location." % directory)
 
@@ -88,8 +88,8 @@ class MainWindowActionsMixin(object):
 
     def on_actionSwitchProfile_triggered(self):
         if self.profileDialog.switchProfile() == self.profileDialog.Accepted and\
-            self.application.profileManager.defaultProfile() != self.application.currentProfile:
-            self.application.restart()
+            self.application().profileManager.defaultProfile() != self.application().currentProfile:
+            self.application().restart()
 
     # ------------ Navigation Actions
     def on_actionSelectTab_triggered(self):
@@ -138,7 +138,7 @@ class MainWindowActionsMixin(object):
         from datetime import datetime
         now = datetime.now()
         baseName = now.strftime("%Y-%m-%d-%H_%M_%S") + '.' + self.SCREENSHOT_FORMAT
-        path = os.path.join(self.application.currentProfile.PMX_SCREENSHOT_PATH, baseName)
+        path = os.path.join(self.application().currentProfile.PMX_SCREENSHOT_PATH, baseName)
         pxm.save(path, self.SCREENSHOT_FORMAT)
         try:
             self.currentEditor().showMessage("%s saved" % baseName)

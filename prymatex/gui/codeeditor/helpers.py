@@ -17,11 +17,11 @@ class CodeEditorKeyHelper(PrymatexEditorKeyHelper, QtCore.QObject):
 class KeyEquivalentHelper(CodeEditorKeyHelper):
     def accept(self, event = None, cursor = None, **kwargs):
         keyseq = int(event.modifiers()) + event.key()
-        if keyseq not in self.application.supportManager.getAllKeyEquivalentCodes():
+        if keyseq not in self.application().supportManager.getAllKeyEquivalentCodes():
             return False
         
         leftScope, rightScope = self.editor.scope(cursor)
-        self.items = self.application.supportManager.getKeyEquivalentItem(
+        self.items = self.application().supportManager.getKeyEquivalentItem(
             keyseq, leftScope, rightScope)
         return bool(self.items)
 
@@ -37,12 +37,12 @@ class TabTriggerHelper(CodeEditorKeyHelper):
     def accept(self, event = None, cursor = None, **kwargs):
         if cursor.hasSelection(): return False
 
-        trigger = self.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
+        trigger = self.application().supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
         if not trigger: return False
         
         self.triggerCursor = self.editor.newCursorAtPosition(cursor.position(), cursor.position() - len(trigger))
         leftScope, rightScope = self.editor.scope(self.triggerCursor)
-        self.items = self.application.supportManager.getTabTriggerItem(
+        self.items = self.application().supportManager.getTabTriggerItem(
             trigger, leftScope, rightScope)
         return bool(self.items)
 
@@ -217,7 +217,7 @@ class SmartIndentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Return
     def execute(self, event = None, cursor = None, **kwargs):
         if self.editor.document().blockCount() == 1:
-            syntax = self.application.supportManager.findSyntaxByFirstLine(cursor.block().text()[:cursor.columnNumber()])
+            syntax = self.application().supportManager.findSyntaxByFirstLine(cursor.block().text()[:cursor.columnNumber()])
             if syntax is not None:
                 self.editor.insertBundleItem(syntax)
         self.editor.insertNewLine(cursor)

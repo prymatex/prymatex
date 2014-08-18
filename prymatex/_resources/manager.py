@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
+import os
+
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.helpers import get_std_icon
 
 from prymatex.utils import text
+from prymatex.utils import six
 
 from .media import load_media
 from .stylesheets import load_stylesheets
@@ -15,7 +18,15 @@ class Resource(dict):
     def __init__(self, name, path):
         self._name = name
         self._path = path
-        
+        self._mapper = {}
+        self._from_theme = QtGui.QIcon._fromTheme
+
+    def name(self):
+        return self._name
+
+    def path(self):
+        return self._path
+
     def find_source(self, name, sections = None):
         if sections is not None:
             sections = sections if isinstance(sections, (list, tuple)) else (sections, )
@@ -32,7 +43,8 @@ class Resource(dict):
         else:
             #Standard Icon
             return get_std_icon(index).pixmap(32)
-    
+        return QtGui.QPixmap()
+
     def get_icon(self, index):
         if index in self._mapper:
             index = self._mapper[index]
@@ -52,15 +64,19 @@ class Resource(dict):
             return self._from_theme(index)
         elif isinstance(index, six.integer_types):
             return _fileIconProvider.icon(index)
+        return QtGui.QIcon()
     
     def get_sequence(self, context, name, default = None, description = None):
         description = description or text.camelcase_to_text(name)
-        return ContextSequence(context, name, default)
+        return ContextSequence(self, context, name, default, description)
     
 class ResourceProvider(object):
     def __init__(self, resources):
         self.resources = resources
 
+    def sources(self):
+        return self.resources[:]
+                
     def get_image(self, index, fallback = None):
         fallback = fallback or QtGui.QPixmap()
         for resource in self.resources:
@@ -81,9 +97,24 @@ class ResourceProvider(object):
         sequence = QtGui.QKeySequence()
         for resource in self.resources:
             sequence = resource.get_sequence(context, name, default, description)
-            if not sequence.is_empty():
+            if not sequence.isEmpty():
                 return sequence
         return sequence
+
+    def _section(self, name):
+        section = {}
+        for resource in reversed(self.resources):
+            section.update(resource[name])
+        return section
+        
+    def get_themes(self):
+        return self._section("Themes")
+
+    def set_theme(self, name):
+        print(name)
+
+    def get_stylesheets(self):
+        return self._section("StyleSheets")
 
 class ResourceManager(object):
     def __init__(self, **kwargs):

@@ -20,17 +20,18 @@ class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtGui.QWidget):
         currentStyleName = self.settings.value('qtStyle')
         currentStyleSheetName = self.settings.value('qtStyleSheet')
         currentIconTheme = self.settings.value('iconTheme')
+        resources = self.application().resources()
         for index, styleName in enumerate(QtGui.QStyleFactory.keys()):
             self.comboBoxQtStyle.addItem(styleName, styleName)
             if currentStyleName and styleName == currentStyleName:
                 self.comboBoxQtStyle.setCurrentIndex(index)
 
-        for index, styleSheetName in enumerate(resources.get_section("Stylesheets").keys()):
+        for index, styleSheetName in enumerate(resources.get_stylesheets().keys()):
             self.comboBoxQtStyleSheet.addItem(styleSheetName, styleSheetName)
             if currentStyleSheetName and styleSheetName == currentStyleSheetName:
                 self.comboBoxQtStyleSheet.setCurrentIndex(index)
 
-        for index, theme in enumerate(resources.get_section("Themes").values()):
+        for index, theme in enumerate(resources.get_themes().values()):
             self.comboBoxIconTheme.addItem(theme.name, theme.name)
             if currentIconTheme and theme.name == currentIconTheme:
                 self.comboBoxIconTheme.setCurrentIndex(index)

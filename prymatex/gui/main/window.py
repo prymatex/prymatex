@@ -3,7 +3,6 @@
 
 import os
 from string import Template
-from functools import reduce
 
 from prymatex import resources
 
@@ -76,7 +75,6 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
         center_widget(self, scale = (0.9, 0.8))
         self.dockWidgets = []
         self.dialogs = []
-        self.customComponentObjects = {}
 
         self.setAcceptDrops(True)
 
@@ -106,8 +104,8 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
         self.centralWidget().tabCreateRequest.connect(self.addEmptyEditor)
 
         # Status and menu bars
-        self.setStatusBar(PrymatexMainStatusBar(self))
-        self.setMenuBar(PrymatexMainMenuBar(self))
+        self.setStatusBar(PrymatexMainStatusBar(parent = self))
+        self.setMenuBar(PrymatexMainMenuBar(parent = self))
         
         self.resize(801, 600)
         
@@ -137,42 +135,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
         self.projectsDock = self.findChild(QtGui.QDockWidget, "ProjectsDock")
 
         # Build Main Menu
-        def extendMainMenu(klass):
-            menuExtensions = issubclass(klass, PrymatexComponent) and klass.contributeToMainMenu() or None
-            if menuExtensions is not None:
-                objects = []
-                for name, settings in menuExtensions.items():
-                    if not settings:
-                        continue
-    
-                    # Find parent menu
-                    parentMenu = self.findChild(QtGui.QMenu, 
-                        text_to_objectname(name, prefix = "menu"))
-                    # Extend
-                    if parentMenu is not None:
-                        # Fix menu extensions
-                        if not isinstance(settings, list):
-                            settings = [ settings ]
-                        objects += extend_menu(parentMenu, settings,
-                            dispatcher = self.componentInstanceDispatcher,
-                            sequence_handler = self.application().registerShortcut,
-                            icon_handler = self.application().registerIcon)
-                    else:
-                        objs = create_menu(self, settings,
-                            dispatcher = self.componentInstanceDispatcher,
-                            allObjects = True,
-                            sequence_handler = self.application().registerShortcut,
-                            icon_handler = self.application().registerIcon)
-                        add_actions(self.menuBar(), [ objs[0] ], settings.get("before", None))
-                        objects += objs
-
-                # Store all new objects from creation or extension
-                self.customComponentObjects.setdefault(klass, []).extend(objects)
-
-                for componentClass in self.application().pluginManager.findComponentsForClass(klass):
-                    extendMainMenu(componentClass)
-
-        extendMainMenu(self.__class__)
+        self.menuBar().extend(self.__class__, self)
         
         # Load some menus as atters of the main window
         self.menuPanels = self.findChild(QtGui.QMenu, "menuPanels")
@@ -189,37 +152,17 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
             if sequence is None:
                 sequence = ("Docks", dock.objectName(), "Alt+%d" % dockIndex)
                 dockIndex += 1
-            self.application().registerShortcut(toggleAction, sequence)
+            self.application().registerShortcut(dock.__class__, toggleAction, sequence)
             icon = dock.ICON
             if icon is None:
                 icon = 'dock'
-            self.application().registerIcon(toggleAction, icon)
+            self.application().registerIcon(dock.__class__, toggleAction, icon)
             self.menuPanels.addAction(toggleAction)
             self.addAction(toggleAction)
 
         # Metemos las acciones del support
         self.application().supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
-        
-    def componentInstanceDispatcher(self, handler, *largs):
-        obj = self.sender()
-        componentClass = None
-        for cmpClass, objects in self.customComponentObjects.items():
-            if obj in objects:
-                componentClass = cmpClass
-                break
-
-        componentInstances = [ self ]
-        for componentClass in self.application().componentHierarchyForClass(componentClass):
-            componentInstances = reduce(
-                lambda ai, ci: ai + ci.findChildren(componentClass),
-                componentInstances, [])
-
-        widget = self.application().focusWidget()
-        self.logger().debug("Trigger %s over %s" % (obj, componentInstances))
-
-        # TODO Tengo todas pero solo se lo aplico a la ultima que es la que generalmente esta en uso
-        handler(componentInstances[-1], *largs)
-
+    
     def environmentVariables(self):
         env = {}
         for docker in self.dockWidgets:
@@ -234,11 +177,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
     # ---------- Override QMainWindow
     def show(self):
         QtGui.QMainWindow.show(self)
-        
-        # Test menu actions
-        objects = self.customComponentObjects[self.__class__]
-        test_actions(self, 
-            filter(lambda obj: isinstance(obj, QtGui.QAction), objects))
+        self.menuBar().update(self.__class__, self)
 
     # --------------- Bundle Items
     def on_bundleItemTriggered(self, bundleItem):
@@ -314,17 +253,13 @@ html_footer
     def updateMenuForEditor(self, editor):
         # Primero las del editor
         self.logger().debug("Update editor %s objects" % editor)
-        objects = self.customComponentObjects.get(editor.__class__, [])
-        test_actions(editor, 
-            filter(lambda obj: isinstance(obj, QtGui.QAction), objects))
+        self.menuBar().update(editor.__class__, editor)
 
         # Ahora sus children
         componentClass = self.application().findComponentsForClass(editor.__class__)
         for klass in componentClass:
             for componentInstance in editor.findChildren(klass):
-                objects = self.customComponentObjects.get(klass, [])
-                test_actions(componentInstance, 
-                    filter(lambda obj: isinstance(obj, QtGui.QAction), objects))
+                self.menuBar().update(klass, componentInstance)
 
     # -------------- Notifications
     def showMessage(self, *largs, **kwargs):

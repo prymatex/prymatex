@@ -5,6 +5,7 @@ import os
 import sys
 import inspect
 import tempfile
+from functools import partial
 
 import prymatex
 from prymatex import resources
@@ -37,13 +38,13 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     @ConfigurableItem(default = "default")
     def qtStyleSheet(self, styleSheetName):
-        styleSheet = resources.getResource(styleSheetName, ["Stylesheets"])
+        styleSheet = self.resources().get_stylesheets().get(styleSheetName)
         if styleSheet is not None:
             self.setStyleSheet(styleSheet.content)
 
     @ConfigurableItem(default = QtGui.QIcon.themeName())
     def iconTheme(self, iconThemeName):
-        resources.set_icon_theme(iconThemeName)
+        self.resources().set_theme(iconThemeName)
             
     askAboutExternalDeletions = ConfigurableItem(default=False)
     askAboutExternalChanges = ConfigurableItem(default=False)
@@ -228,20 +229,6 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             f.close()
 
     # -------------------- Managers
-    def buildResourceManager(self):
-        from prymatex.managers.resources import ResourceManager
-        self.populateComponentClass(ResourceManager)
-        
-        manager = ResourceManager(parent = self)
-        self.currentProfile.registerConfigurableInstance(manager)
-        manager.initialize(parent = self)
-        
-        manager.addNamespace('prymatex', config.PMX_SHARE_PATH)
-
-        manager.addNamespace('user', config.PMX_HOME_PATH)
-        
-        return manager
-
     def buildPluginManager(self):
         from prymatex.managers.plugins import PluginManager
         #manager = self.createComponentInstance(PluginManager, parent = self)
@@ -252,11 +239,9 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self.currentProfile.registerConfigurableInstance(manager)
 
         manager.initialize(parent = self)
+        for source in self.resources().sources():
+            manager.addNamespace(source.name(), source.path())
 
-        manager.addNamespace('prymatex', config.PMX_SHARE_PATH)
-
-        manager.addNamespace('user', config.PMX_HOME_PATH)
-        
         manager.loadPlugins()
         return manager
 
@@ -264,11 +249,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         from prymatex.managers.support import SupportManager
         manager = self.createComponentInstance(SupportManager, parent = self)
 
-        #Prepare prymatex namespace
-        manager.addNamespace('prymatex', config.PMX_SHARE_PATH)
-
-        #Prepare user namespace
-        manager.addNamespace('user', config.PMX_HOME_PATH)
+        for source in reversed(self.resources().sources()):
+            manager.addNamespace(source.name(), source.path())
 
         # Update environment
         manager.updateEnvironment({
@@ -385,7 +367,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             instance.initialize()
             # Shortcuts
             for settings in instance.contributeToShortcuts():
-                create_shortcut(component, settings, sequence_handler = self.registerShortcut)
+                create_shortcut(component, settings, sequence_handler = partial(self.registerShortcut, instance.__class__))
 
         # -------------------- Store
         self.componentInstances.setdefault(componentClass, []).append(component)
@@ -480,17 +462,6 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                 return True
         return False
 
-    __options = None
-
-    @property
-    def options(self):
-        return self.__options
-
-    @options.setter
-    def options(self, value):
-        self.__options = value
-        # Send some singal? Don't think so yet, this is intended to be set at startup
-
     # ---- Open (file, directory, url, canelones)
     def openFile(self, filepath, cursorPosition=None, focus=True, main_window=None):
         """Open a editor in current window"""
@@ -547,21 +518,21 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                 self.openDirectory(path)
                 
     # ------- Icons
-    def registerIcon(self, qobject, icon):
+    def registerIcon(self, componentClass, qobject, icon):
         if not isinstance(icon, QtGui.QIcon):
-            icon = resources.get_icon(icon)
+            icon = componentClass.resources().get_icon(icon)
         if not icon.isNull():
             qobject.setIcon(icon)
 
     # ------- Shortcuts
-    def registerShortcut(self, qobject, sequence):
+    def registerShortcut(self, componentClass, qobject, sequence):
         """Register QAction or QShortcut to Prymatex main application,
         with sequence
         """
         if not isinstance(sequence, resources.ContextSequence):
             if not isinstance(sequence, (tuple, list)):
                 sequence = ("Global", sequence)
-            sequence = resources.get_sequence(*sequence)
+            sequence = componentClass.resources().get_sequence(*sequence)
         if not sequence.isEmpty():
             self.shortcutsTreeModel.registerShortcut(qobject, sequence)
 

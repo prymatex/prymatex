@@ -20,4 +20,4 @@ def load_stylesheets(resourcesPath):
             stylePath = os.path.join(stylesPath, styleFileName)
             with open(stylePath) as styleFile:
                 stylesheets[name] = Stylesheet(name, stylePath, styleFile.read())
-    return { "Stylesheets": stylesheets }
+    return { "StyleSheets": stylesheets }

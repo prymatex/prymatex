@@ -24,7 +24,7 @@ class FileSystemTasks(object):
                 break
             absNewDirName = os.path.join(directory, newDirName)
             try:
-                self.application.fileManager.createDirectory(absNewDirName)
+                self.application().fileManager.createDirectory(absNewDirName)
                 return absNewDirName
             except exceptions.PrymatexFileExistsException as e:
                 QtGui.QMessageBox.warning(self, _("Error creating directory"), 
@@ -45,7 +45,7 @@ class FileSystemTasks(object):
         
             absNewFileName = os.path.join(directory, newFileName)
             try:
-                self.application.fileManager.createFile(absNewFileName)
+                self.application().fileManager.createFile(absNewFileName)
                 return absNewFileName
             except exceptions.FileExistsException as e:
                 QtGui.QMessageBox.warning(self, _("Error creating file"), _("%s already exists") % newFileName)
@@ -62,7 +62,7 @@ class FileSystemTasks(object):
                                             buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
                                             defaultButton = QtGui.QMessageBox.Cancel)
         if result == QtGui.QMessageBox.Ok:
-            self.application.fileManager.deletePath(path)
+            self.application().fileManager.deletePath(path)
             
     def renamePath(self, path):
         ''' Renames files and folders '''
@@ -87,7 +87,7 @@ class FileSystemTasks(object):
                     if rslt == QtGui.QMessageBox.Cancel:
                         return
                     continue
-                self.application.fileManager.move(path, newFullPath)
+                self.application().fileManager.move(path, newFullPath)
                 return newFullPath
             else:
                 return 

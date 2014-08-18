@@ -153,7 +153,7 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
 
     def fillModel(self, callback):
         leftScope, rightScope = self.editor.scope()
-        self.triggers = self.editor.application.supportManager.getAllTabTriggerItemsByScope(leftScope, rightScope)
+        self.triggers = self.editor.application().supportManager.getAllTabTriggerItemsByScope(leftScope, rightScope)
         if self.triggers:
             callback(self)
     
@@ -449,5 +449,5 @@ class CodeEditorCompleter(QtGui.QCompleter):
                     self.complete(rect)
             if model is not None:
                 _go(model)
-            self.completerTasks = self.editor.application.schedulerManager.tasks(
+            self.completerTasks = self.editor.application().schedulerManager.tasks(
                 lambda model: model.fillModel(_go), self.completionModels)
