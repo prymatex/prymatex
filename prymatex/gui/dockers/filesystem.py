@@ -36,7 +36,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
         super(FileSystemDock, self).__init__(**kwargs)
         self.setupUi(self)
 
-        self.fileManager = self.application.fileManager
+        self.fileManager = self.application().fileManager
 
         #File System model
         self.fileSystemModel = QtGui.QFileSystemModel(self)
@@ -76,7 +76,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
                         self.setPathAsRoot(path)
                         return True
                     elif os.path.isfile(path):
-                        self.application.openFile(path)
+                        self.application().openFile(path)
                         return True
 
                 if event.key() == QtCore.Qt.Key_F and event.modifiers() == QtCore.Qt.ControlModifier:
@@ -207,7 +207,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
     def on_treeViewFileSystem_doubleClicked(self, index):
         path = self.currentPath()
         if os.path.isfile(path):
-            self.application.openFile(path)
+            self.application().openFile(path)
         elif os.path.isdir(path):
             self.setPathAsRoot(path)
 
@@ -217,7 +217,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
         return self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
 
     def currentDirectory(self):
-        return self.application.fileManager.directory(self.currentPath())
+        return self.application().fileManager.directory(self.currentPath())
 
     def currentRootPath(self):
         ''' Returns current root path '''
@@ -268,19 +268,19 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
 
     def on_actionCopy_triggered(self):
         mimeData = self.fileSystemProxyModel.mimeData( [ self.treeViewFileSystem.currentIndex() ] )
-        self.application.clipboard().setMimeData(mimeData)
+        self.application().clipboard().setMimeData(mimeData)
 
     def on_actionPaste_triggered(self):
         parentPath = self.currentPath()
-        mimeData = self.application.clipboard().mimeData()
+        mimeData = self.application().clipboard().mimeData()
         if mimeData.hasUrls() and os.path.isdir(parentPath):
             for url in mimeData.urls():
                 srcPath = url.toLocalFile()
-                dstPath = os.path.join(parentPath, self.application.fileManager.basename(srcPath))
+                dstPath = os.path.join(parentPath, self.application().fileManager.basename(srcPath))
                 if os.path.isdir(srcPath):
-                    self.application.fileManager.copytree(srcPath, dstPath)
+                    self.application().fileManager.copytree(srcPath, dstPath)
                 else:
-                    self.application.fileManager.copy(srcPath, dstPath)
+                    self.application().fileManager.copy(srcPath, dstPath)
 
     # ------ Actions Create and Delete objects
     @QtCore.Slot()
@@ -298,7 +298,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
         currentDirectory = self.currentDirectory()
         filePath = self.templateDialog.createFile(fileDirectory = self.currentDirectory())
         if filePath is not None:
-            self.application.openFile(filePath)
+            self.application().openFile(filePath)
 
 
     @QtCore.Slot()
@@ -321,7 +321,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
     def on_actionOpen_triggered(self):
         path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         if os.path.isfile(path):
-            self.application.openFile(path)
+            self.application().openFile(path)
 
     @QtCore.Slot()
     def on_actionOpenSystemEditor_triggered(self):
@@ -332,7 +332,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
     def on_actionOpenDefaultEditor_triggered(self):
         path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         if os.path.isfile(path):
-            self.application.openFile(path)
+            self.application().openFile(path)
 
     # ------ Custom filters
     @QtCore.Slot()
@@ -362,7 +362,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
     @QtCore.Slot()
     def on_actionSetInTerminal_triggered(self):
         path = self.currentPath()
-        directory = self.application.fileManager.getDirectory(path)
+        directory = self.application().fileManager.getDirectory(path)
         self.mainWindow().terminal.chdir(directory)
 
     # ----- Sort and order Actions

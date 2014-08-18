@@ -13,7 +13,7 @@ class SettingsDialog(PrymatexDialog, Ui_TreeWidgetDialog, QtGui.QDialog):
         self.setupUi(self)
         self.setObjectName("SettingsDialog")
         
-        self.treeView.setModel(self.application.profileManager.sortFilterSettingsProxyModel)
+        self.treeView.setModel(self.application().profileManager.sortFilterSettingsProxyModel)
 
         self.stackedWidget = QtGui.QStackedWidget(self.splitter)
         self.widgetsLayout.addWidget(self.stackedWidget)

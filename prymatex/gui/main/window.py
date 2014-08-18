@@ -52,7 +52,8 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
 
     @ConfigurableHook("CodeEditor.defaultTheme")
     def defaultTheme(self, themeUUID):
-        theme = self.application.supportManager.getBundleItem(themeUUID)
+        print(themeUUID)
+        theme = self.application().supportManager.getBundleItem(themeUUID)
         self.notifier.setPalette(theme.palette())
 
     _editorHistory = []
@@ -70,7 +71,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
         self.tabSelectableModel = tabSelectableModelFactory(self)
 
         # Connect Signals
-        self.application.supportManager.bundleItemTriggered.connect(self.on_bundleItemTriggered)
+        self.application().supportManager.bundleItemTriggered.connect(self.on_bundleItemTriggered)
 
         center_widget(self, scale = (0.9, 0.8))
         self.dockWidgets = []
@@ -154,21 +155,21 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
                             settings = [ settings ]
                         objects += extend_menu(parentMenu, settings,
                             dispatcher = self.componentInstanceDispatcher,
-                            sequence_handler = self.application.registerShortcut,
-                            icon_handler = self.application.registerIcon)
+                            sequence_handler = self.application().registerShortcut,
+                            icon_handler = self.application().registerIcon)
                     else:
                         objs = create_menu(self, settings,
                             dispatcher = self.componentInstanceDispatcher,
                             allObjects = True,
-                            sequence_handler = self.application.registerShortcut,
-                            icon_handler = self.application.registerIcon)
+                            sequence_handler = self.application().registerShortcut,
+                            icon_handler = self.application().registerIcon)
                         add_actions(self.menuBar(), [ objs[0] ], settings.get("before", None))
                         objects += objs
 
                 # Store all new objects from creation or extension
                 self.customComponentObjects.setdefault(klass, []).extend(objects)
 
-                for componentClass in self.application.pluginManager.findComponentsForClass(klass):
+                for componentClass in self.application().pluginManager.findComponentsForClass(klass):
                     extendMainMenu(componentClass)
 
         extendMainMenu(self.__class__)
@@ -188,16 +189,16 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
             if sequence is None:
                 sequence = ("Docks", dock.objectName(), "Alt+%d" % dockIndex)
                 dockIndex += 1
-            self.application.registerShortcut(toggleAction, sequence)
+            self.application().registerShortcut(toggleAction, sequence)
             icon = dock.ICON
             if icon is None:
                 icon = 'dock'
-            self.application.registerIcon(toggleAction, icon)
+            self.application().registerIcon(toggleAction, icon)
             self.menuPanels.addAction(toggleAction)
             self.addAction(toggleAction)
 
         # Metemos las acciones del support
-        self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
+        self.application().supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
         
     def componentInstanceDispatcher(self, handler, *largs):
         obj = self.sender()
@@ -208,13 +209,13 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
                 break
 
         componentInstances = [ self ]
-        for componentClass in self.application.componentHierarchyForClass(componentClass):
+        for componentClass in self.application().componentHierarchyForClass(componentClass):
             componentInstances = reduce(
                 lambda ai, ci: ai + ci.findChildren(componentClass),
                 componentInstances, [])
 
-        widget = self.application.focusWidget()
-        self.logger.debug("Trigger %s over %s" % (obj, componentInstances))
+        widget = self.application().focusWidget()
+        self.logger().debug("Trigger %s over %s" % (obj, componentInstances))
 
         # TODO Tengo todas pero solo se lo aplico a la ultima que es la que generalmente esta en uso
         handler(componentInstances[-1], *largs)
@@ -264,8 +265,8 @@ html_footer
                 'name': html.escape(title),
                 'output': html.htmlize(summary),
                 'exitcode': exitcode}
-        bundle = self.application.supportManager.getBundle(self.application.supportManager.defaultBundleForNewBundleItems)
-        command = self.application.supportManager.buildAdHocCommand(commandScript,
+        bundle = self.application().supportManager.getBundle(self.application().supportManager.defaultBundleForNewBundleItems)
+        command = self.application().supportManager.buildAdHocCommand(commandScript,
             bundle,
             name = "%s error" % title,
             commandOutput = 'showAsHTML')
@@ -312,13 +313,13 @@ html_footer
 
     def updateMenuForEditor(self, editor):
         # Primero las del editor
-        self.logger.debug("Update editor %s objects" % editor)
+        self.logger().debug("Update editor %s objects" % editor)
         objects = self.customComponentObjects.get(editor.__class__, [])
         test_actions(editor, 
             filter(lambda obj: isinstance(obj, QtGui.QAction), objects))
 
         # Ahora sus children
-        componentClass = self.application.findComponentsForClass(editor.__class__)
+        componentClass = self.application().findComponentsForClass(editor.__class__)
         for klass in componentClass:
             for componentInstance in editor.findChildren(klass):
                 objects = self.customComponentObjects.get(klass, [])
@@ -371,7 +372,7 @@ html_footer
 
     # ---------------- Create and manage editors
     def addEmptyEditor(self):
-        editor = self.application.createEditorInstance(parent = self)
+        editor = self.application().createEditorInstance(parent = self)
         self.addEditor(editor)
 
     def removeEditor(self, editor):
@@ -405,7 +406,7 @@ html_footer
         self.updateMenuForEditor(editor)
 
         #Avisar al manager si tenemos editor y preparar el handler
-        self.application.supportManager.setEditorAvailable(editor is not None)
+        self.application().supportManager.setEditorAvailable(editor is not None)
         self.bundleItem_handler = editor.bundleItemHandler() or self.insertBundleItem if editor is not None else self.insertBundleItem
 
         #Emitir señal de cambio
@@ -413,12 +414,12 @@ html_footer
 
         # Build title
         titleChunks = [ self.titleTemplate.safe_substitute(
-            **self.application.supportManager.environmentVariables()) ]
+            **self.application().supportManager.environmentVariables()) ]
 
         if editor is not None:
             self.addEditorToHistory(editor)
             editor.setFocus()
-            self.application.checkExternalAction(self, editor)
+            self.application().checkExternalAction(self, editor)
             titleChunks.insert(0, editor.title())
         
         # Set window title
@@ -435,7 +436,7 @@ html_footer
             if result == QtGui.QMessageBox.Yes:
                 saveAs = True
         if editor.isNew() or saveAs:
-            fileDirectory = self.application.fileManager.directory(self.projectsDock.currentPath()) if editor.isNew() else editor.fileDirectory()
+            fileDirectory = self.application().fileManager.directory(self.projectsDock.currentPath()) if editor.isNew() else editor.fileDirectory()
             fileName = editor.title()
             fileFilters = editor.fileFilters()
             # TODO Armar el archivo destino y no solo el basedir
@@ -469,7 +470,7 @@ html_footer
             elif response == QtGui.QMessageBox.Cancel:
                 raise exceptions.UserCancelException()
         self.removeEditor(editor)
-        self.application.deleteEditorInstance(editor)
+        self.application().deleteEditorInstance(editor)
 
     def tryCloseEmptyEditor(self, editor = None):
         editor = editor or self.currentEditor()
@@ -531,7 +532,7 @@ html_footer
 
         # Restore open documents
         for editorState in componentState.get("editors", []):
-            editor = self.application.createEditorInstance(
+            editor = self.application().createEditorInstance(
                 class_name = editorState["name"],
                 file_path = editorState.get("file"),
                 parent = self)
@@ -569,11 +570,11 @@ html_footer
         for path in collectFiles(urls):
             # TODO: Take this code somewhere else, this should change as more editor are added
             if not self.canBeOpened(path):
-                self.logger.debug("Skipping dropped element %s" % path)
+                self.logger().debug("Skipping dropped element %s" % path)
                 continue
-            self.logger.debug("Opening dropped file %s" % path)
+            self.logger().debug("Opening dropped file %s" % path)
             #self.openFile(QtCore.QFileInfo(path), focus = False)
-            self.application.openFile(path)
+            self.application().openFile(path)
 
     FILE_SIZE_THERESHOLD = 1024 ** 2 # 1MB file is enough, ain't it?
     STARTSWITH_BLACKLIST = ['.', '#', ]
@@ -581,7 +582,7 @@ html_footer
 
     def canBeOpened(self, path):
         # Is there any support for it?
-        if not self.application.supportManager.findSyntaxByFileType(path):
+        if not self.application().supportManager.findSyntaxByFileType(path):
             return False
         for start in self.STARTSWITH_BLACKLIST:
             if path.startswith(start):

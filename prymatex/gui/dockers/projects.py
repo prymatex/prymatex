@@ -40,15 +40,15 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
     
     @ConfigurableHook("CodeEditor.defaultTheme")
     def defaultTheme(self, themeUUID):
-        theme = self.application.supportManager.getBundleItem(themeUUID)
+        theme = self.application().supportManager.getBundleItem(themeUUID)
         self.treeViewProjects.setPalette(theme.palette())
         self.treeViewProjects.viewport().setPalette(theme.palette())
     
     def __init__(self, **kwargs):
         super(ProjectsDock, self).__init__(**kwargs)
         self.setupUi(self)
-        self.projectManager = self.application.projectManager
-        self.fileManager = self.application.fileManager
+        self.projectManager = self.application().projectManager
+        self.fileManager = self.application().fileManager
         self.projectTreeProxyModel = self.projectManager.projectTreeProxyModel
     
         self.setupTreeViewProjects()
@@ -95,7 +95,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
         if filePath is not None:
             index = self.projectTreeProxyModel.indexForPath(filePath)
             self.treeViewProjects.setCurrentIndex(index)
-            self.application.openFile(filePath)
+            self.application().openFile(filePath)
 
     def addFileSystemNodeFormater(self, formater):
         self.projectTreeProxyModel.addNodeFormater(formater)
@@ -115,7 +115,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
         indexes = self.treeViewProjects.selectedIndexes()
         if indexes:
             node = self.currentNode()
-            paths = [self.application.fileManager.normcase(node.path()) for node in [ self.projectTreeProxyModel.node(index) for index in indexes ]]
+            paths = [self.application().fileManager.normcase(node.path()) for node in [ self.projectTreeProxyModel.node(index) for index in indexes ]]
             environment.update({
                 'TM_SELECTED_FILE': node.path(), 
                 'TM_SELECTED_FILES': " ".join(["'%s'" % path for path in paths ])
@@ -132,8 +132,8 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
         from prymatex.gui.properties.resource import ResoucePropertiesWidget
         
         for propertyClass in [ProjectPropertiesWidget, EnvironmentPropertiesWidget, ResoucePropertiesWidget]:
-            self.application.extendComponent(propertyClass)
-            self.application.projectManager.registerPropertyWidget(propertyClass(parent = self.propertiesDialog))
+            self.application().extendComponent(propertyClass)
+            self.application().projectManager.registerPropertyWidget(propertyClass(parent = self.propertiesDialog))
 
     def setupTreeViewProjects(self):
         self.treeViewProjects.setModel(self.projectTreeProxyModel)
@@ -214,13 +214,13 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
         
     def on_contextMenu_aboutToShow(self):      
         # TODO Quiza un metodo que haga esto en el manager  
-        self.application.supportManager.setEditorAvailable(False)
-        self.application.supportManager.blockSignals(True)
+        self.application().supportManager.setEditorAvailable(False)
+        self.application().supportManager.blockSignals(True)
                 
     def on_contextMenu_aboutToHide(self):
-        self.application.supportManager.setEditorAvailable(True)
+        self.application().supportManager.setEditorAvailable(True)
         def restore_supportManager_signals():
-            self.application.supportManager.blockSignals(False)
+            self.application().supportManager.blockSignals(False)
         # TODO No estoy muy contento con esto pero que le vamos a hacer
         QtCore.QTimer.singleShot(0, restore_supportManager_signals)
 
@@ -267,13 +267,13 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
     def extendProjectBundleItemMenu(self, menu, node):
         #Menu de los bundles relacionados al proyecto
         #Try get all bundles for project bundle definition
-        bundles = [self.application.supportManager.getManagedObject(uuid) for uuid in node.project().bundleMenu or []]
+        bundles = [self.application().supportManager.getManagedObject(uuid) for uuid in node.project().bundleMenu or []]
         #Filter None bundles
         bundles = [bundle for bundle in bundles if bundle is not None]
         #Sort by name
         bundles = sorted(bundles, key=lambda bundle: bundle.name)
         if bundles:
-            bundleMenues = [self.application.supportManager.menuForBundle(bundle) for bundle in bundles]
+            bundleMenues = [self.application().supportManager.menuForBundle(bundle) for bundle in bundles]
             extend_menu_section(menu, bundleMenues, section = "bundles", position = 0)
 
     #================================================
@@ -295,7 +295,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
         return self.projectTreeProxyModel.node(self.treeViewProjects.currentIndex())
         
     def currentDirectory(self):
-        return self.application.fileManager.directory(self.currentPath())
+        return self.application().fileManager.directory(self.currentPath())
     
     #================================================
     # Actions Create, Delete, Rename objects
@@ -305,7 +305,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
         currentDirectory = self.currentDirectory()
         filePath = self.createFile(currentDirectory)
         if filePath is not None:
-            self.application.openFile(filePath)
+            self.application().openFile(filePath)
             #TODO: si esta en auto update ver como hacer los refresh
             self.projectTreeProxyModel.refreshPath(currentDirectory)
     
@@ -314,7 +314,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
         currentDirectory = self.currentDirectory()
         filePath = self.templateDialog.createFile(fileDirectory = self.currentDirectory())
         if filePath is not None:
-            self.application.openFile(filePath)
+            self.application().openFile(filePath)
             #TODO: si esta en auto update ver como hacer los refresh
             self.projectTreeProxyModel.refreshPath(currentDirectory)
     
@@ -373,7 +373,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
                 QtGui.QMessageBox.Ok
             )
             if ret == QtGui.QMessageBox.Ok:
-                self.application.projectManager.removeProject(node)
+                self.application().projectManager.removeProject(node)
 
     @QtCore.Slot()
     def on_actionRename_triggered(self):
@@ -384,17 +384,17 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
     def on_actionCloseProject_triggered(self):
         treeNode = self.currentNode()
         if treeNode.isproject:
-            self.application.projectManager.closeProject(treeNode)
+            self.application().projectManager.closeProject(treeNode)
     
     @QtCore.Slot()
     def on_actionOpenProject_triggered(self):
         treeNode = self.currentNode()
         if treeNode.isproject:
-            self.application.projectManager.openProject(treeNode)
+            self.application().projectManager.openProject(treeNode)
     
     @QtCore.Slot()
     def on_actionProperties_triggered(self):
-        self.propertiesDialog.setModel(self.application.projectManager.propertiesProxyModel)
+        self.propertiesDialog.setModel(self.application().projectManager.propertiesProxyModel)
         self.propertiesDialog.exec_(self.currentNode())
 
     @QtCore.Slot()
@@ -407,7 +407,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
     def on_actionOpen_triggered(self):
         node = self.currentNode()
         if node.isfile:
-            self.application.openFile(node.path())
+            self.application().openFile(node.path())
         
     @QtCore.Slot()
     def on_actionOpenSystemEditor_triggered(self):
@@ -445,32 +445,32 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
     @QtCore.Slot()
     def on_actionCopy_triggered(self):
         mimeData = self.projectTreeProxyModel.mimeData( self.treeViewProjects.selectedIndexes() )
-        self.application.clipboard().setMimeData(mimeData)
+        self.application().clipboard().setMimeData(mimeData)
         
     @QtCore.Slot()
     def on_actionCut_triggered(self):
         mimeData = self.projectTreeProxyModel.mimeData( self.treeViewProjects.selectedIndexes() )
-        self.application.clipboard().setMimeData(mimeData)
+        self.application().clipboard().setMimeData(mimeData)
         
     @QtCore.Slot()
     def on_actionPaste_triggered(self):
         parentPath = self.currentPath()
-        mimeData = self.application.clipboard().mimeData()
+        mimeData = self.application().clipboard().mimeData()
         if mimeData.hasUrls() and os.path.isdir(parentPath):
             for url in mimeData.urls():
                 srcPath = url.toLocalFile()
-                basename = self.application.fileManager.basename(srcPath)
+                basename = self.application().fileManager.basename(srcPath)
                 dstPath = os.path.join(parentPath, basename)
-                while self.application.fileManager.exists(dstPath):
+                while self.application().fileManager.exists(dstPath):
                     basename, ret = ReplaceRenameInputDialog.getText(self, _("Already exists"), 
                         _("Destiny already exists\nReplace or or replace?"), text = basename, )
                     if ret == ReplaceRenameInputDialog.Cancel: return
                     if ret == ReplaceRenameInputDialog.Replace: break
                     dstPath = os.path.join(parentPath, basename)
                 if os.path.isdir(srcPath):
-                    self.application.fileManager.copytree(srcPath, dstPath)
+                    self.application().fileManager.copytree(srcPath, dstPath)
                 else:
-                    self.application.fileManager.copy(srcPath, dstPath)
+                    self.application().fileManager.copy(srcPath, dstPath)
             self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
 
     @QtCore.Slot()

@@ -29,10 +29,10 @@ class ProjectPropertiesWidget(PropertyTreeNode, Ui_Project, QtGui.QWidget):
     def setupComboKeywords(self):
         # Build project keywords
         self.comboBoxKeywords.setModel(
-            self.application.projectManager.keywordsListModel
+            self.application().projectManager.keywordsListModel
         )
         self.comboBoxKeywords.lineEdit().setReadOnly(True)
-        self.application.projectManager.keywordsListModel.selectionChanged.connect(
+        self.application().projectManager.keywordsListModel.selectionChanged.connect(
             self.on_keywordsListModel_selectionChanged
         )
 
@@ -57,7 +57,7 @@ class ProjectPropertiesWidget(PropertyTreeNode, Ui_Project, QtGui.QWidget):
         self.textLabelLocation.setText(self.projectNode.path())
     
     def saveChanges(self):
-        self.application.projectManager.updateProject(self.projectNode,
+        self.application().projectManager.updateProject(self.projectNode,
             name = self.lineProjectName.text(),
             description = self.textDescription.toPlainText(),
             licence = self.comboBoxLicence.currentText(),

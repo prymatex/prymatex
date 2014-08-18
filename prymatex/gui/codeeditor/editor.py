@@ -91,18 +91,18 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     @ConfigurableItem(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
     def defaultSyntax(self, uuid):
-        self._default_syntax = self.application.supportManager.getBundleItem(uuid)
+        self._default_syntax = self.application().supportManager.getBundleItem(uuid)
         if self._default_syntax is None:
             # Load original default syntax
-            self._default_syntax = self.application.supportManager.getBundleItem(self._settings.default("defaultSyntax"))
+            self._default_syntax = self.application().supportManager.getBundleItem(self._settings.default("defaultSyntax"))
         self.insertBundleItem(self._default_syntax)
         
     @ConfigurableItem(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
     def defaultTheme(self, uuid):
-        self._default_theme = self.application.supportManager.getBundleItem(uuid)
+        self._default_theme = self.application().supportManager.getBundleItem(uuid)
         if self._default_theme is None:
             # Load original default theme
-            self._default_theme = self.application.supportManager.getBundleItem(self._settings.default("defaultTheme"))
+            self._default_theme = self.application().supportManager.getBundleItem(self._settings.default("defaultTheme"))
         self.insertBundleItem(self._default_theme)
         
     @ConfigurableItem(default = MarginLine | IndentGuide | HighlightCurrentLine)
@@ -233,7 +233,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.highlightTime = time()
         def highlightReady(editor):
             def _ready():
-                self.logger.info("Time %f" % (time() - self.highlightTime))
+                self.logger().info("Time %f" % (time() - self.highlightTime))
             return _ready
         self.syntaxHighlighter.start(highlightReady(self))
         #self.syntaxHighlighter.start(lambda editor = self: editor.highlightChanged.emit())
@@ -275,7 +275,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             handler.processBlockUserData(sourceText, cursor, block, userData)
 
     def on_blockCountChanged(self, newBlockCount):
-        self.logger.debug("block Count changed")
+        self.logger().debug("block Count changed")
         block = self.textCursor().block()
         if self.lastBlockCount > self.document().blockCount():
             self.blocksRemoved.emit(block, self.lastBlockCount - newBlockCount)
@@ -291,7 +291,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def open(self, filePath):
         """ Custom open for large files """
         super(CodeEditor, self).open(filePath)
-        content = self.application.fileManager.readFile(filePath)
+        content = self.application().fileManager.readFile(filePath)
         self.setPlainText(content)
         
     def close(self):
@@ -300,7 +300,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def reload(self):
         PrymatexEditor.reload(self)
-        content = self.application.fileManager.readFile(self.filePath())
+        content = self.application().fileManager.readFile(self.filePath())
         self.updatePlainText(content)
 
     def componentState(self):
@@ -326,7 +326,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             self.setPlainText(componentState["text"])
         uuid = componentState.get("syntax")
         if uuid is not None:
-            syntax = self.application.supportManager.getBundleItem(uuid)
+            syntax = self.application().supportManager.getBundleItem(uuid)
             self.insertBundleItem(syntax)
         
     def isModified(self):
@@ -340,8 +340,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def setFilePath(self, filePath):
         super(CodeEditor, self).setFilePath(filePath)
-        extension = self.application.fileManager.extension(filePath)
-        syntax = self.application.supportManager.findSyntaxByFileType(extension)
+        extension = self.application().fileManager.extension(filePath)
+        syntax = self.application().supportManager.findSyntaxByFileType(extension)
         if syntax is not None:
             self.insertBundleItem(syntax)
 
@@ -395,7 +395,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor = cursor or self.textCursor()
         leftToken, rightToken = (self.tokenAtPosition(cursor.selectionStart() - 1),
             self.tokenAtPosition(cursor.selectionEnd()))
-        return self.application.supportManager.getPreferenceSettings(leftToken.scope, leftToken.scope)
+        return self.application().supportManager.getPreferenceSettings(leftToken.scope, leftToken.scope)
 
     # ------------ Obteniendo datos del editor
     def tabKeyBehavior(self):
@@ -712,20 +712,20 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         indentation = self.blockIndentation(block)
 
         if settings.INDENT_INCREASE in indentationFlags:
-            self.logger.debug("Increase indentation")
+            self.logger().debug("Increase indentation")
             blockIndent = indentation + tab_behavior
         elif settings.INDENT_NEXTLINE in indentationFlags:
             #TODO: Creo que este no es el correcto
-            self.logger.debug("Increase next line indentation")
+            self.logger().debug("Increase next line indentation")
             blockIndent = indentation + tab_behavior
         elif settings.UNINDENT in indentationFlags:
-            self.logger.debug("Unindent")
+            self.logger().debug("Unindent")
             blockIndent = ""
         elif settings.INDENT_DECREASE in indentationFlags:
-            self.logger.debug("Decrease indentation")
+            self.logger().debug("Decrease indentation")
             blockIndent = indentation[:-len(tab_behavior)]
         else:
-            self.logger.debug("Preserve indentation")
+            self.logger().debug("Preserve indentation")
             blockIndent = indentation[:positionInBlock]
         cursor.insertText("\n%s" % blockIndent)
         self.ensureCursorVisible()
@@ -758,12 +758,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             _insert_item(0)
 
     def insertSnippet(self, snippetContent, commandInput = "none", commandOutput = "insertText", **kwargs):
-        snippet = self.application.supportManager.buildAdHocSnippet(
+        snippet = self.application().supportManager.buildAdHocSnippet(
             snippetContent, self.syntax().bundle)
         self.insertBundleItem(snippet, **kwargs)
         
     def insertCommand(self, commandScript, commandInput = "none", commandOutput = "insertText", **kwargs):
-        command = self.application.supportManager.buildAdHocCommand(
+        command = self.application().supportManager.buildAdHocCommand(
             commandScript, self.syntax().bundle,
             commandInput=commandInput, commandOutput=commandOutput)
         self.insertBundleItem(command, **kwargs)
@@ -782,7 +782,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         current_text, start, end = self.currentText()
         current_word, start, end = self.currentWord()
 
-        theme = self.application.supportManager.getBundleItem(self.defaultTheme)
+        theme = self.application().supportManager.getBundleItem(self.defaultTheme)
 
         # Build environment
         environment.update({
@@ -799,21 +799,21 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         })
 
         if current_word:
-            self.logger.debug("Add current word to environment")
+            self.logger().debug("Add current word to environment")
             environment['TM_CURRENT_WORD'] = current_word
         if current_text:
-            self.logger.debug("Add current text to environment")
+            self.logger().debug("Add current text to environment")
             environment['TM_CURRENT_TEXT'] = current_text
         if self.filePath():
-            self.logger.debug("Add file path to environment")
+            self.logger().debug("Add file path to environment")
             environment['TM_FILEPATH'] = self.filePath()
-            environment['TM_FILENAME'] = self.application.fileManager.basename(self.filePath())
-            environment['TM_DIRECTORY'] = self.application.fileManager.dirname(self.filePath())
+            environment['TM_FILENAME'] = self.application().fileManager.basename(self.filePath())
+            environment['TM_DIRECTORY'] = self.application().fileManager.dirname(self.filePath())
         if self.project():
-            self.logger.debug("Add project to environment")
+            self.logger().debug("Add project to environment")
             environment.update(self.project().environmentVariables())
         if cursor.hasSelection():
-            self.logger.debug("Add selection to environment")
+            self.logger().debug("Add selection to environment")
             environment['TM_SELECTED_TEXT'] = self.selectedTextWithEol(cursor)
             start, end = self.selectionBlockStartEnd()
             environment['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
@@ -1106,7 +1106,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         menu.setParent(self)
 
         #Bundle Menu
-        bundleMenu = self.application.supportManager.menuForBundle(self.syntax().bundle)
+        bundleMenu = self.application().supportManager.menuForBundle(self.syntax().bundle)
         extend_menu(menu, [ "-", bundleMenu ])
 
         #Se lo pasamos a los addons
@@ -1123,18 +1123,18 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # Contributes to Tab Menu
     def contributeToTabMenu(self):
         menues = []
-        bundleMenu = self.application.supportManager.menuForBundle(self.syntax().bundle)
+        bundleMenu = self.application().supportManager.menuForBundle(self.syntax().bundle)
         if bundleMenu is not None:
             menues.append(bundleMenu)
             menues.append("-")
         if self.filePath() is not None:
             menues.extend([
                 {   "text": "Path to clipboard",
-                    "triggered": lambda ed = self: self.application.clipboard().setText(ed.filePath())  },
+                    "triggered": lambda ed = self: self.application().clipboard().setText(ed.filePath())  },
                 {   "text": "Name to clipboard",
-                    "triggered": lambda ed = self: self.application.clipboard().setText(ed.application.fileManager.basename(ed.filePath()))  },
+                    "triggered": lambda ed = self: self.application().clipboard().setText(ed.application.fileManager.basename(ed.filePath()))  },
                 {   "text": "Directory to clipboard",
-                    "triggered": lambda ed = self: self.application.clipboard().setText(ed.application.fileManager.dirname(ed.filePath()))  },
+                    "triggered": lambda ed = self: self.application().clipboard().setText(ed.application.fileManager.dirname(ed.filePath()))  },
                 ])
         return menues
 
@@ -1475,7 +1475,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         if event.mimeData().hasUrls():
             files = [url.toLocalFile() for url in event.mimeData().urls()]
             for filePath in files:
-                items = self.application.supportManager.getFileExtensionItem(filePath, self.scope())
+                items = self.application().supportManager.getFileExtensionItem(filePath, self.scope())
                 if items:
                     item = items[0]
                     env = {
@@ -1489,6 +1489,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                     }
                     self.insertBundleItem(item, environment = env)
                 else:
-                    self.application.openFile(filePath)
+                    self.application().openFile(filePath)
         elif event.mimeData().hasText():
             self.textCursor().insertText(event.mimeData().text())

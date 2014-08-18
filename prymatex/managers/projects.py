@@ -36,8 +36,8 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
 
     def __init__(self, **kwargs):
         super(ProjectManager, self).__init__(**kwargs)
-        self.fileManager = self.application.fileManager
-        self.supportManager = self.application.supportManager
+        self.fileManager = self.application().fileManager
+        self.supportManager = self.application().supportManager
 
         self.projectTreeModel = ProjectTreeModel(self)
         self.keywordsListModel = CheckableListModel(self)
@@ -47,7 +47,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
 
         self.projectMenuProxyModel = ProjectMenuProxyModel(self)
-        self.projectMenuProxyModel.setSourceModel(self.application.supportManager.bundleProxyModel)
+        self.projectMenuProxyModel.setSourceModel(self.application().supportManager.bundleProxyModel)
 
         self.propertiesProxyModel = PropertiesProxyModel(parent = self)
         self.propertiesProxyModel.setSourceModel(self.propertiesTreeModel)
@@ -164,7 +164,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
     def addProject(self, project):
         project.setManager(self)
         # Todo proyecto define un namespace en el manager de support
-        self.application.supportManager.addProjectNamespace(project)
+        self.application().supportManager.addProjectNamespace(project)
         self.projectTreeModel.appendProject(project)
         self.projectAdded.emit(project)
 
@@ -197,5 +197,5 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
 
     def findProjectForPath(self, path):
         for project in self.getAllProjects():
-            if self.application.fileManager.issubpath(path, project.path()):
+            if self.application().fileManager.issubpath(path, project.path()):
                 return project

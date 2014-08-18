@@ -22,7 +22,7 @@ class ExternalProcessDock(PrymatexDock, QtGui.QDockWidget):
         super(ExternalProcessDock, self).__init__(**kwargs)
         self.setWindowTitle(_("External process"))
         self.setObjectName(_("ExternalProcessDock"))
-        self.processTableModel = self.application.supportManager.processTableModel
+        self.processTableModel = self.application().supportManager.processTableModel
         self.tableViewProcess = QtGui.QTableView()
         self.tableViewProcess.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.tableViewProcess.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)

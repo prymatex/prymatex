@@ -20,7 +20,7 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtGui.QDialog):
         self.setupUi(self)
         self.namespace = None
         
-        self.manager = self.application.supportManager
+        self.manager = self.application().supportManager
         self.proxyTreeModel = self.manager.bundleProxyTreeModel
         
         # Connect signals

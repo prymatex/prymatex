@@ -90,7 +90,7 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
         self.verticalLayout.addWidget(self.tabWebView)
         
         #Settings mover a un lugar de configuracion :)
-        QtWebKit.QWebSettings.globalSettings().setIconDatabasePath(self.application.currentProfile.value('PMX_TMP_PATH'))
+        QtWebKit.QWebSettings.globalSettings().setIconDatabasePath(self.application().currentProfile.value('PMX_TMP_PATH'))
 
         #Capturar editor y webView
         self.currentEditor = None
@@ -204,7 +204,7 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
 
     # ------------ Browser Signals handlers
     def on_manager_commandUrlRequested(self, url):
-        self.application.openUrl(url)
+        self.application().openUrl(url)
 
     def on_lineUrl_returnPressed(self):
         """Url have been changed by user"""

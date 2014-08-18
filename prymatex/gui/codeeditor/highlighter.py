@@ -72,7 +72,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def start(self, callback = None):
         # The task
         self.aboutToHighlightChange.emit()
-        self.highlightTask = self.editor.application.schedulerManager.task(
+        self.highlightTask = self.editor.application().schedulerManager.task(
             _highlight_function(self.document(), self.processor, self.theme),
             sendval = self._task_data())
         self.highlightTask.finished.connect(self._on_worker_finished)

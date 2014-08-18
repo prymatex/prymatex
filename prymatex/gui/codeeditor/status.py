@@ -79,7 +79,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         # Custom Table view for syntax combo
         self.comboBoxSyntaxes.setView(QtGui.QTableView(self))
         self.comboBoxSyntaxes.setModel(
-            self.application.supportManager.syntaxProxyModel);
+            self.application().supportManager.syntaxProxyModel);
         self.comboBoxSyntaxes.setModelColumn(0)
         self.comboBoxSyntaxes.view().resizeColumnsToContents()
         self.comboBoxSyntaxes.view().resizeRowsToContents()
@@ -102,7 +102,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         
         # Create bundle menu
         self.menuBundle = QtGui.QMenu(self)
-        self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundle)
+        self.application().supportManager.appendMenuToBundleMenuGroup(self.menuBundle)
         self.toolButtonMenuBundle.setMenu(self.menuBundle)
         
     def setupWidgetCommand(self):

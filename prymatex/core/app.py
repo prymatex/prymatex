@@ -94,21 +94,27 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     def qtMessageHandler(self, msgType, msgString):
         ''' Route Qt messaging system into Prymatex/Python one'''
         if msgType == QtCore.QtDebugMsg:
-            self.logger.debug(msgString)
+            self.logger().debug(msgString)
         elif msgType == QtCore.QtWarningMsg:
-            self.logger.warn(msgString)
+            self.logger().warn(msgString)
         elif msgType == QtCore.QtCriticalMsg:
-            self.logger.critical(msgString)
+            self.logger().critical(msgString)
         elif msgType == QtCore.QtFatalMsg:
-            self.logger.fatal(msgString)
+            self.logger().fatal(msgString)
         elif msgType == QtCore.QtSystemMsg:
-            self.logger.debug("System: %s" % msgString)
+            self.logger().debug("System: %s" % msgString)
 
     # ------- prymatex's micro kernel
     def applyOptions(self, options):
         # The basic managers
         self.options = options
 
+        # Prepare resources
+        from prymatex._resources.manager import ResourceManager
+        self.resourceManager = ResourceManager()
+        for ns, path in config.NAMESPACES:
+            self.resourceManager.add_source(ns, path)
+        
         # Prepare profile
         from prymatex.managers.profile import ProfileManager
         self.extendComponent(ProfileManager)
@@ -149,7 +155,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         return [ GeneralSettingsWidget, ShortcutsSettingsWidget ]
 
     def loadGraphicalUserInterface(self):
-        self.showMessage = self.logger.info
+        self.showMessage = self.logger().info
         if not self.options.no_splash:
             from prymatex.widgets.splash import SplashScreen
             splash_image = resources.get_image('newsplash')
@@ -164,15 +170,15 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             splash.show()
             self.showMessage = splash.showMessage
         try:
-            # Build Managers
-            self.pluginManager = self.buildPluginManager()      # WARN: FIST Plugin Manager
+            # Build Managers WARN: Order is important
+            self.pluginManager = self.buildPluginManager()      # Plugin manager
             self.storageManager = self.buildStorageManager()    # Persistence system Manager
             self.supportManager = self.buildSupportManager()    # Support Manager
             self.fileManager = self.buildFileManager()          # File Manager
             self.projectManager = self.buildProjectManager()    # Project Manager
             self.schedulerManager =  self.buildSchedulerManager()
             self.serverManager = self.buildServerManager()
-
+            
             # Load Bundles
             self.supportManager.loadSupport(self.showMessage)
             
@@ -192,9 +198,9 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                 splash.finish(main_window)
 
             main_window.show()
-            self.logger.info("Application startup")
+            self.logger().info("Application startup")
         except KeyboardInterrupt:
-            self.logger.critical("Quit signal catched during application startup. Quiting...")
+            self.logger().critical("Quit signal catched during application startup. Quiting...")
             self.quit()
 
     def unloadGraphicalUserInterface(self):
@@ -222,6 +228,20 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             f.close()
 
     # -------------------- Managers
+    def buildResourceManager(self):
+        from prymatex.managers.resources import ResourceManager
+        self.populateComponentClass(ResourceManager)
+        
+        manager = ResourceManager(parent = self)
+        self.currentProfile.registerConfigurableInstance(manager)
+        manager.initialize(parent = self)
+        
+        manager.addNamespace('prymatex', config.PMX_SHARE_PATH)
+
+        manager.addNamespace('user', config.PMX_HOME_PATH)
+        
+        return manager
+
     def buildPluginManager(self):
         from prymatex.managers.plugins import PluginManager
         #manager = self.createComponentInstance(PluginManager, parent = self)
@@ -297,7 +317,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     # --------------------- Application events
     def closePrymatex(self):
-        self.logger.debug("Close")
+        self.logger().debug("Close")
 
         self.storageManager.close()
         for main_window in self.mainWindows():
@@ -308,26 +328,34 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     # --------------------- Exend and populate components
     def extendComponent(self, componentClass):
-        componentClass.application = self
-        componentClass.logger = self.getLogger('.'.join([componentClass.__module__, componentClass.__name__]))
-
+        componentClass._application = self
+        componentClass.application = classmethod(lambda cls: cls._application)
+        componentClass._logger = self.getLogger('.'.join([componentClass.__module__, componentClass.__name__]))
+        componentClass.logger = classmethod(lambda cls: cls._logger)
+        
     def populateComponentClass(self, componentClass):
         self.extendComponent(componentClass)
-        if issubclass(componentClass, PrymatexComponent):
-            # Add configurable class to the current profile 
-            self.currentProfile.addConfigurableClass(componentClass)
-            # Add settings widgets
-            for settingClass in componentClass.contributeToSettings():
-                self.extendComponent(settingClass)
-                settingWidget = settingClass(
-                    settings = componentClass._settings,
-                    profile = self.currentProfile)
-                componentClass._settings.addDialog(settingWidget)
-                self.profileManager.registerSettingsWidget(settingWidget)
+        # ------- Resources
+        sources = getattr(componentClass, "RESOURCES", ( config.USR_NS_NAME, config.PMX_NS_NAME ))
+        componentClass._resources = self.resourceManager.get_provider(sources)
+        componentClass.resources = classmethod(lambda cls: cls._resources)
+        
+        # ------- Settings
+        # Add configurable class to the current profile 
+        self.currentProfile.addConfigurableClass(componentClass)
+        # Add settings widgets
+        for settingClass in componentClass.contributeToSettings():
+            self.extendComponent(settingClass)
+            settingWidget = settingClass(
+                settings = componentClass._settings,
+                profile = self.currentProfile)
+            componentClass._settings.addDialog(settingWidget)
+            self.profileManager.registerSettingsWidget(settingWidget)
+        componentClass._pmx_populated = True
 
     # ------------------- Create components
     def createComponentInstance(self, componentClass, **kwargs):
-        if not hasattr(componentClass, 'application') or componentClass.application != self:
+        if not getattr(componentClass, '_pmx_populated', False):
             self.populateComponentClass(componentClass)
 
         # ------------------- Build

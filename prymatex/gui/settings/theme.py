@@ -29,11 +29,11 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
     def loadSettings(self):
         super(ThemeSettingsWidget, self).loadSettings()
         # Set models
-        self.comboBoxThemes.setModel(self.application.supportManager.themeProxyModel)
-        self.tableViewStyles.setModel(self.application.supportManager.themeStyleProxyModel)
+        self.comboBoxThemes.setModel(self.application().supportManager.themeProxyModel)
+        self.tableViewStyles.setModel(self.application().supportManager.themeStyleProxyModel)
         
         currentThemeUUID = self.settings.value('defaultTheme')
-        currentTheme = self.application.supportManager.getBundleItem(currentThemeUUID)
+        currentTheme = self.application().supportManager.getBundleItem(currentThemeUUID)
         if currentTheme is not None:
             self.updateUi(currentTheme)
         
@@ -70,13 +70,13 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
         message = "<b>%s</b> theme set " % theme.name
         if theme.author is not None:
             message += "<i>(by %s)</i>" % theme.author
-        self.application.showMessage(message)
+        self.application().showMessage(message)
 
     def updateUi(self, theme):
         self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.model().nodeIndex(theme).row())    
         palette = theme.palette()
         # Filter theme proxy model
-        self.application.supportManager.themeStyleProxyModel.setFilterRegExp(str(theme.uuid))
+        self.application().supportManager.themeStyleProxyModel.setFilterRegExp(str(theme.uuid))
 
         # Set color for table view
         self.tableViewStyles.setPalette(palette)
@@ -108,25 +108,25 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
         self.comboBoxScope.editTextChanged.connect(self.on_comboBoxScope_changed)
 
     def on_tableView_activatedOrPressed(self, index):
-        style = self.application.supportManager.themeStyleProxyModel.style(index)
+        style = self.application().supportManager.themeStyleProxyModel.style(index)
         self.comboBoxScope.setEditText(style.scope)
 
     def on_comboBoxScope_changed(self, scopeText):
         index = self.tableViewStyles.currentIndex()
         if index.isValid():
-            style = self.application.supportManager.themeStyleProxyModel.style(index)
+            style = self.application().supportManager.themeStyleProxyModel.style(index)
             if scopeText != style.scope:
-                self.application.supportManager.updateThemeStyle(style, scope = scopeText)
+                self.application().supportManager.updateThemeStyle(style, scope = scopeText)
 
     def on_pushButtonAdd_pressed(self):
         theme = self.comboBoxThemes.model().node(self.comboBoxThemes.currentIndex())
-        self.application.supportManager.createThemeStyle(theme, scope = str(self.comboBoxScope.currentText()))
+        self.application().supportManager.createThemeStyle(theme, scope = str(self.comboBoxScope.currentText()))
 
     def on_pushButtonRemove_pressed(self):
         index = self.tableViewStyles.currentIndex()
         if index.isValid():
-            style = self.application.supportManager.themeStyleProxyModel.mapToSource(index).internalPointer()
-            self.application.supportManager.deleteThemeStyle(style)
+            style = self.application().supportManager.themeStyleProxyModel.mapToSource(index).internalPointer()
+            self.application().supportManager.deleteThemeStyle(style)
 
     # -------------------- Colors Push Button
     def setupPushButton(self):
@@ -153,5 +153,5 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
         color, ok = QtGui.QColorDialog.getRgba(settings[element].rgba(), self)
         if ok:
             # TODO No pasar None, mejorar el uso del namespace default
-            self.application.supportManager.updateBundleItem(theme, None, settings={element:color})
+            self.application().supportManager.updateBundleItem(theme, None, settings={element:color})
             self.updateUi(theme)

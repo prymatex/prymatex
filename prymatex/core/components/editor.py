@@ -23,16 +23,16 @@ class PrymatexEditor(PrymatexComponentWidget):
 
     def open(self, file_path):
         """ Open file """
-        self.application.fileManager.openFile(file_path)
+        self.application().fileManager.openFile(file_path)
         self.setFilePath(file_path)
 
     def save(self, file_path):
         """ Save content of editor in a file """
-        self.application.fileManager.writeFile(file_path, self.toPlainText())
+        self.application().fileManager.writeFile(file_path, self.toPlainText())
         if file_path != self._file_path:
             if self._file_path is not None:
-                self.application.fileManager.closeFile(self._file_path)
-                self.application.fileManager.openFile(file_path)
+                self.application().fileManager.closeFile(self._file_path)
+                self.application().fileManager.openFile(file_path)
             self.setFilePath(file_path)
         self.setModified(False)
         self.setExternalAction(None)
@@ -40,7 +40,7 @@ class PrymatexEditor(PrymatexComponentWidget):
     def close(self):
         """ Close editor """
         if self._file_path is not None:
-            self.application.fileManager.closeFile(self._file_path)
+            self.application().fileManager.closeFile(self._file_path)
 
     def reload(self):
         """ Reload current file """
@@ -55,8 +55,8 @@ class PrymatexEditor(PrymatexComponentWidget):
     
     def setFilePath(self, file_path):
         self._file_path = file_path
-        self._project = self.application.projectManager.findProjectForPath(self._file_path)
-        self._title = self.application.fileManager.basename(file_path)
+        self._project = self.application().projectManager.findProjectForPath(self._file_path)
+        self._title = self.application().fileManager.basename(file_path)
         self.emit(QtCore.SIGNAL("modificationChanged"), False)
 
     def icon(self):
@@ -77,10 +77,10 @@ class PrymatexEditor(PrymatexComponentWidget):
         return self.hasFile() and self.filePath() or self.title()
     
     def fileDirectory(self):
-        return self.application.fileManager.dirname(self._file_path)
+        return self.application().fileManager.dirname(self._file_path)
     
     def fileName(self):
-        return self.application.fileManager.basename(self._file_path)
+        return self.application().fileManager.basename(self._file_path)
         
     def fileFilters(self):
         return []
@@ -125,11 +125,11 @@ class PrymatexEditor(PrymatexComponentWidget):
         self.emit(QtCore.SIGNAL("modificationChanged"), False)
 
     def isExternalChanged(self):
-        return self._external_action == self.application.fileManager.CHANGED
+        return self._external_action == self.application().fileManager.CHANGED
 
     def isExternalDeleted(self):
         # FIXME: Rename or move files make produces bogus behavior 
-        return self._external_action == self.application.fileManager.DELETED    
+        return self._external_action == self.application().fileManager.DELETED    
 
     #------------ Bundle Item Handler
     def bundleItemHandler(self):

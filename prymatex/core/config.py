@@ -43,6 +43,8 @@ TM_SETTINGS_NAME = "com.macromates.textmate.plist"
 TM_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
 TM_PREFERENCE_NAMES = ["Library", "Preferences"]
 PMX_PLUGIN_GLOB = '*.pmxplugin'
+PMX_NS_NAME = 'prymatex'
+USR_NS_NAME = 'user'
 
 #============================================================================
 # Regular expresions
@@ -138,6 +140,14 @@ def get_module_source_path(modname, basename=None):
     if basename is not None:
         srcpath = os.path.abspath(os.path.join(srcpath, basename))
     return srcpath
+
+#============================================================================
+# Configuration namespaces
+#============================================================================
+NAMESPACES = (
+    (PMX_NS_NAME, PMX_SHARE_PATH),
+    (USR_NS_NAME, PMX_HOME_PATH)
+)
 
 #============================================================================
 # Translations

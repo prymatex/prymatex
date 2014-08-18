@@ -13,7 +13,7 @@ class CodeEditorThemeProcessor(CodeEditorBaseProcessor, ThemeProcessorMixin):
         self.editor.syntaxHighlighter.stop()
         CodeEditorBaseProcessor.beginExecution(self, bundleItem)
 
-        theme = self.editor.application.supportManager.getBundleItem(bundleItem.uuid)        
+        theme = self.editor.application().supportManager.getBundleItem(bundleItem.uuid)        
 
         self.editor.setCurrentCharFormat(theme.textCharFormat())
         self.editor.setPalette(theme.palette())

@@ -34,7 +34,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         
         # Set syntax
         CodeEditorBaseProcessor.beginExecution(self, bundleItem)
-        syntax = self.editor.application.supportManager.getBundleItem(bundleItem.uuid)
+        syntax = self.editor.application().supportManager.getBundleItem(bundleItem.uuid)
 
         self.stack = [(syntax.grammar, None)]
         self.beginParse(syntax.scopeName)

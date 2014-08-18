@@ -7,15 +7,11 @@ from __future__ import unicode_literals
 # http://developer.qt.nokia.com/doc/qt-4.8/stylesheet-reference.html
 #===============================================================
 import os
-import prymatex
 from collections import namedtuple
 
 Stylesheet = namedtuple('Stylesheet', 'name path content')
 
-FIND_NO_MATCH_STYLE = 'background-color: red; color: #fff;'
-FIND_MATCH_STYLE = 'background-color: #dea;'
-
-def loadStyleSheets(resourcesPath):
+def load_stylesheets(resourcesPath):
     stylesheets = {}
     stylesPath = os.path.join(resourcesPath, "StyleSheets")
     if os.path.exists(stylesPath):
@@ -24,4 +20,4 @@ def loadStyleSheets(resourcesPath):
             stylePath = os.path.join(stylesPath, styleFileName)
             with open(stylePath) as styleFile:
                 stylesheets[name] = Stylesheet(name, stylePath, styleFile.read())
-    return {"Stylesheets": stylesheets}
+    return { "Stylesheets": stylesheets }

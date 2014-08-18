@@ -244,7 +244,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
 
     # Override buildPlistFileStorage for custom storage
     def buildPlistFileStorage(self):
-        return self.application.storageManager.singleFileStorage("support-plist")
+        return self.application().storageManager.singleFileStorage("support-plist")
         
     def buildBundleItemStorage(self):
         return SupportBaseManager.buildBundleItemStorage(self)

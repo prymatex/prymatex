@@ -42,10 +42,10 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtGui.QDialog):
     def setupComboKeywords(self):
         # Build project keywords
         self.comboBoxKeywords.setModel(
-            self.application.projectManager.keywordsListModel
+            self.application().projectManager.keywordsListModel
         )
         self.comboBoxKeywords.lineEdit().setReadOnly(True)
-        self.application.projectManager.keywordsListModel.selectionChanged.connect(
+        self.application().projectManager.keywordsListModel.selectionChanged.connect(
             self.on_keywordsListModel_selectionChanged
         )
 
@@ -54,7 +54,7 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtGui.QDialog):
         self.comboBoxKeywords.lineEdit().setText(", ".join(currents))
 
     def setupComboTemplates(self):
-        self.projectProxyModel = self.application.supportManager.projectProxyModel
+        self.projectProxyModel = self.application().supportManager.projectProxyModel
         tableView = QtGui.QTableView(self)
         tableView.setModel(self.projectProxyModel)
         tableView.resizeColumnsToContents()
@@ -89,7 +89,7 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtGui.QDialog):
 
     def on_lineProjectName_textChanged(self, text):
         if self.checkBoxUseDefaultLocation.isChecked():
-            projectPath = os.path.join(self.application.projectManager.defaultDirectory, text)
+            projectPath = os.path.join(self.application().projectManager.defaultDirectory, text)
             self.lineLocation.setText(projectPath)
         self.buttonCreate.setEnabled(bool(text.strip()))
 
@@ -102,7 +102,7 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtGui.QDialog):
         self.lineLocation.setEnabled(not checked)
         self.buttonChoose.setEnabled(not checked)
         if checked:
-            projectPath = os.path.join(self.application.projectManager.defaultDirectory, self.lineProjectName.text())
+            projectPath = os.path.join(self.application().projectManager.defaultDirectory, self.lineProjectName.text())
             self.lineLocation.setText(projectPath)
 
     def on_checkBoxAddToWorkingSet_toggled(self, checked):
@@ -126,7 +126,7 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtGui.QDialog):
 
     def runCreateProject(self, name, location):
         try:
-            self.projectCreated = self.application.projectManager.createProject(name, location)
+            self.projectCreated = self.application().projectManager.createProject(name, location)
         except exceptions.ProjectExistsException:
             rslt = QtGui.QMessageBox.information(None, 
                 _("Project already created on %s") % name,
@@ -136,9 +136,9 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtGui.QDialog):
                 QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Ok, QtGui.QMessageBox.Cancel) 
             if rslt == QtGui.QMessageBox.Cancel:
                 self.cancel()
-            self.projectCreated = self.application.projectManager.createProject(name, location, overwrite = True)
+            self.projectCreated = self.application().projectManager.createProject(name, location, overwrite = True)
 
-        self.application.projectManager.updateProject(self.projectCreated,
+        self.application().projectManager.updateProject(self.projectCreated,
             description = self.textDescription.toPlainText(),
             licence = self.comboBoxLicence.currentText(),
             keywords = self.comboBoxKeywords.model().selectedItems())
@@ -167,9 +167,9 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtGui.QDialog):
     def createProject(self, title = "Create new project", directory = None, name = None):
         self.lineProjectName.setText(name or '')
         self.comboBoxKeywords.lineEdit().setText("")
-        self.application.projectManager.keywordsListModel.unselectAllItems()
+        self.application().projectManager.keywordsListModel.unselectAllItems()
         self.buttonCreate.setEnabled(not directory is None and not name is None)
-        self.lineLocation.setText(directory or self.application.projectManager.defaultDirectory)
+        self.lineLocation.setText(directory or self.application().projectManager.defaultDirectory)
         self.checkBoxUseTemplate.setChecked(False)
         if self.exec_() == self.Accepted:
             return self.projectCreated

@@ -34,4 +34,4 @@ class ShortcutsSettingsWidget(SettingsTreeNode, QtGui.QWidget):
 
     def loadSettings(self):
         super(ShortcutsSettingsWidget, self).loadSettings()
-        self.treeViewShortcuts.setModel(self.application.shortcutsTreeModel)
+        self.treeViewShortcuts.setModel(self.application().shortcutsTreeModel)

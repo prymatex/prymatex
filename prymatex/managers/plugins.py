@@ -71,7 +71,7 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
 
     # ------------- Cargando clases
     def registerComponent(self, componentClass, componentBase = PrymatexMainWindow, default = False):
-        self.application.populateComponentClass(componentClass)
+        self.application().populateComponentClass(componentClass)
         componentClass.plugin = self.currentPluginDescriptor
         self.components.setdefault(componentBase, []).append(componentClass)
         if default:
@@ -100,7 +100,7 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
                 return klass
 
     def findEditorClassForFile(self, filepath):
-        mimetype = self.application.fileManager.mimeType(filepath)
+        mimetype = self.application().fileManager.mimeType(filepath)
         editors = (cmp for cmp in self.components.get(PrymatexMainWindow, []) if issubclass(cmp, PrymatexEditor))
         for klass in editors:
             if klass.acceptFile(filepath, mimetype):

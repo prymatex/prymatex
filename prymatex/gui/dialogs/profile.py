@@ -30,7 +30,7 @@ class ProfileDialog(PrymatexDialog, Ui_ProfileDialog, QtGui.QDialog):
         
     def initialize(self, **kwargs):
         super(ProfileDialog, self).initialize(**kwargs)
-        self.setProfileManager(self.application.profileManager)
+        self.setProfileManager(self.application().profileManager)
     
     def on_checkDontAsk_clicked(self):
         self.manager.setDontAsk(self.checkDontAsk.isChecked())

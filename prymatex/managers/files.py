@@ -176,7 +176,7 @@ class FileManager(PrymatexComponent, QtCore.QObject):
     getctime = lambda self, path: os.path.getctime(path)
 
     def expandVars(self, text):
-        context = self.application.supportManager.environmentVariables()
+        context = self.application().supportManager.environmentVariables()
         path = osextra.path.expand_shell_variables(text, context = context)
         if os.path.exists(path):
             return path
@@ -192,11 +192,11 @@ class FileManager(PrymatexComponent, QtCore.QObject):
         return path in self.fileWatcher.files() or path in self.fileWatcher.directories()
         
     def watchPath(self, path):
-        self.logger.debug("Watch path %s" % path)
+        self.logger().debug("Watch path %s" % path)
         self.fileWatcher.addPath(path)
     
     def unwatchPath(self, path):
-        self.logger.debug("Unwatch path %s" % path)
+        self.logger().debug("Unwatch path %s" % path)
         self.fileWatcher.removePath(path)
     
     # ---------- Handling files for retrieving data. open, read, write, close

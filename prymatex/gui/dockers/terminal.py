@@ -122,9 +122,9 @@ class TerminalDock(PrymatexDock, QtGui.QDockWidget):
     def editorTheme(self, value):
         if value:
             # Trigger on register
-            self.application.registerSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
+            self.application().registerSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
         else:
-            self.application.unregisterSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
+            self.application().unregisterSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
             self.tabTerminals.setColorScheme(self._settings.value("defaultScheme"))
 
     synchronizeEditor = ConfigurableItem(default = False)
@@ -139,7 +139,7 @@ class TerminalDock(PrymatexDock, QtGui.QDockWidget):
         
         # Manager
         self.backendManager = BackendManager(parent = self)
-        self.application.aboutToQuit.connect(self.backendManager.stopAll)
+        self.application().aboutToQuit.connect(self.backendManager.stopAll)
         
         # Local Backend
         self.backend = self.backendManager.localBackend()
@@ -152,7 +152,7 @@ class TerminalDock(PrymatexDock, QtGui.QDockWidget):
 
     # ---------------- Settings hooks
     def on_defaultTheme_changed(self, themeUUID):
-        theme = self.application.supportManager.getBundleItem(themeUUID)
+        theme = self.application().supportManager.getBundleItem(themeUUID)
         scheme = ColorScheme(theme.name)
         
         # Foreground and background
@@ -176,7 +176,7 @@ class TerminalDock(PrymatexDock, QtGui.QDockWidget):
     def on_mainWindow_currentEditorChanged(self, editor):
         if self.synchronizeEditor:
             if editor is not None and not editor.isNew():
-                dirname = self.application.fileManager.dirname(editor.filePath)
+                dirname = self.application().fileManager.dirname(editor.filePath)
                 self.runCommand('cd "%s"' % dirname)
                 
     # ---------------- Commands
