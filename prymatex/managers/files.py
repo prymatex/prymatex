@@ -38,7 +38,7 @@ class FileManager(PrymatexComponent, QtCore.QObject):
     fileSytemChanged = QtCore.Signal(str, int)
 
     # ------------- Settings
-    SETTINGS_GROUP = 'FileManager'
+    SETTINGS = 'FileManager'
 
     fileHistory = ConfigurableItem(default = [])
     fileHistoryLength = ConfigurableItem(default = 10)

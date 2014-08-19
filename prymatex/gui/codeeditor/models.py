@@ -129,7 +129,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
 
     def processBlockUserData(self, text, cursor, block, userData):
         symbol = None
-        settings = self.editor.settings(cursor)
+        settings = self.editor.preferenceSettings(cursor)
         if settings.showInSymbolList:
             symbol = settings.transformSymbol(text)
         

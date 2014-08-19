@@ -27,7 +27,6 @@ class PrymatexProfile(object):
         self.state = json.read_file(self.PMX_STATE_PATH) or {}
 
         self.settingsGroups = {}
-        
 
         self.tmsettings = TextMateSettings(
             os.path.join(TM_PREFERENCES_PATH, TM_SETTINGS_NAME))
@@ -36,9 +35,7 @@ class PrymatexProfile(object):
     def __group_name(self, configurableClass):
         if hasattr(configurableClass, '_settings'):
             return configurableClass._settings.groupName()
-        return configurableClass.__dict__['SETTINGS_GROUP'] \
-            if 'SETTINGS_GROUP' in configurableClass.__dict__ \
-            else configurableClass.__name__
+        return getattr(configurableClass, 'SETTINGS', configurableClass.__name__)
 
     def groupByName(self, name):
         if name not in self.settingsGroups:
@@ -48,25 +45,11 @@ class PrymatexProfile(object):
                 self.tmsettings)
         return self.settingsGroups[name]
 
-    def groupByClass(self, configurableClass):
+    def settingsForClass(self, configurableClass):
         return self.groupByName(self.__group_name(configurableClass))
 
-    def addConfigurableClass(self, configurableClass):
-        # Prepare class group
-        # TODO: Una forma de obtener y setear los valores en las settings
-        # Las configurableClass tiene que tener esos metodos
-        configurableClass._settings = self.groupByClass(configurableClass)
-        # Prepare configurable attributes
-        for key, value in configurableClass.__dict__.items():
-            if isinstance(value, ConfigurableItem):
-                if value.name is None:
-                    value.name = key
-                configurableClass._settings.addConfigurableItem(value)
-            elif isinstance(value, ConfigurableHook):
-                configurableClass._settings.addConfigurableHook(value)
-
     def registerConfigurableInstance(self, configurable):
-        settingsGroup = self.groupByClass(configurable.__class__)
+        settingsGroup = configurable.settings()
         settingsGroup.addListener(configurable)
         settingsGroup.configure(configurable)
         # Register hooks
@@ -77,7 +60,7 @@ class PrymatexProfile(object):
             handler(self.settingValue(path))
 
     def unregisterConfigurableInstance(self, configurable):
-        settingsGroup = self.groupByClass(configurable.__class__)
+        settingsGroup = configurable.settings()
         settingsGroup.removeListener(configurable)
         # Unregister hooks
         for path, hook in settingsGroup.configurableHooks.items():

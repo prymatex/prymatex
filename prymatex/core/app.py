@@ -16,7 +16,7 @@ from prymatex.qt.helpers import create_shortcut
 from prymatex.core import config
 from prymatex.core.components import PrymatexComponent, PrymatexEditor
 from prymatex.core import logger, exceptions
-from prymatex.core.settings import ConfigurableItem
+from prymatex.core.settings import ConfigurableItem, ConfigurableHook
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import six
@@ -29,7 +29,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     The application loads the Support."""
 
     # ---------------------- Settings
-    SETTINGS_GROUP = "Global"
+    SETTINGS = "Global"
+    RESOURCES = ( config.USR_NS_NAME, config.PMX_NS_NAME )
 
     @ConfigurableItem()
     def qtStyle(self, styleName):
@@ -319,20 +320,29 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     def populateComponentClass(self, componentClass):
         self.extendComponent(componentClass)
         # ------- Resources
-        sources = getattr(componentClass, "RESOURCES", ( config.USR_NS_NAME, config.PMX_NS_NAME ))
-        componentClass._resources = self.resourceManager.get_provider(sources)
+        componentClass._resources = self.resourceManager.providerForClass(componentClass)
         componentClass.resources = classmethod(lambda cls: cls._resources)
         
         # ------- Settings
-        # Add configurable class to the current profile 
-        self.currentProfile.addConfigurableClass(componentClass)
+        componentClass._settings = self.currentProfile.settingsForClass(componentClass)
+        componentClass.settings = classmethod(lambda cls: cls._settings)
+
+        # Register settings values
+        for key, value in componentClass.__dict__.items():
+            if isinstance(value, ConfigurableItem):
+                if value.name is None:
+                    value.name = key
+                componentClass.settings().addConfigurableItem(value)
+            elif isinstance(value, ConfigurableHook):
+                componentClass.settings().addConfigurableHook(value)
+
         # Add settings widgets
         for settingClass in componentClass.contributeToSettings():
             self.extendComponent(settingClass)
             settingWidget = settingClass(
-                settings = componentClass._settings,
+                settings = componentClass.settings(),
                 profile = self.currentProfile)
-            componentClass._settings.addDialog(settingWidget)
+            componentClass.settings().addDialog(settingWidget)
             self.profileManager.registerSettingsWidget(settingWidget)
         componentClass._pmx_populated = True
 

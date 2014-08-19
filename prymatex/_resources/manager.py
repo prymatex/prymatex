@@ -147,6 +147,10 @@ class ResourceManager(object):
             self.providers[sources] = ResourceProvider(resources)
         return self.providers[sources]
 
+    def providerForClass(self, klass):
+        sources = getattr(klass, "RESOURCES", tuple(self.resources.keys()) )
+        return self.get_provider(sources)
+
     def install_icon_handler(self):
         QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
         QtGui.QIcon.fromTheme = self.icon_from_theme

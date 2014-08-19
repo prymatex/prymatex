@@ -30,7 +30,7 @@ class SmartUnindentAddon(CodeEditorAddon):
             userData = cursor.userData()
             positionInBlock = cursor.positionInBlock()
             block = cursor.block()
-            _, settings = self.editor.settings(cursor)
+            _, settings = self.editor.preferenceSettings(cursor)
             indentMarks = settings.indent(block.text()[:positionInBlock])
             indentGuide = self.editor.findPreviousNoBlankBlock(block)
             if PreferenceSettings.INDENT_DECREASE in indentMarks and indentGuide is not None:

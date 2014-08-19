@@ -52,7 +52,7 @@ class TabTriggerHelper(CodeEditorKeyHelper):
 
 class SmartTypingPairsHelper(CodeEditorKeyHelper):
     def accept(self, event = None, cursor = None, **kwargs):
-        settings = self.editor.settings(cursor)
+        settings = self.editor.preferenceSettings(cursor)
         character = event.text()
         pairs = [pair for pair in settings.smartTypingPairs if character in pair]
         

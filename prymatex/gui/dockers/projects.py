@@ -31,7 +31,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
     #=======================================================================
     # Settings
     #=======================================================================
-    SETTINGS_GROUP = 'Projects'
+    SETTINGS = 'Projects'
     @ConfigurableItem(default = '')
     def customFilters(self, filters):
         filters = [p.strip() for p in filters.split(",")]

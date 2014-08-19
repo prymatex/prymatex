@@ -35,7 +35,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
     currentEditorChanged = QtCore.Signal(object)
 
     # --------------------- Settings
-    SETTINGS_GROUP = 'MainWindow'
+    SETTINGS = 'MainWindow'
 
     @ConfigurableItem(default = "$PMX_APP_NAME ($PMX_VERSION)")
     def windowTitleTemplate(self, titleTemplate):

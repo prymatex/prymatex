@@ -39,7 +39,7 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
     ManualProxy = 1<<2
     
     # -------------- Settings
-    SETTINGS_GROUP = "Browser"
+    SETTINGS = "Browser"
     
     updateInterval = ConfigurableItem(default = 3000)
     homePage = ConfigurableItem(default = "https://github.com/prymatex")

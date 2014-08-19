@@ -47,7 +47,7 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
     #=========================================================
     # Settings
     #=========================================================
-    SETTINGS_GROUP = 'PluginManager'
+    SETTINGS = 'PluginManager'
     
     def __init__(self, **kwargs):
         super(PluginManager, self).__init__(**kwargs)

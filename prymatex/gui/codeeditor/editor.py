@@ -61,7 +61,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     HighlightCurrentLine  = 1<<5
 
     # ------------------- Settings
-    SETTINGS_GROUP = 'CodeEditor'
+    SETTINGS = 'CodeEditor'
 
     removeTrailingSpaces = ConfigurableItem(default = False)
     autoBrackets = ConfigurableItem(default = True)
@@ -268,7 +268,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor = self.newCursorAtPosition(block.position() + len(userData.indentation))
         
         # Folding
-        userData.foldingMark = self.settings(cursor).folding(sourceText)
+        userData.foldingMark = self.preferenceSettings(cursor).folding(sourceText)
         
         # Handlers
         for handler in self.__blockUserDataHandlers:
@@ -391,7 +391,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return (leftToken.scope.auxiliary(leftScope, self.filePath()),
             rightToken.scope.auxiliary(rightScope, self.filePath()))
 
-    def settings(self, cursor = None):
+    def preferenceSettings(self, cursor = None):
         cursor = cursor or self.textCursor()
         leftToken, rightToken = (self.tokenAtPosition(cursor.selectionStart() - 1),
             self.tokenAtPosition(cursor.selectionEnd()))
@@ -475,7 +475,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def setCurrentBraces(self, cursor = None):
         cursor = QtGui.QTextCursor(cursor) if cursor is not None else QtGui.QTextCursor(self.textCursor())
         cursor.clearSelection()
-        settings = self.settings(cursor)
+        settings = self.preferenceSettings(cursor)
         openBraces = [pair[0] for pair in settings.highlightPairs]
         closeBraces = [pair[1] for pair in settings.highlightPairs]
 
@@ -704,7 +704,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor = cursor or self.textCursor()
         block = cursor.block()
         positionInBlock = cursor.positionInBlock()
-        settings = self.settings(cursor)
+        settings = self.preferenceSettings(cursor)
 
         indentationFlags = settings.indentationFlags(block.text()[:positionInBlock])
 
@@ -949,7 +949,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # -------------- Add select text functions
     def selectEnclosingBrackets(self, cursor = None):
         cursor = cursor or self.textCursor()
-        settings = self.settings(cursor)
+        settings = self.preferenceSettings(cursor)
         flags = QtGui.QTextDocument.FindFlags()
         flags |= QtGui.QTextDocument.FindBackward
         foundCursors = [(self.document().find(openBrace_closeBrace[0], cursor.selectionStart(), flags), openBrace_closeBrace[1]) for openBrace_closeBrace in settings.highlightPairs]

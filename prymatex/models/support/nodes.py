@@ -6,8 +6,6 @@ from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import (keyequivalent_to_keysequence,
     keysequence_to_keyequivalent, rgba2color, color2rgba, qapplication)
 
-from prymatex import resources
-
 from prymatex.models.trees import TreeNodeBase
 
 from prymatex.utils import six
@@ -25,6 +23,7 @@ class BundleItemTreeNode(TreeNodeBase):
     def __init__(self, bundleItem, nodeParent = None):
         TreeNodeBase.__init__(self, bundleItem.name, nodeParent)
         self.__bundleItem = bundleItem
+        self._icon = None
         self._format_cache = {}
         self._palette_cache = {}
         self._style_base = { key_value[0]: rgba2color(key_value[1]) \
@@ -52,8 +51,12 @@ class BundleItemTreeNode(TreeNodeBase):
         if hasattr(self.__bundleItem, "keyEquivalent") and isinstance(self.__bundleItem.keyEquivalent, six.string_types):
             return keyequivalent_to_keysequence(self.__bundleItem.keyEquivalent)
     
+    def setIcon(self, icon):
+        self._icon = icon
+
     def icon(self):
-        return resources.get_icon("bundle-item-%s" % self.type())
+        return self._icon
+        #return resources.get_icon("bundle-item-%s" % self.type())
     
     def trigger(self):
         trigger = []

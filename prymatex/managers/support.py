@@ -44,7 +44,7 @@ class BundleItemMenuGroup(QtCore.QObject):
         #Append all bundle menus in order
         for bundle, bundleMenu in iter(sorted(iter(self.menus.items()), key=lambda bundle_bundleMenu: bundle_bundleMenu[1].title().replace("&","").lower())):
             menu.addMenu(bundleMenu)
-        
+
     def buildMenu(self, items, menu, submenus, parent = None):
         for uuid in items:
             if uuid.startswith('-'):
@@ -176,7 +176,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     #When you create a new item in the bundle editor without having selected a bundle first, then the bundle with the UUID held by this defaults key is used as the target
     defaultBundleForNewBundleItems = ConfigurableItem(default = 'B7BC3FFD-6E4B-11D9-91AF-000D93589AF6', tm_name = 'OakDefaultBundleForNewBundleItems')
         
-    SETTINGS_GROUP = 'SupportManager'
+    SETTINGS = 'SupportManager'
     
     def __init__(self, **kwargs):
         super(SupportManager, self).__init__(**kwargs)
@@ -356,6 +356,8 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     #---------------------------------------------------
     def addBundle(self, bundle):
         bundleNode = BundleItemTreeNode(bundle)
+        icon = self.resources().get_icon("bundle-item-%s" % bundleNode.type())
+        bundleNode.setIcon(icon)
         self.bundleTreeModel.appendBundle(bundleNode)
         self.bundleAdded.emit(bundleNode)
         return bundleNode
@@ -381,6 +383,8 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     #---------------------------------------------------
     def addBundleItem(self, bundleItem):
         bundleItemNode = BundleItemTreeNode(bundleItem)
+        icon = self.resources().get_icon("bundle-item-%s" % bundleItemNode.type())
+        bundleItemNode.setIcon(icon)
         self.bundleTreeModel.appendBundleItem(bundleItemNode)
         self.bundleItemAdded.emit(bundleItemNode)
         return bundleItemNode

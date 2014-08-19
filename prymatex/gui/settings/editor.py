@@ -30,10 +30,10 @@ class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtGui.QWidget):
             check.clicked.connect(self.on_editorFlags_clicked)
 
         # Get addons groups from profile
-        self.bookmarksBarGroup = self.profile.groupByClass(BookmarkSideBarAddon)
-        self.lineNumberBarGroup = self.profile.groupByClass(LineNumberSideBarAddon)
-        self.foldingBarGroup = self.profile.groupByClass(FoldingSideBarAddon)
-        self.selectionBarGroup = self.profile.groupByClass(SelectionSideBarAddon)
+        self.bookmarksBarGroup = self.profile.settingsForClass(BookmarkSideBarAddon)
+        self.lineNumberBarGroup = self.profile.settingsForClass(LineNumberSideBarAddon)
+        self.foldingBarGroup = self.profile.settingsForClass(FoldingSideBarAddon)
+        self.selectionBarGroup = self.profile.settingsForClass(SelectionSideBarAddon)
 	
     def loadSettings(self):
         super(EditorSettingsWidget, self).loadSettings()

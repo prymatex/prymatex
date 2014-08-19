@@ -24,7 +24,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
 
     # ----------- Settings
-    SETTINGS_GROUP = 'FileSystem'
+    SETTINGS = 'FileSystem'
     @ConfigurableItem(default = '')
     def customFilters(self, filters):
         self.fileSystemProxyModel.setFilterRegExp(filters)
