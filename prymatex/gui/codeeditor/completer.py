@@ -144,7 +144,7 @@ class WordsCompletionModel(CompletionBaseModel):
     
     def setCurrentRow(self, index, completion_count):
         suggestion = self.suggestions[index.row()]
-        return suggestion != self.completionPrefix()
+        return completion_count > 1 or suggestion != self.completionPrefix()
         
 class TabTriggerItemsCompletionModel(CompletionBaseModel):
     def __init__(self, **kwargs):
@@ -202,7 +202,7 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
         print(trigger)
         
     def setCurrentRow(self, index, completion_count):
-        return True
+        return completion_count > 0
 
 class SuggestionsCompletionModel(CompletionBaseModel):
     #display The title to display in the suggestions list
@@ -276,7 +276,6 @@ class SuggestionsCompletionModel(CompletionBaseModel):
 
     def setCurrentRow(self, index, completion_count):
         suggestion = self.suggestions[index.row()]
-        print(completion_count)
         return suggestion.get('insert') != self.completionPrefix()
 
 # ===================================
@@ -300,7 +299,6 @@ class CodeEditorCompleter(QtGui.QCompleter):
         # Popup table view
         self.setPopup(QtGui.QTableView())
         self.popup().setAlternatingRowColors(True)
-        #self.popup().setWordWrap(False)
         self.popup().verticalHeader().setVisible(False)
         self.popup().horizontalHeader().setStretchLastSection(True)
         self.popup().horizontalHeader().setVisible(False)
@@ -331,7 +329,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
             width = self.popup().verticalScrollBar().sizeHint().width()
             for columnIndex in range(self.model().columnCount()):
                 width += self.popup().sizeHintForColumn(columnIndex)
-            self.popup().setMinimumWidth(width)
+            self.popup().setMinimumWidth(width > 200 and width or 200)
             self.popup().resizeColumnsToContents()
             self.popup().resizeRowsToContents()
     
@@ -359,18 +357,22 @@ class CodeEditorCompleter(QtGui.QCompleter):
 
     def post_key_event(self, event):
         if self.isVisible():
-            maxPosition = self.startCursorPosition + len(self.completionPrefix()) + 1
+            current_prefix = self.completionPrefix()
+            maxPosition = self.startCursorPosition + len(current_prefix) + 1
             cursor = self.editor.textCursor()
             
-            if self.startCursorPosition <= cursor.position() <= maxPosition:
-                cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
-                self.setCompletionPrefix(cursor.selectedText())
-                if not self.setCurrentRow(0) and self.trySetNextModel():
-                    self.complete(self.editor.cursorRect())
-                elif self.model() is None:
-                    self.hide()
-            else:
+            if not (self.startCursorPosition <= cursor.position() <= maxPosition):
                 self.hide()
+                return
+            cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
+            new_prefix = cursor.selectedText()
+            if new_prefix == current_prefix:
+                return
+            self.setCompletionPrefix(new_prefix)
+            if not self.setCurrentRow(0) and not self.trySetNextModel():
+                self.hide()
+                return
+            self.complete(self.editor.cursorRect())
         elif text.asciify(event.text()) in COMPLETER_CHARS:
             alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
             if end - start >= self.editor.wordLengthToComplete:
@@ -395,11 +397,11 @@ class CodeEditorCompleter(QtGui.QCompleter):
 
     def setCompletionPrefix(self, prefix):
         self.startCursorPosition = self.editor.textCursor().position() - len(prefix or "")
-        if self.model() is not None:
-            self.fixPopupView()
         for model in self.completionModels:
             model.setCompletionPrefix(prefix)
         QtGui.QCompleter.setCompletionPrefix(self, prefix)
+        if self.model() is not None:
+            self.fixPopupView()
     
     def setModel(self, model):
         # Esto esta bueno pero cuando cambias de modelo tenes que hacer algo mas
@@ -408,14 +410,15 @@ class CodeEditorCompleter(QtGui.QCompleter):
         QtGui.QCompleter.setModel(self, model)
 
     def trySetModel(self, model):
+        current_model = self.model()
         if model not in self.completionModels:
             return False
         self.setModel(model)
         if self.setCurrentRow(0):
             self.fixPopupView()
         else:
-            self.setModel(None)
-        return self.model() is not None
+            self.setModel(current_model)
+        return self.model() != current_model
         
     def registerModel(self, completionModel):
         self.completionModels.append(completionModel)
@@ -437,8 +440,9 @@ class CodeEditorCompleter(QtGui.QCompleter):
         return False
 
     def runCompleter(self, rect, model = None):
-        if self.isVisible() and model is not None and self.trySetModel(model):
-            self.complete(rect)
+        if self.isVisible():
+            if (model is not None and self.trySetModel(model)) or self.explicit_launch:
+                self.complete(rect)
         elif not self.isVisible():
             for completerTask in self.completerTasks:
                 completerTask.cancel()

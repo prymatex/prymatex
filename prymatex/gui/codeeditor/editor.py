@@ -42,6 +42,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # -------------------- Signals
     syntaxChanged = QtCore.Signal(object)
     themeChanged = QtCore.Signal(object)
+    filePathChanged = QtCore.Signal(str)
     blocksRemoved = QtCore.Signal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.Signal(QtGui.QTextBlock, int)
     modeChanged = QtCore.Signal()
@@ -340,6 +341,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def setFilePath(self, filePath):
         super(CodeEditor, self).setFilePath(filePath)
+        self.filePathChanged.emit(filePath)
         extension = self.application().fileManager.extension(filePath)
         syntax = self.application().supportManager.findSyntaxByFileType(extension)
         if syntax is not None:

@@ -26,7 +26,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     def beginExecution(self, bundleItem):
         if self.bundleItem == bundleItem:
             return
-
+        
         self.editor.syntaxHighlighter.stop()
         # ------------ Previous syntax
         if self.bundleItem is not None:
