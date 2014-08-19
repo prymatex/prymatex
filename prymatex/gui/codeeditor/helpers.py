@@ -19,7 +19,7 @@ class KeyEquivalentHelper(CodeEditorKeyHelper):
         keyseq = int(event.modifiers()) + event.key()
         if keyseq not in self.application().supportManager.getAllKeyEquivalentCodes():
             return False
-        
+    
         leftScope, rightScope = self.editor.scope(cursor)
         self.items = self.application().supportManager.getKeyEquivalentItem(
             keyseq, leftScope, rightScope)
@@ -172,8 +172,7 @@ class BackspaceUnindentHelper(CodeEditorKeyHelper):
         
     def execute(self, event = None, cursor = None, **kwargs):
         counter = cursor.columnNumber() % self.editor.tabWidth or self.editor.tabWidth
-        for _ in range(counter):
-            cursor.deletePreviousChar()
+        self.editor.newCursorAtPosition(cursor.position(), cursor.position() - counter).removeSelectedText()
 
 class BackspaceRemoveBracesHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Backspace
@@ -197,8 +196,7 @@ class DeleteUnindentHelper(CodeEditorKeyHelper):
         
     def execute(self, event = None, cursor = None, **kwargs):
         counter = cursor.columnNumber() % self.editor.tabWidth or self.editor.tabWidth
-        for _ in range(counter):
-            cursor.deleteChar()
+        self.editor.newCursorAtPosition(cursor.position(), cursor.position() + counter).removeSelectedText()
 
 class DeleteRemoveBracesHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Delete
@@ -216,7 +214,7 @@ class DeleteRemoveBracesHelper(CodeEditorKeyHelper):
 class SmartIndentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Return
     def execute(self, event = None, cursor = None, **kwargs):
-        if self.editor.document().blockCount() == 1:
+        if cursor.blockNumber() == 1:
             syntax = self.application().supportManager.findSyntaxByFirstLine(cursor.block().text()[:cursor.columnNumber()])
             if syntax is not None:
                 self.editor.insertBundleItem(syntax)
