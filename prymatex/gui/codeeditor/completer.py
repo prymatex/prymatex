@@ -94,7 +94,7 @@ class WordsCompletionModel(CompletionBaseModel):
             self.suggestions.update(self.editor.blockUserData(block).words)
             block = block.next()
 
-        settings = self.editor.settings()
+        settings = self.editor.preferenceSettings()
         if self.prefix in self.suggestions:
             self.suggestions.remove(self.prefix)
         self.suggestions.update(settings.completions)
