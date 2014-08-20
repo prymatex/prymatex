@@ -20,22 +20,9 @@ from prymatex.utils.importlib import import_module, import_from_directories
 
 from prymatex.gui.main import PrymatexMainWindow
 
-class ResourceProvider():
-    def __init__(self, resources):
-        self.resources = resources
-
-    def get_image(self, index, size = None, default = None):
-        if index in self.resources:
-            return QtGui.QPixmap(self.resources[index])
-        return resources.get_image(index, size, default)
-        
-    def get_icon(self, index, size = None, default = None):
-        if index in self.resources:
-            return QtGui.QIcon(self.resources[index])
-        return resources.get_icon(index, size, default)
-
 class PluginDescriptor(object):
     name = ""
+    title = ""
     description = ""
     icon = None
     def __init__(self, entry):
@@ -71,8 +58,13 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
 
     # ------------- Cargando clases
     def registerComponent(self, componentClass, componentBase = PrymatexMainWindow, default = False):
+        if not hasattr(componentClass, "RESOURCES"):
+            setattr(componentClass, "RESOURCES", self.currentPluginDescriptor.resources.names())
+        
         self.application().populateComponentClass(componentClass)
-        componentClass.plugin = self.currentPluginDescriptor
+        
+        componentClass._plugin = self.currentPluginDescriptor
+        componentClass.plugin = classmethod(lambda cls: cls._plugin)
         self.components.setdefault(componentBase, []).append(componentClass)
         if default:
             self.defaultComponent = componentClass
@@ -111,17 +103,16 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
 
     # ---------- Load plugins
     def loadResources(self, pluginDirectory, pluginEntry):
-        if "icon" in pluginEntry:
-            iconPath = os.path.join(pluginDirectory, pluginEntry["icon"])
-            pluginEntry["icon"] = QtGui.QIcon(iconPath)
+        defaults = self.application().resourceManager.defaults()
+        #  TODO: Dependencias
         if "share" in pluginEntry:
             pluginEntry["share"] = os.path.join(pluginDirectory, pluginEntry["share"])
-            res = resources.loadResources(pluginEntry["share"])
-            pluginEntry["resources"] = ResourceProvider(res)
-        else:
-            # Global resources
-            pluginEntry["resources"] = resources
-        
+            self.application().resourceManager.add_source(pluginEntry["name"], pluginEntry["share"])
+            defaults = (pluginEntry["name"],) + defaults
+        pluginEntry["resources"] = self.application().resourceManager.get_provider(defaults)
+        if "icon" in pluginEntry:
+            pluginEntry["icon"] = pluginEntry["resources"].get_icon(pluginEntry["icon"])
+
     def loadPlugin(self, pluginEntry):
         pluginId = pluginEntry.get("id")
         packageName = pluginEntry.get("package")
@@ -143,8 +134,11 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
         self.currentPluginDescriptor = None
     
     def loadCoreModule(self, moduleName, pluginId):
-        pluginEntry = {"id": pluginId,
-                       "resources": resources}
+        pluginEntry = {
+            "id": pluginId,
+            "icon": self.application().resources().get_icon(':/prymatex.png'),
+            "resources": self.application().resources()
+        }
         try:
             pluginEntry["module"] = import_module(moduleName)
             registerPluginFunction = getattr(pluginEntry["module"], "registerPlugin")
@@ -171,10 +165,14 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
                 continue
             for pluginPath in glob(os.path.join(directory, config.PMX_PLUGIN_GLOB)):
                 pluginDescriptorPath = os.path.join(pluginPath, config.PMX_DESCRIPTOR_NAME)
-                if os.path.isdir(pluginPath) and os.path.isfile(pluginDescriptorPath):
+                if os.path.isfile(pluginDescriptorPath):
                     descriptorFile = open(pluginDescriptorPath, 'r')
                     pluginEntry = json.load(descriptorFile)
                     descriptorFile.close()
+
+                    # Plugin name
+                    pluginEntry["name"], _ = os.path.splitext(os.path.basename(pluginPath))
+
                     # Load paths
                     pluginEntry["path"] = pluginPath
                     paths = [ pluginPath ]
@@ -183,6 +181,7 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
                             path = os.path.abspath(os.path.join(pluginPath, path))
                         paths.append(path)
                     pluginEntry["paths"] = paths
+
                     if self.hasDependenciesResolved(pluginEntry):
                         self.loadPlugin(pluginEntry)
                     else:

@@ -15,11 +15,15 @@ from .sequences import ContextSequence
 _fileIconProvider = QtGui.QFileIconProvider()
 
 class Resource(dict):
-    def __init__(self, name, path):
+    def __init__(self, name, path, default = False):
         self._name = name
         self._path = path
+        self._default = default
         self._mapper = default_media_mapper
-        self._from_theme = QtGui.QIcon.fromTheme
+        self._from_theme = QtGui.QIcon._fromTheme
+
+    def default(self):
+        return self._default
 
     def name(self):
         return self._name
@@ -86,6 +90,9 @@ class ResourceProvider(object):
     def __init__(self, resources):
         self.resources = resources
 
+    def names(self):
+        return tuple([ res.name() for res in self.resources ])
+
     def sources(self):
         return self.resources[:]
                 
@@ -132,23 +139,26 @@ class ResourceProvider(object):
 class ResourceManager(object):
     def __init__(self, **kwargs):
         super(ResourceManager, self).__init__(**kwargs)
-        self.resources = {}
+        self.resources = []
         self.providers = {}
         
-    def add_source(self, name, path):
-        res = Resource(name, path)
+    def add_source(self, name, path, default = False):
+        res = Resource(name, path, default)
         res.update(load_media(path))
         res.update(load_stylesheets(path))
-        self.resources[name] = res
+        self.resources.insert(0, res)
 
     def get_provider(self, sources):
         if sources not in self.providers:
-            resources = [ self.resources[name] for name in sources ]
+            resources = [ res for res in self.resources if res.name() in sources ]
             self.providers[sources] = ResourceProvider(resources)
         return self.providers[sources]
 
+    def defaults(self):
+        return tuple([ res.name() for res in self.resources if res.default() ])
+
     def providerForClass(self, klass):
-        sources = getattr(klass, "RESOURCES", tuple(self.resources.keys()) )
+        sources = getattr(klass, "RESOURCES", self.defaults())
         return self.get_provider(sources)
 
     def install_icon_handler(self):
@@ -156,7 +166,7 @@ class ResourceManager(object):
         QtGui.QIcon.fromTheme = self.icon_from_theme
 
     def icon_from_theme(self, index):
-        for res in self.resources.values():
+        for res in self.resources:
             icon = res.get_icon(index)
             if not icon.isNull():
                 return icon

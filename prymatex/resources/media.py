@@ -1,94 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#===============================================================
-# ICONS
-# http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
-#===============================================================
-
 import os
 import json
 
 from collections import namedtuple
 
-from prymatex.qt import QtGui, QtCore
-from prymatex.qt.helpers import get_std_icon
+from prymatex.qt import QtGui
 
-from prymatex.utils.decorators.memoize import memoized
-from prymatex.utils import six
 from prymatex.utils import encoding
-
 from prymatex.widgets import glyph
 
-from .base import find_resource
-from .base import buildResourceKey
-
-_fileIconProvider = QtGui.QFileIconProvider()
-_media_mapper = {}
-_media_from_theme = lambda index: QtGui.QIcon()
-
-ICONNAMES = set()
-
-def get_image(index, fallback = None):
-    fallback = fallback or QtGui.QPixmap()
-    image = _get_icon(index)
-    return image.isNull() and fallback or image
-
-def get_icon(index, fallback = None):
-    fallback = fallback or QtGui.QIcon()
-    icon = _get_icon(index)
-    return icon.isNull() and fallback or icon
-
-@memoized
-def _get_image(index):
-    path = getResource(index, ["Images", "Icons"])
-    if path is not None:
-        return QtGui.QPixmap(path)
-    else:
-        #Standard Icon
-        return get_std_icon(index).pixmap(32)
-
-@memoized
-def _get_icon(index):
-    '''Makes the best effort to find an icon for an index.
-    Index can be a path, a Qt resource path, an integer.
-    @return: QIcon instance'''
-    global _media_mapper, _media_from_theme
-    if index in _media_mapper:
-        index = _media_mapper[index]
-    if isinstance(index, six.string_types):
-
-        if os.path.exists(index) and os.path.isabs(index):
-            return _fileIconProvider.icon(QtCore.QFileInfo(index))
-	
-        std = get_std_icon(index)
-        if not std.isNull():
-            return std
-
-        path = find_resource(index, ["Icons", "External"])
-        if path is not None:
-            return QtGui.QIcon(path)
-        
-        return _media_from_theme(index)
-    elif isinstance(index, six.integer_types):
-        return _fileIconProvider.icon(index)
+from .base import build_resource_key
 
 IconTheme = namedtuple("IconTheme", "name type path")
-
-def set_icon_theme(theme_name):
-    global _media_mapper, _media_from_theme
-    _media_mapper = find_resource(theme_name, ["Mapping"]) or find_resource("default", ["Mapping"])
-    theme = find_resource(theme_name, ["Themes"])
-    print(theme_name)
-    if theme is None:
-        QtGui.QIcon.setThemeName(theme_name)
-        _media_from_theme = QtGui.QIcon._fromTheme
-    elif theme.type == "pix":
-        QtGui.QIcon.setThemeName(theme.name)
-        _media_from_theme = QtGui.QIcon._fromTheme
-    elif theme.type == "glyph":
-        glyph = find_resource(theme.name, ["Glyphs"])
-        _media_from_theme = glyph.icon
 
 def load_media(resourcesPath):
     resources = { "Images": {}, "Icons": {}, "Themes": {}, "Mapping": {}, "Glyphs": {}, "External": {} }
@@ -98,7 +23,7 @@ def load_media(resourcesPath):
         for dirpath, dirnames, filenames in os.walk(iconsPath):
             for filename in filenames:
                 iconPath = os.path.join(dirpath, filename)
-                name = buildResourceKey(iconPath[len(iconsPath):])
+                name = build_resource_key(iconPath[len(iconsPath):])
                 resources["Icons"][name] = iconPath
 
     # Load Images
@@ -107,22 +32,19 @@ def load_media(resourcesPath):
         for dirpath, dirnames, filenames in os.walk(imagesPath):
             for filename in filenames:
                 imagePath = os.path.join(dirpath, filename)
-                name = buildResourceKey(imagePath[len(imagesPath):])
+                name = build_resource_key(imagePath[len(imagesPath):])
                 resources["Images"][name] = imagePath
                 
     # Load Themes
-    themePaths = set(QtGui.QIcon.themeSearchPaths())
-    if os.path.exists("/usr/share/icons"):
-        themePaths.add("/usr/share/icons")
-    themePaths.add(os.path.join(resourcesPath, "Media", "Themes"))
-    themeNames = [ ]
-    for themePath in themePaths:
-        if not os.path.exists(themePath):
+    themesPaths = [ os.path.join(resourcesPath, "Media", "Themes") ] + \
+        [ "/usr/share/icons" ] + QtGui.QIcon.themeSearchPaths()
+    for themesPath in themesPaths:
+        if not os.path.exists(themesPath):
             continue
-        for name in os.listdir(themePath):
-            descriptor = os.path.join(themePath, name, "index.theme")
+        for name in os.listdir(themesPath):
+            descriptor = os.path.join(themesPath, name, "index.theme")
             if os.path.exists(descriptor):
-                resources["Themes"][name] = IconTheme(name, "pix", os.path.join(themePath, name))
+                resources["Themes"][name] = IconTheme(name, "pix", os.path.join(themesPath, name))
     
     # Load Glyphs
     glyphsPath = os.path.join(resourcesPath, "Media", "Glyphs")
@@ -143,3 +65,27 @@ def load_media(resourcesPath):
             resources["Mapping"][name] = json.loads(file_content)
 
     return resources
+
+default_media_mapper = {
+    "bundle-item-bundle": ":/bundles/bundle.png",
+    "bundle-item-command": ":/bundles/commands.png",
+    "bundle-item-dragcommand": ":/bundles/drag-commands.png",
+    "bundle-item-macro": ":/bundles/macros.png",
+    "bundle-item-preference": ":/bundles/preferences.png",
+    "bundle-item-project": ":/bundles/project.png",
+    "bundle-item-proxy": ":/bundles/template-files.png",
+    "bundle-item-snippet": ":/bundles/snippets.png",
+    "bundle-item-syntax": ":/bundles/languages.png",
+    "bundle-item-template": ":/bundles/templates.png",
+    "bundle-item-staticfile": ":/bundles/template-files.png",
+    "editor-mode": ":/bullets/red.png",
+    "porcess-not-running": ":/bullets/red.png",
+    "porcess-running": ":/bullets/green.png",
+    "porcess-starting": ":/bullets/yellow.png",
+    "symbol-block": ":/bullets/green.png",
+    "symbol-class": ":/bullets/blue.png",
+    "symbol-context": ":/bullets/yellow.png",
+    "symbol-function": ":/bullets/ligthblue.png",
+    "symbol-typedef": ":/bullets/brown.png",
+    "symbol-variable": ":/bullets/red.png",
+}

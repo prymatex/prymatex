@@ -3,7 +3,6 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex import resources
 from prymatex.models.trees import AbstractNamespaceTreeModel, TreeNodeBase
 
 class ContextTreeNode(TreeNodeBase):
@@ -39,7 +38,7 @@ class ShortcutsTreeModel(AbstractNamespaceTreeModel):
     def __init__(self, parent = None):
         AbstractNamespaceTreeModel.__init__(self, separator = ".", parent = parent)
 
-    def loadStandardSequences(self):
+    def loadStandardSequences(self, resources):
         for name in dir(QtGui.QKeySequence):
             if isinstance(getattr(QtGui.QKeySequence, name), QtGui.QKeySequence.StandardKey):
                 sequence = resources.get_sequence("Global", name)

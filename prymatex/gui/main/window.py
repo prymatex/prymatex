@@ -4,8 +4,6 @@
 import os
 from string import Template
 
-from prymatex import resources
-
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.compat import getSaveFileName
 from prymatex.qt.helpers import (text_to_objectname, create_menu, extend_menu,
@@ -91,7 +89,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
 
     def setupUi(self):
         self.setObjectName("MainWindow")
-        self.setWindowIcon(resources.get_icon("icon-prymatex"))
+        self.setWindowIcon(self.resources().get_icon(":/prymatex.png"))
 
         self.setupDockToolBars()
         
