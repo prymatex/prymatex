@@ -220,6 +220,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return self.mainWindow().showMessage(*largs, **kwargs)
     
     def showTooltip(self, *largs, **kwargs):
+        if "point" not in kwargs:
+            kwargs["point"] = self.mapToGlobal(
+                self.cursorRect(self.textCursor()).bottomRight()
+            )
         return self.mainWindow().showTooltip(*largs, **kwargs)
     
     def showStatus(self, *largs, **kwargs):

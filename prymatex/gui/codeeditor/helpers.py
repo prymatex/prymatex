@@ -214,8 +214,9 @@ class DeleteRemoveBracesHelper(CodeEditorKeyHelper):
 class SmartIndentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Return
     def execute(self, event = None, cursor = None, **kwargs):
-        if cursor.blockNumber() == 1:
-            syntax = self.application().supportManager.findSyntaxByFirstLine(cursor.block().text()[:cursor.columnNumber()])
+        if cursor.blockNumber() == 0:
+            text = cursor.block().text()[:cursor.columnNumber()]
+            syntax = self.application().supportManager.findSyntaxByFirstLine(text)
             if syntax is not None:
                 self.editor.insertBundleItem(syntax)
         self.editor.insertNewLine(cursor)

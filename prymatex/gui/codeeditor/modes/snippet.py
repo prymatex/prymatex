@@ -51,20 +51,21 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
             positionBefore = cursor.selectionStart()
             charactersBefore = cursor.document().characterCount()
             
-            #Insert Text
-            cursor.beginEditBlock()
+            # Insert Text
             self.editor.keyPressEvent(event)
             positionAfter = cursor.position()
             charactersAfter = cursor.document().characterCount()
             length = charactersBefore - charactersAfter 
             
-            #Capture Text
+            # Capture Text
             cursor.setPosition(holderStart)
             cursor.setPosition(holderEnd - length, QtGui.QTextCursor.KeepAnchor)
             selectedText = self.editor.selectedTextWithEol(cursor)
-
-            self.processor.setHolderContent(selectedText)
+            cursor.removeSelectedText()
             
+            # Update holder
+            self.processor.setHolderContent(selectedText)
+
             # Render
             self.processor.render()
             
@@ -80,6 +81,5 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
                 # The holder is killed
                 self.processor.selectHolder()
 
-            cursor.endEditBlock()
             return True
         return False

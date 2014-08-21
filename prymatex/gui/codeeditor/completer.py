@@ -19,7 +19,7 @@ class CompletionBaseModel(QtCore.QAbstractTableModel):
     def __init__(self, **kwargs):
         super(CompletionBaseModel, self).__init__(**kwargs)
         self.editor = None
-        self.prefix = None
+        self._prefix = None
 
     def completionPrefix(self):
         return self._prefix
@@ -91,14 +91,12 @@ class WordsCompletionModel(CompletionBaseModel):
         # TODO Palabras mas proximas al cursor o mas utilizadas
         self.suggestions = set()
         block = self.editor.document().begin()
+        # TODO: No usar la linea actual, quiza algo de niveles de anidamiento
         while block.isValid():
             self.suggestions.update(self.editor.blockUserData(block).words)
             block = block.next()
 
-        settings = self.editor.preferenceSettings()
-        if self.prefix in self.suggestions:
-            self.suggestions.remove(self.prefix)
-        self.suggestions.update(settings.completions)
+        self.suggestions.update(self.editor.preferenceSettings().completions)
         if self.suggestions:
             self.suggestions = sorted(list(self.suggestions))
             callback(self)
@@ -114,7 +112,6 @@ class WordsCompletionModel(CompletionBaseModel):
         
     def highlightedCompletion(self, index):
         suggestion = self.suggestions[index.row()]
-        print(suggestion)
 
     # -------------- Model overrite methods
     def columnCount(self, parent = None):
@@ -200,7 +197,6 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
 
     def highlightedCompletion(self, index):
         trigger = self.triggers[index.row()]
-        print(trigger)
         
     def setCurrentRow(self, index, completion_count):
         return completion_count > 0
@@ -273,8 +269,9 @@ class SuggestionsCompletionModel(CompletionBaseModel):
 
     def highlightedCompletion(self, index):
         suggestion = self.suggestions[index.row()]
-        print(suggestion)
-
+        if 'tooltip' in suggestion:
+            self.editor.showTooltip(suggestion['tooltip'])
+            
     def setCurrentRow(self, index, completion_count):
         suggestion = self.suggestions[index.row()]
         return suggestion.get('insert') != self.completionPrefix()
@@ -298,7 +295,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.setCompletionRole(QtCore.Qt.MatchRole)
         
         # Popup table view
-        self.setPopup(QtGui.QTableView())
+        self.setPopup(QtGui.QTableView(self.editor))
         self.popup().setAlternatingRowColors(True)
         self.popup().verticalHeader().setVisible(False)
         self.popup().horizontalHeader().setStretchLastSection(True)
@@ -329,16 +326,13 @@ class CodeEditorCompleter(QtGui.QCompleter):
         if self.completionMode() == QtGui.QCompleter.PopupCompletion:
             self.popup().resizeColumnsToContents()
             self.popup().resizeRowsToContents()
-            print(self.popup().width(), self.popup().height())
             width = self.popup().verticalScrollBar().sizeHint().width()
             for columnIndex in range(self.model().columnCount()):
-                width += self.popup().sizeHintForColumn(columnIndex)
-            self.popup().setMinimumWidth(width > 200 and width or 200)
-            print(self.popup().sizeHintForRow(1), self.completionCount())
-            height = self.popup().sizeHintForRow(1) * self.completionCount()
-            self.popup().setMinimumHeight(height > 400 and 400 or height)
-            print(self.popup().width(), self.popup().height())
-            
+                width += self.popup().columnWidth(columnIndex)
+            self.popup().setMinimumWidth(width > 212 and width or 212)
+            height = self.popup().rowHeight(0) * self.completionCount()
+            self.popup().setMinimumHeight(height > 343 and 343 or height)
+
     def pre_key_event(self, event):
         if self.isVisible():
             if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab):

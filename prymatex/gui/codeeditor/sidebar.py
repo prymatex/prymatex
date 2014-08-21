@@ -83,7 +83,6 @@ class LineNumberSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
     def __init__(self, **kwargs):
         super(LineNumberSideBarAddon, self).__init__(**kwargs)
         self.setObjectName(self.__class__.__name__)
-        #self.setFont(self.font())
 
     def initialize(self, **kwargs):
         super(LineNumberSideBarAddon, self).initialize(**kwargs)

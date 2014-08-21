@@ -164,14 +164,12 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
         if timeout > 2000:
             timeout = 2000
 
-        point = self.editor.cursorRect(self.inputWrapper).bottomRight()
-        point = self.editor.mapToGlobal(point)
         callbacks = {
             'copy': lambda s = message: QtGui.qApp.instance().clipboard().setText(s)
         }
 
-        self.editor.mainWindow().showTooltip(message,
-            frmt = outputFormat or "text", timeout = timeout, point = point,
+        self.editor.showTooltip(message,
+            frmt = outputFormat or "text", timeout = timeout,
             links = callbacks)
 
     def toolTip(self, context, outputFormat = None):
