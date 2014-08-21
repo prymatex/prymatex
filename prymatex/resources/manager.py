@@ -12,6 +12,7 @@ from .base import LICENSES
 from .media import load_media, default_media_mapper
 from .stylesheets import load_stylesheets
 from .sequences import ContextSequence
+from .styles import default_styles
 
 _FileIconProvider = QtGui.QFileIconProvider()
 
@@ -132,6 +133,9 @@ class ResourceProvider(object):
 
     def get_stylesheets(self):
         return self._section("StyleSheets")
+
+    def get_styles(self):
+        return default_styles
 
     def get_software_licenses(self):
         return LICENSES

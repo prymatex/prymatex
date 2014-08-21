@@ -307,7 +307,9 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         if text:
             _, flags = self.getIFindMatchAndFlags()
             match = self.currentEditor.findMatch(text, flags, cyclicFind = True)
-            self.lineEditIFind.setStyleSheet(match and resources.FIND_MATCH_STYLE or resources.FIND_NO_MATCH_STYLE)
+            self.lineEditIFind.setStyleSheet(match and \
+                self.resources().get_styles()["FIND_MATCH_STYLE"] or \
+                self.resources().get_styles()["FIND_NO_MATCH_STYLE"])
         else:
             #TODO: Buscar un clean style
             self.lineEditIFind.setStyleSheet('')
@@ -327,9 +329,9 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
     def on_checkBoxIFindCaseSensitively_stateChanged(self, value):
         match, flags = self.getIFindMatchAndFlags()
         if self.currentEditor.findMatch(match, flags):
-            self.lineEditIFind.setStyleSheet(resources.FIND_MATCH_STYLE)
+            self.lineEditIFind.setStyleSheet(self.resources().get_styles()["FIND_MATCH_STYLE"])
         else:
-            self.lineEditIFind.setStyleSheet(resources.FIND_NO_MATCH_STYLE)
+            self.lineEditIFind.setStyleSheet(self.resources().get_styles()["FIND_NO_MATCH_STYLE"])
 
     def getIFindMatchAndFlags(self):
         flags = QtGui.QTextDocument.FindFlags()

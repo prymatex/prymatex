@@ -11,7 +11,6 @@ from functools import partial
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.helpers.menus import create_menu
-from prymatex import resources
 
 class GroupWidget(QtGui.QTabWidget):
     """ The GroupWidget class is a QTabWidget with a dragable tab bar. """
@@ -111,14 +110,12 @@ class DragableTabBar(QtGui.QTabBar):
                 "text": "Tab Menu",
                 "items": [
                     {   "text": "Close",
-                        "icon": resources.get_icon("tab-close"),
                         "triggered": partial(tabWidget._close_widget, widget) 
                     },
                     {   "text": "Close all",
                         "triggered": tabSplitter.closeAll
                     },
                     {   "text": "Close other",
-                        "icon": resources.get_icon("tab-close-other"),
                         "triggered": partial(tabSplitter.closeAllExceptWidget, widget)
                     }
                 ]
@@ -128,11 +125,9 @@ class DragableTabBar(QtGui.QTabBar):
                 tabMenu["items"].extend([
                     "-", {
                         "text": "Split vertically",
-                        "icon": resources.get_icon("view-split-left-right"),
                         "triggered": partial(tabSplitter.splitVertically, widget)   
                     }, {
                         "text": "Split horizontally",
-                        "icon": resources.get_icon("view-split-top-bottom"),
                         "triggered": partial(tabSplitter.splitHorizontally, widget)
                     }
                 ])

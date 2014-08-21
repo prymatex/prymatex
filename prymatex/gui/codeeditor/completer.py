@@ -7,7 +7,6 @@ from functools import reduce
 from prymatex.qt import QtCore, QtGui, Qt
 
 from prymatex.core import config
-from prymatex import resources
 from prymatex.utils import text
 from prymatex.models.support import BundleItemTreeNode
 
@@ -65,11 +64,13 @@ class WordsCompletionModel(CompletionBaseModel):
         super(WordsCompletionModel, self).__init__(**kwargs)
         self.words = []
         self.suggestions = []
+        self.icon = QtGui.QIcon()
 
     def setEditor(self, editor):
         #TODO: Que pasa si ya tiene bloques
         super(WordsCompletionModel, self).setEditor(editor)
         self.editor.registerBlockUserDataHandler(self)
+        self.icon = self.editor.resources().get_icon('insert-text')
         
     # -------------------- Process User Data
     def contributeToBlockUserData(self, userData):
@@ -135,7 +136,7 @@ class WordsCompletionModel(CompletionBaseModel):
         if role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
             return suggestion
         elif role == QtCore.Qt.DecorationRole:
-            return resources.get_icon('insert-text')
+            return self.icon
         elif role == QtCore.Qt.ToolTipRole:
             return suggestion
         elif role == QtCore.Qt.MatchRole:
@@ -252,7 +253,7 @@ class SuggestionsCompletionModel(CompletionBaseModel):
                 return suggestion['title']
         elif role == QtCore.Qt.DecorationRole:
             if index.column() == 0 and 'image' in suggestion:
-                return resources.get_icon(suggestion['image'])
+                return self.editor.resources().get_icon(suggestion['image'])
         elif role == QtCore.Qt.ToolTipRole:
             if 'tooltip' in suggestion:
                 if 'tooltip_format' in suggestion:
