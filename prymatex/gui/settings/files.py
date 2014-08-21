@@ -15,7 +15,7 @@ class FilesSettingsWidget(SettingsTreeNode, Ui_Files, QtGui.QWidget):
         super(FilesSettingsWidget, self).__init__(nodeName = "files", **kwargs)
         self.setupUi(self)
         self.setTitle("Files")
-        self.setIcon(self.resources().get_icon("drive-harddisk"))
+        self.setIcon(self.resources().get_icon("settings-files"))
         self.loadEncodings()
         self.setupLineEndings()
 

@@ -15,7 +15,7 @@ class PluginsSettingsWidget(SettingsTreeNode, Ui_Plugins, QtGui.QWidget):
         super(PluginsSettingsWidget, self).__init__(nodeName = "plugins", **kwargs)
         self.setupUi(self)
         self.setTitle("Plugins")
-        self.setIcon(self.resources().get_icon("preferences-plugin-script"))
+        self.setIcon(self.resources().get_icon("settings-plugins"))
 
     def loadSettings(self):
         super(PluginsSettingsWidget, self).loadSettings()

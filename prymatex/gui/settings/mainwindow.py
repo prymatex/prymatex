@@ -13,7 +13,7 @@ class MainWindowSettingsWidget(SettingsTreeNode, Ui_MainWindow, QtGui.QWidget):
         super(MainWindowSettingsWidget, self).__init__(nodeName = "mainwindow", **kwargs)
         self.setupUi(self)
         self.setTitle("Main Window")
-        self.setIcon(self.resources().get_icon("preferences-system-windows-actions"))
+        self.setIcon(self.resources().get_icon("settings-main-window"))
 
     def loadSettings(self):
         super(MainWindowSettingsWidget, self).loadSettings()

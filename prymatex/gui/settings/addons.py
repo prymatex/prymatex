@@ -14,5 +14,5 @@ def AddonsSettingsWidgetFactory(namespace):
             super(AddonsSettingsWidget, self).__init__(nodeName = "addons", **kwargs)
             self.setupUi(self)
             self.setTitle("Addons")
-            self.setIcon(self.resources().get_icon("preferences-plugin"))
+            self.setIcon(self.resources().get_icon("settings-addons"))
     return AddonsSettingsWidget

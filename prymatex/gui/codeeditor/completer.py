@@ -327,13 +327,18 @@ class CodeEditorCompleter(QtGui.QCompleter):
 
     def fixPopupView(self):
         if self.completionMode() == QtGui.QCompleter.PopupCompletion:
+            self.popup().resizeColumnsToContents()
+            self.popup().resizeRowsToContents()
+            print(self.popup().width(), self.popup().height())
             width = self.popup().verticalScrollBar().sizeHint().width()
             for columnIndex in range(self.model().columnCount()):
                 width += self.popup().sizeHintForColumn(columnIndex)
             self.popup().setMinimumWidth(width > 200 and width or 200)
-            self.popup().resizeColumnsToContents()
-            self.popup().resizeRowsToContents()
-    
+            print(self.popup().sizeHintForRow(1), self.completionCount())
+            height = self.popup().sizeHintForRow(1) * self.completionCount()
+            self.popup().setMinimumHeight(height > 400 and 400 or height)
+            print(self.popup().width(), self.popup().height())
+            
     def pre_key_event(self, event):
         if self.isVisible():
             if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab):

@@ -12,7 +12,7 @@ class VariablesSettingsWidget(SettingsTreeNode, MultiDictTableEditorWidget):
         super(VariablesSettingsWidget, self).__init__(nodeName = "environment", **kwargs)
         self.model().dictionaryChanged.connect(self.on_model_dictionaryChanged)
         self.setTitle("Variables")
-        self.setIcon(self.resources().get_icon("code-variable"))
+        self.setIcon(self.resources().get_icon("settings-variables"))
 
     def loadSettings(self):
         super(VariablesSettingsWidget, self).loadSettings()

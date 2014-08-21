@@ -107,7 +107,7 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
     def contributeToSettings(cls):
         from prymatex.gui.settings.browser import NetworkSettingsWidget
         from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
-        return [ NetworkSettingsWidget, AddonsSettingsWidgetFactory("browser") ]
+        return [ NetworkSettingsWidget, AddonsSettingsWidgetFactory("network") ]
     
     def environmentVariables(self):
         environment = PrymatexDock.environmentVariables(self)

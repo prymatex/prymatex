@@ -14,7 +14,7 @@ class TerminalSettingsWidget(SettingsTreeNode, Ui_Terminal, QtGui.QWidget):
         super(TerminalSettingsWidget, self).__init__(nodeName = "terminal", **kwargs)
         self.setupUi(self)
         self.setTitle("Terminal")
-        self.setIcon(self.resources().get_icon("utilities-terminal"))
+        self.setIcon(self.resources().get_icon("settings-terminal"))
 
     def loadSettings(self):
         super(TerminalSettingsWidget, self).loadSettings()

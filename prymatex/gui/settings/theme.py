@@ -21,7 +21,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
         super(ThemeSettingsWidget, self).__init__(nodeName = "theme", **kwargs)
         self.setupUi(self)
         self.setTitle("Appearance")
-        self.setIcon(self.resources().get_icon("fill-color"))
+        self.setIcon(self.resources().get_icon("settings-theme"))
         self.setupTableView()
         self.setupPushButton()
 

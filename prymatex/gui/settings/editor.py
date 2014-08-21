@@ -14,7 +14,7 @@ class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtGui.QWidget):
         super(EditorSettingsWidget, self).__init__(nodeName = "editor", **kwargs)
         self.setupUi(self)
         self.setTitle("Editor")
-        self.setIcon(self.resources().get_icon("accessories-text-editor"))
+        self.setIcon(self.resources().get_icon("settings-editor"))
 
         self.checks = [(self.checkBoxWrapLines, CodeEditor.WordWrap),
             (self.checkBoxShowTabSpaces, CodeEditor.ShowTabsAndSpaces),

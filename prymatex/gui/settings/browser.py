@@ -11,10 +11,10 @@ from prymatex.gui.dockers.browser import BrowserDock
 
 class NetworkSettingsWidget(SettingsTreeNode, Ui_Browser, QtGui.QWidget):
     def __init__(self, **kwargs):
-        super(NetworkSettingsWidget, self).__init__(nodeName = "browser", **kwargs)
+        super(NetworkSettingsWidget, self).__init__(nodeName = "network", **kwargs)
         self.setupUi(self)
-        self.setTitle("Browser")
-        self.setIcon(self.resources().get_icon("internet-web-browser"))
+        self.setTitle("Network")
+        self.setIcon(self.resources().get_icon("settings-network"))
 
         self.checks = [(self.checkBoxDeveloperExtrasEnabled, BrowserDock.DeveloperExtrasEnabled),
             (self.checkBoxPluginsEnabled, BrowserDock.PluginsEnabled),

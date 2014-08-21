@@ -128,9 +128,8 @@ class MainWindowActionsMixin(object):
     SCREENSHOT_FORMAT = 'png'
 
     def on_actionTakeScreenshot_triggered(self):
-        from prymatex.resources import icons
         from pprint import pprint
-        pprint(icons.ICONNAMES)
+        pprint(self.resources()._unknoun_icons)
         pxm = QtGui.QPixmap.grabWindow(self.winId())
         import os
         from datetime import datetime
@@ -139,10 +138,10 @@ class MainWindowActionsMixin(object):
         path = os.path.join(self.application().profile().PMX_SCREENSHOT_PATH, baseName)
         pxm.save(path, self.SCREENSHOT_FORMAT)
         try:
-            self.currentEditor().showMessage("%s saved" % baseName)
+            self.showMessage("%s saved" % baseName)
         except AttributeError as e:
             QtGui.QMessageBox.information(self, "Screenshoot",
-                "%s saved" % fileName)
+                "%s saved" % baseName)
 
     @classmethod
     def contributeToMainMenu(cls):

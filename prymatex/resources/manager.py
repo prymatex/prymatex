@@ -85,7 +85,8 @@ class Resource(dict):
 class ResourceProvider(object):
     def __init__(self, resources):
         self.resources = resources
-
+        self._unknoun_icons = set()
+        
     def names(self):
         return tuple([ res.name() for res in self.resources ])
 
@@ -108,6 +109,7 @@ class ResourceProvider(object):
             icon = res.get_icon(index)
             if not icon.isNull():
                 return icon
+        self._unknoun_icons.add(index)
         return fallback
 
     def get_sequence(self, context, name, default = None, description = None):

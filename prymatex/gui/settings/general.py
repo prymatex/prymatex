@@ -11,7 +11,7 @@ class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtGui.QWidget):
         super(GeneralSettingsWidget, self).__init__(nodeName = "general", **kwargs)
         self.setupUi(self)
         self.setTitle("General")
-        self.setIcon(self.resources().get_icon("preferences-other"))
+        self.setIcon(self.resources().get_icon("settings-general"))
 
     def loadSettings(self):
         super(GeneralSettingsWidget, self).loadSettings()

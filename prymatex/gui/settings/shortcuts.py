@@ -15,7 +15,7 @@ class ShortcutsSettingsWidget(SettingsTreeNode, QtGui.QWidget):
         super(ShortcutsSettingsWidget, self).__init__(nodeName = "shortcuts", **kwargs)
         self.setupUi(self)
         self.setTitle("Shortcuts")
-        self.setIcon(self.resources().get_icon("configure-shortcuts"))
+        self.setIcon(self.resources().get_icon("settings-shortcuts"))
 
     def setupUi(self, Shortcuts):
         self.verticalLayout_2 = QtGui.QVBoxLayout(Shortcuts)
