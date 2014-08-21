@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui
-from prymatex import resources
 
 from prymatex.models.properties import PropertyTreeNode
 from prymatex.ui.configure.project import Ui_Project
@@ -23,7 +22,7 @@ class ProjectPropertiesWidget(PropertyTreeNode, Ui_Project, QtGui.QWidget):
         return fileSystemItem.isproject
     
     def setupComboLicences(self):
-        for licence in resources.LICENSES:
+        for licence in self.parent().resources().get_software_licenses():
             self.comboBoxLicence.addItem(licence)
     
     def setupComboKeywords(self):

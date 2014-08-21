@@ -6,8 +6,6 @@ import random
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex import resources
-
 from prymatex.core import config
 from prymatex.core import PrymatexDock
 from prymatex.core.settings import ConfigurableItem

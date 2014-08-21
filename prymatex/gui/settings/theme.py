@@ -5,7 +5,6 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.qt.helpers import test_font_strategy
 from prymatex.qt.helpers.colors import color2rgba
 
-from prymatex import resources
 from prymatex.ui.configure.theme import Ui_FontTheme
 from prymatex.utils.i18n import ugettext as _
 
@@ -17,12 +16,12 @@ from prymatex.delegates.theme import FontStyleDelegate, ColorDelegate
 class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
     """Changes font and theme"""
     NAMESPACE = "editor"
-    TITLE = "Appearance"
-    ICON = resources.get_icon("fill-color")
 
     def __init__(self, **kwargs):
         super(ThemeSettingsWidget, self).__init__(nodeName = "theme", **kwargs)
         self.setupUi(self)
+        self.setTitle("Appearance")
+        self.setIcon(self.resources().get_icon("fill-color"))
         self.setupTableView()
         self.setupPushButton()
 

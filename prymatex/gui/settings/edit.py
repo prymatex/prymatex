@@ -2,19 +2,18 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtGui, QtCore
-from prymatex import resources
 
 from prymatex.ui.configure.edit import Ui_Edit
 from prymatex.models.settings import SettingsTreeNode
 
 class EditSettingsWidget(SettingsTreeNode, Ui_Edit, QtGui.QWidget):
     NAMESPACE = "editor"
-    TITLE = "Edit"
-    ICON = resources.get_icon("document-edit")
 
     def __init__(self, **kwargs):
         super(EditSettingsWidget, self).__init__(nodeName = "edit", **kwargs)
         self.setupUi(self)
+        self.setTitle("Edit")
+        self.setIcon(self.resources().get_icon("document-edit"))
 
     def loadSettings(self):
         super(EditSettingsWidget, self).loadSettings()

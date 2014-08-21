@@ -11,7 +11,6 @@ from prymatex.core import config
 from prymatex.models.trees import TreeNodeBase
 from prymatex.models.configure import ConfigureTreeNode
 
-from prymatex import resources
 from prymatex.core import exceptions
 from prymatex.utils import plist
 import shutil
@@ -22,6 +21,7 @@ __all__ = [ 'FileSystemTreeNode', 'ProjectTreeNode' ]
 # Nodes
 #=========================================
 class FileSystemTreeNode(TreeNodeBase):
+    FileIconProvider = QtGui.QFileIconProvider()
     def __init__(self, name, parent = None):
         TreeNodeBase.__init__(self, name, parent)
         self.isdir = os.path.isdir(self.path())
@@ -43,13 +43,22 @@ class FileSystemTreeNode(TreeNodeBase):
         return os.path.join(self.nodeParent().relpath(), self.nodeName())
     
     def icon(self):
-        return resources.get_icon(self.path())
+        # TODO:
+	#QFileIconProvider::Computer	0
+	#QFileIconProvider::Desktop	1
+	#QFileIconProvider::Trashcan	2
+	#QFileIconProvider::Network	3
+	#QFileIconProvider::Drive	4
+	#QFileIconProvider::Folder	5
+	#QFileIconProvider::File	6
+        return self.FileIconProvider.icon(QtCore.QFileInfo(self.path()))
     
+    # TODO: Cambiar la signatura type
     def type(self):
         if self.isproject:
             return "Project"
         else:
-            return resources.get_file_type(self.path())
+            return self.FileIconProvider.type(QtCore.QFileInfo(self.path()))
   
     def size(self):
         return os.path.getsize(self.path())
@@ -155,7 +164,7 @@ class ProjectTreeNode(FileSystemTreeNode):
         
     def icon(self):
         if self.manager.isOpen(self):
-            return resources.get_icon("project-development")
+            return self.manager.resources().get_icon("project-development")
 
     # --------------- Bundle Menu
     def addBundleMenu(self, bundle):

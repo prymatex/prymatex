@@ -9,8 +9,6 @@ from functools import partial
 
 import prymatex
 
-from prymatex import resources
-
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import create_shortcut
 
@@ -64,19 +62,23 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self.setOrganizationName(prymatex.__author__)
         self.platform = sys.platform
 
+        # Windows
+        self._main_windows = []
+        # Current Profile
+        self._profile = None
+
         # Connects
         self.aboutToQuit.connect(self.closePrymatex)
         self.componentInstances = {}
         self.shortcutsTreeModel = ShortcutsTreeModel(self)
-
         self.replaceSysExceptHook()
     
-        # Windows
-        self._main_windows = []
-
     # ------ exception and logger handlers
     def getLogger(self, *largs, **kwargs):
         return logger.getLogger(*largs, **kwargs)
+
+    def profile(self):
+        return self._profile
 
     def replaceSysExceptHook(self):
         # Exceptions, Print exceptions in a window
@@ -118,20 +120,20 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
         # Prepare profile
         from prymatex.managers.profile import ProfileManager
-        self.extendComponent(ProfileManager)
+        self.populateComponentClass(ProfileManager)
         self.profileManager = ProfileManager(parent = self)
-        self.currentProfile = self.profileManager.currentProfile(self.options.profile)
-        if self.currentProfile is None:
+        self._profile = self.profileManager.currentProfile(self.options.profile)
+        if self._profile is None:
             return False
 
         if self.options.reset_settings:
-            self.currentProfile.clear()
+            self._profile.clear()
 
         # Prepare settings for application
         self.populateComponentClass(PrymatexApplication)
-        self.currentProfile.registerConfigurableInstance(self)
+        self._profile.registerConfigurableInstance(self)
 
-        logger.config(self.options.verbose, self.currentProfile.PMX_LOG_PATH, self.options.log_pattern)
+        logger.config(self.options.verbose, self._profile.PMX_LOG_PATH, self.options.log_pattern)
         
         return self.checkSingleInstance()
 
@@ -218,10 +220,10 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     def checkSingleInstance(self):
         """Checks if there's another instance using current profile"""
-        self.fileLock = os.path.join(self.currentProfile.PMX_PROFILE_PATH, 'prymatex.pid')
+        self.fileLock = os.path.join(self._profile.PMX_PROFILE_PATH, 'prymatex.pid')
 
         if os.path.exists(self.fileLock):
-            self.logger().critical("%s seems to be runnig. Please close the instance or run other profile." % (self.currentProfile.PMX_PROFILE_NAME))
+            self.logger().critical("%s seems to be runnig. Please close the instance or run other profile." % (self._profile.PMX_PROFILE_NAME))
             return False
         f = open(self.fileLock, 'w')
         f.write('%s' % self.applicationPid())
@@ -236,7 +238,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
         manager = PluginManager(parent = self)
 
-        self.currentProfile.registerConfigurableInstance(manager)
+        self._profile.registerConfigurableInstance(manager)
 
         manager.initialize(parent = self)
         for source in self.resources().sources():
@@ -261,15 +263,15 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             #Prymatex
             'PMX_APP_NAME': self.applicationName().title(),
             'PMX_APP_PATH': config.PMX_APP_PATH,
-            'PMX_PREFERENCES_PATH': self.currentProfile.value('PMX_PREFERENCES_PATH'),
+            'PMX_PREFERENCES_PATH': self._profile.value('PMX_PREFERENCES_PATH'),
             'PMX_VERSION': self.applicationVersion(),
             'PMX_PID': self.applicationPid(),
             #User
             'PMX_HOME_PATH': config.PMX_HOME_PATH,
-            'PMX_PROFILE_NAME': self.currentProfile.value('PMX_PROFILE_NAME'),
-            'PMX_PROFILE_PATH': self.currentProfile.value('PMX_PROFILE_PATH'),
-            'PMX_TMP_PATH': self.currentProfile.value('PMX_TMP_PATH'),
-            'PMX_LOG_PATH': self.currentProfile.value('PMX_LOG_PATH')
+            'PMX_PROFILE_NAME': self._profile.value('PMX_PROFILE_NAME'),
+            'PMX_PROFILE_PATH': self._profile.value('PMX_PROFILE_PATH'),
+            'PMX_TMP_PATH': self._profile.value('PMX_TMP_PATH'),
+            'PMX_LOG_PATH': self._profile.value('PMX_LOG_PATH')
         })
 
         return manager
@@ -303,46 +305,48 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
         self.storageManager.close()
         for main_window in self.mainWindows():
-            self.currentProfile.saveState(main_window)
-        self.currentProfile.sync()
+            self._profile.saveState(main_window)
+        self._profile.sync()
         if os.path.exists(self.fileLock):
             os.unlink(self.fileLock)
 
-    # --------------------- Exend and populate components
-    def extendComponent(self, componentClass):
+    # --------------------- Populate components
+    def populateComponentClass(self, componentClass):
+        # ------- Application
         componentClass._application = self
         componentClass.application = classmethod(lambda cls: cls._application)
+
+        # ------- Logger
         componentClass._logger = self.getLogger('.'.join([componentClass.__module__, componentClass.__name__]))
         componentClass.logger = classmethod(lambda cls: cls._logger)
-        
-    def populateComponentClass(self, componentClass):
-        self.extendComponent(componentClass)
+
         # ------- Resources
         componentClass._resources = self.resourceManager.providerForClass(componentClass)
         componentClass.resources = classmethod(lambda cls: cls._resources)
         
         # ------- Settings
-        componentClass._settings = self.currentProfile.settingsForClass(componentClass)
-        componentClass.settings = classmethod(lambda cls: cls._settings)
+        if self._profile is not None and issubclass(componentClass, PrymatexComponent):
+            componentClass._settings = self._profile.settingsForClass(componentClass)
+            componentClass.settings = classmethod(lambda cls: cls._settings)
 
-        # Register settings values
-        for key, value in componentClass.__dict__.items():
-            if isinstance(value, ConfigurableItem):
-                if value.name is None:
-                    value.name = key
-                componentClass.settings().addConfigurableItem(value)
-            elif isinstance(value, ConfigurableHook):
-                componentClass.settings().addConfigurableHook(value)
+            # Register settings values
+            for key, value in componentClass.__dict__.items():
+                if isinstance(value, ConfigurableItem):
+                    if value.name is None:
+                        value.name = key
+                    componentClass.settings().addConfigurableItem(value)
+                elif isinstance(value, ConfigurableHook):
+                    componentClass.settings().addConfigurableHook(value)
 
-        # Add settings widgets
-        for settingClass in componentClass.contributeToSettings():
-            self.extendComponent(settingClass)
-            settingWidget = settingClass(
-                settings = componentClass.settings(),
-                profile = self.currentProfile)
-            componentClass.settings().addDialog(settingWidget)
-            self.profileManager.registerSettingsWidget(settingWidget)
-        componentClass._pmx_populated = True
+            # Add settings widgets
+            for settingClass in componentClass.contributeToSettings():
+                self.populateComponentClass(settingClass)
+                settingWidget = settingClass(
+                    settings = componentClass.settings(),
+                    profile = self._profile)
+                componentClass.settings().addDialog(settingWidget)
+                self.profileManager.registerSettingsWidget(settingWidget)
+            componentClass._pmx_populated = True
 
     # ------------------- Create components
     def createComponentInstance(self, componentClass, **kwargs):
@@ -369,7 +373,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
         # ------------------- Configure Bottom-up
         for instance in buildedInstances[::-1]:
-            self.currentProfile.registerConfigurableInstance(instance)
+            self._profile.registerConfigurableInstance(instance)
 
         # ------------------- Initialize Top-down
         for instance in buildedInstances:
@@ -384,7 +388,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         return component
 
     def deleteComponentInstance(self, component):
-        self.currentProfile.unregisterConfigurableInstance(component)
+        self._profile.unregisterConfigurableInstance(component)
         component.deleteLater()
         
     # ------------ Find Component
@@ -396,13 +400,13 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     # ------------- Settings access
     def settingValue(self, settingPath):
-        return self.currentProfile.settingValue(settingPath)
+        return self._profile.settingValue(settingPath)
 
     def registerSettingHook(self, settingPath, handler):
-        self.currentProfile.registerSettingHook(settingPath, handler)
+        self._profile.registerSettingHook(settingPath, handler)
 
     def unregisterSettingHook(self, settingPath, handler):
-        self.currentProfile.unregisterSettingHook(settingPath, handler)
+        self._profile.unregisterSettingHook(settingPath, handler)
 
     # ------------- Editors and windows handle
     def createEditorInstance(self, class_name = None, file_path=None, 
@@ -447,7 +451,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
         main_window = self.createComponentInstance(PrymatexMainWindow)
 
-        self.currentProfile.restoreState(main_window)
+        self._profile.restoreState(main_window)
 
         if not main_window.editors():
             main_window.addEmptyEditor()
@@ -538,11 +542,9 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         """Register QAction or QShortcut to Prymatex main application,
         with sequence
         """
-        # TODO: este isinstance vuela
-        if not isinstance(sequence, resources.ContextSequence):
-            if not isinstance(sequence, (tuple, list)):
-                sequence = ("Global", sequence)
-            sequence = componentClass.resources().get_sequence(*sequence)
+        if not isinstance(sequence, (tuple, list)):
+            sequence = ("Global", sequence)
+        sequence = componentClass.resources().get_sequence(*sequence)
         if not sequence.isEmpty():
             self.shortcutsTreeModel.registerShortcut(qobject, sequence)
 

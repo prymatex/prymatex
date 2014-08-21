@@ -3,8 +3,6 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex import resources
-
 def hasFeature(dockwidget, feature):
     return dockwidget.features() & feature == feature
 
@@ -62,15 +60,15 @@ class DockWidgetTitleBar(QtGui.QWidget):
     def __init__(self, dockWidget):
         QtGui.QWidget.__init__(self, dockWidget)
         self.floatButton = DockWidgetTitleBarButton(self)
-        self.floatButton.setIcon(resources.get_icon("TitleBarNormalButton"))
+        self.floatButton.setIcon(dockWidget.resources().get_icon("TitleBarNormalButton"))
         self.floatButton.clicked.connect(self.toggleFloating)
         self.floatButton.setVisible(True)
         self.closeButton = DockWidgetTitleBarButton(self)
-        self.closeButton.setIcon(resources.get_icon("TitleBarCloseButton"))
+        self.closeButton.setIcon(dockWidget.resources().get_icon("TitleBarCloseButton"))
         self.closeButton.clicked.connect(dockWidget.close)
         self.closeButton.setVisible(True)
         self.collapseButton = DockWidgetTitleBarButton(self)
-        self.collapseButton.setIcon(resources.get_icon("TitleBarMinButton"))
+        self.collapseButton.setIcon(dockWidget.resources().get_icon("TitleBarMinButton"))
         self.collapseButton.clicked.connect(self._collapse_area_request)
         self.collapseButton.setVisible(True)
         dockWidget.featuresChanged.connect(self.featuresChanged)

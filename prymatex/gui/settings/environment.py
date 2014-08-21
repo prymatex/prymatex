@@ -3,19 +3,16 @@
 
 import os
 
-from prymatex import resources
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.widgets.multidicteditor import MultiDictTableEditorWidget
 
 class VariablesSettingsWidget(SettingsTreeNode, MultiDictTableEditorWidget):
-    """Environment variables"""
     NAMESPACE = "general"
-    TITLE = "Variables"
-    ICON = resources.get_icon("code-variable")
-
     def __init__(self, **kwargs):
         super(VariablesSettingsWidget, self).__init__(nodeName = "environment", **kwargs)
         self.model().dictionaryChanged.connect(self.on_model_dictionaryChanged)
+        self.setTitle("Variables")
+        self.setIcon(self.resources().get_icon("code-variable"))
 
     def loadSettings(self):
         super(VariablesSettingsWidget, self).loadSettings()

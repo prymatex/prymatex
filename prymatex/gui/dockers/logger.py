@@ -8,7 +8,6 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import PMXBaseDock
 
-from prymatex import resources
 from prymatex.ui.others.logwidget import Ui_LogWidget
 
 class LoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXBaseDock):

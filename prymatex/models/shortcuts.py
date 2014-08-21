@@ -41,9 +41,11 @@ class ShortcutsTreeModel(AbstractNamespaceTreeModel):
     def loadStandardSequences(self, resources):
         for name in dir(QtGui.QKeySequence):
             if isinstance(getattr(QtGui.QKeySequence, name), QtGui.QKeySequence.StandardKey):
-                sequence = resources.get_sequence("Global", name)
-                node = ContextSequenceTreeNode(sequence)
-                self.insertNamespaceNode(sequence.context, node)
+                node = self.nodeForNamespace("Global.%s" % name)
+                if node is None:
+                    sequence = resources.get_sequence("Global", name)
+                    node = ContextSequenceTreeNode(sequence)
+                    self.insertNamespaceNode(sequence.context, node)
 
     def registerShortcut(self, qobject, sequence):
         node = self.nodeForNamespace(sequence.fullName())

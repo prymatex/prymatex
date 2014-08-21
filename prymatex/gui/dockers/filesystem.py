@@ -6,8 +6,6 @@ import os, sys, shutil
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers.menus import create_menu
 
-from prymatex import resources
-
 # FileSystem docker parents
 from prymatex.core import PrymatexDock
 from prymatex.gui.dockers.fstasks import FileSystemTasks

@@ -3,17 +3,15 @@
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex import resources
 from prymatex.ui.configure.general import Ui_General
 from prymatex.models.settings import SettingsTreeNode
 
 class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtGui.QWidget):
-    TITLE = "General"
-    ICON = resources.get_icon("preferences-other")
-
     def __init__(self, **kwargs):
         super(GeneralSettingsWidget, self).__init__(nodeName = "general", **kwargs)
         self.setupUi(self)
+        self.setTitle("General")
+        self.setIcon(self.resources().get_icon("preferences-other"))
 
     def loadSettings(self):
         super(GeneralSettingsWidget, self).loadSettings()

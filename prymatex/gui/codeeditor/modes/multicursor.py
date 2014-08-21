@@ -3,8 +3,6 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex import resources
-
 from .base import CodeEditorBaseMode
 
 from prymatex.utils.lists import bisect_key
@@ -363,9 +361,9 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
 
     def contributeToShortcuts(self):
         return [{
-            "sequence": resources.get_sequence("Multiedit", "FindForwardCursor", "Ctrl+Meta+M"),
+            "sequence": ("Multiedit", "FindForwardCursor", "Ctrl+Meta+M"),
             "activated": lambda : self.findCursor()
         }, {
-            "sequence": resources.get_sequence("Multiedit", "FindBackwardCursor", "Ctrl+Meta+Shift+M"),
+            "sequence": ("Multiedit", "FindBackwardCursor", "Ctrl+Meta+Shift+M"),
             "activated": lambda : self.findCursor(backward=True)
         }]

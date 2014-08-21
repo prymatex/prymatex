@@ -3,7 +3,6 @@ import os
 
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers import test_font_strategy
-from prymatex import resources
 
 from prymatex.ui.configure.terminal import Ui_Terminal
 from prymatex.models.settings import SettingsTreeNode
@@ -11,13 +10,12 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.widgets.pmxterm.schemes import ColorScheme
 
 class TerminalSettingsWidget(SettingsTreeNode, Ui_Terminal, QtGui.QWidget):
-    TITLE = "Terminal"
-    ICON = resources.get_icon("utilities-terminal")
-
     def __init__(self, **kwargs):
         super(TerminalSettingsWidget, self).__init__(nodeName = "terminal", **kwargs)
         self.setupUi(self)
-        
+        self.setTitle("Terminal")
+        self.setIcon(self.resources().get_icon("utilities-terminal"))
+
     def loadSettings(self):
         super(TerminalSettingsWidget, self).loadSettings()
         defaultScheme = self.settings.value('defaultScheme')

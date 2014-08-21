@@ -5,7 +5,6 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import PrymatexStatusBar
 
-from prymatex import resources
 from prymatex.gui.codeeditor.editor import CodeEditor
 from prymatex.ui.codeeditor.status import Ui_CodeEditorStatus
 
@@ -357,11 +356,11 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         menu["edit"] = [
                 '-',
                 {'text': "Find",
-                 'sequence': resources.get_sequence("StatusBar", "Find", "Find"),
+                 'sequence': ("StatusBar", "Find", "Find"),
                  'triggered': cls.showIFind
                 },
                 {'text': "Replace",
-                 'sequence': resources.get_sequence("StatusBar", "Replace", "Replace"),
+                 'sequence': ("StatusBar", "Replace", "Replace"),
                  'triggered': cls.showFindReplace
                 }
             ]
@@ -373,7 +372,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         menu["navigation"] = [
                 {'text': 'Go to &line',
                  'triggered': cls.showGoToLine,
-                 'sequence': resources.get_sequence("StatusBar", "GoToLine", 'Meta+Ctrl+Shift+L'),
+                 'sequence': ("StatusBar", "GoToLine", 'Meta+Ctrl+Shift+L'),
                  }
             ]
         return menu

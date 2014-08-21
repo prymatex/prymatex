@@ -5,13 +5,12 @@ from prymatex.qt import QtGui, QtCore
 
 from prymatex.core import PrymatexDock
 
-from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.codeeditor.editor import CodeEditor
 
 class CodeEditorSymbolsDock(PrymatexDock, QtGui.QDockWidget):
     SHORTCUT = "Ctrl+7"
-    ICON = resources.get_icon("code-class")
+    ICON = "code-class"
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def __init__(self, **kwargs):
@@ -52,8 +51,8 @@ class CodeEditorSymbolsDock(PrymatexDock, QtGui.QDockWidget):
         self.window().currentEditor().setFocus()
         
 class CodeEditorBookmarksDock(PrymatexDock, QtGui.QDockWidget):
-    SHORTCUT = resources.get_sequence("Docks", "FileSystemDock", "Alt+M")
-    ICON = resources.get_icon("bookmarks-organize")
+    SHORTCUT = ("Docks", "FileSystemDock", "Alt+M")
+    ICON = "bookmarks-organize"
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def __init__(self, **kwargs):

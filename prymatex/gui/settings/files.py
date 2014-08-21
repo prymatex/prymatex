@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtGui, QtCore
-from prymatex import resources
 
 from prymatex.utils import text, encoding
 
@@ -11,12 +10,12 @@ from prymatex.models.settings import SettingsTreeNode
 
 class FilesSettingsWidget(SettingsTreeNode, Ui_Files, QtGui.QWidget):
     NAMESPACE = "general"
-    TITLE = "Files"
-    ICON = resources.get_icon("drive-harddisk")
 
     def __init__(self, **kwargs):
         super(FilesSettingsWidget, self).__init__(nodeName = "files", **kwargs)
         self.setupUi(self)
+        self.setTitle("Files")
+        self.setIcon(self.resources().get_icon("drive-harddisk"))
         self.loadEncodings()
         self.setupLineEndings()
 

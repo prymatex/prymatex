@@ -7,7 +7,6 @@ from prymatex.qt import QtGui, QtCore
 
 from prymatex.core import PrymatexDock
 
-from prymatex import resources
 from prymatex.ui.dockers.search import Ui_SearchDock
 from prymatex.utils.i18n import ugettext as _
 from prymatex.models.search import SearchTreeModel, LineTreeNode

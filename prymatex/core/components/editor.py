@@ -4,8 +4,6 @@
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers.icons import combine_icons
 
-from prymatex import resources
-
 from prymatex.core.components.base import (PrymatexComponentWidget, 
     PrymatexKeyHelper, PrymatexAddon, Key_Any)
 
@@ -62,11 +60,11 @@ class PrymatexEditor(PrymatexComponentWidget):
     def icon(self):
         baseIcon = QtGui.QIcon()
         if self._file_path is not None:
-            baseIcon = resources.get_icon(self._file_path)
+            baseIcon = self.resources().get_icon(self._file_path)
         if self.isModified():
-            baseIcon = resources.get_icon("document-save")
+            baseIcon = self.resources().get_icon("document-save")
         if self._external_action is not None:
-            importantIcon = resources.get_icon("emblem-important")
+            importantIcon = self.resources().get_icon("emblem-important")
             baseIcon = combine_icons(baseIcon, importantIcon, 0.8)
         return baseIcon
     

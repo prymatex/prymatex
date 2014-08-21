@@ -4,7 +4,6 @@
 import os
 
 from prymatex.qt import QtCore, QtGui
-from prymatex import resources
 
 from prymatex.core.components import PrymatexDialog
 from prymatex.core import exceptions
@@ -36,7 +35,7 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtGui.QDialog):
         self.environmentDialog = self.mainWindow().findChild(QtGui.QDialog, "EnvironmentDialog")
 
     def setupComboLicences(self):
-        for licence in resources.LICENSES:
+        for licence in self.resources().get_software_licenses():
             self.comboBoxLicence.addItem(licence)
 
     def setupComboKeywords(self):

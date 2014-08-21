@@ -1,23 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtGui, QtCore
-
 import os
 
-from prymatex import resources
+from prymatex.qt import QtGui, QtCore
+
 from prymatex.models.settings import SettingsTreeNode
 
 class ShortcutsSettingsWidget(SettingsTreeNode, QtGui.QWidget):
     """Environment variables"""
     NAMESPACE = "general"
-    TITLE = "Shortcuts"
-    ICON = resources.get_icon("configure-shortcuts")
 
     def __init__(self, **kwargs):
         super(ShortcutsSettingsWidget, self).__init__(nodeName = "shortcuts", **kwargs)
         self.setupUi(self)
-        
+        self.setTitle("Shortcuts")
+        self.setIcon(self.resources().get_icon("configure-shortcuts"))
+
     def setupUi(self, Shortcuts):
         self.verticalLayout_2 = QtGui.QVBoxLayout(Shortcuts)
         self.verticalLayout_2.setSpacing(2)

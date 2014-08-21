@@ -8,11 +8,12 @@ from prymatex.qt.helpers import get_std_icon
 from prymatex.utils import text
 from prymatex.utils import six
 
+from .base import LICENSES
 from .media import load_media, default_media_mapper
 from .stylesheets import load_stylesheets
 from .sequences import ContextSequence
 
-_fileIconProvider = QtGui.QFileIconProvider()
+_FileIconProvider = QtGui.QFileIconProvider()
 
 class Resource(dict):
     def __init__(self, name, path, default = False):
@@ -52,22 +53,16 @@ class Resource(dict):
     def get_icon(self, index):
         if index in self._mapper:
             index = self._mapper[index]
-        if isinstance(index, six.string_types):
-            if os.path.exists(index) and os.path.isabs(index):
-                return _fileIconProvider.icon(QtCore.QFileInfo(index))
-    	
-            std = get_std_icon(index)
-            if not std.isNull():
-                return std
+        
+        std = get_std_icon(index)
+        if not std.isNull():
+            return std
+
+        path = self.find_source(index, ["Icons", "External"])
+        if path is not None:
+            return QtGui.QIcon(path)
     
-            path = self.find_source(index, ["Icons", "External"])
-            if path is not None:
-                return QtGui.QIcon(path)
-            
-            return self._from_theme(index)
-        elif isinstance(index, six.integer_types):
-            return _fileIconProvider.icon(index)
-        return QtGui.QIcon()
+        return self._from_theme(index)
     
     def get_sequence(self, context, name, default = None, description = None):
         description = description or text.camelcase_to_text(name)
@@ -105,6 +100,8 @@ class ResourceProvider(object):
         return fallback
     
     def get_icon(self, index, fallback = None):
+        if os.path.exists(index) and os.path.isabs(index):
+            return _FileIconProvider.icon(QtCore.QFileInfo(index))
         fallback = fallback or QtGui.QIcon()
         for res in self.resources:
             icon = res.get_icon(index)
@@ -136,6 +133,9 @@ class ResourceProvider(object):
     def get_stylesheets(self):
         return self._section("StyleSheets")
 
+    def get_software_licenses(self):
+        return LICENSES
+
 class ResourceManager(object):
     def __init__(self, **kwargs):
         super(ResourceManager, self).__init__(**kwargs)
@@ -166,6 +166,7 @@ class ResourceManager(object):
         QtGui.QIcon.fromTheme = self.icon_from_theme
 
     def icon_from_theme(self, index):
+        # TODO: default provider
         for res in self.resources:
             icon = res.get_icon(index)
             if not icon.isNull():

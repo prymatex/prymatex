@@ -11,7 +11,6 @@ from prymatex.qt import QtCore, QtGui, Qt
 from prymatex.core import PrymatexEditor
 from prymatex.widgets.texteditor import TextEditWidget
 
-from prymatex import resources
 from prymatex.core.settings import ConfigurableItem
 from prymatex.qt.helpers.menus import extend_menu
 from prymatex.models.support import BundleItemTreeNode
@@ -632,8 +631,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 positionY = blockGeometry.top()
                 if self.isFolded(block):
                     painter.drawPixmap(characterWidth * block.length() + offset.x() + 10,
-                        positionY + characterHeight - resources.get_image("foldingellipsis").height(),
-                        resources.get_image("foldingellipsis"))
+                        positionY + characterHeight - self.resources().get_image("foldingellipsis").height(),
+                        self.resources().get_image("foldingellipsis"))
                 if self.showIndentGuide:
                     blockPattern = block
                     while blockPattern.isValid() and self.blockUserData(blockPattern).blank():
@@ -1080,7 +1079,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         for index, item in enumerate(menuItems, 1):
             if isinstance(item, dict):
                 title = "%s 	&%d" % (item["title"], index)
-                icon = resources.get_icon(item["image"]) if "image" in item else QtGui.QIcon()
+                icon = self.resources().get_icon(item["image"]) if "image" in item else QtGui.QIcon()
             elif isinstance(item,  BundleItemTreeNode):
                 title = "%s 	&%d" % (item.buildMenuTextEntry(False), index)
                 icon = item.icon()
@@ -1149,23 +1148,23 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 {'text': '&Mode',
                  'items': [{
                         'text': 'Freehanded',
-                        'sequence': resources.get_sequence("Editor", "FreehandedMode", 'Meta+Alt+E')
+                        'sequence': ("Editor", "FreehandedMode", 'Meta+Alt+E')
                     }, {
                         'text': 'Overwrite',
-                        'sequence': resources.get_sequence("Editor", "OverwriteMode", 'Meta+Alt+O')
+                        'sequence': ("Editor", "OverwriteMode", 'Meta+Alt+O')
                     }, {
                         'text': 'Multiedit',
-                        'sequence': resources.get_sequence("Editor", "MultieditMode", 'Meta+Alt+M')
+                        'sequence': ("Editor", "MultieditMode", 'Meta+Alt+M')
                     }
                 ]}
             ]
         menu["view"] = [
                 '-',
                 {'text': "Zoom in",
-                  'sequence': resources.get_sequence("Editor", "ZoomIn"),
+                  'sequence': ("Editor", "ZoomIn"),
                   'triggered': cls.zoomIn},
                  {'text': "Zoom out",
-                  'sequence': resources.get_sequence("Editor", "ZoomOut"),
+                  'sequence': ("Editor", "ZoomOut"),
                   'triggered': cls.zoomOut},
                 '-',
                 {'name': 'leftGutter',
@@ -1225,48 +1224,48 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                  'items': [
                     {'text': '&Word',
                      'triggered': lambda ed: ed.selectWord(),
-                     'sequence': resources.get_sequence("Editor", "SelectWord", 'Ctrl+Meta+W'),
+                     'sequence': ("Editor", "SelectWord", 'Ctrl+Meta+W'),
                      },
                     {'text': '&Text',
                      'triggered': lambda ed: ed.selectText(),
-                     'sequence': resources.get_sequence("Editor", "SelectText", 'Ctrl+Meta+T'),
+                     'sequence': ("Editor", "SelectText", 'Ctrl+Meta+T'),
                      },
                     {'text': '&Line',
                      'triggered': lambda ed: ed.selectLine(),
-                     'sequence': resources.get_sequence("Editor", "SelectLine", 'Ctrl+Meta+L'),
+                     'sequence': ("Editor", "SelectLine", 'Ctrl+Meta+L'),
                      },
                     {'text': '&Paragraph',
                      'triggered': lambda ed: ed.selectParagraph()
                      },
                     {'text': 'Enclosing &brackets',
                      'triggered': lambda ed: ed.selectEnclosingBrackets(),
-                     'sequence': resources.get_sequence("Editor", "SelectEnclosingBrackets", 'Ctrl+Meta+B'),
+                     'sequence': ("Editor", "SelectEnclosingBrackets", 'Ctrl+Meta+B'),
                      },
                     {'text': '&Scope',
                      'triggered': lambda ed: ed.selectScope(),
-                     'sequence': resources.get_sequence("Editor", "SelectScope", 'Ctrl+Meta+S'),
+                     'sequence': ("Editor", "SelectScope", 'Ctrl+Meta+S'),
                      },
                     {'text': '&All',
                      'triggered': lambda ed: ed.selectDocument(),
-                     'sequence': resources.get_sequence("Editor", "SelectAll", 'Ctrl+A'),
+                     'sequence': ("Editor", "SelectAll", 'Ctrl+A'),
                      }
                 ]},
                 {'text': 'Convert',
                  'items': [
                     {'text': 'Uppercase',
-                     'sequence': resources.get_sequence("Editor", "ConvertUppercase", 'Ctrl+U'),
+                     'sequence': ("Editor", "ConvertUppercase", 'Ctrl+U'),
                      'triggered': lambda ed: ed.convertToUppercase(),
                      },
                     {'text': 'Lowercase',
-                     'sequence': resources.get_sequence("Editor", "ConvertLowercase", 'Ctrl+Shift+U'),
+                     'sequence': ("Editor", "ConvertLowercase", 'Ctrl+Shift+U'),
                      'triggered': lambda ed: ed.convertToLowercase(),
                      },
                     {'text': 'Titlecase',
-                     'sequence': resources.get_sequence("Editor", "ConvertTitlecase", 'Ctrl+Alt+U'),
+                     'sequence': ("Editor", "ConvertTitlecase", 'Ctrl+Alt+U'),
                      'triggered': lambda ed: ed.convertToTitlecase(),
                      },
                     {'text': 'Opposite case',
-                     'sequence': resources.get_sequence("Editor", "ConvertOppositeCase", 'Ctrl+G'),
+                     'sequence': ("Editor", "ConvertOppositeCase", 'Ctrl+G'),
                      'triggered': lambda ed: ed.convertToOppositeCase(),
                      }, '-',
                     {'text': 'Tab to spaces',
@@ -1276,7 +1275,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                      'triggered': lambda ed: ed.convertSpacesToTabs(),
                      }, '-',
                     {'text': 'Transpose',
-                     'sequence': resources.get_sequence("Editor", "ConvertTranspose", 'Ctrl+T'),
+                     'sequence': ("Editor", "ConvertTranspose", 'Ctrl+T'),
                      'triggered': lambda ed: ed.convertTranspose(),
                      }
                 ]}, '-',
@@ -1299,7 +1298,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                      } for eol_chars, _, name in text.EOLS])
                 ]}, '-',
                 {'text': 'Select bundle item',
-                 'sequence': resources.get_sequence("Editor", "SelectBundleItem", 'Meta+Ctrl+T'),
+                 'sequence': ("Editor", "SelectBundleItem", 'Meta+Ctrl+T'),
                  'triggered': cls.on_actionSelectBundleItem_triggered,
                  },
                 {'text': 'Execute line/selection',
@@ -1309,37 +1308,36 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         menu["navigation"] = [
                 "-",
                 {'text': 'Bookmarks',
-                 'icon': resources.get_icon("bookmarks"),
                  'items': [
                     {'text': 'Toggle bookmark',
                      'triggered': cls.toggleBookmark,
-                     'sequence': resources.get_sequence("Editor", "ToggleBookmark", 'Ctrl+F2'),
+                     'sequence': ("Editor", "ToggleBookmark", 'Ctrl+F2'),
                      },
                     {'text': 'Next bookmark',
                      'triggered': cls.bookmarkNext,
-                     'sequence': resources.get_sequence("Editor", "NextBookmark", 'F2'),
+                     'sequence': ("Editor", "NextBookmark", 'F2'),
                      },
                     {'text': 'Previous bookmark',
                      'triggered': cls.bookmarkPrevious,
-                     'sequence': resources.get_sequence("Editor", "PreviousBookmark", 'Shift+F2'),
+                     'sequence': ("Editor", "PreviousBookmark", 'Shift+F2'),
                      },
                     {'text': 'Clear bookmarks',
                      'triggered': cls.clearBookmarks,
-                     'sequence': resources.get_sequence("Editor", "ClearBookmarks", 'Ctrl+Shift+F2'),
+                     'sequence': ("Editor", "ClearBookmarks", 'Ctrl+Shift+F2'),
                      },
                     {'text': 'Select all bookmarks',
                      'triggered': cls.selectAllBookmarks,
-                     'sequence': resources.get_sequence("Editor", "SelectAllBookmarks", 'Alt+F2'),
+                     'sequence': ("Editor", "SelectAllBookmarks", 'Alt+F2'),
                      }
                 ]},
                 "-",
                 {'text': 'Go to &symbol',
                  'triggered': cls.on_actionGoToSymbol_triggered,
-                 'sequence': resources.get_sequence("Editor", "GoToSymbol", 'Meta+Ctrl+Shift+O'),
+                 'sequence': ("Editor", "GoToSymbol", 'Meta+Ctrl+Shift+O'),
                  },
                 {'text': 'Go to &bookmark',
                  'triggered': cls.on_actionGoToBookmark_triggered,
-                 'sequence': resources.get_sequence("Editor", "GoToBookmark", 'Meta+Ctrl+Shift+B'),
+                 'sequence': ("Editor", "GoToBookmark", 'Meta+Ctrl+Shift+B'),
                  }
             ]
         return menu
@@ -1354,19 +1352,19 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def contributeToShortcuts(self):
         return [
-            {'sequence': resources.get_sequence("Editor", "MoveLineUp", 'Meta+Ctrl+Up'),
+            {'sequence': ("Editor", "MoveLineUp", 'Meta+Ctrl+Up'),
              'activated': self.moveUp,
              'context': QtCore.Qt.WidgetShortcut
              },
-            {'sequence': resources.get_sequence("Editor", "MoveLineDown", 'Meta+Ctrl+Down'),
+            {'sequence': ("Editor", "MoveLineDown", 'Meta+Ctrl+Down'),
              'activated': self.moveDown,
              'context': QtCore.Qt.WidgetShortcut
              },
-            {'sequence': resources.get_sequence("Editor", "MoveColumnLeft", 'Meta+Ctrl+Left'),
+            {'sequence': ("Editor", "MoveColumnLeft", 'Meta+Ctrl+Left'),
              'activated': self.moveLeft,
              'context': QtCore.Qt.WidgetShortcut
              },
-            {'sequence': resources.get_sequence("Editor", "MoveColumnRight", 'Meta+Ctrl+Right'),
+            {'sequence': ("Editor", "MoveColumnRight", 'Meta+Ctrl+Right'),
              'activated': self.moveRight,
              'context': QtCore.Qt.WidgetShortcut
              }

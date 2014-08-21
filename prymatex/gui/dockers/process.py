@@ -11,7 +11,6 @@ from prymatex.qt.helpers import create_menu
 
 from prymatex.core import PrymatexDock
 
-from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 
 class ExternalProcessDock(PrymatexDock, QtGui.QDockWidget):

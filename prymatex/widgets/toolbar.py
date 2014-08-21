@@ -3,8 +3,7 @@
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.qt.helpers import text2objectname
-from prymatex import resources
+from prymatex.qt.helpers import text_to_objectname
   
 class DockWidgetToolBar(QtGui.QToolBar):
     """QMainWindow "mixin" which provides auto-hiding support for dock widgets (not toolbars)."""
@@ -21,7 +20,7 @@ class DockWidgetToolBar(QtGui.QToolBar):
         assert isinstance(parent, QtGui.QMainWindow)
         assert area in self.DOCK_AREA_TO_TB
         self._area = area
-        self.setObjectName(text2objectname(name, prefix="ToolBar"))
+        self.setObjectName(text_to_objectname(name, prefix="ToolBar"))
         self.setWindowTitle(name)
         
         #Button Style
@@ -34,7 +33,7 @@ class DockWidgetToolBar(QtGui.QToolBar):
         
         #Restore action
         self.restoreAction = QtGui.QAction(self)
-        self.restoreAction.setIcon(resources.get_icon("TitleBarUnshadeButton"))
+        self.restoreAction.setIcon(self.parent().resources().get_icon("TitleBarUnshadeButton"))
         self.restoreAction.triggered.connect(self.hide)
         self.addAction(self.restoreAction)
         

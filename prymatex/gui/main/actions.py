@@ -5,7 +5,6 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.qt.compat import getOpenFileNames
 from prymatex.qt.helpers import text_to_objectname, text_to_iconname, create_action
 
-from prymatex import resources
 from prymatex.core import exceptions
 from prymatex.models.selectable import selectableModelFactory
 
@@ -37,7 +36,6 @@ class MainWindowActionsMixin(object):
 
     # ------------ Update groups actions
     def on_splitter_layoutChanged(self):
-        print("cambio el layout")
         for action in self.menuFocusGroup.actions()[3:]:
             self.menuFocusGroup.removeAction(action)
         for action in self.menuMoveEditorToGroup.actions()[3:]:
@@ -46,13 +44,13 @@ class MainWindowActionsMixin(object):
             # TODO: Estos shortcuts no son configurables
             action = create_action(self, {
                 "text": "Group %d" % index,
-                "sequence": resources.get_sequence("Global", "Group %d" % index, "Ctrl+%d" % index).key(),
+                "sequence": ("Global", "Group %d" % index, "Ctrl+%d" % index),
                 "triggered": lambda group = group: self.setCurrentGroup(group)
             })
             self.menuFocusGroup.addAction(action)
             action = create_action(self, {
                 "text": "Group %d" % index,
-                "sequence": resources.get_sequence("Global", "Group %d" % index, "Shift+Ctrl+%d" % index).key(),
+                "sequence": ("Global", "Group %d" % index, "Shift+Ctrl+%d" % index),
                 "triggered": lambda group = group: self.moveEditorToGroup(group)
             })
             self.menuMoveEditorToGroup.addAction(action)
@@ -88,7 +86,7 @@ class MainWindowActionsMixin(object):
 
     def on_actionSwitchProfile_triggered(self):
         if self.profileDialog.switchProfile() == self.profileDialog.Accepted and\
-            self.application().profileManager.defaultProfile() != self.application().currentProfile:
+            self.application().profileManager.defaultProfile() != self.application().profile():
             self.application().restart()
 
     # ------------ Navigation Actions
@@ -138,7 +136,7 @@ class MainWindowActionsMixin(object):
         from datetime import datetime
         now = datetime.now()
         baseName = now.strftime("%Y-%m-%d-%H_%M_%S") + '.' + self.SCREENSHOT_FORMAT
-        path = os.path.join(self.application().currentProfile.PMX_SCREENSHOT_PATH, baseName)
+        path = os.path.join(self.application().profile().PMX_SCREENSHOT_PATH, baseName)
         pxm.save(path, self.SCREENSHOT_FORMAT)
         try:
             self.currentEditor().showMessage("%s saved" % baseName)

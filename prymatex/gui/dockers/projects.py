@@ -18,8 +18,6 @@ from prymatex.core.settings import ConfigurableItem, ConfigurableHook
 
 from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
 
-from prymatex import resources
-
 from prymatex.models.projects import ProjectTreeNode
 from prymatex.models.projects.lists import SelectableProjectFileProxyModel
 
@@ -80,11 +78,11 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
         navigation = [
                 {'text': 'Go to project file',
                  'triggered': cls.on_actionGoToProjectFile_triggered,
-                 'sequence': resources.get_sequence("Projects", "GoToProjectFiles", 'Meta+Ctrl+Shift+F'),
+                 'sequence': ("Projects", "GoToProjectFiles", 'Meta+Ctrl+Shift+F'),
                  },
                 {'text': 'Go to project symbol',
                  'triggered': cls.on_actionGoToProjectFile_triggered,
-                 'sequence': resources.get_sequence("Projects", "GoToProjectFiles", 'Meta+Ctrl+Shift+F'),
+                 'sequence': ("Projects", "GoToProjectFiles", 'Meta+Ctrl+Shift+F'),
                  }
             ]
         return { "navigation": navigation}
@@ -132,7 +130,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
         from prymatex.gui.properties.resource import ResoucePropertiesWidget
         
         for propertyClass in [ProjectPropertiesWidget, EnvironmentPropertiesWidget, ResoucePropertiesWidget]:
-            self.application().extendComponent(propertyClass)
+            self.application().populateComponentClass(propertyClass)
             self.application().projectManager.registerPropertyWidget(propertyClass(parent = self.propertiesDialog))
 
     def setupTreeViewProjects(self):

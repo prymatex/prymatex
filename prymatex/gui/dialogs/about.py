@@ -6,7 +6,6 @@ import prymatex
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt import API, qt_version_str, pyqt_version_str, sip_version_str, pyside_version_str
-from prymatex import resources
 from prymatex.core.components import PrymatexDialog
 
 from prymatex.ui.about import Ui_AboutDialog
@@ -32,7 +31,7 @@ class AboutDialog(PrymatexDialog, Ui_AboutDialog, QtGui.QDialog):
     def __init__(self, **kwargs):
         super(AboutDialog, self).__init__(**kwargs)
         self.setupUi(self)
-        self.labelLogo.setPixmap(resources.get_image("logo"))
+        self.labelLogo.setPixmap(self.resources().get_image("logo"))
         self.textInformation.setReadOnly(True)
         self.fillVersionInfo()
         

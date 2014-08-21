@@ -3,8 +3,6 @@
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex import resources
-
 from prymatex.core.settings import ConfigurableItem
 from prymatex.core import PrymatexEditorAddon
 
@@ -117,7 +115,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter"
         menuEntry = {
             'text': "Line numbers",
-            'sequence': resources.get_sequence("SideBar", "ShowLineNumbers", 'F10'),
+            'sequence': ("SideBar", "ShowLineNumbers", 'F10'),
             'toggled': lambda instance, checked: instance.setVisible(checked),
             'testChecked': lambda instance: instance.isVisible() }
         return { baseMenu: menuEntry }
@@ -173,7 +171,7 @@ class BookmarkSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
     
     def __init__(self, **kwargs):
         super(BookmarkSideBarAddon, self).__init__(**kwargs)
-        self.bookmarkflagImage = resources.get_image("bookmark-flag")
+        self.bookmarkflagImage = self.resources().get_image("bookmark-flag")
         self.imagesHeight = self.bookmarkflagImage.height()
         self.setFixedWidth(self.bookmarkflagImage.width())
         self.setObjectName(self.__class__.__name__)
@@ -183,7 +181,7 @@ class BookmarkSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter"
         menuEntry = {
             'text': "Bookmarks",
-            'sequence': resources.get_sequence("SideBar", "ShowBookmarks", 'Alt+F10'),
+            'sequence': ("SideBar", "ShowBookmarks", 'Alt+F10'),
             'toggled': lambda instance, checked: instance.setVisible(checked),
             'testChecked': lambda instance: instance.isVisible() }
         return { baseMenu: menuEntry} 
@@ -234,9 +232,9 @@ class FoldingSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
 
     def __init__(self, **kwargs):
         super(FoldingSideBarAddon, self).__init__(**kwargs)
-        self.foldingcollapsedImage = resources.get_image("folding-collapsed")
-        self.foldingtopImage = resources.get_image("folding-top")
-        self.foldingbottomImage = resources.get_image("folding-bottom")
+        self.foldingcollapsedImage = self.resources().get_image("folding-collapsed")
+        self.foldingtopImage = self.resources().get_image("folding-top")
+        self.foldingbottomImage = self.resources().get_image("folding-bottom")
         self.imagesHeight = self.foldingcollapsedImage.height()
         self.setFixedWidth(self.foldingbottomImage.width())
         self.setObjectName(self.__class__.__name__)
@@ -246,7 +244,7 @@ class FoldingSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter"
         menuEntry = {
             'text': 'Foldings',
-            'sequence': resources.get_sequence("SideBar", "ShowFoldings", 'Shift+F10'),
+            'sequence': ("SideBar", "ShowFoldings", 'Shift+F10'),
             'toggled': lambda instance, checked: instance.setVisible(checked),
             'testChecked': lambda instance: instance.isVisible() }
         return {baseMenu: menuEntry} 

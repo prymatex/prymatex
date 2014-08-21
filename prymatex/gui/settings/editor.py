@@ -3,7 +3,6 @@
 
 from prymatex.qt import QtGui, QtCore
 
-from prymatex import resources
 from prymatex.ui.configure.editor import Ui_Editor
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.gui.codeeditor.editor import CodeEditor
@@ -11,12 +10,11 @@ from prymatex.gui.codeeditor.sidebar import (LineNumberSideBarAddon, BookmarkSid
                                 FoldingSideBarAddon, SelectionSideBarAddon)
 
 class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtGui.QWidget):
-    TITLE = "Editor"
-    ICON = resources.get_icon("accessories-text-editor")
-
     def __init__(self, **kwargs):
         super(EditorSettingsWidget, self).__init__(nodeName = "editor", **kwargs)
         self.setupUi(self)
+        self.setTitle("Editor")
+        self.setIcon(self.resources().get_icon("accessories-text-editor"))
 
         self.checks = [(self.checkBoxWrapLines, CodeEditor.WordWrap),
             (self.checkBoxShowTabSpaces, CodeEditor.ShowTabsAndSpaces),

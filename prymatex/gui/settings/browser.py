@@ -5,19 +5,16 @@ import os
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.QtNetwork import QNetworkProxy
 
-from prymatex import resources
 from prymatex.ui.configure.browser import Ui_Browser
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.gui.dockers.browser import BrowserDock
 
 class NetworkSettingsWidget(SettingsTreeNode, Ui_Browser, QtGui.QWidget):
-    """Setup browser"""
-    TITLE = "Browser"
-    ICON = resources.get_icon("internet-web-browser")
-
     def __init__(self, **kwargs):
         super(NetworkSettingsWidget, self).__init__(nodeName = "browser", **kwargs)
         self.setupUi(self)
+        self.setTitle("Browser")
+        self.setIcon(self.resources().get_icon("internet-web-browser"))
 
         self.checks = [(self.checkBoxDeveloperExtrasEnabled, BrowserDock.DeveloperExtrasEnabled),
             (self.checkBoxPluginsEnabled, BrowserDock.PluginsEnabled),

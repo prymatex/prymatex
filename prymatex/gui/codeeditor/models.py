@@ -6,7 +6,6 @@ from bisect import bisect
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex import resources
 from prymatex.utils import text
 from prymatex.utils.lists import bisect_key
 from prymatex.models.selectable import selectableModelFactory
@@ -20,6 +19,7 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
         self.bookmarks = []
+        self.icon_bookmark = editor.resources().get_icon('bookmarks')
         # Connect
         self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
 
@@ -49,7 +49,7 @@ class BookmarkListModel(QtCore.QAbstractListModel):
             return "L%d, C%d - %s" % (block.blockNumber() + 1,
                 cursor.columnNumber(), cursor.hasSelection() and cursor.selectedText() or block.text().strip())
         elif role == QtCore.Qt.DecorationRole:
-            return resources.get_icon('bookmarks')
+            return self.icon_bookmark
 
     # ----------- Public api
     def bookmark(self, row):
@@ -92,11 +92,11 @@ class BookmarkListModel(QtCore.QAbstractListModel):
 # Bookmark Selectable Model
 #=========================================================  
 def bookmarkSelectableModelFactory(editor):
-    # Data function    
+    # Data function
     def bookmarkData():
         return [dict(bookmark=editor.bookmarkListModel.bookmark(row),
                 display=editor.bookmarkListModel.data(editor.bookmarkListModel.index(row)),
-                image=resources.get_icon('bookmarks')) 
+                image=editor.resources().get_icon('bookmarks')) 
             for row in range(len(editor.bookmarkListModel.bookmarks))]
 
     return selectableModelFactory(editor, bookmarkData, 
@@ -106,19 +106,21 @@ def bookmarkSelectableModelFactory(editor):
 # Symbol
 #=========================================================
 class SymbolListModel(QtCore.QAbstractListModel): 
-    ICONS = {
-        "class": resources.get_icon("symbol-class"),
-        "block": resources.get_icon("symbol-block"),
-        "context": resources.get_icon("symbol-context"),
-        "function": resources.get_icon("symbol-function"),
-        "typedef": resources.get_icon("symbol-typedef"),
-        "variable": resources.get_icon("symbol-variable")
-    }
-    def __init__(self, editor): 
+    def __init__(self, editor):
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
         self.symbols = []
+        self.icons = {
+		"class": editor.resources().get_icon("symbol-class"),
+		"block": editor.resources().get_icon("symbol-block"),
+		"context": editor.resources().get_icon("symbol-context"),
+		"function": editor.resources().get_icon("symbol-function"),
+		"typedef": editor.resources().get_icon("symbol-typedef"),
+		"variable": editor.resources().get_icon("symbol-variable")
+	    }
+
         self.editor.registerBlockUserDataHandler(self)
+
         #Connects
         self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
         self.editor.aboutToHighlightChange.connect(self.on_editor_aboutToHighlightChange)
@@ -181,8 +183,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
             if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
                 return userData.symbol
             elif role == QtCore.Qt.DecorationRole:
-                #userData.rootGroup(pos)
-                return resources.get_icon("scope-root-entity")
+                return self.icons["typedef"]
 
     # ------------- Public api
     def findBlockIndex(self, block):
@@ -197,7 +198,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
 def symbolSelectableModelFactory(editor):
     # Data function    
     def symbolData():
-        return [dict(data = block, display = editor.blockUserData(block).symbol, image = resources.get_icon("symbol-class")) for block in editor.symbolListModel.blocks]
+        return [dict(data = block, display = editor.blockUserData(block).symbol, image = editor.resources().get_icon("symbol-class")) for block in editor.symbolListModel.blocks]
 
     return selectableModelFactory(editor, symbolData, 
         filterFunction = lambda text, item: item["display"].find(text) != -1)
@@ -217,7 +218,7 @@ def bundleItemSelectableModelFactory(editor):
                     "trigger": bundleItem.trigger()
                 },
                 match=bundleItem.name.upper(),
-                image=resources.get_icon("bundle-item-%s" % bundleItem.type())) for bundleItem in editor.application.supportManager.getActionItemsByScope(leftScope, rightScope)]
+                image=editor.resources().get_icon("bundle-item-%s" % bundleItem.type())) for bundleItem in editor.application.supportManager.getActionItemsByScope(leftScope, rightScope)]
 
     # Filter function        
     def bundleItemFilter(pattern, item):

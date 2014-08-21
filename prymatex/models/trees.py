@@ -170,7 +170,7 @@ class AbstractNamespaceTreeModel(AbstractTreeModel):
                     node.appendChild(child)
                 parentNode.removeChild(proxy)
             else:
-                raise Exception("Node Already Exists" % node.nodeName())
+                raise Exception("Node already exists: %s" % node.nodeName())
         parentNode.appendChild(node)
         node._isproxy = False
         self.layoutChanged.emit()

@@ -12,12 +12,10 @@ import collections
 #=========================================
 class ConfigureTreeNode(TreeNodeBase):
     NAMESPACE = ""
-    ICON = QtGui.QIcon()
-    TITLE = ""
     def __init__(self, **kwarg):
         super(ConfigureTreeNode, self).__init__(**kwarg)
-        self.setTitle(self.TITLE)
-        self.setIcon(self.ICON)
+        self._icon = QtGui.QIcon()
+        self._title = ""
         
     def filterAcceptsNode(self, string):
         string = string.lower()
@@ -33,16 +31,16 @@ class ConfigureTreeNode(TreeNodeBase):
         return False
     
     def title(self):
-        return self.__title
+        return self._title
     
     def setTitle(self, title):
-        self.__title = title
+        self._title = title
     
     def icon(self):
-        return self.__icon
+        return self._icon
     
     def setIcon(self, icon):
-        self.__icon = icon
+        self._icon = icon
 
 # Proxy for namespaced models
 class ConfigureTreeProxyNode(ConfigureTreeNode, QtGui.QWidget):
