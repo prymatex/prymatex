@@ -124,7 +124,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         #Clean last acction
         self.draggedCursors = []
         self.startPoint = self.doublePoint = None
-        self.application.restoreOverrideCursor()
+        self.application().restoreOverrideCursor()
         
         # Muestro los nuevos cursores
         self.highlightEditor()
