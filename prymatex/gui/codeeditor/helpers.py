@@ -39,7 +39,7 @@ class TabTriggerHelper(CodeEditorKeyHelper):
 
         trigger = self.application().supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
         if not trigger: return False
-        
+
         self.triggerCursor = self.editor.newCursorAtPosition(cursor.position(), cursor.position() - len(trigger))
         leftScope, rightScope = self.editor.scope(self.triggerCursor)
         self.items = self.application().supportManager.getTabTriggerItem(
