@@ -234,9 +234,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def setPlainText(self, text):
         from time import time
         self.syntaxHighlighter.stop()
-        print("va texto")
         super(CodeEditor, self).setPlainText(text)
-        print("listo")
         self.highlightTime = time()
         def highlightReady(editor):
             def _ready():

@@ -91,16 +91,15 @@ selection-background-color: %s; }""" % (
         
     def on_document_contentsChange(self, position, charsRemoved, charsAdded):
         cursor = QtGui.QTextCursor(self.document())
-        print("te tengo")
         cursor.setPosition(position)
-        print("sii")
-        if charsRemoved:
-            cursor.setPosition(position + charsRemoved, QtGui.QTextCursor.KeepAnchor)
+        remove_to = position + charsRemoved
+        if charsRemoved and self.document().characterCount() > remove_to:
+            cursor.setPosition(remove_to, QtGui.QTextCursor.KeepAnchor)
         text = self.editor.document().toPlainText()[position: position + charsAdded]
         cursor.insertText(text)
         block = self.editor.document().findBlock(position)
         self._apply_aditional_formats(block, len(text.split()))
-    
+
     def update_visible_area(self):
         if not self.slider.pressed:
             line_number = self.editor.firstVisibleBlock().blockNumber()

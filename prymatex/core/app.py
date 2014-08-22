@@ -494,7 +494,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                 parent = main_window,
                 )
             # TODO el dialogo de no tengo editor para ese tipo de archivo
-            if editor:
+            if editor is not None:
                 main_window.tryCloseEmptyEditor()
                 main_window.addEditor(editor, focus)
 

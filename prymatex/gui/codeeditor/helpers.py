@@ -239,7 +239,3 @@ class PrintEditorStatusHelper(CodeEditorKeyHelper):
         print("wordUnderCursor, right", self.editor.wordUnderCursor(direction = "right"), cursor.position())
         print("textUnderCursor, left", self.editor.textUnderCursor(direction = "left"), cursor.position())
         print("textUnderCursor, right", self.editor.textUnderCursor(direction = "right"), cursor.position())
-        print(self.editor.word(), cursor.position())
-        print(self.editor.word(direction = "left", search=True), cursor.position())
-        print(self.editor.word(direction = "right", search=True), cursor.position())
-        print(self.editor.word(search=True), cursor.position())
