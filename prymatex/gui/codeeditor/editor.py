@@ -118,7 +118,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         #Current pairs for cursor position (leftBrace <|> rightBrace, oppositeLeftBrace, oppositeRightBrace)
         # <|> the cursor is allways here
         self._currentPairs = (None, None, None, None)
-
+        self.foldingellipsisImage = self.resources().get_image(":/sidebar/folding-ellipsis.png")
+        
         #Sidebars
         self.leftBar = CodeEditorSideBar(self)
         self.rightBar = CodeEditorSideBar(self)
@@ -635,8 +636,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 positionY = blockGeometry.top()
                 if self.isFolded(block):
                     painter.drawPixmap(characterWidth * block.length() + offset.x() + 10,
-                        positionY + characterHeight - self.resources().get_image("foldingellipsis").height(),
-                        self.resources().get_image("foldingellipsis"))
+                        positionY + characterHeight - self.foldingellipsisImage.height(),
+                        self.foldingellipsisImage)
                 if self.showIndentGuide:
                     blockPattern = block
                     while blockPattern.isValid() and self.blockUserData(blockPattern).blank():

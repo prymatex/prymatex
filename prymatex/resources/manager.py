@@ -43,7 +43,7 @@ class Resource(dict):
                 return self[section].get(name)
     
     def get_image(self, index):
-        path = self.find_section(index, ["Images", "Icons"])
+        path = self.find_source(index, ["Images", "Icons"])
         if path is not None:
             return QtGui.QPixmap(path)
         else:
@@ -96,7 +96,7 @@ class ResourceProvider(object):
     def get_image(self, index, fallback = None):
         fallback = fallback or QtGui.QPixmap()
         for res in self.resources:
-            image = res.get_icon(index)
+            image = res.get_image(index)
             if not image.isNull():
                 return image
         return fallback
