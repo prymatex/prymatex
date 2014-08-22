@@ -42,7 +42,7 @@ def registerPlugin(manager, descriptor):
 
     # ---------------- Addons
     manager.registerComponent(SmartUnindentAddon, CodeEditor)
-    manager.registerComponent(SpellCheckerAddon, CodeEditor)
+    #manager.registerComponent(SpellCheckerAddon, CodeEditor)
     manager.registerComponent(HighlightCurrentSelectionAddon, CodeEditor)
 
     # ---------------- Sidebars

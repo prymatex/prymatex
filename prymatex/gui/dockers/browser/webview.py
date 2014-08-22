@@ -63,7 +63,7 @@ class WebView(QtWebKit.QWebView):
     # ------------ Page Signals handlers
     def on_mainFrame_javaScriptWindowObjectCleared(self):
         self.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self,
-            self.browserDock.application.supportManager
+            self.browserDock.application().supportManager
         ))
         environment = "\n".join(
             ['window["{0}"]="{1}";'.format(key_value[0], key_value[1]) for key_value in self.runningContext is not None and iter(self.runningContext.environment.items()) or {}]
@@ -76,4 +76,4 @@ class WebView(QtWebKit.QWebView):
         QtGui.QDesktopServices.openUrl(url)
 
     def on_networkAccessManager_commandUrlRequested(self, url):
-        self.browserDock.application.openUrl(url)
+        self.browserDock.application().openUrl(url)

@@ -111,12 +111,12 @@ class SymbolListModel(QtCore.QAbstractListModel):
         self.editor = editor
         self.symbols = []
         self.icons = {
-		"class": editor.resources().get_icon("symbol-class"),
-		"block": editor.resources().get_icon("symbol-block"),
-		"context": editor.resources().get_icon("symbol-context"),
-		"function": editor.resources().get_icon("symbol-function"),
-		"typedef": editor.resources().get_icon("symbol-typedef"),
-		"variable": editor.resources().get_icon("symbol-variable")
+            "class": editor.resources().get_icon("symbol-class"),
+            "block": editor.resources().get_icon("symbol-block"),
+            "context": editor.resources().get_icon("symbol-context"),
+            "function": editor.resources().get_icon("symbol-function"),
+            "typedef": editor.resources().get_icon("symbol-typedef"),
+            "variable": editor.resources().get_icon("symbol-variable")
 	    }
 
         self.editor.registerBlockUserDataHandler(self)
@@ -155,7 +155,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
     def on_editor_blocksRemoved(self):
         def validSymbolBlock(cursor):
             return bool(self.editor.blockUserData(cursor.block()).symbol)
-        self.symbols = list(filter(validSymbolBlock, self.symbols))
+        self.symbols = [ symbol for symbol in self.symbols if validSymbolBlock(symbol) ]
         self.layoutChanged.emit()
 
     def on_editor_aboutToHighlightChange(self):

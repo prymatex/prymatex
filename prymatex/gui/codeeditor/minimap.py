@@ -91,7 +91,9 @@ selection-background-color: %s; }""" % (
         
     def on_document_contentsChange(self, position, charsRemoved, charsAdded):
         cursor = QtGui.QTextCursor(self.document())
+        print("te tengo")
         cursor.setPosition(position)
+        print("sii")
         if charsRemoved:
             cursor.setPosition(position + charsRemoved, QtGui.QTextCursor.KeepAnchor)
         text = self.editor.document().toPlainText()[position: position + charsAdded]
