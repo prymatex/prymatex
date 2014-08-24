@@ -67,6 +67,14 @@ def load_media(resourcesPath):
     return resources
 
 default_media_mapper = {
+    "copy": "edit-copy",
+    "cut": "edit-cut",
+    "paste": "edit-paste",
+    "delete": "edit-delete",
+    "last-edit-location": "go-last",
+    "close": "window-close",
+    "save": "document-save",
+    "save-as": "document-save-as",
     "bundle-item-bundle": ":/bundles/bundle.png",
     "bundle-item-command": ":/bundles/commands.png",
     "bundle-item-dragcommand": ":/bundles/drag-commands.png",
