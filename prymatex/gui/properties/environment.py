@@ -25,7 +25,7 @@ class EnvironmentPropertiesWidget(PropertyTreeNode, MultiDictTableEditorWidget):
             for value in self.project.shellVariables or []]
         self.addTuples('user', variables, editable = True, selectable=True)
         self.addDictionary('project', self.project.variables)
-        self.addDictionary('prymatex', self.application.supportManager.environmentVariables(), visible = False)
+        self.addDictionary('prymatex', self.application().supportManager.environmentVariables(), visible = False)
 
     def on_model_dictionaryChanged(self, dictionaryName):
         variables = self.model().dumpData(dictionaryName)

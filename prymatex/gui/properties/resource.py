@@ -34,7 +34,7 @@ class ResoucePropertiesWidget(PropertyTreeNode, Ui_ResouceWidget, QtGui.QWidget)
         self.textLabelType.setText(self.fileSystemItem.type())
         self.textLabelLocation.setText(self.fileSystemItem.path())
         self.textLabelSize.setText("%d bytes" % self.fileSystemItem.size())
-        mtime = self.application.fileManager.getmtime(self.fileSystemItem.path())
+        mtime = self.application().fileManager.getmtime(self.fileSystemItem.path())
         self.textLabelLastModified.setText(time.ctime(mtime))
         self.updatePermissions(self.fileSystemItem.path())
 

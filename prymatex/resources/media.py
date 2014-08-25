@@ -75,6 +75,8 @@ default_media_mapper = {
     "close": "window-close",
     "save": "document-save",
     "save-as": "document-save-as",
+    "open": "document-open",
+    "options": "preferences-system",
     "settings": "preferences-system",
     "settings-addons": "system-software-update",
     "settings-edit": "document-page-setup",
