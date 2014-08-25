@@ -2,7 +2,6 @@
 #-*- encoding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui
-from prymatex import resources
 
 class ProfilesListModel(QtCore.QAbstractListModel):
     def __init__(self, profileManager, parent = None): 
@@ -27,7 +26,7 @@ class ProfilesListModel(QtCore.QAbstractListModel):
         elif role == QtCore.Qt.ToolTipRole:
             return profile.PMX_PROFILE_PATH
         elif role == QtCore.Qt.DecorationRole:
-            return resources.get_icon("user-identity")
+            return self.profileManager.resources().get_icon("user-identity")
 
     def setData(self, index, data, role):
         profile = self.__profiles[index.row()]
