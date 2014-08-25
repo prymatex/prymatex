@@ -269,7 +269,7 @@ class SuggestionsCompletionModel(CompletionBaseModel):
 
     def highlightedCompletion(self, index):
         suggestion = self.suggestions[index.row()]
-        if 'tooltip' in suggestion:
+        if 'tooltip' in suggestion and suggestion['tooltip']:
             self.editor.showTooltip(suggestion['tooltip'])
             
     def setCurrentRow(self, index, completion_count):

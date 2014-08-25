@@ -385,7 +385,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         return [{
             "sequence": ("Multiedit", "SwitchToColumnSelection", "Ctrl+Shift+M"),
             "activated": lambda : self.switchToColumnSelection()
-        },{
+        }, {
             "sequence": ("Multiedit", "FindForwardCursor", "Ctrl+Meta+M"),
             "activated": lambda : self.findCursor()
         }, {
