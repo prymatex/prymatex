@@ -164,7 +164,7 @@ class ProjectTreeNode(FileSystemTreeNode):
         
     def icon(self):
         if self.manager.isOpen(self):
-            return self.manager.resources().get_icon("project-development")
+            return self.manager.resources().get_icon("project")
 
     # --------------- Bundle Menu
     def addBundleMenu(self, bundle):

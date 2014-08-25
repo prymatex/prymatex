@@ -13,7 +13,7 @@ class EditSettingsWidget(SettingsTreeNode, Ui_Edit, QtGui.QWidget):
         super(EditSettingsWidget, self).__init__(nodeName = "edit", **kwargs)
         self.setupUi(self)
         self.setTitle("Edit")
-        self.setIcon(self.resources().get_icon("document-edit"))
+        self.setIcon(self.resources().get_icon("settings-edit"))
 
     def loadSettings(self):
         super(EditSettingsWidget, self).loadSettings()

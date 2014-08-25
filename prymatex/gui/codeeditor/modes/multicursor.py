@@ -359,8 +359,33 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
             self.activate()
         self.highlightEditor()
 
+    def switchToColumnSelection(self):
+        cursor = self.editor.textCursor()
+        cursor_start = self.editor.newCursorAtPosition(cursor.selectionStart()) 
+        cursor_end = self.editor.newCursorAtPosition(cursor.selectionEnd())
+        delta = cursor_end.columnNumber() - cursor_start.columnNumber()
+        if delta >= 0:
+            block = cursor_start.block()
+            while block.isValid():
+                start = block.position() + cursor_start.columnNumber()
+                end = start + delta
+                block_position_end = block.position() + block.length()
+                if end > block_position_end:
+                    end = block_position_end
+                cursor = self.editor.newCursorAtPosition(start, end)
+                self.addMergeCursor(cursor)
+                if block == cursor_end.block():
+                    break
+                block = block.next()
+        if self.cursors and not self.isActive():
+            self.activate()
+        self.highlightEditor()
+
     def contributeToShortcuts(self):
         return [{
+            "sequence": ("Multiedit", "SwitchToColumnSelection", "Ctrl+Shift+M"),
+            "activated": lambda : self.switchToColumnSelection()
+        },{
             "sequence": ("Multiedit", "FindForwardCursor", "Ctrl+Meta+M"),
             "activated": lambda : self.findCursor()
         }, {
