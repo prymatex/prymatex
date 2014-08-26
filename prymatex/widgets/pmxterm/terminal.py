@@ -11,7 +11,6 @@ import sys
 import time
 
 from prymatex.qt import QtCore, QtGui
-from prymatex.utils import encoding
 
 from .backend import constants
 from .schemes import ColorScheme
@@ -273,7 +272,6 @@ class TerminalWidget(QtGui.QWidget):
                     painter_setFont(font)
                     painter_setPen(pen)
                 else:
-                    item = encoding.from_fs(item)
                     x = col * char_width
                     length = len(item)
                     rect = QtCore.QRect(x, y, x + char_width * length, y + char_height)
