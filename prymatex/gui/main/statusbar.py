@@ -7,7 +7,7 @@ from prymatex.qt import QtGui
 class PrymatexMainStatusBar(QtGui.QStatusBar):
     def __init__(self, **kwargs):
         super(PrymatexMainStatusBar, self).__init__(**kwargs)
-        self.parent().currentEditorChanged.connect(self.on_currentEditorChanged)
+        self.window().currentEditorChanged.connect(self.on_currentEditorChanged)
         self.statusBars = []
 
     def addPermanentWidget(self, widget):
@@ -18,4 +18,4 @@ class PrymatexMainStatusBar(QtGui.QStatusBar):
         for bar in self.statusBars:
             bar.setCurrentEditor(editor)
             bar.setVisible(bar.acceptEditor(editor))
-        self.show()
+        self.setVisible(editor is not None)

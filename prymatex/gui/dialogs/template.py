@@ -31,7 +31,7 @@ class TemplateDialog(PrymatexDialog, Ui_TemplateDialog, QtGui.QDialog):
     
     def initialize(self, **kwargs):
         super(TemplateDialog, self).initialize(**kwargs)
-        self.environmentDialog = self.mainWindow().findChild(QtGui.QDialog, "EnvironmentDialog")
+        self.environmentDialog = self.window().findChild(QtGui.QDialog, "EnvironmentDialog")
     
     def setupComboTemplates(self):
         tableView = QtGui.QTableView(self)

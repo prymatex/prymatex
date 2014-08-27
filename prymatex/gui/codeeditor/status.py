@@ -188,7 +188,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
     def showTabSizeContextMenu(self, point):
         editor = self.currentEditor
         #Setup Context Menu
-        menuIndentation = self.mainWindow().findChild(QtGui.QMenu, "menuIndentation")
+        menuIndentation = self.window().findChild(QtGui.QMenu, "menuIndentation")
         menuIndentation.popup(self.labelIndentation.mapToGlobal(point))
 
     def setCurrentEditorTabSoft(self, soft):

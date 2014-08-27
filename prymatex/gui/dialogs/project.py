@@ -32,7 +32,7 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtGui.QDialog):
 
     def initialize(self, **kwargs):
         super(ProjectDialog, self).initialize(**kwargs)
-        self.environmentDialog = self.mainWindow().findChild(QtGui.QDialog, "EnvironmentDialog")
+        self.environmentDialog = self.window().findChild(QtGui.QDialog, "EnvironmentDialog")
 
     def setupComboLicences(self):
         for licence in self.resources().get_software_licenses():

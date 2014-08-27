@@ -192,12 +192,18 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.beginMode.connect(lambda mode, ed = self: ed.modeChanged.emit())
         self.endMode.connect(lambda mode, ed = self: ed.modeChanged.emit())
 
+    def window(self):
+        parent = self.parent()
+        while parent and not isinstance(parent, QtGui.QMainWindow):
+            parent = parent.parent()
+        return parent
+
     def initialize(self, **kwargs):
         super(CodeEditor, self).initialize(**kwargs)
 
         # Get dialogs
-        self.selectorDialog = self.mainWindow().findChild(QtGui.QDialog, "SelectorDialog")
-        self.browserDock = self.mainWindow().findChild(QtGui.QDockWidget, "BrowserDock")
+        self.selectorDialog = self.window().findChild(QtGui.QDialog, "SelectorDialog")
+        self.browserDock = self.window().findChild(QtGui.QDockWidget, "BrowserDock")
 
     # OVERRIDE: PrymatexEditor.addComponent()
     def addComponent(self, component):
@@ -218,17 +224,17 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # -------------------- Notifications
     def showMessage(self, *largs, **kwargs):
-        return self.mainWindow().showMessage(*largs, **kwargs)
+        return self.window().showMessage(*largs, **kwargs)
     
     def showTooltip(self, *largs, **kwargs):
         if "point" not in kwargs:
             kwargs["point"] = self.mapToGlobal(
                 self.cursorRect(self.textCursor()).bottomRight()
             )
-        return self.mainWindow().showTooltip(*largs, **kwargs)
+        return self.window().showTooltip(*largs, **kwargs)
     
     def showStatus(self, *largs, **kwargs):
-        return self.mainWindow().showStatus(*largs, **kwargs)
+        return self.window().showStatus(*largs, **kwargs)
 
     # OVERRIDE: TextEditWidget.setPlainText()
     def setPlainText(self, text):
@@ -777,7 +783,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def environmentVariables(self):
         environment = PrymatexEditor.environmentVariables(self)
         environment.update(
-            self.mainWindow().environmentVariables()
+            self.window().environmentVariables()
         )
         
         cursor = self.textCursor()
@@ -1103,7 +1109,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             point = self.viewport().mapToGlobal(
                 self.cursorRect(cursor).bottomLeft())
         else:
-            point = self.mainWindow().cursor().pos()
+            point = self.window().cursor().pos()
         menu.popup(point)
 
     # Default Context Menus

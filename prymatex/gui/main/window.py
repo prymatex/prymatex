@@ -84,7 +84,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
         self.notifier.setFont(font)
         
         #Processor de comandos local a la main window
-        self.commandProcessor = PrymatexMainCommandProcessor(self)
+        self.commandProcessor = PrymatexMainCommandProcessor(parent = self)
         self.bundleItem_handler = self.insertBundleItem
 
     def setupUi(self):

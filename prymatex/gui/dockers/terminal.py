@@ -146,7 +146,7 @@ class TerminalDock(PrymatexDock, QtGui.QDockWidget):
 
     def initialize(self, **kwargs):
         super(TerminalDock, self).initialize(**kwargs)
-        self.mainWindow().currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+        self.window().currentEditorChanged.connect(self.on_window_currentEditorChanged)
 
     # ---------------- Settings hooks
     def on_defaultTheme_changed(self, themeUUID):
@@ -171,7 +171,7 @@ class TerminalDock(PrymatexDock, QtGui.QDockWidget):
         self.tabTerminals.setColorScheme(scheme)
         
     # ---------------- Signals
-    def on_mainWindow_currentEditorChanged(self, editor):
+    def on_window_currentEditorChanged(self, editor):
         if self.synchronizeEditor:
             if editor is not None and not editor.isNew():
                 dirname = self.application().fileManager.dirname(editor.filePath())

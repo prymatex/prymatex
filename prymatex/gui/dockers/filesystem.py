@@ -55,7 +55,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
 
     def initialize(self, **kwargs):
         super(FileSystemDock, self).initialize(**kwargs)
-        self.templateDialog = self.mainWindow().findChild(QtGui.QDialog, "TemplateDialog")
+        self.templateDialog = self.window().findChild(QtGui.QDialog, "TemplateDialog")
 
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
@@ -351,17 +351,17 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
     def on_pushButtonSync_toggled(self, checked):
         if checked:
             #Conectar señal
-            self.mainWindow().currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
-            self.on_mainWindow_currentEditorChanged(self.mainWindow().currentEditor())
+            self.window().currentEditorChanged.connect(self.on_window_currentEditorChanged)
+            self.on_window_currentEditorChanged(self.window().currentEditor())
         else:
             #Desconectar señal
-            self.mainWindow().currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
+            self.window().currentEditorChanged.disconnect(self.on_window_currentEditorChanged)
 
     @QtCore.Slot()
     def on_actionSetInTerminal_triggered(self):
         path = self.currentPath()
         directory = self.application().fileManager.getDirectory(path)
-        self.mainWindow().terminal.chdir(directory)
+        self.window().terminal.chdir(directory)
 
     # ----- Sort and order Actions
     @QtCore.Slot()
@@ -391,9 +391,9 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
     @QtCore.Slot()
     def on_actionConvertIntoProject_triggered(self):
         _base, name = os.path.split(self.currentPath())
-        self.mainWindow().componentByName("projectdialog").createProject(directory = self.currentPath(), name = name)
+        self.window().componentByName("projectdialog").createProject(directory = self.currentPath(), name = name)
 
-    def on_mainWindow_currentEditorChanged(self, editor):
+    def on_window_currentEditorChanged(self, editor):
         if editor is not None and not editor.isNew():
             index = self.fileSystemModel.index(editor.filePath)
             proxyIndex = self.fileSystemProxyModel.mapFromSource(index)

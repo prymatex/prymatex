@@ -73,13 +73,6 @@ class PrymatexAddon(PrymatexComponent):
         return []
 
 class PrymatexComponentWidget(PrymatexComponent):
-    def __init__(self, **kwargs):
-        super(PrymatexComponentWidget, self).__init__(**kwargs)
-        self._main_window = kwargs.get("parent")
-
-    def mainWindow(self):
-        return self._main_window
-        
     def addons(self):
         return filter(lambda ch: isinstance(ch, PrymatexAddon), self.components())
 

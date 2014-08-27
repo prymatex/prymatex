@@ -11,6 +11,9 @@ from prymatex.utils.lists import bisect_key
 from prymatex.support import PreferenceSettings
 
 class CodeEditorAddon(PrymatexEditorAddon, QtCore.QObject):
+    def window(self):
+        return self.editor.window()
+
     def setPalette(self, palette):
         pass
         
