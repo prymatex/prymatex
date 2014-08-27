@@ -174,7 +174,7 @@ class TerminalDock(PrymatexDock, QtGui.QDockWidget):
     def on_mainWindow_currentEditorChanged(self, editor):
         if self.synchronizeEditor:
             if editor is not None and not editor.isNew():
-                dirname = self.application().fileManager.dirname(editor.filePath)
+                dirname = self.application().fileManager.dirname(editor.filePath())
                 self.runCommand('cd "%s"' % dirname)
                 
     # ---------------- Commands

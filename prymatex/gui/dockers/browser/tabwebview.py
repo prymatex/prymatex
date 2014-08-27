@@ -16,7 +16,7 @@ class TabbedWebView(QtGui.QTabWidget):
         # Corner widget
         self.buttonNew = QtGui.QPushButton(self)
         self.buttonNew.setText("")
-        self.buttonNew.setIcon(QtGui.QIcon.fromTheme("tab-new-background"))
+        self.buttonNew.setIcon(QtGui.QIcon.fromTheme("tab-new"))
         self.buttonNew.setMaximumSize(QtCore.QSize(28, 28))
         self.buttonNew.clicked.connect(lambda checked: self.webViewNewRequested.emit())
         self.setCornerWidget(self.buttonNew)

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 import zmq
 from zmq import (FD, LINGER, IDENTITY, SUBSCRIBE, UNSUBSCRIBE, EVENTS,
@@ -122,7 +123,7 @@ class ZmqSocket(QtCore.QObject):
     
     def send_pyobj(self, _msg): return self._socket.send_pyobj(_msg)
     
-    def send_json(self, _msg): return self._socket.send_json()
+    def send_json(self, _msg): return self._socket.send_json(_msg)
     
     def send_multipart(self, _msg): return self._socket.send_multipart(_msg)
     

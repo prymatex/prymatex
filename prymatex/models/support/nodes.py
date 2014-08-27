@@ -137,7 +137,6 @@ class BundleItemTreeNode(TreeNodeBase):
         for s in styles:
             style.update(s[1].settings())
         return style
-    getStyle = style
     
     def palette(self, scope = None, cache = True):
         if cache and scope in self._palette_cache:
