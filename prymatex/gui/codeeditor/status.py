@@ -7,6 +7,7 @@ from prymatex.core import PrymatexStatusBar
 
 from prymatex.gui.codeeditor.editor import CodeEditor
 from prymatex.ui.codeeditor.status import Ui_CodeEditorStatus
+from prymatex.utils import text
 
 class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
     def __init__(self, **kwargs):
@@ -15,6 +16,11 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         self.currentEditor = None
         
         self.setupUi(self)
+        font = self.labelPosition.font()
+        font.setPointSize(font.pointSize() * 0.9)
+        self.labelPosition.setFont(font)
+        self.labelContent.setFont(font)
+        self.labelStatus.setFont(font)
         self.widgetGoToLine.setVisible(False)
         self.widgetFindReplace.setVisible(False)
         self.widgetCommand.setVisible(False)
@@ -96,8 +102,8 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         self.comboBoxSyntaxes.view().setAutoScroll(False)
         
         # Connect tab size context menu
-        self.labelIndentation.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.labelIndentation.customContextMenuRequested.connect(self.showTabSizeContextMenu)
+        self.labelContent.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.labelContent.customContextMenuRequested.connect(self.showTabSizeContextMenu)
         
         # Create bundle menu
         self.menuBundle = QtGui.QMenu(self)
@@ -174,7 +180,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
     def on_cursorPositionChanged(self, editor = None):
         editor = editor or self.currentEditor
         cursor = editor.textCursor()
-        self.labelPosition.setText("Line: %5d Column: %5d Selection: %5d" % (
+        self.labelPosition.setText("Line %d, Column %d, Selection %d |" % (
             cursor.blockNumber() + 1, cursor.columnNumber() + 1, 
             cursor.selectionEnd() - cursor.selectionStart()))
         #Set index of current symbol
@@ -189,7 +195,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         editor = self.currentEditor
         #Setup Context Menu
         menuIndentation = self.window().findChild(QtGui.QMenu, "menuIndentation")
-        menuIndentation.popup(self.labelIndentation.mapToGlobal(point))
+        menuIndentation.popup(self.labelContent.mapToGlobal(point))
 
     def setCurrentEditorTabSoft(self, soft):
         self.currentEditor.indentUsingSpaces = soft
@@ -200,10 +206,11 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
 
     def setTabSizeLabel(self, editor):
         #Tab Size
-        if editor.indentUsingSpaces:
-            self.labelIndentation.setText("Spaces: %d" % editor.indentationWidth)
-        else:
-            self.labelIndentation.setText("Tab width: %d" % editor.tabWidth)
+        eol = filter(lambda eol: eol[0] == editor.lineSeparator(), text.EOLS)
+        self.labelContent.setText("%s, Ending %s, Encoding %s |" % (
+           editor.indentUsingSpaces and "Spaces %d" % editor.indentationWidth or "Tab width %d" % editor.tabWidth,
+           eol and eol[0][2] or "?",
+           editor.encoding))
 
     # -------------- AutoConnect Command widget signals
     @QtCore.Slot()

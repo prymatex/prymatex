@@ -35,7 +35,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="close"/>
+         <iconset theme="close">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -114,7 +116,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="close"/>
+         <iconset theme="close">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -169,7 +173,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="close"/>
+         <iconset theme="close">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -199,7 +205,9 @@ p, li { white-space: pre-wrap; }
          <string>Next</string>
         </property>
         <property name="icon">
-         <iconset theme="go-down"/>
+         <iconset theme="go-down">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -209,7 +217,9 @@ p, li { white-space: pre-wrap; }
          <string>Previous</string>
         </property>
         <property name="icon">
-         <iconset theme="go-up"/>
+         <iconset theme="go-up">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -251,7 +261,9 @@ p, li { white-space: pre-wrap; }
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="close"/>
+         <iconset theme="close">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -297,7 +309,9 @@ p, li { white-space: pre-wrap; }
          <string>Replace</string>
         </property>
         <property name="icon">
-         <iconset theme="replace"/>
+         <iconset theme="replace">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -307,7 +321,9 @@ p, li { white-space: pre-wrap; }
          <string>Replace &amp;All</string>
         </property>
         <property name="icon">
-         <iconset theme="replace-all"/>
+         <iconset theme="replace-all">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -317,7 +333,9 @@ p, li { white-space: pre-wrap; }
          <string>Previous</string>
         </property>
         <property name="icon">
-         <iconset theme="go-up"/>
+         <iconset theme="go-up">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -334,7 +352,9 @@ p, li { white-space: pre-wrap; }
          <string>Next</string>
         </property>
         <property name="icon">
-         <iconset theme="go-down"/>
+         <iconset theme="go-down">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -390,7 +410,9 @@ p, li { white-space: pre-wrap; }
             <string>Find All</string>
            </property>
            <property name="icon">
-            <iconset theme="find-all"/>
+            <iconset theme="find-all">
+             <normaloff/>
+            </iconset>
            </property>
           </widget>
          </item>
@@ -423,14 +445,20 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
+       <widget class="QLabel" name="labelContent">
+        <property name="maximumSize">
+         <size>
+          <width>300</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Content</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="labelIndentation">
+       <widget class="QLabel" name="labelStatus">
         <property name="maximumSize">
          <size>
           <width>80</width>
@@ -438,52 +466,16 @@ p, li { white-space: pre-wrap; }
          </size>
         </property>
         <property name="text">
-         <string>Indentation</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="labelLineEnding">
-        <property name="text">
-         <string>Ending</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="labelEncoding">
-        <property name="text">
-         <string>Encoding</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pushButtonEditorMode">
-        <property name="maximumSize">
-         <size>
-          <width>20</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Overwrite Mode</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset theme="editor-mode">
-          <normaloff/>
-         </iconset>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
+         <string>Status</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QToolButton" name="toolButtonMenuBundle">
         <property name="icon">
-         <iconset theme="cog"/>
+         <iconset theme="cogs">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="popupMode">
          <enum>QToolButton::MenuButtonPopup</enum>

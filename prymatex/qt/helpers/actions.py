@@ -20,7 +20,6 @@ def toggle_actions(actions, enable):
 def test_actions(instance, actions):
     for action in actions:
         # Prevent signals
-        action.blockSignals(True)
         action.setVisible(not hasattr(action, "testVisible") or \
             action.testVisible(instance))
         action.setEnabled(not hasattr(action, "testEnabled") or \
@@ -28,10 +27,6 @@ def test_actions(instance, actions):
         if action.isCheckable():
             action.setChecked(hasattr(action, "testChecked") and \
                 action.testChecked(instance))
-            actionGroup = action.actionGroup()
-            if actionGroup is not None:
-                print(actionGroup)
-        action.blockSignals(False)
 
 def create_action(parent, settings, dispatcher = None, sequence_handler=None, icon_handler=None):
     """Create a QAction"""
@@ -88,7 +83,7 @@ def create_action(parent, settings, dispatcher = None, sequence_handler=None, ic
             action.functionTriggered)
 
     if action.functionToggled is not None:
-        parent.connect(action, QtCore.SIGNAL("toggled(bool)"),
+        parent.connect(action, QtCore.SIGNAL("triggered(bool)"),
             action.functionToggled)
 
     # Test functions

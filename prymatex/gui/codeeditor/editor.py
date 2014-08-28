@@ -31,7 +31,7 @@ from .completer import (CodeEditorCompleter, WordsCompletionModel,
 
 from prymatex.support import PreferenceMasterSettings
 
-from prymatex.utils import text
+from prymatex.utils import text, encoding
 from prymatex.utils.i18n import ugettext as _
 from functools import reduce
 
@@ -73,6 +73,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     wordWrapSize = ConfigurableItem()
     indentUsingSpaces = ConfigurableItem(default = True)
     adjustIndentationOnPaste = ConfigurableItem(default = False)
+    encoding = ConfigurableItem(default = 'utf_8')
 
     @ConfigurableItem(default = 4)
     def indentationWidth(self, size):
@@ -302,16 +303,21 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def open(self, filePath):
         """ Custom open for large files """
         super(CodeEditor, self).open(filePath)
-        content = self.application().fileManager.readFile(filePath)
+        content, self.encoding = self.application().fileManager.readFile(filePath)
         self.setPlainText(content)
         
+    def save(self, filePath):
+        """ Save content of editor in a file """
+        self.encoding = self.application().fileManager.writeFile(filePath, self.toPlainText(), self.encoding)
+        super(CodeEditor, self).save(filePath)
+
     def close(self):
         self.aboutToClose.emit()
         super(CodeEditor, self).close()
 
     def reload(self):
         PrymatexEditor.reload(self)
-        content = self.application().fileManager.readFile(self.filePath())
+        content, self.encoding = self.application().fileManager.readFile(self.filePath())
         self.updatePlainText(content)
 
     def componentState(self):
@@ -1307,6 +1313,13 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                      'toggled': lambda ed, checked, eol_chars = eol_chars: ed.setEolChars(eol_chars),
                      'testChecked': lambda ed, eol_chars = eol_chars: ed.lineSeparator() == eol_chars
                      } for eol_chars, _, name in text.EOLS])
+                ]},
+                {'text': 'Encoding',
+                 'items': [tuple(
+                     [{'text': "%s (%s)" % (language.split(",")[0].title(), codec),
+                     'toggled': lambda ed, checked, codec = codec: ed.on_actionEncoding_toggled(codec),
+                     'testChecked': lambda ed, codec = codec: ed.encoding == codec
+                     } for codec, aliases, language in encoding.CODECS])
                 ]}, '-',
                 {'text': 'Select bundle item',
                  'sequence': ("Editor", "SelectBundleItem", 'Meta+Ctrl+T'),
@@ -1383,7 +1396,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # ------------------ Menu Actions
     def on_actionIndentation_toggled(self, checked, size = None):
-        print("Aplicando a", self)
         if size is None:
           size = self.indentationWidth if self.indentUsingSpaces else self.tabWidth
         self.indentUsingSpaces = checked
@@ -1391,6 +1403,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             self.indentationWidth = size
         else:
             self.tabWidth = size
+
+    def on_actionEncoding_toggled(self, codec):
+        self.encoding = codec
 
     def on_actionShowTabsAndSpaces_toggled(self, checked):
         if checked:

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/codeeditor/status.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/codeeditor/status.ui'
 #
-# Created: Sun Aug 24 09:22:43 2014
-#      by: PyQt4 UI code generator 4.11.1
+# Created: Thu Aug 28 10:16:37 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -214,31 +214,16 @@ class Ui_CodeEditorStatus(object):
         self.labelPosition.setMaximumSize(QtCore.QSize(250, 16777215))
         self.labelPosition.setObjectName(_fromUtf8("labelPosition"))
         self.horizontalLayout_2.addWidget(self.labelPosition)
-        self.line = QtGui.QFrame(self.widgetStatus)
-        self.line.setFrameShape(QtGui.QFrame.VLine)
-        self.line.setFrameShadow(QtGui.QFrame.Sunken)
-        self.line.setObjectName(_fromUtf8("line"))
-        self.horizontalLayout_2.addWidget(self.line)
-        self.labelIndentation = QtGui.QLabel(self.widgetStatus)
-        self.labelIndentation.setMaximumSize(QtCore.QSize(80, 16777215))
-        self.labelIndentation.setObjectName(_fromUtf8("labelIndentation"))
-        self.horizontalLayout_2.addWidget(self.labelIndentation)
-        self.labelLineEnding = QtGui.QLabel(self.widgetStatus)
-        self.labelLineEnding.setObjectName(_fromUtf8("labelLineEnding"))
-        self.horizontalLayout_2.addWidget(self.labelLineEnding)
-        self.labelEncoding = QtGui.QLabel(self.widgetStatus)
-        self.labelEncoding.setObjectName(_fromUtf8("labelEncoding"))
-        self.horizontalLayout_2.addWidget(self.labelEncoding)
-        self.pushButtonEditorMode = QtGui.QPushButton(self.widgetStatus)
-        self.pushButtonEditorMode.setMaximumSize(QtCore.QSize(20, 16777215))
-        self.pushButtonEditorMode.setText(_fromUtf8(""))
-        icon = QtGui.QIcon.fromTheme(_fromUtf8("editor-mode"))
-        self.pushButtonEditorMode.setIcon(icon)
-        self.pushButtonEditorMode.setFlat(True)
-        self.pushButtonEditorMode.setObjectName(_fromUtf8("pushButtonEditorMode"))
-        self.horizontalLayout_2.addWidget(self.pushButtonEditorMode)
+        self.labelContent = QtGui.QLabel(self.widgetStatus)
+        self.labelContent.setMaximumSize(QtCore.QSize(300, 16777215))
+        self.labelContent.setObjectName(_fromUtf8("labelContent"))
+        self.horizontalLayout_2.addWidget(self.labelContent)
+        self.labelStatus = QtGui.QLabel(self.widgetStatus)
+        self.labelStatus.setMaximumSize(QtCore.QSize(80, 16777215))
+        self.labelStatus.setObjectName(_fromUtf8("labelStatus"))
+        self.horizontalLayout_2.addWidget(self.labelStatus)
         self.toolButtonMenuBundle = QtGui.QToolButton(self.widgetStatus)
-        icon = QtGui.QIcon.fromTheme(_fromUtf8("cog"))
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("cogs"))
         self.toolButtonMenuBundle.setIcon(icon)
         self.toolButtonMenuBundle.setPopupMode(QtGui.QToolButton.MenuButtonPopup)
         self.toolButtonMenuBundle.setAutoRaise(True)
@@ -301,8 +286,6 @@ class Ui_CodeEditorStatus(object):
         self.checkBox.setText(_translate("CodeEditorStatus", "Selection Only", None))
         self.pushButtonFindAll.setText(_translate("CodeEditorStatus", "Find All", None))
         self.labelPosition.setText(_translate("CodeEditorStatus", "Position", None))
-        self.labelIndentation.setText(_translate("CodeEditorStatus", "Indentation", None))
-        self.labelLineEnding.setText(_translate("CodeEditorStatus", "Ending", None))
-        self.labelEncoding.setText(_translate("CodeEditorStatus", "Encoding", None))
-        self.pushButtonEditorMode.setToolTip(_translate("CodeEditorStatus", "Overwrite Mode", None))
+        self.labelContent.setText(_translate("CodeEditorStatus", "Content", None))
+        self.labelStatus.setText(_translate("CodeEditorStatus", "Status", None))
 

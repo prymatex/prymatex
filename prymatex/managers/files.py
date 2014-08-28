@@ -215,14 +215,14 @@ class FileManager(PrymatexComponent, QtCore.QObject):
 
     def readFile(self, filePath):
         """Read from file"""
-        content, encode = encoding.read(filePath)
-        return content
+        return encoding.read(filePath)
 
-    def writeFile(self, filePath, content):
+    def writeFile(self, filePath, content, encode = None):
         """Function that actually save the content of a file."""
         self.unwatchPath(filePath)
-        encode = encoding.write(content, filePath, self.defaultEncoding)
+        encode = encoding.write(content, filePath, encode or self.defaultEncoding)
         self.watchPath(filePath)
+        return encode
 
     def closeFile(self, filePath):
         if self.isWatched(filePath):

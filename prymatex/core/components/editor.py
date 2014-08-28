@@ -25,8 +25,7 @@ class PrymatexEditor(PrymatexComponentWidget):
         self.setFilePath(file_path)
 
     def save(self, file_path):
-        """ Save content of editor in a file """
-        self.application().fileManager.writeFile(file_path, self.toPlainText())
+        """ Open close file """
         if file_path != self._file_path:
             if self._file_path is not None:
                 self.application().fileManager.closeFile(self._file_path)
