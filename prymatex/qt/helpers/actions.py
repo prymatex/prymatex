@@ -28,6 +28,9 @@ def test_actions(instance, actions):
         if action.isCheckable():
             action.setChecked(hasattr(action, "testChecked") and \
                 action.testChecked(instance))
+            actionGroup = action.actionGroup()
+            if actionGroup is not None:
+                print(actionGroup)
         action.blockSignals(False)
 
 def create_action(parent, settings, dispatcher = None, sequence_handler=None, icon_handler=None):
@@ -61,30 +64,31 @@ def create_action(parent, settings, dispatcher = None, sequence_handler=None, ic
     if "context" in settings:
         action.setShortcutContext(settings["context"])
     
-    # Action functions
-    action.functionTriggered = action.functionToggled = None
-    if "triggered" in settings and isinstance(settings["triggered"], collections.Callable):
-        action.functionTriggered = settings["triggered"]
-    if "toggled" in settings and isinstance(settings["toggled"], collections.Callable):
-        action.functionToggled = settings["toggled"]
-        action.setCheckable(True)
-
     # The signal dispatcher
     def dispatch_signal(dispatcher, handler):
         def _dispatch(*largs):
             dispatcher(handler, *largs)
         return _dispatch
 
+    # Action functions
+    action.functionTriggered = action.functionToggled = None
+    if "triggered" in settings and isinstance(settings["triggered"], collections.Callable):
+        action.functionTriggered = isinstance(dispatcher, collections.Callable) and \
+            dispatch_signal(dispatcher, settings["triggered"]) or \
+            settings["triggered"]
+
+    if "toggled" in settings and isinstance(settings["toggled"], collections.Callable):
+        action.functionToggled = isinstance(dispatcher, collections.Callable) and \
+            dispatch_signal(dispatcher, settings["toggled"]) or \
+            settings["toggled"]
+        action.setCheckable(True)
+
     if action.functionTriggered is not None:
         parent.connect(action, QtCore.SIGNAL("triggered()"),
-            isinstance(dispatcher, collections.Callable) and \
-            dispatch_signal(dispatcher, action.functionTriggered) or \
             action.functionTriggered)
 
     if action.functionToggled is not None:
         parent.connect(action, QtCore.SIGNAL("toggled(bool)"),
-            isinstance(dispatcher, collections.Callable) and \
-            dispatch_signal(dispatcher, action.functionToggled) or \
             action.functionToggled)
 
     # Test functions
