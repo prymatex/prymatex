@@ -34,7 +34,6 @@ def create_toolbutton(parent, settings):
         
     return button
 
-
 def action2button(action, autoraise=True, text_beside_icon=False, parent=None):
     """Create a QToolButton directly from a QAction object"""
     if parent is None:

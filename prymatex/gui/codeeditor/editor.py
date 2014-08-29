@@ -115,16 +115,25 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         super(CodeEditor, self).__init__(**kwargs)
 
         self.__blockUserDataHandlers = []
+        self.__preKeyPressHandlers = [
+            (QtCore.Qt.Key_Return, self.__first_line_syntax),
+            (QtCore.Qt.Key_Return, self.__insert_new_line),
+            (QtCore.Qt.Key_Tab, self.__insert_bundle_item),
+        ]
+        self.__postKeyPressHandlers = []
         
         #Current pairs for cursor position (leftBrace <|> rightBrace, oppositeLeftBrace, oppositeRightBrace)
         # <|> the cursor is allways here
         self._currentPairs = (None, None, None, None)
         self.foldingellipsisImage = self.resources().get_image(":/sidebar/folding-ellipsis.png")
         
-        #Sidebars
+        # -------------------- Addons containers
+        # Sidebars
         self.leftBar = CodeEditorSideBar(self)
         self.rightBar = CodeEditorSideBar(self)
-
+        # Modes
+        self.codeEditorModes = []
+        
         #Models
         self.bookmarkListModel = BookmarkListModel(self)
         self.symbolListModel = SymbolListModel(self)
@@ -144,9 +153,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
         self.syntaxHighlighter.aboutToHighlightChange.connect(self.aboutToHighlightChange.emit)
         self.syntaxHighlighter.highlightChanged.connect(self.highlightChanged.emit)
-
-        # TODO Quiza algo como que los modos se registren solos?
-        self.codeEditorModes = []
 
         #Completer
         self.completer = CodeEditorCompleter(self)
@@ -701,21 +707,60 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         else:
             TextEditWidget.mouseReleaseEvent(self, event)
 
+    # --------------- Key press pre and post
+    def registerPreKeyPressHandler(self, sequence, handler):
+        self.__preKeyPressHandlers.append((sequence, handler))
+
+    def registerPostKeyPressHandler(self, sequence, handler):
+        self.__postKeyPressHandlers.append((sequence, handler))
+
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
         """This method is called whenever a key is pressed.
         The key code is stored in event.key()"""
         
-        # Completer
-        if self.enableAutoCompletion and self.completer.pre_key_event(event):
-            return
-        
-        if not self.runKeyHelper(event.key(), event=event, cursor=self.textCursor()):
-            TextEditWidget.keyPressEvent(self, event)
+        if not any([ p[1](event) for p in self.__preKeyPressHandlers \
+		if p[0] == event.key() ]):
+            # Completer
+            if self.enableAutoCompletion and self.completer.pre_key_event(event):
+                return
+            
+            if not self.runKeyHelper(event.key(), event=event, cursor=self.textCursor()):
+                TextEditWidget.keyPressEvent(self, event)
+    
+            # Completer
+            if self.enableAutoCompletion:
+                self.completer.post_key_event(event)
+            
+            [ p[1](event) for p in self.__postKeyPressHandlers if event.matches(p[0]) ]
 
-        # Completer
-        if self.enableAutoCompletion:
-            self.completer.post_key_event(event)
+    # ------------ Key press
+    def __first_line_syntax(self, event):
+        cursor = self.textCursor()
+        if cursor.blockNumber() == 0:
+            text = cursor.block().text()[:cursor.columnNumber()]
+            syntax = self.application().supportManager.findSyntaxByFirstLine(text)
+            if syntax is not None:
+                self.insertBundleItem(syntax)
+        return False
+    
+    def __insert_new_line(self, event):
+        self.insertNewLine(self.textCursor())
+        return True
+    
+    def __insert_bundle_item(self, event):
+        cursor = self.textCursor()
+        if cursor.hasSelection(): return False
+
+        trigger = self.application().supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
+        if not trigger: return False
+
+        triggerCursor = self.newCursorAtPosition(cursor.position(), cursor.position() - len(trigger))
+        leftScope, rightScope = self.scope(triggerCursor)
+        items = self.application().supportManager.getTabTriggerItem(
+            trigger, leftScope, rightScope)
+        self.insertBundleItem(items, textCursor = triggerCursor)
+        return bool(items)
 
     # ------------ Insert API
     def insertNewLine(self, cursor = None):
@@ -772,7 +817,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             syntax = any((item.type() == 'syntax' for item in items))
 
             self.showFlatPopupMenu(items, _insert_item, cursorPosition = not syntax)
-        else:
+        elif items:
             _insert_item(0)
 
     def insertSnippet(self, snippetContent, commandInput = "none", commandOutput = "insertText", **kwargs):

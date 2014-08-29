@@ -210,16 +210,6 @@ class DeleteRemoveBracesHelper(CodeEditorKeyHelper):
         self.cursor1.removeSelectedText()
         self.cursor2.removeSelectedText()
         cursor.endEditBlock()
-        
-class SmartIndentHelper(CodeEditorKeyHelper):
-    KEY = QtCore.Qt.Key_Return
-    def execute(self, event = None, cursor = None, **kwargs):
-        if cursor.blockNumber() == 0:
-            text = cursor.block().text()[:cursor.columnNumber()]
-            syntax = self.application().supportManager.findSyntaxByFirstLine(text)
-            if syntax is not None:
-                self.editor.insertBundleItem(syntax)
-        self.editor.insertNewLine(cursor)
 
 class PrintEditorStatusHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_D

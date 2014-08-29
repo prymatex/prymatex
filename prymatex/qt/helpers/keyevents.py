@@ -11,9 +11,13 @@ def keyevent2tuple(event):
     return (event.type(), event.key(), event.modifiers(), event.text(),
             event.isAutoRepeat(), event.count())
     
+keyevent_to_tuple = keyevent2tuple
+    
 def tuple2keyevent(past_event):
     """Convert tuple into a QKeyEvent instance"""
     return QtGui.QKeyEvent(*past_event)
+
+tuple_to_keyevent = tuple2keyevent
 
 def restore_keyevent(event):
     if isinstance(event, tuple):
