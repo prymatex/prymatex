@@ -206,7 +206,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
 
     def setTabSizeLabel(self, editor):
         #Tab Size
-        eol = filter(lambda eol: eol[0] == editor.lineSeparator(), text.EOLS)
+        eol = [ eol for eol in text.EOLS if eol[0] == editor.lineSeparator() ]
         self.labelContent.setText("%s, Ending %s, Encoding %s |" % (
            editor.indentUsingSpaces and "Spaces %d" % editor.indentationWidth or "Tab width %d" % editor.tabWidth,
            eol and eol[0][2] or "?",

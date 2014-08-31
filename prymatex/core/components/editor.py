@@ -4,8 +4,7 @@
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers.icons import combine_icons
 
-from prymatex.core.components.base import (PrymatexComponentWidget, 
-    PrymatexKeyHelper, PrymatexAddon, Key_Any)
+from prymatex.core.components.base import (PrymatexComponentWidget, PrymatexAddon)
 
 from prymatex.utils.decorators import deprecated
 
@@ -148,14 +147,6 @@ class PrymatexEditor(PrymatexComponentWidget):
     @classmethod
     def acceptFile(cls, file_path, mimetype):
         return True
-
-#======================================================================
-# Key Helper
-#======================================================================    
-class PrymatexEditorKeyHelper(PrymatexKeyHelper):
-    def __init__(self, **kwargs):
-        super(PrymatexEditorKeyHelper, self).__init__(**kwargs)
-        self.editor = kwargs.get("parent")
 
 #======================================================================
 # Addon

@@ -57,15 +57,6 @@ class PrymatexComponent(object):
                 if componentName in componentState["components"]:
                     component.setComponentState(componentState["components"][componentName])
 
-Key_Any = 0
-class PrymatexKeyHelper(PrymatexComponent):
-    KEY = Key_Any
-    def accept(self, **kwargs):
-        return True
-    
-    def execute(self, **kwargs):
-        pass
-
 class PrymatexAddon(PrymatexComponent):
     def contributeToContextMenu(self, **kwargs):
         if hasattr(super(PrymatexAddon, self), 'contributeToContextMenu'):
@@ -75,16 +66,3 @@ class PrymatexAddon(PrymatexComponent):
 class PrymatexComponentWidget(PrymatexComponent):
     def addons(self):
         return filter(lambda ch: isinstance(ch, PrymatexAddon), self.components())
-
-    def keyHelpers(self):
-        return filter(lambda ch: isinstance(ch, PrymatexKeyHelper), self.components())
-
-    def keyHelpersByClass(self, klass):
-        return filter(lambda keyHelper: isinstance(keyHelper, klass), self.keyHelpers())
-
-    def runKeyHelper(self, key, **kwargs):
-        for keyHelper in self.keyHelpers():
-            if keyHelper.KEY in ( key, Key_Any ) and keyHelper.accept(**kwargs):
-                keyHelper.execute(**kwargs)
-                return True
-        return False

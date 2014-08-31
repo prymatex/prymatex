@@ -3,10 +3,6 @@
 
 from .dockers import CodeEditorBookmarksDock, CodeEditorSymbolsDock
 from .editor import CodeEditor
-from .helpers import (CodeEditorKeyHelper, KeyEquivalentHelper, SmartTypingPairsHelper,
-    TabTriggerHelper, TabIndentHelper, BacktabUnindentHelper, BackspaceUnindentHelper,
-    BackspaceRemoveBracesHelper, DeleteRemoveBracesHelper, DeleteUnindentHelper,
-    MoveCursorToHomeHelper, OverwriteHelper, PrintEditorStatusHelper)
 from .addons import (CodeEditorAddon, SmartUnindentAddon, SpellCheckerAddon,
     HighlightCurrentSelectionAddon)
 from .sidebar import (SideBarWidgetAddon, BookmarkSideBarAddon, LineNumberSideBarAddon,
@@ -21,19 +17,6 @@ def registerPlugin(manager, descriptor):
     manager.registerComponent(CodeEditorStatus)
     manager.registerComponent(CodeEditorSymbolsDock)
     manager.registerComponent(CodeEditorBookmarksDock)
-
-    manager.registerComponent(KeyEquivalentHelper, CodeEditor)
-    manager.registerComponent(SmartTypingPairsHelper, CodeEditor)
-    #manager.registerComponent(TabTriggerHelper, CodeEditor)
-    manager.registerComponent(TabIndentHelper, CodeEditor)
-    manager.registerComponent(BacktabUnindentHelper, CodeEditor)
-    manager.registerComponent(BackspaceUnindentHelper, CodeEditor)
-    manager.registerComponent(BackspaceRemoveBracesHelper, CodeEditor)
-    manager.registerComponent(DeleteRemoveBracesHelper, CodeEditor)
-    manager.registerComponent(DeleteUnindentHelper, CodeEditor)
-    manager.registerComponent(MoveCursorToHomeHelper, CodeEditor)
-    manager.registerComponent(OverwriteHelper, CodeEditor)
-    manager.registerComponent(PrintEditorStatusHelper, CodeEditor)
 
     # ---------------- Modes
     manager.registerComponent(CodeEditorMultiCursorMode, CodeEditor)

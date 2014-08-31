@@ -6,7 +6,6 @@ from prymatex.qt import QtCore, QtGui
 from .base import CodeEditorBaseMode
 
 from prymatex.utils.lists import bisect_key
-from prymatex.gui.codeeditor.helpers import CodeEditorKeyHelper
 
 WIDTH_CHARACTER = '#'
 
