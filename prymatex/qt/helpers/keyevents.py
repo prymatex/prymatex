@@ -6,18 +6,17 @@ from prymatex.qt import QtCore, QtGui
 KEY_NUMBERS = [getattr(QtCore.Qt, keyname) for keyname in [ "Key_%d" % index for index in range(10)]]
 KEY_NAMES = dict([(getattr(QtCore.Qt, keyname), keyname) for keyname in dir(QtCore.Qt) if keyname.startswith('Key_')])
 
-def keyevent2tuple(event):
+def keyevent_to_keysequence(event):
+    return QtGui.QKeySequence(int(event.modifiers()) + event.key())
+
+def keyevent_to_tuple(event):
     """Convert QKeyEvent instance into a tuple"""
     return (event.type(), event.key(), event.modifiers(), event.text(),
             event.isAutoRepeat(), event.count())
-    
-keyevent_to_tuple = keyevent2tuple
-    
-def tuple2keyevent(past_event):
+
+def tuple_to_keyevent(past_event):
     """Convert tuple into a QKeyEvent instance"""
     return QtGui.QKeyEvent(*past_event)
-
-tuple_to_keyevent = tuple2keyevent
 
 def restore_keyevent(event):
     if isinstance(event, tuple):

@@ -12,7 +12,7 @@ from prymatex.core import PrymatexEditor
 from prymatex.widgets.texteditor import TextEditWidget
 
 from prymatex.core.settings import ConfigurableItem
-from prymatex.qt.helpers.menus import extend_menu
+from prymatex.qt.helpers import (extend_menu, keyevent_to_keysequence)
 from prymatex.models.support import BundleItemTreeNode
 
 from .userdata import CodeEditorBlockUserData
@@ -712,20 +712,30 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             TextEditWidget.mouseReleaseEvent(self, event)
 
     # --------------- Key press pre and post
-    def registerPreKeyPressHandler(self, key, handler):
-        self.__preKeyPressHandlers.setdefault(key, []).append(handler)
+    def registerPreKeyPressHandler(self, sequence, handler):
+		# TODO: Test and fix keysequence
+        self.__preKeyPressHandlers.setdefault(sequence[0], []).append(handler)
 
-    def registerPostKeyPressHandler(self, key, handler):
-        self.__postKeyPressHandlers.setdefault(key, []).append(handler)
+    def registerPostKeyPressHandler(self, sequence, handler):
+        self.__postKeyPressHandlers.setdefault(sequence[0], []).append(handler)
 
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
-        pre_handlers = self.__preKeyPressHandlers.get(event.key(), []) + [ self.__insert_key_bundle_item, self.__insert_typing_pairs ] 
+        keyseq = int(event.modifiers()) + event.key()
+        # Try key equivalent
+        if keyseq in self.application().supportManager.getAllKeyEquivalentCodes():
+            leftScope, rightScope = self.scope()
+            items = self.application().supportManager.getKeyEquivalentItem(
+                keyseq, leftScope, rightScope)
+            if items:
+                self.insertBundleItem(items)
+            
+        pre_handlers = self.__preKeyPressHandlers.get(keyseq, []) + [ self.__insert_typing_pairs ] 
         
         if not any([ handler(event) for handler in pre_handlers ]):
             super(CodeEditor, self).keyPressEvent(event)
 
-            post_handlers = self.__postKeyPressHandlers.get(event.key(), [])
+            post_handlers = self.__postKeyPressHandlers.get(keyseq, [])
             for handler in post_handlers:
                 handler(event)
 
@@ -755,18 +765,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         items = self.application().supportManager.getTabTriggerItem(
             trigger, leftScope, rightScope)
         self.insertBundleItem(items, textCursor = triggerCursor)
-        return bool(items)
-
-    def __insert_key_bundle_item(self, event):
-        cursor = self.textCursor()
-        keyseq = int(event.modifiers()) + event.key()
-        if keyseq not in self.application().supportManager.getAllKeyEquivalentCodes():
-            return False
-    
-        leftScope, rightScope = self.scope(cursor)
-        items = self.application().supportManager.getKeyEquivalentItem(
-            keyseq, leftScope, rightScope)
-        self.insertBundleItem(items)
         return bool(items)
 
     def __indent_tab_behavior(self, event):
@@ -819,7 +817,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         lineText = cursor.block().text()
         if lineText[:cursor.columnNumber()].startswith(self.tabKeyBehavior()):
             counter = cursor.columnNumber() % self.tabWidth or self.tabWidth
-            self.newCursorAtPosition(cursor.position(), cursor.position() - counter).removeSelectedText()
+            self.newCursorAtPosition(cursor.position(), cursor.position() + counter).removeSelectedText()
             return True
         return False
         

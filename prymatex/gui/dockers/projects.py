@@ -119,11 +119,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
                 'TM_SELECTED_FILES': " ".join(["'%s'" % path for path in paths ])
             })
         return environment
-        
-    def keyPressEvent(self, event):
-        if not self.runKeyHelper(event):
-            return QtGui.QDockWidget.keyPressEvent(self, event)
-
+    
     def setupPropertiesWidgets(self):
         from prymatex.gui.properties.project import ProjectPropertiesWidget
         from prymatex.gui.properties.environment import EnvironmentPropertiesWidget
