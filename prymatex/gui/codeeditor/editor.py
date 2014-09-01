@@ -44,9 +44,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     filePathChanged = QtCore.Signal(str)
     blocksRemoved = QtCore.Signal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.Signal(QtGui.QTextBlock, int)
-    modeChanged = QtCore.Signal()
-    beginMode = QtCore.Signal(str)
-    endMode = QtCore.Signal(str)
+    modeChanged = QtCore.Signal(object, object)
+    beginMode = QtCore.Signal(object)
+    endMode = QtCore.Signal(object)
     aboutToClose = QtCore.Signal()
 
     aboutToHighlightChange = QtCore.Signal()
@@ -114,6 +114,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def __init__(self, **kwargs):
         super(CodeEditor, self).__init__(**kwargs)
 
+        self.__current_mode = self
         self.__blockUserDataHandlers = []
         self.__preKeyPressHandlers = {
             QtCore.Qt.Key_Return: [ self.__first_line_syntax, self.__insert_new_line ],
@@ -200,8 +201,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # TODO Algo mejor para acomodar el ancho del tabulador
         self.fontChanged.connect(lambda ed = self: ed.setTabStopWidth(ed.tabWidth * ed.characterWidth()))
-        self.beginMode.connect(lambda mode, ed = self: ed.modeChanged.emit())
-        self.endMode.connect(lambda mode, ed = self: ed.modeChanged.emit())
+        self.beginMode.connect(self.on_beginMode)
+        self.endMode.connect(self.on_endMode)
 
     def window(self):
         parent = self.parent()
@@ -215,6 +216,15 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         # Get dialogs
         self.selectorDialog = self.window().findChild(QtGui.QDialog, "SelectorDialog")
         self.browserDock = self.window().findChild(QtGui.QDockWidget, "BrowserDock")
+
+    # -------------- Self Signal Connect
+    def on_beginMode(self, mode):
+        self.__current_mode = mode
+        self.modeChanged.emit(self, mode)
+
+    def on_endMode(self, mode):
+        self.__current_mode = self
+        self.modeChanged.emit(mode, self)
 
     # OVERRIDE: PrymatexEditor.addComponent()
     def addComponent(self, component):
@@ -426,6 +436,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return self.application().supportManager.getPreferenceSettings(leftToken.scope, leftToken.scope)
 
     # ------------ Obteniendo datos del editor
+    def currentMode(self):
+        return self.__current_mode
+
     def tabKeyBehavior(self):
         return ' ' * self.indentationWidth if self.indentUsingSpaces else '\t'
 

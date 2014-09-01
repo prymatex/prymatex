@@ -18,10 +18,10 @@ class CodeEditorBaseMode(PrymatexEditorAddon, QtCore.QObject):
 
     def activate(self):
         self._is_active = True
-        self.editor.beginMode.emit(self.objectName())
+        self.editor.beginMode.emit(self)
 
     def deactivate(self):
         self._is_active = False
-        self.editor.endMode.emit(self.objectName())
+        self.editor.endMode.emit(self)
     
     isActive = lambda self: self._is_active

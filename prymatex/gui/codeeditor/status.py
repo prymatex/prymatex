@@ -138,11 +138,13 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
 
     def disconnectEditor(self, editor):
         editor.cursorPositionChanged.disconnect(self.on_cursorPositionChanged)
-        editor.syntaxChanged.disconnect(self.on_syntaxChanged)
+        editor.syntaxChanged.disconnect(self.on_editor_syntaxChanged)
+        editor.modeChanged.disconnect(self.on_editor_modeChanged)
 
     def connectEditor(self, editor):
         editor.cursorPositionChanged.connect(self.on_cursorPositionChanged)
-        editor.syntaxChanged.connect(self.on_syntaxChanged)
+        editor.syntaxChanged.connect(self.on_editor_syntaxChanged)
+        editor.modeChanged.connect(self.on_editor_modeChanged)
 
     def setCurrentEditor(self, editor):
         if self.currentEditor is not None:
@@ -153,7 +155,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
             self.connectEditor(self.currentEditor)
             self.comboBoxSymbols.setModel(self.currentEditor.symbolListModel)
             self.on_cursorPositionChanged(self.currentEditor)
-            self.on_syntaxChanged(self.currentEditor.syntax())
+            self.on_editor_syntaxChanged(self.currentEditor.syntax())
             self.setTabSizeLabel(self.currentEditor)
 
     # ---------------- AutoConnect Status Widget signals
@@ -186,10 +188,13 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         #Set index of current symbol
         self.comboBoxSymbols.setCurrentIndex(self.comboBoxSymbols.model().findBlockIndex(cursor))
 
-    def on_syntaxChanged(self, syntax):
+    def on_editor_syntaxChanged(self, syntax):
         model = self.comboBoxSyntaxes.model()
         index = model.nodeIndex(syntax).row()
         self.comboBoxSyntaxes.setCurrentIndex(index)
+    
+    def on_editor_modeChanged(self, old_mode, new_mode):
+        self.labelStatus.setText(new_mode.objectName())
 
     def showTabSizeContextMenu(self, point):
         editor = self.currentEditor
