@@ -120,7 +120,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             QtCore.Qt.Key_Return: [ self.__first_line_syntax, self.__insert_new_line ],
             QtCore.Qt.Key_Tab: [ self.__insert_tab_bundle_item, self.__indent_tab_behavior ],
             QtCore.Qt.Key_Home: [ self.__move_cursor_to_line_start ],
-            QtCore.Qt.Key_Insert: [ self.__toggle_overwrite ],
             QtCore.Qt.Key_Backtab: [ self.__unindent ],
             QtCore.Qt.Key_Backspace: [ self.__unindent_backward_tab_behavior, self.__remove_backward_braces ],
             QtCore.Qt.Key_Delete: [ self.__unindent_forward_tab_behavior, self.__remove_forward_braces ]
@@ -203,6 +202,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.fontChanged.connect(lambda ed = self: ed.setTabStopWidth(ed.tabWidth * ed.characterWidth()))
         self.beginMode.connect(self.on_beginMode)
         self.endMode.connect(self.on_endMode)
+
+    def name(self):
+        return "Edit"
 
     def window(self):
         parent = self.parent()
@@ -726,11 +728,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # --------------- Key press pre and post
     def registerPreKeyPressHandler(self, sequence, handler):
-		# TODO: Test and fix keysequence
-        self.__preKeyPressHandlers.setdefault(sequence[0], []).append(handler)
+        code = sequence[0] if isinstance(sequence, QtGui.QKeySequence) else sequence
+        self.__preKeyPressHandlers.setdefault(code, []).append(handler)
 
     def registerPostKeyPressHandler(self, sequence, handler):
-        self.__postKeyPressHandlers.setdefault(sequence[0], []).append(handler)
+        code = sequence[0] if isinstance(sequence, QtGui.QKeySequence) else sequence
+        self.__postKeyPressHandlers.setdefault(code, []).append(handler)
 
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
@@ -902,10 +905,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             self.setTextCursor(cursor)
             return True
         return False
-        
-    def __toggle_overwrite(self, event):
-        self.setOverwriteMode(not self.overwriteMode())
-        return True
         
     # ------------ Insert API
     def insertNewLine(self, cursor = None):

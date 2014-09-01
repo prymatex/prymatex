@@ -10,6 +10,9 @@ class CodeEditorBaseMode(PrymatexEditorAddon, QtCore.QObject):
         super(CodeEditorBaseMode, self).__init__(**kwargs)
         self._is_active = False
 
+    def name(self):
+        return self.objectName()
+
     def setPalette(self, palette):
         pass
         

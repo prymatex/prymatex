@@ -194,7 +194,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         self.comboBoxSyntaxes.setCurrentIndex(index)
     
     def on_editor_modeChanged(self, old_mode, new_mode):
-        self.labelStatus.setText(new_mode.objectName())
+        self.labelStatus.setText(new_mode.name())
 
     def showTabSizeContextMenu(self, point):
         editor = self.currentEditor

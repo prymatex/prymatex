@@ -10,7 +10,10 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
         super(CodeEditorComplitionMode, self).__init__(**kwargs)
         self.completer = None
         self.setObjectName("CodeEditorComplitionMode")
-
+    
+    def name(self):
+        return "Complition"
+        
     def initialize(self, **kwargs):
         super(CodeEditorComplitionMode, self).initialize(**kwargs)
         self.completer = self.editor.completer

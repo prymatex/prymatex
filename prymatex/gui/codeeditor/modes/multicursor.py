@@ -29,6 +29,9 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.standardCursor = None
         self.setObjectName("CodeEditorSnippetMode")
 
+    def name(self):
+        return "MultiCursor"
+
     # ------- Overrides
     def initialize(self, **kwargs):
         super(CodeEditorMultiCursorMode, self).initialize(**kwargs)

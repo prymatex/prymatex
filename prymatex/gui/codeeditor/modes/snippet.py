@@ -11,6 +11,9 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         self.processor = None
         self.setObjectName("CodeEditorSnippetMode")
 
+    def name(self):
+        return "Snippet"
+        
     def initialize(self, **kwargs):
         super(CodeEditorSnippetMode, self).initialize(**kwargs)
         self.processor = self.editor.findProcessor("snippet")
