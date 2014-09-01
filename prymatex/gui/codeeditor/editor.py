@@ -116,7 +116,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         self.__blockUserDataHandlers = []
         self.__preKeyPressHandlers = {
-            QtCore.Qt.Key_Any: [ self.__insert_key_bundle_item, self.__insert_typing_pairs ],                                        # Where is the any-key? Here is!!!
             QtCore.Qt.Key_Return: [ self.__first_line_syntax, self.__insert_new_line ],
             QtCore.Qt.Key_Tab: [ self.__insert_tab_bundle_item, self.__indent_tab_behavior ],
             QtCore.Qt.Key_Home: [ self.__move_cursor_to_line_start ],
@@ -721,14 +720,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
-        pre_handlers = self.__preKeyPressHandlers.get(QtCore.Qt.Key_Any, []) + \
-            self.__preKeyPressHandlers.get(event.key(), [])
+        pre_handlers = self.__preKeyPressHandlers.get(event.key(), []) + [ self.__insert_key_bundle_item, self.__insert_typing_pairs ] 
         
         if not any([ handler(event) for handler in pre_handlers ]):
-            TextEditWidget.keyPressEvent(self, event)
+            super(CodeEditor, self).keyPressEvent(event)
 
-            post_handlers = self.__postKeyPressHandlers.get(QtCore.Qt.Key_Any, []) + \
-                self.__postKeyPressHandlers.get(event.key(), [])
+            post_handlers = self.__postKeyPressHandlers.get(event.key(), [])
             for handler in post_handlers:
                 handler(event)
 
@@ -763,7 +760,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def __insert_key_bundle_item(self, event):
         cursor = self.textCursor()
         keyseq = int(event.modifiers()) + event.key()
-        print(keyseq)
         if keyseq not in self.application().supportManager.getAllKeyEquivalentCodes():
             return False
     
@@ -771,7 +767,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         items = self.application().supportManager.getKeyEquivalentItem(
             keyseq, leftScope, rightScope)
         self.insertBundleItem(items)
-        print(items)
         return bool(items)
 
     def __indent_tab_behavior(self, event):
