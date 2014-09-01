@@ -120,6 +120,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             QtCore.Qt.Key_Return: [ self.__first_line_syntax, self.__insert_new_line ],
             QtCore.Qt.Key_Tab: [ self.__insert_tab_bundle_item, self.__indent_tab_behavior ],
             QtCore.Qt.Key_Home: [ self.__move_cursor_to_line_start ],
+            (QtCore.Qt.SHIFT + QtCore.Qt.Key_Home): [ self.__move_cursor_to_line_start ],
             QtCore.Qt.Key_Backtab: [ self.__unindent ],
             QtCore.Qt.Key_Backspace: [ self.__unindent_backward_tab_behavior, self.__remove_backward_braces ],
             QtCore.Qt.Key_Delete: [ self.__unindent_forward_tab_behavior, self.__remove_forward_braces ]

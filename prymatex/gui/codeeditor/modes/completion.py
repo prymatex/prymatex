@@ -17,14 +17,32 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
     def initialize(self, **kwargs):
         super(CodeEditorComplitionMode, self).initialize(**kwargs)
         self.completer = self.editor.completer
-        self.editor.installEventFilter(self)
+        self.editor.registerPreKeyPressHandler(
+            QtGui.QKeySequence.fromString("Ctrl+Space"),
+            self.__run_completer
+        )
+        self.completer.popup().installEventFilter(self)
+        self.completer.installEventFilter(self)
 
     def eventFilter(self, obj, event):
-        if self.isActive() and event.type() == QtCore.QEvent.KeyPress:
-            self.pre_key_press_event(event)
-            
+        if event.type() == QtCore.QEvent.Show:
+            self.activate()
+        elif event.type() == QtCore.QEvent.Hide:
+            self.deactivate()
         return False
         
+    def __run_completer(self, event):
+        if self.isActive() and self.completer.trySetNextModel():
+            self.completer.complete(self.editor.cursorRect())
+            return True
+        elif self.isActive():
+            self.completer.hide()
+        else:
+            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
+            self.completer.setCompletionPrefix(alreadyTyped)
+            self.completer.runCompleter(self.editor.cursorRect())
+        return False
+
     def pre_key_press_event(self, event):
         if self.isVisible():
             if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab):

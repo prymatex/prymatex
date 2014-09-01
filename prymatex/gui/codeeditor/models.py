@@ -194,7 +194,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
     
 #=========================================================
 # Bookmark Selectable Model
-#=========================================================  
+#=========================================================
 def symbolSelectableModelFactory(editor):
     # Data function    
     def symbolData():
