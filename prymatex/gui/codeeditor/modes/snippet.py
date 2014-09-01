@@ -9,7 +9,6 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
     def __init__(self, **kwargs):
         super(CodeEditorSnippetMode, self).__init__(**kwargs)
         self.processor = None
-        self.enableCompletion = None
         self.setObjectName("CodeEditorSnippetMode")
 
     def initialize(self, **kwargs):

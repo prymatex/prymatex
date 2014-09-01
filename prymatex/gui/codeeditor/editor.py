@@ -120,7 +120,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             QtCore.Qt.Key_Return: [ self.__first_line_syntax, self.__insert_new_line ],
             QtCore.Qt.Key_Tab: [ self.__insert_tab_bundle_item, self.__indent_tab_behavior ],
             QtCore.Qt.Key_Home: [ self.__move_cursor_to_line_start ],
-            QtCore.Qt.Key_Insert: [],
+            QtCore.Qt.Key_Insert: [ self.__toggle_overwrite ],
             QtCore.Qt.Key_Backtab: [ self.__unindent ],
             QtCore.Qt.Key_Backspace: [ self.__unindent_backward_tab_behavior, self.__remove_backward_braces ],
             QtCore.Qt.Key_Delete: [ self.__unindent_forward_tab_behavior, self.__remove_forward_braces ]
@@ -721,21 +721,16 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
-        """This method is called whenever a key is pressed.
-        The key code is stored in event.key()"""
+        pre_handlers = self.__preKeyPressHandlers.get(QtCore.Qt.Key_Any, []) + \
+            self.__preKeyPressHandlers.get(event.key(), [])
         
-        if not any([ handler(event) for handler in self.__preKeyPressHandlers.get(event.key(), []) ]):
-            # Completer
-            #if self.enableAutoCompletion and self.completer.pre_key_event(event):
-            #    return
-            
+        if not any([ handler(event) for handler in pre_handlers ]):
             TextEditWidget.keyPressEvent(self, event)
-    
-            # Completer
-            #if self.enableAutoCompletion:
-            #    self.completer.post_key_event(event)
-            
-            [ handler(event) for handler in self.__postKeyPressHandlers.get(event.key(), []) ]
+
+            post_handlers = self.__postKeyPressHandlers.get(QtCore.Qt.Key_Any, []) + \
+                self.__postKeyPressHandlers.get(event.key(), [])
+            for handler in post_handlers:
+                handler(event)
 
     # ------------ Key press
     def __first_line_syntax(self, event):
@@ -768,6 +763,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def __insert_key_bundle_item(self, event):
         cursor = self.textCursor()
         keyseq = int(event.modifiers()) + event.key()
+        print(keyseq)
         if keyseq not in self.application().supportManager.getAllKeyEquivalentCodes():
             return False
     
@@ -775,6 +771,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         items = self.application().supportManager.getKeyEquivalentItem(
             keyseq, leftScope, rightScope)
         self.insertBundleItem(items)
+        print(items)
         return bool(items)
 
     def __indent_tab_behavior(self, event):
@@ -899,6 +896,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             self.setTextCursor(cursor)
             return True
         return False
+        
+    def __toggle_overwrite(self, event):
+        self.setOverwriteMode(not self.overwriteMode())
+        return True
         
     # ------------ Insert API
     def insertNewLine(self, cursor = None):

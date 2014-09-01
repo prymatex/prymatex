@@ -7,13 +7,6 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.core import PrymatexEditorKeyHelper, Key_Any
 from prymatex.qt.helpers import debug_key
 
-class CodeEditorKeyHelper(PrymatexEditorKeyHelper, QtCore.QObject):
-    def setPalette(self, palette):
-        pass
-        
-    def setFont(self, font):
-        pass
-
 class KeyEquivalentHelper(CodeEditorKeyHelper):
     def accept(self, event = None, cursor = None, **kwargs):
         keyseq = int(event.modifiers()) + event.key()
@@ -105,11 +98,6 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
             self.editor.setTextCursor(cursor)
         cursor.endEditBlock()
 
-class OverwriteHelper(CodeEditorKeyHelper):
-    KEY = QtCore.Qt.Key_Insert
-    def execute(self, event = None, cursor = None, **kwargs):
-        self.editor.setOverwriteMode(not self.editor.overwriteMode())
-        self.editor.modeChanged.emit()
 
 class PrintEditorStatusHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_D
