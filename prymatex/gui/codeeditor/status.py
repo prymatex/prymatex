@@ -103,7 +103,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         
         # Connect tab size context menu
         self.labelContent.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.labelContent.customContextMenuRequested.connect(self.showTabSizeContextMenu)
+        self.labelContent.customContextMenuRequested.connect(self.showContextMenu)
         
         # Create bundle menu
         self.menuBundle = QtGui.QMenu(self)
@@ -137,12 +137,12 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         return isinstance(editor, CodeEditor)
 
     def disconnectEditor(self, editor):
-        editor.cursorPositionChanged.disconnect(self.on_cursorPositionChanged)
+        editor.cursorPositionChanged.disconnect(self.on_editor_cursorPositionChanged)
         editor.syntaxChanged.disconnect(self.on_editor_syntaxChanged)
         editor.modeChanged.disconnect(self.on_editor_modeChanged)
 
     def connectEditor(self, editor):
-        editor.cursorPositionChanged.connect(self.on_cursorPositionChanged)
+        editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
         editor.syntaxChanged.connect(self.on_editor_syntaxChanged)
         editor.modeChanged.connect(self.on_editor_modeChanged)
 
@@ -154,8 +154,9 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         if self.currentEditor is not None:
             self.connectEditor(self.currentEditor)
             self.comboBoxSymbols.setModel(self.currentEditor.symbolListModel)
-            self.on_cursorPositionChanged(self.currentEditor)
-            self.on_editor_syntaxChanged(self.currentEditor.syntax())
+            self.on_editor_cursorPositionChanged()
+            self.on_editor_syntaxChanged()
+            self.on_editor_modeChanged()
             self.setTabSizeLabel(self.currentEditor)
 
     # ---------------- AutoConnect Status Widget signals
@@ -179,28 +180,29 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
             self.currentEditor.goToBlock(block)
             self.currentEditor.setFocus()
 
-    def on_cursorPositionChanged(self, editor = None):
-        editor = editor or self.currentEditor
-        cursor = editor.textCursor()
+    def on_editor_cursorPositionChanged(self):
+        cursor = self.currentEditor.textCursor()
         self.labelPosition.setText("Line %d, Column %d, Selection %d |" % (
             cursor.blockNumber() + 1, cursor.columnNumber() + 1, 
             cursor.selectionEnd() - cursor.selectionStart()))
         #Set index of current symbol
         self.comboBoxSymbols.setCurrentIndex(self.comboBoxSymbols.model().findBlockIndex(cursor))
 
-    def on_editor_syntaxChanged(self, syntax):
+    def on_editor_syntaxChanged(self):
         model = self.comboBoxSyntaxes.model()
-        index = model.nodeIndex(syntax).row()
+        index = model.nodeIndex(self.currentEditor.syntax()).row()
         self.comboBoxSyntaxes.setCurrentIndex(index)
     
-    def on_editor_modeChanged(self, old_mode, new_mode):
-        self.labelStatus.setText(new_mode.name())
+    def on_editor_modeChanged(self):
+        self.labelStatus.setText(self.currentEditor.currentMode().name())
 
-    def showTabSizeContextMenu(self, point):
-        editor = self.currentEditor
+    def showContextMenu(self, point):
         #Setup Context Menu
-        menuIndentation = self.window().findChild(QtGui.QMenu, "menuIndentation")
-        menuIndentation.popup(self.labelContent.mapToGlobal(point))
+        menu = QtGui.QMenu(self)
+        menu.addMenu(self.window().findChild(QtGui.QMenu, "menuIndentation"))
+        menu.addMenu(self.window().findChild(QtGui.QMenu, "menuLineEndings"))
+        menu.addMenu(self.window().findChild(QtGui.QMenu, "menuEncoding"))
+        menu.popup(self.labelContent.mapToGlobal(point))
 
     def setCurrentEditorTabSoft(self, soft):
         self.currentEditor.indentUsingSpaces = soft

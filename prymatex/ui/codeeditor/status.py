@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/codeeditor/status.ui'
+# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/codeeditor/status.ui'
 #
-# Created: Thu Aug 28 10:16:37 2014
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Mon Sep  1 15:31:26 2014
+#      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_CodeEditorStatus(object):
     def setupUi(self, CodeEditorStatus):
         CodeEditorStatus.setObjectName(_fromUtf8("CodeEditorStatus"))
-        CodeEditorStatus.resize(629, 219)
+        CodeEditorStatus.resize(629, 266)
         self.verticalLayout = QtGui.QVBoxLayout(CodeEditorStatus)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -211,15 +211,15 @@ class Ui_CodeEditorStatus(object):
         self.horizontalLayout_2.setMargin(0)
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.labelPosition = QtGui.QLabel(self.widgetStatus)
-        self.labelPosition.setMaximumSize(QtCore.QSize(250, 16777215))
+        self.labelPosition.setMaximumSize(QtCore.QSize(300, 16777215))
         self.labelPosition.setObjectName(_fromUtf8("labelPosition"))
         self.horizontalLayout_2.addWidget(self.labelPosition)
         self.labelContent = QtGui.QLabel(self.widgetStatus)
-        self.labelContent.setMaximumSize(QtCore.QSize(300, 16777215))
+        self.labelContent.setMaximumSize(QtCore.QSize(350, 16777215))
         self.labelContent.setObjectName(_fromUtf8("labelContent"))
         self.horizontalLayout_2.addWidget(self.labelContent)
         self.labelStatus = QtGui.QLabel(self.widgetStatus)
-        self.labelStatus.setMaximumSize(QtCore.QSize(80, 16777215))
+        self.labelStatus.setMaximumSize(QtCore.QSize(150, 16777215))
         self.labelStatus.setObjectName(_fromUtf8("labelStatus"))
         self.horizontalLayout_2.addWidget(self.labelStatus)
         self.toolButtonMenuBundle = QtGui.QToolButton(self.widgetStatus)

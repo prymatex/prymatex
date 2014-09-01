@@ -39,12 +39,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     STANDARD_SIZES = (70, 78, 80, 100, 120)
 
     # -------------------- Signals
-    syntaxChanged = QtCore.Signal(object)
+    syntaxChanged = QtCore.Signal()
     themeChanged = QtCore.Signal(object)
     filePathChanged = QtCore.Signal(str)
     blocksRemoved = QtCore.Signal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.Signal(QtGui.QTextBlock, int)
-    modeChanged = QtCore.Signal(object, object)
+    modeChanged = QtCore.Signal()
     beginMode = QtCore.Signal(object)
     endMode = QtCore.Signal(object)
     aboutToClose = QtCore.Signal()
@@ -195,8 +195,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.cursorPositionChanged.connect(self.setCurrentBraces)
         self.cursorPositionChanged.connect(self.highlightEditor)
         
-        self.syntaxChanged.connect(lambda syntax, editor=self: 
-            editor.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
+        self.syntaxChanged.connect(lambda editor=self: 
+            editor.showMessage("Syntax changed to <b>%s</b>" % editor.syntax().name)
         )
 
         # TODO Algo mejor para acomodar el ancho del tabulador
@@ -223,11 +223,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # -------------- Self Signal Connect
     def on_beginMode(self, mode):
         self.__current_mode = mode
-        self.modeChanged.emit(self, mode)
+        self.modeChanged.emit()
 
     def on_endMode(self, mode):
         self.__current_mode = self
-        self.modeChanged.emit(mode, self)
+        self.modeChanged.emit()
 
     # OVERRIDE: PrymatexEditor.addComponent()
     def addComponent(self, component):

@@ -40,7 +40,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.beginParse(syntax.scopeName)
         
         self.editor.syntaxHighlighter.start()
-        self.editor.syntaxChanged.emit(syntax)
+        self.editor.syntaxChanged.emit()
 
     def endExecution(self, bundleItem):
         self.endParse(bundleItem.scopeName)

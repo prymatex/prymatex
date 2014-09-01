@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>629</width>
-    <height>219</height>
+    <height>266</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -435,7 +435,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QLabel" name="labelPosition">
         <property name="maximumSize">
          <size>
-          <width>250</width>
+          <width>300</width>
           <height>16777215</height>
          </size>
         </property>
@@ -448,7 +448,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QLabel" name="labelContent">
         <property name="maximumSize">
          <size>
-          <width>300</width>
+          <width>350</width>
           <height>16777215</height>
          </size>
         </property>
@@ -461,7 +461,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QLabel" name="labelStatus">
         <property name="maximumSize">
          <size>
-          <width>80</width>
+          <width>150</width>
           <height>16777215</height>
          </size>
         </property>
