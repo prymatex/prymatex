@@ -83,7 +83,7 @@ class CodeEditorMacroProcessor(CodeEditorBaseProcessor, MacroProcessorMixin):
         self.editor.insertPlainText(text)
 
     def executeCommandWithOptions(self, commandHash):
-        command = self.editor.application.supportManager.buildAdHocCommand(**commandHash)
+        command = self.editor.application().supportManager.buildAdHocCommand(**commandHash)
         self.editor.insertBundleItem(command, asynchronous = False)
 
     def findWithOptions(self, options):

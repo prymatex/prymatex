@@ -749,7 +749,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 items = self.application().supportManager.getKeyEquivalentItem(
                     keyseq, leftScope, rightScope)
                 if items:
-                    self.insertBundleItem(items)
+                    return self.insertBundleItem(items)
                 
             pre_handlers = self.__preKeyPressHandlers.get(keyseq, []) + [ self.__insert_typing_pairs ] 
             

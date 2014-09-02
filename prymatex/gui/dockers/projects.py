@@ -422,7 +422,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
             self.window().currentEditorChanged.disconnect(self.on_window_currentEditorChanged)
     
     def on_window_currentEditorChanged(self, editor):
-        if editor is not None and not editor.isNew():
+        if editor is not None and editor.hasFile():
             index = self.projectTreeProxyModel.indexForPath(editor.filePath())
             self.treeViewProjects.setCurrentIndex(index)
 

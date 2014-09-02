@@ -368,8 +368,8 @@ html_footer
                 defaultButton = QtGui.QMessageBox.Yes)
             if result == QtGui.QMessageBox.Yes:
                 saveAs = True
-        if editor.isNew() or saveAs:
-            fileDirectory = self.application().fileManager.directory(self.projectsDock.currentPath()) if editor.isNew() else editor.fileDirectory()
+        if not editor.hasFile() or saveAs:
+            fileDirectory = self.application().fileManager.directory(self.projectsDock.currentPath()) if not editor.hasFile() else editor.fileDirectory()
             fileName = editor.title()
             fileFilters = editor.fileFilters()
             # TODO Armar el archivo destino y no solo el basedir
@@ -407,7 +407,7 @@ html_footer
 
     def tryCloseEmptyEditor(self, editor = None):
         editor = editor or self.currentEditor()
-        if editor is not None and editor.isNew() and not editor.isModified():
+        if editor is not None and not editor.hasFile() and not editor.isModified():
             self.closeEditor(editor)
 
     # ---------------- Handle location history
