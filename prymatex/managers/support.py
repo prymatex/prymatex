@@ -464,7 +464,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     # KEYEQUIVALENT OVERRIDE INTERFACE
     #---------------------------------------------------
     def getAllKeyEquivalentItems(self):
-        memoizedKey = ("getAllBundleItemsByTabTrigger", None, None, None)
+        memoizedKey = ("getAllKeyEquivalentItems", None, None, None)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache[memoizedKey]
         keyCode = []

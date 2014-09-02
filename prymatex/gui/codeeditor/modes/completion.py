@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
+import string
 
 from prymatex.qt import QtCore, QtGui
+from prymatex.utils import text
 
 from .base import CodeEditorBaseMode
+
+COMPLETER_CHARS = list(string.ascii_letters)
 
 class CodeEditorComplitionMode(CodeEditorBaseMode):
     def __init__(self, **kwargs):
@@ -22,15 +26,33 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             self.__run_completer
         )
         self.completer.popup().installEventFilter(self)
-        self.completer.installEventFilter(self)
+        self.editor.installEventFilter(self)
 
     def eventFilter(self, obj, event):
-        if event.type() == QtCore.QEvent.Show:
+        if obj == self.editor and event.type() == QtCore.QEvent.KeyRelease and \
+        text.asciify(event.text()) in COMPLETER_CHARS:
+            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
+            if end - start >= self.editor.wordLengthToComplete:
+                self.completer.setCompletionPrefix(alreadyTyped)
+                self.completer.runCompleter(self.editor.cursorRect())
+        elif event.type() == QtCore.QEvent.KeyRelease and self.isActive():
+            prefix, start, end = self.completer.completionPrefixRange()
+            cursor = self.editor.textCursor()
+            if start <= cursor.position() <= end:
+                cursor.setPosition(self.completer.startPosition(), QtGui.QTextCursor.KeepAnchor)
+                new_prefix = cursor.selectedText()
+                if new_prefix != prefix:
+                    self.completer.setCompletionPrefix(new_prefix)
+                    if self.completer.setCurrentRow(0) or self.completer.trySetNextModel():
+                        self.completer.complete(self.editor.cursorRect())
+            else: 
+                self.completer.hide()
+        elif event.type() == QtCore.QEvent.Show and obj == self.completer.popup():
             self.activate()
-        elif event.type() == QtCore.QEvent.Hide:
+        elif event.type() == QtCore.QEvent.Hide and obj == self.completer.popup():
             self.deactivate()
         return False
-        
+
     def __run_completer(self, event):
         if self.isActive() and self.completer.trySetNextModel():
             self.completer.complete(self.editor.cursorRect())
@@ -42,50 +64,3 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             self.completer.setCompletionPrefix(alreadyTyped)
             self.completer.runCompleter(self.editor.cursorRect())
         return False
-
-    def pre_key_press_event(self, event):
-        if self.isVisible():
-            if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab):
-                event.ignore()
-                return True
-            elif event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
-                #Proximo modelo
-                if self.trySetNextModel():
-                    self.complete(self.editor.cursorRect())
-                    self.explicit_launch = True
-                    return not self.explicit_launch
-                else:
-                    self.hide()
-            elif event.key() in (QtCore.Qt.Key_Space, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
-                self.hide()
-        elif event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
-            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-            self.explicit_launch = True
-            self.setCompletionPrefix(alreadyTyped)
-            self.runCompleter(self.editor.cursorRect())
-        return False
-    
-    def post_key_press_event(self, event):
-        if self.isVisible():
-            current_prefix = self.completionPrefix()
-            maxPosition = self.startCursorPosition + len(current_prefix) + 1
-            cursor = self.editor.textCursor()
-            
-            if not (self.startCursorPosition <= cursor.position() <= maxPosition):
-                self.hide()
-                return
-            cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
-            new_prefix = cursor.selectedText()
-            if new_prefix == current_prefix:
-                return
-            self.setCompletionPrefix(new_prefix)
-            if not self.setCurrentRow(0) and not self.trySetNextModel():
-                self.hide()
-                return
-            self.complete(self.editor.cursorRect())
-        elif text.asciify(event.text()) in COMPLETER_CHARS:
-            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-            if end - start >= self.editor.wordLengthToComplete:
-                self.explicit_launch = False
-                self.setCompletionPrefix(alreadyTyped)
-                self.runCompleter(self.editor.cursorRect())

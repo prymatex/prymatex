@@ -706,7 +706,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         else:
             TextEditWidget.wheelEvent(self, event)
 
-    # OVERRIDE: TextEditWidget.mouseReleaseEvent()
+    # OVERRIDE: TextEditWidget.mouseReleaseEvent(),
     def mouseReleaseEvent(self, event):
         freehanded = False
         if freehanded:
@@ -738,23 +738,27 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
-        keyseq = int(event.modifiers()) + event.key()
-        # Try key equivalent
-        if keyseq in self.application().supportManager.getAllKeyEquivalentCodes():
-            leftScope, rightScope = self.scope()
-            items = self.application().supportManager.getKeyEquivalentItem(
-                keyseq, leftScope, rightScope)
-            if items:
-                self.insertBundleItem(items)
+        if self.completer.isVisible() and \
+        event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab):
+            event.ignore()
+        else:
+            keyseq = int(event.modifiers()) + event.key()
+            # Try key equivalent
+            if keyseq in self.application().supportManager.getAllKeyEquivalentCodes():
+                leftScope, rightScope = self.scope()
+                items = self.application().supportManager.getKeyEquivalentItem(
+                    keyseq, leftScope, rightScope)
+                if items:
+                    self.insertBundleItem(items)
+                
+            pre_handlers = self.__preKeyPressHandlers.get(keyseq, []) + [ self.__insert_typing_pairs ] 
             
-        pre_handlers = self.__preKeyPressHandlers.get(keyseq, []) + [ self.__insert_typing_pairs ] 
-        
-        if not any([ handler(event) for handler in pre_handlers ]):
-            super(CodeEditor, self).keyPressEvent(event)
-
-            post_handlers = self.__postKeyPressHandlers.get(keyseq, [])
-            for handler in post_handlers:
-                handler(event)
+            if not any([ handler(event) for handler in pre_handlers ]):
+                super(CodeEditor, self).keyPressEvent(event)
+    
+                post_handlers = self.__postKeyPressHandlers.get(keyseq, [])
+                for handler in post_handlers:
+                    handler(event)
 
     # ------------ Key press
     def __first_line_syntax(self, event):

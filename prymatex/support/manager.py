@@ -924,12 +924,11 @@ class SupportBaseManager(object):
 
     #-------------- KEYEQUIVALENT ------------------------
     def getAllKeyEquivalentCodes(self):
-        # TODO En este nivel no se como estan implementados los codes no puedo llamar a keySequence
         memoizedKey = ("getAllKeyEquivalentCodes", None, None, None)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
-            [item.keySequence() for item in self.getAllKeyEquivalentItems()])
+            [item.keyCode() for item in self.getAllKeyEquivalentItems()])
 
     def getKeyEquivalentItem(self, keyCode, leftScope, rightScope):
         memoizedKey = ("getKeyEquivalentItem", keyCode, leftScope, rightScope)

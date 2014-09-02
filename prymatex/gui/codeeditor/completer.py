@@ -1,16 +1,12 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import string
 from functools import reduce
 
 from prymatex.qt import QtCore, QtGui, Qt
 
 from prymatex.core import config
-from prymatex.utils import text
 from prymatex.models.support import BundleItemTreeNode
-
-COMPLETER_CHARS = list(string.ascii_letters)
 
 # ===================================
 # Completer Base Model
@@ -283,8 +279,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
     def __init__(self, editor):
         super(CodeEditorCompleter, self).__init__(parent = editor)
         self.editor = editor
-        self.startCursorPosition = None
-        self.explicit_launch = False
+        self._start_position = 0
 
         # Models
         self.completionModels = [ ]
@@ -309,6 +304,13 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.highlighted[QtCore.QModelIndex].connect(self.highlightedCompletion)
 
         self.setWidget(self.editor)
+        
+    def completionPrefixRange(self):
+        prefix = self.completionPrefix()
+        return prefix, self._start_position, self._start_position + len(prefix) + 1
+        
+    def startPosition(self):
+        return self._start_position
 
     def setPalette(self, palette):
         self.popup().setPalette(palette)
@@ -320,7 +322,6 @@ class CodeEditorCompleter(QtGui.QCompleter):
     def hide(self):
         if self.completionMode() == QtGui.QCompleter.PopupCompletion:
             self.popup().hide()
-        self.startCursorPosition = None
 
     def fixPopupView(self):
         if self.completionMode() == QtGui.QCompleter.PopupCompletion:
@@ -332,53 +333,6 @@ class CodeEditorCompleter(QtGui.QCompleter):
             self.popup().setMinimumWidth(width > 212 and width or 212)
             height = self.popup().rowHeight(0) * self.completionCount()
             self.popup().setMinimumHeight(height > 343 and 343 or height)
-
-    def pre_key_event(self, event):
-        if self.isVisible():
-            if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab):
-                event.ignore()
-                return True
-            elif event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
-                #Proximo modelo
-                if self.trySetNextModel():
-                    self.complete(self.editor.cursorRect())
-                    self.explicit_launch = True
-                    return not self.explicit_launch
-                else:
-                    self.hide()
-            elif event.key() in (QtCore.Qt.Key_Space, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
-                self.hide()
-        elif event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
-            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-            self.explicit_launch = True
-            self.setCompletionPrefix(alreadyTyped)
-            self.runCompleter(self.editor.cursorRect())
-        return False
-
-    def post_key_event(self, event):
-        if self.isVisible():
-            current_prefix = self.completionPrefix()
-            maxPosition = self.startCursorPosition + len(current_prefix) + 1
-            cursor = self.editor.textCursor()
-            
-            if not (self.startCursorPosition <= cursor.position() <= maxPosition):
-                self.hide()
-                return
-            cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
-            new_prefix = cursor.selectedText()
-            if new_prefix == current_prefix:
-                return
-            self.setCompletionPrefix(new_prefix)
-            if not self.setCurrentRow(0) and not self.trySetNextModel():
-                self.hide()
-                return
-            self.complete(self.editor.cursorRect())
-        elif text.asciify(event.text()) in COMPLETER_CHARS:
-            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-            if end - start >= self.editor.wordLengthToComplete:
-                self.explicit_launch = False
-                self.setCompletionPrefix(alreadyTyped)
-                self.runCompleter(self.editor.cursorRect())
 
     def activatedCompletion(self, index):
         self.model().activatedCompletion(self.completionModel().mapToSource(index))
@@ -396,7 +350,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
             self.completionModel().mapToSource(cIndex), self.completionCount())
 
     def setCompletionPrefix(self, prefix):
-        self.startCursorPosition = self.editor.textCursor().position() - len(prefix or "")
+        self._start_position = self.editor.textCursor().position() - len(prefix or "")
         for model in self.completionModels:
             model.setCompletionPrefix(prefix)
         QtGui.QCompleter.setCompletionPrefix(self, prefix)
@@ -441,7 +395,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
 
     def runCompleter(self, rect, model = None):
         if self.isVisible():
-            if (model is not None and self.trySetModel(model)) or self.explicit_launch:
+            if model is not None and self.trySetModel(model):
                 self.complete(rect)
         elif not self.isVisible():
             for completerTask in self.completerTasks:
