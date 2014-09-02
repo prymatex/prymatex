@@ -62,7 +62,7 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
             self.stop()
             
     def runShellScript(self, script):
-        context = self.editor.application.supportManager.runSystemCommand(
+        context = self.editor.application().supportManager.runSystemCommand(
             shellCommand = script,
             environment = self.environmentVariables(),
             shellVariables = self.shellVariables()

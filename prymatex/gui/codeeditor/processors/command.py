@@ -147,7 +147,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
 
     def insertAsSnippet(self, context, outputFormat = None):
         # Build Snippet
-        snippet = self.editor.application.supportManager.buildAdHocSnippet(
+        snippet = self.editor.application().supportManager.buildAdHocSnippet(
             context.outputValue, context.bundleItem.bundle,
             tabTrigger = context.bundleItem.tabTrigger)
         # Insert snippet

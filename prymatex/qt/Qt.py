@@ -7,3 +7,4 @@ if os.environ['QT_API'] == 'pyqt':
     from PyQt4.Qt import *
 
 QWIDGETSIZE_MAX = 16777215
+Key_Any = 0

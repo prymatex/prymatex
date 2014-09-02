@@ -279,8 +279,14 @@ class CodeEditorCompleter(QtGui.QCompleter):
     def __init__(self, editor):
         super(CodeEditorCompleter, self).__init__(parent = editor)
         self.editor = editor
-        self._start_position = 0
+        self.editor.registerKeyPressHandler(QtCore.Qt.Key_Enter, 
+            self.__insert_completion, important = True)
+        self.editor.registerKeyPressHandler(QtCore.Qt.Key_Return, 
+            self.__insert_completion, important = True)
+        self.editor.registerKeyPressHandler(QtCore.Qt.Key_Tab, 
+            self.__insert_completion, important = True)
 
+        self._start_position = 0
         # Models
         self.completionModels = [ ]
 
@@ -304,7 +310,13 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.highlighted[QtCore.QModelIndex].connect(self.highlightedCompletion)
 
         self.setWidget(self.editor)
-        
+    
+    def __insert_completion(self, event):
+        if self.isVisible():
+            event.ignore()
+            return True
+        return False
+
     def completionPrefixRange(self):
         prefix = self.completionPrefix()
         return prefix, self._start_position, self._start_position + len(prefix) + 1

@@ -15,7 +15,7 @@ class CodeEditorOverwriteMode(CodeEditorBaseMode):
 
     def initialize(self, **kwargs):
         super(CodeEditorOverwriteMode, self).initialize(**kwargs)
-        self.editor.registerPreKeyPressHandler(QtCore.Qt.Key_Insert,
+        self.editor.registerKeyPressHandler(QtCore.Qt.Key_Insert,
             self.toggle_overwrite)
 
     def toggle_overwrite(self, event):
@@ -25,3 +25,4 @@ class CodeEditorOverwriteMode(CodeEditorBaseMode):
             self.activate()
         else:
             self.deactivate()
+        return False

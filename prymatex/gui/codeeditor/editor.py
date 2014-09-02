@@ -113,19 +113,17 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # --------------------- init
     def __init__(self, **kwargs):
         super(CodeEditor, self).__init__(**kwargs)
-
         self.__current_mode = self
         self.__blockUserDataHandlers = []
-        self.__preKeyPressHandlers = {
+        self.__keyPressHandlers = {
+            QtCore.Qt.Key_Any: [ self.__insert_key_bundle_item, self.__insert_typing_pairs ],
             QtCore.Qt.Key_Return: [ self.__first_line_syntax, self.__insert_new_line ],
             QtCore.Qt.Key_Tab: [ self.__insert_tab_bundle_item, self.__indent_tab_behavior ],
             QtCore.Qt.Key_Home: [ self.__move_cursor_to_line_start ],
-            (QtCore.Qt.SHIFT + QtCore.Qt.Key_Home): [ self.__move_cursor_to_line_start ],
             QtCore.Qt.Key_Backtab: [ self.__unindent ],
             QtCore.Qt.Key_Backspace: [ self.__unindent_backward_tab_behavior, self.__remove_backward_braces ],
             QtCore.Qt.Key_Delete: [ self.__unindent_forward_tab_behavior, self.__remove_forward_braces ]
         }
-        self.__postKeyPressHandlers = {}
         
         #Current pairs for cursor position (leftBrace <|> rightBrace, oppositeLeftBrace, oppositeRightBrace)
         # <|> the cursor is allways here
@@ -728,37 +726,23 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             TextEditWidget.mouseReleaseEvent(self, event)
 
     # --------------- Key press pre and post
-    def registerPreKeyPressHandler(self, sequence, handler):
-        code = sequence[0] if isinstance(sequence, QtGui.QKeySequence) else sequence
-        self.__preKeyPressHandlers.setdefault(code, []).append(handler)
-
-    def registerPostKeyPressHandler(self, sequence, handler):
-        code = sequence[0] if isinstance(sequence, QtGui.QKeySequence) else sequence
-        self.__postKeyPressHandlers.setdefault(code, []).append(handler)
+    def registerKeyPressHandler(self, key, handler, important = False):
+        handlers = self.__keyPressHandlers.setdefault(key, [])
+        if important:
+            handlers.insert(0, handler)
+        else:
+            handlers.append(handler)
 
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
-        if self.completer.isVisible() and \
-        event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab):
-            event.ignore()
-        else:
-            keyseq = int(event.modifiers()) + event.key()
-            # Try key equivalent
-            if keyseq in self.application().supportManager.getAllKeyEquivalentCodes():
-                leftScope, rightScope = self.scope()
-                items = self.application().supportManager.getKeyEquivalentItem(
-                    keyseq, leftScope, rightScope)
-                if items:
-                    return self.insertBundleItem(items)
-                
-            pre_handlers = self.__preKeyPressHandlers.get(keyseq, []) + [ self.__insert_typing_pairs ] 
-            
-            if not any([ handler(event) for handler in pre_handlers ]):
-                super(CodeEditor, self).keyPressEvent(event)
-    
-                post_handlers = self.__postKeyPressHandlers.get(keyseq, [])
-                for handler in post_handlers:
-                    handler(event)
+        def handle(event):
+            for handler in self.__keyPressHandlers.get(QtCore.Qt.Key_Any, []):
+                yield handler(event)
+            for handler in self.__keyPressHandlers.get(event.key(), []):
+                yield handler(event)
+        
+        if not any(handle(event)):
+            super(CodeEditor, self).keyPressEvent(event)
 
     # ------------ Key press
     def __first_line_syntax(self, event):
@@ -773,6 +757,17 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def __insert_new_line(self, event):
         self.insertNewLine(self.textCursor())
         return True
+    
+    def __insert_key_bundle_item(self, event):
+        keyseq = int(event.modifiers()) + event.key()
+        # Try key equivalent
+        if keyseq in self.application().supportManager.getAllKeyEquivalentCodes():
+            leftScope, rightScope = self.scope()
+            items = self.application().supportManager.getKeyEquivalentItem(
+                keyseq, leftScope, rightScope)
+            self.insertBundleItem(items)
+            return bool(items)
+        return False
     
     def __insert_tab_bundle_item(self, event):
         cursor = self.textCursor()

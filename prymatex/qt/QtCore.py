@@ -16,3 +16,4 @@ else:
     from PySide.QtCore import *
     
 Qt.MatchRole = Qt.UserRole + 1
+Qt.Key_Any = 0
