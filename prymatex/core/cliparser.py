@@ -5,7 +5,7 @@ import sys
 
 import prymatex
 
-usage = "pmx.py [options] [files]"
+usage = "prymatex.py [options] [files]"
 
 description = prymatex.__doc__
 

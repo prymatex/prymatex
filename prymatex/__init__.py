@@ -60,7 +60,6 @@ def get_version(version=None):
 __prj__ = "prymatex"
 __author__ = "The Prymatex Team"
 __mail__ = "team at prymatex dot org"
-#__url__ = "http://www.prymatex.org"
 __url__ = "http://github.com/prymatex/prymatex"
 __source__ = "http://github.com/prymatex/prymatex"
 __license__ = "GPL2"

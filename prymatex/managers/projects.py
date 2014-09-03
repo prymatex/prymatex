@@ -63,7 +63,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
     def contributeToSettings(cls):
         from prymatex.gui.settings.projects import ProjectSettingsWidget
         from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
-        return [ ProjectSettingsWidget, AddonsSettingsWidgetFactory("general.projects") ]
+        return [ ProjectSettingsWidget, AddonsSettingsWidgetFactory("projects") ]
 
     def convertToValidPath(self, name):
         #TODO: este y el del manager de bundles pasarlos a utils

@@ -28,25 +28,37 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
         self.completer.popup().installEventFilter(self)
         self.editor.installEventFilter(self)
 
+    def activate(self):
+        self.editor.textChanged.connect(self.on_editor_textChanged)
+        self.editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
+        super(CodeEditorComplitionMode, self).activate()
+    
+    def deactivate(self):
+        self.editor.textChanged.disconnect(self.on_editor_textChanged)
+        self.editor.cursorPositionChanged.disconnect(self.on_editor_cursorPositionChanged)
+        super(CodeEditorComplitionMode, self).deactivate()
+    
+    def on_editor_textChanged(self):
+        alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
+        self.completer.setCompletionPrefix(alreadyTyped)
+        if self.completer.setCurrentRow(0) or self.completer.trySetNextModel():
+            self.completer.complete(self.editor.cursorRect())
+        else:
+            self.completer.hide()
+
+    def on_editor_cursorPositionChanged(self):
+        prefix, start, end = self.completer.completionPrefixRange()
+        cursor = self.editor.textCursor()
+        if not (start <= cursor.position() <= end):
+            self.completer.hide()
+                        
     def eventFilter(self, obj, event):
-        if obj == self.editor and event.type() == QtCore.QEvent.KeyRelease and \
+        if obj == self.editor and not self.isActive() and event.type() == QtCore.QEvent.KeyRelease and \
         text.asciify(event.text()) in COMPLETER_CHARS:
             alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
             if end - start >= self.editor.wordLengthToComplete:
                 self.completer.setCompletionPrefix(alreadyTyped)
                 self.completer.runCompleter(self.editor.cursorRect())
-        elif event.type() == QtCore.QEvent.KeyRelease and self.isActive():
-            prefix, start, end = self.completer.completionPrefixRange()
-            cursor = self.editor.textCursor()
-            if start <= cursor.position() <= end:
-                cursor.setPosition(self.completer.startPosition(), QtGui.QTextCursor.KeepAnchor)
-                new_prefix = cursor.selectedText()
-                if new_prefix != prefix:
-                    self.completer.setCompletionPrefix(new_prefix)
-                    if self.completer.setCurrentRow(0) or self.completer.trySetNextModel():
-                        self.completer.complete(self.editor.cursorRect())
-            else: 
-                self.completer.hide()
         elif event.type() == QtCore.QEvent.Show and obj == self.completer.popup():
             self.activate()
         elif event.type() == QtCore.QEvent.Hide and obj == self.completer.popup():

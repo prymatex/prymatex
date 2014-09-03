@@ -209,7 +209,9 @@ class SuggestionsCompletionModel(CompletionBaseModel):
         self.completionCallback = None
 
     def setSuggestions(self, suggestions):
+        self.modelAboutToBeReset.emit()
         self.suggestions = suggestions
+        self.modelReset.emit()
 
     def setCompletionCallback(self, callback):
         self.completionCallback = callback
@@ -407,7 +409,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
 
     def runCompleter(self, rect, model = None):
         if self.isVisible():
-            if model is not None and self.trySetModel(model):
+            if model != self.model() and self.trySetModel(model):
                 self.complete(rect)
         elif not self.isVisible():
             for completerTask in self.completerTasks:

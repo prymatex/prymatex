@@ -6,8 +6,8 @@ from prymatex.qt import QtGui, QtCore
 from prymatex.ui.configure.editor import Ui_Editor
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.gui.codeeditor.editor import CodeEditor
-from prymatex.gui.codeeditor.sidebar import (LineNumberSideBarAddon, BookmarkSideBarAddon,
-                                FoldingSideBarAddon, SelectionSideBarAddon)
+from prymatex.gui.codeeditor.sidebar import (LineNumberSideBarAddon, 
+    BookmarkSideBarAddon, FoldingSideBarAddon, SelectionSideBarAddon)
 
 class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtGui.QWidget):
     def __init__(self, **kwargs):
