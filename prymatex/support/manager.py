@@ -177,9 +177,8 @@ class SupportBaseManager(object):
             stdin = subprocess.PIPE, stdout = subprocess.PIPE, 
             stderr = subprocess.PIPE, env = context.scriptFileEnvironment)
 
-        print(encoding.to_fs(context.inputValue))
         outputValue, errorValue =  context.process.communicate(
-            encoding.to_fs(context.inputValue))
+            context.inputValue and encoding.to_fs(context.inputValue))
         
         context.outputValue = encoding.from_fs(outputValue)
         context.errorValue = encoding.from_fs(errorValue)
