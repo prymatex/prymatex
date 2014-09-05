@@ -17,7 +17,7 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
     
     def name(self):
         return "Complition"
-        
+
     def initialize(self, **kwargs):
         super(CodeEditorComplitionMode, self).initialize(**kwargs)
         self.completer = self.editor.completer
@@ -25,8 +25,12 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             QtCore.Qt.Key_Space,
             self.__run_completer
         )
+        self.editor.registerKeyPressHandler(
+            QtCore.Qt.Key_Any,
+            self.__autorun_completer,
+            after = True
+        )
         self.completer.popup().installEventFilter(self)
-        self.editor.installEventFilter(self)
 
     def activate(self):
         self.editor.textChanged.connect(self.on_editor_textChanged)
@@ -53,15 +57,9 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             self.completer.hide()
                         
     def eventFilter(self, obj, event):
-        if obj == self.editor and not self.isActive() and event.type() == QtCore.QEvent.KeyRelease and \
-        text.asciify(event.text()) in COMPLETER_CHARS:
-            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-            if end - start >= self.editor.wordLengthToComplete:
-                self.completer.setCompletionPrefix(alreadyTyped)
-                self.completer.runCompleter(self.editor.cursorRect())
-        elif event.type() == QtCore.QEvent.Show and obj == self.completer.popup():
+        if event.type() == QtCore.QEvent.Show:
             self.activate()
-        elif event.type() == QtCore.QEvent.Hide and obj == self.completer.popup():
+        elif event.type() == QtCore.QEvent.Hide:
             self.deactivate()
         return False
 
@@ -77,3 +75,11 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
                 self.completer.setCompletionPrefix(alreadyTyped)
                 self.completer.runCompleter(self.editor.cursorRect())
         return False
+
+    def __autorun_completer(self, event):
+        if not self.isActive() and not event.modifiers() and \
+            text.asciify(event.text()) in COMPLETER_CHARS:
+            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
+            if end - start >= self.editor.wordLengthToComplete:
+                self.completer.setCompletionPrefix(alreadyTyped)
+                self.completer.runCompleter(self.editor.cursorRect())

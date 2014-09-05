@@ -115,7 +115,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         super(CodeEditor, self).__init__(**kwargs)
         self.__current_mode = self
         self.__blockUserDataHandlers = []
-        self.__keyPressHandlers = {
+        self.__preKeyPressHandlers = {
             QtCore.Qt.Key_Any: [ self.__insert_key_bundle_item, self.__insert_typing_pairs ],
             QtCore.Qt.Key_Return: [ self.__first_line_syntax, self.__insert_new_line ],
             QtCore.Qt.Key_Tab: [ self.__insert_tab_bundle_item, self.__indent_tab_behavior ],
@@ -124,7 +124,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             QtCore.Qt.Key_Backspace: [ self.__unindent_backward_tab_behavior, self.__remove_backward_braces ],
             QtCore.Qt.Key_Delete: [ self.__unindent_forward_tab_behavior, self.__remove_forward_braces ]
         }
-        
+        self.__postKeyPressHandlers = {}
+
         #Current pairs for cursor position (leftBrace <|> rightBrace, oppositeLeftBrace, oppositeRightBrace)
         # <|> the cursor is allways here
         self._currentPairs = (None, None, None, None)
@@ -726,8 +727,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             TextEditWidget.mouseReleaseEvent(self, event)
 
     # --------------- Key press pre and post
-    def registerKeyPressHandler(self, key, handler, important = False):
-        handlers = self.__keyPressHandlers.setdefault(key, [])
+    def registerKeyPressHandler(self, key, handler, important = False, after = False):
+        keyPressHandlers = after and self.__postKeyPressHandlers or self.__preKeyPressHandlers
+        handlers = keyPressHandlers.setdefault(key, [])
         if important:
             handlers.insert(0, handler)
         else:
@@ -735,14 +737,16 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
-        def handle(event):
-            for handler in self.__keyPressHandlers.get(QtCore.Qt.Key_Any, []):
+        def handle(event, keyPressHandlers):
+            for handler in keyPressHandlers.get(QtCore.Qt.Key_Any, []):
                 yield handler(event)
-            for handler in self.__keyPressHandlers.get(event.key(), []):
+            for handler in keyPressHandlers.get(event.key(), []):
                 yield handler(event)
         
-        if not any(handle(event)):
+        if not any(handle(event, self.__preKeyPressHandlers)):
             super(CodeEditor, self).keyPressEvent(event)
+
+            handle(event, self.__postKeyPressHandlers)
 
     # ------------ Key press
     def __first_line_syntax(self, event):
