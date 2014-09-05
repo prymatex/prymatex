@@ -19,15 +19,15 @@ from .userdata import CodeEditorBlockUserData
 from .addons import CodeEditorAddon
 from .sidebar import CodeEditorSideBar, SideBarWidgetAddon
 from .processors import (CodeEditorCommandProcessor, CodeEditorSnippetProcessor,
-        CodeEditorMacroProcessor, CodeEditorSyntaxProcessor, CodeEditorThemeProcessor)
+    CodeEditorMacroProcessor, CodeEditorSyntaxProcessor, CodeEditorThemeProcessor)
 from .modes import CodeEditorBaseMode
 
 from .highlighter import CodeEditorSyntaxHighlighter
 from .models import (SymbolListModel, BookmarkListModel,
-        bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
-        symbolSelectableModelFactory)
+    bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
+    symbolSelectableModelFactory)
 from .completer import (CodeEditorCompleter, WordsCompletionModel,
-        TabTriggerItemsCompletionModel, SuggestionsCompletionModel)
+    TabTriggerItemsCompletionModel, SuggestionsCompletionModel)
 
 from prymatex.support import PreferenceMasterSettings
 
@@ -115,7 +115,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         super(CodeEditor, self).__init__(**kwargs)
         self.__current_mode = self
         self.__blockUserDataHandlers = []
-        self.__keyPressHandlers = {
+        self.__preKeyPressHandlers = {
             QtCore.Qt.Key_Any: [ self.__insert_key_bundle_item, self.__insert_typing_pairs ],
             QtCore.Qt.Key_Return: [ self.__first_line_syntax, self.__insert_new_line ],
             QtCore.Qt.Key_Tab: [ self.__insert_tab_bundle_item, self.__indent_tab_behavior ],
@@ -124,7 +124,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             QtCore.Qt.Key_Backspace: [ self.__unindent_backward_tab_behavior, self.__remove_backward_braces ],
             QtCore.Qt.Key_Delete: [ self.__unindent_forward_tab_behavior, self.__remove_forward_braces ]
         }
-        
+        self.__postKeyPressHandlers = {}
+
         #Current pairs for cursor position (leftBrace <|> rightBrace, oppositeLeftBrace, oppositeRightBrace)
         # <|> the cursor is allways here
         self._currentPairs = (None, None, None, None)
@@ -156,13 +157,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
         self.syntaxHighlighter.aboutToHighlightChange.connect(self.aboutToHighlightChange.emit)
         self.syntaxHighlighter.highlightChanged.connect(self.highlightChanged.emit)
-
-        #Completer
-        self.completer = CodeEditorCompleter(self)
-        self.completer.registerModel(WordsCompletionModel(parent = self))
-        self.completer.registerModel(TabTriggerItemsCompletionModel(parent = self))
-        self.suggestionsCompletionModel = SuggestionsCompletionModel(parent = self)
-        self.completer.registerModel(self.suggestionsCompletionModel)
 
         #Block Count
         self.lastBlockCount = self.document().blockCount()
@@ -606,7 +600,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def setPalette(self, palette):
         super(CodeEditor, self).setPalette(palette)
         self.viewport().setPalette(palette)
-        self.completer.setPalette(palette)
         self.leftBar.setPalette(palette)
         self.rightBar.setPalette(palette)
         
@@ -726,8 +719,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             TextEditWidget.mouseReleaseEvent(self, event)
 
     # --------------- Key press pre and post
-    def registerKeyPressHandler(self, key, handler, important = False):
-        handlers = self.__keyPressHandlers.setdefault(key, [])
+    def registerKeyPressHandler(self, key, handler, important = False, after = False):
+        keyPressHandlers = after and self.__postKeyPressHandlers or self.__preKeyPressHandlers
+        handlers = keyPressHandlers.setdefault(key, [])
         if important:
             handlers.insert(0, handler)
         else:
@@ -735,14 +729,16 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
-        def handle(event):
-            for handler in self.__keyPressHandlers.get(QtCore.Qt.Key_Any, []):
+        def handle(event, keyPressHandlers):
+            for handler in keyPressHandlers.get(QtCore.Qt.Key_Any, []):
                 yield handler(event)
-            for handler in self.__keyPressHandlers.get(event.key(), []):
+            for handler in keyPressHandlers.get(event.key(), []):
                 yield handler(event)
         
-        if not any(handle(event)):
+        if not any(handle(event, self.__preKeyPressHandlers)):
             super(CodeEditor, self).keyPressEvent(event)
+
+            handle(event, self.__postKeyPressHandlers)
 
     # ------------ Key press
     def __first_line_syntax(self, event):
@@ -1035,19 +1031,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             if currentWord is not None else self.textCursor()
         snippet = suggestion.get('insert') or suggestion.get('display') or suggestion.get('title')
         self.insertSnippet(snippet, textCursor = cursor)
-
-    def runCompleter(self, suggestions, already_typed=None, callback = None, 
-        case_insensitive=True, disable_auto_insert = True, api_completions_only = True,
-        next_completion_if_showing = False, auto_complete_commit_on_tab = True):
-        self.suggestionsCompletionModel.setSuggestions(suggestions)
-        self.suggestionsCompletionModel.setCompletionCallback(callback or
-            self.defaultCompletionCallback)
-        self.completer.setCaseSensitivity(case_insensitive and QtCore.Qt.CaseInsensitive or QtCore.Qt.CaseSensitive)
-        #self.completer.setCompletionMode(QtGui.QCompleter.InlineCompletion)
-        if not self.completer.isVisible():
-            alreadyTyped, start, end = self.wordUnderCursor(direction="left", search = True)
-            self.completer.setCompletionPrefix(already_typed or alreadyTyped or "")
-        self.completer.runCompleter(self.cursorRect(), model = self.suggestionsCompletionModel)
 
     # ---------- Folding
     def _find_block_fold_peer(self, block, direction = "down"):

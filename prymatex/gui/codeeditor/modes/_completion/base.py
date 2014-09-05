@@ -5,22 +5,32 @@ import string
 from prymatex.qt import QtCore, QtGui
 from prymatex.utils import text
 
-from .base import CodeEditorBaseMode
+from ..base import CodeEditorBaseMode
+
+from .completer import CodeEditorCompleter
+from .models import (WordsCompletionModel, TabTriggerItemsCompletionModel, SuggestionsCompletionModel)
 
 COMPLETER_CHARS = list(string.ascii_letters)
 
 class CodeEditorComplitionMode(CodeEditorBaseMode):
     def __init__(self, **kwargs):
         super(CodeEditorComplitionMode, self).__init__(**kwargs)
-        print(self.editor)
+        
+        self.completer = CodeEditorCompleter(self.editor)
+        self.completer.registerModel(WordsCompletionModel(parent = self.editor))
+        self.completer.registerModel(TabTriggerItemsCompletionModel(parent = self.editor))
+        self.suggestionsCompletionModel = SuggestionsCompletionModel(parent = self.editor)
+        self.completer.registerModel(self.suggestionsCompletionModel)
+
+        # Install method
+        self.editor.runCompleter = self.__editor_run_completer
         self.setObjectName("CodeEditorComplitionMode")
-    
+
     def name(self):
         return "Complition"
 
     def initialize(self, **kwargs):
         super(CodeEditorComplitionMode, self).initialize(**kwargs)
-        self.completer = self.editor.completer
         self.editor.registerKeyPressHandler(
             QtCore.Qt.Key_Space,
             self.__run_completer
@@ -62,6 +72,19 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
         elif event.type() == QtCore.QEvent.Hide:
             self.deactivate()
         return False
+
+    def __editor_run_completer(self, suggestions, already_typed=None, callback = None, 
+        case_insensitive=True, disable_auto_insert = True, api_completions_only = True,
+        next_completion_if_showing = False, auto_complete_commit_on_tab = True):
+        self.suggestionsCompletionModel.setSuggestions(suggestions)
+        self.suggestionsCompletionModel.setCompletionCallback(callback or
+            self.defaultCompletionCallback)
+        self.completer.setCaseSensitivity(case_insensitive and QtCore.Qt.CaseInsensitive or QtCore.Qt.CaseSensitive)
+        #self.completer.setCompletionMode(QtGui.QCompleter.InlineCompletion)
+        if not self.completer.isVisible():
+            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
+            self.completer.setCompletionPrefix(already_typed or alreadyTyped or "")
+        self.completer.runCompleter(self.editor.cursorRect(), model = self.suggestionsCompletionModel)
 
     def __run_completer(self, event):
         if event.modifiers() & QtCore.Qt.ControlModifier:
