@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-import six
+from prymatex.utils import six
 from prymatex.core.exceptions import UnsupportedPlatformError
 
 
