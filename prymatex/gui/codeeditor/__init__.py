@@ -11,7 +11,6 @@ from .minimap import (MiniMapAddon)
 from .modes import (CodeEditorMultiCursorMode, CodeEditorSnippetMode, CodeEditorOverwriteMode,
     CodeEditorComplitionMode)
 from .status import CodeEditorStatus
-from .completer import CompletionBaseModel
 
 def registerPlugin(manager, descriptor):
     manager.registerComponent(CodeEditor, default = True)

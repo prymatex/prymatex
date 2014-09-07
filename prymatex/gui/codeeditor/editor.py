@@ -26,8 +26,6 @@ from .highlighter import CodeEditorSyntaxHighlighter
 from .models import (SymbolListModel, BookmarkListModel,
     bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
     symbolSelectableModelFactory)
-from .completer import (CodeEditorCompleter, WordsCompletionModel,
-    TabTriggerItemsCompletionModel, SuggestionsCompletionModel)
 
 from prymatex.support import PreferenceMasterSettings
 
