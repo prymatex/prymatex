@@ -855,19 +855,18 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         pair = pairs[0]
         
         insert = replace = wrap = skip = False
-        cursor1 = cursor2 = None
-        
-        isClose = character == pair[1]
+
         isOpen = character == pair[0]
+        isClose = character == pair[1]
         meta_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
         if isClose:
             cursor1, cursor2 = self.currentBracesPairs(cursor, direction = "right")
             if cursor1 and cursor2 and \
-                character == cursor2.selectedText() and \
-                pair[0] != pair[1]:
+                character == cursor2.selectedText():
                 cursor.movePosition(QtGui.QTextCursor.NextCharacter)
                 self.setTextCursor(cursor)
                 return True
+            return False
         elif meta_down and isOpen:
             if cursor.hasSelection():
                 selectedText = cursor.selectedText()
