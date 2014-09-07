@@ -3,8 +3,6 @@
 
 import os
 import sys
-import inspect
-import tempfile
 from functools import partial
 
 import prymatex
@@ -14,13 +12,15 @@ from prymatex.qt.helpers import create_shortcut
 
 from prymatex.core import config
 from prymatex.core.components import PrymatexComponent, PrymatexEditor
-from prymatex.core import logger, exceptions
+from prymatex.core import logger
 from prymatex.core.settings import ConfigurableItem, ConfigurableHook
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import six
+from prymatex.utils.processes import get_process_map
 
 from prymatex.models.shortcuts import ShortcutsTreeModel
+
 
 class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     """The application instance.
@@ -29,23 +29,23 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     # ---------------------- Settings
     SETTINGS = "Global"
-    RESOURCES = ( config.USR_NS_NAME, config.PMX_NS_NAME )
+    RESOURCES = (config.USR_NS_NAME, config.PMX_NS_NAME)
 
     @ConfigurableItem()
     def qtStyle(self, styleName):
         if styleName:
             self.setStyle(styleName)
 
-    @ConfigurableItem(default = "default")
+    @ConfigurableItem(default="default")
     def qtStyleSheet(self, styleSheetName):
         styleSheet = self.resources().get_stylesheets().get(styleSheetName)
         if styleSheet is not None:
             self.setStyleSheet(styleSheet.content)
 
-    @ConfigurableItem(default = QtGui.QIcon.themeName())
+    @ConfigurableItem(default=QtGui.QIcon.themeName())
     def iconTheme(self, iconThemeName):
         self.resources().set_theme(iconThemeName)
-            
+
     askAboutExternalDeletions = ConfigurableItem(default=False)
     askAboutExternalChanges = ConfigurableItem(default=False)
 
@@ -72,7 +72,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self.componentInstances = {}
         self.shortcutsTreeModel = ShortcutsTreeModel(self)
         self.replaceSysExceptHook()
-    
+
     # ------ exception and logger handlers
     def getLogger(self, *largs, **kwargs):
         return logger.getLogger(*largs, **kwargs)
@@ -121,7 +121,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         # Prepare profile
         from prymatex.managers.profile import ProfileManager
         self.populateComponentClass(ProfileManager)
-        self.profileManager = ProfileManager(parent = self)
+        self.profileManager = ProfileManager(parent=self)
         self._profile = self.profileManager.currentProfile(self.options.profile)
         if self._profile is None:
             return False
@@ -133,19 +133,20 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self.populateComponentClass(PrymatexApplication)
         self._profile.registerConfigurableInstance(self)
 
-        logger.config(self.options.verbose, self._profile.PMX_LOG_PATH, self.options.log_pattern)
-        
+        logger.config(self.options.verbose, self._profile.PMX_LOG_PATH,
+                      self.options.log_pattern)
+
         return self.checkSingleInstance()
 
     def installTranslator(self):
         pass
-        #slanguage = QtCore.QLocale.system().name()
-        #print language
-        #self.translator = QtCore.QTranslator()
-        #print os.path.join(config.PMX_SHARE_PATH, "Languages")
+        # slanguage = QtCore.QLocale.system().name()
+        # print language
+        # self.translator = QtCore.QTranslator()
+        # print os.path.join(config.PMX_SHARE_PATH, "Languages")
 
-        #self.translator.load(settings.LANGUAGE)
-        #self.installTranslator(translator)
+        # self.translator.load(settings.LANGUAGE)
+        # self.installTranslator(translator)
 
     # ---------------------- PMXBaseComponent methods
     @classmethod
@@ -153,7 +154,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         from prymatex.gui.settings.general import GeneralSettingsWidget
         from prymatex.gui.settings.shortcuts import ShortcutsSettingsWidget
 
-        return [ GeneralSettingsWidget, ShortcutsSettingsWidget ]
+        return [GeneralSettingsWidget, ShortcutsSettingsWidget]
 
     def loadGraphicalUserInterface(self):
         self.showMessage = self.logger().info
@@ -173,28 +174,28 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         try:
             # Build Managers WARN: Order is important
             self.pluginManager = self.buildPluginManager()      # Plugin manager
-            self.storageManager = self.buildStorageManager()    # Persistence system Manager
+            self.storageManager = self.buildStorageManager()    # Persistence system Manager  # NOQA
             self.supportManager = self.buildSupportManager()    # Support Manager
             self.fileManager = self.buildFileManager()          # File Manager
             self.projectManager = self.buildProjectManager()    # Project Manager
-            self.schedulerManager =  self.buildSchedulerManager()
+            self.schedulerManager = self.buildSchedulerManager()
             self.serverManager = self.buildServerManager()
-            
+
             # Load Bundles
             self.supportManager.loadSupport(self.showMessage)
-            
+
             # Load Projects
             self.projectManager.loadProjects(self.showMessage)
-            
+
             # Create Main Window
             main_window = self.buildMainWindow()
-            
+
             # Change messages handler
             self.showMessage = main_window.showMessage
 
             # Load settings
             self.profileManager.loadSettings(self.showMessage)
-	    
+
             # Load standard shortcuts
             self.shortcutsTreeModel.loadStandardSequences(self.resources())
 
@@ -204,13 +205,14 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             main_window.show()
             self.logger().info("Application startup")
         except KeyboardInterrupt:
-            self.logger().critical("Quit signal catched during application startup. Quiting...")
+            self.logger().critical("Quit signal catched during application startup. "
+                                   "Quiting...")
             self.quit()
 
     def unloadGraphicalUserInterface(self):
-        #TODO: ver como dejar todo lindo y ordenado para terminar correctamente
-        #if self.zmqContext is not None:
-        #    self.zmqContext.destroy()
+        # TODO: ver como dejar todo lindo y ordenado para terminar correctamente
+        # if self.zmqContext is not None:
+        #     self.zmqContext.destroy()
         for main_window in self.mainWindows():
             main_window.close()
             main_window.deleteLater()
@@ -221,10 +223,27 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     def checkSingleInstance(self):
         """Checks if there's another instance using current profile"""
         self.fileLock = os.path.join(self._profile.PMX_PROFILE_PATH, 'prymatex.pid')
-
+        remove_profile_lock = False
         if os.path.exists(self.fileLock):
-            self.logger().critical("%s seems to be runnig. Please close the instance or run other profile." % (self._profile.PMX_PROFILE_NAME))
-            return False
+            with open(self.fileLock) as fp:
+                pid = fp.read()
+            try:
+                pid = int(pid)
+            except ValueError:
+                self.getLogger().debug("Prymatex might have not closed cleanly last "
+                                       "session")
+                remove_profile_lock = True
+            else:
+                if pid in get_process_map():
+                    self.logger().critical("%s seems to be running. Please close the "
+                                           "instance or run other profile." %
+                                           (self._profile.PMX_PROFILE_NAME,))
+                    remove_profile_lock = False
+                else:
+                    remove_profile_lock = True
+        if remove_profile_lock:
+            os.remove(self.fileLock)
+
         f = open(self.fileLock, 'w')
         f.write('%s' % self.applicationPid())
         f.close()
@@ -233,14 +252,14 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     # -------------------- Managers
     def buildPluginManager(self):
         from prymatex.managers.plugins import PluginManager
-        #manager = self.createComponentInstance(PluginManager, parent = self)
+        # manager = self.createComponentInstance(PluginManager, parent = self)
         self.populateComponentClass(PluginManager)
 
-        manager = PluginManager(parent = self)
+        manager = PluginManager(parent=self)
 
         self._profile.registerConfigurableInstance(manager)
 
-        manager.initialize(parent = self)
+        manager.initialize(parent=self)
         for source in self.resources().sources():
             manager.addNamespace(source.name(), source.path())
 
@@ -249,7 +268,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     def buildSupportManager(self):
         from prymatex.managers.support import SupportManager
-        manager = self.createComponentInstance(SupportManager, parent = self)
+        manager = self.createComponentInstance(SupportManager, parent=self)
 
         for source in reversed(self.resources().sources()):
             manager.addNamespace(source.name(), source.path())
@@ -260,13 +279,13 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             'TM_APP_PATH': config.PMX_APP_PATH,
             'TM_BUNDLES_PATH': manager.environmentVariables()['PMX_BUNDLES_PATH'],
             'TM_PID': self.applicationPid(),
-            #Prymatex
+            # Prymatex
             'PMX_APP_NAME': self.applicationName().title(),
             'PMX_APP_PATH': config.PMX_APP_PATH,
             'PMX_PREFERENCES_PATH': self._profile.value('PMX_PREFERENCES_PATH'),
             'PMX_VERSION': self.applicationVersion(),
             'PMX_PID': self.applicationPid(),
-            #User
+            # User
             'PMX_HOME_PATH': config.PMX_HOME_PATH,
             'PMX_PROFILE_NAME': self._profile.value('PMX_PROFILE_NAME'),
             'PMX_PROFILE_PATH': self._profile.value('PMX_PROFILE_PATH'),
@@ -278,26 +297,26 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     def buildFileManager(self):
         from prymatex.managers.files import FileManager
-        manager = self.createComponentInstance(FileManager, parent = self)
+        manager = self.createComponentInstance(FileManager, parent=self)
 
         manager.fileSytemChanged.connect(self.on_fileManager_fileSytemChanged)
         return manager
 
     def buildProjectManager(self):
         from prymatex.managers.projects import ProjectManager
-        return self.createComponentInstance(ProjectManager, parent = self)
+        return self.createComponentInstance(ProjectManager, parent=self)
 
     def buildStorageManager(self):
         from prymatex.managers.storage import StorageManager
-        return self.createComponentInstance(StorageManager, parent = self)
+        return self.createComponentInstance(StorageManager, parent=self)
 
     def buildSchedulerManager(self):
         from prymatex.managers.coroutines import SchedulerManager
-        return self.createComponentInstance(SchedulerManager, parent = self)
+        return self.createComponentInstance(SchedulerManager, parent=self)
 
     def buildServerManager(self):
         from prymatex.managers.server import ServerManager
-        return self.createComponentInstance(ServerManager, parent = self)
+        return self.createComponentInstance(ServerManager, parent=self)
 
     # --------------------- Application events
     def closePrymatex(self):
@@ -317,13 +336,14 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         componentClass.application = classmethod(lambda cls: cls._application)
 
         # ------- Logger
-        componentClass._logger = self.getLogger('.'.join([componentClass.__module__, componentClass.__name__]))
+        componentClass._logger = self.getLogger('.'.join([componentClass.__module__,
+                                                componentClass.__name__]))
         componentClass.logger = classmethod(lambda cls: cls._logger)
 
         # ------- Resources
         componentClass._resources = self.resourceManager.providerForClass(componentClass)
         componentClass.resources = classmethod(lambda cls: cls._resources)
-        
+
         # ------- Settings
         if self._profile is not None and issubclass(componentClass, PrymatexComponent):
             componentClass._settings = self._profile.settingsForClass(componentClass)
@@ -342,8 +362,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             for settingClass in componentClass.contributeToSettings():
                 self.populateComponentClass(settingClass)
                 settingWidget = settingClass(
-                    settings = componentClass.settings(),
-                    profile = self._profile)
+                    settings=componentClass.settings(),
+                    profile=self._profile)
                 componentClass.settings().addDialog(settingWidget)
                 self.profileManager.registerSettingsWidget(settingWidget)
             componentClass._pmx_populated = True
@@ -355,6 +375,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
         # ------------------- Build
         buildedInstances = []
+
         def buildComponentInstance(klass, **kwargs):
             component = klass(**kwargs)
 
@@ -364,7 +385,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                 # Filter editors, editors create explicit
                 if issubclass(componentClass, PrymatexEditor):
                     continue
-                subComponent = buildComponentInstance(componentClass, parent = component)
+                subComponent = buildComponentInstance(componentClass, parent=component)
                 component.addComponent(subComponent)
             buildedInstances.append(component)
             return component
@@ -380,7 +401,9 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             instance.initialize()
             # Shortcuts
             for settings in instance.contributeToShortcuts():
-                create_shortcut(component, settings, sequence_handler = partial(self.registerShortcut, instance.__class__))
+                create_shortcut(component, settings,
+                                sequence_handler=partial(self.registerShortcut,
+                                                         instance.__class__))
 
         # -------------------- Store
         self.componentInstances.setdefault(componentClass, []).append(component)
@@ -390,7 +413,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     def deleteComponentInstance(self, component):
         self._profile.unregisterConfigurableInstance(component)
         component.deleteLater()
-        
+
     # ------------ Find Component
     def componentHierarchyForClass(self, componentClass):
         return self.pluginManager.componentHierarchyForClass(componentClass)
@@ -409,8 +432,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self._profile.unregisterSettingHook(settingPath, handler)
 
     # ------------- Editors and windows handle
-    def createEditorInstance(self, class_name = None, file_path=None, 
-        cursor_position = None, parent=None):
+    def createEditorInstance(self, class_name = None, file_path=None,
+                             cursor_position=None, parent=None):
         editorClass = None
         if class_name is not None:
             editorClass = self.pluginManager.findEditorClassByName(class_name)
@@ -422,10 +445,10 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         # Exists file ?
         if file_path and not self.fileManager.isfile(file_path):
             file_path = None
-        editor = self.createComponentInstance(editorClass, 
-            parent = parent, 
-            file_path = file_path
-        )
+        editor = self.createComponentInstance(editorClass,
+                                              parent=parent,
+                                              file_path=file_path
+                                              )
         if file_path:
             editor.open(file_path)
         if cursor_position:
@@ -444,7 +467,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     def mainWindows(self):
         return self._main_windows
-        
+
     def buildMainWindow(self):
         """Creates the windows"""
         from prymatex.gui.main import PrymatexMainWindow
@@ -463,8 +486,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         return self._main_windows[0]
 
     def canBeHandled(self, filepath):
-        #from prymatex.utils.pyqtdebug import ipdb_set_trace
-        #ipdb_set_trace()
+        # from prymatex.utils.pyqtdebug import ipdb_set_trace
+        # ipdb_set_trace()
         ext = os.path.splitext(filepath)[1].replace('.', '')
         for fileTypes in [syntax.item.fileTypes for syntax in
                           self.supportManager.getAllSyntaxes()
@@ -489,9 +512,9 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         elif self.fileManager.exists(file_path):
             main_window = main_window or self.currentWindow()
             editor = self.createEditorInstance(
-                file_path = file_path,
-                cursor_position = cursorPosition,
-                parent = main_window,
+                file_path=file_path,
+                cursor_position=cursorPosition,
+                parent=main_window,
                 )
             # TODO el dialogo de no tengo editor para ese tipo de archivo
             if editor is not None:
@@ -515,7 +538,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                 position = (position[0], int(column) - 1)
             if sourceFile:
                 filePath = QtCore.QUrl(sourceFile, QtCore.QUrl.TolerantMode).toLocalFile()
-                self.openFile(filePath, cursorPosition = position)
+                self.openFile(filePath, cursorPosition=position)
             else:
                 self.currentWindow().currentEditor().setCursorPosition(position)
         elif url.scheme() == "file":
@@ -529,7 +552,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
                 self.openFile(path)
             else:
                 self.openDirectory(path)
-                
+
     # ------- Icons
     def registerIcon(self, componentClass, qobject, icon):
         if not isinstance(icon, QtGui.QIcon):
@@ -553,21 +576,24 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
     def checkExternalAction(self, main_window, editor):
         if editor.isExternalChanged():
-            message = "The file '%s' has been changed on the file system, Do you want to replace the editor contents with these changes?"
+            message = ("The file '%s' has been changed on the file system, Do you want to "
+            "replace the editor contents with these changes?")
             result = QtGui.QMessageBox.question(editor, _("File changed"),
                                                 _(message) % editor.filePath,
-                                                buttons=QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                                                defaultButton=QtGui.QMessageBox.Yes) if self.askAboutExternalChanges else QtGui.QMessageBox.Yes
+                                                buttons=QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,  # NOQA
+                                                defaultButton=QtGui.QMessageBox.Yes) if self.askAboutExternalChanges else QtGui.QMessageBox.Yes  # NOQA
             if result == QtGui.QMessageBox.Yes:
                 editor.reload()
             elif result == QtGui.QMessageBox.No:
                 pass
         elif editor.isExternalDeleted():
-            message = "The file '%s' has been deleted or is not accessible. Do you want to save your changes or close the editor without saving?"
-            result = QtGui.QMessageBox.question(editor, _("File deleted"),
-                                                _(message) % editor.filePath,
-                                                buttons=QtGui.QMessageBox.Save | QtGui.QMessageBox.Close,
-                                                defaultButton=QtGui.QMessageBox.Close) if self.askAboutExternalDeletions else QtGui.QMessageBox.Close
+            message = ("The file '%s' has been deleted or is not accessible. Do you want "
+                       "to save your changes or close the editor without saving?")
+            result = QtGui.QMessageBox.question(
+                editor, _("File deleted"),
+                _(message) % editor.filePath,
+                buttons=QtGui.QMessageBox.Save | QtGui.QMessageBox.Close,
+                defaultButton=QtGui.QMessageBox.Close) if self.askAboutExternalDeletions else QtGui.QMessageBox.Close  # NOQA
             if result == QtGui.QMessageBox.Close:
                 main_window.closeEditor(editor)
             elif result == QtGui.QMessageBox.Save:
