@@ -148,13 +148,32 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         # self.translator.load(settings.LANGUAGE)
         # self.installTranslator(translator)
 
-    # ---------------------- PMXBaseComponent methods
+    # ---------------------- PrymatexComponent methods
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import GeneralSettingsWidget
         from prymatex.gui.settings.shortcuts import ShortcutsSettingsWidget
 
         return [GeneralSettingsWidget, ShortcutsSettingsWidget]
+        
+    def environmentVariables(self):
+        return {
+            # TextMate Compatible :D
+            'TM_APP_PATH': config.PMX_APP_PATH,
+            'TM_BUNDLES_PATH': self.supportManager.environmentVariables()['PMX_BUNDLES_PATH'],
+            'TM_PID': self.applicationPid(),
+            # Prymatex
+            'PMX_APP_NAME': self.applicationName().title(),
+            'PMX_APP_PATH': config.PMX_APP_PATH,
+            'PMX_VERSION': self.applicationVersion(),
+            'PMX_PID': self.applicationPid(),
+            # User
+            'PMX_HOME_PATH': config.PMX_HOME_PATH,
+            'PMX_PROFILE_NAME': self._profile.value('PMX_PROFILE_NAME'),
+            'PMX_PROFILE_PATH': self._profile.value('PMX_PROFILE_PATH'),
+            'PMX_TMP_PATH': self._profile.value('PMX_TMP_PATH'),
+            'PMX_LOG_PATH': self._profile.value('PMX_LOG_PATH')
+        }
 
     def loadGraphicalUserInterface(self):
         self.showMessage = self.logger().info
@@ -272,25 +291,6 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
 
         for source in reversed(self.resources().sources()):
             manager.addNamespace(source.name(), source.path())
-
-        # Update environment
-        manager.updateEnvironment({
-            # TextMate Compatible :P
-            'TM_APP_PATH': config.PMX_APP_PATH,
-            'TM_BUNDLES_PATH': manager.environmentVariables()['PMX_BUNDLES_PATH'],
-            'TM_PID': self.applicationPid(),
-            # Prymatex
-            'PMX_APP_NAME': self.applicationName().title(),
-            'PMX_APP_PATH': config.PMX_APP_PATH,
-            'PMX_VERSION': self.applicationVersion(),
-            'PMX_PID': self.applicationPid(),
-            # User
-            'PMX_HOME_PATH': config.PMX_HOME_PATH,
-            'PMX_PROFILE_NAME': self._profile.value('PMX_PROFILE_NAME'),
-            'PMX_PROFILE_PATH': self._profile.value('PMX_PROFILE_PATH'),
-            'PMX_TMP_PATH': self._profile.value('PMX_TMP_PATH'),
-            'PMX_LOG_PATH': self._profile.value('PMX_LOG_PATH')
-        })
 
         return manager
 

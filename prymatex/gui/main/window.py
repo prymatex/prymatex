@@ -109,6 +109,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
         
     # ---------- Implements PrymatexComponentWidget
     def addComponent(self, component):
+        super(PrymatexMainWindow, self).addComponent(component)
         if isinstance(component, PrymatexDock):
             self.addDock(component, component.PREFERED_AREA)
         elif isinstance(component, PrymatexDialog):
@@ -162,9 +163,9 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
         self.application().supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
     
     def environmentVariables(self):
-        env = {}
-        for docker in self.dockWidgets:
-            env.update(docker.environmentVariables())
+        env = self.application().environmentVariables()
+        for component in self.components():
+            env.update(component.environmentVariables())
         return env
 
     @classmethod
