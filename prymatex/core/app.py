@@ -282,7 +282,6 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             # Prymatex
             'PMX_APP_NAME': self.applicationName().title(),
             'PMX_APP_PATH': config.PMX_APP_PATH,
-            'PMX_PREFERENCES_PATH': self._profile.value('PMX_PREFERENCES_PATH'),
             'PMX_VERSION': self.applicationVersion(),
             'PMX_PID': self.applicationPid(),
             # User

@@ -82,6 +82,13 @@ class SupportBaseManager(object):
             protected = len(self.namespaces) == 0,
             bundles = os.path.join(base_path, config.PMX_BUNDLES_NAME))
         self.namespaces[name] = namespace
+        # Update environment
+        variableName = [ self.VAR_PREFIX, 'BUNDLES', 'PATH' ]
+        if not namespace.protected:
+            variableName.insert(1, namespace.name.upper())
+        variableName = "_".join(variableName)
+        self.addToEnvironment(variableName, namespace.bundles)
+
         return namespace
 
     def hasNamespace(self, name):
