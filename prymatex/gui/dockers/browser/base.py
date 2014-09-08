@@ -16,7 +16,7 @@ from prymatex.core.settings import ConfigurableItem
 
 from .tabwebview import TabbedWebView
 from .webview import WebView
-from .network import setGlobalApplicationProxy
+from .network import setGlobalApplicationProxyAddress, globalApplicationProxyAddress
 
 #=======================================================================
 # Browser Dock
@@ -47,14 +47,14 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
     @ConfigurableItem(default = NoProxy)
     def proxyType(self, value):
         if value == self.NoProxy:
-            setGlobalApplicationProxy()
+            setGlobalApplicationProxyAddress("")
         elif value == self.SystemProxy:
-            setGlobalApplicationProxy(os.environ.get('http_proxy'))
+            setGlobalApplicationProxyAddress(os.environ.get('http_proxy'))
     
     @ConfigurableItem(default = os.environ.get('http_proxy', ''))
     def proxyAddress(self, value):
         if self.proxyType == self.ManualProxy:
-            setGlobalApplicationProxy(value)
+            setGlobalApplicationProxyAddress(value)
 
     @ConfigurableItem(default = DeveloperExtrasEnabled | PluginsEnabled | JavascriptEnabled | AutoLoadImages)
     def defaultWebSettings(self, flags):
@@ -111,10 +111,11 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
     
     def environmentVariables(self):
         environment = PrymatexDock.environmentVariables(self)
+        address = globalApplicationProxyAddress()
         environment.update({
-            "PMX_FTP_PROXY": self.proxyAddress,
-            "PMX_HTTP_PROXY": self.proxyAddress,
-            "PMX_HTTPS_PROXY": self.proxyAddress
+            "PMX_FTP_PROXY": address,
+            "PMX_HTTP_PROXY": address,
+            "PMX_HTTPS_PROXY": address
         })
         return environment
 

@@ -54,22 +54,27 @@ class NetworkSettingsWidget(SettingsTreeNode, Ui_Browser, QtGui.QWidget):
     def on_lineEditProxyAddress_textEdited(self, text):
         self.settings.setValue("proxyAddress", text)
 
+    @QtCore.Slot(bool)
     def on_radioButtonNoProxy_clicked(self, checked):
         self.settings.setValue('proxyType', BrowserDock.NoProxy)
 
+    @QtCore.Slot(bool)
     def on_radioButtonSystemProxy_clicked(self, checked):
         if checked:
             self.settings.setValue('proxyType', BrowserDock.SystemProxy)
 
+    @QtCore.Slot(bool)
     def on_radioButtonSystemProxy_clicked(self, checked):
         if checked:
             self.settings.setValue('proxyType', BrowserDock.SystemProxy)
 
+    @QtCore.Slot(bool)
     def on_radioButtonManualProxy_clicked(self, checked):
         self.lineEditProxyAddress.setEnabled(checked)
         if checked:
             self.settings.setValue('proxyType', BrowserDock.ManualProxy)
 
+    @QtCore.Slot(bool)
     def on_browserWebSettings_clicked(self, checked):
         flags = 0
         for check, flag in self.checks:
