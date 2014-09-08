@@ -866,7 +866,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 cursor.movePosition(QtGui.QTextCursor.NextCharacter)
                 self.setTextCursor(cursor)
                 return True
-            return False
+            elif pair[0] != pair[1]:
+                return False
         elif meta_down and isOpen:
             if cursor.hasSelection():
                 selectedText = cursor.selectedText()
