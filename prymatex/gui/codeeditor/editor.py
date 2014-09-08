@@ -825,7 +825,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor = self.textCursor()
         if cursor.hasSelection(): return False
         lineText = cursor.block().text()
-        if lineText[:cursor.columnNumber()].startswith(self.tabKeyBehavior()):
+        if lineText[cursor.columnNumber():].startswith(self.tabKeyBehavior()):
             counter = cursor.columnNumber() % self.tabWidth or self.tabWidth
             self.newCursorAtPosition(cursor.position(), cursor.position() + counter).removeSelectedText()
             return True
