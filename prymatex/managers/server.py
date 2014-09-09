@@ -17,6 +17,7 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
         super(ServerManager, self).__init__(**kwargs)
         self.dialogs = {}
         self.instances = {}
+        self.address = None
 
         try:
             from prymatex.utils.zeromqt import ZmqSocket, REP
@@ -31,7 +32,10 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
 
     def environmentVariables(self):
         """Return a dictionary with the defined variables of this component."""
-        return { "PMX_DIALOG_ADDRESS": self.address }    
+        env = {}
+        if self.address is not None:
+            env["PMX_DIALOG_ADDRESS"] = self.address
+        return env    
 
     @QtCore.Slot()
     def socketReadyRead(self):
