@@ -21,8 +21,8 @@ class PrymatexMainCommandProcessor(CommandProcessorMixin, QtCore.QObject):
     def environmentVariables(self):
         if self.__env is None:
             self.__env = {}
-            envs = [ self.command.environmentVariables(),
-                self.window().environmentVariables(),
+            envs = [ self.window().environmentVariables(), 
+                self.command.environmentVariables(),
                 self.baseEnvironment ]
             for env in envs:
                 self.__env.update(env)

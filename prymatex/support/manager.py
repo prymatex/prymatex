@@ -45,7 +45,6 @@ def compare(obj, keys, tests):
 # Every set of items lives inside a namespace
 # ======================================================
 class SupportBaseManager(object):
-    VAR_PREFIX = 'PMX'
     PROTECTEDNS = 0  # El primero es el protected
     DEFAULTNS = 1  # El segundo es el default
     BUNDLEITEM_CLASSES = dict([ (cls.type(), cls) for cls in (
@@ -83,12 +82,12 @@ class SupportBaseManager(object):
             bundles = os.path.join(base_path, config.PMX_BUNDLES_NAME))
         self.namespaces[name] = namespace
         # Update environment
-        variableName = [ self.VAR_PREFIX, 'BUNDLES', 'PATH' ]
-        if not namespace.protected:
-            variableName.insert(1, namespace.name.upper())
-        variableName = "_".join(variableName)
-        self.addToEnvironment(variableName, namespace.bundles)
-
+        if namespace.protected:
+            self.addToEnvironment("PMX_BUNDLES_PATH", namespace.bundles)
+            self.addToEnvironment("TM_BUNDLES_PATH", namespace.bundles)
+        else:
+            self.addToEnvironment("PMX_%s_BUNDLES_PATH" % namespace.name.upper(),
+                namespace.bundles)
         return namespace
 
     def hasNamespace(self, name):
@@ -130,16 +129,7 @@ class SupportBaseManager(object):
 
     #-------------- Environment ---------------------
     def environmentVariables(self):
-        environment = self.environment.copy()
-        # TODO: Esto no puede durar mucho es costoso
-        for namespace in self.namespaces.values():
-            if os.path.exists(namespace.bundles):
-                variableName = [ self.VAR_PREFIX, 'BUNDLES', 'PATH' ]
-                if not namespace.protected:
-                    variableName.insert(1, namespace.name.upper())
-                variableName = "_".join(variableName)
-                environment[variableName] = namespace.bundles
-        return environment
+        return self.environment.copy()
 
     def addToEnvironment(self, name, value):
         self.environment[name] = value

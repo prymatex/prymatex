@@ -33,8 +33,10 @@ class CodeEditorBaseProcessor(QtCore.QObject):
     def environmentVariables(self):
         if self.__env is None:
             self.__env = {}
-            for env in (self.bundleItem.environmentVariables(),
-                self.editor.environmentVariables(), self.baseEnvironment):
+            for env in (
+                self.editor.environmentVariables(),             # From Prymatex 
+                self.bundleItem.environmentVariables(),         # From Bundle    
+                self.baseEnvironment):                          # Custom
                 self.__env.update(env)
         return self.__env
 

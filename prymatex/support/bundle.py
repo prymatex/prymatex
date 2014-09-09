@@ -85,10 +85,10 @@ class Bundle(ManagedObject):
 
     # ------------------ Environment variables
     def environmentVariables(self):
-        environment = self.manager.environmentVariables()
-        environment['TM_BUNDLE_PATH'] = self.currentSourcePath()
-        environment.update(self.variables())
-        return environment
+        env = {}
+        env['TM_BUNDLE_PATH'] = self.currentSourcePath()
+        env.update(self.variables())
+        return env
 
     # --------------- Source Handlers
     def createSourcePath(self, baseDirectory):

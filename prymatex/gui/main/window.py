@@ -348,7 +348,7 @@ html_footer
 
         # Build title
         titleChunks = [ self.titleTemplate.safe_substitute(
-            **self.application().supportManager.environmentVariables()) ]
+            **self.environmentVariables()) ]
 
         if editor is not None:
             self.addEditorToHistory(editor)

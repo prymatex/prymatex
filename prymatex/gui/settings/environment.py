@@ -19,7 +19,7 @@ class VariablesSettingsWidget(SettingsTreeNode, MultiDictTableEditorWidget):
         values = [ (value["variable"], value["value"], value["enabled"]) 
             for value in self.settings.value("shellVariables")]
         self.addTuples('user', values, editable = True, selectable=True)
-        self.addDictionary('prymatex', self.application().supportManager.environment)
+        self.addDictionary('prymatex', self.application().environmentVariables())
         self.addDictionary('system', os.environ, visible = False)
 
     def on_model_dictionaryChanged(self, dictionaryName):

@@ -138,9 +138,9 @@ echo Selection: "$TM_SELECTED_TEXT"''',
 
     # ---------------- Environment Variables
     def environmentVariables(self):
-        environment = BundleItem.environmentVariables(self)
-        environment.update(self.variables())
-        return environment
+        env = BundleItem.environmentVariables(self)
+        env.update(self.variables())
+        return env
 
     def getInputText(self, processor):
         def getInputTypeAndValue(inputType, inputFormat, inputMode):
