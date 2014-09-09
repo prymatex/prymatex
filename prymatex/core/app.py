@@ -21,7 +21,6 @@ from prymatex.utils.processes import get_process_map
 
 from prymatex.models.shortcuts import ShortcutsTreeModel
 
-
 class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     """The application instance.
     There can't be two apps running simultaneously, since configuration issues may occur.
@@ -110,10 +109,12 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     def applyOptions(self, options):
         # The basic managers
         self.options = options
-
+        self.resourceManager = self.profileManager = self.pluginManager = None        
+        
         # Prepare resources
         from prymatex.resources.manager import ResourceManager
-        self.resourceManager = ResourceManager()
+        self.populateComponentClass(ResourceManager)
+        self.resourceManager = ResourceManager(parent=self)
         self.resourceManager.install_icon_handler()
         for ns, path in config.NAMESPACES:
             self.resourceManager.add_source(ns, path, True)
@@ -155,25 +156,28 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         from prymatex.gui.settings.shortcuts import ShortcutsSettingsWidget
 
         return [GeneralSettingsWidget, ShortcutsSettingsWidget]
-        
+
     def environmentVariables(self):
-        return {
-            # TextMate Compatible :D
+        env = {
+            # TextMate Compatible
             'TM_APP_PATH': config.PMX_APP_PATH,
-            'TM_BUNDLES_PATH': self.supportManager.environmentVariables()['PMX_BUNDLES_PATH'],
-            'TM_PID': self.applicationPid(),
-            # Prymatex
-            'PMX_APP_NAME': self.applicationName().title(),
             'PMX_APP_PATH': config.PMX_APP_PATH,
-            'PMX_VERSION': self.applicationVersion(),
+            'TM_PID': self.applicationPid(),
             'PMX_PID': self.applicationPid(),
-            # User
+            'PMX_VERSION': self.applicationVersion(),
+            'PMX_APP_NAME': self.applicationName().title(),
             'PMX_HOME_PATH': config.PMX_HOME_PATH,
-            'PMX_PROFILE_NAME': self._profile.value('PMX_PROFILE_NAME'),
-            'PMX_PROFILE_PATH': self._profile.value('PMX_PROFILE_PATH'),
-            'PMX_TMP_PATH': self._profile.value('PMX_TMP_PATH'),
-            'PMX_LOG_PATH': self._profile.value('PMX_LOG_PATH')
+            'PMX_PROFILE_NAME': self.profile().value('PMX_PROFILE_NAME'),
+            'PMX_PROFILE_PATH': self.profile().value('PMX_PROFILE_PATH'),
+            'PMX_TMP_PATH': self.profile().value('PMX_TMP_PATH'),
+            'PMX_LOG_PATH': self.profile().value('PMX_LOG_PATH')
         }
+        for manager in [self.resourceManager, self.profileManager,
+            self.pluginManager, self.storageManager, self.supportManager,
+            self.fileManager, self.projectManager, self.schedulerManager,
+            self.serverManager]:
+            env.update(manager.environmentVariables())
+        return env
 
     def loadGraphicalUserInterface(self):
         self.showMessage = self.logger().info
@@ -271,14 +275,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
     # -------------------- Managers
     def buildPluginManager(self):
         from prymatex.managers.plugins import PluginManager
-        # manager = self.createComponentInstance(PluginManager, parent = self)
-        self.populateComponentClass(PluginManager)
-
-        manager = PluginManager(parent=self)
-
-        self._profile.registerConfigurableInstance(manager)
-
-        manager.initialize(parent=self)
+        manager = self.createComponentInstance(PluginManager, parent = self)
+        
         for source in self.resources().sources():
             manager.addNamespace(source.name(), source.path())
 
@@ -340,8 +338,9 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         componentClass.logger = classmethod(lambda cls: cls._logger)
 
         # ------- Resources
-        componentClass._resources = self.resourceManager.providerForClass(componentClass)
-        componentClass.resources = classmethod(lambda cls: cls._resources)
+        if self.resourceManager is not None:
+            componentClass._resources = self.resourceManager.providerForClass(componentClass)
+            componentClass.resources = classmethod(lambda cls: cls._resources)
 
         # ------- Settings
         if self._profile is not None and issubclass(componentClass, PrymatexComponent):
@@ -379,7 +378,8 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             component = klass(**kwargs)
 
             # Add components
-            componentClasses = self.pluginManager.findComponentsForClass(klass)
+            componentClasses = self.pluginManager is not None and \
+                self.pluginManager.findComponentsForClass(klass) or []
             for componentClass in componentClasses:
                 # Filter editors, editors create explicit
                 if issubclass(componentClass, PrymatexEditor):
