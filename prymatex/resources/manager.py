@@ -4,6 +4,7 @@ import os
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.helpers import get_std_icon
+from prymatex.core import PrymatexComponent
 
 from prymatex.utils import text
 from prymatex.utils import six
@@ -142,7 +143,7 @@ class ResourceProvider(object):
     def get_software_licenses(self):
         return LICENSES
 
-class ResourceManager(object):
+class ResourceManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
         super(ResourceManager, self).__init__(**kwargs)
         self.resources = []
