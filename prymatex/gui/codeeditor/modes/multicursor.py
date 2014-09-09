@@ -166,12 +166,11 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         elif event.key() in [ QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown, QtCore.Qt.Key_End, QtCore.Qt.Key_Home]:
             #Desactivados por ahora
             pass
-        elif event.text():
+        elif event.text() and not event.modifiers():
             cursor = self.editor.textCursor()
             cursor.beginEditBlock()
             for cursor in self.activeCursors():
-                self.editor.setTextCursor(cursor)
-                self.editor.keyPressEvent(event)
+                cursor.insertText(event.text())
             cursor.endEditBlock()
             handled = True
         if handled:
