@@ -7,7 +7,8 @@ from prymatex.qt import QtCore, QtGui
 class Notification(QtGui.QWidget):
     aboutToClose = QtCore.Signal()
     contentChanged = QtCore.Signal()
-    def __init__(self, text, parent, timeout=None, icon=None, links=None):
+    def __init__(self, text, parent, timeout=None, icon=None, links=None,
+        recyclable=None):
         super(Notification, self).__init__(parent)
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -61,7 +62,7 @@ class Notification(QtGui.QWidget):
         if timeout is not None:
             self.timeoutTimer.setInterval(timeout)
             self.animationIn.finished.connect(self.timeoutTimer.start)
-            self.timeoutTimer.timeout.connect(self.close)
+            self.timeoutTimer.timeout.connect(recyclable and self.hide or self.close)
             
     def setText(self, text):
         self.label.setText(text)
@@ -99,11 +100,13 @@ class Notification(QtGui.QWidget):
                 "border-radius: %dpx" % radius))
         self.label.setStyleSheet(label_style)
     
-    def show(self):
+    def show(self, text=None):
+        if text is not None:
+            self.setText(text)
         self.setWindowOpacity(0.0)
         super(Notification, self).show()
         self.animationIn.start()
-    
+
     def hide(self):
         self.animationOut.finished.connect(super(Notification, self).hide)
         self.animationOut.start()
@@ -175,7 +178,7 @@ class OverlayNotifier(QtCore.QObject):
             offsets[parent] += (notification.height() + self.margin)
 
     def _notification(self, message, title="", frmt="text", timeout=None, icon=None,
-        links={}, widget = None):
+        links={}, widget=None, recyclable=False):
         if title:
             title = "%s:\n" % title if frmt == "text" else "<h4>%s</h4>" % title
         message = title + message
@@ -191,7 +194,8 @@ class OverlayNotifier(QtCore.QObject):
             widget or self.parent(), 
             timeout, 
             icon, 
-            links)
+            links,
+            recyclable)
 
         # --------------- Style
         notification.setFont(self.font)
@@ -200,7 +204,7 @@ class OverlayNotifier(QtCore.QObject):
         notification.applyStyle(background, color)
         notification.adjustSize()
         return notification
-        
+
     def message(self, *args, **kwargs):
         kwargs.setdefault("timeout", self.timeout)
         notification = self._notification(*args, **kwargs)

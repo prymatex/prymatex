@@ -239,7 +239,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # -------------------- Notifications
     def showMessage(self, *largs, **kwargs):
         return self.window().showMessage(*largs, **kwargs)
-    
+        
     def showTooltip(self, *largs, **kwargs):
         if "point" not in kwargs:
             kwargs["point"] = self.mapToGlobal(
