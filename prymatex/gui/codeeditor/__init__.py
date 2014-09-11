@@ -5,7 +5,7 @@ from .dockers import CodeEditorBookmarksDock, CodeEditorSymbolsDock
 from .editor import CodeEditor
 from .addons import (CodeEditorAddon, SmartUnindentAddon, SpellCheckerAddon,
     HighlightCurrentSelectionAddon)
-from .sidebar import (SideBarWidgetAddon, BookmarkSideBarAddon, LineNumberSideBarAddon,
+from .sidebar import (BookmarkSideBarAddon, LineNumberSideBarAddon,
     FoldingSideBarAddon, SelectionSideBarAddon)
 from .minimap import (MiniMapAddon)
 from .modes import (CodeEditorMultiCursorMode, CodeEditorSnippetMode, CodeEditorOverwriteMode,

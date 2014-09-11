@@ -509,5 +509,6 @@ class TextEditWidget(QtGui.QPlainTextEdit):
     CHARACTER = "#"
     def characterWidth(self):
         return self.fontMetrics().width(self.CHARACTER)
+
     def characterHeight(self):
         return self.fontMetrics().height()

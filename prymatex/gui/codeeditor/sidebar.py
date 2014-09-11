@@ -43,18 +43,17 @@ class CodeEditorSideBar(QtGui.QWidget):
 #========================================
 # BASE EDITOR SIDEBAR ADDON
 #========================================
-class SideBarWidgetAddon(PrymatexEditorAddon):
+class SideBarWidgetMixin(PrymatexEditorAddon):
     ALIGNMENT = None
 
     def setPalette(self, palette):
-        super(SideBarWidgetAddon, self).setPalette(palette)
+        super(SideBarWidgetMixin, self).setPalette(palette)
         
     def setFont(self, font):
-        super(SideBarWidgetAddon, self).setFont(font)
+        super(SideBarWidgetMixin, self).setFont(font)
 
     def translatePosition(self, position):
-        font_metrics = QtGui.QFontMetrics(self.editor.font())
-        fh = font_metrics.lineSpacing()
+        fh = self.fontMetrics().lineSpacing()
         ys = position.y()
         
         block = self.editor.firstVisibleBlock()
@@ -72,7 +71,7 @@ class SideBarWidgetAddon(PrymatexEditorAddon):
 #=======================================
 # SideBar Widgets
 #=======================================
-class LineNumberSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
+class LineNumberSideBarAddon(SideBarWidgetMixin, QtGui.QWidget):
     ALIGNMENT = QtCore.Qt.AlignLeft
     MARGIN = 2
 
@@ -88,8 +87,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         super(LineNumberSideBarAddon, self).initialize(**kwargs)
         
         # Connect signals
-        self.editor.fontChanged.connect(self._update_width)
-        self.editor.blockCountChanged.connect(self.on_editor_blockCountChanged)
+        self.editor.blockCountChanged.connect(self.__update_width)
 
     def setFont(self, font):
         super(LineNumberSideBarAddon, self).setFont(font)
@@ -98,17 +96,14 @@ class LineNumberSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         self.boldFont.setBold(True)
         self.normalMetrics = QtGui.QFontMetrics(self.normalFont)
         self.boldMetrics = QtGui.QFontMetrics(self.boldFont)
-
-    def _update_width(self, lineCount = None):
-        lineCount = lineCount or self.editor.document().lineCount()
+        self.__update_width(self.editor.document().lineCount())
+        
+    def __update_width(self, lineCount):
         width = self.boldMetrics.width("%s" % lineCount) + self.MARGIN * 2
         if self.width() != width:
             self.setFixedWidth(width)
             self.editor.updateViewportMargins()
-
-    def on_editor_blockCountChanged(self, newBlockCount):
-        self._update_width(newBlockCount)
-        
+    
     @classmethod
     def contributeToMainMenu(cls):
         baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter"
@@ -161,7 +156,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         painter.end()
         QtGui.QWidget.paintEvent(self, event)
 
-class BookmarkSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
+class BookmarkSideBarAddon(SideBarWidgetMixin, QtGui.QWidget):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
     @ConfigurableItem(default = False)
@@ -186,7 +181,6 @@ class BookmarkSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         return { baseMenu: menuEntry} 
             
     def paintEvent(self, event):
-        font_metrics = QtGui.QFontMetrics(self.editor.font())
         page_bottom = self.editor.viewport().height()
         current_block = self.editor.textCursor().block()
         
@@ -222,7 +216,7 @@ class BookmarkSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         self.editor.toggleBookmark(cursor)
         self.repaint(self.rect())
             
-class FoldingSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
+class FoldingSideBarAddon(SideBarWidgetMixin, QtGui.QWidget):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
     @ConfigurableItem(default = True)
@@ -249,7 +243,6 @@ class FoldingSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         return {baseMenu: menuEntry} 
     
     def paintEvent(self, event):
-        font_metrics = QtGui.QFontMetrics(self.editor.font())
         page_bottom = self.editor.viewport().height()
         current_block = self.editor.textCursor().block()
         
@@ -293,7 +286,7 @@ class FoldingSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         else:
             self.editor.codeFoldingFold(block)
 
-class SelectionSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
+class SelectionSideBarAddon(SideBarWidgetMixin, QtGui.QWidget):
     ALIGNMENT = QtCore.Qt.AlignRight
     
     @ConfigurableItem(default = False)
@@ -322,10 +315,9 @@ class SelectionSideBarAddon(SideBarWidgetAddon, QtGui.QWidget):
         return { baseMenu: menuEntry }
     
     def paintEvent(self, event):
-        font_metrics = QtGui.QFontMetrics(self.editor.font())
         page_bottom = self.editor.viewport().height()
         
-        lineHeight = font_metrics.height()
+        lineHeight = self.fontMetrics().height()
 
         scrollBar = self.editor.verticalScrollBar()
         if scrollBar.isVisible():

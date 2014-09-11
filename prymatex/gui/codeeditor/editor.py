@@ -17,7 +17,7 @@ from prymatex.models.support import BundleItemTreeNode
 
 from .userdata import CodeEditorBlockUserData
 from .addons import CodeEditorAddon
-from .sidebar import CodeEditorSideBar, SideBarWidgetAddon
+from .sidebar import CodeEditorSideBar, SideBarWidgetMixin
 from .processors import (CodeEditorCommandProcessor, CodeEditorSnippetProcessor,
     CodeEditorMacroProcessor, CodeEditorSyntaxProcessor, CodeEditorThemeProcessor)
 from .modes import CodeEditorBaseMode
@@ -222,7 +222,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # OVERRIDE: PrymatexEditor.addComponent()
     def addComponent(self, component):
         PrymatexEditor.addComponent(self, component)
-        if isinstance(component, SideBarWidgetAddon):
+        if isinstance(component, SideBarWidgetMixin):
             self.addSideBarWidget(component)
         elif isinstance(component, CodeEditorBaseMode):
             self.addCodeEditorMode(component)

@@ -3,11 +3,11 @@
 import sys
 
 from prymatex.qt import QtGui, QtCore
-
 from prymatex.core.settings import ConfigurableItem
-from prymatex.gui.codeeditor.sidebar import SideBarWidgetAddon
 
-class MiniMapAddon(SideBarWidgetAddon, QtGui.QPlainTextEdit):
+from .sidebar import SideBarWidgetMixin
+
+class MiniMapAddon(SideBarWidgetMixin, QtGui.QPlainTextEdit):
     ALIGNMENT = QtCore.Qt.AlignRight
     WIDTH = 100
     MAX_OPACITY = 0.8
