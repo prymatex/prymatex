@@ -164,8 +164,8 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
     def defaults(self):
         return tuple([ res.name() for res in self.resources if res.default() ])
 
-    def providerForClass(self, klass):
-        sources = getattr(klass, "RESOURCES", self.defaults())
+    def providerForClass(self, componentClass):
+        sources = getattr(componentClass, "RESOURCES", self.defaults())
         return self.get_provider(sources)
 
     def install_icon_handler(self):

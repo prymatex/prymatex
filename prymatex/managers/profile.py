@@ -30,6 +30,7 @@ class ProfileManager(PrymatexComponent, QtCore.QObject):
         
         self.profilesListModel = ProfilesListModel(self)
         
+        self.__current_profile = None
         self.__dontAsk = True
         
         self.profilesFile = os.path.join(PMX_PROFILES_PATH, self.PMX_PROFILES_FILE)
@@ -87,19 +88,18 @@ class ProfileManager(PrymatexComponent, QtCore.QObject):
             self.saveProfiles()
             return profile
 
-    def currentProfile(self, value = None):
-        if value is None or not self.__dontAsk:
-            profile = ProfileDialog.selectStartupProfile(self)
-        elif value == "":
-            profile = self.defaultProfile()
+    def install_current_profile(self, suggested = None):
+        if suggested is None or not self.__dontAsk:
+            self.__current_profile = ProfileDialog.selectStartupProfile(self)
+        elif suggested == "":
+            self.__current_profile = self.defaultProfile()
         else:
-            profile = self.profilesListModel.findProfileByName(value)
-        if profile is None:
-            profile = self.createProfile(value, default = True)
-        if not os.path.exists(profile.PMX_PROFILE_PATH):
-            self.build_prymatex_profile(profile.PMX_PROFILE_PATH)
-        return profile
-
+            self.__current_profile = self.profilesListModel.findProfileByName(suggested)
+        if self.__current_profile is None:
+            self.__current_profile = self.createProfile(suggested, default = True)
+        if not os.path.exists(self.__current_profile.PMX_PROFILE_PATH):
+            self.build_prymatex_profile(self.__current_profile.PMX_PROFILE_PATH)
+    
     def renameProfile(self, profile, newName):
         newName = newName.lower()
         profile = self.profilesListModel.findProfileByName(profile.PMX_PROFILE_NAME)
@@ -131,6 +131,12 @@ class ProfileManager(PrymatexComponent, QtCore.QObject):
             p.PMX_PROFILE_DEFAULT = False
         profile.PMX_PROFILE_DEFAULT = True
         self.saveProfiles()
+
+    def profileForClass(self, componentClass):
+        return self.currentProfile()
+            
+    def currentProfile(self):
+        return self.__current_profile
 
     def defaultProfile(self):
         for profile in self.profilesListModel.profiles():

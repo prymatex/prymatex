@@ -46,7 +46,16 @@ class PrymatexProfile(object):
         return self.settingsGroups[name]
 
     def settingsForClass(self, configurableClass):
-        return self.groupByName(self.__group_name(configurableClass))
+        settings = self.groupByName(self.__group_name(configurableClass))
+        # --------- Register settings values
+        for key, value in configurableClass.__dict__.items():
+            if isinstance(value, ConfigurableItem):
+                if value.name is None:
+                    value.name = key
+                settings.addConfigurableItem(value)
+            elif isinstance(value, ConfigurableHook):
+                settings.addConfigurableHook(value)
+        return settings
 
     def registerConfigurableInstance(self, configurable):
         settingsGroup = configurable.settings()
