@@ -34,9 +34,10 @@ class TextEditWidget(QtGui.QPlainTextEdit):
     def setEolChars(self, chars_or_text):
         """Set widget end-of-line (EOL) characters from chars_or_text"""
         eol_chars = text.get_eol_chars(chars_or_text)
-        if eol_chars is not None and self.eol_chars is not None:
-            self.document().setModified(True)
-        self.eol_chars = eol_chars
+        if self.eol_chars != eol_chars:
+            self.eol_chars = eol_chars
+            self.setModified(True)
+        self.textChanged.emit()
 
     def lineSeparator(self):
         """Return line separator based on current EOL mode"""

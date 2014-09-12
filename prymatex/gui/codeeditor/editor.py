@@ -321,7 +321,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         
     def save(self, filePath):
         """ Save content of editor in a file """
-        self.encoding = self.application().fileManager.writeFile(filePath, self.toPlainText(), self.encoding)
+        self.encoding = self.application().fileManager.writeFile(filePath, self.toPlainTextWithEol(), self.encoding)
         super(CodeEditor, self).save(filePath)
 
     def close(self):
@@ -1572,9 +1572,13 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             self.indentationWidth = size
         else:
             self.tabWidth = size
+        self.update()
+        self.textChanged.emit()
 
     def on_actionEncoding_toggled(self, codec):
-        self.encoding = codec
+        if self.encoding != codec:
+            self.encoding = codec
+            self.textChanged.emit()
 
     def on_actionShowTabsAndSpaces_toggled(self, checked):
         if checked:

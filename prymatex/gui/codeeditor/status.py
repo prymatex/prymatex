@@ -138,11 +138,13 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
 
     def disconnectEditor(self, editor):
         editor.cursorPositionChanged.disconnect(self.on_editor_cursorPositionChanged)
+        editor.textChanged.disconnect(self.on_editor_textChanged)
         editor.syntaxChanged.disconnect(self.on_editor_syntaxChanged)
         editor.modeChanged.disconnect(self.on_editor_modeChanged)
 
     def connectEditor(self, editor):
         editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
+        editor.textChanged.connect(self.on_editor_textChanged)
         editor.syntaxChanged.connect(self.on_editor_syntaxChanged)
         editor.modeChanged.connect(self.on_editor_modeChanged)
 
@@ -157,7 +159,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
             self.on_editor_cursorPositionChanged()
             self.on_editor_syntaxChanged()
             self.on_editor_modeChanged()
-            self.setTabSizeLabel(self.currentEditor)
+            self.on_editor_textChanged()
 
     # ---------------- AutoConnect Status Widget signals
     @QtCore.Slot(int)
@@ -204,20 +206,12 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         menu.addMenu(self.window().findChild(QtGui.QMenu, "menuEncoding"))
         menu.popup(self.labelContent.mapToGlobal(point))
 
-    def setCurrentEditorTabSoft(self, soft):
-        self.currentEditor.indentUsingSpaces = soft
-
-    def setCurrentEditorTabSize(self, size):
-        self.currentEditor.tabWidth = size
-        self.setTabSizeLabel(self.currentEditor)
-
-    def setTabSizeLabel(self, editor):
-        #Tab Size
-        eol = [ eol for eol in text.EOLS if eol[0] == editor.lineSeparator() ]
+    def on_editor_textChanged(self):
+        eol = [ eol for eol in text.EOLS if eol[0] == self.currentEditor.lineSeparator() ]
         self.labelContent.setText("%s, Ending %s, Encoding %s |" % (
-           editor.indentUsingSpaces and "Spaces %d" % editor.indentationWidth or "Tab width %d" % editor.tabWidth,
+           self.currentEditor.indentUsingSpaces and "Spaces %d" % self.currentEditor.indentationWidth or "Tab width %d" % self.currentEditor.tabWidth,
            eol and eol[0][2] or "?",
-           editor.encoding))
+           self.currentEditor.encoding))
 
     # -------------- AutoConnect Command widget signals
     @QtCore.Slot()
