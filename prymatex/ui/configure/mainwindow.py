@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/configure/mainwindow.ui'
 #
-# Created: Fri Aug 15 10:26:59 2014
+# Created: Fri Sep 12 11:08:11 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(451, 166)
+        MainWindow.resize(838, 266)
         self.verticalLayout = QtGui.QVBoxLayout(MainWindow)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -46,27 +46,30 @@ class Ui_MainWindow(object):
         self.checkBoxAskAboutModifiedEditors.setObjectName(_fromUtf8("checkBoxAskAboutModifiedEditors"))
         self.formLayout_3.setWidget(0, QtGui.QFormLayout.SpanningRole, self.checkBoxAskAboutModifiedEditors)
         self.verticalLayout.addWidget(self.groupBox_3)
-        self.groupBox_2 = QtGui.QGroupBox(MainWindow)
-        self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
-        self.formLayout_2 = QtGui.QFormLayout(self.groupBox_2)
-        self.formLayout_2.setFieldGrowthPolicy(QtGui.QFormLayout.ExpandingFieldsGrow)
-        self.formLayout_2.setMargin(6)
-        self.formLayout_2.setSpacing(2)
-        self.formLayout_2.setObjectName(_fromUtf8("formLayout_2"))
-        self.label_2 = QtGui.QLabel(self.groupBox_2)
-        self.label_2.setObjectName(_fromUtf8("label_2"))
-        self.formLayout_2.setWidget(0, QtGui.QFormLayout.LabelRole, self.label_2)
-        self.comboBoxTitleTemplate = QtGui.QComboBox(self.groupBox_2)
+        self.groupBox_4 = QtGui.QGroupBox(MainWindow)
+        self.groupBox_4.setObjectName(_fromUtf8("groupBox_4"))
+        self.formLayout = QtGui.QFormLayout(self.groupBox_4)
+        self.formLayout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
+        self.formLayout.setMargin(6)
+        self.formLayout.setSpacing(2)
+        self.formLayout.setObjectName(_fromUtf8("formLayout"))
+        self.label_3 = QtGui.QLabel(self.groupBox_4)
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.formLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.label_3)
+        self.comboBoxTitleTemplate = QtGui.QComboBox(self.groupBox_4)
         self.comboBoxTitleTemplate.setEditable(True)
         self.comboBoxTitleTemplate.setObjectName(_fromUtf8("comboBoxTitleTemplate"))
-        self.formLayout_2.setWidget(0, QtGui.QFormLayout.FieldRole, self.comboBoxTitleTemplate)
-        self.checkBoxShowTabsIfMoreThanOne = QtGui.QCheckBox(self.groupBox_2)
+        self.comboBoxTitleTemplate.addItem(_fromUtf8(""))
+        self.comboBoxTitleTemplate.addItem(_fromUtf8(""))
+        self.comboBoxTitleTemplate.addItem(_fromUtf8(""))
+        self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.comboBoxTitleTemplate)
+        self.checkBoxShowTabsIfMoreThanOne = QtGui.QCheckBox(self.groupBox_4)
         font = QtGui.QFont()
         font.setItalic(False)
         self.checkBoxShowTabsIfMoreThanOne.setFont(font)
         self.checkBoxShowTabsIfMoreThanOne.setObjectName(_fromUtf8("checkBoxShowTabsIfMoreThanOne"))
-        self.formLayout_2.setWidget(3, QtGui.QFormLayout.SpanningRole, self.checkBoxShowTabsIfMoreThanOne)
-        self.verticalLayout.addWidget(self.groupBox_2)
+        self.formLayout.setWidget(3, QtGui.QFormLayout.SpanningRole, self.checkBoxShowTabsIfMoreThanOne)
+        self.verticalLayout.addWidget(self.groupBox_4)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
 
@@ -76,8 +79,11 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "General", None))
         self.groupBox_3.setTitle(_translate("MainWindow", "Behavior", None))
-        self.checkBoxAskAboutModifiedEditors.setText(_translate("MainWindow", "Ask about modified editors on exit? or save state for next opening", None))
-        self.groupBox_2.setTitle(_translate("MainWindow", "Interface", None))
-        self.label_2.setText(_translate("MainWindow", "Title template:", None))
+        self.checkBoxAskAboutModifiedEditors.setText(_translate("MainWindow", "Ask about modified editors on exit?", None))
+        self.groupBox_4.setTitle(_translate("MainWindow", "Interface", None))
+        self.label_3.setText(_translate("MainWindow", "Title:", None))
+        self.comboBoxTitleTemplate.setItemText(0, _translate("MainWindow", "$TM_FILENAME${TM_FILENAME/.+/ - /}$PMX_APP_NAME", None))
+        self.comboBoxTitleTemplate.setItemText(1, _translate("MainWindow", "$TM_FILENAME${TM_FILENAME/.+/ - /}$PMX_APP_NAME ($PMX_VERSION)", None))
+        self.comboBoxTitleTemplate.setItemText(2, _translate("MainWindow", "$TM_FILENAME${TM_FILEPATH/.+/ ($0)/}${TM_FILENAME/.+/ - /}$PMX_APP_NAME ($PMX_VERSION)", None))
         self.checkBoxShowTabsIfMoreThanOne.setText(_translate("MainWindow", "Show tabs only if there are more than one", None))
 

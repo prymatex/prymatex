@@ -22,3 +22,7 @@ class MainWindowSettingsWidget(SettingsTreeNode, Ui_MainWindow, QtGui.QWidget):
     @QtCore.Slot(bool)
     def on_checkBoxShowTabsIfMoreThanOne_clicked(self, checked):
         self.settings.setValue('showTabsIfMoreThanOne', self.checkBoxShowTabsIfMoreThanOne.isChecked())
+    
+    @QtCore.Slot(str)
+    def on_comboBoxTitleTemplate_activated(self, template):
+        self.settings.setValue('windowTitleTemplate', template)

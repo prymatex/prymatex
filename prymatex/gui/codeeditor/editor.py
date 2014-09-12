@@ -987,6 +987,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # Build environment
         environment.update({
+            'TM_FILENAME': self.title(),
             'TM_CURRENT_LINE': line,
             'TM_LINE_INDEX': cursor.positionInBlock(),
             'TM_LINE_NUMBER': block.blockNumber() + 1,
@@ -1008,7 +1009,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         if self.filePath():
             self.logger().debug("Add file path to environment")
             environment['TM_FILEPATH'] = self.filePath()
-            environment['TM_FILENAME'] = self.application().fileManager.basename(self.filePath())
             environment['TM_DIRECTORY'] = self.application().fileManager.dirname(self.filePath())
         if self.project():
             self.logger().debug("Add project to environment")

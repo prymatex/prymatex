@@ -40,10 +40,15 @@ class Snippet(object):
     def __len__(self):
         return len(self.placeholders)
     
+    def substitute(self, variables = {}):
+        v = Visitor(variables)
+        self.render(v, types.Memodict())
+        return v.output
+        
 class Visitor(object):
-    def __init__(self):
+    def __init__(self, variables = {}):
         self.output = ""
-        self.variables = {}
+        self.variables = variables
 
     def startRender(self):
         self.output = ""

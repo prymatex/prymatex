@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-from string import Template
 
 from prymatex.qt import QtCore, QtGui
 from prymatex.qt.compat import getSaveFileName
@@ -22,6 +21,8 @@ from prymatex.widgets.toolbar import DockWidgetToolBar
 from prymatex.widgets.notification import OverlayNotifier
 from prymatex.widgets.splitter import SplitterWidget
 
+from prymatex.support.regexp import Snippet as Template
+
 from .menubar import PrymatexMainMenuBar
 from .statusbar import PrymatexMainStatusBar
 from .processors import PrymatexMainCommandProcessor
@@ -35,9 +36,10 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
     # --------------------- Settings
     SETTINGS = 'MainWindow'
 
-    @ConfigurableItem(default = "$PMX_APP_NAME ($PMX_VERSION)")
+    @ConfigurableItem(default = "$TM_FILENAME${TM_FILENAME/.+/ - /}$PMX_APP_NAME ($PMX_VERSION)")
     def windowTitleTemplate(self, titleTemplate):
-         self.titleTemplate = Template(titleTemplate)
+        self.titleTemplate = Template(titleTemplate)
+        self.updateWindowTitle()
 
     @ConfigurableItem(default = False)
     def showTabsIfMoreThanOne(self, value):
@@ -349,20 +351,17 @@ html_footer
 
         #Emitir señal de cambio
         self.currentEditorChanged.emit(editor)
-
-        # Build title
-        titleChunks = [ self.titleTemplate.safe_substitute(
-            **self.environmentVariables()) ]
-
+        
         if editor is not None:
             self.addEditorToHistory(editor)
             editor.setFocus()
             self.application().checkExternalAction(self, editor)
-            titleChunks.insert(0, editor.title())
-        
-        # Set window title
-        self.setWindowTitle(" - ".join(titleChunks))
+        self.updateWindowTitle()
     
+    def updateWindowTitle(self):
+        self.setWindowTitle(self.titleTemplate.substitute(
+            (self.currentEditor() or self).environmentVariables()))
+
     def saveEditor(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor()
         if editor.isExternalChanged():

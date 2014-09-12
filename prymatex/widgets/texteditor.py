@@ -31,9 +31,8 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         self.eol_chars = None
 
     #------ EOL characters
-    def setEolChars(self, chars_or_text):
+    def setEolChars(self, eol_chars):
         """Set widget end-of-line (EOL) characters from chars_or_text"""
-        eol_chars = text.get_eol_chars(chars_or_text)
         if self.eol_chars != eol_chars:
             self.eol_chars = eol_chars
             self.setModified(True)
@@ -426,10 +425,10 @@ class TextEditWidget(QtGui.QPlainTextEdit):
         self.__convert_text(cursor, text.transpose)
 
     #------ Set and Get Text
-    def setPlainText(self, text):
+    def setPlainText(self, plainText):
         """Set the text of the editor"""
-        QtGui.QPlainTextEdit.setPlainText(self, text)
-        self.setEolChars(text)
+        QtGui.QPlainTextEdit.setPlainText(self, plainText)
+        self.eol_chars = text.get_eol_chars(plainText)
 
     def toPlainTextWithEol(self):
         """Same as 'toPlainText', replace '\n' by correct end-of-line characters"""
