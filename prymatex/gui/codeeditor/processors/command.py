@@ -97,7 +97,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
 
     def saveActiveFile(self):
         self.editor.window().saveEditor(editor = self.editor)
-        return not (self.editor.isModified() or self.editor.isNew())
+        return self.editor.hasFile() and not self.editor.isModified()
 
     # ------------------- Outpus function
     def error(self, context, outputFormat = None):

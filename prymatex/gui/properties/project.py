@@ -9,10 +9,9 @@ from prymatex.ui.configure.project import Ui_Project
 class ProjectPropertiesWidget(PropertyTreeNode, Ui_Project, QtGui.QWidget):
     """ Project Settings """
     NAMESPACE = ""
-    TITLE = "Project"
-
     def __init__(self, **kwargs):
         super(ProjectPropertiesWidget, self).__init__(nodeName = "project", **kwargs)
+        self.setTitle("Project")
         self.setupUi(self)
         self.projectNode = None
         self.setupComboLicences()

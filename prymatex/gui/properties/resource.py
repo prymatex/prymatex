@@ -13,7 +13,6 @@ from prymatex.ui.configure.resource import Ui_ResouceWidget
 class ResoucePropertiesWidget(PropertyTreeNode, Ui_ResouceWidget, QtGui.QWidget):
     """Resouce"""
     NAMESPACE = ""
-    TITLE = "Resouce"
     PERMISSIONS = (
         ( stat.S_IRUSR, stat.S_IWUSR, stat.S_IXUSR ), 
         ( stat.S_IRGRP, stat.S_IWGRP, stat.S_IXGRP ),
@@ -22,6 +21,7 @@ class ResoucePropertiesWidget(PropertyTreeNode, Ui_ResouceWidget, QtGui.QWidget)
 
     def __init__(self, **kwargs):
         super(ResoucePropertiesWidget, self).__init__(nodeName = "resouce", **kwargs)
+        self.setTitle("Resouce")
         self.setupUi(self)
         self.fileSystemItem = None
 

@@ -9,9 +9,9 @@ from prymatex.widgets.multidicteditor import MultiDictTableEditorWidget
 class EnvironmentPropertiesWidget(PropertyTreeNode, MultiDictTableEditorWidget):
     """Environment variables"""
     NAMESPACE = ""
-    TITLE = "Variables"
     def __init__(self, **kwargs):
         super(EnvironmentPropertiesWidget, self).__init__(nodeName = "environment", **kwargs)
+        self.setTitle("Variables")
         self.project = None
         self.model().dictionaryChanged.connect(self.on_model_dictionaryChanged)
         

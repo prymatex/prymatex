@@ -340,7 +340,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         componentClass._settings = componentClass.profile().settingsForClass(componentClass) if componentClass.profile() else None
         componentClass.settings = classmethod(lambda cls: cls._settings)
 
-	if issubclass(componentClass, PrymatexComponent):
+        if issubclass(componentClass, PrymatexComponent):
             # Add settings widgets
             for settingClass in componentClass.contributeToSettings():
                 self.populateComponentClass(settingClass)

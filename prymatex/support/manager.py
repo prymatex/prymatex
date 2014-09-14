@@ -326,16 +326,16 @@ class SupportBaseManager(object):
         # Reload Implica ver en todos los espacios de nombre instalados por cambios en los items
         # Install message handler
         self.messageHandler = messageHandler
-        self.logger.debug("Begin reload support.")
+        self.logger().debug("Begin reload support.")
         for namespace in self.namespaces.values():
-            self.logger.debug("Search in %s, %s." % (namespace.name, namespace.bundles))
+            self.logger().debug("Search in %s, %s." % (namespace.name, namespace.bundles))
             self.reloadBundles(namespace)
         for bundle in self.getAllBundles():
             if bundle.enabled():
                 self.repopulateBundle(bundle)
         # Uninstall message handler
         self.messageHandler = None
-        self.logger.debug("End reload support.")
+        self.logger().debug("End reload support.")
 
     # ---------------- RELOAD BUNDLES
     def reloadBundles(self, namespace):
@@ -353,7 +353,7 @@ class SupportBaseManager(object):
                 list(map(lambda item: item.removeSource(namespace.name), bundleItems))
                 bundle.removeSource(namespace)
                 if not bundle.hasSources():
-                    self.logger.debug("Bundle %s removed." % bundle.name)
+                    self.logger().debug("Bundle %s removed." % bundle.name)
                     list(map(lambda item: self.removeManagedObject(item), bundleItems))
                     list(map(lambda item: self.removeBundleItem(item), bundleItems))
                     self.removeManagedObject(bundle)
@@ -363,7 +363,7 @@ class SupportBaseManager(object):
                     bundle.setSupportPath(None)
                     bundle.setDirty()
         for bundlePath in bundlePaths:
-            self.logger.debug("New bundle %s." % bundlePath)
+            self.logger().debug("New bundle %s." % bundlePath)
             try:
                 bundle = self.loadBundle(bundlePath, namespace)
             except Exception as ex:
@@ -386,14 +386,14 @@ class SupportBaseManager(object):
                 bundleItemPath = bundleItem.sourcePath(namespace.name)
                 if bundleItemPath in bundleItemPaths[bundleItem.type()]:
                     if namespace.name == bundleItem.currentSourceName() and bundleItem.sourceChanged(namespace.name):
-                        self.logger.debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, bundleItemPath))
+                        self.logger().debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, bundleItemPath))
                         self.loadBundleItem(self.BUNDLEITEM_CLASSES[bundleItem.type()], bundleItemPath, namespace, bundle)
                         self.modifyBundleItem(bundleItem)
                     bundleItemPaths[bundleItem.type()].remove(bundleItemPath)
                 else:
                     bundleItem.removeSource(namespace.name)
                     if not bundleItem.hasSources():
-                        self.logger.debug("Bundle Item %s removed." % bundleItem.name)
+                        self.logger().debug("Bundle Item %s removed." % bundleItem.name)
                         self.removeManagedObject(bundleItem)
                         self.removeBundleItem(bundleItem)
                     else:
@@ -598,7 +598,7 @@ class SupportBaseManager(object):
             bundle.addSource(namespace.name, bundle.createSourcePath(namespace.bundles))
             bundle.setCurrentSource(namespace.name)
             self.saveManagedObject(bundle, namespace)
-            self.logger.debug("Add namespace '%s' in source %s for bundle." % (namespace.name, bundle.sourcePath(namespace.name)))
+            self.logger().debug("Add namespace '%s' in source %s for bundle." % (namespace.name, bundle.sourcePath(namespace.name)))
         return bundle
 
     def updateBundle(self, bundle, namespaceName, **attrs):
@@ -723,7 +723,7 @@ class SupportBaseManager(object):
             bundleItem.addSource(namespace.name, path)
             bundleItem.setCurrentSource(namespace.name)
             self.saveManagedObject(bundleItem, namespace)
-            self.logger.debug("Add namespace '%s' in source %s for bundle item." % (namespace.name, bundle.sourcePath(namespace.name)))
+            self.logger().debug("Add namespace '%s' in source %s for bundle item." % (namespace.name, bundle.sourcePath(namespace.name)))
         return bundleItem
     
     def updateBundleItem(self, bundleItem, namespaceName, **attrs):
