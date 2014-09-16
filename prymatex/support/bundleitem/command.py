@@ -159,7 +159,6 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         if not inputValue:
             inputType, inputValue = getInputTypeAndValue(self.standardInput, self.inputFormat, "standard")
         
-        print(inputValue)
         return inputType, inputValue
 
     def systemCommand(self):
@@ -208,7 +207,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
 
     def afterExecute(self, processor, context):
         outputHandler = self.getOutputHandler(context.outputType)
-        print(context)
+        
         handlerFunction = getattr(processor, outputHandler, None)
         if handlerFunction is not None:
             handlerFunction(context, self.outputFormat)

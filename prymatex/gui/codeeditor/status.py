@@ -184,7 +184,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
 
     def on_editor_cursorPositionChanged(self):
         cursor = self.currentEditor.textCursor()
-        self.labelPosition.setText("Line %d, Column %d, Selection %d |" % (
+        self.labelPosition.setText("Line %d, Column %d, Selection %d" % (
             cursor.blockNumber() + 1, cursor.columnNumber() + 1, 
             cursor.selectionEnd() - cursor.selectionStart()))
         #Set index of current symbol
@@ -208,7 +208,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
 
     def on_editor_textChanged(self):
         eol = [ eol for eol in text.EOLS if eol[0] == self.currentEditor.lineSeparator() ]
-        self.labelContent.setText("%s, Ending %s, Encoding %s |" % (
+        self.labelContent.setText("%s, Ending %s, Encoding %s" % (
            self.currentEditor.indentUsingSpaces and "Spaces %d" % self.currentEditor.indentationWidth or "Tab width %d" % self.currentEditor.tabWidth,
            eol and eol[0][2] or "?",
            self.currentEditor.encoding))

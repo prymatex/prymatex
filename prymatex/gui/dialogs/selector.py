@@ -34,7 +34,7 @@ class SelectorDialog(PrymatexDialog, QtGui.QDialog):
         # TODO Poner el widget en un lugar referente al widget que lo 
         # esta llamando o sobre el que se aplica
         QtGui.QDialog.showEvent(self, event)
-        screen = self.application.desktop().screen()
+        screen = self.application().desktop().screen()
         point = screen.rect().center() - self.rect().center()
         point.setY(point.y() * 0.5)
         self.move(point)

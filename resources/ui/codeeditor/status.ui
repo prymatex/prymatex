@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>629</width>
-    <height>266</height>
+    <width>686</width>
+    <height>246</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -445,6 +445,13 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="labelContent">
         <property name="maximumSize">
          <size>
@@ -454,6 +461,13 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>Content</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -471,9 +485,22 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
        <widget class="QToolButton" name="toolButtonMenuBundle">
         <property name="icon">
-         <iconset theme="cogs">
+         <iconset theme="bundle-item-bundle">
           <normaloff/>
          </iconset>
         </property>
@@ -486,14 +513,7 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBoxSyntaxes">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
+       <widget class="QComboBox" name="comboBoxSyntaxes"/>
       </item>
       <item>
        <widget class="QComboBox" name="comboBoxSymbols">

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/codeeditor/status.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/codeeditor/status.ui'
 #
-# Created: Mon Sep  1 15:31:26 2014
-#      by: PyQt4 UI code generator 4.11.1
+# Created: Tue Sep 16 12:11:24 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_CodeEditorStatus(object):
     def setupUi(self, CodeEditorStatus):
         CodeEditorStatus.setObjectName(_fromUtf8("CodeEditorStatus"))
-        CodeEditorStatus.resize(629, 266)
+        CodeEditorStatus.resize(686, 246)
         self.verticalLayout = QtGui.QVBoxLayout(CodeEditorStatus)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -214,27 +214,34 @@ class Ui_CodeEditorStatus(object):
         self.labelPosition.setMaximumSize(QtCore.QSize(300, 16777215))
         self.labelPosition.setObjectName(_fromUtf8("labelPosition"))
         self.horizontalLayout_2.addWidget(self.labelPosition)
+        self.line = QtGui.QFrame(self.widgetStatus)
+        self.line.setFrameShape(QtGui.QFrame.VLine)
+        self.line.setFrameShadow(QtGui.QFrame.Sunken)
+        self.line.setObjectName(_fromUtf8("line"))
+        self.horizontalLayout_2.addWidget(self.line)
         self.labelContent = QtGui.QLabel(self.widgetStatus)
         self.labelContent.setMaximumSize(QtCore.QSize(350, 16777215))
         self.labelContent.setObjectName(_fromUtf8("labelContent"))
         self.horizontalLayout_2.addWidget(self.labelContent)
+        self.line_2 = QtGui.QFrame(self.widgetStatus)
+        self.line_2.setFrameShape(QtGui.QFrame.VLine)
+        self.line_2.setFrameShadow(QtGui.QFrame.Sunken)
+        self.line_2.setObjectName(_fromUtf8("line_2"))
+        self.horizontalLayout_2.addWidget(self.line_2)
         self.labelStatus = QtGui.QLabel(self.widgetStatus)
         self.labelStatus.setMaximumSize(QtCore.QSize(150, 16777215))
         self.labelStatus.setObjectName(_fromUtf8("labelStatus"))
         self.horizontalLayout_2.addWidget(self.labelStatus)
+        spacerItem3 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem3)
         self.toolButtonMenuBundle = QtGui.QToolButton(self.widgetStatus)
-        icon = QtGui.QIcon.fromTheme(_fromUtf8("cogs"))
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("bundle-item-bundle"))
         self.toolButtonMenuBundle.setIcon(icon)
         self.toolButtonMenuBundle.setPopupMode(QtGui.QToolButton.MenuButtonPopup)
         self.toolButtonMenuBundle.setAutoRaise(True)
         self.toolButtonMenuBundle.setObjectName(_fromUtf8("toolButtonMenuBundle"))
         self.horizontalLayout_2.addWidget(self.toolButtonMenuBundle)
         self.comboBoxSyntaxes = QtGui.QComboBox(self.widgetStatus)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.comboBoxSyntaxes.sizePolicy().hasHeightForWidth())
-        self.comboBoxSyntaxes.setSizePolicy(sizePolicy)
         self.comboBoxSyntaxes.setObjectName(_fromUtf8("comboBoxSyntaxes"))
         self.horizontalLayout_2.addWidget(self.comboBoxSyntaxes)
         self.comboBoxSymbols = QtGui.QComboBox(self.widgetStatus)

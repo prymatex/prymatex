@@ -447,8 +447,8 @@ def tabSelectableModelFactory(mainWindow):
     def dataFunction():
         return [dict(data=tab,
                 template="<table width='100%%'><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(file)s</small></td></tr></table>",
-                display={"name": tab.tabTitle(), "file": tab.filePath()},
-                image=tab.tabIcon()) for tab in mainWindow.centralWidget().allWidgets()]
+                display={"name": tab.title(), "file": tab.filePath()},
+                image=tab.icon()) for tab in mainWindow.centralWidget().allWidgets()]
 
     return selectableModelFactory(
         mainWindow, dataFunction, 
