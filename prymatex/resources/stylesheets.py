@@ -9,6 +9,8 @@ from __future__ import unicode_literals
 import os
 from collections import namedtuple
 
+__all__ = ["load_stylesheets"]
+
 Stylesheet = namedtuple('Stylesheet', 'name path content')
 
 def load_stylesheets(resourcesPath):

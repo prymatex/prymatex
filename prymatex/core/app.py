@@ -107,7 +107,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self.resourceManager = self.profileManager = self.pluginManager = None        
         
         # Prepare resources
-        from prymatex.resources.manager import ResourceManager
+        from prymatex.managers.resources import ResourceManager
         self.resourceManager = self.createComponentInstance(ResourceManager, parent=self)
         self.resourceManager.install_icon_handler()
         for ns, path in config.NAMESPACES:

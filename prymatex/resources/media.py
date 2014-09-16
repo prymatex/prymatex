@@ -11,7 +11,9 @@ from prymatex.qt import QtGui
 from prymatex.utils import encoding
 from prymatex.widgets import glyph
 
-from .base import build_resource_key
+from .utils import build_resource_key
+
+__all__ = ["load_media", "default_media_mapper"]
 
 IconTheme = namedtuple("IconTheme", "name type path")
 

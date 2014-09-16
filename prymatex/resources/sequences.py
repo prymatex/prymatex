@@ -6,6 +6,8 @@ from collections import namedtuple
 from prymatex.qt import QtGui
 from prymatex.qt.helpers import keybinding
 
+__all__ = ["ContextSequence"]
+
 class ContextSequence(namedtuple("ContextSequence", "resource context name default description")):
     __slots__ = ()
     def isEmpty(self):
