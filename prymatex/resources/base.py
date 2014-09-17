@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import os
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import get_std_icon
 from prymatex.core import PrymatexComponent
 
@@ -35,7 +35,7 @@ LICENSES = [
 def build_resource_key(path):
     return ":/%s" % "/".join(osextra.path.fullsplit(path))
 
-_FileIconProvider = QtGui.QFileIconProvider()
+_FileIconProvider = QtWidgets.QFileIconProvider()
 
 class Resource(dict):
     def __init__(self, name, path, default = False):

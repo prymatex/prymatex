@@ -3,7 +3,7 @@
 
 import os
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.core.components import PrymatexDialog
 
 from prymatex.utils.i18n import ugettext as _
@@ -17,7 +17,7 @@ RENAME_MESSAGE = """Rename the profile %s to:"""
 
 CREATE_MESSAGE = """Enter new profile name:"""
 
-class ProfileDialog(PrymatexDialog, Ui_ProfileDialog, QtGui.QDialog):
+class ProfileDialog(PrymatexDialog, Ui_ProfileDialog, QtWidgets.QDialog):
     
     def __init__(self, **kwargs):
         super(ProfileDialog, self).__init__(**kwargs)

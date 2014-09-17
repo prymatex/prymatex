@@ -3,13 +3,13 @@
 """This module contains the main window menu bar definition and widgets."""
 from functools import reduce, partial
 
-from prymatex.qt import QtGui
+from prymatex.qt import QtGui, QtWidgets
 from prymatex.qt.helpers import (text_to_objectname, extend_menu, add_actions, 
     test_actions, create_menu)
 
 from prymatex.core import PrymatexComponent
 
-class PrymatexMainMenuBar(QtGui.QMenuBar):
+class PrymatexMainMenuBar(QtWidgets.QMenuBar):
     def __init__(self, **kwargs):
         super(PrymatexMainMenuBar, self).__init__(**kwargs)
         self.customComponentObjects = {}
@@ -17,7 +17,7 @@ class PrymatexMainMenuBar(QtGui.QMenuBar):
     def update(self, klass, instance):
         objects = self.customComponentObjects.get(klass, [])
         test_actions(instance, 
-            filter(lambda obj: isinstance(obj, QtGui.QAction), objects))
+            filter(lambda obj: isinstance(obj, QtWidgets.QAction), objects))
         
     # Extend Main Menu
     def extend(self, klass, parent = None):
@@ -29,7 +29,7 @@ class PrymatexMainMenuBar(QtGui.QMenuBar):
                     continue
 
                 # Find parent menu
-                parentMenu = self.parent().findChild(QtGui.QMenu, 
+                parentMenu = self.parent().findChild(QtWidgets.QMenu, 
                     text_to_objectname(name, prefix = "menu"))
                 # Extend
                 if parentMenu is not None:

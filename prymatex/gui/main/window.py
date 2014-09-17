@@ -3,7 +3,7 @@
 
 import os
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.compat import getSaveFileName
 from prymatex.qt.helpers import (text_to_objectname, create_menu, extend_menu,
     add_actions, test_actions, center_widget, qbytearray_to_hex, hex_to_qbytearray)
@@ -28,7 +28,7 @@ from .statusbar import PrymatexMainStatusBar
 from .processors import PrymatexMainCommandProcessor
 from .actions import MainWindowActionsMixin, tabSelectableModelFactory
 
-class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.QMainWindow):
+class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidgets.QMainWindow):
     """Prymatex main window"""
     # --------------------- Signals
     currentEditorChanged = QtCore.Signal(object)
@@ -122,28 +122,28 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
     def initialize(self, **kwargs):
         super(PrymatexMainWindow, self).initialize(**kwargs)
         # Dialogs
-        self.selectorDialog = self.findChild(QtGui.QDialog, "SelectorDialog")
-        self.aboutDialog = self.findChild(QtGui.QDialog, "AboutDialog")
-        self.settingsDialog = self.findChild(QtGui.QDialog, "SettingsDialog")
-        self.bundleEditorDialog = self.findChild(QtGui.QDialog, "BundleEditorDialog")
-        self.profileDialog = self.findChild(QtGui.QDialog, "ProfileDialog")
-        self.templateDialog = self.findChild(QtGui.QDialog, "TemplateDialog")
-        self.projectDialog = self.findChild(QtGui.QDialog, "ProjectDialog")
+        self.selectorDialog = self.findChild(QtWidgets.QDialog, "SelectorDialog")
+        self.aboutDialog = self.findChild(QtWidgets.QDialog, "AboutDialog")
+        self.settingsDialog = self.findChild(QtWidgets.QDialog, "SettingsDialog")
+        self.bundleEditorDialog = self.findChild(QtWidgets.QDialog, "BundleEditorDialog")
+        self.profileDialog = self.findChild(QtWidgets.QDialog, "ProfileDialog")
+        self.templateDialog = self.findChild(QtWidgets.QDialog, "TemplateDialog")
+        self.projectDialog = self.findChild(QtWidgets.QDialog, "ProjectDialog")
 
         # Dockers
-        self.browserDock = self.findChild(QtGui.QDockWidget, "BrowserDock")
-        self.terminalDock = self.findChild(QtGui.QDockWidget, "TerminalDock")
-        self.projectsDock = self.findChild(QtGui.QDockWidget, "ProjectsDock")
+        self.browserDock = self.findChild(QtWidgets.QDockWidget, "BrowserDock")
+        self.terminalDock = self.findChild(QtWidgets.QDockWidget, "TerminalDock")
+        self.projectsDock = self.findChild(QtWidgets.QDockWidget, "ProjectsDock")
 
         # Build Main Menu
         self.menuBar().extend(self.__class__, self)
         
         # Load some menus as atters of the main window
-        self.menuPanels = self.findChild(QtGui.QMenu, "menuPanels")
-        self.menuRecentFiles = self.findChild(QtGui.QMenu, "menuRecentFiles")
-        self.menuBundles = self.findChild(QtGui.QMenu, "menuBundles")
-        self.menuFocusGroup = self.findChild(QtGui.QMenu, "menuFocusGroup")
-        self.menuMoveEditorToGroup = self.findChild(QtGui.QMenu, "menuMoveEditorToGroup")
+        self.menuPanels = self.findChild(QtWidgets.QMenu, "menuPanels")
+        self.menuRecentFiles = self.findChild(QtWidgets.QMenu, "menuRecentFiles")
+        self.menuBundles = self.findChild(QtWidgets.QMenu, "menuBundles")
+        self.menuFocusGroup = self.findChild(QtWidgets.QMenu, "menuFocusGroup")
+        self.menuMoveEditorToGroup = self.findChild(QtWidgets.QMenu, "menuMoveEditorToGroup")
         
         # Metemos las acciones de las dockers al menu panels
         dockIndex = 1
@@ -177,7 +177,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtGui.
 
     # ---------- Override QMainWindow
     def show(self):
-        QtGui.QMainWindow.show(self)
+        QtWidgets.QMainWindow.show(self)
         self.menuBar().update(self.__class__, self)
 
     # --------------- Bundle Items
@@ -366,11 +366,11 @@ html_footer
         editor = editor or self.currentEditor()
         if editor.isExternalChanged():
             message = "The file '%s' has been changed on the file system, Do you want save the file with other name?"
-            result = QtGui.QMessageBox.question(editor, _("File changed"),
+            result = QtWidgets.QMessageBox.question(editor, _("File changed"),
                 _(message) % editor.filePath(),
-                buttons = QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                defaultButton = QtGui.QMessageBox.Yes)
-            if result == QtGui.QMessageBox.Yes:
+                buttons = QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                defaultButton = QtWidgets.QMessageBox.Yes)
+            if result == QtWidgets.QMessageBox.Yes:
                 saveAs = True
         if not editor.hasFile() or saveAs:
             fileDirectory = self.application().fileManager.directory(self.projectsDock.currentPath()) if not editor.hasFile() else editor.fileDirectory()
@@ -391,20 +391,20 @@ html_footer
 
     def closeEditor(self, editor = None, cancel = False):
         editor = editor or self.currentEditor()
-        buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No
+        buttons = QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No
         if cancel:
-            buttons |= QtGui.QMessageBox.Cancel
+            buttons |= QtWidgets.QMessageBox.Cancel
         if editor is None: return
         while editor and editor.isModified():
-            response = QtGui.QMessageBox.question(self, "Save",
+            response = QtWidgets.QMessageBox.question(self, "Save",
                 "Save %s" % editor.title(),
                 buttons = buttons,
-                defaultButton = QtGui.QMessageBox.Ok)
-            if response == QtGui.QMessageBox.Ok:
+                defaultButton = QtWidgets.QMessageBox.Ok)
+            if response == QtWidgets.QMessageBox.Ok:
                 self.saveEditor(editor = editor)
-            elif response == QtGui.QMessageBox.No:
+            elif response == QtWidgets.QMessageBox.No:
                 break
-            elif response == QtGui.QMessageBox.Cancel:
+            elif response == QtWidgets.QMessageBox.Cancel:
                 raise exceptions.UserCancelException()
         self.removeEditor(editor)
         self.application().deleteEditorInstance(editor)
@@ -431,15 +431,15 @@ html_footer
     def closeEvent(self, event):
         for editor in self.editors():
             while editor and editor.isModified():
-                response = QtGui.QMessageBox.question(self, "Save",
+                response = QtWidgets.QMessageBox.question(self, "Save",
                     "Save %s" % editor.title(),
-                    buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel,
-                    defaultButton = QtGui.QMessageBox.Ok)
-                if response == QtGui.QMessageBox.Ok:
+                    buttons = QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel,
+                    defaultButton = QtWidgets.QMessageBox.Ok)
+                if response == QtWidgets.QMessageBox.Ok:
                     self.saveEditor(editor = editor)
-                elif response == QtGui.QMessageBox.No:
+                elif response == QtWidgets.QMessageBox.No:
                     break
-                elif response == QtGui.QMessageBox.Cancel:
+                elif response == QtWidgets.QMessageBox.Cancel:
                     event.ignore()
                     return
 
@@ -460,7 +460,7 @@ html_footer
         componentState["geometry"] = qbytearray_to_hex(self.saveGeometry())
 
         # Store self
-        componentState["self"] = qbytearray_to_hex(QtGui.QMainWindow.saveState(self))
+        componentState["self"] = qbytearray_to_hex(QtWidgets.QMainWindow.saveState(self))
 
         return componentState
 
@@ -483,7 +483,7 @@ html_footer
 
         # Restore self
         if "self" in componentState:
-            QtGui.QMainWindow.restoreState(self, hex_to_qbytearray(componentState["self"]))
+            QtWidgets.QMainWindow.restoreState(self, hex_to_qbytearray(componentState["self"]))
 
     # ------------ Drag and Drop
     def dragEnterEvent(self, event):

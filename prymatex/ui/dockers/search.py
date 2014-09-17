@@ -2,41 +2,27 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/search.ui'
 #
-# Created: Fri Aug 15 10:27:00 2014
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Wed Sep 17 09:55:06 2014
+#      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
-
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_SearchDock(object):
     def setupUi(self, SearchDock):
-        SearchDock.setObjectName(_fromUtf8("SearchDock"))
+        SearchDock.setObjectName("SearchDock")
         SearchDock.resize(262, 220)
-        self.dockWidgetContents = QtGui.QWidget()
-        self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
-        self.verticalLayout = QtGui.QVBoxLayout(self.dockWidgetContents)
+        self.dockWidgetContents = QtWidgets.QWidget()
+        self.dockWidgetContents.setObjectName("dockWidgetContents")
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.dockWidgetContents)
         self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(0)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.treeView = QtGui.QTreeView(self.dockWidgetContents)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.treeView = QtWidgets.QTreeView(self.dockWidgetContents)
         self.treeView.setAlternatingRowColors(True)
         self.treeView.setHeaderHidden(True)
-        self.treeView.setObjectName(_fromUtf8("treeView"))
+        self.treeView.setObjectName("treeView")
         self.verticalLayout.addWidget(self.treeView)
         SearchDock.setWidget(self.dockWidgetContents)
 
@@ -44,5 +30,6 @@ class Ui_SearchDock(object):
         QtCore.QMetaObject.connectSlotsByName(SearchDock)
 
     def retranslateUi(self, SearchDock):
-        SearchDock.setWindowTitle(_translate("SearchDock", "Search", None))
+        _translate = QtCore.QCoreApplication.translate
+        SearchDock.setWindowTitle(_translate("SearchDock", "Search"))
 

@@ -30,12 +30,14 @@ class QtUiBuild(object):
     
     def _ui2py(self, ui_file, py_file):
         try:
-            os.system("pyuic4 -o %s %s" % (py_file, ui_file))
+            os.system("pyuic5 -o %s %s" % (py_file, ui_file))
         except Exception as e:
-            self.warn('Unable to compile user interface %s: %s' % (py_file, e))
-            if not os.path.exists(py_file) or not open(py_file).read():
-                raise SystemExit(1)
-            return
+            try:
+                os.system("pyuic4 -o %s %s" % (py_file, ui_file))
+            except Exception as e:
+                self.warn('Unable to compile user interface %s: %s' % (py_file, e))
+                if not os.path.exists(py_file) or not open(py_file).read():
+                    raise SystemExit(1)
 
     def compile_ui(self, ui_file, py_file = None):
         """Compile the .ui files to python modules."""

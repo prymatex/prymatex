@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
-class SplashScreen(QtGui.QSplashScreen):
+class SplashScreen(QtWidgets.QSplashScreen):
     def __init__(self, pixmap):
-        QtGui.QSplashScreen.__init__(self, pixmap)
+        super(SplashScreen, self).__init__(pixmap)
         self.defaultAlignment = QtCore.Qt.AlignCenter
         self.defaultColor = QtCore.Qt.black
         self.shadowColor = QtGui.QColor(QtCore.Qt.black)
@@ -27,7 +27,7 @@ class SplashScreen(QtGui.QSplashScreen):
         self.message = message
         self.alignment = alignment
         self.color = color
-        QtGui.QSplashScreen.showMessage(self, self.message, 
+        QtWidgets.QSplashScreen.showMessage(self, self.message, 
                                               self.alignment or self.defaultAlignment, 
                                               self.color or self.defaultColor)
         

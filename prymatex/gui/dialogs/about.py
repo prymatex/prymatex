@@ -4,7 +4,7 @@
 import sys
 import prymatex
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt import (API, qt_version_str, pyqt4_version_str,
 	pyqt5_version_str, sip_version_str, pyside_version_str)
 from prymatex.core.components import PrymatexDialog
@@ -31,7 +31,7 @@ informationHtml += '''<dt>Ponyguruma</dt><dd>{pony_version}</dd>
 <dt>Regex</dt><dd>{regex_version}</dd>
 <dt>ZMQ Version</dt><dd>{zmq_version}</dd></dl>'''
 
-class AboutDialog(PrymatexDialog, Ui_AboutDialog, QtGui.QDialog):
+class AboutDialog(PrymatexDialog, Ui_AboutDialog, QtWidgets.QDialog):
     def __init__(self, **kwargs):
         super(AboutDialog, self).__init__(**kwargs)
         self.setupUi(self)

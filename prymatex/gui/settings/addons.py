@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.ui.configure.addons import Ui_Addons
 from prymatex.models.settings import SettingsTreeNode
 
 def AddonsSettingsWidgetFactory(namespace):
-    class AddonsSettingsWidget(SettingsTreeNode, Ui_Addons, QtGui.QWidget):
+    class AddonsSettingsWidget(SettingsTreeNode, Ui_Addons, QtWidgets.QWidget):
         NAMESPACE = namespace
         
         def __init__(self, **kwargs):

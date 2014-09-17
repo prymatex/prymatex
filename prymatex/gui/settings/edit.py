@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.ui.configure.edit import Ui_Edit
 from prymatex.models.settings import SettingsTreeNode
 
-class EditSettingsWidget(SettingsTreeNode, Ui_Edit, QtGui.QWidget):
+class EditSettingsWidget(SettingsTreeNode, Ui_Edit, QtWidgets.QWidget):
     NAMESPACE = "editor"
 
     def __init__(self, **kwargs):

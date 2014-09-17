@@ -9,16 +9,16 @@ This code was adapted from spyderlib original developed by Riverbank Computing L
 import sys
 from functools import partial
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers.menus import create_menu
 
-class GroupWidget(QtGui.QTabWidget):
+class GroupWidget(QtWidgets.QTabWidget):
     """ The GroupWidget class is a QTabWidget with a dragable tab bar. """
 
     def __init__(self, root, *args):
         """ Initialise the instance. """
 
-        QtGui.QTabWidget.__init__(self, *args)
+        QtWidgets.QTabWidget.__init__(self, *args)
         
         # XXX this requires Qt > 4.5
         if sys.platform == 'darwin':
@@ -71,13 +71,13 @@ class GroupWidget(QtGui.QTabWidget):
     def _close_widget(self, widget):
         self._root._close_tab_request(widget)
 
-class DragableTabBar(QtGui.QTabBar):
+class DragableTabBar(QtWidgets.QTabBar):
     """ The DragableTabBar class is a QTabBar that can be dragged around. """
 
     def __init__(self, root, parent):
         """ Initialise the instance. """
 
-        QtGui.QTabBar.__init__(self, parent)
+        QtWidgets.QTabBar.__init__(self, parent)
 
         # XXX this requires Qt > 4.5
         if sys.platform == 'darwin':
@@ -146,7 +146,7 @@ class DragableTabBar(QtGui.QTabBar):
             # tab page.  We suppress the notification so that the workbench doesn't
             # temporarily make the View active.
             self._root._repeat_focus_changes = False
-            QtGui.QTabBar.mousePressEvent(self, e)
+            QtWidgets.QTabBar.mousePressEvent(self, e)
             self._root._repeat_focus_changes = True
     
             # Update the current tab.
@@ -171,7 +171,7 @@ class DragableTabBar(QtGui.QTabBar):
     def mouseMoveEvent(self, e):
         """ Reimplemented to handle mouse move events. """
 
-        QtGui.QTabBar.mouseMoveEvent(self, e)
+        QtWidgets.QTabBar.mouseMoveEvent(self, e)
 
         if self._drag_state is None:
             return
@@ -184,18 +184,18 @@ class DragableTabBar(QtGui.QTabBar):
             # If the mouse has moved far enough that dragging has started then
             # tell the user.
             if self._drag_state.dragging:
-                QtGui.QApplication.setOverrideCursor(QtCore.Qt.OpenHandCursor)
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.OpenHandCursor)
 
     def mouseReleaseEvent(self, e):
         """ Reimplemented to handle mouse release events. """
 
-        QtGui.QTabBar.mouseReleaseEvent(self, e)
+        QtWidgets.QTabBar.mouseReleaseEvent(self, e)
 
         if e.button() != QtCore.Qt.LeftButton:
             return
 
         if self._drag_state is not None and self._drag_state.dragging:
-            QtGui.QApplication.restoreOverrideCursor()
+            QtWidgets.QApplication.restoreOverrideCursor()
             self._drag_state.drop(e.pos())
 
         self._drag_state = None
@@ -227,7 +227,7 @@ class _DragState(object):
     def start_dragging(self, pos):
         """ Start dragging a tab. """
 
-        if (pos - self._start_pos).manhattanLength() <= QtGui.QApplication.startDragDistance():
+        if (pos - self._start_pos).manhattanLength() <= QtWidgets.QApplication.startDragDistance():
             return
 
         self.dragging = True
@@ -236,7 +236,7 @@ class _DragState(object):
         otb = self._tab_bar
         tab = self._tab
 
-        ctb = self._clone = QtGui.QTabBar()
+        ctb = self._clone = QtWidgets.QTabBar()
         if sys.platform == 'darwin' and QtCore.QT_VERSION >= 0x40500:
             ctb.setDocumentMode(True)
           

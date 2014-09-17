@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.core.components import PrymatexDialog
 
 from prymatex.widgets.multidicteditor import MultiDictTableEditorWidget
 
-class EnvironmentDialog(PrymatexDialog, QtGui.QDialog):
+class EnvironmentDialog(PrymatexDialog, QtWidgets.QDialog):
     def __init__(self, **kwargs):
         super(EnvironmentDialog, self).__init__(**kwargs)
         self.setObjectName("EnvironmentDialog")

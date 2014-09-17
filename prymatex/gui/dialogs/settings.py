@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.core.components import PrymatexDialog
 
 from prymatex.ui.dialogs.treewidget import Ui_TreeWidgetDialog
 
-class SettingsDialog(PrymatexDialog, Ui_TreeWidgetDialog, QtGui.QDialog):
+class SettingsDialog(PrymatexDialog, Ui_TreeWidgetDialog, QtWidgets.QDialog):
     """Settings dialog, it's hold by the application under configdialog property"""
     def __init__(self, **kwargs):
         super(SettingsDialog, self).__init__(**kwargs)

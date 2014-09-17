@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.core.components import PrymatexDialog
 
@@ -11,7 +11,7 @@ from prymatex.ui.support.editor import Ui_BundleEditorDialog
 from prymatex.gui.dialogs.bundles import widgets
 from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
 
-class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtGui.QDialog):
+class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtWidgets.QDialog):
     BASE_EDITOR = -1 #El ultimo es el editor base, no tiene nada
     
     def __init__(self, **kwargs):
@@ -53,9 +53,9 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtGui.QDialog):
         self.setCurrentEditor(self.editors[-1])
         #Quitar seleccion
         firstIndex = self.proxyTreeModel.index(0, 0)
-        self.treeView.setSelection(self.treeView.visualRect(firstIndex), QtGui.QItemSelectionModel.Clear)
+        self.treeView.setSelection(self.treeView.visualRect(firstIndex), QtWidgets.QItemSelectionModel.Clear)
         
-        return QtGui.QDialog.exec_(self)
+        return super(BundleEditorDialog, self).exec_()
 
     def execEditor(self, typeFilter = None, namespaceFilter = None, title = "Bundle Editor"):
         # Title
@@ -81,9 +81,9 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtGui.QDialog):
         return self.execEditor("snippet")
 
     def configEditorWidgets(self):
-        self.stackedWidget = QtGui.QStackedWidget()
-        self.stackedWidget.setFrameShape(QtGui.QFrame.StyledPanel)
-        self.stackedWidget.setFrameShadow(QtGui.QFrame.Sunken)
+        self.stackedWidget = QtWidgets.QStackedWidget()
+        self.stackedWidget.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.stackedWidget.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.editorsLayout.insertWidget(1, self.stackedWidget)
         self.indexes = {}
         self.editors = [ widgets.SnippetEditorWidget(self),
@@ -182,33 +182,33 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtGui.QDialog):
         self.bundleFilterDialog.show()
 
     def configToolbar(self):
-        self.toolbarMenu = QtGui.QMenu("Menu", self)
-        action = QtGui.QAction("New Command", self)
+        self.toolbarMenu = QtWidgets.QMenu("Menu", self)
+        action = QtWidgets.QAction("New Command", self)
         action.triggered.connect(self.on_actionCommand_triggered)
         self.toolbarMenu.addAction(action)
-        action = QtGui.QAction("New Drag Command", self)
+        action = QtWidgets.QAction("New Drag Command", self)
         action.triggered.connect(self.on_actionDragCommand_triggered)
         self.toolbarMenu.addAction(action)
-        action = QtGui.QAction("New Language", self)
+        action = QtWidgets.QAction("New Language", self)
         action.triggered.connect(self.on_actionLanguage_triggered)
         self.toolbarMenu.addAction(action)
-        action = QtGui.QAction("New Snippet", self)
+        action = QtWidgets.QAction("New Snippet", self)
         action.triggered.connect(self.on_actionSnippet_triggered)
         self.toolbarMenu.addAction(action)
-        action = QtGui.QAction("New Template", self)
+        action = QtWidgets.QAction("New Template", self)
         action.triggered.connect(self.on_actionTemplate_triggered)
         self.toolbarMenu.addAction(action)
-        action = QtGui.QAction("New Project", self)
+        action = QtWidgets.QAction("New Project", self)
         action.triggered.connect(self.on_actionProject_triggered)
         self.toolbarMenu.addAction(action)
-        self.staticFileAction = QtGui.QAction("New Static File", self)
+        self.staticFileAction = QtWidgets.QAction("New Static File", self)
         self.staticFileAction.triggered.connect(self.on_actionStaticFile_triggered)
         self.toolbarMenu.addAction(self.staticFileAction)
-        action = QtGui.QAction("New Preferences", self)
+        action = QtWidgets.QAction("New Preferences", self)
         action.triggered.connect(self.on_actionPreferences_triggered)
         self.toolbarMenu.addAction(action)
         self.toolbarMenu.addSeparator()
-        action = QtGui.QAction("New Bundle", self)
+        action = QtWidgets.QAction("New Bundle", self)
         action.triggered.connect(self.on_actionBundle_triggered)
         self.toolbarMenu.addAction(action)
         
@@ -243,7 +243,7 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtGui.QDialog):
         self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-preference"), "Preferences", "preference")
         self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-template"), "Templates", "template staticfile")
         self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-project"), "Projects", "project staticfile")
-        self.comboBoxItemFilter.setInsertPolicy(QtGui.QComboBox.NoInsert)
+        self.comboBoxItemFilter.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
         self.comboBoxItemFilter.lineEdit().returnPressed.connect(self.on_comboBoxItemFilter_returnPressed)
 
     # --------------------------- Tree View display the bundle items model
@@ -286,11 +286,11 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtGui.QDialog):
     # -------------------- Activation
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress and obj == self.lineEditKeyEquivalentActivation:
-            keyseq = QtGui.QKeySequence(int(event.modifiers()) + event.key())
+            keyseq = QtWidgets.QKeySequence(int(event.modifiers()) + event.key())
             self.stackedWidget.currentWidget().setKeySequence(keyseq)
             self.lineEditKeyEquivalentActivation.setText(keyseq.toString())
             return True
-        return QtGui.QDialog.eventFilter(self, obj, event)
+        return QtWidgets.QDialog.eventFilter(self, obj, event)
 
     @QtCore.Slot()
     def on_pushButtonCleanKeyEquivalent_pressed(self):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.models.trees import TreeNodeBase
 from prymatex.models.trees import AbstractNamespaceTreeModel
@@ -43,7 +43,7 @@ class ConfigureTreeNode(TreeNodeBase):
         self._icon = icon
 
 # Proxy for namespaced models
-class ConfigureTreeProxyNode(ConfigureTreeNode, QtGui.QWidget):
+class ConfigureTreeProxyNode(ConfigureTreeNode, QtWidgets.QWidget):
     def __init__(self, **kwarg):
         super(ConfigureTreeProxyNode, self).__init__(**kwarg)
         self.setObjectName(self.nodeName().title() + " Widget")
@@ -74,7 +74,7 @@ class ConfigureTreeModelBase(AbstractNamespaceTreeModel):
 #=========================================
 # Proxies
 #=========================================
-class SortFilterConfigureProxyModel(QtGui.QSortFilterProxyModel):
+class SortFilterConfigureProxyModel(QtCore.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = self.sourceModel().node(sIndex)

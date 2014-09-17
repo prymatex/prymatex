@@ -4,11 +4,11 @@
 from prymatex.qt import QtCore, QtGui
 from prymatex.models.trees import FlatTreeProxyModel
 
-class BundleItemProxyTreeModel(QtGui.QSortFilterProxyModel):
+class BundleItemProxyTreeModel(QtCore.QSortFilterProxyModel):
     bundleItemTypeOrder = ("bundle", "command", "dragcommand", "syntax",
         "macro", "snippet", "preference", "template", "staticfile", "project")
     def __init__(self, manager, parent = None):
-        QtGui.QSortFilterProxyModel.__init__(self, parent)
+        super(BundleItemProxyTreeModel, self).__init__(parent)
         self.manager = manager
         self.namespacesFilter = ("prymatex", "user")
         self.bundleItemTypesFilter = self.bundleItemTypeOrder
@@ -185,8 +185,8 @@ class ProjectListModel(BundleItemTypeProxyModel):
     def columnCount(self, parent):
         return 2
 
-class ThemeStyleProxyTableModel(QtGui.QSortFilterProxyModel):
-    # ---------------- QtGui.QSortFilterProxyModel overrides
+class ThemeStyleProxyTableModel(QtCore.QSortFilterProxyModel):
+    # ---------------- QtCore.QSortFilterProxyModel overrides
     def filterAcceptsRow(self, sourceRow, sourceParent):
         regexp = self.filterRegExp()
         if regexp.isEmpty():

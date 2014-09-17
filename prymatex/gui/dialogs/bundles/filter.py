@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
-class BundleFilterDialog(QtGui.QDialog):
+class BundleFilterDialog(QtWidgets.QDialog):
     def __init__(self, parent = None):
-        QtGui.QDialog.__init__(self, parent)
+        super(BundleFilterDialog, self).__init__(parent)
         self.setupUi(self)
         self.setWindowFlags(QtCore.Qt.Dialog)
-        self.proxy = QtGui.QSortFilterProxyModel(self)
+        self.proxy = QtCore.QSortFilterProxyModel(self)
         self.listBundleItems.setModel(self.proxy)
         
     def setModel(self, model):

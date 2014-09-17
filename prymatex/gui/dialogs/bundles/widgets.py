@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.utils import json
 
@@ -17,13 +17,13 @@ from prymatex.ui.support.macro import Ui_Macro
 from prymatex.ui.support.project import Ui_Project
 from prymatex.models.support import BundleItemMenuTreeModel
 
-class BundleItemEditorBaseWidget(QtGui.QWidget):
+class BundleItemEditorBaseWidget(QtWidgets.QWidget):
     '''Base class for editors'''
     TYPE = ''
     TABWIDTH = 20
 
     def __init__(self, parent = None):
-        QtGui.QWidget.__init__(self, parent)
+        super(BundleItemEditorBaseWidget, self).__init__(parent)
         #The bundle item
         self.bundleItem = None
         self.changes = {}
@@ -89,22 +89,22 @@ class NoneEditorWidget(BundleItemEditorBaseWidget):
         
     def setupUi(self, widget):
         widget.setObjectName("NoneWidget")
-        self.gridLayout = QtGui.QGridLayout(widget)
+        self.gridLayout = QtWidgets.QGridLayout(widget)
         self.gridLayout.setObjectName("gridLayout")
-        self.label = QtGui.QLabel(widget)
+        self.label = QtWidgets.QLabel(widget)
         self.label.setEnabled(False)
         self.label.setText("")
         self.label.setPixmap(self.parent().resources().get_image("prymo"))
         self.label.setScaledContents(True)
         self.label.setObjectName("labelPrymo")
         self.gridLayout.addWidget(self.label, 1, 1, 1, 1)
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem, 1, 2, 1, 1)
-        spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.gridLayout.addItem(spacerItem1, 2, 1, 1, 1)
-        spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem2 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.gridLayout.addItem(spacerItem2, 0, 1, 1, 1)
-        spacerItem3 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem3, 1, 0, 1, 1)
 
 #============================================================
@@ -191,7 +191,7 @@ class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
         self.labelInputOption.setVisible(False)
         self.comboBoxFallbackInput.setVisible(False)
 
-        self.menuCommandTemplates = QtGui.QMenu()
+        self.menuCommandTemplates = QtWidgets.QMenu()
         
         #for name, templateText in self.COMMAND_TEMPLATES.items():
         #    action = self.menuCommandTemplates.addAction(name)
@@ -439,7 +439,7 @@ class MacroEditorWidget(BundleItemEditorBaseWidget, Ui_Macro):
         self.listActionWidget.clear()
         self.argument.clear()
         for command in self.changes["commands"]:
-            item = QtGui.QListWidgetItem(command['command'], self.listActionWidget, self.COMMAND)
+            item = QtWidgets.QListWidgetItem(command['command'], self.listActionWidget, self.COMMAND)
             self.listActionWidget.addItem(item)
 
 class BundleEditorWidget(BundleItemEditorBaseWidget, Ui_Menu):

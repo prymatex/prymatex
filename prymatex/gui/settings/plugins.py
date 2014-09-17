@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.ui.configure.plugins import Ui_Plugins
 from prymatex.models.settings import SettingsTreeNode
 
 from prymatex.models.plugins import PluginsTableModel
 
-class PluginsSettingsWidget(SettingsTreeNode, Ui_Plugins, QtGui.QWidget):
+class PluginsSettingsWidget(SettingsTreeNode, Ui_Plugins, QtWidgets.QWidget):
     NAMESPACE = "general"
     
     def __init__(self, **kwargs):

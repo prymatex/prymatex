@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.qt.extensions import HtmlItemDelegate
 from prymatex.core.components import PrymatexDialog
 
-class SelectorDialog(PrymatexDialog, QtGui.QDialog):
+class SelectorDialog(PrymatexDialog, QtWidgets.QDialog):
     '''
     This dialog allow the user to search through commands, snippets and macros in the current scope easily.
     An instance is hold in the main window and triggered with an action.
@@ -33,7 +33,7 @@ class SelectorDialog(PrymatexDialog, QtGui.QDialog):
     def showEvent(self, event):
         # TODO Poner el widget en un lugar referente al widget que lo 
         # esta llamando o sobre el que se aplica
-        QtGui.QDialog.showEvent(self, event)
+        super(SelectorDialog, self).showEvent(event)
         screen = self.application().desktop().screen()
         point = screen.rect().center() - self.rect().center()
         point.setY(point.y() * 0.5)

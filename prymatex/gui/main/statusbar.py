@@ -2,9 +2,9 @@
 
 """This module contains the main window status bar definition and widgets."""
 
-from prymatex.qt import QtGui
+from prymatex.qt import QtGui, QtWidgets
 
-class PrymatexMainStatusBar(QtGui.QStatusBar):
+class PrymatexMainStatusBar(QtWidgets.QStatusBar):
     def __init__(self, **kwargs):
         super(PrymatexMainStatusBar, self).__init__(**kwargs)
         self.window().currentEditorChanged.connect(self.on_currentEditorChanged)
@@ -12,7 +12,7 @@ class PrymatexMainStatusBar(QtGui.QStatusBar):
 
     def addPermanentWidget(self, widget):
         self.statusBars.append(widget)
-        QtGui.QStatusBar.addPermanentWidget(self, widget, 1)
+        super(PrymatexMainStatusBar, self).addPermanentWidget(widget, 1)
 
     def on_currentEditorChanged(self, editor):
         for bar in self.statusBars:

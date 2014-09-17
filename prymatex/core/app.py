@@ -7,7 +7,7 @@ from functools import partial
 
 import prymatex
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import create_shortcut
 
 from prymatex.core import config
@@ -21,7 +21,7 @@ from prymatex.utils.processes import get_process_map
 
 from prymatex.models.shortcuts import ShortcutsTreeModel
 
-class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
+class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     """The application instance.
     There can't be two apps running simultaneously, since configuration issues may occur.
     The application loads the Support."""
@@ -85,7 +85,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         sys.excepthook = displayExceptionDialog
 
         # Route messages to application logger
-        QtCore.qInstallMsgHandler(self.qtMessageHandler)
+        QtCore.qInstallMessageHandler(self.qtMessageHandler)
 
     def qtMessageHandler(self, msgType, msgString):
         ''' Route Qt messaging system into Prymatex/Python one'''

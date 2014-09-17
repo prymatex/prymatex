@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.qt import QtGui
+from prymatex.qt import QtWidgets
 
-class ReplaceRenameInputDialog(QtGui.QInputDialog):
-    Cancel = QtGui.QMessageBox.Cancel
-    Rename = QtGui.QMessageBox.Ok
-    Replace = QtGui.QMessageBox.Discard
+class ReplaceRenameInputDialog(QtWidgets.QInputDialog):
+    Cancel = QtWidgets.QMessageBox.Cancel
+    Rename = QtWidgets.QMessageBox.Ok
+    Replace = QtWidgets.QMessageBox.Discard
     
     def showEvent(self, event):
         self.buttons = self.layout().itemAt(2).widget()
-        self.buttons.button(QtGui.QDialogButtonBox.Ok).setText("Rename")
-        self.replaceButton = self.buttons.addButton("Replace", QtGui.QDialogButtonBox.DestructiveRole)
+        self.buttons.button(QtWidgets.QDialogButtonBox.Ok).setText("Rename")
+        self.replaceButton = self.buttons.addButton("Replace", QtWidgets.QDialogButtonBox.DestructiveRole)
         self.replaceButton.pressed.connect(self.on_replaceButton_pressed)
-        QtGui.QInputDialog.showEvent(self, event)
+        super(ReplaceRenameInputDialog, self).showEvent(event)
 
     def on_replaceButton_pressed(self):
-        self.done(QtGui.QDialogButtonBox.DestructiveRole)
+        self.done(QtWidgets.QDialogButtonBox.DestructiveRole)
         
     @classmethod
-    def getText(cls, parent, title, label, mode = QtGui.QLineEdit.Normal, text = ""):
+    def getText(cls, parent, title, label, mode = QtWidgets.QLineEdit.Normal, text = ""):
         inputDialog = cls(parent)
         inputDialog.setTextValue(text)
         inputDialog.setWindowTitle(title)

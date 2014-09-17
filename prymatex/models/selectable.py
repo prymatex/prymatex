@@ -36,7 +36,7 @@ class SelectableModelMixin(object):
 class SelectableModel(QtCore.QAbstractTableModel, SelectableModelMixin):
     DEFALUT_TEMPLATE = "%s"
     def __init__(self, dataFunction, parent = None):
-        QtCore.QAbstractTableModel.__init__(self, parent)
+        super(SelectableModel, self).__init__(parent)
         self.__dataFunction = dataFunction
         self.__data = []
 
@@ -72,9 +72,9 @@ class SelectableModel(QtCore.QAbstractTableModel, SelectableModelMixin):
         elif role == QtCore.Qt.ToolTipRole and 'tooltip' in item:
             return item['tooltip']
 
-class SelectableProxyModel(QtGui.QSortFilterProxyModel, SelectableModelMixin):
+class SelectableProxyModel(QtCore.QSortFilterProxyModel, SelectableModelMixin):
     def __init__(self, parent = None):
-        QtGui.QSortFilterProxyModel.__init__(self, parent)
+        super(SelectableProxyModel, self).__init__(parent)
         self.__filterFunction = None
         self.__sortFunction = None
         self.__filterString = ""

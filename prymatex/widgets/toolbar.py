@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.qt.helpers import text_to_objectname
   
-class DockWidgetToolBar(QtGui.QToolBar):
+class DockWidgetToolBar(QtWidgets.QToolBar):
     """QMainWindow "mixin" which provides auto-hiding support for dock widgets (not toolbars)."""
 
     DOCK_AREA_TO_TB = {
@@ -16,8 +16,8 @@ class DockWidgetToolBar(QtGui.QToolBar):
     }
     
     def __init__(self, name, area, parent):
-        QtGui.QToolBar.__init__(self, parent)
-        assert isinstance(parent, QtGui.QMainWindow)
+        QtWidgets.QToolBar.__init__(self, parent)
+        assert isinstance(parent, QtWidgets.QMainWindow)
         assert area in self.DOCK_AREA_TO_TB
         self._area = area
         self.setObjectName(text_to_objectname(name, prefix="ToolBar"))
@@ -28,11 +28,11 @@ class DockWidgetToolBar(QtGui.QToolBar):
         
         self.setFloatable(False)
         self.setMovable(False)
-        self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.MinimumExpanding))
+        self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.MinimumExpanding))
         self.setIconSize(QtCore.QSize(16,16));
         
         #Restore action
-        self.restoreAction = QtGui.QAction(self)
+        self.restoreAction = QtWidgets.QAction(self)
         self.restoreAction.setIcon(self.parent().resources().get_icon("TitleBarUnshadeButton"))
         self.restoreAction.triggered.connect(self.hide)
         self.addAction(self.restoreAction)
@@ -54,7 +54,7 @@ class DockWidgetToolBar(QtGui.QToolBar):
 
     def dockWidgets(self):
         mainWindow = self.parent()
-        for dockWidget in mainWindow.findChildren(QtGui.QDockWidget):
+        for dockWidget in mainWindow.findChildren(QtWidgets.QDockWidget):
             if mainWindow.dockWidgetArea(dockWidget) == self._area and dockWidget.isVisible() and not dockWidget.isFloating():
                 if dockWidget.toggleViewAction() not in self.actions():
                     self.addAction(dockWidget.toggleViewAction())
@@ -64,7 +64,7 @@ class DockWidgetToolBar(QtGui.QToolBar):
 
     def allDockWidgets(self):
         mainWindow = self.parent()
-        for dockWidget in mainWindow.findChildren(QtGui.QDockWidget):
+        for dockWidget in mainWindow.findChildren(QtWidgets.QDockWidget):
             if mainWindow.dockWidgetArea(dockWidget) == self._area and not dockWidget.isFloating():
                 yield dockWidget
                 

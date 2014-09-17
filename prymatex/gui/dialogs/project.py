@@ -3,7 +3,7 @@
 
 import os
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.core.components import PrymatexDialog
 from prymatex.core import exceptions
@@ -12,7 +12,7 @@ from prymatex.utils.i18n import ugettext as _
 
 from prymatex.ui.dialogs.project import Ui_ProjectDialog
 
-class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtGui.QDialog):
+class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtWidgets.QDialog):
     def __init__(self, **kwargs):
         super(ProjectDialog, self).__init__(**kwargs)
         self.setupUi(self)
@@ -32,7 +32,7 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtGui.QDialog):
 
     def initialize(self, **kwargs):
         super(ProjectDialog, self).initialize(**kwargs)
-        self.environmentDialog = self.window().findChild(QtGui.QDialog, "EnvironmentDialog")
+        self.environmentDialog = self.window().findChild(QtWidgets.QDialog, "EnvironmentDialog")
 
     def setupComboLicences(self):
         for licence in self.resources().get_software_licenses():

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.core.components import PrymatexDialog
 
@@ -9,7 +9,7 @@ from prymatex.ui.dialogs.treewidget import Ui_TreeWidgetDialog
 from prymatex.models.properties import (PropertyTreeNode, PropertiesTreeModel,
     PropertiesProxyModel)
 
-class PropertiesDialog(PrymatexDialog, Ui_TreeWidgetDialog, QtGui.QDialog):
+class PropertiesDialog(PrymatexDialog, Ui_TreeWidgetDialog, QtWidgets.QDialog):
     """Properties dialog, it's hold by the project docker"""
     def __init__(self, **kwargs):
         super(PropertiesDialog, self).__init__(**kwargs)
@@ -65,5 +65,5 @@ class PropertiesDialog(PrymatexDialog, Ui_TreeWidgetDialog, QtGui.QDialog):
     def exec_(self, fileSystemItem):
         self.treeView.model().setFilterFileSystem(fileSystemItem)
         self.selectFirstIndex()
-        return QtGui.QDialog.exec_(self)
+        return super(PropertiesDialog, self).exec_()
         

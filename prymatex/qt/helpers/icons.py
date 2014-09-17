@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.utils import text
 
@@ -38,7 +38,7 @@ def combine_icons(icon1, icon2, scale = 1):
 def get_std_icon(name):
     if not name.startswith('SP_'):
         name = 'SP_' + name
-    standardIconName = getattr(QtGui.QStyle, name, None)
+    standardIconName = getattr(QtWidgets.QStyle, name, None)
     if standardIconName is not None:
-        return QtGui.QWidget().style().standardIcon(standardIconName)
+        return QtWidgets.QWidget().style().standardIcon(standardIconName)
     return QtGui.QIcon()

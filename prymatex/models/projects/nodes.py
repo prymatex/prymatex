@@ -4,7 +4,7 @@
 import os
 import codecs
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.core import config
 
@@ -21,7 +21,7 @@ __all__ = [ 'FileSystemTreeNode', 'ProjectTreeNode' ]
 # Nodes
 #=========================================
 class FileSystemTreeNode(TreeNodeBase):
-    FileIconProvider = QtGui.QFileIconProvider()
+    FileIconProvider = QtWidgets.QFileIconProvider()
     def __init__(self, name, parent = None):
         TreeNodeBase.__init__(self, name, parent)
         self.isdir = os.path.isdir(self.path())

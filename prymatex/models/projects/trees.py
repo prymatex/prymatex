@@ -4,7 +4,7 @@
 import codecs
 import fnmatch
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.models.trees import AbstractTreeModel
 from prymatex.models.trees import FlatTreeProxyModel
@@ -144,9 +144,9 @@ class ProjectTreeModel(AbstractTreeModel):
 #=========================================
 # Proxies
 #=========================================
-class ProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
+class ProjectTreeProxyModel(QtWidgets.QSortFilterProxyModel):
     def __init__(self, projectManager):
-        QtGui.QSortFilterProxyModel.__init__(self, projectManager)
+        QtWidgets.QSortFilterProxyModel.__init__(self, projectManager)
         self.projectManager = projectManager
         self.fileManager = projectManager.fileManager
         self.orderBy = "name"
@@ -219,7 +219,7 @@ class ProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         self.orderBy = orderBy
         self.folderFirst = folderFirst
         self.descending = descending
-        QtGui.QSortFilterProxyModel.sort(self, 0, order)
+        QtWidgets.QSortFilterProxyModel.sort(self, 0, order)
         
     def isDir(self, index):
         sIndex = self.mapToSource(index)
@@ -229,7 +229,7 @@ class ProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
     # Drag and Drop support
     #=======================================================
     def flags(self, index):
-        defaultFlags = QtGui.QSortFilterProxyModel.flags(self, index)
+        defaultFlags = QtWidgets.QSortFilterProxyModel.flags(self, index)
         if not self.isDir(index):
             return defaultFlags | QtCore.Qt.ItemIsDragEnabled
         return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled 
@@ -313,7 +313,7 @@ class FileSystemProxyModel(FlatTreeProxyModel):
 #=========================================
 # Project Bundle Menu
 #=========================================
-class ProjectMenuProxyModel(QtGui.QSortFilterProxyModel):
+class ProjectMenuProxyModel(QtWidgets.QSortFilterProxyModel):
     def __init__(self, projectManager):
         super(ProjectMenuProxyModel, self).__init__(projectManager)
         self.projectManager = projectManager

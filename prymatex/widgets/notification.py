@@ -2,9 +2,9 @@
 
 import collections
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
-class Notification(QtGui.QWidget):
+class Notification(QtWidgets.QWidget):
     aboutToClose = QtCore.Signal()
     contentChanged = QtCore.Signal()
     def __init__(self, text, parent, timeout=None, icon=None, links=None,
@@ -12,14 +12,14 @@ class Notification(QtGui.QWidget):
         super(Notification, self).__init__(parent)
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self.horizontalLayout = QtGui.QHBoxLayout(self)
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self)
         self.horizontalLayout.setSpacing(0)
         self.horizontalLayout.setMargin(0)
 
         # ------------------- Elements
         self.pixmap = None
         if icon is not None:
-            self.pixmap = QtGui.QLabel(self)
+            self.pixmap = QtWidgets.QLabel(self)
             self.pixmap.setPixmap(icon.pixmap(
                 QtCore.QSize(
                     self.pixmap.height(),
@@ -29,7 +29,7 @@ class Notification(QtGui.QWidget):
             self.pixmap.setAutoFillBackground(True)
             self.horizontalLayout.addWidget(self.pixmap)
 
-        self.label = QtGui.QLabel(self)
+        self.label = QtWidgets.QLabel(self)
         self.label.setText(text)
         self.label.setAutoFillBackground(True)
         self.horizontalLayout.addWidget(self.label)
@@ -42,9 +42,9 @@ class Notification(QtGui.QWidget):
         self.timeoutTimer.setSingleShot(True)
         
         # ---------- Animation
-        #self.shadow = QtGui.QGraphicsDropShadowEffect()
+        #self.shadow = QtWidgets.QGraphicsDropShadowEffect()
         #self.shadow.setBlurRadius(10)
-        self.goe = QtGui.QGraphicsOpacityEffect(self)
+        self.goe = QtWidgets.QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.goe)
         
         # Fade in

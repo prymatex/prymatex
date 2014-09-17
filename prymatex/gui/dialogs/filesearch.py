@@ -7,7 +7,7 @@ try:
 except ImportError:
     import Queue as queue
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.ui.dialogs.search import Ui_SearchDialog
 from functools import reduce
@@ -84,7 +84,7 @@ class FileSearchThread(QtCore.QThread):
     def cancel(self):
         self._cancel = True
 
-class PMXFileSearchDialog(QtGui.QDialog, Ui_SearchDialog):
+class PMXFileSearchDialog(QtWidgets.QDialog, Ui_SearchDialog):
     def __init__(self, model, parent = None):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)

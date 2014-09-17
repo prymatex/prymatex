@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.qt import QtGui
+from prymatex.qt import QtWidgets
 
-class CheckableMessageBox(QtGui.QMessageBox):
+class CheckableMessageBox(QtWidgets.QMessageBox):
     def __init__(self, *largs, **kwargs):
-        QtGui.QMessageBox.__init__(self, *largs, **kwargs)
-        self.checkBox = QtGui.QCheckBox(self)
+        super(CheckableMessageBox, self).__init__(self, *largs, **kwargs)
+        self.checkBox = QtWidgets.QCheckBox(self)
         self.layout().addWidget(self.checkBox, 1, 1)
 
     def setCheckBoxText(self, text):
@@ -16,9 +16,9 @@ class CheckableMessageBox(QtGui.QMessageBox):
         return self.checkBox.isChecked()
 
     @classmethod
-    def questionFactory(cls, parent, title, text, checkText, buttons = QtGui.QMessageBox.Ok, defaultButton = QtGui.QMessageBox.NoButton):
+    def questionFactory(cls, parent, title, text, checkText, buttons = QtWidgets.QMessageBox.Ok, defaultButton = QtWidgets.QMessageBox.NoButton):
         question = cls(parent)
-        question.setIcon(QtGui.QMessageBox.Question)
+        question.setIcon(QtWidgets.QMessageBox.Question)
         question.setStandardButtons(buttons)
         question.setDefaultButton(defaultButton)
         question.setWindowTitle(title)

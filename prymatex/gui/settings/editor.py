@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.ui.configure.editor import Ui_Editor
 from prymatex.models.settings import SettingsTreeNode
@@ -9,7 +9,7 @@ from prymatex.gui.codeeditor.editor import CodeEditor
 from prymatex.gui.codeeditor.sidebar import (LineNumberSideBarAddon, 
     BookmarkSideBarAddon, FoldingSideBarAddon, SelectionSideBarAddon)
 
-class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtGui.QWidget):
+class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtWidgets.QWidget):
     def __init__(self, **kwargs):
         super(EditorSettingsWidget, self).__init__(nodeName = "editor", **kwargs)
         self.setupUi(self)

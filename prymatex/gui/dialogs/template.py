@@ -3,7 +3,7 @@
 
 import os
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.core.components import PrymatexDialog
 
 from prymatex.utils.i18n import ugettext as _
@@ -11,7 +11,7 @@ from prymatex.gui.dialogs.environment import EnvironmentDialog
 
 from prymatex.ui.dialogs.template import Ui_TemplateDialog
 
-class TemplateDialog(PrymatexDialog, Ui_TemplateDialog, QtGui.QDialog):
+class TemplateDialog(PrymatexDialog, Ui_TemplateDialog, QtWidgets.QDialog):
     def __init__(self, **kwargs):
         super(TemplateDialog, self).__init__(**kwargs)
         self.setupUi(self)
@@ -31,7 +31,7 @@ class TemplateDialog(PrymatexDialog, Ui_TemplateDialog, QtGui.QDialog):
     
     def initialize(self, **kwargs):
         super(TemplateDialog, self).initialize(**kwargs)
-        self.environmentDialog = self.window().findChild(QtGui.QDialog, "EnvironmentDialog")
+        self.environmentDialog = self.window().findChild(QtWidgets.QDialog, "EnvironmentDialog")
     
     def setupComboTemplates(self):
         tableView = QtGui.QTableView(self)

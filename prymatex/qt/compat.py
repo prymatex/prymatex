@@ -4,15 +4,15 @@
 import os
 import sys
 
-from prymatex.qt import QtGui
+from prymatex.qt import QtWidgets
 
 #===============================================================================
 # Wrappers around QFileDialog static methods
 #===============================================================================
 
 def getExistingDirectory(parent=None, caption='', basedir='',
-                         options=QtGui.QFileDialog.ShowDirsOnly):
-    """Wrapper around QtGui.QFileDialog.getExistingDirectory static method
+                         options=QtWidgets.QFileDialog.ShowDirsOnly):
+    """Wrapper around QtWidgets.QFileDialog.getExistingDirectory static method
     Compatible with PyQt >=v4.4 (API #1 and #2) and PySide >=v1.0"""
     # Calling QFileDialog static method
     if sys.platform == "win32":
@@ -20,7 +20,7 @@ def getExistingDirectory(parent=None, caption='', basedir='',
         _temp1, _temp2 = sys.stdout, sys.stderr
         sys.stdout, sys.stderr = None, None
     try:
-        result = QtGui.QFileDialog.getExistingDirectory(parent, caption, basedir,
+        result = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, basedir,
                                                   options)
     finally:
         if sys.platform == "win32":
@@ -34,7 +34,7 @@ def getExistingDirectory(parent=None, caption='', basedir='',
 def _qfiledialog_wrapper(attr, parent=None, caption='', basedir='',
                          filters='', selectedfilter='', options=None):
     if options is None:
-        options = QtGui.QFileDialog.Options(0)
+        options = QtWidgets.QFileDialog.Options(0)
     if isinstance(filters, (tuple, list)):
         filters = ";;".join(filters)
     try:
@@ -46,10 +46,10 @@ def _qfiledialog_wrapper(attr, parent=None, caption='', basedir='',
     tuple_returned = True
     try:
         # PyQt >=v4.6
-        func = getattr(QtGui.QFileDialog, attr+'AndFilter')
+        func = getattr(QtWidgets.QFileDialog, attr+'AndFilter')
     except AttributeError:
         # PySide or PyQt <v4.6
-        func = getattr(QtGui.QFileDialog, attr)
+        func = getattr(QtWidgets.QFileDialog, attr)
         if QtCore.QString is not None:
             selectedfilter = QtCore.QString()
             tuple_returned = False
@@ -95,7 +95,7 @@ def _qfiledialog_wrapper(attr, parent=None, caption='', basedir='',
 
 def getOpenFileName(parent=None, caption='', basedir='', filters='',
                     selectedfilter='', options=None):
-    """Wrapper around QtGui.QFileDialog.getOpenFileName static method
+    """Wrapper around QtWidgets.QFileDialog.getOpenFileName static method
     Returns a tuple (filename, selectedfilter) -- when dialog box is canceled,
     returns a tuple of empty strings
     Compatible with PyQt >=v4.4 (API #1 and #2) and PySide >=v1.0"""
@@ -106,7 +106,7 @@ def getOpenFileName(parent=None, caption='', basedir='', filters='',
 
 def getOpenFileNames(parent=None, caption='', basedir='', filters='',
                      selectedfilter='', options=None):
-    """Wrapper around QtGui.QFileDialog.getOpenFileNames static method
+    """Wrapper around QtWidgets.QFileDialog.getOpenFileNames static method
     Returns a tuple (filenames, selectedfilter) -- when dialog box is canceled,
     returns a tuple (empty list, empty string)
     Compatible with PyQt >=v4.4 (API #1 and #2) and PySide >=v1.0"""
@@ -117,7 +117,7 @@ def getOpenFileNames(parent=None, caption='', basedir='', filters='',
 
 def getSaveFileName(parent=None, caption='', basedir='', filters='',
                     selectedfilter='', options=None):
-    """Wrapper around QtGui.QFileDialog.getSaveFileName static method
+    """Wrapper around QtWidgets.QFileDialog.getSaveFileName static method
     Returns a tuple (filename, selectedfilter) -- when dialog box is canceled,
     returns a tuple of empty strings
     Compatible with PyQt >=v4.4 (API #1 and #2) and PySide >=v1.0"""

@@ -4,20 +4,20 @@
 import os
 import math
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from .group import GroupWidget, DragableTabBar
 
-class SplitterWidget(QtGui.QSplitter):
+class SplitterWidget(QtWidgets.QSplitter):
     """ The SplitterWidget class is a hierarchy of QSplitters the leaves of
     which are QTabWidgets.  Any tab may be moved around with the hierarchy
     automatically extended and reduced as required.
     """
 
     # Signals for WorkbenchWindowLayout to handle
-    tabCloseRequest = QtCore.Signal(QtGui.QWidget)
+    tabCloseRequest = QtCore.Signal(QtWidgets.QWidget)
     tabCreateRequest = QtCore.Signal()
-    currentWidgetChanged = QtCore.Signal(QtGui.QWidget)
+    currentWidgetChanged = QtCore.Signal(QtWidgets.QWidget)
     layoutChanged = QtCore.Signal()
 
     # The different hotspots of a QTabWidget.  An non-negative value is a tab
@@ -35,7 +35,7 @@ class SplitterWidget(QtGui.QSplitter):
         super(SplitterWidget, self).__init__(**kwargs)
         self.clear()
 
-        QtCore.QObject.connect(QtGui.qApp, QtCore.SIGNAL('focusChanged(QWidget *,QWidget *)'), self._focus_changed)
+        QtCore.QObject.connect(QtWidgets.qApp, QtCore.SIGNAL('focusChanged(QWidget *,QWidget *)'), self._focus_changed)
         
     def __len__(self):
         return sum([ tw.count() for tw in self.findChildren(GroupWidget)])
@@ -97,7 +97,7 @@ class SplitterWidget(QtGui.QSplitter):
 
             sp_ch_states.append(ch_state)
 
-        return (str(QtGui.QSplitter.saveState(qsplitter)), sp_ch_states)
+        return (str(QtWidgets.QSplitter.saveState(qsplitter)), sp_ch_states)
 
     def restoreState(self, state, factory):
         """ Restore the contents from the given state (returned by a previous
@@ -139,7 +139,7 @@ class SplitterWidget(QtGui.QSplitter):
                 else:
                     del new_tab
             else:
-                new_qsp = QtGui.QSplitter()
+                new_qsp = QtWidgets.QSplitter()
 
                 # Recurse down the tree of splitters.
                 self._restore_qsplitter(ch_state, factory, new_qsp)
@@ -152,7 +152,7 @@ class SplitterWidget(QtGui.QSplitter):
 
         # Restore the QSplitter state (being careful to get the right
         # implementation).
-        QtGui.QSplitter.restoreState(qsplitter, sp_qstate)
+        QtWidgets.QSplitter.restoreState(qsplitter, sp_qstate)
     
     def setMaxColumns(self, columns):
         self._max_columns = columns
@@ -187,7 +187,7 @@ class SplitterWidget(QtGui.QSplitter):
                 group = self.widget(0)
     
                 while not isinstance(group, GroupWidget):
-                    assert isinstance(group, QtGui.QSplitter)
+                    assert isinstance(group, QtWidgets.QSplitter)
                     group = group.widget(0)
             else:
                 # There is no group so create one.
@@ -719,7 +719,7 @@ class SplitterWidget(QtGui.QSplitter):
                 if dhs == self._HS_AFTER_LAST_TAB and stab == stab_w.count()-1:
                     return
 
-            QtGui.qApp.blockSignals(True)
+            QtWidgets.qApp.blockSignals(True)
 
             ticon, ttext, ttextcolor, twidg = self._remove_tab(stab_w, stab)
 
@@ -747,7 +747,7 @@ class SplitterWidget(QtGui.QSplitter):
             if stab_w is dtab_w and stab_w.count() == 1:
                 return
 
-            QtGui.qApp.blockSignals(True)
+            QtWidgets.qApp.blockSignals(True)
 
             self._split(dsplit_w, stab_w, dtab_w, stab, dhs)
         
@@ -757,7 +757,7 @@ class SplitterWidget(QtGui.QSplitter):
         if dsplit_w != self:
             self.currentWidgetChanged.emit(twidg)
         
-        QtGui.qApp.blockSignals(False)
+        QtWidgets.qApp.blockSignals(False)
 
     # Split the splitter :)
     def _split(self, dsplit_w, stab_w, dtab_w, stab, dhs):
@@ -794,7 +794,7 @@ class SplitterWidget(QtGui.QSplitter):
         # Fix childrens
         if dspl.count() > 0:
             group = dspl.widget(0)
-            if isinstance(group, QtGui.QSplitter):
+            if isinstance(group, QtWidgets.QSplitter):
                 self._fix_sizes(group)
 
     def _horizontal_split(self, spl, idx, hs):
@@ -813,7 +813,7 @@ class SplitterWidget(QtGui.QSplitter):
             if hs == self._HS_SOUTH:
                 idx = -1
         else:
-            new_spl = QtGui.QSplitter(QtCore.Qt.Vertical)
+            new_spl = QtWidgets.QSplitter(QtCore.Qt.Vertical)
             new_spl.addWidget(spl.widget(idx))
             spl.insertWidget(idx, new_spl)
 
@@ -842,7 +842,7 @@ class SplitterWidget(QtGui.QSplitter):
             if hs == self._HS_EAST:
                 idx = -1
         else:
-            new_spl = QtGui.QSplitter(QtCore.Qt.Horizontal)
+            new_spl = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
             new_spl.addWidget(spl.widget(idx))
             spl.insertWidget(idx, new_spl)
 
@@ -879,8 +879,8 @@ class SplitterWidget(QtGui.QSplitter):
         miss = (None, self._HS_NONE, None)
 
         # Get the bounding rect of the cloned QTbarBar.
-        top_widget = QtGui.qApp.topLevelAt(global_pos)
-        if isinstance(top_widget, QtGui.QTabBar):
+        top_widget = QtWidgets.qApp.topLevelAt(global_pos)
+        if isinstance(top_widget, QtWidgets.QTabBar):
             cloned_rect = top_widget.frameGeometry()
         else:
             cloned_rect = None
@@ -888,7 +888,7 @@ class SplitterWidget(QtGui.QSplitter):
         # Determine which visible SplitterWidget, if any, is under the cursor
         # (compensating for the cloned QTabBar that may be rendered over it).
         split_widget = None
-        for top_widget in QtGui.qApp.topLevelWidgets():
+        for top_widget in QtWidgets.qApp.topLevelWidgets():
             for split_widget in top_widget.findChildren(SplitterWidget, None):
                 visible_region = split_widget.visibleRegion()
                 widget_pos = split_widget.mapFromGlobal(global_pos)
@@ -961,8 +961,8 @@ class SplitterWidget(QtGui.QSplitter):
         # See if the hotspot is in the tab area.
         tpos = tw.mapFrom(split_widget, pos)
         tab_bar = tw.tabBar()
-        top_bottom = tw.tabPosition() in (QtGui.QTabWidget.North, 
-                                          QtGui.QTabWidget.South)
+        top_bottom = tw.tabPosition() in (QtWidgets.QTabWidget.North, 
+                                          QtWidgets.QTabWidget.South)
         for i in range(tw.count()):
             rect = tab_bar.tabRect(i)
 

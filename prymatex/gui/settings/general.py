@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.ui.configure.general import Ui_General
 from prymatex.models.settings import SettingsTreeNode
 
-class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtGui.QWidget):
+class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtWidgets.QWidget):
     def __init__(self, **kwargs):
         super(GeneralSettingsWidget, self).__init__(nodeName = "general", **kwargs)
         self.setupUi(self)
@@ -19,7 +19,7 @@ class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtGui.QWidget):
         currentStyleSheetName = self.settings.value('qtStyleSheet')
         currentIconTheme = self.settings.value('iconTheme')
         resources = self.application().resources()
-        for index, styleName in enumerate(QtGui.QStyleFactory.keys()):
+        for index, styleName in enumerate(QtWidgets.QStyleFactory.keys()):
             self.comboBoxQtStyle.addItem(styleName, styleName)
             if currentStyleName and styleName == currentStyleName:
                 self.comboBoxQtStyle.setCurrentIndex(index)

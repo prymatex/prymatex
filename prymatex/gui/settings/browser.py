@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 import os
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.QtNetwork import QNetworkProxy
 
 from prymatex.ui.configure.browser import Ui_Browser
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.gui.dockers.browser import BrowserDock
 
-class NetworkSettingsWidget(SettingsTreeNode, Ui_Browser, QtGui.QWidget):
+class NetworkSettingsWidget(SettingsTreeNode, Ui_Browser, QtWidgets.QWidget):
     def __init__(self, **kwargs):
         super(NetworkSettingsWidget, self).__init__(nodeName = "network", **kwargs)
         self.setupUi(self)

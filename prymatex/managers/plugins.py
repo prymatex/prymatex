@@ -11,7 +11,7 @@ try:
 except ImportError:
     import simplejson as json
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex import resources
 from prymatex.utils import osextra
 from prymatex.core import config
@@ -45,7 +45,7 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
         self.plugins = {}
         
         self.components = {}
-        self.defaultComponent = QtGui.QPlainTextEdit
+        self.defaultComponent = QtWidgets.QPlainTextEdit
         
     @classmethod
     def contributeToSettings(cls):

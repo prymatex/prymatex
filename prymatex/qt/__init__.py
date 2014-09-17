@@ -4,14 +4,30 @@
 import os
 import sys
 
-os.environ.setdefault('QT_API', 'pyqt4')
-assert os.environ['QT_API'] in ('pyqt4', 'pyside')
+os.environ.setdefault('QT_API', 'pyqt5')
+assert os.environ['QT_API'] in ('pyqt4', 'pyqt5', 'pyside')
 
+APIS = {'pyqt4': 'PyQt4', 'pyqt5': 'PyQt5', 'pyside': 'PySide'}
 API = os.environ['QT_API']
-API_NAME = {'pyqt4': 'PyQt4', 'pyqt5': 'PyQt5', 'pyside': 'PySide'}[API]
+API_NAME = APIS[API]
 
 qt_version_str = pyqt4_version_str = pyqt5_version_str = sip_version_str = pyside_version_str = ""
 
+# -------------- PyQt5
+if API == 'pyqt5':
+    try:
+        from PyQt5.QtCore import qVersion, PYQT_VERSION_STR
+        pyqt5_version_str = PYQT_VERSION_STR
+        qt_version_str = qVersion()
+        import sipconfig
+        sip_version_str = sipconfig.Configuration().sip_version_str
+    except ImportError as ex:
+        sip_version_str = 'unknown'
+        # Switching to PyQt4
+        API = os.environ['QT_API'] = 'pyqt4'
+        API_NAME = APIS[API]
+
+# -------------- PyQt4
 if API == 'pyqt4':
     try:
         # Force API to #2
@@ -39,6 +55,7 @@ if API == 'pyqt4':
         is_pyqt46 = pyqt4_version_str.startswith('4.6')
         API_NAME += (" (API v%d)" % sip.getapi('QString'))
 
+# -------------- PySide
 if API == 'pyside':
     try:
         from PySide import __version__ as pyside_version_str
