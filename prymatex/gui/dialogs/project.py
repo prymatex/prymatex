@@ -17,10 +17,10 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtWidgets.QDialog):
         super(ProjectDialog, self).__init__(**kwargs)
         self.setupUi(self)
 
-        model = QtGui.QFileSystemModel(self)
+        model = QtWidgets.QFileSystemModel(self)
         model.setRootPath(QtCore.QDir.rootPath())
         model.setFilter(QtCore.QDir.Dirs)
-        self.completerFileSystem = QtGui.QCompleter(model, self)
+        self.completerFileSystem = QtWidgets.QCompleter(model, self)
         self.lineLocation.setCompleter(self.completerFileSystem)
 
         self.setupComboLicences()
@@ -54,7 +54,7 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtWidgets.QDialog):
 
     def setupComboTemplates(self):
         self.projectProxyModel = self.application().supportManager.projectProxyModel
-        tableView = QtGui.QTableView(self)
+        tableView = QtWidgets.QTableView(self)
         tableView.setModel(self.projectProxyModel)
         tableView.resizeColumnsToContents()
         tableView.resizeRowsToContents()
@@ -63,8 +63,8 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtWidgets.QDialog):
         tableView.setShowGrid(False)
         tableView.setMinimumWidth(tableView.horizontalHeader().length() + 25)
         tableView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-        tableView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        tableView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        tableView.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        tableView.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         tableView.setAutoScroll(False)
         self.comboBoxTemplate.setModel(self.projectProxyModel)
         self.comboBoxTemplate.setView(tableView)
@@ -72,7 +72,7 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtWidgets.QDialog):
 
     def on_buttonChoose_pressed(self):
         directory = self.lineLocation.text()
-        path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose Location for Project"), directory)
+        path = QtWidgets.QFileDialog.getExistingDirectory(self, _("Choose Location for Project"), directory)
         if path:
             self.lineLocation.setText(path)
             self.lineProjectName.setText(os.path.basename(path))
@@ -127,13 +127,13 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtWidgets.QDialog):
         try:
             self.projectCreated = self.application().projectManager.createProject(name, location)
         except exceptions.ProjectExistsException:
-            rslt = QtGui.QMessageBox.information(None, 
+            rslt = QtWidgets.QMessageBox.information(None, 
                 _("Project already created on %s") % name,
                 _("Directory %s already contains .pmxproject directory structure. "
                 "Unless you know what you are doing, Cancel and import project,"
                 " if it still fails, choose overwirte. Overwrite?") % location,
-                QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Ok, QtGui.QMessageBox.Cancel) 
-            if rslt == QtGui.QMessageBox.Cancel:
+                QtWidgets.QMessageBox.Cancel | QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.Cancel) 
+            if rslt == QtWidgets.QMessageBox.Cancel:
                 self.cancel()
             self.projectCreated = self.application().projectManager.createProject(name, location, overwrite = True)
 

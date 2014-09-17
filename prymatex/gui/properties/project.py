@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.models.properties import PropertyTreeNode
 from prymatex.ui.configure.project import Ui_Project
 
-class ProjectPropertiesWidget(PropertyTreeNode, Ui_Project, QtGui.QWidget):
+class ProjectPropertiesWidget(PropertyTreeNode, Ui_Project, QtWidgets.QWidget):
     """ Project Settings """
     NAMESPACE = ""
     def __init__(self, **kwargs):

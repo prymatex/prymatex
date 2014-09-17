@@ -1,7 +1,7 @@
 
 import os
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import test_font_strategy
 
 from prymatex.ui.configure.terminal import Ui_Terminal
@@ -9,7 +9,7 @@ from prymatex.models.settings import SettingsTreeNode
 from prymatex.utils.i18n import ugettext as _
 from prymatex.widgets.pmxterm.schemes import ColorScheme
 
-class TerminalSettingsWidget(SettingsTreeNode, Ui_Terminal, QtGui.QWidget):
+class TerminalSettingsWidget(SettingsTreeNode, Ui_Terminal, QtWidgets.QWidget):
     def __init__(self, **kwargs):
         super(TerminalSettingsWidget, self).__init__(nodeName = "terminal", **kwargs)
         self.setupUi(self)
@@ -67,7 +67,7 @@ class TerminalSettingsWidget(SettingsTreeNode, Ui_Terminal, QtGui.QWidget):
     @QtCore.Slot()
     def on_pushButtonChangeFont_pressed(self):
         font = self.settings.value('font')
-        font, ok = QtGui.QFontDialog.getFont(font, self, _("Select terminal font"))
+        font, ok = QtWidgets.QFontDialog.getFont(font, self, _("Select terminal font"))
         if ok:
             self.settings.setValue('font', font)
             self.comboBoxFontName.setCurrentFont(font)

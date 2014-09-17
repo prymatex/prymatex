@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import os, sys
 import random
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.core import config
 from prymatex.core import PrymatexDock
@@ -25,14 +25,14 @@ SHEME_SCOPES = [ 'comment', 'string', 'constant.numeric', 'constant.language',
 # Load color schemes
 ColorScheme.loadSchemes(os.path.join(config.PMX_SHARE_PATH, "Schemes"))
 
-class TabbedTerminal(QtGui.QTabWidget):
+class TabbedTerminal(QtWidgets.QTabWidget):
     
     def __init__(self, parent=None):
         super(TabbedTerminal, self).__init__(parent)
-        self.setTabPosition(QtGui.QTabWidget.South)
+        self.setTabPosition(QtWidgets.QTabWidget.South)
         
         # Corner widget
-        self.buttonNew = QtGui.QPushButton(self)
+        self.buttonNew = QtWidgets.QPushButton(self)
         self.buttonNew.setText("")
         self.buttonNew.setIcon(QtGui.QIcon.fromTheme("tab-new"))
         self.buttonNew.setMaximumSize(QtCore.QSize(28, 28))
@@ -100,7 +100,7 @@ class TabbedTerminal(QtGui.QTabWidget):
         for index in range(self.count()):
             self.widget(index).setFont(font)
 
-class TerminalDock(PrymatexDock, QtGui.QDockWidget):
+class TerminalDock(PrymatexDock, QtWidgets.QDockWidget):
     ICON = "dock-terminal"
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     

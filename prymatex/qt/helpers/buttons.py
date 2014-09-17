@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.qt.helpers.base import text2objectname
 import collections
 
 def create_toolbutton(parent, settings):
     """Create a QToolButton"""
-    button = QtGui.QToolButton(parent)
+    button = QtWidgets.QToolButton(parent)
     text = settings["text"] if "text" in settings else "No name"
     button.setObjectName(text2objectname(text, prefix = "toolButton"))
     button.setText(text)
@@ -38,7 +38,7 @@ def action2button(action, autoraise=True, text_beside_icon=False, parent=None):
     """Create a QToolButton directly from a QAction object"""
     if parent is None:
         parent = action.parent()
-    button = QtGui.QToolButton(parent)
+    button = QtWidgets.QToolButton(parent)
     button.setDefaultAction(action)
     button.setAutoRaise(autoraise)
     if text_beside_icon:

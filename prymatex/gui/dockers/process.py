@@ -7,14 +7,14 @@ import signal
 
 from prymatex.utils import osextra
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import create_menu
 
 from prymatex.core import PrymatexDock
 
 from prymatex.utils.i18n import ugettext as _
 
-class ExternalProcessDock(PrymatexDock, QtGui.QDockWidget):
+class ExternalProcessDock(PrymatexDock, QtWidgets.QDockWidget):
     ICON = "dock-external-process"
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
@@ -23,14 +23,14 @@ class ExternalProcessDock(PrymatexDock, QtGui.QDockWidget):
         self.setWindowTitle(_("External process"))
         self.setObjectName(_("ExternalProcessDock"))
         self.processTableModel = self.application().supportManager.processTableModel
-        self.tableViewProcess = QtGui.QTableView()
-        self.tableViewProcess.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        self.tableViewProcess.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.tableViewProcess = QtWidgets.QTableView()
+        self.tableViewProcess.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tableViewProcess.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.tableViewProcess.setShowGrid(False)
         self.tableViewProcess.horizontalHeader().setVisible(False)
         self.tableViewProcess.verticalHeader().setVisible(False)
-        self.tableViewProcess.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
-        self.tableViewProcess.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.tableViewProcess.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+        self.tableViewProcess.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         self.tableViewProcess.activated.connect(self.on_tableViewProcess_activated)
         self.tableViewProcess.doubleClicked.connect(self.on_tableViewProcess_doubleClicked)
         self.tableViewProcess.setModel(self.processTableModel)

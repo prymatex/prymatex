@@ -5,12 +5,12 @@ import os
 import stat
 import time
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.models.properties import PropertyTreeNode
 from prymatex.ui.configure.resource import Ui_ResouceWidget
 
-class ResoucePropertiesWidget(PropertyTreeNode, Ui_ResouceWidget, QtGui.QWidget):
+class ResoucePropertiesWidget(PropertyTreeNode, Ui_ResouceWidget, QtWidgets.QWidget):
     """Resouce"""
     NAMESPACE = ""
     PERMISSIONS = (

@@ -25,7 +25,7 @@ class SelectorDialog(PrymatexDialog, QtWidgets.QDialog):
         self.listItems.installEventFilter(self)
         
         self.listItems.setItemDelegate(HtmlItemDelegate(self.listItems))
-        self.listItems.setResizeMode(QtGui.QListView.Adjust)
+        self.listItems.setResizeMode(QtWidgets.QListView.Adjust)
         
         self.lineFilter.returnPressed.connect(self.on_lineFilter_returnPressed)
         self.lineFilter.textChanged.connect(self.on_lineFilter_textChanged)
@@ -41,15 +41,15 @@ class SelectorDialog(PrymatexDialog, QtWidgets.QDialog):
     
     def setupUi(self):
         self.setObjectName("SelectorDialog")
-        self.verticalLayout = QtGui.QVBoxLayout(self)
+        self.verticalLayout = QtWidgets.QVBoxLayout(self)
         self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(0)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.lineFilter = QtGui.QLineEdit(self)
+        self.lineFilter = QtWidgets.QLineEdit(self)
         self.lineFilter.setObjectName("lineFilter")
         self.lineFilter.setMinimumWidth(600)
         self.verticalLayout.addWidget(self.lineFilter)
-        self.listItems = QtGui.QListView(self)
+        self.listItems = QtWidgets.QListView(self)
         self.listItems.setAlternatingRowColors(True)
         self.listItems.setUniformItemSizes(True)
         self.listItems.setObjectName("listItems")
@@ -110,7 +110,7 @@ class SelectorDialog(PrymatexDialog, QtWidgets.QDialog):
                 self.lineFilter.setFocus()
                 self.lineFilter.event(event)
                 return True
-        return QtGui.QWidget.eventFilter(self, obj, event)
+        return QtWidgets.QWidget.eventFilter(self, obj, event)
 
     def on_sortTimer_timeout(self):
         self.model.sort(0)

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import (keyequivalent_to_keysequence,
     keysequence_to_keyequivalent, rgba2color, color2rgba, qapplication)
 
@@ -99,8 +99,8 @@ class BundleItemTreeNode(TreeNodeBase):
             return self._action
     
     def buildTriggerItemAction(self, parent, receiver):
-        action = QtGui.QAction(self.icon(), self.buildMenuTextEntry(), parent)
-        parent.connect(action, QtCore.SIGNAL('triggered()'), receiver)
+        action = QtWidgets.QAction(self.icon(), self.buildMenuTextEntry(), parent)
+        action.triggered.connect(receiver)
         return action
     
     def update(self, dataHash):

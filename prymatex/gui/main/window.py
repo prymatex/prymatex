@@ -47,7 +47,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
 
     @ConfigurableItem(default = True)
     def showMenuBar(self, value):
-        self.menuBar().setShown(value)
+        self.menuBar().setVisible(value)
 
     @ConfigurableHook("CodeEditor.defaultTheme")
     def defaultTheme(self, themeUUID):
@@ -316,13 +316,13 @@ html_footer
         self.addEditor(editor)
 
     def removeEditor(self, editor):
-        self.disconnect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_editor_newLocationMemento)
+        editor.newLocationMemento.disconnect(self.on_editor_newLocationMemento)
         self.centralWidget().removeTabWidget(editor)
         # TODO Clean history ?
 
     def addEditor(self, editor, focus = True):
         self.centralWidget().addTabWidget(editor)
-        self.connect(editor, QtCore.SIGNAL("newLocationMemento"), self.on_editor_newLocationMemento)
+        editor.newLocationMemento.connect(self.on_editor_newLocationMemento)
         if focus:
             self.setCurrentEditor(editor)
 

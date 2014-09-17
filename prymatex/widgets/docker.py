@@ -34,7 +34,7 @@ class DockWidgetTitleBarButton(QtWidgets.QAbstractButton):
         p = QtGui.QPainter(self)
         r = self.rect()
         opt = QtWidgets.QStyleOptionToolButton()
-        opt.init(self)
+        opt.initFrom(self)
         opt.state |= QtWidgets.QStyle.State_AutoRaise
         if self.isEnabled() and self.underMouse() and \
            not self.isChecked() and not self.isDown():
@@ -105,7 +105,7 @@ class DockWidgetTitleBar(QtWidgets.QWidget):
         q = self.parentWidget()
         fw = q.isFloating() and q.style().pixelMetric(QtWidgets.QStyle.PM_DockWidgetFrameWidth, None, q) or 0
         mw = q.style().pixelMetric(QtWidgets.QStyle.PM_DockWidgetTitleMargin, None, q)
-        titleOpt = QtWidgets.QStyleOptionDockWidgetV2()
+        titleOpt = QtWidgets.QStyleOptionDockWidget()
         titleOpt.initFrom(q)
         titleOpt.rect = QtCore.QRect(QtCore.QPoint(fw + mw + self.collapseButton.size().width(), fw),
             QtCore.QSize(
@@ -121,7 +121,7 @@ class DockWidgetTitleBar(QtWidgets.QWidget):
         q = self.parentWidget()
         fw = q.isFloating() and q.style().pixelMetric(
             QtWidgets.QStyle.PM_DockWidgetFrameWidth, None, q) or 0
-        opt = QtWidgets.QStyleOptionDockWidgetV2()
+        opt = QtWidgets.QStyleOptionDockWidget()
         opt.initFrom(q)
         opt.rect = QtCore.QRect(
             QtCore.QPoint(fw, fw),

@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.core.settings import ConfigurableItem
 from prymatex.core import PrymatexEditorAddon
 
-class CodeEditorSideBar(QtGui.QWidget):
+class CodeEditorSideBar(QtWidgets.QWidget):
     updateRequest = QtCore.Signal()
     
     def __init__(self, editor):
-        QtGui.QWidget.__init__(self, editor)
+        super(CodeEditorSideBar, self).__init__(editor)
         self.editor = editor
-        self.horizontalLayout = QtGui.QHBoxLayout(self)
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.horizontalLayout.setSpacing(0)
-        self.horizontalLayout.setMargin(0)
+        self.horizontalLayout.setContentsMargins(0,0,0,0)
 
     def addWidget(self, widget):
         self.horizontalLayout.addWidget(widget)
@@ -71,7 +71,7 @@ class SideBarWidgetMixin(PrymatexEditorAddon):
 #=======================================
 # SideBar Widgets
 #=======================================
-class LineNumberSideBarAddon(SideBarWidgetMixin, QtGui.QWidget):
+class LineNumberSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     ALIGNMENT = QtCore.Qt.AlignLeft
     MARGIN = 2
 
@@ -154,9 +154,9 @@ class LineNumberSideBarAddon(SideBarWidgetMixin, QtGui.QWidget):
             block = block.next()
 
         painter.end()
-        QtGui.QWidget.paintEvent(self, event)
+        QtWidgets.QWidget.paintEvent(self, event)
 
-class BookmarkSideBarAddon(SideBarWidgetMixin, QtGui.QWidget):
+class BookmarkSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
     @ConfigurableItem(default = False)
@@ -208,7 +208,7 @@ class BookmarkSideBarAddon(SideBarWidgetMixin, QtGui.QWidget):
             block = block.next()
 
         painter.end()
-        QtGui.QWidget.paintEvent(self, event)
+        QtWidgets.QWidget.paintEvent(self, event)
         
     def mousePressEvent(self, event):
         block = self.translatePosition(event.pos())
@@ -216,7 +216,7 @@ class BookmarkSideBarAddon(SideBarWidgetMixin, QtGui.QWidget):
         self.editor.toggleBookmark(cursor)
         self.repaint(self.rect())
             
-class FoldingSideBarAddon(SideBarWidgetMixin, QtGui.QWidget):
+class FoldingSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
     @ConfigurableItem(default = True)
@@ -277,7 +277,7 @@ class FoldingSideBarAddon(SideBarWidgetMixin, QtGui.QWidget):
             block = block.next()
 
         painter.end()
-        QtGui.QWidget.paintEvent(self, event)
+        QtWidgets.QWidget.paintEvent(self, event)
         
     def mousePressEvent(self, event):
         block = self.translatePosition(event.pos())
@@ -286,7 +286,7 @@ class FoldingSideBarAddon(SideBarWidgetMixin, QtGui.QWidget):
         else:
             self.editor.codeFoldingFold(block)
 
-class SelectionSideBarAddon(SideBarWidgetMixin, QtGui.QWidget):
+class SelectionSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     ALIGNMENT = QtCore.Qt.AlignRight
     
     @ConfigurableItem(default = False)
@@ -338,7 +338,7 @@ class SelectionSideBarAddon(SideBarWidgetMixin, QtGui.QWidget):
             painter.fillRect(0, y, 10, rectHeight, self.palette().highlight().color())
 
         painter.end()
-        QtGui.QWidget.paintEvent(self, event)
+        QtWidgets.QWidget.paintEvent(self, event)
         
     def mousePressEvent(self, event):
         block = self.translatePosition(event.pos())

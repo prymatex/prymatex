@@ -35,7 +35,7 @@ class SplitterWidget(QtWidgets.QSplitter):
         super(SplitterWidget, self).__init__(**kwargs)
         self.clear()
 
-        QtCore.QObject.connect(QtWidgets.qApp, QtCore.SIGNAL('focusChanged(QWidget *,QWidget *)'), self._focus_changed)
+        QtWidgets.qApp.focusChanged.connect(self._focus_changed)
         
     def __len__(self):
         return sum([ tw.count() for tw in self.findChildren(GroupWidget)])
@@ -197,7 +197,7 @@ class SplitterWidget(QtWidgets.QSplitter):
         idx = group.addTab(widget, self._disambiguate_title(widget))
         self.setWidgetToolTip(widget, widget.tooltip())
         self.setWidgetIcon(widget, widget.icon())
-        QtCore.QObject.connect(widget, QtCore.SIGNAL('modificationChanged(bool)'), self._update_tab_status)
+        widget.modificationChanged[bool].connect(self._update_tab_status)
 
         # If the tab has been added to the current group then make it the current tab.
         if group is not self._current_group:
@@ -211,7 +211,7 @@ class SplitterWidget(QtWidgets.QSplitter):
         """ Remove tab to the tab widget."""
         tw, tidx = self._tab_widget(widget)
         if tw is not None:
-            QtCore.QObject.disconnect(widget, QtCore.SIGNAL('modificationChanged(bool)'), self._update_tab_status)
+            widget.modificationChanged[bool].disconnect(self._update_tab_status)
             self._remove_tab(tw, tidx)
             if tw.count() == 0 and self.count() > 0:
                 for tw in self.findChildren(GroupWidget):
@@ -582,8 +582,8 @@ class SplitterWidget(QtWidgets.QSplitter):
     def _focus_changed(self, old, new):
         """ Handle a change in focus that affects the current tab. """
 
-        if self._repeat_focus_changes:
-            self.emit(QtCore.SIGNAL('focusChanged(QWidget *,QWidget *)'), old, new)
+        #if self._repeat_focus_changes:
+        #    QtWidgets.qApp.focusChanged.emit(old, new)
 
         if isinstance(new, DragableTabBar):
             ntw = new.parent()
@@ -603,7 +603,7 @@ class SplitterWidget(QtWidgets.QSplitter):
             else:
                 nw = ntw.widget(ntidx)
     
-            self.emit(QtCore.SIGNAL('hasFocus'), nw)
+            # QtWidgets.qApp.hasFocus.emit(nw)
 
     def _tab_widget_of(self, target):
         """ Return the tab widget and index of the widget that contains the

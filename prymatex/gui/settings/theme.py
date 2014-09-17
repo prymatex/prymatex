@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import test_font_strategy
 from prymatex.qt.helpers.colors import color2rgba
 
@@ -13,7 +13,7 @@ from prymatex.support.bundleitem.theme import DEFAULT_THEME_SETTINGS, DEFAULT_SC
 from prymatex.models.settings import SettingsTreeNode
 from prymatex.delegates.theme import FontStyleDelegate, ColorDelegate
 
-class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
+class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
     """Changes font and theme"""
     NAMESPACE = "editor"
 
@@ -82,7 +82,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
         self.tableViewStyles.viewport().setPalette(palette)
         self.tableViewStyles.resizeColumnsToContents()
         self.tableViewStyles.resizeRowsToContents()
-        self.tableViewStyles.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
+        self.tableViewStyles.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         
         # Set color for buttons
         for button, name, role in self.buttons:
@@ -98,7 +98,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
         self.tableViewStyles.setItemDelegateForColumn(1, ColorDelegate(self))
         self.tableViewStyles.setItemDelegateForColumn(2, ColorDelegate(self))
         self.tableViewStyles.setItemDelegateForColumn(3, FontStyleDelegate(self))
-        self.tableViewStyles.setEditTriggers(QtGui.QAbstractItemView.AllEditTriggers)
+        self.tableViewStyles.setEditTriggers(QtWidgets.QAbstractItemView.AllEditTriggers)
 
         # Combo default scope selectors
         for _, scope in DEFAULT_SCOPE_SELECTORS:
@@ -149,7 +149,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtGui.QWidget):
         sIndex = model.index(self.comboBoxThemes.currentIndex())
         theme = model.node(sIndex)
         settings = theme.getStyle()
-        color, ok = QtGui.QColorDialog.getRgba(settings[element].rgba(), self)
+        color, ok = QtWidgets.QColorDialog.getRgba(settings[element].rgba(), self)
         if ok:
             # TODO No pasar None, mejorar el uso del namespace default
             self.application().supportManager.updateBundleItem(theme, None, settings={element:color})

@@ -16,7 +16,7 @@ class PropertiesDialog(PrymatexDialog, Ui_TreeWidgetDialog, QtWidgets.QDialog):
         self.setupUi(self)
         self.setObjectName("PropertiesDialog")
         
-        self.stackedWidget = QtGui.QStackedWidget(self.splitter)
+        self.stackedWidget = QtWidgets.QStackedWidget(self.splitter)
         self.widgetsLayout.addWidget(self.stackedWidget)
 
         self.finished.connect(self.on_propertiesDialog_finished)
@@ -26,14 +26,14 @@ class PropertiesDialog(PrymatexDialog, Ui_TreeWidgetDialog, QtWidgets.QDialog):
 
     def setModel(self, propertiesModel):
         for widget in propertiesModel.configNodes():
-            if isinstance(widget, QtGui.QWidget) and self.stackedWidget.indexOf(widget) == -1:
+            if isinstance(widget, QtWidgets.QWidget) and self.stackedWidget.indexOf(widget) == -1:
                 self.stackedWidget.addWidget(widget)
         self.treeView.setModel(propertiesModel)
         
     def selectFirstIndex(self):
         firstIndex = self.treeView.model().index(0, 0)
         rect = self.treeView.visualRect(firstIndex)
-        self.treeView.setSelection(rect, QtGui.QItemSelectionModel.ClearAndSelect)
+        self.treeView.setSelection(rect, QtWidgets.QItemSelectionModel.ClearAndSelect)
         treeNode = self.treeView.model().node(firstIndex)
         self.setCurrentPropertyWidget(treeNode)
 

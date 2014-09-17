@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.models.properties import PropertyTreeNode
 from prymatex.widgets.multidicteditor import MultiDictTableEditorWidget

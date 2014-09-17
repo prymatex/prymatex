@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.core.settings import ConfigurableItem
 
 from .sidebar import SideBarWidgetMixin
 
-class MiniMapAddon(SideBarWidgetMixin, QtGui.QPlainTextEdit):
+class MiniMapAddon(SideBarWidgetMixin, QtWidgets.QPlainTextEdit):
     ALIGNMENT = QtCore.Qt.AlignRight
     WIDTH = 100
     MAX_OPACITY = 0.8
@@ -30,7 +30,7 @@ class MiniMapAddon(SideBarWidgetMixin, QtGui.QPlainTextEdit):
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
 
         self.lines_count = 0
-        self.goe = QtGui.QGraphicsOpacityEffect(self)
+        self.goe = QtWidgets.QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.goe)
         self.goe.setOpacity(self.MIN_OPACITY)
         self.animation = QtCore.QPropertyAnimation(self.goe, "opacity")
@@ -127,12 +127,12 @@ selection-background-color: %s; }""" % (
         self.animation.start()
 
     def mousePressEvent(self, event):
-        QtGui.QPlainTextEdit.mousePressEvent(self, event)
+        QtWidgets.QPlainTextEdit.mousePressEvent(self, event)
         cursor = self.cursorForPosition(event.pos())
         self.editor.goToBlock(cursor.block())
 
     def resizeEvent(self, event):
-        QtGui.QPlainTextEdit.resizeEvent(self, event)
+        QtWidgets.QPlainTextEdit.resizeEvent(self, event)
         self.slider.update_position()
 
     def scroll_area(self, pos_parent, pos_slider):
@@ -141,19 +141,19 @@ selection-background-color: %s; }""" % (
         self.editor.verticalScrollBar().setValue(cursor.blockNumber())
 
     def wheelEvent(self, event):
-        QtGui.QPlainTextEdit.wheelEvent(self, event)
+        QtWidgets.QPlainTextEdit.wheelEvent(self, event)
         self.editor.wheelEvent(event)
 
     def scroll(self, *largs):
         pass
             
-class SliderArea(QtGui.QFrame):
+class SliderArea(QtWidgets.QFrame):
     def __init__(self, parent):
-        QtGui.QFrame.__init__(self, parent)
+        QtWidgets.QFrame.__init__(self, parent)
         self.setMouseTracking(True)
         self.setCursor(QtCore.Qt.OpenHandCursor)
 
-        self.goe = QtGui.QGraphicsOpacityEffect(self)
+        self.goe = QtWidgets.QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.goe)
         self.goe.setOpacity(parent.MAX_OPACITY / 2)
 
@@ -175,12 +175,12 @@ class SliderArea(QtGui.QFrame):
         self.move(0, y)
 
     def mousePressEvent(self, event):
-        QtGui.QFrame.mousePressEvent(self, event)
+        QtWidgets.QFrame.mousePressEvent(self, event)
         self.pressed = True
         self.setCursor(QtCore.Qt.ClosedHandCursor)
 
     def mouseReleaseEvent(self, event):
-        QtGui.QFrame.mouseReleaseEvent(self, event)
+        QtWidgets.QFrame.mouseReleaseEvent(self, event)
         self.pressed = False
         self.setCursor(QtCore.Qt.OpenHandCursor)
     
@@ -188,7 +188,7 @@ class SliderArea(QtGui.QFrame):
         self.parent().wheelEvent(event)
 
     def mouseMoveEvent(self, event):
-        QtGui.QFrame.mouseMoveEvent(self, event)
+        QtWidgets.QFrame.mouseMoveEvent(self, event)
         if self.pressed:
             pos = self.mapToParent(event.pos())
             y = pos.y() - (self.height() / 2)

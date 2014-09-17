@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from .base import text_to_objectname
 
@@ -9,7 +9,7 @@ import collections
 
 def create_shortcut(parent, settings, dispatcher = None, sequence_handler=None):
     """Create a QAction"""
-    shortcut = QtGui.QShortcut(parent)
+    shortcut = QtWidgets.QShortcut(parent)
     name = settings.get("name", "None")
     shortcut.setObjectName(text_to_objectname(name, prefix = "shortcut"))
     
@@ -42,7 +42,7 @@ def create_shortcut(parent, settings, dispatcher = None, sequence_handler=None):
         return _dispatch
 
     if shortcut.functionActivated is not None:
-        parent.connect(shortcut, QtCore.SIGNAL("activated()"),
+        shortcut.activated.connect(
             isinstance(dispatcher, collections.Callable) and \
             dispatch_signal(dispatcher, shortcut.functionActivated) or \
             shortcut.functionActivated)

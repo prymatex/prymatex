@@ -6,7 +6,7 @@ import fnmatch
 from bisect import bisect
 import uuid as uuidmodule
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import qbytearray_to_text
 
 from prymatex.core import PrymatexComponent
@@ -55,7 +55,7 @@ class BundleItemMenuGroup(QtCore.QObject):
                 action = item.triggerItemAction(parent)
                 menu.addAction(action)
             elif uuid in submenus:
-                submenu = QtGui.QMenu(submenus[uuid]['name'], parent)
+                submenu = QtWidgets.QMenu(submenus[uuid]['name'], parent)
                 
                 #Conectamos el about to show para filtar un poco los items cuando se muestra el menu
                 submenu.aboutToShow.connect(self.on_bundleMenu_aboutToShow)
@@ -64,7 +64,7 @@ class BundleItemMenuGroup(QtCore.QObject):
                 self.buildMenu(submenus[uuid]['items'], submenu, submenus, parent)
 
     def buildBundleMenu(self, bundle):
-        menu = QtGui.QMenu(bundle.buildBundleAccelerator())
+        menu = QtWidgets.QMenu(bundle.buildBundleAccelerator())
         menu.ID = id(bundle.mainMenu)
         
         #Conectamos el about to show para filtar un poco los items cuando se muestra el menu

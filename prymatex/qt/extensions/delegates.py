@@ -6,7 +6,7 @@ from prymatex.qt import QtCore, QtGui, QtWidgets
 class HtmlItemDelegate(QtWidgets.QItemDelegate):
     def __init__(self, parentView):
         QtWidgets.QItemDelegate.__init__(self, parentView)
-        self.document = QtWidgets.QTextDocument(self)
+        self.document = QtGui.QTextDocument(self)
         self.document.setDocumentMargin(0)
 
     def drawDisplay(self, painter, option, rect, text):
@@ -58,7 +58,7 @@ class HtmlLinkItemDelegate(QtWidgets.QItemDelegate):
         # documents[1] will be used to draw ordinary (not hovered) items
         self.documents = []
         for i in range(2):
-            self.documents.append(QtWidgets.QTextDocument(self))
+            self.documents.append(QtGui.QTextDocument(self))
             self.documents[i].setDocumentMargin(0)
         self.lastTextPos = QtCore.QPoint(0,0)
 

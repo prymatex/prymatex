@@ -10,10 +10,10 @@ class EnvironmentDialog(PrymatexDialog, QtWidgets.QDialog):
     def __init__(self, **kwargs):
         super(EnvironmentDialog, self).__init__(**kwargs)
         self.setObjectName("EnvironmentDialog")
-        self.verticalLayout = QtGui.QVBoxLayout(self)
+        self.verticalLayout = QtWidgets.QVBoxLayout(self)
         self.verticalLayout.setObjectName("verticalLayout")
         self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(0)
+        self.verticalLayout.setContentsMargins(0,0,0,0)
         self.multiDictTableEditorWidget = MultiDictTableEditorWidget(self)
         self.multiDictTableEditorWidget.setObjectName("multiDictTableEditorWidget")
         self.verticalLayout.addWidget(self.multiDictTableEditorWidget)

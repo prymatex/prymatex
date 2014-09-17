@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.core import PrymatexStatusBar
 
@@ -9,7 +9,7 @@ from prymatex.gui.codeeditor.editor import CodeEditor
 from prymatex.ui.codeeditor.status import Ui_CodeEditorStatus
 from prymatex.utils import text
 
-class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
+class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtWidgets.QWidget):
     def __init__(self, **kwargs):
         super(CodeEditorStatus, self).__init__(**kwargs)
 
@@ -77,12 +77,12 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
                 elif event.key() == QtCore.Qt.Key_Return:
                     self.pushButtonReplace.click()
                     return True
-        return QtGui.QWidget.eventFilter(self, obj, event)
+        return QtWidgets.QWidget.eventFilter(self, obj, event)
 
     # -------------- Setup Widgets
     def setupWidgetStatus(self):
         # Custom Table view for syntax combo
-        self.comboBoxSyntaxes.setView(QtGui.QTableView(self))
+        self.comboBoxSyntaxes.setView(QtWidgets.QTableView(self))
         self.comboBoxSyntaxes.setModel(
             self.application().supportManager.syntaxProxyModel);
         self.comboBoxSyntaxes.setModelColumn(0)
@@ -96,9 +96,9 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         self.comboBoxSyntaxes.view().setHorizontalScrollBarPolicy(
             QtCore.Qt.ScrollBarAsNeeded)
         self.comboBoxSyntaxes.view().setSelectionMode(
-            QtGui.QAbstractItemView.SingleSelection)
+            QtWidgets.QAbstractItemView.SingleSelection)
         self.comboBoxSyntaxes.view().setSelectionBehavior(
-            QtGui.QAbstractItemView.SelectRows)
+            QtWidgets.QAbstractItemView.SelectRows)
         self.comboBoxSyntaxes.view().setAutoScroll(False)
         
         # Connect tab size context menu
@@ -106,7 +106,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         self.labelContent.customContextMenuRequested.connect(self.showContextMenu)
         
         # Create bundle menu
-        self.menuBundle = QtGui.QMenu(self)
+        self.menuBundle = QtWidgets.QMenu(self)
         self.application().supportManager.appendMenuToBundleMenuGroup(self.menuBundle)
         self.toolButtonMenuBundle.setMenu(self.menuBundle)
         
@@ -200,10 +200,10 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
 
     def showContextMenu(self, point):
         #Setup Context Menu
-        menu = QtGui.QMenu(self)
-        menu.addMenu(self.window().findChild(QtGui.QMenu, "menuIndentation"))
-        menu.addMenu(self.window().findChild(QtGui.QMenu, "menuLineEndings"))
-        menu.addMenu(self.window().findChild(QtGui.QMenu, "menuEncoding"))
+        menu = QtWidgets.QMenu(self)
+        menu.addMenu(self.window().findChild(QtWidgets.QMenu, "menuIndentation"))
+        menu.addMenu(self.window().findChild(QtWidgets.QMenu, "menuLineEndings"))
+        menu.addMenu(self.window().findChild(QtWidgets.QMenu, "menuEncoding"))
         menu.popup(self.labelContent.mapToGlobal(point))
 
     def on_editor_textChanged(self):
@@ -258,7 +258,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
     @QtCore.Slot()
     def on_pushButtonFindPrevious_pressed(self):
         match, flags = self.getFindMatchAndFlags()
-        flags |= QtGui.QTextDocument.FindBackward
+        flags |= QtWidgets.QTextDocument.FindBackward
         self.currentEditor.findMatch(match, flags)
 
     @QtCore.Slot()
@@ -286,13 +286,13 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
         # TODO: mensaje de cuantos encontro y ver que queremos hacer con ellos
 
     def getFindMatchAndFlags(self):
-        flags = QtGui.QTextDocument.FindFlags()
+        flags = QtWidgets.QTextDocument.FindFlags()
         if self.checkBoxFindCaseSensitively.isChecked():
-            flags |= QtGui.QTextDocument.FindCaseSensitively
+            flags |= QtWidgets.QTextDocument.FindCaseSensitively
         match = self.lineEditFind.text()
         mode = self.comboBoxFindMode.itemData(self.comboBoxFindMode.currentIndex())
         if mode == 1:
-            flags |= QtGui.QTextDocument.FindWholeWords
+            flags |= QtWidgets.QTextDocument.FindWholeWords
         elif mode == 2:
             pass
         elif mode == 3:
@@ -330,7 +330,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
     @QtCore.Slot()
     def on_pushButtonIFindPrevious_pressed(self):
         match, flags = self.getIFindMatchAndFlags()
-        flags |= QtGui.QTextDocument.FindBackward
+        flags |= QtWidgets.QTextDocument.FindBackward
         self.currentEditor.findMatch(match, flags)
 
     @QtCore.Slot(int)
@@ -342,9 +342,9 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtGui.QWidget):
             self.lineEditIFind.setStyleSheet(self.resources().get_styles()["FIND_NO_MATCH_STYLE"])
 
     def getIFindMatchAndFlags(self):
-        flags = QtGui.QTextDocument.FindFlags()
+        flags = QtWidgets.QTextDocument.FindFlags()
         if self.checkBoxIFindCaseSensitively.isChecked():
-            flags |= QtGui.QTextDocument.FindCaseSensitively
+            flags |= QtWidgets.QTextDocument.FindCaseSensitively
         return self.lineEditIFind.text(), flags
 
     def showIFind(self):

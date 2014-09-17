@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import traceback
-from prymatex.qt import QtGui
+from prymatex.qt import QtGui, QtWidgets
 from prymatex.ui.emergencytrace import Ui_TracebackDialog
 from traceback import format_exception
 from .beautify import beautifyTraceback
 
-class PMXTraceBackDialog(QtGui.QDialog, Ui_TracebackDialog):
+class PMXTraceBackDialog(Ui_TracebackDialog, QtWidgets.QDialog):
     '''
     Crash dialog, shown when a fatal exception occurs
     '''
@@ -21,7 +21,7 @@ class PMXTraceBackDialog(QtGui.QDialog, Ui_TracebackDialog):
         self.connectSignals()
     
     def connectSignals(self):
-        self.pushButtonKillApp.pressed.connect(QtGui.QApplication.quit)
+        self.pushButtonKillApp.pressed.connect(QtWidgets.QApplication.quit)
         
     def on_pushCopy_pressed(self):
         '''

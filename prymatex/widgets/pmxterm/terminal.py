@@ -10,14 +10,14 @@
 import sys
 import time
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from .backend import constants
 from .schemes import ColorScheme
 
 DEBUG = False
 
-class TerminalWidget(QtGui.QWidget):
+class TerminalWidget(QtWidgets.QWidget):
     keymap = {
        QtCore.Qt.Key_Backspace: chr(127),
        QtCore.Qt.Key_Escape: chr(27),
@@ -49,7 +49,7 @@ class TerminalWidget(QtGui.QWidget):
     sessionClosed = QtCore.Signal()
 
     def __init__(self, session, scheme = None, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        QtWidgets.QWidget.__init__(self, parent)
         self.parent().setTabOrder(self, self)
         self.setFocusPolicy(QtCore.Qt.WheelFocus)
         self.setAutoFillBackground(False)
@@ -68,7 +68,7 @@ class TerminalWidget(QtGui.QWidget):
         self.session.finished.connect(self.on_session_finished)
         
         # Scroll
-        self.scrollBar = QtGui.QScrollBar(self)
+        self.scrollBar = QtWidgets.QScrollBar(self)
         self.scrollBar.setCursor( QtCore.Qt.ArrowCursor )
         self.scrollBar.setMinimum(0)
         self.scrollBar.setMaximum(0)
@@ -89,7 +89,7 @@ class TerminalWidget(QtGui.QWidget):
         self._cursor_row = 0
         self._press_pos = None
         self._selection = None
-        self._clipboard = QtGui.QApplication.clipboard()
+        self._clipboard = QtWidgets.QApplication.clipboard()
 
     # ---------------- Signals
     def on_session_finished(self, status):
@@ -159,7 +159,7 @@ class TerminalWidget(QtGui.QWidget):
             return self.session.info()
 
     def setFont(self, font):
-        QtGui.QWidget.setFont(self, font)
+        QtWidgets.QWidget.setFont(self, font)
         self._update_metrics()
         
     def focusNextPrevChild(self, next):
@@ -374,7 +374,7 @@ class TerminalWidget(QtGui.QWidget):
                 self.zoom_out()
             event.accept()
         else:
-            QtGui.QWidget.wheelEvent(self, event)
+            QtWidgets.QWidget.wheelEvent(self, event)
     
     def mousePressEvent(self, event):
         button = event.button()

@@ -3,7 +3,7 @@
 
 import os, sys, shutil
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers.menus import create_menu
 
 # FileSystem docker parents
@@ -16,7 +16,7 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.core.settings import ConfigurableItem
 from prymatex.models.filesystem import SortFilterFileSystemProxyModel
 
-class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDockWidget):
+class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtWidgets.QDockWidget):
     SEQUENCE = ("Docks", "FileSystemDock", "Alt+Y")
     ICON = "dock-system-file"
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
@@ -37,7 +37,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
         self.fileManager = self.application().fileManager
 
         #File System model
-        self.fileSystemModel = QtGui.QFileSystemModel(self)
+        self.fileSystemModel = QtWidgets.QFileSystemModel(self)
         self.fileSystemModel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.AllEntries) #http://doc.qt.nokia.com/latest/qdir.html#Filter-enum
         self.fileSystemModel.setRootPath(QtCore.QDir.rootPath())
 
@@ -55,7 +55,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
 
     def initialize(self, **kwargs):
         super(FileSystemDock, self).initialize(**kwargs)
-        self.templateDialog = self.window().findChild(QtGui.QDialog, "TemplateDialog")
+        self.templateDialog = self.window().findChild(QtWidgets.QDialog, "TemplateDialog")
 
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
@@ -81,13 +81,13 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
                     # FIXME: Get Ctrl + F before editor's find, all the foucs is belong to us right now :P
                     self.pushButtonCustomFilters.click()
                     return True
-        return QtGui.QDockWidget.eventFilter(self, obj, event)
+        return QtWidgets.QDockWidget.eventFilter(self, obj, event)
 
 
     def setupComboBoxLocation(self):
         #Combo Dir Model
-        self.comboDirModel = QtGui.QDirModel(self)
-        self.comboTreeView = QtGui.QTreeView(self)
+        self.comboDirModel = QtWidgets.QDirModel(self)
+        self.comboTreeView = QtWidgets.QTreeView(self)
         self.comboTreeView.setModel(self.comboDirModel)
         self.comboBoxLocation.setView(self.comboTreeView)
         self.comboBoxLocation.setModel(self.comboDirModel)
@@ -313,7 +313,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
     # Some of them are in fstask's PMXFileSystemTasks mixin
     def pathToClipboard(self, checked = False):
         basePath = self.currentPath()
-        QtGui.QApplication.clipboard().setText(basePath)
+        QtWidgets.QApplication.clipboard().setText(basePath)
 
     @QtCore.Slot()
     def on_actionOpen_triggered(self):
@@ -324,7 +324,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
     @QtCore.Slot()
     def on_actionOpenSystemEditor_triggered(self):
         path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % path, QtCore.QUrl.TolerantMode))
+        QtWidgets.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % path, QtCore.QUrl.TolerantMode))
 
     @QtCore.Slot()
     def on_actionOpenDefaultEditor_triggered(self):
@@ -335,7 +335,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtGui.QDo
     # ------ Custom filters
     @QtCore.Slot()
     def on_pushButtonCustomFilters_pressed(self):
-        filters, accepted = QtGui.QInputDialog.getText(self, _("Custom Filter"),
+        filters, accepted = QtWidgets.QInputDialog.getText(self, _("Custom Filter"),
                                                         _("Enter the filters (separated by comma)\nOnly * and ? may be used for custom matching"),
                                                         text = self.customFilters)
         if accepted:

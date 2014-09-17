@@ -4,12 +4,12 @@
 import fnmatch
 import sys, os
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
     
-class SortFilterFileSystemProxyModel(QtGui.QSortFilterProxyModel):
+class SortFilterFileSystemProxyModel(QtCore.QSortFilterProxyModel):
     def __init__(self, parent = None):
-        QtGui.QSortFilterProxyModel.__init__(self, parent)
-        self.application = QtGui.QApplication.instance()
+        QtCore.QSortFilterProxyModel.__init__(self, parent)
+        self.application = QtWidgets.QApplication.instance()
         self.orderBy = "name"
         self.folderFirst = True
         self.descending = False
@@ -43,7 +43,7 @@ class SortFilterFileSystemProxyModel(QtGui.QSortFilterProxyModel):
         self.orderBy = orderBy
         self.folderFirst = folderFirst
         self.descending = descending
-        QtGui.QSortFilterProxyModel.sort(self, 0, order)
+        QtCore.QSortFilterProxyModel.sort(self, 0, order)
     
     def filePath(self, index):
         sIndex = self.mapToSource(index)
@@ -84,7 +84,7 @@ class SortFilterFileSystemProxyModel(QtGui.QSortFilterProxyModel):
         return ["text/uri-list"]
     
     def flags(self, index):
-        defaultFlags = QtGui.QSortFilterProxyModel.flags(self, index)
+        defaultFlags = QtCore.QSortFilterProxyModel.flags(self, index)
         if not self.isDir(index):
             return defaultFlags | QtCore.Qt.ItemIsDragEnabled
         return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled 

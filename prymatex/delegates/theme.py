@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
-class ColorDelegate(QtGui.QStyledItemDelegate):
+class ColorDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, options, index):
-        editor = QtGui.QColorDialog(parent)
-        editor.setOptions(QtGui.QColorDialog.ShowAlphaChannel)
+        editor = QtWidgets.QColorDialog(parent)
+        editor.setOptions(QtWidgets.QColorDialog.ShowAlphaChannel)
         return editor
 
     def setModelData(self, editedWidget, model, index):
-        if editedWidget.result() == QtGui.QDialog.Accepted:
+        if editedWidget.result() == QtWidgets.QDialog.Accepted:
             color = editedWidget.currentColor()
             model.setData(index, color)
 
@@ -33,18 +33,18 @@ class ColorDelegate(QtGui.QStyledItemDelegate):
             painter.fillRect(option.rect, brush)
             painter.restore()
 
-class FontStyleDelegate(QtGui.QStyledItemDelegate):
+class FontStyleDelegate(QtWidgets.QStyledItemDelegate):
     
     def buildFontLayout(self, index, parent = None):
         flags = index.data()
-        layout = QtGui.QHBoxLayout()
+        layout = QtWidgets.QHBoxLayout()
         layout.setSpacing(0)
         layout.setMargin(0)
         
-        buttons = [ QtGui.QPushButton("B"), QtGui.QPushButton("I"), QtGui.QPushButton("U") ]
+        buttons = [ QtWidgets.QPushButton("B"), QtWidgets.QPushButton("I"), QtWidgets.QPushButton("U") ]
         
         font = buttons[0].font()
-        font.setWeight(QtGui.QFont.Bold)
+        font.setWeight(QtWidgets.QFont.Bold)
         buttons[0].setFont(font)
         
         font = buttons[1].font()
@@ -68,7 +68,7 @@ class FontStyleDelegate(QtGui.QStyledItemDelegate):
         return layout
     
     def createEditor(self, parent, option, index):
-        dialog = QtGui.QDialog(parent)
+        dialog = QtWidgets.QDialog(parent)
         dialog.setLayout(self.buildFontLayout(index, dialog))      
         return dialog
         
@@ -87,7 +87,7 @@ class FontStyleDelegate(QtGui.QStyledItemDelegate):
         model.setData(index, flags)
     
     def paint(self, painter, option, index):
-        widget = QtGui.QWidget()
+        widget = QtWidgets.QWidget()
         widget.setLayout(self.buildFontLayout(index))
         painter.save()
         painter.translate(option.rect.topLeft())

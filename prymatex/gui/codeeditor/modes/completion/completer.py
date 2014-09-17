@@ -3,7 +3,7 @@
 
 from functools import reduce
 
-from prymatex.qt import QtCore, QtGui, Qt
+from prymatex.qt import QtCore, QtGui, Qt, QtWidgets
 
 from prymatex.core import config
 from prymatex.models.support import BundleItemTreeNode
@@ -11,7 +11,7 @@ from prymatex.models.support import BundleItemTreeNode
 # ===================================
 # Completer
 # ===================================
-class CodeEditorCompleter(QtGui.QCompleter):
+class CodeEditorCompleter(QtWidgets.QCompleter):
     def __init__(self, editor):
         super(CodeEditorCompleter, self).__init__(parent = editor)
         self.editor = editor
@@ -32,15 +32,15 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.setCompletionRole(QtCore.Qt.MatchRole)
         
         # Popup table view
-        self.setPopup(QtGui.QTableView(self.editor))
+        self.setPopup(QtWidgets.QTableView(self.editor))
         self.popup().setAlternatingRowColors(True)
         self.popup().verticalHeader().setVisible(False)
         self.popup().horizontalHeader().setStretchLastSection(True)
         self.popup().horizontalHeader().setVisible(False)
         self.popup().setShowGrid(False)
         self.popup().setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.popup().setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        self.popup().setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.popup().setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.popup().setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 
         self.activated[QtCore.QModelIndex].connect(self.activatedCompletion)
         self.highlighted[QtCore.QModelIndex].connect(self.highlightedCompletion)
@@ -65,14 +65,14 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.popup().viewport().setPalette(palette)
 
     def isVisible(self):
-        return self.completionMode() == QtGui.QCompleter.PopupCompletion and self.popup().isVisible()
+        return self.completionMode() == QtWidgets.QCompleter.PopupCompletion and self.popup().isVisible()
 
     def hide(self):
-        if self.completionMode() == QtGui.QCompleter.PopupCompletion:
+        if self.completionMode() == QtWidgets.QCompleter.PopupCompletion:
             self.popup().hide()
 
     def fixPopupView(self):
-        if self.completionMode() == QtGui.QCompleter.PopupCompletion:
+        if self.completionMode() == QtWidgets.QCompleter.PopupCompletion:
             self.popup().resizeColumnsToContents()
             self.popup().resizeRowsToContents()
             width = self.popup().verticalScrollBar().sizeHint().width()
@@ -89,10 +89,10 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self.model().highlightedCompletion(self.completionModel().mapToSource(index))
         
     def setCurrentRow(self, index):
-        if not QtGui.QCompleter.setCurrentRow(self, index):
+        if not QtWidgets.QCompleter.setCurrentRow(self, index):
             return False
         cIndex = self.completionModel().index(index, 0)
-        if self.completionMode() == QtGui.QCompleter.PopupCompletion:
+        if self.completionMode() == QtWidgets.QCompleter.PopupCompletion:
             self.popup().setCurrentIndex(cIndex)
         return self.model().setCurrentRow(
             self.completionModel().mapToSource(cIndex), self.completionCount())
@@ -101,7 +101,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
         self._start_position = self.editor.textCursor().position() - len(prefix or "")
         for model in self.completionModels:
             model.setCompletionPrefix(prefix)
-        QtGui.QCompleter.setCompletionPrefix(self, prefix)
+        QtWidgets.QCompleter.setCompletionPrefix(self, prefix)
         if self.model() is not None:
             self.fixPopupView()
     
@@ -109,7 +109,7 @@ class CodeEditorCompleter(QtGui.QCompleter):
         # Esto esta bueno pero cuando cambias de modelo tenes que hacer algo mas
         #self.setModelSorting(model.modelSorting())
         #self.setCaseSensitivity(model.caseSensitivity())
-        QtGui.QCompleter.setModel(self, model)
+        QtWidgets.QCompleter.setModel(self, model)
 
     def trySetModel(self, model):
         current_model = self.model()

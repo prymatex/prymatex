@@ -9,7 +9,7 @@ from prymatex.core import PrymatexDock
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dockers.fstasks import FileSystemTasks
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import create_menu, extend_menu_section
 from prymatex.qt.extensions import CheckableMessageBox, ReplaceRenameInputDialog
 
@@ -21,7 +21,7 @@ from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
 from prymatex.models.projects import ProjectTreeNode
 from prymatex.models.projects.lists import SelectableProjectFileProxyModel
 
-class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWidget):
+class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDockWidget):
     SEQUENCE = ("Docks", "ProjectsDock", "Alt+X")
     ICON = "dock-projects"
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
@@ -62,10 +62,10 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
         
     def initialize(self, **kwargs):
         super(ProjectsDock, self).initialize(**kwargs)
-        self.projectDialog = self.window().findChild(QtGui.QDialog, "ProjectDialog")
-        self.templateDialog = self.window().findChild(QtGui.QDialog, "TemplateDialog")
-        self.bundleEditorDialog = self.window().findChild(QtGui.QDialog, "BundleEditorDialog")
-        self.propertiesDialog = self.window().findChild(QtGui.QDialog, "PropertiesDialog")
+        self.projectDialog = self.window().findChild(QtWidgets.QDialog, "ProjectDialog")
+        self.templateDialog = self.window().findChild(QtWidgets.QDialog, "TemplateDialog")
+        self.bundleEditorDialog = self.window().findChild(QtWidgets.QDialog, "BundleEditorDialog")
+        self.propertiesDialog = self.window().findChild(QtWidgets.QDialog, "PropertiesDialog")
         self.setupPropertiesWidgets()
 
     @classmethod
@@ -170,7 +170,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
         self.treeViewProjects.setAnimated(True)
         
         # Selection Mode
-        self.treeViewProjects.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+        self.treeViewProjects.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
     
     #================================================
     # Build Menus
@@ -338,14 +338,14 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
                     "Delete project",
                     "Are you sure you want to delete project '%s' from the workspace?" % node.name,
                     "Delete project contents on disk (cannot be undone)",
-                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel,
-                    QtGui.QMessageBox.Yes
+                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel,
+                    QtWidgets.QMessageBox.Yes
                 )
                 question.setDetailedText("Project location:\n%s" % node.path())
                 ret = question.exec_()
-                if ret == QtGui.QMessageBox.Yes:
+                if ret == QtWidgets.QMessageBox.Yes:
                     projects.append((node, question.isChecked()))
-                elif ret == QtGui.QMessageBox.Cancel:
+                elif ret == QtWidgets.QMessageBox.Cancel:
                     return
             else:
                 paths.append(node)
@@ -360,13 +360,13 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
     def on_actionRemove_triggered(self):
         node = self.currentNode()
         if node.isproject:
-            ret = QtGui.QMessageBox.question(self,
+            ret = QtWidgets.QMessageBox.question(self,
                 "Remove project",
                 "Are you sure you want to remove project '%s' from the workspace?" % node.name,
-                QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
-                QtGui.QMessageBox.Ok
+                QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+                QtWidgets.QMessageBox.Ok
             )
-            if ret == QtGui.QMessageBox.Ok:
+            if ret == QtWidgets.QMessageBox.Ok:
                 self.application().projectManager.removeProject(node)
 
     @QtCore.Slot()
@@ -405,7 +405,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
         
     @QtCore.Slot()
     def on_actionOpenSystemEditor_triggered(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % self.currentPath(), QtCore.QUrl.TolerantMode))
+        QtWidgets.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % self.currentPath(), QtCore.QUrl.TolerantMode))
     
     @QtCore.Slot()
     def on_pushButtonCollapseAll_pressed(self):
@@ -487,7 +487,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtGui.QDockWi
     #================================================
     @QtCore.Slot()
     def on_pushButtonCustomFilters_pressed(self):
-        filters, accepted = QtGui.QInputDialog.getText(self, _("Custom Filter"), 
+        filters, accepted = QtWidgets.QInputDialog.getText(self, _("Custom Filter"), 
                                 _("Enter the filters (separated by comma)\nOnly * and ? may be used for custom matching"), 
                                 text = self.customFilters)
         if accepted:

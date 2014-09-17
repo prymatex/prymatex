@@ -87,18 +87,20 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         # Route messages to application logger
         QtCore.qInstallMessageHandler(self.qtMessageHandler)
 
-    def qtMessageHandler(self, msgType, msgString):
+    def qtMessageHandler(self, *args, **kwargs):
         ''' Route Qt messaging system into Prymatex/Python one'''
-        if msgType == QtCore.QtDebugMsg:
-            self.logger().debug(msgString)
-        elif msgType == QtCore.QtWarningMsg:
-            self.logger().warn(msgString)
-        elif msgType == QtCore.QtCriticalMsg:
-            self.logger().critical(msgString)
-        elif msgType == QtCore.QtFatalMsg:
-            self.logger().fatal(msgString)
-        elif msgType == QtCore.QtSystemMsg:
-            self.logger().debug("System: %s" % msgString)
+        print(*args, **kwargs)
+        messageType, messageContext, messageString = args
+        if messageType == QtCore.QtDebugMsg:
+            self.logger().debug(messageString)
+        elif messageType == QtCore.QtWarningMsg:
+            self.logger().warn(messageString)
+        elif messageType == QtCore.QtCriticalMsg:
+            self.logger().critical(messageString)
+        elif messageType == QtCore.QtFatalMsg:
+            self.logger().fatal(messageString)
+        elif messageType == QtCore.QtSystemMsg:
+            self.logger().debug("System: %s" % messageString)
 
     # ------- prymatex's micro kernel
     def applyOptions(self, options):

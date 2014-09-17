@@ -3,14 +3,14 @@
 
 import mimetypes
 
-from prymatex.qt import QtGui, QtCore, QtWebKit
+from prymatex.qt import QtGui, QtCore, QtWebKit, QtWebKitWidgets
 
 from .network import NetworkAccessManager
 from .scripts import TextMate, SystemWrapper, WINDOW_JAVASCRIPT
 
-class WebView(QtWebKit.QWebView):
+class WebView(QtWebKitWidgets.QWebView):
     def __init__(self, browserDock):
-        QtWebKit.QWebView.__init__(self, browserDock)
+        QtWebKitWidgets.QWebView.__init__(self, browserDock)
         self.browserDock = browserDock
         
         #self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
@@ -38,7 +38,7 @@ class WebView(QtWebKit.QWebView):
             QtCore.QUrl.fromUserInput("about:%s" % context.description()))
 
     def createWebPage(self, content, url):
-        page = QtWebKit.QWebPage(self)
+        page = QtWebKitWidgets.QWebPage(self)
         page.setNetworkAccessManager(self.networkAccessManager)
         page.mainFrame().javaScriptWindowObjectCleared.connect(self.on_mainFrame_javaScriptWindowObjectCleared)
         page.setForwardUnsupportedContent(True)
@@ -49,7 +49,7 @@ class WebView(QtWebKit.QWebView):
 
     # ------------ Override
     def title(self):
-        title = QtWebKit.QWebView.title(self)
+        title = QtWebKitWidgets.QWebView.title(self)
         if not title and self.runningContext is not None:
             return self.runningContext.description()
         return title

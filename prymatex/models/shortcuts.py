@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.models.trees import AbstractNamespaceTreeModel, TreeNodeBase
 
@@ -22,9 +22,9 @@ class ContextSequenceTreeNode(TreeNodeBase):
         self.qobjects = []
 
     def registerObject(self, qobject):
-        if isinstance(qobject, QtGui.QAction):
+        if isinstance(qobject, QtWidgets.QAction):
             qobject.setShortcut(self.sequence.key())
-        elif isinstance(qobject, QtGui.QShortcut):
+        elif isinstance(qobject, QtWidgets.QShortcut):
             qobject.setKey(self.sequence.key())
         self.qobjects.append(qobject)
 
@@ -60,9 +60,9 @@ class ShortcutsTreeModel(AbstractNamespaceTreeModel):
         toberemoved = []
         for index, (qobject, sequence) in enumerate(self.shortcuts):
             try:
-                if isinstance(qobject, QtGui.QAction):
+                if isinstance(qobject, QtWidgets.QAction):
                     qobject.setShortcut(sequence.key())
-                elif isinstance(qobject, QtGui.QShortcut):
+                elif isinstance(qobject, QtWidgets.QShortcut):
                     qobject.setKey(sequence.key())
             except RuntimeError:
                 # Object has been deleted

@@ -15,14 +15,14 @@ class TemplateDialog(PrymatexDialog, Ui_TemplateDialog, QtWidgets.QDialog):
     def __init__(self, **kwargs):
         super(TemplateDialog, self).__init__(**kwargs)
         self.setupUi(self)
-        self.application = QtGui.QApplication.instance()
+        self.application = QtWidgets.QApplication.instance()
         self.setupComboTemplates()
         
         #Completer para los paths
-        model = QtGui.QFileSystemModel(self)
+        model = QtWidgets.QFileSystemModel(self)
         model.setRootPath(QtCore.QDir.rootPath())
         model.setFilter(QtCore.QDir.Dirs)
-        self.completerFileSystem = QtGui.QCompleter(model, self)
+        self.completerFileSystem = QtWidgets.QCompleter(model, self)
         self.lineLocation.setCompleter(self.completerFileSystem)
         
         self.buttonCreate.setDefault(True)
@@ -34,7 +34,7 @@ class TemplateDialog(PrymatexDialog, Ui_TemplateDialog, QtWidgets.QDialog):
         self.environmentDialog = self.window().findChild(QtWidgets.QDialog, "EnvironmentDialog")
     
     def setupComboTemplates(self):
-        tableView = QtGui.QTableView(self)
+        tableView = QtWidgets.QTableView(self)
         tableView.setModel(self.application.supportManager.templateProxyModel)
         tableView.resizeColumnsToContents()
         tableView.resizeRowsToContents()
@@ -43,8 +43,8 @@ class TemplateDialog(PrymatexDialog, Ui_TemplateDialog, QtWidgets.QDialog):
         tableView.setShowGrid(False)
         tableView.setMinimumWidth(tableView.horizontalHeader().length() + 25)
         tableView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-        tableView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        tableView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        tableView.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        tableView.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         tableView.setAutoScroll(False)
         self.comboTemplates.setModel(self.application.supportManager.templateProxyModel);
         self.comboTemplates.setView(tableView)
@@ -52,7 +52,7 @@ class TemplateDialog(PrymatexDialog, Ui_TemplateDialog, QtWidgets.QDialog):
         
     def on_buttonChoose_pressed(self):
         directory = self.lineLocation.text()
-        path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose location for template"), directory)
+        path = QtWidgets.QFileDialog.getExistingDirectory(self, _("Choose location for template"), directory)
         if path:
             self.lineLocation.setText(path)
         

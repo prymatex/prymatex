@@ -14,7 +14,7 @@ class Notification(QtWidgets.QWidget):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.horizontalLayout = QtWidgets.QHBoxLayout(self)
         self.horizontalLayout.setSpacing(0)
-        self.horizontalLayout.setMargin(0)
+        self.horizontalLayout.setContentsMargins(0,0,0,0)
 
         # ------------------- Elements
         self.pixmap = None

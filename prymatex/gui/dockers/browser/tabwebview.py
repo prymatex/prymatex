@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from .webview import WebView
 
-class TabbedWebView(QtGui.QTabWidget):
+class TabbedWebView(QtWidgets.QTabWidget):
     currentWebViewChanged = QtCore.Signal(WebView)
     webViewNewRequested = QtCore.Signal()
     webViewCloseRequested = QtCore.Signal(WebView)
     
     def __init__(self, browserDock):
-        QtGui.QTabWidget.__init__(self, browserDock)
+        QtWidgets.QTabWidget.__init__(self, browserDock)
         self.browserDock = browserDock
 
         # Corner widget
-        self.buttonNew = QtGui.QPushButton(self)
+        self.buttonNew = QtWidgets.QPushButton(self)
         self.buttonNew.setText("")
         self.buttonNew.setIcon(QtGui.QIcon.fromTheme("tab-new"))
         self.buttonNew.setMaximumSize(QtCore.QSize(28, 28))

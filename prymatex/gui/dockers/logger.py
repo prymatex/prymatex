@@ -5,13 +5,13 @@ from __future__ import unicode_literals
 import logging
 from logging.handlers import BufferingHandler
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.core import PMXBaseDock
 
 from prymatex.ui.others.logwidget import Ui_LogWidget
 
-class LoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXBaseDock):
+class LoggerDock(QtWidgets.QDockWidget, Ui_LogWidget, PMXBaseDock):
     """Logging widget"""
     ICON = "dock-log-viewer"
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea

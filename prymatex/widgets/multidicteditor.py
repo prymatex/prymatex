@@ -97,7 +97,7 @@ class MultiDictTableEditorWidget(QtWidgets.QWidget):
     def resize_to_contents(self, dictionaryName = None):
         self.tableViewDictionaries.resizeColumnsToContents()
         self.tableViewDictionaries.resizeRowsToContents()
-        self.tableViewDictionaries.horizontalHeader().setResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        self.tableViewDictionaries.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
 
     def on_actionInsertItem_triggered(self, dictionaryName):
         if not self.selectableMultiDictTableModel.isVisible(dictionaryName):

@@ -3,7 +3,7 @@
 
 import os
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core import exceptions
@@ -17,7 +17,7 @@ class FileSystemTasks(object):
     
     def createDirectory(self, directory):
         while True:
-            newDirName, accepted = QtGui.QInputDialog.getText(self, _("Create Directory"), 
+            newDirName, accepted = QtWidgets.QInputDialog.getText(self, _("Create Directory"), 
                                                         _("Please specify the new directory name"), 
                                                         text = _("New Folder"))
             if not accepted:
@@ -27,17 +27,17 @@ class FileSystemTasks(object):
                 self.application().fileManager.createDirectory(absNewDirName)
                 return absNewDirName
             except exceptions.PrymatexFileExistsException as e:
-                QtGui.QMessageBox.warning(self, _("Error creating directory"), 
+                QtWidgets.QMessageBox.warning(self, _("Error creating directory"), 
                                           _("%s already exists") % newDirName)
             # Permissions? Bad Disk? 
             except Exception as e:
                 # TODO: Show some info about the reason
-                QtGui.QMessageBox.warning(self, _("Error creating directory"), 
+                QtWidgets.QMessageBox.warning(self, _("Error creating directory"), 
                                           _("An error occured while creating %s") % newDirName)
     
     def createFile(self, directory):
         while True:
-            newFileName, accepted = QtGui.QInputDialog.getText(self, _("Create file"), 
+            newFileName, accepted = QtWidgets.QInputDialog.getText(self, _("Create file"), 
                                                         _("Please specify the file name"), 
                                                         text = _("NewFile"))
             if not accepted:
@@ -48,20 +48,20 @@ class FileSystemTasks(object):
                 self.application().fileManager.createFile(absNewFileName)
                 return absNewFileName
             except exceptions.FileExistsException as e:
-                QtGui.QMessageBox.warning(self, _("Error creating file"), _("%s already exists") % newFileName)
+                QtWidgets.QMessageBox.warning(self, _("Error creating file"), _("%s already exists") % newFileName)
             except Exception as e:
                 # TODO: Show some info about the reason
-                QtGui.QMessageBox.warning(self, _("Error creating file"), 
+                QtWidgets.QMessageBox.warning(self, _("Error creating file"), 
                                           _("An error occured while creating %s") % absNewFileName)
     
     def deletePath(self, path):
         basePath, pathTail = os.path.split(path)
-        result = QtGui.QMessageBox.question(self, _("Are you sure?"), 
+        result = QtWidgets.QMessageBox.question(self, _("Are you sure?"), 
                                         _("Are you sure you want to delete %s<br>"
                                           "This action can not be undone.") % pathTail,
-                                            buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
-                                            defaultButton = QtGui.QMessageBox.Cancel)
-        if result == QtGui.QMessageBox.Ok:
+                                            buttons = QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+                                            defaultButton = QtWidgets.QMessageBox.Cancel)
+        if result == QtWidgets.QMessageBox.Ok:
             self.application().fileManager.deletePath(path)
             
     def renamePath(self, path):
@@ -72,7 +72,7 @@ class FileSystemTasks(object):
         elif os.path.isfile(path):
             pathType = _('file')
         while True:
-            newName, accepted = QtGui.QInputDialog.getText(self, _("Choose new name for %s") % pathTail, 
+            newName, accepted = QtWidgets.QInputDialog.getText(self, _("Choose new name for %s") % pathTail, 
                                                            _("Rename {0} {1}").format(pathType, pathTail),
                                                            text = pathTail)
             if accepted:
@@ -80,11 +80,11 @@ class FileSystemTasks(object):
                     continue # Same name
                 newFullPath = os.path.join(basePath, newName)
                 if os.path.exists(newFullPath):
-                    rslt = QtGui.QMessageBox.warning(self, _("Destination already exists"), 
+                    rslt = QtWidgets.QMessageBox.warning(self, _("Destination already exists"), 
                                               _("{0} already exists").format(newName), 
-                                                buttons=QtGui.QMessageBox.Retry | QtGui.QMessageBox.Cancel,
-                                                defaultButton=QtGui.QMessageBox.Retry)
-                    if rslt == QtGui.QMessageBox.Cancel:
+                                                buttons=QtWidgets.QMessageBox.Retry | QtWidgets.QMessageBox.Cancel,
+                                                defaultButton=QtWidgets.QMessageBox.Retry)
+                    if rslt == QtWidgets.QMessageBox.Cancel:
                         return
                     continue
                 self.application().fileManager.move(path, newFullPath)

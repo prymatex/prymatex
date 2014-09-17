@@ -3,7 +3,7 @@
 
 import collections
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.utils import programs
 
 from .base import text_to_objectname
@@ -31,7 +31,7 @@ def test_actions(instance, actions):
 def create_action(parent, settings, dispatcher = None, sequence_handler=None, icon_handler=None):
     """Create a QAction"""
     text = settings.get("text")
-    action = QtGui.QAction(text, parent)
+    action = QtWidgets.QAction(text, parent)
     action.setObjectName(text_to_objectname(text, prefix="action"))
     
     icon = settings.get("icon", text_to_iconname(text))
@@ -79,12 +79,10 @@ def create_action(parent, settings, dispatcher = None, sequence_handler=None, ic
         action.setCheckable(True)
 
     if action.functionTriggered is not None:
-        parent.connect(action, QtCore.SIGNAL("triggered()"),
-            action.functionTriggered)
+        action.triggered.connect(action.functionTriggered)
 
     if action.functionToggled is not None:
-        parent.connect(action, QtCore.SIGNAL("triggered(bool)"),
-            action.functionToggled)
+        action.triggered[bool].connect(action.functionToggled)
 
     # Test functions
     if "testChecked" in settings and isinstance(settings["testChecked"], collections.Callable):

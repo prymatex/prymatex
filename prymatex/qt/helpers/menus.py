@@ -6,7 +6,7 @@ Create QMenu
 Handle dictionary's menu format
 """
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.qt.helpers.base import text_to_objectname
 from prymatex.qt.helpers.icons import text_to_iconname
@@ -18,7 +18,7 @@ import collections
 def create_menu(parent, settings, dispatcher = None, separatorName = False, 
     allObjects = False, sequence_handler = None, icon_handler = None):
     text = settings["text"]
-    menu = QtGui.QMenu(text, parent)
+    menu = QtWidgets.QMenu(text, parent)
     
     menu.setObjectName(text_to_objectname(text, prefix = "menu"))
     menu.menuAction().setObjectName(text_to_objectname(text, prefix = "actionMenu"))
@@ -45,19 +45,19 @@ def create_menu(parent, settings, dispatcher = None, separatorName = False,
         return _dispatch
 
     if menu.functionTriggered is not None:
-        parent.connect(menu, QtCore.SIGNAL("triggered(QAction)"),
+        menu.triggered[QtWidgets.QAction].connect(
             isinstance(dispatcher, collections.Callable) and \
             dispatch_signal(dispatcher, menu.functionTriggered) or \
             menu.functionTriggered)
 
     if menu.functionAboutToHide is not None:
-        parent.connect(menu, QtCore.SIGNAL("aboutToHide()"),
+        menu.aboutToHide.connect(
             isinstance(dispatcher, collections.Callable) and \
             dispatch_signal(dispatcher, menu.functionAboutToHide) or \
             menu.functionAboutToHide)
 
     if menu.functionAboutToShow is not None:
-        parent.connect(menu, QtCore.SIGNAL("aboutToShow()"),
+        menu.aboutToShow.connect(
             isinstance(dispatcher, collections.Callable) and \
             dispatch_signal(dispatcher, menu.functionAboutToShow) or \
             menu.functionAboutToShow)
@@ -105,13 +105,13 @@ def extend_menu(rootMenu, settings, dispatcher = None, separatorName = False,
                 sequence_handler = sequence_handler, 
                 icon_handler = icon_handler)
             add_actions(rootMenu, [ objects ], item.get("before", None))
-        elif isinstance(item, QtGui.QAction):
+        elif isinstance(item, QtWidgets.QAction):
             rootMenu.addAction(item)
             objects = item
-        elif isinstance(item, QtGui.QMenu):
+        elif isinstance(item, QtWidgets.QMenu):
             objects = rootMenu.addMenu(item)
         elif isinstance(item, (tuple, list)):
-            actionGroup = QtGui.QActionGroup(rootMenu.parent())
+            actionGroup = QtWidgets.QActionGroup(rootMenu.parent())
             actionGroup.setExclusive(isinstance(item, tuple))
             objects = []
             for action in item:
@@ -147,12 +147,12 @@ def add_actions(target, actions, before=None):
         objectName = text_to_objectname(before, prefix = "actionMenu")
         before_action = next((ta for ta in target.actions() if ta.objectName() == objectName), None)
     for action in actions:
-        if isinstance(action, QtGui.QMenu):
+        if isinstance(action, QtWidgets.QMenu):
             if before_action is None:
                 target.addMenu(action)
             else:
                 target.insertMenu(before_action, action)
-        elif isinstance(action, QtGui.QAction):
+        elif isinstance(action, QtWidgets.QAction):
             if before_action is None:
                 target.addAction(action)
             else:

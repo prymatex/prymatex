@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import re
 import operator
 
-from prymatex.qt import QtCore, QtGui, Qt
+from prymatex.qt import QtCore, QtGui, Qt, QtWidgets
 
 from prymatex.core import PrymatexEditor
 from prymatex.widgets.texteditor import TextEditWidget
@@ -46,6 +46,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     beginMode = QtCore.Signal(object)
     endMode = QtCore.Signal(object)
     aboutToClose = QtCore.Signal()
+    newLocationMemento = QtCore.Signal(object)
 
     aboutToHighlightChange = QtCore.Signal()
     highlightChanged = QtCore.Signal()
@@ -199,7 +200,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def window(self):
         parent = self.parent()
-        while parent and not isinstance(parent, QtGui.QMainWindow):
+        while parent and not isinstance(parent, QtWidgets.QMainWindow):
             parent = parent.parent()
         return parent
 
@@ -207,8 +208,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         super(CodeEditor, self).initialize(**kwargs)
 
         # Get dialogs
-        self.selectorDialog = self.window().findChild(QtGui.QDialog, "SelectorDialog")
-        self.browserDock = self.window().findChild(QtGui.QDockWidget, "BrowserDock")
+        self.selectorDialog = self.window().findChild(QtWidgets.QDialog, "SelectorDialog")
+        self.browserDock = self.window().findChild(QtWidgets.QDockWidget, "BrowserDock")
 
     # -------------- Self Signal Connect
     def on_beginMode(self, mode):
@@ -1261,7 +1262,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # --------------- Menus
     # Flat Popup Menu
     def showFlatPopupMenu(self, menuItems, callback, cursorPosition = True):
-        menu = QtGui.QMenu(self)
+        menu = QtWidgets.QMenu(self)
         for index, item in enumerate(menuItems, 1):
             if isinstance(item, dict):
                 title = "%s 	&%d" % (item["title"], index)

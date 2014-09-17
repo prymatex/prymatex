@@ -5,7 +5,7 @@ import os, re
 
 import prymatex
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.utils import text
 
 # &Text Button name -> %{prefix}TextButtonName%{sufix}
@@ -16,9 +16,9 @@ text_to_objectname = text2objectname
 
 def qapplication(translate=False):
     """Return QApplication instance creates it if it doesn't already exist"""
-    app = QtGui.QApplication.instance()
+    app = QtWidgets.QApplication.instance()
     if not app:
-        app = QtGui.QApplication([])
+        app = QtWidgets.QApplication([])
         # Set Application name for Gnome 3 (https://groups.google.com/forum/#!topic/pyside/24qxvwfrRDs)
         app.setApplicationName(prymatex.__name__.title())
     if translate:

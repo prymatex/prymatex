@@ -15,7 +15,7 @@ class SettingsDialog(PrymatexDialog, Ui_TreeWidgetDialog, QtWidgets.QDialog):
         
         self.treeView.setModel(self.application().profileManager.sortFilterSettingsProxyModel)
 
-        self.stackedWidget = QtGui.QStackedWidget(self.splitter)
+        self.stackedWidget = QtWidgets.QStackedWidget(self.splitter)
         self.widgetsLayout.addWidget(self.stackedWidget)
 
     def initialize(self, **kwargs):
@@ -25,7 +25,7 @@ class SettingsDialog(PrymatexDialog, Ui_TreeWidgetDialog, QtWidgets.QDialog):
     def selectFirstIndex(self):
         firstIndex = self.treeView.model().index(0, 0)
         rect = self.treeView.visualRect(firstIndex)
-        self.treeView.setSelection(rect, QtGui.QItemSelectionModel.ClearAndSelect)
+        self.treeView.setSelection(rect, QtCore.QItemSelectionModel.ClearAndSelect)
         treeNode = self.treeView.model().node(firstIndex)
         self.setCurrentSettingWidget(treeNode)
 

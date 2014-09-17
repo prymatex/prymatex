@@ -3,7 +3,7 @@
 
 import os
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.core import PrymatexDock
 
@@ -12,7 +12,7 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.models.search import SearchTreeModel, LineTreeNode
 from prymatex.gui.dialogs.filesearch import PMXFileSearchDialog
 
-class SearchResultsDock(PrymatexDock, Ui_SearchDock, QtGui.QDockWidget):
+class SearchResultsDock(PrymatexDock, Ui_SearchDock, QtWidgets.QDockWidget):
     ICON = "dock-search-results"
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     

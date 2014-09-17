@@ -9,12 +9,12 @@ import difflib
 
 from prymatex.utils import text
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import textcursor_to_tuple
 from prymatex.core import config
 from functools import reduce
 
-class TextEditWidget(QtGui.QPlainTextEdit):
+class TextEditWidget(QtWidgets.QPlainTextEdit):
     #------ Signals
     extraSelectionChanged = QtCore.Signal()
     fontChanged = QtCore.Signal()
@@ -44,7 +44,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
 
     #------ Overrides
     def setFont(self, font):
-        QtGui.QPlainTextEdit.setFont(self, font)
+        QtWidgets.QPlainTextEdit.setFont(self, font)
         self.fontChanged.emit()
 
     #------ Retrieve text
@@ -302,7 +302,7 @@ class TextEditWidget(QtGui.QPlainTextEdit):
     def __build_extra_selections(self, scope, cursors):
         extraSelections = []
         for cursor in cursors:
-            selection = QtGui.QTextEdit.ExtraSelection()
+            selection = QtWidgets.QTextEdit.ExtraSelection()
             selection.format = self.textCharFormat(scope)
             selection.cursor = cursor
             extraSelections.append(selection)
@@ -427,12 +427,12 @@ class TextEditWidget(QtGui.QPlainTextEdit):
     #------ Set and Get Text
     def setPlainText(self, plainText):
         """Set the text of the editor"""
-        QtGui.QPlainTextEdit.setPlainText(self, plainText)
+        QtWidgets.QPlainTextEdit.setPlainText(self, plainText)
         self.eol_chars = text.get_eol_chars(plainText)
 
     def toPlainTextWithEol(self):
         """Same as 'toPlainText', replace '\n' by correct end-of-line characters"""
-        plainText = QtGui.QPlainTextEdit.toPlainText(self)
+        plainText = QtWidgets.QPlainTextEdit.toPlainText(self)
         return plainText.replace("\n", self.lineSeparator())
 
     def selectedTextWithEol(self, cursor = None):

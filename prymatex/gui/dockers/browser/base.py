@@ -6,7 +6,7 @@ import codecs
 import mimetypes
 from subprocess import Popen, PIPE, STDOUT
 
-from prymatex.qt import QtCore, QtGui, QtWebKit
+from prymatex.qt import QtCore, QtGui, QtWebKit, QtWebKitWidgets, QtWidgets
 from prymatex.core import PrymatexDock
 
 from prymatex import resources
@@ -21,7 +21,7 @@ from .network import setGlobalApplicationProxyAddress, globalApplicationProxyAdd
 #=======================================================================
 # Browser Dock
 #=======================================================================
-class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
+class BrowserDock(PrymatexDock, Ui_BrowserDock, QtWidgets.QDockWidget):
     ICON = "dock-web-browser"
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
@@ -139,19 +139,19 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
                 self.lineUrl.setFocus()
                 self.lineUrl.selectAll()
                 return True
-        return QtGui.QDockWidget.event(self, event)
+        return QtWidgets.QDockWidget.event(self, event)
 
-    def createWebView(self, windowType = QtWebKit.QWebPage.WebBrowserWindow):
+    def createWebView(self, windowType = QtWebKitWidgets.QWebPage.WebBrowserWindow):
         webView = WebView(self)
-        if windowType == QtWebKit.QWebPage.WebBrowserWindow:
+        if windowType == QtWebKitWidgets.QWebPage.WebBrowserWindow:
             #Connect signals
             webView.urlChanged.connect(self.on_webView_urlChanged)
             webView.loadProgress.connect(self.on_webView_loadProgress)
             index = self.tabWebView.addWebView(webView)
             self.tabWebView.setCurrentIndex(index)
-        elif mode == QtWebKit.QWebPage.WebModalDialog:
+        elif mode == QtWebKitWidgets.QWebPage.WebModalDialog:
             # TODO Aca va dentro de un dialogo que tenga sus propias cosas de navegacion
-            # webDialog = QtGui.QDialog(self)
+            # webDialog = QtWidgets.QDialog(self)
             webView.setWindowModality(QtCore.Qt.ApplicationModal)
             webView.show()
         return webView
@@ -277,11 +277,11 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtGui.QDockWidget):
     
     def stopTimer(self):
         self.updateTimer.stop()
-        self.tabWebView.currentWebView().page().setLinkDelegationPolicy(QtWebKit.QWebPage.DontDelegateLinks)
+        self.tabWebView.currentWebView().page().setLinkDelegationPolicy(QtWebKitWidgets.QWebPage.DontDelegateLinks)
 
     def startTimer(self):
         self.updateTimer.start(self.updateInterval)
-        self.tabWebView.currentWebView().page().setLinkDelegationPolicy(QtWebKit.QWebPage.DelegateAllLinks)
+        self.tabWebView.currentWebView().page().setLinkDelegationPolicy(QtWebKitWidgets.QWebPage.DelegateAllLinks)
 
     def connectCurrentEditor(self):
         self.currentEditor = self.window().currentEditor()

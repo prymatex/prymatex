@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore, QtWidgets
 
 from prymatex.ui.configure.mainwindow import Ui_MainWindow
 from prymatex.models.settings import SettingsTreeNode
 
-class MainWindowSettingsWidget(SettingsTreeNode, Ui_MainWindow, QtGui.QWidget):
+class MainWindowSettingsWidget(SettingsTreeNode, Ui_MainWindow, QtWidgets.QWidget):
     NAMESPACE = "general"
         
     def __init__(self, **kwargs):
