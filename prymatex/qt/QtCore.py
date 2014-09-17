@@ -3,7 +3,7 @@
 
 import os
 
-if os.environ['QT_API'] == 'pyqt':
+if os.environ['QT_API'] == 'pyqt4':
     from PyQt4.QtCore import *
     from PyQt4.Qt import QCoreApplication
     from PyQt4.QtCore import pyqtSignal as Signal

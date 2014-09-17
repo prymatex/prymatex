@@ -3,7 +3,7 @@
 
 import os
 
-if os.environ['QT_API'] == 'pyqt':
+if os.environ['QT_API'] == 'pyqt4':
     from PyQt4.Qt import QKeySequence, QTextCursor
     from PyQt4.QtGui import *
 else:
