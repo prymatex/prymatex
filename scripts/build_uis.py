@@ -18,26 +18,27 @@ def has_been_updated(source, dest):
         return True
     return False
 
+uics = {'pyqt4': "pyuic4", 'pyqt5': "pyuic5", "pyside": "pyside-uic" }
+
 class QtUiBuild(object):
     """Build PyQt (.ui) files and resources."""
  
     description = "Build PyQt GUIs (.ui) for prymatex directory schema"
     
-    def __init__(self, verbose, force = False):
+    def __init__(self, verbose, api='pyqt4', force=False):
         self.verbose = verbose
+        self.api = api
         self.force = force
     
     def _ui2py(self, ui_file, py_file):
         try:
-            print("pyside-uic -o %s %s" % (py_file, ui_file))
-            os.system("pyside-uic -o %s %s" % (py_file, ui_file))
+            os.system("%s -o %s %s" % (uics[self.api], py_file, ui_file))
         except Exception as e:
             self.warn('Unable to compile user interface %s: %s' % (py_file, e))
             if not os.path.exists(py_file) or not open(py_file).read():
                 raise SystemExit(1)
-            return
 
-    def compile_ui(self, ui_file, py_file = None):
+    def compile_ui(self, ui_file, py_file=None):
         """Compile the .ui files to python modules."""
         # Search for pyuic4 in python bin dir, then in the $Path.
         if py_file is None:
@@ -47,6 +48,7 @@ class QtUiBuild(object):
             py_file = os.path.splitext(py_file)[0] + '.py'
             py_file = os.path.join(py_path, py_file)
             
+        
         if has_been_updated(ui_file, py_file) or self.force:
             if self.verbose:
                 print(("Compiling %s -> %s" % (ui_file, py_file)))
@@ -90,6 +92,7 @@ class QtUiBuild(object):
 
     def run(self):
         """Execute the command."""
+        self._wrapuic()
         basepath = os.path.join(PROJECT_PATH, 'resources', 'ui')
         for dirpath, _, filenames in os.walk(basepath):
             self.create_package(dirpath)
@@ -98,13 +101,56 @@ class QtUiBuild(object):
                     
                     self.compile_ui(os.path.join(dirpath, filename))
         #self.compile_rc(os.path.join('resources', 'resources.qrc'))
+    _wrappeduic = False
     
     def warn(self, message, *largs):
         print((message % largs))
+    
+    @classmethod
+    def _wrapuic(cls):
+        """Wrap uic to use gettext's _() in place of tr()"""
+        if cls._wrappeduic:
+            return
+ 
+        from PyQt4.uic.Compiler import compiler, qtproxies, indenter
+ 
+        class _UICompiler(compiler.UICompiler):
+            """Speciallized compiler for qt .ui files."""
+            def createToplevelWidget(self, classname, widgetname):
+                output = indenter.getIndenter()
+                output.level = 0
+                output.write('from prymatex.utils.i18n import ugettext as _')
+                return super(_UICompiler, self).createToplevelWidget(classname, widgetname)
+                
+            def compileUi(self, input_stream, output_stream, from_imports):
+                indenter.createCodeIndenter(output_stream)
+                w = self.parse(input_stream)
+
+                output = indenter.getIndenter()
+                output.write("")
+
+                self.factory._cpolicy._writeOutImports()
+                
+                for res in self._resources:
+                    output.write("from prymatex import %s" % res)
+                    #write_import(res, from_imports)
+
+                return {"widgetname": str(w),
+                        "uiclass" : w.uiclass,
+                        "baseclass" : w.baseclass}
+        compiler.UICompiler = _UICompiler
+ 
+        class _i18n_string(qtproxies.i18n_string):
+            """Provide a translated text."""
+            def __str__(self):
+                return "_('%s')" % self.string.encode('string-escape')
+        qtproxies.i18n_string = _i18n_string
+ 
+        cls._wrappeduic = True
 
 if __name__ == '__main__':
     verbose = 0
     if len(sys.argv) > 1:
         verbose = int(sys.argv[1])
-    sys.exit(QtUiBuild(verbose, force = True).run())
+    sys.exit(QtUiBuild(verbose, api='pyqt4', force = True).run())
     
