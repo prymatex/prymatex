@@ -11,7 +11,7 @@ if os.environ['QT_API'] == 'pyqt4':
     from PyQt4.QtCore import pyqtProperty as Property
     from PyQt4.QtCore import QT_VERSION_STR as __version__
     from PyQt4.QtCore import qInstallMsgHandler as qInstallMessageHandler
-    from PyQt4.QtGui import QSortFilterProxyModel
+    from PyQt4.QtGui import (QSortFilterProxyModel, QItemSelectionModel)
 elif os.environ['QT_API'] == 'pyqt5':
     from PyQt5.QtCore import *
     from PyQt5.Qt import QCoreApplication

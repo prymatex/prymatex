@@ -2,61 +2,74 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/configure/projects.ui'
 #
-# Created: Wed Sep 17 09:55:04 2014
-#      by: PyQt5 UI code generator 5.2.1
+# Created: Thu Sep 18 09:56:56 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt4 import QtCore, QtGui
+
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Projects(object):
     def setupUi(self, Projects):
-        Projects.setObjectName("Projects")
+        Projects.setObjectName(_fromUtf8("Projects"))
         Projects.resize(272, 281)
-        self.verticalLayout = QtWidgets.QVBoxLayout(Projects)
+        self.verticalLayout = QtGui.QVBoxLayout(Projects)
         self.verticalLayout.setSpacing(6)
-        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout.setObjectName("verticalLayout")
-        self.groupBox_3 = QtWidgets.QGroupBox(Projects)
-        self.groupBox_3.setObjectName("groupBox_3")
-        self.formLayout_3 = QtWidgets.QFormLayout(self.groupBox_3)
-        self.formLayout_3.setContentsMargins(6, 6, 6, 6)
+        self.verticalLayout.setMargin(0)
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.groupBox_3 = QtGui.QGroupBox(Projects)
+        self.groupBox_3.setObjectName(_fromUtf8("groupBox_3"))
+        self.formLayout_3 = QtGui.QFormLayout(self.groupBox_3)
+        self.formLayout_3.setMargin(6)
         self.formLayout_3.setSpacing(2)
-        self.formLayout_3.setObjectName("formLayout_3")
-        self.label = QtWidgets.QLabel(self.groupBox_3)
-        self.label.setObjectName("label")
-        self.formLayout_3.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.label)
-        self.horizontalLayout_6 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_6.setObjectName("horizontalLayout_6")
-        self.lineLocation_2 = QtWidgets.QLineEdit(self.groupBox_3)
+        self.formLayout_3.setObjectName(_fromUtf8("formLayout_3"))
+        self.label = QtGui.QLabel(self.groupBox_3)
+        self.label.setObjectName(_fromUtf8("label"))
+        self.formLayout_3.setWidget(0, QtGui.QFormLayout.LabelRole, self.label)
+        self.horizontalLayout_6 = QtGui.QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(_fromUtf8("horizontalLayout_6"))
+        self.lineLocation_2 = QtGui.QLineEdit(self.groupBox_3)
         self.lineLocation_2.setEnabled(False)
-        self.lineLocation_2.setObjectName("lineLocation_2")
+        self.lineLocation_2.setObjectName(_fromUtf8("lineLocation_2"))
         self.horizontalLayout_6.addWidget(self.lineLocation_2)
-        self.buttonChoose_2 = QtWidgets.QPushButton(self.groupBox_3)
+        self.buttonChoose_2 = QtGui.QPushButton(self.groupBox_3)
         self.buttonChoose_2.setEnabled(False)
-        icon = QtGui.QIcon.fromTheme("folder")
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("folder"))
         self.buttonChoose_2.setIcon(icon)
-        self.buttonChoose_2.setObjectName("buttonChoose_2")
+        self.buttonChoose_2.setObjectName(_fromUtf8("buttonChoose_2"))
         self.horizontalLayout_6.addWidget(self.buttonChoose_2)
-        self.formLayout_3.setLayout(0, QtWidgets.QFormLayout.FieldRole, self.horizontalLayout_6)
-        self.label_3 = QtWidgets.QLabel(self.groupBox_3)
-        self.label_3.setObjectName("label_3")
-        self.formLayout_3.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_3)
-        self.comboBoxLicence = QtWidgets.QComboBox(self.groupBox_3)
-        self.comboBoxLicence.setObjectName("comboBoxLicence")
-        self.formLayout_3.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.comboBoxLicence)
+        self.formLayout_3.setLayout(0, QtGui.QFormLayout.FieldRole, self.horizontalLayout_6)
+        self.label_3 = QtGui.QLabel(self.groupBox_3)
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.formLayout_3.setWidget(1, QtGui.QFormLayout.LabelRole, self.label_3)
+        self.comboBoxLicence = QtGui.QComboBox(self.groupBox_3)
+        self.comboBoxLicence.setObjectName(_fromUtf8("comboBoxLicence"))
+        self.formLayout_3.setWidget(1, QtGui.QFormLayout.FieldRole, self.comboBoxLicence)
         self.verticalLayout.addWidget(self.groupBox_3)
-        spacerItem = QtWidgets.QSpacerItem(20, 4, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem = QtGui.QSpacerItem(20, 4, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
 
         self.retranslateUi(Projects)
         QtCore.QMetaObject.connectSlotsByName(Projects)
 
     def retranslateUi(self, Projects):
-        _translate = QtCore.QCoreApplication.translate
-        Projects.setWindowTitle(_translate("Projects", "Projects"))
-        self.groupBox_3.setTitle(_translate("Projects", "Defaults"))
-        self.label.setText(_translate("Projects", "Location:"))
-        self.buttonChoose_2.setText(_translate("Projects", "Ch&oose"))
-        self.label_3.setText(_translate("Projects", "Licence:"))
+        Projects.setWindowTitle(_translate("Projects", "Projects", None))
+        self.groupBox_3.setTitle(_translate("Projects", "Defaults", None))
+        self.label.setText(_translate("Projects", "Location:", None))
+        self.buttonChoose_2.setText(_translate("Projects", "Ch&oose", None))
+        self.label_3.setText(_translate("Projects", "Licence:", None))
 

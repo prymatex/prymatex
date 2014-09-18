@@ -13,28 +13,19 @@ from prymatex.qt.helpers import create_menu
 from prymatex.core import PrymatexDock
 
 from prymatex.utils.i18n import ugettext as _
+from prymatex.ui.dockers.process import Ui_ExternalProcessDock
 
-class ExternalProcessDock(PrymatexDock, QtWidgets.QDockWidget):
+class ExternalProcessDock(PrymatexDock, Ui_ExternalProcessDock, QtWidgets.QDockWidget):
     ICON = "dock-external-process"
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def __init__(self, **kwargs):
         super(ExternalProcessDock, self).__init__(**kwargs)
-        self.setWindowTitle(_("External process"))
-        self.setObjectName(_("ExternalProcessDock"))
         self.processTableModel = self.application().supportManager.processTableModel
-        self.tableViewProcess = QtWidgets.QTableView()
-        self.tableViewProcess.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.tableViewProcess.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.tableViewProcess.setShowGrid(False)
-        self.tableViewProcess.horizontalHeader().setVisible(False)
-        self.tableViewProcess.verticalHeader().setVisible(False)
-        self.tableViewProcess.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-        self.tableViewProcess.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-        self.tableViewProcess.activated.connect(self.on_tableViewProcess_activated)
-        self.tableViewProcess.doubleClicked.connect(self.on_tableViewProcess_doubleClicked)
-        self.tableViewProcess.setModel(self.processTableModel)
-        self.setWidget(self.tableViewProcess)
+        self.setupUi(self)
+        self.tableViewExternalProcess.activated.connect(self.on_tableViewExternalProcess_activated)
+        self.tableViewExternalProcess.doubleClicked.connect(self.on_tableViewExternalProcess_doubleClicked)
+        self.tableViewExternalProcess.setModel(self.processTableModel)
 
         #Setup Context Menu
         contextMenu = { 
@@ -56,16 +47,16 @@ class ExternalProcessDock(PrymatexDock, QtWidgets.QDockWidget):
         }
         self.processMenu = create_menu(self, contextMenu)
         
-        self.tableViewProcess.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.tableViewProcess.customContextMenuRequested.connect(self.showtableViewProcessContextMenu)
+        self.tableViewExternalProcess.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.tableViewExternalProcess.customContextMenuRequested.connect(self.showTableViewExternalProcessContextMenu)
         
-    def showtableViewProcessContextMenu(self, point):
-        index = self.tableViewProcess.indexAt(point)
+    def showTableViewExternalProcessContextMenu(self, point):
+        index = self.tableViewExternalProcess.indexAt(point)
         if index.isValid():
-            self.processMenu.popup(self.tableViewProcess.mapToGlobal(point))
+            self.processMenu.popup(self.tableViewExternalProcess.mapToGlobal(point))
         
     def currentProcess(self):
-        index = self.tableViewProcess.currentIndex()
+        index = self.tableViewExternalProcess.currentIndex()
         return self.processTableModel.processForIndex(index)
 
     def on_actionCloseProcess_triggered(self):
@@ -81,8 +72,8 @@ class ExternalProcessDock(PrymatexDock, QtWidgets.QDockWidget):
     def on_actionTerminate_triggered(self):
         self.currentProcess().terminate()
         
-    def on_tableViewProcess_activated(self, index):
+    def on_tableViewExternalProcess_activated(self, index):
         self.currentProcess().terminate()
     
-    def on_tableViewProcess_doubleClicked(self, index):
+    def on_tableViewExternalProcess_doubleClicked(self, index):
         self.currentProcess().terminate()

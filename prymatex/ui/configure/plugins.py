@@ -2,33 +2,46 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/configure/plugins.ui'
 #
-# Created: Wed Sep 17 09:55:04 2014
-#      by: PyQt5 UI code generator 5.2.1
+# Created: Thu Sep 18 09:56:56 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt4 import QtCore, QtGui
+
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Plugins(object):
     def setupUi(self, Plugins):
-        Plugins.setObjectName("Plugins")
+        Plugins.setObjectName(_fromUtf8("Plugins"))
         Plugins.resize(400, 300)
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(Plugins)
+        self.verticalLayout_2 = QtGui.QVBoxLayout(Plugins)
         self.verticalLayout_2.setSpacing(2)
-        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.lineEditFilter = QtWidgets.QLineEdit(Plugins)
+        self.verticalLayout_2.setMargin(0)
+        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
+        self.lineEditFilter = QtGui.QLineEdit(Plugins)
         self.lineEditFilter.setReadOnly(True)
-        self.lineEditFilter.setObjectName("lineEditFilter")
+        self.lineEditFilter.setObjectName(_fromUtf8("lineEditFilter"))
         self.verticalLayout_2.addWidget(self.lineEditFilter)
-        self.listViewPlugins = QtWidgets.QListView(Plugins)
-        self.listViewPlugins.setObjectName("listViewPlugins")
+        self.listViewPlugins = QtGui.QListView(Plugins)
+        self.listViewPlugins.setObjectName(_fromUtf8("listViewPlugins"))
         self.verticalLayout_2.addWidget(self.listViewPlugins)
 
         self.retranslateUi(Plugins)
         QtCore.QMetaObject.connectSlotsByName(Plugins)
 
     def retranslateUi(self, Plugins):
-        _translate = QtCore.QCoreApplication.translate
-        Plugins.setWindowTitle(_translate("Plugins", "Terminal"))
+        Plugins.setWindowTitle(_translate("Plugins", "Terminal", None))
 

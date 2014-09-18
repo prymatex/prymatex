@@ -82,7 +82,6 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
         self.tableViewStyles.viewport().setPalette(palette)
         self.tableViewStyles.resizeColumnsToContents()
         self.tableViewStyles.resizeRowsToContents()
-        self.tableViewStyles.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         
         # Set color for buttons
         for button, name, role in self.buttons:
