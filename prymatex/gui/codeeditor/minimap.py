@@ -50,7 +50,8 @@ class MiniMapAddon(SideBarWidgetMixin, QtWidgets.QPlainTextEdit):
         baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter"
         menuEntry = {
             'text': "Minimap",
-            'toggled': lambda instance, checked: instance.setVisible(checked),
+            'checkable': True,
+            'triggered': lambda instance, checked: instance.setVisible(checked),
             'testChecked': lambda instance: instance.isVisible() }
         return { baseMenu: menuEntry }
     

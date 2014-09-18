@@ -109,8 +109,9 @@ class LineNumberSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
         baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter"
         menuEntry = {
             'text': "Line numbers",
+            'checkable': True,
             'sequence': ("SideBar", "ShowLineNumbers", 'F10'),
-            'toggled': lambda instance, checked: instance.setVisible(checked),
+            'triggered': lambda instance, checked: instance.setVisible(checked),
             'testChecked': lambda instance: instance.isVisible() }
         return { baseMenu: menuEntry }
 
@@ -176,7 +177,8 @@ class BookmarkSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
         menuEntry = {
             'text': "Bookmarks",
             'sequence': ("SideBar", "ShowBookmarks", 'Alt+F10'),
-            'toggled': lambda instance, checked: instance.setVisible(checked),
+            'checkable': True,
+            'triggered': lambda instance, checked: instance.setVisible(checked),
             'testChecked': lambda instance: instance.isVisible() }
         return { baseMenu: menuEntry} 
             
@@ -238,7 +240,8 @@ class FoldingSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
         menuEntry = {
             'text': 'Foldings',
             'sequence': ("SideBar", "ShowFoldings", 'Shift+F10'),
-            'toggled': lambda instance, checked: instance.setVisible(checked),
+            'checkable': True,
+            'triggered': lambda instance, checked: instance.setVisible(checked),
             'testChecked': lambda instance: instance.isVisible() }
         return {baseMenu: menuEntry} 
     
@@ -310,7 +313,8 @@ class SelectionSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
         baseMenu = cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter"
         menuEntry = {
             'text': 'Selection',
-            'toggled': lambda instance, checked: instance.setVisible(checked),
+            'checkable': True,
+            'triggered': lambda instance, checked: instance.setVisible(checked),
             'testChecked': lambda instance: instance.isVisible() }
         return { baseMenu: menuEntry }
     

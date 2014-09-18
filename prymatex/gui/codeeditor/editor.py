@@ -1349,10 +1349,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 '-',
                 {'text': "Zoom in",
                   'sequence': ("Editor", "ZoomIn"),
-                  'triggered': cls.zoomIn},
+                  'triggered': lambda ed, checked=False: ed.zoomIn()},
                  {'text': "Zoom out",
                   'sequence': ("Editor", "ZoomOut"),
-                  'triggered': cls.zoomOut},
+                  'triggered': lambda ed, checked=False: ed.zoomOut()},
                 '-',
                 {'name': 'leftGutter',
                  'text': 'Left gutter',
@@ -1362,43 +1362,51 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                  'items': []
                 }, '-',
                 {'text': "Word wrap",
-                 "items": [{
-                        "text": "Automatic",
-                        'toggled': cls.on_actionWordWrap_toggled,
+                 'items': [{
+                        'text': "Automatic",
+                        'checkable': True,
+                        'triggered': cls.on_actionWordWrap_triggered,
                         'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap)  and \
                             ed.wordWrapSize is Qt.QWIDGETSIZE_MAX
                     }, "-" ] + [ tuple([ {
-                        "text": "%s" % size,
-                        "toggled": lambda ed, checked, size=size: ed.on_actionWordWrap_toggled(checked, size=size),
+                        'text': "%s" % size,
+                        'checkable': True,
+                        'triggered': lambda ed, checked, size=size: ed.on_actionWordWrap_triggered(checked, size=size),
                         'testChecked': lambda ed, size=size: bool(ed.getFlags() & ed.WordWrap) and \
                             ed.wordWrapSize == size
                     } for size in cls.STANDARD_SIZES]) ]
                 },
                 {'text': "Margin line",
-                 "items": [{
-                        "text": "None",
-                        'toggled': lambda ed, checked: ed.on_actionMarginLine_toggled(not checked),
+                 'items': [{
+                        'text': "None",
+                        'checkable': True,
+                        'triggered': lambda ed, checked: ed.on_actionMarginLine_triggered(not checked),
                         'testChecked': lambda ed: not bool(ed.getFlags() & ed.MarginLine)
                     }, "-" ] + [ tuple([ {
-                        "text": "%s" % size,
-                        "toggled": lambda ed, checked, size = size: ed.on_actionMarginLine_toggled(checked, size = size),
+                        'text': "%s" % size,
+                        'checkable': True,
+                        'triggered': lambda ed, checked, size = size: ed.on_actionMarginLine_triggered(checked, size = size),
                         'testChecked': lambda ed, size = size: bool(ed.getFlags() & ed.MarginLine) and \
                             ed.marginLineSize == size
                     } for size in cls.STANDARD_SIZES]) ]
                 }, '-',
                 {'text': "Indent guide",
-                 'toggled': cls.on_actionIndentGuide_toggled,
+                 'checkable': True,
+                 'triggered': cls.on_actionIndentGuide_triggered,
                  'testChecked': lambda ed: bool(ed.getFlags() & ed.IndentGuide)
                 },
                 {'text': "Highlight current line",
-                 'toggled': cls.on_actionHighlightCurrentLine_toggled,
+                 'checkable': True,
+                 'triggered': cls.on_actionHighlightCurrentLine_triggered,
                  'testChecked': lambda ed: bool(ed.getFlags() & ed.HighlightCurrentLine)
                 },
                 {'text': "Show tabs and spaces",
-                 'toggled': cls.on_actionShowTabsAndSpaces_toggled,
+                 'checkable': True,
+                 'triggered': cls.on_actionShowTabsAndSpaces_triggered,
                  'testChecked': lambda ed: bool(ed.getFlags() & ed.ShowTabsAndSpaces) },
                 {'text': "Show line and paragraph",
-                 'toggled': cls.on_actionShowLineAndParagraphs_toggled,
+                 'checkable': True,
+                 'triggered': cls.on_actionShowLineAndParagraphs_triggered,
                  'testChecked': lambda ed: bool(ed.getFlags() & ed.ShowLineAndParagraphs)
                 }
             ]
@@ -1410,30 +1418,30 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 {'text': 'Select',
                  'items': [
                     {'text': '&Word',
-                     'triggered': lambda ed: ed.selectWord(),
+                     'triggered': lambda ed, checked=False: ed.selectWord(),
                      'sequence': ("Editor", "SelectWord", 'Ctrl+Meta+W'),
                      },
                     {'text': '&Text',
-                     'triggered': lambda ed: ed.selectText(),
+                     'triggered': lambda ed, checked=False: ed.selectText(),
                      'sequence': ("Editor", "SelectText", 'Ctrl+Meta+T'),
                      },
                     {'text': '&Line',
-                     'triggered': lambda ed: ed.selectLine(),
+                     'triggered': lambda ed, checked=False: ed.selectLine(),
                      'sequence': ("Editor", "SelectLine", 'Ctrl+Meta+L'),
                      },
                     {'text': '&Paragraph',
-                     'triggered': lambda ed: ed.selectParagraph()
+                     'triggered': lambda ed, checked=False: ed.selectParagraph()
                      },
                     {'text': 'Enclosing &brackets',
-                     'triggered': lambda ed: ed.selectEnclosingBrackets(),
+                     'triggered': lambda ed, checked=False: ed.selectEnclosingBrackets(),
                      'sequence': ("Editor", "SelectEnclosingBrackets", 'Ctrl+Meta+B'),
                      },
                     {'text': '&Scope',
-                     'triggered': lambda ed: ed.selectScope(),
+                     'triggered': lambda ed, checked=False: ed.selectScope(),
                      'sequence': ("Editor", "SelectScope", 'Ctrl+Meta+S'),
                      },
                     {'text': '&All',
-                     'triggered': lambda ed: ed.selectDocument(),
+                     'triggered': lambda ed, checked=False: ed.selectDocument(),
                      'sequence': ("Editor", "SelectAll", 'Ctrl+A'),
                      }
                 ]},
@@ -1441,53 +1449,57 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                  'items': [
                     {'text': 'Uppercase',
                      'sequence': ("Editor", "ConvertUppercase", 'Ctrl+U'),
-                     'triggered': lambda ed: ed.convertToUppercase(),
+                     'triggered': lambda ed, checked=False: ed.convertToUppercase(),
                      },
                     {'text': 'Lowercase',
                      'sequence': ("Editor", "ConvertLowercase", 'Ctrl+Shift+U'),
-                     'triggered': lambda ed: ed.convertToLowercase(),
+                     'triggered': lambda ed, checked=False: ed.convertToLowercase(),
                      },
                     {'text': 'Titlecase',
                      'sequence': ("Editor", "ConvertTitlecase", 'Ctrl+Alt+U'),
-                     'triggered': lambda ed: ed.convertToTitlecase(),
+                     'triggered': lambda ed, checked=False: ed.convertToTitlecase(),
                      },
                     {'text': 'Opposite case',
                      'sequence': ("Editor", "ConvertOppositeCase", 'Ctrl+G'),
-                     'triggered': lambda ed: ed.convertToOppositeCase(),
+                     'triggered': lambda ed, checked=False: ed.convertToOppositeCase(),
                      }, '-',
                     {'text': 'Tab to spaces',
-                     'triggered': lambda ed: ed.convertTabsToSpaces(),
+                     'triggered': lambda ed, checked=False: ed.convertTabsToSpaces(),
                      },
                     {'text': 'Spaces to tabs',
-                     'triggered': lambda ed: ed.convertSpacesToTabs(),
+                     'triggered': lambda ed, checked=False: ed.convertSpacesToTabs(),
                      }, '-',
                     {'text': 'Transpose',
                      'sequence': ("Editor", "ConvertTranspose", 'Ctrl+T'),
-                     'triggered': lambda ed: ed.convertTranspose(),
+                     'triggered': lambda ed, checked=False: ed.convertTranspose(),
                      }
                 ]}, '-',
                 {'text': 'Indentation',
                  'items': [
                     {'text': 'Indent using spaces',
-                     'toggled': lambda ed, checked: ed.on_actionIndentation_toggled(checked),
+                     'checkable': True,
+                     'triggered': lambda ed, checked: ed.on_actionIndentation_triggered(checked),
                      'testChecked': lambda ed: ed.indentUsingSpaces
                      }, '-', ] + [ tuple([
                     {'text': 'Tab width: %d' % size,
-                     'toggled': lambda ed, checked, size = size: ed.on_actionIndentation_toggled(ed.indentUsingSpaces, size = size),
+                     'checkable': True,
+                     'triggered': lambda ed, checked, size = size: ed.on_actionIndentation_triggered(ed.indentUsingSpaces, size = size),
                      'testChecked': lambda ed, size = size: (ed.indentUsingSpaces and ed.indentationWidth == size) or (not ed.indentUsingSpaces and ed.tabWidth == size)
                      } for size in range(1, 9) ]) ]
                 },
                 {'text': 'Line endings',
                  'items': [tuple(
                      [{'text': '%s' % name,
-                     'toggled': lambda ed, checked, eol_chars = eol_chars: ed.setEolChars(eol_chars),
+                     'checkable': True,
+                     'triggered': lambda ed, checked, eol_chars = eol_chars: ed.setEolChars(eol_chars),
                      'testChecked': lambda ed, eol_chars = eol_chars: ed.lineSeparator() == eol_chars
                      } for eol_chars, _, name in text.EOLS])
                 ]},
                 {'text': 'Encoding',
                  'items': [tuple(
                      [{'text': "%s (%s)" % (language.split(",")[0].title(), codec),
-                     'toggled': lambda ed, checked, codec = codec: ed.on_actionEncoding_toggled(codec),
+                     'checkable': True,
+                     'triggered': lambda ed, checked, codec = codec: ed.on_actionEncoding_triggered(codec),
                      'testChecked': lambda ed, codec = codec: ed.encoding == codec
                      } for codec, aliases, language in encoding.CODECS])
                 ]}, '-',
@@ -1565,7 +1577,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         ]
 
     # ------------------ Menu Actions
-    def on_actionIndentation_toggled(self, checked, size = None):
+    def on_actionIndentation_triggered(self, checked, size = None):
         if size is None:
           size = self.indentationWidth if self.indentUsingSpaces else self.tabWidth
         self.indentUsingSpaces = checked
@@ -1576,26 +1588,26 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.update()
         self.textChanged.emit()
 
-    def on_actionEncoding_toggled(self, codec):
+    def on_actionEncoding_triggered(self, codec):
         if self.encoding != codec:
             self.encoding = codec
             self.textChanged.emit()
 
-    def on_actionShowTabsAndSpaces_toggled(self, checked):
+    def on_actionShowTabsAndSpaces_triggered(self, checked):
         if checked:
             flags = self.getFlags() | self.ShowTabsAndSpaces
         else:
             flags = self.getFlags() & ~self.ShowTabsAndSpaces
         self.setFlags(flags)
 
-    def on_actionShowLineAndParagraphs_toggled(self, checked):
+    def on_actionShowLineAndParagraphs_triggered(self, checked):
         if checked:
             flags = self.getFlags() | self.ShowLineAndParagraphs
         else:
             flags = self.getFlags() & ~self.ShowLineAndParagraphs
         self.setFlags(flags)
 
-    def on_actionWordWrap_toggled(self, checked, size = Qt.QWIDGETSIZE_MAX):
+    def on_actionWordWrap_triggered(self, checked, size = Qt.QWIDGETSIZE_MAX):
         if checked:
             flags = self.getFlags() | self.WordWrap
             self.wordWrapSize = size
@@ -1607,14 +1619,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             flags = self.getFlags() & ~self.WordWrap
         self.setFlags(flags)
 
-    def on_actionHighlightCurrentLine_toggled(self, checked):
+    def on_actionHighlightCurrentLine_triggered(self, checked):
         if checked:
             flags = self.getFlags() | self.HighlightCurrentLine
         else:
             flags = self.getFlags() & ~self.HighlightCurrentLine
         self.setFlags(flags)
 
-    def on_actionMarginLine_toggled(self, checked, size = None):
+    def on_actionMarginLine_triggered(self, checked, size = None):
         if isinstance(size, int):
             self.marginLineSize = size
         if checked:
@@ -1623,14 +1635,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             flags = self.getFlags() & ~self.MarginLine
         self.setFlags(flags)
 
-    def on_actionIndentGuide_toggled(self, checked):
+    def on_actionIndentGuide_triggered(self, checked):
         if checked:
             flags = self.getFlags() | self.IndentGuide
         else:
             flags = self.getFlags() & ~self.IndentGuide
         self.setFlags(flags)
 
-    def on_actionSelectBundleItem_triggered(self):
+    def on_actionSelectBundleItem_triggered(self, checked=False):
         item = self.selectorDialog.select(self.bundleItemSelectableModel, title=_("Select Bundle Item"))
 
         # Select one?

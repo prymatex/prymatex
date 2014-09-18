@@ -55,7 +55,7 @@ class PrymatexMainMenuBar(QtWidgets.QMenuBar):
             for componentClass in self.parent().application().pluginManager.findComponentsForClass(klass):
                 self.extend(componentClass, parent)
 
-    def componentInstanceDispatcher(self, handler, *largs):
+    def componentInstanceDispatcher(self, handler, *args):
         obj = self.sender()
         componentClass = None
         for cmpClass, objects in self.customComponentObjects.items():
@@ -73,7 +73,8 @@ class PrymatexMainMenuBar(QtWidgets.QMenuBar):
         self.parent().logger().debug("Trigger %s over %s" % (obj, componentInstances))
 
         # TODO Tengo todas pero solo se lo aplico a la ultima que es la que generalmente esta en uso
-        handler(componentInstances[-1], *largs)
+        print(handler, componentInstances, args)
+        handler(componentInstances[-1], *args)
 
     def registerShortcut(self, *args, **kwargs):
         self.parent().application().registerShortcut(*args, **kwargs)

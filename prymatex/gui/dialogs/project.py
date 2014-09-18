@@ -96,7 +96,6 @@ class ProjectDialog(PrymatexDialog, Ui_ProjectDialog, QtWidgets.QDialog):
         if text and not self.checkBoxUseDefaultLocation.isChecked():
             self.lineProjectName.setText(os.path.basename(text))
 
-
     def on_checkBoxUseDefaultLocation_toggled(self, checked):
         self.lineLocation.setEnabled(not checked)
         self.buttonChoose.setEnabled(not checked)

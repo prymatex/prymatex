@@ -67,7 +67,7 @@ class SpellCheckerAddon(CodeEditorAddon):
 
     @classmethod
     def contributeToMainMenu(cls):
-        def on_actionSpellingOnType_toggled(editor, checked):
+        def on_actionSpellingOnType_triggered(editor, checked=False):
             instance = editor.findChild(cls, "Nombre")
             #instance.spellingOnType = checked
 
@@ -83,7 +83,8 @@ class SpellCheckerAddon(CodeEditorAddon):
                     {'text': 'Show Spelling'},
                     {'text': 'Check Spelling'},
                     {'text': 'Check Spelling as You Type',
-                      'toggled': on_actionSpellingOnType_toggled,
+                      'checkable': True,
+                      'triggered': on_actionSpellingOnType_triggered,
                       'testChecked': on_actionSpellingOnType_testChecked
                     }
                 ]}
@@ -134,7 +135,7 @@ class SpellCheckerAddon(CodeEditorAddon):
             yield
         self.editor.highlightEditor()
     
-    def on_actionSpell_toggled(self, cursor):
+    def on_actionSpell_triggered(self, cursor):
         print(cursor.selectedText())
         
     def on_editor_syntaxReady(self):

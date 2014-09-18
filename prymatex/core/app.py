@@ -89,7 +89,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
     def qtMessageHandler(self, *args, **kwargs):
         ''' Route Qt messaging system into Prymatex/Python one'''
-        print(*args, **kwargs)
         messageType, messageContext, messageString = args
         if messageType == QtCore.QtDebugMsg:
             self.logger().debug(messageString)

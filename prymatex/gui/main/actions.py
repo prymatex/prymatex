@@ -56,7 +56,7 @@ class MainWindowActionsMixin(object):
             self.menuMoveEditorToGroup.addAction(action)
 
     # ------------ File Actions
-    def on_actionOpen_triggered(self):
+    def on_actionOpen_triggered(self, checked=False):
         current_editor = self.currentEditor()
         file_path = current_editor and current_editor.filePath() or None
         selected_paths, selected_filter = getOpenFileNames(
@@ -70,7 +70,7 @@ class MainWindowActionsMixin(object):
                 focus = selected_paths[-1] == file_path   # Focus on last editor
             )
 
-    def on_actionImportProject_triggered(self):
+    def on_actionImportProject_triggered(self, checked=False):
         directory = QtGui.QFileDialog.getExistingDirectory(self, "Choose project location", self.application().fileManager.directory())
         if directory:
             try:
@@ -78,30 +78,30 @@ class MainWindowActionsMixin(object):
             except exceptions.LocationIsNotProject:
                 QtGui.QMessageBox.critical(self, "Critical", "A error has occurred.\n%s is not a valid project location." % directory)
 
-    def on_actionCloseOthers_triggered(self):
+    def on_actionCloseOthers_triggered(self, checked=False):
         current = self.currentEditor()
         for w in self.centralWidget().allWidgets():
             if w is not current:
                 self.closeEditor(editor = w)
 
-    def on_actionSwitchProfile_triggered(self):
+    def on_actionSwitchProfile_triggered(self, checked=False):
         if self.profileDialog.switchProfile() == self.profileDialog.Accepted and\
             self.application().profileManager.defaultProfile() != self.application().profile():
             self.application().restart()
 
     # ------------ Navigation Actions
-    def on_actionSelectTab_triggered(self):
+    def on_actionSelectTab_triggered(self, checked=False):
         item = self.selectorDialog.select(self.tabSelectableModel, title=_("Select tab"))
 
         if item is not None:
             self.centralWidget().setCurrentWidget(item['data'])
 
-    def on_actionJumpToTab_triggered(self):
+    def on_actionJumpToTab_triggered(self, checked=False):
         if self.currentEditor() is not None:
             self.currentEditor().setFocus()
 
     # ------------ Global navigation
-    def on_actionLocationBack_triggered(self):
+    def on_actionLocationBack_triggered(self, checked=False):
         if self._editorHistory and self._editorHistoryIndex < len(self._editorHistory) - 1:
             self._editorHistoryIndex += 1
             entry = self._editorHistory[self._editorHistoryIndex]
@@ -109,7 +109,7 @@ class MainWindowActionsMixin(object):
                 entry["editor"].restoreLocationMemento(entry["memento"])
             self.setCurrentEditor(entry["editor"])
 
-    def on_actionLocationForward_triggered(self):
+    def on_actionLocationForward_triggered(self, checked=False):
         if self._editorHistoryIndex != 0:
             self._editorHistoryIndex -= 1
             entry = self._editorHistory[self._editorHistoryIndex]
@@ -117,7 +117,7 @@ class MainWindowActionsMixin(object):
                 entry["editor"].restoreLocationMemento(entry["memento"])
             self.setCurrentEditor(entry["editor"])
 
-    def on_actionLastEditLocation_triggered(self):
+    def on_actionLastEditLocation_triggered(self, checked=False):
         for index, entry in enumerate(self._editorHistory):
             if "memento" in entry:
                 entry["editor"].restoreLocationMemento(entry["memento"])
@@ -127,7 +127,7 @@ class MainWindowActionsMixin(object):
 
     SCREENSHOT_FORMAT = 'png'
 
-    def on_actionTakeScreenshot_triggered(self):
+    def on_actionTakeScreenshot_triggered(self, checked=False):
         from pprint import pprint
         pprint(self.resources()._unknoun_icons)
         pxm = QtGui.QPixmap.grabWindow(self.winId())
@@ -157,15 +157,15 @@ class MainWindowActionsMixin(object):
                 "items": [{
                     "text": "Editor",
                     "sequence": "New",
-                    "triggered": cls.addEmptyEditor,
+                    "triggered": lambda mw, checked=False: mw.addEmptyEditor(),
                     "icon": "new-editor",
                 }, "-", {
                     "text": "From template",
-                    "triggered": lambda mw: mw.templateDialog.createFile(),
+                    "triggered": lambda mw, checked=False: mw.templateDialog.createFile(),
                     "icon": "new-from-template",
                 }, {
                     "text": "Project",
-                    "triggered": lambda mw: mw.projectDialog.createProject(),
+                    "triggered": lambda mw, checked=False: mw.projectDialog.createProject(),
                     "icon": "new-project",
                 }]
             }, {
@@ -176,25 +176,25 @@ class MainWindowActionsMixin(object):
                 "aboutToShow": cls.on_menuRecentFiles_aboutToShow,
                 "items": ["-", {
                     "text": "Open all recent files",
-                    "triggered": lambda mw: [ mw.application().openFile(path)
+                    "triggered": lambda mw, checked=False: [ mw.application().openFile(path)
                         for path in mw.application().fileManager.fileHistory ]
                 }, {
                     "text": "Remove all recent files",
-                    "triggered": lambda mw: mw.application().fileManager.clearFileHistory()
+                    "triggered": lambda mw, checked=False: mw.application().fileManager.clearFileHistory()
                 }]
             }, {
                 "text": "Import project",
                 "triggered": cls.on_actionImportProject_triggered,
             }, "-", {
                 "text": "Save",
-                "triggered": lambda mw: mw.saveEditor()
+                "triggered": lambda mw, checked=False: mw.saveEditor()
             }, {
                 "text": "Save as",
-                "triggered": lambda mw: mw.saveEditor(saveAs=True)
+                "triggered": lambda mw, checked=False: mw.saveEditor(saveAs=True)
             }, {
                 "text": "Save all",
                 "sequence": ("Global", "SaveAll", "Ctrl+Shift+S"),
-                "triggered": lambda mw: [ mw.saveEditor(editor=editor) for editor in mw.editors() ]
+                "triggered": lambda mw, checked=False: [ mw.saveEditor(editor=editor) for editor in mw.editors() ]
             }, "-", {
                 "text": "Close",
                 "triggered": lambda mw: mw.closeEditor()
@@ -210,7 +210,7 @@ class MainWindowActionsMixin(object):
                 "triggered": cls.on_actionSwitchProfile_triggered
             }, "-", {
                 "text": "Quit",
-                "triggered": lambda mw: mw.application().quit()
+                "triggered": lambda mw, checked=False: mw.application().quit()
             }]
         }
 
@@ -236,102 +236,110 @@ class MainWindowActionsMixin(object):
                 "items": []
             }, "-", {
                 "text": "Show main menu",
-                "toggled": lambda mw, checked: mw.menuBar().setShown(checked),
+                "checkable": True,
+                "triggered": lambda mw, checked: mw.menuBar().setShown(checked),
                 "testChecked": lambda mw: mw.menuBar().isVisible()
             }, {
                 "text": "Show status",
-                "toggled": lambda mw, checked: mw.statusBar().setShown(checked),
+                "checkable": True,
+                "triggered": lambda mw, checked: mw.statusBar().setShown(checked),
                 "testChecked": lambda mw: mw.statusBar().isVisible()
             }, {
                 "text": "Show tabs",
-                "toggled": lambda mw, checked: mw.centralWidget().setShowTabs(checked),
+                "checkable": True,
+                "triggered": lambda mw, checked: mw.centralWidget().setShowTabs(checked),
                 "testChecked": lambda mw: mw.centralWidget().showTabs(),
             }, "-", {
                 "text": "Layout",
                 "items": [{
                     "text": "Split vertically",
-                    "triggered": lambda mw: mw.centralWidget().splitVertically()
+                    "triggered": lambda mw, checked=False: mw.centralWidget().splitVertically()
                 }, {
                     "text": "Split horizontally",
-                    "triggered": lambda mw: mw.centralWidget().splitHorizontally()
+                    "triggered": lambda mw, checked=False: mw.centralWidget().splitHorizontally()
                 }, "-", {
                     "text": "Single",
                     "sequence": ("Global", "LayoutSingle", "Shift+Alt+1"),
-                    "triggered": lambda mw: mw.centralWidget().setLayout()
+                    "triggered": lambda mw, checked=False: mw.centralWidget().setLayout()
                 }, {
                     "text": "Columns: 2",
                     "sequence": ("Global", "Layout2Columns", "Shift+Alt+2"),
-                    "triggered": lambda mw: mw.centralWidget().setLayout(columns = 2)
+                    "triggered": lambda mw, checked=False: mw.centralWidget().setLayout(columns = 2)
                 }, {
                     "text": "Columns: 3",
                     "sequence": ("Global", "Layout3Columns", "Shift+Alt+3"),
-                    "triggered": lambda mw: mw.centralWidget().setLayout(columns = 3)
+                    "triggered": lambda mw, checked=False: mw.centralWidget().setLayout(columns = 3)
                 }, {
                     "text": "Columns: 4",
                     "sequence": ("Global", "Layout4Columns", "Shift+Alt+4"),
-                    "triggered": lambda mw: mw.centralWidget().setLayout(columns = 4)
+                    "triggered": lambda mw, checked=False: mw.centralWidget().setLayout(columns = 4)
                 }, {
                     "text": "Rows: 2",
                     "sequence": ("Global", "Layout2Rows", "Shift+Alt+8"),
-                    "triggered": lambda mw: mw.centralWidget().setLayout(rows = 2)
+                    "triggered": lambda mw, checked=False: mw.centralWidget().setLayout(rows = 2)
                 }, {
                     "text": "Rows: 3",
                     "sequence": ("Global", "Layout3Rows", "Shift+Alt+9"),
-                    "triggered": lambda mw: mw.centralWidget().setLayout(rows = 3)
+                    "triggered": lambda mw, checked=False: mw.centralWidget().setLayout(rows = 3)
                 }, {
                     "text": "Grid: 4",
                     "sequence": ("Global", "Layout4Grid", "Shift+Alt+5"),
-                    "triggered": lambda mw: mw.centralWidget().setLayout(columns = 2, rows = 2)
+                    "triggered": lambda mw, checked=False: mw.centralWidget().setLayout(columns = 2, rows = 2)
                 }]
             }, {
                 "text": "Groups",
                 "items": [{
                     "text": "Move editor to new group",
-                    "triggered": cls.moveEditorToNewGroup
+                    "triggered": lambda mw, checked=False: mw.moveEditorToNewGroup()
                 }, {
                     "text": "New group",
-                    "triggered": cls.addEmptyGroup
+                    "triggered": lambda mw, checked=False: mw.addEmptyGroup()
                 }, {
                     "text": "Close group",
-                    "triggered": cls.closeGroup
+                    "triggered": lambda mw, checked=False: mw.closeGroup()
                 }, "-", {
                     "text": "Max Columns: 1",
+                    "checkable": True,
                     "testChecked": lambda mw: mw.centralWidget().maxColumns() == 1,
-                    "toggled": lambda mw, checked: checked and mw.centralWidget().setMaxColumns(1)
+                    "triggered": lambda mw, checked: checked and mw.centralWidget().setMaxColumns(1)
                 }, {
                     "text": "Max Columns: 2",
+                    "checkable": True,
                     "testChecked": lambda mw: mw.centralWidget().maxColumns() == 2,
-                    "toggled": lambda mw, checked: checked and mw.centralWidget().setMaxColumns(2)
+                    "triggered": lambda mw, checked: checked and mw.centralWidget().setMaxColumns(2)
                 }, {
                     "text": "Max Columns: 3",
+                    "checkable": True,
                     "testChecked": lambda mw: mw.centralWidget().maxColumns() == 3,
-                    "toggled": lambda mw, checked: checked and mw.centralWidget().setMaxColumns(3)
+                    "triggered": lambda mw, checked: checked and mw.centralWidget().setMaxColumns(3)
                 }, {
                     "text": "Max Columns: 4",
+                    "checkable": True,
                     "testChecked": lambda mw: mw.centralWidget().maxColumns() == 4,
-                    "toggled": lambda mw, checked: checked and mw.centralWidget().setMaxColumns(4)
+                    "triggered": lambda mw, checked: checked and mw.centralWidget().setMaxColumns(4)
                 }, {
                     "text": "Max Columns: 5",
+                    "checkable": True,
                     "testChecked": lambda mw: mw.centralWidget().maxColumns() == 5,
-                    "toggled": lambda mw, checked: checked and mw.centralWidget().setMaxColumns(5)
+                    "triggered": lambda mw, checked: checked and mw.centralWidget().setMaxColumns(5)
                 }]
             }, {
                 "text": "Focus group",
                 "items": [{
                     "text": "Next",
-                    "triggered": cls.nextGroup
+                    "triggered": lambda mw, checked=False: mw.nextGroup()
                 }, {
                     "text": "Previous",
-                    "triggered": cls.previousGroup
+                    "triggered": lambda mw, checked=False: mw.previousGroup()
                 }, "-"]
             }, {
                 "text": "Move editor to group",
                 "items": [{
                     "text": "Next",
-                    "triggered": cls.moveEditorToNextGroup
+                    "triggered": lambda mw, checked=False: mw.moveEditorToNextGroup()
                 }, {
                     "text": "Previous",
-                    "triggered": cls.moveEditorToPreviousGroup
+                    "triggered": lambda mw, checked=False: mw.moveEditorToPreviousGroup()
                 }, "-"]
             }]
         }
@@ -346,7 +354,7 @@ class MainWindowActionsMixin(object):
             }, {
                 "text": "Previous tab",
                 "sequence": "PreviousChild",
-                "triggered": lambda mw: mw.centralWidget().focusPreviousTab()
+                "triggered": lambda mw, checked=False: mw.centralWidget().focusPreviousTab()
             }, {
                 "text": "Select tab",
                 "triggered": cls.on_actionSelectTab_triggered
@@ -374,22 +382,22 @@ class MainWindowActionsMixin(object):
                 "items": [{
                     "text": "Show bundle editor",
                     "sequence": ("Global", "ShowBundleEditor", "Meta+Ctrl+Alt+B"),
-                    "triggered": lambda mw: mw.bundleEditorDialog.execEditor()
+                    "triggered": lambda mw, checked=False: mw.bundleEditorDialog.execEditor()
                 }, "-", {
                     "text": "Edit commands",
                     "sequence": ("Global", "EditCommands", "Meta+Ctrl+Alt+C"),
-                    "triggered": lambda mw: mw.bundleEditorDialog.execCommand()
+                    "triggered": lambda mw, checked=False: mw.bundleEditorDialog.execCommand()
                 }, {
                     "text": "Edit languages",
                     "sequence": ("Global", "EditLanguages", "Meta+Ctrl+Alt+L"),
-                    "triggered": lambda mw: mw.bundleEditorDialog.execLanguage()
+                    "triggered": lambda mw, checked=False: mw.bundleEditorDialog.execLanguage()
                 }, {
                     "text": "Edit snippets",
                     "sequence": ("Global", "EditSnippets", "Meta+Ctrl+Alt+S"),
-                    "triggered": lambda mw: mw.bundleEditorDialog.execSnippet()
+                    "triggered": lambda mw, checked=False: mw.bundleEditorDialog.execSnippet()
                 }, {
                     "text": "Reload bundles",
-                    "triggered": lambda mw: mw.application().supportManager.reloadSupport(mw.showMessage)
+                    "triggered": lambda mw, checked=False: mw.application().supportManager.reloadSupport(mw.showMessage)
                 }]
             }, "-"]
         }
@@ -399,16 +407,18 @@ class MainWindowActionsMixin(object):
             "text": "&Preferences",
             "items": [ {
                 "text": "Full screen",
-                "toggled": lambda mw, checked: getattr(mw, checked and "showFullScreen" or "showNormal")(),
+                "checkable": True,
+                "triggered": lambda mw, checked: getattr(mw, checked and "showFullScreen" or "showNormal")(),
                 "testChecked": lambda mw: mw.isFullScreen(),
                 "sequence": ("Global", "ShowFullScreen", "F11")
             }, {
                 "text": "Distraction free mode",
-                "toggled": lambda mw, checked: getattr(mw, checked and "showDistractionFreeMode" or "showNormal")(),
+                "checkable": True,
+                "triggered": lambda mw, checked: getattr(mw, checked and "showDistractionFreeMode" or "showNormal")(),
                 "sequence": ("Global", "ShowDistractionFreeMode", "Shift+F11")
             }, "-", {
                 "text": "Settings",
-                "triggered": lambda mw: mw.settingsDialog.exec_()
+                "triggered": lambda mw, checked=False: mw.settingsDialog.exec_()
             }]
         }
 
@@ -417,25 +427,25 @@ class MainWindowActionsMixin(object):
             "text": "&Help",
             "items": [ {
                 "text": "Read documentation",
-                "triggered": lambda mw: mw.application().openUrl(prymatex.__source__ + '/wiki')
+                "triggered": lambda mw, checked=False: mw.application().openUrl(prymatex.__source__ + '/wiki')
             }, {
                 "text": "Project homepage",
-                "triggered": lambda mw: mw.application().openUrl(prymatex.__url__)
+                "triggered": lambda mw, checked=False: mw.application().openUrl(prymatex.__url__)
             }, "-", {
                 "text": "Translate Prymatex",
-                "triggered": lambda mw: mw.application().openUrl(prymatex.__source__ + '/wiki')
+                "triggered": lambda mw, checked=False: mw.application().openUrl(prymatex.__source__ + '/wiki')
             }, "-", {
                 "text": "Report bug",
-                "triggered": lambda mw: mw.application().openUrl(prymatex.__source__ + '/issues?utf8=%E2%9C%93')
+                "triggered": lambda mw, checked=False: mw.application().openUrl(prymatex.__source__ + '/issues?utf8=%E2%9C%93')
             },  {
                 "text": "Take screenshoot",
                 "triggered": cls.on_actionTakeScreenshot_triggered
             }, "-", {
                 "text": "About Prymatex",
-                "triggered": lambda mw: mw.aboutDialog.exec_()
+                "triggered": lambda mw, checked=False: mw.aboutDialog.exec_()
             }, {
                 "text": "About Qt",
-                "triggered": lambda mw: mw.application().aboutQt()
+                "triggered": lambda mw, checked=False: mw.application().aboutQt()
             }, ]
         }
         return menu

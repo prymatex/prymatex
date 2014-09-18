@@ -66,23 +66,15 @@ def create_action(parent, settings, dispatcher = None, sequence_handler=None, ic
         return _dispatch
 
     # Action functions
-    action.functionTriggered = action.functionToggled = None
+    action.functionTriggered = None
     if "triggered" in settings and isinstance(settings["triggered"], collections.Callable):
         action.functionTriggered = isinstance(dispatcher, collections.Callable) and \
             dispatch_signal(dispatcher, settings["triggered"]) or \
             settings["triggered"]
-
-    if "toggled" in settings and isinstance(settings["toggled"], collections.Callable):
-        action.functionToggled = isinstance(dispatcher, collections.Callable) and \
-            dispatch_signal(dispatcher, settings["toggled"]) or \
-            settings["toggled"]
-        action.setCheckable(True)
+    action.setCheckable(settings.get("checkable", False))
 
     if action.functionTriggered is not None:
         action.triggered.connect(action.functionTriggered)
-
-    if action.functionToggled is not None:
-        action.triggered[bool].connect(action.functionToggled)
 
     # Test functions
     if "testChecked" in settings and isinstance(settings["testChecked"], collections.Callable):
