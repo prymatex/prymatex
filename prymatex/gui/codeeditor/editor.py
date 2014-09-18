@@ -256,8 +256,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.syntaxHighlighter.stop()
         super(CodeEditor, self).setPlainText(text)
         self.highlightTime = time()
-        def highlightReady(editor, *args):
-            def _ready():
+        def highlightReady(editor):
+            def _ready(*args):
                 self.logger().info("Time %f" % (time() - self.highlightTime))
             return _ready
         self.syntaxHighlighter.start(highlightReady(self))

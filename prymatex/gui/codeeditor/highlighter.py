@@ -8,7 +8,7 @@ import re
 from prymatex.qt import QtGui, QtCore
 
 @asyncio.coroutine
-def highlight_function(document, start, end, syntaxProcessor, themeProcessor):
+def highlight_function(document, visible_range, syntaxProcessor, themeProcessor):
     block = document.begin()
     position = None
     length = 0
@@ -24,7 +24,7 @@ def highlight_function(document, start, end, syntaxProcessor, themeProcessor):
             formats.append(frange)
 
         block.layout().setAdditionalFormats(formats)
-        if start <= block.blockNumber() <= end:
+        if visible_range and visible_range[0] <= block.blockNumber() <= visible_range[1]:
             if position is None:
                 position = block.position()
                 length = 0
@@ -33,12 +33,10 @@ def highlight_function(document, start, end, syntaxProcessor, themeProcessor):
             document.markContentsDirty(position, length)
             position = None
         else:
-            ran = yield
-            if ran:
-                start, end = ran
+            visible_range = yield
         block = block.next()
     document.markContentsDirty(0, document.characterCount())
-        
+    
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     aboutToHighlightChange = QtCore.Signal()
     highlightChanged = QtCore.Signal()
@@ -55,7 +53,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def on_editor_updateRequest(self, rect, dy):
         if dy and self.running():
-            self.highlight_coroutine.send(self._task_data())
+            self.highlight_coroutine.send(self.visible_range())
     
     def _on_task_finished(self, *args):
         self.highlightBlock = self.syncHighlightFunction
@@ -72,15 +70,16 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def start(self, callback=None):
         if self.syntaxProcessor.ready() and self.themeProcessor.ready():
             self.aboutToHighlightChange.emit()
-            start, end = self._task_data()
+            visible_range = self.visible_range()
             loop = self.editor.application().loop()
             self.highlight_coroutine = highlight_function(self.document(), 
-                start, end, self.syntaxProcessor, self.themeProcessor)
+                visible_range, self.syntaxProcessor, self.themeProcessor)
             self.highlight_task = asyncio.async(self.highlight_coroutine, loop=loop)
             self.highlight_task.add_done_callback(self._on_task_finished)
-            self.highlight_task.add_done_callback(callback)
+            if callable(callback):
+                self.highlight_task.add_done_callback(callback)
 
-    def _task_data(self):
+    def visible_range(self):
         # Visible area
         start = self.editor.firstVisibleBlock().blockNumber()
         return start, start + 50
