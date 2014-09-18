@@ -49,6 +49,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.highlightTask = None
         self.editor.updateRequest.connect(self.on_editor_updateRequest)
         self.editor.aboutToClose.connect(self.stop)
+        self.highlightBlock = lambda text: None
 
     def on_editor_updateRequest(self, rect, dy):
         if dy and self.running():
