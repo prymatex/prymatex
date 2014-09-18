@@ -14,6 +14,7 @@ from prymatex.core import config
 from prymatex.core.components import PrymatexComponent, PrymatexEditor
 from prymatex.core import logger
 from prymatex.core.settings import ConfigurableItem, ConfigurableHook
+from prymatex.core.quamash import QEventLoop
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import six
@@ -61,6 +62,7 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self.setOrganizationName(prymatex.__author__)
         self.platform = sys.platform
 
+        self._loop = QEventLoop(self)
         # Windows
         self._main_windows = []
 
@@ -69,6 +71,9 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
         self.componentInstances = {}
         self.shortcutsTreeModel = ShortcutsTreeModel(self)
         self.replaceSysExceptHook()
+    
+    def loop(self):
+        return self._loop
 
     # ------ exception and logger handlers
     def getLogger(self, *largs, **kwargs):
@@ -222,6 +227,10 @@ class PrymatexApplication(PrymatexComponent, QtGui.QApplication):
             self.logger().critical("Quit signal catched during application startup. "
                                    "Quiting...")
             self.quit()
+
+    def execute(self):
+        #self.exec_()
+        self.loop().run_forever()
 
     def unloadGraphicalUserInterface(self):
         # TODO: ver como dejar todo lindo y ordenado para terminar correctamente

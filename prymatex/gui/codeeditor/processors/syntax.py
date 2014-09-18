@@ -28,13 +28,15 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
             return
         
         self.editor.syntaxHighlighter.stop()
+
+        # Get Wrapped Syntax
+        syntax = self.editor.application().supportManager.getBundleItem(bundleItem.uuid)
+
         # ------------ Previous syntax
         if self.bundleItem is not None:
             self.endExecution(self.bundleItem)
-        
-        # Set syntax
-        CodeEditorBaseProcessor.beginExecution(self, bundleItem)
-        syntax = self.editor.application().supportManager.getBundleItem(bundleItem.uuid)
+
+        CodeEditorBaseProcessor.beginExecution(self, syntax)
 
         self.stack = [(syntax.grammar, None)]
         self.beginParse(syntax.scopeName)

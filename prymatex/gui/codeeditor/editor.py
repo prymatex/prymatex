@@ -256,7 +256,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.syntaxHighlighter.stop()
         super(CodeEditor, self).setPlainText(text)
         self.highlightTime = time()
-        def highlightReady(editor):
+        def highlightReady(editor, *args):
             def _ready():
                 self.logger().info("Time %f" % (time() - self.highlightTime))
             return _ready
@@ -482,7 +482,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return self.findProcessor("syntax").bundleItem
 
     def theme(self):
-        return self.syntaxHighlighter.theme
+        return self.findProcessor("theme").bundleItem
         
     # -------------------- SideBars
     def updateViewportMargins(self):
