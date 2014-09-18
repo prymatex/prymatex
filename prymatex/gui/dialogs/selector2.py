@@ -47,7 +47,7 @@ class SelectorDialog(QtWidgets.QDialog, PMXBaseDialog):
         self.setObjectName("SelectorDialog")
         self.verticalLayout = QtGui.QVBoxLayout(self)
         self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(0)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.lineFilter = QtGui.QLineEdit(self)
         self.lineFilter.setObjectName("lineFilter")

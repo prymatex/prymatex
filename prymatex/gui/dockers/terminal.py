@@ -15,7 +15,7 @@ from prymatex.utils import six
 
 from prymatex.widgets.pmxterm import Backend, BackendManager, TerminalWidget, ColorScheme
 
-SHEME_SCOPES = [ 'comment', 'string', 'constant.numeric', 'constant.language', 
+SHEME_SCOPES = [ 'comment', 'string', 'constant.numeric', 'constantanguage', 
     'constant.character, constant.other', 'variable.language, variable.other',
     'keyword', 'storage', 'entity.name.class', 'entity.other.inherited-class',
     'entity.name.function', 'variable.parameter', 'entity.name.tag',
@@ -153,20 +153,21 @@ class TerminalDock(PrymatexDock, QtWidgets.QDockWidget):
         theme = self.application().supportManager.getBundleItem(themeUUID)
         scheme = ColorScheme(theme.name)
         
+        styles = theme.style()
         # Foreground and background
-        scheme.setBackground(theme.settings["background"])
-        scheme.setBackground(theme.settings["selection"], intense = True)
-        scheme.setForeground(theme.settings["foreground"])
-        scheme.setForeground(theme.settings["lineHighlight"], intense = True)
+        scheme.setBackground(styles["background"])
+        scheme.setBackground(styles["selection"], intense = True)
+        scheme.setForeground(styles["foreground"])
+        scheme.setForeground(styles["lineHighlight"], intense = True)
         
         # Mapping scopes :)
         scopes = SHEME_SCOPES[:]
         random.shuffle(scopes)
         scopes = scopes[:16]
         for index, scope in enumerate(scopes[:8]):
-            scheme.setColor(index, theme.getStyle(scope)["foreground"])
+            scheme.setColor(index, theme.style(scope)["foreground"])
         for index, scope in enumerate(scopes[8:]):
-            scheme.setColor(index, theme.getStyle(scope)["foreground"], intense = True)
+            scheme.setColor(index, theme.style(scope)["foreground"], intense = True)
         
         self.tabTerminals.setColorScheme(scheme)
         

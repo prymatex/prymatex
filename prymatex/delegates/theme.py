@@ -39,12 +39,12 @@ class FontStyleDelegate(QtWidgets.QStyledItemDelegate):
         flags = index.data()
         layout = QtWidgets.QHBoxLayout()
         layout.setSpacing(0)
-        layout.setMargin(0)
+        layout.setContentsMargins(0, 0, 0, 0)
         
         buttons = [ QtWidgets.QPushButton("B"), QtWidgets.QPushButton("I"), QtWidgets.QPushButton("U") ]
         
         font = buttons[0].font()
-        font.setWeight(QtWidgets.QFont.Bold)
+        font.setWeight(QtGui.QFont.Bold)
         buttons[0].setFont(font)
         
         font = buttons[1].font()

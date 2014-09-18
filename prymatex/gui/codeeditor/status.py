@@ -258,7 +258,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtWidgets.QWidget
     @QtCore.Slot()
     def on_pushButtonFindPrevious_pressed(self):
         match, flags = self.getFindMatchAndFlags()
-        flags |= QtWidgets.QTextDocument.FindBackward
+        flags |= QtGui.QTextDocument.FindBackward
         self.currentEditor.findMatch(match, flags)
 
     @QtCore.Slot()
@@ -286,13 +286,13 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtWidgets.QWidget
         # TODO: mensaje de cuantos encontro y ver que queremos hacer con ellos
 
     def getFindMatchAndFlags(self):
-        flags = QtWidgets.QTextDocument.FindFlags()
+        flags = QtGui.QTextDocument.FindFlags()
         if self.checkBoxFindCaseSensitively.isChecked():
-            flags |= QtWidgets.QTextDocument.FindCaseSensitively
+            flags |= QtGui.QTextDocument.FindCaseSensitively
         match = self.lineEditFind.text()
         mode = self.comboBoxFindMode.itemData(self.comboBoxFindMode.currentIndex())
         if mode == 1:
-            flags |= QtWidgets.QTextDocument.FindWholeWords
+            flags |= QtGui.QTextDocument.FindWholeWords
         elif mode == 2:
             pass
         elif mode == 3:
@@ -330,7 +330,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtWidgets.QWidget
     @QtCore.Slot()
     def on_pushButtonIFindPrevious_pressed(self):
         match, flags = self.getIFindMatchAndFlags()
-        flags |= QtWidgets.QTextDocument.FindBackward
+        flags |= QtGui.QTextDocument.FindBackward
         self.currentEditor.findMatch(match, flags)
 
     @QtCore.Slot(int)
@@ -342,9 +342,9 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtWidgets.QWidget
             self.lineEditIFind.setStyleSheet(self.resources().get_styles()["FIND_NO_MATCH_STYLE"])
 
     def getIFindMatchAndFlags(self):
-        flags = QtWidgets.QTextDocument.FindFlags()
+        flags = QtGui.QTextDocument.FindFlags()
         if self.checkBoxIFindCaseSensitively.isChecked():
-            flags |= QtWidgets.QTextDocument.FindCaseSensitively
+            flags |= QtGui.QTextDocument.FindCaseSensitively
         return self.lineEditIFind.text(), flags
 
     def showIFind(self):
@@ -367,11 +367,11 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtWidgets.QWidget
                 '-',
                 {'text': "Find",
                  'sequence': ("StatusBar", "Find", "Find"),
-                 'triggered': cls.showIFind
+                 'triggered': lambda st, checked=False: st.showIFind()
                 },
                 {'text': "Replace",
                  'sequence': ("StatusBar", "Replace", "Replace"),
-                 'triggered': cls.showFindReplace
+                 'triggered': lambda st, checked=False: st.showFindReplace()
                 }
             ]
         menu["text"] = [
@@ -381,7 +381,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtWidgets.QWidget
             ]
         menu["navigation"] = [
                 {'text': 'Go to &line',
-                 'triggered': cls.showGoToLine,
+                 'triggered': lambda st, checked=False: st.showGoToLine(),
                  'sequence': ("StatusBar", "GoToLine", 'Meta+Ctrl+Shift+L'),
                  }
             ]

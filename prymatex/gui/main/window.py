@@ -51,7 +51,6 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
 
     @ConfigurableHook("CodeEditor.defaultTheme")
     def defaultTheme(self, themeUUID):
-        print(themeUUID)
         theme = self.application().supportManager.getBundleItem(themeUUID)
         self.notifier.setPalette(theme.palette())
 
