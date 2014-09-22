@@ -46,11 +46,12 @@ def _qfiledialog_wrapper(attr, parent=None, caption='', basedir='',
     tuple_returned = True
     try:
         # PyQt >= v4.6
-        func = getattr(QtWidgets.QFileDialog, attr) if \
-            hasattr(QtWidgets.QFileDialog, attr) else \
-            getattr(QtWidgets.QFileDialog, attr + 'AndFilter')
+        if hasattr(QtWidgets.QFileDialog, attr):
+            tuple_returned = False
+            func = getattr(QtWidgets.QFileDialog, attr)
+        else:
+            func = getattr(QtWidgets.QFileDialog, attr + 'AndFilter')
     except AttributeError as ex:
-        print(ex)
         # PySide or PyQt <v4.6
         func = getattr(QtWidgets.QFileDialog, attr)
         if QtCore.QString is not None:
