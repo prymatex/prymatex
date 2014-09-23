@@ -25,5 +25,5 @@ class ReplaceRenameInputDialog(QtWidgets.QInputDialog):
         inputDialog.setWindowTitle(title)
         inputDialog.setLabelText(label)
         if inputDialog.exec_():
-            return inputDialog.textValue(), QtGui.QDialogButtonBox.DestructiveRole == inputDialog.result() and ReplaceRenameInputDialog.Replace or ReplaceRenameInputDialog.Rename
+            return inputDialog.textValue(), QtWidgets.QDialogButtonBox.DestructiveRole == inputDialog.result() and ReplaceRenameInputDialog.Replace or ReplaceRenameInputDialog.Rename
         return inputDialog.textValue(), ReplaceRenameInputDialog.Cancel
