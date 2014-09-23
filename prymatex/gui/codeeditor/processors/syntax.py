@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import ctypes
 from .base import CodeEditorBaseProcessor
 
 from prymatex.support import Scope
 from prymatex.support.processor import SyntaxProcessorMixin
 from prymatex.gui.codeeditor.userdata import CodeEditorToken
-
-def build_userData_revision(scope, text, state):
-    return hash("%s:%s:%d" % (scope, text, state))
 
 class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     NO_STATE = -1
@@ -55,11 +52,11 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
 
     def blockUserData(self, block):
         text = block.text() + "\n"
-        revision = build_userData_revision(self.bundleItem.scopeName, 
-            text, block.previous().userState())
-
+        revision = hash("%s:%s:%d" % (self.bundleItem.scopeName, text, 
+            block.previous().userState()))
+        
         userData = self.editor.blockUserData(block)
-        if block.revision() != revision:
+        if userData.revision() != revision:
 
             self.restoreState(block.previous())
             self.bundleItem.parseLine(self.stack, text, self)
@@ -68,7 +65,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
             userData.setBlank(text.strip() == "")
             self.editor.processBlockUserData(text, block, userData)
 
-            block.setRevision(revision)
+            userData.setRevision(revision)
 
             # Store stack and state
             block.setUserState(len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE)

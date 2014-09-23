@@ -22,9 +22,16 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
         self.__blank = True
         self.__tokens = []
         self.__ranges = None
+        self.__revision = None
 
         self.__cache = {}
 
+    def setRevision(self, revision):
+        self.__revision = revision
+
+    def revision(self):
+        return self.__revision
+                
     def setTokens(self, tokens):
         self.__tokens = tokens
         self.__ranges = None
