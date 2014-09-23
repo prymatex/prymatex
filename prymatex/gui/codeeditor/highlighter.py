@@ -8,34 +8,34 @@ import re
 from prymatex.qt import QtGui, QtCore
 
 @asyncio.coroutine
-def highlight_function(document, visible_range, syntaxProcessor, themeProcessor):
-    block = document.begin()
+def highlight_function(highlighter):
+    block = highlighter.document().begin()
     position = None
     length = 0
     while block.isValid():
-        userData = syntaxProcessor.blockUserData(block)
+        userData = highlighter.syntaxProcessor.blockUserData(block)
         
-        formats = []
-        for token in userData.tokens():
-            frange = QtGui.QTextLayout.FormatRange()
-            frange.start = token.start
-            frange.length = token.end - token.start
-            frange.format = themeProcessor.textCharFormat(token.scope)
-            formats.append(frange)
+        def formats(themeProcessor):
+            for token in userData.tokens():
+                frange = QtGui.QTextLayout.FormatRange()
+                frange.start = token.start
+                frange.length = token.end - token.start
+                frange.format = themeProcessor.textCharFormat(token.scope)
+                yield frange
 
-        block.layout().setAdditionalFormats(formats)
-        if visible_range and visible_range[0] <= block.blockNumber() <= visible_range[1]:
+        block.layout().setAdditionalFormats(list(formats(highlighter.themeProcessor)))
+        if highlighter.visible_area[0] <= block.blockNumber() <= highlighter.visible_area[1]:
             if position is None:
                 position = block.position()
                 length = 0
             length += block.length()
         elif position is not None:
-            document.markContentsDirty(position, length)
+            highlighter.document().markContentsDirty(position, length)
             position = None
         else:
             visible_range = yield
         block = block.next()
-    document.markContentsDirty(0, document.characterCount())
+    highlighter.document().markContentsDirty(0, document.characterCount())
     
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     aboutToHighlightChange = QtCore.Signal()
@@ -48,14 +48,17 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.syntaxProcessor = editor.findProcessor("syntax")
         self.themeProcessor = editor.findProcessor("theme")
         self.highlight_task = None
+        self.visible_area = self.editor.firstVisibleBlock().blockNumber()
+        self.visible_area = (self.visible_area, self.visible_area + 50)
         self.editor.updateRequest.connect(self.on_editor_updateRequest)
         self.editor.aboutToClose.connect(self.stop)
 
     def on_editor_updateRequest(self, rect, dy):
-        if dy and self.running():
-            self.highlight_coroutine.send(self.visible_range())
+        if dy:
+            self.visible_area = self.editor.firstVisibleBlock().blockNumber()
+            self.visible_area = (self.visible_area, self.visible_area + 50)
     
-    def _on_task_finished(self, *args):
+    def on_task_finished(self, *args):
         self.highlightBlock = self.syncHighlightFunction
         self.highlightChanged.emit()
 
@@ -70,20 +73,12 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def start(self, callback=None):
         if self.syntaxProcessor.ready() and self.themeProcessor.ready():
             self.aboutToHighlightChange.emit()
-            visible_range = self.visible_range()
             loop = self.editor.application().loop()
-            self.highlight_coroutine = highlight_function(self.document(), 
-                visible_range, self.syntaxProcessor, self.themeProcessor)
-            self.highlight_task = asyncio.async(self.highlight_coroutine, loop=loop)
-            self.highlight_task.add_done_callback(self._on_task_finished)
+            self.highlight_task = asyncio.async(highlight_function(self), loop=loop)
+            self.highlight_task.add_done_callback(self.on_task_finished)
             if callable(callback):
                 self.highlight_task.add_done_callback(callback)
 
-    def visible_range(self):
-        # Visible area
-        start = self.editor.firstVisibleBlock().blockNumber()
-        return start, start + 50
-    
     def syncHighlightFunction(self, text):
         block = self.currentBlock()
         userData = self.syntaxProcessor.blockUserData(self.currentBlock())
