@@ -4,7 +4,6 @@
 from collections import namedtuple
 
 from prymatex.qt import QtGui
-
 from prymatex.support import Scope
 
 class CodeEditorToken(namedtuple('CodeEditorToken', 'start end scope chunk')):

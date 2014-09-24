@@ -59,10 +59,10 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
             block.previous().userState()))
 
         userData = self.editor.blockUserData(block)
-
         if userData.revision() != revision:
             self.restoreState(block.previous())
             self.bundleItem.parseLine(self.stack, text, self)
+            
             userData.setTokens(self.__tokens)
             userData.setBlank(text.strip() == "")
             self.editor.processBlockUserData(text, block, userData)
