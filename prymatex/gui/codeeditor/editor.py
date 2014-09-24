@@ -258,7 +258,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         super(CodeEditor, self).setPlainText(text)
         self.highlightTime = time()
         def highlightReady(editor):
-            def _ready():
+            def _ready(*args):
                 self.logger().info("Time %f" % (time() - self.highlightTime))
             return _ready
         self.syntaxHighlighter.start(highlightReady(self))
@@ -269,7 +269,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.__blockUserDataHandlers.append(handler)
 
     def blockUserData(self, block):
-        # TODO: If block not is valid ?
+        if not block.isValid():
+            return CodeEditorBlockUserData()
         if block.userData() is None:
             userData = CodeEditorBlockUserData()
             # Indent and content
@@ -483,7 +484,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return self.findProcessor("syntax").bundleItem
 
     def theme(self):
-        return self.syntaxHighlighter.theme
+        return self.findProcessor("theme").bundleItem
         
     # -------------------- SideBars
     def updateViewportMargins(self):
@@ -624,12 +625,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         super(CodeEditor, self).setFont(font)
         for component in self.components():
             component.setFont(font)
-
-    # OVERRIDE: TextEditWidget.focusInEvent()
-    def focusInEvent(self, event):
-        # TODO No es para este evento pero hay que poner en alugn lugar el update de las side bars
-        super(CodeEditor, self).focusInEvent(event)
-        self.updateSideBarsGeometry()
 
     # OVERRIDE: TextEditWidget.resizeEvent()
     def resizeEvent(self, event):

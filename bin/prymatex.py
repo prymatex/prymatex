@@ -35,7 +35,7 @@ def runPrymatexApplication(options, files):
         # ---- Open files
         for path in files:
             prymatexAppInstance.openPath(path)
-        return prymatexAppInstance.exec_()
+        return prymatexAppInstance.execute()
 
     returnCode = PrymatexApplication.RESTART_CODE
     try:
