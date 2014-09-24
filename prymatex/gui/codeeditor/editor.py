@@ -624,12 +624,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         for component in self.components():
             component.setFont(font)
 
-    # OVERRIDE: TextEditWidget.focusInEvent()
-    def focusInEvent(self, event):
-        # TODO No es para este evento pero hay que poner en alugn lugar el update de las side bars
-        super(CodeEditor, self).focusInEvent(event)
-        self.updateSideBarsGeometry()
-
     # OVERRIDE: TextEditWidget.resizeEvent()
     def resizeEvent(self, event):
         super(CodeEditor, self).resizeEvent(event)
