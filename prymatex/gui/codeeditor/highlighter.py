@@ -71,7 +71,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             loop = self.editor.application().loop()
             self.highlight_tasks = [ asyncio.async(highlight_function(self, 
                         self.document().findBlockByNumber(n)), loop=loop) for n in 
-                        range(0, self.document().lineCount(), 5) ]
+                        range(0, self.document().lineCount(), 20) ]
             self.highlight_task = asyncio.async(asyncio.wait(self.highlight_tasks, loop=loop), loop=loop)
             self.highlight_task.add_done_callback(self.on_task_finished)
             if callable(callback):
