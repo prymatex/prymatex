@@ -59,9 +59,8 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
             block.previous().userState()))
 
         userData = self.editor.blockUserData(block)
-        changed = userData.revision() != revision
 
-        if changed:
+        if userData.revision() != revision:
             self.restoreState(block.previous())
             self.bundleItem.parseLine(self.stack, text, self)
             userData.setTokens(self.__tokens)
@@ -73,7 +72,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
             # Store stack and state
             block.setUserState(len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE)
             self.saveState(block)
-        return userData, changed
+        return userData
 
     # -------- Parsing
     def beginParse(self, scopeName):

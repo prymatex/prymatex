@@ -43,4 +43,4 @@ class CodeEditorThemeProcessor(CodeEditorBaseProcessor, ThemeProcessorMixin):
             frange.length = token.end - token.start
             frange.format = self.textCharFormat(token.scope)
             formats.append(frange)
-        return formats, False
+        return formats
