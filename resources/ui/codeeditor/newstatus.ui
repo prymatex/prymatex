@@ -94,7 +94,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="widgetIFind" native="true">
+    <widget class="QWidget" name="widgetFind" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <property name="spacing">
        <number>2</number>
@@ -103,41 +103,59 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="pushButtonFindRegularExrepssion">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Regular expression</string>
         </property>
         <property name="text">
          <string>.*</string>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="pushButtonFindCaseSensitive">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Case sensitive</string>
         </property>
         <property name="text">
          <string>Aa</string>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QPushButton" name="pushButtonFindWholeWord">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Whole word</string>
+        </property>
         <property name="text">
          <string>&quot;&quot;</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -149,28 +167,40 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_4">
+       <widget class="QPushButton" name="pushButtonFindWrap">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Wrap</string>
+        </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_5">
+       <widget class="QPushButton" name="pushButtonFindInSelection">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>In selection</string>
+        </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -182,20 +212,26 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_6">
+       <widget class="QPushButton" name="pushButtonFindHighlightMatches">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Highlight matches</string>
+        </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBoxCommand_2">
+       <widget class="QComboBox" name="comboBoxFind">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -208,7 +244,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonIFindNext">
+       <widget class="QPushButton" name="pushButtonFindFind">
         <property name="toolTip">
          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -222,21 +258,21 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonIFindPrevious">
+       <widget class="QPushButton" name="pushButtonFindPrev">
         <property name="text">
          <string>Find Prev</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonFindAll_2">
+       <widget class="QPushButton" name="pushButtonFindAll">
         <property name="text">
          <string>Find All</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonIFindClose">
+       <widget class="QPushButton" name="pushButtonFindClose">
         <property name="maximumSize">
          <size>
           <width>24</width>
@@ -260,7 +296,7 @@ p, li { white-space: pre-wrap; }
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="widgetFindReplace" native="true">
+    <widget class="QWidget" name="widgetReplace" native="true">
      <layout class="QGridLayout" name="gridLayout">
       <property name="margin">
        <number>0</number>
@@ -268,19 +304,6 @@ p, li { white-space: pre-wrap; }
       <property name="spacing">
        <number>2</number>
       </property>
-      <item row="0" column="4">
-       <widget class="QPushButton" name="pushButton_10">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="6">
        <widget class="QLabel" name="labelFindMode_2">
         <property name="text">
@@ -288,51 +311,27 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
       </item>
-      <item row="1" column="8">
-       <widget class="QPushButton" name="pushButtonReplace">
+      <item row="0" column="4">
+       <widget class="QPushButton" name="pushButtonReplaceWrap">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
         <property name="toolTip">
-         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Nimbus Mono L'; font-size:8pt; font-weight:600; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Replace &amp;amp; Find Previous&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>Wrap</string>
         </property>
         <property name="text">
-         <string>Replace</string>
+         <string/>
         </property>
-        <property name="icon">
-         <iconset theme="replace">
-          <normaloff/>
-         </iconset>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="9">
-       <widget class="QPushButton" name="pushButtonReplaceAll">
-        <property name="text">
-         <string>Replace &amp;All</string>
-        </property>
-        <property name="icon">
-         <iconset theme="replace-all">
-          <normaloff/>
-         </iconset>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="9">
-       <widget class="QPushButton" name="pushButtonFindPrevious">
-        <property name="text">
-         <string>Previous</string>
-        </property>
-        <property name="icon">
-         <iconset theme="go-up">
-          <normaloff/>
-         </iconset>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
       <item row="0" column="8">
-       <widget class="QPushButton" name="pushButtonFindNext">
+       <widget class="QPushButton" name="pushButtonReplaceFind">
         <property name="toolTip">
          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -341,25 +340,26 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Find Previous&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
-         <string>Next</string>
-        </property>
-        <property name="icon">
-         <iconset theme="go-down">
-          <normaloff/>
-         </iconset>
+         <string>Find</string>
         </property>
        </widget>
       </item>
       <item row="0" column="5">
-       <widget class="QPushButton" name="pushButton_11">
+       <widget class="QPushButton" name="pushButtonReplaceInSelection">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>In selection</string>
+        </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -378,7 +378,7 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item row="0" column="7">
-       <widget class="QComboBox" name="comboBoxCommand_3">
+       <widget class="QComboBox" name="comboBoxReplaceWhat">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -391,32 +391,44 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QPushButton" name="pushButton_9">
+       <widget class="QPushButton" name="pushButtonReplaceWholeWord">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Whole word</string>
         </property>
         <property name="text">
          <string>&quot;&quot;</string>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QPushButton" name="pushButton_8">
+       <widget class="QPushButton" name="pushButtonReplaceCaseSensitive">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Case sensitive</string>
+        </property>
         <property name="text">
          <string>Aa</string>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
-      <item row="0" column="10">
+      <item row="0" column="12">
        <widget class="QPushButton" name="pushButtonFindReplaceClose">
         <property name="maximumSize">
          <size>
@@ -438,33 +450,45 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item row="1" column="4">
-       <widget class="QPushButton" name="pushButton_12">
+       <widget class="QPushButton" name="pushButtonReplaceHighlightMatches">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Highlight matches</string>
         </property>
         <property name="text">
          <string/>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QPushButton" name="pushButton_7">
+       <widget class="QPushButton" name="pushButtonReplaceRegularExpression">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Regular expression</string>
+        </property>
         <property name="text">
          <string>.*</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
       <item row="1" column="7">
-       <widget class="QComboBox" name="comboBoxCommand_4">
+       <widget class="QComboBox" name="comboBoxReplaceWith">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -477,15 +501,59 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QPushButton" name="pushButton_13">
+       <widget class="QPushButton" name="pushButtonReplacePreserveCase">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Preserve case</string>
+        </property>
         <property name="text">
          <string>Aa</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="9">
+       <widget class="QPushButton" name="pushButtonReplaceReplaceAll">
+        <property name="text">
+         <string>Replace &amp;All</string>
+        </property>
+        <property name="icon">
+         <iconset theme="replace-all">
+          <normaloff/>
+         </iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="9">
+       <widget class="QPushButton" name="pushButtonReplaceReplace">
+        <property name="toolTip">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Nimbus Mono L'; font-size:8pt; font-weight:600; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Replace &amp;amp; Find Previous&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Replace</string>
+        </property>
+        <property name="icon">
+         <iconset theme="replace">
+          <normaloff/>
+         </iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="8">
+       <widget class="QPushButton" name="pushButtonReplaceFindAll">
+        <property name="text">
+         <string>Find All</string>
         </property>
        </widget>
       </item>
@@ -493,7 +561,7 @@ p, li { white-space: pre-wrap; }
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="widgetFindReplace_2" native="true">
+    <widget class="QWidget" name="widgetFindInFiles" native="true">
      <layout class="QGridLayout" name="gridLayout_2">
       <property name="margin">
        <number>0</number>
@@ -502,7 +570,7 @@ p, li { white-space: pre-wrap; }
        <number>2</number>
       </property>
       <item row="0" column="9">
-       <widget class="QPushButton" name="pushButtonFindReplaceClose_2">
+       <widget class="QPushButton" name="pushButtonFindInFilesClose">
         <property name="maximumSize">
          <size>
           <width>24</width>
@@ -523,15 +591,21 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item row="0" column="4">
-       <widget class="QPushButton" name="pushButton_15">
+       <widget class="QPushButton" name="pushButtonFindInFilesUseEditor">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Use editor</string>
+        </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -539,18 +613,6 @@ p, li { white-space: pre-wrap; }
        <widget class="QLabel" name="labelFindMode_6">
         <property name="text">
          <string>Replace:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="8">
-       <widget class="QPushButton" name="pushButtonReplaceAll_2">
-        <property name="text">
-         <string>Replace &amp;All</string>
-        </property>
-        <property name="icon">
-         <iconset theme="replace-all">
-          <normaloff/>
-         </iconset>
         </property>
        </widget>
       </item>
@@ -568,33 +630,27 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
       </item>
-      <item row="0" column="8">
-       <widget class="QPushButton" name="pushButtonFindPrevious_2">
-        <property name="text">
-         <string>Previous</string>
-        </property>
-        <property name="icon">
-         <iconset theme="go-up">
-          <normaloff/>
-         </iconset>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="2">
-       <widget class="QPushButton" name="pushButton_16">
+       <widget class="QPushButton" name="pushButtonFindInFilesWholeWord">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Whole word</string>
+        </property>
         <property name="text">
          <string>&quot;&quot;</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
       <item row="2" column="6">
-       <widget class="QComboBox" name="comboBoxCommand_7">
+       <widget class="QComboBox" name="comboBoxFindInFilesReplace">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -607,7 +663,7 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item row="0" column="6">
-       <widget class="QComboBox" name="comboBoxCommand_5">
+       <widget class="QComboBox" name="comboBoxFindInFilesWhat">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -620,33 +676,91 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QPushButton" name="pushButton_19">
+       <widget class="QPushButton" name="pushButtonFindInFilesRegularExpression">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Regular expression</string>
         </property>
         <property name="text">
          <string>.*</string>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="0" column="3">
-       <widget class="QPushButton" name="pushButton_14">
+       <widget class="QPushButton" name="pushButtonFindInFilesShowContext">
         <property name="maximumSize">
          <size>
           <width>24</width>
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Show context</string>
+        </property>
         <property name="text">
          <string/>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
-      <item row="1" column="7">
-       <widget class="QPushButton" name="pushButtonReplace_2">
+      <item row="0" column="1">
+       <widget class="QPushButton" name="pushButtonFindInFilesCaseSensitive">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Case sensitive</string>
+        </property>
+        <property name="text">
+         <string>Aa</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="6">
+       <widget class="QComboBox" name="comboBoxFindInFilesWhere">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="7">
+       <widget class="QPushButton" name="pushButtonFindInFilesFind">
+        <property name="toolTip">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Nimbus Mono L'; font-size:8pt; font-weight:600; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Find Previous&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Find</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="7">
+       <widget class="QPushButton" name="pushButtonFindInFilesReplace">
         <property name="toolTip">
          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -664,48 +778,10 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QPushButton" name="pushButton_17">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
+      <item row="1" column="7">
+       <widget class="QPushButton" name="pushButtonFindInFilesWhere">
         <property name="text">
-         <string>Aa</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="6">
-       <widget class="QComboBox" name="comboBoxCommand_6">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="editable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="7">
-       <widget class="QPushButton" name="pushButtonFindNext_2">
-        <property name="toolTip">
-         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Nimbus Mono L'; font-size:8pt; font-weight:600; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Find Previous&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string>Next</string>
-        </property>
-        <property name="icon">
-         <iconset theme="go-down">
-          <normaloff/>
-         </iconset>
+         <string>...</string>
         </property>
        </widget>
       </item>
@@ -815,5 +891,70 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>pushButtonCommandClose</sender>
+   <signal>pressed()</signal>
+   <receiver>widgetCommand</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>686</x>
+     <y>11</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>670</x>
+     <y>21</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonFindClose</sender>
+   <signal>pressed()</signal>
+   <receiver>widgetFind</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>688</x>
+     <y>49</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>680</x>
+     <y>55</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonFindReplaceClose</sender>
+   <signal>pressed()</signal>
+   <receiver>widgetReplace</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>685</x>
+     <y>80</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>686</x>
+     <y>96</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonFindInFilesClose</sender>
+   <signal>pressed()</signal>
+   <receiver>widgetFindInFiles</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>684</x>
+     <y>134</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>685</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
