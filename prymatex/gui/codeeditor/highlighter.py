@@ -12,16 +12,10 @@ def highlight_function(highlighter, block):
     position = None
     length = 0
     while block.isValid():
-        userData = highlighter.syntaxProcessor.blockUserData(block)
-
-        formats = []
-        for token in userData.tokens():
-            frange = QtGui.QTextLayout.FormatRange()
-            frange.start = token.start
-            frange.length = token.end - token.start
-            frange.format = highlighter.themeProcessor.textCharFormat(token.scope)
-            formats.append(frange)
-
+        userData, uchanged = highlighter.syntaxProcessor.blockUserData(block)
+        formats, tchanged = highlighter.themeProcessor.textCharFormats(userData)
+        if (not uchanged and not tchanged):
+            return
         block.layout().setAdditionalFormats(formats)
         if highlighter.visible_area[0] <= block.blockNumber() <= highlighter.visible_area[1]:
             if position is None:
@@ -77,7 +71,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             loop = self.editor.application().loop()
             self.highlight_tasks = [ asyncio.async(highlight_function(self, 
                         self.document().findBlockByNumber(n)), loop=loop) for n in 
-                        range(0, self.document().lineCount(), 50) ]
+                        range(0, self.document().lineCount(), 5) ]
             self.highlight_task = asyncio.async(asyncio.wait(self.highlight_tasks, loop=loop), loop=loop)
             self.highlight_task.add_done_callback(self.on_task_finished)
             if callable(callback):
@@ -85,11 +79,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def syncHighlightFunction(self, text):
         block = self.currentBlock()
-        userData = self.syntaxProcessor.blockUserData(self.currentBlock())
-        self.applyFormat(userData)
-
-    def applyFormat(self, userData):
+        userData, changed = self.syntaxProcessor.blockUserData(self.currentBlock())
         for token in userData.tokens():
-            frmt = self.themeProcessor.textCharFormat(token.scope)
-            if frmt is not None:
-                self.setFormat(token.start, token.end - token.start, frmt)
+            self.setFormat(token.start, token.end - token.start,
+                self.themeProcessor.textCharFormat(token.scope))

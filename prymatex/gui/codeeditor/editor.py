@@ -268,7 +268,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.__blockUserDataHandlers.append(handler)
 
     def blockUserData(self, block):
-        # TODO: If block not is valid ?
+        if not block.isValid():
+            return CodeEditorBlockUserData()
         if block.userData() is None:
             userData = CodeEditorBlockUserData()
             # Indent and content

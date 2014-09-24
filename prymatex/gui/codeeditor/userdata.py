@@ -4,6 +4,7 @@
 from collections import namedtuple
 
 from prymatex.qt import QtGui
+
 from prymatex.support import Scope
 
 class CodeEditorToken(namedtuple('CodeEditorToken', 'start end scope chunk')):
@@ -22,8 +23,14 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
         self.__blank = True
         self.__tokens = []
         self.__ranges = None
-
+        self.__revision = None
         self.__cache = {}
+    
+    def setRevision(self, revision):
+        self.__revision = revision
+    
+    def revision(self):
+        return self.__revision
 
     def setTokens(self, tokens):
         self.__tokens = tokens
@@ -63,7 +70,7 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
 
     # ------------------- Cache Handle
     def processorState(self):
-        return self.__cache.get("processor_state", ([], Scope()))
+        return self.__cache.get("processor_state")
 
     def setProcessorState(self, processorState):
         self.__cache["processor_state"] = processorState

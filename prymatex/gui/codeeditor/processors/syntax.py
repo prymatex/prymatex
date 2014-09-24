@@ -7,9 +7,6 @@ from prymatex.support import Scope
 from prymatex.support.processor import SyntaxProcessorMixin
 from prymatex.gui.codeeditor.userdata import CodeEditorToken
 
-def build_userData_revision(scope, text, state):
-    return hash("%s:%s:%d" % (scope, text, state))
-
 class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     NO_STATE = -1
     SINGLE_LINE = 1
@@ -49,32 +46,34 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         CodeEditorBaseProcessor.endExecution(self, bundleItem)
     
     def restoreState(self, block):
-        if block.isValid():
-            self.stack, self.scope = self.editor.blockUserData(block).processorState()
+        userData = self.editor.blockUserData(block)
+        self.stack, self.scope = userData.processorState() or \
+            ([(self.bundleItem.grammar, None)], Scope(self.bundleItem.scopeName))
 
     def saveState(self, block):
         self.editor.blockUserData(block).setProcessorState((self.stack[:], self.scope.clone()))
 
     def blockUserData(self, block):
         text = block.text() + "\n"
-        revision = build_userData_revision(self.bundleItem.scopeName, 
-            text, block.previous().userState())
+        revision = hash("%s:%s:%d" % (self.bundleItem.scopeName, text,
+            block.previous().userState()))
+
         userData = self.editor.blockUserData(block)
-        print(block.revision(), revision)
-        if block.revision() != revision:
+        changed = userData.revision() != revision
+
+        if changed:
             self.restoreState(block.previous())
             self.bundleItem.parseLine(self.stack, text, self)
-            
             userData.setTokens(self.__tokens)
             userData.setBlank(text.strip() == "")
             self.editor.processBlockUserData(text, block, userData)
 
-            block.setRevision(revision)
+            userData.setRevision(revision)
 
             # Store stack and state
             block.setUserState(len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE)
             self.saveState(block)
-        return userData
+        return userData, changed
 
     # -------- Parsing
     def beginParse(self, scopeName):
