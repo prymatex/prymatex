@@ -12,13 +12,17 @@ __license__ = 'BSD'
 
 import sys
 import os
-import asyncio
 import time
 from functools import wraps
-from queue import Queue
+try:
+    from queue import Queue
+except ImportError:
+    import Queue
 from concurrent.futures import Future
 
 from prymatex.qt import QtCore, QtGui
+
+from prymatex.utils import asyncio
 
 from ._common import with_logger
 
@@ -34,7 +38,7 @@ class _QThreadWorker(QtCore.QThread):
 		self.__queue = queue
 		self.__stop = False
 		self.__num = num
-		super().__init__()
+		super(_QThreadWorker, self).__init__()
 
 	def run(self):
 		queue = self.__queue
@@ -66,7 +70,7 @@ class _QThreadWorker(QtCore.QThread):
 
 	def wait(self):
 		self._logger.debug('Waiting for thread #{} to stop...'.format(self.__num))
-		super().wait()
+		super(_QThreadWorker, self).wait()
 
 
 @with_logger
@@ -82,7 +86,7 @@ class QThreadExecutor(QtCore.QObject):
 	...     assert r == 4
 	"""
 	def __init__(self, max_workers=10, parent=None):
-		super().__init__(parent)
+		super(QThreadExecutor, self).__init__(parent)
 		self.__max_workers = max_workers
 		self.__queue = Queue()
 		self.__workers = [_QThreadWorker(self.__queue, i + 1) for i in range(max_workers)]
@@ -102,7 +106,7 @@ class QThreadExecutor(QtCore.QObject):
 		self.__queue.put((future, callback, args, kwargs))
 		return future
 
-	def map(self, func, *iterables, timeout=None):
+	def map(self, func, *iterables, **kwargs):
 		raise NotImplementedError("use as_completed on the event loop")
 
 	def shutdown(self):
@@ -214,7 +218,7 @@ class QEventLoop(_baseclass):
 
 		assert self.__app is not None
 
-		super().__init__()
+		super(QEventLoop, self).__init__()
 
 	def run_forever(self):
 		"""Run eventloop forever."""
@@ -265,7 +269,7 @@ class QEventLoop(_baseclass):
 		self.__app = None
 		if self.__default_executor is not None:
 			self.__default_executor.shutdown()
-		super().close()
+		super(QEventLoop, self).close()
 
 	def call_later(self, delay, callback, *args):
 		"""Register callback to be invoked after a certain delay."""
@@ -408,7 +412,7 @@ class QEventLoop(_baseclass):
 		return self.__debug_enabled
 
 	def set_debug(self, enabled):
-		super().set_debug(enabled)
+		super(QEventLoop, self).set_debug(enabled)
 		self.__debug_enabled = enabled
 
 	def __enter__(self):

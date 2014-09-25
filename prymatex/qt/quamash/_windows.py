@@ -6,8 +6,8 @@
 import asyncio
 try:
 	import _winapi
-	from asyncio import windows_events
-	from asyncio import _overlapped
+	from prymatex.utils.asyncio import windows_events
+	from prymatex.utils.asyncio import _overlapped
 except ImportError:  # noqa
 	pass  # w/o guarding this import py.test can't gather doctests on platforms w/o _winapi
 

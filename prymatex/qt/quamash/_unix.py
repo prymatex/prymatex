@@ -3,9 +3,11 @@
 # © 2014 Mark Harviston <mark.harviston@gmail.com>
 # © 2014 Arve Knudsen <arve.knudsen@gmail.com>
 # BSD License
-import asyncio
-from asyncio import selectors
+
 import collections
+
+from prymatex.utils import asyncio
+selectors = asyncio.selectors
 
 from . import QtCore, with_logger
 
@@ -32,7 +34,7 @@ def _fileobj_to_fd(fileobj):
 		try:
 			fd = int(fileobj.fileno())
 		except (AttributeError, TypeError, ValueError):
-			raise ValueError("Invalid file object: {!r}".format(fileobj)) from None
+			raise ValueError("Invalid file object: {!r}".format(fileobj))
 	if fd < 0:
 		raise ValueError("Invalid file descriptor: {}".format(fd))
 	return fd
@@ -51,7 +53,7 @@ class _SelectorMapping(collections.Mapping):
 			fd = self._selector._fileobj_lookup(fileobj)
 			return self._selector._fd_to_key[fd]
 		except KeyError:
-			raise KeyError("{!r} is not registered".format(fileobj)) from None
+			raise KeyError("{!r} is not registered".format(fileobj))
 
 	def __iter__(self):
 		return iter(self._selector._fd_to_key)
@@ -137,7 +139,7 @@ class _Selector(selectors.BaseSelector):
 		try:
 			key = self._fd_to_key.pop(self._fileobj_lookup(fileobj))
 		except KeyError:
-			raise KeyError("{!r} is not registered".format(fileobj)) from None
+			raise KeyError("{!r} is not registered".format(fileobj))
 
 		drop_notifier(self.__read_notifiers)
 		drop_notifier(self.__write_notifiers)
@@ -148,7 +150,7 @@ class _Selector(selectors.BaseSelector):
 		try:
 			key = self._fd_to_key[self._fileobj_lookup(fileobj)]
 		except KeyError:
-			raise KeyError("{!r} is not registered".format(fileobj)) from None
+			raise KeyError("{!r} is not registered".format(fileobj))
 		if events != key.events:
 			self.unregister(fileobj)
 			key = self.register(fileobj, events, data)

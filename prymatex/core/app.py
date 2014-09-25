@@ -9,12 +9,12 @@ import prymatex
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import create_shortcut
+from prymatex.qt.quamash import QEventLoop
 
 from prymatex.core import config
 from prymatex.core.components import PrymatexComponent, PrymatexEditor
 from prymatex.core import logger
 from prymatex.core.settings import ConfigurableItem, ConfigurableHook
-from prymatex.core.quamash import QEventLoop
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import six
