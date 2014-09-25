@@ -363,17 +363,77 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtWidgets.QWidget
     @classmethod
     def contributeToMainMenu(cls):
         menu = {}
-        menu["edit"] = [
-                '-',
-                {'text': "Find",
+        menu["find"] = {
+            'before': 'view',
+            'name': 'find',
+            'text': '&Find',
+            'items': [
+                {'text': "Find...",
                  'sequence': ("StatusBar", "Find", "Find"),
                  'triggered': lambda st, checked=False: st.showIFind()
                 },
+                {'text': "Find Next",
+                 'sequence': ("StatusBar", "FindNext", "F3"),
+                 'triggered': lambda st, checked=False: st.showIFind()
+                },
+                {'text': "Find Previous",
+                 'sequence': ("StatusBar", "FindPrevious", "Shift+F3"),
+                 'triggered': lambda st, checked=False: st.showIFind()
+                },
+                {'text': "Incremental Find",
+                 'sequence': ("StatusBar", "IncrementalFind", "Ctrl+I"),
+                 'triggered': lambda st, checked=False: st.showIFind()
+                }, '-',
                 {'text': "Replace",
                  'sequence': ("StatusBar", "Replace", "Replace"),
                  'triggered': lambda st, checked=False: st.showFindReplace()
-                }
-            ]
+                },
+                {'text': "Replace Next",
+                 'sequence': ("StatusBar", "ReplaceNext", "Ctrl+Shift+H"),
+                 'triggered': lambda st, checked=False: st.showFindReplace()
+                }, '-',
+                {'text': "Quick Find",
+                 'sequence': ("StatusBar", "QuickFind", "Ctrl+F3"),
+                 'triggered': lambda st, checked=False: st.showFindReplace()
+                },
+                {'text': "Quick Find All",
+                 'sequence': ("StatusBar", "QuickFindAll", "Alt+F3"),
+                 'triggered': lambda st, checked=False: st.showFindReplace()
+                },
+                {'text': "Quick Add Next",
+                 'sequence': ("StatusBar", "QuickAddNext", "Ctrl+D"),
+                 'triggered': lambda st, checked=False: st.showFindReplace()
+                },
+                {'text': "Quick Skip Next",
+                 'triggered': lambda st, checked=False: st.showFindReplace()
+                }, '-',
+                {'text': "Use Selection For Find",
+                 'sequence': ("StatusBar", "UseSelectionForFind", "Ctrl+E"),
+                 'triggered': lambda st, checked=False: st.showFindReplace()
+                },
+                {'text': "Use Selection For Replace",
+                 'sequence': ("StatusBar", "UseSelectionForReplace", "Ctrl+Shift+E"),
+                 'triggered': lambda st, checked=False: st.showFindReplace()
+                }, '-',
+                {'text': "Find In Files",
+                 'sequence': ("StatusBar", "FindInFiles", "Ctrl+Shift+F"),
+                 'triggered': lambda st, checked=False: st.showFindReplace()
+                },
+                {'text': "Find Results",
+                 'items': [
+                     {'text': "Show Results Panel",
+                      'triggered': lambda st, checked=False: st.showFindReplace()
+                     },
+                     {'text': "Next Result",
+                      'sequence': ("StatusBar", "NextResult", "F4"),
+                      'triggered': lambda st, checked=False: st.showFindReplace()
+                     },
+                     {'text': "Previous Result",
+                      'sequence': ("StatusBar", "PreviousResult", "Shift+F4"),
+                      'triggered': lambda st, checked=False: st.showFindReplace()
+                    }]
+                }]
+            }
         menu["text"] = [
                 {'text': 'Filter through command',
                  'triggered': cls.showCommand
