@@ -150,7 +150,6 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
             if self.completer_task is not None:
                 self.completer_task.cancel()
             self.setModel(None)
-            loop = self.editor.application().loop()
             def _task_ready(model):
                 # First win
                 if self.model() is None and self.trySetModel(model):
@@ -158,4 +157,4 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
             if model is not None:
                 _task_ready(model)
             self.completer_task = asyncio.async(asyncio.wait(
-                [ asyncio.async(asyncio.coroutine(model.fillModel)(_task_ready), loop=loop) for model in self.completion_models ], loop=loop), loop=loop)
+                [ asyncio.async(asyncio.coroutine(model.fillModel)(_task_ready)) for model in self.completion_models ]))

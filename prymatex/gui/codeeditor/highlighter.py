@@ -54,11 +54,10 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             screen_height = QtWidgets.QDesktopWidget().screenGeometry().height()
             lines = int(screen_height / line_height)
             # Create tasks
-            loop = self.editor.application().loop()
             tasks = [ asyncio.async(highlight_function(self, 
-                        self.document().findBlockByNumber(n), n + lines), loop=loop) for n in 
+                        self.document().findBlockByNumber(n), n + lines)) for n in 
                         range(0, self.document().lineCount(), lines) ]
-            self.highlight_task = asyncio.async(asyncio.wait(tasks, loop=loop), loop=loop)
+            self.highlight_task = asyncio.async(asyncio.wait(tasks))
             self.highlight_task.add_done_callback(self.on_task_finished)
             if callable(callback):
                 self.highlight_task.add_done_callback(callback)
