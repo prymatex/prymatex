@@ -5,6 +5,7 @@ from functools import reduce
 
 from prymatex.qt import QtCore, QtGui, Qt, QtWidgets
 
+from prymatex.utils import asyncio
 from prymatex.core import config
 from prymatex.models.support import BundleItemTreeNode
 
@@ -24,8 +25,8 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
 
         self._start_position = 0
         # Models
-        self.completionModels = [ ]
-
+        self.completion_models = [ ]
+        self.completer_task = None
         self.completerTasks = [ ]
         
         # Role
@@ -99,7 +100,7 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
 
     def setCompletionPrefix(self, prefix):
         self._start_position = self.editor.textCursor().position() - len(prefix or "")
-        for model in self.completionModels:
+        for model in self.completion_models:
             model.setCompletionPrefix(prefix)
         QtWidgets.QCompleter.setCompletionPrefix(self, prefix)
         if self.model() is not None:
@@ -113,7 +114,7 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
 
     def trySetModel(self, model):
         current_model = self.model()
-        if model not in self.completionModels:
+        if model not in self.completion_models:
             return False
         self.setModel(model)
         if self.setCurrentRow(0):
@@ -123,18 +124,18 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         return self.model() != current_model
         
     def registerModel(self, completionModel):
-        self.completionModels.append(completionModel)
+        self.completion_models.append(completionModel)
         completionModel.setEditor(self.editor)
     
     def unregisterModel(self, completionModel):
-        self.completionModels.remove(completionModel)
+        self.completion_models.remove(completionModel)
         completionModel.setEditor(None)
 
     def trySetNextModel(self):
-        current = model = self.model() or self.completionModels[-1]
+        current = model = self.model() or self.completion_models[-1]
         while True:
-            index = (self.completionModels.index(model) + 1) % len(self.completionModels)
-            model = self.completionModels[index]
+            index = (self.completion_models.index(model) + 1) % len(self.completion_models)
+            model = self.completion_models[index]
             if model.isReady() and self.trySetModel(model):
                 return True
             if current == model:
@@ -146,14 +147,15 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
             if model != self.model() and self.trySetModel(model):
                 self.complete(rect)
         elif not self.isVisible():
-            for completerTask in self.completerTasks:
-                completerTask.cancel()
+            if self.completer_task is not None:
+                self.completer_task.cancel()
             self.setModel(None)
-            def _go(model):
+            loop = self.editor.application().loop()
+            def _task_ready(model):
                 # First win
                 if self.model() is None and self.trySetModel(model):
                     self.complete(rect)
             if model is not None:
-                _go(model)
-            self.completerTasks = self.editor.application().schedulerManager.tasks(
-                lambda model: model.fillModel(_go), self.completionModels)
+                _task_ready(model)
+            self.completer_task = asyncio.async(asyncio.wait(
+                [ asyncio.async(asyncio.coroutine(model.fillModel)(_task_ready), loop=loop) for model in self.completion_models ], loop=loop), loop=loop)
