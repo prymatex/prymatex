@@ -22,7 +22,6 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
         self.dialogs = {}
         self.instances = {}
         self.address = tempfile.mktemp(prefix="pmx")
-        print(self.address)
         self.server = QtNetwork.QLocalServer(self)
         self.server.listen(self.address)
         self.server.newConnection.connect(self.on_server_newConnection)
