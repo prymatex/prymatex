@@ -90,7 +90,7 @@ class BundleItemTreeNode(TreeNodeBase):
         if bundle item haven't action is created whit the given parent, otherwise return None
         """
         if parent is not None:
-            receiver = lambda item = self: item.manager.bundleItemTriggered.emit(item)
+            receiver = lambda checked, item = self: item.manager.bundleItemTriggered.emit(item)
             self._action = self.buildTriggerItemAction(parent, receiver)
             #Que la accion referencia a su nodo
             self._action.bundleTreeNode = self
