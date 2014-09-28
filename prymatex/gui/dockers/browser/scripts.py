@@ -59,7 +59,6 @@ class TextMate(QtCore.QObject):
     def _system(self, command):
         self.busy = True
         systemWrapper = SystemWrapper(self)
-        print(command)
         context = self.manager.runSystemCommand(
             shellCommand = command,
             environment = self.webView.environmentVariables(),

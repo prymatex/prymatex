@@ -72,7 +72,6 @@ class WebView(QtWebKitWidgets.QWebView):
 
     def on_page_unsupportedContent(self, reply):
         url = reply.url()
-        print("UnsupportedContent", url)
         QtGui.QDesktopServices.openUrl(url)
 
     def on_networkAccessManager_commandUrlRequested(self, url):
