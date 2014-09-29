@@ -19,6 +19,18 @@ def highlight_function(highlighter, block, stop):
         yield
     highlighter.document().markContentsDirty(position, length)
 
+class HighlighterThread(QtCore.QThread):
+    def start(self, *args, **kwargs):
+        self.running = True
+        super(HighlighterThread, self).start(*args, **kwargs)
+     
+    def stop(self):
+        self.running = False
+   
+    def run(self):
+        while self.running:
+            self.msleep(100)
+
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     aboutToHighlightChange = QtCore.Signal()
     highlightChanged = QtCore.Signal()
@@ -31,22 +43,33 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.themeProcessor = editor.findProcessor("theme")
         self.highlight_task = None
         self.editor.aboutToClose.connect(self.stop)
-        self.highlightBlock = lambda text: None
+        self.thread = HighlighterThread(self)
+        # Setup visible area
+        block = editor.firstVisibleBlock()
+        self.visible_area = block.blockNumber() 
+        line_height = self.editor.blockBoundingGeometry(block).height()
+        screen_height = QtWidgets.QDesktopWidget().screenGeometry().height()
+        self.visible_area = (self.visible_area, self.visible_area + int(screen_height / line_height))
 
     def on_task_finished(self, *args):
         self.highlightBlock = self.syncHighlightFunction
         self.highlight_task = None
+        self.thread.stop()
         self.highlightChanged.emit()
 
-    def running(self):
-        return self.highlight_task and not self.highlight_task.done()
+    def isRunning(self):
+        return self.thread.isRunning()
 
     def stop(self):
+        self.thread.stop()
+        return
         if self.running():
             self.highlight_task.cancel()
         self.highlightBlock = lambda text: None
 
     def start(self, callback=None):
+        self.thread.start()
+        return
         if self.syntaxProcessor.ready() and self.themeProcessor.ready():
             self.aboutToHighlightChange.emit()
             # Setup visible area
@@ -61,10 +84,12 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.highlight_task.add_done_callback(self.on_task_finished)
             if callable(callback):
                 self.highlight_task.add_done_callback(callback)
+            self.thread.start()
 
-    def syncHighlightFunction(self, text):
+    def highlightBlock(self, text):
         block = self.currentBlock()
-        userData = self.syntaxProcessor.blockUserData(self.currentBlock())
-        for token in userData.tokens():
-            self.setFormat(token.start, token.end - token.start,
-                self.themeProcessor.textCharFormat(token.scope))
+        if self.visible_area[0] <= block.blockNumber() <= self.visible_area[1]:
+            userData = self.syntaxProcessor.blockUserData(self.currentBlock())
+            for token in userData.tokens():
+                self.setFormat(token.start, token.end - token.start,
+                    self.themeProcessor.textCharFormat(token.scope))
