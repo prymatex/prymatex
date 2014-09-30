@@ -34,13 +34,3 @@ class CodeEditorThemeProcessor(CodeEditorBaseProcessor, ThemeProcessorMixin):
 
     def textCharFormat(self, scope):
         return self.bundleItem.textCharFormat(scope)
-
-    def textCharFormats(self, userData):
-        formats = []
-        for token in userData.tokens():
-            frange = QtGui.QTextLayout.FormatRange()
-            frange.start = token.start
-            frange.length = token.end - token.start
-            frange.format = self.textCharFormat(token.scope)
-            formats.append(frange)
-        return formats

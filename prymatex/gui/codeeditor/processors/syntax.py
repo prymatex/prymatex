@@ -45,13 +45,25 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.endParse(bundleItem.scopeName)
         CodeEditorBaseProcessor.endExecution(self, bundleItem)
     
-    def restoreState(self, block):
-        userData = self.editor.blockUserData(block)
-        self.stack, self.scope = userData.processorState() or \
+    def restoreState(self, user_data):
+        self.stack, self.scope = user_data.processorState() or \
             ([(self.bundleItem.grammar, None)], Scope(self.bundleItem.scopeName))
 
-    def saveState(self, block):
-        self.editor.blockUserData(block).setProcessorState((self.stack[:], self.scope.clone()))
+    def saveState(self, user_data):
+        user_data.setProcessorState((self.stack[:], self.scope.clone()))
+
+    def scopeName(self):
+        return self.bundleItem.scopeName
+
+    def parseBlock(self, block, text, user_data):
+        self.restoreState(self.editor.blockUserData(block.previous()))
+        self.bundleItem.parseLine(self.stack, text, self)
+        
+        user_data.setTokens(self.__tokens)
+        user_data.setBlank(text.strip() == "")
+        self.saveState(user_data)
+
+        return user_data, len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
 
     def blockUserData(self, block):
         text = block.text() + "\n"
@@ -60,18 +72,17 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
 
         userData = self.editor.blockUserData(block)
         if userData.revision() != revision:
-            self.restoreState(block.previous())
+            self.restoreState(self.editor.blockUserData(block.previous()))
             self.bundleItem.parseLine(self.stack, text, self)
             
             userData.setTokens(self.__tokens)
             userData.setBlank(text.strip() == "")
-            self.editor.processBlockUserData(text, block, userData)
 
             userData.setRevision(revision)
 
             # Store stack and state
             block.setUserState(len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE)
-            self.saveState(block)
+            self.saveState(userData)
         return userData
 
     # -------- Parsing

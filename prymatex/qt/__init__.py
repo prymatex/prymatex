@@ -32,7 +32,7 @@ if API == 'pyqt4':
     try:
         # Force API to #2
         import sip
-        for obj in ['QDate', 'QTime', 'QDateTime', 'QUrl', 'QTextStream', 'QVariant', 'QString']:
+        for obj in ['QDate', 'QTime', 'QDateTime', 'QUrl', 'QTextStream', 'QString']:
             try:
                 sip.setapi(obj, 2)
             except AttributeError:
