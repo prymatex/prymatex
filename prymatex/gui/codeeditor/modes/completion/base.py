@@ -15,7 +15,6 @@ COMPLETER_CHARS = list(string.ascii_letters)
 class CodeEditorComplitionMode(CodeEditorBaseMode):
     def __init__(self, **kwargs):
         super(CodeEditorComplitionMode, self).__init__(**kwargs)
-        
         self.completer = CodeEditorCompleter(self.editor)
         self.completer.registerModel(WordsCompletionModel(parent = self.editor))
         self.completer.registerModel(TabTriggerItemsCompletionModel(parent = self.editor))
@@ -44,12 +43,10 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
 
     def activate(self):
         self.editor.textChanged.connect(self.on_editor_textChanged)
-        self.editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
         super(CodeEditorComplitionMode, self).activate()
     
     def deactivate(self):
         self.editor.textChanged.disconnect(self.on_editor_textChanged)
-        self.editor.cursorPositionChanged.disconnect(self.on_editor_cursorPositionChanged)
         super(CodeEditorComplitionMode, self).deactivate()
     
     def on_editor_textChanged(self):
@@ -59,13 +56,7 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             self.completer.complete(self.editor.cursorRect())
         else:
             self.completer.hide()
-
-    def on_editor_cursorPositionChanged(self):
-        prefix, start, end = self.completer.completionPrefixRange()
-        cursor = self.editor.textCursor()
-        if not (start <= cursor.position() <= end):
-            self.completer.hide()
-                        
+        
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.Show:
             self.activate()

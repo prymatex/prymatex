@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from functools import reduce
-
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import config
@@ -57,41 +55,27 @@ class CompletionBaseModel(QtCore.QAbstractTableModel):
 class WordsCompletionModel(CompletionBaseModel):
     def __init__(self, **kwargs):
         super(WordsCompletionModel, self).__init__(**kwargs)
-        self.words = []
-        self.suggestions = []
-        self.icon = QtGui.QIcon()
-
-    def setEditor(self, editor):
-        #TODO: Que pasa si ya tiene bloques
-        super(WordsCompletionModel, self).setEditor(editor)
-        self.editor.registerBlockUserDataHandler(self)
-        self.icon = self.editor.resources().get_icon('insert-text')
+        self.suggestions = set()
         
-    # -------------------- Process User Data
-    def contributeToBlockUserData(self, userData):
-        userData.words = set()
-
-    def processBlockUserData(self, text, cursor, block, userData):
-        userData.words = set(
-            reduce(lambda w1, w2: w1 + w2,
-                map(lambda token: config.RE_WORD.findall(token.chunk),
-                    userData.tokens()[::-1]
-                )
-        , []))
-
     def modelSorting(self):
         return QtGui.QCompleter.CaseSensitivelySortedModel
 
     def fillModel(self, callback):
+        # TODO Hacer las palabras con un timer
         # TODO Palabras mas proximas al cursor o mas utilizadas
         self.suggestions = set()
         block = self.editor.document().begin()
         # TODO: No usar la linea actual, quiza algo de niveles de anidamiento
         while block.isValid():
-            self.suggestions.update(self.editor.blockUserData(block).words)
+            user_data = self.editor.blockUserData(block)
+            all_words = map(lambda token: config.RE_WORD.findall(token.chunk),
+                user_data.tokens()[::-1])
+            for words in all_words:
+                self.suggestions.update(words)
             block = block.next()
 
         self.suggestions.update(self.editor.preferenceSettings().completions)
+        self.suggestions.discard(self.completionPrefix())
         if self.suggestions:
             self.suggestions = sorted(list(self.suggestions))
             callback(self)
@@ -127,8 +111,6 @@ class WordsCompletionModel(CompletionBaseModel):
         suggestion = self.suggestions[index.row()]
         if role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
             return suggestion
-        elif role == QtCore.Qt.DecorationRole:
-            return self.icon
         elif role == QtCore.Qt.ToolTipRole:
             return suggestion
         elif role == QtCore.Qt.MatchRole:

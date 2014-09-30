@@ -23,7 +23,6 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         self.editor.registerKeyPressHandler(QtCore.Qt.Key_Tab, 
             self.__insert_completion, important = True)
 
-        self._start_position = 0
         # Models
         self.completion_models = [ ]
         self.completer_task = None
@@ -53,14 +52,7 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
             event.ignore()
             return True
         return False
-
-    def completionPrefixRange(self):
-        prefix = self.completionPrefix()
-        return prefix, self._start_position, self._start_position + len(prefix) + 1
-        
-    def startPosition(self):
-        return self._start_position
-
+    
     def setPalette(self, palette):
         self.popup().setPalette(palette)
         self.popup().viewport().setPalette(palette)
@@ -99,7 +91,6 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
             self.completionModel().mapToSource(cIndex), self.completionCount())
 
     def setCompletionPrefix(self, prefix):
-        self._start_position = self.editor.textCursor().position() - len(prefix or "")
         for model in self.completion_models:
             model.setCompletionPrefix(prefix)
         QtWidgets.QCompleter.setCompletionPrefix(self, prefix)
