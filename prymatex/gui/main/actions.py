@@ -29,7 +29,7 @@ class MainWindowActionsMixin(object):
         for index, filePath in enumerate(self.application().fileManager.fileHistory, 1):
             action = create_action(self, {
                 "text": "%s (%s)\t&%d" % (self.application().fileManager.basename(filePath), filePath, index),
-                "triggered": lambda file = filePath: self.application().openFile(file)
+                "triggered": lambda checked=False, file=filePath: self.application().openFile(file)
             })
             self.menuRecentFiles.addAction(action)
         self.menuRecentFiles.addActions(actions)
@@ -45,13 +45,13 @@ class MainWindowActionsMixin(object):
             action = create_action(self, {
                 "text": "Group %d" % index,
                 "sequence": ("Global", "Group %d" % index, "Ctrl+%d" % index),
-                "triggered": lambda group = group: self.setCurrentGroup(group)
+                "triggered": lambda checked=False, group=group: self.setCurrentGroup(group)
             })
             self.menuFocusGroup.addAction(action)
             action = create_action(self, {
                 "text": "Group %d" % index,
                 "sequence": ("Global", "Group %d" % index, "Shift+Ctrl+%d" % index),
-                "triggered": lambda group = group: self.moveEditorToGroup(group)
+                "triggered": lambda checked=False, group=group: self.moveEditorToGroup(group)
             })
             self.menuMoveEditorToGroup.addAction(action)
 
