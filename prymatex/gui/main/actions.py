@@ -160,7 +160,7 @@ class MainWindowActionsMixin(object):
                     "triggered": lambda mw, checked=False: mw.addEmptyEditor(),
                     "icon": "new-editor",
                 }, "-", {
-                    "text": "From template",
+                    "text": "From Template",
                     "triggered": lambda mw, checked=False: mw.templateDialog.createFile(),
                     "icon": "new-from-template",
                 }, {
@@ -172,10 +172,10 @@ class MainWindowActionsMixin(object):
                 "text": "Open",
                 "triggered": cls.on_actionOpen_triggered
             }, {
-                "text": "Recent files",
+                "text": "Recent Files",
                 "aboutToShow": cls.on_menuRecentFiles_aboutToShow,
                 "items": ["-", {
-                    "text": "Open all recent files",
+                    "text": "Open All Recent Files",
                     "triggered": lambda mw, checked=False: [ mw.application().openFile(path)
                         for path in mw.application().fileManager.fileHistory ]
                 }, {
@@ -183,30 +183,30 @@ class MainWindowActionsMixin(object):
                     "triggered": lambda mw, checked=False: mw.application().fileManager.clearFileHistory()
                 }]
             }, {
-                "text": "Import project",
+                "text": "Import Project",
                 "triggered": cls.on_actionImportProject_triggered,
             }, "-", {
                 "text": "Save",
                 "triggered": lambda mw, checked=False: mw.saveEditor()
             }, {
-                "text": "Save as",
+                "text": "Save As",
                 "triggered": lambda mw, checked=False: mw.saveEditor(saveAs=True)
             }, {
-                "text": "Save all",
+                "text": "Save All",
                 "sequence": ("Global", "SaveAll", "Ctrl+Shift+S"),
                 "triggered": lambda mw, checked=False: [ mw.saveEditor(editor=editor) for editor in mw.editors() ]
             }, "-", {
                 "text": "Close",
                 "triggered": lambda mw: mw.closeEditor()
             }, {
-                "text": "Close all",
+                "text": "Close All",
                 "sequence": ("Global", "CloseAll", "Ctrl+Shift+W"),
                 "triggered": lambda mw: [ mw.closeEditor(editor=editor) for editor in mw.editors() ]
             }, {
-                "text": "Close others",
+                "text": "Close Others",
                 "tirgger": cls.on_actionCloseOthers_triggered
             }, "-", {
-                "text": "Switch profile",
+                "text": "Switch Profile",
                 "triggered": cls.on_actionSwitchProfile_triggered
             }, "-", {
                 "text": "Quit",
@@ -235,27 +235,27 @@ class MainWindowActionsMixin(object):
                 "text": "Panels",
                 "items": []
             }, "-", {
-                "text": "Show main menu",
+                "text": "Show Main Menu",
                 "checkable": True,
                 "triggered": lambda mw, checked: mw.menuBar().setShown(checked),
                 "testChecked": lambda mw: mw.menuBar().isVisible()
             }, {
-                "text": "Show status",
+                "text": "Show Status",
                 "checkable": True,
                 "triggered": lambda mw, checked: mw.statusBar().setShown(checked),
                 "testChecked": lambda mw: mw.statusBar().isVisible()
             }, {
-                "text": "Show tabs",
+                "text": "Show Tabs",
                 "checkable": True,
                 "triggered": lambda mw, checked: mw.centralWidget().setShowTabs(checked),
                 "testChecked": lambda mw: mw.centralWidget().showTabs(),
             }, "-", {
                 "text": "Layout",
                 "items": [{
-                    "text": "Split vertically",
+                    "text": "Split Vertically",
                     "triggered": lambda mw, checked=False: mw.centralWidget().splitVertically()
                 }, {
-                    "text": "Split horizontally",
+                    "text": "Split Horizontally",
                     "triggered": lambda mw, checked=False: mw.centralWidget().splitHorizontally()
                 }, "-", {
                     "text": "Single",
@@ -289,13 +289,13 @@ class MainWindowActionsMixin(object):
             }, {
                 "text": "Groups",
                 "items": [{
-                    "text": "Move editor to new group",
+                    "text": "Move Editor to New Group",
                     "triggered": lambda mw, checked=False: mw.moveEditorToNewGroup()
                 }, {
-                    "text": "New group",
+                    "text": "New Group",
                     "triggered": lambda mw, checked=False: mw.addEmptyGroup()
                 }, {
-                    "text": "Close group",
+                    "text": "Close Group",
                     "triggered": lambda mw, checked=False: mw.closeGroup()
                 }, "-", {
                     "text": "Max Columns: 1",
@@ -348,7 +348,7 @@ class MainWindowActionsMixin(object):
         menu["navigation"] = {
             "text": "&Navigation",
             "items": [{
-                "text": "Next tab",
+                "text": "Next Tab",
                 "sequence": "NextChild",
                 "triggered": lambda mw: mw.centralWidget().focusNextTab()
             }, {
@@ -356,20 +356,20 @@ class MainWindowActionsMixin(object):
                 "sequence": "PreviousChild",
                 "triggered": lambda mw, checked=False: mw.centralWidget().focusPreviousTab()
             }, {
-                "text": "Select tab",
+                "text": "Select Tab",
                 "triggered": cls.on_actionSelectTab_triggered
             }, {
-                "text": "Jump to tab",
+                "text": "Jump to Tab",
                 "sequence": ("Global", "JumpToTab", "F12"),
                 "triggered": cls.on_actionJumpToTab_triggered
             }, "-", {
-                "text": "Last edit location",
+                "text": "Last Edit Location",
                 "triggered": cls.on_actionLastEditLocation_triggered
             }, {
-                "text": "Go back location",
+                "text": "Go Back Location",
                 "triggered": cls.on_actionLocationBack_triggered
             }, {
-                "text": "Go forward location",
+                "text": "Go Forward Location",
                 "triggered": cls.on_actionLocationForward_triggered
             }]
         }
@@ -378,25 +378,25 @@ class MainWindowActionsMixin(object):
         menu["bundles"] = {
             "text": "&Bundles",
             "items": [{
-                "text": "Bundle editor",
+                "text": "Bundle Editor",
                 "items": [{
-                    "text": "Show bundle editor",
+                    "text": "Show Bundle Editor",
                     "sequence": ("Global", "ShowBundleEditor", "Meta+Ctrl+Alt+B"),
                     "triggered": lambda mw, checked=False: mw.bundleEditorDialog.execEditor()
                 }, "-", {
-                    "text": "Edit commands",
+                    "text": "Edit Commands",
                     "sequence": ("Global", "EditCommands", "Meta+Ctrl+Alt+C"),
                     "triggered": lambda mw, checked=False: mw.bundleEditorDialog.execCommand()
                 }, {
-                    "text": "Edit languages",
+                    "text": "Edit Languages",
                     "sequence": ("Global", "EditLanguages", "Meta+Ctrl+Alt+L"),
                     "triggered": lambda mw, checked=False: mw.bundleEditorDialog.execLanguage()
                 }, {
-                    "text": "Edit snippets",
+                    "text": "Edit Snippets",
                     "sequence": ("Global", "EditSnippets", "Meta+Ctrl+Alt+S"),
                     "triggered": lambda mw, checked=False: mw.bundleEditorDialog.execSnippet()
                 }, {
-                    "text": "Reload bundles",
+                    "text": "Reload Bundles",
                     "triggered": lambda mw, checked=False: mw.application().supportManager.reloadSupport(mw.showMessage)
                 }]
             }, "-"]
@@ -406,13 +406,13 @@ class MainWindowActionsMixin(object):
         menu["preferences"] = {
             "text": "&Preferences",
             "items": [ {
-                "text": "Full screen",
+                "text": "Full Screen",
                 "checkable": True,
                 "triggered": lambda mw, checked: getattr(mw, checked and "showFullScreen" or "showNormal")(),
                 "testChecked": lambda mw: mw.isFullScreen(),
                 "sequence": ("Global", "ShowFullScreen", "F11")
             }, {
-                "text": "Distraction free mode",
+                "text": "Distraction Free Mode",
                 "checkable": True,
                 "triggered": lambda mw, checked: getattr(mw, checked and "showDistractionFreeMode" or "showNormal")(),
                 "sequence": ("Global", "ShowDistractionFreeMode", "Shift+F11")
@@ -426,19 +426,19 @@ class MainWindowActionsMixin(object):
         menu["help"] = {
             "text": "&Help",
             "items": [ {
-                "text": "Read documentation",
+                "text": "Read Documentation",
                 "triggered": lambda mw, checked=False: mw.application().openUrl(prymatex.__source__ + '/wiki')
             }, {
-                "text": "Project homepage",
+                "text": "Project Homepage",
                 "triggered": lambda mw, checked=False: mw.application().openUrl(prymatex.__url__)
             }, "-", {
                 "text": "Translate Prymatex",
                 "triggered": lambda mw, checked=False: mw.application().openUrl(prymatex.__source__ + '/wiki')
             }, "-", {
-                "text": "Report bug",
+                "text": "Report Bug",
                 "triggered": lambda mw, checked=False: mw.application().openUrl(prymatex.__source__ + '/issues?utf8=%E2%9C%93')
             },  {
-                "text": "Take screenshoot",
+                "text": "Take Screenshoot",
                 "triggered": cls.on_actionTakeScreenshot_triggered
             }, "-", {
                 "text": "About Prymatex",
