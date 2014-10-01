@@ -7,24 +7,12 @@ from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserData
 from prymatex.qt import QtCore, QtGui, QtWidgets, helpers
 
 class HighlighterThread(QtCore.QThread):
-    blockReady = QtCore.Signal(int, str, int, int)
-    def __init__(self, parent):
-        super(HighlighterThread, self).__init__(parent)
-        self.pending_work = []
-    
-    def flush(self):
-        self.pending_work = []
-
+    highlightingReady = QtCore.Signal(object)
     def run(self):
-        while True:
-            if self.pending_work:
-                number, text, revision = self.pending_work.pop(0)
-                block = self.parent().document().findBlockByNumber(number)
-                user_data = self.parent().editor.blockUserData(block)
-                user_data, state = self.parent().syntaxProcessor.parseBlock(block, text, user_data)
-                self.blockReady.emit(number, text, revision, state)
-            else:
-                self.msleep(300)
+        highlighting = {}
+        block = self.parent().document().begin()
+	while block.isValid():
+            block = block.next()
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     aboutToHighlightChange = QtCore.Signal()
@@ -40,18 +28,22 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.themeProcessor.end.connect(self.on_processors_ready)
         self.syntaxProcessor.begin.connect(self.on_processors_ready)
         self.syntaxProcessor.end.connect(self.on_processors_ready)
-        self.highlight_task = None
+        self.highlightBlock = self._nop
         self.editor.aboutToClose.connect(self.stop)
         self.thread = HighlighterThread(self)
-        self.thread.blockReady.connect(self.on_thread_blockReady)
+        self.thread.finished.connect(self.on_trhead_finished)
+        self.thread.highlightingReady.connect(self.on_thread_highlightingReady)
     
     def on_processors_ready(self):
         if self.syntaxProcessor.ready() and self.themeProcessor.ready():
-            self.highlightBlock = self._highlight_block
+            self.highlightBlock = self.realtime_highlight
         else:
             self.highlightBlock = self._nop
 
-    def on_thread_blockReady(self, number, text, revision, state):
+    def on_trhead_finished(self):
+        self.highlightBlock = self.realtime_highlight
+
+    def on_thread_highlightingReady(self, data):
         block = self.document().findBlockByNumber(number)
         user_data = self.editor.blockUserData(block)
         self.editor.processBlockUserData(text, block, user_data)
@@ -68,27 +60,34 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         return self.thread.isRunning()
 
     def stop(self):
-        self.thread.flush()
         self.thread.terminate()
         self.thread.wait()
 
     def start(self, callback=None):
-        self.thread.callback = callback
         self.thread.start()
 
     def _nop(self, text):
         pass
-
-    def _user_data_factory(self, text):
-        self.editor.blockUserData(self.currentBlock())
         
+    def threaded_highlight(self, text):
+        pass
+
+    def realtime_highlight(self, text):
+        block = self.currentBlock()
+        user_data = self.syntaxProcessor.blockUserData(block)
+        block.setUserData(user_data)
+        block.setUserState(user_data.state)
+        block.setRevision(user_data.revision)
+        for token in user_data.tokens:
+            self.setFormat(token.start, token.end - token.start,
+                self.themeProcessor.textCharFormat(token.scope))
+
     def _highlight_block(self, text):
         block = self.currentBlock()
         revision = helpers.qt_int(hash("%s:%s:%d" % (
             self.syntaxProcessor.scopeName(), text, 
             block.previous().userState()
         )))
-        print(block.revision(), revision)
         if block.revision() != revision:
             self.thread.pending_work.append((block.blockNumber(), text, revision))
         else:

@@ -15,7 +15,7 @@ from prymatex.core.settings import ConfigurableItem
 from prymatex.qt.helpers import (extend_menu, keyevent_to_keysequence)
 from prymatex.models.support import BundleItemTreeNode
 
-from .userdata import CodeEditorBlockUserData
+from .userdata import _empty_user_data
 from .addons import CodeEditorAddon
 from .sidebar import CodeEditorSideBar, SideBarWidgetMixin
 from .processors import (CodeEditorCommandProcessor, CodeEditorSnippetProcessor,
@@ -269,8 +269,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.__blockUserDataHandlers.append(handler)
 
     def blockUserData(self, block):
-        if not block.isValid():
-            return CodeEditorBlockUserData()
+        return block.userData() or _empty_user_data
         if block.userData() is None:
             userData = CodeEditorBlockUserData()
             # Indent and content
@@ -360,7 +359,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         if uuid is not None:
             syntax = self.application().supportManager.getBundleItem(uuid)
             self.insertBundleItem(syntax)
-        
+
     def isModified(self):
         return self.document().isModified()
 
@@ -387,18 +386,18 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         #return PrymatexEditor.fileFilters(self)
 
     # ---------------------- Scopes
-    def tokenAtPosition(self, position):
+    def tokenAt(self, position):
         if position < 0:
             position = 0
         elif position > self.document().characterCount():
             position = self.document().characterCount()
         block = self.document().findBlock(position)
-        return self.blockUserData(block).tokenAtPosition(position - block.position())
+        return self.blockUserData(block).tokenAt(position - block.position())
 
     def scope(self, cursor = None):
         cursor = cursor or self.textCursor()
-        leftToken, rightToken = (self.tokenAtPosition(cursor.selectionStart() - 1),
-            self.tokenAtPosition(cursor.selectionEnd()))
+        leftToken, rightToken = (self.tokenAt(cursor.selectionStart() - 1),
+            self.tokenAt(cursor.selectionEnd()))
         # Cursor scope
         leftScope, rightScope = [], []
         leftCursor = self.newCursorAtPosition(cursor.selectionStart())
@@ -426,8 +425,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def preferenceSettings(self, cursor = None):
         cursor = cursor or self.textCursor()
-        leftToken, rightToken = (self.tokenAtPosition(cursor.selectionStart() - 1),
-            self.tokenAtPosition(cursor.selectionEnd()))
+        leftToken, rightToken = (self.tokenAt(cursor.selectionStart() - 1),
+            self.tokenAt(cursor.selectionEnd()))
         return self.application().supportManager.getPreferenceSettings(leftToken.scope, leftToken.scope)
 
     # ------------ Obteniendo datos del editor
@@ -1148,7 +1147,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def selectScope(self, cursor = None):
         cursor = cursor or self.textCursor()
         block = cursor.block()
-        token = self.tokenAtPosition(cursor.position())
+        token = self.tokenAt(cursor.position())
         cursor = self.newCursorAtPosition(block.position() + token.start,
             block.position() + token.end)
         self.setTextCursor(cursor)

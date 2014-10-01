@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .base import CodeEditorBaseProcessor
-
+from prymatex.qt import helpers
 from prymatex.support import Scope
 from prymatex.support.processor import SyntaxProcessorMixin
-from prymatex.gui.codeeditor.userdata import CodeEditorToken
+from prymatex.utils import text
+
+from .base import CodeEditorBaseProcessor
+from ..userdata import CodeEditorBlockUserData, CodeEditorToken
 
 class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     NO_STATE = -1
@@ -16,6 +18,8 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         CodeEditorBaseProcessor.__init__(self, editor)
         self.stack = []
         self.scope = None
+        self.state = self.NO_STATE
+        self.stacks = {}
 
     def managed(self):
         return True
@@ -45,45 +49,37 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.endParse(bundleItem.scopeName)
         CodeEditorBaseProcessor.endExecution(self, bundleItem)
     
-    def restoreState(self, user_data):
-        self.stack, self.scope = user_data.processorState() or \
-            ([(self.bundleItem.grammar, None)], Scope(self.bundleItem.scopeName))
+    def restore(self, user_data):
+        self.state = user_data.state
+        if user_data.revision in self.stacks:
+            self.stack, self.scope = self.stacks[user_data.revision]
+	else:
+            self.stack, self.scope = ([(self.bundleItem.grammar, None)], Scope(self.bundleItem.scopeName))
 
-    def saveState(self, user_data):
-        user_data.setProcessorState((self.stack[:], self.scope.clone()))
+    def save(self, user_data):
+        if self.state == self.MULTI_LINE:
+            self.stacks[user_data.revision] = (self.stack[:], self.scope.clone())
 
     def scopeName(self):
         return self.bundleItem.scopeName
 
-    def parseBlock(self, block, text, user_data):
-        self.restoreState(self.editor.blockUserData(block.previous()))
-        self.bundleItem.parseLine(self.stack, text, self)
-        
-        user_data.setTokens(self.__tokens)
-        user_data.setBlank(text.strip() == "")
-        self.saveState(user_data)
+    def parseBlock(self, block):
+        block_text = block.text() + "\n"
 
-        return user_data, len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
+        revision = helpers.qt_int(hash("%s:%s:%d" % (self.scopeName(), block_text,
+            self.state)))
+
+        self.bundleItem.parseLine(self.stack, block_text, self)
+        
+        self.state = len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
+
+        return CodeEditorBlockUserData(tuple(self.__tokens), self.state, revision, text.white_space(block_text), block_text.strip() == "")
 
     def blockUserData(self, block):
-        text = block.text() + "\n"
-        revision = hash("%s:%s:%d" % (self.bundleItem.scopeName, text,
-            block.previous().userState()))
-
-        userData = self.editor.blockUserData(block)
-        if userData.revision() != revision:
-            self.restoreState(self.editor.blockUserData(block.previous()))
-            self.bundleItem.parseLine(self.stack, text, self)
-            
-            userData.setTokens(self.__tokens)
-            userData.setBlank(text.strip() == "")
-
-            userData.setRevision(revision)
-
-            # Store stack and state
-            block.setUserState(len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE)
-            self.saveState(userData)
-        return userData
+        self.restore(self.editor.blockUserData(block.previous()))
+        user_data = self.parseBlock(block)
+        self.save(user_data)
+        return user_data
 
     # -------- Parsing
     def beginParse(self, scopeName):
