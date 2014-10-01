@@ -117,7 +117,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
             "function": editor.resources().get_icon("symbol-function"),
             "typedef": editor.resources().get_icon("symbol-typedef"),
             "variable": editor.resources().get_icon("symbol-variable")
-	    }
+        }
 
         self.editor.registerBlockUserDataHandler(self)
 

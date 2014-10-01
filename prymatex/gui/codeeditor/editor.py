@@ -1328,6 +1328,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         menu["edit"] = [
                 '-',
                 {'text': '&Mode',
+                 'name': 'mode',
                  'items': [{
                         'text': 'Freehanded',
                         'sequence': ("Editor", "FreehandedMode", 'Meta+Alt+E')
