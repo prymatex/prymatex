@@ -53,7 +53,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.state = user_data.state
         if user_data.revision in self.stacks:
             self.stack, self.scope = self.stacks[user_data.revision]
-	else:
+        else:
             self.stack, self.scope = ([(self.bundleItem.grammar, None)], Scope(self.bundleItem.scopeName))
 
     def save(self, user_data):
@@ -65,19 +65,16 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
 
     def parseBlock(self, block):
         block_text = block.text() + "\n"
-
         revision = helpers.qt_int(hash("%s:%s:%d" % (self.scopeName(), block_text,
             self.state)))
-
         self.bundleItem.parseLine(self.stack, block_text, self)
-        
         self.state = len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
 
-        return CodeEditorBlockUserData(tuple(self.__tokens), self.state, revision, text.white_space(block_text), block_text.strip() == "")
+        return tuple(self.__tokens), self.state, revision, text.white_space(block_text), block_text.strip() == ""
 
     def blockUserData(self, block):
         self.restore(self.editor.blockUserData(block.previous()))
-        user_data = self.parseBlock(block)
+        user_data = CodeEditorBlockUserData(*self.parseBlock(block))
         self.save(user_data)
         return user_data
 
