@@ -662,7 +662,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                         self.foldingellipsisImage)
                 if self.showIndentGuide:
                     blockPattern = block
-                    while blockPattern.isValid() and self.blockUserData(blockPattern).blank():
+                    while blockPattern.isValid() and self.blockUserData(blockPattern).blank:
                         blockPattern = blockPattern.next()
                     if blockPattern.isValid():
                         indentLen = len(self.blockUserData(blockPattern).indentation)
