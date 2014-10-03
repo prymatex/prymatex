@@ -20,6 +20,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.scope = None
         self.state = self.NO_STATE
         self.stacks = {}
+        self.scope_name = ""
 
     def managed(self):
         return True
@@ -39,6 +40,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
 
         CodeEditorBaseProcessor.beginExecution(self, syntax)
 
+	self._scope_name = syntax.scopeName
         self.stack = [(syntax.grammar, None)]
         self.beginParse(syntax.scopeName)
         
@@ -60,12 +62,20 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         if self.state == self.MULTI_LINE:
             self.stacks[user_data.revision] = (self.stack[:], self.scope.clone())
 
-    def scopeName(self):
-        return self.bundleItem.scopeName
+    def buildRevision(self, block):
+        block_text = block.text() + "\n"
+        return helpers.qt_int(
+            hash("%s:%s:%d" % (
+                self.scope_name, 
+                block.text() + "\n",
+                block.previous().userState())
+        ))
 
     def parseBlock(self, block):
+        if self.bundleItem is None:
+            return (), -1, -1, "", True
         block_text = block.text() + "\n"
-        revision = helpers.qt_int(hash("%s:%s:%d" % (self.scopeName(), block_text,
+        revision = helpers.qt_int(hash("%s:%s:%d" % (self.scope_name, block_text,
             self.state)))
         self.bundleItem.parseLine(self.stack, block_text, self)
         self.state = len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
@@ -80,9 +90,11 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
 
     # -------- Parsing
     def beginParse(self, scopeName):
+        self.scope_name = scopeName
         self.scope = Scope(scopeName)
 
     def endParse(self, scopeName):
+        self.scope_name = ""
         self.scope.pop_scope()
 
     # -------- Line
