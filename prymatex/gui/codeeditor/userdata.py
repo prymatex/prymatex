@@ -14,8 +14,6 @@ class CodeEditorToken(namedtuple('CodeEditorToken', 'start end scope chunk')):
     def group(self):
         return self.scope.rootGroupName()
 
-_empty_token = CodeEditorToken(0, 0, Scope(), "")
-
 class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
     __slots__ = ('tokens', 'state', 'revision', 'indentation', 'blank')
     def __init__(self, tokens, state, revision, indentation, blank):
@@ -31,9 +29,8 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
         return PreferenceMasterSettings.FOLDING_NONE
 
     def tokenAt(self, pos):
+        # TODO Validar que pos "<= token.end" funcione bien porque puede ser tenga 
+        # que obtener la mejor opcion buscando entre dos candidatos
         for token in self.tokens[::-1]:
-            if token.start <= pos < token.end:
+            if token.start <= pos <= token.end:
                 return token
-        return _empty_token
-
-_empty_user_data = CodeEditorBlockUserData((_empty_token, ), -1, -1, "", True)

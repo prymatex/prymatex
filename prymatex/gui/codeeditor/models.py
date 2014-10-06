@@ -20,13 +20,8 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         self.editor = editor
         self.bookmarks = []
         self.icon_bookmark = editor.resources().get_icon('bookmarks')
-        # Connect
-        self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
 
     # -------- Signals
-    def on_editor_blocksRemoved(self):
-        self.layoutChanged.emit()
-
     def on_document_contentsChange(self, position, removed, added):
         pass
         
@@ -118,13 +113,18 @@ class SymbolListModel(QtCore.QAbstractListModel):
             "typedef": editor.resources().get_icon("symbol-typedef"),
             "variable": editor.resources().get_icon("symbol-variable")
         }
-
-        self.editor.registerBlockUserDataHandler(self)
-
+        
+        self.editor.document().contentsChange.connect(self.on_document_contentsChange)
         #Connects
-        self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
         self.editor.aboutToHighlightChange.connect(self.on_editor_aboutToHighlightChange)
         
+    def on_document_contentsChange(self, position, removed, added):
+        block = self.editor.document().findBlock(position)
+        if removed:
+            print("quitando simbolos")
+        if added:
+            print("agregando simbolos")
+
     # -------------- Block User Data Handler Methods
     def contributeToBlockUserData(self, userData):
         userData.symbol = None
@@ -152,12 +152,6 @@ class SymbolListModel(QtCore.QAbstractListModel):
                 self.endInsertRows()
 
     # ----------- Signals
-    def on_editor_blocksRemoved(self):
-        def validSymbolBlock(cursor):
-            return bool(self.editor.blockUserData(cursor.block()).symbol)
-        self.symbols = [ symbol for symbol in self.symbols if validSymbolBlock(symbol) ]
-        self.layoutChanged.emit()
-
     def on_editor_aboutToHighlightChange(self):
         for cursor in self.symbols:
             self.editor.blockUserData(cursor.block()).symbol = None

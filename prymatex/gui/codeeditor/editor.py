@@ -15,7 +15,6 @@ from prymatex.core.settings import ConfigurableItem
 from prymatex.qt.helpers import (extend_menu, keyevent_to_keysequence)
 from prymatex.models.support import BundleItemTreeNode
 
-from .userdata import _empty_user_data
 from .addons import CodeEditorAddon
 from .sidebar import CodeEditorSideBar, SideBarWidgetMixin
 from .processors import (CodeEditorCommandProcessor, CodeEditorSnippetProcessor,
@@ -40,8 +39,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     syntaxChanged = QtCore.Signal()
     themeChanged = QtCore.Signal(object)
     filePathChanged = QtCore.Signal(str)
-    blocksRemoved = QtCore.Signal(QtGui.QTextBlock, int)
-    blocksAdded = QtCore.Signal(QtGui.QTextBlock, int)
     modeChanged = QtCore.Signal()
     beginMode = QtCore.Signal(object)
     endMode = QtCore.Signal(object)
@@ -156,9 +153,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
         self.syntaxHighlighter.aboutToHighlightChange.connect(self.aboutToHighlightChange.emit)
         self.syntaxHighlighter.highlightChanged.connect(self.highlightChanged.emit)
-
-        #Block Count
-        self.lastBlockCount = self.document().blockCount()
         
         # By default
         self.showMarginLine = True
@@ -179,7 +173,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)
 
         # Editor signals
-        self.blockCountChanged.connect(self.on_blockCountChanged)
         self.updateRequest.connect(self.updateSideBars)
         self.themeChanged.connect(self.highlightEditor)
         
@@ -263,7 +256,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.__blockUserDataHandlers.append(handler)
 
     def blockUserData(self, block):
-        return block.userData() or _empty_user_data
+        return block.userData() or self.findProcessor("syntax").emptyUserData()
         if block.userData() is None:
             userData = CodeEditorBlockUserData()
             # Indent and content
@@ -293,15 +286,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         # Handlers
         for handler in self.__blockUserDataHandlers:
             handler.processBlockUserData(sourceText, cursor, block, userData)
-
-    def on_blockCountChanged(self, newBlockCount):
-        self.logger().debug("block Count changed")
-        block = self.textCursor().block()
-        if self.lastBlockCount > self.document().blockCount():
-            self.blocksRemoved.emit(block, self.lastBlockCount - newBlockCount)
-        else:
-            self.blocksAdded.emit(block, newBlockCount - self.lastBlockCount)
-        self.lastBlockCount = self.document().blockCount()
 
     # ------------- Base Editor Api
     @classmethod

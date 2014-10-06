@@ -20,7 +20,16 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.scope = None
         self.state = self.NO_STATE
         self.stacks = {}
-        self.scope_name = ""
+        self.setScopeName("")
+    
+    def setScopeName(self, name):
+        self.scope_name = name
+        self.empty_scope = Scope(self.scope_name)
+        self.empty_token = CodeEditorToken(0, 0, self.empty_scope, "")
+        self.empty_user_data = CodeEditorBlockUserData((self.empty_token, ), -1, -1, "", True)
+    
+    def emptyUserData(self):
+        return self.empty_user_data
 
     def managed(self):
         return True
@@ -39,9 +48,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
             self.endExecution(self.bundleItem)
 
         CodeEditorBaseProcessor.beginExecution(self, syntax)
-
-	self._scope_name = syntax.scopeName
-        self.stack = [(syntax.grammar, None)]
+        
         self.beginParse(syntax.scopeName)
         
         self.editor.syntaxHighlighter.start()
@@ -67,35 +74,40 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         return helpers.qt_int(
             hash("%s:%s:%d" % (
                 self.scope_name, 
-                block.text() + "\n",
+                block_text,
                 block.previous().userState())
         ))
 
-    def parseBlock(self, block):
+    def blockUserData(self, block):
         if self.bundleItem is None:
-            return (), -1, -1, "", True
+            return self.empty_user_data
+        
+        # ------ Restore State
+        self.restore(block.previous().userData() or self.empty_user_data)
+                
         block_text = block.text() + "\n"
         revision = helpers.qt_int(hash("%s:%s:%d" % (self.scope_name, block_text,
             self.state)))
         self.bundleItem.parseLine(self.stack, block_text, self)
         self.state = len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
 
-        return tuple(self.__tokens), self.state, revision, text.white_space(block_text), block_text.strip() == ""
-
-    def blockUserData(self, block):
-        self.restore(self.editor.blockUserData(block.previous()))
-        user_data = CodeEditorBlockUserData(*self.parseBlock(block))
+        user_data = CodeEditorBlockUserData(tuple(self.__tokens), self.state, 
+            revision, text.white_space(block_text), block_text.strip() == "")
+        
+        # ------- Save State
         self.save(user_data)
         return user_data
 
     # -------- Parsing
     def beginParse(self, scopeName):
-        self.scope_name = scopeName
+        self.setScopeName(scopeName)
         self.scope = Scope(scopeName)
+        self.stack = [(self.bundleItem.grammar, None)]
 
     def endParse(self, scopeName):
-        self.scope_name = ""
+        self.setScopeName("")
         self.scope.pop_scope()
+        self.stack = []
 
     # -------- Line
     def beginLine(self, line):
