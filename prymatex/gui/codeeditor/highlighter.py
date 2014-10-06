@@ -21,7 +21,7 @@ class HighlighterThread(QtCore.QThread):
         self.deleteLater()
 
     def run(self):
-        self.msleep(300)
+        self.msleep(100)
         block = self.parent().document().begin()
         while block.isValid() and self._running:
             user_data = self.parent().syntaxProcessor.blockUserData(block)
@@ -37,6 +37,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def __init__(self, editor):
         super(CodeEditorSyntaxHighlighter, self).__init__(editor)
+        self.highlightBlock = self._nop
         self.setDocument(editor.document())
         self.editor = editor
         self.syntaxProcessor = editor.findProcessor("syntax")
@@ -45,6 +46,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.thread = None
 
     def on_thread_highlightingReady(self):
+        print("Termino")
         self.highlightBlock = self._highlight
         self.document().markContentsDirty(0, self.document().characterCount())
         self.highlightChanged.emit()

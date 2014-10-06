@@ -69,7 +69,7 @@ class WordsCompletionModel(CompletionBaseModel):
         while block.isValid():
             user_data = self.editor.blockUserData(block)
             all_words = map(lambda token: config.RE_WORD.findall(token.chunk),
-                user_data.tokens()[::-1])
+                user_data.tokens[::-1])
             for words in all_words:
                 self.suggestions.update(words)
             block = block.next()

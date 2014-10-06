@@ -32,7 +32,7 @@ class CodeEditorThemeProcessor(CodeEditorBaseProcessor, ThemeProcessorMixin):
         CodeEditorBaseProcessor.endExecution(self, bundleItem)
 
     def textCharFormat(self, scope):
-        return self.bundleItem.textCharFormat(scope)
+        return self.bundleItem is not None and self.bundleItem.textCharFormat(scope) or QtGui.QTextCharFormat()
 
     def textCharFormats(self, user_data):
         formats = []
