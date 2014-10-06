@@ -36,4 +36,4 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
                 return token
         return _empty_token
 
-_empty_user_data = CodeEditorBlockUserData((), -1, -1, "", True)
+_empty_user_data = CodeEditorBlockUserData((_empty_token, ), -1, -1, "", True)

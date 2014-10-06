@@ -256,13 +256,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         from time import time
         self.syntaxHighlighter.stop()
         super(CodeEditor, self).setPlainText(text)
-        self.highlightTime = time()
-        def highlightReady(editor):
-            def _ready(*args):
-                self.logger().info("Time %f" % (time() - self.highlightTime))
-            return _ready
-        self.syntaxHighlighter.start(highlightReady(self))
-        #self.syntaxHighlighter.start(lambda editor = self: editor.highlightChanged.emit())
+        self.syntaxHighlighter.start()
 
     # --------------- Block User Data
     def registerBlockUserDataHandler(self, handler):
