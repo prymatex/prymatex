@@ -34,3 +34,9 @@ class CodeEditorThemeProcessor(CodeEditorBaseProcessor, ThemeProcessorMixin):
 
     def textCharFormat(self, scope):
         return self.bundleItem.textCharFormat(scope)
+
+    def textCharFormats(self, user_data):
+        formats = []
+        for token in user_data.tokens:
+            formats.append(self.textCharFormat(token.scope))
+        return formats

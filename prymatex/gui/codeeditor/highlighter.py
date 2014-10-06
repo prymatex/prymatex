@@ -12,12 +12,16 @@ class HighlighterThread(QtCore.QThread):
         block = self.parent().document().begin()
         highlighted = []
         while block.isValid():
-            data = self.parent().syntaxProcessor.parseBlock(block)
-            user_data = CodeEditorBlockUserData(*data)
-            highlighted.append((
-                block.blockNumber(),
-                user_data)
-            )
+            user_data = self.parent().syntaxProcessor.blockUserData(block)
+            self.parent()._process(block, user_data)
+            formats = self.parent().themeProcessor.textCharFormats(user_data)
+            block.layout().setAdditionalFormats(formats)
+            #data = self.parent().syntaxProcessor.parseBlock(block)
+            #user_data = CodeEditorBlockUserData(*data)
+            #highlighted.append((
+            #    block.blockNumber(),
+            #    user_data)
+            #)
             block = block.next()
             self.usleep(300)
         self.highlightingReady.emit(highlighted)
@@ -42,6 +46,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self._process(block, user_data)
             self.rehighlightBlock(block)
         self.highlightBlock = self._highlight
+        self.document().markContentsDirty(0, self.document().characterCount())
         self.highlightChanged.emit()
 
     def stop(self):
