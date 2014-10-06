@@ -29,8 +29,7 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
         return PreferenceMasterSettings.FOLDING_NONE
 
     def tokenAt(self, pos):
-        # TODO Validar que pos "<= token.end" funcione bien porque puede ser tenga 
-        # que obtener la mejor opcion buscando entre dos candidatos
         for token in self.tokens[::-1]:
-            if token.start <= pos <= token.end:
+            if token.start <= pos < token.end:
                 return token
+        return self.tokens[0]
