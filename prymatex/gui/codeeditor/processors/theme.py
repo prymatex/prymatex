@@ -38,5 +38,9 @@ class CodeEditorThemeProcessor(CodeEditorBaseProcessor, ThemeProcessorMixin):
     def textCharFormats(self, user_data):
         formats = []
         for token in user_data.tokens:
-            formats.append(self.textCharFormat(token.scope))
+            frange = QtGui.QTextLayout.FormatRange()
+            frange.start = token.start
+            frange.length = token.end - token.start
+            frange.format = self.textCharFormat(token.scope)
+            formats.append(frange)
         return formats

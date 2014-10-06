@@ -7,24 +7,28 @@ from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserData
 from prymatex.qt import QtCore, QtGui, QtWidgets, helpers
 
 class HighlighterThread(QtCore.QThread):
-    highlightingReady = QtCore.Signal(object)
+    highlightingReady = QtCore.Signal()
+    def __init__(self, highlighter):
+        super(HighlighterThread, self).__init__(highlighter)
+        self._highlighter = highlighter
+        self._running = True
+    
+    def stop(self):
+        self._running = False
+        self.terminate()
+        self.wait()
+        self.deleteLater()
+
     def run(self):
+        self.msleep(100)
         block = self.parent().document().begin()
-        highlighted = []
-        while block.isValid():
+        while block.isValid() and self._running:
             user_data = self.parent().syntaxProcessor.blockUserData(block)
             self.parent()._process(block, user_data)
             formats = self.parent().themeProcessor.textCharFormats(user_data)
             block.layout().setAdditionalFormats(formats)
-            #data = self.parent().syntaxProcessor.parseBlock(block)
-            #user_data = CodeEditorBlockUserData(*data)
-            #highlighted.append((
-            #    block.blockNumber(),
-            #    user_data)
-            #)
             block = block.next()
-            self.usleep(300)
-        self.highlightingReady.emit(highlighted)
+        self.highlightingReady.emit()
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     aboutToHighlightChange = QtCore.Signal()
@@ -37,24 +41,22 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.syntaxProcessor = editor.findProcessor("syntax")
         self.themeProcessor = editor.findProcessor("theme")
         self.editor.aboutToClose.connect(self.stop)
-        self.thread = HighlighterThread(self)
-        self.thread.highlightingReady.connect(self.on_thread_highlightingReady)
+        self.thread = None
 
-    def on_thread_highlightingReady(self, highlighted):
-        for number, user_data in highlighted:
-            block = self.document().findBlockByNumber(number)
-            self._process(block, user_data)
-            self.rehighlightBlock(block)
+    def on_thread_highlightingReady(self):
         self.highlightBlock = self._highlight
         self.document().markContentsDirty(0, self.document().characterCount())
         self.highlightChanged.emit()
 
     def stop(self):
         self.highlightBlock = self._nop
-        self.thread.terminate()
-        self.thread.wait()
+        if self.thread is not None:
+            self.thread.stop()
+            self.thread = None
 
     def start(self, callback=None):
+        self.thread = HighlighterThread(self)
+        self.thread.highlightingReady.connect(self.on_thread_highlightingReady)
         self.thread.start()
 
     def _process(self, block, user_data):
@@ -67,7 +69,6 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def _highlight(self, text):
         block = self.currentBlock()
-
         # ------ Syntax
         revision = self.syntaxProcessor.buildRevision(block)
         if block.revision() != revision:
@@ -75,7 +76,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self._process(block, user_data)
         else:
             user_data = block.userData()
-        
+
         # ------ Formats
         if user_data is not None:
             for token in user_data.tokens:

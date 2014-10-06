@@ -55,7 +55,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.state = user_data.state
         if user_data.revision in self.stacks:
             self.stack, self.scope = self.stacks[user_data.revision]
-        else:
+        elif self.bundleItem is not None:
             self.stack, self.scope = ([(self.bundleItem.grammar, None)], Scope(self.bundleItem.scopeName))
 
     def save(self, user_data):
