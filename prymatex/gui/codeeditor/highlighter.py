@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 import re
 
+import time
 from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserData
 from prymatex.qt import QtCore, QtGui, QtWidgets, helpers
 
@@ -20,7 +21,7 @@ class HighlighterThread(QtCore.QThread):
         self.deleteLater()
 
     def run(self):
-        self.msleep(100)
+        self.msleep(300)
         block = self.parent().document().begin()
         while block.isValid() and self._running:
             user_data = self.parent().syntaxProcessor.blockUserData(block)
