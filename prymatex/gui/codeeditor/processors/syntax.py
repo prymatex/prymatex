@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import helpers
 from prymatex.support import Scope
 from prymatex.support.processor import SyntaxProcessorMixin
 from prymatex.utils import text
@@ -70,13 +69,13 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
             self.stacks[user_data.revision] = (self.stack[:], self.scope.clone())
 
     def buildRevision(self, block):
+        # http://qt-project.org/doc/qt-4.8/qvariant.html#toInt
         block_text = block.text() + "\n"
-        return helpers.qt_int(
-            hash("%s:%s:%d" % (
+        return hash("%s:%s:%d" % (
                 self.scope_name, 
                 block_text,
                 block.previous().userState())
-        ))
+        ) & (0xFFFFFFFF >> 2)
 
     def blockUserData(self, block):
         if self.bundleItem is None:
@@ -86,8 +85,8 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.restore(block.previous().userData() or self.empty_user_data)
                 
         block_text = block.text() + "\n"
-        revision = helpers.qt_int(hash("%s:%s:%d" % (self.scope_name, block_text,
-            self.state)))
+        revision = hash("%s:%s:%d" % (self.scope_name, block_text,
+            self.state)) & (0xFFFFFFFF >> 2)
         self.bundleItem.parseLine(self.stack, block_text, self)
         self.state = len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
 
