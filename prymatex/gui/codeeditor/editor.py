@@ -1311,11 +1311,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             menues.append("-")
         if self.filePath() is not None:
             menues.extend([
-                {   "text": "Path to clipboard",
+                {   "text": "Path to Clipboard",
                     "triggered": lambda ed = self: self.application().clipboard().setText(ed.filePath())  },
-                {   "text": "Name to clipboard",
+                {   "text": "Name to Clipboard",
                     "triggered": lambda ed = self: self.application().clipboard().setText(ed.application.fileManager.basename(ed.filePath()))  },
-                {   "text": "Directory to clipboard",
+                {   "text": "Directory to Clipboard",
                     "triggered": lambda ed = self: self.application().clipboard().setText(ed.application.fileManager.dirname(ed.filePath()))  },
                 ])
         return menues
@@ -1342,21 +1342,21 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             ]
         menu["view"] = [
                 '-',
-                {'text': "Zoom in",
+                {'text': "Zoom In",
                   'sequence': ("Editor", "ZoomIn"),
                   'triggered': lambda ed, checked=False: ed.zoomIn()},
-                 {'text': "Zoom out",
+                 {'text': "Zoom Out",
                   'sequence': ("Editor", "ZoomOut"),
                   'triggered': lambda ed, checked=False: ed.zoomOut()},
                 '-',
                 {'name': 'leftGutter',
-                 'text': 'Left gutter',
+                 'text': 'Left Gutter',
                  'items': []},
                 {'name': 'rightGutter',
-                 'text': 'Right gutter',
+                 'text': 'Right Gutter',
                  'items': []
                 }, '-',
-                {'text': "Word wrap",
+                {'text': "Word Wrap",
                  'items': [{
                         'text': "Automatic",
                         'checkable': True,
@@ -1371,7 +1371,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                             ed.wordWrapSize == size
                     } for size in cls.STANDARD_SIZES]) ]
                 },
-                {'text': "Margin line",
+                {'text': "Margin Line",
                  'items': [{
                         'text': "None",
                         'checkable': True,
@@ -1385,21 +1385,21 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                             ed.marginLineSize == size
                     } for size in cls.STANDARD_SIZES]) ]
                 }, '-',
-                {'text': "Indent guide",
+                {'text': "Indent Guide",
                  'checkable': True,
                  'triggered': cls.on_actionIndentGuide_triggered,
                  'testChecked': lambda ed: bool(ed.getFlags() & ed.IndentGuide)
                 },
-                {'text': "Highlight current line",
+                {'text': "Highlight Current Line",
                  'checkable': True,
                  'triggered': cls.on_actionHighlightCurrentLine_triggered,
                  'testChecked': lambda ed: bool(ed.getFlags() & ed.HighlightCurrentLine)
                 },
-                {'text': "Show tabs and spaces",
+                {'text': "Show Tabs and Spaces",
                  'checkable': True,
                  'triggered': cls.on_actionShowTabsAndSpaces_triggered,
                  'testChecked': lambda ed: bool(ed.getFlags() & ed.ShowTabsAndSpaces) },
-                {'text': "Show line and paragraph",
+                {'text': "Show Line and Paragraph",
                  'checkable': True,
                  'triggered': cls.on_actionShowLineAndParagraphs_triggered,
                  'testChecked': lambda ed: bool(ed.getFlags() & ed.ShowLineAndParagraphs)
@@ -1454,14 +1454,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                      'sequence': ("Editor", "ConvertTitlecase", 'Ctrl+Alt+U'),
                      'triggered': lambda ed, checked=False: ed.convertToTitlecase(),
                      },
-                    {'text': 'Opposite case',
+                    {'text': 'Opposite Case',
                      'sequence': ("Editor", "ConvertOppositeCase", 'Ctrl+G'),
                      'triggered': lambda ed, checked=False: ed.convertToOppositeCase(),
                      }, '-',
-                    {'text': 'Tab to spaces',
+                    {'text': 'Tab to Spaces',
                      'triggered': lambda ed, checked=False: ed.convertTabsToSpaces(),
                      },
-                    {'text': 'Spaces to tabs',
+                    {'text': 'Spaces to Tabs',
                      'triggered': lambda ed, checked=False: ed.convertSpacesToTabs(),
                      }, '-',
                     {'text': 'Transpose',
@@ -1471,18 +1471,18 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 ]}, '-',
                 {'text': 'Indentation',
                  'items': [
-                    {'text': 'Indent using spaces',
+                    {'text': 'Indent Using Spaces',
                      'checkable': True,
                      'triggered': lambda ed, checked: ed.on_actionIndentation_triggered(checked),
                      'testChecked': lambda ed: ed.indentUsingSpaces
                      }, '-', ] + [ tuple([
-                    {'text': 'Tab width: %d' % size,
+                    {'text': 'Tab Width: %d' % size,
                      'checkable': True,
                      'triggered': lambda ed, checked, size = size: ed.on_actionIndentation_triggered(ed.indentUsingSpaces, size = size),
                      'testChecked': lambda ed, size = size: (ed.indentUsingSpaces and ed.indentationWidth == size) or (not ed.indentUsingSpaces and ed.tabWidth == size)
                      } for size in range(1, 9) ]) ]
                 },
-                {'text': 'Line endings',
+                {'text': 'Line Endings',
                  'items': [tuple(
                      [{'text': '%s' % name,
                      'checkable': True,
@@ -1498,7 +1498,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                      'testChecked': lambda ed, codec = codec: ed.encoding == codec
                      } for codec, aliases, language in encoding.CODECS])
                 ]}, '-',
-                {'text': 'Select bundle item',
+                {'text': 'Select Bundle Item',
                  'sequence': ("Editor", "SelectBundleItem", 'Meta+Ctrl+T'),
                  'triggered': cls.on_actionSelectBundleItem_triggered,
                  },
@@ -1510,33 +1510,33 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 "-",
                 {'text': 'Bookmarks',
                  'items': [
-                    {'text': 'Toggle bookmark',
+                    {'text': 'Toggle Bookmark',
                      'triggered': cls.toggleBookmark,
                      'sequence': ("Editor", "ToggleBookmark", 'Ctrl+F2'),
                      },
-                    {'text': 'Next bookmark',
+                    {'text': 'Next Bookmark',
                      'triggered': cls.bookmarkNext,
                      'sequence': ("Editor", "NextBookmark", 'F2'),
                      },
-                    {'text': 'Previous bookmark',
+                    {'text': 'Previous Bookmark',
                      'triggered': cls.bookmarkPrevious,
                      'sequence': ("Editor", "PreviousBookmark", 'Shift+F2'),
                      },
-                    {'text': 'Clear bookmarks',
+                    {'text': 'Clear Bookmarks',
                      'triggered': cls.clearBookmarks,
                      'sequence': ("Editor", "ClearBookmarks", 'Ctrl+Shift+F2'),
                      },
-                    {'text': 'Select all bookmarks',
+                    {'text': 'Select All Bookmarks',
                      'triggered': cls.selectAllBookmarks,
                      'sequence': ("Editor", "SelectAllBookmarks", 'Alt+F2'),
                      }
                 ]},
                 "-",
-                {'text': 'Go to &symbol',
+                {'text': 'Go to &Symbol',
                  'triggered': cls.on_actionGoToSymbol_triggered,
                  'sequence': ("Editor", "GoToSymbol", 'Meta+Ctrl+Shift+O'),
                  },
-                {'text': 'Go to &bookmark',
+                {'text': 'Go to &Bookmark',
                  'triggered': cls.on_actionGoToBookmark_triggered,
                  'sequence': ("Editor", "GoToBookmark", 'Meta+Ctrl+Shift+B'),
                  }
