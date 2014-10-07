@@ -93,7 +93,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             # Load original default syntax
             self._default_syntax = self.application().supportManager.getBundleItem(self._settings.default("defaultSyntax"))
         self.insertBundleItem(self._default_syntax)
-        
+
     @ConfigurableItem(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
     def defaultTheme(self, uuid):
         self._default_theme = self.application().supportManager.getBundleItem(uuid)
@@ -101,7 +101,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             # Load original default theme
             self._default_theme = self.application().supportManager.getBundleItem(self._settings.default("defaultTheme"))
         self.insertBundleItem(self._default_theme)
-        
+
     @ConfigurableItem(default = MarginLine | IndentGuide | HighlightCurrentLine)
     def defaultFlags(self, flags):
         self.setFlags(flags)
@@ -151,9 +151,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         #Highlighter
         self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
-        self.syntaxHighlighter.aboutToHighlightChange.connect(self.aboutToHighlightChange.emit)
-        self.syntaxHighlighter.highlightChanged.connect(self.highlightChanged.emit)
-        
+
         # By default
         self.showMarginLine = True
         self.showIndentGuide = True
@@ -371,11 +369,15 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             position = self.document().characterCount()
         block = self.document().findBlock(position)
         return self.blockUserData(block).tokenAt(position - block.position())
+        
+    def tokens(self, cursor):
+        return (self.tokenAt(cursor.selectionStart() - 1),
+            self.tokenAt(cursor.selectionEnd()))
 
     def scope(self, cursor = None):
         cursor = cursor or self.textCursor()
-        leftToken, rightToken = (self.tokenAt(cursor.selectionStart() - 1),
-            self.tokenAt(cursor.selectionEnd()))
+        leftToken, rightToken = self.tokens(cursor)
+        
         # Cursor scope
         leftScope, rightScope = [], []
         leftCursor = self.newCursorAtPosition(cursor.selectionStart())
@@ -403,8 +405,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def preferenceSettings(self, cursor = None):
         cursor = cursor or self.textCursor()
-        leftToken, rightToken = (self.tokenAt(cursor.selectionStart() - 1),
-            self.tokenAt(cursor.selectionEnd()))
+        leftToken, rightToken = self.tokens(cursor)
         return self.application().supportManager.getPreferenceSettings(leftToken.scope, leftToken.scope)
 
     # ------------ Obteniendo datos del editor
