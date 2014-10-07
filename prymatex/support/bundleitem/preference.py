@@ -182,7 +182,7 @@ class PreferenceMasterSettings(object):
     
     def transformSymbol(self, text):
         transformation = self.symbolTransformation
-        return transformation and transformation.transform(text) or ""
+        return transformation and transformation.transform(text)
 
     def indentationFlags(self, line):
         if not hasattr(self, "_indent_settings"):

@@ -3,6 +3,7 @@
 
 import difflib
 from bisect import bisect
+from collections import OrderedDict
 
 from prymatex.qt import QtCore, QtGui
 
@@ -14,7 +15,7 @@ from prymatex.models.support import BundleItemTreeNode
 #=========================================================
 # Bookmark
 #=========================================================
-class BookmarkListModel(QtCore.QAbstractListModel): 
+class BookmarkListModel(QtCore.QAbstractListModel):
     def __init__(self, editor):
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
@@ -40,7 +41,7 @@ class BookmarkListModel(QtCore.QAbstractListModel):
             return None
         cursor = self.bookmarks[index.row()]
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole ]:
-            block =  cursor.block()
+            block = cursor.block()
             return "L%d, C%d - %s" % (block.blockNumber() + 1,
                 cursor.columnNumber(), cursor.hasSelection() and cursor.selectedText() or block.text().strip())
         elif role == QtCore.Qt.DecorationRole:
@@ -115,47 +116,51 @@ class SymbolListModel(QtCore.QAbstractListModel):
         }
         
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
+        
         #Connects
         self.editor.aboutToHighlightChange.connect(self.on_editor_aboutToHighlightChange)
-        
+        self.editor.highlightChanged.connect(self.on_editor_highlightChanged)
+     
+    # --------------- Signals   
     def on_document_contentsChange(self, position, removed, added):
         block = self.editor.document().findBlock(position)
         if removed:
-            print("quitando simbolos")
+            first_cursor = self.editor.newCursorAtPosition(block.position())
+            index = bisect(self.symbols, first_cursor)
+            remove = []
+            for symbol_cursor in self.symbols[index:]:
+                settings = self.editor.preferenceSettings(symbol_cursor)
+                if not settings.transformSymbol(symbol_cursor.block().text()):
+                    remove.append(symbol_cursor)
+                if symbol_cursor.position() > position + removed:
+                    break
+            print(remove)
         if added:
-            print("agregando simbolos")
+            last = self.editor.document().findBlock(position + added)
+            while True:
+                user_data = self.editor.blockUserData(block)
+                symbol_cursor = self.editor.newCursorAtPosition(block.position() + len(user_data.indentation))
+                settings = self.editor.preferenceSettings(symbol_cursor)
+                if settings.showInSymbolList and settings.transformSymbol(symbol_cursor.block().text()):
+                    if symbol_cursor in self.symbols:
+                        index = self.symbols.index(symbol_cursor)
+                        self.dataChanged.emit(self.index(index), self.index(index))
+                    else:
+                        index = bisect(self.symbols, symbol_cursor)
+                        self.beginInsertRows(QtCore.QModelIndex(), index, index)
+                        self.symbols.insert(index, symbol_cursor)
+                        self.endInsertRows()
+                if block == last:
+                    break
+                block = block.next()
 
-    # -------------- Block User Data Handler Methods
-    def contributeToBlockUserData(self, userData):
-        userData.symbol = None
-
-    def processBlockUserData(self, text, cursor, block, userData):
-        symbol = None
-        settings = self.editor.preferenceSettings(cursor)
-        if settings.showInSymbolList:
-            symbol = settings.transformSymbol(text)
-        
-        if userData.symbol != symbol:
-            userData.symbol = symbol
-            if cursor in self.symbols:
-                index = self.symbols.index(cursor)
-                if symbol is None:
-                    self.beginRemoveRows(QtCore.QModelIndex(), index, index)
-                    self.symbols.remove(cursor)
-                    self.endRemoveRows()
-                else:
-                    self.dataChanged.emit(self.index(index), self.index(index))
-            else:
-                position = bisect_key(self.symbols, cursor, lambda cursor: cursor.position())
-                self.beginInsertRows(QtCore.QModelIndex(), position, position)
-                self.symbols.insert(position, cursor)
-                self.endInsertRows()
-
-    # ----------- Signals
     def on_editor_aboutToHighlightChange(self):
-        for cursor in self.symbols:
-            self.editor.blockUserData(cursor.block()).symbol = None
         self.symbols = []
+        self.editor.document().contentsChange.disconnect(self.on_document_contentsChange)
+        self.layoutChanged.emit()
+    
+    def on_editor_highlightChanged(self):
+        self.editor.document().contentsChange.connect(self.on_document_contentsChange)
         self.layoutChanged.emit()
 
     # ----------- Model api
@@ -172,16 +177,16 @@ class SymbolListModel(QtCore.QAbstractListModel):
         if not index.isValid() or index.row() >= len(self.symbols):
             return None
         
-        userData = self.editor.blockUserData(self.symbols[index.row()].block())
-        if userData:
-            if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
-                return userData.symbol
-            elif role == QtCore.Qt.DecorationRole:
-                return self.icons["typedef"]
+        symbol_cursor = self.symbols[index.row()]
+        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
+            settings = self.editor.preferenceSettings(symbol_cursor)
+            return settings.transformSymbol(symbol_cursor.block().text())
+        elif role == QtCore.Qt.DecorationRole:
+            return self.icons["typedef"]
 
     # ------------- Public api
-    def findBlockIndex(self, block):
-        position = bisect_key(self.symbols, block, lambda cursor: cursor.block().position()) - 1
+    def findSymbolIndex(self, cursor):
+        position = bisect(self.symbols, cursor)
         if position == -1:
             position = 0
         return position

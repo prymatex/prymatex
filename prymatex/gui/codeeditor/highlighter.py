@@ -32,11 +32,9 @@ class HighlighterThread(QtCore.QThread):
         self.highlightingReady.emit()
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
-    aboutToHighlightChange = QtCore.Signal()
-    highlightChanged = QtCore.Signal()
-
     def __init__(self, editor):
         super(CodeEditorSyntaxHighlighter, self).__init__(editor)
+        self.highlightBlock = self._nop
         self.setDocument(editor.document())
         self.editor = editor
         self.syntaxProcessor = editor.findProcessor("syntax")
@@ -47,7 +45,6 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def on_thread_highlightingReady(self):
         self.highlightBlock = self._highlight
         self.document().markContentsDirty(0, self.document().characterCount())
-        self.highlightChanged.emit()
 
     def stop(self):
         self.highlightBlock = self._nop
@@ -56,9 +53,10 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.thread = None
 
     def start(self, callback=None):
-        self.aboutToHighlightChange.emit()
         self.thread = HighlighterThread(self)
         self.thread.highlightingReady.connect(self.on_thread_highlightingReady)
+        self.thread.started.connect(self.editor.aboutToHighlightChange.emit)
+        self.thread.finished.connect(self.editor.highlightChanged.emit)
         self.thread.start()
 
     def _process(self, block, user_data):

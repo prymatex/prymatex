@@ -188,7 +188,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtWidgets.QWidget
             cursor.blockNumber() + 1, cursor.columnNumber() + 1, 
             cursor.selectionEnd() - cursor.selectionStart()))
         #Set index of current symbol
-        self.comboBoxSymbols.setCurrentIndex(self.comboBoxSymbols.model().findBlockIndex(cursor))
+        self.comboBoxSymbols.setCurrentIndex(self.comboBoxSymbols.model().findSymbolIndex(cursor))
 
     def on_editor_syntaxChanged(self):
         model = self.comboBoxSyntaxes.model()
