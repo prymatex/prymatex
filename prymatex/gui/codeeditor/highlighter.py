@@ -8,7 +8,7 @@ from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserData
 from prymatex.qt import QtCore, QtGui, QtWidgets, helpers
 
 class HighlighterThread(QtCore.QThread):
-    highlightingReady = QtCore.Signal()
+    highlightReady = QtCore.Signal()
     def __init__(self, highlighter):
         super(HighlighterThread, self).__init__(highlighter)
         self._highlighter = highlighter
@@ -29,7 +29,7 @@ class HighlighterThread(QtCore.QThread):
             formats = self.parent().themeProcessor.textCharFormats(user_data)
             block.layout().setAdditionalFormats(formats)
             block = block.next()
-        self.highlightingReady.emit()
+        self.highlightReady.emit()
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def __init__(self, editor):
@@ -43,7 +43,6 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.thread = None
 
     def on_thread_highlightingReady(self):
-        print("Termino")
         self.highlightBlock = self._highlight
         self.document().markContentsDirty(0, self.document().characterCount())
 
@@ -55,7 +54,8 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def start(self, callback=None):
         self.thread = HighlighterThread(self)
-        self.thread.highlightingReady.connect(self.on_thread_highlightingReady)
+        self.thread.highlightReady.connect(self.on_thread_highlightingReady)
+        self.thread.highlightReady.connect(self.editor.highlightReady.emit)
         self.thread.started.connect(self.editor.aboutToHighlightChange.emit)
         self.thread.finished.connect(self.editor.highlightChanged.emit)
         self.thread.start()
@@ -70,6 +70,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def _highlight(self, text):
         block = self.currentBlock()
+
         # ------ Syntax
         revision = self.syntaxProcessor.buildRevision(block)
         if block.revision() != revision:

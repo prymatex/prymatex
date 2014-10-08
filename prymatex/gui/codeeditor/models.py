@@ -47,29 +47,6 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         elif role == QtCore.Qt.DecorationRole:
             return self.icon_bookmark
 
-    # ----------- Public api
-    def bookmark(self, row):
-        return self.bookmarks[row]
-
-    def lineNumbers(self):
-        return [cursor.block().lineCount() for cursor in self.bookmarks]
-
-    def toggleBookmark(self, cursor):
-        if cursor in self.bookmarks:
-            index = self.bookmarks.index(cursor)
-            self.beginRemoveRows(QtCore.QModelIndex(), index, index)
-            self.bookmarks.remove(cursor)
-            self.endRemoveRows()
-        else:
-            position = bisect_key(self.bookmarks, cursor, lambda cursor: cursor.position())
-            self.beginInsertRows(QtCore.QModelIndex(), position, position)
-            self.bookmarks.insert(position, cursor)
-            self.endInsertRows()
-
-    def removeAllBookmarks(self):
-        self.beginRemoveRows(QtCore.QModelIndex(), 0, len(self.bookmarks))
-        self.bookmarks = []
-        self.endRemoveRows()
     
     def nextBookmark(self, cursor):
         if self.bookmarks:
@@ -119,6 +96,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
         
         #Connects
         self.editor.aboutToHighlightChange.connect(self.on_editor_aboutToHighlightChange)
+        self.editor.highlightReady.connect(self.on_editor_highlightingReady)
         self.editor.highlightChanged.connect(self.on_editor_highlightChanged)
      
     # --------------- Signals   
@@ -128,28 +106,24 @@ class SymbolListModel(QtCore.QAbstractListModel):
             first_cursor = self.editor.newCursorAtPosition(block.position())
             index = bisect(self.symbols, first_cursor)
             remove = []
+            for cursor in self.symbols:
+                print(cursor.block().blockNumber(), cursor.block().text())
             for symbol_cursor in self.symbols[index:]:
                 settings = self.editor.preferenceSettings(symbol_cursor)
-                if not settings.transformSymbol(symbol_cursor.block().text()):
+                if settings.showInSymbolList:
                     remove.append(symbol_cursor)
                 if symbol_cursor.position() > position + removed:
                     break
-            print(remove)
+            # TODO Buscarlos porque quedan en el mismo lugar :)
+            for symbol_cursor in remove:
+                index = self.symbols.index(symbol_cursor)
+                self.beginRemoveRows(QtCore.QModelIndex(), index, index)
+                self.symbols.remove(symbol_cursor)
+                self.endRemoveRows()
         if added:
             last = self.editor.document().findBlock(position + added)
             while True:
-                user_data = self.editor.blockUserData(block)
-                symbol_cursor = self.editor.newCursorAtPosition(block.position() + len(user_data.indentation))
-                settings = self.editor.preferenceSettings(symbol_cursor)
-                if settings.showInSymbolList and settings.transformSymbol(symbol_cursor.block().text()):
-                    if symbol_cursor in self.symbols:
-                        index = self.symbols.index(symbol_cursor)
-                        self.dataChanged.emit(self.index(index), self.index(index))
-                    else:
-                        index = bisect(self.symbols, symbol_cursor)
-                        self.beginInsertRows(QtCore.QModelIndex(), index, index)
-                        self.symbols.insert(index, symbol_cursor)
-                        self.endInsertRows()
+                self._add_symbol(block)
                 if block == last:
                     break
                 block = block.next()
@@ -159,9 +133,28 @@ class SymbolListModel(QtCore.QAbstractListModel):
         self.editor.document().contentsChange.disconnect(self.on_document_contentsChange)
         self.layoutChanged.emit()
     
+    def on_editor_highlightingReady(self):
+        block = self.editor.document().begin()
+        while block.isValid():
+            self._add_symbol(block)
+            block = block.next()
+    
     def on_editor_highlightChanged(self):
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
         self.layoutChanged.emit()
+
+    def _add_symbol(self, block):
+        symbol_cursor = self.editor.newCursorAtPosition(block.position())
+        settings = self.editor.preferenceSettings(symbol_cursor)
+        if settings.showInSymbolList:
+            if symbol_cursor in self.symbols:
+                index = self.symbols.index(symbol_cursor)
+                self.dataChanged.emit(self.index(index), self.index(index))
+            else:
+                index = bisect(self.symbols, symbol_cursor)
+                self.beginInsertRows(QtCore.QModelIndex(), index, index)
+                self.symbols.insert(index, symbol_cursor)
+                self.endInsertRows()
 
     # ----------- Model api
     def index(self, row, column = 0, parent = None):
@@ -186,10 +179,8 @@ class SymbolListModel(QtCore.QAbstractListModel):
 
     # ------------- Public api
     def findSymbolIndex(self, cursor):
-        position = bisect(self.symbols, cursor)
-        if position == -1:
-            position = 0
-        return position
+        position = bisect(self.symbols, cursor) - 1
+        return position > 0 and position or 0
     
 #=========================================================
 # Bookmark Selectable Model

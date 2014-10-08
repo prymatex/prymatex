@@ -91,9 +91,9 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
         return False
 
     def __autorun_completer(self, event):
-        if not self.isActive() and not event.modifiers() and \
+        if not (event.modifiers() & QtCore.Qt.ControlModifier) and \
             text.asciify(event.text()) in COMPLETER_CHARS:
             alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-            if end - start >= self.editor.wordLengthToComplete:
+            if self.isActive() or end - start >= self.editor.wordLengthToComplete:
                 self.completer.setCompletionPrefix(alreadyTyped)
                 self.completer.runCompleter(self.editor.cursorRect())

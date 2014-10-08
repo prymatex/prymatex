@@ -45,8 +45,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     aboutToClose = QtCore.Signal()
     newLocationMemento = QtCore.Signal(object)
 
-    aboutToHighlightChange = QtCore.Signal()
-    highlightChanged = QtCore.Signal()
+    aboutToHighlightChange = QtCore.Signal()  # When the highlight go to change allways triggered
+    highlightReady = QtCore.Signal()       # When the highlight is ready not allways triggered
+    highlightChanged = QtCore.Signal()        # On the highlight changed allways triggered
     
     # ------------------ Flags
     ShowTabsAndSpaces     = 1<<0
@@ -374,10 +375,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return (self.tokenAt(cursor.selectionStart() - 1),
             self.tokenAt(cursor.selectionEnd()))
 
-    def scope(self, cursor = None):
+    def scope(self, cursor = None, auxiliary = True):
         cursor = cursor or self.textCursor()
         leftToken, rightToken = self.tokens(cursor)
-        
+        if not auxiliary:
+            return (leftToken.scope, rightToken.scope)
+
         # Cursor scope
         leftScope, rightScope = [], []
         leftCursor = self.newCursorAtPosition(cursor.selectionStart())
@@ -399,14 +402,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             rightScope.append("dyn.caret.end.line")
         if rightCursor.atEnd():
             rightScope.append("dyn.caret.end.document")
-
+        # TODO Una cache para los auxiliary del file path
         return (leftToken.scope.auxiliary(leftScope, self.filePath()),
             rightToken.scope.auxiliary(rightScope, self.filePath()))
 
     def preferenceSettings(self, cursor = None):
-        cursor = cursor or self.textCursor()
-        leftToken, rightToken = self.tokens(cursor)
-        return self.application().supportManager.getPreferenceSettings(leftToken.scope, leftToken.scope)
+        return self.application().supportManager.getPreferenceSettings(
+            *self.scope(cursor or self.textCursor(), auxiliary = False)
+        )
 
     # ------------ Obteniendo datos del editor
     def currentMode(self):
