@@ -103,18 +103,9 @@ class SymbolListModel(QtCore.QAbstractListModel):
     def on_document_contentsChange(self, position, removed, added):
         block = self.editor.document().findBlock(position)
         if removed:
-            first_cursor = self.editor.newCursorAtPosition(block.position())
-            index = bisect(self.symbols, first_cursor)
-            remove = []
-            for cursor in self.symbols:
-                print(cursor.block().blockNumber(), cursor.block().text())
-            for symbol_cursor in self.symbols[index:]:
-                settings = self.editor.preferenceSettings(symbol_cursor)
-                if settings.showInSymbolList:
-                    remove.append(symbol_cursor)
-                if symbol_cursor.position() > position + removed:
-                    break
-            # TODO Buscarlos porque quedan en el mismo lugar :)
+            remove = [ symbol_cursor 
+                for symbol_cursor in self.symbols \
+                if symbol_cursor.position() == position ]
             for symbol_cursor in remove:
                 index = self.symbols.index(symbol_cursor)
                 self.beginRemoveRows(QtCore.QModelIndex(), index, index)
