@@ -8,7 +8,23 @@ from prymatex.core import PrymatexEditorAddon
 class CodeEditorBaseMode(PrymatexEditorAddon, QtCore.QObject):
     def __init__(self, **kwargs):
         super(CodeEditorBaseMode, self).__init__(**kwargs)
-        self._is_active = False
+        self.preEventHandlers = {
+            QtCore.QEvent.KeyPress: {}
+        }
+        self.postEventHandlers = {
+            QtCore.QEvent.KeyPress: {}
+        }
+        self.setObjectName(self.__class__.__name__)
+
+    def registerKeyPressHandler(self, key, handler, after=False):
+        handlers = self.postEventHandlers if after else self.preEventHandlers
+        handlers[QtCore.QEvent.KeyPress].setdefault(key, []).append(handler)
+
+    def preKeyPressHandlers(self):
+        return self.preEventHandlers[QtCore.QEvent.KeyPress]
+
+    def postKeyPressHandlers(self):
+        return self.postEventHandlers[QtCore.QEvent.KeyPress]
 
     def name(self):
         return self.objectName()
@@ -20,11 +36,9 @@ class CodeEditorBaseMode(PrymatexEditorAddon, QtCore.QObject):
         pass
 
     def activate(self):
-        self._is_active = True
-        self.editor.beginMode.emit(self)
+        self.editor.beginCodeEditorMode(self)
 
     def deactivate(self):
-        self._is_active = False
-        self.editor.endMode.emit(self)
+        self.editor.endCodeEditorMode(self)
     
-    isActive = lambda self: self._is_active
+    isActive = lambda self: self.editor.currentMode() == self

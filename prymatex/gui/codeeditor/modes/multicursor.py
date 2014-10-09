@@ -27,10 +27,9 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.draggedCursors = []
         self.startPoint = self.doublePoint = None
         self.standardCursor = None
-        self.setObjectName("CodeEditorSnippetMode")
 
     def name(self):
-        return "MultiCursor"
+        return "MULTICURSOR"
 
     # ------- Overrides
     def initialize(self, **kwargs):
@@ -170,7 +169,8 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
             cursor = self.editor.textCursor()
             cursor.beginEditBlock()
             for cursor in self.activeCursors():
-                cursor.insertText(event.text())
+                self.editor.setTextCursor(cursor)
+                self.editor.keyPressEvent(event)
             cursor.endEditBlock()
             handled = True
         if handled:

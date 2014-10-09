@@ -110,18 +110,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # --------------------- init
     def __init__(self, **kwargs):
         super(CodeEditor, self).__init__(**kwargs)
-        self.__current_mode = self
-        self.__blockUserDataHandlers = []
-        self.__preKeyPressHandlers = {
-            QtCore.Qt.Key_Any: [ self.__insert_key_bundle_item, self.__insert_typing_pairs ],
-            QtCore.Qt.Key_Return: [ self.__first_line_syntax, self.__insert_new_line ],
-            QtCore.Qt.Key_Tab: [ self.__insert_tab_bundle_item, self.__indent_tab_behavior ],
-            QtCore.Qt.Key_Home: [ self.__move_cursor_to_line_start ],
-            QtCore.Qt.Key_Backtab: [ self.__unindent ],
-            QtCore.Qt.Key_Backspace: [ self.__unindent_backward_tab_behavior, self.__remove_backward_braces ],
-            QtCore.Qt.Key_Delete: [ self.__unindent_forward_tab_behavior, self.__remove_forward_braces ]
-        }
-        self.__postKeyPressHandlers = {}
+        self.__current_mode = self.__default_mode = None
 
         #Current pairs for cursor position (leftBrace <|> rightBrace, oppositeLeftBrace, oppositeRightBrace)
         # <|> the cursor is allways here
@@ -184,11 +173,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # TODO Algo mejor para acomodar el ancho del tabulador
         self.fontChanged.connect(lambda ed = self: ed.setTabStopWidth(ed.tabWidth * ed.characterWidth()))
-        self.beginMode.connect(self.on_beginMode)
-        self.endMode.connect(self.on_endMode)
-
-    def name(self):
-        return "Edit"
 
     def window(self):
         parent = self.parent()
@@ -204,12 +188,15 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.browserDock = self.window().findChild(QtWidgets.QDockWidget, "BrowserDock")
 
     # -------------- Self Signal Connect
-    def on_beginMode(self, mode):
+    def setDefaultCodeEditorMode(self, mode):
+        self.__current_mode = self.__default_mode = mode
+        
+    def beginCodeEditorMode(self, mode):
         self.__current_mode = mode
         self.modeChanged.emit()
 
-    def on_endMode(self, mode):
-        self.__current_mode = self
+    def endCodeEditorMode(self, mode):
+        self.__current_mode = self.__default_mode
         self.modeChanged.emit()
 
     # OVERRIDE: PrymatexEditor.addComponent()
@@ -245,7 +232,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # OVERRIDE: TextEditWidget.setPlainText()
     def setPlainText(self, text):
-        from time import time
         self.syntaxHighlighter.stop()
         super(CodeEditor, self).setPlainText(text)
         self.syntaxHighlighter.start()
@@ -660,6 +646,18 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             painter.drawLine(pos_margin + offset.x(), 0, pos_margin + offset.x(), self.viewport().height())
 
         painter.end()
+    
+    # OVERRIDE: TextEditWidget.keyPressEvent()
+    def keyPressEvent(self, event):
+        def handle(event, keyPressHandlers):
+            for handler in keyPressHandlers.get(QtCore.Qt.Key_Any, []):
+                yield handler(event)
+            for handler in keyPressHandlers.get(event.key(), []):
+                yield handler(event)
+
+        if not any(handle(event, self.currentMode().preKeyPressHandlers())):
+            super(CodeEditor, self).keyPressEvent(event)
+            list(handle(event, self.currentMode().postKeyPressHandlers()))
 
     # OVERRIDE: TextEditWidget.wheelEvent()
     def wheelEvent(self, event):
@@ -694,188 +692,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             TextEditWidget.mouseReleaseEvent(self, event)
 
     # --------------- Key press pre and post
-    def registerKeyPressHandler(self, key, handler, important = False, after = False):
-        keyPressHandlers = after and self.__postKeyPressHandlers or self.__preKeyPressHandlers
-        handlers = keyPressHandlers.setdefault(key, [])
-        if important:
-            handlers.insert(0, handler)
-        else:
-            handlers.append(handler)
+    def registerKeyPressHandler(self, key, handler, after = False):
+        self.__default_mode.registerKeyPressHandler(key, handler, after)
 
-    # OVERRIDE: TextEditWidget.keyPressEvent()
-    def keyPressEvent(self, event):
-        def handle(event, keyPressHandlers):
-            for handler in keyPressHandlers.get(QtCore.Qt.Key_Any, []):
-                yield handler(event)
-            for handler in keyPressHandlers.get(event.key(), []):
-                yield handler(event)
-        
-        if not any(handle(event, self.__preKeyPressHandlers)):
-            super(CodeEditor, self).keyPressEvent(event)
-
-            handle(event, self.__postKeyPressHandlers)
-
-    # ------------ Key press
-    def __first_line_syntax(self, event):
-        cursor = self.textCursor()
-        if cursor.blockNumber() == 0:
-            text = cursor.block().text()[:cursor.columnNumber()]
-            syntax = self.application().supportManager.findSyntaxByFirstLine(text)
-            if syntax is not None:
-                self.insertBundleItem(syntax)
-        return False
-    
-    def __insert_new_line(self, event):
-        self.insertNewLine(self.textCursor())
-        return True
-    
-    def __insert_key_bundle_item(self, event):
-        keyseq = int(event.modifiers()) + event.key()
-        # Try key equivalent
-        if keyseq in self.application().supportManager.getAllKeyEquivalentCodes():
-            leftScope, rightScope = self.scope()
-            items = self.application().supportManager.getKeyEquivalentItem(
-                keyseq, leftScope, rightScope)
-            self.insertBundleItem(items)
-            return bool(items)
-        return False
-    
-    def __insert_tab_bundle_item(self, event):
-        cursor = self.textCursor()
-        if cursor.hasSelection(): return False
-
-        trigger = self.application().supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
-        if not trigger: return False
-
-        triggerCursor = self.newCursorAtPosition(cursor.position(), cursor.position() - len(trigger))
-        leftScope, rightScope = self.scope(triggerCursor)
-        items = self.application().supportManager.getTabTriggerItem(
-            trigger, leftScope, rightScope)
-        self.insertBundleItem(items, textCursor = triggerCursor)
-        return bool(items)
-
-    def __indent_tab_behavior(self, event):
-        start, end = self.selectionBlockStartEnd()
-        if start != end:
-            self.indentBlocks()
-        else:
-            self.textCursor().insertText(self.tabKeyBehavior())
-        return True
-    
-    def __move_cursor_to_line_start(self, event):
-        cursor = self.textCursor()
-        #Solo si el cursor no esta al final de la indentacion
-        block = cursor.block()
-        newPosition = block.position() + len(self.blockIndentation(block))
-        if newPosition != cursor.position():
-            cursor.setPosition(newPosition, event.modifiers() == QtCore.Qt.ShiftModifier and QtGui.QTextCursor.KeepAnchor or QtGui.QTextCursor.MoveAnchor)
-            self.setTextCursor(cursor)
-            return True
-        return False
-
-    def __unindent(self, event):
-        self.unindentBlocks()
-       
-    def __unindent_backward_tab_behavior(self, event):
-        cursor = self.textCursor()
-        if cursor.hasSelection(): return False
-        lineText = cursor.block().text()
-        if lineText[:cursor.columnNumber()].endswith(self.tabKeyBehavior()):
-            counter = cursor.columnNumber() % self.tabWidth or self.tabWidth
-            self.newCursorAtPosition(cursor.position(), cursor.position() - counter).removeSelectedText()
-            return True
-        return False
-        
-    def __remove_backward_braces(self, event):
-        cursor = self.textCursor()
-        if cursor.hasSelection(): return False
-        cursor1, cursor2 = self.currentBracesPairs(cursor, direction = "left")
-        if cursor1 and cursor2  and (cursor1.selectionStart() == cursor2.selectionEnd() or cursor1.selectionEnd() == cursor2.selectionStart()):
-            cursor.beginEditBlock()
-            cursor1.removeSelectedText()
-            cursor2.removeSelectedText()
-            cursor.endEditBlock()
-            return True
-        return False
-
-    def __unindent_forward_tab_behavior(self, event):
-        cursor = self.textCursor()
-        if cursor.hasSelection(): return False
-        lineText = cursor.block().text()
-        if lineText[cursor.columnNumber():].startswith(self.tabKeyBehavior()):
-            counter = cursor.columnNumber() % self.tabWidth or self.tabWidth
-            self.newCursorAtPosition(cursor.position(), cursor.position() + counter).removeSelectedText()
-            return True
-        return False
-        
-    def __remove_forward_braces(self, event):
-        cursor = self.textCursor()
-        if cursor.hasSelection(): return False
-        cursor1, cursor2 = self.currentBracesPairs(cursor, direction = "right")
-        if cursor1 and cursor2  and (cursor1.selectionStart() == cursor2.selectionEnd() or cursor1.selectionEnd() == cursor2.selectionStart()):
-            cursor.beginEditBlock()
-            cursor1.removeSelectedText()
-            cursor2.removeSelectedText()
-            cursor.endEditBlock()
-            return True
-        return False
-        
-    def __insert_typing_pairs(self, event):
-        cursor = self.textCursor()
-        settings = self.preferenceSettings(cursor)
-        character = event.text()
-        pairs = [pair for pair in settings.smartTypingPairs if character in pair]
-        
-        # No pairs
-        if not pairs: return False
-
-        pair = pairs[0]
-        
-        insert = replace = wrap = skip = False
-
-        isOpen = character == pair[0]
-        isClose = character == pair[1]
-        meta_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
-        if isClose:
-            cursor1, cursor2 = self.currentBracesPairs(cursor, direction = "right")
-            if cursor1 and cursor2 and \
-                character == cursor2.selectedText():
-                cursor.movePosition(QtGui.QTextCursor.NextCharacter)
-                self.setTextCursor(cursor)
-                return True
-            elif pair[0] != pair[1]:
-                return False
-        elif meta_down and isOpen:
-            if cursor.hasSelection():
-                selectedText = cursor.selectedText()
-                if any([selectedText == pair[0] for pair in settings.smartTypingPairs]):
-                    cursor1, cursor2 = self.currentBracesPairs(cursor)
-                    cursor1.insertText(pair[0])
-                    cursor2.insertText(pair[1])
-                    return True
-            else:
-                cursor1, cursor2 = self.currentBracesPairs(cursor)
-                if cursor1 and cursor2:
-                    if cursor.position() == cursor1.selectionStart():
-                        cursor1.setPosition(cursor1.selectionStart())
-                        cursor2.setPosition(cursor2.selectionEnd())
-                    else:
-                        cursor1.setPosition(cursor1.selectionEnd())
-                        cursor2.setPosition(cursor2.selectionStart())
-                    cursor.beginEditBlock()
-                    cursor1.insertText(pair[0])
-                    cursor2.insertText(pair[1])
-                    cursor.endEditBlock()
-                    return True
-                    
-        word, wordStart, wordEnd = self.currentWord()
-        if not (wordStart <= cursor.position() < wordEnd):
-            position = cursor.position()
-            cursor.insertText("%s%s" % (pair[0], pair[1]))
-            cursor.setPosition(position + 1)
-            self.setTextCursor(cursor)
-            return True
-        return False
+    def trySyntaxByText(self, cursor):
+        text = cursor.block().text()[:cursor.columnNumber()]
+        syntax = self.application().supportManager.findSyntaxByFirstLine(text)
+        if syntax is not None:
+            self.insertBundleItem(syntax)
         
     # ------------ Insert API
     def insertNewLine(self, cursor = None):

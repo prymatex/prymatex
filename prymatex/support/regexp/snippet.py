@@ -113,7 +113,7 @@ class SnippetHandler(object):
         found = None
         for holder in self.holders:
             holderStart, holderEnd = holder.position(self.memodict)
-            holderLength = holderEnd -holderStart
+            holderLength = holderEnd - holderStart
             if holderStart <= start <= end <= holderEnd and \
                 (found is None or holderLength < found):
                 found = holderLength

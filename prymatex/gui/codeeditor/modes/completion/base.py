@@ -26,7 +26,7 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
         self.setObjectName("CodeEditorComplitionMode")
 
     def name(self):
-        return "Complition"
+        return "COMPLITION"
 
     def initialize(self, **kwargs):
         super(CodeEditorComplitionMode, self).initialize(**kwargs)
@@ -43,10 +43,12 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
 
     def activate(self):
         self.editor.textChanged.connect(self.on_editor_textChanged)
+        self.editor.installEventFilter(self)
         super(CodeEditorComplitionMode, self).activate()
     
     def deactivate(self):
         self.editor.textChanged.disconnect(self.on_editor_textChanged)
+        self.editor.removeEventFilter(self)
         super(CodeEditorComplitionMode, self).deactivate()
     
     def on_editor_textChanged(self):
@@ -62,6 +64,10 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             self.activate()
         elif event.type() == QtCore.QEvent.Hide:
             self.deactivate()
+        elif event.type() == QtCore.QEvent.KeyPress and \
+            event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab):
+            print("Controlando")
+            event.ignore()
         return False
 
     def __editor_run_completer(self, suggestions, already_typed=None, callback = None, 

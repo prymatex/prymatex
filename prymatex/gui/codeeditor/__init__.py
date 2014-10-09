@@ -8,8 +8,8 @@ from .addons import (CodeEditorAddon, SmartUnindentAddon, SpellCheckerAddon,
 from .sidebar import (BookmarkSideBarAddon, LineNumberSideBarAddon,
     FoldingSideBarAddon, SelectionSideBarAddon)
 from .minimap import (MiniMapAddon)
-from .modes import (CodeEditorMultiCursorMode, CodeEditorSnippetMode, CodeEditorOverwriteMode,
-    CodeEditorComplitionMode)
+from .modes import (CodeEditorEditMode, CodeEditorMultiCursorMode,
+    CodeEditorSnippetMode, CodeEditorComplitionMode)
 from .status import CodeEditorStatus
 
 def registerPlugin(manager, descriptor):
@@ -19,10 +19,10 @@ def registerPlugin(manager, descriptor):
     manager.registerComponent(CodeEditorBookmarksDock)
 
     # ---------------- Modes
+    manager.registerComponent(CodeEditorEditMode, CodeEditor)
     manager.registerComponent(CodeEditorMultiCursorMode, CodeEditor)
     manager.registerComponent(CodeEditorSnippetMode, CodeEditor)
     manager.registerComponent(CodeEditorComplitionMode, CodeEditor)
-    manager.registerComponent(CodeEditorOverwriteMode, CodeEditor)
 
     # ---------------- Addons
     manager.registerComponent(SmartUnindentAddon, CodeEditor)

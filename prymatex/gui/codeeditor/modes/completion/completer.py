@@ -16,12 +16,6 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
     def __init__(self, editor):
         super(CodeEditorCompleter, self).__init__(parent = editor)
         self.editor = editor
-        self.editor.registerKeyPressHandler(QtCore.Qt.Key_Enter, 
-            self.__insert_completion, important = True)
-        self.editor.registerKeyPressHandler(QtCore.Qt.Key_Return, 
-            self.__insert_completion, important = True)
-        self.editor.registerKeyPressHandler(QtCore.Qt.Key_Tab, 
-            self.__insert_completion, important = True)
 
         # Models
         self.completion_models = [ ]
@@ -46,12 +40,6 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         self.highlighted[QtCore.QModelIndex].connect(self.highlightedCompletion)
 
         self.setWidget(self.editor)
-    
-    def __insert_completion(self, event):
-        if self.isVisible():
-            event.ignore()
-            return True
-        return False
     
     def setPalette(self, palette):
         self.popup().setPalette(palette)
