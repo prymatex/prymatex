@@ -115,10 +115,10 @@ default_media_mapper = {
     "porcess-not-running": ":/bullets/red.png",
     "porcess-running": ":/bullets/green.png",
     "porcess-starting": ":/bullets/yellow.png",
-    "symbol-block": ":/bullets/green.png",
-    "symbol-class": ":/bullets/blue.png",
+    "symbol-block": ":/bullets/violet.png",
+    "symbol-class": ":/bullets/red.png",
     "symbol-context": ":/bullets/yellow.png",
     "symbol-function": ":/bullets/ligthblue.png",
     "symbol-typedef": ":/bullets/brown.png",
-    "symbol-variable": ":/bullets/red.png",
+    "symbol-variable": ":/bullets/green.png",
 }

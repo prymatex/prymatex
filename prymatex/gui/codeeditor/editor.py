@@ -24,7 +24,7 @@ from .modes import CodeEditorBaseMode
 from .highlighter import CodeEditorSyntaxHighlighter
 from .models import (SymbolListModel, BookmarkListModel,
     bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
-    symbolSelectableModelFactory)
+    symbolSelectableModelFactory, FoldingTreeModel)
 
 from prymatex.support import PreferenceMasterSettings
 
@@ -127,6 +127,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         #Models
         self.bookmarkListModel = BookmarkListModel(self)
         self.symbolListModel = SymbolListModel(self)
+        self.foldingTreeModel = FoldingTreeModel(self)
         self.bundleItemSelectableModel = bundleItemSelectableModelFactory(self)
         self.symbolSelectableModel = symbolSelectableModelFactory(self)
 
@@ -361,7 +362,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return (self.tokenAt(cursor.selectionStart() - 1),
             self.tokenAt(cursor.selectionEnd()))
 
-    def scope(self, cursor = None, auxiliary = True):
+    def scope(self, cursor=None, auxiliary=True):
         cursor = cursor or self.textCursor()
         leftToken, rightToken = self.tokens(cursor)
         if not auxiliary:

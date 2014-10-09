@@ -107,13 +107,13 @@ class Scope(object):
             lhs.pop_scope()
         return lhs == rhs
     
-    def rootGroupName(self):
-        node = self.node
+    def root_group(self):
+        best = node = self.node
         while node is not None:
-            for atom in node.split("."):
-                if atom in ROOTS:
-                    return atom
-                node = node.parent
+            if node[0] in ROOTS:
+                best = node
+            node = node.parent
+        return best
     
     @staticmethod
     def shared_prefix(lhs, rhs):

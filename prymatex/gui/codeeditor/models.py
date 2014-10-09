@@ -9,8 +9,23 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.utils import text
 from prymatex.utils.lists import bisect_key
+from prymatex.models.trees import TreeNodeBase, AbstractTreeModel
 from prymatex.models.selectable import selectableModelFactory
 from prymatex.models.support import BundleItemTreeNode
+
+#=========================================================
+# Folding
+#=========================================================
+class FoldingNode(TreeNodeBase):
+    pass
+        
+class FoldingTreeModel(AbstractTreeModel):
+    def __init__(self, editor):
+        super(FoldingTreeModel, self).__init__(parent=editor)
+        self.editor = editor
+    
+    def treeNodeFactory(self, nodeName, nodeParent):
+        return FoldingNode(nodeName, nodeParent)
 
 #=========================================================
 # Bookmark
@@ -107,12 +122,12 @@ class SymbolListModel(QtCore.QAbstractListModel):
         self.editor = editor
         self.symbols = []
         self.icons = {
-            "class": editor.resources().get_icon("symbol-class"),
-            "block": editor.resources().get_icon("symbol-block"),
-            "context": editor.resources().get_icon("symbol-context"),
-            "function": editor.resources().get_icon("symbol-function"),
-            "typedef": editor.resources().get_icon("symbol-typedef"),
-            "variable": editor.resources().get_icon("symbol-variable")
+            ("meta", "class"): editor.resources().get_icon("symbol-class"),
+            ("meta", "block"): editor.resources().get_icon("symbol-block"),
+            ("meta", "context"): editor.resources().get_icon("symbol-context"),
+            ("meta", "function"): editor.resources().get_icon("symbol-function"),
+            ("meta", "typedef"): editor.resources().get_icon("symbol-typedef"),
+            ("meta", "variable"): editor.resources().get_icon("symbol-variable")
         }
         
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
@@ -189,7 +204,8 @@ class SymbolListModel(QtCore.QAbstractListModel):
             settings = self.editor.preferenceSettings(symbol_cursor)
             return settings.transformSymbol(symbol_cursor.block().text())
         elif role == QtCore.Qt.DecorationRole:
-            return self.icons["typedef"]
+            leftScope, rightScope = self.editor.scope(symbol_cursor, auxiliary=False)
+            return self.icons.get(rightScope.root_group()[:2])
 
     # ------------- Public api
     def findSymbolIndex(self, cursor):
