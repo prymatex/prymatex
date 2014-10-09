@@ -13,7 +13,7 @@ class HighlighterThread(QtCore.QThread):
         super(HighlighterThread, self).__init__(highlighter)
         self._highlighter = highlighter
         self._running = True
-    
+
     def stop(self):
         self._running = False
         self.terminate()

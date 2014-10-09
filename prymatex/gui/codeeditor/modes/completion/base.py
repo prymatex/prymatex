@@ -23,13 +23,13 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
 
         # Install method
         self.editor.runCompleter = self.__editor_run_completer
-        self.setObjectName("CodeEditorComplitionMode")
 
     def name(self):
         return "COMPLITION"
 
     def initialize(self, **kwargs):
         super(CodeEditorComplitionMode, self).initialize(**kwargs)
+        # To default editor mode
         self.editor.registerKeyPressHandler(
             QtCore.Qt.Key_Space,
             self.__run_completer
@@ -39,16 +39,31 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             self.__autorun_completer,
             after = True
         )
+        # To this mode
+        self.registerKeyPressHandler(
+            QtCore.Qt.Key_Space,
+            self.__next_model
+        )
+        self.registerKeyPressHandler(
+            QtCore.Qt.Key_Return,
+            self.__insert_completion
+        )
+        self.registerKeyPressHandler(
+            QtCore.Qt.Key_Enter,
+            self.__insert_completion
+        )
+        self.registerKeyPressHandler(
+            QtCore.Qt.Key_Tab,
+            self.__insert_completion
+        )
         self.completer.popup().installEventFilter(self)
 
     def activate(self):
         self.editor.textChanged.connect(self.on_editor_textChanged)
-        self.editor.installEventFilter(self)
         super(CodeEditorComplitionMode, self).activate()
     
     def deactivate(self):
         self.editor.textChanged.disconnect(self.on_editor_textChanged)
-        self.editor.removeEventFilter(self)
         super(CodeEditorComplitionMode, self).deactivate()
     
     def on_editor_textChanged(self):
@@ -64,10 +79,6 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             self.activate()
         elif event.type() == QtCore.QEvent.Hide:
             self.deactivate()
-        elif event.type() == QtCore.QEvent.KeyPress and \
-            event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab):
-            print("Controlando")
-            event.ignore()
         return False
 
     def __editor_run_completer(self, suggestions, already_typed=None, callback = None, 
@@ -83,17 +94,24 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             self.completer.setCompletionPrefix(already_typed or alreadyTyped or "")
         self.completer.runCompleter(self.editor.cursorRect(), model = self.suggestionsCompletionModel)
 
+    def __next_model(self, event):
+        if event.modifiers() & QtCore.Qt.ControlModifier and self.completer.trySetNextModel():
+            self.completer.complete(self.editor.cursorRect())
+            return True
+        else:
+            self.completer.hide()
+        return False
+
+    def __insert_completion(self, event):
+        event.ignore()
+        return True
+
+    # ------ Editor default handlers
     def __run_completer(self, event):
         if event.modifiers() & QtCore.Qt.ControlModifier:
-            if self.isActive() and self.completer.trySetNextModel():
-                self.completer.complete(self.editor.cursorRect())
-                return True
-            elif self.isActive():
-                self.completer.hide()
-            else:
-                alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-                self.completer.setCompletionPrefix(alreadyTyped)
-                self.completer.runCompleter(self.editor.cursorRect())
+            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
+            self.completer.setCompletionPrefix(alreadyTyped)
+            self.completer.runCompleter(self.editor.cursorRect())
         return False
 
     def __autorun_completer(self, event):
