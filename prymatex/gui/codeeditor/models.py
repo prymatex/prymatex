@@ -46,7 +46,30 @@ class BookmarkListModel(QtCore.QAbstractListModel):
                 cursor.columnNumber(), cursor.hasSelection() and cursor.selectedText() or block.text().strip())
         elif role == QtCore.Qt.DecorationRole:
             return self.icon_bookmark
+    
+    # ----------- Public api
+    def bookmark(self, row):
+        return self.bookmarks[row]
 
+    def lineNumbers(self):
+        return [cursor.block().lineCount() for cursor in self.bookmarks]
+
+    def toggleBookmark(self, cursor):
+        if cursor in self.bookmarks:
+            index = self.bookmarks.index(cursor)
+            self.beginRemoveRows(QtCore.QModelIndex(), index, index)
+            self.bookmarks.remove(cursor)
+            self.endRemoveRows()
+        else:
+            position = bisect_key(self.bookmarks, cursor, lambda cursor: cursor.position())
+            self.beginInsertRows(QtCore.QModelIndex(), position, position)
+            self.bookmarks.insert(position, cursor)
+            self.endInsertRows()
+    
+    def removeAllBookmarks(self):
+        self.beginRemoveRows(QtCore.QModelIndex(), 0, len(self.bookmarks))
+        self.bookmarks = []
+        self.endRemoveRows()
     
     def nextBookmark(self, cursor):
         if self.bookmarks:
