@@ -39,7 +39,6 @@ def worker_multiplexer(queue_multiplexer, queue_notifier, addr):
             zrep.send_pyobj(None)
         should_continue = pycmd["command"] != "proc_buryall"
 
-
 def worker_notifier(queue_notifier, addr):
     context = zmq.Context()
     zpub = context.socket(zmq.PUB)

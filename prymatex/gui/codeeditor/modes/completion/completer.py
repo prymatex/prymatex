@@ -5,7 +5,6 @@ from functools import reduce
 
 from prymatex.qt import QtCore, QtGui, Qt, QtWidgets
 
-from prymatex.utils import asyncio
 from prymatex.core import config
 from prymatex.models.support import BundleItemTreeNode
 
@@ -19,9 +18,7 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
 
         # Models
         self.completion_models = [ ]
-        self.completer_task = None
-        self.completerTasks = [ ]
-        
+
         # Role
         self.setCompletionRole(QtCore.Qt.MatchRole)
         
@@ -104,11 +101,13 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         
     def registerModel(self, completionModel):
         self.completion_models.append(completionModel)
+        completionModel.suggestionsReady.connect(self.on_model_suggestionsReady)
         completionModel.setEditor(self.editor)
     
     def unregisterModel(self, completionModel):
         self.completion_models.remove(completionModel)
         completionModel.setEditor(None)
+        completionModel.suggestionsReady.disconnect(self.on_model_suggestionsReady)
 
     def trySetNextModel(self):
         current = model = self.model() or self.completion_models[-1]
@@ -121,19 +120,16 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
                 break
         return False
 
+    def on_model_suggestionsReady(self):
+        model = self.sender()
+        if self.model() is None and self.trySetModel(model):
+            self.complete(self.editor.cursorRect())
+
     def runCompleter(self, rect, model = None):
-        if self.isVisible():
+        if self.isVisible() or model is not None:
             if model != self.model() and self.trySetModel(model):
                 self.complete(rect)
-        elif not self.isVisible():
-            if self.completer_task is not None:
-                self.completer_task.cancel()
-            self.setModel(None)
-            def _task_ready(model):
-                # First win
-                if self.model() is None and self.trySetModel(model):
-                    self.complete(rect)
-            if model is not None:
-                _task_ready(model)
-            self.completer_task = asyncio.async(asyncio.wait(
-                [ asyncio.async(asyncio.coroutine(model.fillModel)(_task_ready)) for model in self.completion_models ]))
+        else:
+            self.setModel(model)
+            for model in self.completion_models:
+                model.fill()

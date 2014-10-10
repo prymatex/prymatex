@@ -10,7 +10,6 @@ import prymatex
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import create_shortcut
 from prymatex.qt.quamash import QEventLoop
-from prymatex.utils import asyncio
 
 from prymatex.core import config
 from prymatex.core.components import PrymatexComponent, PrymatexEditor
@@ -63,8 +62,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         self.setOrganizationName(prymatex.__author__)
         self.platform = sys.platform
 
-        self._event_loop = QEventLoop(self)
-        asyncio.set_event_loop(self._event_loop)
+        #self._event_loop = QEventLoop(self)
+        #asyncio.set_event_loop(self._event_loop)
         
         # Windows
         self._main_windows = []
@@ -232,7 +231,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             self.quit()
 
     def execute(self):
-        self._event_loop.run_forever()
+        return self.exec_()
+        #self._event_loop.run_forever()
 
     def unloadGraphicalUserInterface(self):
         # TODO: ver como dejar todo lindo y ordenado para terminar correctamente

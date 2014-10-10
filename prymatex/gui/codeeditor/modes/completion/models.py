@@ -9,6 +9,7 @@ from prymatex.core import config
 # Completer Base Model
 # ===================================
 class CompletionBaseModel(QtCore.QAbstractTableModel):
+    suggestionsReady = QtCore.Signal()
     def __init__(self, **kwargs):
         super(CompletionBaseModel, self).__init__(**kwargs)
         self.editor = None
@@ -37,7 +38,7 @@ class CompletionBaseModel(QtCore.QAbstractTableModel):
         #QtCore.Qt.CaseSensitive
         return QtCore.Qt.CaseSensitive
 
-    def fillModel(self, callback):
+    def fill(self):
         raise NotImplemented
     
     def isReady(self):
@@ -56,11 +57,11 @@ class WordsCompletionModel(CompletionBaseModel):
     def __init__(self, **kwargs):
         super(WordsCompletionModel, self).__init__(**kwargs)
         self.suggestions = set()
-        
+
     def modelSorting(self):
         return QtGui.QCompleter.CaseSensitivelySortedModel
 
-    def fillModel(self, callback):
+    def fill(self):
         # TODO Hacer las palabras con un timer
         # TODO Palabras mas proximas al cursor o mas utilizadas
         self.suggestions = set()
@@ -78,7 +79,7 @@ class WordsCompletionModel(CompletionBaseModel):
         self.suggestions.discard(self.completionPrefix())
         if self.suggestions:
             self.suggestions = sorted(list(self.suggestions))
-            callback(self)
+            self.suggestionsReady.emit()
 
     def isReady(self):
         return bool(self.suggestions)
@@ -126,11 +127,11 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
         super(TabTriggerItemsCompletionModel, self).__init__(**kwargs)
         self.triggers = []
 
-    def fillModel(self, callback):
+    def fill(self):
         leftScope, rightScope = self.editor.scope()
         self.triggers = self.editor.application().supportManager.getAllTabTriggerItemsByScope(leftScope, rightScope)
         if self.triggers:
-            callback(self)
+            self.suggestionsReady.emit()
     
     # -------------- Model overrite methods
     def columnCount(self, parent = None):
@@ -237,7 +238,7 @@ class SuggestionsCompletionModel(CompletionBaseModel):
         elif role == QtCore.Qt.MatchRole:
             return suggestion['display']
 
-    def fillModel(self, callback):
+    def fill(self):
         pass
 
     def isReady(self):
