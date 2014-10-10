@@ -30,6 +30,9 @@ class FoldingTreeModel(AbstractTreeModel):
         self.editor.highlightReady.connect(self.on_editor_highlightingReady)
         self.editor.highlightChanged.connect(self.on_editor_highlightChanged)
 
+        # Images
+        self.foldingellipsisImage = self.editor.resources().get_image(":/sidebar/folding-ellipsis.png")
+
     def treeNodeFactory(self, nodeName, nodeParent):
         return FoldingNode(nodeName, nodeParent)
 
@@ -79,6 +82,8 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
         self.bookmarks = []
+        
+        # Images
         self.icon_bookmark = editor.resources().get_icon('bookmarks')
 
     # -------- Signals

@@ -100,55 +100,26 @@ class PreferenceMasterSettings(object):
     FOLDING_STOP = 2
     FOLDING_INDENTED_START = 3
     FOLDING_INDENTED_IGNORE = 4
-    TRANSFORMATION_PATTERN = compileRegexp(r"s(/.+/.+/\w*);")
-
+    
     def __init__(self, settings):
         self.settings = settings
 
-    @property
-    def completions(self):
+    def _first(self, key, default=None):
         for settings in self.settings:
-            if settings.completions is not None:
-                return settings.completions[:]
-        return []
+            attr = getattr(settings, key, None)
+            if attr is not None:
+                return attr
+        return default
+    
+    completions = property(lambda self: self._first("completions", []))
+    completionCommand = property(lambda self: self._first("completionCommand"))
+    disableDefaultCompletion = property(lambda self: self._first("disableDefaultCompletion"))
+    showInSymbolList = property(lambda self: self._first("showInSymbolList", False))
+    symbolTransformation = property(lambda self: self._first("symbolTransformation"))
+    highlightPairs = property(lambda self: self._first("highlightPairs"))
+    smartTypingPairs = property(lambda self: self._first("smartTypingPairs"))
 
-    @property
-    def completionCommand(self):
-        for settings in self.settings:
-            if settings.completionCommand is not None:
-                return settings.completionCommand
-
-    @property
-    def disableDefaultCompletion(self):
-        for settings in self.settings:
-            if settings.disableDefaultCompletion is not None:
-                return settings.disableDefaultCompletion
-
-    @property
-    def showInSymbolList(self):
-        for index, settings in enumerate(self.settings):
-            if settings.showInSymbolList is not None:
-                return settings.showInSymbolList
-        return False
-
-    @property
-    def symbolTransformation(self):
-        for index, settings in enumerate(self.settings):
-            if settings.symbolTransformation is not None:
-                return settings.symbolTransformation
-
-    @property
-    def highlightPairs(self):
-        for settings in self.settings:
-            if settings.highlightPairs is not None:
-                return settings.highlightPairs[:]
-
-    @property
-    def smartTypingPairs(self):
-        for settings in self.settings:
-            if settings.smartTypingPairs is not None:
-                return settings.smartTypingPairs[:]
-
+    # Custom 
     @property
     def shellVariables(self):
         shellVariables = []
@@ -163,13 +134,16 @@ class PreferenceMasterSettings(object):
                     takenNames.update(names)
         return shellVariables
 
-    @property
-    def spellChecking(self):
-        for settings in self.settings:
-            if settings.spellChecking is not None:
-                return settings.spellChecking
-        return True
-        
+    spellChecking = property(lambda self: self._first("spellChecking", True))
+    decreaseIndentPattern = property(lambda self: self._first("decreaseIndentPattern"))
+    increaseIndentPattern = property(lambda self: self._first("increaseIndentPattern"))
+    indentNextLinePattern = property(lambda self: self._first("indentNextLinePattern"))
+    unIndentedLinePattern = property(lambda self: self._first("unIndentedLinePattern"))
+    foldingIndentedBlockStart = property(lambda self: self._first("foldingIndentedBlockStart"))
+    foldingIndentedBlockIgnore = property(lambda self: self._first("foldingIndentedBlockIgnore"))
+    foldingStartMarker = property(lambda self: self._first("foldingStartMarker"))
+    foldingStopMarker = property(lambda self: self._first("foldingStopMarker"))
+    
     def _getBundle(self, attrKey):
         for settings in self.settings:
             if getattr(settings, attrKey) is not None:
@@ -185,55 +159,41 @@ class PreferenceMasterSettings(object):
         return transformation and transformation.transform(text)
 
     def indentationFlags(self, line):
-        if not hasattr(self, "_indent_settings"):
-            self._indent_settings = None
-            for settings in self.settings:
-                if any([getattr(settings, indentKey) for indentKey in PreferenceSettings.INDENT_KEYS]):
-                    self._indent_settings = settings
-                    break
         indent = []
-        if self._indent_settings is not None:
-            #IncreasePattern on return indent nextline
-            #DecreasePattern evaluate line to decrease, no requiere del return
-            #IncreaseOnlyNextLine on return indent nextline only
-            #IgnoringLines evaluate line to unindent, no require el return
-            if self._indent_settings.decreaseIndentPattern is not None and \
-                self._indent_settings.decreaseIndentPattern.search(line):
-                indent.append(self.INDENT_DECREASE)
-            if self._indent_settings.increaseIndentPattern is not None and \
-                self._indent_settings.increaseIndentPattern.search(line):
-                indent.append(self.INDENT_INCREASE)
-            if self._indent_settings.indentNextLinePattern is not None and \
-                self._indent_settings.indentNextLinePattern.search(line):
-                indent.append(self.INDENT_NEXTLINE)
-            if self._indent_settings.unIndentedLinePattern is not None and \
-                self._indent_settings.unIndentedLinePattern.search(line):
-                indent.append(self.UNINDENT)
+        #IncreasePattern on return indent nextline
+        #DecreasePattern evaluate line to decrease, no requiere del return
+        #IncreaseOnlyNextLine on return indent nextline only
+        #IgnoringLines evaluate line to unindent, no require el return
+        if self.decreaseIndentPattern is not None and \
+            self.decreaseIndentPattern.search(line):
+            indent.append(self.INDENT_DECREASE)
+        if self.increaseIndentPattern is not None and \
+            self.increaseIndentPattern.search(line):
+            indent.append(self.INDENT_INCREASE)
+        if self.indentNextLinePattern is not None and \
+            self.indentNextLinePattern.search(line):
+            indent.append(self.INDENT_NEXTLINE)
+        if self.unIndentedLinePattern is not None and \
+            self.unIndentedLinePattern.search(line):
+            indent.append(self.UNINDENT)
         return indent
 
     def folding(self, line):
-        if not hasattr(self, "_folding_settings"):
-            self._folding_settings = None
-            for settings in self.settings:
-                if any([getattr(settings, foldingKey) for foldingKey in PreferenceSettings.FOLDING_KEYS]):
-                    self._folding_settings = settings
-                    break
-        if self._folding_settings is not None:
-            start_match = self._folding_settings.foldingStartMarker.search(line) \
-                if self._folding_settings.foldingStartMarker is not None else None
-            stop_match = self._folding_settings.foldingStopMarker.search(line) \
-                if self._folding_settings.foldingStopMarker is not None else None
-            if start_match is not None and stop_match is None:
-                return self.FOLDING_START
-            elif start_match is None and stop_match is not None:
-                return self.FOLDING_STOP
-            # Ahora probamos los de indented
-            if self._folding_settings.foldingIndentedBlockStart is not None and \
-                self._folding_settings.foldingIndentedBlockStart.search(line):
-                return self.FOLDING_INDENTED_START
-            if self._folding_settings.foldingIndentedBlockIgnore is not None and \
-                self._folding_settings.foldingIndentedBlockIgnore.search(line):
-                return self.FOLDING_INDENTED_IGNORE
+        start_match = self.foldingStartMarker.search(line) \
+            if self.foldingStartMarker is not None else None
+        stop_match = self.foldingStopMarker.search(line) \
+            if self.foldingStopMarker is not None else None
+        if start_match is not None and stop_match is None:
+            return self.FOLDING_START
+        elif start_match is None and stop_match is not None:
+            return self.FOLDING_STOP
+        # Ahora probamos los de indented
+        if self.foldingIndentedBlockStart is not None and \
+            self.foldingIndentedBlockStart.search(line):
+            return self.FOLDING_INDENTED_START
+        if self.foldingIndentedBlockIgnore is not None and \
+            self.foldingIndentedBlockIgnore.search(line):
+            return self.FOLDING_INDENTED_IGNORE
         return self.FOLDING_NONE
 
 class Preference(BundleItem):
