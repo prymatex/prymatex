@@ -22,11 +22,9 @@ from .processors import (CodeEditorCommandProcessor, CodeEditorSnippetProcessor,
 from .modes import CodeEditorBaseMode
 
 from .highlighter import CodeEditorSyntaxHighlighter
-from .models import (SymbolListModel, BookmarkListModel,
+from .models import (SymbolListModel, BookmarkListModel, FoldingListModel,
     bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
-    symbolSelectableModelFactory, FoldingTreeModel)
-
-from prymatex.support import PreferenceMasterSettings
+    symbolSelectableModelFactory)
 
 from prymatex.utils import text, encoding
 from prymatex.utils.i18n import ugettext as _
@@ -126,7 +124,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         #Models
         self.bookmarkListModel = BookmarkListModel(self)
         self.symbolListModel = SymbolListModel(self)
-        self.foldingTreeModel = FoldingTreeModel(self)
+        self.foldingListModel = FoldingListModel(self)
         self.bundleItemSelectableModel = bundleItemSelectableModelFactory(self)
         self.symbolSelectableModel = symbolSelectableModelFactory(self)
 
@@ -237,40 +235,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.syntaxHighlighter.start()
 
     # --------------- Block User Data
-    def registerBlockUserDataHandler(self, handler):
-        self.__blockUserDataHandlers.append(handler)
-
     def blockUserData(self, block):
         return block.userData() or self.findProcessor("syntax").emptyUserData()
-        if block.userData() is None:
-            userData = CodeEditorBlockUserData()
-            # Indent and content
-            userData.indentation = ""
-
-            # Folding
-            userData.foldingMark = PreferenceMasterSettings.FOLDING_NONE
-            userData.foldedLevel = 0
-            userData.folded = False
-
-            # Now the handlers
-            for handler in self.__blockUserDataHandlers:
-                handler.contributeToBlockUserData(userData)
-            block.setUserData(userData)
-        return block.userData()
-
-    def processBlockUserData(self, sourceText, block, userData):
-        # Indent
-        userData.indentation = text.white_space(sourceText)
-        
-        # Build cursor from block
-        cursor = self.newCursorAtPosition(block.position() + len(userData.indentation))
-        
-        # Folding
-        userData.foldingMark = self.preferenceSettings(cursor).folding(sourceText)
-        
-        # Handlers
-        for handler in self.__blockUserDataHandlers:
-            handler.processBlockUserData(sourceText, cursor, block, userData)
 
     # ------------- Base Editor Api
     @classmethod
@@ -624,10 +590,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 break
             if block.isVisible():
                 positionY = blockGeometry.top()
-                if self.isFolded(block):
+                cursor = self.newCursorAtPosition(block.position())
+                if self.foldingListModel.isFolded(cursor):
                     painter.drawPixmap(characterWidth * block.length() + offset.x() + 10,
-                        positionY + characterHeight - self.foldingTreeModel.foldingellipsisImage.height(),
-                        self.foldingTreeModel.foldingellipsisImage)
+                        positionY + characterHeight - self.foldingListModel.foldingellipsisImage.height(),
+                        self.foldingListModel.foldingellipsisImage)
                 if self.showIndentGuide:
                     blockPattern = block
                     while blockPattern.isValid() and self.blockUserData(blockPattern).blank:
@@ -832,25 +799,27 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.insertSnippet(snippet, textCursor = cursor)
 
     # ---------- Folding
-    def _find_block_fold_peer(self, block, direction = "down"):
+    def _find_block_fold_peer(self, cursor, direction = "down"):
         """ Direction are 'down' or up"""
+        block = cursor.block()
         if direction == "down":
-            assert self.isFoldingStartMarker(block), "Block isn't folding start"
+            assert self.foldingListModel.isFoldingStartMarker(cursor), "Block isn't folding start"
         else:
-            assert self.isFoldingStopMarker(block), "Block isn't folding stop"
+            assert self.foldingListModel.isFoldingStopMarker(cursor), "Block isn't folding stop"
         nest = 0
         while block.isValid():
-            userData = self.blockUserData(block)
-            if userData.foldingMark == PreferenceMasterSettings.FOLDING_START:
+            cursor = self.newCursorAtPosition(block.position())
+            if self.foldingListModel.isFoldingStartMarker(cursor):
                 nest += 1
-            elif userData.foldingMark == PreferenceMasterSettings.FOLDING_STOP:
+            elif self.foldingListModel.isFoldingStopMarker(cursor):
                 nest -= 1
             if nest == 0:
                 return block
             block = block.next() if direction == "down" else block.previous()
 
-    def _find_indented_block_fold_close(self, block):
-        assert self.isFoldingIndentedBlockStart(block), "Block isn't folding indented start"
+    def _find_indented_block_fold_close(self, cursor):
+        assert self.foldingListModel.isFoldingIndentedBlockStart(cursor), "Block isn't folding indented start"
+        block = cursor.block()
         indentation = self.blockUserData(block).indentation
         indentedBlock = self.findIndentedBlock(block, indentation = indentation, comparison = operator.le)
         while indentedBlock.isValid() and self.isFoldingIndentedBlockIgnore(indentedBlock):
@@ -860,34 +829,16 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         else:
             return self.document().lastBlock()
 
-    def isFoldingStartMarker(self, block):
-        return self.blockUserData(block).foldingMark == PreferenceMasterSettings.FOLDING_START
-
-    def isFoldingStopMarker(self, block):
-        return self.blockUserData(block).foldingMark == PreferenceMasterSettings.FOLDING_STOP
-
-    def isFoldingIndentedBlockStart(self, block):
-        return self.blockUserData(block).foldingMark == PreferenceMasterSettings.FOLDING_INDENTED_START
-
-    def isFoldingIndentedBlockIgnore(self, block):
-        return self.blockUserData(block).foldingMark == PreferenceMasterSettings.FOLDING_INDENTED_IGNORE
-
-    def isFoldingMark(self, block):
-        return self.isFoldingStartMarker(block) or self.isFoldingStopMarker(block) or self.isFoldingIndentedBlockStart(block)
-
-    def isFolded(self, block):
-        return self.isFoldingMark(block) and self.blockUserData(block).folded
-
     def codeFoldingFold(self, milestone):
         block = endBlock = None
-        if self.isFoldingStartMarker(milestone):
+        if self.foldingListModel.isFoldingStartMarker(milestone):
             startBlock = block = milestone.next()
             endBlock = self._find_block_fold_peer(milestone, "down")
-        elif self.isFoldingStopMarker(milestone):
+        elif self.foldingListModel.isFoldingStopMarker(milestone):
             endBlock = milestone
             milestone = self._find_block_fold_peer(endBlock, "up")
             startBlock = block = milestone.next()
-        elif self.isFoldingIndentedBlockStart(milestone):
+        elif self.foldingListModel.isFoldingIndentedBlockStart(milestone):
             startBlock = block = milestone.next()
             endBlock = self._find_indented_block_fold_close(milestone)
 
@@ -907,9 +858,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def codeFoldingUnfold(self, milestone):
         endBlock = None
         startBlock = block = milestone.next()
-        if self.isFoldingStartMarker(milestone):
+        if self.foldingListModel.isFoldingStartMarker(milestone):
             endBlock = self._find_block_fold_peer(milestone, "down")
-        elif self.isFoldingIndentedBlockStart(milestone):
+        elif self.foldingListModel.isFoldingIndentedBlockStart(milestone):
             endBlock = self._find_indented_block_fold_close(milestone)
 
         if endBlock:

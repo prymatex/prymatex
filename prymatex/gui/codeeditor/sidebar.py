@@ -52,22 +52,6 @@ class SideBarWidgetMixin(PrymatexEditorAddon):
     def setFont(self, font):
         super(SideBarWidgetMixin, self).setFont(font)
 
-    def translatePosition(self, position):
-        fh = self.fontMetrics().lineSpacing()
-        ys = position.y()
-        
-        block = self.editor.firstVisibleBlock()
-        offset = self.editor.contentOffset()
-        page_bottom = self.editor.viewport().height()
-        while block.isValid():
-            blockPosition = self.editor.blockBoundingGeometry(block).topLeft() + offset
-            if blockPosition.y() > page_bottom:
-                break
-            if blockPosition.y() < ys and (blockPosition.y() + fh) > ys:
-                break
-            block = block.next()
-        return block
-
 #=======================================
 # SideBar Widgets
 #=======================================
@@ -213,8 +197,7 @@ class BookmarkSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
         QtWidgets.QWidget.paintEvent(self, event)
         
     def mousePressEvent(self, event):
-        block = self.translatePosition(event.pos())
-        cursor = self.editor.newCursorAtPosition(block.position())
+        cursor = self.editor.cursorForPosition(event.pos())
         self.editor.toggleBookmark(cursor)
         self.repaint(self.rect())
             
@@ -269,12 +252,14 @@ class FoldingSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
             # Draw the line number right justified at the y position of the line.
             if block.isVisible():
                 positionY = blockGeometry.top() + ((blockGeometry.height() - self.imagesHeight) / 2)
-                if self.editor.isFoldingStartMarker(block) or self.editor.isFoldingIndentedBlockStart(block):
-                    if self.editor.isFolded(block):
+                cursor = self.editor.newCursorAtPosition(block.position())
+                if self.editor.foldingListModel.isFoldingStartMarker(cursor) or \
+                    self.editor.foldingListModel.isFoldingIndentedBlockStart(cursor):
+                    if self.editor.foldingListModel.isFolded(cursor):
                         painter.drawPixmap(0, positionY, self.foldingcollapsedImage)
                     else:
                         painter.drawPixmap(0, positionY, self.foldingtopImage)
-                elif self.editor.isFoldingStopMarker(block):
+                elif self.editor.foldingListModel.isFoldingStopMarker(cursor):
                     painter.drawPixmap(0, positionY, self.foldingbottomImage)
 
             block = block.next()
@@ -283,11 +268,11 @@ class FoldingSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
         QtWidgets.QWidget.paintEvent(self, event)
         
     def mousePressEvent(self, event):
-        block = self.translatePosition(event.pos())
-        if self.editor.isFolded(block):
-            self.editor.codeFoldingUnfold(block)
+        cursor = self.editor.cursorForPosition(event.pos())
+        if self.editor.foldingListModel.isFolded(cursor):
+            self.editor.codeFoldingUnfold(cursor)
         else:
-            self.editor.codeFoldingFold(block)
+            self.editor.codeFoldingFold(cursor)
 
 class SelectionSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     ALIGNMENT = QtCore.Qt.AlignRight
@@ -345,5 +330,5 @@ class SelectionSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
         QtWidgets.QWidget.paintEvent(self, event)
         
     def mousePressEvent(self, event):
-        block = self.translatePosition(event.pos())
-        print(block)
+        cursor = self.editor.cursorForPosition(event.pos())
+        print(cursor)

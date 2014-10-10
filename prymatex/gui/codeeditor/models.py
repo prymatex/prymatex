@@ -3,7 +3,6 @@
 
 import difflib
 from bisect import bisect
-from collections import OrderedDict
 
 from prymatex.qt import QtCore, QtGui
 
@@ -12,15 +11,18 @@ from prymatex.utils.lists import bisect_key
 from prymatex.models.selectable import selectableModelFactory
 from prymatex.models.support import BundleItemTreeNode
 
+from prymatex.support import PreferenceMasterSettings
+
 #=========================================================
 # Folding
 #=========================================================
-class FoldingTreeModel(QtCore.QAbstractListModel):
+class FoldingListModel(QtCore.QAbstractListModel):
     def __init__(self, editor):
-        super(FoldingTreeModel, self).__init__(parent=editor)
+        super(FoldingListModel, self).__init__(parent=editor)
         self.editor = editor
         self.foldings = []
         self.flags = []
+        self.folded = []
         
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
 
@@ -107,7 +109,26 @@ class FoldingTreeModel(QtCore.QAbstractListModel):
                 self.foldings.insert(index, folding_cursor)
                 self.flags.insert(index, flag)
                 self.endInsertRows()
-                
+    
+    # ----------- Public api
+    def isFoldingStartMarker(self, cursor):
+        return cursor in self.foldings and self.flags[self.foldings.index(cursor)] == PreferenceMasterSettings.FOLDING_START
+
+    def isFoldingStopMarker(self, cursor):
+        return cursor in self.foldings and self.flags[self.foldings.index(cursor)] == PreferenceMasterSettings.FOLDING_STOP
+
+    def isFoldingIndentedBlockStart(self, cursor):
+        return cursor in self.foldings and self.flags[self.foldings.index(cursor)] == PreferenceMasterSettings.FOLDING_INDENTED_START
+
+    def isFoldingIndentedBlockIgnore(self, cursor):
+        return cursor in self.foldings and self.flags[self.foldings.index(cursor)] == PreferenceMasterSettings.FOLDING_INDENTED_IGNORE
+
+    def isFoldingMark(self, cursor):
+        return self.isFoldingStartMarker(cursor) or self.isFoldingStopMarker(cursor) or self.isFoldingIndentedBlockStart(cursor)
+
+    def isFolded(self, cursor):
+        return self.isFoldingMark(cursor) and cursor in self.folded
+
 #=========================================================
 # Bookmark
 #=========================================================
