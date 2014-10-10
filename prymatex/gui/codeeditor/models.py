@@ -23,10 +23,54 @@ class FoldingTreeModel(AbstractTreeModel):
     def __init__(self, editor):
         super(FoldingTreeModel, self).__init__(parent=editor)
         self.editor = editor
-    
+        self.editor.document().contentsChange.connect(self.on_document_contentsChange)
+
+        #Connects
+        self.editor.aboutToHighlightChange.connect(self.on_editor_aboutToHighlightChange)
+        self.editor.highlightReady.connect(self.on_editor_highlightingReady)
+        self.editor.highlightChanged.connect(self.on_editor_highlightChanged)
+
     def treeNodeFactory(self, nodeName, nodeParent):
         return FoldingNode(nodeName, nodeParent)
 
+    # --------------- Signals   
+    def on_document_contentsChange(self, position, removed, added):
+        block = self.editor.document().findBlock(position)
+        if removed:
+            print("Quitando")
+        if added:
+            print("Agregando")
+
+    def on_editor_aboutToHighlightChange(self):
+        self.rootNode.removeAllChild()
+        self.editor.document().contentsChange.disconnect(self.on_document_contentsChange)
+        self.layoutChanged.emit()
+    
+    def on_editor_highlightingReady(self):
+        block = self.editor.document().begin()
+        while block.isValid():
+            self._add_folding(block)
+            block = block.next()
+    
+    def on_editor_highlightChanged(self):
+        self.editor.document().contentsChange.connect(self.on_document_contentsChange)
+        self.layoutChanged.emit()
+        
+    def _add_folding(self, block):
+        symbol_cursor = self.editor.newCursorAtPosition(block.position())
+        settings = self.editor.preferenceSettings(symbol_cursor)
+        print(settings.folding(block.text()))
+        return
+        if settings.showInSymbolList:
+            if symbol_cursor in self.symbols:
+                index = self.symbols.index(symbol_cursor)
+                self.dataChanged.emit(self.index(index), self.index(index))
+            else:
+                index = bisect(self.symbols, symbol_cursor)
+                self.beginInsertRows(QtCore.QModelIndex(), index, index)
+                self.symbols.insert(index, symbol_cursor)
+                self.endInsertRows()
+                
 #=========================================================
 # Bookmark
 #=========================================================
