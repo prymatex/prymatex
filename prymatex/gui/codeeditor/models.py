@@ -122,14 +122,18 @@ class FoldingListModel(QtCore.QAbstractListModel):
         return cursor in self.foldings and self.flags[self.foldings.index(cursor)] == PreferenceMasterSettings.FOLDING_INDENTED_IGNORE
 
     def isFolded(self, cursor):
-        return cursor in self.folded
+        return any((folded == cursor for folded in self.folded.keys()))
 
     def isVisible(self, cursor):
         return not any((start <= cursor <= stop for start, stop in self.folded.values()))
         
     def fold(self, milestone, start, stop):
         self.folded[milestone] = (start, stop)
-        print(self.folded)
+    
+    def unfold(self, milestone):
+        cursors = [ folded for folded in self.folded.keys() if folded == milestone ]
+        if cursors:
+            return self.folded.pop(cursors[0])
 
 #=========================================================
 # Bookmark

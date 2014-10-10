@@ -860,24 +860,20 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     def codeFoldingUnfold(self, milestone):
-        endBlock = None
-        startBlock = block = milestone.block().next()
-        if self.foldingListModel.isFoldingStartMarker(milestone):
-            endBlock = self._find_block_fold_peer(milestone, "down")
-        elif self.foldingListModel.isFoldingIndentedBlockStart(milestone):
-            endBlock = self._find_indented_block_fold_close(milestone)
+        unfolded = self.foldingListModel.unfold(milestone)
 
-        if endBlock:
+        if unfolded:
             # Go!
+            startBlock, endBlock = unfolded[0].block(), unfolded[1].block()
+            block = startBlock
             while block.isValid():
-                userData = self.blockUserData(block)
-                userData.foldedLevel -= 1
-                block.setVisible(userData.foldedLevel == 0)
+                block.setVisible(self.foldingListModel.isVisible(
+                    self.newCursorAtPosition(block.position())
+                ))
                 if block == endBlock:
                     break
                 block = block.next()
 
-            milestone.userData().folded = False
             self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     # ---------- Override convert tabs <---> spaces
