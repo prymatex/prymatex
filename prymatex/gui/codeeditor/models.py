@@ -22,7 +22,7 @@ class FoldingListModel(QtCore.QAbstractListModel):
         self.editor = editor
         self.foldings = []
         self.flags = []
-        self.folded = []
+        self.folded = {}
         
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
 
@@ -87,8 +87,6 @@ class FoldingListModel(QtCore.QAbstractListModel):
         while block.isValid():
             self._add_folding(block)
             block = block.next()
-        print(self.foldings)
-        print(self.flags)
 
     def on_editor_highlightChanged(self):
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
@@ -123,11 +121,15 @@ class FoldingListModel(QtCore.QAbstractListModel):
     def isFoldingIndentedBlockIgnore(self, cursor):
         return cursor in self.foldings and self.flags[self.foldings.index(cursor)] == PreferenceMasterSettings.FOLDING_INDENTED_IGNORE
 
-    def isFoldingMark(self, cursor):
-        return self.isFoldingStartMarker(cursor) or self.isFoldingStopMarker(cursor) or self.isFoldingIndentedBlockStart(cursor)
-
     def isFolded(self, cursor):
-        return self.isFoldingMark(cursor) and cursor in self.folded
+        return cursor in self.folded
+
+    def isVisible(self, cursor):
+        return not any((start <= cursor <= stop for start, stop in self.folded.values()))
+        
+    def fold(self, milestone, start, stop):
+        self.folded[milestone] = (start, stop)
+        print(self.folded)
 
 #=========================================================
 # Bookmark

@@ -822,7 +822,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         block = cursor.block()
         indentation = self.blockUserData(block).indentation
         indentedBlock = self.findIndentedBlock(block, indentation = indentation, comparison = operator.le)
-        while indentedBlock.isValid() and self.isFoldingIndentedBlockIgnore(indentedBlock):
+        while indentedBlock.isValid() and self.foldingListModel.isFoldingIndentedBlockIgnore(self.newCursorAtPosition(indentedBlock.position())):
             indentedBlock = self.findIndentedBlock(indentedBlock, indentation = indentation, comparison = operator.le)
         if indentedBlock.isValid():
             return self.findNoBlankBlock(indentedBlock, "up")
@@ -832,32 +832,36 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def codeFoldingFold(self, milestone):
         block = endBlock = None
         if self.foldingListModel.isFoldingStartMarker(milestone):
-            startBlock = block = milestone.next()
+            startBlock = block = milestone.block().next()
             endBlock = self._find_block_fold_peer(milestone, "down")
         elif self.foldingListModel.isFoldingStopMarker(milestone):
-            endBlock = milestone
-            milestone = self._find_block_fold_peer(endBlock, "up")
-            startBlock = block = milestone.next()
+            endBlock = milestone.block()
+            milestone = self._find_block_fold_peer(
+                self.newCursorAtPosition(endBlock.position()), "up")
+            startBlock = block = milestone.block().next()
         elif self.foldingListModel.isFoldingIndentedBlockStart(milestone):
-            startBlock = block = milestone.next()
+            startBlock = block = milestone.block().next()
             endBlock = self._find_indented_block_fold_close(milestone)
 
         if block and endBlock and milestone:
             # Go!
+            self.foldingListModel.fold(
+                milestone,
+                self.newCursorAtPosition(block.position()),
+                self.newCursorAtPosition(endBlock.position())
+            )
             while block.isValid():
-                userData = self.blockUserData(block)
-                userData.foldedLevel += 1
-                block.setVisible(userData.foldedLevel == 0)
+                block.setVisible(self.foldingListModel.isVisible(
+                    self.newCursorAtPosition(block.position())
+                ))
                 if block == endBlock:
                     break
                 block = block.next()
-
-            milestone.userData().folded = True
             self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     def codeFoldingUnfold(self, milestone):
         endBlock = None
-        startBlock = block = milestone.next()
+        startBlock = block = milestone.block().next()
         if self.foldingListModel.isFoldingStartMarker(milestone):
             endBlock = self._find_block_fold_peer(milestone, "down")
         elif self.foldingListModel.isFoldingIndentedBlockStart(milestone):
@@ -966,7 +970,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def findNoBlankBlock(self, block, direction = "down"):
         """ Return no blank block """
         block = block.next() if direction == "down" else block.previous()
-        while block.isValid() and self.blockUserData(block).blank():
+        while block.isValid() and self.blockUserData(block).blank:
             block = block.next() if direction == "down" else block.previous()
         return block
 
