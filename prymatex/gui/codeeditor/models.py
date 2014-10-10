@@ -9,20 +9,19 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.utils import text
 from prymatex.utils.lists import bisect_key
-from prymatex.models.trees import TreeNodeBase, AbstractTreeModel
 from prymatex.models.selectable import selectableModelFactory
 from prymatex.models.support import BundleItemTreeNode
 
 #=========================================================
 # Folding
 #=========================================================
-class FoldingNode(TreeNodeBase):
-    pass
-        
-class FoldingTreeModel(AbstractTreeModel):
+class FoldingTreeModel(QtCore.QAbstractListModel):
     def __init__(self, editor):
         super(FoldingTreeModel, self).__init__(parent=editor)
         self.editor = editor
+        self.foldings = []
+        self.flags = []
+        
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
 
         #Connects
@@ -33,19 +32,51 @@ class FoldingTreeModel(AbstractTreeModel):
         # Images
         self.foldingellipsisImage = self.editor.resources().get_image(":/sidebar/folding-ellipsis.png")
 
-    def treeNodeFactory(self, nodeName, nodeParent):
-        return FoldingNode(nodeName, nodeParent)
+    # --------- List Model api
+    def index(self, row, column = 0, parent = None):
+        if 0 <= row < len(self.foldings):
+            return self.createIndex(row, column, self.foldings[row])
+        else:
+            return QtCore.QModelIndex()
+
+    def rowCount(self, parent = None):
+        return len(self.foldings)
+
+    def data(self, index, role = QtCore.Qt.DisplayRole):
+        if not index.isValid():
+            return None
+        cursor = self.foldings[index.row()]
+        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole ]:
+            block = cursor.block()
+            return "L%d, C%d - %s" % (block.blockNumber() + 1,
+                cursor.columnNumber(), cursor.hasSelection() and cursor.selectedText() or block.text().strip())
+        elif role == QtCore.Qt.DecorationRole:
+            return self.foldingellipsisImage
 
     # --------------- Signals   
     def on_document_contentsChange(self, position, removed, added):
         block = self.editor.document().findBlock(position)
         if removed:
-            print("Quitando")
+            remove = [ folding_cursor 
+                for folding_cursor in self.foldings \
+                if folding_cursor.position() == position ]
+            for folding_cursor in remove:
+                index = self.foldings.index(folding_cursor)
+                self.beginRemoveRows(QtCore.QModelIndex(), index, index)
+                self.foldings.remove(folding_cursor)
+                self.flags.pop(index)
+                self.endRemoveRows()
         if added:
-            print("Agregando")
+            last = self.editor.document().findBlock(position + added)
+            while True:
+                self._add_folding(block)
+                if block == last:
+                    break
+                block = block.next()
 
     def on_editor_aboutToHighlightChange(self):
-        self.rootNode.removeAllChild()
+        self.foldings = []
+        self.flags = []
         self.editor.document().contentsChange.disconnect(self.on_document_contentsChange)
         self.layoutChanged.emit()
     
@@ -54,24 +85,27 @@ class FoldingTreeModel(AbstractTreeModel):
         while block.isValid():
             self._add_folding(block)
             block = block.next()
-    
+        print(self.foldings)
+        print(self.flags)
+
     def on_editor_highlightChanged(self):
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
         self.layoutChanged.emit()
         
     def _add_folding(self, block):
-        symbol_cursor = self.editor.newCursorAtPosition(block.position())
-        settings = self.editor.preferenceSettings(symbol_cursor)
-        print(settings.folding(block.text()))
-        return
-        if settings.showInSymbolList:
-            if symbol_cursor in self.symbols:
-                index = self.symbols.index(symbol_cursor)
+        folding_cursor = self.editor.newCursorAtPosition(block.position())
+        settings = self.editor.preferenceSettings(folding_cursor)
+        flag = settings.folding(block.text())
+        if flag != settings.FOLDING_NONE:
+            if folding_cursor in self.foldings:
+                index = self.foldings.index(folding_cursor)
+                self.flags[index] = flag
                 self.dataChanged.emit(self.index(index), self.index(index))
             else:
-                index = bisect(self.symbols, symbol_cursor)
+                index = bisect(self.foldings, folding_cursor)
                 self.beginInsertRows(QtCore.QModelIndex(), index, index)
-                self.symbols.insert(index, symbol_cursor)
+                self.foldings.insert(index, folding_cursor)
+                self.flags.insert(index, flag)
                 self.endInsertRows()
                 
 #=========================================================
