@@ -31,6 +31,13 @@ class PrymatexProfile(object):
         self.tmsettings = TextMateSettings(
             os.path.join(TM_PREFERENCES_PATH, TM_SETTINGS_NAME))
 
+    # ------------------------ Paths
+    def ensure_paths(self):
+        new_paths = filter(lambda p: not os.path.exists(p), (self.PMX_PROFILE_PATH, 
+            self.PMX_TMP_PATH, self.PMX_LOG_PATH, self.PMX_CACHE_PATH, self.PMX_SCREENSHOT_PATH))
+        for new_path in new_paths:
+            os.makedirs(new_path, 0o700)
+
     # ------------------------ Setting Groups
     def __group_name(self, configurableClass):
         if hasattr(configurableClass, '_settings'):

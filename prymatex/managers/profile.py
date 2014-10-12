@@ -54,14 +54,6 @@ class ProfileManager(PrymatexComponent, QtCore.QObject):
         self.sortFilterSettingsProxyModel.setSourceModel(self.settingsTreeModel)
 
     # --------------- Profile
-    def build_prymatex_profile(self, path):
-        # TODO: Algo como ensure paths porque si falta uno que hago?
-        os.makedirs(path)
-        os.makedirs(os.path.join(path, 'tmp'), mode = 0o0700)
-        os.makedirs(os.path.join(path, 'log'), mode = 0o0700)
-        os.makedirs(os.path.join(path, 'cache'), mode = 0o0700)
-        os.makedirs(os.path.join(path, 'screenshot'), mode = 0o0700)
-
     def saveProfiles(self):
         config = configparser.RawConfigParser()
         config.add_section("General")
@@ -97,8 +89,7 @@ class ProfileManager(PrymatexComponent, QtCore.QObject):
             self.__current_profile = self.profilesListModel.findProfileByName(suggested)
         if self.__current_profile is None:
             self.__current_profile = self.createProfile(suggested, default = True)
-        if not os.path.exists(self.__current_profile.PMX_PROFILE_PATH):
-            self.build_prymatex_profile(self.__current_profile.PMX_PROFILE_PATH)
+        self.__current_profile.ensure_paths()
     
     def renameProfile(self, profile, newName):
         newName = newName.lower()

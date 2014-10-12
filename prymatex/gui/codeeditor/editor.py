@@ -830,30 +830,27 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             return self.document().lastBlock()
 
     def codeFoldingFold(self, milestone):
-        block = endBlock = None
+        startBlock = endBlock = None
         if self.foldingListModel.isFoldingStartMarker(milestone):
-            startBlock = block = milestone.block().next()
+            startBlock = milestone.block()
             endBlock = self._find_block_fold_peer(milestone, "down")
         elif self.foldingListModel.isFoldingStopMarker(milestone):
             endBlock = milestone.block()
-            milestone = self._find_block_fold_peer(
-                self.newCursorAtPosition(endBlock.position()), "up")
-            startBlock = block = milestone.block().next()
+            startBlock = self._find_block_fold_peer(milestone, "up")
         elif self.foldingListModel.isFoldingIndentedBlockStart(milestone):
-            startBlock = block = milestone.block().next()
+            startBlock = block = milestone.block()
             endBlock = self._find_indented_block_fold_close(milestone)
 
-        if block and endBlock and milestone:
+        if startBlock and endBlock:
             # Go!
             self.foldingListModel.fold(
-                milestone,
-                self.newCursorAtPosition(block.position()),
+                self.newCursorAtPosition(startBlock.position()),
                 self.newCursorAtPosition(endBlock.position())
             )
+            block = startBlock
             while block.isValid():
-                block.setVisible(self.foldingListModel.isVisible(
-                    self.newCursorAtPosition(block.position())
-                ))
+                # Solo queda visible el primero para marcar el folding
+                block.setVisible(block == startBlock)
                 if block == endBlock:
                     break
                 block = block.next()
