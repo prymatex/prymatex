@@ -46,7 +46,7 @@ class PrymatexMainMenuBar(QtWidgets.QMenuBar):
                         allObjects = True,
                         sequence_handler = partial(self.registerShortcut, klass),
                         icon_handler = partial(self.registerIcon, klass))
-                    add_actions(self, [ objs[0] ], settings.get("before", None))
+                    add_actions(self, [ objs[0] ], settings.get("before", None), prefix="actionMenu")
                     objects += objs
 
             # Store all new objects from creation or extension

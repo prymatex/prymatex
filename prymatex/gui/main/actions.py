@@ -227,7 +227,7 @@ class MainWindowActionsMixin(object):
             "items": [ globalEditAction(name) for name in ("&Undo", "&Redo") ] + ["-"] +
             [ globalEditAction(name) for name in ("Cu&t", "&Copy", "&Paste", "&Delete") ]
         }
-        
+    
         # ------------- View menu
         menu["view"] = {
             "text": "&View",

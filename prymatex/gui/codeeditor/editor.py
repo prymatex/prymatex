@@ -1094,6 +1094,17 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                     }
                 ]}
             ]
+
+        menu["edit"] = [
+            {'before': 'delete',
+             'text': '&Paste and Indent',
+             'triggered': lambda ed, checked=False: ed.zoomIn()
+            }, {'before': 'delete',
+             'text': '&Paste from History',
+             'triggered': lambda ed, checked=False: ed.zoomIn()
+            }
+        ]
+
         menu["view"] = [
                 '-',
                 {'text': "Zoom In",

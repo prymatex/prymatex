@@ -87,6 +87,26 @@ def create_action(parent, settings, dispatcher = None, sequence_handler=None, ic
     return action
 
 
+def add_actions(target, actions, before=None, prefix=""):
+    """Add actions to a menu"""
+    # Convert before to action
+    before_action = None
+    if before:
+        objectName = text_to_objectname(before, prefix=prefix)
+        before_action = next((ta for ta in target.actions() if ta.objectName() == objectName), None)
+    for action in actions:
+        if isinstance(action, QtWidgets.QMenu):
+            if before_action is None:
+                target.addMenu(action)
+            else:
+                target.insertMenu(before_action, action)
+        elif isinstance(action, QtWidgets.QAction):
+            if before_action is None:
+                target.addAction(action)
+            else:
+                target.insertAction(before_action, action)
+
+
 def create_bookmark_action(parent, url, text, icon=None, sequence=None):
     """Create bookmark action"""
     return create_action( parent, {"text": text, "sequence":sequence, "icon":icon,

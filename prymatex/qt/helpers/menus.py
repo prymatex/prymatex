@@ -10,7 +10,7 @@ from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.qt.helpers.base import text_to_objectname
 from prymatex.qt.helpers.icons import text_to_iconname
-from prymatex.qt.helpers.actions import create_action
+from prymatex.qt.helpers.actions import create_action, add_actions
 from prymatex.utils import six
 
 import collections
@@ -98,13 +98,13 @@ def extend_menu(rootMenu, settings, dispatcher = None, separatorName = False,
                 allObjects = True,
                 sequence_handler = sequence_handler, 
                 icon_handler = icon_handler)
-            add_actions(rootMenu, [ objects[0] ], item.get("before", None))
+            add_actions(rootMenu, [ objects[0] ], item.get("before", None), prefix="actionMenu")
         elif isinstance(item, dict):
             objects = create_action(rootMenu.parent(), item,
                 dispatcher = dispatcher, 
                 sequence_handler = sequence_handler, 
                 icon_handler = icon_handler)
-            add_actions(rootMenu, [ objects ], item.get("before", None))
+            add_actions(rootMenu, [ objects ], item.get("before", None), prefix="action")
         elif isinstance(item, QtWidgets.QAction):
             rootMenu.addAction(item)
             objects = item
@@ -138,25 +138,6 @@ def extend_menu(rootMenu, settings, dispatcher = None, separatorName = False,
         if objects is not None:
             getattr(collectedObjects, isinstance(objects, (tuple, list)) and "extend" or "append")(objects)
     return collectedObjects
-
-def add_actions(target, actions, before=None):
-    """Add actions to a menu"""
-    # Convert before to action
-    before_action = None
-    if before:
-        objectName = text_to_objectname(before, prefix = "actionMenu")
-        before_action = next((ta for ta in target.actions() if ta.objectName() == objectName), None)
-    for action in actions:
-        if isinstance(action, QtWidgets.QMenu):
-            if before_action is None:
-                target.addMenu(action)
-            else:
-                target.insertMenu(before_action, action)
-        elif isinstance(action, QtWidgets.QAction):
-            if before_action is None:
-                target.addAction(action)
-            else:
-                target.insertAction(before_action, action)
 
 # Sections
 def _chunk_sections(items):
