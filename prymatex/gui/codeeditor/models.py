@@ -131,9 +131,10 @@ class FoldingListModel(QtCore.QAbstractListModel):
         self.folded.append((start, stop))
     
     def unfold(self, cursor):
-        cursors = [ folded for folded in self.folded if folded[0] == cursor ]
+        cursors = ( folded for folded in self.folded if folded[0] == cursor ).next()
         if cursors:
-            return self.folded.remove(cursors[0])
+            self.folded.remove(cursors)
+            return cursors
 
 #=========================================================
 # Bookmark

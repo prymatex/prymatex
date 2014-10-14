@@ -859,7 +859,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def codeFoldingUnfold(self, milestone):
         unfolded = self.foldingListModel.unfold(milestone)
 
-        if unfolded:
+        if unfolded is not None:
             # Go!
             startBlock, endBlock = unfolded[0].block(), unfolded[1].block()
             block = startBlock
