@@ -32,6 +32,7 @@ from functools import reduce
 
 class CodeEditor(PrymatexEditor, TextEditWidget):
     STANDARD_SIZES = (70, 78, 80, 100, 120)
+    MAX_FOLD_LEVEL = 10
 
     # -------------------- Signals
     syntaxChanged = QtCore.Signal()
@@ -830,6 +831,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             return self.document().lastBlock()
 
     def codeFoldingFold(self, milestone):
+        # Search start and stop
         startBlock = endBlock = None
         if self.foldingListModel.isFoldingStartMarker(milestone):
             startBlock = milestone.block()
@@ -847,31 +849,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 self.newCursorAtPosition(startBlock.position()),
                 self.newCursorAtPosition(endBlock.position())
             )
-            block = startBlock
-            while block.isValid():
-                # Solo queda visible el primero para marcar el folding
-                block.setVisible(block == startBlock)
-                if block == endBlock:
-                    break
-                block = block.next()
-            self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     def codeFoldingUnfold(self, milestone):
-        unfolded = self.foldingListModel.unfold(milestone)
-
-        if unfolded is not None:
-            # Go!
-            startBlock, endBlock = unfolded[0].block(), unfolded[1].block()
-            block = startBlock
-            while block.isValid():
-                block.setVisible(self.foldingListModel.isVisible(
-                    self.newCursorAtPosition(block.position())
-                ))
-                if block == endBlock:
-                    break
-                block = block.next()
-
-            self.document().markContentsDirty(startBlock.position(), endBlock.position())
+        self.foldingListModel.unfold(milestone)
 
     # ---------- Override convert tabs <---> spaces
     def convertTabsToSpaces(self):
@@ -1101,6 +1081,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
              'triggered': lambda ed, checked=False: ed.zoomIn()
             }, {'before': 'delete',
              'text': '&Paste from History',
+             'testEnabled': lambda ed: False,
              'triggered': lambda ed, checked=False: ed.zoomIn()
             }
         ]
@@ -1121,6 +1102,27 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                  'text': 'Right Gutter',
                  'items': []
                 }, '-',
+                {'text': "Code Folding",
+                 'items': [{
+                        'text': "Fold",
+                        'triggered': cls.on_actionFold_triggered,
+                        'sequence': ("Editor", "Fold", 'Ctrl+Shift+['),
+                    }, {
+                        'text': "Unfold",
+                        'triggered': cls.on_actionUnfold_triggered,
+                        'sequence': ("Editor", "Unfold", 'Ctrl+Shift+]'),
+                    }, {
+                        'text': "Unfold All",
+                        'triggered': cls.on_actionUnfoldAll_triggered
+                    }, "-" ] + [ tuple([ {
+                        'text': "Fold Level %s" % level,
+                        'triggered': lambda ed, checked, level=level: ed.on_actionFold_triggered(checked, level=level)
+                    } for level in range(1, cls.MAX_FOLD_LEVEL) ]) ] + [ 
+                        '-', {
+                        'text': "Fold Tab Attributes",
+                        'triggered': cls.on_actionFold_triggered
+                    }]
+                },
                 {'text': "Word Wrap",
                  'items': [{
                         'text': "Automatic",
@@ -1419,6 +1421,15 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         item = self.selectorDialog.select(bookmarkSelectableModel, title=_("Select Bookmark"))
         if item is not None:
             self.setTextCursor(item['bookmark'])
+
+    def on_actionFold_triggered(self, checked=False, level=None):
+        print("Fold", level)
+    
+    def on_actionUnfold_triggered(self, checked=False):
+        print("Unfold")
+        
+    def on_actionUnfoldAll_triggered(self, checked=False):
+        print("Unfold All")
 
     # ---------------------- Navigation API
     def restoreLocationMemento(self, memento):

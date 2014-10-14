@@ -253,8 +253,7 @@ class FoldingSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
             if block.isVisible():
                 positionY = blockGeometry.top() + ((blockGeometry.height() - self.imagesHeight) / 2)
                 cursor = self.editor.newCursorAtPosition(block.position())
-                if self.editor.foldingListModel.isFoldingStartMarker(cursor) or \
-                    self.editor.foldingListModel.isFoldingIndentedBlockStart(cursor):
+                if self.editor.foldingListModel.isFoldingMarker(cursor):
                     if self.editor.foldingListModel.isFolded(cursor):
                         painter.drawPixmap(0, positionY, self.foldingcollapsedImage)
                     else:

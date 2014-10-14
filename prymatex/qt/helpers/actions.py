@@ -19,7 +19,6 @@ def toggle_actions(actions, enable):
 
 def test_actions(instance, actions):
     for action in actions:
-        # Prevent signals
         action.setVisible(not hasattr(action, "testVisible") or \
             action.testVisible(instance))
         action.setEnabled(not hasattr(action, "testEnabled") or \
