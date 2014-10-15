@@ -800,24 +800,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.insertSnippet(snippet, textCursor = cursor)
 
     # ---------- Folding
-    def _find_block_fold_peer(self, cursor, direction = "down"):
-        """ Direction are 'down' or up"""
-        block = cursor.block()
-        if direction == "down":
-            assert self.foldingListModel.isFoldingStartMarker(cursor), "Block isn't folding start"
-        else:
-            assert self.foldingListModel.isFoldingStopMarker(cursor), "Block isn't folding stop"
-        nest = 0
-        while block.isValid():
-            cursor = self.newCursorAtPosition(block.position())
-            if self.foldingListModel.isFoldingStartMarker(cursor):
-                nest += 1
-            elif self.foldingListModel.isFoldingStopMarker(cursor):
-                nest -= 1
-            if nest == 0:
-                return block
-            block = block.next() if direction == "down" else block.previous()
-
     def _find_indented_block_fold_close(self, cursor):
         assert self.foldingListModel.isFoldingIndentedBlockStart(cursor), "Block isn't folding indented start"
         block = cursor.block()
@@ -830,20 +812,37 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         else:
             return self.document().lastBlock()
 
+    def _find_block_fold_peer(self, cursor, direction = "down"):
+        """ Direction are 'down' or up"""
+        block = cursor.block()
+        if direction == "down":
+            assert self.foldingListModel.isFoldingStartMarker(cursor) or \
+                self.foldingListModel.isFoldingIndentedBlockStart(cursor), "Block isn't folding start"
+        else:
+            assert self.foldingListModel.isFoldingStopMarker(cursor), "Block isn't folding stop"
+        if direction == "down" and self.foldingListModel.isFoldingIndentedBlockStart(cursor):
+            block = self._find_indented_block_fold_close(cursor)
+        else:
+            nest = 0
+            while block.isValid():
+                cursor = self.newCursorAtPosition(block.position())
+                if self.foldingListModel.isFoldingStartMarker(cursor):
+                    nest += 1
+                elif self.foldingListModel.isFoldingStopMarker(cursor):
+                    nest -= 1
+                if nest == 0:
+                    break
+                block = block.next() if direction == "down" else block.previous()
+        if direction == "down":
+            return cursor.block(), block
+        return block, cursor.block()
+
     def codeFoldingFold(self, milestone):
         # Search start and stop
-        startBlock = endBlock = None
-        if self.foldingListModel.isFoldingStartMarker(milestone):
-            startBlock = milestone.block()
-            endBlock = self._find_block_fold_peer(milestone, "down")
-        elif self.foldingListModel.isFoldingStopMarker(milestone):
-            endBlock = milestone.block()
-            startBlock = self._find_block_fold_peer(milestone, "up")
-        elif self.foldingListModel.isFoldingIndentedBlockStart(milestone):
-            startBlock = milestone.block()
-            endBlock = self._find_indented_block_fold_close(milestone)
-
-        if startBlock and endBlock:
+        startBlock, endBlock = self._find_block_fold_peer(milestone, 
+            self.foldingListModel.isFoldingStopMarker(milestone) and "up" or "down")
+        
+        if startBlock.isValid() and endBlock.isValid():
             # Go!
             self.foldingListModel.fold(
                 self.newCursorAtPosition(startBlock.position()),
@@ -949,7 +948,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def findIndentedBlock(self, block, indentation = None, direction = "down", comparison = operator.eq):
         """ Return equal indentation block """
-        indentation = indentation if indentation is not None else self.blockIndentation(block)
+        if indentation is None:
+            indentation_block = block if not self.blockUserData(block).blank else self.findNoBlankBlock(block, direction)
+            indentation = self.blockIndentation(indentation_block)
         block = self.findNoBlankBlock(block, direction)
         while block.isValid() and not comparison(self.blockIndentation(block), indentation):
             block = self.findNoBlankBlock(block, direction)
@@ -1425,28 +1426,30 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def on_actionFold_triggered(self, checked=False, level=None):
         # if level then find folding for level number and fold
         if level is not None:
-            pass
+            print(level)
         else:
             cursor = self.textCursor()
             start, end = self.selectionBlockStartEnd(cursor)
             milestone = start
             milestone_cursor = self.newCursorAtPosition(milestone.position())
             if start == end:
-                while milestone.isValid() and not (self.foldingListModel.isFoldingStartMarker(milestone_cursor) or \
-                    self.foldingListModel.isFoldingIndentedBlockStart(milestone_cursor)):
+                while milestone.isValid() and not ((self.foldingListModel.isFoldingStartMarker(milestone_cursor) or \
+                    self.foldingListModel.isFoldingIndentedBlockStart(milestone_cursor)) and not \
+                    self.foldingListModel.isFolded(milestone_cursor)):
                     milestone = self.findIndentedBlock(milestone, 
                         direction="up", comparison=operator.lt
                     )
                     milestone_cursor = self.newCursorAtPosition(milestone.position())
                 if milestone.isValid():
                     self.codeFoldingFold(milestone_cursor)
+                    self.setTextCursor(milestone_cursor)
             else:
                 # Fold selection
                 self.foldingListModel.fold(
                     milestone_cursor,
                     self.newCursorAtPosition(end.position())
                 )
-            self.setTextCursor(milestone_cursor)
+                self.setTextCursor(milestone_cursor)
         print("Fold", level)
     
     def on_actionUnfold_triggered(self, checked=False):
