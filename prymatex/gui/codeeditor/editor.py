@@ -838,7 +838,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def toggleFolding(self, milestone):
         if self.foldingListModel.isFoldingMarker(milestone):
-            if self.foldingListModel.isFolded(cursor):
+            if self.foldingListModel.isFolded(milestone):
                 self.foldingListModel.unfold(milestone)
             else:
                 startBlock, endBlock = self._find_block_fold_peer(milestone, 
@@ -1463,7 +1463,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             block = block.next()
         
     def on_actionUnfoldAll_triggered(self, checked=False):
-        print("Unfold All")
+        self.foldingListModel.unfoldall()
 
     # ---------------------- Navigation API
     def restoreLocationMemento(self, memento):
