@@ -134,6 +134,14 @@ class FoldingListModel(QtCore.QAbstractListModel):
         return self.isFoldingMarker(cursor) and \
             self.flags[self.foldings.index(cursor)] == PreferenceMasterSettings.FOLDING_INDENTED_IGNORE
 
+    def isStart(self, cursor):
+        return self.isFoldingMarker(cursor) and \
+            self.flags[self.foldings.index(cursor)] in (PreferenceMasterSettings.FOLDING_START, PreferenceMasterSettings.FOLDING_INDENTED_START)
+
+    def isStop(self, cursor):
+        return self.isFoldingMarker(cursor) and \
+            self.flags[self.foldings.index(cursor)] == PreferenceMasterSettings.FOLDING_STOP
+
     def isFolded(self, cursor):
         return any((folded[0] == cursor for folded in self.folded))
 
@@ -153,6 +161,7 @@ class FoldingListModel(QtCore.QAbstractListModel):
             if block == stop.block():
                 break
             block = block.next()
+        print(startBlock.position(), stop.block().position())
         self.editor.document().markContentsDirty(
             startBlock.position(), stop.block().position()
         )

@@ -812,16 +812,15 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         else:
             return self.document().lastBlock()
 
-    def _find_block_fold_peer(self, cursor, direction = "down"):
+    def _find_block_fold_peer(self, milestone, direction = "down"):
         """ Direction are 'down' or up"""
-        block = cursor.block()
+        block = milestone.block()
         if direction == "down":
-            assert self.foldingListModel.isFoldingStartMarker(cursor) or \
-                self.foldingListModel.isFoldingIndentedBlockStart(cursor), "Block isn't folding start"
+            assert self.foldingListModel.isStart(milestone), "Block isn't folding start"
         else:
-            assert self.foldingListModel.isFoldingStopMarker(cursor), "Block isn't folding stop"
-        if direction == "down" and self.foldingListModel.isFoldingIndentedBlockStart(cursor):
-            block = self._find_indented_block_fold_close(cursor)
+            assert self.foldingListModel.isStop(milestone), "Block isn't folding stop"
+        if direction == "down" and self.foldingListModel.isFoldingIndentedBlockStart(milestone):
+            block = self._find_indented_block_fold_close(milestone)
         else:
             nest = 0
             while block.isValid():
@@ -834,23 +833,23 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                     break
                 block = block.next() if direction == "down" else block.previous()
         if direction == "down":
-            return cursor.block(), block
-        return block, cursor.block()
+            return milestone.block(), block
+        return block, milestone.block()
 
-    def codeFoldingFold(self, milestone):
-        # Search start and stop
-        startBlock, endBlock = self._find_block_fold_peer(milestone, 
-            self.foldingListModel.isFoldingStopMarker(milestone) and "up" or "down")
-        
-        if startBlock.isValid() and endBlock.isValid():
-            # Go!
-            self.foldingListModel.fold(
-                self.newCursorAtPosition(startBlock.position()),
-                self.newCursorAtPosition(endBlock.position())
-            )
-
-    def codeFoldingUnfold(self, milestone):
-        self.foldingListModel.unfold(milestone)
+    def toggleFolding(self, milestone):
+        if self.foldingListModel.isFoldingMarker(milestone):
+            if self.foldingListModel.isFolded(cursor):
+                self.foldingListModel.unfold(milestone)
+            else:
+                startBlock, endBlock = self._find_block_fold_peer(milestone, 
+                    self.foldingListModel.isStop(milestone) and "up" or "down")
+                
+                if startBlock.isValid() and endBlock.isValid():
+                    # Go!
+                    self.foldingListModel.fold(
+                        self.newCursorAtPosition(startBlock.position()),
+                        self.newCursorAtPosition(endBlock.position())
+                    )
 
     # ---------- Override convert tabs <---> spaces
     def convertTabsToSpaces(self):
@@ -1426,22 +1425,21 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def on_actionFold_triggered(self, checked=False, level=None):
         # if level then find folding for level number and fold
         if level is not None:
-            print(level)
+          print(level)  
         else:
             cursor = self.textCursor()
             start, end = self.selectionBlockStartEnd(cursor)
             milestone = start
             milestone_cursor = self.newCursorAtPosition(milestone.position())
             if start == end:
-                while milestone.isValid() and not ((self.foldingListModel.isFoldingStartMarker(milestone_cursor) or \
-                    self.foldingListModel.isFoldingIndentedBlockStart(milestone_cursor)) and not \
+                while milestone.isValid() and (not self.foldingListModel.isStart(milestone_cursor) or \
                     self.foldingListModel.isFolded(milestone_cursor)):
                     milestone = self.findIndentedBlock(milestone, 
                         direction="up", comparison=operator.lt
                     )
                     milestone_cursor = self.newCursorAtPosition(milestone.position())
                 if milestone.isValid():
-                    self.codeFoldingFold(milestone_cursor)
+                    self.toggleFolding(milestone_cursor)
                     self.setTextCursor(milestone_cursor)
             else:
                 # Fold selection

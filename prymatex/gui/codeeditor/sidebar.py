@@ -253,12 +253,12 @@ class FoldingSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
             if block.isVisible():
                 positionY = blockGeometry.top() + ((blockGeometry.height() - self.imagesHeight) / 2)
                 cursor = self.editor.newCursorAtPosition(block.position())
-                if self.editor.foldingListModel.isFoldingMarker(cursor):
+                if self.editor.foldingListModel.isStart(cursor):
                     if self.editor.foldingListModel.isFolded(cursor):
                         painter.drawPixmap(0, positionY, self.foldingcollapsedImage)
                     else:
                         painter.drawPixmap(0, positionY, self.foldingtopImage)
-                elif self.editor.foldingListModel.isFoldingStopMarker(cursor):
+                elif self.editor.foldingListModel.isStop(cursor):
                     painter.drawPixmap(0, positionY, self.foldingbottomImage)
 
             block = block.next()
@@ -268,10 +268,7 @@ class FoldingSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
         
     def mousePressEvent(self, event):
         cursor = self.editor.cursorForPosition(event.pos())
-        if self.editor.foldingListModel.isFolded(cursor):
-            self.editor.codeFoldingUnfold(cursor)
-        else:
-            self.editor.codeFoldingFold(cursor)
+        self.editor.toggleFolding(cursor)
 
 class SelectionSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     ALIGNMENT = QtCore.Qt.AlignRight
