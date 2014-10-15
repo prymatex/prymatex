@@ -1423,6 +1423,21 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             self.setTextCursor(item['bookmark'])
 
     def on_actionFold_triggered(self, checked=False, level=None):
+        # if level then find folding for level number and fold
+        if level is not None:
+            pass
+        else:
+            cursor = self.textCursor()
+            start, end = self.selectionBlockStartEnd(cursor)
+            if start == end:
+                pass
+                # Find folding for position
+            else:
+                # Fold selection
+                self.foldingListModel.fold(
+                    self.newCursorAtPosition(start.position()),
+                    self.newCursorAtPosition(end.position())
+                )
         print("Fold", level)
     
     def on_actionUnfold_triggered(self, checked=False):

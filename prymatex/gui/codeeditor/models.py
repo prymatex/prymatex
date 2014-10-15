@@ -4,6 +4,7 @@
 import difflib
 from bisect import bisect
 
+from prymatex.utils import six
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.utils import text
@@ -157,7 +158,7 @@ class FoldingListModel(QtCore.QAbstractListModel):
         )
     
     def unfold(self, cursor):
-        cursors = ( folded for folded in self.folded if folded[0] == cursor ).next()
+        cursors = six.next(( folded for folded in self.folded if folded[0] == cursor ))
         if cursors:
             self.folded.remove(cursors)
             # Go!
