@@ -4,7 +4,6 @@
 import difflib
 from bisect import bisect
 
-from prymatex.utils import six
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.utils import text
@@ -142,7 +141,8 @@ class FoldingListModel(QtCore.QAbstractListModel):
         return not any((start < cursor <= stop for start, stop in self.folded))
         
     def fold(self, start, stop):
-        # Custom start fold
+        if self.isFolded(start):
+            self.unfold(start)
         if not self.isFoldingMarker(start):
             self._add_folding_cursor(start, PreferenceMasterSettings.FOLDING_START)
         self.folded.append((start, stop))
@@ -158,11 +158,13 @@ class FoldingListModel(QtCore.QAbstractListModel):
         )
     
     def unfold(self, cursor):
-        cursors = six.next(( folded for folded in self.folded if folded[0] == cursor ))
+        if not self.isFolded(cursor):
+            return
+        cursors = [ folded for folded in self.folded if folded[0] == cursor ]
         if cursors:
-            self.folded.remove(cursors)
+            self.folded.remove(cursors[0])
             # Go!
-            start, stop = cursors
+            start, stop = cursors[0]
             startBlock, endBlock = start.block(), stop.block()
             block = startBlock
             while block.isValid():
@@ -180,6 +182,10 @@ class FoldingListModel(QtCore.QAbstractListModel):
             flag = settings.folding(startBlock.text())
             if flag == settings.FOLDING_NONE:
                 self._remove_folding_cursor(start)
+
+    def findFoldingStart(self, cursor):
+        position = bisect(self.foldings, cursor) - 1
+        return self.foldings[position > 0 and position or 0]    
 
 #=========================================================
 # Bookmark

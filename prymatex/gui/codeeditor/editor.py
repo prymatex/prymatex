@@ -1430,8 +1430,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             cursor = self.textCursor()
             start, end = self.selectionBlockStartEnd(cursor)
             if start == end:
-                pass
-                # Find folding for position
+                start = self.foldingListModel.findFoldingStart(
+                    self.newCursorAtPosition(end.position())
+                )
+                self.codeFoldingFold(start)
             else:
                 # Fold selection
                 self.foldingListModel.fold(
@@ -1441,7 +1443,16 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         print("Fold", level)
     
     def on_actionUnfold_triggered(self, checked=False):
-        print("Unfold")
+        cursor = self.textCursor()
+        start, end = self.selectionBlockStartEnd(cursor)
+        block = start
+        while block.isValid():
+            self.foldingListModel.unfold(
+                self.newCursorAtPosition(block.position())
+            )
+            if block == end:
+                break
+            block = block.next()
         
     def on_actionUnfoldAll_triggered(self, checked=False):
         print("Unfold All")
