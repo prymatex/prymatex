@@ -528,16 +528,16 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
     def refresh(self):
         self.on_actionRefresh_triggered()
         
-    def copy(self):
+    def copy(self, checked=False):
         self.on_actionCopy_triggered()
         
-    def paste(self):
+    def paste(self, checked=False):
         self.on_actionPaste_triggered()
         
-    def cut(self):
+    def cut(self, checked=False):
         self.on_actionCut_triggereda()
 
-    def delete(self):
+    def delete(self, checked=False):
         self.on_actionDelete_triggered()
         
     def rename(self):

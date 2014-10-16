@@ -217,10 +217,6 @@ class FoldingListModel(QtCore.QAbstractListModel):
             0, self.editor.document().characterCount()
         )        
 
-    def findFoldingStart(self, cursor):
-        position = bisect(self.foldings, cursor) - 1
-        return self.foldings[position > 0 and position or 0]    
-
 #=========================================================
 # Bookmark
 #=========================================================
