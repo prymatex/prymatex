@@ -146,9 +146,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     def setCursorPosition(self, position):
         if isinstance(position, (tuple, list)):
             position = self.document().findBlockByNumber(position[0]).position() + position[1]
-        print("intento")
         self.setTextCursor(self.newCursorAtPosition(position))
-        print("listo")
         
     def cursorPosition(self):
         return self.textCursor().position()
