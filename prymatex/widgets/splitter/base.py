@@ -473,7 +473,7 @@ class SplitterWidget(QtWidgets.QSplitter):
             subTitles = widget.filePath().split(os.sep)[::-1]
             for subTitle in subTitles[1:]:
                 title = "%s (%s)" % (widget.title(), subTitle)
-                if not self._has_tab_title(title):
+                if not self._has_tabs_with_same_title(widget, title):
                     return title
         
         def title_from_counter(widget):
@@ -488,8 +488,7 @@ class SplitterWidget(QtWidgets.QSplitter):
             return title_from_counter(newWidget)
         
         newWidgetTitle = newWidget.title()
-        addedWidgets = self._widgets_by_title(newWidgetTitle)
-        
+        addedWidgets = self._widgets_with_same_title(newWidget)
         if not addedWidgets:
             return newWidgetTitle
 
@@ -501,19 +500,21 @@ class SplitterWidget(QtWidgets.QSplitter):
                     title_from_counter(addedWidget))
         return title_from_file(newWidget)
     
-    def _has_tab_title(self, title):
-        for tw in self.findChildren(GroupWidget):
-            for index in range(tw.count()):
-                if tw.tabText(index) == title:
-                    return True
-        return False
-    
-    def _widgets_by_title(self, title):
-        widgets = []
+    def _has_tabs_with_same_title(self, newWidget, title):
         for tw in self.findChildren(GroupWidget):
             for index in range(tw.count()):
                 widget = tw.widget(index)
-                if widget.title() == title:
+                if tw.tabText(index) == title and widget != newWidget:
+                    return True
+        return False
+
+    def _widgets_with_same_title(self, newWidget, title=None):
+        widgets = []
+        title = title or newWidget.title()
+        for tw in self.findChildren(GroupWidget):
+            for index in range(tw.count()):
+                widget = tw.widget(index)
+                if widget.title() == title and widget != newWidget:
                     widgets.append(widget)
         return widgets
 
