@@ -47,7 +47,6 @@ def _qfiledialog_wrapper(attr, parent=None, caption='', basedir='',
     try:
         # PyQt >= v4.6
         if hasattr(QtWidgets.QFileDialog, attr):
-            tuple_returned = False
             func = getattr(QtWidgets.QFileDialog, attr)
         else:
             func = getattr(QtWidgets.QFileDialog, attr + 'AndFilter')

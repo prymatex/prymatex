@@ -92,7 +92,7 @@ class QtUiBuild(object):
 
     def run(self):
         """Execute the command."""
-        self._wrapuic()
+        #self._wrapuic()
         basepath = os.path.join(PROJECT_PATH, 'resources', 'ui')
         for dirpath, _, filenames in os.walk(basepath):
             self.create_package(dirpath)
@@ -152,5 +152,5 @@ if __name__ == '__main__':
     verbose = 0
     if len(sys.argv) > 1:
         verbose = int(sys.argv[1])
-    sys.exit(QtUiBuild(verbose, api='pyqt4', force = True).run())
+    sys.exit(QtUiBuild(verbose, api='pyqt5', force = True).run())
     

@@ -38,8 +38,7 @@ def load_media(resourcesPath):
                 resources["Images"][name] = imagePath
                 
     # Load Themes
-    themesPaths = [ os.path.join(resourcesPath, "Media", "Themes") ] + \
-        [ "/usr/share/icons" ] + QtGui.QIcon.themeSearchPaths()
+    themesPaths = [ os.path.join(resourcesPath, "Media", "Themes") ] + QtGui.QIcon.themeSearchPaths()
     for themesPath in themesPaths:
         if not os.path.exists(themesPath):
             continue

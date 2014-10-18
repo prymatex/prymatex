@@ -1,48 +1,35 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/support/macro.ui'
+# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/support/macro.ui'
 #
-# Created: Thu Sep 18 10:11:58 2014
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Sat Oct 18 10:31:41 2014
+#      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
-
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_Macro(object):
     def setupUi(self, Macro):
-        Macro.setObjectName(_fromUtf8("Macro"))
+        Macro.setObjectName("Macro")
         Macro.resize(274, 210)
-        self.verticalLayout = QtGui.QVBoxLayout(Macro)
+        self.verticalLayout = QtWidgets.QVBoxLayout(Macro)
         self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(0)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.listActionWidget = QtGui.QListWidget(Macro)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.listActionWidget = QtWidgets.QListWidget(Macro)
         self.listActionWidget.setAlternatingRowColors(True)
-        self.listActionWidget.setObjectName(_fromUtf8("listActionWidget"))
+        self.listActionWidget.setObjectName("listActionWidget")
         self.verticalLayout.addWidget(self.listActionWidget)
-        self.argument = QtGui.QPlainTextEdit(Macro)
+        self.argument = QtWidgets.QPlainTextEdit(Macro)
         self.argument.setReadOnly(True)
-        self.argument.setObjectName(_fromUtf8("argument"))
+        self.argument.setObjectName("argument")
         self.verticalLayout.addWidget(self.argument)
 
         self.retranslateUi(Macro)
         QtCore.QMetaObject.connectSlotsByName(Macro)
 
     def retranslateUi(self, Macro):
-        Macro.setWindowTitle(_translate("Macro", "Form", None))
+        _translate = QtCore.QCoreApplication.translate
+        Macro.setWindowTitle(_translate("Macro", "Form"))
 

@@ -1,82 +1,68 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dialogs/treewidget.ui'
+# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/dialogs/treewidget.ui'
 #
-# Created: Thu Sep 18 10:11:59 2014
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Sat Oct 18 10:31:40 2014
+#      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
-
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_TreeWidgetDialog(object):
     def setupUi(self, TreeWidgetDialog):
-        TreeWidgetDialog.setObjectName(_fromUtf8("TreeWidgetDialog"))
+        TreeWidgetDialog.setObjectName("TreeWidgetDialog")
         TreeWidgetDialog.resize(900, 600)
         TreeWidgetDialog.setMinimumSize(QtCore.QSize(900, 600))
-        self.verticalLayout_3 = QtGui.QVBoxLayout(TreeWidgetDialog)
+        self.verticalLayout_3 = QtWidgets.QVBoxLayout(TreeWidgetDialog)
         self.verticalLayout_3.setSpacing(6)
         self.verticalLayout_3.setContentsMargins(6, 6, 3, 3)
-        self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
-        self.splitter = QtGui.QSplitter(TreeWidgetDialog)
+        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.splitter = QtWidgets.QSplitter(TreeWidgetDialog)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
-        self.splitter.setObjectName(_fromUtf8("splitter"))
-        self.verticalLayoutWidget = QtGui.QWidget(self.splitter)
-        self.verticalLayoutWidget.setObjectName(_fromUtf8("verticalLayoutWidget"))
-        self.treeLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget)
+        self.splitter.setObjectName("splitter")
+        self.verticalLayoutWidget = QtWidgets.QWidget(self.splitter)
+        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
+        self.treeLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
         self.treeLayout.setSpacing(2)
         self.treeLayout.setContentsMargins(0, 3, 0, 3)
-        self.treeLayout.setObjectName(_fromUtf8("treeLayout"))
-        self.lineEditFilter = QtGui.QLineEdit(self.verticalLayoutWidget)
-        self.lineEditFilter.setObjectName(_fromUtf8("lineEditFilter"))
+        self.treeLayout.setObjectName("treeLayout")
+        self.lineEditFilter = QtWidgets.QLineEdit(self.verticalLayoutWidget)
+        self.lineEditFilter.setObjectName("lineEditFilter")
         self.treeLayout.addWidget(self.lineEditFilter)
-        self.treeView = QtGui.QTreeView(self.verticalLayoutWidget)
+        self.treeView = QtWidgets.QTreeView(self.verticalLayoutWidget)
         self.treeView.setHeaderHidden(True)
-        self.treeView.setObjectName(_fromUtf8("treeView"))
+        self.treeView.setObjectName("treeView")
         self.treeLayout.addWidget(self.treeView)
-        self.verticalLayoutWidget_2 = QtGui.QWidget(self.splitter)
-        self.verticalLayoutWidget_2.setObjectName(_fromUtf8("verticalLayoutWidget_2"))
-        self.widgetsLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
+        self.verticalLayoutWidget_2 = QtWidgets.QWidget(self.splitter)
+        self.verticalLayoutWidget_2.setObjectName("verticalLayoutWidget_2")
+        self.widgetsLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_2)
         self.widgetsLayout.setSpacing(6)
         self.widgetsLayout.setContentsMargins(3, -1, -1, -1)
-        self.widgetsLayout.setObjectName(_fromUtf8("widgetsLayout"))
-        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.widgetsLayout.setObjectName("widgetsLayout")
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setSpacing(2)
         self.horizontalLayout.setContentsMargins(3, 0, 3, 0)
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.textLabelTitle = QtGui.QLabel(self.verticalLayoutWidget_2)
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.textLabelTitle = QtWidgets.QLabel(self.verticalLayoutWidget_2)
         font = QtGui.QFont()
         font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
         self.textLabelTitle.setFont(font)
-        self.textLabelTitle.setObjectName(_fromUtf8("textLabelTitle"))
+        self.textLabelTitle.setObjectName("textLabelTitle")
         self.horizontalLayout.addWidget(self.textLabelTitle)
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.textLabelPixmap = QtGui.QLabel(self.verticalLayoutWidget_2)
-        self.textLabelPixmap.setText(_fromUtf8(""))
-        self.textLabelPixmap.setObjectName(_fromUtf8("textLabelPixmap"))
+        self.textLabelPixmap = QtWidgets.QLabel(self.verticalLayoutWidget_2)
+        self.textLabelPixmap.setText("")
+        self.textLabelPixmap.setObjectName("textLabelPixmap")
         self.horizontalLayout.addWidget(self.textLabelPixmap)
         self.widgetsLayout.addLayout(self.horizontalLayout)
-        self.line = QtGui.QFrame(self.verticalLayoutWidget_2)
-        self.line.setFrameShape(QtGui.QFrame.HLine)
-        self.line.setFrameShadow(QtGui.QFrame.Sunken)
-        self.line.setObjectName(_fromUtf8("line"))
+        self.line = QtWidgets.QFrame(self.verticalLayoutWidget_2)
+        self.line.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line.setObjectName("line")
         self.widgetsLayout.addWidget(self.line)
         self.verticalLayout_3.addWidget(self.splitter)
 
@@ -84,5 +70,6 @@ class Ui_TreeWidgetDialog(object):
         QtCore.QMetaObject.connectSlotsByName(TreeWidgetDialog)
 
     def retranslateUi(self, TreeWidgetDialog):
-        self.textLabelTitle.setText(_translate("TreeWidgetDialog", "TextLabel", None))
+        _translate = QtCore.QCoreApplication.translate
+        self.textLabelTitle.setText(_translate("TreeWidgetDialog", "TextLabel"))
 

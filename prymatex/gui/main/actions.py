@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.compat import getOpenFileNames
 from prymatex.qt.helpers import text_to_objectname, text_to_iconname, create_action
 
@@ -71,12 +71,12 @@ class MainWindowActionsMixin(object):
             )
 
     def on_actionImportProject_triggered(self, checked=False):
-        directory = QtGui.QFileDialog.getExistingDirectory(self, "Choose project location", self.application().fileManager.directory())
+        directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Choose project location", self.application().fileManager.directory())
         if directory:
             try:
                 self.application().projectManager.importProject(directory)
             except exceptions.LocationIsNotProject:
-                QtGui.QMessageBox.critical(self, "Critical", "A error has occurred.\n%s is not a valid project location." % directory)
+                QtWidgets.QMessageBox.critical(self, "Critical", "A error has occurred.\n%s is not a valid project location." % directory)
 
     def on_actionCloseOthers_triggered(self, checked=False):
         current = self.currentEditor()
@@ -140,7 +140,7 @@ class MainWindowActionsMixin(object):
         try:
             self.showMessage("%s saved" % baseName)
         except AttributeError as e:
-            QtGui.QMessageBox.information(self, "Screenshoot",
+            QtWidgets.QMessageBox.information(self, "Screenshoot",
                 "%s saved" % baseName)
 
     @classmethod
