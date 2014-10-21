@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import re
 import operator
 
-from prymatex.qt import QtCore, QtGui, Qt, QtWidgets
+from prymatex.qt import QtCore, QtGui, Qt, QtWidgets, API
 
 from prymatex.core import PrymatexEditor
 from prymatex.widgets.texteditor import TextEditWidget
@@ -629,10 +629,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # OVERRIDE: TextEditWidget.wheelEvent()
     def wheelEvent(self, event):
+        delta = getattr(event, API == "pyqt5" and "angleDelta" or "delta")()
         if event.modifiers() == QtCore.Qt.ControlModifier:
-            if event.delta() == 120:
+            if delta == 120:
                 self.zoomIn()
-            elif event.delta() == -120:
+            elif delta == -120:
                 self.zoomOut()
             event.ignore()
         else:

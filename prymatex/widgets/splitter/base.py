@@ -480,7 +480,7 @@ class SplitterWidget(QtWidgets.QSplitter):
             c = 1
             while True:
                 title = "%s %d" % (widget.title(), c)
-                if not self._has_tab_title(title):
+                if not self._has_tabs_with_same_title(widget, title):
                     return title
                 c += 1
         
