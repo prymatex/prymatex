@@ -627,18 +627,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             super(CodeEditor, self).keyPressEvent(event)
             list(handle(event, self.currentMode().postKeyPressHandlers()))
 
-    # OVERRIDE: TextEditWidget.wheelEvent()
-    def wheelEvent(self, event):
-        delta = getattr(event, API == "pyqt5" and "angleDelta" or "delta")()
-        if event.modifiers() == QtCore.Qt.ControlModifier:
-            if delta == 120:
-                self.zoomIn()
-            elif delta == -120:
-                self.zoomOut()
-            event.ignore()
-        else:
-            TextEditWidget.wheelEvent(self, event)
-
     # OVERRIDE: TextEditWidget.mouseReleaseEvent(),
     def mouseReleaseEvent(self, event):
         freehanded = False
@@ -677,22 +665,22 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         positionInBlock = cursor.positionInBlock()
         settings = self.preferenceSettings(cursor)
 
-        indentationFlags = settings.indentationFlags(block.text()[:positionInBlock])
+        indentationFlag = settings.indentationFlag(block.text()[:positionInBlock])
 
         tab_behavior = self.tabKeyBehavior()
         indentation = self.blockIndentation(block)
 
-        if settings.INDENT_INCREASE in indentationFlags:
+        if indentationFlag is settings.INDENT_INCREASE:
             self.logger().debug("Increase indentation")
             blockIndent = indentation + tab_behavior
-        elif settings.INDENT_NEXTLINE in indentationFlags:
+        elif indentationFlag is settings.INDENT_NEXTLINE:
             #TODO: Creo que este no es el correcto
             self.logger().debug("Increase next line indentation")
             blockIndent = indentation + tab_behavior
-        elif settings.UNINDENT in indentationFlags:
+        elif indentationFlag is settings.INDENT_UNINDENT:
             self.logger().debug("Unindent")
             blockIndent = ""
-        elif settings.INDENT_DECREASE in indentationFlags:
+        elif indentationFlag is settings.INDENT_DECREASE:
             self.logger().debug("Decrease indentation")
             blockIndent = indentation[:-len(tab_behavior)]
         else:

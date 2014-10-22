@@ -12,6 +12,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
 
     def name(self):
         return self.editor.overwriteMode() and "OVERWRITE" or "EDIT"
+        
 
     def initialize(self, **kwargs):
         super(CodeEditorEditMode, self).initialize(**kwargs)
@@ -87,7 +88,8 @@ class CodeEditorEditMode(CodeEditorBaseMode):
 
     def __unindent(self, event):
         self.editor.unindentBlocks()
-       
+        return False
+        
     def __unindent_backward_tab_behavior(self, event):
         cursor = self.editor.textCursor()
         if cursor.hasSelection(): return False

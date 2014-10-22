@@ -53,7 +53,7 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtWidgets.QDialo
         self.setCurrentEditor(self.editors[-1])
         #Quitar seleccion
         firstIndex = self.proxyTreeModel.index(0, 0)
-        self.treeView.setSelection(self.treeView.visualRect(firstIndex), QtWidgets.QItemSelectionModel.Clear)
+        self.treeView.setSelection(self.treeView.visualRect(firstIndex), QtCore.QItemSelectionModel.Clear)
         
         return super(BundleEditorDialog, self).exec_()
 

@@ -52,6 +52,7 @@ class PreferenceSettings(object):
         self.preference = preference
         self.update(dataHash)
 
+
     @property
     def bundle(self):
         return self.preference.bundle
@@ -91,10 +92,11 @@ class PreferenceSettings(object):
             setattr(self, key, value)
 
 class PreferenceMasterSettings(object):
-    INDENT_INCREASE = 0
-    INDENT_DECREASE = 1
-    INDENT_NEXTLINE = 2
-    UNINDENT = 3
+    INDENT_NONE = 0
+    INDENT_INCREASE = 1
+    INDENT_DECREASE = 2
+    INDENT_NEXTLINE = 3
+    INDENT_UNINDENT = 4
     FOLDING_NONE = 0
     FOLDING_START = 1
     FOLDING_STOP = 2
@@ -158,25 +160,24 @@ class PreferenceMasterSettings(object):
         transformation = self.symbolTransformation
         return transformation and transformation.transform(text)
 
-    def indentationFlags(self, line):
-        indent = []
+    def indentationFlag(self, line):
         #IncreasePattern on return indent nextline
         #DecreasePattern evaluate line to decrease, no requiere del return
         #IncreaseOnlyNextLine on return indent nextline only
         #IgnoringLines evaluate line to unindent, no require el return
-        if self.decreaseIndentPattern is not None and \
+        if self.decreaseIndentPattern and \
             self.decreaseIndentPattern.search(line):
-            indent.append(self.INDENT_DECREASE)
-        if self.increaseIndentPattern is not None and \
+            return self.INDENT_DECREASE
+        if self.increaseIndentPattern and \
             self.increaseIndentPattern.search(line):
-            indent.append(self.INDENT_INCREASE)
-        if self.indentNextLinePattern is not None and \
+            return self.INDENT_INCREASE
+        if self.indentNextLinePattern and \
             self.indentNextLinePattern.search(line):
-            indent.append(self.INDENT_NEXTLINE)
-        if self.unIndentedLinePattern is not None and \
+            return self.INDENT_NEXTLINE
+        if self.unIndentedLinePattern and \
             self.unIndentedLinePattern.search(line):
-            indent.append(self.UNINDENT)
-        return indent
+            return self.INDENT_UNINDENT
+        return self.INDENT_NONE
 
     def folding(self, line):
         start_match = self.foldingStartMarker.search(line) \

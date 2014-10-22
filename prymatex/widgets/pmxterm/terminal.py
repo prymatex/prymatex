@@ -10,7 +10,7 @@
 import sys
 import time
 
-from prymatex.qt import QtCore, QtGui, QtWidgets
+from prymatex.qt import QtCore, QtGui, QtWidgets, API
 
 from .backend import constants
 from .schemes import ColorScheme
@@ -367,14 +367,18 @@ class TerminalWidget(QtWidgets.QWidget):
             self.return_pressed.emit()
 
     def wheelEvent(self, event):
-        if event.modifiers() == QtCore.Qt.ControlModifier:
-            if event.delta() == 120:
-                self.zoom_in()
-            elif event.delta() == -120:
-                self.zoom_out()
-            event.accept()
+        if API == "pyqt5":
+            delta = event.angleDelta().y()
         else:
-            QtWidgets.QWidget.wheelEvent(self, event)
+            delta = event.delta()
+        if event.modifiers() == QtCore.Qt.ControlModifier:
+            if delta > 0:
+                self.zoom_in()
+            elif delta < 0:
+                self.zoom_out()
+            event.ignore()
+        else:
+            super(TerminalWidget, self).wheelEvent(event)
     
     def mousePressEvent(self, event):
         button = event.button()

@@ -7,6 +7,7 @@ import re
 import os
 import difflib
 
+from prymatex.qt import API
 from prymatex.utils import text
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
@@ -42,7 +43,22 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         """Return line separator based on current EOL mode"""
         return self.eol_chars if self.eol_chars is not None else os.linesep
 
-    #------ Overrides
+    # OVERRIDE: QPlainTextEdit.wheelEvent()
+    def wheelEvent(self, event):
+        if API == "pyqt5":
+            delta = event.angleDelta().y()
+        else:
+            delta = event.delta()
+        if event.modifiers() == QtCore.Qt.ControlModifier:
+            if delta > 0:
+                self.zoomIn()
+            elif delta < 0:
+                self.zoomOut()
+            event.ignore()
+        else:
+            super(TextEditWidget, self).wheelEvent(event)
+
+    # OVERRIDE: QPlainTextEdit.setFont()
     def setFont(self, font):
         QtWidgets.QPlainTextEdit.setFont(self, font)
         self.fontChanged.emit()
