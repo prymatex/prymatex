@@ -4,6 +4,7 @@
 import os
 import sys
 import utils
+import argparse
 
 PROJECT_PATH = os.path.abspath(os.path.join(__file__, '..', '..'))
 
@@ -25,7 +26,7 @@ class QtUiBuild(object):
  
     description = "Build PyQt GUIs (.ui) for prymatex directory schema"
     
-    def __init__(self, verbose, api='pyqt4', force=False):
+    def __init__(self, verbose=False, api='pyqt4', force=False):
         self.verbose = verbose
         self.api = api
         self.force = force
@@ -92,65 +93,29 @@ class QtUiBuild(object):
 
     def run(self):
         """Execute the command."""
-        #self._wrapuic()
         basepath = os.path.join(PROJECT_PATH, 'resources', 'ui')
         for dirpath, _, filenames in os.walk(basepath):
             self.create_package(dirpath)
             for filename in filenames:
                 if filename.endswith('.ui'):
-                    
                     self.compile_ui(os.path.join(dirpath, filename))
-        #self.compile_rc(os.path.join('resources', 'resources.qrc'))
-    _wrappeduic = False
-    
+
     def warn(self, message, *largs):
         print((message % largs))
-    
-    @classmethod
-    def _wrapuic(cls):
-        """Wrap uic to use gettext's _() in place of tr()"""
-        if cls._wrappeduic:
-            return
- 
-        from PyQt4.uic.Compiler import compiler, qtproxies, indenter
- 
-        class _UICompiler(compiler.UICompiler):
-            """Speciallized compiler for qt .ui files."""
-            def createToplevelWidget(self, classname, widgetname):
-                output = indenter.getIndenter()
-                output.level = 0
-                output.write('from prymatex.utils.i18n import ugettext as _')
-                return super(_UICompiler, self).createToplevelWidget(classname, widgetname)
-                
-            def compileUi(self, input_stream, output_stream, from_imports):
-                indenter.createCodeIndenter(output_stream)
-                w = self.parse(input_stream)
 
-                output = indenter.getIndenter()
-                output.write("")
+parser = argparse.ArgumentParser()
 
-                self.factory._cpolicy._writeOutImports()
-                
-                for res in self._resources:
-                    output.write("from prymatex import %s" % res)
-                    #write_import(res, from_imports)
+# Reverts custom options
+parser.add_argument('--force', action='store_true', default=False,
+                    help='Re-build all uis')
+                    
+parser.add_argument('--verbose', action='store_true', default=False,
+                    help='Set verbose')
 
-                return {"widgetname": str(w),
-                        "uiclass" : w.uiclass,
-                        "baseclass" : w.baseclass}
-        compiler.UICompiler = _UICompiler
- 
-        class _i18n_string(qtproxies.i18n_string):
-            """Provide a translated text."""
-            def __str__(self):
-                return "_('%s')" % self.string.encode('string-escape')
-        qtproxies.i18n_string = _i18n_string
- 
-        cls._wrappeduic = True
+parser.add_argument('--api', default='pyqt4', type=str,
+                help="Set api for compile (pyqt4, pyqt5, pyside)")
 
 if __name__ == '__main__':
-    verbose = 0
-    if len(sys.argv) > 1:
-        verbose = int(sys.argv[1])
-    sys.exit(QtUiBuild(verbose, api='pyqt5', force = True).run())
-    
+    opts = parser.parse_args()
+    sys.exit(QtUiBuild(api=opts.api, 
+        verbose=opts.verbose, force=opts.force).run())
