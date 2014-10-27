@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/dialogs/project.ui'
 #
-# Created: Tue Oct 21 18:29:49 2014
+# Created: Wed Oct 22 18:41:36 2014
 #      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!

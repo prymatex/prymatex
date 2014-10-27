@@ -524,12 +524,13 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         if isinstance(url, six.string_types):
             url = QtCore.QUrl(url)
         if url.scheme() == "txmt":
-            sourceFile = url.queryItemValue('url')
+            query = QtCore.QUrlQuery(url.query())
+            sourceFile = query.queryItemValue('url')
             position = (0, 0)
-            line = url.queryItemValue('line')
+            line = query.queryItemValue('line')
             if line.isdigit():
                 position = (int(line) - 1, position[1])
-            column = url.queryItemValue('column')
+            column = query.queryItemValue('column')
             if column.isdigit():
                 position = (position[0], int(column) - 1)
             if sourceFile:

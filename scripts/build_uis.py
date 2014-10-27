@@ -8,7 +8,7 @@ import utils
 PROJECT_PATH = os.path.abspath(os.path.join(__file__, '..', '..'))
 
 def has_been_updated(source, dest):
-    ''' Chcecks weather a file needs to be updated'''
+    '''Chcecks weather a file needs to be updated'''
     source_mtime = os.path.getmtime(source)
     try:
         dest_mtime = os.path.getmtime(dest)
