@@ -4,7 +4,7 @@
 from prymatex.qt import QtCore, QtGui
 
 from .base import CodeEditorBaseMode
-
+()
 class CodeEditorEditMode(CodeEditorBaseMode):
     def __init__(self, **kwargs):
         super(CodeEditorEditMode, self).__init__(**kwargs)
@@ -88,50 +88,50 @@ class CodeEditorEditMode(CodeEditorBaseMode):
 
     def __unindent(self, event):
         self.editor.unindentBlocks()
-        return False
+        return True
         
     def __unindent_backward_tab_behavior(self, event):
         cursor = self.editor.textCursor()
-        if cursor.hasSelection(): return False
-        lineText = cursor.block().text()
-        if lineText[:cursor.columnNumber()].endswith(self.editor.tabKeyBehavior()):
-            counter = cursor.columnNumber() % self.editor.tabWidth or self.editor.tabWidth
-            self.editor.newCursorAtPosition(cursor.position(), cursor.position() - counter).removeSelectedText()
-            return True
+        if not cursor.hasSelection():
+            lineText = cursor.block().text()
+            if lineText[:cursor.columnNumber()].endswith(self.editor.tabKeyBehavior()):
+                counter = cursor.columnNumber() % self.editor.tabWidth or self.editor.tabWidth
+                self.editor.newCursorAtPosition(cursor.position(), cursor.position() - counter).removeSelectedText()
+                return True
         return False
         
     def __remove_backward_braces(self, event):
         cursor = self.editor.textCursor()
-        if cursor.hasSelection(): return False
-        cursor1, cursor2 = self.editor.currentBracesPairs(cursor, direction = "left")
-        if cursor1 and cursor2  and (cursor1.selectionStart() == cursor2.selectionEnd() or cursor1.selectionEnd() == cursor2.selectionStart()):
-            cursor.beginEditBlock()
-            cursor1.removeSelectedText()
-            cursor2.removeSelectedText()
-            cursor.endEditBlock()
-            return True
+        if not cursor.hasSelection():
+            cursor1, _, cursor2, _ = self.editor._smart_typing_pairs(cursor)
+            if cursor1 and cursor2  and (cursor1.selectionStart() == cursor2.selectionEnd() or cursor1.selectionEnd() == cursor2.selectionStart()):
+                cursor.beginEditBlock()
+                cursor1.removeSelectedText()
+                cursor2.removeSelectedText()
+                cursor.endEditBlock()
+                return True
         return False
 
     def __unindent_forward_tab_behavior(self, event):
         cursor = self.editor.textCursor()
-        if cursor.hasSelection(): return False
-        lineText = cursor.block().text()
-        if lineText[cursor.columnNumber():].startswith(self.editor.tabKeyBehavior()):
-            counter = cursor.columnNumber() % self.editor.tabWidth or self.editor.tabWidth
-            self.editor.newCursorAtPosition(cursor.position(), cursor.position() + counter).removeSelectedText()
-            return True
+        if not cursor.hasSelection():
+            lineText = cursor.block().text()
+            if lineText[cursor.columnNumber():].startswith(self.editor.tabKeyBehavior()):
+                counter = cursor.columnNumber() % self.editor.tabWidth or self.editor.tabWidth
+                self.editor.newCursorAtPosition(cursor.position(), cursor.position() + counter).removeSelectedText()
+                return True
         return False
         
     def __remove_forward_braces(self, event):
         cursor = self.editor.textCursor()
-        if cursor.hasSelection(): return False
-        cursor1, cursor2 = self.editor.currentBracesPairs(cursor, direction = "right")
-        if cursor1 and cursor2  and (cursor1.selectionStart() == cursor2.selectionEnd() or cursor1.selectionEnd() == cursor2.selectionStart()):
-            cursor.beginEditBlock()
-            cursor1.removeSelectedText()
-            cursor2.removeSelectedText()
-            cursor.endEditBlock()
-            return True
+        if not cursor.hasSelection():
+            _, cursor1, _, cursor2 = self.editor._smart_typing_pairs(cursor)
+            if cursor1 and cursor2  and (cursor1.selectionStart() == cursor2.selectionEnd() or cursor1.selectionEnd() == cursor2.selectionStart()):
+                cursor.beginEditBlock()
+                cursor1.removeSelectedText()
+                cursor2.removeSelectedText()
+                cursor.endEditBlock()
+                return True
         return False
         
     def __insert_typing_pairs(self, event):
@@ -142,43 +142,56 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         
         # No pairs
         if not pairs: return False
-
+        lc1, rc1, lc2, rc2 = self.editor._smart_typing_pairs(cursor)
+        
         pair = pairs[0]
         
-        insert = replace = wrap = skip = False
-
         isOpen = character == pair[0]
         isClose = character == pair[1]
-        meta_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
+        control_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
         if isClose:
-            cursor1, cursor2 = self.editor.currentBracesPairs(cursor, direction = "right")
-            if cursor1 and cursor2 and \
-                character == cursor2.selectedText():
+            print(lc1.selectedText(), rc1.selectedText())
+            if rc1 is not None and rc2 is not None and \
+                character == rc2.selectedText():
                 cursor.movePosition(QtGui.QTextCursor.NextCharacter)
                 self.editor.setTextCursor(cursor)
                 return True
             elif pair[0] != pair[1]:
                 return False
-        elif meta_down and isOpen:
+        elif control_down and isOpen:
             if cursor.hasSelection():
                 selectedText = cursor.selectedText()
                 if any([selectedText == pair[0] for pair in settings.smartTypingPairs]):
-                    cursor1, cursor2 = self.currentBracesPairs(cursor)
-                    cursor1.insertText(pair[0])
-                    cursor2.insertText(pair[1])
+                    if lc1 is not None and lc2 is not None:
+                        lc1.insertText(pair[0])
+                        lc2.insertText(pair[1])
+                    elif rc1 is not None and rc2 is not None:
+                        rc1.insertText(pair[0])
+                        rc2.insertText(pair[1])
                     return True
             else:
-                cursor1, cursor2 = self.editor.currentBracesPairs(cursor)
-                if cursor1 and cursor2:
-                    if cursor.position() == cursor1.selectionStart():
-                        cursor1.setPosition(cursor1.selectionStart())
-                        cursor2.setPosition(cursor2.selectionEnd())
+                if lc1 is not None and lc2 is not None:
+                    if cursor.position() == lc1.selectionStart():
+                        lc1.setPosition(lc1.selectionStart())
+                        rc2.setPosition(lc2.selectionEnd())
                     else:
-                        cursor1.setPosition(cursor1.selectionEnd())
-                        cursor2.setPosition(cursor2.selectionStart())
+                        lc1.setPosition(lc1.selectionEnd())
+                        rc2.setPosition(lc2.selectionStart())
                     cursor.beginEditBlock()
-                    cursor1.insertText(pair[0])
-                    cursor2.insertText(pair[1])
+                    lc1.insertText(pair[0])
+                    lc2.insertText(pair[1])
+                    cursor.endEditBlock()
+                    return True
+                elif rc1 is not None and rc2 is not None:
+                    if cursor.position() == rc1.selectionStart():
+                        rc1.setPosition(rc1.selectionStart())
+                        rc2.setPosition(rc2.selectionEnd())
+                    else:
+                        rc1.setPosition(rc1.selectionEnd())
+                        rc2.setPosition(rc2.selectionStart())
+                    cursor.beginEditBlock()
+                    rc1.insertText(pair[0])
+                    rc2.insertText(pair[1])
                     cursor.endEditBlock()
                     return True
                     

@@ -69,7 +69,7 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
     def on_editor_textChanged(self):
         alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
         self.completer.setCompletionPrefix(alreadyTyped)
-        if self.completer.setCurrentRow(0) or self.completer.trySetNextModel():
+        if alreadyTyped and (self.completer.setCurrentRow(0) or self.completer.trySetNextModel()):
             self.completer.complete(self.editor.cursorRect())
         else:
             self.completer.hide()

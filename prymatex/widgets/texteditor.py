@@ -168,7 +168,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         return self.textCursor().position()
 
     #------ Find and Replace
-    def findTypingPair(self, b1, b2, cursor, backward = False):
+    def findPair(self, b1, b2, cursor, backward = False):
         """
         Busca b2 asumiendo que b1 es su antitesis de ese modo controla el balanceo.
         b1 antitesis de b2

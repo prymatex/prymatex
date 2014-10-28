@@ -111,10 +111,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         super(CodeEditor, self).__init__(**kwargs)
         self.__current_mode = self.__default_mode = None
 
-        #Current pairs for cursor position (leftBrace <|> rightBrace, oppositeLeftBrace, oppositeRightBrace)
-        # <|> the cursor is allways here
-        self._currentPairs = (None, None, None, None)
-        
         # -------------------- Addons containers
         # Sidebars
         self.leftBar = CodeEditorSideBar(self)
@@ -161,10 +157,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # Editor signals
         self.updateRequest.connect(self.updateSideBars)
-        self.themeChanged.connect(self.highlightEditor)
-        
-        self.cursorPositionChanged.connect(self.setCurrentBraces)
-        self.cursorPositionChanged.connect(self.highlightEditor)
+        self.themeChanged.connect(self._update_highlight)
+        self.cursorPositionChanged.connect(self._update_highlight)
         
         self.syntaxChanged.connect(lambda editor=self: 
             editor.showMessage("Syntax changed to <b>%s</b>" % editor.syntax().name)
@@ -441,48 +435,60 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             rightBarPosition -= self.verticalScrollBar().width()
         self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
 
-    # -------------- Braces
-    def setCurrentBraces(self, cursor = None):
-        cursor = QtGui.QTextCursor(cursor) if cursor is not None else QtGui.QTextCursor(self.textCursor())
-        cursor.clearSelection()
+    # -------------- Smart Typing Pairs
+    def _smart_typing_pairs(self, cursor):
         settings = self.preferenceSettings(cursor)
-        openBraces = [pair[0] for pair in settings.highlightPairs]
-        closeBraces = [pair[1] for pair in settings.highlightPairs]
+        return self._find_all_pairs(cursor, 
+            [pair[0] for pair in settings.smartTypingPairs], 
+            [pair[1] for pair in settings.smartTypingPairs]
+        )
 
-        leftChar = cursor.document().characterAt(cursor.position() - 1)
-        rightChar = cursor.document().characterAt(cursor.position())
+    # -------------- Highlight Pairs    
+    def _highlight_pairs(self, cursor):
+        settings = self.preferenceSettings(cursor)
+        return self._find_all_pairs(cursor, 
+            [pair[0] for pair in settings.highlightPairs], 
+            [pair[1] for pair in settings.highlightPairs]
+        )
         
-        self._currentPairs = (None, None, None, None)
+    def _find_all_pairs(self, cursor, open_pairs, close_pairs):
+        left_char = cursor.document().characterAt(cursor.position() - 1)
+        right_char = cursor.document().characterAt(cursor.position())
 
-        # TODO si no hay para uno no hay para ninguno, quitar el que esta si el findTypingPair retorna None
-        if leftChar in openBraces:
+        #Current pairs for cursor position (left <|> right, oppositeLeft, oppositeRight)
+        # <|> the cursor is allways here
+        pairs = (None, None, None, None)
+
+        # TODO si no hay para uno no hay para ninguno, quitar el que esta si el findPair retorna None
+        if left_char in open_pairs:
             leftCursor = QtGui.QTextCursor(cursor)
             leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-            index = openBraces.index(leftChar)
-            otherBrace = self.findTypingPair(leftChar, closeBraces[index], leftCursor)
+            index = open_pairs.index(left_char)
+            otherBrace = self.findPair(left_char, close_pairs[index], leftCursor)
             if otherBrace is not None:
-                self._currentPairs = (leftCursor, None, otherBrace, None)
-        if rightChar in openBraces:
+                pairs = (leftCursor, None, otherBrace, None)
+        if right_char in open_pairs:
             rightCursor = QtGui.QTextCursor(cursor)
             rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
-            index = openBraces.index(rightChar)
-            otherBrace = self.findTypingPair(rightChar, closeBraces[index], rightCursor)
+            index = open_pairs.index(right_char)
+            otherBrace = self.findPair(right_char, close_pairs[index], rightCursor)
             if otherBrace is not None:
-                self._currentPairs = (self._currentPairs[0], rightCursor, self._currentPairs[2], otherBrace)
-        if leftChar in closeBraces and self._currentPairs[0] is None:  #Tener uno implica tener los dos por el if
+                pairs = (pairs[0], rightCursor, pairs[2], otherBrace)
+        if left_char in close_pairs and pairs[0] is None:  #Tener uno implica tener los dos por el if
             leftCursor = QtGui.QTextCursor(cursor)
             leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-            otherBrace = self.findTypingPair(leftChar, openBraces[closeBraces.index(leftChar)], leftCursor, True)
+            otherBrace = self.findPair(left_char, open_pairs[close_pairs.index(left_char)], leftCursor, True)
             if otherBrace is not None:
-                self._currentPairs = (leftCursor, self._currentPairs[1], otherBrace, self._currentPairs[3])
-        if rightChar in closeBraces and self._currentPairs[1] is None: #Tener uno implica tener los dos por el if
+                pairs = (leftCursor, pairs[1], otherBrace, pairs[3])
+        if right_char in close_pairs and pairs[1] is None: #Tener uno implica tener los dos por el if
             rightCursor = QtGui.QTextCursor(cursor)
             rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
-            otherBrace = self.findTypingPair(rightChar, openBraces[closeBraces.index(rightChar)], rightCursor, True)
+            otherBrace = self.findPair(right_char, open_pairs[close_pairs.index(right_char)], rightCursor, True)
             if otherBrace is not None:
-                self._currentPairs = (self._currentPairs[0], rightCursor, self._currentPairs[2], otherBrace)
+                pairs = (pairs[0], rightCursor, pairs[2], otherBrace)
+        return pairs
 
-    def currentBracesPairs(self, cursor = None, direction = "both"):
+    def _currentBracesPairs(self, cursor = None, direction = "both"):
         """ Retorna el otro cursor correspondiente al cursor (brace)
         pasado o actual del editor, puede retornar None en caso de no
         estar cerrado el brace"""
@@ -506,28 +512,29 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             return (brace2, brace1)
         return (brace1, brace2)
 
-    def beforeBrace(self, cursor):
+    def _beforeBrace(self, cursor):
         return self._currentPairs[1] is not None and self._currentPairs[1].position() - 1 == cursor.position()
 
-    def afterBrace(self, cursor):
+    def _afterBrace(self, cursor):
         return self._currentPairs[0] is not None and self._currentPairs[0].position() + 1 == cursor.position()
 
-    def besideBrace(self, cursor):
+    def _besideBrace(self, cursor):
         return self.beforeBrace(cursor) or self.afterBrace(cursor)
 
-    def surroundBraces(self, cursor):
+    def _surroundBraces(self, cursor):
         #TODO: Esto esta mal
         return self.beforeBrace(cursor) and self.afterBrace(cursor)
 
-    #-------------------- Highlight Editor
-    def highlightEditor(self):
+    #-------------------- Highlight Editor on signal trigger
+    def _update_highlight(self):
         cursor = self.textCursor()
         cursor.clearSelection()
         if self.showHighlightCurrentLine:
             self.setExtraSelectionCursors("dyn.lineHighlight", [ cursor ])
         else:
             self.clearExtraSelectionCursors("dyn.lineHighlight")
-        self.setExtraSelectionCursors("dyn.highlightPairs", [cursor for cursor in list(self._currentPairs) if cursor is not None])
+        highlight_pairs = self._highlight_pairs(cursor)
+        self.setExtraSelectionCursors("dyn.highlightPairs", [cursor for cursor in list(highlight_pairs) if cursor is not None])
         self.updateExtraSelections()
 
     # OVERRIDE: TextEditWidget.setPalette()
@@ -858,7 +865,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         foundCursors = [(self.document().find(openBrace_closeBrace[0], cursor.selectionStart(), flags), openBrace_closeBrace[1]) for openBrace_closeBrace in settings.highlightPairs]
         openCursor = reduce(lambda c1, c2: (not c1[0].isNull() and c1[0].selectionEnd() > c2[0].selectionEnd()) and c1 or c2, foundCursors)
         if not openCursor[0].isNull():
-            closeCursor = self.findTypingPair(openCursor[0].selectedText(), openCursor[1], openCursor[0])
+            closeCursor = self.findPair(openCursor[0].selectedText(), openCursor[1], openCursor[0])
             if openCursor[0].selectionEnd() <= cursor.selectionStart() <= closeCursor.selectionStart():
                 # TODO New cursor at position
                 cursor.setPosition(openCursor[0].selectionEnd())
