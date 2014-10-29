@@ -150,9 +150,9 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         isClose = character == pair[1]
         control_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
         if isClose:
-            print(lc1.selectedText(), rc1.selectedText())
+            print(lc1.selectedText(), rc1.selectedText(), lc2.selectedText(), rc2.selectedText())
             if rc1 is not None and rc2 is not None and \
-                character == rc2.selectedText():
+                character == rc1.selectedText():
                 cursor.movePosition(QtGui.QTextCursor.NextCharacter)
                 self.editor.setTextCursor(cursor)
                 return True
