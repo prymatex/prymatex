@@ -4,7 +4,7 @@
 from prymatex.qt import QtCore, QtGui
 
 from .base import CodeEditorBaseMode
-()
+
 class CodeEditorEditMode(CodeEditorBaseMode):
     def __init__(self, **kwargs):
         super(CodeEditorEditMode, self).__init__(**kwargs)
@@ -12,7 +12,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
 
     def name(self):
         return self.editor.overwriteMode() and "OVERWRITE" or "EDIT"
-        
 
     def initialize(self, **kwargs):
         super(CodeEditorEditMode, self).initialize(**kwargs)
@@ -35,7 +34,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         cursor = self.editor.textCursor()
         if cursor.blockNumber() == 0:
             self.editor.trySyntaxByText(cursor)
-        return False
     
     def __insert_new_line(self, event):
         self.editor.insertNewLine(self.editor.textCursor())
@@ -50,22 +48,19 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                 keyseq, leftScope, rightScope)
             self.editor.insertBundleItem(items)
             return bool(items)
-        return False
     
     def __insert_tab_bundle_item(self, event):
         cursor = self.editor.textCursor()
-        if cursor.hasSelection(): return False
-
-        trigger = self.application().supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
-        if not trigger: return False
-
-        triggerCursor = self.editor.newCursorAtPosition(
-            cursor.position(), cursor.position() - len(trigger))
-        leftScope, rightScope = self.editor.scope(triggerCursor)
-        items = self.application().supportManager.getTabTriggerItem(
-            trigger, leftScope, rightScope)
-        self.editor.insertBundleItem(items, textCursor = triggerCursor)
-        return bool(items)
+        if not cursor.hasSelection():
+            trigger = self.application().supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
+            if trigger:
+                triggerCursor = self.editor.newCursorAtPosition(
+                    cursor.position(), cursor.position() - len(trigger))
+                leftScope, rightScope = self.editor.scope(triggerCursor)
+                items = self.application().supportManager.getTabTriggerItem(
+                    trigger, leftScope, rightScope)
+                self.editor.insertBundleItem(items, textCursor = triggerCursor)
+                return bool(items)
 
     def __indent_tab_behavior(self, event):
         start, end = self.editor.selectionBlockStartEnd()
@@ -84,7 +79,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
             cursor.setPosition(newPosition, event.modifiers() == QtCore.Qt.ShiftModifier and QtGui.QTextCursor.KeepAnchor or QtGui.QTextCursor.MoveAnchor)
             self.editor.setTextCursor(cursor)
             return True
-        return False
 
     def __unindent(self, event):
         self.editor.unindentBlocks()
@@ -98,7 +92,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                 counter = cursor.columnNumber() % self.editor.tabWidth or self.editor.tabWidth
                 self.editor.newCursorAtPosition(cursor.position(), cursor.position() - counter).removeSelectedText()
                 return True
-        return False
         
     def __remove_backward_braces(self, event):
         cursor = self.editor.textCursor()
@@ -110,7 +103,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                 cursor2.removeSelectedText()
                 cursor.endEditBlock()
                 return True
-        return False
 
     def __unindent_forward_tab_behavior(self, event):
         cursor = self.editor.textCursor()
@@ -120,7 +112,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                 counter = cursor.columnNumber() % self.editor.tabWidth or self.editor.tabWidth
                 self.editor.newCursorAtPosition(cursor.position(), cursor.position() + counter).removeSelectedText()
                 return True
-        return False
         
     def __remove_forward_braces(self, event):
         cursor = self.editor.textCursor()
@@ -132,7 +123,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                 cursor2.removeSelectedText()
                 cursor.endEditBlock()
                 return True
-        return False
         
     def __insert_typing_pairs(self, event):
         cursor = self.editor.textCursor()
@@ -150,14 +140,10 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         isClose = character == pair[1]
         control_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
         if isClose:
-            print(lc1.selectedText(), rc1.selectedText(), lc2.selectedText(), rc2.selectedText())
-            if rc1 is not None and rc2 is not None and \
-                character == rc1.selectedText():
+            if rc1 and rc2 and character == rc1.selectedText():
                 cursor.movePosition(QtGui.QTextCursor.NextCharacter)
                 self.editor.setTextCursor(cursor)
                 return True
-            elif pair[0] != pair[1]:
-                return False
         elif control_down and isOpen:
             if cursor.hasSelection():
                 selectedText = cursor.selectedText()
@@ -170,7 +156,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                         rc2.insertText(pair[1])
                     return True
             else:
-                if lc1 is not None and lc2 is not None:
+                if lc1 and lc2:
                     if cursor.position() == lc1.selectionStart():
                         lc1.setPosition(lc1.selectionStart())
                         rc2.setPosition(lc2.selectionEnd())
@@ -182,7 +168,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                     lc2.insertText(pair[1])
                     cursor.endEditBlock()
                     return True
-                elif rc1 is not None and rc2 is not None:
+                elif rc1 and rc2:
                     if cursor.position() == rc1.selectionStart():
                         rc1.setPosition(rc1.selectionStart())
                         rc2.setPosition(rc2.selectionEnd())
@@ -202,9 +188,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
             cursor.setPosition(position + 1)
             self.editor.setTextCursor(cursor)
             return True
-        return False
 
     def __toggle_overwrite(self, event):
-        overwrite = not self.editor.overwriteMode()
-        self.editor.setOverwriteMode(overwrite)
-        return False
+        self.editor.setOverwriteMode(not self.editor.overwriteMode())

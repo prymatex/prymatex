@@ -112,6 +112,7 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
             self.completer.setCompletionPrefix(alreadyTyped)
             self.completer.runCompleter(self.editor.cursorRect())
+            return True
         return False
 
     def __autorun_completer(self, event):
