@@ -100,7 +100,6 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             return True
         else:
             self.completer.hide()
-        return False
 
     def __insert_completion(self, event):
         event.ignore()
@@ -113,7 +112,6 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             self.completer.setCompletionPrefix(alreadyTyped)
             self.completer.runCompleter(self.editor.cursorRect())
             return True
-        return False
 
     def __autorun_completer(self, event):
         if not (event.modifiers() & QtCore.Qt.ControlModifier) and \

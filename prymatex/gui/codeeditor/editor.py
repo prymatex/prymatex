@@ -38,7 +38,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     syntaxChanged = QtCore.Signal()
     themeChanged = QtCore.Signal(object)
     filePathChanged = QtCore.Signal(str)
-    modeChanged = QtCore.Signal()
+    modeChanged = QtCore.Signal(object, object)
     beginMode = QtCore.Signal(object)
     endMode = QtCore.Signal(object)
     aboutToClose = QtCore.Signal()
@@ -109,13 +109,13 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # --------------------- init
     def __init__(self, **kwargs):
         super(CodeEditor, self).__init__(**kwargs)
-        self.__current_mode = self.__default_mode = None
-
         # -------------------- Addons containers
         # Sidebars
         self.leftBar = CodeEditorSideBar(self)
         self.rightBar = CodeEditorSideBar(self)
+
         # Modes
+        self.__current_mode_index = 0
         self.codeEditorModes = []
         
         #Models
@@ -181,16 +181,15 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.browserDock = self.window().findChild(QtWidgets.QDockWidget, "BrowserDock")
 
     # -------------- Self Signal Connect
-    def setDefaultCodeEditorMode(self, mode):
-        self.__current_mode = self.__default_mode = mode
-        
     def beginCodeEditorMode(self, mode):
-        self.__current_mode = mode
-        self.modeChanged.emit()
+        old_mode = self.codeEditorModes[self.__current_mode_index]
+        self.__current_mode_index = self.codeEditorModes.index(mode) 
+        self.modeChanged.emit(old_mode, self.codeEditorModes[self.__current_mode_index])
 
     def endCodeEditorMode(self, mode):
-        self.__current_mode = self.__default_mode
-        self.modeChanged.emit()
+        old_mode = self.codeEditorModes[self.__current_mode_index]
+        self.__current_mode_index = 0
+        self.modeChanged.emit(old_mode, self.codeEditorModes[self.__current_mode_index])
 
     # OVERRIDE: PrymatexEditor.addComponent()
     def addComponent(self, component):
@@ -360,7 +359,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # ------------ Obteniendo datos del editor
     def currentMode(self):
-        return self.__current_mode
+        return self.codeEditorModes[self.__current_mode_index]
 
     def tabKeyBehavior(self):
         return ' ' * self.indentationWidth if self.indentUsingSpaces else '\t'
@@ -629,7 +628,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 yield handler(event)
             for handler in keyPressHandlers.get(event.key(), []):
                 yield handler(event)
-
+        
+        # Plus el default mode 
         if not any(handle(event, self.currentMode().preKeyPressHandlers())):
             super(CodeEditor, self).keyPressEvent(event)
             list(handle(event, self.currentMode().postKeyPressHandlers()))
@@ -657,7 +657,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # --------------- Key press pre and post
     def registerKeyPressHandler(self, key, handler, after = False):
-        self.__default_mode.registerKeyPressHandler(key, handler, after)
+        self.currentMode().registerKeyPressHandler(key, handler, after)
 
     def trySyntaxByText(self, cursor):
         text = cursor.block().text()[:cursor.columnNumber()]

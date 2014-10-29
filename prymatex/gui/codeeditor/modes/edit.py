@@ -6,10 +6,6 @@ from prymatex.qt import QtCore, QtGui
 from .base import CodeEditorBaseMode
 
 class CodeEditorEditMode(CodeEditorBaseMode):
-    def __init__(self, **kwargs):
-        super(CodeEditorEditMode, self).__init__(**kwargs)
-        self.editor.setDefaultCodeEditorMode(self)
-
     def name(self):
         return self.editor.overwriteMode() and "OVERWRITE" or "EDIT"
 
@@ -182,7 +178,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                     return True
                     
         word, wordStart, wordEnd = self.editor.currentWord()
-        if not (wordStart <= cursor.position() < wordEnd):
+        if isOpen and not (wordStart <= cursor.position() < wordEnd):
             position = cursor.position()
             cursor.insertText("%s%s" % (pair[0], pair[1]))
             cursor.setPosition(position + 1)

@@ -19,7 +19,7 @@ def registerPlugin(manager, descriptor):
     manager.registerComponent(CodeEditorBookmarksDock)
 
     # ---------------- Modes
-    manager.registerComponent(CodeEditorEditMode, CodeEditor)
+    manager.registerComponent(CodeEditorEditMode, CodeEditor) # First is default mode
     manager.registerComponent(CodeEditorMultiCursorMode, CodeEditor)
     manager.registerComponent(CodeEditorSnippetMode, CodeEditor)
     manager.registerComponent(CodeEditorComplitionMode, CodeEditor)
