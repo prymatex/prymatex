@@ -88,16 +88,10 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         QtWidgets.QCompleter.setModel(self, model)
 
     def trySetModel(self, model):
-        current_model = self.model()
-        if model not in self.completion_models:
-            return False
         self.setModel(model)
-        if self.setCurrentRow(0):
-            self.fixPopupView()
-        else:
-            self.setModel(current_model)
-        return self.model() != current_model
-        
+        self.fixPopupView()
+        return self.setCurrentRow(0)
+
     def registerModel(self, completionModel):
         self.completion_models.append(completionModel)
         completionModel.suggestionsReady.connect(self.on_model_suggestionsReady)
@@ -113,10 +107,10 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         while True:
             index = (self.completion_models.index(model) + 1) % len(self.completion_models)
             model = self.completion_models[index]
-            if model.isReady() and self.trySetModel(model):
-                return True
             if current == model:
                 break
+            if model.isReady() and self.trySetModel(model):
+                return True
         return False
 
     def on_model_suggestionsReady(self):
@@ -124,11 +118,6 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         if self.model() is None and self.trySetModel(model):
             self.complete(self.editor.cursorRect())
 
-    def runCompleter(self, rect, model = None):
-        if self.isVisible() or model is not None:
-            if model != self.model() and self.trySetModel(model):
-                self.complete(rect)
-        else:
-            self.setModel(model)
-            for model in self.completion_models:
-                model.fill()
+    def runCompleter(self, rect):
+        self.setModel(None)
+        [ model.fill() for model in self.completion_models ]

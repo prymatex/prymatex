@@ -80,11 +80,12 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
         if not self.completer.isVisible():
             alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
             self.completer.setCompletionPrefix(already_typed or alreadyTyped or "")
-        self.completer.runCompleter(self.editor.cursorRect(), model = self.suggestionsCompletionModel)
+        if self.completer.trySetModel(self.suggestionsCompletionModel):
+            self.completer.complete(self.editor.cursorRect())
 
     # ------ Mode handlers
     def __any_pressed(self, event):
-        if event.modifiers() & QtCore.Qt.ControlModifier or text.asciify(event.text()) not in COMPLETER_CHARS:
+        if event.text() and text.asciify(event.text()) not in COMPLETER_CHARS:
             self.completer.hide()
 
     def __next_model(self, event):
