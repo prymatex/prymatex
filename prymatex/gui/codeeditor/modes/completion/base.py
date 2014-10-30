@@ -30,11 +30,11 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
     def initialize(self, **kwargs):
         super(CodeEditorComplitionMode, self).initialize(**kwargs)
         # To default editor mode
-        self.editor.registerKeyPressHandler(
+        self.editor.defaultMode().registerKeyPressHandler(
             QtCore.Qt.Key_Space,
             self.__run_completer
         )
-        self.editor.registerKeyPressHandler(
+        self.editor.defaultMode().registerKeyPressHandler(
             QtCore.Qt.Key_Any,
             self.__autorun_completer,
             after = True
@@ -60,11 +60,17 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
 
     def activate(self):
         self.editor.textChanged.connect(self.on_editor_textChanged)
+        self.editor.defaultMode().unregisterKeyPressHandler(self.__autorun_completer)
         super(CodeEditorComplitionMode, self).activate()
-    
+        
     def deactivate(self):
-        self.editor.textChanged.disconnect(self.on_editor_textChanged)
         super(CodeEditorComplitionMode, self).deactivate()
+        self.editor.textChanged.disconnect(self.on_editor_textChanged)
+        self.editor.defaultMode().registerKeyPressHandler(
+            QtCore.Qt.Key_Any,
+            self.__autorun_completer,
+            after = True
+        )
     
     def on_editor_textChanged(self):
         alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)

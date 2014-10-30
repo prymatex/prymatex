@@ -19,12 +19,20 @@ class CodeEditorBaseMode(PrymatexEditorAddon, QtCore.QObject):
     def registerKeyPressHandler(self, key, handler, after=False):
         handlers = self.postEventHandlers if after else self.preEventHandlers
         handlers[QtCore.QEvent.KeyPress].setdefault(key, []).append(handler)
+        
+    def unregisterKeyPressHandler(self, handler):
+        for handlers in self.postEventHandlers.values():
+            if handler in handlers:
+                handlers.remove(handler)
+        for handlers in self.preEventHandlers.values():
+            if handler in handlers:
+                handlers.remove(handler)
 
-    def preKeyPressHandlers(self):
-        return self.preEventHandlers[QtCore.QEvent.KeyPress]
+    def preKeyPressHandlers(self, key):
+        return self.preEventHandlers[QtCore.QEvent.KeyPress].get(key, [])
 
-    def postKeyPressHandlers(self):
-        return self.postEventHandlers[QtCore.QEvent.KeyPress]
+    def postKeyPressHandlers(self, key):
+        return self.postEventHandlers[QtCore.QEvent.KeyPress].get(key, [])
 
     def name(self):
         return self.objectName()

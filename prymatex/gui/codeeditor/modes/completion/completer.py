@@ -67,13 +67,12 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         self.model().highlightedCompletion(self.completionModel().mapToSource(index))
         
     def setCurrentRow(self, index):
-        if not QtWidgets.QCompleter.setCurrentRow(self, index):
-            return False
-        cIndex = self.completionModel().index(index, 0)
-        if self.completionMode() == QtWidgets.QCompleter.PopupCompletion:
-            self.popup().setCurrentIndex(cIndex)
-        return self.model().setCurrentRow(
-            self.completionModel().mapToSource(cIndex), self.completionCount())
+        if super(CodeEditorCompleter, self).setCurrentRow(index):
+            cIndex = self.completionModel().index(index, 0)
+            if self.completionMode() == QtWidgets.QCompleter.PopupCompletion:
+                self.popup().setCurrentIndex(cIndex)
+            return self.model().setCurrentRow(
+                self.completionModel().mapToSource(cIndex), self.completionCount())
 
     def setCompletionPrefix(self, prefix):
         for model in self.completion_models:

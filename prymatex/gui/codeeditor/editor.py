@@ -33,7 +33,8 @@ from functools import reduce
 class CodeEditor(PrymatexEditor, TextEditWidget):
     STANDARD_SIZES = (70, 78, 80, 100, 120)
     MAX_FOLD_LEVEL = 10
-
+    DEFAULT_MODE_INDEX = 0
+    
     # -------------------- Signals
     syntaxChanged = QtCore.Signal()
     themeChanged = QtCore.Signal(object)
@@ -115,7 +116,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.rightBar = CodeEditorSideBar(self)
 
         # Modes
-        self.__current_mode_index = 0
+        self.__current_mode_index = self.DEFAULT_MODE_INDEX
         self.codeEditorModes = []
         
         #Models
@@ -188,7 +189,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def endCodeEditorMode(self, mode):
         old_mode = self.codeEditorModes[self.__current_mode_index]
-        self.__current_mode_index = 0
+        self.__current_mode_index = self.DEFAULT_MODE_INDEX
         self.modeChanged.emit(old_mode, self.codeEditorModes[self.__current_mode_index])
 
     # OVERRIDE: PrymatexEditor.addComponent()
@@ -360,6 +361,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # ------------ Obteniendo datos del editor
     def currentMode(self):
         return self.codeEditorModes[self.__current_mode_index]
+    
+    def defaultMode(self):
+        return self.codeEditorModes[self.DEFAULT_MODE_INDEX]
 
     def tabKeyBehavior(self):
         return ' ' * self.indentationWidth if self.indentUsingSpaces else '\t'
@@ -623,16 +627,17 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
-        def handle(event, keyPressHandlers):
-            for handler in keyPressHandlers.get(QtCore.Qt.Key_Any, []):
-                yield handler(event)
-            for handler in keyPressHandlers.get(event.key(), []):
-                yield handler(event)
+        def handle(event, attr, *modes):
+            for mode in modes:
+                for handler in getattr(mode, attr)(QtCore.Qt.Key_Any):
+                    yield handler(event)
+                for handler in getattr(mode, attr)(event.key()):
+                    yield handler(event)
         
         # Plus el default mode 
-        if not any(handle(event, self.currentMode().preKeyPressHandlers())):
+        if not any(handle(event, "preKeyPressHandlers", self.currentMode(), self.defaultMode())):
             super(CodeEditor, self).keyPressEvent(event)
-            list(handle(event, self.currentMode().postKeyPressHandlers()))
+            list(handle(event, "postKeyPressHandlers", self.currentMode(), self.defaultMode()))
 
     # OVERRIDE: TextEditWidget.mouseReleaseEvent(),
     def mouseReleaseEvent(self, event):
@@ -656,9 +661,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             TextEditWidget.mouseReleaseEvent(self, event)
 
     # --------------- Key press pre and post
-    def registerKeyPressHandler(self, key, handler, after = False):
-        self.currentMode().registerKeyPressHandler(key, handler, after)
-
     def trySyntaxByText(self, cursor):
         text = cursor.block().text()[:cursor.columnNumber()]
         syntax = self.application().supportManager.findSyntaxByFirstLine(text)

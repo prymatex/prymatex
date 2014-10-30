@@ -201,7 +201,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             self.projectManager = self.buildProjectManager()    # Project Manager
             self.schedulerManager = self.buildSchedulerManager()
             self.serverManager = self.buildServerManager()
-
+            print("aca")
             # Load Bundles
             self.supportManager.loadSupport(self.showMessage)
 
