@@ -23,10 +23,14 @@ class HighlighterThread(QtCore.QThread):
     def run(self):
         self.msleep(100)
         block = self.parent().document().begin()
+        syntaxProcessor = self.parent().syntaxProcessor
+        themeProcessor = self.parent().themeProcessor
+        process = self.parent()._process
         while block.isValid() and self._running:
-            user_data = self.parent().syntaxProcessor.blockUserData(block)
-            self.parent()._process(block, user_data)
-            formats = self.parent().themeProcessor.textCharFormats(user_data)
+            self.usleep(1)
+            user_data = syntaxProcessor.blockUserData(block)
+            process(block, user_data)
+            formats = themeProcessor.textCharFormats(user_data)
             block.layout().setAdditionalFormats(formats)
             block = block.next()
         self.highlightReady.emit()
@@ -34,7 +38,7 @@ class HighlighterThread(QtCore.QThread):
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def __init__(self, editor):
         super(CodeEditorSyntaxHighlighter, self).__init__(editor)
-        self.highlightBlock = self._highlight
+        self.highlightBlock = self._nop
         self.setDocument(editor.document())
         self.editor = editor
         self.syntaxProcessor = editor.findProcessor("syntax")
