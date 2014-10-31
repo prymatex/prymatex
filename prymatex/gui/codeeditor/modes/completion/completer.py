@@ -3,7 +3,7 @@
 
 from functools import reduce
 
-from prymatex.qt import QtCore, QtGui, Qt, QtWidgets
+from prymatex.qt import QtCore, QtGui, Qt, QtWidgets, API
 
 from prymatex.core import config
 from prymatex.models.support import BundleItemTreeNode
@@ -82,10 +82,12 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
             self.fixPopupView()
     
     def setModel(self, model):
-        # Esto esta bueno pero cuando cambias de modelo tenes que hacer algo mas
-        #self.setModelSorting(model.modelSorting())
-        #self.setCaseSensitivity(model.caseSensitivity())
-        QtWidgets.QCompleter.setModel(self, model)
+        super(CodeEditorCompleter, self).setModel(model)
+        if model is not None:
+            self.setModelSorting(model.modelSorting())
+            self.setCaseSensitivity(model.caseSensitivity())
+            if API == 'pyqt5':
+                self.setFilterMode(model.filterMode())
 
     def trySetModel(self, model):
         self.setModel(model)

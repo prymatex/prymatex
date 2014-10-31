@@ -20,7 +20,7 @@ class HtmlItemDelegate(QtWidgets.QItemDelegate):
                 color: %s; }""" % (background.name(), color.name()))
         else:
             self.document.setDefaultStyleSheet("")
-
+        
         self.document.setHtml(text)
         self.document.setTextWidth(option.rect.width() - option.decorationSize.width())
         

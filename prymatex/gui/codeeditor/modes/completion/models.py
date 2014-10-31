@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtWidgets
 
 from prymatex.core import config
 
@@ -31,13 +31,19 @@ class CompletionBaseModel(QtCore.QAbstractTableModel):
         #QCompleter.UnsortedModel
         #QCompleter.CaseSensitivelySortedModel
         #QCompleter.CaseInsensitivelySortedModel
-        return QtGui.QCompleter.UnsortedModel
+        return QtWidgets.QCompleter.UnsortedModel
 
     def caseSensitivity(self):
         #QtCore.Qt.CaseInsensitive
         #QtCore.Qt.CaseSensitive
         return QtCore.Qt.CaseSensitive
 
+    def filterMode(self):
+        #QtCore.Qt.MatchStartsWith
+        #QtCore.Qt.MatchContains
+        #QtCore.Qt.MatchEndsWith 
+        return QtCore.Qt.MatchStartsWith
+        
     def fill(self):
         raise NotImplemented
     
@@ -58,8 +64,15 @@ class WordsCompletionModel(CompletionBaseModel):
         super(WordsCompletionModel, self).__init__(**kwargs)
         self.suggestions = set()
 
+    # ----------- Setup completer
     def modelSorting(self):
-        return QtGui.QCompleter.CaseSensitivelySortedModel
+        return QtWidgets.QCompleter.CaseInsensitivelySortedModel
+
+    def caseSensitivity(self):
+        return QtCore.Qt.CaseInsensitive
+    
+    def filterMode(self):
+        return QtCore.Qt.MatchContains
 
     def fill(self):
         # TODO Hacer las palabras con un timer
@@ -127,6 +140,9 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
         super(TabTriggerItemsCompletionModel, self).__init__(**kwargs)
         self.triggers = []
 
+    def caseSensitivity(self):
+        return QtCore.Qt.CaseSensitive
+        
     def fill(self):
         leftScope, rightScope = self.editor.scope()
         self.triggers = self.editor.application().supportManager.getAllTabTriggerItemsByScope(leftScope, rightScope)

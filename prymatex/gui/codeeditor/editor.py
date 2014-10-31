@@ -637,7 +637,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         # Plus el default mode 
         if not any(handle(event, "preKeyPressHandlers", self.currentMode(), self.defaultMode())):
             super(CodeEditor, self).keyPressEvent(event)
-            list(handle(event, "postKeyPressHandlers", self.currentMode(), self.defaultMode()))
+            list(handle(event, "postKeyPressHandlers", self.currentMode()))
 
     # OVERRIDE: TextEditWidget.mouseReleaseEvent(),
     def mouseReleaseEvent(self, event):
