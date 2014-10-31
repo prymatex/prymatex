@@ -130,11 +130,11 @@ class WordsCompletionModel(CompletionBaseModel):
         elif role == QtCore.Qt.MatchRole:
             #return text.fuzzy_match(self.prefix, suggestion) and self.prefix or suggestion
             return suggestion
-    
+
     def setCurrentRow(self, index, completion_count):
         suggestion = self.suggestions[index.row()]
-        return completion_count > 1 or suggestion != self.completionPrefix()
-        
+        return completion_count > 1 or self.completionPrefix() != suggestion
+
 class TabTriggerItemsCompletionModel(CompletionBaseModel):
     def __init__(self, **kwargs):
         super(TabTriggerItemsCompletionModel, self).__init__(**kwargs)

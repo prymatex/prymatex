@@ -23,7 +23,7 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
 
         # Install method
         self.editor.runCompleter = self.__editor_run_completer
-
+    
     def name(self):
         return "COMPLITION"
 
@@ -40,6 +40,11 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             after = True
         )
         # To this mode
+        self.registerKeyPressHandler(
+            QtCore.Qt.Key_Any,
+            self.__after_any_pressed,
+            after = True
+        )
         self.registerKeyPressHandler(
             QtCore.Qt.Key_Any,
             self.__any_pressed
@@ -88,6 +93,12 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
         if event.text() and text.asciify(event.text()) not in COMPLETER_CHARS:
             self.completer.hide()
 
+    def __after_any_pressed(self, event):
+        alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
+        self.completer.setCompletionPrefix(alreadyTyped)
+        if self.completer.setCurrentRow(0) or self.completer.trySetNextModel():
+            self.completer.complete(self.editor.cursorRect())
+
     def __next_model(self, event):
         if event.modifiers() & QtCore.Qt.ControlModifier and self.completer.trySetNextModel():
             self.completer.complete(self.editor.cursorRect())
@@ -110,7 +121,6 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
     def __default_after_any_pressed(self, event):
         if not (event.modifiers() & QtCore.Qt.ControlModifier) and (text.asciify(event.text()) in COMPLETER_CHARS):
             alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-            self.completer.setCompletionPrefix(alreadyTyped)
-            if (self.isActive() and (self.completer.setCurrentRow(0) or self.completer.trySetNextModel())) or \
-                (not self.isActive() and (end - start >= self.editor.wordLengthToComplete)):
-                    self.completer.runCompleter(self.editor.cursorRect())
+            if end - start >= self.editor.wordLengthToComplete:
+                self.completer.setCompletionPrefix(alreadyTyped)
+                self.completer.runCompleter(self.editor.cursorRect())
