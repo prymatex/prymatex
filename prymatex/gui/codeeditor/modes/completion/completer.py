@@ -38,6 +38,17 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
 
         self.setWidget(self.editor)
     
+    # ------------------- Register models
+    def registerModel(self, completionModel):
+        self.completion_models.append(completionModel)
+        completionModel.suggestionsReady.connect(self.on_model_suggestionsReady)
+        completionModel.setEditor(self.editor)
+    
+    def unregisterModel(self, completionModel):
+        self.completion_models.remove(completionModel)
+        completionModel.setEditor(None)
+        completionModel.suggestionsReady.disconnect(self.on_model_suggestionsReady)
+
     def setPalette(self, palette):
         self.popup().setPalette(palette)
         self.popup().viewport().setPalette(palette)
@@ -81,6 +92,7 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         if self.model() is not None:
             self.fixPopupView()
     
+    # ----------- Set or try to set model
     def setModel(self, model):
         super(CodeEditorCompleter, self).setModel(model)
         if model is not None:
@@ -90,19 +102,15 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
                 self.setFilterMode(model.filterMode())
 
     def trySetModel(self, model):
+        current = self.model()
+        prefix = self.completionPrefix()
         self.setModel(model)
-        self.fixPopupView()
-        return self.setCurrentRow(0)
-
-    def registerModel(self, completionModel):
-        self.completion_models.append(completionModel)
-        completionModel.suggestionsReady.connect(self.on_model_suggestionsReady)
-        completionModel.setEditor(self.editor)
-    
-    def unregisterModel(self, completionModel):
-        self.completion_models.remove(completionModel)
-        completionModel.setEditor(None)
-        completionModel.suggestionsReady.disconnect(self.on_model_suggestionsReady)
+        self.setCompletionPrefix(prefix)
+        if self.setCurrentRow(0):
+            self.fixPopupView()
+            return True
+        self.setModel(current)
+        return False
 
     def trySetNextModel(self):
         current = model = self.model() or self.completion_models[-1]
@@ -111,7 +119,7 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
             model = self.completion_models[index]
             if current == model:
                 break
-            if model.isReady() and self.trySetModel(model):
+            if self.trySetModel(model):
                 return True
         return False
 

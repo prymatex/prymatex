@@ -94,10 +94,11 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             self.completer.hide()
 
     def __after_any_pressed(self, event):
-        alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-        self.completer.setCompletionPrefix(alreadyTyped)
-        if self.completer.setCurrentRow(0) or self.completer.trySetNextModel():
-            self.completer.complete(self.editor.cursorRect())
+        if event.text():
+            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
+            self.completer.setCompletionPrefix(alreadyTyped)
+            if self.completer.setCurrentRow(0) or self.completer.trySetNextModel():
+                self.completer.complete(self.editor.cursorRect())
 
     def __next_model(self, event):
         if event.modifiers() & QtCore.Qt.ControlModifier and self.completer.trySetNextModel():
