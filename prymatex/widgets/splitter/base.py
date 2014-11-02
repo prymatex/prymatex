@@ -677,7 +677,7 @@ class SplitterWidget(QtWidgets.QSplitter):
                     self._rband.deleteLater()
                 position = QtCore.QPoint(*hs_geom[0:2])
                 window = tw.window()
-                self._rband = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle,
+                self._rband = QtWidgets.QRubberBand(QtWidgets.QRubberBand.Rectangle,
                                                 window)
                 self._rband.move(window.mapFromGlobal(position))
                 self._rband.resize(*hs_geom[2:4])
