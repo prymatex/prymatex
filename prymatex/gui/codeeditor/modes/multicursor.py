@@ -7,8 +7,6 @@ from .base import CodeEditorBaseMode
 
 from prymatex.utils.lists import bisect_key
 
-WIDTH_CHARACTER = '#'
-
 def build_point_matrix(start, end, hight):
     sx, ex = (start.x(), end.x()) if start.x() <= end.x() else (end.x(), start.x())
     sy, ey = (start.y(), end.y()) if start.y() <= end.y() else (end.y(), start.y())
@@ -37,7 +35,13 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.editor.installEventFilter(self)
         self.editor.viewport().installEventFilter(self)
         self.standardCursor = self.editor.viewport().cursor()
-        # Formater
+
+        # ------------ Handlers
+        self.registerKeyPressHandler(QtCore.Qt.Key_Escape, self.__multicursor_end)
+        self.registerKeyPressHandler(QtCore.Qt.Key_Right, self.__move_cursors)
+        self.registerKeyPressHandler(QtCore.Qt.Key_Left, self.__move_cursors)
+        
+        # ------------- Formater
         self.editor.registerTextCharFormat("dyn.caret.mixed.dragged", self.textCharFormat_dragged_builder())
         self.editor.registerTextCharFormat("dyn.caret.mixed", self.textCharFormat_multicursor_builder())
     
@@ -64,6 +68,30 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         textCharFormat.setForeground(palette.base().color())
         return textCharFormat
         
+    # ------------ Key press handlers
+    def __multicursor_end(self, event):
+        firstCursor = self.cursors[0]
+        lastCursor = self.cursors[-1]
+        self.editor.document().markContentsDirty(firstCursor.position(), lastCursor.position())
+        if lastCursor.hasSelection():
+            lastCursor.clearSelection()
+        self.editor.setTextCursor(lastCursor)
+        self.deactivate()
+        self.highlightEditor()
+        return True
+
+    def __move_cursors(self, event):
+        if self.canMove(event.key()):
+            mode = QtGui.QTextCursor.KeepAnchor if bool(event.modifiers() & QtCore.Qt.ShiftModifier) else QtGui.QTextCursor.MoveAnchor
+            if event.key() == QtCore.Qt.Key_Right:
+                position = QtGui.QTextCursor.NextWord if bool(event.modifiers() & QtCore.Qt.ControlModifier) else QtGui.QTextCursor.NextCharacter
+            elif event.key() == QtCore.Qt.Key_Left:
+                position = QtGui.QTextCursor.PreviousWord if bool(event.modifiers() & QtCore.Qt.ControlModifier) else QtGui.QTextCursor.PreviousCharacter
+            for cursor in self.activeCursors():
+                cursor.movePosition(position, mode)
+            self.highlightEditor()
+            return True
+
     # ------- Handle events
     def eventFilter(self, obj, event):
         if self.isActive() and event.type() == QtCore.QEvent.KeyPress:
@@ -91,9 +119,8 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def mouseMovePoint(self, dragPoint, remove = False):
         self.draggedCursors = []
         
-        metrics = self.editor.fontMetrics()
-        hight = metrics.lineSpacing()
-        width = metrics.width(WIDTH_CHARACTER)
+        hight = self.editor.characterHeight()
+        width = self.editor.characterWidth()
 
         lastCursor = None
         for start, end in build_point_matrix(self.startPoint, dragPoint, hight):
@@ -132,37 +159,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
 
     def keyPressEvent(self, event):
         handled = False
-        if event.key() == QtCore.Qt.Key_Escape:
-            #Deprecated usar una lista de cursores ordenados paracursorLine tomar de [0] y [-1]
-            firstCursor = self.cursors[0]
-            lastCursor = self.cursors[-1]
-            self.editor.document().markContentsDirty(firstCursor.position(), lastCursor.position())
-            if lastCursor.hasSelection():
-                lastCursor.clearSelection()
-            self.editor.setTextCursor(lastCursor)
-            self.deactivate()
-            handled = True
-        elif event.key() == QtCore.Qt.Key_Right:
-            if self.canMoveRight():
-                mode = QtGui.QTextCursor.KeepAnchor if bool(event.modifiers() & QtCore.Qt.ShiftModifier) else QtGui.QTextCursor.MoveAnchor
-                for cursor in self.activeCursors():
-                    if event.modifiers() & QtCore.Qt.ControlModifier:
-                        cursor.movePosition(QtGui.QTextCursor.NextWord, mode)
-                    else:
-                        cursor.movePosition(QtGui.QTextCursor.NextCharacter, mode)
-                self.editor.setTextCursor(self.editor.newCursorAtPosition(cursor.position()))
-                handled = True
-        elif event.key() == QtCore.Qt.Key_Left:
-            if self.canMoveLeft():
-                mode = QtGui.QTextCursor.KeepAnchor if bool(event.modifiers() & QtCore.Qt.ShiftModifier) else QtGui.QTextCursor.MoveAnchor
-                for cursor in self.activeCursors():
-                    if event.modifiers() & QtCore.Qt.ControlModifier:
-                        cursor.movePosition(QtGui.QTextCursor.PreviousWord, mode)
-                    else:
-                        cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, mode)
-                self.editor.setTextCursor(self.editor.newCursorAtPosition(cursor.position()))
-                handled = True
-        elif event.key() in [ QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown, QtCore.Qt.Key_End, QtCore.Qt.Key_Home]:
+        if event.key() in [ QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown, QtCore.Qt.Key_End, QtCore.Qt.Key_Home]:
             #Desactivados por ahora
             pass
         elif event.text() and not event.modifiers():
@@ -325,11 +322,9 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
                     self.cursors.remove(c)
                     break
 
-    def canMoveRight(self):
-        return not self.cursors[-1].atEnd()
-
-    def canMoveLeft(self):
-        return not self.cursors[0].atStart()
+    def canMove(self, key):
+        return (key == QtCore.Qt.Key_Right and not self.cursors[-1].atEnd()) or \
+            (key == QtCore.Qt.Key_Left and not self.cursors[0].atStart())
 
     def findCursor(self, backward = False):
         # Get leader cursor

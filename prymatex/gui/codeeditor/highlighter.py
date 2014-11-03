@@ -67,7 +67,6 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def _process(self, block, user_data):
         block.setUserData(user_data)
         block.setUserState(user_data.state)
-        block.setRevision(user_data.revision)
 
     def _nop(self, text):
         pass
@@ -77,14 +76,12 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
         # ------ Syntax
         revision = self.syntaxProcessor.buildRevision(block)
-        if block.revision() != revision:
+        user_data = block.userData()
+        if user_data is None or user_data.revision != revision:
             user_data = self.syntaxProcessor.blockUserData(block)
             self._process(block, user_data)
-        else:
-            user_data = block.userData()
 
         # ------ Formats
-        if user_data is not None:
-            for token in user_data.tokens:
-                self.setFormat(token.start, token.end - token.start,
-                    self.themeProcessor.textCharFormat(token.scope))
+        for token in user_data.tokens:
+            self.setFormat(token.start, token.end - token.start,
+                self.themeProcessor.textCharFormat(token.scope))
