@@ -627,15 +627,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
-        def handle(event, attr, *modes):
-            for mode in modes:
-                for handler in getattr(mode, attr)(event.key()):
-                    yield handler(event)
-                for handler in getattr(mode, attr)(QtCore.Qt.Key_Any):
-                    yield handler(event)
+        def handle(event, attr, mode):
+            for handler in getattr(mode, attr)(event.key()):
+                yield handler(event)
+            for handler in getattr(mode, attr)(QtCore.Qt.Key_Any):
+                yield handler(event)
 
         # Plus el default mode 
-        if not any(handle(event, "preKeyPressHandlers", self.currentMode(), self.defaultMode())):
+        if not any(handle(event, "preKeyPressHandlers", self.currentMode())):
             super(CodeEditor, self).keyPressEvent(event)
             list(handle(event, "postKeyPressHandlers", self.currentMode()))
 
