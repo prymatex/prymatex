@@ -33,7 +33,7 @@ class PropertiesDialog(PrymatexDialog, Ui_TreeWidgetDialog, QtWidgets.QDialog):
     def selectFirstIndex(self):
         firstIndex = self.treeView.model().index(0, 0)
         rect = self.treeView.visualRect(firstIndex)
-        self.treeView.setSelection(rect, QtWidgets.QItemSelectionModel.ClearAndSelect)
+        self.treeView.setSelection(rect, QtCore.QItemSelectionModel.ClearAndSelect)
         treeNode = self.treeView.model().node(firstIndex)
         self.setCurrentPropertyWidget(treeNode)
 
