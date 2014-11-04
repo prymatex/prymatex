@@ -495,9 +495,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         return False
 
     # ---- Open (file, directory, url, canelones)
-    def openFile(self, filepath, cursorPosition=None, focus=True, main_window=None):
+    def openFile(self, file_path, cursorPosition=None, focus=True, main_window=None):
         """Open a editor in current window"""
-        file_path = self.fileManager.normcase(filepath)
+        file_path = self.fileManager.normcase(file_path)
 
         if self.fileManager.isOpen(file_path):
             main_window, editor = self.findEditorForFile(file_path)
@@ -521,11 +521,11 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         raise NotImplementedError("Directory contents should be opened as files here")
 
     def openUrl(self, url):
-        if isinstance(url, six.string_types):
+        if not isinstance(url, QtCore.QUrl):
             url = QtCore.QUrl(url)
         if url.scheme() == "txmt":
             query = QtCore.QUrlQuery(url.query())
-            sourceFile = query.queryItemValue('url')
+            source_file = query.queryItemValue('url')
             position = (0, 0)
             line = query.queryItemValue('line')
             if line.isdigit():
@@ -533,9 +533,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             column = query.queryItemValue('column')
             if column.isdigit():
                 position = (position[0], int(column) - 1)
-            if sourceFile:
-                filePath = QtCore.QUrl(sourceFile, QtCore.QUrl.TolerantMode).toLocalFile()
-                self.openFile(filePath, cursorPosition=position)
+            if source_file:
+                self.openFile(source_file, cursorPosition=position)
             else:
                 self.currentWindow().currentEditor().setCursorPosition(position)
         elif url.scheme() == "file":
