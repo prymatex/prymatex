@@ -36,7 +36,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
     # --------------------- Settings
     SETTINGS = 'MainWindow'
 
-    @ConfigurableItem(default = "$TM_FILENAME${TM_FILENAME/.+/ - /}$PMX_APP_NAME ($PMX_VERSION)")
+    @ConfigurableItem(default = "$TM_DISPLAYNAME - $PMX_APP_NAME ($PMX_VERSION)")
     def windowTitleTemplate(self, titleTemplate):
         self.titleTemplate = Template(titleTemplate)
         self.updateWindowTitle()
