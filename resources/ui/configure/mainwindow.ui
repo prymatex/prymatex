@@ -88,17 +88,17 @@
         </property>
         <item>
          <property name="text">
-          <string>$TM_FILENAME${TM_FILENAME/.+/ - /}$PMX_APP_NAME</string>
+          <string>$TM_DISPLAYNAME - $PMX_APP_NAME</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>$TM_FILENAME${TM_FILENAME/.+/ - /}$PMX_APP_NAME ($PMX_VERSION)</string>
+          <string>$TM_DISPLAYNAME - $PMX_APP_NAME ($PMX_VERSION)</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>$TM_FILENAME${TM_FILEPATH/.+/ ($0)/}${TM_FILENAME/.+/ - /}$PMX_APP_NAME ($PMX_VERSION)</string>
+          <string>$TM_DISPLAYNAME${TM_FILEPATH/.+/ ($0)/} - $PMX_APP_NAME ($PMX_VERSION)</string>
          </property>
         </item>
        </widget>

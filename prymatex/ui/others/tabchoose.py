@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/others/tabchoose.ui'
 #
-# Created: Mon Oct 27 12:36:55 2014
+# Created: Tue Nov  4 08:31:36 2014
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!

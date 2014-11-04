@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/configure/mainwindow.ui'
 #
-# Created: Mon Oct 27 12:36:57 2014
+# Created: Tue Nov  4 08:31:38 2014
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -69,8 +69,8 @@ class Ui_MainWindow(object):
         self.checkBoxAskAboutModifiedEditors.setText(_translate("MainWindow", "Ask about modified editors on exit?"))
         self.groupBox_4.setTitle(_translate("MainWindow", "Interface"))
         self.label_3.setText(_translate("MainWindow", "Title:"))
-        self.comboBoxTitleTemplate.setItemText(0, _translate("MainWindow", "$TM_FILENAME${TM_FILENAME/.+/ - /}$PMX_APP_NAME"))
-        self.comboBoxTitleTemplate.setItemText(1, _translate("MainWindow", "$TM_FILENAME${TM_FILENAME/.+/ - /}$PMX_APP_NAME ($PMX_VERSION)"))
-        self.comboBoxTitleTemplate.setItemText(2, _translate("MainWindow", "$TM_FILENAME${TM_FILEPATH/.+/ ($0)/}${TM_FILENAME/.+/ - /}$PMX_APP_NAME ($PMX_VERSION)"))
+        self.comboBoxTitleTemplate.setItemText(0, _translate("MainWindow", "$TM_DISPLAYNAME - $PMX_APP_NAME"))
+        self.comboBoxTitleTemplate.setItemText(1, _translate("MainWindow", "$TM_DISPLAYNAME - $PMX_APP_NAME ($PMX_VERSION)"))
+        self.comboBoxTitleTemplate.setItemText(2, _translate("MainWindow", "$TM_DISPLAYNAME${TM_FILEPATH/.+/ ($0)/} - $PMX_APP_NAME ($PMX_VERSION)"))
         self.checkBoxShowTabsIfMoreThanOne.setText(_translate("MainWindow", "Show tabs only if there are more than one"))
 
