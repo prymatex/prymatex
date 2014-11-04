@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+"""Application configuration.
 """
-Application configuration based on Qt's QSettings module.
-"""
+
 import re
 import sys
 import os
@@ -23,25 +23,27 @@ DEBUG = True
 #============================================================================
 # Logging
 #============================================================================
-PMX_LOG_FORMAT = "%(asctime)s %(name)s:%(lineno)-4d %(levelname)-8s %(message)s"
+PMX_LOG_FORMAT = '%(asctime)s %(name)s:%(lineno)-4d %(levelname)-8s %(message)s'
 PMX_LOG_TIME_FORMAT = '%H:%M:%S'
 PMX_LOG_DATE_FORMAT = '%Y-%m-%d'
-PMX_LOG_DATETIME_FORMAT = "%s %s" % (PMX_LOG_DATE_FORMAT, PMX_LOG_TIME_FORMAT)
+PMX_LOG_DATETIME_FORMAT = '%s %s' % (PMX_LOG_DATE_FORMAT, PMX_LOG_TIME_FORMAT)
 
 #============================================================================
 # Configuration names
 #============================================================================
-PMX_HOME_NAME = ".prymatex"
-PMX_BUNDLES_NAME = "Bundles"
-PMX_PLUGINS_NAME = "Plugins"
-PMX_PROFILES_NAME = "Profiles"
+PMX_HOME_NAME = '.prymatex'
+PMX_PROJECT_NAME = PMX_HOME_NAME
+PMX_BUNDLES_NAME = 'Bundles'
+PMX_PLUGINS_NAME = 'Plugins'
+PMX_PROFILES_NAME = 'Profiles'
 PMX_SUPPORT_NAME = 'Support'
-PMX_SETTINGS_NAME = "settings.json"
-PMX_STATE_NAME = "state.json"
+PMX_SETTINGS_NAME = 'settings.json'
+PMX_STATE_NAME = 'state.json'
 PMX_DESCRIPTOR_NAME = 'info.json'
-TM_SETTINGS_NAME = "com.macromates.textmate.plist"
-TM_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
-TM_PREFERENCE_NAMES = ["Library", "Preferences"]
+PMX_PROPERTIES_NAME = '.pmxproperties'
+TM_SETTINGS_NAME = 'com.macromates.textmate.plist'
+TM_WEBPREVIEW_NAME = 'com.macromates.textmate.webpreview.plist'
+TM_PREFERENCE_NAMES = ['Library', 'Preferences']
 PMX_PLUGIN_GLOB = '*.pmxplugin'
 PMX_NS_NAME = 'prymatex'
 USR_NS_NAME = 'user'
@@ -49,7 +51,7 @@ USR_NS_NAME = 'user'
 #============================================================================
 # Regular expresions
 #============================================================================
-RE_WORD = re.compile(r"[A-Za-z_]+", re.UNICODE)
+RE_WORD = re.compile(r'[A-Za-z_]+', re.UNICODE)
 
 #============================================================================
 # Configuration paths
@@ -80,7 +82,7 @@ def get_textmate_preferences_user_path():
     #Create extra files
     webpreview = os.path.join(path, TM_WEBPREVIEW_NAME)
     if not os.path.exists(webpreview):
-        plistlib.writePlist({"SelectedTheme": "bright"}, webpreview)
+        plistlib.writePlist({'SelectedTheme': 'bright'}, webpreview)
     return path
 
 TM_PREFERENCES_PATH = get_textmate_preferences_user_path()
@@ -156,21 +158,21 @@ def get_translation(modname, dirname=None):
     """Return translation callback for module *modname*"""
     if dirname is None:
         dirname = modname
-    locale_path = get_module_data_path(dirname, relpath="share/Locale",
+    locale_path = get_module_data_path(dirname, relpath='share/Locale',
                                        attr_name='LOCALEPATH')
     # fixup environment var LANG in case it's unknown
-    if "LANG" not in os.environ:
+    if 'LANG' not in os.environ:
         import locale
         lang = locale.getdefaultlocale()[0]
         if lang is not None:
-            os.environ["LANG"] = lang
+            os.environ['LANG'] = lang
     import gettext
     try:
-        _trans = gettext.translation(modname, locale_path, codeset="utf-8")
+        _trans = gettext.translation(modname, locale_path, codeset='utf-8')
         lgettext = _trans.lgettext
         def translate_gettext(x):
             if isinstance(x, six.string_types):
-                x = x.encode("utf-8")
+                x = x.encode('utf-8')
             return lgettext(x)
         return translate_gettext
     except IOError as _e:  # analysis:ignore
@@ -182,7 +184,7 @@ def get_translation(modname, dirname=None):
         return translate_dumb
 
 # Translation callback
-_ = get_translation("prymatex")
+_ = get_translation('prymatex')
 
 #============================================================================
 # Namespace Browser (Variable Explorer) configuration management

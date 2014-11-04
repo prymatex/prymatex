@@ -73,7 +73,7 @@ class ProjectTreeNode(FileSystemTreeNode):
     
     def __init__(self, directory, dataHash):
         self.directory = directory
-        self.projectPath = os.path.join(self.path(), config.PMX_HOME_NAME)
+        self.projectPath = os.path.join(self.path(), config.PMX_PROJECT_NAME)
         FileSystemTreeNode.__init__(self, dataHash.get("name"))
         self.workingSet = None
         self.manager = None
