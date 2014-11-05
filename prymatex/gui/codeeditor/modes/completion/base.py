@@ -90,7 +90,7 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
 
     # ------ Mode handlers
     def __any_pressed(self, event):
-        if event.text() and text.asciify(event.text()) not in COMPLETER_CHARS:
+        if event.modifiers() | QtCore.Qt.ControlModifier or (event.text() and text.asciify(event.text()) not in COMPLETER_CHARS):
             self.completer.hide()
 
     def __after_any_pressed(self, event):

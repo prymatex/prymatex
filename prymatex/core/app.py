@@ -121,7 +121,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             self.resourceManager.add_source(ns, path, True)
 
         # Prepare profile
-        from prymatex.managers.profile import ProfileManager
+        from prymatex.managers.profiles import ProfileManager
         self.profileManager = self.createComponentInstance(ProfileManager, parent=self)
         self.profileManager.install_current_profile(options.profile)
 
@@ -198,6 +198,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             self.storageManager = self.buildStorageManager()    # Persistence system Manager  # NOQA
             self.supportManager = self.buildSupportManager()    # Support Manager
             self.fileManager = self.buildFileManager()          # File Manager
+            self.propertyManager = self.buildPropertyManager()      # Property Manager
             self.projectManager = self.buildProjectManager()    # Project Manager
             self.schedulerManager = self.buildSchedulerManager()
             self.serverManager = self.buildServerManager()
@@ -300,6 +301,10 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
         manager.fileSytemChanged.connect(self.on_fileManager_fileSytemChanged)
         return manager
+
+    def buildPropertyManager(self):
+        from prymatex.managers.properties import PropertyManager
+        return self.createComponentInstance(PropertyManager, parent=self)
 
     def buildProjectManager(self):
         from prymatex.managers.projects import ProjectManager
