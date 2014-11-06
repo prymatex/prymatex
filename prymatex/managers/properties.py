@@ -82,6 +82,15 @@ from prymatex.core import config
 # * `includeDirectoriesInBrowser`
 # * `includeFilesInFileChooser`
 
+class Properties(object):
+    def __init__(self, selector, dataHash):
+        self.selector = selector
+        self.dataHash = dataHash
+
+class PropertiesMasterSettings(object):
+    def __init__(self, properties):
+        self.properties = properties
+
 class PropertyManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
         super(PropertyManager, self).__init__(**kwargs)
@@ -94,7 +103,7 @@ class PropertyManager(PrymatexComponent, QtCore.QObject):
             with open(properties_path) as props:
                 content = props.read()
                 if content[0] != "[":
-                    content = "[DEFAULT]\n" + content
+                    content = "[%s]\n%s" % (configparser.DEFAULTSECT, content)
                 parser.read_string(content)
 
     def _load_parser(self, root):
@@ -113,7 +122,8 @@ class PropertyManager(PrymatexComponent, QtCore.QObject):
         return self._parsers[root]
 
     def _build_properites(self, path):
-        return self._load_parser(os.path.isfile(path) and os.path.dirname(path) or path)
+        parser = self._load_parser(os.path.isfile(path) and os.path.dirname(path) or path)
+        return PropertiesMasterSettings([Properties(section, parser[section]) for section in parser.sections()])
 
     def properties(self, path):
         if path not in self._properties:
