@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+import os
+import configparser
+
 from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import PrymatexComponent
@@ -82,4 +85,37 @@ from prymatex.core import config
 class PropertyManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
         super(PropertyManager, self).__init__(**kwargs)
-        self.properties = []
+        self._parsers = {}
+        self._properties = {}
+    
+    def _fill_parser(self, parser, path):
+        properties_path = os.path.join(path, config.PMX_PROPERTIES_NAME)
+        if os.path.isfile(properties_path):
+            with open(properties_path) as props:
+                content = props.read()
+                if content[0] != "[":
+                    content = "[DEFAULT]\n" + content
+                parser.read_string(content)
+
+    def _load_parser(self, root):
+        if root not in self._parsers:
+            path = root
+            parser = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
+            parser.optionxform = str
+            while True:
+                self._fill_parser(parser, path)
+                if path in (os.sep, config.USER_HOME_PATH):
+                    break
+                path = os.path.dirname(path)
+            if path != config.USER_HOME_PATH:
+                self._fill_parser(parser, config.USER_HOME_PATH)
+            self._parsers[root] = parser
+        return self._parsers[root]
+
+    def _build_properites(self, path):
+        return self._load_parser(os.path.isfile(path) and os.path.dirname(path) or path)
+
+    def properties(self, path):
+        if path not in self._properties:
+            self._properties[path] = self._build_properites(path)
+        return self._properties[path]
