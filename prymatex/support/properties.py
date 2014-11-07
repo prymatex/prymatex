@@ -86,8 +86,12 @@ class ContextSettings(object):
         self.settings = settings
 
 class Properties(object):
-    def __init__(self):
+    def __init__(self, auxiliary):
+        self._auxiliary = auxiliary
         self.settings = []
-    
+
+    def auxiliary(self):
+        return self._auxiliary
+
     def add(self, selector, dataHash):
         self.settings.insert(0, (selector, Settings(dataHash)))

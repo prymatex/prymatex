@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import re
 import os
 import string
 import shutil
@@ -21,7 +22,8 @@ from prymatex.utils.fnmatch import translate as fntranslate
 from prymatex.utils.decorators import printtime, printparams
 
 from .bundle import Bundle
-from . import bundleitem 
+from .properties import Properties
+from . import bundleitem
 from . import scope
 from .staticfile import StaticFile
 from .process import RunningContext
@@ -885,14 +887,15 @@ class SupportBaseManager(object):
 
     def _load_parser(self, directory):
         if directory not in self._configparsers:
-            path = directory
             parser = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
             parser.optionxform = str
-            while True:
-                self._fill_parser(parser, path)
-                if path in (os.sep, config.USER_HOME_PATH):
-                    break
-                path = os.path.dirname(path)
+            path = directory
+            if path:
+                while True:
+                    self._fill_parser(parser, path)
+                    if path in (os.sep, config.USER_HOME_PATH):
+                        break
+                    path = os.path.dirname(path)
             if path != config.USER_HOME_PATH:
                 self._fill_parser(parser, config.USER_HOME_PATH)
             self._configparsers[directory] = parser
@@ -901,7 +904,7 @@ class SupportBaseManager(object):
     def _build_properites(self, path):
         directory = path if os.path.isdir(path) else os.path.dirname(path)
         parser = self._load_parser(directory)
-        properties = Properties()
+        properties = Properties(scope.auxiliary(path))
         properties.add(self.selectorFactory(""), parser.defaults())
         for section in parser.sections():
             options = parser[section]
