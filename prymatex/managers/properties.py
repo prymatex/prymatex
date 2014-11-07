@@ -47,14 +47,12 @@ class PropertyManager(PrymatexComponent, QtCore.QObject):
     def _build_properites(self, path):
         directory = path if os.path.isdir(path) else os.path.dirname(path)
         parser = self._load_parser(directory)
-        properties = [ parser.defaults() ]
+        properties = [ Properties(scope.Selector(), parser.defaults()) ]
         for section in parser.sections():
             selector = scope.Selector(section)
             options = parser[section]
-            if fnmatch.fnmatch(section, path):
-                properties.append(scope.Scope.wildcard, options)
-            print(type(section), section, type(selector), selector)
-        print(properties)
+            if fnmatch.fnmatch(section, path) or selector:
+                properties.append(Properties(selector, options))
         return PropertiesMaster(properties)
 
     def properties(self, path):

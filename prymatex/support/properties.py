@@ -79,7 +79,6 @@ from prymatex.qt import QtCore, QtGui
 
 class Properties(object):
     def __init__(self, selector, dataHash):
-        print(selector)
         self.selector = selector
         self.dataHash = dataHash
 
