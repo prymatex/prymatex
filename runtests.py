@@ -9,13 +9,14 @@ from tests.test_scope import ScopeSelectorTests
 from tests.test_regexp import RegexpTests
 from tests.test_plist import PlistTests
 from tests.test_osextra import OsExtraTests
+from tests.test_fnmatch import FnmatchTests
 
 def suite():
     return unittest.TestSuite([ 
         #unittest.makeSuite(KeySequencesTests, 'test'),
         #unittest.makeSuite(MenusTests, 'test'),
         #unittest.makeSuite(SupportTests, 'test_bundleitems'),
-        unittest.makeSuite(ScopeSelectorTests, 'test'),
+        unittest.makeSuite(FnmatchTests, 'test'),
         #unittest.makeSuite(RegexpTests, 'test_symbol_transformation'),
         #unittest.makeSuite(PlistTests, 'test'),
         #unittest.makeSuite(OsExtraTests, 'test')
