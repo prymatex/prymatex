@@ -914,7 +914,7 @@ class SupportBaseManager(object):
                 properties.add(selector, options)
         return properties
 
-    def getPropertySettings(self, path = None):
+    def getPropertySettings(self, path=""):
         if path not in self._properties:
             self._properties[path] = self._build_properites(path)
         return self._properties[path]

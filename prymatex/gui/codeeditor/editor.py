@@ -9,6 +9,7 @@ import operator
 from prymatex.qt import QtCore, QtGui, Qt, QtWidgets, API
 
 from prymatex.core import PrymatexEditor
+from prymatex.core import constants
 from prymatex.widgets.texteditor import TextEditWidget
 
 from prymatex.core.settings import ConfigurableItem
@@ -295,6 +296,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def setFilePath(self, filePath):
         super(CodeEditor, self).setFilePath(filePath)
+        self.properties = self.application().supportManager.getPropertySettings(filePath)
         self.filePathChanged.emit(filePath)
         extension = self.application().fileManager.extension(filePath)
         syntax = self.application().supportManager.findSyntaxByFileType(extension)
@@ -678,17 +680,17 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         tab_behavior = self.tabKeyBehavior()
         indentation = self.blockIndentation(block)
 
-        if indentationFlag is settings.INDENT_INCREASE:
+        if indentationFlag is constants.INDENT_INCREASE:
             self.logger().debug("Increase indentation")
             blockIndent = indentation + tab_behavior
-        elif indentationFlag is settings.INDENT_NEXTLINE:
+        elif indentationFlag is constants.INDENT_NEXTLINE:
             #TODO: Creo que este no es el correcto
             self.logger().debug("Increase next line indentation")
             blockIndent = indentation + tab_behavior
-        elif indentationFlag is settings.INDENT_UNINDENT:
+        elif indentationFlag is constants.INDENT_UNINDENT:
             self.logger().debug("Unindent")
             blockIndent = ""
-        elif indentationFlag is settings.INDENT_DECREASE:
+        elif indentationFlag is constants.INDENT_DECREASE:
             self.logger().debug("Decrease indentation")
             blockIndent = indentation[:-len(tab_behavior)]
         else:
