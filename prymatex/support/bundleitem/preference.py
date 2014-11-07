@@ -24,12 +24,14 @@ from __future__ import unicode_literals
     shellVariables, an array of key/value pairs. See context dependent variables.
     spellChecking, set to 0/1 to disable/enable spell checking.
 '''
+
+from prymatex.core import constants
 from prymatex.utils import osextra
 
 from .base import BundleItem
 from ..regexp import compileRegexp, SymbolTransformation
 
-class PreferenceSettings(object):
+class Settings(object):
     KEYS = (
         'completions', 'completionCommand', 'disableDefaultCompletion',
         'disableIndentCorrections', 'indentOnPaste',
@@ -91,18 +93,7 @@ class PreferenceSettings(object):
                     value = bool(int(value))
             setattr(self, key, value)
 
-class PreferenceMasterSettings(object):
-    INDENT_NONE = 0
-    INDENT_INCREASE = 1
-    INDENT_DECREASE = 2
-    INDENT_NEXTLINE = 3
-    INDENT_UNINDENT = 4
-    FOLDING_NONE = 0
-    FOLDING_START = 1
-    FOLDING_STOP = 2
-    FOLDING_INDENTED_START = 3
-    FOLDING_INDENTED_IGNORE = 4
-    
+class ContextSettings(object):
     def __init__(self, settings):
         self.settings = settings
 
@@ -167,17 +158,17 @@ class PreferenceMasterSettings(object):
         #IgnoringLines evaluate line to unindent, no require el return
         if self.decreaseIndentPattern and \
             self.decreaseIndentPattern.search(line):
-            return self.INDENT_DECREASE
+            return constants.INDENT_DECREASE
         if self.increaseIndentPattern and \
             self.increaseIndentPattern.search(line):
-            return self.INDENT_INCREASE
+            return constants.INDENT_INCREASE
         if self.indentNextLinePattern and \
             self.indentNextLinePattern.search(line):
-            return self.INDENT_NEXTLINE
+            return constants.INDENT_NEXTLINE
         if self.unIndentedLinePattern and \
             self.unIndentedLinePattern.search(line):
-            return self.INDENT_UNINDENT
-        return self.INDENT_NONE
+            return constants.INDENT_UNINDENT
+        return constants.INDENT_NONE
 
     def folding(self, line):
         start_match = self.foldingStartMarker.search(line) \
@@ -185,17 +176,17 @@ class PreferenceMasterSettings(object):
         stop_match = self.foldingStopMarker.search(line) \
             if self.foldingStopMarker is not None else None
         if start_match is not None and stop_match is None:
-            return self.FOLDING_START
+            return constants.FOLDING_START
         elif start_match is None and stop_match is not None:
-            return self.FOLDING_STOP
+            return constants.FOLDING_STOP
         # Ahora probamos los de indented
         if self.foldingIndentedBlockStart is not None and \
             self.foldingIndentedBlockStart.search(line):
-            return self.FOLDING_INDENTED_START
+            return constants.FOLDING_INDENTED_START
         if self.foldingIndentedBlockIgnore is not None and \
             self.foldingIndentedBlockIgnore.search(line):
-            return self.FOLDING_INDENTED_IGNORE
-        return self.FOLDING_NONE
+            return constants.FOLDING_INDENTED_IGNORE
+        return constants.FOLDING_NONE
 
 class Preference(BundleItem):
     KEYS = ( 'settings', )
@@ -210,7 +201,7 @@ class Preference(BundleItem):
         for key in Preference.KEYS:
             value = dataHash.get(key, None)
             if key == 'settings':
-                value = PreferenceSettings(value or {}, self)
+                value = Settings(value or {}, self)
             setattr(self, key, value)
 
     def update(self, dataHash):
@@ -235,5 +226,5 @@ class Preference(BundleItem):
 
     @staticmethod
     def buildSettings(preferences):
-        """El orden si importa, las preferences vienen ordenadas por score"""
-        return PreferenceMasterSettings([p.settings for p in preferences])
+        """El orden si importa, las preferences vienen ordenadas por score de mayor a menor"""
+        return ContextSettings([p.settings for p in preferences])

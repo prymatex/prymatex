@@ -6,8 +6,6 @@ from collections import namedtuple
 from prymatex.qt import QtGui
 from prymatex.support import Scope
 
-from prymatex.support import PreferenceMasterSettings
-
 class CodeEditorToken(namedtuple('CodeEditorToken', 'start end scope chunk')):
     __slots__ = ()
     @property
@@ -23,10 +21,6 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
         self.revision = revision
         self.indentation = indentation
         self.blank = blank
-
-    @property
-    def foldingMark(self):
-        return PreferenceMasterSettings.FOLDING_NONE
 
     def tokenAt(self, pos):
         for token in self.tokens[::-1]:

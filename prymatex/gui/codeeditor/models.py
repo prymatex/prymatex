@@ -6,23 +6,17 @@ from bisect import bisect
 
 from prymatex.qt import QtCore, QtGui
 
+from prymatex.core import constants
+
 from prymatex.utils import text
 from prymatex.utils.lists import bisect_key
 from prymatex.models.selectable import selectableModelFactory
 from prymatex.models.support import BundleItemTreeNode
 
-from prymatex.support import PreferenceMasterSettings
-
 #=========================================================
 # Folding
 #=========================================================
 class FoldingListModel(QtCore.QAbstractListModel):
-    FOLDING_NONE = PreferenceMasterSettings.FOLDING_NONE
-    FOLDING_START = PreferenceMasterSettings.FOLDING_START
-    FOLDING_STOP = PreferenceMasterSettings.FOLDING_STOP
-    FOLDING_INDENTED_START = PreferenceMasterSettings.FOLDING_INDENTED_START
-    FOLDING_INDENTED_IGNORE = PreferenceMasterSettings.FOLDING_INDENTED_IGNORE
-
     def __init__(self, editor):
         super(FoldingListModel, self).__init__(parent=editor)
         self.editor = editor
@@ -98,7 +92,7 @@ class FoldingListModel(QtCore.QAbstractListModel):
         folding_cursor = self.editor.newCursorAtPosition(block.position())
         self.editor.preferenceSettings(folding_cursor).folding(block.text())
         flag = self.editor.preferenceSettings(folding_cursor).folding(block.text())
-        if flag != self.FOLDING_NONE:
+        if flag != constants.FOLDING_NONE:
             if folding_cursor in self.foldings:
                 index = self.foldings.index(folding_cursor)
                 self.flags[index] = flag
@@ -126,27 +120,27 @@ class FoldingListModel(QtCore.QAbstractListModel):
 
     def isFoldingStartMarker(self, cursor):
         return self.isFoldingMarker(cursor) and \
-            self.flags[self.foldings.index(cursor)] == self.FOLDING_START
+            self.flags[self.foldings.index(cursor)] == constants.FOLDING_START
 
     def isFoldingStopMarker(self, cursor):
         return self.isFoldingMarker(cursor) and \
-            self.flags[self.foldings.index(cursor)] == self.FOLDING_STOP
+            self.flags[self.foldings.index(cursor)] == constants.FOLDING_STOP
 
     def isFoldingIndentedBlockStart(self, cursor):
         return self.isFoldingMarker(cursor) and \
-            self.flags[self.foldings.index(cursor)] == self.FOLDING_INDENTED_START
+            self.flags[self.foldings.index(cursor)] == constants.FOLDING_INDENTED_START
 
     def isFoldingIndentedBlockIgnore(self, cursor):
         return self.isFoldingMarker(cursor) and \
-            self.flags[self.foldings.index(cursor)] == self.FOLDING_INDENTED_IGNORE
+            self.flags[self.foldings.index(cursor)] == constants.FOLDING_INDENTED_IGNORE
 
     def isStart(self, cursor):
         return self.isFoldingMarker(cursor) and \
-            self.flags[self.foldings.index(cursor)] in (self.FOLDING_START, self.FOLDING_INDENTED_START)
+            self.flags[self.foldings.index(cursor)] in (constants.FOLDING_START, constants.FOLDING_INDENTED_START)
 
     def isStop(self, cursor):
         return self.isFoldingMarker(cursor) and \
-            self.flags[self.foldings.index(cursor)] == self.FOLDING_STOP
+            self.flags[self.foldings.index(cursor)] == constants.FOLDING_STOP
 
     def isFolded(self, cursor):
         return any((folded[0] == cursor for folded in self.folded))
@@ -202,7 +196,7 @@ class FoldingListModel(QtCore.QAbstractListModel):
         self.folded = []
         # Clean custom folding
         remove = [ cursor for cursor in self.foldings \
-            if self.editor.preferenceSettings(cursor).folding(cursor.block().text()) == self.FOLDING_NONE
+            if self.editor.preferenceSettings(cursor).folding(cursor.block().text()) == constants.FOLDING_NONE
         ]
         for cursor in remove:
             self._remove_folding_cursor(cursor)
