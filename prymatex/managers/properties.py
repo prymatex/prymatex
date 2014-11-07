@@ -84,17 +84,17 @@ from prymatex.core import config
 
 class Properties(object):
     def __init__(self, selector, dataHash):
+        print(selector)
         self.selector = selector
         self.dataHash = dataHash
 
-class PropertiesMasterSettings(object):
+class PropertiesMaster(object):
     def __init__(self, properties):
         self.properties = properties
 
 class PropertyManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
         super(PropertyManager, self).__init__(**kwargs)
-        self._parsers = {}
         self._properties = {}
     
     def _fill_parser(self, parser, path):
@@ -106,26 +106,28 @@ class PropertyManager(PrymatexComponent, QtCore.QObject):
                     content = "[%s]\n%s" % (configparser.DEFAULTSECT, content)
                 parser.read_string(content)
 
-    def _load_parser(self, root):
-        if root not in self._parsers:
-            path = root
-            parser = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
-            parser.optionxform = str
-            while True:
-                self._fill_parser(parser, path)
-                if path in (os.sep, config.USER_HOME_PATH):
-                    break
-                path = os.path.dirname(path)
-            if path != config.USER_HOME_PATH:
-                self._fill_parser(parser, config.USER_HOME_PATH)
-            self._parsers[root] = parser
-        return self._parsers[root]
+    def _load_parser(self, path):
+        parser = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
+        parser.optionxform = str
+        while True:
+            self._fill_parser(parser, path)
+            if path in (os.sep, config.USER_HOME_PATH):
+                break
+            path = os.path.dirname(path)
+        if path != config.USER_HOME_PATH:
+            self._fill_parser(parser, config.USER_HOME_PATH)
+        return parser
 
     def _build_properites(self, path):
-        parser = self._load_parser(os.path.isfile(path) and os.path.dirname(path) or path)
-        return PropertiesMasterSettings([Properties(section, parser[section]) for section in parser.sections()])
+        parser = self._load_parser(path)
+        return PropertiesMaster(
+            [ Properties(section, parser[section]) \
+                for section in parser.sections() \
+                if section != configparser.DEFAULTSECT ]
+        )
 
     def properties(self, path):
+        path = os.path.isfile(path) and os.path.dirname(path) or path
         if path not in self._properties:
             self._properties[path] = self._build_properites(path)
         return self._properties[path]
