@@ -188,6 +188,9 @@ class Selector(object):
         if source is not None:
             self._selector = Parser.selector(source)
 
+    def __bool__(self):
+        return self._selector is not None
+        
     def __repr__(self):
         return repr(self._selector)
         
@@ -195,13 +198,14 @@ class Selector(object):
         return self._selector and "%s" % self._selector or ""
 
     # --------- Python 2
+    __nonzero__ = __bool__
     __unicode__ = __str__
     
     # ------- Matching 
     def does_match(self, context, rank = None):
         if not isinstance(context, Context):
             context = Context(context)
-        if self._selector:
+        if self:
             return context.left == wildcard or context.right == wildcard or self._selector.does_match(context.left, context.right, rank)
         if rank is not None:        
             rank.append(0)
