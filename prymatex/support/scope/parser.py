@@ -99,9 +99,8 @@ class Parser(object):
                 break
             res.expressions.append(expression)
             rc = True
-            if self.ws() and self.parse_char("&|-", dest) and self.ws():
-                continue
-            break
+            if not (self.ws() and self.parse_char("&|-", dest) and self.ws()):
+                break
         return rc
 
     def parse_selector(self, res):
@@ -121,6 +120,7 @@ class Parser(object):
     @staticmethod
     def selector(source):
         selector = types.SelectorType()
-        if Parser(source).parse_selector(selector):
+        parser = Parser(source)
+        if parser.parse_selector(selector) and parser.it == parser.last:
             return selector
 
