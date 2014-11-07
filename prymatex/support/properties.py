@@ -77,11 +77,17 @@ from prymatex.qt import QtCore, QtGui
 # * `includeDirectoriesInBrowser`
 # * `includeFilesInFileChooser`
 
-class Properties(object):
-    def __init__(self, selector, dataHash):
-        self.selector = selector
+class Settings(object):
+    def __init__(self, dataHash):
         self.dataHash = dataHash
 
-class PropertiesMaster(object):
-    def __init__(self, properties):
-        self.properties = properties
+class ContextSettings(object):
+    def __init__(self, settings):
+        self.settings = settings
+
+class Properties(object):
+    def __init__(self):
+        self.settings = []
+    
+    def add(self, selector, dataHash):
+        self.settings.insert(0, (selector, Settings(dataHash)))

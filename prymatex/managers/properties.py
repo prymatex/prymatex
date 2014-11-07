@@ -2,6 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 import os
+import re
 import configparser
 
 from prymatex.qt import QtCore, QtGui
@@ -12,7 +13,7 @@ from prymatex.core import config
 from prymatex.support import scope
 from prymatex.support.properties import *
 
-from prymatex.utils import fnmatch
+from prymatex.utils.fnmatch import translate
 
 class PropertyManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
@@ -49,9 +50,13 @@ class PropertyManager(PrymatexComponent, QtCore.QObject):
         parser = self._load_parser(directory)
         properties = [ Properties(scope.Selector(), parser.defaults()) ]
         for section in parser.sections():
-            selector = scope.Selector(section)
             options = parser[section]
-            if fnmatch.fnmatch(section, path) or selector:
+            selector = section.strip()
+            if selector[0] in ("'", '"') and selector[0] == selector[-1]:
+                selector = selector[1:-1]
+            pattern = re.compile(translate(selector))
+            selector = scope.Selector(selector)
+            if pattern.search(path) or selector:
                 properties.append(Properties(selector, options))
         return PropertiesMaster(properties)
 

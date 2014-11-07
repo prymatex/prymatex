@@ -8,19 +8,23 @@ import uuid as uuidmodule
 import subprocess
 from glob import glob
 from collections import namedtuple, OrderedDict
+from functools import reduce
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
+
+from prymatex.core import config
+from prymatex.utils import plist, osextra, six
+from prymatex.utils import encoding
+from prymatex.utils.fnmatch import translate as fntranslate
+from prymatex.utils.decorators import printtime, printparams
 
 from .bundle import Bundle
 from . import bundleitem 
 from . import scope
 from .staticfile import StaticFile
 from .process import RunningContext
-
-from prymatex.core import config
-from prymatex.utils import plist, osextra, six
-from prymatex.utils import encoding
-from prymatex.utils.decorators import printtime, printparams
-
-from functools import reduce
 
 Namespace = namedtuple("Namespace", "name protected bundles")
 
@@ -70,7 +74,11 @@ class SupportBaseManager(object):
         self.environment = {}
         self.managedObjects = {}
 
-        # Cache!!
+        # Cache
+        self._configparsers = {}
+        self._properties = {}
+        
+        # Stored Cache!!
         self.bundleItemCache = self.buildBundleItemStorage()
         self.plistFileCache = self.buildPlistFileStorage()
         
@@ -864,6 +872,52 @@ class SupportBaseManager(object):
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
             bundleitem.Preference.buildSettings(self.getPreferences(leftScope, rightScope)))
+
+    #----------------- PROPERTIES ---------------------
+    def _fill_parser(self, parser, path):
+        properties_path = os.path.join(path, config.PMX_PROPERTIES_NAME)
+        if os.path.isfile(properties_path):
+            with open(properties_path) as props:
+                content = props.read()
+                if content[0] != "[":
+                    content = "[%s]\n%s" % (configparser.DEFAULTSECT, content)
+                parser.read_string(content)
+
+    def _load_parser(self, directory):
+        if directory not in self._configparsers:
+            path = directory
+            parser = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
+            parser.optionxform = str
+            while True:
+                self._fill_parser(parser, path)
+                if path in (os.sep, config.USER_HOME_PATH):
+                    break
+                path = os.path.dirname(path)
+            if path != config.USER_HOME_PATH:
+                self._fill_parser(parser, config.USER_HOME_PATH)
+            self._configparsers[directory] = parser
+        return self._configparsers[directory]
+
+    def _build_properites(self, path):
+        directory = path if os.path.isdir(path) else os.path.dirname(path)
+        parser = self._load_parser(directory)
+        properties = Properties()
+        properties.add(self.selectorFactory(""), parser.defaults())
+        for section in parser.sections():
+            options = parser[section]
+            selector = section.strip()
+            if selector[0] in ("'", '"') and selector[0] == selector[-1]:
+                selector = selector[1:-1]
+            pattern = re.compile(fntranslate(selector))
+            selector = self.selectorFactory(selector)
+            if pattern.search(path) or selector:
+                properties.add(selector, options)
+        return properties
+
+    def getPropertySettings(self, path = None):
+        if path not in self._properties:
+            self._properties[path] = self._build_properites(path)
+        return self._properties[path]
 
     # ----------------- TABTRIGGERS INTERFACE
     def getAllTabTriggerItems(self):
