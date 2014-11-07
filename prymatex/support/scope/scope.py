@@ -3,15 +3,14 @@
 import sys
 
 from .parser import Parser
-from .auxiliary import auxiliary as auxiliary_scoping
 
 ROOTS = ( "comment", "constant", "entity", "invalid", "keyword", "markup",
 "meta", "storage", "string", "support", "variable" )            
 
 class Scope(object):
     class Node(tuple):
-        def __new__(cls, iter, parent):
-            return super(Scope.Node, cls).__new__(cls, iter)
+        def __new__(cls, iterable, parent):
+            return super(Scope.Node, cls).__new__(cls, iterable)
 
         def __init__(self, iter, parent):
             self.parent = parent
@@ -57,35 +56,48 @@ class Scope(object):
         return not self.empty()
 
     def __str__(self):
+        return " ".join([".".join(n) for n in self])
+    
+    def __iter__(self):
         res = []
         n = self.node
         while n is not None:
-            res.append(".".join(n))
+            res.append(n)
             n = n.parent
-        return " ".join(res[::-1])
-    
+        return iter(res[::-1])
+
+    def __add__(self, other):
+        new = self.clone()
+        new.extend(other)
+        return new
+
     # --------- Python 2
     __nonzero__ = __bool__
     __unicode__ = __str__
 
     def clone(self):
         return Scope(self)
+    
+    def extend(self, other):
+        [self.push(n) for n in other]
 
-    def auxiliary(self, dynamics, file_path):
-        s = self.clone()
-        for dyn in dynamics:
-            s.push_scope(dyn)
-        return auxiliary_scoping(s, file_path)
-        
     def empty(self):
         return self.node is None
 
+    def push(self, iterable):
+        self.node = Scope.Node(iterable, self.node)
+
+    def pop(self):
+        assert(self.node is not None)
+        node = self.node
+        self.node = self.node.parent
+        return node
+
     def push_scope(self, atom):
-        self.node = Scope.Node(atom.split("."), self.node)
+        self.push(atom.split("."))
     
     def pop_scope(self):
-        assert(self.node is not None)
-        self.node = self.node.parent
+        return ".".join(self.pop())
 
     def back(self):
         assert(self.node is not None)
