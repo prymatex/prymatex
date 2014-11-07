@@ -127,7 +127,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.bundleItemSelectableModel = bundleItemSelectableModelFactory(self)
         self.symbolSelectableModel = symbolSelectableModelFactory(self)
 
-        #Processors
+        # Processors
         self.processors = [
             CodeEditorSnippetProcessor(self),
             CodeEditorCommandProcessor(self),
@@ -136,6 +136,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             CodeEditorThemeProcessor(self)
         ]
 
+        # Properties
+        self.properties = self.application().supportManager.getPropertySettings()
+        
         #Highlighter
         self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
 
@@ -143,7 +146,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.showMarginLine = True
         self.showIndentGuide = True
         self.showHighlightCurrentLine = True
-        
+
         # Connect context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         
@@ -324,40 +327,38 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return (self.tokenAt(cursor.selectionStart() - 1),
             self.tokenAt(cursor.selectionEnd()))
 
-    def scope(self, cursor=None, auxiliary=True):
+    def scope(self, cursor=None):
         cursor = cursor or self.textCursor()
         leftToken, rightToken = self.tokens(cursor)
-        if not auxiliary:
-            return (leftToken.scope, rightToken.scope)
+        left_scope, right_scope = leftToken.scope.clone(), rightToken.scope.clone()
 
         # Cursor scope
-        leftScope, rightScope = [], []
         leftCursor = self.newCursorAtPosition(cursor.selectionStart())
         rightCursor = self.newCursorAtPosition(cursor.selectionEnd())
         if cursor.hasSelection():
             # If there is one or more selections: dyn.selection.
             # TODO If there is a single zero-width selection: dyn.caret.mixed.columnar.
             # TODO If there are multiple carets and/or selections: dyn.caret.mixed.
-            leftScope.append("dyn.selection")
-            rightScope.append("dyn.selection")
+            left_scope.push_scope("dyn.selection")
+            right_scope.push_scope("dyn.selection")
         # When there is only a single caret or a single continuous selection
         # the left scope may contain: dyn.caret.begin.line or dyn.caret.begin.document
         if leftCursor.atBlockStart():
-            leftScope.append("dyn.caret.begin.line")
+            left_scope.push_scope("dyn.caret.begin.line")
         if leftCursor.atStart():
-            leftScope.append("dyn.caret.begin.document")
+            left_scope.push_scope("dyn.caret.begin.document")
         # Likewise the right scope may contain: dyn.caret.end.line or dyn.caret.end.document.
         if rightCursor.atBlockEnd():
-            rightScope.append("dyn.caret.end.line")
+            right_scope.push_scope("dyn.caret.end.line")
         if rightCursor.atEnd():
-            rightScope.append("dyn.caret.end.document")
-        # TODO Una cache para los auxiliary del file path
-        return (leftToken.scope.auxiliary(leftScope, self.filePath()),
-            rightToken.scope.auxiliary(rightScope, self.filePath()))
+            right_scope.push_scope("dyn.caret.end.document")
+        
+        return (left_scope + self.properties.auxiliary(), 
+            right_scope + self.properties.auxiliary())
 
     def preferenceSettings(self, cursor = None):
         return self.application().supportManager.getPreferenceSettings(
-            *self.scope(cursor or self.textCursor(), auxiliary = False)
+            *self.scope(cursor or self.textCursor())
         )
 
     # ------------ Obteniendo datos del editor

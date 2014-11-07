@@ -390,7 +390,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
             settings = self.editor.preferenceSettings(symbol_cursor)
             return settings.transformSymbol(symbol_cursor.block().text())
         elif role == QtCore.Qt.DecorationRole:
-            leftScope, rightScope = self.editor.scope(symbol_cursor, auxiliary=False)
+            leftScope, rightScope = self.editor.scope(symbol_cursor)
             return self.icons.get(rightScope.root_group()[:2])
 
     # ------------- Public api
