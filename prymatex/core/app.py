@@ -198,7 +198,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             self.storageManager = self.buildStorageManager()    # Persistence system Manager  # NOQA
             self.supportManager = self.buildSupportManager()    # Support Manager
             self.fileManager = self.buildFileManager()          # File Manager
-            self.propertyManager = self.buildPropertyManager()      # Property Manager
             self.projectManager = self.buildProjectManager()    # Project Manager
             self.schedulerManager = self.buildSchedulerManager()
             self.serverManager = self.buildServerManager()
@@ -301,10 +300,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
         manager.fileSytemChanged.connect(self.on_fileManager_fileSytemChanged)
         return manager
-
-    def buildPropertyManager(self):
-        from prymatex.managers.properties import PropertyManager
-        return self.createComponentInstance(PropertyManager, parent=self)
 
     def buildProjectManager(self):
         from prymatex.managers.projects import ProjectManager

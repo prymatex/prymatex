@@ -295,8 +295,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def setFilePath(self, filePath):
         super(CodeEditor, self).setFilePath(filePath)
-        self.properties = self.application().propertyManager.properties(filePath)
-        print(self.properties)
         self.filePathChanged.emit(filePath)
         extension = self.application().fileManager.extension(filePath)
         syntax = self.application().supportManager.findSyntaxByFileType(extension)
