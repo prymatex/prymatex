@@ -138,7 +138,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # Properties
         self.properties = self.application().supportManager.getPropertySettings()
-        
+
         #Highlighter
         self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
 
@@ -300,6 +300,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def setFilePath(self, filePath):
         super(CodeEditor, self).setFilePath(filePath)
         self.properties = self.application().supportManager.getPropertySettings(filePath)
+        print(self.propertySettings())
         self.filePathChanged.emit(filePath)
         extension = self.application().fileManager.extension(filePath)
         syntax = self.application().supportManager.findSyntaxByFileType(extension)
@@ -307,8 +308,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             self.insertBundleItem(syntax)
 
     def title(self):
-        #Podemos marcar de otra forma cuando algo cambia :P
-        return PrymatexEditor.title(self)
+        title = PrymatexEditor.title(self)
+        if self.isModified():
+            title = "%s *" % title
+        return title
 
     def fileFilters(self):
         return [ "%s (%s)" % (self.syntax().bundle.name, " ".join(["*." + ft for ft in self.syntax().fileTypes])) ]
@@ -361,6 +364,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             *self.scope(cursor or self.textCursor())
         )
 
+    def propertySettings(self, cursor = None):
+        return self.properties.contextSettings(
+            *self.scope(cursor or self.textCursor())
+        )
+        
     # ------------ Obteniendo datos del editor
     def currentMode(self):
         return self.codeEditorModes[self.__current_mode_index]

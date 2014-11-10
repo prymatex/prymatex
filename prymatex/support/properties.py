@@ -93,5 +93,8 @@ class Properties(object):
     def auxiliary(self):
         return self._auxiliary
 
+    def contextSettings(self, leftScope = None, rightScope = None):
+        return ContextSettings([])
+        
     def add(self, selector, dataHash):
         self.settings.insert(0, (selector, Settings(dataHash)))
