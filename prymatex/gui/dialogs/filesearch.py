@@ -90,8 +90,8 @@ class PMXFileSearchDialog(QtWidgets.QDialog, Ui_SearchDialog):
         self.setupUi(self)
         self.application = QtGui.QApplication.instance()
         self.model = model
-        self.fileSearchThread = FileSearchThread(self.application, self)
-        self.fileSearchThread.foundPattern.connect(self.on_fileSearchThread_foundPattern)
+        #self.fileSearchThread = FileSearchThread(self.application, self)
+        #self.fileSearchThread.foundPattern.connect(self.on_fileSearchThread_foundPattern)
         
         self.comboBoxContainingText.lineEdit().returnPressed.connect(self.buttonSearch.click)
         
@@ -101,7 +101,7 @@ class PMXFileSearchDialog(QtWidgets.QDialog, Ui_SearchDialog):
         
     def on_buttonCancel_pressed(self):
         #FIXME: solo si esta corriendo
-        self.fileSearchThread.cancel()
+        #self.fileSearchThread.cancel()
         self.reject()
         
     def on_buttonSearch_pressed(self):
@@ -117,7 +117,7 @@ class PMXFileSearchDialog(QtWidgets.QDialog, Ui_SearchDialog):
             for project in self.application.projectManager.getAllProjects():
                 self.model.addGroup(project.nodeName(), project.directory)
                 directories.append(project.directory)
-        self.fileSearchThread.searchInFiles(directories, filters, searchPattern, recursive, byPhrase)
+        #self.fileSearchThread.searchInFiles(directories, filters, searchPattern, recursive, byPhrase)
         
     @classmethod
     def search(cls, model, parent = None):
