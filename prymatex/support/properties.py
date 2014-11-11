@@ -82,9 +82,38 @@ class Settings(object):
         self.selector = selector
         self.dataHash = dataHash
 
+    def get(self, key, default=None):
+        return self.dataHash.get(key, default)
+
 class ContextSettings(object):
     def __init__(self, settings):
         self.settings = settings
+
+    def _first(self, key, default=None):
+        for settings in self.settings:
+            attr = settings.get(key, None)
+            if attr is not None:
+                return attr
+        return default
+
+    ## I/O
+    binary = property(lambda self: self._first("binary"))
+    encoding = property(lambda self: self._first("encoding"))
+    fileType = property(lambda self: self._first("fileType"))
+    useBOM = property(lambda self: self._first("useBOM"))
+    
+    ## Display
+    theme = property(lambda self: self._first("theme"))
+    fontName = property(lambda self: self._first("fontName"))
+    fontSize = property(lambda self: self._first("fontSize"))
+    showInvisibles = property(lambda self: self._first("showInvisibles"))
+    spellChecking = property(lambda self: self._first("spellChecking"))
+    
+    ## Projects
+    projectDirectory = property(lambda self: self._first("projectDirectory"))
+    windowTitle = property(lambda self: self._first("windowTitle"))
+    
+    scopeAttributes = property(lambda self: self._first("scopeAttributes"))
 
 class Properties(object):
     def __init__(self):

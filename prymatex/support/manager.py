@@ -238,8 +238,10 @@ class SupportBaseManager(object):
     def auxiliaryScope(self, path=""):
         return scope.auxiliary(path)
     
-    def __sort_filter_items(self, items, leftScope, rightScope = None):
+    def __filter_items(self, items, leftScope, rightScope = None, sort=True):
         context = self.contextFactory(leftScope, rightScope)
+        if not sort:
+            return [ item for item in items if item.selector.does_match(context) ]
         sortFilterItems = []
         for item in items:
             rank = []
@@ -864,7 +866,7 @@ class SupportBaseManager(object):
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
-            self.__sort_filter_items(self.getAllPreferences(), leftScope, rightScope))
+            self.__filter_items(self.getAllPreferences(), leftScope, rightScope))
 
     def getPreferenceSettings(self, leftScope = None, rightScope = None):
         # If leftScope == rightScope == None then return base settings
@@ -932,7 +934,7 @@ class SupportBaseManager(object):
         properties = self.getProperties(path)
         return self.bundleItemCache.setdefault(memoizedKey,
             Properties.buildSettings(
-                self.__sort_filter_items(properties.settings, leftScope, rightScope)
+                self.__filter_items(properties.settings, leftScope, rightScope, sort=False)
             )
         )
 
@@ -969,14 +971,14 @@ class SupportBaseManager(object):
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
-            self.__sort_filter_items(self.getAllTabTriggerItems(), leftScope, rightScope))
+            self.__filter_items(self.getAllTabTriggerItems(), leftScope, rightScope))
 
     def getTabTriggerItem(self, tabTrigger, leftScope, rightScope):
         memoizedKey = ("getTabTriggerItem", tabTrigger, leftScope, rightScope)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
-            self.__sort_filter_items(self.getAllBundleItemsByTabTrigger(tabTrigger), leftScope, rightScope))
+            self.__filter_items(self.getAllBundleItemsByTabTrigger(tabTrigger), leftScope, rightScope))
 
     # -------------- KEYEQUIVALENT INTERFACE
     def getAllKeyEquivalentItems(self):
@@ -1002,7 +1004,7 @@ class SupportBaseManager(object):
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
-            self.__sort_filter_items(self.getAllBundleItemsByKeyEquivalent(keyCode), leftScope, rightScope))
+            self.__filter_items(self.getAllBundleItemsByKeyEquivalent(keyCode), leftScope, rightScope))
 
     # --------------- FILE EXTENSION INTERFACE
     def getAllBundleItemsByFileExtension(self, path):
@@ -1013,7 +1015,7 @@ class SupportBaseManager(object):
 
     #------------- FILE EXTENSION, for drag commands -------------------------
     def getFileExtensionItem(self, path, scope):
-        return self.__sort_filter_items(self.getAllBundleItemsByFileExtension(path), scope)
+        return self.__filter_items(self.getAllBundleItemsByFileExtension(path), scope)
 
     # ------------- ACTION ITEMS INTERFACE
     def getAllActionItems(self):
@@ -1029,7 +1031,7 @@ class SupportBaseManager(object):
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
-            self.__sort_filter_items(self.getAllActionItems(), leftScope, rightScope))
+            self.__filter_items(self.getAllActionItems(), leftScope, rightScope))
 
     # ------------------ SYNTAXES INTERFACE
     def getAllSyntaxes(self):

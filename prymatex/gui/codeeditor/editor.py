@@ -299,7 +299,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.filePathChanged.emit(filePath)
         extension = self.application().fileManager.extension(filePath)
         syntax = self.application().supportManager.findSyntaxByFileType(extension)
-        print(self.propertiesSettings())
+        print(self.propertiesSettings().windowTitle)
         if syntax is not None:
             self.insertBundleItem(syntax)
 
