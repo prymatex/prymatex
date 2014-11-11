@@ -113,7 +113,17 @@ class ContextSettings(object):
     projectDirectory = property(lambda self: self._first("projectDirectory"))
     windowTitle = property(lambda self: self._first("windowTitle"))
     
+    ## Other
     scopeAttributes = property(lambda self: self._first("scopeAttributes"))
+
+## File Filtering Keys
+for attr in [ "exclude", "excludeFiles", "excludeDirectories", "excludeInBrowser",
+    "excludeInFolderSearch", "excludeInFileChooser", "excludeFilesInBrowser",
+    "excludeDirectoriesInBrowser", "include", "includeFiles", "includeDirectories",
+    "includeInBrowser","includeInFileChooser", "includeFilesInBrowser",
+    "includeDirectoriesInBrowser", "includeFilesInFileChooser" ]:
+    setattr(ContextSettings, attr, property(lambda self: self._first(attr)))
+
 
 class Properties(object):
     def __init__(self):
