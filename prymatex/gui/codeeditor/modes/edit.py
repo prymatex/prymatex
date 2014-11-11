@@ -39,7 +39,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         keyseq = int(event.modifiers()) + event.key()
         # Try key equivalent
         if keyseq in self.application().supportManager.getAllKeyEquivalentCodes():
-            leftScope, rightScope = self.editor.scope()
+            leftScope, rightScope = self.editor.scope(self.editor.textCursor())
             items = self.application().supportManager.getKeyEquivalentItem(
                 keyseq, leftScope, rightScope)
             self.editor.insertBundleItem(items)

@@ -233,10 +233,10 @@ class SupportBaseManager(object):
         
     def contextFactory(self, leftScope, rightScope = None):
         return scope.Context(leftScope, rightScope)
-    
-    # ------------------ SCOPE ATTRIBUTES
-    def attributeScopes(self, filePath, projectDirectory = None):
-        return self.scopeFactory(scope.attributes(filePath, projectDirectory))
+
+    # ------------------ AUXILIARY SCOPE
+    def auxiliaryScope(self, path=""):
+        return scope.auxiliary(path)
     
     def __sort_filter_items(self, items, leftScope, rightScope = None):
         context = self.contextFactory(leftScope, rightScope)
@@ -904,7 +904,7 @@ class SupportBaseManager(object):
     def _build_properites(self, path):
         directory = path if os.path.isdir(path) else os.path.dirname(path)
         parser = self._load_parser(directory)
-        properties = Properties(scope.auxiliary(path))
+        properties = Properties()
         properties.add(self.selectorFactory(""), parser.defaults())
         for section in parser.sections():
             options = parser[section]

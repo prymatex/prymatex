@@ -136,9 +136,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             CodeEditorThemeProcessor(self)
         ]
 
-        # Properties
-        self.properties = self.application().supportManager.getPropertySettings()
-
         #Highlighter
         self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
 
@@ -164,7 +161,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.updateRequest.connect(self.updateSideBars)
         self.themeChanged.connect(self._update_highlight)
         self.cursorPositionChanged.connect(self._update_highlight)
-        
+
         self.syntaxChanged.connect(lambda editor=self: 
             editor.showMessage("Syntax changed to <b>%s</b>" % editor.syntax().name)
         )
@@ -299,8 +296,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def setFilePath(self, filePath):
         super(CodeEditor, self).setFilePath(filePath)
-        self.properties = self.application().supportManager.getPropertySettings(filePath)
-        print(self.propertySettings())
         self.filePathChanged.emit(filePath)
         extension = self.application().fileManager.extension(filePath)
         syntax = self.application().supportManager.findSyntaxByFileType(extension)
@@ -330,34 +325,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return (self.tokenAt(cursor.selectionStart() - 1),
             self.tokenAt(cursor.selectionEnd()))
 
-    def scope(self, cursor=None):
-        cursor = cursor or self.textCursor()
+    def scope(self, cursor):
         leftToken, rightToken = self.tokens(cursor)
-        left_scope, right_scope = leftToken.scope.clone(), rightToken.scope.clone()
+        left_token_scope, right_token_scope = leftToken.scope, rightToken.scope
+        left_cursor_scope, right_cursor_scope = self.application().supportManager.cursorScope(self.textCursor())
+        auxiliary_scope = self.application().supportManager.auxiliaryScope(self.filePath())
 
-        # Cursor scope
-        leftCursor = self.newCursorAtPosition(cursor.selectionStart())
-        rightCursor = self.newCursorAtPosition(cursor.selectionEnd())
-        if cursor.hasSelection():
-            # If there is one or more selections: dyn.selection.
-            # TODO If there is a single zero-width selection: dyn.caret.mixed.columnar.
-            # TODO If there are multiple carets and/or selections: dyn.caret.mixed.
-            left_scope.push_scope("dyn.selection")
-            right_scope.push_scope("dyn.selection")
-        # When there is only a single caret or a single continuous selection
-        # the left scope may contain: dyn.caret.begin.line or dyn.caret.begin.document
-        if leftCursor.atBlockStart():
-            left_scope.push_scope("dyn.caret.begin.line")
-        if leftCursor.atStart():
-            left_scope.push_scope("dyn.caret.begin.document")
-        # Likewise the right scope may contain: dyn.caret.end.line or dyn.caret.end.document.
-        if rightCursor.atBlockEnd():
-            right_scope.push_scope("dyn.caret.end.line")
-        if rightCursor.atEnd():
-            right_scope.push_scope("dyn.caret.end.document")
-        
-        return (left_scope + self.properties.auxiliary(), 
-            right_scope + self.properties.auxiliary())
+        return (left_token_scope + left_cursor_scope + auxiliary_scope, 
+            right_token_scope + right_cursor_scope + auxiliary_scope)
 
     def preferenceSettings(self, cursor = None):
         return self.application().supportManager.getPreferenceSettings(

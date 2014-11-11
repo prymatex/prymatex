@@ -144,7 +144,7 @@ class TabTriggerItemsCompletionModel(CompletionBaseModel):
         return QtCore.Qt.CaseSensitive
         
     def fill(self):
-        leftScope, rightScope = self.editor.scope()
+        leftScope, rightScope = self.editor.scope(self.editor.textCursor())
         self.triggers = self.editor.application().supportManager.getAllTabTriggerItemsByScope(leftScope, rightScope)
         if self.triggers:
             self.suggestionsReady.emit()

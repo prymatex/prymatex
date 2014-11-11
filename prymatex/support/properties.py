@@ -86,12 +86,8 @@ class ContextSettings(object):
         self.settings = settings
 
 class Properties(object):
-    def __init__(self, auxiliary):
-        self._auxiliary = auxiliary
+    def __init__(self):
         self.settings = []
-
-    def auxiliary(self):
-        return self._auxiliary
 
     def contextSettings(self, leftScope = None, rightScope = None):
         return ContextSettings([])

@@ -512,3 +512,32 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     #---------------------------------------------------
     def getAllSyntaxes(self):
         return self.syntaxProxyModel.nodes()
+
+    #---------------------------------------------------
+    # CURSOR SCOPE
+    #---------------------------------------------------
+    def cursorScope(self, cursor):
+        left_scope = self.scopeFactory("")
+        right_scope = self.scopeFactory("")
+        leftCursor = QtGui.QTextCursor(cursor)
+        rightCursor = QtGui.QTextCursor(cursor)
+        leftCursor.setPosition(cursor.selectionStart())
+        rightCursor.setPosition(cursor.selectionEnd())
+        if cursor.hasSelection():
+            # If there is one or more selections: dyn.selection.
+            # TODO If there is a single zero-width selection: dyn.caret.mixed.columnar.
+            # TODO If there are multiple carets and/or selections: dyn.caret.mixed.
+            left_scope.push_scope("dyn.selection")
+            right_scope.push_scope("dyn.selection")
+        # When there is only a single caret or a single continuous selection
+        # the left scope may contain: dyn.caret.begin.line or dyn.caret.begin.document
+        if leftCursor.atBlockStart():
+            left_scope.push_scope("dyn.caret.begin.line")
+        if leftCursor.atStart():
+            left_scope.push_scope("dyn.caret.begin.document")
+        # Likewise the right scope may contain: dyn.caret.end.line or dyn.caret.end.document.
+        if rightCursor.atBlockEnd():
+            right_scope.push_scope("dyn.caret.end.line")
+        if rightCursor.atEnd():
+            right_scope.push_scope("dyn.caret.end.document")
+        return left_scope, right_scope
