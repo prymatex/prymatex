@@ -78,13 +78,13 @@ from prymatex.qt import QtCore, QtGui
 # * `includeFilesInFileChooser`
 
 class Settings(object):
-    def __init__(self, selector, dataHash):
+    def __init__(self, selector, section, config):
         self.selector = selector
-        self.dataHash = dataHash
+        self.section = section
+        self.config = config
 
     def get(self, key, default=None):
-        print(dir(self.dataHash))
-        return self.dataHash.get(key, default)
+        return self.config.get(self.section, key, fallback=default, raw=True)
 
 class ContextSettings(object):
     def __init__(self, settings):
@@ -128,8 +128,8 @@ class Properties(object):
     def contextSettings(self, leftScope = None, rightScope = None):
         return ContextSettings([])
         
-    def add(self, selector, dataHash):
-        self.settings.insert(0, Settings(selector, dataHash))
+    def add(self, selector, section, config):
+        self.settings.insert(0, Settings(selector, section, config))
 
     @staticmethod
     def buildSettings(settings):

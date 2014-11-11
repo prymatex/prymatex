@@ -909,7 +909,7 @@ class SupportBaseManager(object):
         directory = path if os.path.isdir(path) else os.path.dirname(path)
         parser = self._load_parser(directory)
         properties = Properties()
-        properties.add(self.selectorFactory(None), parser.defaults())
+        properties.add(self.selectorFactory(None), configparser.DEFAULTSECT, parser)
         for section in parser.sections():
             options = parser[section]
             selector = section.strip()
@@ -918,7 +918,7 @@ class SupportBaseManager(object):
             pattern = re.compile(fntranslate(selector))
             selector = self.selectorFactory(selector)
             if pattern.search(path) or selector:
-                properties.add(selector, options)
+                properties.add(selector, section, parser)
         return properties
 
     def getProperties(self, path=None):
