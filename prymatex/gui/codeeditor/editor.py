@@ -299,7 +299,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.filePathChanged.emit(filePath)
         extension = self.application().fileManager.extension(filePath)
         syntax = self.application().supportManager.findSyntaxByFileType(extension)
-        print(self.propertiesSettings().windowTitle)
+        props = self.propertiesSettings()
+        for attr in dir(props):
+            print(attr, getattr(props, attr))
         if syntax is not None:
             self.insertBundleItem(syntax)
 

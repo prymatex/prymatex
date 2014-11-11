@@ -83,6 +83,7 @@ class Settings(object):
         self.dataHash = dataHash
 
     def get(self, key, default=None):
+        print(dir(self.dataHash))
         return self.dataHash.get(key, default)
 
 class ContextSettings(object):
@@ -96,25 +97,21 @@ class ContextSettings(object):
                 return attr
         return default
 
-    ## I/O
-    binary = property(lambda self: self._first("binary"))
-    encoding = property(lambda self: self._first("encoding"))
-    fileType = property(lambda self: self._first("fileType"))
-    useBOM = property(lambda self: self._first("useBOM"))
+## I/O
+for attr in [ "binary", "encoding", "fileType", "useBOM", "lineEndings" ]:
+    setattr(ContextSettings, attr, property(lambda self: self._first(attr)))
+
+## Display
+for attr in [ "theme", "fontName", "fontSize", "showInvisibles", "spellChecking" ]:
+    setattr(ContextSettings, attr, property(lambda self: self._first(attr)))
     
-    ## Display
-    theme = property(lambda self: self._first("theme"))
-    fontName = property(lambda self: self._first("fontName"))
-    fontSize = property(lambda self: self._first("fontSize"))
-    showInvisibles = property(lambda self: self._first("showInvisibles"))
-    spellChecking = property(lambda self: self._first("spellChecking"))
-    
-    ## Projects
-    projectDirectory = property(lambda self: self._first("projectDirectory"))
-    windowTitle = property(lambda self: self._first("windowTitle"))
-    
-    ## Other
-    scopeAttributes = property(lambda self: self._first("scopeAttributes"))
+## Projects
+for attr in [ "projectDirectory", "windowTitle" ]:
+    setattr(ContextSettings, attr, property(lambda self: self._first(attr)))
+
+## Other
+for attr in [ "scopeAttributes" ]:
+    setattr(ContextSettings, attr, property(lambda self: self._first(attr)))
 
 ## File Filtering Keys
 for attr in [ "exclude", "excludeFiles", "excludeDirectories", "excludeInBrowser",
@@ -123,7 +120,6 @@ for attr in [ "exclude", "excludeFiles", "excludeDirectories", "excludeInBrowser
     "includeInBrowser","includeInFileChooser", "includeFilesInBrowser",
     "includeDirectoriesInBrowser", "includeFilesInFileChooser" ]:
     setattr(ContextSettings, attr, property(lambda self: self._first(attr)))
-
 
 class Properties(object):
     def __init__(self):
