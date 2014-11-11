@@ -299,6 +299,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.filePathChanged.emit(filePath)
         extension = self.application().fileManager.extension(filePath)
         syntax = self.application().supportManager.findSyntaxByFileType(extension)
+        print(self.propertiesSettings())
         if syntax is not None:
             self.insertBundleItem(syntax)
 
@@ -339,9 +340,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             *self.scope(cursor or self.textCursor())
         )
 
-    def propertySettings(self, cursor = None):
-        return self.properties.contextSettings(
-            *self.scope(cursor or self.textCursor())
+    def propertiesSettings(self, cursor = None):
+        return self.application().supportManager.getPropertiesSettings(
+            self.filePath(), *self.scope(cursor or self.textCursor())
         )
         
     # ------------ Obteniendo datos del editor

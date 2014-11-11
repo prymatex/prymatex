@@ -389,7 +389,6 @@ class SupportBaseManager(object):
             bundlePath = bundle.sourcePath(namespace.name)
             bundleItemPaths = dict([ (klass.type(), klass.sourcePaths(bundlePath)) 
                 for klass in self.BUNDLEITEM_CLASSES.values() ])
-            print(bundleItemPaths)
             for bundleItem in self.findBundleItems(bundle=bundle):
                 if not bundleItem.hasSource(namespace.name):
                     continue
@@ -873,7 +872,10 @@ class SupportBaseManager(object):
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,
-            bundleitem.Preference.buildSettings(self.getPreferences(leftScope, rightScope)))
+            bundleitem.Preference.buildSettings(
+                [p.settings for p in self.getPreferences(leftScope, rightScope)]
+            )
+        )
 
     #----------------- PROPERTIES ---------------------
     def _fill_parser(self, parser, path):
@@ -905,7 +907,7 @@ class SupportBaseManager(object):
         directory = path if os.path.isdir(path) else os.path.dirname(path)
         parser = self._load_parser(directory)
         properties = Properties()
-        properties.add(self.selectorFactory(""), parser.defaults())
+        properties.add(self.selectorFactory(None), parser.defaults())
         for section in parser.sections():
             options = parser[section]
             selector = section.strip()
@@ -917,10 +919,22 @@ class SupportBaseManager(object):
                 properties.add(selector, options)
         return properties
 
-    def getPropertySettings(self, path=""):
+    def getProperties(self, path=None):
+        path = path or ""
         if path not in self._properties:
             self._properties[path] = self._build_properites(path)
         return self._properties[path]
+
+    def getPropertiesSettings(self, path=None, leftScope = None, rightScope = None):
+        memoizedKey = ("getPropertiesSettings", path, leftScope, rightScope)
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
+        properties = self.getProperties(path)
+        return self.bundleItemCache.setdefault(memoizedKey,
+            Properties.buildSettings(
+                self.__sort_filter_items(properties.settings, leftScope, rightScope)
+            )
+        )
 
     # ----------------- TABTRIGGERS INTERFACE
     def getAllTabTriggerItems(self):

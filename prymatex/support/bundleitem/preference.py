@@ -225,6 +225,6 @@ class Preference(BundleItem):
         return dataHash
 
     @staticmethod
-    def buildSettings(preferences):
+    def buildSettings(settings):
         """El orden si importa, las preferences vienen ordenadas por score de mayor a menor"""
-        return ContextSettings([p.settings for p in preferences])
+        return ContextSettings(settings)

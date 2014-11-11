@@ -78,7 +78,8 @@ from prymatex.qt import QtCore, QtGui
 # * `includeFilesInFileChooser`
 
 class Settings(object):
-    def __init__(self, dataHash):
+    def __init__(self, selector, dataHash):
+        self.selector = selector
         self.dataHash = dataHash
 
 class ContextSettings(object):
@@ -93,4 +94,8 @@ class Properties(object):
         return ContextSettings([])
         
     def add(self, selector, dataHash):
-        self.settings.insert(0, (selector, Settings(dataHash)))
+        self.settings.insert(0, Settings(selector, dataHash))
+
+    @staticmethod
+    def buildSettings(settings):
+        return ContextSettings(settings)
