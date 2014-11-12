@@ -177,12 +177,37 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def initialize(self, **kwargs):
         super(CodeEditor, self).initialize(**kwargs)
-
+        
+        self._apply_properties()
         # Get dialogs
         self.selectorDialog = self.window().findChild(QtWidgets.QDialog, "SelectorDialog")
         self.browserDock = self.window().findChild(QtWidgets.QDockWidget, "BrowserDock")
 
-    # -------------- Self Signal Connect
+    def _apply_properties(self):
+        properties = self.propertiesSettings()
+        if properties.lineEndings:
+            self.setEolChars(properties.lineEndings)
+        if properties.encoding:
+            self.encoding = properties.encoding
+        if properties.fontName:
+            font = QtGui.QFont(properties.fontName)
+        else:
+            font = self.font()
+        if properties.fontSize:
+            font.setPointSize(properties.fontSize)
+        self.setFont(font)
+        #showInvisibles   = false
+        # TODO: Mejorar esto crear un tabsize y un softwrap
+        if properties.softTabs:
+            self.indentUsingSpaces = properties.softTabs
+        if properties.tabSize:
+            self.indentationWidth = properties.tabSize
+        if properties.theme:
+            theme = self.application().supportManager.getBundleItem(properties.theme)
+            if theme is not None:
+                self.insertBundleItem(theme)
+
+    # -------------- Editor Modes
     def beginCodeEditorMode(self, mode):
         old_mode = self.codeEditorModes[self.__current_mode_index]
         self.__current_mode_index = self.codeEditorModes.index(mode) 
@@ -259,6 +284,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         content, self.encoding = self.application().fileManager.readFile(self.filePath())
         self.updatePlainText(content)
 
+    # ------------ Component State save and restore
     def componentState(self):
         """Returns a Python dictionary containing the state of the editor."""
         state = super(CodeEditor, self).componentState()
@@ -299,11 +325,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.filePathChanged.emit(filePath)
         extension = self.application().fileManager.extension(filePath)
         syntax = self.application().supportManager.findSyntaxByFileType(extension)
-        props = self.propertiesSettings()
-        for attr in dir(props):
-            print(attr, getattr(props, attr))
         if syntax is not None:
             self.insertBundleItem(syntax)
+        self._apply_properties()
 
     def title(self):
         title = PrymatexEditor.title(self)

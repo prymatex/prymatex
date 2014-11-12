@@ -8,23 +8,8 @@ from prymatex.qt import QtCore, QtGui
 
 ## I/O
 
-#* `binary` — If set for a file, file browser will open it with external program
-# when double clicked. Mainly makes sense when targetting specific globs.
-
-# * `encoding` — Set to the file’s encoding. This will be used during save but
-# is also fallback during load (when file is not UTF-8). Load encodinng heuristic
-# is likely going to change.
-
-# * `fileType` — The file type given as scope, e.g. `text.plain`.
-
-# * `useBOM` — Used during save to add BOM (for those who insist on putting BOMs
-# in their UTF-8 files).
-
 ## Display
 
-# * `theme` — UUID of theme, presently unused but will be back, and should allow
-# name of theme as well (use _View → Themes_ to change theme — remember to install
-# the Themes bundle).
 
 # * `fontName`, `fontSize` — Name and size of font, e.g. `Menlo` and `13`.
 # Presently these two keys are required to override font, but there will be a
@@ -82,52 +67,84 @@ class Settings(object):
         self.selector = selector
         self.section = section
         self.config = config
-
+        
     def get(self, key, default=None):
-        return self.config.get(self.section, key, fallback=default, raw=True)
+        return self.config.get(self.section, key, fallback=default)
 
 class ContextSettings(object):
     def __init__(self, settings):
         self.settings = settings
 
-    def _first(self, key, default=None):
+    def _first(self, key, default=None, value_type=str):
         for settings in self.settings:
-            attr = settings.get(key, None)
-            if attr is not None:
-                return attr
+            value = settings.get(key, default=None)
+            if value is not None:
+                return value_type(value)
         return default
 
-## I/O
-for attr in [ "binary", "encoding", "fileType", "useBOM", "lineEndings" ]:
-    setattr(ContextSettings, attr, property(lambda self: self._first(attr)))
-
-## Display
-for attr in [ "theme", "fontName", "fontSize", "showInvisibles", "spellChecking" ]:
-    setattr(ContextSettings, attr, property(lambda self: self._first(attr)))
+    ## I/O
+    #* `binary` — If set for a file, file browser will open it with external program
+    # when double clicked. Mainly makes sense when targetting specific globs.
+    binary = property(lambda self: self._first("binary"))
     
-## Projects
-for attr in [ "projectDirectory", "windowTitle" ]:
-    setattr(ContextSettings, attr, property(lambda self: self._first(attr)))
+    # * `encoding` — Set to the file’s encoding. This will be used during save but
+    # is also fallback during load (when file is not UTF-8). Load encodinng heuristic
+    # is likely going to change.    
+    encoding = property(lambda self: self._first("encoding"))
+    
+    # * `fileType` — The file type given as scope, e.g. `text.plain`.
+    fileType = property(lambda self: self._first("fileType"))
 
-## Other
-for attr in [ "scopeAttributes" ]:
-    setattr(ContextSettings, attr, property(lambda self: self._first(attr)))
+    # * `useBOM` — Used during save to add BOM (for those who insist on putting BOMs
+    # in their UTF-8 files).
+    useBOM = property(lambda self: self._first("useBOM"))
+    lineEndings = property(lambda self: self._first("lineEndings"))
 
-## File Filtering Keys
-for attr in [ "exclude", "excludeFiles", "excludeDirectories", "excludeInBrowser",
-    "excludeInFolderSearch", "excludeInFileChooser", "excludeFilesInBrowser",
-    "excludeDirectoriesInBrowser", "include", "includeFiles", "includeDirectories",
-    "includeInBrowser","includeInFileChooser", "includeFilesInBrowser",
-    "includeDirectoriesInBrowser", "includeFilesInFileChooser" ]:
-    setattr(ContextSettings, attr, property(lambda self: self._first(attr)))
+    ## Display
+    # * `theme` — UUID of theme, presently unused but will be back, and should allow
+    # name of theme as well (use _View → Themes_ to change theme — remember to install
+    # the Themes bundle).
+    theme = property(lambda self: self._first("theme"))
+    fontName = property(lambda self: self._first("fontName"))
+    fontSize = property(lambda self: self._first("fontSize", value_type=int))
+    showInvisibles = property(lambda self: self._first("showInvisibles"))
+    spellChecking = property(lambda self: self._first("spellChecking"))
+
+    # * `softTabs`, `tabSize` — Presently can only be changed this way, but there
+    # should be some memory added to Avian.    
+    softTabs = property(lambda self: self._first("softTabs", "").lower() == "true")
+    tabSize = property(lambda self: self._first("tabSize", value_type=int))
+
+    ## Projects
+    projectDirectory = property(lambda self: self._first("projectDirectory"))
+    windowTitle = property(lambda self: self._first("windowTitle"))
+    
+    ## Other
+    scopeAttributes = property(lambda self: self._first("scopeAttributes"))
+    
+    ## File Filtering Keys
+    exclude = property(lambda self: self._first("exclude"))
+    excludeFiles = property(lambda self: self._first("excludeFiles"))
+    excludeDirectories = property(lambda self: self._first("excludeDirectories"))
+    excludeInBrowser = property(lambda self: self._first("excludeInBrowser"))
+    excludeInFolderSearch = property(lambda self: self._first("excludeInFolderSearch"))
+    excludeInFileChooser = property(lambda self: self._first("excludeInFileChooser"))
+    excludeFilesInBrowser = property(lambda self: self._first("excludeFilesInBrowser"))
+    excludeDirectoriesInBrowser = property(lambda self: self._first("excludeDirectoriesInBrowser"))
+    
+    include = property(lambda self: self._first("include"))
+    includeFiles = property(lambda self: self._first("includeFiles"))
+    includeDirectories = property(lambda self: self._first("includeDirectories"))
+    includeInBrowser = property(lambda self: self._first("includeInBrowser"))
+    includeInFileChooser = property(lambda self: self._first("includeInFileChooser"))
+    includeFilesInBrowser = property(lambda self: self._first("includeFilesInBrowser"))
+    includeDirectoriesInBrowser = property(lambda self: self._first("includeDirectoriesInBrowser"))
+    includeFilesInFileChooser = property(lambda self: self._first("includeFilesInFileChooser"))
 
 class Properties(object):
     def __init__(self):
         self.settings = []
-
-    def contextSettings(self, leftScope = None, rightScope = None):
-        return ContextSettings([])
-        
+    
     def add(self, selector, section, config):
         self.settings.insert(0, Settings(selector, section, config))
 

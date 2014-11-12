@@ -891,7 +891,7 @@ class SupportBaseManager(object):
 
     def _load_parser(self, directory):
         if directory not in self._configparsers:
-            parser = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
+            parser = configparser.ConfigParser()
             parser.optionxform = str
             path = directory
             if path:
@@ -934,7 +934,7 @@ class SupportBaseManager(object):
         properties = self.getProperties(path)
         return self.bundleItemCache.setdefault(memoizedKey,
             Properties.buildSettings(
-                self.__filter_items(properties.settings, leftScope, rightScope, sort=False)
+                self.__filter_items(properties.settings, leftScope, rightScope)
             )
         )
 
