@@ -527,7 +527,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         if (brace1 is not None and brace2 is not None) and brace1.selectionStart() > brace2.selectionStart():
             return (brace2, brace1)
         return (brace1, brace2)
-
+    
     def _beforeBrace(self, cursor):
         return self._currentPairs[1] is not None and self._currentPairs[1].position() - 1 == cursor.position()
 
