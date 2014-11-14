@@ -68,24 +68,39 @@ class Settings(object):
         self.section = section
         self.configs = configs
         
-    def get(self, key, default=None):
-        return self.configs[0].get(self.section, key, fallback=default)
+    def get_str(self, key, default=None):
+        value = default
+        for config in self.configs[::-1]:
+            value = config.get(self.section, key, fallback=value, raw=True)
+        return value
 
+    def get_bool(self, key, default=None):
+        value = default
+        for config in self.configs[::-1]:
+            value = config.getboolean(self.section, key, fallback=value, raw=True)
+        return value
+
+    def get_int(self, key, default=None):
+        value = default
+        for config in self.configs[::-1]:
+            value = config.getint(self.section, key, fallback=value, raw=True)
+        return value
+        
 class ContextSettings(object):
     def __init__(self, settings):
         self.settings = settings
 
     def _first(self, key, default=None, value_type=str):
         for settings in self.settings:
-            value = settings.get(key, default=None)
-            if value is not None:
-                return value_type(value)
+            value = getattr(settings, "get_%s" % value_type.__name__)(key, default=None)
+            if value:
+                return value
         return default
 
     ## I/O
     #* `binary` — If set for a file, file browser will open it with external program
     # when double clicked. Mainly makes sense when targetting specific globs.
-    binary = property(lambda self: self._first("binary"))
+    binary = property(lambda self: self._first("binary", value_type=bool))
     
     # * `encoding` — Set to the file’s encoding. This will be used during save but
     # is also fallback during load (when file is not UTF-8). Load encodinng heuristic
@@ -107,12 +122,12 @@ class ContextSettings(object):
     theme = property(lambda self: self._first("theme"))
     fontName = property(lambda self: self._first("fontName"))
     fontSize = property(lambda self: self._first("fontSize", value_type=int))
-    showInvisibles = property(lambda self: self._first("showInvisibles"))
-    spellChecking = property(lambda self: self._first("spellChecking"))
+    showInvisibles = property(lambda self: self._first("showInvisibles", value_type=bool))
+    spellChecking = property(lambda self: self._first("spellChecking", value_type=bool))
 
     # * `softTabs`, `tabSize` — Presently can only be changed this way, but there
     # should be some memory added to Avian.    
-    softTabs = property(lambda self: self._first("softTabs", "").lower() == "true")
+    softTabs = property(lambda self: self._first("softTabs", value_type=bool))
     tabSize = property(lambda self: self._first("tabSize", value_type=int))
 
     ## Projects

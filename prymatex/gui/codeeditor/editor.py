@@ -198,7 +198,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.setFont(font)
         #showInvisibles   = false
         # TODO: Mejorar esto crear un tabsize y un softwrap
-        if properties.softTabs:
+        if properties.softTabs is not None:
             self.indentUsingSpaces = properties.softTabs
         if properties.tabSize:
             self.indentationWidth = properties.tabSize
@@ -322,12 +322,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def setFilePath(self, filePath):
         super(CodeEditor, self).setFilePath(filePath)
-        self.filePathChanged.emit(filePath)
         extension = self.application().fileManager.extension(filePath)
         syntax = self.application().supportManager.findSyntaxByFileType(extension)
         if syntax is not None:
             self.insertBundleItem(syntax)
         self._apply_properties()
+        self.filePathChanged.emit(filePath)
 
     def title(self):
         title = PrymatexEditor.title(self)

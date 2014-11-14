@@ -886,11 +886,7 @@ class SupportBaseManager(object):
             parser = configparser.ConfigParser()
             parser.optionxform = str
             parser.directory = directory
-            with open(properties_path) as props:
-                content = props.read()
-                if content[0] != "[":
-                    content = "[%s]\n%s" % (configparser.DEFAULTSECT, content)
-                parser.read_string(content)
+            parser.read(properties_path)
             return parser
 
     def _load_parsers(self, directory):
@@ -909,7 +905,7 @@ class SupportBaseManager(object):
     def _build_properites(self, path):
         directory = path if os.path.isdir(path) else os.path.dirname(path)
         parsers = self._load_parsers(directory)
-        print(path, [ (p.directory, p) for p in parsers ])
+        # TODO: Build properties from parser
         properties = Properties()
         sections = set()
         for parser in parsers:
