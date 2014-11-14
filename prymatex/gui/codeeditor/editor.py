@@ -357,11 +357,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         left_token_scope, right_token_scope = leftToken.scope, rightToken.scope
         left_cursor_scope, right_cursor_scope = self.application().supportManager.cursorScope(self.textCursor())
         auxiliary_scope = self.application().supportManager.auxiliaryScope(self.filePath())
-
         return (left_token_scope + left_cursor_scope + auxiliary_scope, 
             right_token_scope + right_cursor_scope + auxiliary_scope)
 
     def preferenceSettings(self, cursor = None):
+        import traceback
+        traceback.print_stack()
         return self.application().supportManager.getPreferenceSettings(
             *self.scope(cursor or self.textCursor())
         )

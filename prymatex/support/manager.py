@@ -79,6 +79,7 @@ class SupportBaseManager(object):
         # Cache
         self._configparsers = {}
         self._properties = {}
+        self._auxiliaries = {}
         
         # Stored Cache!!
         self.bundleItemCache = self.buildBundleItemStorage()
@@ -236,7 +237,9 @@ class SupportBaseManager(object):
 
     # ------------------ AUXILIARY SCOPE
     def auxiliaryScope(self, path=""):
-        return scope.auxiliary(path)
+        if path in self._auxiliaries:
+            return self._auxiliaries[path]
+        return self._auxiliaries.setdefault(path, scope.auxiliary(path))
     
     def __filter_items(self, items, leftScope, rightScope = None, sort=True):
         context = self.contextFactory(leftScope, rightScope)

@@ -58,6 +58,7 @@ class FoldingListModel(QtCore.QAbstractListModel):
     # --------------- Signals   
     def on_document_contentsChange(self, position, removed, added):
         block = self.editor.document().findBlock(position)
+        print(block.text())
         if removed:
             remove = [ folding_cursor 
                 for folding_cursor in self.foldings \
@@ -326,6 +327,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
     # --------------- Signals   
     def on_document_contentsChange(self, position, removed, added):
         block = self.editor.document().findBlock(position)
+        print(block.text())
         if removed:
             remove = [ symbol_cursor 
                 for symbol_cursor in self.symbols \

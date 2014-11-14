@@ -207,6 +207,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtWidgets.QWidget
         menu.popup(self.labelContent.mapToGlobal(point))
 
     def on_editor_textChanged(self):
+        print("update text")
         eol = [ eol for eol in text.EOLS if eol[0] == self.currentEditor.lineSeparator() ]
         self.labelContent.setText("%s, Ending %s, Encoding %s" % (
            self.currentEditor.indentUsingSpaces and "Spaces %d" % self.currentEditor.indentationWidth or "Tab width %d" % self.currentEditor.tabWidth,

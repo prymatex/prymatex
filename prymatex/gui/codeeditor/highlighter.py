@@ -9,6 +9,7 @@ from prymatex.qt import QtCore, QtGui, QtWidgets, helpers
 
 class HighlighterThread(QtCore.QThread):
     highlightReady = QtCore.Signal()
+    highlightBlockReady = QtCore.Signal(int, object, list)
     def __init__(self, highlighter):
         super(HighlighterThread, self).__init__(highlighter)
         self._highlighter = highlighter
@@ -25,20 +26,19 @@ class HighlighterThread(QtCore.QThread):
         block = self.parent().document().begin()
         syntaxProcessor = self.parent().syntaxProcessor
         themeProcessor = self.parent().themeProcessor
-        process = self.parent()._process
         while block.isValid() and self._running:
             self.usleep(1)
             user_data = syntaxProcessor.blockUserData(block)
-            process(block, user_data)
             formats = themeProcessor.textCharFormats(user_data)
-            block.layout().setAdditionalFormats(formats)
+            #self.highlightBlockReady.emit(block.blockNumber(), user_data, formats)
             block = block.next()
+        print("listo, aviso al resto")
         self.highlightReady.emit()
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def __init__(self, editor):
         super(CodeEditorSyntaxHighlighter, self).__init__(editor)
-        self.highlightBlock = self._highlight
+        self.highlightBlock = self._nop
         self.setDocument(editor.document())
         self.editor = editor
         self.syntaxProcessor = editor.findProcessor("syntax")
@@ -50,18 +50,24 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.highlightBlock = self._highlight
         self.document().markContentsDirty(0, self.document().characterCount())
 
+    def on_thread_highlightBlockReady(self, block_number, user_data, formats):
+        block = self.document().findBlockByNumber(block_number)
+        self._process(block, user_data)
+        block.layout().setAdditionalFormats(formats)
+
     def stop(self):
-        return
+        #return
         self.highlightBlock = self._nop
         if self.thread is not None:
             self.thread.stop()
             self.thread = None
 
     def start(self, callback=None):
-        self.rehighlight()
-        return
+        #self.rehighlight()
+        #return
         self.thread = HighlighterThread(self)
         self.thread.highlightReady.connect(self.on_thread_highlightingReady)
+        self.thread.highlightBlockReady.connect(self.on_thread_highlightBlockReady)
         self.thread.highlightReady.connect(self.editor.highlightReady.emit)
         self.thread.started.connect(self.editor.aboutToHighlightChange.emit)
         self.thread.finished.connect(self.editor.highlightChanged.emit)

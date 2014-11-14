@@ -20,17 +20,17 @@ def registerPlugin(manager, descriptor):
 
     # ---------------- Modes
     manager.registerComponent(CodeEditorEditMode, CodeEditor) # First is default mode
-    manager.registerComponent(CodeEditorMultiCursorMode, CodeEditor)
-    manager.registerComponent(CodeEditorSnippetMode, CodeEditor)
-    manager.registerComponent(CodeEditorComplitionMode, CodeEditor)
+    #manager.registerComponent(CodeEditorMultiCursorMode, CodeEditor)
+    #manager.registerComponent(CodeEditorSnippetMode, CodeEditor)
+    #manager.registerComponent(CodeEditorComplitionMode, CodeEditor)
 
     # ---------------- Addons
-    manager.registerComponent(SmartUnindentAddon, CodeEditor)
+    #manager.registerComponent(SmartUnindentAddon, CodeEditor)
     #manager.registerComponent(SpellCheckerAddon, CodeEditor)
     manager.registerComponent(HighlightCurrentSelectionAddon, CodeEditor)
 
     # ---------------- Sidebars
-    manager.registerComponent(MiniMapAddon, CodeEditor)
+    #manager.registerComponent(MiniMapAddon, CodeEditor)
     manager.registerComponent(BookmarkSideBarAddon, CodeEditor)
     manager.registerComponent(LineNumberSideBarAddon, CodeEditor)
     manager.registerComponent(FoldingSideBarAddon, CodeEditor)
