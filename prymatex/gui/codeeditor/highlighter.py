@@ -30,7 +30,7 @@ class HighlighterThread(QtCore.QThread):
             self.usleep(1)
             user_data = syntaxProcessor.blockUserData(block)
             formats = themeProcessor.textCharFormats(user_data)
-            #self.highlightBlockReady.emit(block.blockNumber(), user_data, formats)
+            self.highlightBlockReady.emit(block.blockNumber(), user_data, formats)
             block = block.next()
         print("listo, aviso al resto")
         self.highlightReady.emit()

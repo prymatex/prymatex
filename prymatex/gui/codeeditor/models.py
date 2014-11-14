@@ -58,7 +58,6 @@ class FoldingListModel(QtCore.QAbstractListModel):
     # --------------- Signals   
     def on_document_contentsChange(self, position, removed, added):
         block = self.editor.document().findBlock(position)
-        print(block.text())
         if removed:
             remove = [ folding_cursor 
                 for folding_cursor in self.foldings \
@@ -84,7 +83,7 @@ class FoldingListModel(QtCore.QAbstractListModel):
         while block.isValid():
             self._add_folding(block)
             block = block.next()
-
+        
     def on_editor_highlightChanged(self):
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
         self.layoutChanged.emit()
@@ -318,7 +317,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
         }
         
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
-        
+
         #Connects
         self.editor.aboutToHighlightChange.connect(self.on_editor_aboutToHighlightChange)
         self.editor.highlightReady.connect(self.on_editor_highlightingReady)
@@ -327,7 +326,6 @@ class SymbolListModel(QtCore.QAbstractListModel):
     # --------------- Signals   
     def on_document_contentsChange(self, position, removed, added):
         block = self.editor.document().findBlock(position)
-        print(block.text())
         if removed:
             remove = [ symbol_cursor 
                 for symbol_cursor in self.symbols \
@@ -355,7 +353,7 @@ class SymbolListModel(QtCore.QAbstractListModel):
         while block.isValid():
             self._add_symbol(block)
             block = block.next()
-    
+        
     def on_editor_highlightChanged(self):
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
         self.layoutChanged.emit()

@@ -27,3 +27,11 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
             if token.start <= pos < token.end:
                 return token
         return self.tokens[0]
+
+    def syntaxScope(self, cursor):
+        left = cursor.position() - cursor.selectionStart() - 1
+        right = cursor.position() - cursor.selectionStart()
+        return (self.tokenAt(left).scope, self.tokenAt(right).scope)
+
+    def isEmpty(self):
+        return self.state == -1

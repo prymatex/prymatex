@@ -20,9 +20,9 @@ def registerPlugin(manager, descriptor):
 
     # ---------------- Modes
     manager.registerComponent(CodeEditorEditMode, CodeEditor) # First is default mode
-    #manager.registerComponent(CodeEditorMultiCursorMode, CodeEditor)
-    #manager.registerComponent(CodeEditorSnippetMode, CodeEditor)
-    #manager.registerComponent(CodeEditorComplitionMode, CodeEditor)
+    manager.registerComponent(CodeEditorMultiCursorMode, CodeEditor)
+    manager.registerComponent(CodeEditorSnippetMode, CodeEditor)
+    manager.registerComponent(CodeEditorComplitionMode, CodeEditor)
 
     # ---------------- Addons
     #manager.registerComponent(SmartUnindentAddon, CodeEditor)

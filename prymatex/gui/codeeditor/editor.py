@@ -340,29 +340,16 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         #return PrymatexEditor.fileFilters(self)
 
     # ---------------------- Scopes
-    def tokenAt(self, position):
-        if position < 0:
-            position = 0
-        elif position > self.document().characterCount():
-            position = self.document().characterCount()
-        block = self.document().findBlock(position)
-        return self.blockUserData(block).tokenAt(position - block.position())
-        
-    def tokens(self, cursor):
-        return (self.tokenAt(cursor.selectionStart() - 1),
-            self.tokenAt(cursor.selectionEnd()))
-
     def scope(self, cursor):
-        leftToken, rightToken = self.tokens(cursor)
-        left_token_scope, right_token_scope = leftToken.scope, rightToken.scope
+        user_data = self.blockUserData(cursor.block())
+        print(user_data.isEmpty())
+        left_syntax_scope, right_syntax_scope = user_data.syntaxScope(cursor)
         left_cursor_scope, right_cursor_scope = self.application().supportManager.cursorScope(self.textCursor())
         auxiliary_scope = self.application().supportManager.auxiliaryScope(self.filePath())
-        return (left_token_scope + left_cursor_scope + auxiliary_scope, 
-            right_token_scope + right_cursor_scope + auxiliary_scope)
+        return (left_syntax_scope + left_cursor_scope + auxiliary_scope, 
+            right_syntax_scope + right_cursor_scope + auxiliary_scope)
 
     def preferenceSettings(self, cursor = None):
-        import traceback
-        traceback.print_stack()
         return self.application().supportManager.getPreferenceSettings(
             *self.scope(cursor or self.textCursor())
         )
