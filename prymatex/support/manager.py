@@ -880,45 +880,48 @@ class SupportBaseManager(object):
         )
 
     #----------------- PROPERTIES ---------------------
-    def _fill_parser(self, parser, path):
-        properties_path = os.path.join(path, config.PMX_PROPERTIES_NAME)
+    def _load_parser(self, directory):
+        properties_path = os.path.join(directory, config.PMX_PROPERTIES_NAME)
         if os.path.isfile(properties_path):
+            parser = configparser.ConfigParser()
+            parser.optionxform = str
+            parser.directory = directory
             with open(properties_path) as props:
                 content = props.read()
                 if content[0] != "[":
                     content = "[%s]\n%s" % (configparser.DEFAULTSECT, content)
                 parser.read_string(content)
+            return parser
 
-    def _load_parser(self, directory):
-        if directory not in self._configparsers:
-            parser = configparser.ConfigParser()
-            parser.optionxform = str
-            path = directory
-            if path:
-                while True:
-                    self._fill_parser(parser, path)
-                    if path in (os.sep, config.USER_HOME_PATH):
-                        break
-                    path = os.path.dirname(path)
-            if path != config.USER_HOME_PATH:
-                self._fill_parser(parser, config.USER_HOME_PATH)
-            self._configparsers[directory] = parser
-        return self._configparsers[directory]
+    def _load_parsers(self, directory):
+        if directory and directory not in self._configparsers:
+            parsers = []
+            parser = self._load_parser(directory)
+            if parser:
+                parsers.append(parser)
+            if directory not in (os.sep, config.USER_HOME_PATH):
+                parsers += self._load_parsers(os.path.dirname(directory))
+            elif directory == os.sep:
+                parsers.append(self._load_parser(config.USER_HOME_PATH))
+            self._configparsers[directory] = parsers
+        return directory and self._configparsers[directory] or []
 
     def _build_properites(self, path):
         directory = path if os.path.isdir(path) else os.path.dirname(path)
-        parser = self._load_parser(directory)
+        parsers = self._load_parsers(directory)
+        print(path, [ (p.directory, p) for p in parsers ])
         properties = Properties()
-        properties.add(self.selectorFactory(None), configparser.DEFAULTSECT, parser)
-        for section in parser.sections():
-            options = parser[section]
+        sections = set()
+        for parser in parsers:
+            sections.update(parser.sections())
+        for section in sections:
             selector = section.strip()
             if selector[0] in ("'", '"') and selector[0] == selector[-1]:
                 selector = selector[1:-1]
             pattern = re.compile(fntranslate(selector))
             selector = self.selectorFactory(selector)
             if pattern.search(path) or selector:
-                properties.add(selector, section, parser)
+                properties.add(selector, section, parsers)
         return properties
 
     def getProperties(self, path=None):

@@ -63,13 +63,13 @@ from prymatex.qt import QtCore, QtGui
 # * `includeFilesInFileChooser`
 
 class Settings(object):
-    def __init__(self, selector, section, config):
+    def __init__(self, selector, section, configs):
         self.selector = selector
         self.section = section
-        self.config = config
+        self.configs = configs
         
     def get(self, key, default=None):
-        return self.config.get(self.section, key, fallback=default)
+        return self.configs[0].get(self.section, key, fallback=default)
 
 class ContextSettings(object):
     def __init__(self, settings):
