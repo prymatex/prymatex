@@ -32,7 +32,6 @@ class HighlighterThread(QtCore.QThread):
             formats = themeProcessor.textCharFormats(user_data)
             self.highlightBlockReady.emit(block.blockNumber(), user_data, formats)
             block = block.next()
-        print("listo, aviso al resto")
         self.highlightReady.emit()
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):

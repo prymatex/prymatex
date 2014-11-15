@@ -901,7 +901,9 @@ class SupportBaseManager(object):
             if directory not in (os.sep, config.USER_HOME_PATH):
                 parsers += self._load_parsers(os.path.dirname(directory))
             elif directory == os.sep:
-                parsers.append(self._load_parser(config.USER_HOME_PATH))
+                parser = self._load_parser(config.USER_HOME_PATH)
+                if parser:
+                    parsers.append(parser)
             self._configparsers[directory] = parsers
         return directory and self._configparsers[directory] or []
 

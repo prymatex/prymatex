@@ -12,11 +12,15 @@ import constants
 
 from multiprocessing import Process, Queue
 from multiplexer import Multiplexer
-    
+
+procs = set()
+shutdown = False
+
 # ===========
 # = Workers =
 # ===========
 def worker_multiplexer(queue_multiplexer, queue_notifier, addr):
+    global shutdown
     multiplexer = Multiplexer(queue_notifier)
         
     context = zmq.Context()
@@ -30,7 +34,7 @@ def worker_multiplexer(queue_multiplexer, queue_notifier, addr):
         queue_multiplexer.put(addr[0])
     
     should_continue = True
-    while should_continue:
+    while not shutdown and should_continue:
         pycmd = zrep.recv_pyobj()
         method = getattr(multiplexer, pycmd["command"], None)
         if method is not None:
@@ -40,6 +44,7 @@ def worker_multiplexer(queue_multiplexer, queue_notifier, addr):
         should_continue = pycmd["command"] != "proc_buryall"
 
 def worker_notifier(queue_notifier, addr):
+    global shutdown
     context = zmq.Context()
     zpub = context.socket(zmq.PUB)
     
@@ -51,7 +56,7 @@ def worker_notifier(queue_notifier, addr):
         queue_notifier.put(addr[0])
         
     should_continue = True
-    while should_continue:
+    while not shutdown and should_continue:
         data = queue_notifier.get()
         if isinstance(data, (tuple, list)):
             zpub.send_multipart([ s.encode(constants.FS_ENCODING) for s in data ])
@@ -120,12 +125,14 @@ if __name__ == "__main__":
     # Start the notifier
     nproc = Process(target=worker_notifier, args=(queue_notifier, pub_addr))
     nproc.start()
-
+    procs.add(nproc)
+    
     naddress = queue_notifier.get()    
     
     # Start the multiplexer
     mproc = Process(target=worker_multiplexer, args=(queue_multiplexer, queue_notifier, rep_addr))
     mproc.start()
+    procs.add(nproc)
     
     maddress = queue_multiplexer.get()
         
@@ -135,12 +142,12 @@ if __name__ == "__main__":
     print(info)
     sys.stdout.flush()
     
-    def signal_handler(signal, frame):
-        nproc.terminate()
-        mproc.terminate()
-        nproc.join()
-        mproc.join()
-        sys.exit(0)
+    def signal_handler(signum, frame):
+        global shutdown
+        shutdown = True
+        for proc in procs:
+            proc.terminate()
+            proc.join()
     
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)

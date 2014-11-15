@@ -338,7 +338,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # ---------------------- Scopes
     def scope(self, cursor):
         user_data = self.blockUserData(cursor.block())
-        print(user_data.isEmpty())
         left_syntax_scope, right_syntax_scope = user_data.syntaxScope(cursor)
         left_cursor_scope, right_cursor_scope = self.application().supportManager.cursorScope(self.textCursor())
         auxiliary_scope = self.application().supportManager.auxiliaryScope(self.filePath())
@@ -360,7 +359,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return block.userData() or self.findProcessor("syntax").emptyUserData()
 
     def isBlockReady(self, block):
-        return block.isValid()
+        return block.isValid() and self.findProcessor("syntax").testRevision(block)
 
     # ------------ Obteniendo datos del editor
     def currentMode(self):
