@@ -84,11 +84,11 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         block = self.currentBlock()
 
         # ------ Syntax
-        revision = self.syntaxProcessor.buildRevision(block)
-        user_data = block.userData()
-        if user_data is None or user_data.revision != revision:
+        if not self.syntaxProcessor.testRevision(block):
             user_data = self.syntaxProcessor.blockUserData(block)
             self._process(block, user_data)
+        else:
+            user_data = block.userData()
 
         # ------ Formats
         for token in user_data.tokens:

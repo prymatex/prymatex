@@ -57,20 +57,18 @@ class FoldingListModel(QtCore.QAbstractListModel):
 
     # --------------- Signals   
     def on_document_contentsChange(self, position, removed, added):
+        remove = [ folding_cursor 
+            for folding_cursor in self.foldings \
+            if folding_cursor.position() == position ]
+        for folding_cursor in remove:
+            self._remove_folding_cursor(folding_cursor)
         block = self.editor.document().findBlock(position)
-        if removed:
-            remove = [ folding_cursor 
-                for folding_cursor in self.foldings \
-                if folding_cursor.position() == position ]
-            for folding_cursor in remove:
-                self._remove_folding_cursor(folding_cursor)
-        if added:
-            last = self.editor.document().findBlock(position + added)
-            while True:
-                self._add_folding(block)
-                if block == last:
-                    break
-                block = block.next()
+        last = self.editor.document().findBlock(position + added)
+        while self.editor.isBlockReady(block):
+            self._add_folding(block)
+            if block == last:
+                break
+            block = block.next()
 
     def on_editor_aboutToHighlightChange(self):
         self.foldings = []
@@ -325,23 +323,21 @@ class SymbolListModel(QtCore.QAbstractListModel):
      
     # --------------- Signals   
     def on_document_contentsChange(self, position, removed, added):
+        remove = [ symbol_cursor 
+            for symbol_cursor in self.symbols \
+            if symbol_cursor.position() == position ]
+        for symbol_cursor in remove:
+            index = self.symbols.index(symbol_cursor)
+            self.beginRemoveRows(QtCore.QModelIndex(), index, index)
+            self.symbols.remove(symbol_cursor)
+            self.endRemoveRows()
         block = self.editor.document().findBlock(position)
-        if removed:
-            remove = [ symbol_cursor 
-                for symbol_cursor in self.symbols \
-                if symbol_cursor.position() == position ]
-            for symbol_cursor in remove:
-                index = self.symbols.index(symbol_cursor)
-                self.beginRemoveRows(QtCore.QModelIndex(), index, index)
-                self.symbols.remove(symbol_cursor)
-                self.endRemoveRows()
-        if added:
-            last = self.editor.document().findBlock(position + added)
-            while True:
-                self._add_symbol(block)
-                if block == last:
-                    break
-                block = block.next()
+        last = self.editor.document().findBlock(position + added)
+        while self.editor.isBlockReady(block):
+            self._add_symbol(block)
+            if block == last:
+                break
+            block = block.next()
 
     def on_editor_aboutToHighlightChange(self):
         self.symbols = []

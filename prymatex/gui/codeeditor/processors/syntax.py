@@ -76,6 +76,9 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
                 block.previous().userState())
         )
 
+    def testRevision(self, block):
+        return block.userData() is not None and block.userData().revision == self.buildRevision(block)
+            
     def blockUserData(self, block):
         if self.bundleItem is None:
             return self.empty_user_data

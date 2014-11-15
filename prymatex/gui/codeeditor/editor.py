@@ -255,10 +255,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         super(CodeEditor, self).setPlainText(text)
         self.syntaxHighlighter.start()
 
-    # --------------- Block User Data
-    def blockUserData(self, block):
-        return block.userData() or self.findProcessor("syntax").emptyUserData()
-
     # ------------- Base Editor Api
     @classmethod
     def acceptFile(cls, filePath, mimetype):
@@ -358,7 +354,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return self.application().supportManager.getPropertiesSettings(
             self.filePath(), *self.scope(cursor or self.textCursor())
         )
-        
+    
+    # --------------- Block User Data
+    def blockUserData(self, block):
+        return block.userData() or self.findProcessor("syntax").emptyUserData()
+
+    def isBlockReady(self, block):
+        return block.isValid()
+
     # ------------ Obteniendo datos del editor
     def currentMode(self):
         return self.codeEditorModes[self.__current_mode_index]
