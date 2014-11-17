@@ -175,7 +175,7 @@ class Context(object):
     def __init__(self, left = None, right = None):
         self.left = Scope(left)
         self.right = right is not None and Scope(right) or Scope(left)
-        
+
     def __eq__(self, rhs):
         return self.left == rhs.left and self.right == rhs.right
     

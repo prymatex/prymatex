@@ -337,13 +337,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # ---------------------- Scopes
     def scope(self, cursor):
-        user_data = self.blockUserData(cursor.block())
-        left_syntax_scope, right_syntax_scope = user_data.syntaxScope(cursor)
+        left_syntax_scope, right_syntax_scope = self.blockUserData(cursor.block()).syntaxScope(cursor)
         left_cursor_scope, right_cursor_scope = self.application().supportManager.cursorScope(self.textCursor())
         auxiliary_scope = self.application().supportManager.auxiliaryScope(self.filePath())
         return (left_syntax_scope + left_cursor_scope + auxiliary_scope, 
             right_syntax_scope + right_cursor_scope + auxiliary_scope)
-
+        
     def preferenceSettings(self, cursor = None):
         return self.application().supportManager.getPreferenceSettings(
             *self.scope(cursor or self.textCursor())
@@ -748,7 +747,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         block = cursor.block()
         line = block.text()
 
-        leftScope, rightScope = self.scope(cursor)
         current_text, start, end = self.currentText()
         current_word, start, end = self.currentWord()
 
@@ -762,13 +760,15 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             'TM_LINE_NUMBER': block.blockNumber() + 1,
             'TM_CURRENT_THEME_PATH': theme.currentSourcePath(),
             'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
-            'TM_SCOPE': "%s" % rightScope,
-            'TM_SCOPE_LEFT': "%s" % leftScope,
             'TM_MODE': self.syntax().name,
             'TM_SOFT_TABS': self.indentUsingSpaces and 'YES' or 'NO',
             'TM_TAB_SIZE': self.tabWidth
         })
-
+        
+        if self.isBlockReady(block):
+            leftScope, rightScope = self.scope(cursor)
+            environment['TM_SCOPE'] = "%s" % rightScope
+            environment['TM_SCOPE_LEFT'] = "%s" % leftScope
         if current_word:
             self.logger().debug("Add current word to environment")
             environment['TM_CURRENT_WORD'] = current_word
