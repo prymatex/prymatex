@@ -85,7 +85,18 @@ class Settings(object):
         for config in self.configs[::-1]:
             value = config.getint(self.section, key, fallback=value, raw=True)
         return value
-        
+
+    def shellVariables(self):
+        variables = []
+        for config in self.configs[::-1]:
+            for name in config[self.section]:
+                if name.isupper():
+                    value = config[self.section][name]
+                    if value[0] in ("'", '"') and value[0] == value[-1]:
+                        value = value[1:-1]
+                    variables.append((name, value))
+        return variables
+
 class ContextSettings(object):
     def __init__(self, settings):
         self.settings = settings
@@ -160,15 +171,8 @@ class ContextSettings(object):
     @property
     def shellVariables(self):
         shellVariables = []
-        takenNames = set()
         for settings in self.settings:
-            variables = settings.shellVariables
-            if variables is not None:
-                names = [ variable[0] for variable in variables if variable[0].startswith("TM_") ]
-                if not any([ name in takenNames for name in names ]):
-                    shellVariables.extend(settings.preference.variables().items())
-                    shellVariables.extend(variables)
-                    takenNames.update(names)
+            shellVariables.extend(settings.shellVariables())
         return shellVariables
 
 class Properties(object):
