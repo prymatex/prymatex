@@ -125,5 +125,4 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
             if end - start >= self.editor.wordLengthToComplete:
                 self.completer.setCompletionPrefix(alreadyTyped)
-                print("Sigo funcionando")
                 self.completer.runCompleter(self.editor.cursorRect())

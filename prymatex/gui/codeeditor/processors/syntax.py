@@ -43,7 +43,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         syntax = self.editor.application().supportManager.getBundleItem(bundleItem.uuid)
 
         # ------------ Previous syntax
-        if self.bundleItem is not None:
+        if self.isReady():
             self.endExecution(self.bundleItem)
 
         CodeEditorBaseProcessor.beginExecution(self, syntax)
@@ -61,7 +61,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.state = user_data.state
         if user_data.revision in self.stacks:
             self.stack, self.scope = self.stacks[user_data.revision]
-        elif self.bundleItem is not None:
+        elif self.isReady():
             self.stack, self.scope = ([(self.bundleItem.grammar, None)], Scope(self.bundleItem.scopeName))
 
     def save(self, user_data):
@@ -80,9 +80,9 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         return block.userData() is not None and block.userData().revision == self.buildRevision(block)
             
     def blockUserData(self, block):
-        if self.bundleItem is None:
+        if not self.isReady():
             return self.empty_user_data
-        
+
         # ------ Restore State
         self.restore(block.previous().userData() or self.empty_user_data)
                 

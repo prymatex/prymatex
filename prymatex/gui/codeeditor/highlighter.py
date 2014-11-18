@@ -43,9 +43,8 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def on_thread_highlightingReady(self, user_datas):
         self._user_datas = user_datas
-        if self.themeProcessor.isReady():
-            self.setDocument(self.editor.document())
-            self.editor.highlightReady.emit()
+        self.setDocument(self.editor.document())
+        self.editor.highlightReady.emit()
 
     def stop(self):
         self.setDocument(None)
@@ -54,12 +53,11 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.thread = None
 
     def start(self, callback=None):
-        if self.syntaxProcessor.isReady():
-            self.thread = HighlighterThread(self.editor.document(), self.syntaxProcessor)
-            self.thread.highlightReady.connect(self.on_thread_highlightingReady)
-            self.thread.started.connect(self.editor.aboutToHighlightChange.emit)
-            self.thread.finished.connect(self.editor.highlightChanged.emit)
-            self.thread.start()
+        self.thread = HighlighterThread(self.editor.document(), self.syntaxProcessor)
+        self.thread.highlightReady.connect(self.on_thread_highlightingReady)
+        self.thread.started.connect(self.editor.aboutToHighlightChange.emit)
+        self.thread.finished.connect(self.editor.highlightChanged.emit)
+        self.thread.start()
 
     def _process(self, block, user_data):
         block.setUserData(user_data)
