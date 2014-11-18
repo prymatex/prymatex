@@ -156,6 +156,21 @@ class ContextSettings(object):
     includeDirectoriesInBrowser = property(lambda self: self._first("includeDirectoriesInBrowser"))
     includeFilesInFileChooser = property(lambda self: self._first("includeFilesInFileChooser"))
 
+    # Shell Variables
+    @property
+    def shellVariables(self):
+        shellVariables = []
+        takenNames = set()
+        for settings in self.settings:
+            variables = settings.shellVariables
+            if variables is not None:
+                names = [ variable[0] for variable in variables if variable[0].startswith("TM_") ]
+                if not any([ name in takenNames for name in names ]):
+                    shellVariables.extend(settings.preference.variables().items())
+                    shellVariables.extend(variables)
+                    takenNames.update(names)
+        return shellVariables
+
 class Properties(object):
     def __init__(self):
         self.settings = []

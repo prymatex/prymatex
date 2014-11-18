@@ -13,11 +13,11 @@ class CodeEditorBaseProcessor(QtCore.QObject):
         self.textCursor = None
         self.bundleItem = None
 
-    def ready(self):
+    def isReady(self):
         return self.bundleItem is not None
 
     def currentType(self):
-        return self.ready() and self.bundleItem.type() or ""
+        return self.isReady() and self.bundleItem.type() or ""
 
     def configure(self, **kwargs):
         self.textCursor = kwargs.get("textCursor", 

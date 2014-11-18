@@ -97,8 +97,9 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
         if event.text():
             alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
             self.completer.setCompletionPrefix(alreadyTyped)
-            if self.completer.setCurrentRow(0) or self.completer.trySetNextModel():
-                self.completer.complete(self.editor.cursorRect())
+            if not (self.completer.setCurrentRow(0) or self.completer.trySetNextModel()):
+                self.completer.hide()
+                #self.completer.complete(self.editor.cursorRect())
 
     def __next_model(self, event):
         if event.modifiers() & QtCore.Qt.ControlModifier and self.completer.trySetNextModel():
@@ -124,4 +125,5 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
             if end - start >= self.editor.wordLengthToComplete:
                 self.completer.setCompletionPrefix(alreadyTyped)
+                print("Sigo funcionando")
                 self.completer.runCompleter(self.editor.cursorRect())
