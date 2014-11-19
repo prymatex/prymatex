@@ -18,7 +18,6 @@ from functools import reduce
 class TextEditWidget(QtWidgets.QPlainTextEdit):
     #------ Signals
     extraSelectionChanged = QtCore.Signal()
-    fontChanged = QtCore.Signal()
 
     def __init__(self, **kwargs):
         super(TextEditWidget, self).__init__(**kwargs)
@@ -57,11 +56,6 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             event.ignore()
         else:
             super(TextEditWidget, self).wheelEvent(event)
-
-    # OVERRIDE: QPlainTextEdit.setFont()
-    def setFont(self, font):
-        QtWidgets.QPlainTextEdit.setFont(self, font)
-        self.fontChanged.emit()
 
     #------ Retrieve text
     def currentWord(self):

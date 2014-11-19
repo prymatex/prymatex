@@ -166,9 +166,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             editor.showMessage("Syntax changed to <b>%s</b>" % editor.syntax().name)
         )
 
-        # TODO Algo mejor para acomodar el ancho del tabulador
-        self.fontChanged.connect(lambda ed = self: ed.setTabStopWidth(ed.tabWidth * ed.characterWidth()))
-
     def window(self):
         parent = self.parent()
         while parent and not isinstance(parent, QtWidgets.QMainWindow):
@@ -569,6 +566,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # OVERRIDE: TextEditWidget.setFont()
     def setFont(self, font):
         super(CodeEditor, self).setFont(font)
+        self.setTabStopWidth(self.tabWidth * self.characterWidth())
         for component in self.components():
             component.setFont(font)
 
