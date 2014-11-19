@@ -67,12 +67,15 @@ class Settings(object):
         self.selector = selector
         self.section = section
         self.configs = configs
-        
+    
+    def _remove_quotes(self, value):
+        return value[1:-1] if value[0] in ("'", '"') and value[0] == value[-1] else value
+
     def get_str(self, key, default=None):
         value = default
         for config in self.configs[::-1]:
             value = config.get(self.section, key, fallback=value, raw=True)
-        return value
+        return self._remove_quotes(value)
 
     def get_bool(self, key, default=None):
         value = default
@@ -91,9 +94,7 @@ class Settings(object):
         for config in self.configs[::-1]:
             for name in config[self.section]:
                 if name.isupper():
-                    value = config[self.section][name]
-                    if value[0] in ("'", '"') and value[0] == value[-1]:
-                        value = value[1:-1]
+                    value = self._remove_quotes(config[self.section][name])
                     variables.append((name, value))
         return variables
 
