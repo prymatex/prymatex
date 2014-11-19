@@ -69,7 +69,7 @@ class Settings(object):
         self.configs = configs
     
     def _remove_quotes(self, value):
-        return value[1:-1] if value[0] in ("'", '"') and value[0] == value[-1] else value
+        return value[1:-1] if value and value[0] in ("'", '"') and value[0] == value[-1] else value
 
     def get_str(self, key, default=None):
         value = default

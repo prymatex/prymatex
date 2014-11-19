@@ -27,13 +27,13 @@ class FoldingListModel(QtCore.QAbstractListModel):
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
 
         #Connects
-        self.editor.highlighter().aboutToHighlightChange.connect(
+        self.editor.highlighter().aboutToChange.connect(
             self.on_editor_aboutToHighlightChange
         )
-        self.editor.highlighter().highlightReady.connect(
+        self.editor.highlighter().ready.connect(
             self.on_editor_highlightingReady
         )
-        self.editor.highlighter().highlightChanged.connect(
+        self.editor.highlighter().changed.connect(
             self.on_editor_highlightChanged
         )
 
@@ -323,13 +323,13 @@ class SymbolListModel(QtCore.QAbstractListModel):
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
 
         #Connects
-        self.editor.highlighter().aboutToHighlightChange.connect(
+        self.editor.highlighter().aboutToChange.connect(
             self.on_editor_aboutToHighlightChange
         )
-        self.editor.highlighter().highlightReady.connect(
+        self.editor.highlighter().ready.connect(
             self.on_editor_highlightingReady
         )
-        self.editor.highlighter().highlightChanged.connect(
+        self.editor.highlighter().changed.connect(
             self.on_editor_highlightChanged
         )
      

@@ -8,7 +8,7 @@ from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserData
 from prymatex.qt import QtCore, QtGui, QtWidgets, helpers
 
 class HighlighterThread(QtCore.QThread):
-    highlightReady = QtCore.Signal(dict)
+    ready = QtCore.Signal(dict)
     def __init__(self, document, processor):
         super(HighlighterThread, self).__init__(document)
         self._document = document
@@ -29,12 +29,12 @@ class HighlighterThread(QtCore.QThread):
             self.usleep(1)
             user_datas[block.blockNumber()] = self._processor.blockUserData(block)
             block = block.next()
-        self.highlightReady.emit(user_datas)
+        self.ready.emit(user_datas)
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
-    aboutToHighlightChange = QtCore.Signal()  # When the highlight go to change allways triggered
-    highlightReady = QtCore.Signal()       # When the highlight is ready not allways triggered
-    highlightChanged = QtCore.Signal()        # On the highlight changed allways triggered
+    aboutToChange = QtCore.Signal()  # When the highlight go to change allways triggered
+    ready = QtCore.Signal()       # When the highlight is ready not allways triggered
+    changed = QtCore.Signal()        # On the highlight changed allways triggered
 
     def __init__(self, editor):
         super(CodeEditorSyntaxHighlighter, self).__init__(editor)
@@ -45,10 +45,10 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.thread = None
         self._user_datas = {}
 
-    def on_thread_highlightingReady(self, user_datas):
+    def on_thread_ready(self, user_datas):
         self._user_datas = user_datas
         self.setDocument(self.editor.document())
-        self.highlightReady.emit()
+        self.ready.emit()
 
     def stop(self):
         self.setDocument(None)
@@ -58,9 +58,9 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def start(self, callback=None):
         self.thread = HighlighterThread(self.editor.document(), self.syntaxProcessor)
-        self.thread.highlightReady.connect(self.on_thread_highlightingReady)
-        self.thread.started.connect(self.aboutToHighlightChange.emit)
-        self.thread.finished.connect(self.highlightChanged.emit)
+        self.thread.ready.connect(self.on_thread_ready)
+        self.thread.started.connect(self.aboutToChange.emit)
+        self.thread.finished.connect(self.changed.emit)
         self.thread.start()
 
     def _process(self, block, user_data):

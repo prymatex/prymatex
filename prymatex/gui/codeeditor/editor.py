@@ -159,6 +159,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.syntaxChanged.connect(lambda editor=self: 
             editor.showMessage("Syntax changed to <b>%s</b>" % editor.syntax().name)
         )
+        
+        self.syntaxHighlighter.ready.connect(self.on_highlighter_ready)
 
     def highlighter(self):
         return self.syntaxHighlighter
@@ -172,12 +174,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def initialize(self, **kwargs):
         super(CodeEditor, self).initialize(**kwargs)
         
-        self._apply_properties()
         # Get dialogs
         self.selectorDialog = self.window().findChild(QtWidgets.QDialog, "SelectorDialog")
         self.browserDock = self.window().findChild(QtWidgets.QDockWidget, "BrowserDock")
 
-    def _apply_properties(self):
+    def on_highlighter_ready(self):
         properties = self.propertiesSettings()
         if properties.lineEndings:
             self.setEolChars(properties.lineEndings)
@@ -316,7 +317,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         syntax = self.application().supportManager.findSyntaxByFileType(extension)
         if syntax is not None:
             self.insertBundleItem(syntax)
-        self._apply_properties()
         self.filePathChanged.emit(filePath)
 
     def title(self):
