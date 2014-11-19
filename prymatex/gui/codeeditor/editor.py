@@ -116,17 +116,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         # Modes
         self.__current_mode_index = self.DEFAULT_MODE_INDEX
         self.codeEditorModes = []
-        
-        # Sidebars
-        self.leftBar = CodeEditorSideBar(self)
-        self.rightBar = CodeEditorSideBar(self)
-
-        #Models
-        self.bookmarkListModel = BookmarkListModel(self)
-        self.symbolListModel = SymbolListModel(self)
-        self.foldingListModel = FoldingListModel(self)
-        self.bundleItemSelectableModel = bundleItemSelectableModelFactory(self)
-        self.symbolSelectableModel = symbolSelectableModelFactory(self)
 
         # Processors
         self.processors = [
@@ -139,6 +128,17 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # Highlighter
         self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
+
+        # Sidebars
+        self.leftBar = CodeEditorSideBar(self)
+        self.rightBar = CodeEditorSideBar(self)
+
+        #Models
+        self.bookmarkListModel = BookmarkListModel(self)
+        self.symbolListModel = SymbolListModel(self)
+        self.foldingListModel = FoldingListModel(self)
+        self.bundleItemSelectableModel = bundleItemSelectableModelFactory(self)
+        self.symbolSelectableModel = symbolSelectableModelFactory(self)
 
         # Custom context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -159,6 +159,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.syntaxChanged.connect(lambda editor=self: 
             editor.showMessage("Syntax changed to <b>%s</b>" % editor.syntax().name)
         )
+
+    def highlighter(self):
+        return self.syntaxHighlighter
 
     def window(self):
         parent = self.parent()
