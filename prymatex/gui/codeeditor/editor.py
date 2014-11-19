@@ -45,10 +45,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     endMode = QtCore.Signal(object)
     aboutToClose = QtCore.Signal()
     newLocationMemento = QtCore.Signal(object)
-
-    aboutToHighlightChange = QtCore.Signal()  # When the highlight go to change allways triggered
-    highlightReady = QtCore.Signal()       # When the highlight is ready not allways triggered
-    highlightChanged = QtCore.Signal()        # On the highlight changed allways triggered
     
     # ------------------ Flags
     ShowTabsAndSpaces     = 1<<0
@@ -111,15 +107,20 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # --------------------- init
     def __init__(self, **kwargs):
         super(CodeEditor, self).__init__(**kwargs)
-        # -------------------- Addons containers
-        # Sidebars
-        self.leftBar = CodeEditorSideBar(self)
-        self.rightBar = CodeEditorSideBar(self)
+        
+        # By default
+        self.showMarginLine = True
+        self.showIndentGuide = True
+        self.showHighlightCurrentLine = True
 
         # Modes
         self.__current_mode_index = self.DEFAULT_MODE_INDEX
         self.codeEditorModes = []
         
+        # Sidebars
+        self.leftBar = CodeEditorSideBar(self)
+        self.rightBar = CodeEditorSideBar(self)
+
         #Models
         self.bookmarkListModel = BookmarkListModel(self)
         self.symbolListModel = SymbolListModel(self)
@@ -136,18 +137,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             CodeEditorThemeProcessor(self)
         ]
 
-        #Highlighter
+        # Highlighter
         self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
 
-        # By default
-        self.showMarginLine = True
-        self.showIndentGuide = True
-        self.showHighlightCurrentLine = True
-
-        # Connect context menu
+        # Custom context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        
-        # Connect Signals
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
 
         # Sidebars signals

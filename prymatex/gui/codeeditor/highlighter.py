@@ -32,6 +32,10 @@ class HighlighterThread(QtCore.QThread):
         self.highlightReady.emit(user_datas)
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
+    aboutToHighlightChange = QtCore.Signal()  # When the highlight go to change allways triggered
+    highlightReady = QtCore.Signal()       # When the highlight is ready not allways triggered
+    highlightChanged = QtCore.Signal()        # On the highlight changed allways triggered
+
     def __init__(self, editor):
         super(CodeEditorSyntaxHighlighter, self).__init__(editor)
         self.editor = editor
@@ -44,7 +48,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def on_thread_highlightingReady(self, user_datas):
         self._user_datas = user_datas
         self.setDocument(self.editor.document())
-        self.editor.highlightReady.emit()
+        self.highlightReady.emit()
 
     def stop(self):
         self.setDocument(None)
@@ -55,8 +59,8 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def start(self, callback=None):
         self.thread = HighlighterThread(self.editor.document(), self.syntaxProcessor)
         self.thread.highlightReady.connect(self.on_thread_highlightingReady)
-        self.thread.started.connect(self.editor.aboutToHighlightChange.emit)
-        self.thread.finished.connect(self.editor.highlightChanged.emit)
+        self.thread.started.connect(self.aboutToHighlightChange.emit)
+        self.thread.finished.connect(self.highlightChanged.emit)
         self.thread.start()
 
     def _process(self, block, user_data):
