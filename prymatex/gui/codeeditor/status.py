@@ -185,7 +185,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtWidgets.QWidget
     def on_editor_cursorPositionChanged(self):
         cursor = self.currentEditor.textCursor()
         self.labelPosition.setText("Line %d, Column %d, Selection %d" % (
-            cursor.blockNumber() + 1, cursor.columnNumber() + 1, 
+            cursor.blockNumber() + 1, cursor.positionInBlock() + 1, 
             cursor.selectionEnd() - cursor.selectionStart()))
         #Set index of current symbol
         self.comboBoxSymbols.setCurrentIndex(self.comboBoxSymbols.model().findSymbolIndex(cursor))
@@ -207,7 +207,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtWidgets.QWidget
         menu.popup(self.labelContent.mapToGlobal(point))
 
     def on_editor_textChanged(self):
-        eol = [ eol for eol in text.EOLS if eol[0] == self.currentEditor.lineSeparator() ]
+        eol = [ eol for eol in text.EOLS if eol[0] == self.currentEditor.eolChars() ]
         self.labelContent.setText("%s, Ending %s, Encoding %s" % (
            self.currentEditor.indentUsingSpaces and "Spaces %d" % self.currentEditor.indentationWidth or "Tab width %d" % self.currentEditor.tabWidth,
            eol and eol[0][2] or "?",

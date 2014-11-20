@@ -361,9 +361,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def defaultMode(self):
         return self.codeEditorModes[self.DEFAULT_MODE_INDEX]
 
-    def tabKeyBehavior(self):
-        return ' ' * self.indentationWidth if self.indentUsingSpaces else '\t'
-
     def blockIndentation(self, block):
         return self.blockUserData(block).indentation
 
@@ -658,7 +655,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # --------------- Key press pre and post
     def trySyntaxByText(self, cursor):
-        text = cursor.block().text()[:cursor.columnNumber()]
+        text = cursor.block().text()[:cursor.positionInBlock()]
         syntax = self.application().supportManager.findSyntaxByFirstLine(text)
         if syntax is not None:
             self.insertBundleItem(syntax)
@@ -951,38 +948,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             block = self.findNoBlankBlock(block, direction)
         return block
 
-    def indentBlocks(self, cursor = None):
-        """Indents text, block selections."""
-        cursor = QtGui.QTextCursor(cursor or self.textCursor())
-        start, end = self.selectionBlockStartEnd(cursor)
-        cursor.beginEditBlock()
-        while True:
-            cursor.setPosition(start.position())
-            cursor.insertText(self.tabKeyBehavior())
-            if start == end:
-                break
-            start = start.next()
-        cursor.endEditBlock()
-
-    def unindentBlocks(self, cursor = None):
-        cursor = QtGui.QTextCursor(cursor or self.textCursor())
-        start, end = self.selectionBlockStartEnd(cursor)
-        cursor.beginEditBlock()
-        while True:
-            indentation_len = len(self.blockIndentation(start))
-            if self.indentUsingSpaces:
-                counter = self.tabWidth if indentation_len > self.tabWidth else indentation_len
-            else:
-                counter = 1 if indentation_len else 0
-            if counter > 0:
-                cursor.setPosition(start.position())
-                for _ in range(counter):
-                    cursor.deleteChar()
-            if start == end:
-                break
-            start = start.next()
-        cursor.endEditBlock()
-
     # --------------- Menus
     # Flat Popup Menu
     def showFlatPopupMenu(self, menuItems, callback, cursorPosition = True):
@@ -1250,7 +1215,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                      [{'text': '%s' % name,
                      'checkable': True,
                      'triggered': lambda ed, checked, eol_chars = eol_chars: ed.setEolChars(eol_chars),
-                     'testChecked': lambda ed, eol_chars = eol_chars: ed.lineSeparator() == eol_chars
+                     'testChecked': lambda ed, eol_chars = eol_chars: ed.eolChars() == eol_chars
                      } for eol_chars, _, name in text.EOLS])
                 ]},
                 {'text': 'Encoding',

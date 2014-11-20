@@ -57,7 +57,7 @@ class FoldingListModel(QtCore.QAbstractListModel):
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole ]:
             block = cursor.block()
             return "L%d, C%d - %s" % (block.blockNumber() + 1,
-                cursor.columnNumber(), cursor.hasSelection() and cursor.selectedText() or block.text().strip())
+                cursor.positionInBlock(), cursor.hasSelection() and cursor.selectedText() or block.text().strip())
         elif role == QtCore.Qt.DecorationRole:
             return self.foldingellipsisImage
 
@@ -248,7 +248,7 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole ]:
             block = cursor.block()
             return "L%d, C%d - %s" % (block.blockNumber() + 1,
-                cursor.columnNumber(), cursor.hasSelection() and cursor.selectedText() or block.text().strip())
+                cursor.positionInBlock(), cursor.hasSelection() and cursor.selectedText() or block.text().strip())
         elif role == QtCore.Qt.DecorationRole:
             return self.icon_bookmark
     

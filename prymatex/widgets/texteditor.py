@@ -24,7 +24,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     FONT_MAX_SIZE = 32
     FONT_MIN_SIZE = 6
     CHARACTER = "#"
-
+    
     def __init__(self, **kwargs):
         super(TextEditWidget, self).__init__(**kwargs)
 
@@ -34,7 +34,9 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         self.__scopedExtraSelections = {}
         self.__updateExtraSelectionsOrder = []
         self.__textCharFormat = {}
-        self.eol_chars = None
+        self.eol_chars = os.linesep
+        self.soft_tabs = False
+        self.tab_size = None
 
     #------ EOL characters
     def setEolChars(self, eol_chars):
@@ -44,9 +46,74 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             self.setModified(True)
         self.textChanged.emit()
 
-    def lineSeparator(self):
-        """Return line separator based on current EOL mode"""
-        return self.eol_chars if self.eol_chars is not None else os.linesep
+    def eolChars(self):
+        return self.eol_chars
+
+    #------ Soft Tabs
+    def setSoftTab(self, soft):
+        self.soft_tabs = soft
+    
+    def softTab(self):
+        return self.soft_tabs
+        
+    #------ Tab Size
+    def setTabSize(self, size):
+        self.tab_size = size
+    
+    def tabSize(self):
+        return self.tab_size
+
+    def tabKeyBehavior(self):
+        return ' ' * self.tabSize() if self.softTab() else '\t'
+
+    #--------- Indentation
+    def indentation(self, cursor = None, direction = "left"):
+        cursor =  cursor or self.textCursor()
+        sourceText = cursor.block().text()
+        if direction == "left":
+            sourceText = sourceText[:cursor.columnNumber()]
+        elif direction == "right":
+            sourceText = sourceText[cursor.columnNumber():]
+        return text.white_space(sourceText)
+
+    def indent(self, cursor = None):
+        """Indents text, block selections."""
+        cursor = QtGui.QTextCursor(cursor or self.textCursor())
+        start, end = self.selectionBlockStartEnd(cursor)
+        cursor.beginEditBlock()
+        block = start
+        while True:
+            cursor = self.newCursorAtPosition(block.position())
+            cursor.insertText(self.tabKeyBehavior())
+            if block == end:
+                break
+            block = block.next()
+        cursor.endEditBlock()
+
+    def unindent(self, cursor = None):
+        cursor = QtGui.QTextCursor(cursor or self.textCursor())
+        start, end = self.selectionBlockStartEnd(cursor)
+        cursor.beginEditBlock()
+        tab_behavior = self.tabKeyBehavior()
+        indent_len = len(self.tabKeyBehavior())
+        block = start
+        while True:
+            cursor = self.newCursorAtPosition(block.position(), block.position() + indent_len)
+            if cursor.selectedText() == tab_behavior:
+                cursor.removeSelectedText()
+            if block == end:
+                break
+            block = block.next()
+        cursor.endEditBlock()
+
+    # OVERRIDE: QPlainTextEdit.keyPressEvent()
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Tab:
+            self.indent()
+        elif event.key() == QtCore.Qt.Key_Backtab:
+            self.unindent()
+        else:
+            super(TextEditWidget, self).keyPressEvent(event)
 
     # OVERRIDE: QPlainTextEdit.wheelEvent()
     def wheelEvent(self, event):
@@ -132,15 +199,6 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
                 return line[start - blockPosition : end - blockPosition], start, end
         return None, cursor.position(), cursor.position()
 
-    def indentation(self, cursor = None, direction = "left"):
-        cursor =  cursor or self.textCursor()
-        sourceText = cursor.block().text()
-        if direction == "left":
-            sourceText = sourceText[:cursor.columnNumber()]
-        elif direction == "right":
-            sourceText = sourceText[cursor.columnNumber():]
-        return text.white_space(sourceText)
-        
     #------ Retrieve cursors and blocks
     def newCursorAtPosition(self, position, anchor = None):
         cursor = QtGui.QTextCursor(self.document())
@@ -447,16 +505,16 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     def toPlainTextWithEol(self):
         """Same as 'toPlainText', replace '\n' by correct end-of-line characters"""
         plainText = QtWidgets.QPlainTextEdit.toPlainText(self)
-        return plainText.replace("\n", self.lineSeparator())
+        return plainText.replace("\n", self.eolChars())
 
     def selectedTextWithEol(self, cursor = None):
         """
         Return text selected text cursor
         Replace the unicode line separator character \u2029 by
-        the line separator characters returned by lineSeparator
+        the line separator characters returned by eolChars
         """
         cursor = cursor or self.textCursor()
-        return cursor.selectedText().replace("\u2029", self.lineSeparator())
+        return cursor.selectedText().replace("\u2029", self.eolChars())
 
     def selectedText(self, cursor = None):
         """

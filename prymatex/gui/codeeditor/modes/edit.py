@@ -16,9 +16,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         self.registerKeyPressHandler(QtCore.Qt.Key_Return, self.__first_line_syntax)
         self.registerKeyPressHandler(QtCore.Qt.Key_Return, self.__insert_new_line)
         self.registerKeyPressHandler(QtCore.Qt.Key_Tab, self.__insert_tab_bundle_item)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Tab, self.__indent_tab_behavior)
         self.registerKeyPressHandler(QtCore.Qt.Key_Home, self.__move_cursor_to_line_start)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Backtab, self.__unindent)
         self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__unindent_backward_tab_behavior)
         self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__remove_backward_braces)
         self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__unindent_forward_tab_behavior)
@@ -48,7 +46,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
     def __insert_tab_bundle_item(self, event):
         cursor = self.editor.textCursor()
         if not cursor.hasSelection():
-            trigger = self.application().supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
+            trigger = self.application().supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.positionInBlock())
             if trigger:
                 triggerCursor = self.editor.newCursorAtPosition(
                     cursor.position(), cursor.position() - len(trigger))
@@ -58,14 +56,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                 self.editor.insertBundleItem(items, textCursor = triggerCursor)
                 return bool(items)
 
-    def __indent_tab_behavior(self, event):
-        start, end = self.editor.selectionBlockStartEnd()
-        if start != end:
-            self.editor.indentBlocks()
-        else:
-            self.editor.textCursor().insertText(self.editor.tabKeyBehavior())
-        return True
-    
     def __move_cursor_to_line_start(self, event):
         cursor = self.editor.textCursor()
         #Solo si el cursor no esta al final de la indentacion
@@ -75,17 +65,13 @@ class CodeEditorEditMode(CodeEditorBaseMode):
             cursor.setPosition(newPosition, event.modifiers() == QtCore.Qt.ShiftModifier and QtGui.QTextCursor.KeepAnchor or QtGui.QTextCursor.MoveAnchor)
             self.editor.setTextCursor(cursor)
             return True
-
-    def __unindent(self, event):
-        self.editor.unindentBlocks()
-        return True
         
     def __unindent_backward_tab_behavior(self, event):
         cursor = self.editor.textCursor()
         if not cursor.hasSelection():
             lineText = cursor.block().text()
-            if lineText[:cursor.columnNumber()].endswith(self.editor.tabKeyBehavior()):
-                counter = cursor.columnNumber() % self.editor.tabWidth or self.editor.tabWidth
+            if lineText[:cursor.positionInBlock()].endswith(self.editor.tabKeyBehavior()):
+                counter = cursor.positionInBlock() % self.editor.tabWidth or self.editor.tabWidth
                 self.editor.newCursorAtPosition(cursor.position(), cursor.position() - counter).removeSelectedText()
                 return True
         
@@ -104,8 +90,8 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         cursor = self.editor.textCursor()
         if not cursor.hasSelection():
             lineText = cursor.block().text()
-            if lineText[cursor.columnNumber():].startswith(self.editor.tabKeyBehavior()):
-                counter = cursor.columnNumber() % self.editor.tabWidth or self.editor.tabWidth
+            if lineText[cursor.positionInBlock():].startswith(self.editor.tabKeyBehavior()):
+                counter = cursor.positionInBlock() % self.editor.tabWidth or self.editor.tabWidth
                 self.editor.newCursorAtPosition(cursor.position(), cursor.position() + counter).removeSelectedText()
                 return True
         
