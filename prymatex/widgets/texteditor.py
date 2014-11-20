@@ -19,6 +19,12 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     #------ Signals
     extraSelectionChanged = QtCore.Signal()
 
+    #------ Editor constants
+    EOL_CHARS = [ item[0] for item in text.EOLS ]
+    FONT_MAX_SIZE = 32
+    FONT_MIN_SIZE = 6
+    CHARACTER = "#"
+
     def __init__(self, **kwargs):
         super(TextEditWidget, self).__init__(**kwargs)
 
@@ -33,7 +39,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     #------ EOL characters
     def setEolChars(self, eol_chars):
         """Set widget end-of-line (EOL) characters from chars_or_text"""
-        if self.eol_chars != eol_chars:
+        if eol_chars in self.EOL_CHARS and self.eol_chars != eol_chars:
             self.eol_chars = eol_chars
             self.setModified(True)
         self.textChanged.emit()
@@ -493,8 +499,6 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         self.ensureCursorVisible()
 
     #------ Text Zoom
-    FONT_MAX_SIZE = 32
-    FONT_MIN_SIZE = 6
     def zoomIn(self):
         font = self.font()
         size = font.pointSize()
@@ -514,7 +518,6 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         self.setFont(font)
 
     #------ Character width
-    CHARACTER = "#"
     def characterWidth(self):
         return self.fontMetrics().width(self.CHARACTER)
 

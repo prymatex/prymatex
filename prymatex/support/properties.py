@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 #-*- encoding: utf-8 -*-
+import codecs
 
 from prymatex.qt import QtCore, QtGui
 
@@ -125,7 +126,10 @@ class ContextSettings(object):
     # * `useBOM` — Used during save to add BOM (for those who insist on putting BOMs
     # in their UTF-8 files).
     useBOM = property(lambda self: self._first("useBOM"))
-    lineEndings = property(lambda self: self._first("lineEndings"))
+    @property
+    def lineEndings(self):
+        value = self._first("lineEndings")
+        return value and codecs.getdecoder("unicode_escape")(value)[0]
 
     ## Display
     # * `theme` — UUID of theme, presently unused but will be back, and should allow

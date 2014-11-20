@@ -58,10 +58,10 @@ class unaccented_map(dict):
         0xf9: "u", # ù LATIN SMALL LETTER U WITH GRAVE
         0xfa: "u", # ú LATIN SMALL LETTER U WITH ACUTE
  
-        0x2018: "'", # ‘ LEFT SINGLE QUOTATION MARK
-        0x2019: "'", # ’ RIGHT SINGLE QUOTATION MARK
-        0x201c: '"', # “ LEFT DOUBLE QUOTATION MARK
-        0x201d: '"', # ” RIGHT DOUBLE QUOTATION MARK
+        0x2018: "'", #  LEFT SINGLE QUOTATION MARK
+        0x2019: "'", #  RIGHT SINGLE QUOTATION MARK
+        0x201c: '"', #  LEFT DOUBLE QUOTATION MARK
+        0x201d: '"', #  RIGHT DOUBLE QUOTATION MARK
  
         }
  
@@ -147,6 +147,13 @@ def get_eol_chars_from_os_name(os_name):
     """Return EOL characters from OS name"""
     for eol_chars, name, _ in EOLS:
         if name == os_name:
+            return eol_chars
+
+def get_eol_chars_from_description(desc):
+    """Return EOL characters from OS name"""
+    desc = desc.lower()
+    for eol_chars, _, description in EOLS:
+        if description.lower().find(desc) > -1:
             return eol_chars
 
 def has_mixed_eol_chars(text):
