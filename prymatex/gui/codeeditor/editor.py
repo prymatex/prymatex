@@ -69,6 +69,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     adjustIndentationOnPaste = ConfigurableItem(default = False)
     encoding = ConfigurableItem(default = 'utf_8')
 
+    @ConfigurableItem(default = True)
+    def indentUsingSpaces(self, soft):
+    	self.setSoftTab(soft)
+    	 
     @ConfigurableItem(default = 4)
     def indentationWidth(self, size):
         self.repaint()
