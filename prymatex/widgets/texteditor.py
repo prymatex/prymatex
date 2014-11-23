@@ -36,7 +36,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         self.__textCharFormat = {}
         self.eol_chars = os.linesep
         self.soft_tabs = False
-        self.tab_size = None
+        self.tab_size = 2
 
     #------ EOL characters
     def setEolChars(self, eol_chars):
