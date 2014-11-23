@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
 import re
 import string
 import unicodedata
@@ -136,6 +137,7 @@ def get_eol_chars(text):
     for eol_chars, _os_name, _ in EOLS:
         if text.find(eol_chars) > -1:
             return eol_chars
+    return os.linesep
 
 def get_os_name_from_eol_chars(eol_chars):
     """Return OS name from EOL characters"""

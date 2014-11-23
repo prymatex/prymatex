@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/configure/edit.ui'
+# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/configure/edit.ui'
 #
-# Created: Tue Nov  4 08:31:38 2014
-#      by: PyQt5 UI code generator 5.2.1
+# Created: Sun Nov 23 18:35:04 2014
+#      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Edit(object):
     def setupUi(self, Edit):
         Edit.setObjectName("Edit")
-        Edit.resize(385, 375)
+        Edit.resize(389, 376)
         self.verticalLayout = QtWidgets.QVBoxLayout(Edit)
         self.verticalLayout.setSpacing(6)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
@@ -44,24 +44,10 @@ class Ui_Edit(object):
         self.radioButtonSpaces = QtWidgets.QRadioButton(self.groupBox_5)
         self.radioButtonSpaces.setObjectName("radioButtonSpaces")
         self.formLayout_4.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.radioButtonSpaces)
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem)
-        self.label_2 = QtWidgets.QLabel(self.groupBox_5)
-        self.label_2.setObjectName("label_2")
-        self.horizontalLayout.addWidget(self.label_2)
-        self.spinBoxTabWidth = QtWidgets.QSpinBox(self.groupBox_5)
-        self.spinBoxTabWidth.setMinimum(2)
-        self.spinBoxTabWidth.setMaximum(20)
-        self.spinBoxTabWidth.setProperty("value", 4)
-        self.spinBoxTabWidth.setObjectName("spinBoxTabWidth")
-        self.horizontalLayout.addWidget(self.spinBoxTabWidth)
-        self.formLayout_4.setLayout(0, QtWidgets.QFormLayout.FieldRole, self.horizontalLayout)
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_3.addItem(spacerItem1)
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem)
         self.label_4 = QtWidgets.QLabel(self.groupBox_5)
         self.label_4.setObjectName("label_4")
         self.horizontalLayout_3.addWidget(self.label_4)
@@ -106,8 +92,8 @@ class Ui_Edit(object):
         self.spinBoxWordLengthToComplete.setObjectName("spinBoxWordLengthToComplete")
         self.formLayout_3.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.spinBoxWordLengthToComplete)
         self.verticalLayout.addWidget(self.groupBox_4)
-        spacerItem2 = QtWidgets.QSpacerItem(17, 50, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout.addItem(spacerItem2)
+        spacerItem1 = QtWidgets.QSpacerItem(17, 50, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout.addItem(spacerItem1)
 
         self.retranslateUi(Edit)
         QtCore.QMetaObject.connectSlotsByName(Edit)
@@ -121,7 +107,6 @@ class Ui_Edit(object):
         self.groupBox_5.setTitle(_translate("Edit", "Indentation"))
         self.radioButtonTabulators.setText(_translate("Edit", "Tabulators"))
         self.radioButtonSpaces.setText(_translate("Edit", "Spaces"))
-        self.label_2.setText(_translate("Edit", "Tab width:"))
         self.label_4.setText(_translate("Edit", "Indentation width:"))
         self.checkBoxAdjustIndentationOnPaste.setText(_translate("Edit", "Adjust indentation of code pasted from the clipboard"))
         self.groupBox_3.setTitle(_translate("Edit", "Text Cursor"))

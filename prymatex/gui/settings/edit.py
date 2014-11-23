@@ -18,7 +18,6 @@ class EditSettingsWidget(SettingsTreeNode, Ui_Edit, QtWidgets.QWidget):
     def loadSettings(self):
         super(EditSettingsWidget, self).loadSettings()
 
-        self.spinBoxTabWidth.setValue(self.settings.value("tabWidth"))
         self.spinBoxIndentationWidth.setValue(self.settings.value("indentationWidth"))
         self.spinBoxWordLengthToComplete.setValue(self.settings.value("wordLengthToComplete"))
 
@@ -53,10 +52,6 @@ class EditSettingsWidget(SettingsTreeNode, Ui_Edit, QtWidgets.QWidget):
     @QtCore.Slot(bool)
     def on_checkBoxAdjustIndentationOnPaste_clicked(self, checked):
         self.settings.setValue('adjustIndentationOnPaste', self.checkBoxAdjustIndentationOnPaste.isChecked())
-
-    @QtCore.Slot(int)
-    def on_spinBoxTabWidth_valueChanged(self, value):
-        self.settings.setValue('tabWidth', value)
 
     @QtCore.Slot(int)
     def on_spinBoxIndentationWidth_valueChanged(self, value):

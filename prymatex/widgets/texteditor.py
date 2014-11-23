@@ -30,10 +30,11 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
 
         # TODO: Buscar sobre este atributo en la documnetación
         #self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-
+        
         self.__scopedExtraSelections = {}
         self.__updateExtraSelectionsOrder = []
         self.__textCharFormat = {}
+        # Defaults
         self.eol_chars = os.linesep
         self.soft_tabs = False
         self.tab_size = 2
@@ -41,6 +42,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     #------ EOL characters
     def setEolChars(self, eol_chars):
         """Set widget end-of-line (EOL) characters from chars_or_text"""
+        
         if eol_chars in self.EOL_CHARS and self.eol_chars != eol_chars:
             self.eol_chars = eol_chars
             self.setModified(True)
@@ -59,6 +61,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     #------ Tab Size
     def setTabSize(self, size):
         self.tab_size = size
+        self.setTabStopWidth(self.tab_size * self.characterWidth())
     
     def tabSize(self):
         return self.tab_size

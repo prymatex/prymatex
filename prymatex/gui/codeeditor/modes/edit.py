@@ -71,8 +71,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         if not cursor.hasSelection():
             lineText = cursor.block().text()
             if lineText[:cursor.positionInBlock()].endswith(self.editor.tabKeyBehavior()):
-                counter = cursor.positionInBlock() % self.editor.tabWidth or self.editor.tabWidth
-                self.editor.newCursorAtPosition(cursor.position(), cursor.position() - counter).removeSelectedText()
+                self.editor.unindent()
                 return True
         
     def __remove_backward_braces(self, event):

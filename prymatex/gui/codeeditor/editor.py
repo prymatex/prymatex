@@ -75,11 +75,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     	 
     @ConfigurableItem(default = 4)
     def indentationWidth(self, size):
+        self.setTabSize(size)
         self.repaint()
-
-    @ConfigurableItem(default = 4)
-    def tabWidth(self, size):
-        self.setTabStopWidth(size * self.characterWidth())
 
     @ConfigurableItem(default = ("Monospace", 10))
     def defaultFont(self, value):
@@ -564,7 +561,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # OVERRIDE: TextEditWidget.setFont()
     def setFont(self, font):
         super(CodeEditor, self).setFont(font)
-        self.setTabStopWidth(self.tabWidth * self.characterWidth())
+        self.setTabStopWidth(self.tabSize() * self.characterWidth())
         for component in self.components():
             component.setFont(font)
 
@@ -757,8 +754,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             'TM_CURRENT_THEME_PATH': theme.currentSourcePath(),
             'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
             'TM_MODE': self.syntax().name,
-            'TM_SOFT_TABS': self.indentUsingSpaces and 'YES' or 'NO',
-            'TM_TAB_SIZE': self.tabWidth
+            'TM_SOFT_TABS': self.softTab() and 'YES' or 'NO',
+            'TM_TAB_SIZE': self.tabSize()
         })
         
         if self.isBlockReady(block):
