@@ -185,6 +185,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             self.setEolChars(properties.lineEndings)
         if properties.encoding:
             self.encoding = properties.encoding
+        # Font
         if properties.fontName:
             font = QtGui.QFont(properties.fontName)
         else:
@@ -193,11 +194,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             font.setPointSize(properties.fontSize)
         self.setFont(font)
         #showInvisibles   = false
-        # TODO: Mejorar esto crear un tabsize y un softwrap
         if properties.softTabs is not None:
-            self.indentUsingSpaces = properties.softTabs
+            self.setSoftTabs(properties.softTabs)
         if properties.tabSize:
-            self.indentationWidth = properties.tabSize
+            self.setTabSize(properties.tabSize)
         if properties.theme:
             theme = self.application().supportManager.getBundleItem(properties.theme)
             if theme is not None:
@@ -333,7 +333,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # ---------------------- Scopes
     def scope(self, cursor):
         left_syntax_scope, right_syntax_scope = self.blockUserData(cursor.block()).syntaxScope(cursor)
-        left_cursor_scope, right_cursor_scope = self.application().supportManager.cursorScope(self.textCursor())
+        left_cursor_scope, right_cursor_scope = self.application().supportManager.cursorScope(cursor)
         auxiliary_scope = self.application().supportManager.auxiliaryScope(self.filePath())
         return (left_syntax_scope + left_cursor_scope + auxiliary_scope, 
             right_syntax_scope + right_cursor_scope + auxiliary_scope)
@@ -1205,7 +1205,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                      'triggered': lambda ed, checked: ed.on_actionIndentation_triggered(checked),
                      'testChecked': lambda ed: ed.indentUsingSpaces
                      }, '-', ] + [ tuple([
-                    {'text': 'Tab Width: %d' % size,
+                    {'text': 'Width: %d' % size,
                      'checkable': True,
                      'triggered': lambda ed, checked, size = size: ed.on_actionIndentation_triggered(ed.indentUsingSpaces, size = size),
                      'testChecked': lambda ed, size = size: (ed.indentUsingSpaces and ed.indentationWidth == size) or (not ed.indentUsingSpaces and ed.tabWidth == size)

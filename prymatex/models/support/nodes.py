@@ -105,7 +105,7 @@ class BundleItemTreeNode(TreeNodeBase):
     
     def update(self, dataHash):
         if 'keySequence' in dataHash and isinstance(dataHash['keySequence'], QtGui.QKeySequence):
-            dataHash['keyEquivalent'] = keysequence_to_keyequivalent(int(dataHash['keySequence']))
+            dataHash['keyEquivalent'] = keysequence_to_keyequivalent(dataHash['keySequence'])
         if 'settings' in dataHash and isinstance(dataHash['settings'], dict):
             settings = {}
             for key, value in dataHash['settings'].items():
