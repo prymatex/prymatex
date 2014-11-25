@@ -7,7 +7,6 @@ from bisect import bisect
 import uuid as uuidmodule
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
-from prymatex.qt.helpers import qbytearray_to_text
 
 from prymatex.core import PrymatexComponent
 from prymatex.core.settings import ConfigurableItem
@@ -291,12 +290,13 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         def onQProcessFinished(context):
             def _finished(exitCode, exitStatus):
                 self.processTableModel.removeProcess(context.process)
-                errorValue = qbytearray_to_text(
-                    context.process.readAllStandardError())
-                context.errorValue = encoding.from_fs(errorValue)
-                outputValue = qbytearray_to_text(
-                    context.process.readAllStandardOutput())
-                context.outputValue = encoding.from_fs(outputValue)
+                errorValue = context.process.readAllStandardError().data()
+                context.errorValue = encoding.from_fs(
+                    context.process.readAllStandardError().data()
+                )
+                context.outputValue = encoding.from_fs(
+                    context.process.readAllStandardOutput().data()
+                )
                 context.outputType = exitCode
                 context.callback(context)
             return _finished

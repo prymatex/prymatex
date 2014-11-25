@@ -10,11 +10,11 @@ import json
 from prymatex import resources
 from prymatex.core import PrymatexComponent
 from prymatex.qt import QtCore, QtGui, QtNetwork
-from prymatex.qt.helpers import qbytearray_to_text
 
 from prymatex.utils.importlib import import_from_directories
 from prymatex.utils import plist
 from prymatex.utils import six
+from prymatex.utils import encoding
 
 # TODO: por ahora este nombre esta bien, pero algo mas orientado a Prymatex server taria bueno
 class ServerManager(PrymatexComponent, QtCore.QObject):
@@ -39,7 +39,7 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
         connection.readyRead.connect(lambda con = connection: self.socketReadyRead(con))
 
     def socketReadyRead(self, connection):
-        command = json.loads(qbytearray_to_text(connection.readAll()))
+        command = json.loads(encoding.from_fs(connection.readAll().data()))
         name = command.get("name")
         args = command.get("args", [])
         kwargs = command.get("kwargs", {})
@@ -49,7 +49,7 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
         # esto tendria que ser controlado de una mejor forma
         kwargs = dict([key_value for key_value in iter(kwargs.items()) if key_value[1] != None])
         
-        self.logger.debug("Dialog Recv --> Method: %s, Arguments: %s" % (name, kwargs))
+        self.logger().debug("Dialog Recv --> Method: %s, Arguments: %s" % (name, kwargs))
         method = getattr(self, name)
         try:
             method(*args, **kwargs)
@@ -78,13 +78,12 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
         if value is None:
             value = ""
         if isinstance(value, int):
-            value = str(value)
+            value = "%d" % value
         if isinstance(value, dict):
             value = plist.writePlistToString(value)
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}  
-        #Ensure Unicode encode
-        result = str(value).encode("utf-8")
-        self.logger.debug("Dialog Send --> Result %s: %s" % (type(result), result))
+        result = encoding.to_fs(value)
+        self.logger().debug("Dialog Send --> Result %s: %s" % (type(result), result))
         connection.send(result)
         
     def async_window(self, connection, **kwargs):
