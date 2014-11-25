@@ -25,9 +25,11 @@ class HighlighterThread(QtCore.QThread):
         self.msleep(100)
         block = self._document.begin()
         user_datas = {}
+        user_data = None
         while block.isValid() and self._running:
             self.usleep(1)
-            user_datas[block.blockNumber()] = self._processor.blockUserData(block)
+            user_data = self._processor.blockUserData(block, user_data)
+            user_datas[block.blockNumber()] = user_data
             block = block.next()
         self.ready.emit(user_datas)
 

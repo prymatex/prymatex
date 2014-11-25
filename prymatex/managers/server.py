@@ -54,7 +54,7 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
         try:
             method(*args, **kwargs)
         except Exception as reason:
-            self.sendResult({"error": {"code": -1, "message": six.text_type(reason)}})
+            self.sendResult(connection, {"error": {"code": -1, "message": six.text_type(reason)}})
             raise reason
 
     def loadDialogClass(self, moduleName, directory):
@@ -84,7 +84,7 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}  
         result = encoding.to_fs(value)
         self.logger().debug("Dialog Send --> Result %s: %s" % (type(result), result))
-        connection.send(result)
+        connection.write(result)
         
     def async_window(self, connection, **kwargs):
         directory = os.path.dirname(kwargs["guiPath"])
@@ -130,7 +130,7 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
 
     def tooltip(self, connection, message = "", format = "text", transparent = False):
         if message:
-            self.application().currentEditor().showMessage(message)
+            self.application().currentWindow().currentEditor().showMessage(message)
         self.sendResult(connection)
     
     def menu(self, connection, **kwargs):
@@ -144,7 +144,7 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
             return _send
 
         if "menuItems" in parameters:
-            self.application().currentEditor().showFlatPopupMenu(parameters["menuItems"], sendSelectedIndex(connection))
+            self.application().currentWindow().currentEditor().showFlatPopupMenu(parameters["menuItems"], sendSelectedIndex(connection))
 
     def popup(self, connection, **kwargs):
         suggestions = plist.readPlistFromString(kwargs["suggestions"])
@@ -156,12 +156,12 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
                     else:
                         self.sendResult(connection, {})
                 return _send
-            self.application().currentEditor().runCompleter( suggestions = suggestions["suggestions"], 
+            self.application().currentWindow().currentEditor().runCompleter( suggestions = suggestions["suggestions"], 
                                                         already_typed = kwargs.get("alreadyTyped"), 
                                                         case_insensitive = kwargs.get("caseInsensitive", True),
                                                         callback = sendSelectedSuggestion(connection))
         else:
-            self.application().currentEditor().runCompleter( suggestions = suggestions["suggestions"], 
+            self.application().currentWindow().currentEditor().runCompleter( suggestions = suggestions["suggestions"], 
                                                         already_typed = kwargs.get("alreadyTyped"), 
                                                         case_insensitive = kwargs.get("caseInsensitive", True))
             self.sendResult(connection)

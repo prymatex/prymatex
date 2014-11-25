@@ -165,7 +165,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
             timeout = 2000
 
         callbacks = {
-            'copy': lambda s = message: QtGui.qApp.instance().clipboard().setText(s)
+            'copy': lambda s = message: self.editor.application().clipboard().setText(s)
         }
 
         self.editor.showTooltip(message,

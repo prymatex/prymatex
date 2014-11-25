@@ -79,12 +79,12 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     def testRevision(self, block):
         return block.userData() is not None and block.userData().revision == self.buildRevision(block)
             
-    def blockUserData(self, block):
+    def blockUserData(self, block, previous_user_data=None):
         if not self.isReady():
             return self.empty_user_data
 
         # ------ Restore State
-        self.restore(block.previous().userData() or self.empty_user_data)
+        self.restore(previous_user_data or block.previous().userData() or self.empty_user_data)
                 
         block_text = block.text() + "\n"
         revision = hash("%s:%s:%d" % (self.scope_name, block_text, self.state))
