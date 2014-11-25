@@ -65,24 +65,20 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.thread.finished.connect(self.changed.emit)
         self.thread.start()
 
-    def _process(self, block, user_data):
-        block.setUserData(user_data)
-        block.setUserState(user_data.state)
-
     def highlightBlock(self, text):
         block = self.currentBlock()
 
-        # ------ Cache
-        if block.blockNumber() in self._user_datas:
-            user_data = self._user_datas.pop(block.blockNumber())
-            self._process(block, user_data)
         # ------ No changes
-        elif self.syntaxProcessor.testRevision(block):
+        if self.syntaxProcessor.testRevision(block):
             user_data = block.userData()
-        # ------ Build
         else:
-            user_data = self.syntaxProcessor.blockUserData(block)
-            self._process(block, user_data)
+            # ------ Cache or build
+            block_number = block.blockNumber()
+            user_data = self._user_datas.pop(block_number) \
+                if block_number in self._user_datas \
+                else self.syntaxProcessor.blockUserData(block)
+            self.setCurrentBlockUserData(user_data)
+            self.setCurrentBlockState(user_data.state)
 
         # ------ Formats
         for token in user_data.tokens:

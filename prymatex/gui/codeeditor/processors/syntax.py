@@ -72,7 +72,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
             self.stacks[user_data.revision] = (self.stack[:], self.scope.clone())
 
     def blockRevision(self, block):
-        return _revision(block.text() + "\n", self.scope_name, block.previous().userState())
+        return _revision(self.scope_name, block.text() + "\n", block.previous().userState())
 
     def testRevision(self, block):
         return block.userData() is not None and block.userData().revision == self.blockRevision(block)

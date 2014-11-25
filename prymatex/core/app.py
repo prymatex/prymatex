@@ -207,22 +207,23 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             # Load Projects
             self.projectManager.loadProjects(self.showMessage)
 
-            # Create Main Window
-            main_window = self.buildMainWindow()
-
-            # Change messages handler
-            self.showMessage = main_window.showMessage
-
             # Load settings
             self.profileManager.loadSettings(self.showMessage)
-
+            
             # Load standard shortcuts
             self.shortcutsTreeModel.loadStandardSequences(self.resources())
+
+            self.profile().restoreState(self)
+            main_window = self.currentWindow() or self.buildMainWindow()
+    
+            # Change messages handler
+            self.showMessage = main_window.showMessage
 
             if not self.options.no_splash:
                 splash.finish(main_window)
 
             main_window.show()
+            
             self.logger().info("Application startup")
         except KeyboardInterrupt:
             self.logger().critical("Quit signal catched during application startup. "
@@ -316,13 +317,32 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         from prymatex.managers.server import ServerManager
         return self.createComponentInstance(ServerManager, parent=self)
 
+    # ---------- MainWindow State
+    def componentState(self):
+        componentState = super(PrymatexApplication, self).componentState()
+
+        componentState["windows"] = []
+        for window in self.mainWindows():
+            componentState["windows"].append(window.componentState())
+        
+        return componentState
+
+    def setComponentState(self, componentState):
+        super(PrymatexApplication, self).setComponentState(componentState)
+
+        # Restore open documents
+        for windowState in componentState.get("windows", []):
+            window = self.buildMainWindow()
+            window.setComponentState(windowState)
+            if not window.editors():
+                window.addEmptyEditor()
+
     # --------------------- Application events
     def closePrymatex(self):
         self.logger().debug("Close")
 
         self.storageManager.close()
-        for main_window in self.mainWindows():
-            self.profile().saveState(main_window)
+        self.profile().saveState(self)
         self.profile().sync()
         if os.path.exists(self.fileLock):
             os.unlink(self.fileLock)
@@ -467,18 +487,15 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         """Creates the windows"""
         from prymatex.gui.main import PrymatexMainWindow
 
-        main_window = self.createComponentInstance(PrymatexMainWindow)
-
-        self.profile().restoreState(main_window)
-
-        if not main_window.editors():
-            main_window.addEmptyEditor()
-        self._main_windows.append(main_window)
-        return main_window
+        self._main_windows.append(
+            self.createComponentInstance(PrymatexMainWindow)
+        )
+        return self._main_windows[-1]
 
     def currentWindow(self):
         # TODO Aca retornar la window actual
-        return self._main_windows[0]
+        if self._main_windows:
+            return self._main_windows[0]
 
     def canBeHandled(self, filepath):
         # from prymatex.utils.pyqtdebug import ipdb_set_trace
