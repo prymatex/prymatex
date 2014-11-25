@@ -60,11 +60,11 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
     def loadDialogClass(self, moduleName, directory):
         module = import_from_directories([ directory ], moduleName)
         dialogClass = getattr(module, 'dialogClass')
-        self.application.populateComponentClass(dialogClass)
+        self.application().populateComponentClass(dialogClass)
         return dialogClass
         
     def createDialogInstance(self, dialogClass, mainWindow, async = False):
-        instance = self.application.createComponentInstance(dialogClass, mainWindow)
+        instance = self.application().createComponentInstance(dialogClass, mainWindow)
         if async:
             instanceId = id(instance)
             self.instances[instanceId] = instance
@@ -90,7 +90,7 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
         directory = os.path.dirname(kwargs["guiPath"])
         name = os.path.basename(kwargs["guiPath"])
         dialogClass = self.loadDialogClass(name, directory)
-        instance, instanceId = self.createDialogInstance(dialogClass, self.application.mainWindow, async = True)
+        instance, instanceId = self.createDialogInstance(dialogClass, self.application().currentWindow(), async = True)
         if "parameters" in kwargs and kwargs["parameters"]:
             instance.setParameters(plist.readPlistFromString(kwargs["parameters"]))
         instance.show()
@@ -123,14 +123,14 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
         directory = os.path.dirname(kwargs["guiPath"])
         name = os.path.basename(kwargs["guiPath"])
         dialogClass = self.loadDialogClass(name, directory)
-        instance = self.createDialogInstance(dialogClass, self.application.mainWindow)
+        instance = self.createDialogInstance(dialogClass, self.application().currentWindow())
         instance.setParameters(parameters)
         value = instance.execModal()
         self.sendResult(connection, {"result": value})
 
     def tooltip(self, connection, message = "", format = "text", transparent = False):
         if message:
-            self.application.currentEditor().showMessage(message)
+            self.application().currentEditor().showMessage(message)
         self.sendResult(connection)
     
     def menu(self, connection, **kwargs):
@@ -144,7 +144,7 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
             return _send
 
         if "menuItems" in parameters:
-            self.application.currentEditor().showFlatPopupMenu(parameters["menuItems"], sendSelectedIndex(connection))
+            self.application().currentEditor().showFlatPopupMenu(parameters["menuItems"], sendSelectedIndex(connection))
 
     def popup(self, connection, **kwargs):
         suggestions = plist.readPlistFromString(kwargs["suggestions"])
@@ -156,12 +156,12 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
                     else:
                         self.sendResult(connection, {})
                 return _send
-            self.application.currentEditor().runCompleter( suggestions = suggestions["suggestions"], 
+            self.application().currentEditor().runCompleter( suggestions = suggestions["suggestions"], 
                                                         already_typed = kwargs.get("alreadyTyped"), 
                                                         case_insensitive = kwargs.get("caseInsensitive", True),
                                                         callback = sendSelectedSuggestion(connection))
         else:
-            self.application.currentEditor().runCompleter( suggestions = suggestions["suggestions"], 
+            self.application().currentEditor().runCompleter( suggestions = suggestions["suggestions"], 
                                                         already_typed = kwargs.get("alreadyTyped"), 
                                                         case_insensitive = kwargs.get("caseInsensitive", True))
             self.sendResult(connection)
@@ -181,16 +181,16 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
     def mate(self, connection, **kwargs):
         if "paths" in kwargs:
             for path in kwargs["paths"]:
-                self.application.openFile(path)
+                self.application().openFile(path)
         self.sendResult(connection)
     
     def open(self, connection, **kwargs):
-        self.application.openUrl(kwargs["url"])
+        self.application().openUrl(kwargs["url"])
         self.sendResult(connection)
     
     def terminal(self, connection, **kwargs):
         for command in kwargs["commands"]:
-            self.application.mainWindow.terminalDock.runCommand(command)
+            self.application().currentWindow().terminalDock.runCommand(command)
         self.sendResult(connection)
 
     def debug(self, connection, **kwargs):
