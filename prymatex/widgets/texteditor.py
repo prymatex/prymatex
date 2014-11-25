@@ -67,7 +67,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         return self.tab_size
 
     def tabKeyBehavior(self):
-        return ' ' * self.tabSize() if self.softTab() else '\t'
+        return ' ' * self.tabSize() if self.softTabs() else '\t'
 
     #--------- Indentation
     def indentation(self, cursor = None, direction = "left"):

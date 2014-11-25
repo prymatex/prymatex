@@ -7,10 +7,11 @@ import tempfile
 import socket
 import json
 
-from prymatex.qt import QtCore, QtGui, QtNetwork
-from prymatex.core import PrymatexComponent
-
 from prymatex import resources
+from prymatex.core import PrymatexComponent
+from prymatex.qt import QtCore, QtGui, QtNetwork
+from prymatex.qt.helpers import qbytearray_to_text
+
 from prymatex.utils.importlib import import_from_directories
 from prymatex.utils import plist
 from prymatex.utils import six
@@ -38,7 +39,7 @@ class ServerManager(PrymatexComponent, QtCore.QObject):
         connection.readyRead.connect(lambda con = connection: self.socketReadyRead(con))
 
     def socketReadyRead(self, connection):
-        command = json.loads(connection.readAll())
+        command = json.loads(qbytearray_to_text(connection.readAll()))
         name = command.get("name")
         args = command.get("args", [])
         kwargs = command.get("kwargs", {})
