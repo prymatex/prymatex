@@ -71,7 +71,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     @ConfigurableItem(default = True)
     def indentUsingSpaces(self, soft):
-    	self.setSoftTab(soft)
+    	self.setSoftTabs(soft)
     	 
     @ConfigurableItem(default = 4)
     def indentationWidth(self, size):
@@ -754,7 +754,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             'TM_CURRENT_THEME_PATH': theme.currentSourcePath(),
             'TM_COLUMN_NUMBER': cursor.positionInBlock() + 1,
             'TM_MODE': self.syntax().name,
-            'TM_SOFT_TABS': self.softTab() and 'YES' or 'NO',
+            'TM_SOFT_TABS': self.softTabs() and 'YES' or 'NO',
             'TM_TAB_SIZE': self.tabSize()
         })
         

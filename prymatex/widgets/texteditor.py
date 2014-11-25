@@ -52,10 +52,10 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         return self.eol_chars
 
     #------ Soft Tabs
-    def setSoftTab(self, soft):
+    def setSoftTabs(self, soft):
         self.soft_tabs = soft
     
-    def softTab(self):
+    def softTabs(self):
         return self.soft_tabs
         
     #------ Tab Size
