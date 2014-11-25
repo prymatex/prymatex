@@ -8,6 +8,9 @@ from prymatex.utils import text
 from .base import CodeEditorBaseProcessor
 from ..userdata import CodeEditorBlockUserData, CodeEditorToken
 
+def _revision(scope, text, state):
+    return hash("%s:%s:%d" % (scope, text, state))
+
 class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     NO_STATE = -1
     SINGLE_LINE = 1
@@ -25,7 +28,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.scope_name = name
         self.empty_scope = Scope(self.scope_name)
         self.empty_token = CodeEditorToken(0, 0, self.empty_scope, "")
-        self.empty_user_data = CodeEditorBlockUserData((self.empty_token, ), -1, -1, "", True)
+        self.empty_user_data = CodeEditorBlockUserData((self.empty_token, ), self.NO_STATE, -1, "", True)
     
     def emptyUserData(self):
         return self.empty_user_data
@@ -68,16 +71,11 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         if self.state == self.MULTI_LINE:
             self.stacks[user_data.revision] = (self.stack[:], self.scope.clone())
 
-    def buildRevision(self, block):
-        block_text = block.text() + "\n"
-        return hash("%s:%s:%d" % (
-                self.scope_name, 
-                block_text,
-                block.previous().userState())
-        )
+    def blockRevision(self, block):
+        return _revision(block.text() + "\n", self.scope_name, block.previous().userState())
 
     def testRevision(self, block):
-        return block.userData() is not None and block.userData().revision == self.buildRevision(block)
+        return block.userData() is not None and block.userData().revision == self.blockRevision(block)
             
     def blockUserData(self, block, previous_user_data=None):
         if not self.isReady():
@@ -87,7 +85,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.restore(previous_user_data or block.previous().userData() or self.empty_user_data)
                 
         block_text = block.text() + "\n"
-        revision = hash("%s:%s:%d" % (self.scope_name, block_text, self.state))
+        revision = _revision(self.scope_name, block_text, self.state)
         self.bundleItem.parseLine(self.stack, block_text, self)
         self.state = len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
 
