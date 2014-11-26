@@ -103,9 +103,9 @@ class ContextSettings(object):
     def __init__(self, settings):
         self.settings = settings
 
-    def _first(self, key, default=None, value_type=str):
+    def _first(self, key, default=None, value_type='str'):
         for settings in self.settings:
-            value = getattr(settings, "get_%s" % value_type.__name__)(key, default=None)
+            value = getattr(settings, "get_%s" % value_type)(key, default=None)
             if value:
                 return value
         return default
@@ -113,7 +113,7 @@ class ContextSettings(object):
     ## I/O
     #* `binary` — If set for a file, file browser will open it with external program
     # when double clicked. Mainly makes sense when targetting specific globs.
-    binary = property(lambda self: self._first("binary", value_type=bool))
+    binary = property(lambda self: self._first("binary", value_type='bool'))
     
     # * `encoding` — Set to the file’s encoding. This will be used during save but
     # is also fallback during load (when file is not UTF-8). Load encodinng heuristic
@@ -137,14 +137,14 @@ class ContextSettings(object):
     # the Themes bundle).
     theme = property(lambda self: self._first("theme"))
     fontName = property(lambda self: self._first("fontName"))
-    fontSize = property(lambda self: self._first("fontSize", value_type=int))
-    showInvisibles = property(lambda self: self._first("showInvisibles", value_type=bool))
-    spellChecking = property(lambda self: self._first("spellChecking", value_type=bool))
+    fontSize = property(lambda self: self._first("fontSize", value_type='int'))
+    showInvisibles = property(lambda self: self._first("showInvisibles", value_type='bool'))
+    spellChecking = property(lambda self: self._first("spellChecking", value_type='bool'))
 
     # * `softTabs`, `tabSize` — Presently can only be changed this way, but there
     # should be some memory added to Avian.    
-    softTabs = property(lambda self: self._first("softTabs", value_type=bool))
-    tabSize = property(lambda self: self._first("tabSize", value_type=int))
+    softTabs = property(lambda self: self._first("softTabs", value_type='bool'))
+    tabSize = property(lambda self: self._first("tabSize", value_type='int'))
 
     ## Projects
     projectDirectory = property(lambda self: self._first("projectDirectory"))

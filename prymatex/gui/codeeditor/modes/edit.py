@@ -163,7 +163,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                     return True
                     
         word, wordStart, wordEnd = self.editor.currentWord()
-        if isOpen and not (wordStart <= cursor.position() < wordEnd):
+        if isOpen and pair[0] != pair[1] and not (wordStart <= cursor.position() < wordEnd):
             position = cursor.position()
             cursor.insertText("%s%s" % (pair[0], pair[1]))
             cursor.setPosition(position + 1)
