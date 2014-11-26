@@ -910,7 +910,7 @@ class SupportBaseManager(object):
     def _build_properites(self, path):
         directory = path if os.path.isdir(path) else os.path.dirname(path)
         parsers = self._load_parsers(directory)
-        # TODO: Build properties from parser
+        print(parsers)
         properties = Properties()
         sections = set()
         for parser in parsers:
@@ -922,7 +922,7 @@ class SupportBaseManager(object):
             pattern = re.compile(fntranslate(selector))
             selector = self.selectorFactory(selector)
             if pattern.search(path) or selector:
-                properties.add(selector, section, parsers)
+                properties.append(selector, section, parsers)
         return properties
 
     def getProperties(self, path=None):

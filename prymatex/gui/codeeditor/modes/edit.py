@@ -89,9 +89,10 @@ class CodeEditorEditMode(CodeEditorBaseMode):
     def __unindent_forward_tab_behavior(self, event):
         cursor = self.editor.textCursor()
         if not cursor.hasSelection():
-            lineText = cursor.block().text()
-            if lineText[cursor.positionInBlock():].startswith(self.editor.tabKeyBehavior()):
-                self.editor.unindent()
+            tab_behavior = self.editor.tabKeyBehavior()
+            cursor = self.editor.newCursorAtPosition(cursor.position(), cursor.position() + len(tab_behavior))
+            if cursor.selectedText() == tab_behavior:
+                cursor.removeSelectedText()
                 return True
         
     def __remove_forward_braces(self, event):
@@ -119,23 +120,29 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         
         isOpen = character == pair[0]
         isClose = character == pair[1]
+        isSame = pair[0] == pair[1]
         control_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
-        if isClose:
-            if rc1 and rc2 and character == rc1.selectedText():
-                cursor.movePosition(QtGui.QTextCursor.NextCharacter)
-                self.editor.setTextCursor(cursor)
-                return True
+        if isClose and not cursor.hasSelection() \
+            and rc1 and rc2 and character == rc1.selectedText():
+            # Skip
+            cursor.movePosition(QtGui.QTextCursor.NextCharacter)
+            self.editor.setTextCursor(cursor)
+            return True
         elif control_down and isOpen:
             if cursor.hasSelection():
                 selectedText = cursor.selectedText()
                 if any([selectedText == pair[0] for pair in settings.smartTypingPairs]):
+                    # Replace
                     if lc1 is not None and lc2 is not None:
                         lc1.insertText(pair[0])
                         lc2.insertText(pair[1])
                     elif rc1 is not None and rc2 is not None:
                         rc1.insertText(pair[0])
                         rc2.insertText(pair[1])
-                    return True
+                else:
+                    # Wrap
+                    cursor.insertText("%s%s%s" % (pair[0],selectedText,pair[1]))
+                return True
             else:
                 if lc1 and lc2:
                     if cursor.position() == lc1.selectionStart():
@@ -163,7 +170,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                     return True
                     
         word, wordStart, wordEnd = self.editor.currentWord()
-        if isOpen and pair[0] != pair[1] and not (wordStart <= cursor.position() < wordEnd):
+        if isOpen and not isSame and not (wordStart <= cursor.position() < wordEnd):
             position = cursor.position()
             cursor.insertText("%s%s" % (pair[0], pair[1]))
             cursor.setPosition(position + 1)

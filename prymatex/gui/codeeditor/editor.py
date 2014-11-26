@@ -203,6 +203,21 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             if theme is not None:
                 self.insertBundleItem(theme)
 
+    # 'exclude', 'excludeFiles', excludeDirectories, excludeInBrowser
+    # excludeInFolderSearch
+    # excludeInFileChooser
+    # excludeFilesInBrowser
+    # excludeDirectoriesInBrowser
+    #
+    # include
+    # includeFiles
+    # includeDirectories
+    # includeInBrowser
+    # includeInFileChooser
+    # includeFilesInBrowser
+    # includeDirectoriesInBrowser
+    # includeFilesInFileChooser
+    
     # -------------- Editor Modes
     def beginCodeEditorMode(self, mode):
         old_mode = self.codeEditorModes[self.__current_mode_index]

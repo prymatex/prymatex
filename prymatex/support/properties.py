@@ -5,6 +5,7 @@ import codecs
 
 from prymatex.qt import QtCore, QtGui
 
+from . import regexp
 # List of Settings
 
 ## I/O
@@ -72,27 +73,36 @@ class Settings(object):
     def _remove_quotes(self, value):
         return value[1:-1] if value and value[0] in ("'", '"') and value[0] == value[-1] else value
 
-    def get_str(self, key, default=None):
-        value = default
+    def get_snippet(self, key):
+        value = ''
         for config in self.configs[::-1]:
             value = config.get(self.section, key, fallback=value, raw=True)
+            value = self._remove_quotes(value)
+            variables = dict(config.get(self.section))
+            print(value, variables)
+        return self._remove_quotes(value)
+        
+    def get_str(self, key, default=None):
+        value = default
+        for config in self.configs:
+            value = config.get(self.section, key, fallback=value)
         return self._remove_quotes(value)
 
     def get_bool(self, key, default=None):
         value = default
-        for config in self.configs[::-1]:
-            value = config.getboolean(self.section, key, fallback=value, raw=True)
+        for config in self.configs:
+            value = config.getboolean(self.section, key, fallback=value)
         return value
 
     def get_int(self, key, default=None):
         value = default
-        for config in self.configs[::-1]:
-            value = config.getint(self.section, key, fallback=value, raw=True)
+        for config in self.configs:
+            value = config.getint(self.section, key, fallback=value)
         return value
 
     def shellVariables(self):
         variables = []
-        for config in self.configs[::-1]:
+        for config in self.configs:
             for name in config[self.section]:
                 if name.isupper():
                     value = self._remove_quotes(config[self.section][name])
@@ -147,30 +157,30 @@ class ContextSettings(object):
     tabSize = property(lambda self: self._first("tabSize", value_type='int'))
 
     ## Projects
-    projectDirectory = property(lambda self: self._first("projectDirectory"))
-    windowTitle = property(lambda self: self._first("windowTitle"))
+    projectDirectory = property(lambda self: self._first("projectDirectory", value_type='snippet'))
+    windowTitle = property(lambda self: self._first("windowTitle", value_type='snippet'))
     
     ## Other
     scopeAttributes = property(lambda self: self._first("scopeAttributes"))
     
     ## File Filtering Keys
-    exclude = property(lambda self: self._first("exclude"))
-    excludeFiles = property(lambda self: self._first("excludeFiles"))
-    excludeDirectories = property(lambda self: self._first("excludeDirectories"))
-    excludeInBrowser = property(lambda self: self._first("excludeInBrowser"))
-    excludeInFolderSearch = property(lambda self: self._first("excludeInFolderSearch"))
-    excludeInFileChooser = property(lambda self: self._first("excludeInFileChooser"))
-    excludeFilesInBrowser = property(lambda self: self._first("excludeFilesInBrowser"))
-    excludeDirectoriesInBrowser = property(lambda self: self._first("excludeDirectoriesInBrowser"))
+    exclude = property(lambda self: self._first("exclude", value_type='snippet'))
+    excludeFiles = property(lambda self: self._first("excludeFiles", value_type='snippet'))
+    excludeDirectories = property(lambda self: self._first("excludeDirectories", value_type='snippet'))
+    excludeInBrowser = property(lambda self: self._first("excludeInBrowser", value_type='snippet'))
+    excludeInFolderSearch = property(lambda self: self._first("excludeInFolderSearch", value_type='snippet'))
+    excludeInFileChooser = property(lambda self: self._first("excludeInFileChooser", value_type='snippet'))
+    excludeFilesInBrowser = property(lambda self: self._first("excludeFilesInBrowser", value_type='snippet'))
+    excludeDirectoriesInBrowser = property(lambda self: self._first("excludeDirectoriesInBrowser", value_type='snippet'))
     
-    include = property(lambda self: self._first("include"))
-    includeFiles = property(lambda self: self._first("includeFiles"))
-    includeDirectories = property(lambda self: self._first("includeDirectories"))
-    includeInBrowser = property(lambda self: self._first("includeInBrowser"))
-    includeInFileChooser = property(lambda self: self._first("includeInFileChooser"))
-    includeFilesInBrowser = property(lambda self: self._first("includeFilesInBrowser"))
-    includeDirectoriesInBrowser = property(lambda self: self._first("includeDirectoriesInBrowser"))
-    includeFilesInFileChooser = property(lambda self: self._first("includeFilesInFileChooser"))
+    include = property(lambda self: self._first("include", value_type='snippet'))
+    includeFiles = property(lambda self: self._first("includeFiles", value_type='snippet'))
+    includeDirectories = property(lambda self: self._first("includeDirectories", value_type='snippet'))
+    includeInBrowser = property(lambda self: self._first("includeInBrowser", value_type='snippet'))
+    includeInFileChooser = property(lambda self: self._first("includeInFileChooser", value_type='snippet'))
+    includeFilesInBrowser = property(lambda self: self._first("includeFilesInBrowser", value_type='snippet'))
+    includeDirectoriesInBrowser = property(lambda self: self._first("includeDirectoriesInBrowser", value_type='snippet'))
+    includeFilesInFileChooser = property(lambda self: self._first("includeFilesInFileChooser", value_type='snippet'))
 
     # Shell Variables
     @property
@@ -184,8 +194,8 @@ class Properties(object):
     def __init__(self):
         self.settings = []
     
-    def add(self, selector, section, config):
-        self.settings.insert(0, Settings(selector, section, config))
+    def append(self, selector, section, config):
+        self.settings.append(Settings(selector, section, config))
 
     @staticmethod
     def buildSettings(settings):
