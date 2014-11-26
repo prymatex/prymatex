@@ -10,7 +10,8 @@ from . import regexp
 class Settings(object):
     WELL_KNOWN_SETTINGS = ['binary', 'encoding', 'fileType', 'useBOM', 'softTabs',
         'lineEndings', 'theme', 'fontName', 'fontSize', 'showInvisibles', 'tabSize',
-        'spellChecking', 'projectDirectory', 'windowTitle', 'scopeAttributes', 'wrapColumn']
+        'spellChecking', 'projectDirectory', 'windowTitle', 'scopeAttributes', 
+        'wrapColumn', 'softWrap']
     def __init__(self, selector, section, configs):
         self.selector = selector
         self.section = section
@@ -20,17 +21,20 @@ class Settings(object):
         return value[1:-1] if value and value[0] in ("'", '"') and value[0] == value[-1] else value
 
     def get_snippet(self, key, default=None):
-        value = ''
-        for config in self.configs[::-1]:
-            value = config.get(self.section, key, fallback=value, raw=True)
-            value = self._remove_quotes(value)
-            variables = dict(
-                ((item[0], self._remove_quotes(item[1])) \
-                    for item in config[self.section].items() \
-                    if item[0] not in self.WELL_KNOWN_SETTINGS and not item[0].isupper())
-            )
-            print(value, variables)
-        return self._remove_quotes(value)
+        variables = { key: '' }
+        for config in self.configs:
+            value = config.get(self.section, key, fallback=None, raw=True)
+            if value is not None:
+                value = self._remove_quotes(value)
+                variables.update(dict(
+                    ((item[0], self._remove_quotes(item[1])) \
+                        for item in config[self.section].items() \
+                        if item[0] not in self.WELL_KNOWN_SETTINGS \
+                            and not item[0].isupper() \
+                            and item[0] != key)
+                ))
+                variables[key] = regexp.Snippet(value).substitute(variables)
+        return variables.get(key)
         
     def get_str(self, key, default=None):
         value = default

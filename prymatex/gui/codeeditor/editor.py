@@ -209,7 +209,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         'excludeDirectoriesInBrowser', 'include', 'includeFiles', 'includeDirectories',
         'includeInBrowser', 'includeInFileChooser', 'includeFilesInBrowser',
         'includeDirectoriesInBrowser', 'includeFilesInFileChooser']:
-            print(getattr(properties, p))
+            print(p, getattr(properties, p))
 
     # -------------- Editor Modes
     def beginCodeEditorMode(self, mode):

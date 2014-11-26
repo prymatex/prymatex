@@ -215,7 +215,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
             self.profile().restoreState(self)
             main_window = self.currentWindow() or self.buildMainWindow()
-    
+            
             # Change messages handler
             self.showMessage = main_window.showMessage
 
@@ -334,8 +334,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         for windowState in componentState.get("windows", []):
             window = self.buildMainWindow()
             window.setComponentState(windowState)
-            if not window.editors():
-                window.addEmptyEditor()
 
     # --------------------- Application events
     def closePrymatex(self):

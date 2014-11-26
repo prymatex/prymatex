@@ -120,6 +120,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
 
     def initialize(self, **kwargs):
         super(PrymatexMainWindow, self).initialize(**kwargs)
+
         # Dialogs
         self.selectorDialog = self.findChild(QtWidgets.QDialog, "SelectorDialog")
         self.aboutDialog = self.findChild(QtWidgets.QDialog, "AboutDialog")
@@ -162,6 +163,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
 
         # Metemos las acciones del support
         self.application().supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
+        self.addEmptyEditor()
     
     def environmentVariables(self):
         env = self.application().environmentVariables()
