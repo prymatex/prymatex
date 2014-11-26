@@ -2,7 +2,7 @@
 
 #-*- encoding: utf-8 -*-
 import codecs
-
+    
 from prymatex.qt import QtCore, QtGui
 
 from . import regexp
@@ -23,16 +23,20 @@ class Settings(object):
     def get_snippet(self, key, default=None):
         variables = { key: '' }
         for config in self.configs:
-            value = config.get(self.section, key, fallback=None, raw=True)
+            section = self.section \
+                if self.section in config.sections() \
+                else 'DEFAULT'
+            value = config.get(section, key, fallback=None, raw=True)
             if value is not None:
                 value = self._remove_quotes(value)
                 variables.update(dict(
                     ((item[0], self._remove_quotes(item[1])) \
-                        for item in config[self.section].items() \
+                        for item in config[section].items() \
                         if item[0] not in self.WELL_KNOWN_SETTINGS \
                             and not item[0].isupper() \
                             and item[0] != key)
                 ))
+                print(config.directory, value, variables)
                 variables[key] = regexp.Snippet(value).substitute(variables)
         return variables.get(key)
         
