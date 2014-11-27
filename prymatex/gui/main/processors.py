@@ -29,8 +29,9 @@ class PrymatexMainCommandProcessor(CommandProcessorMixin, QtCore.QObject):
         return self.__env
         
     def shellVariables(self):
-        settings = self.window().application.supportManager.getPreferenceSettings()
-        return settings.shellVariables
+        settings = self.window().application().supportManager.getPreferenceSettings()
+        properties = self.window().application().supportManager.getPropertiesSettings()
+        return settings.shellVariables + properties.shellVariables
 
     def configure(self, settings):
         self.asynchronous = settings.get("asynchronous", True)

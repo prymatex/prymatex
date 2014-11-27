@@ -163,7 +163,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
         timeout = len(message) * 20
         if timeout > 2000:
             timeout = 2000
-
+        
         callbacks = {
             'copy': lambda s = message: self.editor.application().clipboard().setText(s)
         }

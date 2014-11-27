@@ -189,7 +189,7 @@ class OverlayNotifier(QtCore.QObject):
             for key in links.keys():
                 message += "<a href='%s'>%s</a>" % (key, key.title())
             message += "</div>"
-        
+
         notification = Notification(message, 
             widget or self.parent(), 
             timeout, 

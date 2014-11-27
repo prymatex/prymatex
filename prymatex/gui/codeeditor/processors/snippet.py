@@ -101,10 +101,7 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         return self.bundleItem.lastHolder()
 
     def setHolder(self, start, end):
-        if not self.bundleItem.setHolder(start, end):
-            self.stop()
-            return False
-        return True
+        return self.isReady() and self.bundleItem.setHolder(start, end)
 
     def hasHolderContent(self):
         return self.bundleItem.hasHolderContent()

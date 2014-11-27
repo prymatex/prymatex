@@ -30,8 +30,8 @@ class CodeEditorBaseProcessor(QtCore.QObject):
         self.begin.emit()
 
     def endExecution(self, bundleItem):
-        self.end.emit()
         self.bundleItem = None
+        self.end.emit()
 
     def environmentVariables(self):
         if self.__env is None:
