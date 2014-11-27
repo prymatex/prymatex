@@ -20,50 +20,53 @@ class Settings(object):
     def _remove_quotes(self, value):
         return value[1:-1] if value and value[0] in ("'", '"') and value[0] == value[-1] else value
 
-    def get_snippet(self, key, default=None):
-        variables = { key: '' }
+    def sections(self):
         for config in self.configs:
             section = self.section \
                 if self.section in config.sections() \
                 else 'DEFAULT'
-            value = config.get(section, key, fallback=None, raw=True)
+            yield config[section]
+
+    def get_snippet(self, key, default=None):
+        variables = { key: '' }
+        for section in self.sections():
+            value = section.get(key, fallback=None)
             if value is not None:
                 value = self._remove_quotes(value)
                 variables.update(dict(
                     ((item[0], self._remove_quotes(item[1])) \
-                        for item in config[section].items() \
+                        for item in section.items() \
                         if item[0] not in self.WELL_KNOWN_SETTINGS \
                             and not item[0].isupper() \
                             and item[0] != key)
                 ))
-                print(config.directory, value, variables)
                 variables[key] = regexp.Snippet(value).substitute(variables)
         return variables.get(key)
         
     def get_str(self, key, default=None):
         value = default
-        for config in self.configs:
-            value = config.get(self.section, key, fallback=value)
+        for section in self.sections():
+            value = section.get(key, fallback=value)
         return self._remove_quotes(value)
 
     def get_bool(self, key, default=None):
         value = default
-        for config in self.configs:
-            value = config.getboolean(self.section, key, fallback=value)
+        for section in self.sections():
+            value = section.getboolean(key, fallback=value)
         return value
 
     def get_int(self, key, default=None):
         value = default
-        for config in self.configs:
-            value = config.getint(self.section, key, fallback=value)
+        for section in self.sections():
+            value = section.getint(key, fallback=value)
         return value
 
     def shellVariables(self):
         variables = []
-        for config in self.configs:
-            for name in config[self.section]:
+        for section in self.sections():
+            for name in section:
                 if name.isupper():
-                    value = self._remove_quotes(config[self.section][name])
+                    value = self._remove_quotes(section[name])
                     variables.append((name, value))
         return variables
 
