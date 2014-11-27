@@ -910,7 +910,6 @@ class SupportBaseManager(object):
     def _build_properites(self, path):
         directory = path if os.path.isdir(path) else os.path.dirname(path)
         parsers = self._load_parsers(directory)
-        print(parsers)
         properties = Properties()
         sections = set()
         for parser in parsers:

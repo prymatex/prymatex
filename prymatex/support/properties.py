@@ -61,13 +61,13 @@ class Settings(object):
             value = section.getint(key, fallback=value)
         return value
 
-    def shellVariables(self):
+    def get_variables(self):
         variables = []
         for section in self.sections():
-            for name in section:
-                if name.isupper():
-                    value = self._remove_quotes(section[name])
-                    variables.append((name, value))
+            variables.extend(
+                [ (item[0], self._remove_quotes(item[1])) \
+                    for item in section.items() if item[0].isupper() ]
+            )
         return variables
 
 class ContextSettings(object):
@@ -149,7 +149,7 @@ class ContextSettings(object):
     def shellVariables(self):
         shellVariables = []
         for settings in self.settings:
-            shellVariables.extend(settings.shellVariables())
+            shellVariables.extend(settings.get_variables())
         return shellVariables
 
 class Properties(object):

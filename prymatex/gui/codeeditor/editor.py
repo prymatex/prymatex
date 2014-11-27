@@ -204,12 +204,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 self.insertBundleItem(theme)
         
         # TODO: Probar esta linea extensa queno funciona al hacer la indentacion, hay que tomar la indentacion desde otr lugar o ver que pasa
-        for p in ['exclude', 'excludeFiles', 'excludeDirectories', 'excludeInBrowser',
-        'excludeInFolderSearch', 'excludeInFileChooser', 'excludeFilesInBrowser',
-        'excludeDirectoriesInBrowser', 'include', 'includeFiles', 'includeDirectories',
-        'includeInBrowser', 'includeInFileChooser', 'includeFilesInBrowser',
-        'includeDirectoriesInBrowser', 'includeFilesInFileChooser']:
-            print(p, getattr(properties, p))
+#        for p in ['exclude', 'excludeFiles', 'excludeDirectories', 'excludeInBrowser',
+#        'excludeInFolderSearch', 'excludeInFileChooser', 'excludeFilesInBrowser',
+#        'excludeDirectoriesInBrowser', 'include', 'includeFiles', 'includeDirectories',
+#        'includeInBrowser', 'includeInFileChooser', 'includeFilesInBrowser',
+#        'includeDirectoriesInBrowser', 'includeFilesInFileChooser']:
+#            print(p, getattr(properties, p))
 
     # -------------- Editor Modes
     def beginCodeEditorMode(self, mode):
