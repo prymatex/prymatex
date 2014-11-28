@@ -672,6 +672,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # ------------ Insert API
     def insertNewLine(self, cursor = None):
         cursor = cursor or self.textCursor()
+        # TODO: Is first line ? then try new syntax
+        if cursor.blockNumber() == 0:
+            self.trySyntaxByText(cursor)
         block = cursor.block()
         positionInBlock = cursor.positionInBlock()
         settings = self.preferenceSettings(cursor)

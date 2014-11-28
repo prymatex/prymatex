@@ -11,6 +11,7 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
     
     def initialize(self, **kwargs):
         super(CodeEditorSnippetMode, self).initialize(**kwargs)
+        self.setAllowDefaultHandlers(False)
         self.processor = self.editor.findProcessor("snippet")
         self.processor.begin.connect(self.activate)
         self.processor.end.connect(self.deactivate)

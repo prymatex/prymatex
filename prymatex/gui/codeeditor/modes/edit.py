@@ -13,7 +13,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         super(CodeEditorEditMode, self).initialize(**kwargs)
         self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__insert_key_bundle_item)
         self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__insert_typing_pairs)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Return, self.__first_line_syntax)
         self.registerKeyPressHandler(QtCore.Qt.Key_Return, self.__insert_new_line)
         self.registerKeyPressHandler(QtCore.Qt.Key_Tab, self.__insert_tab_bundle_item)
         self.registerKeyPressHandler(QtCore.Qt.Key_Home, self.__move_cursor_to_line_start)
@@ -24,11 +23,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         self.registerKeyPressHandler(QtCore.Qt.Key_Insert, self.__toggle_overwrite)
 
     # ------------ Key press handlers
-    def __first_line_syntax(self, event):
-        cursor = self.editor.textCursor()
-        if cursor.blockNumber() == 0:
-            self.editor.trySyntaxByText(cursor)
-    
     def __insert_new_line(self, event):
         self.editor.insertNewLine(self.editor.textCursor())
         return True
