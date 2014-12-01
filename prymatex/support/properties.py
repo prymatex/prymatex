@@ -25,14 +25,15 @@ class Settings(object):
             section = self.section \
                 if self.section in config.sections() \
                 else 'DEFAULT'
-            yield config[section]
+            yield config.directory, config[section]
 
     def get_snippet(self, key, default=None):
         variables = { key: '' }
-        for section in self.sections():
+        for directory, section in self.sections():
             value = section.get(key, fallback=None)
             if value is not None:
                 value = self._remove_quotes(value)
+                variables["CWD"] = directory
                 variables.update(dict(
                     ((item[0], self._remove_quotes(item[1])) \
                         for item in section.items() \
@@ -45,25 +46,25 @@ class Settings(object):
         
     def get_str(self, key, default=None):
         value = default
-        for section in self.sections():
+        for directory, section in self.sections():
             value = section.get(key, fallback=value)
         return self._remove_quotes(value)
 
     def get_bool(self, key, default=None):
         value = default
-        for section in self.sections():
+        for directory, section in self.sections():
             value = section.getboolean(key, fallback=value)
         return value
 
     def get_int(self, key, default=None):
         value = default
-        for section in self.sections():
+        for directory, section in self.sections():
             value = section.getint(key, fallback=value)
         return value
 
     def get_variables(self):
         variables = []
-        for section in self.sections():
+        for directory, section in self.sections():
             variables.extend(
                 [ (item[0], self._remove_quotes(item[1])) \
                     for item in section.items() if item[0].isupper() ]

@@ -75,6 +75,8 @@ class PrymatexMainCommandProcessor(CommandProcessorMixin, QtCore.QObject):
     def showAsTooltip(self, context, outputFormat = None):
         message = html.escape(context.outputValue.strip())
         timeout = len(message) * 20
+        if timeout > 2000:
+            timeout = 2000
 
         self.window().showTooltip(message, timeout = timeout)
     
