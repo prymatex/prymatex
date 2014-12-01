@@ -15,11 +15,10 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__insert_typing_pairs)
         self.registerKeyPressHandler(QtCore.Qt.Key_Return, self.__insert_new_line)
         self.registerKeyPressHandler(QtCore.Qt.Key_Tab, self.__insert_tab_bundle_item)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Home, self.__move_cursor_to_line_start)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__unindent_backward_tab_behavior)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__remove_backward_braces)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__unindent_forward_tab_behavior)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__remove_forward_braces)
+        self.registerKeyPressHandler(QtCore.Qt.Key_Home, self.__move_cursor_to_home)
+        self.registerKeyPressHandler(QtCore.Qt.Key_End, self.__move_cursor_to_end)
+        self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__backspace_behavior)
+        self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__delete_behavior)
         self.registerKeyPressHandler(QtCore.Qt.Key_Insert, self.__toggle_overwrite)
 
     # ------------ Key press handlers
@@ -51,27 +50,36 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                 self.editor.insertBundleItem(items, textCursor = triggerCursor)
                 return bool(items)
 
-    def __move_cursor_to_line_start(self, event):
+    def __move_cursor_to_home(self, event):
         cursor = self.editor.textCursor()
-        #Solo si el cursor no esta al final de la indentacion
         block = cursor.block()
         newPosition = block.position() + len(self.editor.blockIndentation(block))
+        # Solo si el cursor no esta al final de la indentacion
         if newPosition != cursor.position():
             cursor.setPosition(newPosition, event.modifiers() == QtCore.Qt.ShiftModifier and QtGui.QTextCursor.KeepAnchor or QtGui.QTextCursor.MoveAnchor)
             self.editor.setTextCursor(cursor)
             return True
         
-    def __unindent_backward_tab_behavior(self, event):
+    def __move_cursor_to_end(self, event):
+        cursor = self.editor.textCursor()
+        block = cursor.block()
+        newPosition = block.position() + len(block.text().rstrip())
+        # Solo si el cursor no esta al final del texto
+        if newPosition != cursor.position():
+            cursor.setPosition(newPosition, event.modifiers() == QtCore.Qt.ShiftModifier and QtGui.QTextCursor.KeepAnchor or QtGui.QTextCursor.MoveAnchor)
+            self.editor.setTextCursor(cursor)
+            return True
+
+    def __backspace_behavior(self, event):
         cursor = self.editor.textCursor()
         if not cursor.hasSelection():
-            lineText = cursor.block().text()
-            if lineText[:cursor.positionInBlock()].endswith(self.editor.tabKeyBehavior()):
-                self.editor.unindent()
+            # ----------- Remove Tab_behavior
+            tab_behavior = self.editor.tabKeyBehavior()
+            cursor = self.editor.newCursorAtPosition(cursor.position(), cursor.position() - len(tab_behavior))
+            if cursor.selectedText() == tab_behavior:
+                cursor.removeSelectedText()
                 return True
-        
-    def __remove_backward_braces(self, event):
-        cursor = self.editor.textCursor()
-        if not cursor.hasSelection():
+            # ----------- Remove Braces
             cursor1, _, cursor2, _ = self.editor._smart_typing_pairs(cursor)
             if cursor1 and cursor2  and (cursor1.selectionStart() == cursor2.selectionEnd() or cursor1.selectionEnd() == cursor2.selectionStart()):
                 cursor.beginEditBlock()
@@ -80,18 +88,16 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                 cursor.endEditBlock()
                 return True
 
-    def __unindent_forward_tab_behavior(self, event):
+    def __delete_behavior(self, event):
         cursor = self.editor.textCursor()
         if not cursor.hasSelection():
+            # ----------- Remove Tab_behavior
             tab_behavior = self.editor.tabKeyBehavior()
             cursor = self.editor.newCursorAtPosition(cursor.position(), cursor.position() + len(tab_behavior))
             if cursor.selectedText() == tab_behavior:
                 cursor.removeSelectedText()
                 return True
-        
-    def __remove_forward_braces(self, event):
-        cursor = self.editor.textCursor()
-        if not cursor.hasSelection():
+            # ----------- Remove Braces
             _, cursor1, _, cursor2 = self.editor._smart_typing_pairs(cursor)
             if cursor1 and cursor2  and (cursor1.selectionStart() == cursor2.selectionEnd() or cursor1.selectionEnd() == cursor2.selectionStart()):
                 cursor.beginEditBlock()
