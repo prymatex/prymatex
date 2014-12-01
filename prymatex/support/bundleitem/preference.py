@@ -61,7 +61,7 @@ class Settings(object):
 
     def dump(self):
         dataHash = {}
-        for key in PreferenceSettings.KEYS:
+        for key in Settings.KEYS:
             value = getattr(self, key, None)
             if value is not None:
                 if key in self.INDENT_KEYS or key in self.FOLDING_KEYS:

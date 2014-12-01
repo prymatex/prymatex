@@ -192,7 +192,7 @@ class FoldingListModel(QtCore.QAbstractListModel):
             )
             settings = self.editor.preferenceSettings(start)
             flag = settings.folding(startBlock.text())
-            if flag == settings.FOLDING_NONE:
+            if flag == constants.FOLDING_NONE:
                 self._remove_folding_cursor(start)
 
     def unfoldall(self):
