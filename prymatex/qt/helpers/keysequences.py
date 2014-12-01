@@ -5,7 +5,6 @@ import string
 
 from prymatex.qt import QtCore, QtGui
 
-from prymatex.utils.decorators.memoize import memoized
 from prymatex.utils.modmap import get_keymap_table
 from .base import text_to_objectname
 
@@ -56,7 +55,6 @@ def _keyboard_layout_keys(key):
 * supr -> ?M-^\?
 * Alt -> ~
 """
-@memoized
 def keysequence_to_keyequivalent(sequence):
     nemonic = []
     if sequence & QtCore.Qt.CTRL:
@@ -108,7 +106,6 @@ def _keyboard_layout_qtkeys(character):
     keys.append(code)
     return keys
 
-@memoized
 def keyequivalent_to_keysequence(nemonic):
     nemonic = list(nemonic)
     sequence = []
