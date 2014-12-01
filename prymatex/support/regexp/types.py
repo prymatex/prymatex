@@ -84,8 +84,10 @@ class VariableType(object):
             try:
                 return match.group(int(self.name))
             except:
-                print("no paso")
-        return variables and variables.get(self.name, "") or ""
+                pass
+        elif self.name in variables:
+            return variables[self.name]
+        return str(self)
 
     def render(self, visitor, memodict, holders = None, match = None):
         visitor.insertText(self.replace(memodict, holders, match, visitor.environmentVariables()))
