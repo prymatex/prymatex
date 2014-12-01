@@ -21,7 +21,6 @@ class Bundle(ManagedObject):
     def __init__(self, uuid, manager):
         ManagedObject.__init__(self, uuid, manager)
         self._populated = False
-        self._variables = None
 
     def setPopulated(self, populated):
         self._populated = populated
@@ -38,8 +37,6 @@ class Bundle(ManagedObject):
     def load(self, dataHash):
         ManagedObject.load(self, dataHash)
         self.__load_update(dataHash, True)
-        # Remove cached values
-        self._variables = None
 
     def update(self, dataHash):
         ManagedObject.update(self, dataHash)
@@ -60,34 +57,32 @@ class Bundle(ManagedObject):
                 return supportPath
 
     # ---------------- Variables
-    def variables(self):
-        if self._variables is None:
-            self._variables = {}
-            for r in self.require or []:
-                bundle = self.manager.getBundle(r["uuid"])
-                # TODO: Recursivo ?
-                if bundle is not None:
-                    self._variables.update(bundle.variables())
-                    support = bundle.supportPath()
-                    if support is not None:
-                        self._variables["TM_%s_BUNDLE_SUPPORT" % r["name"].upper()] = support
-            support = self.supportPath()
-            if support is not None:
-                self._variables['TM_BUNDLE_SUPPORT'] = support
-            for program in self.requiredCommands or []:
-                if not programs.is_program_installed(program["command"]):
-                    # Search in locations
-                    for location in program["locations"]:
-                        if os.path.exists(location):
-                            self._variables[program["variable"]] = location
-                            break
-        return self._variables.copy()
+    def shellVariables(self, environment):
+        variables = []
+        for r in self.require or []:
+            bundle = self.manager.getBundle(r["uuid"])
+            # TODO: Recursivo ?
+            if bundle is not None:
+                variables.extend(bundle.shellVariables())
+                support = bundle.supportPath()
+                if support is not None:
+                    variables.append(("TM_%s_BUNDLE_SUPPORT" % r["name"].upper(), support))
+        support = self.supportPath()
+        if support is not None:
+            variables.append(('TM_BUNDLE_SUPPORT', support))
+        for program in self.requiredCommands or []:
+            if not programs.is_program_installed(program["command"]):
+                # Search in locations
+                for location in program["locations"]:
+                    if os.path.exists(location):
+                        variables.append((program["variable"], location))
+                        break
+        return variables
 
     # ------------------ Environment variables
     def environmentVariables(self):
         env = {}
         env['TM_BUNDLE_PATH'] = self.currentSourcePath()
-        env.update(self.variables())
         return env
 
     # --------------- Source Handlers

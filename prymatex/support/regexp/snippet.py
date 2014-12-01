@@ -40,6 +40,8 @@ class Snippet(object):
     def __len__(self):
         return len(self.placeholders)
     
+    # TODO: Add parameter for partial resolution
+    # $PATH:$HOME/Scripts if environement has not PATH then dont resolve 
     def substitute(self, variables = {}):
         v = Visitor(variables)
         self.render(v, types.Memodict())

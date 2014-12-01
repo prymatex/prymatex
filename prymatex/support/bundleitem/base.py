@@ -50,8 +50,8 @@ class BundleItem(ManagedObject):
     def enabled(self):
         return self.bundle.enabled()
 
-    def variables(self):
-        return self.bundle.variables()
+    def shellVariables(self, environment):
+        return self.bundle.shellVariables(environment)
 
     # ---------------- Environment Variables
     def environmentVariables(self):

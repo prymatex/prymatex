@@ -80,10 +80,6 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         206: 'showAsTooltip',
         207: 'createNewDocument'
     }
-    def __init__(self, *largs, **kwargs):
-        super(Command, self).__init__(*largs, **kwargs)
-        self._variables = None
-
     # ---------------- Load, update, dump
     def __load_update(self, dataHash, initialize):
         for key in Command.KEYS:
@@ -97,8 +93,6 @@ echo Selection: "$TM_SELECTED_TEXT"''',
     def load(self, dataHash):
         BundleItem.load(self, dataHash)
         self.__load_update(dataHash, True)
-        # Remove cached values
-        self._variables = None
 
     def update(self, dataHash):
         BundleItem.update(self, dataHash)
@@ -115,32 +109,24 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         return dataHash
 
     # ---------------- Variables
-    def variables(self):
-        if self._variables is None:
-            self._variables = {}
-            for r in self.require or []:
-                bundle = self.manager.getBundle(r["uuid"])
-                if bundle is not None:
-                    self._variables.update(bundle.variables())
-                    support = bundle.supportPath()
-                    if support is not None:
-                        self._variables["TM_%s_BUNDLE_SUPPORT" % r["name"].upper()] = support
-            self._variables.update(self.bundle.variables())
-            for program in self.requiredCommands or []:
-                if not programs.is_program_installed(program["command"]):
-                    # Search in locations
-                    for location in program["locations"]:
-                        if os.path.exists(location):
-                            self._variables[program["variable"]] = location
-                            break
-            
-        return self._variables.copy()
-
-    # ---------------- Environment Variables
-    def environmentVariables(self):
-        env = BundleItem.environmentVariables(self)
-        env.update(self.variables())
-        return env
+    def shellVariables(self, environment):
+        variables = []
+        for r in self.require or []:
+            bundle = self.manager.getBundle(r["uuid"])
+            if bundle is not None:
+                variables.extend(bundle.shellVariables(environment))
+                support = bundle.supportPath()
+                if support is not None:
+                    variables.append(("TM_%s_BUNDLE_SUPPORT" % r["name"].upper(), support))
+        variables.extend(self.bundle.shellVariables(environment))
+        for program in self.requiredCommands or []:
+            if not programs.is_program_installed(program["command"]):
+                # Search in locations
+                for location in program["locations"]:
+                    if os.path.exists(location):
+                        variables.append((program["variable"], location))
+                        break
+        return variables
 
     def getInputText(self, processor):
         def getInputTypeAndValue(inputType, inputFormat, inputMode):
@@ -193,13 +179,17 @@ echo Selection: "$TM_SELECTED_TEXT"''',
     def executeCallback(self, processor, callback):
         processor.beginExecution(self)
         if self.beforeExecute(processor):
+            shellCommand = self.systemCommand()
+            environment = processor.environmentVariables()
+            shellVariables = processor.shellVariables(environment)
+            asynchronous = processor.asynchronous
             inputType, inputValue = self.getInputText(processor)
             self.manager.runSystemCommand(
                 bundleItem = self,
-                shellCommand = self.systemCommand(),
-                environment = processor.environmentVariables(),
-                shellVariables = processor.shellVariables(),
-                asynchronous = processor.asynchronous,
+                shellCommand = shellCommand,
+                environment = environment,
+                shellVariables = shellVariables,
+                asynchronous = asynchronous,
                 inputType = inputType,
                 inputValue = inputValue,
                 callback = callback

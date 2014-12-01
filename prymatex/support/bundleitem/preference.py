@@ -112,7 +112,7 @@ class ContextSettings(object):
     highlightPairs = property(lambda self: self._first("highlightPairs"))
     smartTypingPairs = property(lambda self: self._first("smartTypingPairs"))
 
-    def shellVariables(self):
+    def shellVariables(self, environment):
         shellVariables = []
         takenNames = set()
         for settings in self.settings:
@@ -120,7 +120,7 @@ class ContextSettings(object):
             if variables is not None:
                 names = [ variable[0] for variable in variables if variable[0].startswith("TM_") ]
                 if not any([ name in takenNames for name in names ]):
-                    shellVariables.extend(settings.preference.variables().items())
+                    shellVariables.extend(settings.preference.shellVariables(environment))
                     shellVariables.extend(variables)
                     takenNames.update(names)
         return shellVariables

@@ -62,11 +62,16 @@ class Settings(object):
             value = section.getint(key, fallback=value)
         return value
 
-    def get_variables(self):
+    def get_variables(self, environment):
         variables = []
+        env = environment.copy()
         for directory, section in self.sections():
+            env["CWD"] = directory
             variables.extend(
-                [ (item[0], self._remove_quotes(item[1])) \
+                [ ( item[0], 
+                    regexp.Snippet(
+                        self._remove_quotes(item[1])
+                    ).substitute(env)) \
                     for item in section.items() if item[0].isupper() ]
             )
         return variables
@@ -145,10 +150,12 @@ class ContextSettings(object):
     includeDirectoriesInBrowser = property(lambda self: self._first("includeDirectoriesInBrowser", value_type='snippet'))
     includeFilesInFileChooser = property(lambda self: self._first("includeFilesInFileChooser", value_type='snippet'))
 
-    def shellVariables(self):
+    def shellVariables(self, environment):
         shellVariables = []
         for settings in self.settings:
-            shellVariables.extend(settings.get_variables())
+            shellVariables = settings.get_variables(environment)
+            if shellVariables:
+                break
         return shellVariables
 
 class Properties(object):
