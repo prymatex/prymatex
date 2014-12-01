@@ -32,17 +32,35 @@ class CodeEditorBaseMode(PrymatexEditorAddon, QtCore.QObject):
             if handler in handlers:
                 handlers.remove(handler)
 
-    def preKeyPressHandlers(self, key):
-        handlers = self.preEventHandlers[QtCore.QEvent.KeyPress].get(key, [])
-        if self._allow_default_handlers and self != self.editor.defaultMode():
-            return handlers + self.editor.defaultMode().preKeyPressHandlers(key)
-        return handlers
+    def preHandle(self, event):
+        if event.type() == QtCore.QEvent.KeyPress:
+            return self.handle(self.pre_KeyPress_handlers(event.key()), event)
 
-    def postKeyPressHandlers(self, key):
-        handlers = self.postEventHandlers[QtCore.QEvent.KeyPress].get(key, [])
+    def postHandle(self, event):
+        if event.type() == QtCore.QEvent.KeyPress:
+            return self.handle(self.post_KeyPress_handlers(event.key()), event)
+
+    def handle(self, handlers, event):
+        for handler in handlers:
+            yield handler(event)
+
+    def pre_KeyPress_handlers(self, key):
+        for hander in self.preEventHandlers[QtCore.QEvent.KeyPress].get(QtCore.Qt.Key_Any, []):
+            yield hander
+        for hander in self.preEventHandlers[QtCore.QEvent.KeyPress].get(key, []):
+            yield hander
         if self._allow_default_handlers and self != self.editor.defaultMode():
-            return handlers + self.editor.defaultMode().postKeyPressHandlers(key)
-        return handlers
+            for hander in self.editor.defaultMode().pre_KeyPress_handlers(key):
+                yield hander
+
+    def post_KeyPress_handlers(self, key):
+        for hander in self.postEventHandlers[QtCore.QEvent.KeyPress].get(QtCore.Qt.Key_Any, []):
+            yield hander
+        for hander in self.postEventHandlers[QtCore.QEvent.KeyPress].get(key, []):
+            yield hander
+        if self._allow_default_handlers and self != self.editor.defaultMode():
+            for hander in self.editor.defaultMode().post_KeyPress_handlers(key):
+                yield hander
 
     def name(self):
         return self.objectName()
