@@ -112,8 +112,6 @@ class ContextSettings(object):
     highlightPairs = property(lambda self: self._first("highlightPairs"))
     smartTypingPairs = property(lambda self: self._first("smartTypingPairs"))
 
-    # Custom 
-    @property
     def shellVariables(self):
         shellVariables = []
         takenNames = set()

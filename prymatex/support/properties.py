@@ -145,8 +145,6 @@ class ContextSettings(object):
     includeDirectoriesInBrowser = property(lambda self: self._first("includeDirectoriesInBrowser", value_type='snippet'))
     includeFilesInFileChooser = property(lambda self: self._first("includeFilesInFileChooser", value_type='snippet'))
 
-    # Shell Variables
-    @property
     def shellVariables(self):
         shellVariables = []
         for settings in self.settings:

@@ -31,7 +31,7 @@ class PrymatexMainCommandProcessor(CommandProcessorMixin, QtCore.QObject):
     def shellVariables(self):
         settings = self.window().application().supportManager.getPreferenceSettings()
         properties = self.window().application().supportManager.getPropertiesSettings()
-        return settings.shellVariables + properties.shellVariables
+        return settings.shellVariables() + properties.shellVariables()
 
     def configure(self, settings):
         self.asynchronous = settings.get("asynchronous", True)
