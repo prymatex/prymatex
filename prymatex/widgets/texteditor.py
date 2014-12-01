@@ -111,8 +111,12 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
 
     # OVERRIDE: QPlainTextEdit.keyPressEvent()
     def keyPressEvent(self, event):
+        cursor = self.textCursor()
         if event.key() == QtCore.Qt.Key_Tab:
-            self.indent()
+            if not cursor.hasSelection():
+                cursor.insertText(self.tabKeyBehavior())
+            else:
+                self.indent(cursor)
         elif event.key() == QtCore.Qt.Key_Backtab:
             self.unindent()
         else:
