@@ -63,7 +63,7 @@ class Bundle(ManagedObject):
             bundle = self.manager.getBundle(r["uuid"])
             # TODO: Recursivo ?
             if bundle is not None:
-                variables.extend(bundle.shellVariables())
+                variables.extend(bundle.shellVariables(environment))
                 support = bundle.supportPath()
                 if support is not None:
                     variables.append(("TM_%s_BUNDLE_SUPPORT" % r["name"].upper(), support))
