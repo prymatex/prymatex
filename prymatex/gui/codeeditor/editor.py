@@ -193,14 +193,20 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         if properties.fontSize:
             font.setPointSize(properties.fontSize)
         self.setFont(font)
-        if properites.showInvisibles is not None:
+        if properties.showInvisibles is not None:
             flags = self.getFlags()
             invisibles = self.ShowTabsAndSpaces | self.ShowLineAndParagraphs
-            if properites.showInvisibles:
+            if properties.showInvisibles:
                 flags = flags | invisibles 
             else:
                 flags = flags & ~invisibles
             self.setFlags(flags)
+        if properties.spellChecking is not None:
+            pass
+        if properties.softWrap is not None:
+            pass
+        if properties.wrapColumn:
+            pass
         if properties.softTabs is not None:
             self.setSoftTabs(properties.softTabs)
         if properties.tabSize:
