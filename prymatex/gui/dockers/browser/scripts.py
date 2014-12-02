@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.utils import encoding
 
@@ -28,7 +28,7 @@ class SystemWrapper(QtCore.QObject):
 
     def outputString(self):
         while self.context is None:
-            QtGui.QApplication.processEvents()
+            QtWidgets.QApplication.processEvents()
         return self.context.outputValue
     outputString = QtCore.Property(str, outputString)
 

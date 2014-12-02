@@ -133,7 +133,16 @@ class ContextSettings(object):
     ## Other
     scopeAttributes = property(lambda self: self._first("scopeAttributes"))
     
-    ## File Filtering Keys
+    ## File Filtes
+    # These are all globs and perhaps a bit arcane. (Note that the glob syntax
+    # is documented in the built-in help system.)
+    # The file browser, if it has a file, checks that file against the first
+    # key with a value in this order: excludeFilesInBrowser, excludeInBrowser,
+    # excludeFiles, exclude. If neither match, it then does the same with
+    # include keys, and if one match, it is included.
+    # The default include key is * (so no hidden files, although see the default
+    # .tm_properties which include .htaccess and .tm_properties). The default
+    # exclude key is the empty string (nothing matches).
     exclude = property(lambda self: self._first("exclude", value_type='snippet'))
     excludeFiles = property(lambda self: self._first("excludeFiles", value_type='snippet'))
     excludeDirectories = property(lambda self: self._first("excludeDirectories", value_type='snippet'))
