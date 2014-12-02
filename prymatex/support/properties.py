@@ -118,6 +118,8 @@ class ContextSettings(object):
     fontSize = property(lambda self: self._first("fontSize", value_type='int'))
     showInvisibles = property(lambda self: self._first("showInvisibles", value_type='bool'))
     spellChecking = property(lambda self: self._first("spellChecking", value_type='bool'))
+    softWrap = property(lambda self: self._first("softWrap", value_type='bool'))
+    wrapColumn = property(lambda self: self._first("wrapColumn", value_type='int'))
 
     # * `softTabs`, `tabSize` — Presently can only be changed this way, but there
     # should be some memory added to Avian.    
@@ -149,6 +151,10 @@ class ContextSettings(object):
     includeFilesInBrowser = property(lambda self: self._first("includeFilesInBrowser", value_type='snippet'))
     includeDirectoriesInBrowser = property(lambda self: self._first("includeDirectoriesInBrowser", value_type='snippet'))
     includeFilesInFileChooser = property(lambda self: self._first("includeFilesInFileChooser", value_type='snippet'))
+
+    ## File Browsing
+    fileBrowserGlob = property(lambda self: self._first("fileBrowserGlob", value_type='snippet'))
+    fileChooserGlob = property(lambda self: self._first("fileChooserGlob", value_type='snippet'))
 
     def shellVariables(self, environment):
         shellVariables = []
