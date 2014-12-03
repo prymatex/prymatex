@@ -18,45 +18,54 @@ class PrymatexMainMenuBar(QtWidgets.QMenuBar):
         objects = self.customComponentObjects.get(klass, [])
         test_actions(instance, 
             filter(lambda obj: isinstance(obj, QtWidgets.QAction), objects))
-        
+    
+    def on_menu_aboutToShow(self, klass, actions):
+        instance = self.window()
+        components = self.window().application().componentHierarchyForClass(klass)
+        print(klass, components)
+
     # Extend Main Menu
     def extend(self, klass, parent = None):
-        menuExtensions = issubclass(klass, PrymatexComponent) and klass.contributeToMainMenu() or None
-        if menuExtensions is not None:
-            objects = []
-            for name, settings in menuExtensions.items():
-                if not settings:
-                    continue
+        menuExtensions = issubclass(klass, PrymatexComponent) and \
+            klass.contributeToMainMenu() or {}
+        objects = []
+        for name, settings in menuExtensions.items():
+            if not settings:
+                continue
 
-                # Find parent menu
-                parentMenu = self.parent().findChild(QtWidgets.QMenu, 
-                    text_to_objectname(name, prefix = "menu"))
-                # Extend
-                if parentMenu is not None:
-                    # Fix menu extensions
-                    if not isinstance(settings, list):
-                        settings = [ settings ]
-                    objects += extend_menu(parentMenu, settings,
-                        dispatcher = self.componentInstanceDispatcher,
-                        sequence_handler = partial(self.registerShortcut, klass),
-                        icon_handler = partial(self.registerIcon, klass))
-                else:
-                    objs = create_menu(parent, settings,
-                        dispatcher = self.componentInstanceDispatcher,
-                        allObjects = True,
-                        sequence_handler = partial(self.registerShortcut, klass),
-                        icon_handler = partial(self.registerIcon, klass))
-                    add_actions(self, [ objs[0] ], settings.get("before", None), prefix="actionMenu")
-                    objects += objs
+            # Find parent menu
+            parentMenu = self.parent().findChild(QtWidgets.QMenu, 
+                text_to_objectname(name, prefix = "menu"))
+            # Extend
+            if parentMenu is not None:
+                # Fix menu extensions
+                if not isinstance(settings, list):
+                    settings = [ settings ]
+                objects += extend_menu(parentMenu, settings,
+                    dispatcher = self.componentInstanceDispatcher,
+                    sequence_handler = partial(self.registerShortcut, klass),
+                    icon_handler = partial(self.registerIcon, klass))
+            else:
+                objs = create_menu(parent, settings,
+                    dispatcher = self.componentInstanceDispatcher,
+                    allObjects = True,
+                    sequence_handler = partial(self.registerShortcut, klass),
+                    icon_handler = partial(self.registerIcon, klass))
+                add_actions(self, [ objs[0] ], settings.get("before", None), prefix="actionMenu")
+                objects += objs
 
-            # Store all new objects from creation or extension
-            self.customComponentObjects.setdefault(klass, []).extend(objects)
-            
-            menus = [ obj for obj in objects if isinstance(obj, QtWidgets.QMenu) ]
-            #print(menus)            
+        # Store all new objects from creation or extension
+        self.customComponentObjects.setdefault(klass, []).extend(objects)
+        
+        menus = [ obj for obj in objects if isinstance(obj, QtWidgets.QMenu) ]
+        actions = [ obj for obj in objects if isinstance(obj, QtWidgets.QAction) ]
+        for menu in menus:
+            menu.aboutToShow.connect(
+                lambda klass=klass, actions=actions: self.on_menu_aboutToShow(klass, actions)
+            )
 
-            for componentClass in self.parent().application().pluginManager.findComponentsForClass(klass):
-                self.extend(componentClass, parent)
+        for componentClass in self.parent().application().pluginManager.findComponentsForClass(klass):
+            self.extend(componentClass, parent)
 
     def componentInstanceDispatcher(self, handler, *args):
         obj = self.sender()
