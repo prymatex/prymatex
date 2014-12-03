@@ -591,7 +591,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             result = QtWidgets.QMessageBox.question(editor, _("File changed"),
                                                 _(message) % editor.filePath,
                                                 buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,  # NOQA
-                                                defaultButton=QtWidgets.QMessageBox.Yes) if self.askAboutExternalChanges else QtGui.QMessageBox.Yes  # NOQA
+                                                defaultButton=QtWidgets.QMessageBox.Yes) if self.askAboutExternalChanges else QtWidgets.QMessageBox.Yes  # NOQA
             if result == QtWidgets.QMessageBox.Yes:
                 editor.reload()
             elif result == QtWidgets.QMessageBox.No:

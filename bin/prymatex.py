@@ -54,8 +54,10 @@ def runPrymatexApplication(options, files):
         returnCode = -1
 
     except exceptions.AlreadyRunningError as ex:
-        from prymatex.qt import QtGui
-        QtGui.QMessageBox.critical(None, ex.title, ex.message, QtGui.QMessageBox.Ok)
+        from prymatex.qt import QtWidgets
+        QtWidgets.QMessageBox.critical(
+            None, ex.title, ex.message, QtWidgets.QMessageBox.Ok
+        )
         returnCode = -2
 
     except:

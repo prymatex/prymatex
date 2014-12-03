@@ -7,7 +7,7 @@ if __name__ == "__main__":
     import sys, os
     sys.path.append(os.path.abspath("../.."))
 
-from prymatex.qt import QtGui, QtCore
+from prymatex.qt import QtGui, QtCore, QtWidgets
 from prymatex.qt.helpers import create_action, add_actions, keybinding
 from prymatex.utils.i18n import ugettext as _
 
@@ -263,7 +263,7 @@ class TableEditorDialog(QtGui.QDialog):
 
     def error(self, message):
         """An error occured, closing the dialog box"""
-        QtGui.QMessageBox.critical(self, _("Array editor"), message)
+        QtWidgets.QMessageBox.critical(self, _("Array editor"), message)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.reject()
 

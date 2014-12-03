@@ -60,12 +60,12 @@ class ProfileDialog(PrymatexDialog, Ui_ProfileDialog, QtWidgets.QDialog):
 
     def on_buttonDelete_pressed(self):
         profile = self.manager.profilesListModel.profile(self.listViewProfiles.currentIndex())
-        result = QtGui.QMessageBox.question(self, _("Delete Profile"),
+        result = QtWidgets.QMessageBox.question(self, _("Delete Profile"),
             _(DELETE_MESSAGE) % profile.PMX_PROFILE_NAME,
-            buttons = QtGui.QMessageBox.Yes | QtGui.QMessageBox.Ok | QtGui.QMessageBox.Discard,
-            defaultButton = QtGui.QMessageBox.Ok)
-        if result != QtGui.QMessageBox.Discard:
-            self.manager.deleteProfile(profile, result == QtGui.QMessageBox.Yes)
+            buttons = QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Discard,
+            defaultButton = QtWidgets.QMessageBox.Ok)
+        if result != QtWidgets.QMessageBox.Discard:
+            self.manager.deleteProfile(profile, result == QtWidgets.QMessageBox.Yes)
 
             
     def switchProfile(self, title="Switch profile"):
