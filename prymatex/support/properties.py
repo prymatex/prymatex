@@ -119,7 +119,7 @@ class ContextSettings(object):
     showInvisibles = property(lambda self: self._first("showInvisibles", value_type='bool'))
     spellChecking = property(lambda self: self._first("spellChecking", value_type='bool'))
     softWrap = property(lambda self: self._first("softWrap", value_type='bool'))
-    wrapColumn = property(lambda self: self._first("wrapColumn", value_type='int'))
+    wrapColumn = property(lambda self: self._first("wrapColumn"))
 
     # * `softTabs`, `tabSize` — Presently can only be changed this way, but there
     # should be some memory added to Avian.    

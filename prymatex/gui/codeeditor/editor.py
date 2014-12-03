@@ -64,15 +64,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     wordLengthToComplete = ConfigurableItem(default = 3)
 
     marginLineSize = ConfigurableItem(default = 80)
-    wordWrapSize = ConfigurableItem()
-    indentUsingSpaces = ConfigurableItem(default = True)
+    wordWrapSize = ConfigurableItem(default = Qt.QWIDGETSIZE_MAX)
     adjustIndentationOnPaste = ConfigurableItem(default = False)
     encoding = ConfigurableItem(default = 'utf_8')
 
     @ConfigurableItem(default = True)
     def indentUsingSpaces(self, soft):
-    	self.setSoftTabs(soft)
-    	 
+    	    self.setSoftTabs(soft)
+
     @ConfigurableItem(default = 4)
     def indentationWidth(self, size):
         self.setTabSize(size)
@@ -1104,12 +1103,17 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 },
                 {'text': "Word Wrap",
                  'items': [{
-                        'text': "Automatic",
+                        'text': "Enabled",
                         'checkable': True,
                         'triggered': cls.on_actionWordWrap_triggered,
-                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap)  and \
-                            ed.wordWrapSize is Qt.QWIDGETSIZE_MAX
-                    }, "-" ] + [ tuple([ {
+                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap)
+                    }, "-" ] + [ tuple(
+                    [{
+                        'text': "Automatic",
+                        'checkable': True,
+                        'triggered': lambda ed, checked: ed.on_actionWordWrap_triggered(checked, size=Qt.QWIDGETSIZE_MAX),
+                        'testChecked': lambda ed: ed.wordWrapSize == Qt.QWIDGETSIZE_MAX
+                    }] + [{
                         'text': "%s" % size,
                         'checkable': True,
                         'triggered': lambda ed, checked, size=size: ed.on_actionWordWrap_triggered(checked, size=size),
@@ -1119,10 +1123,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 },
                 {'text': "Margin Line",
                  'items': [{
-                        'text': "None",
+                        'text': "Enabled",
                         'checkable': True,
-                        'triggered': lambda ed, checked: ed.on_actionMarginLine_triggered(not checked),
-                        'testChecked': lambda ed: not bool(ed.getFlags() & ed.MarginLine)
+                        'triggered': cls.on_actionMarginLine_triggered,
+                        'testChecked': lambda ed: bool(ed.getFlags() & ed.MarginLine)
                     }, "-" ] + [ tuple([ {
                         'text': "%s" % size,
                         'checkable': True,
@@ -1348,15 +1352,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             flags = self.getFlags() & ~self.ShowLineAndParagraphs
         self.setFlags(flags)
 
-    def on_actionWordWrap_triggered(self, checked, size = Qt.QWIDGETSIZE_MAX):
+    def on_actionWordWrap_triggered(self, checked, size = None):
+        if isinstance(size, int):
+            self.wordWrapSize = size
         if checked:
             flags = self.getFlags() | self.WordWrap
-            self.wordWrapSize = size
-            if size != Qt.QWIDGETSIZE_MAX:
-                size = (size * self.characterWidth()) + 2
-            self.viewport().setMaximumWidth(size)
         else:
-            self.wordWrapSize = None
             flags = self.getFlags() & ~self.WordWrap
         self.setFlags(flags)
 

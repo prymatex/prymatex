@@ -46,6 +46,8 @@ class CodeEditorBaseProcessor(QtCore.QObject):
     def shellVariables(self, environment):
         settings = self.editor.preferenceSettings(self.textCursor)
         properties = self.editor.propertiesSettings(self.textCursor)
-        return settings.shellVariables(environment) + \
+        variables = settings.shellVariables(environment) + \
             properties.shellVariables(environment) + \
             self.bundleItem.shellVariables(environment)
+        print(variables)
+        return variables
