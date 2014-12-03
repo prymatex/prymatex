@@ -51,6 +51,9 @@ class PrymatexMainMenuBar(QtWidgets.QMenuBar):
 
             # Store all new objects from creation or extension
             self.customComponentObjects.setdefault(klass, []).extend(objects)
+            
+            menus = [ obj for obj in objects if isinstance(obj, QtWidgets.QMenu) ]
+            #print(menus)            
 
             for componentClass in self.parent().application().pluginManager.findComponentsForClass(klass):
                 self.extend(componentClass, parent)
