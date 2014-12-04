@@ -74,15 +74,15 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
         return self.components.get(klass, [])
     
     def componentHierarchyForClass(self, klass):
-        hierarchy = [ ]
+        hierarchy = []
         while klass != PrymatexMainWindow:
             hierarchy.append(klass)
-            parent = [p_children for p_children in iter(self.components.items()) if klass in p_children[1]]
-            if len(parent) != 1:
-                break
-            klass = parent.pop()[0]
-        hierarchy.reverse()
-        return hierarchy
+            for parent, childs in self.components.items():
+                print(type(parent), type(childs))
+                if klass in childs:
+                    klass = parent
+                    break
+        return hierarchy[::-1]
         
     # ------------ Handle editor classes
     def findEditorClassByName(self, name):
