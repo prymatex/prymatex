@@ -176,11 +176,6 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
         from prymatex.gui.settings.mainwindow import MainWindowSettingsWidget
         return [ MainWindowSettingsWidget ]
 
-    # ---------- Override QMainWindow
-    def show(self):
-        QtWidgets.QMainWindow.show(self)
-        self.menuBar().update(self.__class__, self)
-
     # --------------- Bundle Items
     def on_bundleItemTriggered(self, bundleItem):
         if self.bundleItem_handler is not None:
@@ -251,17 +246,6 @@ html_footer
         if not dock.isFloating():
             area = self.dockWidgetArea(dock)
             self.dockToolBars[area].show()
-
-    def updateMenuForEditor(self, editor):
-        # Primero las del editor
-        self.logger().debug("Update editor %s objects" % editor)
-        self.menuBar().update(editor.__class__, editor)
-
-        # Ahora sus children
-        componentClass = self.application().findComponentsForClass(editor.__class__)
-        for klass in componentClass:
-            for componentInstance in editor.findChildren(klass):
-                self.menuBar().update(klass, componentInstance)
 
     # -------------- Notifications
     def showMessage(self, *largs, **kwargs):
@@ -343,8 +327,8 @@ html_footer
         return self.centralWidget().currentWidget()
 
     def on_splitter_currentWidgetChanged(self, editor):
-        #Update Menu
-        self.updateMenuForEditor(editor)
+        # Update Menu Bar
+        #self.updateMenuForEditor(editor)
 
         #Avisar al manager si tenemos editor y preparar el handler
         self.application().supportManager.setEditorAvailable(editor is not None)

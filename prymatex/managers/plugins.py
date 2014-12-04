@@ -78,7 +78,6 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
         while klass != PrymatexMainWindow:
             hierarchy.append(klass)
             for parent, childs in self.components.items():
-                print(type(parent), type(childs))
                 if klass in childs:
                     klass = parent
                     break

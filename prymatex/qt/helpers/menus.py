@@ -15,8 +15,8 @@ from prymatex.utils import six
 
 import collections
 
-def create_menu(parent, settings, dispatcher = None, separatorName = False, 
-    allObjects = False, sequence_handler = None, icon_handler = None):
+def create_menu(parent, settings, dispatcher = None, separatorName = False,
+    sequence_handler = None, icon_handler = None):
     text = settings["text"]
     menu = QtWidgets.QMenu(text, parent)
     
@@ -75,45 +75,48 @@ def create_menu(parent, settings, dispatcher = None, separatorName = False,
         sequence_handler = sequence_handler, 
         icon_handler = icon_handler)
 
-    return allObjects and objects or menu
+    return menu, objects
 
 def extend_menu(rootMenu, settings, dispatcher = None, separatorName = False, 
     sequence_handler = None, icon_handler = None):
-    collectedObjects = [ rootMenu ]
+    collectedObjects = []
     for item in settings:
-        objects = None
         if item == "-":
-            objects = rootMenu.addSeparator()
-            objects.setObjectName(text_to_objectname("None", prefix = "separator"))
+            separator = rootMenu.addSeparator()
+            separator.setObjectName(text_to_objectname("None", prefix = "separator"))
+            collectedObjects.append(separator)
         elif isinstance(item, six.string_types) and item.startswith("--"):
             name = item[item.rfind("-") + 1:]
-            objects = rootMenu.addSeparator()
-            objects.setObjectName(text_to_objectname(name, prefix = "separator"))
+            separator = rootMenu.addSeparator()
+            separator.setObjectName(text_to_objectname(name, prefix = "separator"))
             if separatorName:
-                objects.setText(name)
+                separator.setText(name)
+            collectedObjects.append(separator)
         elif isinstance(item, dict) and 'items' in item:
-            objects = create_menu(rootMenu.parent(), item,
+            menu, objects = create_menu(rootMenu.parent(), item,
                 dispatcher = dispatcher,
                 separatorName = separatorName,
-                allObjects = True,
                 sequence_handler = sequence_handler, 
                 icon_handler = icon_handler)
-            add_actions(rootMenu, [ objects[0] ], item.get("before", None), prefix="actionMenu")
+            add_actions(rootMenu, [ menu ], item.get("before", None), prefix="actionMenu")
+            collectedObjects.append(menu)
+            collectedObjects.extend(objects)
         elif isinstance(item, dict):
-            objects = create_action(rootMenu.parent(), item,
+            action = create_action(rootMenu.parent(), item,
                 dispatcher = dispatcher, 
                 sequence_handler = sequence_handler, 
                 icon_handler = icon_handler)
-            add_actions(rootMenu, [ objects ], item.get("before", None), prefix="action")
+            add_actions(rootMenu, [ action ], item.get("before", None), prefix="action")
+            collectedObjects.append(action)
         elif isinstance(item, QtWidgets.QAction):
             rootMenu.addAction(item)
-            objects = item
+            collectedObjects.append(item)
         elif isinstance(item, QtWidgets.QMenu):
-            objects = rootMenu.addMenu(item)
+            rootMenu.addMenu(item)
+            collectedObjects.append(item)
         elif isinstance(item, (tuple, list)):
             actionGroup = QtWidgets.QActionGroup(rootMenu.parent())
             actionGroup.setExclusive(isinstance(item, tuple))
-            objects = []
             for action in item:
                 if isinstance(action, dict):
                     action = create_action(rootMenu.parent(), action,
@@ -132,11 +135,9 @@ def extend_menu(rootMenu, settings, dispatcher = None, separatorName = False,
                 else:
                     rootMenu.addAction(action)
                     action.setActionGroup(actionGroup)
-                objects.append(action)
+                collectedObjects.append(action)
         else:
             raise Exception("%s" % item)
-        if objects is not None:
-            getattr(collectedObjects, isinstance(objects, (tuple, list)) and "extend" or "append")(objects)
     return collectedObjects
 
 # Sections

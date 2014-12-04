@@ -151,7 +151,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
         self.actionOrderFoldersFirst.setChecked(True)
         self.actionOrderByName.trigger()
         
-        self.projectOptionsMenu = create_menu(self, optionsMenu)
+        self.projectOptionsMenu, objects = create_menu(self, optionsMenu)
         self.pushButtonOptions.setMenu(self.projectOptionsMenu)
 
         #Connect context menu
@@ -199,7 +199,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
             self.extendAddonsItemMenu(contextMenu, node)
             self.extendProjectBundleItemMenu(contextMenu, node)
         # contextMenu = create_menu(contextMenu, self, separatorName = True)
-        contextMenu = create_menu(self, contextMenu, separatorName = True)
+        contextMenu, objects = create_menu(self, contextMenu, separatorName = True)
         
         contextMenu.aboutToShow.connect(self.on_contextMenu_aboutToShow)
         contextMenu.aboutToHide.connect(self.on_contextMenu_aboutToHide)

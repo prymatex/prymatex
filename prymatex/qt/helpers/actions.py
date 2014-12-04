@@ -19,13 +19,12 @@ def toggle_actions(actions, enable):
 
 def test_actions(instance, actions):
     for action in actions:
-        action.setVisible(not hasattr(action, "testVisible") or \
-            action.testVisible(instance))
-        action.setEnabled(not hasattr(action, "testEnabled") or \
-            action.testEnabled(instance))
-        if action.isCheckable():
-            action.setChecked(hasattr(action, "testChecked") and \
-                action.testChecked(instance))
+        if hasattr(action, "testVisible"):
+            action.setVisible(action.testVisible(instance))
+        if hasattr(action, "testEnabled"):
+            action.setEnabled(action.testEnabled(instance))
+        if hasattr(action, "testChecked"):
+            action.setChecked(action.testChecked(instance))
 
 def create_action(parent, settings, dispatcher = None, sequence_handler=None, icon_handler=None):
     """Create a QAction"""
@@ -84,7 +83,6 @@ def create_action(parent, settings, dispatcher = None, sequence_handler=None, ic
         action.testVisible = settings["testVisible"]
     
     return action
-
 
 def add_actions(target, actions, before=None, prefix=""):
     """Add actions to a menu"""

@@ -134,7 +134,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtWidgets
                 self.actionDelete,
             ]
         }
-        self.fileSystemMenu = create_menu(self, contextMenu)
+        self.fileSystemMenu, objects = create_menu(self, contextMenu)
 
         #Setup Context Menu
         optionsMenu = {
@@ -152,7 +152,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtWidgets
         self.actionOrderFoldersFirst.setChecked(True)
         self.actionOrderByName.trigger()
 
-        self.fileSystemOptionsMenu = create_menu(self, optionsMenu)
+        self.fileSystemOptionsMenu, objects = create_menu(self, optionsMenu)
         self.pushButtonOptions.setMenu(self.fileSystemOptionsMenu)
 
         #Connect context menu

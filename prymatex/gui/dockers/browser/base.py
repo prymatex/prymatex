@@ -126,7 +126,7 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtWidgets.QDockWidget):
             "items": [ self.actionSyncEditor, self.actionConnectEditor ]
         }
 
-        self.browserOptionsMenu = create_menu(self, optionsMenu)
+        self.browserOptionsMenu, objects = create_menu(self, optionsMenu)
         self.toolButtonOptions.setMenu(self.browserOptionsMenu)
 
     def event(self, event):
