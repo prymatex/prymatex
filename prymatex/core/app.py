@@ -214,15 +214,15 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             self.shortcutsTreeModel.loadStandardSequences(self.resources())
 
             self.profile().restoreState(self)
-            main_window = self.currentWindow() or self.buildMainWindow()
+            window = self.currentWindow() or self.buildMainWindow(editor=True)
             
             # Change messages handler
-            self.showMessage = main_window.showMessage
+            self.showMessage = window.showMessage
 
             if not self.options.no_splash:
-                splash.finish(main_window)
+                splash.finish(window)
 
-            main_window.show()
+            window.show()
             
             self.logger().info("Application startup")
         except KeyboardInterrupt:
@@ -481,19 +481,19 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     def mainWindows(self):
         return self._main_windows
 
-    def buildMainWindow(self):
+    def buildMainWindow(self, editor = False):
         """Creates the windows"""
         from prymatex.gui.main import PrymatexMainWindow
 
-        self._main_windows.append(
-            self.createComponentInstance(PrymatexMainWindow)
-        )
-        return self._main_windows[-1]
+        window = self.createComponentInstance(PrymatexMainWindow)
+        if editor:
+            window.addEmptyEditor()
+        self._main_windows.append(window)    
+        return window
 
     def currentWindow(self):
         # TODO Aca retornar la window actual
-        if self._main_windows:
-            return self._main_windows[0]
+        return self._main_windows and self._main_windows[0]
 
     def canBeHandled(self, filepath):
         # from prymatex.utils.pyqtdebug import ipdb_set_trace

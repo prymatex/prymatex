@@ -163,7 +163,6 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
 
         # Metemos las acciones del support
         self.application().supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
-        self.addEmptyEditor()
     
     def environmentVariables(self):
         env = self.application().environmentVariables()
