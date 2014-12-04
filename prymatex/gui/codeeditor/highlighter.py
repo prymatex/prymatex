@@ -13,11 +13,11 @@ class HighlighterThread(QtCore.QThread):
         super(HighlighterThread, self).__init__(document)
         self._document = document
         self._processor = processor
-        self._running = True
+        self._stopped = False
+        print(self._document)
 
     def stop(self):
-        self._running = False
-        self.terminate()
+        self._stopped = True
         self.wait()
         self.deleteLater()
 
@@ -26,12 +26,12 @@ class HighlighterThread(QtCore.QThread):
         block = self._document.begin()
         user_datas = {}
         user_data = None
-        while block.isValid() and self._running:
-            self.usleep(1)
+        while block.isValid() and self._stopped:
             user_data = self._processor.blockUserData(block, user_data)
             user_datas[block.blockNumber()] = user_data
             block = block.next()
-        self.ready.emit(user_datas)
+        if not self._stopped:
+            self.ready.emit(user_datas)
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     aboutToChange = QtCore.Signal()  # When the highlight go to change allways triggered
@@ -51,19 +51,22 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self._user_datas = user_datas
         self.setDocument(self.editor.document())
         self.ready.emit()
+        print("ready bitch")
 
     def stop(self):
-        self.setDocument(None)
-        if self.thread is not None:
+        if self.thread and self.thread.isRunning():
             self.thread.stop()
-            self.thread = None
+            self.setDocument(None)
+            print("stop bitch")
 
     def start(self, callback=None):
-        self.thread = HighlighterThread(self.editor.document(), self.syntaxProcessor)
-        self.thread.ready.connect(self.on_thread_ready)
-        self.thread.started.connect(self.aboutToChange.emit)
-        self.thread.finished.connect(self.changed.emit)
-        self.thread.start()
+        if self.syntaxProcessor.isReady():
+            print("run bitch", self.themeProcessor.isReady())
+            self.thread = HighlighterThread(self.editor.document(), self.syntaxProcessor)
+            self.thread.ready.connect(self.on_thread_ready)
+            self.thread.started.connect(self.aboutToChange.emit)
+            self.thread.finished.connect(self.changed.emit)
+            self.thread.start()
 
     def highlightBlock(self, text):
         block = self.currentBlock()

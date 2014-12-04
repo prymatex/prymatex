@@ -87,7 +87,8 @@ class StorageManager(PrymatexComponent, QtCore.QObject):
     def singleFileStorage(self, storageName):
         fileName = self.buildFileName(storageName)
         storagePath = os.path.join(self.cacheDirectory, fileName)
-        storage = SingleFileStorage(storagePath)
+        #storage = SingleFileStorage(storagePath)
+        storage = MemoryStorage()
         self.__add_storage(storage)
         return storage
 
