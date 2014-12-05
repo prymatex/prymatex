@@ -14,7 +14,6 @@ class HighlighterThread(QtCore.QThread):
         self._document = document
         self._processor = processor
         self._stopped = False
-        print(self._document)
 
     def stop(self):
         self._stopped = True
@@ -51,17 +50,14 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self._user_datas = user_datas
         self.setDocument(self.editor.document())
         self.ready.emit()
-        print("ready bitch")
 
     def stop(self):
         if self.thread and self.thread.isRunning():
             self.thread.stop()
             self.setDocument(None)
-            print("stop bitch")
 
     def start(self, callback=None):
         if self.syntaxProcessor.isReady():
-            print("run bitch", self.themeProcessor.isReady())
             self.thread = HighlighterThread(self.editor.document(), self.syntaxProcessor)
             self.thread.ready.connect(self.on_thread_ready)
             self.thread.started.connect(self.aboutToChange.emit)
