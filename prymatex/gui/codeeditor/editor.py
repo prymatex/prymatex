@@ -63,14 +63,20 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     enableAutoCompletion = ConfigurableItem(default = True)
     wordLengthToComplete = ConfigurableItem(default = 3)
 
-    marginLineSize = ConfigurableItem(default = 80)
-    wordWrapSize = ConfigurableItem(default = Qt.QWIDGETSIZE_MAX)
     adjustIndentationOnPaste = ConfigurableItem(default = False)
     encoding = ConfigurableItem(default = 'utf_8')
 
+    @ConfigurableItem(default = 80)
+    def marginLineSize(self, size):
+        self.repaint()
+
+    @ConfigurableItem(default = Qt.QWIDGETSIZE_MAX)
+    def wordWrapSize(self, size):
+        self.viewport().setMaximumWidth((size * self.characterWidth()) + 2)
+    
     @ConfigurableItem(default = True)
     def indentUsingSpaces(self, soft):
-    	    self.setSoftTabs(soft)
+        self.setSoftTabs(soft)
 
     @ConfigurableItem(default = 4)
     def indentationWidth(self, size):
