@@ -466,7 +466,7 @@ class SplitterWidget(QtWidgets.QSplitter):
 
         if tw is not None:
             tw.setTabIcon(tidx, icon)
-
+    
     def _disambiguate_title(self, newWidget):  
         #Search all widgets with the same title
         def title_from_file(widget):

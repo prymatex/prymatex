@@ -178,7 +178,7 @@
          <string>Wrap</string>
         </property>
         <property name="text">
-         <string/>
+         <string>W</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -197,7 +197,7 @@
          <string>In selection</string>
         </property>
         <property name="text">
-         <string/>
+         <string>S</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -223,7 +223,7 @@
          <string>Highlight matches</string>
         </property>
         <property name="text">
-         <string/>
+         <string>H</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -323,7 +323,7 @@ p, li { white-space: pre-wrap; }
          <string>Wrap</string>
         </property>
         <property name="text">
-         <string/>
+         <string>W</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -356,7 +356,7 @@ p, li { white-space: pre-wrap; }
          <string>In selection</string>
         </property>
         <property name="text">
-         <string/>
+         <string>S</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -461,7 +461,7 @@ p, li { white-space: pre-wrap; }
          <string>Highlight matches</string>
         </property>
         <property name="text">
-         <string/>
+         <string>H</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -706,7 +706,7 @@ p, li { white-space: pre-wrap; }
          <string>Show context</string>
         </property>
         <property name="text">
-         <string/>
+         <string>C</string>
         </property>
         <property name="checkable">
          <bool>true</bool>

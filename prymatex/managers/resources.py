@@ -4,7 +4,7 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.core import PrymatexComponent
 
 from prymatex.resources import (Resource, ResourceProvider, 
-    load_media, load_stylesheets)
+    load_media, load_fonts, load_stylesheets)
 
 class ResourceManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
@@ -14,6 +14,7 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
         
     def add_source(self, name, path, default = False):
         res = Resource(name, path, default)
+        res.update(load_fonts(path))
         res.update(load_media(path))
         res.update(load_stylesheets(path))
         self.resources.insert(0, res)

@@ -105,25 +105,6 @@ class QtGlyph(QtCore.QObject):
     def defaultOption(self, name):
         return self.default_options[name]
 
-    @classmethod
-    def initGlyph(cls, ttf_path, parent = None):
-        if ttf_path not in cls.fontIds:
-            font_file = QtCore.QFile(ttf_path)
-            if not font_file.open(QtCore.QIODevice.ReadOnly):
-                raise Exception("Font could not be loaded!")
-            
-            font_data = font_file.readAll()
-            font_file.close()
-            cls.fontIds[ttf_path] = QtGui.QFontDatabase.addApplicationFontFromData(font_data)
-        
-        loadedFontFamilies = QtGui.QFontDatabase.applicationFontFamilies(cls.fontIds[ttf_path])
-        if loadedFontFamilies:
-            font_name = loadedFontFamilies[0]
-            return QtGlyph(font_name)
-        else:
-            del cls.fontIds[ttf_path]
-            raise Exception("Font is empty?!")
-
     # Creates an icon with the given name
     # You can use the icon names as defined on http://fortawesome.github.io/Font-Awesome/design.html withour the 'icon-' prefix
     def icon(self, name, **options):

@@ -19,7 +19,7 @@ else:
 
 def font_is_installed(font):
     """Check if font is installed"""
-    return [fam for fam in QtGui.QFontDatabase().families() if str(fam) == font]
+    return [fam for fam in QtGui.QFontDatabase().families() if fam == font]
     
 def get_family(families):
     """Return the first installed font family in family list"""
@@ -32,3 +32,17 @@ def get_family(families):
         print("Warning: None of the following fonts is installed: %r" % families)
         return QtGui.QFont().family()
 
+def load_fonts(resourcesPath):
+    resources = { "Fonts": {} }
+    
+    # Load Fonts
+    fontsPath = os.path.join(resourcesPath, "Media", "Fonts")
+    if os.path.exists(fontsPath):
+        for fontFileName in os.listdir(fontsPath):
+            name = os.path.splitext(fontFileName)[0]
+            fontPath = os.path.join(fontsPath, fontFileName)
+            fid = QtGui.QFontDatabase.addApplicationFont(fontPath)
+            families = QtGui.QFontDatabase.applicationFontFamilies(fid)
+            for f in families:
+                resources["Fonts"].setdefault(f, []).append(fontPath)
+    return resources

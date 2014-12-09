@@ -48,14 +48,11 @@ def load_media(resourcesPath):
                 resources["Themes"][name] = IconTheme(name, "pix", os.path.join(themesPath, name))
     
     # Load Glyphs
-    glyphsPath = os.path.join(resourcesPath, "Media", "Glyphs")
-    if os.path.exists(glyphsPath):
-        for glyphFileName in os.listdir(glyphsPath):
-            name = os.path.splitext(glyphFileName)[0]
-            glyphPath = os.path.join(glyphsPath, glyphFileName)
-            gly = glyph.QtGlyph.initGlyph(glyphPath)
-            resources["Glyphs"][gly.name()] = gly
-            resources["Themes"][gly.name()] = IconTheme(gly.name(), "glyph", glyphPath)
+    glyphsNames = ["FontAwesome", "WebHostingHub-Glyphs"]
+    for glyphNames in glyphsNames:
+        gly = glyph.QtGlyph(glyphNames)
+        resources["Glyphs"][gly.name()] = gly
+        resources["Themes"][gly.name()] = IconTheme(gly.name(), "glyph", glyphNames)
     
     # Load Mapping
     mappingsPath = os.path.join(resourcesPath, "Media", "Mapping")
