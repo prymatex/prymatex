@@ -347,12 +347,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             self.insertBundleItem(syntax)
         self.filePathChanged.emit(filePath)
 
-    def title(self):
-        title = PrymatexEditor.title(self)
-        if self.isModified():
-            title = "%s *" % title
-        return title
-
     def fileFilters(self):
         return [ "%s (%s)" % (self.syntax().bundle.name, " ".join(["*." + ft for ft in self.syntax().fileTypes])) ]
         #return PrymatexEditor.fileFilters(self)
