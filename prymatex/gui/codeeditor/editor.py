@@ -72,6 +72,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     @ConfigurableItem(default = Qt.QWIDGETSIZE_MAX)
     def wordWrapSize(self, size):
+        print(size)
         self.viewport().setMaximumWidth((size * self.characterWidth()) + 2)
     
     @ConfigurableItem(default = True)
