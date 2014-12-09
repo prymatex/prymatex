@@ -1111,14 +1111,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                  'items': [{
                         'text': "Enabled",
                         'checkable': True,
-                        'triggered': cls.on_actionWordWrap_triggered,
+                        'triggered': lambda ed, checked: ed.on_actionWordWrap_triggered(checked, size=Qt.QWIDGETSIZE_MAX),
                         'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap)
                     }, "-" ] + [ tuple(
                     [{
                         'text': "Automatic",
                         'checkable': True,
                         'triggered': lambda ed, checked: ed.on_actionWordWrap_triggered(checked, size=Qt.QWIDGETSIZE_MAX),
-                        'testChecked': lambda ed: ed.wordWrapSize == Qt.QWIDGETSIZE_MAX
+                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap) and ed.wordWrapSize == Qt.QWIDGETSIZE_MAX
                     }] + [{
                         'text': "%s" % size,
                         'checkable': True,
