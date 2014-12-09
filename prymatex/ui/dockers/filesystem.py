@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/filesystem.ui'
+# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/dockers/filesystem.ui'
 #
-# Created: Tue Dec  9 12:44:19 2014
-#      by: PyQt5 UI code generator 5.2.1
+# Created: Tue Dec  9 16:01:57 2014
+#      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_FileSystemDock(object):
     def setupUi(self, FileSystemDock):
         FileSystemDock.setObjectName("FileSystemDock")
-        FileSystemDock.resize(330, 484)
+        FileSystemDock.resize(347, 484)
         self.dockWidgetContents = QtWidgets.QWidget()
         self.dockWidgetContents.setObjectName("dockWidgetContents")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.dockWidgetContents)
@@ -26,19 +26,16 @@ class Ui_FileSystemDock(object):
         spacerItem = QtWidgets.QSpacerItem(10, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.buttonsLayout.addItem(spacerItem)
         self.pushButtonBack = QtWidgets.QPushButton(self.dockWidgetContents)
-        self.pushButtonBack.setMaximumSize(QtCore.QSize(24, 24))
         icon = QtGui.QIcon.fromTheme("go-previous")
         self.pushButtonBack.setIcon(icon)
         self.pushButtonBack.setObjectName("pushButtonBack")
         self.buttonsLayout.addWidget(self.pushButtonBack)
         self.pushButtonFoward = QtWidgets.QPushButton(self.dockWidgetContents)
-        self.pushButtonFoward.setMaximumSize(QtCore.QSize(24, 24))
         icon = QtGui.QIcon.fromTheme("go-next")
         self.pushButtonFoward.setIcon(icon)
         self.pushButtonFoward.setObjectName("pushButtonFoward")
         self.buttonsLayout.addWidget(self.pushButtonFoward)
         self.pushButtonUp = QtWidgets.QPushButton(self.dockWidgetContents)
-        self.pushButtonUp.setMaximumSize(QtCore.QSize(24, 24))
         icon = QtGui.QIcon.fromTheme("go-up")
         self.pushButtonUp.setIcon(icon)
         self.pushButtonUp.setObjectName("pushButtonUp")
@@ -49,21 +46,18 @@ class Ui_FileSystemDock(object):
         self.line.setObjectName("line")
         self.buttonsLayout.addWidget(self.line)
         self.pushButtonSync = QtWidgets.QPushButton(self.dockWidgetContents)
-        self.pushButtonSync.setMaximumSize(QtCore.QSize(24, 24))
         icon = QtGui.QIcon.fromTheme("sync")
         self.pushButtonSync.setIcon(icon)
         self.pushButtonSync.setCheckable(True)
         self.pushButtonSync.setObjectName("pushButtonSync")
         self.buttonsLayout.addWidget(self.pushButtonSync)
         self.pushButtonCollapseAll = QtWidgets.QPushButton(self.dockWidgetContents)
-        self.pushButtonCollapseAll.setMaximumSize(QtCore.QSize(24, 24))
         self.pushButtonCollapseAll.setText("")
         icon = QtGui.QIcon.fromTheme("collapse-all")
         self.pushButtonCollapseAll.setIcon(icon)
         self.pushButtonCollapseAll.setObjectName("pushButtonCollapseAll")
         self.buttonsLayout.addWidget(self.pushButtonCollapseAll)
         self.pushButtonCustomFilters = QtWidgets.QPushButton(self.dockWidgetContents)
-        self.pushButtonCustomFilters.setMaximumSize(QtCore.QSize(24, 24))
         self.pushButtonCustomFilters.setText("")
         icon = QtGui.QIcon.fromTheme("custom-filters")
         self.pushButtonCustomFilters.setIcon(icon)

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/configure/project.ui'
+# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/configure/project.ui'
 #
-# Created: Tue Dec  9 12:44:17 2014
-#      by: PyQt5 UI code generator 5.2.1
+# Created: Tue Dec  9 16:01:56 2014
+#      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 

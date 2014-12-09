@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dialogs/template.ui'
+# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/dialogs/template.ui'
 #
-# Created: Tue Dec  9 12:44:18 2014
-#      by: PyQt5 UI code generator 5.2.1
+# Created: Tue Dec  9 16:01:53 2014
+#      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -13,7 +13,7 @@ class Ui_TemplateDialog(object):
     def setupUi(self, TemplateDialog):
         TemplateDialog.setObjectName("TemplateDialog")
         TemplateDialog.setWindowModality(QtCore.Qt.WindowModal)
-        TemplateDialog.resize(600, 130)
+        TemplateDialog.resize(600, 161)
         TemplateDialog.setMinimumSize(QtCore.QSize(600, 0))
         self.verticalLayout = QtWidgets.QVBoxLayout(TemplateDialog)
         self.verticalLayout.setSpacing(2)
@@ -58,7 +58,6 @@ class Ui_TemplateDialog(object):
         self.comboTemplates.setObjectName("comboTemplates")
         self.horizontalLayout_3.addWidget(self.comboTemplates)
         self.buttonEnvironment = QtWidgets.QPushButton(TemplateDialog)
-        self.buttonEnvironment.setMaximumSize(QtCore.QSize(32, 16777215))
         self.buttonEnvironment.setText("")
         icon = QtGui.QIcon.fromTheme("code-variable")
         self.buttonEnvironment.setIcon(icon)

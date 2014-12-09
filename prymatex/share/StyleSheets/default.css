@@ -17,3 +17,11 @@ QListView {
 QListView::item {
     padding: 1px;
 }
+
+QPushButton {
+    max-height: 1em;
+}
+
+QToolButton {
+    max-height: 1em;
+}

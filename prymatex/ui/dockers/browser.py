@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/browser.ui'
+# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/dockers/browser.ui'
 #
-# Created: Tue Dec  9 12:44:20 2014
-#      by: PyQt5 UI code generator 5.2.1
+# Created: Tue Dec  9 16:01:56 2014
+#      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_BrowserDock(object):
     def setupUi(self, BrowserDock):
         BrowserDock.setObjectName("BrowserDock")
-        BrowserDock.resize(520, 54)
+        BrowserDock.resize(520, 61)
         self.dockWidgetContents = QtWidgets.QWidget()
         self.dockWidgetContents.setObjectName("dockWidgetContents")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.dockWidgetContents)
@@ -23,7 +23,6 @@ class Ui_BrowserDock(object):
         self.horizontalLayout.setSpacing(2)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.pushButtonGoPrevious = QtWidgets.QPushButton(self.dockWidgetContents)
-        self.pushButtonGoPrevious.setMaximumSize(QtCore.QSize(24, 24))
         self.pushButtonGoPrevious.setText("")
         icon = QtGui.QIcon.fromTheme("go-previous")
         self.pushButtonGoPrevious.setIcon(icon)
@@ -31,7 +30,6 @@ class Ui_BrowserDock(object):
         self.horizontalLayout.addWidget(self.pushButtonGoPrevious)
         self.pushButtonGoNext = QtWidgets.QPushButton(self.dockWidgetContents)
         self.pushButtonGoNext.setEnabled(True)
-        self.pushButtonGoNext.setMaximumSize(QtCore.QSize(24, 24))
         self.pushButtonGoNext.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.pushButtonGoNext.setText("")
         icon = QtGui.QIcon.fromTheme("go-next")
@@ -39,7 +37,6 @@ class Ui_BrowserDock(object):
         self.pushButtonGoNext.setObjectName("pushButtonGoNext")
         self.horizontalLayout.addWidget(self.pushButtonGoNext)
         self.pushButtonReload = QtWidgets.QPushButton(self.dockWidgetContents)
-        self.pushButtonReload.setMaximumSize(QtCore.QSize(24, 24))
         self.pushButtonReload.setText("")
         icon = QtGui.QIcon.fromTheme("reload")
         self.pushButtonReload.setIcon(icon)
@@ -49,7 +46,6 @@ class Ui_BrowserDock(object):
         self.lineUrl.setObjectName("lineUrl")
         self.horizontalLayout.addWidget(self.lineUrl)
         self.pushButtonStop = QtWidgets.QPushButton(self.dockWidgetContents)
-        self.pushButtonStop.setMaximumSize(QtCore.QSize(24, 24))
         self.pushButtonStop.setText("")
         icon = QtGui.QIcon.fromTheme("stop")
         self.pushButtonStop.setIcon(icon)
