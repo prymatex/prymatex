@@ -135,7 +135,7 @@ class DragableTabBar(QtWidgets.QTabBar):
             # Create custom menu
             tabMenu["items"].extend(widget.contributeToTabMenu())
             
-            menu = create_menu(self, tabMenu)
+            menu, objects = create_menu(self, tabMenu)
             
             # Display menu
             menu.exec_(e.globalPos())
