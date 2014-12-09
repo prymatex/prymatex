@@ -58,14 +58,18 @@
          <item>
           <widget class="QPushButton" name="pushButtonAdd">
            <property name="icon">
-            <iconset theme="add"/>
+            <iconset theme="add">
+             <normaloff/>
+            </iconset>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="pushButtonRemove">
            <property name="icon">
-            <iconset theme="remove"/>
+            <iconset theme="remove">
+             <normaloff/>
+            </iconset>
            </property>
           </widget>
          </item>
@@ -88,7 +92,9 @@
             <string>Filter</string>
            </property>
            <property name="icon">
-            <iconset theme="filter"/>
+            <iconset theme="filter">
+             <normaloff/>
+            </iconset>
            </property>
           </widget>
          </item>
@@ -173,17 +179,13 @@
            </item>
            <item>
             <widget class="QPushButton" name="pushButtonCleanKeyEquivalent">
-             <property name="maximumSize">
-              <size>
-               <width>32</width>
-               <height>16777215</height>
-              </size>
-             </property>
              <property name="text">
               <string/>
              </property>
              <property name="icon">
-              <iconset theme="clear-shortcut"/>
+              <iconset theme="clear-shortcut">
+               <normaloff/>
+              </iconset>
              </property>
             </widget>
            </item>

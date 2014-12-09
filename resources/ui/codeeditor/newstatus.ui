@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>696</width>
-    <height>230</height>
+    <width>1093</width>
+    <height>281</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,14 +30,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QComboBox" name="comboBoxInput">
-        <property name="maximumSize">
-         <size>
-          <width>120</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
+       <widget class="QComboBox" name="comboBoxInput"/>
       </item>
       <item>
        <widget class="Line" name="line_4">
@@ -47,14 +40,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBoxOutput">
-        <property name="maximumSize">
-         <size>
-          <width>160</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
+       <widget class="QComboBox" name="comboBoxOutput"/>
       </item>
       <item>
        <widget class="QComboBox" name="comboBoxCommand">
@@ -71,12 +57,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonCommandClose">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="text">
          <string/>
         </property>
@@ -84,9 +64,6 @@
          <iconset theme="close">
           <normaloff/>
          </iconset>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -104,17 +81,13 @@
       </property>
       <item>
        <widget class="QPushButton" name="pushButtonFindRegularExrepssion">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Regular expression</string>
         </property>
         <property name="icon">
-         <iconset theme="regular-expression"/>
+         <iconset theme="regular-expression">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -123,17 +96,13 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonFindCaseSensitive">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Case sensitive</string>
         </property>
         <property name="icon">
-         <iconset theme="case-sensitive"/>
+         <iconset theme="case-sensitive">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -142,17 +111,13 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonFindWholeWord">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Whole word</string>
         </property>
         <property name="icon">
-         <iconset theme="whole-word"/>
+         <iconset theme="whole-word">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -168,17 +133,13 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonFindWrap">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Wrap</string>
         </property>
         <property name="icon">
-         <iconset theme="wrap"/>
+         <iconset theme="wrap">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -187,17 +148,13 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonFindInSelection">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>In selection</string>
         </property>
         <property name="icon">
-         <iconset theme="selection"/>
+         <iconset theme="selection">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -213,17 +170,13 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonFindHighlightMatches">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Highlight matches</string>
         </property>
         <property name="icon">
-         <iconset theme="highlight-matches"/>
+         <iconset theme="highlight-matches">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -273,12 +226,6 @@ p, li { white-space: pre-wrap; }
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonFindClose">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="text">
          <string/>
         </property>
@@ -286,9 +233,6 @@ p, li { white-space: pre-wrap; }
          <iconset theme="close">
           <normaloff/>
          </iconset>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -313,17 +257,13 @@ p, li { white-space: pre-wrap; }
       </item>
       <item row="0" column="4">
        <widget class="QPushButton" name="pushButtonReplaceWrap">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Wrap</string>
         </property>
         <property name="icon">
-         <iconset theme="wrap"/>
+         <iconset theme="wrap">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -346,17 +286,13 @@ p, li { white-space: pre-wrap; }
       </item>
       <item row="0" column="5">
        <widget class="QPushButton" name="pushButtonReplaceInSelection">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>In selection</string>
         </property>
         <property name="icon">
-         <iconset theme="selection"/>
+         <iconset theme="selection">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -392,17 +328,13 @@ p, li { white-space: pre-wrap; }
       </item>
       <item row="0" column="2">
        <widget class="QPushButton" name="pushButtonReplaceWholeWord">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Whole word</string>
         </property>
         <property name="icon">
-         <iconset theme="whole-word"/>
+         <iconset theme="whole-word">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -411,17 +343,13 @@ p, li { white-space: pre-wrap; }
       </item>
       <item row="0" column="1">
        <widget class="QPushButton" name="pushButtonReplaceCaseSensitive">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Case sensitive</string>
         </property>
         <property name="icon">
-         <iconset theme="case-sensitive"/>
+         <iconset theme="case-sensitive">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -430,12 +358,6 @@ p, li { white-space: pre-wrap; }
       </item>
       <item row="0" column="12">
        <widget class="QPushButton" name="pushButtonFindReplaceClose">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="text">
          <string/>
         </property>
@@ -444,24 +366,17 @@ p, li { white-space: pre-wrap; }
           <normaloff/>
          </iconset>
         </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
        </widget>
       </item>
       <item row="1" column="4">
        <widget class="QPushButton" name="pushButtonReplaceHighlightMatches">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Highlight matches</string>
         </property>
         <property name="icon">
-         <iconset theme="highlight-matches"/>
+         <iconset theme="highlight-matches">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -470,17 +385,13 @@ p, li { white-space: pre-wrap; }
       </item>
       <item row="0" column="0">
        <widget class="QPushButton" name="pushButtonReplaceRegularExpression">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Regular expression</string>
         </property>
         <property name="icon">
-         <iconset theme="regular-expression"/>
+         <iconset theme="regular-expression">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -502,17 +413,13 @@ p, li { white-space: pre-wrap; }
       </item>
       <item row="1" column="0">
        <widget class="QPushButton" name="pushButtonReplacePreserveCase">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Preserve case</string>
         </property>
         <property name="icon">
-         <iconset theme="preserve-case"/>
+         <iconset theme="preserve-case">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -571,12 +478,6 @@ p, li { white-space: pre-wrap; }
       </property>
       <item row="0" column="9">
        <widget class="QPushButton" name="pushButtonFindInFilesClose">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="text">
          <string/>
         </property>
@@ -585,24 +486,17 @@ p, li { white-space: pre-wrap; }
           <normaloff/>
          </iconset>
         </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
        </widget>
       </item>
       <item row="0" column="4">
        <widget class="QPushButton" name="pushButtonFindInFilesUseEditor">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Use editor</string>
         </property>
         <property name="icon">
-         <iconset theme="use-editor"/>
+         <iconset theme="use-editor">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -632,17 +526,13 @@ p, li { white-space: pre-wrap; }
       </item>
       <item row="0" column="2">
        <widget class="QPushButton" name="pushButtonFindInFilesWholeWord">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Whole word</string>
         </property>
         <property name="icon">
-         <iconset theme="whole-word"/>
+         <iconset theme="whole-word">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -677,17 +567,13 @@ p, li { white-space: pre-wrap; }
       </item>
       <item row="0" column="0">
        <widget class="QPushButton" name="pushButtonFindInFilesRegularExpression">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Regular expression</string>
         </property>
         <property name="icon">
-         <iconset theme="regular-expression"/>
+         <iconset theme="regular-expression">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -696,17 +582,13 @@ p, li { white-space: pre-wrap; }
       </item>
       <item row="0" column="3">
        <widget class="QPushButton" name="pushButtonFindInFilesShowContext">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Show context</string>
         </property>
         <property name="icon">
-         <iconset theme="show-context"/>
+         <iconset theme="show-context">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -715,17 +597,13 @@ p, li { white-space: pre-wrap; }
       </item>
       <item row="0" column="1">
        <widget class="QPushButton" name="pushButtonFindInFilesCaseSensitive">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Case sensitive</string>
         </property>
         <property name="icon">
-         <iconset theme="case-sensitive"/>
+         <iconset theme="case-sensitive">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>330</width>
+    <width>347</width>
     <height>484</height>
    </rect>
   </property>
@@ -47,12 +47,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonGoPrevious">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Go previous place</string>
         </property>
@@ -65,12 +59,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonGoNext">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Go next place</string>
         </property>
@@ -83,12 +71,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonGoUp">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Go up one level</string>
         </property>
@@ -108,12 +90,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonSync">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Sync folder with current editor file path</string>
         </property>
@@ -129,12 +105,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonCollapseAll">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="text">
          <string/>
         </property>
@@ -147,12 +117,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonCustomFilters">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="text">
          <string/>
         </property>
@@ -165,12 +129,6 @@
       </item>
       <item>
        <widget class="QToolButton" name="toolButtonOptions">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="icon">
          <iconset theme="options">
           <normaloff/>

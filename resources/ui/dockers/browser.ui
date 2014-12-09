@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>520</width>
-    <height>60</height>
+    <height>61</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,12 +28,6 @@
       </property>
       <item>
        <widget class="QPushButton" name="pushButtonGoPrevious">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Back</string>
         </property>
@@ -51,12 +45,6 @@
        <widget class="QPushButton" name="pushButtonGoNext">
         <property name="enabled">
          <bool>true</bool>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
         </property>
         <property name="toolTip">
          <string>Next</string>
@@ -76,12 +64,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonReload">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Reload</string>
         </property>
@@ -100,12 +82,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonStop">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Stop</string>
         </property>
@@ -128,12 +104,6 @@
       </item>
       <item>
        <widget class="QToolButton" name="toolButtonOptions">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>24</height>
-         </size>
-        </property>
         <property name="icon">
          <iconset theme="options">
           <normaloff/>
