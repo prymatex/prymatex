@@ -152,7 +152,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
         self.actionOrderByName.trigger()
         
         self.projectOptionsMenu, objects = create_menu(self, optionsMenu)
-        self.pushButtonOptions.setMenu(self.projectOptionsMenu)
+        self.toolButtonOptions.setMenu(self.projectOptionsMenu)
 
         #Connect context menu
         self.treeViewProjects.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)

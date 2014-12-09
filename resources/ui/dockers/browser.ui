@@ -45,9 +45,6 @@
           <normaloff/>
          </iconset>
         </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
        </widget>
       </item>
       <item>
@@ -75,9 +72,6 @@
           <normaloff/>
          </iconset>
         </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
        </widget>
       </item>
       <item>
@@ -95,10 +89,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="reload"/>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
+         <iconset theme="reload">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -120,10 +113,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="stop"/>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
+         <iconset theme="stop">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -137,16 +129,15 @@
       <item>
        <widget class="QToolButton" name="toolButtonOptions">
         <property name="icon">
-         <iconset theme="options"/>
+         <iconset theme="options">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="popupMode">
          <enum>QToolButton::MenuButtonPopup</enum>
         </property>
         <property name="toolButtonStyle">
          <enum>Qt::ToolButtonIconOnly</enum>
-        </property>
-        <property name="autoRaise">
-         <bool>true</bool>
         </property>
         <property name="arrowType">
          <enum>Qt::NoArrow</enum>

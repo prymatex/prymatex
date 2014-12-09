@@ -12,7 +12,7 @@ from prymatex.utils.i18n import ugettext as _
 
 class MainWindowActionsMixin(object):
     # -------------- Global callback for copy, paste cut...
-    def globalCallback(self):
+    def globalCallback(self, *args, **kwargs):
         """Global callback"""
         widget = self.application().focusWidget()
         action = self.sender()

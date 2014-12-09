@@ -61,9 +61,6 @@
           <normaloff/>
          </iconset>
         </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
        </widget>
       </item>
       <item>
@@ -82,9 +79,6 @@
           <normaloff/>
          </iconset>
         </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
        </widget>
       </item>
       <item>
@@ -102,9 +96,6 @@
          <iconset theme="go-up">
           <normaloff/>
          </iconset>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -127,12 +118,11 @@
          <string>Sync folder with current editor file path</string>
         </property>
         <property name="icon">
-         <iconset theme="sync"/>
+         <iconset theme="sync">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
          <bool>true</bool>
         </property>
        </widget>
@@ -149,10 +139,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="collapse-all"/>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
+         <iconset theme="collapse-all">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -168,29 +157,27 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="custom-filters"/>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
+         <iconset theme="custom-filters">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonOptions">
-        <property name="maximumSize">
-         <size>
-          <width>45</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
+       <widget class="QToolButton" name="toolButtonOptions">
         <property name="icon">
-         <iconset theme="options"/>
+         <iconset theme="options">
+          <normaloff/>
+         </iconset>
         </property>
-        <property name="flat">
-         <bool>true</bool>
+        <property name="popupMode">
+         <enum>QToolButton::MenuButtonPopup</enum>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonIconOnly</enum>
+        </property>
+        <property name="arrowType">
+         <enum>Qt::NoArrow</enum>
         </property>
        </widget>
       </item>

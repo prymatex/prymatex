@@ -56,11 +56,6 @@ p, li { white-space: pre-wrap; }
          <property name="text">
           <string>&amp;Create Profile</string>
          </property>
-         <property name="icon">
-          <iconset theme="list-add-user">
-           <normaloff/>
-          </iconset>
-         </property>
         </widget>
        </item>
        <item>
@@ -68,22 +63,12 @@ p, li { white-space: pre-wrap; }
          <property name="text">
           <string>&amp;Rename Profile</string>
          </property>
-         <property name="icon">
-          <iconset theme="user-properties">
-           <normaloff/>
-          </iconset>
-         </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="buttonDelete">
          <property name="text">
           <string>&amp;Delete Profile</string>
-         </property>
-         <property name="icon">
-          <iconset theme="list-remove-user">
-           <normaloff/>
-          </iconset>
          </property>
         </widget>
        </item>
@@ -144,22 +129,12 @@ p, li { white-space: pre-wrap; }
        <property name="text">
         <string>Exit</string>
        </property>
-       <property name="icon">
-        <iconset theme="application-exit">
-         <normaloff/>
-        </iconset>
-       </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="buttonStartPrymatex">
        <property name="text">
         <string>Start Prymatex</string>
-       </property>
-       <property name="icon">
-        <iconset theme="system-run">
-         <normaloff/>
-        </iconset>
        </property>
       </widget>
      </item>

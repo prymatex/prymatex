@@ -113,8 +113,8 @@
         <property name="toolTip">
          <string>Regular expression</string>
         </property>
-        <property name="text">
-         <string>.*</string>
+        <property name="icon">
+         <iconset theme="regular-expression"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -132,8 +132,8 @@
         <property name="toolTip">
          <string>Case sensitive</string>
         </property>
-        <property name="text">
-         <string>Aa</string>
+        <property name="icon">
+         <iconset theme="case-sensitive"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -151,8 +151,8 @@
         <property name="toolTip">
          <string>Whole word</string>
         </property>
-        <property name="text">
-         <string>&quot;&quot;</string>
+        <property name="icon">
+         <iconset theme="whole-word"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -177,8 +177,8 @@
         <property name="toolTip">
          <string>Wrap</string>
         </property>
-        <property name="text">
-         <string>W</string>
+        <property name="icon">
+         <iconset theme="wrap"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -196,8 +196,8 @@
         <property name="toolTip">
          <string>In selection</string>
         </property>
-        <property name="text">
-         <string>S</string>
+        <property name="icon">
+         <iconset theme="selection"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -222,8 +222,8 @@
         <property name="toolTip">
          <string>Highlight matches</string>
         </property>
-        <property name="text">
-         <string>H</string>
+        <property name="icon">
+         <iconset theme="highlight-matches"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -322,8 +322,8 @@ p, li { white-space: pre-wrap; }
         <property name="toolTip">
          <string>Wrap</string>
         </property>
-        <property name="text">
-         <string>W</string>
+        <property name="icon">
+         <iconset theme="wrap"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -355,8 +355,8 @@ p, li { white-space: pre-wrap; }
         <property name="toolTip">
          <string>In selection</string>
         </property>
-        <property name="text">
-         <string>S</string>
+        <property name="icon">
+         <iconset theme="selection"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -401,8 +401,8 @@ p, li { white-space: pre-wrap; }
         <property name="toolTip">
          <string>Whole word</string>
         </property>
-        <property name="text">
-         <string>&quot;&quot;</string>
+        <property name="icon">
+         <iconset theme="whole-word"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -420,8 +420,8 @@ p, li { white-space: pre-wrap; }
         <property name="toolTip">
          <string>Case sensitive</string>
         </property>
-        <property name="text">
-         <string>Aa</string>
+        <property name="icon">
+         <iconset theme="case-sensitive"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -460,8 +460,8 @@ p, li { white-space: pre-wrap; }
         <property name="toolTip">
          <string>Highlight matches</string>
         </property>
-        <property name="text">
-         <string>H</string>
+        <property name="icon">
+         <iconset theme="highlight-matches"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -479,8 +479,8 @@ p, li { white-space: pre-wrap; }
         <property name="toolTip">
          <string>Regular expression</string>
         </property>
-        <property name="text">
-         <string>.*</string>
+        <property name="icon">
+         <iconset theme="regular-expression"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -511,8 +511,8 @@ p, li { white-space: pre-wrap; }
         <property name="toolTip">
          <string>Preserve case</string>
         </property>
-        <property name="text">
-         <string>Aa</string>
+        <property name="icon">
+         <iconset theme="preserve-case"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -601,8 +601,8 @@ p, li { white-space: pre-wrap; }
         <property name="toolTip">
          <string>Use editor</string>
         </property>
-        <property name="text">
-         <string/>
+        <property name="icon">
+         <iconset theme="use-editor"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -641,8 +641,8 @@ p, li { white-space: pre-wrap; }
         <property name="toolTip">
          <string>Whole word</string>
         </property>
-        <property name="text">
-         <string>&quot;&quot;</string>
+        <property name="icon">
+         <iconset theme="whole-word"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -686,8 +686,8 @@ p, li { white-space: pre-wrap; }
         <property name="toolTip">
          <string>Regular expression</string>
         </property>
-        <property name="text">
-         <string>.*</string>
+        <property name="icon">
+         <iconset theme="regular-expression"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -705,8 +705,8 @@ p, li { white-space: pre-wrap; }
         <property name="toolTip">
          <string>Show context</string>
         </property>
-        <property name="text">
-         <string>C</string>
+        <property name="icon">
+         <iconset theme="show-context"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -724,8 +724,8 @@ p, li { white-space: pre-wrap; }
         <property name="toolTip">
          <string>Case sensitive</string>
         </property>
-        <property name="text">
-         <string>Aa</string>
+        <property name="icon">
+         <iconset theme="case-sensitive"/>
         </property>
         <property name="checkable">
          <bool>true</bool>

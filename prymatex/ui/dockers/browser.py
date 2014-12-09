@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/browser.ui'
 #
-# Created: Tue Nov  4 08:31:39 2014
+# Created: Tue Dec  9 12:44:20 2014
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,7 +27,6 @@ class Ui_BrowserDock(object):
         self.pushButtonGoPrevious.setText("")
         icon = QtGui.QIcon.fromTheme("go-previous")
         self.pushButtonGoPrevious.setIcon(icon)
-        self.pushButtonGoPrevious.setFlat(True)
         self.pushButtonGoPrevious.setObjectName("pushButtonGoPrevious")
         self.horizontalLayout.addWidget(self.pushButtonGoPrevious)
         self.pushButtonGoNext = QtWidgets.QPushButton(self.dockWidgetContents)
@@ -37,7 +36,6 @@ class Ui_BrowserDock(object):
         self.pushButtonGoNext.setText("")
         icon = QtGui.QIcon.fromTheme("go-next")
         self.pushButtonGoNext.setIcon(icon)
-        self.pushButtonGoNext.setFlat(True)
         self.pushButtonGoNext.setObjectName("pushButtonGoNext")
         self.horizontalLayout.addWidget(self.pushButtonGoNext)
         self.pushButtonReload = QtWidgets.QPushButton(self.dockWidgetContents)
@@ -45,7 +43,6 @@ class Ui_BrowserDock(object):
         self.pushButtonReload.setText("")
         icon = QtGui.QIcon.fromTheme("reload")
         self.pushButtonReload.setIcon(icon)
-        self.pushButtonReload.setFlat(True)
         self.pushButtonReload.setObjectName("pushButtonReload")
         self.horizontalLayout.addWidget(self.pushButtonReload)
         self.lineUrl = QtWidgets.QLineEdit(self.dockWidgetContents)
@@ -56,7 +53,6 @@ class Ui_BrowserDock(object):
         self.pushButtonStop.setText("")
         icon = QtGui.QIcon.fromTheme("stop")
         self.pushButtonStop.setIcon(icon)
-        self.pushButtonStop.setFlat(True)
         self.pushButtonStop.setObjectName("pushButtonStop")
         self.horizontalLayout.addWidget(self.pushButtonStop)
         self.line = QtWidgets.QFrame(self.dockWidgetContents)
@@ -69,7 +65,6 @@ class Ui_BrowserDock(object):
         self.toolButtonOptions.setIcon(icon)
         self.toolButtonOptions.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
         self.toolButtonOptions.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
-        self.toolButtonOptions.setAutoRaise(True)
         self.toolButtonOptions.setArrowType(QtCore.Qt.NoArrow)
         self.toolButtonOptions.setObjectName("toolButtonOptions")
         self.horizontalLayout.addWidget(self.toolButtonOptions)

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/support/editor.ui'
 #
-# Created: Tue Nov  4 08:31:36 2014
+# Created: Tue Dec  9 12:44:16 2014
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -41,19 +41,19 @@ class Ui_BundleEditorDialog(object):
         self.toolbarLayout.setSpacing(2)
         self.toolbarLayout.setObjectName("toolbarLayout")
         self.pushButtonAdd = QtWidgets.QPushButton(self.verticalLayoutWidget)
-        icon = QtGui.QIcon.fromTheme("list-add")
+        icon = QtGui.QIcon.fromTheme("add")
         self.pushButtonAdd.setIcon(icon)
         self.pushButtonAdd.setObjectName("pushButtonAdd")
         self.toolbarLayout.addWidget(self.pushButtonAdd)
         self.pushButtonRemove = QtWidgets.QPushButton(self.verticalLayoutWidget)
-        icon = QtGui.QIcon.fromTheme("list-remove")
+        icon = QtGui.QIcon.fromTheme("remove")
         self.pushButtonRemove.setIcon(icon)
         self.pushButtonRemove.setObjectName("pushButtonRemove")
         self.toolbarLayout.addWidget(self.pushButtonRemove)
         spacerItem = QtWidgets.QSpacerItem(98, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.toolbarLayout.addItem(spacerItem)
         self.pushButtonFilter = QtWidgets.QPushButton(self.verticalLayoutWidget)
-        icon = QtGui.QIcon.fromTheme("view-filter")
+        icon = QtGui.QIcon.fromTheme("filter")
         self.pushButtonFilter.setIcon(icon)
         self.pushButtonFilter.setObjectName("pushButtonFilter")
         self.toolbarLayout.addWidget(self.pushButtonFilter)
@@ -106,9 +106,8 @@ class Ui_BundleEditorDialog(object):
         self.pushButtonCleanKeyEquivalent = QtWidgets.QPushButton(self.verticalLayoutWidget_2)
         self.pushButtonCleanKeyEquivalent.setMaximumSize(QtCore.QSize(32, 16777215))
         self.pushButtonCleanKeyEquivalent.setText("")
-        icon = QtGui.QIcon.fromTheme("edit-clear-locationbar-rtl")
+        icon = QtGui.QIcon.fromTheme("clear-shortcut")
         self.pushButtonCleanKeyEquivalent.setIcon(icon)
-        self.pushButtonCleanKeyEquivalent.setFlat(True)
         self.pushButtonCleanKeyEquivalent.setObjectName("pushButtonCleanKeyEquivalent")
         self.horizontalLayout.addWidget(self.pushButtonCleanKeyEquivalent)
         self.basicFormLayout.setLayout(2, QtWidgets.QFormLayout.FieldRole, self.horizontalLayout)

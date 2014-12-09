@@ -153,7 +153,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtWidgets
         self.actionOrderByName.trigger()
 
         self.fileSystemOptionsMenu, objects = create_menu(self, optionsMenu)
-        self.pushButtonOptions.setMenu(self.fileSystemOptionsMenu)
+        self.toolButtonOptions.setMenu(self.fileSystemOptionsMenu)
 
         #Connect context menu
         self.treeViewFileSystem.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)

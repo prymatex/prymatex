@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dialogs/profile.ui'
 #
-# Created: Tue Nov  4 08:31:38 2014
+# Created: Tue Dec  9 12:44:18 2014
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -31,18 +31,12 @@ class Ui_ProfileDialog(object):
         self.verticalLayout_2.setSpacing(2)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.buttonCreate = QtWidgets.QPushButton(ProfileDialog)
-        icon = QtGui.QIcon.fromTheme("list-add-user")
-        self.buttonCreate.setIcon(icon)
         self.buttonCreate.setObjectName("buttonCreate")
         self.verticalLayout_2.addWidget(self.buttonCreate)
         self.buttonRename = QtWidgets.QPushButton(ProfileDialog)
-        icon = QtGui.QIcon.fromTheme("user-properties")
-        self.buttonRename.setIcon(icon)
         self.buttonRename.setObjectName("buttonRename")
         self.verticalLayout_2.addWidget(self.buttonRename)
         self.buttonDelete = QtWidgets.QPushButton(ProfileDialog)
-        icon = QtGui.QIcon.fromTheme("list-remove-user")
-        self.buttonDelete.setIcon(icon)
         self.buttonDelete.setObjectName("buttonDelete")
         self.verticalLayout_2.addWidget(self.buttonDelete)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
@@ -65,13 +59,9 @@ class Ui_ProfileDialog(object):
         spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem1)
         self.buttonExit = QtWidgets.QPushButton(ProfileDialog)
-        icon = QtGui.QIcon.fromTheme("application-exit")
-        self.buttonExit.setIcon(icon)
         self.buttonExit.setObjectName("buttonExit")
         self.horizontalLayout_2.addWidget(self.buttonExit)
         self.buttonStartPrymatex = QtWidgets.QPushButton(ProfileDialog)
-        icon = QtGui.QIcon.fromTheme("system-run")
-        self.buttonStartPrymatex.setIcon(icon)
         self.buttonStartPrymatex.setObjectName("buttonStartPrymatex")
         self.horizontalLayout_2.addWidget(self.buttonStartPrymatex)
         self.verticalLayout.addLayout(self.horizontalLayout_2)

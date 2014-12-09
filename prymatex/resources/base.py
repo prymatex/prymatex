@@ -75,6 +75,8 @@ class Resource(dict):
     def get_icon(self, index):
         if index in self._mapper:
             index = self._mapper[index]
+        else:
+            print(index)
         
         std = get_std_icon(index)
         if not std.isNull():
