@@ -46,7 +46,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonBack">
+       <widget class="QPushButton" name="pushButtonGoPrevious">
         <property name="toolTip">
          <string>Go previous place</string>
         </property>
@@ -58,7 +58,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonFoward">
+       <widget class="QPushButton" name="pushButtonGoNext">
         <property name="toolTip">
          <string>Go next place</string>
         </property>
@@ -70,7 +70,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonUp">
+       <widget class="QPushButton" name="pushButtonGoUp">
         <property name="toolTip">
          <string>Go up one level</string>
         </property>
@@ -104,26 +104,22 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonCollapseAll">
+       <widget class="QPushButton" name="pushButtonCollapse">
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="collapse-all">
-          <normaloff/>
-         </iconset>
+         <iconset theme="collapse"/>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonCustomFilters">
+       <widget class="QPushButton" name="pushButtonFilter">
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="custom-filters">
-          <normaloff/>
-         </iconset>
+         <iconset theme="filter"/>
         </property>
        </widget>
       </item>

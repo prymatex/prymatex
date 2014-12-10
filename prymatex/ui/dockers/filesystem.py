@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/dockers/filesystem.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/filesystem.ui'
 #
-# Created: Tue Dec  9 16:01:57 2014
-#      by: PyQt5 UI code generator 5.3.2
+# Created: Wed Dec 10 13:43:30 2014
+#      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -25,21 +25,21 @@ class Ui_FileSystemDock(object):
         self.buttonsLayout.setObjectName("buttonsLayout")
         spacerItem = QtWidgets.QSpacerItem(10, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.buttonsLayout.addItem(spacerItem)
-        self.pushButtonBack = QtWidgets.QPushButton(self.dockWidgetContents)
+        self.pushButtonGoPrevious = QtWidgets.QPushButton(self.dockWidgetContents)
         icon = QtGui.QIcon.fromTheme("go-previous")
-        self.pushButtonBack.setIcon(icon)
-        self.pushButtonBack.setObjectName("pushButtonBack")
-        self.buttonsLayout.addWidget(self.pushButtonBack)
-        self.pushButtonFoward = QtWidgets.QPushButton(self.dockWidgetContents)
+        self.pushButtonGoPrevious.setIcon(icon)
+        self.pushButtonGoPrevious.setObjectName("pushButtonGoPrevious")
+        self.buttonsLayout.addWidget(self.pushButtonGoPrevious)
+        self.pushButtonGoNext = QtWidgets.QPushButton(self.dockWidgetContents)
         icon = QtGui.QIcon.fromTheme("go-next")
-        self.pushButtonFoward.setIcon(icon)
-        self.pushButtonFoward.setObjectName("pushButtonFoward")
-        self.buttonsLayout.addWidget(self.pushButtonFoward)
-        self.pushButtonUp = QtWidgets.QPushButton(self.dockWidgetContents)
+        self.pushButtonGoNext.setIcon(icon)
+        self.pushButtonGoNext.setObjectName("pushButtonGoNext")
+        self.buttonsLayout.addWidget(self.pushButtonGoNext)
+        self.pushButtonGoUp = QtWidgets.QPushButton(self.dockWidgetContents)
         icon = QtGui.QIcon.fromTheme("go-up")
-        self.pushButtonUp.setIcon(icon)
-        self.pushButtonUp.setObjectName("pushButtonUp")
-        self.buttonsLayout.addWidget(self.pushButtonUp)
+        self.pushButtonGoUp.setIcon(icon)
+        self.pushButtonGoUp.setObjectName("pushButtonGoUp")
+        self.buttonsLayout.addWidget(self.pushButtonGoUp)
         self.line = QtWidgets.QFrame(self.dockWidgetContents)
         self.line.setFrameShape(QtWidgets.QFrame.VLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
@@ -51,18 +51,18 @@ class Ui_FileSystemDock(object):
         self.pushButtonSync.setCheckable(True)
         self.pushButtonSync.setObjectName("pushButtonSync")
         self.buttonsLayout.addWidget(self.pushButtonSync)
-        self.pushButtonCollapseAll = QtWidgets.QPushButton(self.dockWidgetContents)
-        self.pushButtonCollapseAll.setText("")
-        icon = QtGui.QIcon.fromTheme("collapse-all")
-        self.pushButtonCollapseAll.setIcon(icon)
-        self.pushButtonCollapseAll.setObjectName("pushButtonCollapseAll")
-        self.buttonsLayout.addWidget(self.pushButtonCollapseAll)
-        self.pushButtonCustomFilters = QtWidgets.QPushButton(self.dockWidgetContents)
-        self.pushButtonCustomFilters.setText("")
-        icon = QtGui.QIcon.fromTheme("custom-filters")
-        self.pushButtonCustomFilters.setIcon(icon)
-        self.pushButtonCustomFilters.setObjectName("pushButtonCustomFilters")
-        self.buttonsLayout.addWidget(self.pushButtonCustomFilters)
+        self.pushButtonCollapse = QtWidgets.QPushButton(self.dockWidgetContents)
+        self.pushButtonCollapse.setText("")
+        icon = QtGui.QIcon.fromTheme("collapse")
+        self.pushButtonCollapse.setIcon(icon)
+        self.pushButtonCollapse.setObjectName("pushButtonCollapse")
+        self.buttonsLayout.addWidget(self.pushButtonCollapse)
+        self.pushButtonFilter = QtWidgets.QPushButton(self.dockWidgetContents)
+        self.pushButtonFilter.setText("")
+        icon = QtGui.QIcon.fromTheme("filter")
+        self.pushButtonFilter.setIcon(icon)
+        self.pushButtonFilter.setObjectName("pushButtonFilter")
+        self.buttonsLayout.addWidget(self.pushButtonFilter)
         self.toolButtonOptions = QtWidgets.QToolButton(self.dockWidgetContents)
         icon = QtGui.QIcon.fromTheme("options")
         self.toolButtonOptions.setIcon(icon)
@@ -161,9 +161,9 @@ class Ui_FileSystemDock(object):
     def retranslateUi(self, FileSystemDock):
         _translate = QtCore.QCoreApplication.translate
         FileSystemDock.setWindowTitle(_translate("FileSystemDock", "File System"))
-        self.pushButtonBack.setToolTip(_translate("FileSystemDock", "Go previous place"))
-        self.pushButtonFoward.setToolTip(_translate("FileSystemDock", "Go next place"))
-        self.pushButtonUp.setToolTip(_translate("FileSystemDock", "Go up one level"))
+        self.pushButtonGoPrevious.setToolTip(_translate("FileSystemDock", "Go previous place"))
+        self.pushButtonGoNext.setToolTip(_translate("FileSystemDock", "Go next place"))
+        self.pushButtonGoUp.setToolTip(_translate("FileSystemDock", "Go up one level"))
         self.pushButtonSync.setToolTip(_translate("FileSystemDock", "Sync folder with current editor file path"))
         self.comboBoxLocation.setToolTip(_translate("FileSystemDock", "Folders"))
         self.actionNewFile.setText(_translate("FileSystemDock", "File"))

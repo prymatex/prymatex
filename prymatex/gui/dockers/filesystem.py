@@ -66,7 +66,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtWidgets
                     return True
             elif obj == self.treeViewFileSystem:
                 if event.key() == QtCore.Qt.Key_Backspace:
-                    self.pushButtonUp.click()
+                    self.pushButtonGoUp.click()
                     return True
                 elif event.key() == QtCore.Qt.Key_Return:
                     path = self.currentPath()
@@ -100,8 +100,8 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtWidgets
 
     def setupButtons(self):
         self.pushButtonSync.setCheckable(True)
-        self.pushButtonBack.setEnabled(False)
-        self.pushButtonFoward.setEnabled(False)
+        self.pushButtonGoPrevious.setEnabled(False)
+        self.pushButtonGoNext.setEnabled(False)
 
     def setupTreeViewFileSystem(self):
         self.treeViewFileSystem.setModel(self.fileSystemProxyModel)
@@ -177,7 +177,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtWidgets
             self.setPathAsRoot(path)
 
     @QtCore.Slot()
-    def on_pushButtonUp_pressed(self):
+    def on_pushButtonGoUp_pressed(self):
         index = self.treeViewFileSystem.rootIndex()
         sIndex = self.fileSystemProxyModel.mapToSource(index)
         dir = QtCore.QDir(self.fileSystemModel.filePath(sIndex))
@@ -240,25 +240,25 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtWidgets
         #Store history
         if trackHistory and os.path.isdir(oldPath):
             self._pushButtonHistoryBack.append(oldPath)
-            self.pushButtonBack.setEnabled(True)
+            self.pushButtonGoPrevious.setEnabled(True)
             self._pushButtonHistoryForward = []
-            self.pushButtonFoward.setEnabled(False)
+            self.pushButtonGoNext.setEnabled(False)
 
-    def on_pushButtonBack_pressed(self):
+    def on_pushButtonGoPrevious_pressed(self):
         if os.path.exists(self.currentPath()):
             self._pushButtonHistoryForward.append(self.currentPath())
-            self.pushButtonFoward.setEnabled(True)
+            self.pushButtonGoNext.setEnabled(True)
         destination = self._pushButtonHistoryBack.pop()
-        self.pushButtonBack.setEnabled(bool(self._pushButtonHistoryBack))
+        self.pushButtonGoPrevious.setEnabled(bool(self._pushButtonHistoryBack))
         self.setPathAsRoot(destination, trackHistory = False)
 
-    def on_pushButtonFoward_pressed(self):
+    def on_pushButtonGoNext_pressed(self):
         self._pushButtonHistoryBack.append(self.currentRootPath())
-        self.pushButtonBack.setEnabled(True)
+        self.pushButtonGoPrevious.setEnabled(True)
         destination = self._pushButtonHistoryForward.pop()
         self.setPathAsRoot(destination, trackHistory = False)
         if not len(self._pushButtonHistoryForward):
-            self.pushButtonFoward.setEnabled(False)
+            self.pushButtonGoNext.setEnabled(False)
 
     # ------------- Actions cut, copy, paste
     def on_actionCut_triggered(self):

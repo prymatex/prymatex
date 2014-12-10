@@ -1,3 +1,4 @@
 QPushButton, QToolButton {
     icon-size: 12px;
+    padding: 4px;
 }
