@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 
 import logging
+logger = logging.getLogger(__name__)
 
 COMPILERS = []
-logger = logging.getLogger(__name__)
 
 # =================
 #        re

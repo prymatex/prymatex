@@ -1,9 +1,3 @@
-QPushButton {
-    height: 18px;
-    icon-size: 16px;
-}
-
-QToolButton {
-    height: 18px;
-    icon-size: 16px;
+QPushButton, QToolButton {
+    icon-size: 12px;
 }

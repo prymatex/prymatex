@@ -128,8 +128,6 @@ class MainWindowActionsMixin(object):
     SCREENSHOT_FORMAT = 'png'
 
     def on_actionTakeScreenshot_triggered(self, checked=False):
-        from pprint import pprint
-        pprint(self.resources()._unknoun_icons)
         pxm = QtGui.QPixmap.grabWindow(self.winId())
         import os
         from datetime import datetime

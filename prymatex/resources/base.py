@@ -3,13 +3,12 @@
 from __future__ import unicode_literals
 
 import os
+import logging
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import get_std_icon
 from prymatex.core import PrymatexComponent
-
-from prymatex.utils import text
-from prymatex.utils import six
+from prymatex.utils import text as textutils
 
 from .media import default_media_mapper
 from .stylesheets import load_stylesheets
@@ -17,6 +16,8 @@ from .sequences import ContextSequence
 from .styles import default_styles
 
 __all__ = ["LICENSES", "build_resource_key", "Resource", "ResourceProvider"]
+
+logger = logging.getLogger(__name__)
 
 LICENSES = [
     'Apache License 2.0',
@@ -87,7 +88,7 @@ class Resource(dict):
         return self._from_theme(index)
     
     def get_sequence(self, context, name, default = None, description = None):
-        description = description or text.camelcase_to_text(name)
+        description = description or textutils.camelcase_to_text(name)
         return ContextSequence(self, context, name, default, description)
     
     def set_theme(self, name):
@@ -106,14 +107,13 @@ class Resource(dict):
 class ResourceProvider(object):
     def __init__(self, resources):
         self.resources = resources
-        self._unknoun_icons = set()
-        
+
     def names(self):
         return tuple([ res.name() for res in self.resources ])
 
     def sources(self):
         return self.resources[:]
-                
+
     def get_image(self, index, fallback = None):
         fallback = fallback or QtGui.QPixmap()
         for res in self.resources:
@@ -121,7 +121,7 @@ class ResourceProvider(object):
             if not image.isNull():
                 return image
         return fallback
-    
+
     def get_icon(self, index, fallback = None):
         if os.path.exists(index) and os.path.isabs(index):
             return _FileIconProvider.icon(QtCore.QFileInfo(index))
@@ -130,7 +130,7 @@ class ResourceProvider(object):
             icon = res.get_icon(index)
             if not icon.isNull():
                 return icon
-        self._unknoun_icons.add(index)
+        logger.info("Unknown icon with %s key" % index)
         return fallback
 
     def get_sequence(self, context, name, default = None, description = None):
