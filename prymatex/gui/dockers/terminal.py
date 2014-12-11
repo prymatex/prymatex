@@ -105,7 +105,7 @@ class TerminalDock(PrymatexDock, QtWidgets.QDockWidget):
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
     # ------------------ Settings
-    SETTINGS = 'Terminal'
+    SETTINGS = 'TerminalDock'
 
     @ConfigurableItem(default = "default")
     def defaultScheme(self, name):

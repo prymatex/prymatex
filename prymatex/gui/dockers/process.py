@@ -16,7 +16,7 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.ui.dockers.process import Ui_ExternalProcessDock
 
 class ExternalProcessDock(PrymatexDock, Ui_ExternalProcessDock, QtWidgets.QDockWidget):
-    ICON = "dock-external-process"
+    ICON = "dock-process"
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def __init__(self, **kwargs):

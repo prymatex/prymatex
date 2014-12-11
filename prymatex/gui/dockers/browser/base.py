@@ -22,7 +22,7 @@ from .network import setGlobalApplicationProxyAddress, globalApplicationProxyAdd
 # Browser Dock
 #=======================================================================
 class BrowserDock(PrymatexDock, Ui_BrowserDock, QtWidgets.QDockWidget):
-    ICON = "dock-web-browser"
+    ICON = "dock-browser"
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
     # ------------------ Web Settings
@@ -39,7 +39,7 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtWidgets.QDockWidget):
     ManualProxy = 1<<2
     
     # -------------- Settings
-    SETTINGS = "Browser"
+    SETTINGS = "BrowserDock"
     
     updateInterval = ConfigurableItem(default = 3000)
     homePage = ConfigurableItem(default = "https://github.com/prymatex")
@@ -136,8 +136,8 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtWidgets.QDockWidget):
                 self.window().currentEditor().setFocus()
                 return True
             elif event.key() == QtCore.Qt.Key_L and event.modifiers() == QtCore.Qt.ControlModifier:
-                self.lineUrl.setFocus()
-                self.lineUrl.selectAll()
+                self.comboBoxUrl.lineEdit().setFocus()
+                self.comboBoxUrl.lineEdit().selectAll()
                 return True
         return QtWidgets.QDockWidget.event(self, event)
 
@@ -189,7 +189,7 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtWidgets.QDockWidget):
         history = webView.page().history()
         self.pushButtonGoPrevious.setEnabled(history.canGoBack())
         self.pushButtonGoNext.setEnabled(history.canGoForward())
-        self.lineUrl.setText(webView.url().toString())
+        self.comboBoxUrl.lineEdit().setText(webView.url().toString())
     
     def on_tabWebView_webViewNewRequested(self):
         webView = self.createWebView()
@@ -215,7 +215,7 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtWidgets.QDockWidget):
         self.pushButtonGoPrevious.setEnabled(history.canGoBack())
         self.pushButtonGoNext.setEnabled(history.canGoForward())
 
-        webView.setUrl(QtCore.QUrl.fromUserInput(self.lineUrl.text()))
+        webView.setUrl(QtCore.QUrl.fromUserInput(self.comboBoxUrl.lineEdit().text()))
 
     def on_pushButtonStop_clicked(self):
         """Stop loading the page"""
@@ -256,7 +256,7 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtWidgets.QDockWidget):
         self.pushButtonGoNext.setEnabled(history.canGoForward())
         
         #Line Location
-        self.lineUrl.setText(url.toString())
+        self.comboBoxUrl.lineEdit().setText(url.toString())
         
     def on_webView_loadProgress(self, load):
         """Page load progress"""

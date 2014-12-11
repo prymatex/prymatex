@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/process.ui'
+# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/dockers/process.ui'
 #
-# Created: Wed Dec 10 13:43:29 2014
-#      by: PyQt5 UI code generator 5.2.1
+# Created: Wed Dec 10 16:51:32 2014
+#      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -126,7 +126,7 @@ class Ui_ExternalProcessDock(object):
 
     def retranslateUi(self, ExternalProcessDock):
         _translate = QtCore.QCoreApplication.translate
-        ExternalProcessDock.setWindowTitle(_translate("ExternalProcessDock", "External Process"))
+        ExternalProcessDock.setWindowTitle(_translate("ExternalProcessDock", "Process"))
         self.actionNewFile.setText(_translate("ExternalProcessDock", "File"))
         self.actionNewFolder.setText(_translate("ExternalProcessDock", "Folder"))
         self.actionNewFromTemplate.setText(_translate("ExternalProcessDock", "From Template"))

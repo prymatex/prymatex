@@ -17,12 +17,12 @@ from prymatex.core.settings import ConfigurableItem
 from prymatex.models.filesystem import SortFilterFileSystemProxyModel
 
 class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtWidgets.QDockWidget):
-    SEQUENCE = ("Docks", "FileSystemDock", "Alt+Y")
-    ICON = "dock-system-file"
+    SEQUENCE = ("Docks", "FilesDock", "Alt+Y")
+    ICON = "dock-files"
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
 
     # ----------- Settings
-    SETTINGS = 'FileSystem'
+    SETTINGS = 'FilesDock'
     @ConfigurableItem(default = '')
     def customFilters(self, filters):
         self.fileSystemProxyModel.setFilterRegExp(filters)

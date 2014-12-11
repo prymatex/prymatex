@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>File System</string>
+   <string>Files</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -109,7 +109,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="collapse"/>
+         <iconset theme="collapse">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -119,7 +121,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="filter"/>
+         <iconset theme="filter">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>

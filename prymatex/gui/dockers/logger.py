@@ -13,7 +13,7 @@ from prymatex.ui.others.logwidget import Ui_LogWidget
 
 class LoggerDock(QtWidgets.QDockWidget, Ui_LogWidget, PMXBaseDock):
     """Logging widget"""
-    ICON = "dock-log-viewer"
+    ICON = "dock-logger"
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
     def __init__(self, parent = None):

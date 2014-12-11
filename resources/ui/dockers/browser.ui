@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>520</width>
+    <width>773</width>
     <height>61</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Web Browser</string>
+   <string>Browser</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -35,7 +35,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="go-previous">
+         <iconset theme="browser-back">
           <normaloff/>
          </iconset>
         </property>
@@ -56,7 +56,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="go-next">
+         <iconset theme="browser-forward">
           <normaloff/>
          </iconset>
         </property>
@@ -71,14 +71,24 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="reload">
+         <iconset theme="browser-reload">
           <normaloff/>
          </iconset>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineUrl"/>
+       <widget class="QComboBox" name="comboBoxUrl">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonStop">
@@ -89,7 +99,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="stop">
+         <iconset theme="browser-stop">
           <normaloff/>
          </iconset>
         </property>

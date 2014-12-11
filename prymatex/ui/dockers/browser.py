@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/browser.ui'
+# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/dockers/browser.ui'
 #
-# Created: Wed Dec 10 13:43:30 2014
-#      by: PyQt5 UI code generator 5.2.1
+# Created: Wed Dec 10 16:55:51 2014
+#      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_BrowserDock(object):
     def setupUi(self, BrowserDock):
         BrowserDock.setObjectName("BrowserDock")
-        BrowserDock.resize(520, 61)
+        BrowserDock.resize(773, 61)
         self.dockWidgetContents = QtWidgets.QWidget()
         self.dockWidgetContents.setObjectName("dockWidgetContents")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.dockWidgetContents)
@@ -24,7 +24,7 @@ class Ui_BrowserDock(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.pushButtonGoPrevious = QtWidgets.QPushButton(self.dockWidgetContents)
         self.pushButtonGoPrevious.setText("")
-        icon = QtGui.QIcon.fromTheme("go-previous")
+        icon = QtGui.QIcon.fromTheme("browser-back")
         self.pushButtonGoPrevious.setIcon(icon)
         self.pushButtonGoPrevious.setObjectName("pushButtonGoPrevious")
         self.horizontalLayout.addWidget(self.pushButtonGoPrevious)
@@ -32,22 +32,28 @@ class Ui_BrowserDock(object):
         self.pushButtonGoNext.setEnabled(True)
         self.pushButtonGoNext.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.pushButtonGoNext.setText("")
-        icon = QtGui.QIcon.fromTheme("go-next")
+        icon = QtGui.QIcon.fromTheme("browser-forward")
         self.pushButtonGoNext.setIcon(icon)
         self.pushButtonGoNext.setObjectName("pushButtonGoNext")
         self.horizontalLayout.addWidget(self.pushButtonGoNext)
         self.pushButtonReload = QtWidgets.QPushButton(self.dockWidgetContents)
         self.pushButtonReload.setText("")
-        icon = QtGui.QIcon.fromTheme("reload")
+        icon = QtGui.QIcon.fromTheme("browser-reload")
         self.pushButtonReload.setIcon(icon)
         self.pushButtonReload.setObjectName("pushButtonReload")
         self.horizontalLayout.addWidget(self.pushButtonReload)
-        self.lineUrl = QtWidgets.QLineEdit(self.dockWidgetContents)
-        self.lineUrl.setObjectName("lineUrl")
-        self.horizontalLayout.addWidget(self.lineUrl)
+        self.comboBoxUrl = QtWidgets.QComboBox(self.dockWidgetContents)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.comboBoxUrl.sizePolicy().hasHeightForWidth())
+        self.comboBoxUrl.setSizePolicy(sizePolicy)
+        self.comboBoxUrl.setEditable(True)
+        self.comboBoxUrl.setObjectName("comboBoxUrl")
+        self.horizontalLayout.addWidget(self.comboBoxUrl)
         self.pushButtonStop = QtWidgets.QPushButton(self.dockWidgetContents)
         self.pushButtonStop.setText("")
-        icon = QtGui.QIcon.fromTheme("stop")
+        icon = QtGui.QIcon.fromTheme("browser-stop")
         self.pushButtonStop.setIcon(icon)
         self.pushButtonStop.setObjectName("pushButtonStop")
         self.horizontalLayout.addWidget(self.pushButtonStop)
@@ -84,7 +90,7 @@ class Ui_BrowserDock(object):
 
     def retranslateUi(self, BrowserDock):
         _translate = QtCore.QCoreApplication.translate
-        BrowserDock.setWindowTitle(_translate("BrowserDock", "Web Browser"))
+        BrowserDock.setWindowTitle(_translate("BrowserDock", "Browser"))
         self.pushButtonGoPrevious.setToolTip(_translate("BrowserDock", "Back"))
         self.pushButtonGoNext.setToolTip(_translate("BrowserDock", "Next"))
         self.pushButtonReload.setToolTip(_translate("BrowserDock", "Reload"))

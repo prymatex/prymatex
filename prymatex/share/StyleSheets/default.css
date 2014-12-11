@@ -1,4 +1,12 @@
-QPushButton, QToolButton {
+QDockWidget QPushButton {
     icon-size: 12px;
     padding: 4px;
+}
+
+QDockWidget QToolButton {
+    icon-size: 16px;
+}
+
+QDockWidget QComboBox {
+    padding: 2px;
 }

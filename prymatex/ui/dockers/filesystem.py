@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/filesystem.ui'
+# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/dockers/filesystem.ui'
 #
-# Created: Wed Dec 10 13:43:30 2014
-#      by: PyQt5 UI code generator 5.2.1
+# Created: Wed Dec 10 16:51:32 2014
+#      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -160,7 +160,7 @@ class Ui_FileSystemDock(object):
 
     def retranslateUi(self, FileSystemDock):
         _translate = QtCore.QCoreApplication.translate
-        FileSystemDock.setWindowTitle(_translate("FileSystemDock", "File System"))
+        FileSystemDock.setWindowTitle(_translate("FileSystemDock", "Files"))
         self.pushButtonGoPrevious.setToolTip(_translate("FileSystemDock", "Go previous place"))
         self.pushButtonGoNext.setToolTip(_translate("FileSystemDock", "Go next place"))
         self.pushButtonGoUp.setToolTip(_translate("FileSystemDock", "Go up one level"))
