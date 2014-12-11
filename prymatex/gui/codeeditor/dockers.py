@@ -23,9 +23,9 @@ class CodeEditorSymbolsDock(PrymatexDock, Ui_SymbolsDock, QtWidgets.QDockWidget)
 
     def initialize(self, *args, **kwargs):
         super(CodeEditorSymbolsDock, self).initialize(*args, **kwargs)
-        self.window().currentEditorChanged.connect(self.on_window_currentEditorChanged)
+        self.window().editorChanged.connect(self.on_window_editorChanged)
 
-    def on_window_currentEditorChanged(self, editor):
+    def on_window_editorChanged(self, editor):
         if isinstance(editor, CodeEditor):
             self.tableViewSymbols.setModel(editor.symbolListModel)
         elif editor is None:
@@ -55,9 +55,9 @@ class CodeEditorBookmarksDock(PrymatexDock, Ui_BookmarksDock, QtWidgets.QDockWid
         
     def initialize(self, *args, **kwargs):
         super(CodeEditorBookmarksDock, self).initialize(**kwargs)
-        self.window().currentEditorChanged.connect(self.on_window_currentEditorChanged)
+        self.window().editorChanged.connect(self.on_window_editorChanged)
 
-    def on_window_currentEditorChanged(self, editor):
+    def on_window_editorChanged(self, editor):
         if isinstance(editor, CodeEditor):
             self.tableViewBookmarks.setModel(editor.bookmarkListModel)
         elif editor is None:

@@ -415,13 +415,13 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
     def on_pushButtonSync_toggled(self, checked):
         if checked:
             #Conectar señal
-            self.window().currentEditorChanged.connect(self.on_window_currentEditorChanged)
-            self.on_window_currentEditorChanged(self.window().currentEditor())
+            self.window().editorChanged.connect(self.on_window_editorChanged)
+            self.on_window_editorChanged(self.window().currentEditor())
         else:
             #Desconectar señal
-            self.window().currentEditorChanged.disconnect(self.on_window_currentEditorChanged)
+            self.window().editorChanged.disconnect(self.on_window_editorChanged)
     
-    def on_window_currentEditorChanged(self, editor):
+    def on_window_editorChanged(self, editor):
         if editor is not None and editor.hasFile():
             index = self.projectTreeProxyModel.indexForPath(editor.filePath())
             self.treeViewProjects.setCurrentIndex(index)
