@@ -379,15 +379,15 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         componentClass._pmx_populated = True
 
     # ------------------- Create components
-    def createComponentInstance(self, componentClass, **kwargs):
+    def createComponentInstance(self, componentClass, *args, **kwargs):
         if not getattr(componentClass, '_pmx_populated', False):
             self.populateComponentClass(componentClass)
 
         # ------------------- Build
         buildedInstances = []
 
-        def buildComponentInstance(klass, **kwargs):
-            component = klass(**kwargs)
+        def buildComponentInstance(klass, *args, **kwargs):
+            component = klass(*args, **kwargs)
 
             # Add components
             componentClasses = self.pluginManager is not None and \
@@ -398,20 +398,19 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
                     continue
                 subComponent = buildComponentInstance(componentClass, parent=component)
                 component.addComponent(subComponent)
-            buildedInstances.append(component)
+            buildedInstances.append((component, component.profile(), args, kwargs))
             return component
 
-        component = buildComponentInstance(componentClass, **kwargs)
+        component = buildComponentInstance(componentClass, *args, **kwargs)
 
         # ------------------- Configure Bottom-up
-        profile = componentClass.profile()
-        if profile:
-            for instance in buildedInstances[::-1]:
+        for instance, profile, args, kwargs in buildedInstances[::-1]:
+            if profile:
                 profile.registerConfigurableInstance(instance)
 
         # ------------------- Initialize Top-down
-        for instance in buildedInstances:
-            instance.initialize()
+        for instance, profile, args, kwargs in buildedInstances:
+            instance.initialize(*args, **kwargs)
             # Shortcuts
             for settings in instance.contributeToShortcuts():
                 create_shortcut(component, settings,

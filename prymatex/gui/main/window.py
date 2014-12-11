@@ -31,7 +31,8 @@ from .actions import MainWindowActionsMixin, tabSelectableModelFactory
 class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidgets.QMainWindow):
     """Prymatex main window"""
     # --------------------- Signals
-    currentEditorChanged = QtCore.Signal(object)
+    aboutToEditorChanged = QtCore.Signal(object)
+    editorChanged = QtCore.Signal(object)
 
     # --------------------- Settings
     SETTINGS = 'MainWindow'
@@ -97,7 +98,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
         self.setCentralWidget(SplitterWidget(parent = self))
         
         # Splitter signals
-        self.centralWidget().currentWidgetChanged.connect(self.on_splitter_currentWidgetChanged)
+        self.centralWidget().widgetChanged.connect(self.on_splitter_widgetChanged)
         self.centralWidget().layoutChanged.connect(self.on_splitter_layoutChanged)
         self.centralWidget().tabCloseRequest.connect(self.closeEditor)
         self.centralWidget().tabCreateRequest.connect(self.addEmptyEditor)
@@ -170,6 +171,12 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
             env.update(component.environmentVariables())
         return env
 
+    # OVERRIDE: PrymatexComponentWidget.contributeToMainMenu()
+    @classmethod
+    def contributeToMainMenu(cls):
+        return MainWindowActionsMixin.contributeToMainMenu()
+
+    # OVERRIDE: PrymatexComponentWidget.contributeToSettings()
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.mainwindow import MainWindowSettingsWidget
@@ -325,7 +332,7 @@ html_footer
     def currentEditor(self):
         return self.centralWidget().currentWidget()
 
-    def on_splitter_currentWidgetChanged(self, editor):
+    def on_splitter_widgetChanged(self, editor):
         # Update Menu Bar
         #self.updateMenuForEditor(editor)
 
@@ -334,7 +341,7 @@ html_footer
         self.bundleItem_handler = editor.bundleItemHandler() or self.insertBundleItem if editor is not None else self.insertBundleItem
 
         #Emitir señal de cambio
-        self.currentEditorChanged.emit(editor)
+        self.editorChanged.emit(editor)
         
         if editor is not None:
             self.addEditorToHistory(editor)

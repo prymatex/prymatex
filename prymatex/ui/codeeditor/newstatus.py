@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/codeeditor/newstatus.ui'
 #
-# Created: Wed Dec 10 16:51:30 2014
-#      by: PyQt5 UI code generator 5.3.2
+# Created: Thu Dec 11 08:36:24 2014
+#      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_CodeEditorStatus(object):
     def setupUi(self, CodeEditorStatus):
         CodeEditorStatus.setObjectName("CodeEditorStatus")
-        CodeEditorStatus.resize(1093, 281)
+        CodeEditorStatus.resize(1093, 230)
         self.verticalLayout = QtWidgets.QVBoxLayout(CodeEditorStatus)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
@@ -348,8 +348,6 @@ class Ui_CodeEditorStatus(object):
         self.toolButtonMenuBundle = QtWidgets.QToolButton(self.widgetStatus)
         icon = QtGui.QIcon.fromTheme("cogs")
         self.toolButtonMenuBundle.setIcon(icon)
-        self.toolButtonMenuBundle.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
-        self.toolButtonMenuBundle.setAutoRaise(True)
         self.toolButtonMenuBundle.setObjectName("toolButtonMenuBundle")
         self.horizontalLayout_2.addWidget(self.toolButtonMenuBundle)
         self.comboBoxSyntaxes = QtWidgets.QComboBox(self.widgetStatus)

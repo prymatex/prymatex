@@ -58,7 +58,7 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         choices = self.bundleItem.holderChoices()
         if choices:
             self.editor.showFlatPopupMenu(choices, self.setHolderChoiceIndex)
-        if self.lastHolder() and not self.hasHolderContent():
+        if self.isLastHolder() and not self.hasHolderContent():
             self.stop()
             
     def runShellScript(self, script):
@@ -97,14 +97,14 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         else:
             self.stop()
 
-    def lastHolder(self):
-        return self.bundleItem.lastHolder()
+    def isLastHolder(self):
+        return self.isReady() and self.bundleItem.lastHolder()
 
     def setHolder(self, start, end):
         return self.isReady() and self.bundleItem.setHolder(start, end)
 
     def hasHolderContent(self):
-        return self.bundleItem.hasHolderContent()
+        return self.isReady() and self.bundleItem.hasHolderContent()
 
     def setHolderContent(self, content):
         self.bundleItem.setHolderContent(content)

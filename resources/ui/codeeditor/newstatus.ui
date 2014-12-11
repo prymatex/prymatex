@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1093</width>
-    <height>281</height>
+    <height>230</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -734,12 +734,6 @@ p, li { white-space: pre-wrap; }
          <iconset theme="cogs">
           <normaloff/>
          </iconset>
-        </property>
-        <property name="popupMode">
-         <enum>QToolButton::MenuButtonPopup</enum>
-        </property>
-        <property name="autoRaise">
-         <bool>true</bool>
         </property>
        </widget>
       </item>

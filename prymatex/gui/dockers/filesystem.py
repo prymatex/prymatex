@@ -351,11 +351,11 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtWidgets
     def on_pushButtonSync_toggled(self, checked):
         if checked:
             #Conectar señal
-            self.window().currentEditorChanged.connect(self.on_window_currentEditorChanged)
-            self.on_window_currentEditorChanged(self.window().currentEditor())
+            self.window().editorChanged.connect(self.on_window_editorChanged)
+            self.on_window_editorChanged(self.window().currentEditor())
         else:
             #Desconectar señal
-            self.window().currentEditorChanged.disconnect(self.on_window_currentEditorChanged)
+            self.window().editorChanged.disconnect(self.on_window_editorChanged)
 
     @QtCore.Slot()
     def on_actionSetInTerminal_triggered(self):
@@ -393,7 +393,7 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtWidgets
         _base, name = os.path.split(self.currentPath())
         self.window().componentByName("projectdialog").createProject(directory = self.currentPath(), name = name)
 
-    def on_window_currentEditorChanged(self, editor):
+    def on_window_editorChanged(self, editor):
         if editor is not None and not editor.isNew():
             index = self.fileSystemModel.index(editor.filePath)
             proxyIndex = self.fileSystemProxyModel.mapFromSource(index)

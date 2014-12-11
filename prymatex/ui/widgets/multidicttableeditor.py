@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/widgets/multidicttableeditor.ui'
 #
-# Created: Wed Dec 10 16:51:31 2014
-#      by: PyQt5 UI code generator 5.3.2
+# Created: Thu Dec 11 08:36:24 2014
+#      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
 

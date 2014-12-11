@@ -13,7 +13,7 @@ class PrymatexMainMenuBar(QtWidgets.QMenuBar):
     def __init__(self, **kwargs):
         super(PrymatexMainMenuBar, self).__init__(**kwargs)
         self.componentActions = {}
-        self.window().currentEditorChanged.connect(self.on_currentEditorChanged)
+        self.window().editorChanged.connect(self.on_window_editorChanged)
 
     def _instances(self, componentClass):
         componentInstances = [ self.window() ]
@@ -33,7 +33,7 @@ class PrymatexMainMenuBar(QtWidgets.QMenuBar):
         if instance:
             test_actions(instance, objects)
 
-    def on_currentEditorChanged(self, editor):
+    def on_window_editorChanged(self, editor):
         components = [ self.window().__class__ ]
         if editor is not None:
             components.append(editor.__class__)
@@ -59,7 +59,7 @@ class PrymatexMainMenuBar(QtWidgets.QMenuBar):
             menu = self.parent().findChild(QtWidgets.QMenu, 
                 text_to_objectname(name, prefix = "menu"))
 
-            # Extend menu or create new one 
+            # Extend menu or create new one
             if menu is None:
                 menu, objects = create_menu(parent, settings,
                     dispatcher = dispatcher,

@@ -17,7 +17,8 @@ class SplitterWidget(QtWidgets.QSplitter):
     # Signals for WorkbenchWindowLayout to handle
     tabCloseRequest = QtCore.Signal(QtWidgets.QWidget)
     tabCreateRequest = QtCore.Signal()
-    currentWidgetChanged = QtCore.Signal(QtWidgets.QWidget)
+    aboutToWidgetChanged = QtCore.Signal(QtWidgets.QWidget)
+    widgetChanged = QtCore.Signal(QtWidgets.QWidget)
     layoutChanged = QtCore.Signal()
 
     # The different hotspots of a QTabWidget.  An non-negative value is a tab
@@ -406,7 +407,7 @@ class SplitterWidget(QtWidgets.QSplitter):
         
         if self._current_widget != widget:
             self._current_widget = widget
-            self.currentWidgetChanged.emit(widget)
+            self.widgetChanged.emit(widget)
         
     def _tab_create_request(self, tabWidget):
         self._current_group = tabWidget
@@ -756,7 +757,7 @@ class SplitterWidget(QtWidgets.QSplitter):
 
         # Signal that the tab's SplitterWidget has changed, if necessary.
         if dsplit_w != self:
-            self.currentWidgetChanged.emit(twidg)
+            self.widgetChanged.emit(twidg)
         
         QtWidgets.qApp.blockSignals(False)
 

@@ -1038,21 +1038,21 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def contributeToMainMenu(cls):
         menu = {}
         menu["edit"] = [
-                '-',
-                {'text': '&Mode',
-                 'name': 'mode',
-                 'items': [{
-                        'text': 'Freehanded',
-                        'sequence': ("Editor", "FreehandedMode", 'Meta+Alt+E')
-                    }, {
-                        'text': 'Overwrite',
-                        'sequence': ("Editor", "OverwriteMode", 'Meta+Alt+O')
-                    }, {
-                        'text': 'Multiedit',
-                        'sequence': ("Editor", "MultieditMode", 'Meta+Alt+M')
-                    }
-                ]}
-            ]
+            '-',
+            {'text': '&Mode',
+             'name': 'mode',
+             'items': [{
+                    'text': 'Freehanded',
+                    'sequence': ("Editor", "FreehandedMode", 'Meta+Alt+E')
+                }, {
+                    'text': 'Overwrite',
+                    'sequence': ("Editor", "OverwriteMode", 'Meta+Alt+O')
+                }, {
+                    'text': 'Multiedit',
+                    'sequence': ("Editor", "MultieditMode", 'Meta+Alt+M')
+                }
+            ]}
+        ]
 
         menu["edit"] = [
             {'before': 'delete',
@@ -1066,96 +1066,97 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         ]
 
         menu["view"] = [
-                '-',
-                {'text': "Zoom In",
-                  'sequence': ("Editor", "ZoomIn"),
-                  'triggered': lambda ed, checked=False: ed.zoomIn()},
-                 {'text': "Zoom Out",
-                  'sequence': ("Editor", "ZoomOut"),
-                  'triggered': lambda ed, checked=False: ed.zoomOut()},
-                '-',
-                {'name': 'leftGutter',
-                 'text': 'Left Gutter',
-                 'items': []},
-                {'name': 'rightGutter',
-                 'text': 'Right Gutter',
-                 'items': []
-                }, '-',
-                {'text': "Code Folding",
-                 'items': [{
-                        'text': "Fold",
-                        'triggered': cls.on_actionFold_triggered,
-                        'sequence': ("Editor", "Fold", 'Ctrl+Shift+['),
-                    }, {
-                        'text': "Unfold",
-                        'triggered': cls.on_actionUnfold_triggered,
-                        'sequence': ("Editor", "Unfold", 'Ctrl+Shift+]'),
-                    }, {
-                        'text': "Unfold All",
-                        'triggered': cls.on_actionUnfoldAll_triggered
-                    }, "-" ] + [ tuple([ {
-                        'text': "Fold Level %s" % level,
-                        'triggered': lambda ed, checked, level=level: ed.on_actionFold_triggered(checked, level=level)
-                    } for level in range(1, cls.MAX_FOLD_LEVEL) ]) ] + [ 
-                        '-', {
-                        'text': "Fold Tab Attributes",
-                        'triggered': cls.on_actionFold_triggered
-                    }]
-                },
-                {'text': "Word Wrap",
-                 'items': [{
-                        'text': "Enabled",
-                        'checkable': True,
-                        'triggered': lambda ed, checked: ed.on_actionWordWrap_triggered(checked, size=Qt.QWIDGETSIZE_MAX),
-                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap)
-                    }, "-" ] + [ tuple(
-                    [{
-                        'text': "Automatic",
-                        'checkable': True,
-                        'triggered': lambda ed, checked: ed.on_actionWordWrap_triggered(checked, size=Qt.QWIDGETSIZE_MAX),
-                        'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap) and ed.wordWrapSize == Qt.QWIDGETSIZE_MAX
-                    }] + [{
-                        'text': "%s" % size,
-                        'checkable': True,
-                        'triggered': lambda ed, checked, size=size: ed.on_actionWordWrap_triggered(checked, size=size),
-                        'testChecked': lambda ed, size=size: bool(ed.getFlags() & ed.WordWrap) and \
-                            ed.wordWrapSize == size
-                    } for size in cls.STANDARD_SIZES]) ]
-                },
-                {'text': "Margin Line",
-                 'items': [{
-                        'text': "Enabled",
-                        'checkable': True,
-                        'triggered': cls.on_actionMarginLine_triggered,
-                        'testChecked': lambda ed: bool(ed.getFlags() & ed.MarginLine)
-                    }, "-" ] + [ tuple([ {
-                        'text': "%s" % size,
-                        'checkable': True,
-                        'triggered': lambda ed, checked, size = size: ed.on_actionMarginLine_triggered(checked, size = size),
-                        'testChecked': lambda ed, size = size: bool(ed.getFlags() & ed.MarginLine) and \
-                            ed.marginLineSize == size
-                    } for size in cls.STANDARD_SIZES]) ]
-                }, '-',
-                {'text': "Indent Guide",
-                 'checkable': True,
-                 'triggered': cls.on_actionIndentGuide_triggered,
-                 'testChecked': lambda ed: bool(ed.getFlags() & ed.IndentGuide)
-                },
-                {'text': "Highlight Current Line",
-                 'checkable': True,
-                 'triggered': cls.on_actionHighlightCurrentLine_triggered,
-                 'testChecked': lambda ed: bool(ed.getFlags() & ed.HighlightCurrentLine)
-                },
-                {'text': "Show Tabs and Spaces",
-                 'checkable': True,
-                 'triggered': cls.on_actionShowTabsAndSpaces_triggered,
-                 'testChecked': lambda ed: bool(ed.getFlags() & ed.ShowTabsAndSpaces) },
-                {'text': "Show Line and Paragraph",
-                 'checkable': True,
-                 'triggered': cls.on_actionShowLineAndParagraphs_triggered,
-                 'testChecked': lambda ed: bool(ed.getFlags() & ed.ShowLineAndParagraphs)
-                }
-            ]
+            '-',
+            {'text': "Zoom In",
+              'sequence': ("Editor", "ZoomIn"),
+              'triggered': lambda ed, checked=False: ed.zoomIn()},
+             {'text': "Zoom Out",
+              'sequence': ("Editor", "ZoomOut"),
+              'triggered': lambda ed, checked=False: ed.zoomOut()},
+            '-',
+            {'name': 'leftGutter',
+             'text': 'Left Gutter',
+             'items': []},
+            {'name': 'rightGutter',
+             'text': 'Right Gutter',
+             'items': []
+            }, '-',
+            {'text': "Code Folding",
+             'items': [{
+                    'text': "Fold",
+                    'triggered': cls.on_actionFold_triggered,
+                    'sequence': ("Editor", "Fold", 'Ctrl+Shift+['),
+                }, {
+                    'text': "Unfold",
+                    'triggered': cls.on_actionUnfold_triggered,
+                    'sequence': ("Editor", "Unfold", 'Ctrl+Shift+]'),
+                }, {
+                    'text': "Unfold All",
+                    'triggered': cls.on_actionUnfoldAll_triggered
+                }, "-" ] + [ tuple([ {
+                    'text': "Fold Level %s" % level,
+                    'triggered': lambda ed, checked, level=level: ed.on_actionFold_triggered(checked, level=level)
+                } for level in range(1, cls.MAX_FOLD_LEVEL) ]) ] + [ 
+                    '-', {
+                    'text': "Fold Tab Attributes",
+                    'triggered': cls.on_actionFold_triggered
+                }]
+            },
+            {'text': "Word Wrap",
+             'items': [{
+                    'text': "Enabled",
+                    'checkable': True,
+                    'triggered': lambda ed, checked: ed.on_actionWordWrap_triggered(checked, size=Qt.QWIDGETSIZE_MAX),
+                    'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap)
+                }, "-" ] + [ tuple(
+                [{
+                    'text': "Automatic",
+                    'checkable': True,
+                    'triggered': lambda ed, checked: ed.on_actionWordWrap_triggered(checked, size=Qt.QWIDGETSIZE_MAX),
+                    'testChecked': lambda ed: bool(ed.getFlags() & ed.WordWrap) and ed.wordWrapSize == Qt.QWIDGETSIZE_MAX
+                }] + [{
+                    'text': "%s" % size,
+                    'checkable': True,
+                    'triggered': lambda ed, checked, size=size: ed.on_actionWordWrap_triggered(checked, size=size),
+                    'testChecked': lambda ed, size=size: bool(ed.getFlags() & ed.WordWrap) and \
+                        ed.wordWrapSize == size
+                } for size in cls.STANDARD_SIZES]) ]
+            },
+            {'text': "Margin Line",
+             'items': [{
+                    'text': "Enabled",
+                    'checkable': True,
+                    'triggered': cls.on_actionMarginLine_triggered,
+                    'testChecked': lambda ed: bool(ed.getFlags() & ed.MarginLine)
+                }, "-" ] + [ tuple([ {
+                    'text': "%s" % size,
+                    'checkable': True,
+                    'triggered': lambda ed, checked, size = size: ed.on_actionMarginLine_triggered(checked, size = size),
+                    'testChecked': lambda ed, size = size: bool(ed.getFlags() & ed.MarginLine) and \
+                        ed.marginLineSize == size
+                } for size in cls.STANDARD_SIZES]) ]
+            }, '-',
+            {'text': "Indent Guide",
+             'checkable': True,
+             'triggered': cls.on_actionIndentGuide_triggered,
+             'testChecked': lambda ed: bool(ed.getFlags() & ed.IndentGuide)
+            },
+            {'text': "Highlight Current Line",
+             'checkable': True,
+             'triggered': cls.on_actionHighlightCurrentLine_triggered,
+             'testChecked': lambda ed: bool(ed.getFlags() & ed.HighlightCurrentLine)
+            },
+            {'text': "Show Tabs and Spaces",
+             'checkable': True,
+             'triggered': cls.on_actionShowTabsAndSpaces_triggered,
+             'testChecked': lambda ed: bool(ed.getFlags() & ed.ShowTabsAndSpaces) },
+            {'text': "Show Line and Paragraph",
+             'checkable': True,
+             'triggered': cls.on_actionShowLineAndParagraphs_triggered,
+             'testChecked': lambda ed: bool(ed.getFlags() & ed.ShowLineAndParagraphs)
+            }
+        ]
+
         menu["text"] = {
             'before': 'bundles',
             'name': 'text',
@@ -1258,40 +1259,40 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                  }
             ]}
         menu["navigation"] = [
-                "-",
-                {'text': 'Bookmarks',
-                 'items': [
-                    {'text': 'Toggle Bookmark',
-                     'triggered': cls.toggleBookmark,
-                     'sequence': ("Editor", "ToggleBookmark", 'Ctrl+F2'),
-                     },
-                    {'text': 'Next Bookmark',
-                     'triggered': cls.bookmarkNext,
-                     'sequence': ("Editor", "NextBookmark", 'F2'),
-                     },
-                    {'text': 'Previous Bookmark',
-                     'triggered': cls.bookmarkPrevious,
-                     'sequence': ("Editor", "PreviousBookmark", 'Shift+F2'),
-                     },
-                    {'text': 'Clear Bookmarks',
-                     'triggered': cls.clearBookmarks,
-                     'sequence': ("Editor", "ClearBookmarks", 'Ctrl+Shift+F2'),
-                     },
-                    {'text': 'Select All Bookmarks',
-                     'triggered': cls.selectAllBookmarks,
-                     'sequence': ("Editor", "SelectAllBookmarks", 'Alt+F2'),
-                     }
-                ]},
-                "-",
-                {'text': 'Go to &Symbol',
-                 'triggered': cls.on_actionGoToSymbol_triggered,
-                 'sequence': ("Editor", "GoToSymbol", 'Meta+Ctrl+Shift+O'),
+            "-",
+            {'text': 'Bookmarks',
+             'items': [
+                {'text': 'Toggle Bookmark',
+                 'triggered': cls.toggleBookmark,
+                 'sequence': ("Editor", "ToggleBookmark", 'Ctrl+F2'),
                  },
-                {'text': 'Go to &Bookmark',
-                 'triggered': cls.on_actionGoToBookmark_triggered,
-                 'sequence': ("Editor", "GoToBookmark", 'Meta+Ctrl+Shift+B'),
+                {'text': 'Next Bookmark',
+                 'triggered': cls.bookmarkNext,
+                 'sequence': ("Editor", "NextBookmark", 'F2'),
+                 },
+                {'text': 'Previous Bookmark',
+                 'triggered': cls.bookmarkPrevious,
+                 'sequence': ("Editor", "PreviousBookmark", 'Shift+F2'),
+                 },
+                {'text': 'Clear Bookmarks',
+                 'triggered': cls.clearBookmarks,
+                 'sequence': ("Editor", "ClearBookmarks", 'Ctrl+Shift+F2'),
+                 },
+                {'text': 'Select All Bookmarks',
+                 'triggered': cls.selectAllBookmarks,
+                 'sequence': ("Editor", "SelectAllBookmarks", 'Alt+F2'),
                  }
-            ]
+            ]},
+            "-",
+            {'text': 'Go to &Symbol',
+             'triggered': cls.on_actionGoToSymbol_triggered,
+             'sequence': ("Editor", "GoToSymbol", 'Meta+Ctrl+Shift+O'),
+             },
+            {'text': 'Go to &Bookmark',
+             'triggered': cls.on_actionGoToBookmark_triggered,
+             'sequence': ("Editor", "GoToBookmark", 'Meta+Ctrl+Shift+B'),
+             }
+        ]
         return menu
 
     @classmethod

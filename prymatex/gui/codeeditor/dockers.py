@@ -15,17 +15,17 @@ class CodeEditorSymbolsDock(PrymatexDock, Ui_SymbolsDock, QtWidgets.QDockWidget)
     ICON = "code-class"
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
-    def __init__(self, **kwargs):
-        super(CodeEditorSymbolsDock, self).__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super(CodeEditorSymbolsDock, self).__init__(*args, **kwargs)
         self.setupUi(self)
         self.tableViewSymbols.activated.connect(self.on_tableViewSymbols_activated)
         self.tableViewSymbols.doubleClicked.connect(self.on_tableViewSymbols_doubleClicked)
 
-    def initialize(self, **kwargs):
-        super(CodeEditorSymbolsDock, self).initialize(**kwargs)
-        self.window().currentEditorChanged.connect(self.on_window_currentEditorChanged)
+    def initialize(self, *args, **kwargs):
+        super(CodeEditorSymbolsDock, self).initialize(*args, **kwargs)
+        self.window().editorChanged.connect(self.on_window_editorChanged)
 
-    def on_window_currentEditorChanged(self, editor):
+    def on_window_editorChanged(self, editor):
         if isinstance(editor, CodeEditor):
             self.tableViewSymbols.setModel(editor.symbolListModel)
         elif editor is None:
@@ -53,11 +53,11 @@ class CodeEditorBookmarksDock(PrymatexDock, Ui_BookmarksDock, QtWidgets.QDockWid
         self.tableViewBookmarks.activated.connect(self.on_tableViewBookmarks_activated)
         self.tableViewBookmarks.doubleClicked.connect(self.on_tableViewBookmarks_doubleClicked)
         
-    def initialize(self, **kwargs):
+    def initialize(self, *args, **kwargs):
         super(CodeEditorBookmarksDock, self).initialize(**kwargs)
-        self.window().currentEditorChanged.connect(self.on_window_currentEditorChanged)
+        self.window().editorChanged.connect(self.on_window_editorChanged)
 
-    def on_window_currentEditorChanged(self, editor):
+    def on_window_editorChanged(self, editor):
         if isinstance(editor, CodeEditor):
             self.tableViewBookmarks.setModel(editor.bookmarkListModel)
         elif editor is None:
