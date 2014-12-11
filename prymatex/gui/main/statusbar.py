@@ -16,6 +16,5 @@ class PrymatexMainStatusBar(QtWidgets.QStatusBar):
 
     def on_currentEditorChanged(self, editor):
         for bar in self.statusBars:
-            bar.setCurrentEditor(editor)
             bar.setVisible(bar.acceptEditor(editor))
         self.setVisible(editor is not None)

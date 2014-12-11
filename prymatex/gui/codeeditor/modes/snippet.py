@@ -87,12 +87,14 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
 
     def __snippet_backspace(self, event):
         cursor = self.editor.textCursor()
-        holderStart, holderEnd = self.processor.currentPosition()
-        if not cursor.hasSelection() and cursor.position() == holderStart:
-            self.processor.stop()
+        if self.processor.isReady():
+            holderStart, holderEnd = self.processor.currentPosition()
+            if not cursor.hasSelection() and cursor.position() == holderStart:
+                self.processor.stop()
 
     def __snippet_delete(self, event):
         cursor = self.editor.textCursor()
-        holderStart, holderEnd = self.processor.currentPosition()
-        if not cursor.hasSelection() and cursor.position() == holderEnd:
-            self.processor.stop()
+        if self.processor.isReady():
+            holderStart, holderEnd = self.processor.currentPosition()
+            if not cursor.hasSelection() and cursor.position() == holderEnd:
+                self.processor.stop()
