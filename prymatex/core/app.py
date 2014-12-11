@@ -379,15 +379,15 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         componentClass._pmx_populated = True
 
     # ------------------- Create components
-    def createComponentInstance(self, componentClass, **kwargs):
+    def createComponentInstance(self, componentClass, *args, **kwargs):
         if not getattr(componentClass, '_pmx_populated', False):
             self.populateComponentClass(componentClass)
 
         # ------------------- Build
         buildedInstances = []
 
-        def buildComponentInstance(klass, **kwargs):
-            component = klass(**kwargs)
+        def buildComponentInstance(klass, *args, **kwargs):
+            component = klass(*args, **kwargs)
 
             # Add components
             componentClasses = self.pluginManager is not None and \

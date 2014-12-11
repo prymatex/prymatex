@@ -15,14 +15,15 @@ class CodeEditorSymbolsDock(PrymatexDock, Ui_SymbolsDock, QtWidgets.QDockWidget)
     ICON = "code-class"
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
-    def __init__(self, **kwargs):
-        super(CodeEditorSymbolsDock, self).__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super(CodeEditorSymbolsDock, self).__init__(*args, **kwargs)
         self.setupUi(self)
         self.tableViewSymbols.activated.connect(self.on_tableViewSymbols_activated)
         self.tableViewSymbols.doubleClicked.connect(self.on_tableViewSymbols_doubleClicked)
 
-    def initialize(self, **kwargs):
-        super(CodeEditorSymbolsDock, self).initialize(**kwargs)
+    def initialize(self, *args, **kwargs):
+        print(*args, **kwargs)
+        super(CodeEditorSymbolsDock, self).initialize(*args, **kwargs)
         self.window().currentEditorChanged.connect(self.on_window_currentEditorChanged)
 
     def on_window_currentEditorChanged(self, editor):

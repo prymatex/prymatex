@@ -10,6 +10,9 @@ class PrymatexDock(PrymatexComponentWidget):
     ICON = None
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
 
+    def __init__(self, *args, **kwargs):
+        super(PrymatexDock, self).__init__(*args, **kwargs)
+
 #========================================
 # BASE ADDON
 #========================================

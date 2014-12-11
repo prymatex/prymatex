@@ -59,7 +59,7 @@ class PrymatexMainMenuBar(QtWidgets.QMenuBar):
             menu = self.parent().findChild(QtWidgets.QMenu, 
                 text_to_objectname(name, prefix = "menu"))
 
-            # Extend menu or create new one 
+            # Extend menu or create new one
             if menu is None:
                 menu, objects = create_menu(parent, settings,
                     dispatcher = dispatcher,

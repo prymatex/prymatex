@@ -170,6 +170,12 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
             env.update(component.environmentVariables())
         return env
 
+    # OVERRIDE: PrymatexComponentWidget.contributeToMainMenu()
+    @classmethod
+    def contributeToMainMenu(cls):
+        return MainWindowActionsMixin.contributeToMainMenu()
+
+    # OVERRIDE: PrymatexComponentWidget.contributeToSettings()
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.mainwindow import MainWindowSettingsWidget

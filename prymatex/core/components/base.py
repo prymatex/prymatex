@@ -4,14 +4,14 @@
 #http://pyqt.sourceforge.net/Docs/PyQt5/multiinheritance.html#ref-cooperative-multiinheritance
 
 class PrymatexComponent(object):
-    def __init__(self, **kwargs):
-        super(PrymatexComponent, self).__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super(PrymatexComponent, self).__init__(*args, **kwargs)
         self._components = []
 
-    def initialize(self, **kwargs):
+    def initialize(self, *args, **kwargs):
         pass
     
-    def finalize(self, **kwargs):
+    def finalize(self, *args, **kwargs):
         pass
 
     def components(self):
@@ -27,8 +27,6 @@ class PrymatexComponent(object):
 
     @classmethod
     def contributeToMainMenu(cls):
-        if hasattr(super(PrymatexComponent, cls), 'contributeToMainMenu'):
-            return super(PrymatexComponent, cls).contributeToMainMenu()
         return {}
 
     def contributeToShortcuts(self):
@@ -58,9 +56,7 @@ class PrymatexComponent(object):
                     component.setComponentState(componentState["components"][componentName])
 
 class PrymatexAddon(PrymatexComponent):
-    def contributeToContextMenu(self, **kwargs):
-        if hasattr(super(PrymatexAddon, self), 'contributeToContextMenu'):
-            return super(PrymatexAddon, self).contributeToContextMenu(**kwargs)
+    def contributeToContextMenu(self, *args, **kwargs):
         return []
 
 class PrymatexComponentWidget(PrymatexComponent):
