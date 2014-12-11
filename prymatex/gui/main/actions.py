@@ -146,7 +146,7 @@ class MainWindowActionsMixin(object):
         import prymatex
         import collections
         menu = collections.OrderedDict()
-        print("Go")
+
         # ------------- File menu
         menu["file"] = {
             "text": "&File",

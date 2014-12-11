@@ -24,4 +24,9 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
         
     def initialize(self, *args, **kwargs):
         super(CodeEditorStatus, self).initialize(*args, **kwargs)
-        #print(self.parent(), self.window, args, kwargs)
+        FindMixin.initialize(self, *args, **kwargs)
+        FindInFilesMixin.initialize(self, *args, **kwargs)
+        ReplaceMixin.initialize(self, *args, **kwargs)
+        StatusMixin.initialize(self, *args, **kwargs)
+        CommandMixin.initialize(self, *args, **kwargs)
+        

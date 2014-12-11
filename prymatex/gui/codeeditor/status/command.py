@@ -5,7 +5,7 @@ class CommandMixin(object):
     """docstring for FindMixin"""
     def __init__(self, **kwargs):
         super(CommandMixin, self).__init__(**kwargs)
+        print(self.window())
 
     def initialize(self, *args, **kwargs):
-        super(CommandMixin, self).initialize(*args, **kwargs)
         self.widgetCommand.setVisible(False)

@@ -7,5 +7,4 @@ class FindInFilesMixin(object):
         super(FindInFilesMixin, self).__init__(**kwargs)
 
     def initialize(self, *args, **kwargs):
-        super(FindInFilesMixin, self).initialize(*args, **kwargs)
         self.widgetFindInFiles.setVisible(False)

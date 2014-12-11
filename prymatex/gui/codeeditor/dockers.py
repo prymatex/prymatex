@@ -22,7 +22,6 @@ class CodeEditorSymbolsDock(PrymatexDock, Ui_SymbolsDock, QtWidgets.QDockWidget)
         self.tableViewSymbols.doubleClicked.connect(self.on_tableViewSymbols_doubleClicked)
 
     def initialize(self, *args, **kwargs):
-        print(*args, **kwargs)
         super(CodeEditorSymbolsDock, self).initialize(*args, **kwargs)
         self.window().currentEditorChanged.connect(self.on_window_currentEditorChanged)
 
@@ -54,7 +53,7 @@ class CodeEditorBookmarksDock(PrymatexDock, Ui_BookmarksDock, QtWidgets.QDockWid
         self.tableViewBookmarks.activated.connect(self.on_tableViewBookmarks_activated)
         self.tableViewBookmarks.doubleClicked.connect(self.on_tableViewBookmarks_doubleClicked)
         
-    def initialize(self, **kwargs):
+    def initialize(self, *args, **kwargs):
         super(CodeEditorBookmarksDock, self).initialize(**kwargs)
         self.window().currentEditorChanged.connect(self.on_window_currentEditorChanged)
 
