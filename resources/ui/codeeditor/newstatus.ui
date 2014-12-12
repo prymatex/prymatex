@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1093</width>
+    <width>1100</width>
     <height>230</height>
    </rect>
   </property>
@@ -729,11 +729,9 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButtonMenuBundle">
+       <widget class="QToolButton" name="toolButtonMenuBundles">
         <property name="icon">
-         <iconset theme="cogs">
-          <normaloff/>
-         </iconset>
+         <iconset theme="menu-bundles"/>
         </property>
        </widget>
       </item>

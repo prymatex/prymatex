@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/codeeditor/newstatus.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/codeeditor/newstatus.ui'
 #
-# Created: Thu Dec 11 08:36:24 2014
+# Created: Fri Dec 12 08:09:37 2014
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_CodeEditorStatus(object):
     def setupUi(self, CodeEditorStatus):
         CodeEditorStatus.setObjectName("CodeEditorStatus")
-        CodeEditorStatus.resize(1093, 230)
+        CodeEditorStatus.resize(1100, 230)
         self.verticalLayout = QtWidgets.QVBoxLayout(CodeEditorStatus)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
@@ -345,11 +345,11 @@ class Ui_CodeEditorStatus(object):
         self.labelStatus.setMaximumSize(QtCore.QSize(150, 16777215))
         self.labelStatus.setObjectName("labelStatus")
         self.horizontalLayout_2.addWidget(self.labelStatus)
-        self.toolButtonMenuBundle = QtWidgets.QToolButton(self.widgetStatus)
-        icon = QtGui.QIcon.fromTheme("cogs")
-        self.toolButtonMenuBundle.setIcon(icon)
-        self.toolButtonMenuBundle.setObjectName("toolButtonMenuBundle")
-        self.horizontalLayout_2.addWidget(self.toolButtonMenuBundle)
+        self.toolButtonMenuBundles = QtWidgets.QToolButton(self.widgetStatus)
+        icon = QtGui.QIcon.fromTheme("menu-bundles")
+        self.toolButtonMenuBundles.setIcon(icon)
+        self.toolButtonMenuBundles.setObjectName("toolButtonMenuBundles")
+        self.horizontalLayout_2.addWidget(self.toolButtonMenuBundles)
         self.comboBoxSyntaxes = QtWidgets.QComboBox(self.widgetStatus)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
