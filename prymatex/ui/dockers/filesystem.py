@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/filesystem.ui'
 #
-# Created: Fri Dec 12 07:46:00 2014
+# Created: Fri Dec 12 11:53:21 2014
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -66,9 +66,6 @@ class Ui_FileSystemDock(object):
         self.toolButtonOptions = QtWidgets.QToolButton(self.dockWidgetContents)
         icon = QtGui.QIcon.fromTheme("options")
         self.toolButtonOptions.setIcon(icon)
-        self.toolButtonOptions.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
-        self.toolButtonOptions.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
-        self.toolButtonOptions.setArrowType(QtCore.Qt.NoArrow)
         self.toolButtonOptions.setObjectName("toolButtonOptions")
         self.buttonsLayout.addWidget(self.toolButtonOptions)
         self.verticalLayout.addLayout(self.buttonsLayout)

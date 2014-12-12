@@ -15,18 +15,18 @@ from .status import StatusMixin
 
 class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
     ReplaceMixin, CommandMixin, StatusMixin, Ui_CodeEditorStatus, QtWidgets.QWidget):
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(CodeEditorStatus, self).__init__(**kwargs)
         self.setupUi(self)
+        StatusMixin.setup(self)
 
     def acceptEditor(self, editor):
         return isinstance(editor, CodeEditor)
         
     def initialize(self, *args, **kwargs):
         super(CodeEditorStatus, self).initialize(*args, **kwargs)
-        # FindMixin.initialize(self, *args, **kwargs)
-        # FindInFilesMixin.initialize(self, *args, **kwargs)
-        # ReplaceMixin.initialize(self, *args, **kwargs)
-        # StatusMixin.initialize(self, *args, **kwargs)
-        # CommandMixin.initialize(self, *args, **kwargs)
-        
+        FindMixin.initialize(self, *args, **kwargs)
+        FindInFilesMixin.initialize(self, *args, **kwargs)
+        ReplaceMixin.initialize(self, *args, **kwargs)
+        StatusMixin.initialize(self, *args, **kwargs)
+        CommandMixin.initialize(self, *args, **kwargs)

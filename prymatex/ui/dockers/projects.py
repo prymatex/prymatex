@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/dockers/projects.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/projects.ui'
 #
-# Created: Thu Dec 11 08:36:24 2014
+# Created: Fri Dec 12 11:53:21 2014
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_ProjectsDock(object):
     def setupUi(self, ProjectsDock):
         ProjectsDock.setObjectName("ProjectsDock")
-        ProjectsDock.resize(347, 484)
+        ProjectsDock.resize(291, 484)
         self.dockWidgetContents = QtWidgets.QWidget()
         self.dockWidgetContents.setObjectName("dockWidgetContents")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.dockWidgetContents)
@@ -66,9 +66,6 @@ class Ui_ProjectsDock(object):
         self.toolButtonOptions = QtWidgets.QToolButton(self.dockWidgetContents)
         icon = QtGui.QIcon.fromTheme("options")
         self.toolButtonOptions.setIcon(icon)
-        self.toolButtonOptions.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
-        self.toolButtonOptions.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
-        self.toolButtonOptions.setArrowType(QtCore.Qt.NoArrow)
         self.toolButtonOptions.setObjectName("toolButtonOptions")
         self.buttonsLayout.addWidget(self.toolButtonOptions)
         self.verticalLayout.addLayout(self.buttonsLayout)

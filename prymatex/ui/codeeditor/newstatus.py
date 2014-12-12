@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/codeeditor/newstatus.ui'
 #
-# Created: Fri Dec 12 08:09:37 2014
+# Created: Fri Dec 12 12:19:07 2014
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -345,6 +345,8 @@ class Ui_CodeEditorStatus(object):
         self.labelStatus.setMaximumSize(QtCore.QSize(150, 16777215))
         self.labelStatus.setObjectName("labelStatus")
         self.horizontalLayout_2.addWidget(self.labelStatus)
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem)
         self.toolButtonMenuBundles = QtWidgets.QToolButton(self.widgetStatus)
         icon = QtGui.QIcon.fromTheme("menu-bundles")
         self.toolButtonMenuBundles.setIcon(icon)

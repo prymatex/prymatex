@@ -729,9 +729,24 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
        <widget class="QToolButton" name="toolButtonMenuBundles">
         <property name="icon">
-         <iconset theme="menu-bundles"/>
+         <iconset theme="menu-bundles">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>

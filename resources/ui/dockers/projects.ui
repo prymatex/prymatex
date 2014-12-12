@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>347</width>
+    <width>291</width>
     <height>484</height>
    </rect>
   </property>
@@ -109,7 +109,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="collapse"/>
+         <iconset theme="collapse">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -119,7 +121,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="filter"/>
+         <iconset theme="filter">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -129,15 +133,6 @@
          <iconset theme="options">
           <normaloff/>
          </iconset>
-        </property>
-        <property name="popupMode">
-         <enum>QToolButton::MenuButtonPopup</enum>
-        </property>
-        <property name="toolButtonStyle">
-         <enum>Qt::ToolButtonIconOnly</enum>
-        </property>
-        <property name="arrowType">
-         <enum>Qt::NoArrow</enum>
         </property>
        </widget>
       </item>

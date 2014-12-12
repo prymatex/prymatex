@@ -443,34 +443,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     def unregisterSettingHook(self, settingPath, handler):
         self.profile().unregisterSettingHook(settingPath, handler)
 
-    # ------------- Editors and windows handle
-    def createEditorInstance(self, class_name = None, file_path=None,
-                             cursor_position=None, parent=None):
-        editorClass = None
-        if class_name is not None:
-            editorClass = self.pluginManager.findEditorClassByName(class_name)
-        elif file_path is not None:
-            editorClass = self.pluginManager.findEditorClassForFile(file_path)
-        if editorClass is None:
-            editorClass = self.pluginManager.defaultEditor()
-
-        # Exists file ?
-        if file_path and not self.fileManager.isfile(file_path):
-            file_path = None
-        editor = self.createComponentInstance(editorClass,
-                                              parent=parent,
-                                              file_path=file_path
-                                              )
-        if file_path:
-            editor.open(file_path)
-        if cursor_position:
-            editor.setCursorPosition(cursor_position)
-        return editor
-
-    def deleteEditorInstance(self, editor):
-        editor.close()
-        self.deleteComponentInstance(editor)
-
+    # ------------- Main windows handlers
     def findEditorForFile(self, filepath):
         for main_window in self.mainWindows():
             editor = main_window.findEditorForFile(filepath)
@@ -520,11 +493,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
                     editor.setCursorPosition(cursorPosition)
         elif self.fileManager.exists(file_path):
             main_window = main_window or self.currentWindow()
-            editor = self.createEditorInstance(
+            editor = main_window.createEditor(
                 file_path=file_path,
-                cursor_position=cursorPosition,
-                parent=main_window,
-                )
+                cursor_position=cursorPosition)
             # TODO el dialogo de no tengo editor para ese tipo de archivo
             if editor is not None:
                 main_window.tryCloseEmptyEditor()

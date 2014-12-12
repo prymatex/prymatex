@@ -31,7 +31,9 @@ from .actions import MainWindowActionsMixin, tabSelectableModelFactory
 class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidgets.QMainWindow):
     """Prymatex main window"""
     # --------------------- Signals
-    aboutToEditorChanged = QtCore.Signal(object)
+    editorCreated = QtCore.Signal(object)
+    aboutToEditorDelete = QtCore.Signal(object)
+    aboutToEditorChange = QtCore.Signal(object)
     editorChanged = QtCore.Signal(object)
 
     # --------------------- Settings
@@ -302,8 +304,36 @@ html_footer
         self.centralWidget().moveWidgetToPreviousGroup(self.currentEditor())
 
     # ---------------- Create and manage editors
+    def createEditor(self, class_name = None, file_path=None,
+            cursor_position=None):
+        editorClass = None
+        if class_name is not None:
+            editorClass = self.application().pluginManager.findEditorClassByName(class_name)
+        elif file_path is not None:
+            editorClass = self.application().pluginManager.findEditorClassForFile(file_path)
+        if editorClass is None:
+            editorClass = self.application().pluginManager.defaultEditor()
+
+        # Exists file ?
+        if file_path and not self.application().fileManager.isfile(file_path):
+            file_path = None
+        editor = self.application().createComponentInstance(editorClass,
+                                              parent=self,
+                                              file_path=file_path)
+        if file_path:
+            editor.open(file_path)
+        if cursor_position:
+            editor.setCursorPosition(cursor_position)
+        self.editorCreated.emit(editor)
+        return editor
+
+    def deleteEditor(self, editor):
+        self.aboutToEditorDelete.emit(editor)
+        editor.close()
+        self.application().deleteComponentInstance(editor)
+
     def addEmptyEditor(self):
-        editor = self.application().createEditorInstance(parent = self)
+        editor = self.createEditor(parent = self)
         self.addEditor(editor)
 
     def removeEditor(self, editor):
@@ -398,7 +428,7 @@ html_footer
             elif response == QtWidgets.QMessageBox.Cancel:
                 raise exceptions.UserCancelException()
         self.removeEditor(editor)
-        self.application().deleteEditorInstance(editor)
+        self.deleteEditor(editor)
 
     def tryCloseEmptyEditor(self, editor = None):
         editor = editor or self.currentEditor()
@@ -460,10 +490,9 @@ html_footer
 
         # Restore open documents
         for editorState in componentState.get("editors", []):
-            editor = self.application().createEditorInstance(
+            editor = self.createEditor(
                 class_name = editorState["name"],
-                file_path = editorState.get("file"),
-                parent = self)
+                file_path = editorState.get("file"))
             editor.setComponentState(editorState)
             editor.setModified(editorState.get("modified", False))
             self.addEditor(editor)

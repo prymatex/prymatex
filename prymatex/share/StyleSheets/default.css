@@ -1,25 +1,19 @@
 QDockWidget QPushButton {
-    icon-size: 12px;
-    padding: 4px;
+  icon-size: 12px;
+  padding: 4px;
+  margin: 2px;
 }
 
 QDockWidget QToolButton {
-    icon-size: 16px;
+  icon-size: 12px;
+  padding: 2px;
+  margin: 2px;
 }
 
-QDockWidget QComboBox {
-    padding: 2px;
-}
-
-QStatusBar QPushButton {
-    icon-size: 12px;
-    padding: 4px;
-}
-
-QStatusBar QToolButton {
-    icon-size: 16px;
+QStatusBar QLabel {
+  font-size: 11px;
 }
 
 QStatusBar QComboBox {
-    padding: 2px;
+  font-size: 11px;
 }
