@@ -8,3 +8,6 @@ class ReplaceMixin(object):
 
     def initialize(self, *args, **kwargs):
         self.widgetReplace.setVisible(False)
+
+    def showReplace(self):
+        self.widgetReplace.setVisible(True)

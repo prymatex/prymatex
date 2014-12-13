@@ -8,3 +8,6 @@ class FindMixin(object):
 
     def initialize(self, *args, **kwargs):
         self.widgetFind.setVisible(False)
+
+    def showFind(self):
+        self.widgetFind.setVisible(True)
