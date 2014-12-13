@@ -73,37 +73,37 @@ class CodeEditorEditMode(CodeEditorBaseMode):
     def __backspace_behavior(self, event):
         cursor = self.editor.textCursor()
         if not cursor.hasSelection():
+            # ----------- Remove Braces
+            cl, cr, clo, cro = self.editor._smart_typing_pairs(cursor)
+            if cl and clo  and (cl.selectionStart() == clo.selectionEnd() or cl.selectionEnd() == clo.selectionStart()):
+                cursor.beginEditBlock()
+                cl.removeSelectedText()
+                clo.removeSelectedText()
+                cursor.endEditBlock()
+                return True
             # ----------- Remove Tab_behavior
             tab_behavior = self.editor.tabKeyBehavior()
             cursor = self.editor.newCursorAtPosition(cursor.position(), cursor.position() - len(tab_behavior))
             if cursor.selectedText() == tab_behavior:
                 cursor.removeSelectedText()
                 return True
-            # ----------- Remove Braces
-            cursor1, _, cursor2, _ = self.editor._smart_typing_pairs(cursor)
-            if cursor1 and cursor2  and (cursor1.selectionStart() == cursor2.selectionEnd() or cursor1.selectionEnd() == cursor2.selectionStart()):
-                cursor.beginEditBlock()
-                cursor1.removeSelectedText()
-                cursor2.removeSelectedText()
-                cursor.endEditBlock()
-                return True
 
     def __delete_behavior(self, event):
         cursor = self.editor.textCursor()
         if not cursor.hasSelection():
+            # ----------- Remove Braces
+            cl, cr, clo, cro = self.editor._smart_typing_pairs(cursor)
+            if cr and cro  and (cr.selectionStart() == cro.selectionEnd() or cr.selectionEnd() == cro.selectionStart()):
+                cursor.beginEditBlock()
+                cr.removeSelectedText()
+                cro.removeSelectedText()
+                cursor.endEditBlock()
+                return True
             # ----------- Remove Tab_behavior
             tab_behavior = self.editor.tabKeyBehavior()
             cursor = self.editor.newCursorAtPosition(cursor.position(), cursor.position() + len(tab_behavior))
             if cursor.selectedText() == tab_behavior:
                 cursor.removeSelectedText()
-                return True
-            # ----------- Remove Braces
-            _, cursor1, _, cursor2 = self.editor._smart_typing_pairs(cursor)
-            if cursor1 and cursor2  and (cursor1.selectionStart() == cursor2.selectionEnd() or cursor1.selectionEnd() == cursor2.selectionStart()):
-                cursor.beginEditBlock()
-                cursor1.removeSelectedText()
-                cursor2.removeSelectedText()
-                cursor.endEditBlock()
                 return True
         
     def __insert_typing_pairs(self, event):
@@ -114,7 +114,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         
         # No pairs
         if not pairs: return False
-        lc1, rc1, lc2, rc2 = self.editor._smart_typing_pairs(cursor)
+        cl, cr, clo, cro = self.editor._smart_typing_pairs(cursor)
         
         pair = pairs[0]
         
@@ -123,7 +123,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         isSame = pair[0] == pair[1]
         control_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
         if isClose and not cursor.hasSelection() \
-            and rc1 and rc2 and character == rc1.selectedText():
+            and cr and cro and character == cr.selectedText():
             # Skip
             cursor.movePosition(QtGui.QTextCursor.NextCharacter)
             self.editor.setTextCursor(cursor)
@@ -133,39 +133,39 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                 selectedText = cursor.selectedText()
                 if any([selectedText == pair[0] for pair in settings.smartTypingPairs]):
                     # Replace
-                    if lc1 is not None and lc2 is not None:
-                        lc1.insertText(pair[0])
-                        lc2.insertText(pair[1])
-                    elif rc1 is not None and rc2 is not None:
-                        rc1.insertText(pair[0])
-                        rc2.insertText(pair[1])
+                    if cl is not None and clo is not None:
+                        cl.insertText(pair[0])
+                        clo.insertText(pair[1])
+                    elif cr is not None and cro is not None:
+                        cr.insertText(pair[0])
+                        cro.insertText(pair[1])
                 else:
                     # Wrap
                     cursor.insertText("%s%s%s" % (pair[0],selectedText,pair[1]))
                 return True
             else:
-                if lc1 and lc2:
-                    if cursor.position() == lc1.selectionStart():
-                        lc1.setPosition(lc1.selectionStart())
-                        rc2.setPosition(lc2.selectionEnd())
+                if cl and clo:
+                    if cursor.position() == cl.selectionStart():
+                        cl.setPosition(cl.selectionStart())
+                        clo.setPosition(clo.selectionEnd())
                     else:
-                        lc1.setPosition(lc1.selectionEnd())
-                        rc2.setPosition(lc2.selectionStart())
+                        cl.setPosition(cl.selectionEnd())
+                        clo.setPosition(clo.selectionStart())
                     cursor.beginEditBlock()
-                    lc1.insertText(pair[0])
-                    lc2.insertText(pair[1])
+                    cl.insertText(pair[0])
+                    clo.insertText(pair[1])
                     cursor.endEditBlock()
                     return True
-                elif rc1 and rc2:
-                    if cursor.position() == rc1.selectionStart():
-                        rc1.setPosition(rc1.selectionStart())
-                        rc2.setPosition(rc2.selectionEnd())
+                elif cr and cro:
+                    if cursor.position() == cr.selectionStart():
+                        cr.setPosition(cr.selectionStart())
+                        cro.setPosition(cro.selectionEnd())
                     else:
-                        rc1.setPosition(rc1.selectionEnd())
-                        rc2.setPosition(rc2.selectionStart())
+                        cr.setPosition(cr.selectionEnd())
+                        cro.setPosition(cro.selectionStart())
                     cursor.beginEditBlock()
-                    rc1.insertText(pair[0])
-                    rc2.insertText(pair[1])
+                    cr.insertText(pair[0])
+                    cro.insertText(pair[1])
                     cursor.endEditBlock()
                     return True
                     
