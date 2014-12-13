@@ -333,7 +333,7 @@ html_footer
         self.application().deleteComponentInstance(editor)
 
     def addEmptyEditor(self):
-        editor = self.createEditor(parent = self)
+        editor = self.createEditor()
         self.addEditor(editor)
 
     def removeEditor(self, editor):
