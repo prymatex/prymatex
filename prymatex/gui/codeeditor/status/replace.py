@@ -9,6 +9,11 @@ class ReplaceMixin(object):
     def initialize(self, *args, **kwargs):
         self.widgetReplace.setVisible(False)
 
+    # ------- Go to replace
+    def replace(self):
+        editor = self.window().currentEditor()
+        print(editor)
+
     def showReplace(self):
         self.hideAll()
         self.widgetReplace.setVisible(True)

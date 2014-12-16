@@ -46,15 +46,15 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
             'items': [
                 {'text': "Find...",
                  'sequence': ("StatusBar", "Find", "Find"),
-                 'triggered': lambda st, checked=False: st.showFind()
+                 'triggered': lambda st, checked=False: st.find()
                 },
                 {'text': "Find Next",
                  'sequence': ("StatusBar", "FindNext", "F3"),
-                 'triggered': lambda st, checked=False: st.showIFind()
+                 'triggered': lambda st, checked=False: st.findNext()
                 },
                 {'text': "Find Previous",
                  'sequence': ("StatusBar", "FindPrevious", "Shift+F3"),
-                 'triggered': lambda st, checked=False: st.showIFind()
+                 'triggered': lambda st, checked=False: st.findPrevious()
                 },
                 {'text': "Incremental Find",
                  'sequence': ("StatusBar", "IncrementalFind", "Ctrl+I"),
@@ -62,11 +62,11 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
                 }, '-',
                 {'text': "Replace",
                  'sequence': ("StatusBar", "Replace", "Replace"),
-                 'triggered': lambda st, checked=False: st.showReplace()
+                 'triggered': lambda st, checked=False: st.replace()
                 },
                 {'text': "Replace Next",
                  'sequence': ("StatusBar", "ReplaceNext", "Ctrl+Shift+H"),
-                 'triggered': lambda st, checked=False: st.showReplace()
+                 'triggered': lambda st, checked=False: st.replaceNext()
                 }, '-',
                 {'text': "Quick Find",
                  'sequence': ("StatusBar", "QuickFind", "Ctrl+F3"),
