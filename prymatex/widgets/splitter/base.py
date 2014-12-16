@@ -220,7 +220,7 @@ class SplitterWidget(QtWidgets.QSplitter):
                         break
                 (tw, tidx) = (tw, tw.count() - 1) if tw.count() != 0 else (None, -1)
             else:
-                tidx = tidx - 1
+                tidx = tidx - 1 if tidx > 0 else 0
             self._set_current_tab(tw, tidx)
             if tw is not None:
                 tw.tabBar().setFocus()
@@ -231,8 +231,7 @@ class SplitterWidget(QtWidgets.QSplitter):
             count += group.count()
         return count
 
-    # TODO Migrar a TabWidget en lugar de solo Widget para no confundir
-    def allWidgets(self):
+    def tabWidgets(self):
         widgets = []
         for group in self.allGroups():
             for index in range(group.count()):
@@ -262,17 +261,14 @@ class SplitterWidget(QtWidgets.QSplitter):
         return self._current_group
     
     # ------ Close widgets
-    def closeAllExceptWidget(self, widget):
+    def closeAll(self, exclude=None):
         count = 0
-        for w in self.allWidgets():
-            if w is widget:
+        for w in self.tabWidgets():
+            if w is exclude:
                 continue
             self._close_tab_request(w)
             count += 1
         return count
-    
-    def closeAll(self):
-        return self.closeAllExceptWidget(None)
 
     # ------ Layout, Split
     def splitHorizontally(self, widget = None):
@@ -546,7 +542,7 @@ class SplitterWidget(QtWidgets.QSplitter):
         self._current_group = tw
         self._current_tab_idx = tidx
         
-        self._tab_focus_changed(self._current_group and self._current_group.widget(self._current_tab_idx) or None)
+        self._tab_focus_changed(self._current_group and self._current_group.widget(self._current_tab_idx))
 
     def _set_focus(self):
         """ Set the focus to an appropriate widget in the current tab. """

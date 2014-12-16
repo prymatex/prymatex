@@ -116,7 +116,7 @@ class DragableTabBar(QtWidgets.QTabBar):
                         "triggered": tabSplitter.closeAll
                     },
                     {   "text": "Close other",
-                        "triggered": partial(tabSplitter.closeAllExceptWidget, widget)
+                        "triggered": partial(tabSplitter.closeAll, widget)
                     }
                 ]
             }
