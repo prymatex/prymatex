@@ -341,20 +341,22 @@ html_footer
         self.centralWidget().removeTabWidget(editor)
         # TODO Clean history ?
 
-    def addEditor(self, editor, focus = True):
+    def addEditor(self, editor, focus=True):
+        current = self.currentEditor()
         self.centralWidget().addTabWidget(editor)
         editor.newLocationMemento.connect(self.on_editor_newLocationMemento)
+        self.tryCloseEmptyEditor(current)
         if focus:
             self.setCurrentEditor(editor)
-
+        
     def findEditorForFile(self, filePath):
         # Find open editor for fileInfo
-        for editor in self.centralWidget().allWidgets():
+        for editor in self.centralWidget().tabWidgets():
             if editor.filePath() == filePath:
                 return editor
 
     def editors(self):
-        return self.centralWidget().allWidgets()
+        return self.centralWidget().tabWidgets()
 
     def setCurrentEditor(self, editor):
         self.centralWidget().setCurrentWidget(editor)
@@ -363,22 +365,25 @@ html_footer
         return self.centralWidget().currentWidget()
 
     def on_splitter_widgetChanged(self, editor):
+        # ----- Not allow None
+        if editor is None:
+            return self.addEmptyEditor()
+
         # Update Menu Bar
         #self.updateMenuForEditor(editor)
 
-        #Avisar al manager si tenemos editor y preparar el handler
-        self.application().supportManager.setEditorAvailable(editor is not None)
-        self.bundleItem_handler = editor.bundleItemHandler() or self.insertBundleItem if editor is not None else self.insertBundleItem
+        # Avisar al manager de bundles del editor y preparar el handler de bundle items
+        self.application().supportManager.setEditorAvailable(True)
+        self.bundleItem_handler = editor.bundleItemHandler() or self.insertBundleItem
 
         #Emitir señal de cambio
         self.editorChanged.emit(editor)
         
-        if editor is not None:
-            self.addEditorToHistory(editor)
-            editor.setFocus()
-            self.application().checkExternalAction(self, editor)
+        self.addEditorToHistory(editor)
+        editor.setFocus()
+        self.application().checkExternalAction(self, editor)
         self.updateWindowTitle()
-    
+
     def updateWindowTitle(self):
         self.setWindowTitle(self.titleTemplate.substitute(
             (self.currentEditor() or self).environmentVariables()))
@@ -430,10 +435,11 @@ html_footer
         self.removeEditor(editor)
         self.deleteEditor(editor)
 
-    def tryCloseEmptyEditor(self, editor = None):
-        editor = editor or self.currentEditor()
-        if editor is not None and not editor.hasFile() and not editor.isModified():
+    def tryCloseEmptyEditor(self, editor):
+        if editor and not editor.hasFile() and not editor.isEmpty():
             self.closeEditor(editor)
+            return True
+        return False
 
     # ---------------- Handle location history
     def on_editor_newLocationMemento(self, memento):

@@ -497,10 +497,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
                 file_path=file_path,
                 cursor_position=cursorPosition)
             # TODO el dialogo de no tengo editor para ese tipo de archivo
-            if editor is not None:
-                main_window.tryCloseEmptyEditor()
-                main_window.addEditor(editor, focus)
-
+            main_window.addEditor(editor, focus)
+            
     def openDirectory(self, directoryPath):
         raise NotImplementedError("Directory contents should be opened as files here")
 
