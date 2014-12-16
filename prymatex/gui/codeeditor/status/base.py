@@ -22,7 +22,11 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
 
     def acceptEditor(self, editor):
         return isinstance(editor, CodeEditor)
-        
+
+    def hideAll(self):
+        for widget in [self.widgetFind, self.widgetReplace, self.widgetCommand, self.widgetFindInFiles]:
+            widget.setVisible(False)
+                    
     def initialize(self, *args, **kwargs):
         super(CodeEditorStatus, self).initialize(*args, **kwargs)
         FindMixin.initialize(self, *args, **kwargs)

@@ -10,4 +10,5 @@ class ReplaceMixin(object):
         self.widgetReplace.setVisible(False)
 
     def showReplace(self):
+        self.hideAll()
         self.widgetReplace.setVisible(True)

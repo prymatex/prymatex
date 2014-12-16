@@ -10,4 +10,5 @@ class FindInFilesMixin(object):
         self.widgetFindInFiles.setVisible(False)
 
     def showFindInFiles(self):
+        self.hideAll()
         self.widgetFindInFiles.setVisible(True)

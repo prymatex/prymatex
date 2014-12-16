@@ -10,4 +10,5 @@ class CommandMixin(object):
         self.widgetCommand.setVisible(False)
 
     def showCommand(self):
+        self.hideAll()
         self.widgetCommand.setVisible(True)

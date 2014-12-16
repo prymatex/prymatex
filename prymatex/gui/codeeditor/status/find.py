@@ -10,4 +10,5 @@ class FindMixin(object):
         self.widgetFind.setVisible(False)
 
     def showFind(self):
+        self.hideAll()
         self.widgetFind.setVisible(True)
