@@ -235,7 +235,9 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
             lastCursor = QtGui.QTextCursor(self.cursors[-1])
             lastCursor.clearSelection()
             self.editor.setTextCursor(lastCursor)
-        self.editor.setExtraCursors(self.cursors)        
+            
+        #self.editor.setExtraCursors(self.cursors)        
+        self.editor.setHighlightCursors(self.cursors)        
 
     def removeBreakCursor(self, cursor):
         #TODO: Hay cosas que se pueden simplificar pero hoy no me da el cerebro
@@ -295,7 +297,8 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
                 if not c.hasSelection() and c.position() == cursor.position():
                     self.cursors.remove(c)
                     break
-        self.editor.setExtraCursors(self.cursors)
+        #self.editor.setExtraCursors(self.cursors)
+        self.editor.setHighlightCursors(self.cursors)
 
     def canMove(self, key):
         return (key == QtCore.Qt.Key_Right and not self.cursors[-1].atEnd()) or \

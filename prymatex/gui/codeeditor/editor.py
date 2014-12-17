@@ -72,8 +72,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     @ConfigurableItem(default = Qt.QWIDGETSIZE_MAX)
     def wordWrapSize(self, size):
-        print(size)
-        self.viewport().setMaximumWidth((size * self.characterWidth()) + 2)
+        # TODO: Ver que hacer con este offset tan feo de 2
+        size = (size * self.characterWidth()) + 2
+        self.viewport().setMaximumWidth(size < Qt.QWIDGETSIZE_MAX \
+            and size or Qt.QWIDGETSIZE_MAX)
     
     @ConfigurableItem(default = True)
     def indentUsingSpaces(self, soft):
@@ -122,6 +124,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # Cursors
         self.__extra_cursors = []
+        self.__highlight_cursors = []
 
         # Modes
         self.__current_mode_index = self.DEFAULT_MODE_INDEX
@@ -234,13 +237,20 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 #        'includeDirectoriesInBrowser', 'includeFilesInFileChooser']:
 #            print(p, getattr(properties, p))
 
-    # -------------- Multicursor support
+    # -------------- Extra Cursors
     def setExtraCursors(self, cursors):
         self.__extra_cursors = cursors
 
     def extraCursors(self):
         return [QtGui.QTextCursor(c) for c in self.__extra_cursors]  
     
+    # -------------- Highlight Cursors
+    def setHighlightCursors(self, cursors):
+        self.__highlight_cursors = cursors
+
+    def highlightCursors(self):
+        return [QtGui.QTextCursor(c) for c in self.__highlight_cursors]
+        
     # -------------- Editor Modes
     def beginCodeEditorMode(self, mode):
         old_mode = self.codeEditorModes[self.__current_mode_index]
@@ -673,9 +683,16 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             pos_margin = characterWidth * self.marginLineSize
             painter.drawLine(pos_margin + offset.x(), 0, pos_margin + offset.x(), self.viewport().height())
 
-        # -------------- Cursor line
+        painter.setPen(self.palette().brightText().color())
+        # -------------- Highlight Cursors
+        for c in self.highlightCursors():
+            if c.hasSelection():
+                r1 = self.cursorRect(self.newCursorAtPosition(c.selectionStart()))
+                r2 = self.cursorRect(self.newCursorAtPosition(c.selectionEnd()))
+                painter.drawRect(QtCore.QRect(r1.topLeft(), r2.bottomRight()))
+
+        # -------------- Extra Cursors
         if cursorPosition != -1:
-            painter.setPen(self.palette().brightText().color())
             for c in self.extraCursors():
                 rec = self.cursorRect(c)
                 painter.drawLine(rec.x(), rec.y(), rec.x(), rec.y() + characterHeight)
