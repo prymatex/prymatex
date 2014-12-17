@@ -239,7 +239,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.__extra_cursors = cursors
 
     def extraCursors(self):
-        return self.__extra_cursors  
+        return [QtGui.QTextCursor(c) for c in self.__extra_cursors]  
     
     # -------------- Editor Modes
     def beginCodeEditorMode(self, mode):
@@ -558,25 +558,25 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     #-------------------- Highlight Editor on signal trigger
     def _update_highlight(self):
-        # Extra cursors selection
-        self.setExtraSelectionCursors("dyn.selection", 
-            [c for c in self.extraCursors() if c.hasSelection()]
-        )
+        selections = []
+        lines = []
+        pairs = []
+        current = self.textCursor()
+        for cursor in [ current ] + self.extraCursors():
+            if cursor.hasSelection() and current != cursor:
+                selections.append(cursor)
+            cursor.clearSelection()
+            if self.showHighlightCurrentLine and not any(
+                filter(lambda c: c.block() == cursor.block(), lines)):
+                lines.append(cursor)
+            pairs.extend([c for c in self._highlight_pairs(cursor) if c is not None])
 
-        # Line
-        if self.showHighlightCurrentLine:
-            lines = [ self.textCursor() ]
-            for extra in self.extraCursors():
-                if all(filter(lambda c: c.block().position() != extra.block().position(), lines)):
-                    c = QtGui.QTextCursor(extra)
-                    c.clearSelection()
-                    lines.append(c)
-            self.setExtraSelectionCursors("dyn.highlight.line", lines)
-        
+        # Extra cursors selection
+        self.setExtraSelectionCursors("dyn.selection", selections)
+        # Current line
+        self.setExtraSelectionCursors("dyn.highlight.line", lines)
         # Pairs
-        highlight_pairs = self._highlight_pairs(self.textCursor())
-        self.setExtraSelectionCursors("dyn.highlight.pairs", 
-            [c for c in highlight_pairs if c is not None])
+        self.setExtraSelectionCursors("dyn.highlight.pairs", pairs)
         self.updateExtraSelections()
 
     # OVERRIDE: TextEditWidget.setPalette()
