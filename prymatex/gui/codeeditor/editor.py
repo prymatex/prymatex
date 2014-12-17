@@ -68,7 +68,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     @ConfigurableItem(default = 80)
     def marginLineSize(self, size):
-        self.repaint()
+        self.viewport().update()
 
     @ConfigurableItem(default = Qt.QWIDGETSIZE_MAX)
     def wordWrapSize(self, size):
@@ -84,7 +84,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     @ConfigurableItem(default = 4)
     def indentationWidth(self, size):
         self.setTabSize(size)
-        self.repaint()
+        self.viewport().update()
 
     @ConfigurableItem(default = ("Monospace", 10))
     def defaultFont(self, value):
@@ -247,6 +247,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # -------------- Highlight Cursors
     def setHighlightCursors(self, cursors):
         self.__highlight_cursors = cursors
+        self.viewport().update()
 
     def highlightCursors(self):
         return [QtGui.QTextCursor(c) for c in self.__highlight_cursors]
@@ -687,9 +688,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         # -------------- Highlight Cursors
         for c in self.highlightCursors():
             if c.hasSelection():
-                r1 = self.cursorRect(self.newCursorAtPosition(c.selectionStart()))
-                r2 = self.cursorRect(self.newCursorAtPosition(c.selectionEnd()))
-                painter.drawRect(QtCore.QRect(r1.topLeft(), r2.bottomRight()))
+                topLeft = self.cursorRect(self.newCursorAtPosition(c.selectionStart())).topLeft()
+                bottomRight = self.cursorRect(self.newCursorAtPosition(c.selectionEnd())).bottomRight()
+                topLeft.setY(topLeft.y() + 1)
+                bottomRight.setY(bottomRight.y() - 1)
+                painter.drawRoundedRect(
+                    QtCore.QRect(topLeft, bottomRight), 
+                    0.15 * characterHeight, 
+                    0.15 * characterHeight)
 
         # -------------- Extra Cursors
         if cursorPosition != -1:
