@@ -40,11 +40,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.registerKeyPressHandler(QtCore.Qt.Key_Escape, self.__multicursor_end)
         self.registerKeyPressHandler(QtCore.Qt.Key_Right, self.__move_cursors)
         self.registerKeyPressHandler(QtCore.Qt.Key_Left, self.__move_cursors)
-        
-        # ------------- Formater
-        self.editor.registerTextCharFormat("dyn.caret.mixed.dragged", self.textCharFormat_dragged_builder())
-        self.editor.registerTextCharFormat("dyn.caret.mixed", self.textCharFormat_multicursor_builder())
-    
+
     def activate(self):
         CodeEditorBaseMode.activate(self)
         self.editor.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
@@ -54,19 +50,18 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.editor.viewport().setCursor(self.standardCursor)
         CodeEditorBaseMode.deactivate(self)
 
-    # ------- Text char format builders
-    def textCharFormat_dragged_builder(self):
-        palette = self.editor.palette()
-        textCharFormat = QtGui.QTextCharFormat()
-        textCharFormat.setBackground(palette.alternateBase().color())
-        return textCharFormat
-    
-    def textCharFormat_multicursor_builder(self):
-        palette = self.editor.palette()
-        textCharFormat = QtGui.QTextCharFormat()
-        textCharFormat.setBackground(palette.highlightedText().color())
-        textCharFormat.setForeground(palette.base().color())
-        return textCharFormat
+    # OVERRIDE: CodeEditorAddon.setPalette()
+    def setPalette(self, palette):
+        # Dragged Cursor
+        draggedTextCharFormat = QtGui.QTextCharFormat()
+        draggedTextCharFormat.setBackground(palette.alternateBase().color())
+        self.editor.registerTextCharFormat("dyn.caret.mixed.dragged", draggedTextCharFormat)
+        
+        # Multi cursor
+        multicursorTextCharFormat = QtGui.QTextCharFormat()
+        multicursorTextCharFormat.setBackground(palette.highlightedText().color())
+        multicursorTextCharFormat.setForeground(palette.base().color())
+        self.editor.registerTextCharFormat("dyn.caret.mixed", multicursorTextCharFormat)
         
     # ------------ Key press handlers
     def __multicursor_end(self, event):
@@ -179,28 +174,6 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         dragged = (c for c in (QtGui.QTextCursor(c) for c in self.draggedCursors) if c.hasSelection())
         self.editor.setExtraSelectionCursors("dyn.caret.mixed.dragged", [c for c in [QtGui.QTextCursor(c) for c in self.draggedCursors] if c.hasSelection()])
         
-        # Selection
-        selection = (c for c in (QtGui.QTextCursor(c) for c in self.cursors) if c.hasSelection())
-        self.editor.setExtraSelectionCursors("dyn.selection", selection)
-        
-        # Multicursor
-        def build_multicursor(cursors):
-            for cursor in cursors:
-                cursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
-                yield cursor
-        self.editor.setExtraSelectionCursors("dyn.caret.mixed", build_multicursor((QtGui.QTextCursor(c) for c in self.cursors if not c.hasSelection())))
-
-        # Lines
-        def build_cursor_lines(cursors):
-            lines = set()
-            for cursor in cursors:
-                if cursor.block().position() not in lines:
-                    cursor.clearSelection()
-                    lines.add(cursor.block().position())
-                    yield cursor
-        self.editor.setExtraSelectionCursors("dyn.lineHighlight", 
-            build_cursor_lines((QtGui.QTextCursor(c) for c in self.cursors)))
-
         self.editor.updateExtraSelections()
 
     def activeCursors(self):
@@ -262,6 +235,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
             lastCursor = QtGui.QTextCursor(self.cursors[-1])
             lastCursor.clearSelection()
             self.editor.setTextCursor(lastCursor)
+        self.editor.setExtraCursors(self.cursors)        
 
     def removeBreakCursor(self, cursor):
         #TODO: Hay cosas que se pueden simplificar pero hoy no me da el cerebro
@@ -321,6 +295,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
                 if not c.hasSelection() and c.position() == cursor.position():
                     self.cursors.remove(c)
                     break
+        self.editor.setExtraCursors(self.cursors)
 
     def canMove(self, key):
         return (key == QtCore.Qt.Key_Right and not self.cursors[-1].atEnd()) or \

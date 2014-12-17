@@ -120,6 +120,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.showIndentGuide = True
         self.showHighlightCurrentLine = True
 
+        # Cursors
+        self.__extra_cursors = []
+
         # Modes
         self.__current_mode_index = self.DEFAULT_MODE_INDEX
         self.codeEditorModes = []
@@ -178,6 +181,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             parent = parent.parent()
         return parent
 
+    # OVERRIDE: PrymatexEditor.initialize()
     def initialize(self, **kwargs):
         super(CodeEditor, self).initialize(**kwargs)
         
@@ -230,6 +234,13 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 #        'includeDirectoriesInBrowser', 'includeFilesInFileChooser']:
 #            print(p, getattr(properties, p))
 
+    # -------------- Multicursor support
+    def setExtraCursors(self, cursors):
+        self.__extra_cursors = cursors
+
+    def extraCursors(self):
+        return self.__extra_cursors  
+    
     # -------------- Editor Modes
     def beginCodeEditorMode(self, mode):
         old_mode = self.codeEditorModes[self.__current_mode_index]
@@ -444,6 +455,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         else:
             self.rightBar.update(0, rect.y(), self.rightBar.width(), rect.height())
             self.leftBar.update(0, rect.y(), self.leftBar.width(), rect.height())
+            for c in self.extraCursors():
+                self.viewport().update(self.cursorRect(c))
 
     def updateSideBarsGeometry(self):
         cr = self.contentsRect()
@@ -545,14 +558,25 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     #-------------------- Highlight Editor on signal trigger
     def _update_highlight(self):
-        cursor = self.textCursor()
-        cursor.clearSelection()
+        # Extra cursors selection
+        self.setExtraSelectionCursors("dyn.selection", 
+            [c for c in self.extraCursors() if c.hasSelection()]
+        )
+
+        # Line
         if self.showHighlightCurrentLine:
-            self.setExtraSelectionCursors("dyn.lineHighlight", [ cursor ])
-        else:
-            self.clearExtraSelectionCursors("dyn.lineHighlight")
-        highlight_pairs = self._highlight_pairs(cursor)
-        self.setExtraSelectionCursors("dyn.highlightPairs", [cursor for cursor in list(highlight_pairs) if cursor is not None])
+            lines = [ self.textCursor() ]
+            for extra in self.extraCursors():
+                if all(filter(lambda c: c.block().position() != extra.block().position(), lines)):
+                    c = QtGui.QTextCursor(extra)
+                    c.clearSelection()
+                    lines.append(c)
+            self.setExtraSelectionCursors("dyn.highlight.line", lines)
+        
+        # Pairs
+        highlight_pairs = self._highlight_pairs(self.textCursor())
+        self.setExtraSelectionCursors("dyn.highlight.pairs", 
+            [c for c in highlight_pairs if c is not None])
         self.updateExtraSelections()
 
     # OVERRIDE: TextEditWidget.setPalette()
@@ -562,11 +586,17 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.leftBar.setPalette(palette)
         self.rightBar.setPalette(palette)
         
+        # Register selection textCharFormat
+        # Register lineHighlight textCharFormat
+        textCharFormat = QtGui.QTextCharFormat()
+        textCharFormat.setBackground(palette.highlight().color())
+        self.registerTextCharFormat("dyn.selection", textCharFormat)
+        
         # Register lineHighlight textCharFormat
         textCharFormat = QtGui.QTextCharFormat()
         textCharFormat.setBackground(palette.alternateBase().color())
         textCharFormat.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
-        self.registerTextCharFormat("dyn.lineHighlight", textCharFormat)
+        self.registerTextCharFormat("dyn.highlight.line", textCharFormat)
         
         # Register highlightPairs textCharFormat
         textCharFormat = QtGui.QTextCharFormat()
@@ -574,7 +604,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         textCharFormat.setBackground(palette.alternateBase().color())
         textCharFormat.setUnderlineColor(palette.text().color())
         textCharFormat.setBackground(QtCore.Qt.transparent)
-        self.registerTextCharFormat("dyn.highlightPairs", textCharFormat)
+        self.registerTextCharFormat("dyn.highlight.pairs", textCharFormat)
 
         for component in self.components():
             component.setPalette(palette)
@@ -593,18 +623,20 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # OVERRIDE: TextEditWidget.paintEvent()
     def paintEvent(self, event):
-        super(CodeEditor, self).paintEvent(event)
-        page_bottom = self.viewport().height()
+        super(TextEditWidget, self).paintEvent(event)
 
+        painter = QtGui.QPainter(self.viewport())
+
+        cursorPosition = self.getPaintContext().cursorPosition
+        page_bottom = self.viewport().height()
         characterWidth = self.characterWidth()
         characterHeight = self.characterHeight()
 
-        painter = QtGui.QPainter(self.viewport())
         font = painter.font()
         font.setBold(True)
         painter.setFont(font)
-
         painter.setPen(self.palette().highlight().color())
+        
         block = self.firstVisibleBlock()
         offset = self.contentOffset()
         while block.isValid() and self.blockUserData(block):
@@ -617,11 +649,13 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 break
             if block.isVisible():
                 positionY = blockGeometry.top()
-                cursor = self.newCursorAtPosition(block.position())
-                if self.foldingListModel.isFolded(cursor):
+                # -------------- Folding
+                if self.foldingListModel.isFolded(self.newCursorAtPosition(block.position())):
                     painter.drawPixmap(characterWidth * block.length() + offset.x() + 10,
                         positionY + characterHeight - self.foldingListModel.foldingellipsisImage.height(),
                         self.foldingListModel.foldingellipsisImage)
+
+                # -------------- Indent guide
                 if self.showIndentGuide:
                     blockPattern = block
                     while blockPattern.isValid() and self.blockUserData(blockPattern).blank:
@@ -638,6 +672,13 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         if self.showMarginLine:
             pos_margin = characterWidth * self.marginLineSize
             painter.drawLine(pos_margin + offset.x(), 0, pos_margin + offset.x(), self.viewport().height())
+
+        # -------------- Cursor line
+        if cursorPosition != -1:
+            painter.setPen(self.palette().brightText().color())
+            for c in self.extraCursors():
+                rec = self.cursorRect(c)
+                painter.drawLine(rec.x(), rec.y(), rec.x(), rec.y() + characterHeight)
 
         painter.end()
     

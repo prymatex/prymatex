@@ -27,13 +27,10 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     
     def __init__(self, **kwargs):
         super(TextEditWidget, self).__init__(**kwargs)
-
-        # TODO: Buscar sobre este atributo en la documnetación
-        #self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         
         self.__scopedExtraSelections = {}
-        self.__updateExtraSelectionsOrder = []
         self.__textCharFormat = {}
+
         # Defaults
         self.eol_chars = os.linesep
         self.soft_tabs = False
@@ -336,56 +333,45 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         cursor.endEditBlock()
         return replaced
 
-    #------ Extra selections
-    def registerTextCharFormat(self, scope, frmt):
-        # TODO Un poco mejor esto para soportar subscopes con puntos
-        self.__updateExtraSelectionsOrder.append(scope)
-        self.__textCharFormat[scope] = frmt
+    #------ TextCharFormats for key
+    def registerTextCharFormat(self, key, frmt):
+        self.__textCharFormat[key] = frmt
 
-    def textCharFormat(self, scope):
-        if scope in self.__textCharFormat:
-            return self.__textCharFormat[scope]
+    def textCharFormat(self, key):
+        if key in self.__textCharFormat:
+            return self.__textCharFormat[key]
         return super(TextEditWidget, self).currentCharFormat()
 
-    def extendExtraSelectionCursors(self, scope, cursors):
-        self.__scopedExtraSelections.setdefault(scope, []).extend(self.__build_extra_selections(scope, cursors))
+    #------ Extra selections
+    def __build_extra_selections(self, key, cursors):
+        extraSelections = []
+        for cursor in cursors:
+            selection = QtWidgets.QTextEdit.ExtraSelection()
+            selection.format = self.textCharFormat(key)
+            selection.cursor = cursor
+            extraSelections.append(selection)
+        return extraSelections
 
-    def setExtraSelectionCursors(self, scope, cursors):
-        self.__scopedExtraSelections[scope] = self.__build_extra_selections(scope, cursors)
+    def extendExtraSelectionCursors(self, key, cursors):
+        self.__scopedExtraSelections.setdefault(key, []).extend(self.__build_extra_selections(scope, cursors))
+
+    def setExtraSelectionCursors(self, key, cursors):
+        self.__scopedExtraSelections[key] = self.__build_extra_selections(key, cursors)
 
     def updateExtraSelectionCursors(self, cursorsDict):
-        for scope, cursors in cursorsDict.items():
-            self.setExtraSelectionCursors(scope, cursors)
+        for key, cursors in cursorsDict.items():
+            self.setExtraSelectionCursors(key, cursors)
 
     def updateExtraSelections(self):
         extraSelections = []
-        for scope in self.__updateExtraSelectionsOrder:
-            if scope in self.__scopedExtraSelections:
-                extraSelections.extend(self.__scopedExtraSelections[scope])
+        for extras in self.__scopedExtraSelections.values():
+            extraSelections.extend(extras)
         self.setExtraSelections(extraSelections)
         self.extraSelectionChanged.emit()
-
-    def searchExtraSelections(self, scope):
-        # TODO: Mejorar esta forma de obtener los cursores en un scope
-        filterCursors = [scopedCursors[1] for scopedCursors in iter(self.__scopedExtraSelections.items()) if scopedCursors[0].startswith(scope)]
-        return reduce(lambda allCursors, cursors: allCursors + cursors, filterCursors, [])
-
-    def clearExtraSelectionCursors(self, scope):
-        if scope in self.__scopedExtraSelections:
-            del self.__scopedExtraSelections[scope]
 
     def clearExtraSelections(self):
         self.__scopedExtraSelections.clear()
         self.updateExtraSelections()
-
-    def __build_extra_selections(self, scope, cursors):
-        extraSelections = []
-        for cursor in cursors:
-            selection = QtWidgets.QTextEdit.ExtraSelection()
-            selection.format = self.textCharFormat(scope)
-            selection.cursor = cursor
-            extraSelections.append(selection)
-        return extraSelections
 
     #------ Move text
     def __move_line(self, cursor, moveType):

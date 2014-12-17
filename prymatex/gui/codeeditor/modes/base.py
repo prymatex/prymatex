@@ -3,9 +3,9 @@
 
 from prymatex.qt import QtCore
 
-from prymatex.core import PrymatexEditorAddon
+from ..addons import CodeEditorAddon
 
-class CodeEditorBaseMode(PrymatexEditorAddon, QtCore.QObject):
+class CodeEditorBaseMode(CodeEditorAddon):
     def __init__(self, **kwargs):
         super(CodeEditorBaseMode, self).__init__(**kwargs)
         self.preEventHandlers = {
@@ -64,12 +64,6 @@ class CodeEditorBaseMode(PrymatexEditorAddon, QtCore.QObject):
 
     def name(self):
         return self.objectName()
-
-    def setPalette(self, palette):
-        pass
-        
-    def setFont(self, font):
-        pass
 
     def activate(self):
         self.editor.beginCodeEditorMode(self)
