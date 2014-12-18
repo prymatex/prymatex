@@ -5,8 +5,6 @@ from prymatex.qt import QtCore, QtGui
 
 from .base import CodeEditorBaseMode
 
-from prymatex.utils.lists import bisect_key
-
 def _build_points(start, end, hight):
     offset = (hight / 2) + start.y()
     while offset <= end.y():
@@ -16,7 +14,7 @@ def _build_points(start, end, hight):
 def _build_set(cursors):
     s = set()
     for c in cursors:
-        s.update(list(range(c.selectionStart(), c.selectionEnd()))) 
+        s.update(list(range(c.selectionStart(), c.selectionEnd() + 1))) 
     return s
 
 def _build_cursors(editor, s):
@@ -26,11 +24,11 @@ def _build_cursors(editor, s):
         end = start = ranges[0]
         for index in ranges[1:]:
             if index != (end + 1):
-                cursors.append(editor.newCursorAtPosition(start, end + 1))
+                cursors.append(editor.newCursorAtPosition(start, end))
                 end = start = index
             else:
                 end = index
-        cursors.append(editor.newCursorAtPosition(start, end + 1))
+        cursors.append(editor.newCursorAtPosition(start, end))
     return cursors
     
 class CodeEditorMultiCursorMode(CodeEditorBaseMode):
@@ -39,6 +37,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.draggedCursors = []
         self.startPoint = self.doublePoint = None
         self.standardCursor = None
+        self._hash = None
 
     def name(self):
         return "MULTICURSOR"
@@ -51,9 +50,9 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.standardCursor = self.editor.viewport().cursor()
 
         # ------------ Handlers
+        self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__cursors_update)
+        self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__cursors_update_after, after=True)
         self.registerKeyPressHandler(QtCore.Qt.Key_Escape, self.__multicursor_end)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Right, self.__move_cursors)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Left, self.__move_cursors)
 
     def activate(self):
         CodeEditorBaseMode.activate(self)
@@ -90,22 +89,34 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.deactivate()
         return True
 
-    def __move_cursors(self, event):
-        if self.canMove(event.key()):
-            mode = QtGui.QTextCursor.KeepAnchor if bool(event.modifiers() & QtCore.Qt.ShiftModifier) else QtGui.QTextCursor.MoveAnchor
-            if event.key() == QtCore.Qt.Key_Right:
-                position = QtGui.QTextCursor.NextWord if bool(event.modifiers() & QtCore.Qt.ControlModifier) else QtGui.QTextCursor.NextCharacter
-            elif event.key() == QtCore.Qt.Key_Left:
-                position = QtGui.QTextCursor.PreviousWord if bool(event.modifiers() & QtCore.Qt.ControlModifier) else QtGui.QTextCursor.PreviousCharacter
-            for cursor in self.cursors():
-                cursor.movePosition(position, mode)
-            return True
+    def __cursors_update(self, event):
+        cursors = self.cursors()
+        position = cursors[0].position()
+        character = self.editor.document().characterAt(position)
+        self._hash = hash("%d:%s" % (position, character))
+        cursors[0].beginEditBlock()
+        return False
+        
+    def __cursors_update_after(self, event):
+        cursors = self.cursors()
+        position = cursors[0].position()
+        character = self.editor.document().characterAt(position)
+        changed = self._hash != hash("%d:%s" % (position, character))
+        if changed:
+            _cursors = [ cursors[0] ]
+            for index, cursor in enumerate(cursors[1:]):
+                self.editor.setTextCursor(cursor)
+                super(self.editor.__class__, self.editor).keyPressEvent(event)
+                _cursors.append(self.editor.textCursor())
+            cursors = _cursors
+        cursors[0].endEditBlock()
+        if changed:
+            self.setCursors(_build_cursors(self.editor, _build_set(cursors)))
+            self.switch()
 
     # ------- Handle events
     def eventFilter(self, obj, event):
-        if self.isActive() and event.type() == QtCore.QEvent.KeyPress:
-            return self.keyPressEvent(event)
-        elif event.type() == QtCore.QEvent.MouseButtonRelease and \
+        if event.type() == QtCore.QEvent.MouseButtonRelease and \
             (self.isActive() or event.modifiers() & QtCore.Qt.ControlModifier):
             self.mouseReleasePoint(event.pos(), 
                 event.modifiers() & QtCore.Qt.MetaModifier)
@@ -211,10 +222,6 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         set1 = _build_set(self.cursors())
         set2 = _build_set(cursors)
         self.setCursors(_build_cursors(self.editor, set1.difference(set2)))
-
-    def canMove(self, key):
-        return (key == QtCore.Qt.Key_Right and not self.cursors()[-1].atEnd()) or \
-            (key == QtCore.Qt.Key_Left and not self.cursors()[0].atStart())
 
     def findCursor(self, backward = False):
         # Get leader cursor
