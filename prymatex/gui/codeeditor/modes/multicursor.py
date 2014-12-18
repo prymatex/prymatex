@@ -7,15 +7,31 @@ from .base import CodeEditorBaseMode
 
 from prymatex.utils.lists import bisect_key
 
-def build_point_matrix(start, end, hight):
-    offset = hight / 2
-    sx, ex = start.x(), end.x()
-    sy, ey = start.y() + offset, end.y() + offset
-    yield ( (sx, sy), (ex, sy) )
-    p = sy + hight
-    while p <= ey:
-        yield ( (sx, p), (ex, p) ) 
-        p += hight
+def _build_points(start, end, hight):
+    offset = (hight / 2) + start.y()
+    while offset <= end.y():
+        yield ( QtCore.QPoint(start.x(), offset), QtCore.QPoint(end.x(), offset) )
+        offset += hight
+
+def _build_set(cursors):
+    s = set()
+    for c in cursors:
+        s.update(list(range(c.selectionStart(), c.selectionEnd()))) 
+    return s
+
+def _build_cursors(editor, s):
+    cursors = []
+    ranges = sorted(s)
+    if ranges:
+        end = start = ranges[0]
+        for index in ranges[1:]:
+            if index != (end + 1):
+                cursors.append(editor.newCursorAtPosition(start, end + 1))
+                end = start = index
+            else:
+                end = index
+        cursors.append(editor.newCursorAtPosition(start, end + 1))
+    return cursors
     
 class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def __init__(self, **kwargs):
@@ -112,30 +128,29 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def mouseMovePoint(self, dragPoint, remove = False):
         self.draggedCursors = []
         
-        startPoint = self.startPoint
-        endPoint = dragPoint
-        anchor = 'right'
-        if self.startPoint.x() > dragPoint.x():
+        if self.startPoint.x() <= dragPoint.x():
+            anchor = 'right'
+            startRect = self.editor.cursorRect(
+                self.editor.cursorForPosition(self.startPoint))
+            endRect = self.editor.cursorRect(
+                self.editor.cursorForPosition(dragPoint))
+            point1, point2 = startRect.topLeft(), endRect.bottomRight()
+        else:
             anchor = 'left'
-            startPoint, endPoint = endPoint, startPoint
-            
+            startRect = self.editor.cursorRect(
+                self.editor.cursorForPosition(dragPoint))
+            endRect = self.editor.cursorRect(
+                self.editor.cursorForPosition(self.startPoint))
+            point1, point2 = endRect.topRight(), startRect.bottomLeft()
+            point1, point2 = QtCore.QPoint(point2.x(), point1.y()), QtCore.QPoint(point1.x(), point2.y()) 
+
         hight = self.editor.characterHeight()
-        topLeft = self.editor.cursorRect(
-            self.editor.cursorForPosition(startPoint)).topLeft()
-        bottomRight = self.editor.cursorRect(
-            self.editor.cursorForPosition(endPoint)).bottomRight()
-        
-        for start, end in build_point_matrix(topLeft, bottomRight, hight):
+        for start, end in _build_points(point1, point2, hight):
             #Sentido en el que queda el cursor
             if anchor == 'left':
-                cursor = self.editor.newCursorAtPosition(
-                    QtCore.QPoint(*end), QtCore.QPoint(*start)
-                )
+                cursor = self.editor.newCursorAtPosition(end, start)
             else:
-                cursor = self.editor.newCursorAtPosition(
-                    QtCore.QPoint(*start),
-                    QtCore.QPoint(*end)
-                )
+                cursor = self.editor.newCursorAtPosition(start, end)
             self.draggedCursors.append(cursor)
 
         # Muestro los dragged cursors
@@ -187,115 +202,15 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def setCursors(self, cursors):
         self.editor.setTextCursors(cursors)
 
-    def _union(self, set1, set2):
-        result = []
-        for c2 in set2:
-            if c2.hasSelection():
-                newCursor = None
-                new_begin, new_end = c2.selectionStart(), c2.selectionEnd()
-                for c1 in set1:
-                    c_begin, c_end = c1.selectionStart(), c1.selectionEnd()
-                    if c_begin <= new_begin <= new_end <= c_end:
-                        return
-                    elif c_begin <= new_begin <= c_end:
-                        # Extiende por detras
-                        newCursor = QtGui.QTextCursor(self.editor.document())
-                        if c.position() > new_begin:
-                            newCursor.setPosition(c_begin)
-                            newCursor.setPosition(new_end, QtGui.QTextCursor.KeepAnchor)
-                        else:
-                            newCursor.setPosition(new_end)
-                            newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
-                        break
-                    elif c_begin <= new_end <= c_end:
-                        #Extiende por el frente
-                        newCursor = QtGui.QTextCursor(self.editor.document())
-                        if c.position() < new_end:
-                            newCursor.setPosition(c_end)
-                            newCursor.setPosition(new_begin, QtGui.QTextCursor.KeepAnchor)
-                        else:
-                            newCursor.setPosition(new_begin)
-                            newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
-                        removeCursor = c
-                        break
-                    elif new_begin <= c_begin <= c_end <= new_end:
-                        #Contiene al cursor
-                        newCursor = cursor
-                        removeCursor = c
-                        break
-                if newCursor is not None:
-                    result.extend(self._union(result, [newCursor]))
-                else:
-                    result.append(c2)
-            else:
-                newCursor = None
-                for c1 in set1:
-                    begin, end = c1.selectionStart(), c1.selectionEnd()
-                    if begin <= c2.position() <= end:
-                        newCursor = c2
-                        break
-                if newCursor is not None:
-                    result.append(newCursor)
-        return result
-
-    def _difference(self, set1, set2):
-        result = []
-        #TODO: Hay cosas que se pueden simplificar pero hoy no me da el cerebro
-        for c2 in set2:
-            if c2.hasSelection():
-                newCursors = []
-                new_begin, new_end = cursor.selectionStart(), cursor.selectionEnd()
-                for c1 in set1:
-                    c_begin, c_end = c1.selectionStart(), c1.selectionEnd()
-                    if new_begin <= c_begin <= c_end <= new_end:
-                        break
-                    elif (c_begin < new_begin < new_end < c_end):
-                        #Recortar
-                        if c.position() < new_begin:
-                            newCursors.append(
-                                self.editor.newCursorAtPosition(new_begin, c_begin))
-                            newCursors.append(
-                                self.editor.newCursorAtPosition(c_end, new_end))    
-                        else:
-                            newCursors.append(
-                                self.editor.newCursorAtPosition(c_begin, new_begin))
-                            newCursors.append(
-                                self.editor.newCursorAtPosition(new_end, c_end))
-                        break
-                    elif c_begin <= new_begin <= c_end:
-                        #Recorta por detras, quitar el actual y agregar uno con la seleccion mas chica
-                        if c.position() > new_begin:
-                            newCursors.append(
-                                self.editor.newCursorAtPosition(c_begin, new_begin))
-                        else:
-                            newCursors.append(
-                                self.editor.newCursorAtPosition(new_begin, c.position()))
-                        break
-                    elif c_begin <= new_end <= c_end:
-                        #Recorta por el frente, quitra el actual y agregar uno con la seleccion mas chica
-                        if c.position() < new_end:
-                            newCursors.append(
-                                self.editor.newCursorAtPosition(c_end, new_end))
-                        else:
-                            newCursors.append(
-                                self.editor.newCursorAtPosition(new_end, c.position()))
-                        break
-                result.extend(newCursors)
-            else:
-                #Solo puedo quitar cursores que no tengan seleccion osea que sean un clic :)
-                newCursors = []
-                for c1 in set1:
-                    if c1.hasSelection() or c1.position() != c2.position():
-                        newCursors.append(c1)
-                result.extend(newCursors)
-        return result
-
     def addMergeCursor(self, cursors):
-        """Only can add new cursors, if the cursor has selection then try to merge with others"""
-        self.setCursors(self._union(self.cursors(), cursors))
+        set1 = _build_set(self.cursors())
+        set2 = _build_set(cursors)
+        self.setCursors(_build_cursors(self.editor, set1.union(set2)))
 
     def removeBreakCursor(self, cursors):
-        self.setCursors(self._difference(self.cursors(), cursors))
+        set1 = _build_set(self.cursors())
+        set2 = _build_set(cursors)
+        self.setCursors(_build_cursors(self.editor, set1.difference(set2)))
 
     def canMove(self, key):
         return (key == QtCore.Qt.Key_Right and not self.cursors()[-1].atEnd()) or \
