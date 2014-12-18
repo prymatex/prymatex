@@ -123,7 +123,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.showHighlightCurrentLine = True
 
         # Cursors
-        self.__extra_cursors = []
+        self.__text_cursors = []
         self.__highlight_cursors = []
 
         # Modes
@@ -238,13 +238,15 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 #            print(p, getattr(properties, p))
 
     # -------------- Extra Cursors
-    def setExtraCursors(self, cursors):
-        self.__extra_cursors = cursors
-        #self.viewport().update()
+    def setTextCursors(self, cursors):
+        self.__text_cursors = cursors[1:]
+        if len(cursors):
+            self.setTextCursor(cursors[0])
+        # TODO: Create new signal for more than one cursor
         self.cursorPositionChanged.emit()
-        
-    def extraCursors(self):
-        return [QtGui.QTextCursor(c) for c in self.__extra_cursors]  
+
+    def textCursors(self):
+        return [self.textCursor()] + [QtGui.QTextCursor(c) for c in self.__text_cursors]  
     
     # -------------- Highlight Cursors
     def setHighlightCursors(self, cursors):
@@ -468,7 +470,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         else:
             self.rightBar.update(0, rect.y(), self.rightBar.width(), rect.height())
             self.leftBar.update(0, rect.y(), self.leftBar.width(), rect.height())
-            for c in self.extraCursors():
+            for c in self.textCursors():
                 self.viewport().update(self.cursorRect(c))
 
     def updateSideBarsGeometry(self):
@@ -575,7 +577,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         lines = []
         pairs = []
         current = self.textCursor()
-        for cursor in [ current ] + self.extraCursors():
+        for cursor in self.textCursors():
             if cursor.hasSelection() and current != cursor:
                 selections.append(QtGui.QTextCursor(cursor))
             cursor.clearSelection()
@@ -701,7 +703,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # -------------- Extra Cursors
         if cursorPosition != -1:
-            for c in self.extraCursors():
+            for c in self.textCursors()[1:]:
                 rec = self.cursorRect(c)
                 painter.drawLine(rec.x(), rec.y(), rec.x(), rec.y() + characterHeight)
 

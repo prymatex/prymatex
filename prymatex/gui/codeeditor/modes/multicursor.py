@@ -45,9 +45,16 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
 
     def deactivate(self):
         self.draggedCursors = []
-        self.editor.setExtraCursors([])
+        self.editor.setTextCursors([])
         self.editor.viewport().setCursor(self.standardCursor)
         CodeEditorBaseMode.deactivate(self)
+
+    def switch(self):
+        # Test and switch state
+        if len(self.cursors()) > 1 and not self.isActive():
+            self.activate()
+        elif len(self.cursors()) == 1 and self.isActive():
+            self.deactivate()
 
     # OVERRIDE: CodeEditorAddon.setPalette()
     def setPalette(self, palette):
@@ -64,12 +71,6 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         
     # ------------ Key press handlers
     def __multicursor_end(self, event):
-        firstCursor = self.cursors()[0]
-        lastCursor = self.cursors()[-1]
-        self.editor.document().markContentsDirty(firstCursor.position(), lastCursor.position())
-        if lastCursor.hasSelection():
-            lastCursor.clearSelection()
-        self.editor.setTextCursor(lastCursor)
         self.deactivate()
         return True
 
@@ -142,16 +143,11 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     
     def mouseReleasePoint(self, endPoint, remove = False):
         multicursorAction = self.addMergeCursor if not remove else self.removeBreakCursor
-        if self.draggedCursors:
-            for cursor in self.draggedCursors:
-                multicursorAction(cursor)
-        elif self.startPoint is not None:
-            multicursorAction(self.editor.newCursorAtPosition(self.startPoint))
+        multicursorAction(self.draggedCursors or \
+            [self.editor.newCursorAtPosition(self.startPoint)]
+        )
 
-        if self.editor.extraCursors() and not self.isActive():
-            self.activate()
-        elif not self.editor.extraCursors() and self.isActive():
-            self.deactivate()
+        self.switch()
 
         #Clean last acction
         self.draggedCursors = []
@@ -167,12 +163,12 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
             #Desactivados por ahora
             pass
         elif event.text() and not event.modifiers():
-            cursor = self.editor.textCursor()
-            cursor.beginEditBlock()
-            for cursor in self.cursors():
+            cursors = self.cursors()
+            cursors[0].beginEditBlock()
+            for cursor in cursors:
                 self.editor.setTextCursor(cursor)
                 self.editor.keyPressEvent(event)
-            cursor.endEditBlock()
+            cursors[0].endEditBlock()
             handled = True
         if handled:
             self.highlightEditor()
@@ -186,126 +182,120 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.editor.updateExtraSelections()
 
     def cursors(self):
-        return self.editor.extraCursors()
+        return self.editor.textCursors()
         
     def setCursors(self, cursors):
-        self.editor.setExtraCursors(cursors)
+        self.editor.setTextCursors(cursors)
 
-    def addMergeCursor(self, cursor):
-        """Only can add new cursors, if the cursor has selection then try to merge with others"""
-        cursors = self.cursors()
-        if cursor.hasSelection():
-            newCursor = None
-            removeCursor = None
-            new_begin, new_end = cursor.selectionStart(), cursor.selectionEnd()
-            for c in cursors:
-                c_begin, c_end = c.selectionStart(), c.selectionEnd()
-                if c_begin <= new_begin <= new_end <= c_end:
-                    return
-                elif c_begin <= new_begin <= c_end:
-                    # Extiende por detras
-                    newCursor = QtGui.QTextCursor(self.editor.document())
-                    if c.position() > new_begin:
-                        newCursor.setPosition(c_begin)
-                        newCursor.setPosition(new_end, QtGui.QTextCursor.KeepAnchor)
-                    else:
-                        newCursor.setPosition(new_end)
-                        newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
-                    removeCursor = c
-                    break
-                elif c_begin <= new_end <= c_end:
-                    #Extiende por el frente
-                    newCursor = QtGui.QTextCursor(self.editor.document())
-                    if c.position() < new_end:
-                        newCursor.setPosition(c_end)
-                        newCursor.setPosition(new_begin, QtGui.QTextCursor.KeepAnchor)
-                    else:
-                        newCursor.setPosition(new_begin)
-                        newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
-                    removeCursor = c
-                    break
-                elif new_begin <= c_begin <= c_end <= new_end:
-                    #Contiene al cursor
-                    newCursor = cursor
-                    removeCursor = c
-                    break
-            if newCursor is not None:
-                cursors.remove(removeCursor)
-                self.addMergeCursor(newCursor)
+    def _union(self, set1, set2):
+        result = []
+        for c2 in set2:
+            if c2.hasSelection():
+                newCursor = None
+                new_begin, new_end = c2.selectionStart(), c2.selectionEnd()
+                for c1 in set1:
+                    c_begin, c_end = c1.selectionStart(), c1.selectionEnd()
+                    if c_begin <= new_begin <= new_end <= c_end:
+                        return
+                    elif c_begin <= new_begin <= c_end:
+                        # Extiende por detras
+                        newCursor = QtGui.QTextCursor(self.editor.document())
+                        if c.position() > new_begin:
+                            newCursor.setPosition(c_begin)
+                            newCursor.setPosition(new_end, QtGui.QTextCursor.KeepAnchor)
+                        else:
+                            newCursor.setPosition(new_end)
+                            newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
+                        break
+                    elif c_begin <= new_end <= c_end:
+                        #Extiende por el frente
+                        newCursor = QtGui.QTextCursor(self.editor.document())
+                        if c.position() < new_end:
+                            newCursor.setPosition(c_end)
+                            newCursor.setPosition(new_begin, QtGui.QTextCursor.KeepAnchor)
+                        else:
+                            newCursor.setPosition(new_begin)
+                            newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
+                        removeCursor = c
+                        break
+                    elif new_begin <= c_begin <= c_end <= new_end:
+                        #Contiene al cursor
+                        newCursor = cursor
+                        removeCursor = c
+                        break
+                if newCursor is not None:
+                    result.extend(self._union(result, [newCursor]))
+                else:
+                    result.append(c2)
             else:
-                position = bisect_key(cursors, cursor, lambda cursor: cursor.position())
-                cursors.insert(position, cursor)
-        else:
-            for c in cursors:
-                begin, end = c.selectionStart(), c.selectionEnd()
-                if begin <= cursor.position() <= end:
-                    return
-            position = bisect_key(cursors, cursor, lambda cursor: cursor.position())
-            cursors.insert(position, cursor)
-    
-        self.setCursors(cursors)        
+                newCursor = None
+                for c1 in set1:
+                    begin, end = c1.selectionStart(), c1.selectionEnd()
+                    if begin <= c2.position() <= end:
+                        newCursor = c2
+                        break
+                if newCursor is not None:
+                    result.append(newCursor)
+        return result
 
-    def removeBreakCursor(self, cursor):
-        cursors = self.cursors()
+    def _difference(self, set1, set2):
+        result = []
         #TODO: Hay cosas que se pueden simplificar pero hoy no me da el cerebro
-        if cursor.hasSelection():
-            newCursors = []
-            removeCursor = None
-            new_begin, new_end = cursor.selectionStart(), cursor.selectionEnd()
-            for c in cursors:
-                c_begin, c_end = c.selectionStart(), c.selectionEnd()
-                if new_begin <= c_begin <= c_end <= new_end:
-                    #Contiene al cursor, hay que quitarlo
-                    removeCursor = c
-                    break
-                elif (c_begin < new_begin < new_end < c_end):
-                    #Recortar
-                    if c.position() < new_begin:
-                        newCursors.append(
-                            self.editor.newCursorAtPosition(new_begin, c_begin))
-                        newCursors.append(
-                            self.editor.newCursorAtPosition(c_end, new_end))    
-                    else:
-                        newCursors.append(
-                            self.editor.newCursorAtPosition(c_begin, new_begin))
-                        newCursors.append(
-                            self.editor.newCursorAtPosition(new_end, c_end))
-                    removeCursor = c
-                    break
-                elif c_begin <= new_begin <= c_end:
-                    #Recorta por detras, quitar el actual y agregar uno con la seleccion mas chica
-                    if c.position() > new_begin:
-                        newCursors.append(
-                            self.editor.newCursorAtPosition(c_begin, new_begin))
-                    else:
-                        newCursors.append(
-                            self.editor.newCursorAtPosition(new_begin, c.position()))
-                    removeCursor = c
-                    break
-                elif c_begin <= new_end <= c_end:
-                    #Recorta por el frente, quitra el actual y agregar uno con la seleccion mas chica
-                    if c.position() < new_end:
-                        newCursors.append(
-                            self.editor.newCursorAtPosition(c_end, new_end))
-                    else:
-                        newCursors.append(
-                            self.editor.newCursorAtPosition(new_end, c.position()))
-                    removeCursor = c
-                    break
-            if removeCursor is not None:
-                cursors.remove(removeCursor)
-            for cursors in newCursors:
-                position = bisect_key(cursors, cursors, lambda cursor: cursor.position())
-                cursors.insert(position, cursors)
-        else:
-            #Solo puedo quitar cursores que no tengan seleccion osea que sean un clic :)
-            for c in cursors:
-                begin, end = c.selectionStart(), c.selectionEnd()
-                if not c.hasSelection() and c.position() == cursor.position():
-                    cursors.remove(c)
-                    break
+        for c2 in set2:
+            if c2.hasSelection():
+                newCursors = []
+                new_begin, new_end = cursor.selectionStart(), cursor.selectionEnd()
+                for c1 in set1:
+                    c_begin, c_end = c1.selectionStart(), c1.selectionEnd()
+                    if new_begin <= c_begin <= c_end <= new_end:
+                        break
+                    elif (c_begin < new_begin < new_end < c_end):
+                        #Recortar
+                        if c.position() < new_begin:
+                            newCursors.append(
+                                self.editor.newCursorAtPosition(new_begin, c_begin))
+                            newCursors.append(
+                                self.editor.newCursorAtPosition(c_end, new_end))    
+                        else:
+                            newCursors.append(
+                                self.editor.newCursorAtPosition(c_begin, new_begin))
+                            newCursors.append(
+                                self.editor.newCursorAtPosition(new_end, c_end))
+                        break
+                    elif c_begin <= new_begin <= c_end:
+                        #Recorta por detras, quitar el actual y agregar uno con la seleccion mas chica
+                        if c.position() > new_begin:
+                            newCursors.append(
+                                self.editor.newCursorAtPosition(c_begin, new_begin))
+                        else:
+                            newCursors.append(
+                                self.editor.newCursorAtPosition(new_begin, c.position()))
+                        break
+                    elif c_begin <= new_end <= c_end:
+                        #Recorta por el frente, quitra el actual y agregar uno con la seleccion mas chica
+                        if c.position() < new_end:
+                            newCursors.append(
+                                self.editor.newCursorAtPosition(c_end, new_end))
+                        else:
+                            newCursors.append(
+                                self.editor.newCursorAtPosition(new_end, c.position()))
+                        break
+                result.extend(newCursors)
+            else:
+                #Solo puedo quitar cursores que no tengan seleccion osea que sean un clic :)
+                newCursors = []
+                for c1 in set1:
+                    if c1.hasSelection() or c1.position() != c2.position():
+                        newCursors.append(c1)
+                result.extend(newCursors)
+        return result
 
-        self.setCursors(cursors)
+    def addMergeCursor(self, cursors):
+        """Only can add new cursors, if the cursor has selection then try to merge with others"""
+        self.setCursors(self._union(self.cursors(), cursors))
+
+    def removeBreakCursor(self, cursors):
+        self.setCursors(self._difference(self.cursors(), cursors))
 
     def canMove(self, key):
         return (key == QtCore.Qt.Key_Right and not self.cursors()[-1].atEnd()) or \
@@ -331,13 +321,12 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         
         if not self.isActive() and cursor.hasSelection():
             # The first time also add the leader cursor if has selection
-            self.addMergeCursor(cursor)
+            self.addMergeCursor([ cursor ])
         if not new_cursor.isNull():
-            self.addMergeCursor(new_cursor)
+            self.addMergeCursor([ new_cursor ])
             self.editor.centerCursor(new_cursor)
 
-        if self.editor.extraCursors() and not self.isActive():
-            self.activate()
+        self.switch()
         self.highlightEditor()
 
     def switchToColumnSelection(self):
@@ -354,12 +343,11 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
                 if end > block_position_end:
                     end = block_position_end
                 cursor = self.editor.newCursorAtPosition(start, end)
-                self.addMergeCursor(cursor)
+                self.addMergeCursor([ cursor ])
                 if block == cursor_end.block():
                     break
                 block = block.next()
-        if self.editor.extraCursors() and not self.isActive():
-            self.activate()
+        self.switch()
         self.highlightEditor()
 
     def contributeToShortcuts(self):
