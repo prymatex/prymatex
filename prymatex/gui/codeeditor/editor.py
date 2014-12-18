@@ -240,7 +240,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # -------------- Extra Cursors
     def setExtraCursors(self, cursors):
         self.__extra_cursors = cursors
-
+        #self.viewport().update()
+        self.cursorPositionChanged.emit()
+        
     def extraCursors(self):
         return [QtGui.QTextCursor(c) for c in self.__extra_cursors]  
     
@@ -575,7 +577,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         current = self.textCursor()
         for cursor in [ current ] + self.extraCursors():
             if cursor.hasSelection() and current != cursor:
-                selections.append(cursor)
+                selections.append(QtGui.QTextCursor(cursor))
             cursor.clearSelection()
             if self.showHighlightCurrentLine and not any(
                 filter(lambda c: c.block() == cursor.block(), lines)):
