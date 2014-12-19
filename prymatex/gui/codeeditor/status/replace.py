@@ -11,9 +11,5 @@ class ReplaceMixin(object):
 
     # ------- Go to replace
     def replace(self):
-        editor = self.window().currentEditor()
-        print(editor)
-
-    def showReplace(self):
         self.hideAll()
         self.widgetReplace.setVisible(True)

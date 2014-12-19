@@ -35,6 +35,49 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
         StatusMixin.initialize(self, *args, **kwargs)
         CommandMixin.initialize(self, *args, **kwargs)
 
+    # Flag buttons
+    def pushButtonRegularExpression_toggled(self, checked):
+        print("toggled", self.sender())
+    on_pushButtonFindRegularExpression_toggled = pushButtonRegularExpression_toggled
+    on_pushButtonReplaceRegularExpression_toggled = pushButtonRegularExpression_toggled
+    on_pushButtonFindInFilesRegularExpression_toggled = pushButtonRegularExpression_toggled
+    
+    def pushButtonCaseSensitive_toggled(self, checked):
+        print("toggled", self.sender())
+    on_pushButtonFindCaseSensitive_toggled = pushButtonCaseSensitive_toggled
+    on_pushButtonReplaceCaseSensitive_toggled = pushButtonCaseSensitive_toggled
+    on_pushButtonFindInFilesCaseSensitive_toggled = pushButtonCaseSensitive_toggled
+    
+    def pushButtonWholeWord_toggled(self, checked):
+        print("toggled", self.sender())
+    on_pushButtonFindWholeWord_toggled = pushButtonWholeWord_toggled
+    on_pushButtonReplaceWholeWord_toggled = pushButtonWholeWord_toggled
+    on_pushButtonFindInFilesWholeWord_toggled = pushButtonWholeWord_toggled
+    
+    def pushButtonWrap_toggled(self, checked):
+        print("toggled", self.sender())
+    on_pushButtonFindWrap_toggled = pushButtonWrap_toggled
+    on_pushButtonReplaceWrap_toggled = pushButtonWrap_toggled
+    
+    def pushButtonInSelection_toggled(self, checked):
+        print("toggled", self.sender())
+    on_pushButtonFindInSelection_toggled = pushButtonInSelection_toggled
+    on_pushButtonReplaceInSelection_toggled = pushButtonInSelection_toggled
+    
+    def pushButtonHighlightMatches_toggled(self, checked):
+        print("toggled", self.sender())
+    on_pushButtonFindHighlightMatches_toggled = pushButtonHighlightMatches_toggled
+    on_pushButtonReplaceHighlightMatches_toggled = pushButtonHighlightMatches_toggled
+        
+    def on_pushButtonReplacePreserveCase_toggled(self, checked):
+        print("toggled", self.sender())
+    
+    def on_pushButtonFindInFilesShowContext_toggled(self, checked):
+        print("toggled", self.sender())
+    
+    def on_pushButtonFindInFilesUseEditor_toggled(self, checked):
+        print("toggled", self.sender())
+    
     # ------------- Contributes to Main Menu
     @classmethod
     def contributeToMainMenu(cls):
@@ -70,7 +113,7 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
                 }, '-',
                 {'text': "Quick Find",
                  'sequence': ("StatusBar", "QuickFind", "Ctrl+F3"),
-                 'triggered': lambda st, checked=False: st.showFindReplace()
+                 'triggered': lambda st, checked=False: st.quickFind()
                 },
                 {'text': "Quick Find All",
                  'sequence': ("StatusBar", "QuickFindAll", "Alt+F3"),
@@ -93,7 +136,7 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
                 }, '-',
                 {'text': "Find In Files",
                  'sequence': ("StatusBar", "FindInFiles", "Ctrl+Shift+F"),
-                 'triggered': lambda st, checked=False: st.showFindInFiles()
+                 'triggered': lambda st, checked=False: st.findInFiles()
                 },
                 {'text': "Find Results",
                  'items': [

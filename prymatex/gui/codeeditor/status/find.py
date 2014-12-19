@@ -14,6 +14,12 @@ class FindMixin(object):
     def on_lineEditFind_textEdited(self, text):
         print(text)
         
+    # ------- Go to quickFind
+    def quickFind(self):
+        self.hideAll()
+        # TODO Hide buttons
+        self.widgetFind.setVisible(True)
+
     # ------- Go to find
     def find(self):
         self.hideAll()
