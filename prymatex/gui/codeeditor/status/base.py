@@ -19,6 +19,7 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
         super(CodeEditorStatus, self).__init__(**kwargs)
         self.setupUi(self)
         StatusMixin.setup(self)
+        CommandMixin.setup(self)
 
     def acceptEditor(self, editor):
         return isinstance(editor, CodeEditor)
@@ -155,7 +156,7 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
             }
         menu["text"] = [
                 {'text': 'Filter through command',
-                 'triggered': lambda st, checked=False: st.showCommand()
+                 'triggered': lambda st, checked=False: st.filterThroughCommand()
                  }
             ]
         return menu
