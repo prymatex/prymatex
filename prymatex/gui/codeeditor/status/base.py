@@ -17,8 +17,8 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
     ReplaceMixin, CommandMixin, StatusMixin, Ui_CodeEditorStatus, QtWidgets.QWidget):
     # ------------------ Flags
     Backward               = 1<<0
-    CaseSensitively        = 1<<1
-    WholeWords             = 1<<2
+    CaseSensitive          = 1<<1
+    WholeWord              = 1<<2
     RegularExpression      = 1<<3
     Wrap                   = 1<<4
     InSelection            = 1<<5
@@ -32,13 +32,13 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
         self.setupUi(self)
         StatusMixin.setup(self)
         CommandMixin.setup(self)
-        self.__find_flags = QtGui.QTextDocument.FindFlags()
+        self.__flags = QtGui.QTextDocument.FindFlags()
         
-    def setFindFlags(self, flags):
-        self.__find_flags = flags
+    def setFlags(self, flags):
+        self.__flags = flags
 
-    def findFlags(self):
-        return self.__find_flags
+    def flags(self):
+        return self.__flags
 
     def acceptEditor(self, editor):
         return isinstance(editor, CodeEditor)
@@ -56,8 +56,14 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
         CommandMixin.initialize(self, *args, **kwargs)
 
     # Flag buttons
-    def _update_checked(self, buttons, trigger, checked):
+    def _update_checked(self, buttons, trigger, checked, flag):
         [ button.setChecked(checked) for button in buttons if trigger != button]
+        flags = self.flags()
+        if checked:
+            flags |= flag
+        else:
+            flags &= flag
+        self.setFlags(flags)
 
     def pushButtonRegularExpression_toggled(self, checked):
         self._update_checked(
@@ -65,7 +71,7 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
                 self.pushButtonFindRegularExpression,
                 self.pushButtonReplaceRegularExpression,
                 self.pushButtonFindInFilesRegularExpression
-            ], self.sender(), checked
+            ], self.sender(), checked, self.RegularExpression
         )
     on_pushButtonFindRegularExpression_toggled = pushButtonRegularExpression_toggled
     on_pushButtonReplaceRegularExpression_toggled = pushButtonRegularExpression_toggled
@@ -77,7 +83,7 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
                 self.pushButtonFindCaseSensitive,
                 self.pushButtonReplaceCaseSensitive,
                 self.pushButtonFindInFilesCaseSensitive
-            ], self.sender(), checked
+            ], self.sender(), checked, self.CaseSensitive
         )
     on_pushButtonFindCaseSensitive_toggled = pushButtonCaseSensitive_toggled
     on_pushButtonReplaceCaseSensitive_toggled = pushButtonCaseSensitive_toggled
@@ -89,7 +95,7 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
                 self.pushButtonFindWholeWord,
                 self.pushButtonReplaceWholeWord,
                 self.pushButtonFindInFilesWholeWord
-            ], self.sender(), checked
+            ], self.sender(), checked, self.WholeWord
         )
     on_pushButtonFindWholeWord_toggled = pushButtonWholeWord_toggled
     on_pushButtonReplaceWholeWord_toggled = pushButtonWholeWord_toggled
@@ -100,7 +106,7 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
             [
                 self.pushButtonFindWrap,
                 self.pushButtonReplaceWrap
-            ], self.sender(), checked
+            ], self.sender(), checked, self.Wrap
         )
     on_pushButtonFindWrap_toggled = pushButtonWrap_toggled
     on_pushButtonReplaceWrap_toggled = pushButtonWrap_toggled
@@ -110,7 +116,7 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
             [
                 self.pushButtonFindInSelection,
                 self.pushButtonReplaceInSelection
-            ], self.sender(), checked
+            ], self.sender(), checked, self.InSelection
         )
     on_pushButtonFindInSelection_toggled = pushButtonInSelection_toggled
     on_pushButtonReplaceInSelection_toggled = pushButtonInSelection_toggled
@@ -120,19 +126,25 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
             [
                 self.pushButtonFindHighlightMatches,
                 self.pushButtonReplaceHighlightMatches
-            ], self.sender(), checked
+            ], self.sender(), checked, self.HighlightMatches
         )
     on_pushButtonFindHighlightMatches_toggled = pushButtonHighlightMatches_toggled
     on_pushButtonReplaceHighlightMatches_toggled = pushButtonHighlightMatches_toggled
         
     def on_pushButtonReplacePreserveCase_toggled(self, checked):
-        print("toggled", self.sender())
+        self._update_checked(
+            [], self.sender(), checked, self.PreserveCase
+        )
     
     def on_pushButtonFindInFilesShowContext_toggled(self, checked):
-        print("toggled", self.sender())
+        self._update_checked(
+            [], self.sender(), checked, self.ShowContext
+        )
     
     def on_pushButtonFindInFilesUseEditor_toggled(self, checked):
-        print("toggled", self.sender())
+        self._update_checked(
+            [], self.sender(), checked, self.UseEditor
+        )
     
     # ------------- Contributes to Main Menu
     @classmethod

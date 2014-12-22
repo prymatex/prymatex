@@ -158,21 +158,12 @@ class HighlightCurrentSelectionAddon(CodeEditorAddon):
     def initialize(self, **kwargs):
         super(HighlightCurrentSelectionAddon, self).initialize(**kwargs)
         self.editor.selectionChanged.connect(self.findHighlightCursors)
-        self.editor.cursorPositionChanged.connect(self.findHighlightCursors)
 
-    def setPalette(self, palette):
-        textCharFormat = QtGui.QTextCharFormat()
-        color = palette.highlight().color()
-        color.setAlpha(128)
-        textCharFormat.setBackground(color)
-        self.editor.registerTextCharFormat("dyn.selection.extra", textCharFormat)
-    
     def findHighlightCursors(self):
         cursor = self.editor.textCursor()
         cursors = self.editor.findAll(
                 cursor.selectedText(), 
                 QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords
             ) if cursor.hasSelection() and cursor.selectedText().strip() != '' else []
-        self.editor.setExtraSelectionCursors("dyn.selection.extra", cursors)
-        self.editor.updateExtraSelections()
+        self.editor.setHighlightCursors(cursors)
         

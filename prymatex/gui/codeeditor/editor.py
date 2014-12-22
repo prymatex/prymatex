@@ -254,7 +254,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.viewport().update()
 
     def highlightCursors(self):
-        return [QtGui.QTextCursor(c) for c in self.__highlight_cursors]
+        return self.__highlight_cursors
         
     # -------------- Editor Modes
     def beginCodeEditorMode(self, mode):
@@ -641,17 +641,14 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         super(TextEditWidget, self).paintEvent(event)
 
         painter = QtGui.QPainter(self.viewport())
-
+        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        
         cursorPosition = self.getPaintContext().cursorPosition
         page_bottom = self.viewport().height()
         characterWidth = self.characterWidth()
         characterHeight = self.characterHeight()
 
-        font = painter.font()
-        font.setBold(True)
-        painter.setFont(font)
-        painter.setPen(self.palette().highlight().color())
-        
+        highlight = self.highlightCursors()
         block = self.firstVisibleBlock()
         offset = self.contentOffset()
         while block.isValid() and self.blockUserData(block):
@@ -664,14 +661,17 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 break
             if block.isVisible():
                 positionY = blockGeometry.top()
-                # -------------- Folding
+
+                # -------------- Folding Image
                 if self.foldingListModel.isFolded(self.newCursorAtPosition(block.position())):
+                    painter.setPen(self.palette().base().color())
                     painter.drawPixmap(characterWidth * block.length() + offset.x() + 10,
                         positionY + characterHeight - self.foldingListModel.foldingellipsisImage.height(),
                         self.foldingListModel.foldingellipsisImage)
 
                 # -------------- Indent guide
                 if self.showIndentGuide:
+                    painter.setPen(self.palette().highlight().color())
                     blockPattern = block
                     while blockPattern.isValid() and self.blockUserData(blockPattern).blank:
                         blockPattern = blockPattern.next()
@@ -681,28 +681,27 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                         for s in range(0, indentLen // self.indentationWidth):
                             positionX = (characterWidth * self.indentationWidth * s) + padding
                             painter.drawLine(positionX, positionY, positionX, positionY + characterHeight)
+                
+                # -------------- Highlight Cursors
+                painter.setPen(self.palette().brightText().color())
+                for c in [c for c in highlight if c.block() == block and c.hasSelection()]:
+                    topLeft = self.cursorRect(self.newCursorAtPosition(c.selectionStart())).topLeft()
+                    bottomRight = self.cursorRect(self.newCursorAtPosition(c.selectionEnd())).bottomRight()
+                    painter.drawRoundedRect(
+                        QtCore.QRect(topLeft, bottomRight), 
+                        0.15 * characterWidth,
+                        0.15 * characterWidth)
 
             block = block.next()
 
         if self.showMarginLine:
+            painter.setPen(self.palette().highlight().color())
             pos_margin = characterWidth * self.marginLineSize
             painter.drawLine(pos_margin + offset.x(), 0, pos_margin + offset.x(), self.viewport().height())
 
-        painter.setPen(self.palette().brightText().color())
-        # -------------- Highlight Cursors
-        for c in self.highlightCursors():
-            if c.hasSelection():
-                topLeft = self.cursorRect(self.newCursorAtPosition(c.selectionStart())).topLeft()
-                bottomRight = self.cursorRect(self.newCursorAtPosition(c.selectionEnd())).bottomRight()
-                topLeft.setY(topLeft.y() + 1)
-                bottomRight.setY(bottomRight.y() - 1)
-                painter.drawRoundedRect(
-                    QtCore.QRect(topLeft, bottomRight), 
-                    0.15 * characterHeight, 
-                    0.15 * characterHeight)
-
         # -------------- Extra Cursors
         if cursorPosition != -1:
+            painter.setPen(self.palette().brightText().color())
             for c in self.textCursors()[1:]:
                 rec = self.cursorRect(c)
                 painter.drawLine(rec.x(), rec.y(), rec.x(), rec.y() + characterHeight)

@@ -283,7 +283,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     def findMatchCursor(self, match, flags, findNext = False, cursor = None, cyclicFind = False):
         """Busca la ocurrencia de match a partir de un cursor o el cursor actual
         si cyclicFind = True intenta desde el principio al llegar al final del texto"""
-        cursor = cursor or self.textCursor()
+        cursor = QtGui.QTextCursor(cursor) or self.textCursor()
         if cursor.hasSelection():
             cursor.setPosition(findNext and cursor.selectionEnd() or cursor.selectionStart())
         cursor = self.document().find(match, cursor, flags)
@@ -304,15 +304,17 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         return False
 
     def findAll(self, match, flags):
+        cursors = []
         cursor = self.textCursor()
         cursor.movePosition(QtGui.QTextCursor.Start)
         cursor = self.findMatchCursor(match, flags, cursor = cursor)
         while not cursor.isNull():
-            yield cursor
+            cursors.append(cursor)
             cursor = self.findMatchCursor(match, flags, findNext = True, cursor = cursor)
-
-    def replaceMatch(self, match, text, flags, allText = False):
-        cursor = self.textCursor()
+        return cursors
+        
+    def replaceMatch(self, match, text, flags, allText = False, cursor = None):
+        cursor = QtGui.QTextCursor(cursor) or self.textCursor()
         cursor.beginEditBlock()
         replaced = 0
         findCursor = cursor
