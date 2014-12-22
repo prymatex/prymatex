@@ -52,7 +52,7 @@ class CodeEditorBaseMode(CodeEditorAddon):
                     yield handler
         if self._allow_default_handlers and self != self.editor.defaultMode():
             for handler in self.editor.defaultMode().pre_KeyPress_handlers(key):
-                yield hander
+                yield handler
 
     def post_KeyPress_handlers(self, key):
         for _key, handlers in self.postEventHandlers[QtCore.QEvent.KeyPress].items():

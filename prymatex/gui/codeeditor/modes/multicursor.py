@@ -127,7 +127,10 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
 
     def mouseMovePoint(self, dragPoint, remove = False):
         self.draggedCursors = []
-        
+        if not self.startPoint:
+            self.startPoint = dragPoint
+            return
+
         if self.startPoint.x() <= dragPoint.x():
             anchor = 'right'
             startRect = self.editor.cursorRect(
