@@ -50,7 +50,6 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.standardCursor = self.editor.viewport().cursor()
 
         # ------------ Handlers
-        self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__cursors_update)
         self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__cursors_update_after, after=True)
         self.registerKeyPressHandler(QtCore.Qt.Key_Escape, self.__multicursor_end)
 
@@ -88,31 +87,18 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def __multicursor_end(self, event):
         self.deactivate()
         return True
-
-    def __cursors_update(self, event):
-        cursors = self.cursors()
-        position = cursors[0].position()
-        character = self.editor.document().characterAt(position)
-        self._hash = hash("%d:%s" % (position, character))
-        cursors[0].beginEditBlock()
-        return False
-        
+    
     def __cursors_update_after(self, event):
         cursors = self.cursors()
-        position = cursors[0].position()
-        character = self.editor.document().characterAt(position)
-        changed = self._hash != hash("%d:%s" % (position, character))
-        if changed:
-            _cursors = [ cursors[0] ]
-            for index, cursor in enumerate(cursors[1:]):
-                self.editor.setTextCursor(cursor)
-                super(self.editor.__class__, self.editor).keyPressEvent(event)
-                _cursors.append(self.editor.textCursor())
-            cursors = _cursors
+        cursors[0].joinPreviousEditBlock()
+        new_cursors = [ cursors[0] ]
+        for cursor in cursors[1:]:
+            self.editor.setTextCursor(cursor)
+            super(self.editor.__class__, self.editor).keyPressEvent(event)
+            new_cursors.append(self.editor.textCursor())
         cursors[0].endEditBlock()
-        if changed:
-            self.setCursors(_build_cursors(self.editor, _build_set(cursors)))
-            self.switch()
+        self.setCursors(_build_cursors(self.editor, _build_set(new_cursors)))
+        self.switch()
 
     # ------- Handle events
     def eventFilter(self, obj, event):
@@ -182,23 +168,6 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         
         # Muestro los nuevos cursores
         self.highlightEditor()
-
-    def keyPressEvent(self, event):
-        handled = False
-        if event.key() in [ QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown, QtCore.Qt.Key_End, QtCore.Qt.Key_Home]:
-            #Desactivados por ahora
-            pass
-        elif event.text() and not event.modifiers():
-            cursors = self.cursors()
-            cursors[0].beginEditBlock()
-            for cursor in cursors:
-                self.editor.setTextCursor(cursor)
-                self.editor.keyPressEvent(event)
-            cursors[0].endEditBlock()
-            handled = True
-        if handled:
-            self.highlightEditor()
-        return handled
 
     def highlightEditor(self):
         # Dragged
