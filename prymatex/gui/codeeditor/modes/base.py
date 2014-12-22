@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
+from collections import OrderedDict
 
 from prymatex.qt import QtCore
 
@@ -9,10 +10,10 @@ class CodeEditorBaseMode(CodeEditorAddon):
     def __init__(self, **kwargs):
         super(CodeEditorBaseMode, self).__init__(**kwargs)
         self.preEventHandlers = {
-            QtCore.QEvent.KeyPress: {}
+            QtCore.QEvent.KeyPress: OrderedDict()
         }
         self.postEventHandlers = {
-            QtCore.QEvent.KeyPress: {}
+            QtCore.QEvent.KeyPress: OrderedDict()
         }
         self._allow_default_handlers = True
         self.setObjectName(self.__class__.__name__)
@@ -45,22 +46,22 @@ class CodeEditorBaseMode(CodeEditorAddon):
             yield handler(event)
 
     def pre_KeyPress_handlers(self, key):
-        for hander in self.preEventHandlers[QtCore.QEvent.KeyPress].get(QtCore.Qt.Key_Any, []):
-            yield hander
-        for hander in self.preEventHandlers[QtCore.QEvent.KeyPress].get(key, []):
-            yield hander
+        for _key, handlers in self.preEventHandlers[QtCore.QEvent.KeyPress].items():
+            if _key in (key, QtCore.Qt.Key_Any):
+                for handler in handlers:
+                    yield handler
         if self._allow_default_handlers and self != self.editor.defaultMode():
-            for hander in self.editor.defaultMode().pre_KeyPress_handlers(key):
+            for handler in self.editor.defaultMode().pre_KeyPress_handlers(key):
                 yield hander
 
     def post_KeyPress_handlers(self, key):
-        for hander in self.postEventHandlers[QtCore.QEvent.KeyPress].get(QtCore.Qt.Key_Any, []):
-            yield hander
-        for hander in self.postEventHandlers[QtCore.QEvent.KeyPress].get(key, []):
-            yield hander
+        for _key, handlers in self.postEventHandlers[QtCore.QEvent.KeyPress].items():
+            if _key in (key, QtCore.Qt.Key_Any):
+                for handler in handlers:
+                    yield handler
         if self._allow_default_handlers and self != self.editor.defaultMode():
-            for hander in self.editor.defaultMode().post_KeyPress_handlers(key):
-                yield hander
+            for handler in self.editor.defaultMode().post_KeyPress_handlers(key):
+                yield handler
 
     def name(self):
         return self.objectName()

@@ -470,8 +470,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         else:
             self.rightBar.update(0, rect.y(), self.rightBar.width(), rect.height())
             self.leftBar.update(0, rect.y(), self.leftBar.width(), rect.height())
-            for c in self.textCursors():
-                self.viewport().update(self.cursorRect(c))
+            cursors = self.textCursors()
+            if len(cursors) > 1:
+                topLeft = self.cursorRect(self.newCursorAtPosition(cursors[0].selectionStart())).topLeft()
+                bottomRight = self.cursorRect(self.newCursorAtPosition(cursors[-1].selectionEnd())).bottomRight()
+                self.viewport().update(QtCore.QRect(topLeft, bottomRight))
 
     def updateSideBarsGeometry(self):
         cr = self.contentsRect()
@@ -689,8 +692,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                     bottomRight = self.cursorRect(self.newCursorAtPosition(c.selectionEnd())).bottomRight()
                     painter.drawRoundedRect(
                         QtCore.QRect(topLeft, bottomRight), 
-                        0.15 * characterWidth,
-                        0.15 * characterWidth)
+                        0.2 * characterWidth,
+                        0.2 * characterWidth)
 
             block = block.next()
 

@@ -34,6 +34,7 @@ def _build_cursors(editor, s):
 class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def __init__(self, **kwargs):
         super(CodeEditorMultiCursorMode, self).__init__(**kwargs)
+        self.setAllowDefaultHandlers(False)
         self.draggedCursors = []
         self.startPoint = self.doublePoint = None
         self.standardCursor = None
@@ -50,8 +51,8 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.standardCursor = self.editor.viewport().cursor()
 
         # ------------ Handlers
-        self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__cursors_update_after, after=True)
         self.registerKeyPressHandler(QtCore.Qt.Key_Escape, self.__multicursor_end)
+        self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__cursors_update)
 
     def activate(self):
         CodeEditorBaseMode.activate(self)
@@ -88,17 +89,19 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.deactivate()
         return True
     
-    def __cursors_update_after(self, event):
+    def __cursors_update(self, event):
+        # TODO Separar lo que sea insertar texto de los shortcuts
         cursors = self.cursors()
-        cursors[0].joinPreviousEditBlock()
-        new_cursors = [ cursors[0] ]
-        for cursor in cursors[1:]:
+        cursors[0].beginEditBlock()
+        new_cursors = [ ]
+        for cursor in cursors:
             self.editor.setTextCursor(cursor)
             super(self.editor.__class__, self.editor).keyPressEvent(event)
             new_cursors.append(self.editor.textCursor())
         cursors[0].endEditBlock()
         self.setCursors(_build_cursors(self.editor, _build_set(new_cursors)))
         self.switch()
+        return True
 
     # ------- Handle events
     def eventFilter(self, obj, event):
