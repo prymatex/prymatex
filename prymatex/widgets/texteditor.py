@@ -294,25 +294,22 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             else:
                 cursor.movePosition(QtGui.QTextCursor.Start)
             cursor = self.document().find(match, cursor, flags)
-        if not cursor.isNull():
-            return cursor
+        return cursor
 
     def findMatch(self, match, flags, findNext = False, cyclicFind = False):
         cursor = self.findMatchCursor(match, flags, findNext = findNext, cyclicFind = cyclicFind)
-        if cursor is not None:
+        if not cursor.isNull():
             self.setTextCursor(cursor)
             return True
         return False
 
     def findAll(self, match, flags):
-        cursors = []
         cursor = self.textCursor()
         cursor.movePosition(QtGui.QTextCursor.Start)
         cursor = self.findMatchCursor(match, flags, cursor = cursor)
-        while cursor is not None:
-            cursors.append(QtGui.QTextCursor(cursor))
+        while not cursor.isNull():
+            yield cursor
             cursor = self.findMatchCursor(match, flags, findNext = True, cursor = cursor)
-        return cursors
 
     def replaceMatch(self, match, text, flags, allText = False):
         cursor = self.textCursor()
@@ -323,7 +320,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             findCursor.movePosition(QtGui.QTextCursor.Start)
         while True:
             findCursor = self.findMatchCursor(match, flags, cursor = findCursor)
-            if not findCursor: break
+            if findCursor.isNull(): break
             if isinstance(match, QtCore.QRegExp):
                 findCursor.insertText(re.sub(match.pattern(), text, cursor.selectedText()))
             else:

@@ -17,7 +17,9 @@ class FindMixin(object):
     # ------- Go to quickFind
     def quickFind(self):
         self.hideAll()
-        # TODO Hide buttons
+        self.pushButtonFindFind.setVisible(False)
+        self.pushButtonFindPrev.setVisible(False)
+        self.pushButtonFindAll.setVisible(False)
         self.widgetFind.setVisible(True)
 
     # ------- Go to find
@@ -27,7 +29,10 @@ class FindMixin(object):
         cursor = editor.textCursor() 
         if cursor.hasSelection():
             word = cursor.selectedText()
-            self.comboBoxFind.lineEdit().setText(word)        
+            self.comboBoxFind.lineEdit().setText(word)
+        self.pushButtonFindFind.setVisible(True)
+        self.pushButtonFindPrev.setVisible(True)
+        self.pushButtonFindAll.setVisible(True)        
         self.widgetFind.setVisible(True)
         self.comboBoxFind.lineEdit().selectAll()
         self.comboBoxFind.lineEdit().setFocus()

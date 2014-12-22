@@ -15,11 +15,30 @@ from .status import StatusMixin
 
 class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
     ReplaceMixin, CommandMixin, StatusMixin, Ui_CodeEditorStatus, QtWidgets.QWidget):
+    # ------------------ Flags
+    Backward               = 1<<0
+    CaseSensitively        = 1<<1
+    WholeWords             = 1<<2
+    RegularExpression      = 1<<3
+    Wrap                   = 1<<4
+    InSelection            = 1<<5
+    PreserveCase           = 1<<6
+    HighlightMatches       = 1<<7
+    ShowContext            = 1<<8
+    UseEditor              = 1<<9
+
     def __init__(self, *args, **kwargs):
         super(CodeEditorStatus, self).__init__(**kwargs)
         self.setupUi(self)
         StatusMixin.setup(self)
         CommandMixin.setup(self)
+        self.__find_flags = QtGui.QTextDocument.FindFlags()
+        
+    def setFindFlags(self, flags):
+        self.__find_flags = flags
+
+    def findFlags(self):
+        return self.__find_flags
 
     def acceptEditor(self, editor):
         return isinstance(editor, CodeEditor)
@@ -37,36 +56,72 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
         CommandMixin.initialize(self, *args, **kwargs)
 
     # Flag buttons
+    def _update_checked(self, buttons, trigger, checked):
+        [ button.setChecked(checked) for button in buttons if trigger != button]
+
     def pushButtonRegularExpression_toggled(self, checked):
-        print("toggled", self.sender())
+        self._update_checked(
+            [
+                self.pushButtonFindRegularExpression,
+                self.pushButtonReplaceRegularExpression,
+                self.pushButtonFindInFilesRegularExpression
+            ], self.sender(), checked
+        )
     on_pushButtonFindRegularExpression_toggled = pushButtonRegularExpression_toggled
     on_pushButtonReplaceRegularExpression_toggled = pushButtonRegularExpression_toggled
     on_pushButtonFindInFilesRegularExpression_toggled = pushButtonRegularExpression_toggled
     
     def pushButtonCaseSensitive_toggled(self, checked):
-        print("toggled", self.sender())
+        self._update_checked(
+            [
+                self.pushButtonFindCaseSensitive,
+                self.pushButtonReplaceCaseSensitive,
+                self.pushButtonFindInFilesCaseSensitive
+            ], self.sender(), checked
+        )
     on_pushButtonFindCaseSensitive_toggled = pushButtonCaseSensitive_toggled
     on_pushButtonReplaceCaseSensitive_toggled = pushButtonCaseSensitive_toggled
     on_pushButtonFindInFilesCaseSensitive_toggled = pushButtonCaseSensitive_toggled
     
     def pushButtonWholeWord_toggled(self, checked):
-        print("toggled", self.sender())
+        self._update_checked(
+            [
+                self.pushButtonFindWholeWord,
+                self.pushButtonReplaceWholeWord,
+                self.pushButtonFindInFilesWholeWord
+            ], self.sender(), checked
+        )
     on_pushButtonFindWholeWord_toggled = pushButtonWholeWord_toggled
     on_pushButtonReplaceWholeWord_toggled = pushButtonWholeWord_toggled
     on_pushButtonFindInFilesWholeWord_toggled = pushButtonWholeWord_toggled
     
     def pushButtonWrap_toggled(self, checked):
-        print("toggled", self.sender())
+        self._update_checked(
+            [
+                self.pushButtonFindWrap,
+                self.pushButtonReplaceWrap
+            ], self.sender(), checked
+        )
     on_pushButtonFindWrap_toggled = pushButtonWrap_toggled
     on_pushButtonReplaceWrap_toggled = pushButtonWrap_toggled
     
     def pushButtonInSelection_toggled(self, checked):
-        print("toggled", self.sender())
+        self._update_checked(
+            [
+                self.pushButtonFindInSelection,
+                self.pushButtonReplaceInSelection
+            ], self.sender(), checked
+        )
     on_pushButtonFindInSelection_toggled = pushButtonInSelection_toggled
     on_pushButtonReplaceInSelection_toggled = pushButtonInSelection_toggled
     
     def pushButtonHighlightMatches_toggled(self, checked):
-        print("toggled", self.sender())
+        self._update_checked(
+            [
+                self.pushButtonFindHighlightMatches,
+                self.pushButtonReplaceHighlightMatches
+            ], self.sender(), checked
+        )
     on_pushButtonFindHighlightMatches_toggled = pushButtonHighlightMatches_toggled
     on_pushButtonReplaceHighlightMatches_toggled = pushButtonHighlightMatches_toggled
         
