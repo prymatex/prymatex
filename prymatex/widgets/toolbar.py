@@ -37,7 +37,7 @@ class DockWidgetToolBar(QtWidgets.QToolBar):
         self.restoreAction.triggered.connect(self.hide)
         self.addAction(self.restoreAction)
         
-        self.visibilityChanged.connect(self.on_visibilityChanged)
+        #self.visibilityChanged.connect(self.on_visibilityChanged)
 
     def on_actionTriggered(self, action):
         self.hideDockWidgets(excludeAction = action)

@@ -35,8 +35,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def __init__(self, **kwargs):
         super(CodeEditorMultiCursorMode, self).__init__(**kwargs)
         self.setAllowDefaultHandlers(False)
-        self.draggedCursors = []
-        self.startPoint = self.doublePoint = None
+        self.draggedCursors = self.startPoint = None
         self.standardCursor = None
         self._hash = None
 
@@ -47,7 +46,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def initialize(self, **kwargs):
         super(CodeEditorMultiCursorMode, self).initialize(**kwargs)
         self.editor.viewport().installEventFilter(self)
-        self.editor.cursorPositionChanged.connect(self.switch)
+        self.editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
 
         self.standardCursor = self.editor.viewport().cursor()
 
@@ -60,18 +59,14 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.editor.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
 
     def deactivate(self):
-        self.draggedCursors = []
-        self.editor.setTextCursors([])
         self.editor.viewport().setCursor(self.standardCursor)
         CodeEditorBaseMode.deactivate(self)
 
-    def switch(self):
+    def on_editor_cursorPositionChanged(self):
         # Test and switch state
         if len(self.cursors()) > 1 and not self.isActive():
-            self.editor.syntaxHighlighter.stop()
             self.activate()
         elif len(self.cursors()) == 1 and self.isActive():
-            self.editor.syntaxHighlighter.start()
             self.deactivate()
 
     # OVERRIDE: CodeEditorAddon.setPalette()
@@ -89,7 +84,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         
     # ------------ Key press handlers
     def __multicursor_end(self, event):
-        self.deactivate()
+        self.setCursors([])
         return True
     
     def __cursors_update(self, event):
@@ -103,7 +98,6 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
             new_cursors.append(self.editor.textCursor())
         cursors[0].endEditBlock()
         self.setCursors(_build_cursors(self.editor, _build_set(new_cursors)))
-        self.switch()
         return True
 
     # ------- Handle events
@@ -165,14 +159,11 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def mouseReleasePoint(self, endPoint, remove = False):
         multicursorAction = self.addMergeCursor if not remove else self.removeBreakCursor
         multicursorAction(self.draggedCursors or \
-            [self.editor.newCursorAtPosition(self.startPoint)]
+            [self.editor.newCursorAtPosition(endPoint)]
         )
 
-        self.switch()
-
         #Clean last acction
-        self.draggedCursors = []
-        self.startPoint = self.doublePoint = None
+        self.draggedCursors = self.startPoint = None
         self.application().restoreOverrideCursor()
         
         # Muestro los nuevos cursores
@@ -180,10 +171,10 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
 
     def highlightEditor(self):
         # Dragged
-        dragged = (c for c in (QtGui.QTextCursor(c) for c in self.draggedCursors) if c.hasSelection())
-        self.editor.setExtraSelectionCursors("dyn.caret.mixed.dragged", [c for c in [QtGui.QTextCursor(c) for c in self.draggedCursors] if c.hasSelection()])
-        
-        self.editor.updateExtraSelections()
+        if self.draggedCursors:
+            dragged = (c for c in (QtGui.QTextCursor(c) for c in self.draggedCursors) if c.hasSelection())
+            self.editor.setExtraSelectionCursors("dyn.caret.mixed.dragged", [c for c in [QtGui.QTextCursor(c) for c in self.draggedCursors] if c.hasSelection()])
+            self.editor.updateExtraSelections()
 
     def cursors(self):
         return self.editor.textCursors()
@@ -226,7 +217,6 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
             self.addMergeCursor([ new_cursor ])
             self.editor.centerCursor(new_cursor)
 
-        self.switch()
         self.highlightEditor()
 
     def switchToColumnSelection(self):
@@ -247,7 +237,6 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
                 if block == cursor_end.block():
                     break
                 block = block.next()
-        self.switch()
         self.highlightEditor()
 
     def contributeToShortcuts(self):
