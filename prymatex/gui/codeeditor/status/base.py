@@ -54,8 +54,13 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
         ReplaceMixin.initialize(self, *args, **kwargs)
         StatusMixin.initialize(self, *args, **kwargs)
         CommandMixin.initialize(self, *args, **kwargs)
-
-    # Flag buttons
+        
+        # Connect all finds
+        self.comboBoxFind.lineEdit().textChanged.connect(self.on_lineEdit_textChanged)
+        self.comboBoxReplaceWhat.lineEdit().textChanged.connect(self.on_lineEdit_textChanged)
+        self.comboBoxFindInFilesWhat.lineEdit().textChanged.connect(self.on_lineEdit_textChanged)
+        
+    # ---------- Tool, set flags and update buttons
     def _update_checked(self, buttons, trigger, checked, flag):
         [ button.setChecked(checked) for button in buttons if trigger != button]
         flags = self.flags()
@@ -64,6 +69,15 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
         else:
             flags &= flag
         self.setFlags(flags)
+
+    # ----------- Signals
+    def on_lineEdit_textChanged(self, text):
+        combos = [self.comboBoxFind, self.comboBoxReplaceWhat, self.comboBoxFindInFilesWhat]
+        for combo in combos:
+            if combo.lineEdit() != self.sender():
+                combo.lineEdit().blockSignals(True)
+                combo.lineEdit().setText(text)
+                combo.lineEdit().blockSignals(False)
 
     def pushButtonRegularExpression_toggled(self, checked):
         self._update_checked(
@@ -150,10 +164,10 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
     @classmethod
     def contributeToMainMenu(cls):
         menu = {}
-        menu["edit"] = {
-            'before': 'mode',
+        menu["find"] = {
+            'before': 'view',
             'name': 'find',
-            'text': '&Find',
+            'text': 'F&ind',
             'items': [
                 {'text': "Find...",
                  'sequence': ("StatusBar", "Find", "Find"),
@@ -169,7 +183,7 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
                 },
                 {'text': "Incremental Find",
                  'sequence': ("StatusBar", "IncrementalFind", "Ctrl+I"),
-                 'triggered': lambda st, checked=False: st.showIFind()
+                 'triggered': lambda st, checked=False: st.incrementalFind()
                 }, '-',
                 {'text': "Replace",
                  'sequence': ("StatusBar", "Replace", "Replace"),
