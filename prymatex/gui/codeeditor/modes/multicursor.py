@@ -46,8 +46,9 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     # ------- Overrides
     def initialize(self, **kwargs):
         super(CodeEditorMultiCursorMode, self).initialize(**kwargs)
-        self.editor.installEventFilter(self)
         self.editor.viewport().installEventFilter(self)
+        self.editor.cursorPositionChanged.connect(self.switch)
+
         self.standardCursor = self.editor.viewport().cursor()
 
         # ------------ Handlers
@@ -67,8 +68,10 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def switch(self):
         # Test and switch state
         if len(self.cursors()) > 1 and not self.isActive():
+            self.editor.syntaxHighlighter.stop()
             self.activate()
         elif len(self.cursors()) == 1 and self.isActive():
+            self.editor.syntaxHighlighter.start()
             self.deactivate()
 
     # OVERRIDE: CodeEditorAddon.setPalette()

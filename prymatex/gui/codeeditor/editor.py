@@ -242,8 +242,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.__text_cursors = cursors[1:]
         if len(cursors):
             self.setTextCursor(cursors[0])
-        # TODO: Create new signal for more than one cursor
-        self.cursorPositionChanged.emit()
+        else:
+            self.cursorPositionChanged.emit()
 
     def textCursors(self):
         return [self.textCursor()] + [QtGui.QTextCursor(c) for c in self.__text_cursors]  

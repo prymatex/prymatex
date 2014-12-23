@@ -32,8 +32,11 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
         self.setupUi(self)
         StatusMixin.setup(self)
         CommandMixin.setup(self)
-        self.__flags = QtGui.QTextDocument.FindFlags()
+        self.__flags = self.defaultFlags()
         
+    def defaultFlags(self):
+        return QtGui.QTextDocument.FindFlags() | self.WholeWord | self.CaseSensitive
+
     def setFlags(self, flags):
         self.__flags = flags
 
@@ -70,6 +73,16 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
             flags &= flag
         self.setFlags(flags)
 
+    # ------- Tool find context        
+    def _find_context(self, select=False):
+        editor = self.window().currentEditor()
+        cursor = editor.textCursor()
+        if not cursor.hasSelection() and select:
+            _, start, end  = editor.currentWord()
+            cursor = editor.newCursorAtPosition(start, end)
+        self.comboBoxFind.lineEdit().setText(cursor.selectedText())
+        return editor, cursor
+    
     # ----------- Signals
     def on_lineEdit_textChanged(self, text):
         combos = [self.comboBoxFind, self.comboBoxReplaceWhat, self.comboBoxFindInFilesWhat]
@@ -199,7 +212,7 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
                 },
                 {'text': "Quick Find All",
                  'sequence': ("StatusBar", "QuickFindAll", "Alt+F3"),
-                 'triggered': lambda st, checked=False: st.showFindReplace()
+                 'triggered': lambda st, checked=False: st.quickFindAll()
                 },
                 {'text': "Quick Add Next",
                  'sequence': ("StatusBar", "QuickAddNext", "Ctrl+D"),

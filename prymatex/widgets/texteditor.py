@@ -280,7 +280,8 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
                 if text[:positionStart].count(b2) % 2 == 0 and text[positionEnd:].count(b2) % 2 == 0:
                     return c2
 
-    def findMatchCursor(self, match, flags, findNext = False, cursor = None, cyclicFind = False):
+    def findMatchCursor(self, match, flags, 
+            findNext=False, cursor=None, cyclicFind=False):
         """Busca la ocurrencia de match a partir de un cursor o el cursor actual
         si cyclicFind = True intenta desde el principio al llegar al final del texto"""
         cursor = QtGui.QTextCursor(cursor) or self.textCursor()
@@ -296,8 +297,12 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             cursor = self.document().find(match, cursor, flags)
         return cursor
 
-    def findMatch(self, match, flags, findNext = False, cyclicFind = False):
-        cursor = self.findMatchCursor(match, flags, findNext = findNext, cyclicFind = cyclicFind)
+    def findMatch(self, match, flags,
+            findNext=False, cursor=None, cyclicFind=False):
+        cursor = self.findMatchCursor(match, flags, 
+            findNext=findNext,
+            cursor=cursor,
+            cyclicFind=cyclicFind)
         if not cursor.isNull():
             self.setTextCursor(cursor)
             return True

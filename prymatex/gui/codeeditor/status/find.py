@@ -13,20 +13,20 @@ class FindMixin(object):
     # ------- Signals
     def on_lineEditFind_textEdited(self, text):
         print(text)
- 
-    # ------- Tools        
-    def _get_cursor(self, word = False):
-        editor = self.window().currentEditor()
-        cursor = editor.textCursor()
-        if cursor.hasSelection():
-            word = cursor.selectedText()
-            self.comboBoxFind.lineEdit().setText(word)
-            
+         
     # ------- Go to quickFind
     def quickFind(self):
-        editor = self.window().currentEditor()
-        cursor = editor.textCursor()
-        
+        editor, cursor = self._find_context(select=True)
+        if cursor.hasSelection():
+            editor.findMatch(cursor.selectedText(), self.defaultFlags(), 
+                findNext=True, cursor=cursor)
+            
+    def quickFindAll(self):
+        editor, cursor = self._find_context(select=True)
+        if cursor.hasSelection():
+            cursors = editor.findAll(cursor.selectedText(), self.defaultFlags())
+            editor.setTextCursors(cursors)
+
     # ------- Go to incrementalFind
     def incrementalFind(self):
         self.hideAll()
