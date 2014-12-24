@@ -6,6 +6,7 @@ from prymatex.core.exceptions import UnsupportedPlatformError
 
 
 LINUX_PS_COMMAND = six.text_type('ps -eo pid,cmd')
+OSX_PS_COMMAND = six.text_type('ps -eo pid,args')
 
 
 def check_output_safe(*popenargs, **kwargs):
@@ -22,6 +23,17 @@ def get_process_map():
     platform = sys.platform
     if 'linux' in platform:
         output = six.text_type(check_output_safe(LINUX_PS_COMMAND.split()))
+        # Remove first line since it has the titles
+        # and the last one which holds a null string
+        lines = output.split('\\n')[1:-1]
+        lines = map(lambda x: x.strip(), lines)
+        processes = {}
+        for line in lines:
+            pid, cmd = line.split(' ', 1)  # Do not need regex since we used -o pid,cmd
+            processes[int(pid)] = cmd
+        return processes
+    elif 'darwin' in platform:
+        output = six.text_type(check_output_safe(OSX_PS_COMMAND.split()))
         # Remove first line since it has the titles
         # and the last one which holds a null string
         lines = output.split('\\n')[1:-1]
