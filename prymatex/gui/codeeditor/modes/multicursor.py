@@ -171,10 +171,11 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
 
     def highlightEditor(self):
         # Dragged
+        dragged = []
         if self.draggedCursors:
-            dragged = (c for c in (QtGui.QTextCursor(c) for c in self.draggedCursors) if c.hasSelection())
-            self.editor.setExtraSelectionCursors("dyn.caret.mixed.dragged", [c for c in [QtGui.QTextCursor(c) for c in self.draggedCursors] if c.hasSelection()])
-            self.editor.updateExtraSelections()
+            dragged = [c for c in [QtGui.QTextCursor(c) for c in self.draggedCursors] if c.hasSelection()]
+        self.editor.setExtraSelectionCursors("dyn.caret.mixed.dragged", dragged)
+        self.editor.updateExtraSelections()
 
     def cursors(self):
         return self.editor.textCursors()
