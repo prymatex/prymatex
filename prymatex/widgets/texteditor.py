@@ -235,8 +235,8 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     def cursorPosition(self):
         return self.textCursor().position()
 
-    #------ Find and Replace
-    def findPair(self, b1, b2, cursor, backward = False):
+    #------ Find Cursors
+    def findPairCursor(self, b1, b2, cursor, backward = False):
         """
         Busca b2 asumiendo que b1 es su antitesis de ese modo controla el balanceo.
         b1 antitesis de b2
@@ -271,8 +271,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
                         break
                     if c1 < c2:
                         c2 = self.document().find(b2, c2.selectionEnd(), flags)
-            if not c2.isNull():
-                return c2
+            return c2
         else:
             #Cuando son iguales por ahora balanceo solo para el mismo bloque
             if not c2.isNull() and c2.block() == cursor.block():
@@ -285,24 +284,18 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
                 positionEnd -= block.position()
                 if text[:positionStart].count(b2) % 2 == 0 and text[positionEnd:].count(b2) % 2 == 0:
                     return c2
+        return QtGui.QTextCursor()
 
     def findMatchCursor(self, match, flags, 
-            findNext=None, cursor=None, cyclicFind=False):
-        """Busca la ocurrencia de match a partir de un cursor o el cursor actual
-        si cyclicFind = True intenta desde el principio al llegar al final del texto"""
+            findNext=None, cursor=None):
+        """Busca la ocurrencia de match a partir de un cursor o el cursor actual"""
         cursor = QtGui.QTextCursor(cursor) if cursor else self.textCursor()
-        match = QtCore.QRegExp(match) if flags & self.FindRegularExpression else match
+        if flags & self.FindRegularExpression:
+            match = QtCore.QRegExp(match, flags & self.FindCaseSensitive \
+                and QtCore.Qt.CaseSensitive or QtCore.Qt.CaseInsensitive)
         if cursor.hasSelection() and findNext is not None:
             cursor.setPosition(findNext and cursor.selectionEnd() or cursor.selectionStart())
-        cursor = self.document().find(match, cursor, flags)
-        if cursor.isNull() and cyclicFind:
-            cursor = self.textCursor()
-            if flags & self.FindBackward:
-                cursor.movePosition(QtGui.QTextCursor.End)
-            else:
-                cursor.movePosition(QtGui.QTextCursor.Start)
-            cursor = self.document().find(match, cursor, flags)
-        return cursor
+        return self.document().find(match, cursor, flags)
 
     def findAllCursors(self, match, flags):
         cursors = []
@@ -314,16 +307,22 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             cursor = self.findMatchCursor(match, flags, findNext=True, cursor = cursor)
         return cursors
         
+    # ------------ Find functions
     def findMatch(self, match, flags,
-            findNext=None, cursor=None, cyclicFind=False):
+            findNext=None, cursor=None, cyclic=False):
         cursor = self.findMatchCursor(match, flags, 
             findNext=findNext,
-            cursor=cursor,
-            cyclicFind=cyclicFind)
+            cursor=cursor)
+        if cursor.isNull() and cyclic:
+            cursor = QtGui.QTextCursor(self.document())
+            if flags & self.FindBackward:
+                cursor.movePosition(QtGui.QTextCursor.End)
+            cursor = self.findMatchCursor(match, flags, 
+                findNext=findNext,
+                cursor=cursor)
         if not cursor.isNull():
             self.setTextCursor(cursor)
-            return True
-        return False
+        return not cursor.isNull()
 
     def findAll(self, match, flags):
         cursors = self.findAllCursors(match, flags)
@@ -332,6 +331,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             return True
         return False
 
+    # ------------- Replace functions
     def replaceMatch(self, match, text, flags, allText=False, cursor=None):
         cursor = QtGui.QTextCursor(cursor) if cursor else self.textCursor()
         cursor.beginEditBlock()

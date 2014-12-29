@@ -17,15 +17,17 @@ class FindMixin(object):
         editor, cursor = self._find_context()
         flags = self.flags()
         cursor = cursor if flags & self.InSelection else None
+        cyclic = bool(flags & self.Wrap)
         match = self.comboBoxFind.lineEdit().text()
-        editor.findMatch(match, flags, cursor=cursor, findNext=True, cyclicFind=False)
+        editor.findMatch(match, flags, cursor=cursor, findNext=True, cyclic=cyclic)
 
     def on_pushButtonFindPrev_pressed(self):
         editor, cursor = self._find_context()
         flags = self.flags() | self.Backward
         cursor = cursor if flags & self.InSelection else None
+        cyclic = bool(flags & self.Wrap)
         match = self.comboBoxFind.lineEdit().text()
-        editor.findMatch(match, flags, cursor=cursor, findNext=False, cyclicFind=False)
+        editor.findMatch(match, flags, cursor=cursor, findNext=False, cyclic=cyclic)
 
     def on_pushButtonFindAll_pressed(self):
         editor, cursor = self._find_context()

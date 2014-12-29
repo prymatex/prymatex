@@ -508,32 +508,32 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         # <|> the cursor is allways here
         pairs = (None, None, None, None)
 
-        # TODO si no hay para uno no hay para ninguno, quitar el que esta si el findPair retorna None
+        # TODO si no hay para uno no hay para ninguno, quitar el que esta si el findPairCursor retorna Null
         if left_char in open_pairs:
             leftCursor = QtGui.QTextCursor(cursor)
             leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
             index = open_pairs.index(left_char)
-            otherBrace = self.findPair(left_char, close_pairs[index], leftCursor)
-            if otherBrace is not None:
+            otherBrace = self.findPairCursor(left_char, close_pairs[index], leftCursor)
+            if not otherBrace.isNull():
                 pairs = (leftCursor, None, otherBrace, None)
         if right_char in open_pairs:
             rightCursor = QtGui.QTextCursor(cursor)
             rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
             index = open_pairs.index(right_char)
-            otherBrace = self.findPair(right_char, close_pairs[index], rightCursor)
-            if otherBrace is not None:
+            otherBrace = self.findPairCursor(right_char, close_pairs[index], rightCursor)
+            if not otherBrace.isNull():
                 pairs = (pairs[0], rightCursor, pairs[2], otherBrace)
         if left_char in close_pairs and pairs[0] is None:  #Tener uno implica tener los dos por el if
             leftCursor = QtGui.QTextCursor(cursor)
             leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-            otherBrace = self.findPair(left_char, open_pairs[close_pairs.index(left_char)], leftCursor, True)
-            if otherBrace is not None:
+            otherBrace = self.findPairCursor(left_char, open_pairs[close_pairs.index(left_char)], leftCursor, True)
+            if not otherBrace.isNull():
                 pairs = (leftCursor, pairs[1], otherBrace, pairs[3])
         if right_char in close_pairs and pairs[1] is None: #Tener uno implica tener los dos por el if
             rightCursor = QtGui.QTextCursor(cursor)
             rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
-            otherBrace = self.findPair(right_char, open_pairs[close_pairs.index(right_char)], rightCursor, True)
-            if otherBrace is not None:
+            otherBrace = self.findPairCursor(right_char, open_pairs[close_pairs.index(right_char)], rightCursor, True)
+            if not otherBrace.isNull():
                 pairs = (pairs[0], rightCursor, pairs[2], otherBrace)
         return pairs
 

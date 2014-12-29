@@ -32,11 +32,8 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
         self.setupUi(self)
         StatusMixin.setup(self)
         CommandMixin.setup(self)
-        self.__flags = self.defaultFlags()
-        
-    def defaultFlags(self):
-        return QtGui.QTextDocument.FindFlags() | self.WholeWord | self.CaseSensitive
-
+        self.__flags = QtGui.QTextDocument.FindFlags()
+    
     def setFlags(self, flags):
         self.__flags = flags
 
@@ -70,7 +67,7 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
         if checked:
             flags |= flag
         else:
-            flags &= flag
+            flags &= (flag ^ 0xFF)
         self.setFlags(flags)
 
     # ------- Tool find context        
