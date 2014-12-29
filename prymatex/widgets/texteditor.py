@@ -16,14 +16,20 @@ from prymatex.core import config
 from functools import reduce
 
 class TextEditWidget(QtWidgets.QPlainTextEdit):
-    #------ Signals
-    extraSelectionChanged = QtCore.Signal()
-
-    #------ Editor constants
+    # ------------------ Constants
     EOL_CHARS = [ item[0] for item in text.EOLS ]
     FONT_MAX_SIZE = 32
     FONT_MIN_SIZE = 6
     CHARACTER = "#"
+    
+    # ------------------ Signals
+    extraSelectionChanged = QtCore.Signal()
+
+    # ------------------ Find Flags
+    FindBackward           = 1<<0
+    FindCaseSensitive      = 1<<1
+    FindWholeWord          = 1<<2
+    FindRegularExpression  = 1<<3
     
     def __init__(self, **kwargs):
         super(TextEditWidget, self).__init__(**kwargs)
@@ -281,16 +287,17 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
                     return c2
 
     def findMatchCursor(self, match, flags, 
-            findNext=False, cursor=None, cyclicFind=False):
+            findNext=None, cursor=None, cyclicFind=False):
         """Busca la ocurrencia de match a partir de un cursor o el cursor actual
         si cyclicFind = True intenta desde el principio al llegar al final del texto"""
-        cursor = QtGui.QTextCursor(cursor) or self.textCursor()
-        if cursor.hasSelection():
+        cursor = QtGui.QTextCursor(cursor) if cursor else self.textCursor()
+        match = QtCore.QRegExp(match) if flags & self.FindRegularExpression else match
+        if cursor.hasSelection() and findNext is not None:
             cursor.setPosition(findNext and cursor.selectionEnd() or cursor.selectionStart())
         cursor = self.document().find(match, cursor, flags)
         if cursor.isNull() and cyclicFind:
             cursor = self.textCursor()
-            if flags & QtGui.QTextDocument.FindBackward:
+            if flags & self.FindBackward:
                 cursor.movePosition(QtGui.QTextCursor.End)
             else:
                 cursor.movePosition(QtGui.QTextCursor.Start)
@@ -298,7 +305,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         return cursor
 
     def findMatch(self, match, flags,
-            findNext=False, cursor=None, cyclicFind=False):
+            findNext=None, cursor=None, cyclicFind=False):
         cursor = self.findMatchCursor(match, flags, 
             findNext=findNext,
             cursor=cursor,
@@ -315,21 +322,22 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         cursor = self.findMatchCursor(match, flags, cursor = cursor)
         while not cursor.isNull():
             cursors.append(cursor)
-            cursor = self.findMatchCursor(match, flags, findNext = True, cursor = cursor)
+            cursor = self.findMatchCursor(match, flags, findNext=True, cursor = cursor)
         return cursors
         
-    def replaceMatch(self, match, text, flags, allText = False, cursor = None):
-        cursor = QtGui.QTextCursor(cursor) or self.textCursor()
+    def replaceMatch(self, match, text, flags, allText=False, cursor=None):
+        cursor = QtGui.QTextCursor(cursor) if cursor else self.textCursor()
         cursor.beginEditBlock()
         replaced = 0
         findCursor = cursor
         if allText:
             findCursor.movePosition(QtGui.QTextCursor.Start)
         while True:
-            findCursor = self.findMatchCursor(match, flags, cursor = findCursor)
+            findCursor = self.findMatchCursor(match, flags, cursor=findCursor)
             if findCursor.isNull(): break
-            if isinstance(match, QtCore.QRegExp):
-                findCursor.insertText(re.sub(match.pattern(), text, cursor.selectedText()))
+            if flags & self.FindRegularExpression:
+                findCursor.insertText(
+                    re.sub(match.pattern(), text, self.selectedText(cursor)))
             else:
                 findCursor.insertText(text)
             replaced += 1

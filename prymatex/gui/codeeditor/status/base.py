@@ -16,10 +16,10 @@ from .status import StatusMixin
 class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
     ReplaceMixin, CommandMixin, StatusMixin, Ui_CodeEditorStatus, QtWidgets.QWidget):
     # ------------------ Flags
-    Backward               = 1<<0
-    CaseSensitive          = 1<<1
-    WholeWord              = 1<<2
-    RegularExpression      = 1<<3
+    Backward               = CodeEditor.FindBackward
+    CaseSensitive          = CodeEditor.FindCaseSensitive
+    WholeWord              = CodeEditor.FindWholeWord
+    RegularExpression      = CodeEditor.FindRegularExpression
     Wrap                   = 1<<4
     InSelection            = 1<<5
     PreserveCase           = 1<<6
@@ -74,13 +74,14 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
         self.setFlags(flags)
 
     # ------- Tool find context        
-    def _find_context(self, select=False):
+    def _find_context(self, select=False, update=False):
         editor = self.window().currentEditor()
         cursor = editor.textCursor()
         if not cursor.hasSelection() and select:
-            _, start, end  = editor.currentWord()
+            _, start, end = editor.currentWord()
             cursor = editor.newCursorAtPosition(start, end)
-        self.comboBoxFind.lineEdit().setText(cursor.selectedText())
+        if cursor.hasSelection() and update:
+            self.comboBoxFind.lineEdit().setText(cursor.selectedText())
         return editor, cursor
     
     # ----------- Signals

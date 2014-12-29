@@ -13,6 +13,16 @@ class FindMixin(object):
     # ------- Signals
     def on_lineEditFind_textEdited(self, text):
         print(text)
+        
+    def on_pushButtonFindFind_pressed(self):
+        editor, cursor = self._find_context()
+        flags = self.flags()
+        cursor = cursor if flags & self.InSelection else None
+        match = self.comboBoxFind.lineEdit().text()
+        editor.findMatch(match, flags, cursor=cursor, cyclicFind=False)
+
+    def on_lineEditFind_returnPressed(self):
+        pass
          
     # ------- Go to quickFind
     def quickFind(self):

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/codeeditor/newstatus.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/codeeditor/newstatus.ui'
 #
-# Created: Fri Dec 19 15:37:33 2014
-#      by: PyQt5 UI code generator 5.4-snapshot-10c73f88bfd5
+# Created: Mon Dec 29 08:49:01 2014
+#      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_CodeEditorStatus(object):
     def setupUi(self, CodeEditorStatus):
         CodeEditorStatus.setObjectName("CodeEditorStatus")
-        CodeEditorStatus.resize(1100, 281)
+        CodeEditorStatus.resize(1100, 230)
         self.verticalLayout = QtWidgets.QVBoxLayout(CodeEditorStatus)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
@@ -47,6 +47,7 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonCommandClose.setText("")
         icon = QtGui.QIcon.fromTheme("close")
         self.pushButtonCommandClose.setIcon(icon)
+        self.pushButtonCommandClose.setFlat(True)
         self.pushButtonCommandClose.setObjectName("pushButtonCommandClose")
         self.horizontalLayout.addWidget(self.pushButtonCommandClose)
         self.verticalLayout.addWidget(self.widgetCommand)
@@ -124,6 +125,7 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonFindClose.setText("")
         icon = QtGui.QIcon.fromTheme("close")
         self.pushButtonFindClose.setIcon(icon)
+        self.pushButtonFindClose.setFlat(True)
         self.pushButtonFindClose.setObjectName("pushButtonFindClose")
         self.horizontalLayout_5.addWidget(self.pushButtonFindClose)
         self.verticalLayout.addWidget(self.widgetFind)
@@ -184,6 +186,7 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonFindReplaceClose.setText("")
         icon = QtGui.QIcon.fromTheme("close")
         self.pushButtonFindReplaceClose.setIcon(icon)
+        self.pushButtonFindReplaceClose.setFlat(True)
         self.pushButtonFindReplaceClose.setObjectName("pushButtonFindReplaceClose")
         self.gridLayout.addWidget(self.pushButtonFindReplaceClose, 0, 12, 1, 1)
         self.pushButtonReplaceHighlightMatches = QtWidgets.QPushButton(self.widgetReplace)
@@ -237,6 +240,7 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonFindInFilesClose.setText("")
         icon = QtGui.QIcon.fromTheme("close")
         self.pushButtonFindInFilesClose.setIcon(icon)
+        self.pushButtonFindInFilesClose.setFlat(True)
         self.pushButtonFindInFilesClose.setObjectName("pushButtonFindInFilesClose")
         self.gridLayout_2.addWidget(self.pushButtonFindInFilesClose, 0, 10, 1, 1)
         self.pushButtonFindInFilesUseEditor = QtWidgets.QPushButton(self.widgetFindInFiles)
@@ -391,21 +395,11 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonFindWrap.setToolTip(_translate("CodeEditorStatus", "Wrap"))
         self.pushButtonFindInSelection.setToolTip(_translate("CodeEditorStatus", "In selection"))
         self.pushButtonFindHighlightMatches.setToolTip(_translate("CodeEditorStatus", "Highlight matches"))
-        self.pushButtonFindFind.setToolTip(_translate("CodeEditorStatus", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Find Previous</p></body></html>"))
         self.pushButtonFindFind.setText(_translate("CodeEditorStatus", "Find"))
         self.pushButtonFindPrev.setText(_translate("CodeEditorStatus", "Find Prev"))
         self.pushButtonFindAll.setText(_translate("CodeEditorStatus", "Find All"))
         self.labelFindMode_2.setText(_translate("CodeEditorStatus", "With:"))
         self.pushButtonReplaceWrap.setToolTip(_translate("CodeEditorStatus", "Wrap"))
-        self.pushButtonReplaceFind.setToolTip(_translate("CodeEditorStatus", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Find Previous</p></body></html>"))
         self.pushButtonReplaceFind.setText(_translate("CodeEditorStatus", "Find"))
         self.pushButtonReplaceInSelection.setToolTip(_translate("CodeEditorStatus", "In selection"))
         self.labelFindMode_3.setText(_translate("CodeEditorStatus", "What:"))
@@ -415,11 +409,6 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonReplaceRegularExpression.setToolTip(_translate("CodeEditorStatus", "Regular expression"))
         self.pushButtonReplacePreserveCase.setToolTip(_translate("CodeEditorStatus", "Preserve case"))
         self.pushButtonReplaceReplaceAll.setText(_translate("CodeEditorStatus", "Replace &All"))
-        self.pushButtonReplaceReplace.setToolTip(_translate("CodeEditorStatus", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Replace &amp; Find Previous</p></body></html>"))
         self.pushButtonReplaceReplace.setText(_translate("CodeEditorStatus", "Replace"))
         self.pushButtonReplaceFindAll.setText(_translate("CodeEditorStatus", "Find All"))
         self.pushButtonFindInFilesUseEditor.setToolTip(_translate("CodeEditorStatus", "Use editor"))
@@ -430,17 +419,7 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonFindInFilesRegularExpression.setToolTip(_translate("CodeEditorStatus", "Regular expression"))
         self.pushButtonFindInFilesShowContext.setToolTip(_translate("CodeEditorStatus", "Show context"))
         self.pushButtonFindInFilesCaseSensitive.setToolTip(_translate("CodeEditorStatus", "Case sensitive"))
-        self.pushButtonFindInFilesFind.setToolTip(_translate("CodeEditorStatus", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Find Previous</p></body></html>"))
         self.pushButtonFindInFilesFind.setText(_translate("CodeEditorStatus", "Find"))
-        self.pushButtonFindInFilesReplace.setToolTip(_translate("CodeEditorStatus", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Replace &amp; Find Previous</p></body></html>"))
         self.pushButtonFindInFilesReplace.setText(_translate("CodeEditorStatus", "Replace"))
         self.pushButtonFindInFilesWhere.setText(_translate("CodeEditorStatus", "..."))
         self.labelPosition.setText(_translate("CodeEditorStatus", "Position"))
