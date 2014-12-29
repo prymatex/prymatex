@@ -13,22 +13,18 @@ class FindMixin(object):
         self.comboBoxFind.lineEdit().returnPressed.connect(self.on_lineEditFind_returnPressed)
 
     # ------- Signals
-    def on_pushButtonFindFind_pressed(self):
+    def on_pushButtonFindFind_pressed(self, backward=False):
         editor, cursor = self._find_context()
         flags = self.flags()
+        if backward:
+            flags |= self.Backward
         cursor = cursor if flags & self.InSelection else None
         cyclic = bool(flags & self.Wrap)
         match = self.comboBoxFind.lineEdit().text()
-        editor.findMatch(match, flags, cursor=cursor, findNext=True, cyclic=cyclic)
-
-    def on_pushButtonFindPrev_pressed(self):
-        editor, cursor = self._find_context()
-        flags = self.flags() | self.Backward
-        cursor = cursor if flags & self.InSelection else None
-        cyclic = bool(flags & self.Wrap)
-        match = self.comboBoxFind.lineEdit().text()
-        editor.findMatch(match, flags, cursor=cursor, findNext=False, cyclic=cyclic)
-
+        editor.findMatch(match, flags, cursor=cursor, cyclic=cyclic)
+            
+    on_pushButtonFindPrev_pressed = lambda self: self.on_pushButtonFindFind_pressed(True)
+        
     def on_pushButtonFindAll_pressed(self):
         editor, cursor = self._find_context()
         flags = self.flags()

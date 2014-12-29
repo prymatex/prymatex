@@ -286,15 +286,14 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
                     return c2
         return QtGui.QTextCursor()
 
-    def findMatchCursor(self, match, flags, 
-            findNext=None, cursor=None):
+    def findMatchCursor(self, match, flags, cursor=None):
         """Busca la ocurrencia de match a partir de un cursor o el cursor actual"""
         cursor = QtGui.QTextCursor(cursor) if cursor else self.textCursor()
         if flags & self.FindRegularExpression:
             match = QtCore.QRegExp(match, flags & self.FindCaseSensitive \
                 and QtCore.Qt.CaseSensitive or QtCore.Qt.CaseInsensitive)
-        if cursor.hasSelection() and findNext is not None:
-            cursor.setPosition(findNext and cursor.selectionEnd() or cursor.selectionStart())
+        if cursor.hasSelection():
+            cursor.setPosition((flags & self.FindBackward) and cursor.selectionStart() or cursor.selectionEnd())
         return self.document().find(match, cursor, flags)
 
     def findAllCursors(self, match, flags):
@@ -304,22 +303,17 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         cursor = self.findMatchCursor(match, flags, cursor = cursor)
         while not cursor.isNull():
             cursors.append(cursor)
-            cursor = self.findMatchCursor(match, flags, findNext=True, cursor = cursor)
+            cursor = self.findMatchCursor(match, flags, cursor = cursor)
         return cursors
         
     # ------------ Find functions
-    def findMatch(self, match, flags,
-            findNext=None, cursor=None, cyclic=False):
-        cursor = self.findMatchCursor(match, flags, 
-            findNext=findNext,
-            cursor=cursor)
+    def findMatch(self, match, flags, cursor=None, cyclic=False):
+        cursor = self.findMatchCursor(match, flags, cursor=cursor)
         if cursor.isNull() and cyclic:
             cursor = QtGui.QTextCursor(self.document())
             if flags & self.FindBackward:
                 cursor.movePosition(QtGui.QTextCursor.End)
-            cursor = self.findMatchCursor(match, flags, 
-                findNext=findNext,
-                cursor=cursor)
+            cursor = self.findMatchCursor(match, flags, cursor=cursor)
         if not cursor.isNull():
             self.setTextCursor(cursor)
         return not cursor.isNull()
