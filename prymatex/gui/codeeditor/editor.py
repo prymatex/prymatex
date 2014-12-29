@@ -37,7 +37,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     DEFAULT_MODE_INDEX = 0
     
     # -------------------- Signals
-    syntaxChanged = QtCore.Signal()
+    syntaxChanged = QtCore.Signal(object)
     themeChanged = QtCore.Signal(object)
     filePathChanged = QtCore.Signal(str)
     modeChanged = QtCore.Signal(object, object)
@@ -169,8 +169,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.themeChanged.connect(self._update_highlight)
         self.cursorPositionChanged.connect(self._update_highlight)
 
-        self.syntaxChanged.connect(lambda editor=self: 
-            editor.showMessage("Syntax changed to <b>%s</b>" % editor.syntax().name)
+        self.syntaxChanged.connect(lambda syntax, editor=self: 
+            editor.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
         )
         
         self.syntaxHighlighter.ready.connect(self.on_highlighter_ready)
@@ -286,9 +286,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # -------------------- Notifications
     def showMessage(self, *largs, **kwargs):
+        kwargs["widget"] = self.viewport()
         return self.window().showMessage(*largs, **kwargs)
         
     def showTooltip(self, *largs, **kwargs):
+        kwargs["widget"] = self.viewport()
         if "point" not in kwargs:
             kwargs["point"] = self.mapToGlobal(
                 self.cursorRect(self.textCursor()).bottomRight()
@@ -296,6 +298,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return self.window().showTooltip(*largs, **kwargs)
     
     def showStatus(self, *largs, **kwargs):
+        kwargs["widget"] = self.viewport()
         return self.window().showStatus(*largs, **kwargs)
 
     # OVERRIDE: TextEditWidget.setPlainText()
@@ -537,42 +540,45 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 pairs = (pairs[0], rightCursor, pairs[2], otherBrace)
         return pairs
 
-    def _currentBracesPairs(self, cursor = None, direction = "both"):
-        """ Retorna el otro cursor correspondiente al cursor (brace)
-        pasado o actual del editor, puede retornar None en caso de no
-        estar cerrado el brace"""
-        cursor = cursor or self.textCursor()
-        brace1, brace2 = (None, None)
-        if cursor.hasSelection():
-            for index in [0, 1]:
-                if self._currentPairs[index] is not None and cursor.selectedText() == self._currentPairs[index].selectedText():
-                    brace1 = QtGui.QTextCursor(self._currentPairs[index + 2]) if self._currentPairs[index + 2] is not None else None
-                    brace2 = cursor
-                    break
-        else:
-            #print map(lambda c: c is not None and c.selectedText() or "None", self._currentPairs)
-            if direction in ("left", "both"):
-                brace1 = self._currentPairs[0]
-                brace2 = self._currentPairs[2]
-            if (brace1 is None or brace2 is None) and direction in ("right", "both"):
-                brace1 = self._currentPairs[1]
-                brace2 = self._currentPairs[3]
-        if (brace1 is not None and brace2 is not None) and brace1.selectionStart() > brace2.selectionStart():
-            return (brace2, brace1)
-        return (brace1, brace2)
-    
-    def _beforeBrace(self, cursor):
-        return self._currentPairs[1] is not None and self._currentPairs[1].position() - 1 == cursor.position()
+    # ------------ Find functions
+    def findMatch(self, match, flags, cursor=None, cyclic=False):
+        cursor = self.findMatchCursor(match, flags, cursor=cursor)
+        if cursor.isNull() and cyclic:
+            cursor = QtGui.QTextCursor(self.document())
+            if flags & self.FindBackward:
+                cursor.movePosition(QtGui.QTextCursor.End)
+            cursor = self.findMatchCursor(match, flags, cursor=cursor)
+        if not cursor.isNull():
+            self.setTextCursor(cursor)
+        return not cursor.isNull()
 
-    def _afterBrace(self, cursor):
-        return self._currentPairs[0] is not None and self._currentPairs[0].position() + 1 == cursor.position()
+    def findAll(self, match, flags):
+        cursors = self.findAllCursors(match, flags)
+        if cursors:
+            self.setTextCursors(cursors)
+            return True
+        return False
 
-    def _besideBrace(self, cursor):
-        return self.beforeBrace(cursor) or self.afterBrace(cursor)
-
-    def _surroundBraces(self, cursor):
-        #TODO: Esto esta mal
-        return self.beforeBrace(cursor) and self.afterBrace(cursor)
+    # ------------- Replace functions
+    def replaceMatch(self, match, text, flags, allText=False, cursor=None):
+        cursor = QtGui.QTextCursor(cursor) if cursor else self.textCursor()
+        cursor.beginEditBlock()
+        replaced = 0
+        findCursor = cursor
+        if allText:
+            findCursor.movePosition(QtGui.QTextCursor.Start)
+        while True:
+            findCursor = self.findMatchCursor(match, flags, cursor=findCursor)
+            if findCursor.isNull(): break
+            if flags & self.FindRegularExpression:
+                findCursor.insertText(
+                    re.sub(match.pattern(), text, self.selectedText(cursor)))
+            else:
+                findCursor.insertText(text)
+            replaced += 1
+            if not allText: break
+        cursor.endEditBlock()
+        return replaced
 
     #-------------------- Highlight Editor on signal trigger
     def _update_highlight(self):

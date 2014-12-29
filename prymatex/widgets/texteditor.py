@@ -305,47 +305,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             cursors.append(cursor)
             cursor = self.findMatchCursor(match, flags, cursor = cursor)
         return cursors
-        
-    # ------------ Find functions
-    def findMatch(self, match, flags, cursor=None, cyclic=False):
-        cursor = self.findMatchCursor(match, flags, cursor=cursor)
-        if cursor.isNull() and cyclic:
-            cursor = QtGui.QTextCursor(self.document())
-            if flags & self.FindBackward:
-                cursor.movePosition(QtGui.QTextCursor.End)
-            cursor = self.findMatchCursor(match, flags, cursor=cursor)
-        if not cursor.isNull():
-            self.setTextCursor(cursor)
-        return not cursor.isNull()
-
-    def findAll(self, match, flags):
-        cursors = self.findAllCursors(match, flags)
-        if cursors:
-            self.setTextCursors(cursors)
-            return True
-        return False
-
-    # ------------- Replace functions
-    def replaceMatch(self, match, text, flags, allText=False, cursor=None):
-        cursor = QtGui.QTextCursor(cursor) if cursor else self.textCursor()
-        cursor.beginEditBlock()
-        replaced = 0
-        findCursor = cursor
-        if allText:
-            findCursor.movePosition(QtGui.QTextCursor.Start)
-        while True:
-            findCursor = self.findMatchCursor(match, flags, cursor=findCursor)
-            if findCursor.isNull(): break
-            if flags & self.FindRegularExpression:
-                findCursor.insertText(
-                    re.sub(match.pattern(), text, self.selectedText(cursor)))
-            else:
-                findCursor.insertText(text)
-            replaced += 1
-            if not allText: break
-        cursor.endEditBlock()
-        return replaced
-
+    
     #------ TextCharFormats for key
     def registerTextCharFormat(self, key, frmt):
         self.__textCharFormat[key] = frmt

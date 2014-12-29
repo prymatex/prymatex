@@ -52,8 +52,15 @@ class StatusMixin(object):
     def on_window_editorCreated(self, editor):
         editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
         editor.textChanged.connect(self.on_editor_textChanged)
+        editor.syntaxChanged.connect(self.on_editor_syntaxChanged)
         editor.modeChanged.connect(self.on_editor_modeChanged)
     
+    @QtCore.Slot(int)
+    def on_comboBoxSyntaxes_activated(self, index):
+        model = self.comboBoxSyntaxes.model()
+        node = model.node(model.createIndex(index, 0))
+        self.window().currentEditor().insertBundleItem(node)
+
     # -------------- Editor signals
     def on_editor_cursorPositionChanged(self):
         editor = self.sender()
@@ -73,6 +80,11 @@ class StatusMixin(object):
            eol and eol[0][2] or "?",
            editor.encoding))
            
+    def on_editor_syntaxChanged(self, syntax):
+        model = self.comboBoxSyntaxes.model()
+        index = model.nodeIndex(syntax).row()
+        self.comboBoxSyntaxes.setCurrentIndex(index)
+
     def on_editor_modeChanged(self):
         editor = self.sender()
         self.labelStatus.setText(editor.currentMode().name())

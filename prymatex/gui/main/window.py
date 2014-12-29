@@ -257,13 +257,9 @@ html_footer
 
     # -------------- Notifications
     def showMessage(self, *largs, **kwargs):
-        if not hasattr(self, "_recyclable_message") and not kwargs:
-            kwargs["recyclable"] = True
-            self._recyclable_message = self.notifier.message(*largs, **kwargs)
-            self._recyclable_message.show()
-        else:
-            self._recyclable_message.show(*largs)
-        return self._recyclable_message
+        message = self.notifier.message(*largs, **kwargs)
+        message.show()
+        return message
 
     def showTooltip(self, *largs, **kwargs):
         tooltip = self.notifier.tooltip(*largs, **kwargs)
