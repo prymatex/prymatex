@@ -304,6 +304,16 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             cursor = self.document().find(match, cursor, flags)
         return cursor
 
+    def findAllCursors(self, match, flags):
+        cursors = []
+        cursor = self.textCursor()
+        cursor.movePosition(QtGui.QTextCursor.Start)
+        cursor = self.findMatchCursor(match, flags, cursor = cursor)
+        while not cursor.isNull():
+            cursors.append(cursor)
+            cursor = self.findMatchCursor(match, flags, findNext=True, cursor = cursor)
+        return cursors
+        
     def findMatch(self, match, flags,
             findNext=None, cursor=None, cyclicFind=False):
         cursor = self.findMatchCursor(match, flags, 
@@ -316,15 +326,12 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         return False
 
     def findAll(self, match, flags):
-        cursors = []
-        cursor = self.textCursor()
-        cursor.movePosition(QtGui.QTextCursor.Start)
-        cursor = self.findMatchCursor(match, flags, cursor = cursor)
-        while not cursor.isNull():
-            cursors.append(cursor)
-            cursor = self.findMatchCursor(match, flags, findNext=True, cursor = cursor)
-        return cursors
-        
+        cursors = self.findAllCursors(match, flags)
+        if cursors:
+            self.setTextCursors(cursors)
+            return True
+        return False
+
     def replaceMatch(self, match, text, flags, allText=False, cursor=None):
         cursor = QtGui.QTextCursor(cursor) if cursor else self.textCursor()
         cursor.beginEditBlock()
