@@ -1,23 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 import os
 
 from prymatex.support import scripts
 
+TEMPLATE = """Description: {description}
+Asynchronous: {asynchronous}
+Command: {command}
+Working Directory: {workingDirectory}
+Input:  Type {inputType}, Value {inputValue}
+Variables: {variables}
+Environment: {environment}
+OutputType: {outputType}
+OutputValue: {outputValue}
+ErrorValue: {errorValue}
+"""
+
 class RunningContext(object):
-    TEMPLATE = """Item Name: {itemName}
-    Asynchronous: {asynchronous}
-    Working Directory: {workingDirectory}
-    Input:  Type {inputType}, Value {inputValue}
-    Environment: {environment}
-    OutputType: {outputType}
-    OutputValue: {outputValue}
-    ErrorValue: {errorValue}
-    """
-    shellCommand = None
+    command = None
     environment = None
-    shellVariables = None
+    variables = None
     asynchronous = False
     workingDirectory = None
     inputType = None
@@ -31,13 +35,13 @@ class RunningContext(object):
     def __init__(self, **attrs):
         
         # Command
-        self.shellCommand = attrs.pop("shellCommand")
+        self.command = attrs.pop("command")
         
         # Environment
         self.environment = attrs.pop("environment", {})
         
         # Variables
-        self.shellVariables = attrs.pop("shellVariables", [])
+        self.variables = attrs.pop("variables", [])
 
         # Asynchronous ?
         self.asynchronous = attrs.pop("asynchronous", False)
@@ -52,7 +56,7 @@ class RunningContext(object):
         self.callback = attrs.pop("callback", None)
         
         self.scriptFilePath, self.scriptFileEnvironment = scripts.buildShellScriptContext(
-            self.shellCommand, self.environment, self.shellVariables)
+            self.command, self.environment, self.variables)
 
         for key, value in attrs.items():
             setattr(self, key, value)
@@ -60,39 +64,28 @@ class RunningContext(object):
     def __delete__(self):
         self.removeScriptFile()
 
-    def __unicode__(self):
-        return self.TEMPLATE.format(
-            itemName = hasattr(self, "bundleItem") and \
-                self.bundleItem.name or "None item",
-            asynchronous = self.asynchronous,
-            workingDirectory = self.workingDirectory,
-            inputType = self.inputType,
-            inputValue = self.inputValue,
-            environment = self.environment,
-            outputType = self.outputType,
-            outputValue = self.outputValue,
-            errorValue = self.errorValue
-        )
-
     def __str__(self):
-        return self.TEMPLATE.format(
-            itemName = hasattr(self, "bundleItem") and \
-                self.bundleItem.name or "None item",
-            asynchronous = self.asynchronous,
-            workingDirectory = self.workingDirectory,
-            inputType = self.inputType,
-            inputValue = self.inputValue,
-            environment = self.environment,
-            outputType = self.outputType,
-            outputValue = self.outputValue,
-            errorValue = self.errorValue
+        return TEMPLATE.format(
+            description=self.description(),
+            asynchronous=self.asynchronous,
+            command=self.command,
+            workingDirectory=self.workingDirectory,
+            inputType=self.inputType,
+            inputValue=self.inputValue,
+            variables=self.variables,
+            environment=self.environment,
+            outputType=self.outputType,
+            outputValue=self.outputValue,
+            errorValue=self.errorValue
         )
 
+    __unicode__ = __str__
+    
     def isBundleItem(self, bundleItem):
         return self.bundleItem == bundleItem
 
     def description(self):
-        return hasattr(self, "bundleItem") and self.bundleItem.name or "No Name"
+        return hasattr(self, "bundleItem") and self.bundleItem.name or "%s..." % self.command[:10]
         
     def removeScriptFile(self):
         if os.path.exists(self.scriptFilePath):

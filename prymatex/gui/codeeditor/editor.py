@@ -296,19 +296,16 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # -------------------- Notifications
     def showMessage(self, *largs, **kwargs):
-        kwargs["widget"] = self.viewport()
         return self.window().showMessage(*largs, **kwargs)
         
     def showTooltip(self, *largs, **kwargs):
-        kwargs["widget"] = self.viewport()
         if "point" not in kwargs:
-            kwargs["point"] = self.mapToGlobal(
+            kwargs["point"] = self.viewport().mapToGlobal(
                 self.cursorRect(self.textCursor()).bottomRight()
             )
         return self.window().showTooltip(*largs, **kwargs)
     
     def showStatus(self, *largs, **kwargs):
-        kwargs["widget"] = self.viewport()
         return self.window().showStatus(*largs, **kwargs)
 
     # OVERRIDE: TextEditWidget.setPlainText()
@@ -1094,12 +1091,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor = self.cursorForPosition(point)
         items = ["-"]
         for addon in self.addons():
-            items += addon.contributeToContextMenu(cursor = cursor)
+            items += addon.contributeToContextMenu(cursor=cursor)
 
         if len(items) > 1:
             actions = extend_menu(menu, items)
 
-        menu.popup(self.mapToGlobal(point))
+        menu.popup(self.viewport().mapToGlobal(point))
 
     # Contributes to Tab Menu
     def contributeToTabMenu(self):

@@ -59,11 +59,14 @@ class TextMate(QtCore.QObject):
     def _system(self, command):
         self.busy = True
         systemWrapper = SystemWrapper(self)
-        context = self.manager.runSystemCommand(
-            shellCommand = command,
-            environment = self.webView.environmentVariables(),
-            asynchronous = True,
-            callback = systemWrapper.contextReady
+        context = self.webView.runningContext()
+        self.manager.runSystemCommand(
+            bundleItem=context.bundleItem,
+            command=command,
+            variables=context.variables[:],
+            environment=context.environment.copy(),
+            asynchronous=True,
+            callback=systemWrapper.contextReady
         )
         self.webView.page().mainFrame().addToJavaScriptWindowObject("_systemWrapper", 
             systemWrapper)

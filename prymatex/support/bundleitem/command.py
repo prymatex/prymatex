@@ -179,16 +179,16 @@ echo Selection: "$TM_SELECTED_TEXT"''',
     def executeCallback(self, processor, callback):
         processor.beginExecution(self)
         if self.beforeExecute(processor):
-            shellCommand = self.systemCommand()
+            command = self.systemCommand()
             environment = processor.environmentVariables()
-            shellVariables = processor.shellVariables(environment)
+            variables = processor.shellVariables(environment)
             asynchronous = processor.asynchronous
             inputType, inputValue = self.getInputText(processor)
             self.manager.runSystemCommand(
                 bundleItem = self,
-                shellCommand = shellCommand,
+                command = command,
                 environment = environment,
-                shellVariables = shellVariables,
+                variables = variables,
                 asynchronous = asynchronous,
                 inputType = inputType,
                 inputValue = inputValue,

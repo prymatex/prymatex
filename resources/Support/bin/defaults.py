@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-import os, sys, plistlib, glob
-from optparse import OptionParser
+import os
+import sys
+import plistlib
+import glob
 
 PREFERENCES_PATH = os.environ['PMX_PREFERENCES_PATH'] if 'PMX_PREFERENCES_PATH' in os.environ else os.path.join(os.environ['HOME'], 'Library', 'Preferences')
 
@@ -94,7 +96,8 @@ def help():
         help        Prints a list of possible command formats.
     '''
     pass
-    
+
+# TODO Usar a argparse y migrar a pmxctl.py
 def main(command, *args):
     if command == 'read':
         read(*args)
