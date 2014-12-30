@@ -14,7 +14,7 @@ class ReplaceMixin(object):
         
     # ------- Signals
     def on_pushButtonReplaceFind_pressed(self, backward=False):
-        editor, cursor = self._find_context()
+        editor, cursor, *cursors = self._find_context()
         flags = self.flags()
         if backward:
             flags |= self.Backward
@@ -24,7 +24,7 @@ class ReplaceMixin(object):
         editor.findMatch(match, flags, cursor=cursor, cyclic=cyclic)
         
     def on_pushButtonReplaceFindAll_pressed(self):
-        editor, cursor = self._find_context()
+        editor, cursor, *cursors = self._find_context()
         flags = self.flags()
         match = self.comboBoxFind.lineEdit().text()
         editor.findAll(match, flags)

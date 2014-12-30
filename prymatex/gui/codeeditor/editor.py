@@ -238,12 +238,22 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 #            print(p, getattr(properties, p))
 
     # -------------- Extra Cursors
-    def setTextCursors(self, cursors):
-        self.__text_cursors = cursors[1:]
-        if len(cursors):
-            self.setTextCursor(cursors[0])
-        else:
+    def clearExtraCursors(self):
+        changed = len(self.__text_cursors) > 0
+        self.__text_cursors = []
+        if changed:
             self.cursorPositionChanged.emit()
+
+    def setTextCursors(self, cursors):
+        assert len(cursors) > 0, "Cursors should contain at last one cursor"
+        currents = self.textCursors()
+        changed = len(currents) != len(cursors) or \
+            any(map(lambda cs: cs[0] != cs[1], zip(currents, cursors)))
+        if changed:
+            self.__text_cursors = cursors[1:]
+            self.setTextCursor(cursors[0])
+            if self.textCursor() == currents[0]: 
+                self.cursorPositionChanged.emit()
 
     def textCursors(self):
         return [self.textCursor()] + [QtGui.QTextCursor(c) for c in self.__text_cursors]  
@@ -254,7 +264,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.viewport().update()
 
     def highlightCursors(self):
-        return self.__highlight_cursors
+        return self.__highlight_cursors[:]
         
     # -------------- Editor Modes
     def beginCodeEditorMode(self, mode):

@@ -142,10 +142,10 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
 
     #------ Retrieve text
     def currentWord(self):
-        return self.wordUnderCursor(self.textCursor(), search = True)
+        return self.wordUnderCursor(self.textCursor(), search=True)
         
     def currentText(self):
-        return self.textUnderCursor(self.textCursor(), search = True)
+        return self.textUnderCursor(self.textCursor(), search=True)
 
     def wordUnderCursor(self, cursor = None, pattern = config.RE_WORD,
         direction = "both", search = False):
@@ -376,60 +376,60 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         cursor.endEditBlock()
         self.setTextCursor(cursor)
 
-    def moveUp(self, cursor = None):
+    def moveUp(self, cursor=None):
         cursor = cursor or self.textCursor()
         if cursor.hasSelection():
             self.__move_text(cursor, QtGui.QTextCursor.Up)
         elif cursor.block() != self.document().firstBlock():
             self.__move_line(cursor, QtGui.QTextCursor.Up)
 
-    def moveDown(self, cursor = None):
+    def moveDown(self, cursor=None):
         cursor = cursor or self.textCursor()
         if cursor.hasSelection():
             self.__move_text(cursor, QtGui.QTextCursor.Down)
         elif cursor.block() != self.document().lastBlock():
             self.__move_line(cursor, QtGui.QTextCursor.Down)
 
-    def moveLeft(self, cursor = None):
+    def moveLeft(self, cursor=None):
         cursor = cursor or self.textCursor()
         if cursor.hasSelection() and cursor.selectionStart() != 0:
             self.__move_text(cursor, QtGui.QTextCursor.Left)
 
-    def moveRight(self, cursor = None):
+    def moveRight(self, cursor=None):
         cursor = cursor or self.textCursor()
         if cursor.hasSelection() and cursor.selectionEnd() != self.document().characterCount():
             self.__move_text(cursor, QtGui.QTextCursor.Right)
 
     #------ Select Text
-    def selectText(self, cursor = None):
+    def selectText(self, cursor=None):
         cursor = cursor or self.textCursor()
         text, start, end = self.textUnderCursor(cursor, search = True)
         if text:
             self.setTextCursor(self.newCursorAtPosition(start, end))
 
-    def selectWord(self, cursor = None):
+    def selectWord(self, cursor=None):
         cursor = cursor or self.textCursor()
         word, start, end = self.wordUnderCursor(cursor, search = True)
         if word:
             self.setTextCursor(self.newCursorAtPosition(start, end))
 
-    def selectLine(self, cursor = None):
+    def selectLine(self, cursor=None):
         cursor = cursor or self.textCursor()
         cursor.select(QtGui.QTextCursor.LineUnderCursor)
         self.setTextCursor(cursor)
 
-    def selectParagraph(self, cursor = None):
+    def selectParagraph(self, cursor=None):
         cursor = cursor or self.textCursor()
         cursor.select(QtGui.QTextCursor.BlockUnderCursor)
         self.setTextCursor(cursor)
 
-    def selectDocument(self, cursor = None):
+    def selectDocument(self, cursor=None):
         cursor = cursor or self.textCursor()
         cursor.select(QtGui.QTextCursor.Document)
         self.setTextCursor(cursor)
 
     #------ Convert Text
-    def __convert_text(self, cursor = None, convertFunction = lambda x: x):
+    def __convert_text(self, cursor=None, convertFunction=lambda x: x):
         cursor = cursor or self.textCursor()
         tupleCursor = textcursor_to_tuple(cursor)
         cursor.beginEditBlock()
@@ -441,25 +441,25 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         cursor.endEditBlock()
         self.setTextCursor(self.newCursorAtPosition(*tupleCursor))
 
-    def convertToUppercase(self, cursor = None):
+    def convertToUppercase(self, cursor=None):
         self.__convert_text(cursor, text.upper_case)
 
-    def convertToLowercase(self, cursor = None):
+    def convertToLowercase(self, cursor=None):
         self.__convert_text(cursor, text.lower_case)
 
-    def convertToTitlecase(self, cursor = None):
+    def convertToTitlecase(self, cursor=None):
         self.__convert_text(cursor, text.title_case)
 
-    def convertToOppositeCase(self, cursor = None):
+    def convertToOppositeCase(self, cursor=None):
         self.__convert_text(cursor, text.opposite_case)
 
-    def convertSpacesToTabs(self, cursor = None):
+    def convertSpacesToTabs(self, cursor=None):
         self.__convert_text(cursor, text.spaces_to_tabs)
 
-    def convertTabsToSpaces(self, cursor = None):
+    def convertTabsToSpaces(self, cursor=None):
         self.__convert_text(cursor, text.tabs_to_spaces)
 
-    def convertTranspose(self, cursor = None):
+    def convertTranspose(self, cursor=None):
         self.__convert_text(cursor, text.transpose)
 
     #------ Set and Get Text
@@ -473,7 +473,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         plainText = QtWidgets.QPlainTextEdit.toPlainText(self)
         return plainText.replace("\n", self.eolChars())
 
-    def selectedTextWithEol(self, cursor = None):
+    def selectedTextWithEol(self, cursor=None):
         """
         Return text selected text cursor
         Replace the unicode line separator character \u2029 by
@@ -482,7 +482,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         cursor = cursor or self.textCursor()
         return cursor.selectedText().replace("\u2029", self.eolChars())
 
-    def selectedText(self, cursor = None):
+    def selectedText(self, cursor=None):
         """
         Return text selected text cursor
         Replace the unicode line separator character \u2029 by \n
@@ -491,7 +491,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         return cursor.selectedText().replace("\u2029", '\n')
 
     #------ Update Text
-    def updatePlainText(self, text, cursor = None):
+    def updatePlainText(self, text, cursor=None):
         if cursor:
             sourceText = cursor.selectedText()
             sourceOffset = cursor.selectionStart()

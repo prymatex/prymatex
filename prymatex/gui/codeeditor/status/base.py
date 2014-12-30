@@ -76,13 +76,15 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
     # ------- Tool find context        
     def _find_context(self, select=False, update=False):
         editor = self.window().currentEditor()
-        cursor = editor.textCursor()
-        if not cursor.hasSelection() and select:
-            _, start, end = editor.currentWord()
-            cursor = editor.newCursorAtPosition(start, end)
-        if cursor.hasSelection() and update:
-            self.comboBoxFind.lineEdit().setText(cursor.selectedText())
-        return editor, cursor
+        cursors = editor.textCursors()
+        if select:
+            for index, cursor in enumerate(cursors[:]):
+                if not cursor.hasSelection(): 
+                    _, start, end = editor.wordUnderCursor(cursor, search=True)
+                    cursors[index] = editor.newCursorAtPosition(start, end)
+        if cursors[0].hasSelection() and update:
+            self.comboBoxFind.lineEdit().setText(cursors[0].selectedText())
+        return [ editor ] + cursors
     
     # ----------- Signals
     def on_lineEdit_textChanged(self, text):

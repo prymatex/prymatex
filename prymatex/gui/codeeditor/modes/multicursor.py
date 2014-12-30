@@ -84,7 +84,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         
     # ------------ Key press handlers
     def __multicursor_end(self, event):
-        self.setCursors([])
+        self.editor.clearExtraCursors()
         return True
     
     def __cursors_update(self, event):

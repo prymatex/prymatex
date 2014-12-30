@@ -31,7 +31,7 @@ class FindMixin(object):
     on_pushButtonFindPrev_pressed = lambda self: self.findPrevious()
     
     def on_pushButtonFindAll_pressed(self):
-        editor, cursor = self._find_context()
+        editor, cursor, *cursors = self._find_context()
         flags = self.flags()
         match = self.comboBoxFind.lineEdit().text()
         editor.findAll(match, flags)
@@ -47,19 +47,28 @@ class FindMixin(object):
          
     # ------- QuickFind, menu actions
     def quickFind(self):
-        editor, cursor = self._find_context(select=True)
-        if cursor.hasSelection():
-            editor.findMatch(cursor.selectedText(), self.defaultFlags(), cursor=cursor)
+        editor, cursor, *cursors = self._find_context(select=True)
+        editor.findMatch(cursor.selectedText(), self.defaultFlags(), cursor=cursor)
             
     def quickFindAll(self):
-        editor, cursor = self._find_context(select=True)
-        if cursor.hasSelection():
-            cursors = editor.findAllCursors(cursor.selectedText(), self.defaultFlags())
-            editor.setTextCursors(cursors)
+        editor, cursor, *cursors = self._find_context(select=True)
+        cursors = editor.findAllCursors(cursor.selectedText(), self.defaultFlags())
+        editor.setTextCursors(cursors)
 
     def quickAddNext(self):
-        print("quickAddNext")
-        
+        editor, *cursors = self._find_context()
+        # TODO Parriba tambien
+        nail = cursors[-1]
+        if not nail.hasSelection():
+            _, start, end = editor.wordUnderCursor(nail, search=True)
+            cursors[-1] = editor.newCursorAtPosition(start, end)
+        else:
+            cursor = editor.findMatchCursor(
+                nail.selectedText(), self.defaultFlags(), cursor=nail)
+            if not cursor.isNull():
+                cursors.append(cursor)
+        editor.setTextCursors(cursors)
+
     def quickSkipNext(self):
         print("quickSkipNext")
         
