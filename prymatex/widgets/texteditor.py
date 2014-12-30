@@ -5,10 +5,9 @@ from __future__ import unicode_literals
 
 import re
 import os
-import difflib
 
 from prymatex.qt import API
-from prymatex.utils import text
+from prymatex.utils import text, difflib
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import textcursor_to_tuple
@@ -491,33 +490,30 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         return cursor.selectedText().replace("\u2029", '\n')
 
     #------ Update Text
-    def updatePlainText(self, text, cursor=None):
-        if cursor:
-            sourceText = cursor.selectedText()
-            sourceOffset = cursor.selectionStart()
+    def updatePlainText(self, text, wrapper=None):
+        if wrapper:
+            sourceText = wrapper.selectedText()
+            sourceOffset = wrapper.selectionStart()
         else:
             sourceText = self.toPlainText()
             sourceOffset = 0
 
-        def perform_action(code, cursor, text=""):
-            def _nop():
-                pass
+        def perform_action(cursor, text):
             def _action():
                 cursor.insertText(text)
-            return _action if code in ["insert", "replace", "delete"] else _nop
+            return _action
 
-        sequenceMatcher = difflib.SequenceMatcher(None, sourceText, text)
-        opcodes = sequenceMatcher.get_opcodes()
-
-        actions = [perform_action(
-                code[0],
-                self.newCursorAtPosition(code[1] + sourceOffset, code[2] + sourceOffset), text[code[3]:code[4]]
-            ) for code in opcodes]
+        actions = [
+            perform_action(
+                self.newCursorAtPosition(
+                    patch.start + sourceOffset, 
+                    patch.end + sourceOffset
+                ), patch.text) for patch in difflib.patches(sourceText, text)]
 
         cursor = self.textCursor()
 
         cursor.beginEditBlock()
-        list(map(lambda action: action(), actions))
+        [ action() for action in actions ]
         cursor.endEditBlock()
 
         self.ensureCursorVisible()
