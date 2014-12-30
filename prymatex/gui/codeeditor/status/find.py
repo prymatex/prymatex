@@ -55,20 +55,31 @@ class FindMixin(object):
         cursors = editor.findAllCursors(cursor.selectedText(), self.defaultFlags())
         editor.setTextCursors(cursors)
 
-    def quickAddNext(self):
+    def _quick_add(self, backward=False):
         editor, *cursors = self._find_context()
-        # TODO Parriba tambien
-        nail = cursors[-1]
+        index = 0 if backward else -1
+        nail = cursors[index]
         if not nail.hasSelection():
             _, start, end = editor.wordUnderCursor(nail, search=True)
-            cursors[-1] = editor.newCursorAtPosition(start, end)
+            cursors[index] = editor.newCursorAtPosition(start, end)
         else:
+            flags = self.defaultFlags()
+            if backward:
+                flags |= self.Backward
             cursor = editor.findMatchCursor(
-                nail.selectedText(), self.defaultFlags(), cursor=nail)
+                nail.selectedText(), flags, cursor=nail)
             if not cursor.isNull():
-                cursors.append(cursor)
+                if backward:
+                    cursors.insert(0, cursor)
+                else:
+                    cursors.append(cursor)
+        print(cursors, sorted(cursors))
         editor.setTextCursors(cursors)
-
+        
+    # ------------ Menu actions
+    quickAddNext = lambda self: self._quick_add()
+    quickAddPrevious = lambda self: self._quick_add(True)
+    
     def quickSkipNext(self):
         print("quickSkipNext")
         

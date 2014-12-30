@@ -35,7 +35,7 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
         self.__flags = QtGui.QTextDocument.FindFlags()
     
     def defaultFlags(self):
-        return QtGui.QTextDocument.FindFlags() | self.WholeWord
+        return QtGui.QTextDocument.FindFlags() | self.WholeWord | self.CaseSensitive
         
     def setFlags(self, flags):
         self.__flags = flags
@@ -257,3 +257,9 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
                  }
             ]
         return menu
+
+    def contributeToShortcuts(self):
+        return [{
+            'sequence': ("StatusBar", "QuickAddPrevious", "Ctrl+Shift+D"),
+            "activated": lambda : self.quickAddPrevious()
+        }]

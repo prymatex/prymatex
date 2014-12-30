@@ -288,7 +288,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
 
     def findMatchCursor(self, match, flags, cursor=None):
         """Busca la ocurrencia de match a partir de un cursor o el cursor actual"""
-        cursor = QtGui.QTextCursor(cursor) if cursor else self.textCursor()
+        cursor = QtGui.QTextCursor(cursor) if cursor is not None else self.textCursor()
         if flags & self.FindRegularExpression:
             match = QtCore.QRegExp(match, flags & self.FindCaseSensitive \
                 and QtCore.Qt.CaseSensitive or QtCore.Qt.CaseInsensitive)
