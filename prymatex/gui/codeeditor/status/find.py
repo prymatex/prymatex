@@ -24,7 +24,7 @@ class FindMixin(object):
     
     # ------------ Menu actions
     findNext = lambda self: self._find()
-    findPrevious = lambda self: self._find(True)
+    findPrevious = lambda self: self._find(backward=True)
     
     # ------- Auto connect button signals
     on_pushButtonFindFind_pressed = lambda self: self.findNext()
@@ -55,10 +55,10 @@ class FindMixin(object):
         cursors = editor.findAllCursors(cursor.selectedText(), self.defaultFlags())
         editor.setTextCursors(cursors)
 
-    def _quick_add(self, backward=False):
-        editor, *cursors = self._find_context()
+    def _quick(self, backward=False, skip=False):
+        editor, *cursors = self._find_context(select=skip)
         index = 0 if backward else -1
-        nail = cursors[index]
+        nail = cursors.pop(index) if skip else cursors[index] 
         if not nail.hasSelection():
             _, start, end = editor.wordUnderCursor(nail, search=True)
             cursors[index] = editor.newCursorAtPosition(start, end)
@@ -73,15 +73,14 @@ class FindMixin(object):
                     cursors.insert(0, cursor)
                 else:
                     cursors.append(cursor)
-        print(cursors, sorted(cursors))
         editor.setTextCursors(cursors)
         
     # ------------ Menu actions
-    quickAddNext = lambda self: self._quick_add()
-    quickAddPrevious = lambda self: self._quick_add(True)
+    quickAddNext = lambda self: self._quick()
+    quickAddPrevious = lambda self: self._quick(backward=True)
     
-    def quickSkipNext(self):
-        print("quickSkipNext")
+    quickSkipNext = lambda self: self._quick(skip=True)
+    quickSkipPrevious = lambda self: self._quick(backward=True, skip=True)
         
     # ------- Show incrementalFind
     def incrementalFind(self):
