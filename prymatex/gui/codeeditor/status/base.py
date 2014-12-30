@@ -34,6 +34,9 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
         CommandMixin.setup(self)
         self.__flags = QtGui.QTextDocument.FindFlags()
     
+    def defaultFlags(self):
+        return QtGui.QTextDocument.FindFlags() | self.WholeWord
+        
     def setFlags(self, flags):
         self.__flags = flags
 
@@ -214,10 +217,10 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
                 },
                 {'text': "Quick Add Next",
                  'sequence': ("StatusBar", "QuickAddNext", "Ctrl+D"),
-                 'triggered': lambda st, checked=False: st.showFindReplace()
+                 'triggered': lambda st, checked=False: st.quickAddNext()
                 },
                 {'text': "Quick Skip Next",
-                 'triggered': lambda st, checked=False: st.showFindReplace()
+                 'triggered': lambda st, checked=False: st.quickSkipNext()
                 }, '-',
                 {'text': "Use Selection For Find",
                  'sequence': ("StatusBar", "UseSelectionForFind", "Ctrl+E"),

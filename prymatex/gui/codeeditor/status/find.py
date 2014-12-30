@@ -12,8 +12,7 @@ class FindMixin(object):
         self.widgetFind.setVisible(False)
         self.comboBoxFind.lineEdit().returnPressed.connect(self.on_lineEditFind_returnPressed)
 
-    # ------- Signals
-    def on_pushButtonFindFind_pressed(self, backward=False):
+    def _find(self, backward=False):
         editor, cursor = self._find_context()
         flags = self.flags()
         if backward:
@@ -22,9 +21,15 @@ class FindMixin(object):
         cyclic = bool(flags & self.Wrap)
         match = self.comboBoxFind.lineEdit().text()
         editor.findMatch(match, flags, cursor=cursor, cyclic=cyclic)
-            
-    on_pushButtonFindPrev_pressed = lambda self: self.on_pushButtonFindFind_pressed(True)
-        
+    
+    # ------------ Menu actions
+    findNext = lambda self: self._find()
+    findPrevious = lambda self: self._find(True)
+    
+    # ------- Auto connect button signals
+    on_pushButtonFindFind_pressed = lambda self: self.findNext()
+    on_pushButtonFindPrev_pressed = lambda self: self.findPrevious()
+    
     def on_pushButtonFindAll_pressed(self):
         editor, cursor = self._find_context()
         flags = self.flags()
@@ -40,20 +45,25 @@ class FindMixin(object):
         else:
             self.on_pushButtonFindFind_pressed()
          
-    # ------- Go to quickFind
+    # ------- QuickFind, menu actions
     def quickFind(self):
         editor, cursor = self._find_context(select=True)
         if cursor.hasSelection():
-            editor.findMatch(cursor.selectedText(), self.defaultFlags(), 
-                findNext=True, cursor=cursor)
+            editor.findMatch(cursor.selectedText(), self.defaultFlags(), cursor=cursor)
             
     def quickFindAll(self):
         editor, cursor = self._find_context(select=True)
         if cursor.hasSelection():
-            cursors = editor.findAll(cursor.selectedText(), self.defaultFlags())
+            cursors = editor.findAllCursors(cursor.selectedText(), self.defaultFlags())
             editor.setTextCursors(cursors)
 
-    # ------- Go to incrementalFind
+    def quickAddNext(self):
+        print("quickAddNext")
+        
+    def quickSkipNext(self):
+        print("quickSkipNext")
+        
+    # ------- Show incrementalFind
     def incrementalFind(self):
         self.hideAll()
         self.pushButtonFindFind.setVisible(False)
@@ -61,7 +71,7 @@ class FindMixin(object):
         self.pushButtonFindAll.setVisible(False)
         self.widgetFind.setVisible(True)
 
-    # ------- Go to find
+    # ------- Show find
     def find(self):
         self.hideAll()
         editor = self.window().currentEditor() 
