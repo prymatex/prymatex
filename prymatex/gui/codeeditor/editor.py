@@ -930,6 +930,22 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             return milestone.block(), block
         return block, milestone.block()
 
+    def _find_all_milestones_by_level(self):
+        levels = {}
+        def _collect(start, end, l):
+            block = start
+            while block != end:
+                cursor = self.newCursorAtPosition(block.position())
+                if self.foldingListModel.isStart(cursor):
+                    new_start, new_end = self._find_block_fold_peer(cursor)
+                    levels.setdefault(l, []).append(cursor)
+                    block = _collect(new_start.next(), new_end, l + 1)
+                else:
+                    block = block.next()
+            return block
+        _collect(self.document().begin(), self.document().end(), 1)
+        return levels
+            
     def toggleFolding(self, milestone):
         if self.foldingListModel.isFoldingMarker(milestone):
             if self.foldingListModel.isFolded(milestone):
@@ -1489,19 +1505,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def on_actionFold_triggered(self, checked=False, level=None):
         # if level then find folding for level number and fold
-        if level is not None:
-            levels = {}            
-            def _collect(start, end, l):
-                block = start
-                while block.isValid() and block != end:
-                    start = self.newCursorAtPosition(block.position())
-                    if self.foldingListModel.isStart(start):
-                        block = _collect(start, self._find_block_fold_peer(cursor), l + 1)
-                    else:
-                        block = block.next()
-                return block
-
-            print("Fold", level)
+        if isinstance(level, int):
+            milestones = self._find_all_milestones_by_level()
+            if level in milestones:
+                self.foldingListModel.unfoldall()
+                for milestone in milestones.get(level, []):
+                    self.toggleFolding(milestone)
         else:
             cursor = self.textCursor()
             start, end = self.selectionBlockStartEnd(cursor)
