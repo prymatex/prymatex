@@ -355,7 +355,7 @@ class SupportBaseManager(object):
     # ---------------- RELOAD BUNDLES
     def reloadBundles(self, namespace):
         installedBundles = [bundle for bundle in self.getAllBundles() if bundle.hasSource(namespace.name)]
-        bundlePaths =  Bundle.sourcePaths(namespace.bundles)
+        bundlePaths = list(Bundle.sourcePaths(namespace.bundles))
         for bundle in installedBundles:
             bundlePath = bundle.sourcePath(namespace.name)
             if bundlePath in bundlePaths:
@@ -364,17 +364,20 @@ class SupportBaseManager(object):
                     self.modifyBundle(bundle)
                 bundlePaths.remove(bundlePath)
             else:
-                bundleItems = self.findBundleItems(bundle = bundle)
-                list(map(lambda item: item.removeSource(namespace.name), bundleItems))
+                bundleItems = self.findBundleItems(bundle=bundle)
+                for item in bundleItems:
+                    item.removeSource(namespace.name)
                 bundle.removeSource(namespace)
                 if not bundle.hasSources():
                     self.logger().debug("Bundle %s removed." % bundle.name)
-                    list(map(lambda item: self.removeManagedObject(item), bundleItems))
-                    list(map(lambda item: self.removeBundleItem(item), bundleItems))
+                    for item in bundleItems:
+                        self.removeManagedObject(item)
+                        self.removeBundleItem(item)
                     self.removeManagedObject(bundle)
                     self.removeBundle(bundle)
                 else:
-                    list(map(lambda item: item.setDirty(), bundleItems))
+                    for item in bundleItems:
+                        item.setDirty()
                     bundle.setSupportPath(None)
                     bundle.setDirty()
         for bundlePath in bundlePaths:
@@ -392,8 +395,8 @@ class SupportBaseManager(object):
             if not bundle.hasSource(namespace.name):
                 continue
             bundlePath = bundle.sourcePath(namespace.name)
-            bundleItemPaths = dict([ (klass.type(), klass.sourcePaths(bundlePath)) 
-                for klass in self.BUNDLEITEM_CLASSES.values() ])
+            bundleItemPaths = { klass.type(): list(klass.sourcePaths(bundlePath)) 
+                for klass in self.BUNDLEITEM_CLASSES.values() }
             for bundleItem in self.findBundleItems(bundle=bundle):
                 if not bundleItem.hasSource(namespace.name):
                     continue
