@@ -46,6 +46,7 @@ class NetworkAccessManager(QtNetwork.QNetworkAccessManager):
     def createRequest(self, operation, request, data):
         if request.url().scheme() == "txmt":
             self.commandUrlRequested.emit(request.url())
+            return QtNetwork.QNetworkReply(self)
         elif request.url().scheme() == "tm-file" and operation == self.GetOperation:
             return FileReply(self, request.url(), self.GetOperation)
         return QtNetwork.QNetworkAccessManager.createRequest(self, operation, request, data)

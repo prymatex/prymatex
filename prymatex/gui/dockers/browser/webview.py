@@ -76,4 +76,5 @@ class WebView(QtWebKitWidgets.QWebView):
         QtGui.QDesktopServices.openUrl(url)
 
     def on_networkAccessManager_commandUrlRequested(self, url):
+        print(url)
         self.browserDock.application().openUrl(url)
