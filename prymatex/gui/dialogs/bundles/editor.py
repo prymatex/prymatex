@@ -38,11 +38,11 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtWidgets.QDialo
 
     # --------------- signal handlers
     def on_manager_itemChanged(self, item):
-        currentEditor = self.currentEditor()
-        if currentEditor.bundleItem == item and currentEditor.getName() != item.name:
-            self.currentEditor().setName(item.name)
-            self.labelTitle.setText(currentEditor.title())
-            self.lineEditName.setText(currentEditor.getName())
+        editor = self.currentEditor()
+        if editor.bundleItem is not None and editor.bundleItem == item and editor.getName() != item.name:
+            editor.setName(item.name)
+            self.labelTitle.setText(editor.title())
+            self.lineEditName.setText(editor.getName())
 
     def on_bundleEditor_finished(self, code):
         self.saveChanges()
