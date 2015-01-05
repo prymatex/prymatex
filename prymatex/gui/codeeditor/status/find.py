@@ -17,7 +17,7 @@ class FindMixin(object):
         # )
 
     def _find(self, backward=False):
-        editor, cursor = self._find_context()
+        editor, cursor, *cursors = self._find_context()
         flags = self.flags()
         if backward:
             flags |= self.Backward

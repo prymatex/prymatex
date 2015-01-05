@@ -166,7 +166,8 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtWidgets.QWidget
     def on_comboBoxSyntaxes_activated(self, index):
         if self.currentEditor is not None:
             model = self.comboBoxSyntaxes.model()
-            node = model.node(model.createIndex(index, 0))
+            #node = model.node(model.createIndex(index, 0))
+            node = model.node(model.index(index))
             self.currentEditor.insertBundleItem(node)
 
     @QtCore.Slot(int)
@@ -176,7 +177,7 @@ class CodeEditorStatus(PrymatexStatusBar, Ui_CodeEditorStatus, QtWidgets.QWidget
     @QtCore.Slot(int)
     def on_comboBoxSymbols_activated(self, pos):
         model = self.comboBoxSymbols.model()
-        index = model.index(pos)
+        index = model.symbolCursor(pos)
         if index.isValid():
             block = index.internalPointer()
             self.currentEditor.goToBlock(block)
