@@ -261,5 +261,5 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
     def contributeToShortcuts(self):
         return [{
             'sequence': ("StatusBar", "QuickAddPrevious", "Ctrl+Shift+D"),
-            "activated": lambda : self.quickAddPrevious()
+            'activated': lambda : self.quickAddPrevious()
         }]

@@ -567,23 +567,27 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return False
 
     # ------------- Replace functions
-    def replaceMatch(self, match, text, flags, allText=False, cursor=None):
+    def replaceMatch(self, match, text, flags, all_text=False, cursor=None):
         cursor = QtGui.QTextCursor(cursor) if cursor else self.textCursor()
+        if cursor.hasSelection():
+            cursor.setPosition((flags & self.FindBackward) and cursor.selectionEnd() or cursor.selectionStart())
+        if all_text:
+            cursor.movePosition(QtGui.QTextCursor.Start)
         cursor.beginEditBlock()
         replaced = 0
         findCursor = cursor
-        if allText:
-            findCursor.movePosition(QtGui.QTextCursor.Start)
         while True:
             findCursor = self.findMatchCursor(match, flags, cursor=findCursor)
             if findCursor.isNull(): break
             if flags & self.FindRegularExpression:
                 findCursor.insertText(
-                    re.sub(match.pattern(), text, self.selectedText(cursor)))
+                    re.sub(match.pattern(), text, self.selectedText(findCursor)))
             else:
                 findCursor.insertText(text)
             replaced += 1
-            if not allText: break
+            if not all_text:
+                self.setTextCursor(findCursor)
+                break
         cursor.endEditBlock()
         return replaced
 
