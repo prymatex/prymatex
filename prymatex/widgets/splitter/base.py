@@ -17,7 +17,7 @@ class SplitterWidget(QtWidgets.QSplitter):
     # Signals for WorkbenchWindowLayout to handle
     tabCloseRequest = QtCore.Signal(QtWidgets.QWidget)
     tabCreateRequest = QtCore.Signal()
-    aboutToWidgetChanged = QtCore.Signal(QtWidgets.QWidget)
+    aboutToWidgetChange = QtCore.Signal(QtWidgets.QWidget)
     widgetChanged = QtCore.Signal(QtWidgets.QWidget)
     layoutChanged = QtCore.Signal()
 
@@ -400,8 +400,8 @@ class SplitterWidget(QtWidgets.QSplitter):
         
     def _tab_focus_changed(self, widget):
         """ A close button was clicked in one of out GroupWidgets """
-        
         if self._current_widget != widget:
+            self.aboutToWidgetChange.emit(self._current_widget)
             self._current_widget = widget
             self.widgetChanged.emit(widget)
         
@@ -753,7 +753,7 @@ class SplitterWidget(QtWidgets.QSplitter):
 
         # Signal that the tab's SplitterWidget has changed, if necessary.
         if dsplit_w != self:
-            self.widgetChanged.emit(twidg)
+            self._tab_focus_changed(twidg)
         
         QtWidgets.qApp.blockSignals(False)
 

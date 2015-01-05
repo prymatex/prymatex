@@ -58,9 +58,7 @@
          <item>
           <widget class="QPushButton" name="pushButtonAdd">
            <property name="icon">
-            <iconset theme="add">
-             <normaloff/>
-            </iconset>
+            <iconset theme="add"/>
            </property>
           </widget>
          </item>

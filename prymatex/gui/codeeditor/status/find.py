@@ -11,9 +11,13 @@ class FindMixin(object):
     def initialize(self, *args, **kwargs):
         self.widgetFind.setVisible(False)
         self.comboBoxFind.lineEdit().returnPressed.connect(self.on_lineEditFind_returnPressed)
+        # TODO Migrar a esta forma de shortcuts eventualmente
+        # self.application().registerShortcut(self, self.pushButtonFindAll,
+        #     ("StatusBar", "FindAll", "Alt+Return")
+        # )
 
     def _find(self, backward=False):
-        editor, cursor = self._find_context()
+        editor, cursor, *cursors = self._find_context()
         flags = self.flags()
         if backward:
             flags |= self.Backward
@@ -29,7 +33,7 @@ class FindMixin(object):
     # ------- Auto connect button signals
     on_pushButtonFindFind_pressed = lambda self: self.findNext()
     on_pushButtonFindPrev_pressed = lambda self: self.findPrevious()
-    
+
     def on_pushButtonFindAll_pressed(self):
         editor, cursor, *cursors = self._find_context()
         flags = self.flags()
@@ -93,8 +97,7 @@ class FindMixin(object):
     # ------- Show find
     def find(self):
         self.hideAll()
-        editor = self.window().currentEditor() 
-        cursor = editor.textCursor()
+        editor, cursor, *cursors = self._find_context()
         if cursor.hasSelection():
             word = cursor.selectedText()
             self.comboBoxFind.lineEdit().setText(word)

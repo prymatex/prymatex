@@ -402,6 +402,11 @@ class SymbolListModel(QtCore.QAbstractListModel):
             return self.icons.get(rightScope.root_group()[:2])
 
     # ------------- Public api
+    def symbolCursor(self, index):
+        if not index.isValid() or index.row() >= len(self.symbols):
+            return QtGui.QTextCursor()
+        return index.internalPointer()
+
     def findSymbolIndex(self, cursor):
         position = bisect(self.symbols, cursor) - 1
         return position > 0 and position or 0

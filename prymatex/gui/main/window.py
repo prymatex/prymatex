@@ -101,6 +101,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
         
         # Splitter signals
         self.centralWidget().widgetChanged.connect(self.on_splitter_widgetChanged)
+        self.centralWidget().aboutToWidgetChange.connect(self.on_splitter_aboutToWidgetChange)
         self.centralWidget().layoutChanged.connect(self.on_splitter_layoutChanged)
         self.centralWidget().tabCloseRequest.connect(self.closeEditor)
         self.centralWidget().tabCreateRequest.connect(self.addEmptyEditor)
@@ -360,6 +361,10 @@ html_footer
     def currentEditor(self):
         return self.centralWidget().currentWidget()
 
+    def on_splitter_aboutToWidgetChange(self, editor):
+        if editor is not None:
+            self.aboutToEditorChange.emit(editor)
+        
     def on_splitter_widgetChanged(self, editor):
         # ----- Not allow None
         if editor is None:
@@ -372,13 +377,13 @@ html_footer
         self.application().supportManager.setEditorAvailable(True)
         self.bundleItem_handler = editor.bundleItemHandler() or self.insertBundleItem
 
-        #Emitir señal de cambio
-        self.editorChanged.emit(editor)
-        
         self.addEditorToHistory(editor)
         editor.setFocus()
         self.application().checkExternalAction(self, editor)
         self.updateWindowTitle()
+        
+        #Emitir señal de cambio
+        self.editorChanged.emit(editor)
 
     def updateWindowTitle(self):
         self.setWindowTitle(self.titleTemplate.substitute(
