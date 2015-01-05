@@ -225,7 +225,7 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         self.bookmarks = []
         
         # Images
-        self.icon_bookmark = editor.resources().get_icon('bookmarks')
+        self.icon_bookmark = editor.resources().get_icon('bookmark')
 
     # -------- Signals
     def on_document_contentsChange(self, position, removed, added):
@@ -289,6 +289,18 @@ class BookmarkListModel(QtCore.QAbstractListModel):
     def bookmarksCount(self, block):
         return len([c for c in self.bookmarks if c.block() == block])
 
+# https://github.com/textmate/textmate/blob/master/Applications/TextMate/about/Changes.md#2014-10-15-v20-alpha9575
+class MarkListModel(QtCore.QAbstractListModel):
+    def __init__(self, editor):
+        super(QtCore.QAbstractListModel, self).__init__(editor)
+        self.editor = editor
+        self.icons = {
+            "bookmark": editor.resources().get_icon("bookmark"),
+            "error": editor.resources().get_icon("error"),
+            "warning": editor.resources().get_icon("warning"),
+            "search": editor.resources().get_icon("search")
+        }
+    
 #=========================================================
 # Bookmark Selectable Model
 #=========================================================  

@@ -12,6 +12,7 @@
     "applications-system": "notfound.png",
     "applications-utilities": "notfound.png",
     "automatic": "notfound.png",
+    "bookmark": ":/sidebar/bookmark-flag.png",
     "bookmarks": "icon-bookmark",
     "bookmarks-organize": "notfound.png",
     "browser-back": "icon-circlepreviousempty",

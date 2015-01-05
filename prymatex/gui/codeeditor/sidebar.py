@@ -150,7 +150,7 @@ class BookmarkSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     
     def __init__(self, **kwargs):
         super(BookmarkSideBarAddon, self).__init__(**kwargs)
-        self.bookmarkflagImage = self.resources().get_image(":/sidebar/bookmark-flag.png")
+        self.bookmarkflagImage = self.resources().get_image("bookmark")
         self.imagesHeight = self.bookmarkflagImage.height()
         self.setFixedWidth(self.bookmarkflagImage.width())
         self.setObjectName(self.__class__.__name__)

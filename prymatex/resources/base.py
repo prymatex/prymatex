@@ -55,27 +55,33 @@ class Resource(dict):
     def path(self):
         return self._path
 
-    def find_source(self, name, sections = None):
-        if sections is not None:
-            sections = sections if isinstance(sections, (list, tuple)) else (sections, )
-        else:
-            sections = list(self.keys())
+    def map_index(self, index):
+        return self._mapper.get(index, index)
+
+    def find_source(self, name, sections=None):
+        if sections is None:
+            sections = self.keys()
+        elif not isinstance(sections, (list, tuple)):
+            sections = (sections, )
         for section in sections:
             if section in self and name in self[section]:
                 return self[section].get(name)
     
     def get_image(self, index):
+        index = self.map_index(index)
+        
+        std = get_std_icon(index)
+        if not std.isNull():
+            return std.pixmap(32)
+
         path = self.find_source(index, ["Images", "Icons"])
         if path is not None:
             return QtGui.QPixmap(path)
-        else:
-            #Standard Icon
-            return get_std_icon(index).pixmap(32)
-        return QtGui.QPixmap()
+
+        return self._from_theme(index).pixmap(32)
 
     def get_icon(self, index):
-        if index in self._mapper:
-            index = self._mapper[index]
+        index = self.map_index(index)
         
         std = get_std_icon(index)
         if not std.isNull():
