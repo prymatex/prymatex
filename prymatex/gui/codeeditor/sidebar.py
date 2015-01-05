@@ -316,8 +316,8 @@ class SelectionSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
 
         offset = self.editor.contentOffset()
 
-        for extra in self.editor.searchExtraSelections("selection"):
-            y = round(extra.cursor.block().blockNumber() * rectRelation)
+        for cursor in self.editor.highlightCursors():
+            y = round(cursor.block().blockNumber() * rectRelation)
             if rectRelation == lineHeight:
                 y += offset.y()
             painter.fillRect(0, y, 10, rectHeight, self.palette().highlight().color())
