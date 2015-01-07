@@ -889,14 +889,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             environment['TM_INPUT_START_LINE_INDEX'] = cursor.selectionStart() - start.position()
         return environment
 
-    # ---------- Completer
-    def defaultCompletionCallback(self, suggestion):
-        currentWord, start, end = self.currentWord()
-        cursor = self.newCursorAtPosition(start, end) \
-            if currentWord is not None else self.textCursor()
-        snippet = suggestion.get('insert') or suggestion.get('display') or suggestion.get('title')
-        self.insertSnippet(snippet, textCursor = cursor)
-
     # ---------- Folding
     def _find_indented_block_fold_close(self, cursor):
         assert self.foldingListModel.isFoldingIndentedBlockStart(cursor), "Block isn't folding indented start"
