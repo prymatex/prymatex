@@ -90,9 +90,11 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         for model in self.completion_models:
             model.setCompletionPrefix(prefix)
         QtWidgets.QCompleter.setCompletionPrefix(self, prefix)
-        if self.model() is not None:
-            self.fixPopupView()
     
+    def complete(self, rect):
+        self.fixPopupView()
+        super(CodeEditorCompleter, self).complete(rect)
+
     # ----------- Set or try to set model
     def setModel(self, model):
         super(CodeEditorCompleter, self).setModel(model)
@@ -108,7 +110,6 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         self.setModel(model)
         self.setCompletionPrefix(prefix)
         if self.setCurrentRow(0):
-            self.fixPopupView()
             return True
         self.setModel(current)
         return False

@@ -102,7 +102,6 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
         if not (self.completer.setCurrentRow(0) or self.completer.trySetNextModel()):
             print("me voy despues")
             self.completer.hide()
-        self.completer.fixPopupView()
         self.completer.complete(self.editor.cursorRect())
 
     def __next_model(self, event):
