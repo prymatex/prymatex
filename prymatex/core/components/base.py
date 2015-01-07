@@ -13,7 +13,7 @@ class PrymatexComponent(object):
     
     def finalize(self, *args, **kwargs):
         pass
-
+    
     def components(self):
         return self._components
  
@@ -62,3 +62,6 @@ class PrymatexAddon(PrymatexComponent):
 class PrymatexComponentWidget(PrymatexComponent):
     def addons(self):
         return filter(lambda ch: isinstance(ch, PrymatexAddon), self.components())
+        
+    def findAddon(self, klass):
+        return next((addon for addon in self.addons() if isinstance(addon, klass)))

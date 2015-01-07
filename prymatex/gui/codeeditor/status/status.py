@@ -50,7 +50,9 @@ class StatusMixin(object):
             cursor.blockNumber() + 1, cursor.positionInBlock() + 1, 
             cursor.selectionEnd() - cursor.selectionStart())
         )
-        self.comboBoxSymbols.setCurrentIndex(self.comboBoxSymbols.model().findSymbolIndex(cursor))
+        if cursor.position() > 0:
+            symbolModel = self.comboBoxSymbols.model()
+            self.comboBoxSymbols.setCurrentIndex(symbolModel.findSymbolIndex(cursor))
 
     # -------------- Content tool
     def _update_content(self, editor):

@@ -43,6 +43,7 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         self.completion_models.append(completionModel)
         completionModel.suggestionsReady.connect(self.on_model_suggestionsReady)
         completionModel.setEditor(self.editor)
+        completionModel.setPriority(len(self.completion_models))
     
     def unregisterModel(self, completionModel):
         self.completion_models.remove(completionModel)
@@ -125,9 +126,13 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
 
     def on_model_suggestionsReady(self):
         model = self.sender()
-        if self.model() is None and self.trySetModel(model):
+        if not self.isVisible():
+            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
+            self.setCompletionPrefix(alreadyTyped)
+        if (not self.isVisible() or self.model() is None or self.model().priority() <= model.priority()) and self.trySetModel(model):
             self.complete(self.editor.cursorRect())
-
-    def runCompleter(self, rect):
+        
+    def runCompleter(self):
         self.setModel(None)
-        [ model.fill() for model in self.completion_models ]
+        for model in self.completion_models:
+            model.fill()

@@ -14,6 +14,13 @@ class CompletionBaseModel(QtCore.QAbstractTableModel):
         super(CompletionBaseModel, self).__init__(**kwargs)
         self.editor = None
         self._prefix = None
+        self._priority = 0
+
+    def priority(self):
+        return self._priority
+        
+    def setPriority(self, priority):
+        self._priority = priority
 
     def completionPrefix(self):
         return self._prefix
