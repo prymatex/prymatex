@@ -13,7 +13,7 @@ from prymatex.core import constants
 from prymatex.widgets.texteditor import TextEditWidget
 
 from prymatex.core.settings import ConfigurableItem
-from prymatex.qt.helpers import (extend_menu, keyevent_to_keysequence)
+from prymatex.qt.helpers import (extend_menu, keyevent_to_keysequence, keyevent_to_tuple)
 from prymatex.models.support import BundleItemTreeNode
 
 from .addons import CodeEditorAddon
@@ -45,6 +45,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     endMode = QtCore.Signal(object)
     aboutToClose = QtCore.Signal()
     newLocationMemento = QtCore.Signal(object)
+    keyPressed = QtCore.Signal(QtCore.QEvent)
     
     # ------------------ Flags
     ShowTabsAndSpaces     = 1<<0
@@ -730,10 +731,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
-        if not any(self.currentMode().preHandle(event)):
+        if not any(self.currentMode().handle(event)):
             super(CodeEditor, self).keyPressEvent(event)
-            list(self.currentMode().postHandle(event))
-
+            self.keyPressed.emit(event)
+        
     # OVERRIDE: TextEditWidget.mouseReleaseEvent(),
     def mouseReleaseEvent(self, event):
         freehanded = False

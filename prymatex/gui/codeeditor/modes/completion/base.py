@@ -38,17 +38,9 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             QtCore.Qt.Key_Space,
             self.__default_space_pressed
         )
-        self.editor.defaultMode().registerKeyPressHandler(
-            QtCore.Qt.Key_Any,
-            self.__default_after_any_pressed,
-            after = True
-        )
+        self.editor.keyPressed.connect(self.on_editor_keyPressed)
+        
         # To this mode
-        self.registerKeyPressHandler(
-            QtCore.Qt.Key_Any,
-            self.__after_any_pressed,
-            after = True
-        )
         self.registerKeyPressHandler(
             QtCore.Qt.Key_Space,
             self.__next_model
@@ -81,6 +73,18 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
         snippet = suggestion.get('insert') or suggestion.get('display') or suggestion.get('title')
         self.editor.insertSnippet(snippet, textCursor = cursor)
 
+    def on_editor_keyPressed(self, event):
+        alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
+        self.completer.setCompletionPrefix(alreadyTyped)
+        if self.isActive() and not (self.completer.setCurrentRow(0) or self.completer.trySetNextModel()):
+            print("Hide completer")
+            self.completer.hide()
+        elif not self.isActive() and not (event.modifiers() & QtCore.Qt.ControlModifier) and (text.asciify(event.text()) in COMPLETER_CHARS) and end - start >= self.editor.wordLengthToComplete:
+            print("Run completer")
+            self.completer.runCompleter()
+        elif self.isActive():
+            self.completer.complete(self.editor.cursorRect())
+            
     def __editor_run_completer(self, suggestions, already_typed=None, callback = None, 
         case_insensitive=True, disable_auto_insert = True, api_completions_only = True,
         next_completion_if_showing = False, auto_complete_commit_on_tab = True):
@@ -96,14 +100,6 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             self.completer.complete(self.editor.cursorRect())
 
     # ------ Mode handlers
-    def __after_any_pressed(self, event):
-        alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-        self.completer.setCompletionPrefix(alreadyTyped)
-        if not (self.completer.setCurrentRow(0) or self.completer.trySetNextModel()):
-            print("me voy despues")
-            self.completer.hide()
-        self.completer.complete(self.editor.cursorRect())
-
     def __next_model(self, event):
         if event.modifiers() & QtCore.Qt.ControlModifier and self.completer.trySetNextModel():
             self.completer.complete(self.editor.cursorRect())
@@ -122,10 +118,3 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
             self.completer.setCompletionPrefix(alreadyTyped)
             self.completer.runCompleter()
             return True
-
-    def __default_after_any_pressed(self, event):
-        if not (event.modifiers() & QtCore.Qt.ControlModifier) and (text.asciify(event.text()) in COMPLETER_CHARS):
-            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-            if end - start >= self.editor.wordLengthToComplete:
-                self.completer.setCompletionPrefix(alreadyTyped)
-                self.completer.runCompleter()

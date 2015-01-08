@@ -54,7 +54,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def stop(self):
         if self.thread and self.thread.isRunning():
             self.thread.stop()
-            self.setDocument(None)
+        self.setDocument(None)
 
     def start(self, callback=None):
         if self.syntaxProcessor.isReady():

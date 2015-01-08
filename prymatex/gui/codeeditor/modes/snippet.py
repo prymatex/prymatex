@@ -15,14 +15,17 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         self.processor = self.editor.findProcessor("snippet")
         self.processor.begin.connect(self.activate)
         self.processor.end.connect(self.deactivate)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__snippet_update_holder)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__snippet_update_holder_after, after=True)
         self.registerKeyPressHandler(QtCore.Qt.Key_Escape, self.__snippet_end)
         self.registerKeyPressHandler(QtCore.Qt.Key_Tab, self.__snippet_navigation)
         self.registerKeyPressHandler(QtCore.Qt.Key_Backtab, self.__snippet_navigation)
         self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__snippet_backspace)
         self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__snippet_delete)
+        self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__snippet_update_holder)
 
+    def deactivate(self):
+        self.editor.keyPressed.disconnect(self.on_editor_keyPressed)
+        super(CodeEditorSnippetMode, self).deactivate()
+        
     def activate(self):
         super(CodeEditorSnippetMode, self).activate()
         cursor = self.editor.textCursor()
@@ -30,20 +33,9 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         self.holderPositionBefore = cursor.selectionStart() - holderStart
         self.positionBefore = cursor.selectionStart()
         self.charactersBefore = cursor.document().characterCount()
+        self.editor.keyPressed.connect(self.on_editor_keyPressed)
 
-    # ------------ Key press handlers
-    def __snippet_update_holder(self, event):
-        cursor = self.editor.textCursor()
-        if self.processor.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
-            holderStart, holderEnd = self.processor.currentPosition()
-
-            self.holderPositionBefore = cursor.selectionStart() - holderStart
-            self.positionBefore = cursor.selectionStart()
-            self.charactersBefore = cursor.document().characterCount()
-        else:
-            self.processor.stop()
-
-    def __snippet_update_holder_after(self, event):
+    def on_editor_keyPressed(self, event):
         if event.text():
             cursor = self.editor.textCursor()
             holderStart, holderEnd = self.processor.currentPosition()
@@ -70,6 +62,18 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
                         newHolderStart + self.holderPositionBefore + (positionAfter - self.positionBefore)
                     )
                 )
+
+    # ------------ Key press handlers
+    def __snippet_update_holder(self, event):
+        cursor = self.editor.textCursor()
+        if self.processor.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
+            holderStart, holderEnd = self.processor.currentPosition()
+
+            self.holderPositionBefore = cursor.selectionStart() - holderStart
+            self.positionBefore = cursor.selectionStart()
+            self.charactersBefore = cursor.document().characterCount()
+        else:
+            self.processor.stop()
     
     def __snippet_end(self, event):
         self.processor.stop()
