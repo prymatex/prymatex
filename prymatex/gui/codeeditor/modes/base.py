@@ -12,7 +12,6 @@ class CodeEditorBaseMode(CodeEditorAddon):
         self.eventHandlers = {
             QtCore.QEvent.KeyPress: OrderedDict()
         }
-        self._allow_default_handlers = True
         self.setObjectName(self.__class__.__name__)
 
     def setAllowDefaultHandlers(self, allow):
@@ -28,7 +27,8 @@ class CodeEditorBaseMode(CodeEditorAddon):
 
     def handle(self, event):
         if event.type() == QtCore.QEvent.KeyPress:
-            return self._handle(self.keyPress_handlers(event.key()), event)
+            return any(self._handle(self.keyPress_handlers(event.key()), event))
+        return False
 
     def _handle(self, handlers, event):
         for handler in handlers:
@@ -39,17 +39,17 @@ class CodeEditorBaseMode(CodeEditorAddon):
             if _key in (key, QtCore.Qt.Key_Any):
                 for handler in handlers:
                     yield handler
-        if self._allow_default_handlers and self != self.editor.defaultMode():
-            for handler in self.editor.defaultMode().keyPress_handlers(key):
+        if self != self.editor.defaultMode():
+            for handler in self.editor.previousMode(self).keyPress_handlers(key):
                 yield handler
 
     def name(self):
         return self.objectName()
 
     def activate(self):
-        self.editor.beginCodeEditorMode(self)
+        self.editor.beginMode(self)
 
     def deactivate(self):
-        self.editor.endCodeEditorMode(self)
+        self.editor.endMode(self)
     
     isActive = lambda self: self.editor.currentMode() == self

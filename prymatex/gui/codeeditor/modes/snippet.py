@@ -21,11 +21,7 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__snippet_backspace)
         self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__snippet_delete)
         self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__snippet_update_holder)
-
-    def deactivate(self):
-        self.editor.keyPressed.disconnect(self.on_editor_keyPressed)
-        super(CodeEditorSnippetMode, self).deactivate()
-        
+    
     def activate(self):
         super(CodeEditorSnippetMode, self).activate()
         cursor = self.editor.textCursor()
@@ -33,7 +29,6 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         self.holderPositionBefore = cursor.selectionStart() - holderStart
         self.positionBefore = cursor.selectionStart()
         self.charactersBefore = cursor.document().characterCount()
-        self.editor.keyPressed.connect(self.on_editor_keyPressed)
 
     def on_editor_keyPressed(self, event):
         if event.text():
