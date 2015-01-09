@@ -71,6 +71,7 @@ class SnippetHandler(object):
     def __init__(self):
         self.snippet = None
         self.holders = None
+        self.taborder = None
         self.holderIndex = None
         self.memodict = None
         
@@ -79,9 +80,9 @@ class SnippetHandler(object):
 
     def setSnippet(self, snippet):
         self.snippet = snippet
-        taborder = sorted(snippet.placeholders.keys())
-        taborder.append(taborder.pop(0))
-        self.holders = [ snippet.placeholders[key] for key in taborder ]
+        self.taborder = sorted(snippet.placeholders.keys())
+        self.taborder.append(self.taborder.pop(0))
+        self.holders = [ snippet.placeholders[key] for key in self.taborder ]
 
     def reset(self):
         self.memodict = types.Memodict()
@@ -141,7 +142,10 @@ class SnippetHandler(object):
         return False
 
     def lastHolder(self):
-        return self.__current_holder().index == self.snippet.LAST_INDEX
+        index = self.taborder.index(self.__current_holder().index)
+        if self.snippet.lastHolderFixed():
+            index += 1
+        return index + 1 == len(self.taborder) 
 
     def holderNumber(self):
         return self.holderIndex + 1
