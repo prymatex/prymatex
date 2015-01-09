@@ -270,10 +270,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def beginMode(self, mode):
         self.__active_modes.insert(0, mode)
         self.modeChanged.emit(self.__active_modes[1], self.__active_modes[0])
+        print(self.__active_modes)
 
     def endMode(self, mode):
         self.__active_modes.remove(mode)
         self.modeChanged.emit(mode, self.__active_modes[0])
+        print(self.__active_modes)
 
     # OVERRIDE: PrymatexEditor.addComponent()
     def addComponent(self, component):
@@ -414,15 +416,19 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # ------------ Obteniendo datos del editor
     def currentMode(self):
-        return len(self.__active_modes) > 0 and self.__active_modes[0] or None
+        return len(self.__active_modes) > 0 and self.__active_modes[0]
     
     def defaultMode(self):
         return self.__active_modes[-1]
 
     def previousMode(self, mode):
-        index = self.__active_modes.index(mode)
-        return self.__active_modes[index + 1]
-        
+        return mode in self.__active_modes and \
+            self.__active_modes[self.__active_modes.index(mode) + 1] or \
+            self.currentMode()
+
+    def isModeActive(self, mode):
+        return mode in self.__active_modes
+
     def blockIndentation(self, block):
         return self.blockUserData(block).indentation
 

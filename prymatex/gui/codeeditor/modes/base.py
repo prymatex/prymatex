@@ -36,7 +36,7 @@ class CodeEditorBaseMode(CodeEditorAddon):
 
     def keyPress_handlers(self, key):
         for _key, handlers in self.eventHandlers[QtCore.QEvent.KeyPress].items():
-            if _key in (key, QtCore.Qt.Key_Any):
+            if self.isActive() and _key in (key, QtCore.Qt.Key_Any):
                 for handler in handlers:
                     yield handler
         if self != self.editor.defaultMode():
@@ -46,10 +46,6 @@ class CodeEditorBaseMode(CodeEditorAddon):
     def name(self):
         return self.objectName()
 
-    def activate(self):
-        self.editor.beginMode(self)
-
-    def deactivate(self):
-        self.editor.endMode(self)
-    
-    isActive = lambda self: self.editor.currentMode() == self
+    activate = lambda self: self.editor.beginMode(self)
+    deactivate = lambda self: self.editor.endMode(self)
+    isActive = lambda self: self.editor.isModeActive(self)

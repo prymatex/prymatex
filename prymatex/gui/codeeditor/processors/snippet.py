@@ -58,8 +58,6 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         choices = self.bundleItem.holderChoices()
         if choices:
             self.editor.showFlatPopupMenu(choices, self.setHolderChoiceIndex)
-        if self.isLastHolder() and not self.hasHolderContent():
-            self.stop()
             
     def runShellScript(self, script):
         context = self.editor.application().supportManager.runSystemCommand(
