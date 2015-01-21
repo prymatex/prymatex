@@ -5,7 +5,7 @@ from prymatex.qt import QtWidgets
 
 class CheckableMessageBox(QtWidgets.QMessageBox):
     def __init__(self, *largs, **kwargs):
-        super(CheckableMessageBox, self).__init__(self, *largs, **kwargs)
+        super(CheckableMessageBox, self).__init__(*largs, **kwargs)
         self.checkBox = QtWidgets.QCheckBox(self)
         self.layout().addWidget(self.checkBox, 1, 1)
 
