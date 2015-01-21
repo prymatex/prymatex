@@ -14,9 +14,6 @@ class CodeEditorBaseMode(CodeEditorAddon):
         }
         self.setObjectName(self.__class__.__name__)
 
-    def setAllowDefaultHandlers(self, allow):
-        self._allow_default_handlers = allow
-
     def registerKeyPressHandler(self, key, handler):
         self.eventHandlers[QtCore.QEvent.KeyPress].setdefault(key, []).append(handler)
         
