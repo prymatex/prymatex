@@ -39,7 +39,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     syntaxChanged = QtCore.Signal(object)
     themeChanged = QtCore.Signal(object)
     filePathChanged = QtCore.Signal(str)
-    modeChanged = QtCore.Signal(object, object)
+    modeChanged = QtCore.Signal(object)
     beginMode = QtCore.Signal(object)
     endMode = QtCore.Signal(object)
     aboutToClose = QtCore.Signal()
@@ -128,7 +128,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # Modes
         self.__modes = []
-        self.__active_modes = []
 
         # Processors
         self.processors = [
@@ -268,14 +267,13 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         
     # -------------- Editor Modes
     def beginMode(self, mode):
-        self.__active_modes.insert(0, mode)
-        self.modeChanged.emit(self.__active_modes[1], self.__active_modes[0])
-        print(self.__active_modes)
+        self.__modes.append(mode)
+        self.modeChanged.emit(mode)
 
     def endMode(self, mode):
-        self.__active_modes.remove(mode)
-        self.modeChanged.emit(mode, self.__active_modes[0])
-        print(self.__active_modes)
+        print(self.__modes, mode)
+        if mode == self.__modes[-1]:
+            self.modeChanged.emit(self.__modes.pop())
 
     # OVERRIDE: PrymatexEditor.addComponent()
     def addComponent(self, component):
@@ -283,18 +281,17 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         if isinstance(component, SideBarWidgetMixin):
             self.addSideBarWidget(component)
         elif isinstance(component, CodeEditorBaseMode):
-            self.addMode(component)
-
+            self.addCodeEditorMode(component)
+            
     def addSideBarWidget(self, widget):
         if widget.ALIGNMENT == QtCore.Qt.AlignRight:
             self.rightBar.addWidget(widget)
         else:
             self.leftBar.addWidget(widget)
-
-    def addMode(self, mode):
-        self.__modes.append(mode)
-        if len(self.__modes) == 1:
-            self.__active_modes.append(mode)
+    
+    def addCodeEditorMode(self, mode):
+        if not self.__modes:
+            self.__modes.append(mode)
 
     # -------------------- Notifications
     def showMessage(self, *largs, **kwargs):
@@ -416,18 +413,13 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # ------------ Obteniendo datos del editor
     def currentMode(self):
-        return len(self.__active_modes) > 0 and self.__active_modes[0]
+        return self.__modes[-1]
     
     def defaultMode(self):
-        return self.__active_modes[-1]
-
-    def previousMode(self, mode):
-        return mode in self.__active_modes and \
-            self.__active_modes[self.__active_modes.index(mode) + 1] or \
-            self.currentMode()
+        return self.__modes[0]
 
     def isModeActive(self, mode):
-        return mode in self.__active_modes
+        return mode in self.__modes
 
     def blockIndentation(self, block):
         return self.blockUserData(block).indentation
@@ -738,11 +730,21 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         painter.end()
     
+    # -------------- Event handling
+    def keyPress_handlers(self, key):
+        for mode in self.__modes[::-1]:
+            for handler in mode.keyPress_handlers(key):
+                yield handler
+     
+    def _handle_event(self, handlers, event):
+        for handler in handlers:
+            yield handler(event)
+                   
     def event(self, event):
-        mode = self.currentMode()
-        if mode and mode.handle(event):
+        if event.type() == QtCore.QEvent.KeyPress and \
+                any(self._handle_event(self.keyPress_handlers(event.key()), event)):
             return True
-        return super(CodeEditor, self).event(event) 
+        return super(CodeEditor, self).event(event)
 
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):

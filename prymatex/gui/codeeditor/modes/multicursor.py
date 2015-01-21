@@ -34,7 +34,6 @@ def _build_cursors(editor, s):
 class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def __init__(self, **kwargs):
         super(CodeEditorMultiCursorMode, self).__init__(**kwargs)
-        self.setAllowDefaultHandlers(False)
         self.draggedCursors = self.startPoint = None
         self.standardCursor = None
         self._hash = None

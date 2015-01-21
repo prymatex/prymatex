@@ -15,7 +15,6 @@ COMPLETER_CHARS = list(string.ascii_letters)
 class CodeEditorComplitionMode(CodeEditorBaseMode):
     def __init__(self, **kwargs):
         super(CodeEditorComplitionMode, self).__init__(**kwargs)
-        self.setAllowDefaultHandlers(False)
         self.completer = CodeEditorCompleter(self.editor)
         self.registerModel(TabTriggerItemsCompletionModel(parent = self.editor))
         self.registerModel(WordsCompletionModel(parent = self.editor))

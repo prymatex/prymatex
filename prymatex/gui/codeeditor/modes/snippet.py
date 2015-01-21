@@ -11,7 +11,6 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
     
     def initialize(self, **kwargs):
         super(CodeEditorSnippetMode, self).initialize(**kwargs)
-        self.setAllowDefaultHandlers(False)
         self.processor = self.editor.findProcessor("snippet")
         self.processor.begin.connect(self.activate)
         self.processor.end.connect(self.deactivate)
@@ -34,7 +33,7 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
             holderPositionBefore = cursor.selectionStart() - holderStart
             positionBefore = cursor.selectionStart()
             charactersBefore = cursor.document().characterCount()
-            
+            print(event.text())
             self.editor.keyPressEvent(event)
 
             positionAfter = cursor.position()

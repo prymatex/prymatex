@@ -22,23 +22,11 @@ class CodeEditorBaseMode(CodeEditorAddon):
             if handler in handlers:
                 handlers.remove(handler)
 
-    def handle(self, event):
-        if event.type() == QtCore.QEvent.KeyPress:
-            return any(self._handle(self.keyPress_handlers(event.key()), event))
-        return False
-
-    def _handle(self, handlers, event):
-        for handler in handlers:
-            yield handler(event)
-
     def keyPress_handlers(self, key):
         for _key, handlers in self.eventHandlers[QtCore.QEvent.KeyPress].items():
             if self.isActive() and _key in (key, QtCore.Qt.Key_Any):
                 for handler in handlers:
                     yield handler
-        if self != self.editor.defaultMode():
-            for handler in self.editor.previousMode(self).keyPress_handlers(key):
-                yield handler
 
     def name(self):
         return self.objectName()
