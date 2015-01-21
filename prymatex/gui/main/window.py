@@ -339,10 +339,8 @@ html_footer
         # TODO Clean history ?
 
     def addEditor(self, editor, focus=True):
-        current = self.currentEditor()
         self.centralWidget().addTabWidget(editor)
         editor.newLocationMemento.connect(self.on_editor_newLocationMemento)
-        self.tryCloseEmptyEditor(current)
         if focus:
             self.setCurrentEditor(editor)
         
@@ -437,7 +435,7 @@ html_footer
         self.deleteEditor(editor)
 
     def tryCloseEmptyEditor(self, editor):
-        if editor and not editor.hasFile() and not editor.isEmpty():
+        if not editor.hasFile() and editor.isEmpty():
             self.closeEditor(editor)
             return True
         return False
