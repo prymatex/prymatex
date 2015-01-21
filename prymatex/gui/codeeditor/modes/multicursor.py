@@ -90,14 +90,19 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     
     def __cursors_update(self, event):
         # TODO Separar lo que sea insertar texto de los shortcuts
-        cursors = self.cursors()
-        cursors[0].beginEditBlock()
+        if event.text():
+            new_cursors = [ ]
+            for cursor in self.cursors():
+                cursor.insertText(event.text())
+                new_cursors.append(cursor)
+            self.setCursors(_build_cursors(self.editor, _build_set(new_cursors)))
+            return True
         new_cursors = [ ]
-        for cursor in cursors:
+        for cursor in self.cursors():
             self.editor.setTextCursor(cursor)
-            super(self.editor.__class__, self.editor).keyPressEvent(event)
+            self.editor.keyPressEvent(event)
+            new_cursors.append(cursor)
             new_cursors.append(self.editor.textCursor())
-        cursors[0].endEditBlock()
         self.setCursors(_build_cursors(self.editor, _build_set(new_cursors)))
         return True
 

@@ -33,7 +33,6 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
             holderPositionBefore = cursor.selectionStart() - holderStart
             positionBefore = cursor.selectionStart()
             charactersBefore = cursor.document().characterCount()
-            print(event.text())
             self.editor.keyPressEvent(event)
 
             positionAfter = cursor.position()
