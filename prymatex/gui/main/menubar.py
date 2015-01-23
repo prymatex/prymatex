@@ -46,7 +46,7 @@ class PrymatexMainMenuBar(QtWidgets.QMenuBar):
             [ action.setEnabled(klass in components) for action in actions ]
 
     # Extend Main Menu
-    def extend(self, klass, parent = None):
+    def extend(self, klass, parent=None):
         # Build handlers
         dispatcher = partial(self.componentInstanceDispatcher, klass)
         sequence_handler = partial(self.registerShortcut, klass)

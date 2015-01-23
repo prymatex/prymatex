@@ -256,6 +256,10 @@ html_footer
             area = self.dockWidgetArea(dock)
             self.dockToolBars[area].show()
 
+    def showDistractionFreeMode(self):
+        self.showFullScreen()
+        self.showMenuBar = False
+
     # -------------- Notifications
     def showMessage(self, *largs, **kwargs):
         message = self.notifier.message(*largs, **kwargs)
