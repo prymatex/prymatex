@@ -3,14 +3,14 @@
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 
-from prymatex.qt.helpers.base import text2objectname
+from prymatex.qt.helpers.base import text_to_objectname
 import collections
 
 def create_toolbutton(parent, settings):
     """Create a QToolButton"""
     button = QtWidgets.QToolButton(parent)
     text = settings["text"] if "text" in settings else "No name"
-    button.setObjectName(text2objectname(text, prefix = "toolButton"))
+    button.setObjectName(text_to_objectname(text, prefix="toolButton"))
     button.setText(text)
     
     # attrs

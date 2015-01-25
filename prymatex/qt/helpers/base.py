@@ -6,14 +6,12 @@ import os, re
 import prymatex
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
-from prymatex.utils import text
+from prymatex.utils import text as textutils
 
-# &Text Button name -> %{prefix}TextButtonName%{sufix}
-text2objectname = lambda source, sufix = "", prefix = "": \
-    prefix + text.to_alphanumeric(text.text_to_camelcase(source.replace("&", ""))) + sufix
-
-text_to_objectname = text2objectname
-
+def text_to_objectname(value, prefix="", sufix=""):
+    """&Text Button name -> %{prefix}TextButtonName%{sufix}"""
+    return prefix + textutils.camelify(value.replace("&", "")) + sufix
+    
 def qapplication(translate=False):
     """Return QApplication instance creates it if it doesn't already exist"""
     app = QtWidgets.QApplication.instance()
