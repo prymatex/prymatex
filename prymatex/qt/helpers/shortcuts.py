@@ -7,11 +7,11 @@ from .base import text_to_objectname
 
 import collections
 
-def create_shortcut(parent, settings, dispatcher = None, sequence_handler=None):
+def create_shortcut(parent, settings, dispatcher=None, sequence_handler=None):
     """Create a QAction"""
     shortcut = QtWidgets.QShortcut(parent)
     name = settings.get("name", "None")
-    shortcut.setObjectName(text_to_objectname(name, prefix = "shortcut"))
+    shortcut.setObjectName(text_to_objectname(name, prefix="shortcut"))
     
     # attrs
     sequence = settings.get("sequence", name)
