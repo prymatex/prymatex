@@ -275,7 +275,7 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtWidgets.QDialo
         else:
             self.editTreeItem(None)
             
-    def configTreeView(self, manager = None):
+    def configTreeView(self, manager=None):
         self.proxyTreeModel.dataChanged.connect(self.on_proxyTreeModel_dataChanged)
         
         self.treeView.setModel(self.proxyTreeModel)

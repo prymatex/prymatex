@@ -5,9 +5,10 @@ import os
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 
+from prymatex.ui.configure.shortcuts import Ui_Shortcuts
 from prymatex.models.settings import SettingsTreeNode
 
-class ShortcutsSettingsWidget(SettingsTreeNode, QtWidgets.QWidget):
+class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget):
     """Environment variables"""
     NAMESPACE = "general"
 
@@ -16,21 +17,35 @@ class ShortcutsSettingsWidget(SettingsTreeNode, QtWidgets.QWidget):
         self.setupUi(self)
         self.setTitle("Shortcuts")
         self.setIcon(self.resources().get_icon("settings-shortcuts"))
+        self.shortcutsTreeModel = self.application().shortcutsTreeModel
+        self.configTreeView()
+        self.configActivation()
 
-    def setupUi(self, Shortcuts):
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(Shortcuts)
-        self.verticalLayout_2.setSpacing(2)
-        self.verticalLayout_2.setContentsMargins(QtCore.QMargins(0,0,0,0))
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.lineEditFilter = QtWidgets.QLineEdit(Shortcuts)
-        self.lineEditFilter.setReadOnly(True)
-        self.lineEditFilter.setObjectName("lineEditFilter")
-        self.verticalLayout_2.addWidget(self.lineEditFilter)
-        self.treeViewShortcuts = QtWidgets.QTreeView(Shortcuts)
-        self.treeViewShortcuts.setObjectName("treeViewShortcuts")
-        self.verticalLayout_2.addWidget(self.treeViewShortcuts)
-        QtCore.QMetaObject.connectSlotsByName(Shortcuts)
+    def configTreeView(self):
+        self.treeViewShortcuts.setModel(self.shortcutsTreeModel)
+        self.treeViewShortcuts.setAnimated(True)
+        self.treeViewShortcuts.selectionModel().selectionChanged.connect(
+            self.on_treeViewShortcuts_selectionChanged
+        )
 
+    def configActivation(self):
+        self.lineEditShortcut.installEventFilter(self)
+        
     def loadSettings(self):
         super(ShortcutsSettingsWidget, self).loadSettings()
-        self.treeViewShortcuts.setModel(self.application().shortcutsTreeModel)
+
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.KeyPress and obj == self.lineEditShortcut:
+            keyseq = QtGui.QKeySequence(int(event.modifiers()) + event.key())
+            self.stackedWidget.currentWidget().setKeySequence(keyseq)
+            self.lineEditShortcut.setText(keyseq.toString())
+            return True
+        return super(ShortcutsSettingsWidget, self).eventFilter(obj, event)
+
+    def on_treeViewShortcuts_selectionChanged(self, selected, deselected):
+        if selected.indexes():
+            index = selected.indexes()[0]
+            treeItem = self.shortcutsTreeModel.node(index)
+            shortcut = treeItem.shortcut()
+            self.lineEditShortcut.setEnabled(shortcut is not None)
+            self.lineEditShortcut.setText(shortcut and shortcut.toString() or "")
