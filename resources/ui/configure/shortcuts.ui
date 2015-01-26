@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Addons</class>
- <widget class="QWidget" name="Addons">
+ <class>Shortcuts</class>
+ <widget class="QWidget" name="Shortcuts">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>499</width>
+    <height>617</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,14 +21,84 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QLineEdit" name="lineEditFilter">
-     <property name="readOnly">
-      <bool>true</bool>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Keyboard Shortcuts</string>
      </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLineEdit" name="lineEditFilter">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTreeView" name="treeViewShortcuts"/>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="pushButtonResetAll">
+          <property name="text">
+           <string>Reset All</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonImport">
+          <property name="text">
+           <string>Import</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonExport">
+          <property name="text">
+           <string>Export</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="treeViewShortcuts"/>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Shortcut</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLineEdit" name="lineEditShortcut"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonCleanShortcut">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset theme="clear-shortcut">
+          <normaloff>../support</normaloff>../support</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
   </layout>
  </widget>
