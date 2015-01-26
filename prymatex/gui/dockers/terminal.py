@@ -23,10 +23,9 @@ SHEME_SCOPES = [ 'comment', 'string', 'constant.numeric', 'constantanguage',
     'support.type, support.class', 'support.other.variable', 'invalid' ]
 
 # Load color schemes
-ColorScheme.loadSchemes(os.path.join(config.PMX_SHARE_PATH, "Schemes"))
+ColorScheme.loadSchemes(os.path.join(config.PMX_SHARE_PATH, "TerminalSchemes"))
 
 class TabbedTerminal(QtWidgets.QTabWidget):
-    
     def __init__(self, parent=None):
         super(TabbedTerminal, self).__init__(parent)
         self.setTabPosition(QtWidgets.QTabWidget.South)
