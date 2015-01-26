@@ -6,14 +6,14 @@ from collections import namedtuple
 from prymatex.qt import QtGui
 from prymatex.qt.helpers import keybinding
 
-__all__ = ["ContextSequence"]
+__all__ = ["ContextKeySequence"]
 
-class ContextSequence(namedtuple("ContextSequence", "resource context name default description")):
+class ContextKeySequence(namedtuple("ContextKeySequence", "resource context name default description")):
     __slots__ = ()
     def isEmpty(self):
-        return self.key().isEmpty()
+        return self.keySequence().isEmpty()
 
-    def key(self):
+    def keySequence(self):
         sec = keybinding(self.name)
         if sec.isEmpty():
             keystr = self.resource.find_source(self.fullName(), 'Sequences')

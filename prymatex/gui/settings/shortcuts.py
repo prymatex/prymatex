@@ -34,18 +34,21 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
     def loadSettings(self):
         super(ShortcutsSettingsWidget, self).loadSettings()
 
+    def currentShortcut(self):
+        return self.shortcutsTreeModel.node(self.treeViewShortcuts.currentIndex())
+        
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress and obj == self.lineEditShortcut:
-            keyseq = QtGui.QKeySequence(int(event.modifiers()) + event.key())
-            self.stackedWidget.currentWidget().setKeySequence(keyseq)
-            self.lineEditShortcut.setText(keyseq.toString())
+            sequence = QtGui.QKeySequence(int(event.modifiers()) + event.key())
+            self.currentShortcut().setKeySequence(sequence)
+            self.lineEditShortcut.setText(sequence.toString())
             return True
         return super(ShortcutsSettingsWidget, self).eventFilter(obj, event)
 
     def on_treeViewShortcuts_selectionChanged(self, selected, deselected):
         if selected.indexes():
             index = selected.indexes()[0]
-            treeItem = self.shortcutsTreeModel.node(index)
-            shortcut = treeItem.shortcut()
-            self.lineEditShortcut.setEnabled(shortcut is not None)
-            self.lineEditShortcut.setText(shortcut and shortcut.toString() or "")
+            node = self.shortcutsTreeModel.node(index)
+            sequence = node.keySequence()
+            self.lineEditShortcut.setEnabled(sequence is not None)
+            self.lineEditShortcut.setText(sequence and sequence.toString() or "")

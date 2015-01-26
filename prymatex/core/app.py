@@ -545,7 +545,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         """
         if not isinstance(sequence, (tuple, list)):
             sequence = ("Global", sequence)
-        sequence = componentClass.resources().get_sequence(*sequence)
+        sequence = componentClass.resources().get_context_sequence(*sequence)
         if not sequence.isEmpty():
             self.shortcutsTreeModel.registerShortcut(qobject, sequence)
 
