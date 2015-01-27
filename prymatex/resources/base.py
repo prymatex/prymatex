@@ -39,7 +39,7 @@ def build_resource_key(path):
 _FileIconProvider = QtWidgets.QFileIconProvider()
 
 class Resource(dict):
-    def __init__(self, name, path, default = False):
+    def __init__(self, name, path, default=False):
         self._name = name
         self._path = path
         self._default = default
@@ -140,7 +140,7 @@ class ResourceProvider(object):
         logger.info("Unknown icon with %s key" % index)
         return fallback
 
-    def get_context_sequence(self, context, name, default = None, description = None):
+    def get_context_sequence(self, context, name, default=None, description=None):
         sequence = QtGui.QKeySequence()
         for res in self.resources:
             sequence = res.get_context_sequence(context, name, default, description)
@@ -150,8 +150,9 @@ class ResourceProvider(object):
 
     def _section(self, name):
         section = {}
-        for res in reversed(self.resources):
-            section.update(res[name])
+        for resource in reversed(self.resources):
+            if name in resource:
+                section.update(resource[name])
         return section
         
     def get_themes(self):
@@ -166,6 +167,12 @@ class ResourceProvider(object):
 
     def get_styles(self):
         return default_styles
+
+    def get_shortcuts(self):
+        return self._section("Shortcuts")
+        
+    def set_shortcuts(self, shortcuts):
+        print(shortcuts)
 
     def get_software_licenses(self):
         return LICENSES

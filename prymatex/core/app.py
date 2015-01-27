@@ -325,11 +325,17 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         for window in self.mainWindows():
             componentState["windows"].append(window.componentState())
         
+        componentState["shortcuts"] = self.resources().get_shortcuts()
+        print(componentState["shortcuts"])
+        
         return componentState
 
     def setComponentState(self, componentState):
         super(PrymatexApplication, self).setComponentState(componentState)
 
+        # Restore shortcuts
+        self.resources().set_shortcuts(componentState.get("shortcuts", {}))
+        
         # Restore open documents
         for windowState in componentState.get("windows", []):
             window = self.buildMainWindow()

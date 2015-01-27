@@ -21,18 +21,23 @@ class ContextKeySequenceTreeNode(TreeNodeBase):
         self.context_sequence = context_sequence
         self.qobjects = []
 
-    def registerObject(self, qobject):
+    def _set_shortcut(self, qobject):
         if isinstance(qobject, QtWidgets.QAction):
             qobject.setShortcut(self.context_sequence.keySequence())
         elif isinstance(qobject, QtWidgets.QShortcut):
             qobject.setKey(self.context_sequence.keySequence())
+            
+    def registerObject(self, qobject):
         self.qobjects.append(qobject)
+        self._set_shortcut(qobject)
 
     def keySequence(self):
         return self.context_sequence.keySequence()
     
     def setKeySequence(self, sequence):
-        print(sequence)
+        self.context_sequence.setKeySequence(sequence)
+        for qobject in self.qobjects:
+            self._set_shortcut(qobject)
 
     def description(self):
         return self.context_sequence.description

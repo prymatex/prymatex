@@ -14,13 +14,17 @@ class ContextKeySequence(namedtuple("ContextKeySequence", "resource context name
         return self.keySequence().isEmpty()
 
     def keySequence(self):
-        sec = keybinding(self.name)
-        if sec.isEmpty():
-            keystr = self.resource.find_source(self.fullName(), 'Sequences')
-            sec = QtGui.QKeySequence.fromString(keystr or "")
-        if sec.isEmpty():
-            sec = QtGui.QKeySequence.fromString(self.default or "")
-        return sec
+        sequence = keybinding(self.name)
+        if sequence.isEmpty():
+            keystr = self.resource.find_source(self.fullName(), 'Shortcuts')
+            sequence = QtGui.QKeySequence.fromString(keystr or "")
+        if sequence.isEmpty():
+            sequence = QtGui.QKeySequence.fromString(self.default or "")
+        return sequence
+
+    def setKeySequence(self, sequence):
+        shortcuts = self.resource.setdefault('Shortcuts', {})
+        shortcuts[self.fullName()] = sequence.toString()
 
     def fullName(self):
         return '%s.%s' % (self.context, self.name)

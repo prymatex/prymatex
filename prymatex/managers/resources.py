@@ -3,8 +3,8 @@
 from prymatex.qt import QtCore, QtGui
 from prymatex.core import PrymatexComponent
 
-from prymatex.resources import (Resource, ResourceProvider, 
-    load_media, load_fonts, load_stylesheets)
+from prymatex.resources import (Resource, ResourceProvider, load_media,
+    load_fonts, load_stylesheets)
 
 class ResourceManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
@@ -12,7 +12,7 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
         self.resources = []
         self.providers = {}
         
-    def add_source(self, name, path, default = False):
+    def add_source(self, name, path, default=False):
         res = Resource(name, path, default)
         res.update(load_fonts(path))
         res.update(load_media(path))
@@ -21,8 +21,9 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
 
     def get_provider(self, sources):
         if sources not in self.providers:
-            resources = [ res for res in self.resources if res.name() in sources ]
-            self.providers[sources] = ResourceProvider(resources)
+            self.providers[sources] = ResourceProvider(
+                [ res for res in self.resources if res.name() in sources ]
+            )
         return self.providers[sources]
 
     def defaults(self):
