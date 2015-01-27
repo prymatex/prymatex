@@ -63,7 +63,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
         #self._event_loop = QEventLoop(self)
         #asyncio.set_event_loop(self._event_loop)
-        
+
+	# Base Managers
+        self.resourceManager = self.profileManager = self.pluginManager = None
         # Windows
         self._main_windows = []
 
@@ -110,7 +112,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     def applyOptions(self, options):
         # The basic managers
         self.options = options
-        self.resourceManager = self.profileManager = self.pluginManager = None        
         
         # Prepare resources
         from prymatex.managers.resources import ResourceManager
@@ -124,8 +125,13 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         self.profileManager = self.createComponentInstance(ProfileManager, parent=self)
         self.profileManager.install_current_profile(options.profile)
 
-        # Prepare settings for application
         self.populateComponentClass(PrymatexApplication)
+
+        # Settings for profile
+        self.profile().registerConfigurableInstance(self.profileManager)        
+        # Settings for resources
+        self.profile().registerConfigurableInstance(self.resourceManager)
+        # Settings for application
         self.profile().registerConfigurableInstance(self)
 
         if self.options.reset_settings:
@@ -150,9 +156,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import GeneralSettingsWidget
-        from prymatex.gui.settings.shortcuts import ShortcutsSettingsWidget
 
-        return [GeneralSettingsWidget, ShortcutsSettingsWidget]
+        return [ GeneralSettingsWidget ]
 
     def environmentVariables(self):
         env = {

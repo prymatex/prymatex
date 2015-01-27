@@ -11,6 +11,12 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
         super(ResourceManager, self).__init__(**kwargs)
         self.resources = []
         self.providers = {}
+    
+    @classmethod
+    def contributeToSettings(cls):
+        from prymatex.gui.settings.shortcuts import ShortcutsSettingsWidget
+
+        return [ShortcutsSettingsWidget]
         
     def add_source(self, name, path, default=False):
         res = Resource(name, path, default)
