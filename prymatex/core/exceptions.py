@@ -5,10 +5,20 @@
 
 from prymatex.utils.i18n import ugettext as _
 
-class AlreadyRunningError(Exception):
-    title = _('Application already running')
+class PrymatexException(Exception):
+    title = ''
+    
+    def __init__(self, message, *args):
+        super(PrymatexException, self).__init__(*args)
+        self.message = message
 
-class UnsupportedPlatformError(Exception):
+    def __str__(self):
+        return "%s: %s" % (self.title, self.message)
+
+class AlreadyRunningError(PrymatexException):
+    title = _('Already running')
+
+class UnsupportedPlatformError(PrymatexException):
     pass
     
 class APIUsageError(Exception):

@@ -34,8 +34,7 @@ def runPrymatexApplication(options, files):
             prymatexAppInstance.unloadGraphicalUserInterface()
             del prymatexAppInstance
         prymatexAppInstance = PrymatexApplication.instance(instanceOptions, argv = sys.argv)
-        if not prymatexAppInstance.checkSingleInstance():
-            return 0
+        prymatexAppInstance.checkSingleInstance()
         prymatexAppInstance.loadGraphicalUserInterface()
         # ---- Open files
         for path in files:
@@ -50,16 +49,11 @@ def runPrymatexApplication(options, files):
             options.profile, files = "", []
     except exceptions.EnviromentNotSuitable as ex:
         print(ex)
-        print("Prymatex can't run. Basic imports can't be found. Running in virtualenv?")
         returnCode = -1
 
     except exceptions.AlreadyRunningError as ex:
-        from prymatex.qt import QtWidgets
-        QtWidgets.QMessageBox.critical(
-            None, ex.title, ex.message, QtWidgets.QMessageBox.Ok
-        )
+        print(ex)
         returnCode = -2
-
     except:
         from traceback import format_exc
         traceback = format_exc()

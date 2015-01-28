@@ -10,7 +10,7 @@ import prymatex
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import create_shortcut
 
-from prymatex.core import config
+from prymatex.core import config, exceptions
 from prymatex.core.components import PrymatexComponent, PrymatexEditor
 from prymatex.core import logger
 from prymatex.core.settings import ConfigurableItem, ConfigurableHook
@@ -280,7 +280,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     def checkSingleInstance(self):
         """Checks if there's another instance using current profile"""
         self.fileLock = os.path.join(self.profile().PMX_PROFILE_PATH, 'prymatex.pid')
-        remove_profile_lock = False
         if os.path.exists(self.fileLock):
             with open(self.fileLock) as fp:
                 pid = fp.read()
@@ -288,24 +287,18 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
                 pid = int(pid)
             except ValueError:
                 self.logger().debug("Prymatex might have not closed cleanly last "
-                                       "session")
-                remove_profile_lock = True
+                    "session")
             else:
                 if pid in get_process_map():
-                    self.logger().critical("%s seems to be running. Please close the "
-                                           "instance or run other profile." %
-                                           (self.profile().PMX_PROFILE_NAME,))
-                    remove_profile_lock = False
-                else:
-                    remove_profile_lock = True
-        if remove_profile_lock:
+                    raise exceptions.AlreadyRunningError("The '%s' profile seems to be running. Please close the "
+                                "instance or run other profile." %
+                                (self.profile().PMX_PROFILE_NAME,))
             os.remove(self.fileLock)
 
         f = open(self.fileLock, 'w')
         f.write('%s' % self.applicationPid())
         f.close()
-        return True
-
+        
     # -------------------- Managers
     def buildPluginManager(self):
         from prymatex.managers.plugins import PluginManager
@@ -386,7 +379,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     # --------------------- Populate components
     def populateComponentClass(self, componentClass):
         if hasattr(componentClass, '_application'):
-            print("Ya esta listo, no te repitas con", componentClass)
             return
 
         # ------- Application
