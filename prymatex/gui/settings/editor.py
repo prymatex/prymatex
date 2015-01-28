@@ -26,15 +26,16 @@ class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtWidgets.QWidget):
 
         for check, flag in self.checks:
             check.clicked.connect(self.on_editorFlags_clicked)
+	
+    def loadSettings(self):
+        super(EditorSettingsWidget, self).loadSettings()
 
         # Get addons groups from profile
         self.bookmarksBarGroup = self.profile.settingsForClass(BookmarkSideBarAddon)
         self.lineNumberBarGroup = self.profile.settingsForClass(LineNumberSideBarAddon)
         self.foldingBarGroup = self.profile.settingsForClass(FoldingSideBarAddon)
         self.selectionBarGroup = self.profile.settingsForClass(SelectionSideBarAddon)
-	
-    def loadSettings(self):
-        super(EditorSettingsWidget, self).loadSettings()
+
         self.comboBoxDefaultSyntax.setModel(self.application().supportManager.syntaxProxyModel)
         self.comboBoxDefaultSyntax.setModelColumn(0)
 

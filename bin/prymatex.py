@@ -28,13 +28,13 @@ def runPrymatexApplication(options, files):
     from prymatex.core.app import PrymatexApplication
     from prymatex.core import exceptions
     
-    def runPrymatexInstance(instanceOptions, instanceFiles = []):
+    def runPrymatexInstance(instanceOptions, instanceFiles=[]):
         global prymatexAppInstance
         if prymatexAppInstance is not None:
             prymatexAppInstance.unloadGraphicalUserInterface()
             del prymatexAppInstance
-        prymatexAppInstance = PrymatexApplication(argv = sys.argv)
-        if not prymatexAppInstance.applyOptions(instanceOptions):
+        prymatexAppInstance = PrymatexApplication.instance(instanceOptions, argv = sys.argv)
+        if not prymatexAppInstance.checkSingleInstance():
             return 0
         prymatexAppInstance.loadGraphicalUserInterface()
         # ---- Open files

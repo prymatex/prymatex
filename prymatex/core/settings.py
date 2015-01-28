@@ -52,9 +52,7 @@ class SettingsGroup(object):
         self.configurableHooks = {}
         # Hooks
         self.hooks = {}
-        # Dialogs
-        self.dialogs = []
-
+        
     def groupName(self):
         return self.__groupName
 
@@ -110,9 +108,6 @@ class SettingsGroup(object):
         hooks = self.hooks.setdefault(name, [])
         if handler in hooks:
             hooks.remove(handler)
-
-    def addDialog(self, dialog):
-        self.dialogs.append(dialog)
 
     def configure(self, obj):
         for name, item in self.configurableItems.items():

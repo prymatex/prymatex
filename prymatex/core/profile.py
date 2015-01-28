@@ -40,7 +40,7 @@ class PrymatexProfile(object):
 
     # ------------------------ Setting Groups
     def __group_name(self, configurableClass):
-        if hasattr(configurableClass, '_settings'):
+        if configurableClass._settings is not None:
             return configurableClass._settings.groupName()
         return getattr(configurableClass, 'SETTINGS', configurableClass.__name__)
 

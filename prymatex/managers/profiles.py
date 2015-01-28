@@ -15,8 +15,6 @@ from prymatex.core.config import PMX_PROFILES_PATH
 from prymatex.core import PrymatexComponent
 
 from prymatex.models.profiles import ProfilesListModel
-from prymatex.models.settings import SettingsTreeModel
-from prymatex.models.settings import SortFilterSettingsProxyModel
 
 from prymatex.gui.dialogs.profile import ProfileDialog
 
@@ -48,11 +46,6 @@ class ProfileManager(PrymatexComponent, QtCore.QObject):
         else:
             self.createProfile(self.DEFAULT_PROFILE_NAME, default = True)
 
-        # Setting models        
-        self.settingsTreeModel = SettingsTreeModel(parent = self)
-        self.sortFilterSettingsProxyModel = SortFilterSettingsProxyModel(parent = self)
-        self.sortFilterSettingsProxyModel.setSourceModel(self.settingsTreeModel)
-
     # --------------- Profile
     def saveProfiles(self):
         config = configparser.RawConfigParser()
@@ -80,7 +73,8 @@ class ProfileManager(PrymatexComponent, QtCore.QObject):
             self.saveProfiles()
             return profile
 
-    def install_current_profile(self, suggested = None):
+    def install(self):
+        suggested = self.application().options.profile
         if suggested is None or not self.__dontAsk:
             self.__current_profile = ProfileDialog.selectStartupProfile(self)
         elif suggested == "":
@@ -134,11 +128,3 @@ class ProfileManager(PrymatexComponent, QtCore.QObject):
             if profile.PMX_PROFILE_DEFAULT:
                 return profile
 
-    # ------------------- Settings
-    def registerSettingsWidget(self, widget):
-        self.settingsTreeModel.addConfigNode(widget)
-
-    def loadSettings(self, messageHandler = None):
-        self.messageHandler = messageHandler
-        self.settingsTreeModel.loadSettings()
-        self.messageHandler = None
