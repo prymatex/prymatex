@@ -161,20 +161,21 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     themeChanged = QtCore.Signal(object)
     
     #Settings
-    shellVariables = ConfigurableItem(default = [], tm_name = 'OakShelVariables')
+    shellVariables = ConfigurableItem(default=[], tm_name='OakShelVariables')
     
-    @ConfigurableItem(default = [], tm_name = 'OakBundleManagerDeletedBundles')
+    @ConfigurableItem(default=[], tm_name='OakBundleManagerDeletedBundles')
     def deleted(self, deleted):
         self.deletedObjects = [uuidmodule.UUID(uuid) for uuid in deleted]
         
-    @ConfigurableItem(default = [], tm_name = 'OakBundleManagerDeletedBundles')
+    @ConfigurableItem(default=[], tm_name='OakBundleManagerDeletedBundles')
     def disabled(self, disabled):
         self.disabledObjects = [uuidmodule.UUID(uuid) for uuid in disabled]
     
     #http://manual.macromates.com/en/expert_preferences.html
     #When you create a new item in the bundle editor without having selected a bundle first, then the bundle with the UUID held by this defaults key is used as the target
     defaultBundleForNewBundleItems = ConfigurableItem(default = 'B7BC3FFD-6E4B-11D9-91AF-000D93589AF6', tm_name = 'OakDefaultBundleForNewBundleItems')
-        
+    
+    # ------------- Settings
     SETTINGS = 'SupportManager'
     
     def __init__(self, **kwargs):
@@ -333,7 +334,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         """
         self.deletedObjects.append(uuid)
         deleted = [str(uuid).upper() for uuid in self.deletedObjects]
-        self.settings.setValue('deleted', deleted)
+        self.settings().setValue('deleted', deleted)
 
     def isDeleted(self, uuid):
         return uuid in self.deletedObjects
@@ -344,12 +345,12 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def setDisabled(self, uuid):
         self.disabledObjects.append(uuid)
         disabled = [str(uuid).upper() for uuid in self.disabledObjects]
-        self.settings.setValue('disabled', disabled)
+        self.settings().setValue('disabled', disabled)
         
     def setEnabled(self, uuid):
         self.disabledObjects.remove(uuid)
         disabled = [str(uuid).upper() for uuid in self.disabledObjects]
-        self.settings.setValue('disabled', disabled)
+        self.settings().setValue('disabled', disabled)
     
     #---------------------------------------------------
     # BUNDLE OVERRIDE INTERFACE 

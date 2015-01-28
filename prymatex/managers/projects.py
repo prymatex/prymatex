@@ -26,7 +26,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
     projectClose = QtCore.Signal(object)
     projectOpen = QtCore.Signal(object)
 
-    #Settings
+    # ------------- Settings
     SETTINGS = 'ProjectManager'
 
     defaultDirectory  = ConfigurableItem(default = os.path.join(get_home_dir(), "Projects"))

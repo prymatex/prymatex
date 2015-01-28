@@ -16,6 +16,9 @@ from prymatex.support.properties import *
 from prymatex.utils.fnmatch import translate
 
 class PropertyManager(PrymatexComponent, QtCore.QObject):
+    # ------------- Settings
+    SETTINGS = 'PropertyManager'
+    
     def __init__(self, **kwargs):
         super(PropertyManager, self).__init__(**kwargs)
         self._parsers = {}

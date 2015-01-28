@@ -30,10 +30,7 @@ class PluginDescriptor(object):
             setattr(self, key, value)
         
 class PluginManager(PrymatexComponent, QtCore.QObject):
-    
-    #=========================================================
-    # Settings
-    #=========================================================
+    # ------------- Settings
     SETTINGS = 'PluginManager'
     
     def __init__(self, **kwargs):
@@ -53,8 +50,8 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
         return [ PluginsSettingsWidget ]
 
     def install(self):
-         for source in self.resources().sources():
-            self.addNamespace(source.name(), source.path())
+         for ns, path in config.NAMESPACES:
+            self.addNamespace(ns, path)
 
     def addNamespace(self, name, base_path):
         #TODO Validar que existe el base_path + PMX_PLUGINS_NAME

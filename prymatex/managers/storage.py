@@ -71,6 +71,9 @@ class MemoryStorage(dict, ManagedStorage):
     pass
 
 class StorageManager(PrymatexComponent, QtCore.QObject):
+    # ------------- Settings
+    SETTINGS = 'StorageManager'
+    
     def __init__(self, **kwargs):
         super(StorageManager, self).__init__(**kwargs)
         self.cacheDirectory = self.application().profile().value('PMX_CACHE_PATH')

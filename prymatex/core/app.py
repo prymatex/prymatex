@@ -141,8 +141,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         app.profileManager = ProfileManager(parent=app)
         app.pluginManager = PluginManager(parent=app)
         
-        app.profileManager.install()
         app.resourceManager.install()
+        app.profileManager.install()
         app.pluginManager.install()
         
         # Populate configurable
@@ -300,22 +300,12 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         f.close()
         
     # -------------------- Managers
-    def buildPluginManager(self):
-        from prymatex.managers.plugins import PluginManager
-        manager = self.createComponentInstance(PluginManager, parent=self)
-        
-        for source in self.resources().sources():
-            manager.addNamespace(source.name(), source.path())
-
-        manager.loadPlugins()
-        return manager
-
     def buildSupportManager(self):
         from prymatex.managers.support import SupportManager
         manager = self.createComponentInstance(SupportManager, parent=self)
 
-        for source in reversed(self.resources().sources()):
-            manager.addNamespace(source.name(), source.path())
+        for ns, path in reversed(config.NAMESPACES):
+            manager.addNamespace(ns, path)
 
         return manager
 
@@ -350,17 +340,11 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         for window in self.mainWindows():
             componentState["windows"].append(window.componentState())
         
-        componentState["shortcuts"] = self.resources().get_shortcuts()
-        print(componentState["shortcuts"])
-        
         return componentState
 
     def setComponentState(self, componentState):
         super(PrymatexApplication, self).setComponentState(componentState)
 
-        # Restore shortcuts
-        self.resources().set_shortcuts(componentState.get("shortcuts", {}))
-        
         # Restore open documents
         for windowState in componentState.get("windows", []):
             window = self.buildMainWindow()

@@ -39,7 +39,7 @@ def build_resource_key(path):
 _FileIconProvider = QtWidgets.QFileIconProvider()
 
 class Resource(dict):
-    def __init__(self, name, path, default=False):
+    def __init__(self, name, path=None, default=False):
         self._name = name
         self._path = path
         self._default = default
