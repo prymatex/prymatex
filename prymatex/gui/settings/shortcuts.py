@@ -45,8 +45,6 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
             if sequence:
                 self.currentShortcut().setKeySequence(sequence)
                 self.lineEditShortcut.setText(sequence.toString())
-                shortcuts = self.shortcutsTreeModel.dictionary()
-                self.settings.setValue('shortcuts', shortcuts)
             return True
         return super(ShortcutsSettingsWidget, self).eventFilter(obj, event)
 
@@ -60,6 +58,10 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
             self.lineEditShortcut.selectAll()
             self.lineEditShortcut.setFocus()
     
+    def _set_shortcuts_to_settings(self):
+        shortcuts = self.shortcutsTreeModel.dictionary()
+        self.settings.setValue('shortcuts', shortcuts)
+        
     # ---------- AUTOCONNECT: Button Export
     def on_pushButtonExport_pressed(self):
         shortcuts = self.shortcutsTreeModel.dictionary(defaults=True)
@@ -71,5 +73,6 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
         
     def on_pushButtonResetAll_pressed(self):
         for shortcut in self.shortcutsTreeModel.shortcuts():
-            print(shortcut)
+            shortcut.resetKeySequence()
+        self._set_shortcuts_to_settings()
         
