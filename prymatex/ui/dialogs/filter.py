@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/dialogs/filter.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dialogs/filter.ui'
 #
-# Created: Thu Dec 11 08:36:23 2014
+# Created: Thu Jan 29 12:30:37 2015
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
