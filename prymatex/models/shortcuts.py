@@ -9,12 +9,13 @@ from prymatex.models.trees import AbstractNamespaceTreeModel, TreeNodeBase
 class ContextTreeNode(TreeNodeBase):
     def __init__(self, name, parent = None):
         TreeNodeBase.__init__(self, name, parent)
+        self.sequence = QtGui.QKeySequence()
 
     def keySequence(self):
-        return None
+        return self.sequence
 
     def description(self):
-        return None
+        return ""
         
 class ContextKeySequenceTreeNode(TreeNodeBase):
     def __init__(self, sequence, parent = None):
@@ -105,4 +106,4 @@ class ShortcutsTreeModel(AbstractNamespaceTreeModel):
             elif index.column() == 1:
                 return node.description()
             elif index.column() == 2:
-                return node.keySequence()
+                return node.keySequence().toString()
