@@ -9,14 +9,9 @@ from prymatex.resources import (Resource, ResourceProvider, load_media,
 class ResourceManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
         super(ResourceManager, self).__init__(**kwargs)
+        self.base = None
         self.resources = []
         self.providers = {}
-    
-    @classmethod
-    def contributeToSettings(cls):
-        from prymatex.gui.settings.shortcuts import ShortcutsSettingsWidget
-
-        return [ShortcutsSettingsWidget]
         
     def add_source(self, name, path, default=False):
         res = Resource(name, path, default)
@@ -28,7 +23,7 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
     def get_provider(self, sources):
         if sources not in self.providers:
             self.providers[sources] = ResourceProvider(
-                [ res for res in self.resources if res.name() in sources ]
+                [ res for res in self.resources if res.name() in sources ] + [ self.base ]
             )
         return self.providers[sources]
 
@@ -43,9 +38,8 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
         # Icon Handler
         QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
         QtGui.QIcon.fromTheme = self.icon_from_theme
-        # Namespaces
-        for ns, path in config.NAMESPACES:
-            self.add_source(ns, path, True)
+        
+        self.base = Resource('base')
 
     def icon_from_theme(self, index):
         # TODO: default provider

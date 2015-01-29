@@ -38,7 +38,7 @@ def build_resource_key(path):
 _FileIconProvider = QtWidgets.QFileIconProvider()
 
 class Resource(dict):
-    def __init__(self, name, path, default=False):
+    def __init__(self, name, path=None, default=False):
         self._name = name
         self._path = path
         self._default = default
@@ -115,6 +115,14 @@ class ResourceProvider(object):
     def sources(self):
         return self.resources[:]
 
+    def _section(self, name):
+        section = {}
+        for resource in reversed(self.resources):
+            if name in resource:
+                section.update(resource[name])
+        return section
+    
+    # ------------- Get data
     def get_image(self, index, fallback = None):
         fallback = fallback or QtGui.QPixmap()
         for res in self.resources:
@@ -133,20 +141,9 @@ class ResourceProvider(object):
                 return icon
         logger.info("Unknown icon with %s key" % index)
         return fallback
-
-    def _section(self, name):
-        section = {}
-        for resource in reversed(self.resources):
-            if name in resource:
-                section.update(resource[name])
-        return section
-        
+    
     def get_themes(self):
         return self._section("Themes")
-
-    def set_theme(self, name):
-        for res in self.resources:
-            res.set_theme(name)
 
     def get_stylesheets(self):
         return self._section("StyleSheets")
@@ -157,8 +154,13 @@ class ResourceProvider(object):
     def get_shortcuts(self):
         return self._section("Shortcuts")
         
-    def set_shortcuts(self, shortcuts):
-        print(shortcuts)
-
     def get_software_licenses(self):
         return LICENSES
+
+    # --------- Some sets
+    def set_shortcuts(self, shortcuts):
+        self.resources[-1]["Shortcuts"] = shortcuts
+    
+    def set_theme(self, name):
+        for res in self.resources:
+            res.set_theme(name)

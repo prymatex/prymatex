@@ -64,23 +64,6 @@ class ShortcutsTreeModel(AbstractNamespaceTreeModel):
             self.insertNamespaceNode(sequence.context(), node)
         node.registerObject(qobject)
 
-    def _applyShortcuts(self):
-        """Apply shortcuts settings to all widgets/plugins
-        """
-        # TODO Usar los item del tree
-        toberemoved = []
-        for index, (qobject, sequence) in enumerate(self.shortcuts):
-            try:
-                if isinstance(qobject, QtWidgets.QAction):
-                    qobject.setShortcut(sequence)
-                elif isinstance(qobject, QtWidgets.QShortcut):
-                    qobject.setKey(sequence)
-            except RuntimeError:
-                # Object has been deleted
-                toberemoved.append(index)
-        for index in sorted(toberemoved, reverse=True):
-            self.shortcuts.pop(index)
-
     def treeNodeFactory(self, name, parent = None):
         return ContextTreeNode(name, parent)
         

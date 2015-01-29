@@ -51,6 +51,10 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     askAboutExternalDeletions = ConfigurableItem(default=False)
     askAboutExternalChanges = ConfigurableItem(default=False)
 
+    @ConfigurableItem(default={})
+    def shortcuts(self, shortcuts):
+        self.resources().set_shortcuts(shortcuts)
+        
     RESTART_CODE = 1000
 
     def __init__(self, options, *args, **kwargs):
@@ -144,7 +148,11 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         
         app.profileManager.install()
         app.resourceManager.install()
-        app.pluginManager.install()
+        
+        # Namespaces
+        for ns, path in config.NAMESPACES:
+            app.resourceManager.add_source(ns, path, True)
+            app.pluginManager.addNamespace(ns, path)
         
         # Populate configurable
         app.populateConfigurableClass(ResourceManager)
@@ -183,8 +191,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import GeneralSettingsWidget
+        from prymatex.gui.settings.shortcuts import ShortcutsSettingsWidget
 
-        return [ GeneralSettingsWidget ]
+        return [ GeneralSettingsWidget, ShortcutsSettingsWidget ]
 
     def environmentVariables(self):
         env = {
@@ -301,22 +310,12 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         f.close()
         
     # -------------------- Managers
-    def buildPluginManager(self):
-        from prymatex.managers.plugins import PluginManager
-        manager = self.createComponentInstance(PluginManager, parent=self)
-        
-        for source in self.resources().sources():
-            manager.addNamespace(source.name(), source.path())
-
-        manager.loadPlugins()
-        return manager
-
     def buildSupportManager(self):
         from prymatex.managers.support import SupportManager
         manager = self.createComponentInstance(SupportManager, parent=self)
 
-        for source in reversed(self.resources().sources()):
-            manager.addNamespace(source.name(), source.path())
+        for ns, path in reversed(config.NAMESPACES):
+            manager.addNamespace(ns, path)
 
         return manager
 
