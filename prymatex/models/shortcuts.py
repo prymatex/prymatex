@@ -40,10 +40,9 @@ class ContextKeySequenceTreeNode(TreeNodeBase):
         return self.sequence
 
     def setKeySequence(self, sequence):
-        self.sequence.swap(sequence)
-        # TODO Veamos si funciona esto
-        #for qobject in self.qobjects:
-        #    self._set_shortcut(qobject)
+        self.sequence.swap(QtGui.QKeySequence(sequence))
+        for qobject in self.qobjects:
+            self._set_shortcut(qobject)
 
     def description(self):
         return self.sequence.description()
@@ -80,7 +79,7 @@ class ShortcutsTreeModel(AbstractNamespaceTreeModel):
     def dictionary(self, defaults=False):
         return { node.identifier(): node.toString() \
             for node in self.nodes() \
-            if isinstance(node, ContextKeySequenceTreeNode) and (defaults or node.isDefault()) 
+            if isinstance(node, ContextKeySequenceTreeNode) and (defaults or not node.isDefault()) 
         }
 
     def treeNodeFactory(self, name, parent=None):

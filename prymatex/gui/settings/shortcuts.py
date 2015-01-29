@@ -4,7 +4,7 @@
 import os
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
-
+from prymatex.qt.helpers import keyevent_to_keysequence
 from prymatex.ui.configure.shortcuts import Ui_Shortcuts
 from prymatex.models.settings import SettingsTreeNode
 
@@ -39,11 +39,15 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
         
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress and obj == self.lineEditShortcut:
-            sequence = QtGui.QKeySequence(int(event.modifiers()) + event.key())
-            self.currentShortcut().setKeySequence(sequence)
-            self.lineEditShortcut.setText(sequence.toString())
-            shortcuts = self.shortcutsTreeModel.dictionary()
-            print(shortcuts)
+            if not self.lineEditShortcut.hasSelectedText():
+                currents = self.lineEditShortcut.text().split(', ')
+                sequence = keyevent_to_keysequence(event, prefixes=currents)
+            else:
+                sequence = keyevent_to_keysequence(event)
+            if sequence:
+                self.currentShortcut().setKeySequence(sequence)
+                self.lineEditShortcut.setText(sequence)
+                shortcuts = self.shortcutsTreeModel.dictionary()
             return True
         return super(ShortcutsSettingsWidget, self).eventFilter(obj, event)
 
@@ -54,6 +58,8 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
             # TODO Mejorar esto del _isproxy
             self.lineEditShortcut.setEnabled(not node._isproxy)
             self.lineEditShortcut.setText(node.toString())
+            self.lineEditShortcut.selectAll()
+            self.lineEditShortcut.setFocus()
     
     # ---------- AUTOCONNECT: Button Export
     def on_pushButtonExport_pressed(self):
