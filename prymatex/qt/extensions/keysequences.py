@@ -16,6 +16,9 @@ class ContextKeySequence(QtGui.QKeySequence):
             self._default = QtGui.QKeySequence.fromString(default)
         super(ContextKeySequence, self).__init__(self._default)
 
+    def isDefault(self):
+        return self == self._default
+
     def name(self):
         return self._name
         

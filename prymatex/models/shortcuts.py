@@ -31,18 +31,19 @@ class ContextKeySequenceTreeNode(TreeNodeBase):
             qobject.setShortcut(self.sequence)
         elif isinstance(qobject, QtWidgets.QShortcut):
             qobject.setKey(self.sequence)
-            
+
     def registerObject(self, qobject):
         self.qobjects.append(qobject)
         self._set_shortcut(qobject)
 
     def keySequence(self):
         return self.sequence
-    
+
     def setKeySequence(self, sequence):
         self.sequence.swap(sequence)
-        for qobject in self.qobjects:
-            self._set_shortcut(qobject)
+        # TODO Veamos si funciona esto
+        #for qobject in self.qobjects:
+        #    self._set_shortcut(qobject)
 
     def description(self):
         return self.sequence.description()
@@ -52,7 +53,10 @@ class ContextKeySequenceTreeNode(TreeNodeBase):
         
     def toString(self):
         return self.sequence.toString()
-
+        
+    def isDefault(self):
+        return self.sequence.isDefault()
+        
 class ShortcutsTreeModel(AbstractNamespaceTreeModel):
     def __init__(self, parent=None):
         AbstractNamespaceTreeModel.__init__(self, separator=".", parent=parent)
@@ -73,10 +77,13 @@ class ShortcutsTreeModel(AbstractNamespaceTreeModel):
             self.insertNamespaceNode(sequence.context(), node)
         node.registerObject(qobject)
 
-    def dictionary(self):
-        return { node.identifier(): node.toString() for node in self.nodes() if isinstance(node, ContextKeySequenceTreeNode) }
+    def dictionary(self, defaults=False):
+        return { node.identifier(): node.toString() \
+            for node in self.nodes() \
+            if isinstance(node, ContextKeySequenceTreeNode) and (defaults or node.isDefault()) 
+        }
 
-    def treeNodeFactory(self, name, parent = None):
+    def treeNodeFactory(self, name, parent=None):
         return ContextTreeNode(name, parent)
         
     # -------------- Override Tree Methods

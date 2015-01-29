@@ -42,6 +42,8 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
             sequence = QtGui.QKeySequence(int(event.modifiers()) + event.key())
             self.currentShortcut().setKeySequence(sequence)
             self.lineEditShortcut.setText(sequence.toString())
+            shortcuts = self.shortcutsTreeModel.dictionary()
+            print(shortcuts)
             return True
         return super(ShortcutsSettingsWidget, self).eventFilter(obj, event)
 
@@ -49,20 +51,20 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
         if selected.indexes():
             index = selected.indexes()[0]
             node = self.shortcutsTreeModel.node(index)
-            sequence = node.keySequence()
-            self.lineEditShortcut.setEnabled(sequence is not None)
-            self.lineEditShortcut.setText(sequence and sequence.toString() or "")
+            # TODO Mejorar esto del _isproxy
+            self.lineEditShortcut.setEnabled(not node._isproxy)
+            self.lineEditShortcut.setText(node.toString())
     
     # ---------- AUTOCONNECT: Button Export
     def on_pushButtonExport_pressed(self):
-        shortcuts = self.shortcutsTreeModel.dictionary()
+        shortcuts = self.shortcutsTreeModel.dictionary(defaults=True)
         print(shortcuts)
         
     def on_pushButtonImport_pressed(self):
-        shortcuts = self.shortcutsTreeModel.dictionary()
+        shortcuts = self.shortcutsTreeModel.dictionary(defaults=True)
         print(shortcuts)
         
     def on_pushButtonResetAll_pressed(self):
-        shortcuts = self.shortcutsTreeModel.dictionary()
+        shortcuts = self.shortcutsTreeModel.dictionary(defaults=True)
         print(shortcuts)
         
