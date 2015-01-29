@@ -27,12 +27,16 @@ class ContextKeySequenceTreeNode(TreeNodeBase):
         self.qobjects = []
 
     def _apply_shortcut(self):
-        for qobject in self.qobjects:
-            if isinstance(qobject, QtWidgets.QAction):
-                qobject.setShortcut(self.sequence)
-            elif isinstance(qobject, QtWidgets.QShortcut):
-                qobject.setKey(self.sequence)
-
+        for qobject in self.qobjects[::]:
+            try:
+                if isinstance(qobject, QtWidgets.QAction):
+                    qobject.setShortcut(self.sequence)
+                elif isinstance(qobject, QtWidgets.QShortcut):
+                    qobject.setKey(self.sequence)
+            except RuntimeError:
+                # Object has been deleted
+                self.qobjects.remove(qobject)
+            
     def registerObject(self, qobject):
         self.qobjects.append(qobject)
         self._apply_shortcut()
