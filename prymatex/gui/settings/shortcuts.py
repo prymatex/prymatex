@@ -5,6 +5,10 @@ import os
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import keyevent_to_keysequence
+from prymatex.qt.compat import getOpenFileName, getSaveFileName
+
+from prymatex.core import config
+
 from prymatex.ui.configure.shortcuts import Ui_Shortcuts
 from prymatex.models.settings import SettingsTreeNode
 
@@ -64,13 +68,22 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
         
     # ---------- AUTOCONNECT: Button Export
     def on_pushButtonExport_pressed(self):
-        shortcuts = self.shortcutsTreeModel.dictionary(defaults=True)
-        print(shortcuts)
+        selected_path, selected_filter = getSaveFileName(
+            self,
+            caption="Export shortcuts",
+            basedir=config.USER_HOME_PATH
+        )
+        print(selected_path)
         
     def on_pushButtonImport_pressed(self):
-        shortcuts = self.shortcutsTreeModel.dictionary(defaults=True)
-        print(shortcuts)
-        
+        selected_path, selected_filter = getOpenFileName(
+            self,
+            caption="Import shortcuts",
+            basedir=config.USER_HOME_PATH
+        )
+        print(selected_path)
+        self._set_shortcuts_to_settings()
+
     def on_pushButtonResetAll_pressed(self):
         for shortcut in self.shortcutsTreeModel.shortcuts():
             shortcut.resetKeySequence()

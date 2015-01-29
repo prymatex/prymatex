@@ -157,10 +157,7 @@ class ResourceProvider(object):
     def get_software_licenses(self):
         return LICENSES
 
-    # --------- Some sets
-    def set_shortcuts(self, shortcuts):
-        self.resources[-1]["Shortcuts"] = shortcuts
-    
+    # --------- Some sets    
     def set_theme(self, name):
         for res in self.resources:
             res.set_theme(name)
