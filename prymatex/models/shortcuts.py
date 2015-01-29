@@ -17,6 +17,9 @@ class ContextTreeNode(TreeNodeBase):
     def description(self):
         return ""
         
+    def toString(self):
+        return self.sequence.toString()
+
 class ContextKeySequenceTreeNode(TreeNodeBase):
     def __init__(self, sequence, parent = None):
         TreeNodeBase.__init__(self, sequence.name(), parent)
@@ -43,6 +46,12 @@ class ContextKeySequenceTreeNode(TreeNodeBase):
 
     def description(self):
         return self.sequence.description()
+        
+    def identifier(self):
+        return self.sequence.identifier()
+        
+    def toString(self):
+        return self.sequence.toString()
 
 class ShortcutsTreeModel(AbstractNamespaceTreeModel):
     def __init__(self, parent=None):
@@ -63,6 +72,9 @@ class ShortcutsTreeModel(AbstractNamespaceTreeModel):
             node = ContextKeySequenceTreeNode(sequence)
             self.insertNamespaceNode(sequence.context(), node)
         node.registerObject(qobject)
+
+    def dictionary(self):
+        return { node.identifier(): node.toString() for node in self.nodes() if isinstance(node, ContextKeySequenceTreeNode) }
 
     def treeNodeFactory(self, name, parent = None):
         return ContextTreeNode(name, parent)
@@ -89,4 +101,4 @@ class ShortcutsTreeModel(AbstractNamespaceTreeModel):
             elif index.column() == 1:
                 return node.description()
             elif index.column() == 2:
-                return node.keySequence().toString()
+                return node.toString()

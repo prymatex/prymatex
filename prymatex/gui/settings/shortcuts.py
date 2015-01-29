@@ -52,3 +52,17 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
             sequence = node.keySequence()
             self.lineEditShortcut.setEnabled(sequence is not None)
             self.lineEditShortcut.setText(sequence and sequence.toString() or "")
+    
+    # ---------- AUTOCONNECT: Button Export
+    def on_pushButtonExport_pressed(self):
+        shortcuts = self.shortcutsTreeModel.dictionary()
+        print(shortcuts)
+        
+    def on_pushButtonImport_pressed(self):
+        shortcuts = self.shortcutsTreeModel.dictionary()
+        print(shortcuts)
+        
+    def on_pushButtonResetAll_pressed(self):
+        shortcuts = self.shortcutsTreeModel.dictionary()
+        print(shortcuts)
+        
