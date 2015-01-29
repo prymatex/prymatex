@@ -6,14 +6,10 @@ from prymatex.qt import QtCore, QtGui
 KEY_NUMBERS = [getattr(QtCore.Qt, keyname) for keyname in [ "Key_%d" % index for index in range(10)]]
 KEY_NAMES = dict([(getattr(QtCore.Qt, keyname), keyname) for keyname in dir(QtCore.Qt) if keyname.startswith('Key_')])
 
-def keyevent_to_keysequence(event, prefixes=None):
+def keyevent_to_keysequence(event, prefix=''):
     key = event.key()
-    if prefixes is None:
-        prefixes = []
-    elif not isinstance(prefixes, list):
-        prefixes = [ prefixes ]
     if key in [QtCore.Qt.Key_unknown, QtCore.Qt.Key_Control, QtCore.Qt.Key_Shift, QtCore.Qt.Key_Alt, QtCore.Qt.Key_Meta]:
-        prefixes.append('')
+        return QtGui.QKeySequence(prefix)
     else:
         modifiers = event.modifiers() 
         if modifiers & QtCore.Qt.ShiftModifier: 
@@ -23,9 +19,11 @@ def keyevent_to_keysequence(event, prefixes=None):
         if modifiers & QtCore.Qt.AltModifier: 
             key += QtCore.Qt.ALT
         if modifiers & QtCore.Qt.MetaModifier:
-            key += QtCore.Qt.META    
-        prefixes.append(QtGui.QKeySequence(key).toString())
-    return ', '.join(prefixes)
+            key += QtCore.Qt.META
+        sequence = [ QtGui.QKeySequence(key).toString() ]
+        if prefix:
+            sequence.insert(0, prefix)
+    return QtGui.QKeySequence(','.join(sequence))
     
 def keyevent_to_tuple(event):
     """Convert QKeyEvent instance into a tuple"""

@@ -39,15 +39,14 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
         
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress and obj == self.lineEditShortcut:
-            if not self.lineEditShortcut.hasSelectedText():
-                currents = self.lineEditShortcut.text().split(', ')
-                sequence = keyevent_to_keysequence(event, prefixes=currents)
-            else:
-                sequence = keyevent_to_keysequence(event)
+            if self.lineEditShortcut.hasSelectedText():
+                self.lineEditShortcut.clear()
+            sequence = keyevent_to_keysequence(event, prefix=self.lineEditShortcut.text())
             if sequence:
                 self.currentShortcut().setKeySequence(sequence)
-                self.lineEditShortcut.setText(sequence)
+                self.lineEditShortcut.setText(sequence.toString())
                 shortcuts = self.shortcutsTreeModel.dictionary()
+                print(shortcuts)
             return True
         return super(ShortcutsSettingsWidget, self).eventFilter(obj, event)
 
