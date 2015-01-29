@@ -19,6 +19,12 @@ class ContextKeySequence(QtGui.QKeySequence):
     def isDefault(self):
         return self == self._default
 
+    def update(self, sequence):
+        self.swap(QtGui.QKeySequence(sequence))
+
+    def reset(self):
+        self.update(self._default)
+
     def name(self):
         return self._name
         
