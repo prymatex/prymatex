@@ -12,8 +12,8 @@ dumps = lambda obj, indent = 2, separators=(',', ': '), **kwargs: \
 
 loads = lambda source, **kwargs: json.loads(source, **kwargs)
 
-dump = lambda obj, fp, indent = 2, separators=(',', ': '), **kwargs: \
-	json.dump(obj, fp, indent = indent, separators = separators, **kwargs)
+dump = lambda obj, fp, indent=2, separators=(',', ': '), **kwargs: \
+	json.dump(obj, fp, indent=indent, separators=separators, **kwargs)
 
 load = lambda fp, **kwargs: json.load(fp, **kwargs)
     

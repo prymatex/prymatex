@@ -586,11 +586,12 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         """
         if not isinstance(sequence, (tuple, list)):
             sequence = ("Global", sequence)
-        shortcut = self.shortcutsTreeModel.registerShortcut(
-            qobject, ContextKeySequence(*sequence)
-        )
-        if shortcut.identifier() in self.shortcuts:
-            shortcut.setKeySequence(self.shortcuts[shortcut.identifier()])
+        sequence = ContextKeySequence(*sequence)
+        # TODO: Algo interesante si no hago esto podria registrar para todo lo que tenga keysequence
+        if sequence:    
+            shortcut = self.shortcutsTreeModel.registerShortcut(qobject, sequence)
+            if shortcut.identifier() in self.shortcuts:
+                shortcut.setKeySequence(self.shortcuts[shortcut.identifier()])
 
     def checkExternalAction(self, main_window, editor):
         if editor.isExternalChanged():

@@ -9,6 +9,8 @@ from prymatex.qt.compat import getOpenFileName, getSaveFileName
 
 from prymatex.core import config
 
+from prymatex.utils import json
+
 from prymatex.ui.configure.shortcuts import Ui_Shortcuts
 from prymatex.models.settings import SettingsTreeNode
 
@@ -73,17 +75,20 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
             caption="Export shortcuts",
             basedir=config.USER_HOME_PATH
         )
-        print(selected_path)
-        
+        if selected_path:
+            shortcuts = self.shortcutsTreeModel.dictionary(defaults=True)
+            json.write_file(shortcuts, selected_path)
+
     def on_pushButtonImport_pressed(self):
         selected_path, selected_filter = getOpenFileName(
             self,
             caption="Import shortcuts",
             basedir=config.USER_HOME_PATH
         )
-        print(selected_path)
-        self._set_shortcuts_to_settings()
-
+        if selected_path:
+            shortcuts = json.read_file(selected_path)
+            print(shortcuts)
+            
     def on_pushButtonResetAll_pressed(self):
         for shortcut in self.shortcutsTreeModel.shortcuts():
             shortcut.resetKeySequence()
