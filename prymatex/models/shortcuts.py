@@ -2,6 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
+from prymatex.qt.extensions import ContextKeySequence
 
 from prymatex.models.trees import AbstractNamespaceTreeModel, TreeNodeBase
 
@@ -16,63 +17,63 @@ class ContextTreeNode(TreeNodeBase):
         return None
         
 class ContextKeySequenceTreeNode(TreeNodeBase):
-    def __init__(self, context_sequence, parent = None):
-        TreeNodeBase.__init__(self, context_sequence.name, parent)
-        self.context_sequence = context_sequence
+    def __init__(self, sequence, parent = None):
+        TreeNodeBase.__init__(self, sequence.name(), parent)
+        self.sequence = sequence
         self.qobjects = []
 
     def _set_shortcut(self, qobject):
         if isinstance(qobject, QtWidgets.QAction):
-            qobject.setShortcut(self.context_sequence.keySequence())
+            qobject.setShortcut(self.sequence)
         elif isinstance(qobject, QtWidgets.QShortcut):
-            qobject.setKey(self.context_sequence.keySequence())
+            qobject.setKey(self.sequence)
             
     def registerObject(self, qobject):
         self.qobjects.append(qobject)
         self._set_shortcut(qobject)
 
     def keySequence(self):
-        return self.context_sequence.keySequence()
+        return self.sequence
     
     def setKeySequence(self, sequence):
-        self.context_sequence.setKeySequence(sequence)
+        self.sequence.swap(sequence)
         for qobject in self.qobjects:
             self._set_shortcut(qobject)
 
     def description(self):
-        return self.context_sequence.description
+        return self.sequence.description()
 
 class ShortcutsTreeModel(AbstractNamespaceTreeModel):
-    def __init__(self, parent = None):
-        AbstractNamespaceTreeModel.__init__(self, separator = ".", parent = parent)
+    def __init__(self, parent=None):
+        AbstractNamespaceTreeModel.__init__(self, separator=".", parent=parent)
 
     def loadStandardSequences(self, resources):
         for name in dir(QtGui.QKeySequence):
             if isinstance(getattr(QtGui.QKeySequence, name), QtGui.QKeySequence.StandardKey):
                 node = self.nodeForNamespace("Global.%s" % name)
                 if node is None:
-                    context_sequence = resources.get_context_sequence("Global", name)
-                    node = ContextKeySequenceTreeNode(context_sequence)
-                    self.insertNamespaceNode(context_sequence.context, node)
+                    sequence = ContextKeySequence("Global", name)
+                    node = ContextKeySequenceTreeNode(sequence)
+                    self.insertNamespaceNode(sequence.context(), node)
 
-    def registerShortcut(self, qobject, context_sequence):
-        node = self.nodeForNamespace(context_sequence.fullName())
+    def registerShortcut(self, qobject, sequence):
+        node = self.nodeForNamespace(sequence.identifier())
         if node is None:
-            node = ContextKeySequenceTreeNode(context_sequence)
-            self.insertNamespaceNode(context_sequence.context, node)
+            node = ContextKeySequenceTreeNode(sequence)
+            self.insertNamespaceNode(sequence.context(), node)
         node.registerObject(qobject)
 
-    def applyShortcuts(self):
+    def _applyShortcuts(self):
         """Apply shortcuts settings to all widgets/plugins
         """
         # TODO Usar los item del tree
         toberemoved = []
-        for index, (qobject, context_sequence) in enumerate(self.shortcuts):
+        for index, (qobject, sequence) in enumerate(self.shortcuts):
             try:
                 if isinstance(qobject, QtWidgets.QAction):
-                    qobject.setShortcut(context_sequence.keySequence())
+                    qobject.setShortcut(sequence)
                 elif isinstance(qobject, QtWidgets.QShortcut):
-                    qobject.setKey(context_sequence.keySequence())
+                    qobject.setKey(sequence)
             except RuntimeError:
                 # Object has been deleted
                 toberemoved.append(index)

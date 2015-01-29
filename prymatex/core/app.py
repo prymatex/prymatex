@@ -9,6 +9,7 @@ import prymatex
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import create_shortcut
+from prymatex.qt.extensions import ContextKeySequence
 
 from prymatex.core import config, exceptions
 from prymatex.core.components import PrymatexComponent, PrymatexEditor
@@ -595,7 +596,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         """
         if not isinstance(sequence, (tuple, list)):
             sequence = ("Global", sequence)
-        sequence = componentClass.resources().get_context_sequence(*sequence)
+        sequence = ContextKeySequence(*sequence)
         if not sequence.isEmpty():
             self.shortcutsTreeModel.registerShortcut(qobject, sequence)
 
