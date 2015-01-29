@@ -12,7 +12,6 @@ from prymatex.utils import text as textutils
 
 from .media import default_media_mapper
 from .stylesheets import load_stylesheets
-from .sequences import ContextKeySequence
 from .styles import default_styles
 
 __all__ = ["LICENSES", "build_resource_key", "Resource", "ResourceProvider"]
