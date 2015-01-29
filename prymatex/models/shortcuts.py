@@ -75,13 +75,17 @@ class ShortcutsTreeModel(AbstractNamespaceTreeModel):
             node = ContextKeySequenceTreeNode(sequence)
             self.insertNamespaceNode(sequence.context(), node)
         node.registerObject(qobject)
+        return node
 
     def dictionary(self, defaults=False):
         return { node.identifier(): node.toString() \
-            for node in self.nodes() \
-            if isinstance(node, ContextKeySequenceTreeNode) and (defaults or not node.isDefault()) 
+            for node in self.shortcuts() \
+            if defaults or not node.isDefault() 
         }
 
+    def shortcuts(self):
+        return [ node for node in self.nodes() if isinstance(node, ContextKeySequenceTreeNode) ]
+        
     def treeNodeFactory(self, name, parent=None):
         return ContextTreeNode(name, parent)
         

@@ -50,10 +50,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
     askAboutExternalDeletions = ConfigurableItem(default=False)
     askAboutExternalChanges = ConfigurableItem(default=False)
-
-    @ConfigurableItem(default={})
-    def shortcuts(self, shortcuts):
-        self.resources().set_shortcuts(shortcuts)
+    shortcuts = ConfigurableItem(default={})
         
     RESTART_CODE = 1000
 
@@ -589,12 +586,11 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         """
         if not isinstance(sequence, (tuple, list)):
             sequence = ("Global", sequence)
-        sequence = ContextKeySequence(*sequence)
-        if not sequence.isEmpty():
-            self.shortcutsTreeModel.registerShortcut(qobject, sequence)
-
-    def applyShortcuts(self):
-        self.shortcutsTreeModel.applyShortcuts()
+        shortcut = self.shortcutsTreeModel.registerShortcut(
+            qobject, ContextKeySequence(*sequence)
+        )
+        if shortcut.identifier() in self.shortcuts:
+            shortcut.setKeySequence(self.shortcuts[shortcut.identifier()])
 
     def checkExternalAction(self, main_window, editor):
         if editor.isExternalChanged():

@@ -46,7 +46,7 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
                 self.currentShortcut().setKeySequence(sequence)
                 self.lineEditShortcut.setText(sequence.toString())
                 shortcuts = self.shortcutsTreeModel.dictionary()
-                print(shortcuts)
+                self.settings.setValue('shortcuts', shortcuts)
             return True
         return super(ShortcutsSettingsWidget, self).eventFilter(obj, event)
 
@@ -70,6 +70,6 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
         print(shortcuts)
         
     def on_pushButtonResetAll_pressed(self):
-        shortcuts = self.shortcutsTreeModel.dictionary(defaults=True)
-        print(shortcuts)
+        for shortcut in self.shortcutsTreeModel.shortcuts():
+            print(shortcut)
         
