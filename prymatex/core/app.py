@@ -503,7 +503,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     def mainWindows(self):
         return self._main_windows
 
-    def buildMainWindow(self, editor = False):
+    def buildMainWindow(self, editor=False):
         """Creates the windows"""
         from prymatex.gui.main import PrymatexMainWindow
 
