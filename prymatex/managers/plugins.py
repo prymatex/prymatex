@@ -52,6 +52,10 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
         from prymatex.gui.settings.plugins import PluginsSettingsWidget
         return [ PluginsSettingsWidget ]
 
+    def install(self):
+         for source in self.resources().sources():
+            self.addNamespace(source.name(), source.path())
+
     def addNamespace(self, name, base_path):
         #TODO Validar que existe el base_path + PMX_PLUGINS_NAME
         self.namespaces[name] = os.path.join(base_path, config.PMX_PLUGINS_NAME)
@@ -62,7 +66,8 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
             setattr(componentClass, "RESOURCES", self.currentPluginDescriptor.resources.names())
         
         self.application().populateComponentClass(componentClass)
-        
+        self.application().populateConfigurableClass(componentClass)
+
         componentClass._plugin = self.currentPluginDescriptor
         componentClass.plugin = classmethod(lambda cls: cls._plugin)
         self.components.setdefault(componentBase, []).append(componentClass)

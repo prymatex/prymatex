@@ -12,7 +12,6 @@ from prymatex.utils import text as textutils
 
 from .media import default_media_mapper
 from .stylesheets import load_stylesheets
-from .sequences import ContextKeySequence
 from .styles import default_styles
 
 __all__ = ["LICENSES", "build_resource_key", "Resource", "ResourceProvider"]
@@ -92,12 +91,7 @@ class Resource(dict):
             return QtGui.QIcon(path)
     
         return self._from_theme(index)
-    
-    def get_context_sequence(self, context, name, default=None, description=None):
-        return ContextKeySequence(self, context, name, default, 
-            description or textutils.camelcase_to_text(name)
-        )
-    
+
     def set_theme(self, name):
         self._mapper = self.find_source(name, ["Mapping"]) or default_media_mapper
         theme = self.find_source(name, ["Themes"])
@@ -139,14 +133,6 @@ class ResourceProvider(object):
                 return icon
         logger.info("Unknown icon with %s key" % index)
         return fallback
-
-    def get_context_sequence(self, context, name, default=None, description=None):
-        sequence = QtGui.QKeySequence()
-        for res in self.resources:
-            sequence = res.get_context_sequence(context, name, default, description)
-            if not sequence.isEmpty():
-                return sequence
-        return sequence
 
     def _section(self, name):
         section = {}

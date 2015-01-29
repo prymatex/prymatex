@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from prymatex.qt import QtCore, QtGui
-from prymatex.core import PrymatexComponent
+from prymatex.core import PrymatexComponent, config
 
 from prymatex.resources import (Resource, ResourceProvider, load_media,
     load_fonts, load_stylesheets)
@@ -39,9 +39,13 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
         sources = getattr(componentClass, "RESOURCES", self.defaults())
         return self.get_provider(sources)
 
-    def install_icon_handler(self):
+    def install(self):
+        # Icon Handler
         QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
         QtGui.QIcon.fromTheme = self.icon_from_theme
+        # Namespaces
+        for ns, path in config.NAMESPACES:
+            self.add_source(ns, path, True)
 
     def icon_from_theme(self, index):
         # TODO: default provider
