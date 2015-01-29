@@ -13,7 +13,7 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
     NAMESPACE = "general"
 
     def __init__(self, **kwargs):
-        super(ShortcutsSettingsWidget, self).__init__(nodeName = "shortcuts", **kwargs)
+        super(ShortcutsSettingsWidget, self).__init__(nodeName="shortcuts", **kwargs)
         self.setupUi(self)
         self.setTitle("Shortcuts")
         self.setIcon(self.resources().get_icon("settings-shortcuts"))
