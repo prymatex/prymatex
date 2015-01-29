@@ -3,7 +3,7 @@
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.core import PrymatexStatusBar
-from prymatex.ui.codeeditor.newstatus import Ui_CodeEditorStatus
+from prymatex.ui.codeeditor.status import Ui_CodeEditorStatus
 
 from ..editor import CodeEditor
 

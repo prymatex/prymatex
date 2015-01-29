@@ -9,6 +9,7 @@ import prymatex
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import create_shortcut
+from prymatex.qt.extensions import ContextKeySequence
 
 from prymatex.core import config, exceptions
 from prymatex.core.components import PrymatexComponent, PrymatexEditor
@@ -50,6 +51,10 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     askAboutExternalDeletions = ConfigurableItem(default=False)
     askAboutExternalChanges = ConfigurableItem(default=False)
 
+    @ConfigurableItem(default={})
+    def shortcuts(self, shortcuts):
+        self.resources().set_shortcuts(shortcuts)
+        
     RESTART_CODE = 1000
 
     def __init__(self, options, *args, **kwargs):
@@ -141,9 +146,13 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         app.profileManager = ProfileManager(parent=app)
         app.pluginManager = PluginManager(parent=app)
         
-        app.resourceManager.install()
         app.profileManager.install()
-        app.pluginManager.install()
+        app.resourceManager.install()
+        
+        # Namespaces
+        for ns, path in config.NAMESPACES:
+            app.resourceManager.add_source(ns, path, True)
+            app.pluginManager.addNamespace(ns, path)
         
         # Populate configurable
         app.populateConfigurableClass(ResourceManager)
@@ -182,8 +191,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import GeneralSettingsWidget
+        from prymatex.gui.settings.shortcuts import ShortcutsSettingsWidget
 
-        return [ GeneralSettingsWidget ]
+        return [ GeneralSettingsWidget, ShortcutsSettingsWidget ]
 
     def environmentVariables(self):
         env = {
@@ -487,7 +497,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     def mainWindows(self):
         return self._main_windows
 
-    def buildMainWindow(self, editor = False):
+    def buildMainWindow(self, editor=False):
         """Creates the windows"""
         from prymatex.gui.main import PrymatexMainWindow
 
@@ -579,7 +589,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         """
         if not isinstance(sequence, (tuple, list)):
             sequence = ("Global", sequence)
-        sequence = componentClass.resources().get_context_sequence(*sequence)
+        sequence = ContextKeySequence(*sequence)
         if not sequence.isEmpty():
             self.shortcutsTreeModel.registerShortcut(qobject, sequence)
 

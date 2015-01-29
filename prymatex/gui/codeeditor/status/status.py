@@ -100,7 +100,7 @@ class StatusMixin(object):
         self._update_syntax(editor)
 
     def on_window_aboutToEditorChange(self, editor):
-        print("About to change", editor)
+        pass
 
     def on_window_aboutToEditorDelete(self, editor):
         editor.cursorPositionChanged.disconnect(self.on_editor_cursorPositionChanged)

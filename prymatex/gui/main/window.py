@@ -343,8 +343,12 @@ html_footer
         # TODO Clean history ?
 
     def addEditor(self, editor, focus=True):
+        current = self.currentEditor()
         self.centralWidget().addTabWidget(editor)
         editor.newLocationMemento.connect(self.on_editor_newLocationMemento)
+        # If new editor has file, try to close current editor
+        if current and editor.hasFile():
+            self.tryCloseEmptyEditor(current)
         if focus:
             self.setCurrentEditor(editor)
         
@@ -441,8 +445,6 @@ html_footer
     def tryCloseEmptyEditor(self, editor):
         if not editor.hasFile() and editor.isEmpty():
             self.closeEditor(editor)
-            return True
-        return False
 
     # ---------------- Handle location history
     def on_editor_newLocationMemento(self, memento):

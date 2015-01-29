@@ -108,6 +108,15 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
             return index.internalPointer()
         return self.rootNode
     
+    def nodes(self):
+        def _collect(node):
+            nodes = [ node ]
+            if node.childCount():
+                for child in node.childNodes():
+                    nodes.extend(_collect(child))
+            return nodes
+        return _collect(self.rootNode)
+
     def clear(self):
         self.rootNode.removeAllChild()
         self.layoutChanged.emit()

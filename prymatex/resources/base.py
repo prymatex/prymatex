@@ -12,7 +12,6 @@ from prymatex.utils import text as textutils
 
 from .media import default_media_mapper
 from .stylesheets import load_stylesheets
-from .sequences import ContextKeySequence
 from .styles import default_styles
 
 __all__ = ["LICENSES", "build_resource_key", "Resource", "ResourceProvider"]
@@ -92,12 +91,7 @@ class Resource(dict):
             return QtGui.QIcon(path)
     
         return self._from_theme(index)
-    
-    def get_context_sequence(self, context, name, default=None, description=None):
-        return ContextKeySequence(self, context, name, default, 
-            description or textutils.camelcase_to_text(name)
-        )
-    
+
     def set_theme(self, name):
         self._mapper = self.find_source(name, ["Mapping"]) or default_media_mapper
         theme = self.find_source(name, ["Themes"])
@@ -121,6 +115,14 @@ class ResourceProvider(object):
     def sources(self):
         return self.resources[:]
 
+    def _section(self, name):
+        section = {}
+        for resource in reversed(self.resources):
+            if name in resource:
+                section.update(resource[name])
+        return section
+    
+    # ------------- Get data
     def get_image(self, index, fallback = None):
         fallback = fallback or QtGui.QPixmap()
         for res in self.resources:
@@ -139,28 +141,9 @@ class ResourceProvider(object):
                 return icon
         logger.info("Unknown icon with %s key" % index)
         return fallback
-
-    def get_context_sequence(self, context, name, default=None, description=None):
-        sequence = QtGui.QKeySequence()
-        for res in self.resources:
-            sequence = res.get_context_sequence(context, name, default, description)
-            if not sequence.isEmpty():
-                return sequence
-        return sequence
-
-    def _section(self, name):
-        section = {}
-        for resource in reversed(self.resources):
-            if name in resource:
-                section.update(resource[name])
-        return section
-        
+    
     def get_themes(self):
         return self._section("Themes")
-
-    def set_theme(self, name):
-        for res in self.resources:
-            res.set_theme(name)
 
     def get_stylesheets(self):
         return self._section("StyleSheets")
@@ -171,8 +154,13 @@ class ResourceProvider(object):
     def get_shortcuts(self):
         return self._section("Shortcuts")
         
-    def set_shortcuts(self, shortcuts):
-        print(shortcuts)
-
     def get_software_licenses(self):
         return LICENSES
+
+    # --------- Some sets
+    def set_shortcuts(self, shortcuts):
+        self.resources[-1]["Shortcuts"] = shortcuts
+    
+    def set_theme(self, name):
+        for res in self.resources:
+            res.set_theme(name)

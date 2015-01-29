@@ -49,10 +49,6 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
         from prymatex.gui.settings.plugins import PluginsSettingsWidget
         return [ PluginsSettingsWidget ]
 
-    def install(self):
-         for ns, path in config.NAMESPACES:
-            self.addNamespace(ns, path)
-
     def addNamespace(self, name, base_path):
         #TODO Validar que existe el base_path + PMX_PLUGINS_NAME
         self.namespaces[name] = os.path.join(base_path, config.PMX_PLUGINS_NAME)

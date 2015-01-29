@@ -1,37 +1,17 @@
 #!/usr/bin/env python
 
-from collections import namedtuple
-
 from prymatex.qt import QtCore, QtGui
 from prymatex.core import PrymatexComponent, config
-from prymatex.core.settings import ConfigurableItem
 
 from prymatex.resources import (Resource, ResourceProvider, load_media,
     load_fonts, load_stylesheets)
 
-Namespace = namedtuple("Namespace", "name path")
-
 class ResourceManager(PrymatexComponent, QtCore.QObject):
-    @ConfigurableItem(default={})
-    def shortcuts(self, shortcuts):
-        print(self.base)
-        self.base["Shortcuts"] = shortcuts
-        print(self.base)
-
-    # ------------- Settings
-    SETTINGS = 'ResourceManager'
-    
     def __init__(self, **kwargs):
         super(ResourceManager, self).__init__(**kwargs)
         self.base = None
         self.resources = []
         self.providers = {}
-    
-    @classmethod
-    def contributeToSettings(cls):
-        from prymatex.gui.settings.shortcuts import ShortcutsSettingsWidget
-
-        return [ShortcutsSettingsWidget]
         
     def add_source(self, name, path, default=False):
         res = Resource(name, path, default)
@@ -60,10 +40,6 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
         QtGui.QIcon.fromTheme = self.icon_from_theme
         
         self.base = Resource('base')
-        
-	# Namespaces
-        for ns, path in config.NAMESPACES:
-            self.add_source(ns, path, True)
 
     def icon_from_theme(self, index):
         # TODO: default provider
