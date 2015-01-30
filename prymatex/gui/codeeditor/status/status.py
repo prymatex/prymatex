@@ -69,9 +69,6 @@ class StatusMixin(object):
         self.labelStatus.setText(editor.currentMode().name())
     
     # -------------- Syntax tool
-    def _update_mode(self, editor):
-        self.labelStatus.setText(editor.currentMode().name())
-
     def _update_syntax(self, editor):
         model = self.comboBoxSyntaxes.model()
         index = model.nodeIndex(editor.syntax()).row()
@@ -122,15 +119,19 @@ class StatusMixin(object):
             self.window().currentEditor().setTextCursor(cursor)
 
     # -------------- Editor signals
+    @QtCore.Slot()
     def on_editor_cursorPositionChanged(self):
         self._update_position(self.sender())
 
+    @QtCore.Slot()
     def on_editor_textChanged(self):
         self._update_content(self.sender())
-        
+    
+    @QtCore.Slot(object)    
     def on_editor_syntaxChanged(self, syntax):
         self._update_syntax(self.sender())
 
+    @QtCore.Slot()
     def on_editor_modeChanged(self):
         self._update_mode(self.sender())
 
