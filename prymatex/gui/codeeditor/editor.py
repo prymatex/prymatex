@@ -38,13 +38,18 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # -------------------- Signals
     activated = QtCore.Signal()
     deactivated = QtCore.Signal()
+    
+    aboutToSave = QtCore.Signal()
+    saved = QtCore.Signal()
+    aboutToClose = QtCore.Signal()
+    closed = QtCore.Signal()
+
     syntaxChanged = QtCore.Signal(object)
     themeChanged = QtCore.Signal(object)
     filePathChanged = QtCore.Signal(str)
     modeChanged = QtCore.Signal(object)
     beginMode = QtCore.Signal(object)
     endMode = QtCore.Signal(object)
-    aboutToClose = QtCore.Signal()
     newLocationMemento = QtCore.Signal(object)
     keyPressed = QtCore.Signal(QtCore.QEvent)
     
@@ -328,12 +333,15 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         
     def save(self, filePath):
         """ Save content of editor in a file """
+        self.aboutToSave.emit()
         self.encoding = self.application().fileManager.writeFile(filePath, self.toPlainTextWithEol(), self.encoding)
         super(CodeEditor, self).save(filePath)
+        self.saved.emit()
 
     def close(self):
         self.aboutToClose.emit()
         super(CodeEditor, self).close()
+        self.close.emit()
 
     def reload(self):
         PrymatexEditor.reload(self)
