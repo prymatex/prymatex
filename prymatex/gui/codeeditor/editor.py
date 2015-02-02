@@ -341,7 +341,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def close(self):
         self.aboutToClose.emit()
         super(CodeEditor, self).close()
-        self.close.emit()
+        self.closed.emit()
 
     def reload(self):
         PrymatexEditor.reload(self)
@@ -783,9 +783,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             TextEditWidget.mouseReleaseEvent(self, event)
 
     def focusInEvent(self, event):
+        super(CodeEditor, self).focusInEvent(event)
         self.activated.emit()
         
     def focusOutEvent(self, event):
+        super(CodeEditor, self).focusOutEvent(event)
         self.deactivated.emit()
 
     # --------------- Key press pre and post
