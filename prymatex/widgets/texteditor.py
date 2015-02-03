@@ -210,7 +210,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         return None, cursor.position(), cursor.position()
 
     #------ Retrieve cursors and blocks
-    def newCursorAtPosition(self, position, anchor = None):
+    def newCursorAtPosition(self, position, anchor=None):
         cursor = QtGui.QTextCursor(self.document())
         if isinstance(position, QtCore.QPoint):
             position = self.cursorForPosition(position).position()
