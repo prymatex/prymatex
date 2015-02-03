@@ -189,7 +189,7 @@ class FileManager(PrymatexComponent, QtCore.QObject):
         return filePath in self.fileWatcher.files()
     
     def isWatched(self, path):
-        return path in self.fileWatcher.files() or path in self.fileWatcher.directories()
+        return path in self.fileWatcher.files() + self.fileWatcher.directories()
         
     def watchPath(self, path):
         self.logger().debug("Watch path %s" % path)

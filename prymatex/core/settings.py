@@ -39,6 +39,83 @@ class TextMateSettings(object):
     def sync(self):
         plist.writePlist(self.settings, self.file)
 
+class PrymatexSettings(dict):
+    def __init__(self, name, settings):
+        super(PrymatexSettings, self).__init__(settings)
+        self._name = name
+        self._tm = None
+        self._listeners = set()
+        # Setting attrs
+        self._items = {}
+        # Setting hooks
+        self._hooks = {}
+        # Callbacks
+        self._callbacks = {}
+
+    def setTm(self, tm):
+        self._tm = tm
+
+    def name(self):
+        return self._name
+
+    def default(self, name):
+        return self._items.get(name).getDefault()
+
+    def set(self, name, value):
+        item = self.items.get(name)
+        if item:
+            # If default value then pop from settings
+            if name in self and value == item.getDefault():
+                self.pop(name)
+            else:
+                self[name] = value
+            if self._tm and item.tm_name:
+                self._tm.setValue(item.tm_name, value)
+            for listener in self._listeners:
+                setattr(listener, name, value)
+            for callback in self._callbacks.get(name, []):
+                callback(value)
+
+    def get(self, name, default=None):
+        value = super(PrymatexSettings, self).get(name, default)
+        if value is None and name in self._items:
+            value = self._items.get(name).getDefault()
+        return value
+
+    def has(self, name):
+        return name in self.items
+
+    def add_item(self, item):
+        self._items[item.name] = item
+        if item.tm_name and self._tm.value(item.tm_name) is not None:
+            self._tm.setValue(item.tm_name, item.getDefault())
+        
+    def add_hook(self, hook):
+        self._hooks[hook.path] = hook
+
+    def add_listener(self, listener):
+        self._listeners.add(listener)
+
+    def remove_listener(self, listener):
+        self._listeners.remove(listener)
+
+    def add_callback(self, name, callback):
+        # Add hook
+        callbacks = self._callbacks.setdefault(name, [])
+        if callback not in callbacks:
+            callbacks.append(callback)
+
+    def remove_callback(self, name, callback):
+        callbacks = self._callbacks.setdefault(name, [])
+        if callback in callbacks:
+            callbacks.remove(callback)
+
+    def configure(self, obj):
+        for name, item in self._items.items():
+            value = self.get(name)
+            if value is not None:
+                setattr(obj, name, value)
+
 class SettingsGroup(object):
     def __init__(self, name, settings, tmsettings):
         self.__groupName = name
