@@ -3,30 +3,11 @@
 
 import os
 
-from prymatex.utils import plist, settings
+from prymatex.utils import settings
 
 # --------------- Settings
 class TextMateSettings(settings.Settings):
-    def __init__(self, file):
-        self.file = file
-        settings = {}
-        if os.path.exists(self.file):
-            try:
-                settings = plist.readPlist(self.file)
-            except Exception as e:
-                print(("Exception raised while reading settings file: %s" % e))
-        super(TextMateSettings, self).__init__(os.path.basename(file), settings)
-
-    def set(self, name, value):
-        super(TextMateSettings, self).set(name, value)
-        self.sync()
-
-    def clear(self):
-        super(TextMateSettings, self).clear()
-        self.sync()
-
-    def sync(self):
-        plist.writePlist(self, self.file)
+    pass
 
 class PrymatexSettings(settings.Settings):
     def __init__(self, name, settings):
@@ -40,7 +21,13 @@ class PrymatexSettings(settings.Settings):
 
     def setTm(self, tm):
         self._tm = tm
-
+        
+    def scope(self, name):
+        if name not in self or not isinstance(self[name], PrymatexSettings):
+            self[name] = PrymatexSettings(name, self.setdefault(name, {}))
+            self[name].setTm(self._tm)
+        return self[name]
+    
     def default(self, name):
         return self._items.get(name).getDefault()
 

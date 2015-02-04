@@ -4,7 +4,7 @@
 import os
 
 from prymatex.qt import QtCore
-from prymatex.utils import json
+from prymatex.utils import json, plist
 
 from prymatex.core.config import (TM_PREFERENCES_PATH,
     PMX_SETTINGS_NAME, PMX_STATE_NAME, TM_SETTINGS_NAME)
@@ -22,14 +22,21 @@ class PrymatexProfile(object):
         self.PMX_LOG_PATH = os.path.join(self.PMX_PROFILE_PATH, 'log')
         self.PMX_CACHE_PATH = os.path.join(self.PMX_PROFILE_PATH, 'cache')
         self.PMX_SCREENSHOT_PATH = os.path.join(self.PMX_PROFILE_PATH, 'screenshot')
+        self.TM_PREFERENCES_PATH = os.path.join(TM_PREFERENCES_PATH, TM_SETTINGS_NAME)
+        
+        tm = {}
+        try:
+            tm = plist.readPlist(self.TM_PREFERENCES_PATH)
+        except Exception as e:
+            print(("Exception raised while reading settings file: %s" % e))
+        self.tmsettings = TextMateSettings('tm', tm)
 
-        self.settings = json.read_file(self.PMX_SETTINGS_PATH) or {}
-        self.state = json.read_file(self.PMX_STATE_PATH) or {}
+        settings = json.read_file(self.PMX_SETTINGS_PATH)
+        self.settings = PrymatexSettings('settings', settings)
+        self.settings.setTm(self.tmsettings)
 
-        self.settingsGroups = {}
-
-        self.tmsettings = TextMateSettings(
-            os.path.join(TM_PREFERENCES_PATH, TM_SETTINGS_NAME))
+        state = json.read_file(self.PMX_STATE_PATH)
+        self.state = PrymatexSettings('state', state)
 
     # ------------------------ Paths
     def ensure_paths(self):
@@ -44,16 +51,8 @@ class PrymatexProfile(object):
             return configurableClass._settings.name()
         return getattr(configurableClass, 'SETTINGS', configurableClass.__name__)
 
-    def groupByName(self, name):
-        if name not in self.settingsGroups:
-            self.settingsGroups[name] = PrymatexSettings(
-                name,
-                self.settings.setdefault(name, {}))
-            self.settingsGroups[name].setTm(self.tmsettings)
-        return self.settingsGroups[name]
-
     def settingsForClass(self, configurableClass):
-        settings = self.groupByName(self.__group_name(configurableClass))
+        settings = self.settings.scope(self.__group_name(configurableClass))
         # --------- Register settings values
         for key, value in configurableClass.__dict__.items():
             if isinstance(value, ConfigurableItem):
@@ -65,21 +64,21 @@ class PrymatexProfile(object):
         return settings
 
     def registerConfigurableInstance(self, configurable):
-        settingsGroup = configurable.settings()
-        settingsGroup.addListener(configurable)
-        settingsGroup.configure(configurable)
+        settings = configurable.settings()
+        settings.addListener(configurable)
+        settings.configure(configurable)
         # Register hooks
-        for path, hook in settingsGroup.hooks().items():
+        for path, hook in settings.hooks().items():
             handler = hook.fset.__get__(
                 configurable, configurable.__class__)
             self.registerSettingCallback(path, handler)
             handler(self.settingValue(path))
 
     def unregisterConfigurableInstance(self, configurable):
-        settingsGroup = configurable.settings()
-        settingsGroup.removeListener(configurable)
+        settings = configurable.settings()
+        settings.removeListener(configurable)
         # Unregister hooks
-        for path, hook in settingsGroup.hooks().items():
+        for path, hook in settings.hooks().items():
             self.unregisterSettingCallback(path, hook.fset)
         
     def saveState(self, configurable):
@@ -100,27 +99,31 @@ class PrymatexProfile(object):
 
     # -------------- Hooks
     def settingValue(self, settingPath):
-        groupName, settingName = settingPath.split(".")
-        return self.groupByName(groupName).get(settingName)
+        names = settingPath.split(".")
+        settings = self.settings
+        for name in names[:-1]:
+            settings = settings.get(name)
+        return settings.get(names[-1])
 
     def registerSettingCallback(self, settingPath, handler):
-        groupName, settingName = settingPath.split(".")
-        group = self.groupByName(groupName)
-        group.add_callback(settingName, handler)
+        names = settingPath.split(".")
+        settings = self.settings
+        for name in names[:-1]:
+            settings = settings.get(name)
+        settings.add_callback(names[-1], handler)
 
     def unregisterSettingCallback(self, settingPath, handler):
-        groupName, settingName = settingPath.split(".")
-        group = self.groupByName(groupName)
-        group.remove_callback(settingName, handler)
+        names = settingPath.split(".")
+        settings = self.settings
+        for name in names[:-1]:
+            settings = settings.get(name)
+        settings.remove_callback(names[-1], handler)
         
     def clear(self):
         self.settings.clear()
 
     def sync(self):
         #Save capture values from qt
-        for group in self.settingsGroups.values():
-            groupName = group.name()
-            if not self.settings[groupName]:
-                self.settings.pop(groupName)
+        plist.writePlist(self.tmsettings, self.TM_PREFERENCES_PATH)
         json.write_file(self.settings, self.PMX_SETTINGS_PATH)
         json.write_file(self.state, self.PMX_STATE_PATH)
