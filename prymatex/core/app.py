@@ -319,7 +319,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     def buildFileManager(self):
         from prymatex.managers.files import FileManager
         manager = self.createComponentInstance(FileManager, parent=self)
-
+        manager.add_change_callback(self.profile().PMX_SETTINGS_PATH, self.on_settings_changed)
         manager.fileSytemChanged.connect(self.on_fileManager_fileSytemChanged)
         return manager
 
@@ -475,6 +475,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         return self.pluginManager.findComponentsForClass(componentClass)
 
     # ------------- Settings access
+    def on_settings_changed(self, path):
+        print("Cambiaron los settings", path)
+        
     def settingValue(self, settingPath):
         return self.profile().settingValue(settingPath)
 
@@ -490,6 +493,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             editor = main_window.findEditorForFile(filepath)
             if editor:
                 return main_window, editor
+        return None, None
 
     def mainWindows(self):
         return self._main_windows

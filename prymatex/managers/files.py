@@ -58,6 +58,8 @@ class FileManager(PrymatexComponent, QtCore.QObject):
         super(FileManager, self).__init__(**kwargs)
         
         self.last_directory = get_home_dir()
+        self.callbacks = {}
+        self._opens = []
         self.fileWatcher = QtCore.QFileSystemWatcher()
         self.fileWatcher.fileChanged.connect(self.on_fileWatcher_fileChanged)
         self.fileWatcher.directoryChanged.connect(self.on_fileWatcher_directoryChanged)
@@ -92,13 +94,32 @@ class FileManager(PrymatexComponent, QtCore.QObject):
             self.fileDeleted.emit(filePath)
         else:
             self.fileChanged.emit(filePath)
+        self._apply_callback(filePath)
     
     def on_fileWatcher_directoryChanged(self, directoryPath):
         if not os.path.exists(directoryPath):
             self.directoryDeleted.emit(directoryPath)
         else:
             self.directoryChanged.emit(directoryPath)
-    
+        self._apply_callback(filePath)
+
+    # -------------- File Changes callbacks
+    def _apply_callback(self, path):
+        for callback in self.callbacks.get(path, []):
+            callback(path)
+
+    def add_change_callback(self, path, callback):
+        callbacks = self.callbacks.setdefault(path, [])
+        if callback not in callbacks:
+            self.watchPath(path)
+            callbacks.append(callback)
+        
+    def remove_change_callback(self, path, callback):
+        callbacks = self.callbacks.setdefault(path, [])
+        if callback in callbacks:
+            self.unwatchPath(path)
+            callbacks.remove(callback)
+        
     # -------------- History
     def add_file_history(self, filePath):
         if filePath in self.fileHistory:
@@ -186,7 +207,7 @@ class FileManager(PrymatexComponent, QtCore.QObject):
 
     # -------------- Open file control
     def isOpen(self, filePath):
-        return filePath in self.fileWatcher.files()
+        return filePath in self._opens
     
     def isWatched(self, path):
         return path in self.fileWatcher.files() + self.fileWatcher.directories()
@@ -201,31 +222,32 @@ class FileManager(PrymatexComponent, QtCore.QObject):
     
     # ---------- Handling files for retrieving data. open, read, write, close
     def openFile(self, filePath):
-        """
-        Open and read a file, return the content.
+        """Open and read a file, return the content.
         """
         if not os.path.exists(filePath):
             raise exceptions.IOException("The file does not exist: %s" % filePath)
         if not os.path.isfile(filePath):
             raise exceptions.IOException("%s is not a file" % filePath)
         self.last_directory = os.path.dirname(filePath)
-        #Update file history
         self.add_file_history(filePath)
+        self._opens.append(filePath)
         self.watchPath(filePath)
 
     def readFile(self, filePath):
         """Read from file"""
         return encoding.read(filePath)
 
-    def writeFile(self, filePath, content, encode = None):
+    def writeFile(self, filePath, content, encode=None):
         """Function that actually save the content of a file."""
         self.unwatchPath(filePath)
         encode = encoding.write(content, filePath, encode or self.defaultEncoding)
         self.watchPath(filePath)
+        self._apply_callback(filePath)
         return encode
 
     def closeFile(self, filePath):
         if self.isWatched(filePath):
+            self._opens.remove(filePath)
             self.unwatchPath(filePath)
 
     def directory(self, filePath = None):
@@ -239,7 +261,7 @@ class FileManager(PrymatexComponent, QtCore.QObject):
             return filePath
         return os.path.dirname(filePath)
     
-    def listDirectory(self, directory, absolute = False, filePatterns = []):
+    def listDirectory(self, directory, absolute=False, filePatterns=[]):
         if not os.path.isdir(directory):
             raise exceptions.DirectoryException("%s not exists" % directory)
         filenames = os.listdir(directory)
