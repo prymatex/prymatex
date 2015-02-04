@@ -119,10 +119,10 @@ class TerminalDock(PrymatexDock, QtWidgets.QDockWidget):
     def editorTheme(self, value):
         if value:
             # Trigger on register
-            self.application().registerSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
+            self.application().registerSettingCallback("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
         else:
-            self.application().unregisterSettingHook("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
-            self.tabTerminals.setColorScheme(self._settings.value("defaultScheme"))
+            self.application().unregisterSettingCallback("CodeEditor.defaultTheme", self.on_defaultTheme_changed)
+            self.tabTerminals.setColorScheme(self.settings().get("defaultScheme"))
 
     synchronizeEditor = ConfigurableItem(default = False)
     bufferSize = ConfigurableItem(default = 300)

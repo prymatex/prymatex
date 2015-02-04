@@ -3,79 +3,59 @@
 
 import os
 
-from prymatex.utils import plist
+from prymatex.utils import plist, settings
 
-class TextMateSettings(object):
+# --------------- Settings
+class TextMateSettings(settings.Settings):
     def __init__(self, file):
         self.file = file
-
+        settings = {}
         if os.path.exists(self.file):
             try:
-                self.settings = plist.readPlist(self.file)
+                settings = plist.readPlist(self.file)
             except Exception as e:
                 print(("Exception raised while reading settings file: %s" % e))
+        super(TextMateSettings, self).__init__(os.path.basename(file), settings)
 
-        not hasattr(self, "settings") and self.initializeSettings()
-
-    def initializeSettings(self):
-        self.settings = {}
+    def set(self, name, value):
+        super(TextMateSettings, self).set(name, value)
         self.sync()
-
-    def setValue(self, name, value):
-        if name in self.settings and self.settings[name] == value:
-            return
-        self.settings[name] = value
-        self.sync()
-
-    def value(self, name, default = None):
-        try:
-            return self.settings[name]
-        except KeyError:
-            return default
 
     def clear(self):
-        self.initializeSettings()
+        super(TextMateSettings, self).clear()
+        self.sync()
 
     def sync(self):
-        plist.writePlist(self.settings, self.file)
+        plist.writePlist(self, self.file)
 
-class PrymatexSettings(dict):
+class PrymatexSettings(settings.Settings):
     def __init__(self, name, settings):
-        super(PrymatexSettings, self).__init__(settings)
-        self._name = name
+        super(PrymatexSettings, self).__init__(name, settings)
         self._tm = None
         self._listeners = set()
         # Setting attrs
         self._items = {}
         # Setting hooks
         self._hooks = {}
-        # Callbacks
-        self._callbacks = {}
 
     def setTm(self, tm):
         self._tm = tm
-
-    def name(self):
-        return self._name
 
     def default(self, name):
         return self._items.get(name).getDefault()
 
     def set(self, name, value):
-        item = self.items.get(name)
+        item = self._items.get(name)
         if item:
-            # If default value then pop from settings
             if name in self and value == item.getDefault():
-                self.pop(name)
+                self.erase(name)
             else:
-                self[name] = value
+                super(PrymatexSettings, self).set(name, value)
             if self._tm and item.tm_name:
-                self._tm.setValue(item.tm_name, value)
+                self._tm.set(item.tm_name, value)
             for listener in self._listeners:
                 setattr(listener, name, value)
-            for callback in self._callbacks.get(name, []):
-                callback(value)
-
+            
     def get(self, name, default=None):
         value = super(PrymatexSettings, self).get(name, default)
         if value is None and name in self._items:
@@ -85,30 +65,22 @@ class PrymatexSettings(dict):
     def has(self, name):
         return name in self.items
 
-    def add_item(self, item):
+    def addItem(self, item):
         self._items[item.name] = item
-        if item.tm_name and self._tm.value(item.tm_name) is not None:
-            self._tm.setValue(item.tm_name, item.getDefault())
-        
-    def add_hook(self, hook):
+        if item.tm_name and self._tm.get(item.tm_name) is not None:
+            self._tm.set(item.tm_name, item.getDefault())
+
+    def hooks(self):
+        return self._hooks
+
+    def addHook(self, hook):
         self._hooks[hook.path] = hook
 
-    def add_listener(self, listener):
+    def addListener(self, listener):
         self._listeners.add(listener)
 
-    def remove_listener(self, listener):
+    def removeListener(self, listener):
         self._listeners.remove(listener)
-
-    def add_callback(self, name, callback):
-        # Add hook
-        callbacks = self._callbacks.setdefault(name, [])
-        if callback not in callbacks:
-            callbacks.append(callback)
-
-    def remove_callback(self, name, callback):
-        callbacks = self._callbacks.setdefault(name, [])
-        if callback in callbacks:
-            callbacks.remove(callback)
 
     def configure(self, obj):
         for name, item in self._items.items():
@@ -192,6 +164,7 @@ class SettingsGroup(object):
             if value is not None:
                 setattr(obj, name, value)
 
+# --------------- Items and Hooks
 class ConfigurableItem(object):
     """Configuration descriptor"""
     def __init__(self, name = None, default = None, fset = None,

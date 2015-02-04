@@ -17,12 +17,12 @@ class MainWindowSettingsWidget(SettingsTreeNode, Ui_MainWindow, QtWidgets.QWidge
 
     def loadSettings(self):
         super(MainWindowSettingsWidget, self).loadSettings()
-        self.checkBoxShowTabsIfMoreThanOne.setChecked(self.settings.value("showTabsIfMoreThanOne", False))
+        self.checkBoxShowTabsIfMoreThanOne.setChecked(self.settings.get("showTabsIfMoreThanOne", False))
 
     @QtCore.Slot(bool)
     def on_checkBoxShowTabsIfMoreThanOne_clicked(self, checked):
-        self.settings.setValue('showTabsIfMoreThanOne', self.checkBoxShowTabsIfMoreThanOne.isChecked())
+        self.settings.set('showTabsIfMoreThanOne', self.checkBoxShowTabsIfMoreThanOne.isChecked())
     
     @QtCore.Slot(str)
     def on_comboBoxTitleTemplate_activated(self, template):
-        self.settings.setValue('windowTitleTemplate', template)
+        self.settings.set('windowTitleTemplate', template)

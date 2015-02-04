@@ -66,7 +66,7 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
     
     def _set_shortcuts_to_settings(self):
         shortcuts = self.shortcutsTreeModel.dictionary()
-        self.settings.setValue('shortcuts', shortcuts)
+        self.settings.set('shortcuts', shortcuts)
         
     # ---------- AUTOCONNECT: Button Export
     def on_pushButtonExport_pressed(self):

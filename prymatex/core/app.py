@@ -478,11 +478,11 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     def settingValue(self, settingPath):
         return self.profile().settingValue(settingPath)
 
-    def registerSettingHook(self, settingPath, handler):
-        self.profile().registerSettingHook(settingPath, handler)
+    def registerSettingCallback(self, settingPath, handler):
+        self.profile().registerSettingCallback(settingPath, handler)
 
-    def unregisterSettingHook(self, settingPath, handler):
-        self.profile().unregisterSettingHook(settingPath, handler)
+    def unregisterSettingCallback(self, settingPath, handler):
+        self.profile().unregisterSettingCallback(settingPath, handler)
 
     # ------------- Main windows handlers
     def findEditorForFile(self, filepath):
