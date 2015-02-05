@@ -5,7 +5,9 @@ from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.utils import text as textutils
 
-__all__ = [ "combine_icons", "get_std_icon", "text_to_iconname" ]
+__all__ = [ "combine_icons", "get_std_icon", "get_path_icon", "get_type_icon", "text_to_iconname" ]
+
+_FileIconProvider = QtWidgets.QFileIconProvider()
 
 def text_to_iconname(value, prefix="", sufix=""):
     """&Text Button name -> %{prefix}-text-button-name-%{sufix}"""
@@ -40,3 +42,9 @@ def get_std_icon(name):
     if standardIconName is not None:
         return QtWidgets.QWidget().style().standardIcon(standardIconName)
     return QtGui.QIcon()
+
+def get_path_icon(path):
+    return _FileIconProvider.icon(QtCore.QFileInfo(path))
+    
+def get_type_icon(_type):
+    return _FileIconProvider.icon(_type)

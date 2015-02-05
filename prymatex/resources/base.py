@@ -6,7 +6,7 @@ import os
 import logging
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
-from prymatex.qt.helpers import get_std_icon
+from prymatex.qt.helpers import get_std_icon, get_path_icon, get_type_icon
 from prymatex.core import PrymatexComponent
 from prymatex.utils import text as textutils
 
@@ -34,8 +34,6 @@ LICENSES = [
 
 def build_resource_key(path):
     return ":/%s" % "/".join(osextra.path.fullsplit(path))
-
-_FileIconProvider = QtWidgets.QFileIconProvider()
 
 class Resource(dict):
     def __init__(self, name, path=None, default=False):
@@ -131,9 +129,11 @@ class ResourceProvider(object):
                 return image
         return fallback
 
-    def get_icon(self, index, fallback = None):
+    def get_icon(self, index, fallback=None):
         if os.path.exists(index) and os.path.isabs(index):
-            return _FileIconProvider.icon(QtCore.QFileInfo(index))
+            return get_path_icon(index)
+        elif isinstance(index, int):
+            return get_type_icon(index)
         fallback = fallback or QtGui.QIcon()
         for res in self.resources:
             icon = res.get_icon(index)
