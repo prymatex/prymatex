@@ -9,6 +9,7 @@ import prymatex
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import create_shortcut
+from prymatex.qt.helpers import watcher
 from prymatex.qt.extensions import ContextKeySequence
 
 from prymatex.core import config, exceptions
@@ -319,8 +320,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     def buildFileManager(self):
         from prymatex.managers.files import FileManager
         manager = self.createComponentInstance(FileManager, parent=self)
-        manager.add_change_callback(self.profile().PMX_SETTINGS_PATH, self.on_settings_changed)
-        manager.fileSytemChanged.connect(self.on_fileManager_fileSytemChanged)
+        #manager.add_change_callback(self.profile().PMX_SETTINGS_PATH, self.on_settings_changed)
+        #manager.fileSytemChanged.connect(self.on_fileManager_fileSytemChanged)
         return manager
 
     def buildProjectManager(self):
@@ -489,11 +490,10 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
     # ------------- Main windows handlers
     def findEditorForFile(self, filepath):
-        for main_window in self.mainWindows():
-            editor = main_window.findEditorForFile(filepath)
+        for window in self.mainWindows():
+            editor = window.findEditorForFile(filepath)
             if editor:
-                return main_window, editor
-        return None, None
+                return editor
 
     def mainWindows(self):
         return self._main_windows
@@ -526,23 +526,23 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         return False
 
     # ---- Open (file, directory, url, canelones)
-    def openFile(self, file_path, cursorPosition=None, focus=True, main_window=None):
+    def openFile(self, file_path, cursorPosition=None, focus=True, window=None):
         """Open a editor in current window"""
         file_path = self.fileManager.normcase(file_path)
 
-        if self.fileManager.isOpen(file_path):
-            main_window, editor = self.findEditorForFile(file_path)
-            if editor is not None:
-                main_window.setCurrentEditor(editor)
-                if cursorPosition is not None:
-                    editor.setCursorPosition(cursorPosition)
+        editor = self.findEditorForFile(file_path)
+        if editor is not None:
+            window = editor.window()
+            window.setCurrentEditor(editor)
+            if cursorPosition is not None:
+                editor.setCursorPosition(cursorPosition)
         elif self.fileManager.exists(file_path):
-            main_window = main_window or self.currentWindow()
-            editor = main_window.createEditor(
+            window = window or self.currentWindow()
+            editor = window.createEditor(
                 file_path=file_path,
                 cursor_position=cursorPosition)
-            # TODO el dialogo de no tengo editor para ese tipo de archivo
-            main_window.addEditor(editor, focus)
+            window.addEditor(editor, focus)
+            watcher.on_change(file_path, self.on_fileManager_fileSytemChanged)
             
     def openDirectory(self, directoryPath):
         raise NotImplementedError("Directory contents should be opened as files here")
@@ -622,7 +622,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             elif result == QtWidgets.QMessageBox.Save:
                 main_window.saveEditor(editor)
 
-    def on_fileManager_fileSytemChanged(self, filePath, change):
+    def on_fileManager_fileSytemChanged(self, filePath, changes):
+        print(filePath, changes)
+        return
         main_window, editor = self.findEditorForFile(filePath)
         editor.setExternalAction(change)
         if main_window.currentEditor() == editor:

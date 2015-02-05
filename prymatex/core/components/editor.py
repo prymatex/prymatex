@@ -3,6 +3,7 @@
 
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers.icons import combine_icons
+from prymatex.qt.helpers import watcher
 
 from prymatex.core.components.base import (PrymatexComponentWidget, PrymatexAddon)
 
@@ -105,11 +106,11 @@ class PrymatexEditor(PrymatexComponentWidget):
         self.modificationChanged.emit(False)
 
     def isExternalChanged(self):
-        return self._external_action == self.application().fileManager.CHANGED
+        return self._external_action == watcher.CHANGED
 
     def isExternalDeleted(self):
         # FIXME: Rename or move files make produces bogus behavior 
-        return self._external_action == self.application().fileManager.DELETED    
+        return self._external_action == watcher.DELETED   
 
     #------------ Bundle Item Handler
     def bundleItemHandler(self):

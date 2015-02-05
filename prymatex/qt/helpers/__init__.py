@@ -22,3 +22,4 @@ from .textcursors import *
 from .fonts import *
 from .shortcuts import *
 from .qbytearray import *
+from .watcher import *

@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-
-#Cosas interesantes
-#http://www.riverbankcomputing.co.uk/static/Docs/PyQt4/html/qfilesystemwatcher.html
-
 import os
 import codecs
 import shutil
@@ -24,19 +20,6 @@ from prymatex.core import exceptions
 
 class FileManager(PrymatexComponent, QtCore.QObject):
     """A File Manager"""
-    # ------------ Signals
-    fileCreated = QtCore.Signal(str)
-    fileDeleted = QtCore.Signal(str)
-    fileChanged = QtCore.Signal(str)
-    fileRenamed = QtCore.Signal(str, str)
-    directoryCreated = QtCore.Signal(str)
-    directoryDeleted = QtCore.Signal(str)
-    directoryChanged = QtCore.Signal(str)
-    directoryRenamed = QtCore.Signal(str, str)
-
-    # Generic Signal 
-    fileSytemChanged = QtCore.Signal(str, int)
-
     # ------------- Settings
     SETTINGS = 'FileManager'
 
@@ -47,61 +30,16 @@ class FileManager(PrymatexComponent, QtCore.QObject):
     detectEndOfLine = ConfigurableItem(default = False)
     removeTrailingSpaces = ConfigurableItem(default = False)
 
-    # ---------------- Constants
-    CREATED = 1<<0
-    DELETED = 1<<1
-    RENAMED = 1<<2
-    MOVED   = 1<<3
-    CHANGED = 1<<4
-
     def __init__(self, **kwargs):
         super(FileManager, self).__init__(**kwargs)
         
         self.last_directory = get_home_dir()
-        self.callbacks = {}
         self._opens = []
-        self.fileWatcher = QtCore.QFileSystemWatcher()
-        self.fileWatcher.fileChanged.connect(self.on_fileWatcher_fileChanged)
-        self.fileWatcher.directoryChanged.connect(self.on_fileWatcher_directoryChanged)
-        self.connectGenericSignal()
 
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.files import FilesSettingsWidget
         return [ FilesSettingsWidget ]
-    
-    # ------------- Signals
-    def connectGenericSignal(self):
-        UNARY_SINGAL_CONSTANT_MAP = (
-            (self.fileCreated, FileManager.CREATED ),
-            (self.fileDeleted, FileManager.DELETED ),
-            (self.fileChanged, FileManager.CHANGED ),
-            (self.directoryCreated, FileManager.CREATED ),
-            (self.directoryDeleted, FileManager.DELETED ),
-            (self.directoryChanged, FileManager.CHANGED ),
-        )
-        BINARY_SINGAL_CONSTANT_MAP = (
-            (self.fileRenamed, FileManager.RENAMED ),
-            (self.directoryRenamed, FileManager.RENAMED ),                       
-        )
-        for signal, associatedConstant in UNARY_SINGAL_CONSTANT_MAP:
-            signal.connect(lambda path, constant = associatedConstant: self.fileSytemChanged.emit(path, constant))
-        for signal, associatedConstant in BINARY_SINGAL_CONSTANT_MAP:
-            signal.connect(lambda _x, path, constant = associatedConstant: self.fileSytemChanged.emit(path, constant))
-
-    def on_fileWatcher_fileChanged(self, filePath):
-        if not os.path.exists(filePath):
-            self.fileDeleted.emit(filePath)
-        else:
-            self.fileChanged.emit(filePath)
-        self._apply_callback(filePath)
-    
-    def on_fileWatcher_directoryChanged(self, directoryPath):
-        if not os.path.exists(directoryPath):
-            self.directoryDeleted.emit(directoryPath)
-        else:
-            self.directoryChanged.emit(directoryPath)
-        self._apply_callback(filePath)
 
     # -------------- File Changes callbacks
     def _apply_callback(self, path):
@@ -111,13 +49,11 @@ class FileManager(PrymatexComponent, QtCore.QObject):
     def add_change_callback(self, path, callback):
         callbacks = self.callbacks.setdefault(path, [])
         if callback not in callbacks:
-            self.watchPath(path)
             callbacks.append(callback)
         
     def remove_change_callback(self, path, callback):
         callbacks = self.callbacks.setdefault(path, [])
         if callback in callbacks:
-            self.unwatchPath(path)
             callbacks.remove(callback)
         
     # -------------- History
@@ -209,17 +145,6 @@ class FileManager(PrymatexComponent, QtCore.QObject):
     def isOpen(self, filePath):
         return filePath in self._opens
     
-    def isWatched(self, path):
-        return path in self.fileWatcher.files() + self.fileWatcher.directories()
-        
-    def watchPath(self, path):
-        self.logger().debug("Watch path %s" % path)
-        self.fileWatcher.addPath(path)
-    
-    def unwatchPath(self, path):
-        self.logger().debug("Unwatch path %s" % path)
-        self.fileWatcher.removePath(path)
-    
     # ---------- Handling files for retrieving data. open, read, write, close
     def openFile(self, filePath):
         """Open and read a file, return the content.
@@ -230,8 +155,6 @@ class FileManager(PrymatexComponent, QtCore.QObject):
             raise exceptions.IOException("%s is not a file" % filePath)
         self.last_directory = os.path.dirname(filePath)
         self.add_file_history(filePath)
-        self._opens.append(filePath)
-        self.watchPath(filePath)
 
     def readFile(self, filePath):
         """Read from file"""
@@ -239,20 +162,14 @@ class FileManager(PrymatexComponent, QtCore.QObject):
 
     def writeFile(self, filePath, content, encode=None):
         """Function that actually save the content of a file."""
-        self.unwatchPath(filePath)
         encode = encoding.write(content, filePath, encode or self.defaultEncoding)
-        self.watchPath(filePath)
-        self._apply_callback(filePath)
         return encode
 
     def closeFile(self, filePath):
-        if self.isWatched(filePath):
-            self._opens.remove(filePath)
-            self.unwatchPath(filePath)
+        pass
 
     def directory(self, filePath = None):
-        """
-        Obtiene un directorio para el path
+        """Obtiene un directorio para el path
         """
         if filePath is None:
             #if fileInfo is None return the las directory or the home directory
