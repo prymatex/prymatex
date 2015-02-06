@@ -15,6 +15,7 @@ from prymatex.utils import encoding
 
 from prymatex.core import PrymatexComponent
 from prymatex.core.settings import ConfigurableItem
+from prymatex.core import notifier
 from prymatex.utils.misc import get_home_dir
 from prymatex.core import exceptions
 
@@ -34,7 +35,7 @@ class FileManager(PrymatexComponent, QtCore.QObject):
         super(FileManager, self).__init__(**kwargs)
         
         self.last_directory = get_home_dir()
-        self._opens = []
+        self._open_files = {}
 
     @classmethod
     def contributeToSettings(cls):
@@ -143,7 +144,7 @@ class FileManager(PrymatexComponent, QtCore.QObject):
 
     # -------------- Open file control
     def isOpen(self, filePath):
-        return filePath in self._opens
+        return filePath in self._open_files
     
     # ---------- Handling files for retrieving data. open, read, write, close
     def openFile(self, filePath):
@@ -155,6 +156,9 @@ class FileManager(PrymatexComponent, QtCore.QObject):
             raise exceptions.IOException("%s is not a file" % filePath)
         self.last_directory = os.path.dirname(filePath)
         self.add_file_history(filePath)
+        watch = notifier.watch(filePath, notifier.DELETED | notifier.CHANGED,
+            self.application().on_fileSytemChanged)
+        self._open_files[filePath] = watch
 
     def readFile(self, filePath):
         """Read from file"""
@@ -162,11 +166,13 @@ class FileManager(PrymatexComponent, QtCore.QObject):
 
     def writeFile(self, filePath, content, encode=None):
         """Function that actually save the content of a file."""
+        self._open_files[filePath].skip = True
         encode = encoding.write(content, filePath, encode or self.defaultEncoding)
         return encode
 
     def closeFile(self, filePath):
-        pass
+        notifier.unwatch(self._open_files[filePath])
+        del self._open_files[filePath]
 
     def directory(self, filePath = None):
         """Obtiene un directorio para el path

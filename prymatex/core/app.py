@@ -9,13 +9,7 @@ import prymatex
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import create_shortcut
-from prymatex.qt.helpers import watcher
 from prymatex.qt.extensions import ContextKeySequence
-
-from prymatex.core import config, exceptions
-from prymatex.core.components import PrymatexComponent, PrymatexEditor
-from prymatex.core import logger
-from prymatex.core.settings import ConfigurableItem, ConfigurableHook
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import six
@@ -24,6 +18,13 @@ from prymatex.utils.processes import get_process_map
 from prymatex.models.shortcuts import ShortcutsTreeModel
 from prymatex.models.settings import SettingsTreeModel
 from prymatex.models.settings import SortFilterSettingsProxyModel
+
+from . import config
+from . import exceptions
+from .components import PrymatexComponent, PrymatexEditor
+from . import logger
+from .settings import ConfigurableItem, ConfigurableHook
+from . import notifier
 
 class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     """The application instance.
@@ -88,7 +89,11 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         self.sortFilterSettingsProxyModel = SortFilterSettingsProxyModel(parent=self)
         self.sortFilterSettingsProxyModel.setSourceModel(self.settingsTreeModel)
 
+        # Exceptions
         self.replaceSysExceptHook()
+        
+        # File Notifier
+        notifier.start_notifier()
     
     def eventLoop(self):
         return self._event_loop
@@ -526,24 +531,25 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         return False
 
     # ---- Open (file, directory, url, canelones)
-    def openFile(self, file_path, cursorPosition=None, focus=True, window=None):
+    def openFile(self, path, position=None, focus=True, editor=None, window=None):
         """Open a editor in current window"""
-        file_path = self.fileManager.normcase(file_path)
+        path = self.fileManager.normcase(path)
 
-        editor = self.findEditorForFile(file_path)
+        editor = self.findEditorForFile(path)
         if editor is not None:
             window = editor.window()
             window.setCurrentEditor(editor)
-            if cursorPosition is not None:
-                editor.setCursorPosition(cursorPosition)
-        elif self.fileManager.exists(file_path):
+            if position is not None:
+                editor.setCursorPosition(position)
+        elif self.fileManager.exists(path):
             window = window or self.currentWindow()
             editor = window.createEditor(
-                file_path=file_path,
-                cursor_position=cursorPosition)
+                file_path=path,
+                class_name=editor,
+                position=position)
             window.addEditor(editor, focus)
-            watcher.on_change(file_path, self.on_fileManager_fileSytemChanged)
-            
+        return editor
+
     def openDirectory(self, directoryPath):
         raise NotImplementedError("Directory contents should be opened as files here")
 
@@ -597,7 +603,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             if shortcut.identifier() in self.shortcuts:
                 shortcut.setKeySequence(self.shortcuts[shortcut.identifier()])
 
-    def checkExternalAction(self, main_window, editor):
+    def checkExternalAction(self, window, editor):
         if editor.isExternalChanged():
             message = ("The file '%s' has been changed on the file system, Do you want to "
             "replace the editor contents with these changes?")
@@ -618,17 +624,17 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
                 buttons=QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Close,
                 defaultButton=QtWidgets.QMessageBox.Close) if self.askAboutExternalDeletions else QtWidgets.QMessageBox.Close  # NOQA
             if result == QtWidgets.QMessageBox.Close:
-                main_window.closeEditor(editor)
+                window.closeEditor(editor)
             elif result == QtWidgets.QMessageBox.Save:
-                main_window.saveEditor(editor)
+                window.saveEditor(editor)
 
-    def on_fileManager_fileSytemChanged(self, filePath, changes):
-        print(filePath, changes)
-        return
-        main_window, editor = self.findEditorForFile(filePath)
-        editor.setExternalAction(change)
-        if main_window.currentEditor() == editor:
-            self.checkExternalAction(main_window, editor)
+    def on_fileSytemChanged(self, filePath, actions):
+        print("Cambio este archivo", filePath)
+        editor = self.findEditorForFile(filePath)
+        window = editor.window()
+        editor.setExternalAction(actions)
+        if window.currentEditor() == editor:
+            self.checkExternalAction(window, editor)
 
     def __str__(self):
         return '<PrymatexApplication at {} PID: {}>'.format(hash(self), os.getpid())

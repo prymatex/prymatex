@@ -305,8 +305,8 @@ html_footer
         self.centralWidget().moveWidgetToPreviousGroup(self.currentEditor())
 
     # ---------------- Create and manage editors
-    def createEditor(self, class_name = None, file_path=None,
-            cursor_position=None):
+    def createEditor(self, class_name=None, file_path=None,
+            position=None):
         editorClass = None
         if class_name is not None:
             editorClass = self.application().pluginManager.findEditorClassByName(class_name)
@@ -323,8 +323,8 @@ html_footer
                                               file_path=file_path)
         if file_path:
             editor.open(file_path)
-        if cursor_position:
-            editor.setCursorPosition(cursor_position)
+        if position:
+            editor.setCursorPosition(position)
         self.editorCreated.emit(editor)
         return editor
 
@@ -501,9 +501,14 @@ html_footer
 
         # Restore open documents
         for editorState in componentState.get("editors", []):
-            editor = self.createEditor(
-                class_name = editorState["name"],
-                file_path = editorState.get("file"))
+            if 'file' in editorState:
+                editor = self.application().openFile(
+                    editorState["file"],
+                    editor=editorState["name"],
+                )
+            else:
+                editor = self.createEditor(
+                    editor_class=editorState["name"])
             editor.setComponentState(editorState)
             editor.setModified(editorState.get("modified", False))
             self.addEditor(editor)

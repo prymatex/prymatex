@@ -53,6 +53,7 @@
     "configure-shortcuts": "notfound.png",
     "convert": "notfound.png",
     "copy": "icon-copy",
+    "critical": "MessageBoxCritical",
     "cut": "icon-cuthere",
     "delete": "notfound.png",
     "dialog-cancel": "notfound.png",
@@ -114,6 +115,7 @@
     "help": "notfound.png",
     "highlight-current-line": "notfound.png",
     "highlight-matches": "icon-cpu-processor",
+    "information": "MessageBoxInformation",
     "whole-word": "icon-quoteup",
     "import-project": "icon-addfolderalt",
     "indent-guide": "notfound.png",
@@ -185,6 +187,7 @@
     "prymatex": ":/prymatex.png",
     "python": "icon-python",
     "quit": "icon-exit",
+    "question": "MessageBoxQuestion",
     "read-documentation": "notfound.png",
     "recent-files": "notfound.png",
     "redo": "notfound.png",
@@ -275,6 +278,7 @@
     "word": "notfound.png",
     "word-wrap": "icon-indent-right",
     "wrap": "icon-cmd",
+    "warning": "MessageBoxWarning",
     "zoom-in": "icon-zoom-in",
     "zoom-out": "icon-zoom-out"
 }
