@@ -18,7 +18,7 @@ class VariablesSettingsWidget(SettingsTreeNode, MultiDictTableEditorWidget):
         super(VariablesSettingsWidget, self).loadSettings()
         values = [ (value["variable"], value["value"], value["enabled"]) 
             for value in self.settings.get("shellVariables")]
-        self.addTuples('user', values, editable = True, selectable=True)
+        self.addTuples('user', values, editable=True, selectable=True)
         self.addDictionary('prymatex', self.application().environmentVariables())
         self.addDictionary('system', os.environ, visible = False)
 

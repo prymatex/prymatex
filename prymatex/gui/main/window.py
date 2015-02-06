@@ -508,7 +508,7 @@ html_footer
                 )
             else:
                 editor = self.createEditor(
-                    editor_class=editorState["name"])
+                    class_name=editorState["name"])
             editor.setComponentState(editorState)
             editor.setModified(editorState.get("modified", False))
             self.addEditor(editor)

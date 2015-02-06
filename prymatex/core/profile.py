@@ -6,6 +6,8 @@ import os
 from prymatex.qt import QtCore
 from prymatex.utils import json, plist
 
+from . import notifier
+
 from prymatex.core.config import (TM_PREFERENCES_PATH,
     PMX_SETTINGS_NAME, PMX_STATE_NAME, TM_SETTINGS_NAME)
 
@@ -34,6 +36,8 @@ class PrymatexProfile(object):
         settings = json.read_file(self.PMX_SETTINGS_PATH)
         self.settings = PrymatexSettings('settings', settings)
         self.settings.setTm(self.tmsettings)
+        # Reload settings
+        notifier.watch(self.PMX_SETTINGS_PATH, notifier.CHANGED, self.reload_settings)
 
         state = json.read_file(self.PMX_STATE_PATH)
         self.state = PrymatexSettings('state', state)
@@ -45,14 +49,21 @@ class PrymatexProfile(object):
         for new_path in new_paths:
             os.makedirs(new_path, 0o700)
 
-    # ------------------------ Setting Groups
-    def __group_name(self, configurableClass):
-        if configurableClass._settings is not None:
-            return configurableClass._settings.name()
-        return getattr(configurableClass, 'SETTINGS', configurableClass.__name__)
+    def get(self, name, default=None):
+        if hasattr(self, name):
+            return getattr(self, name)
+        return self.settings.get(name, default)
 
+    # ------------------------ Setting
+    def reload_settings(self, path, changes):
+        settings = json.read_file(path)
+        self.settings.reload(settings)
+        
     def settingsForClass(self, configurableClass):
-        settings = self.settings.scope(self.__group_name(configurableClass))
+        name = configurableClass._settings.name() \
+            if configurableClass._settings is not None else \
+            getattr(configurableClass, 'SETTINGS', configurableClass.__name__)
+        settings = self.settings.scope(name)
         # --------- Register settings values
         for key, value in configurableClass.__dict__.items():
             if isinstance(value, ConfigurableItem):
@@ -89,15 +100,6 @@ class PrymatexProfile(object):
         if componentState is not None:
             configurable.setComponentState(componentState)
 
-    def setValue(self, name, value):
-        self.settings[name] = value
-
-    def value(self, name, default=None):
-        if hasattr(self, name):
-            return getattr(self, name)
-        return self.settings.get(name, default)
-
-    # -------------- Hooks
     def settingValue(self, settingPath):
         names = settingPath.split(".")
         settings = self.settings
@@ -125,5 +127,7 @@ class PrymatexProfile(object):
     def sync(self):
         #Save capture values from qt
         plist.writePlist(self.tmsettings, self.TM_PREFERENCES_PATH)
+        self.settings.purge()
         json.write_file(self.settings, self.PMX_SETTINGS_PATH)
+        self.state.purge()
         json.write_file(self.state, self.PMX_STATE_PATH)

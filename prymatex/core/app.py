@@ -208,10 +208,10 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             'PMX_VERSION': self.applicationVersion(),
             'PMX_APP_NAME': self.applicationName().title(),
             'PMX_HOME_PATH': config.PMX_HOME_PATH,
-            'PMX_PROFILE_NAME': self.profile().value('PMX_PROFILE_NAME'),
-            'PMX_PROFILE_PATH': self.profile().value('PMX_PROFILE_PATH'),
-            'PMX_TMP_PATH': self.profile().value('PMX_TMP_PATH'),
-            'PMX_LOG_PATH': self.profile().value('PMX_LOG_PATH')
+            'PMX_PROFILE_NAME': self.profile().get('PMX_PROFILE_NAME'),
+            'PMX_PROFILE_PATH': self.profile().get('PMX_PROFILE_PATH'),
+            'PMX_TMP_PATH': self.profile().get('PMX_TMP_PATH'),
+            'PMX_LOG_PATH': self.profile().get('PMX_LOG_PATH')
         }
         for manager in [self.resourceManager, self.profileManager,
             self.pluginManager, self.storageManager, self.supportManager,
@@ -608,7 +608,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             message = ("The file '%s' has been changed on the file system, Do you want to "
             "replace the editor contents with these changes?")
             result = QtWidgets.QMessageBox.question(editor, _("File changed"),
-                                                _(message) % editor.filePath,
+                                                _(message) % editor.filePath(),
                                                 buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,  # NOQA
                                                 defaultButton=QtWidgets.QMessageBox.Yes) if self.askAboutExternalChanges else QtWidgets.QMessageBox.Yes  # NOQA
             if result == QtWidgets.QMessageBox.Yes:
@@ -620,7 +620,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
                        "to save your changes or close the editor without saving?")
             result = QtWidgets.QMessageBox.question(
                 editor, _("File deleted"),
-                _(message) % editor.filePath,
+                _(message) % editor.filePath(),
                 buttons=QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Close,
                 defaultButton=QtWidgets.QMessageBox.Close) if self.askAboutExternalDeletions else QtWidgets.QMessageBox.Close  # NOQA
             if result == QtWidgets.QMessageBox.Close:

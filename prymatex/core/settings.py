@@ -31,13 +31,33 @@ class PrymatexSettings(settings.Settings):
     def default(self, name):
         return self._items.get(name).getDefault()
 
+    def purge(self):
+        # remove all empty scopes from settings
+        for name in list(self.keys()):
+            if isinstance(self[name], PrymatexSettings) and not self[name]:
+                del self[name]
+
+    def clear(self):
+        # clear all settings values except scopes
+        for name in list(self.keys()):
+            if isinstance(self[name], PrymatexSettings):
+                self[name].clear()
+            else:
+                del self[name]
+
+    def reload(self, attrs):
+        for name, value in attrs.items():
+            if name in self and isinstance(self[name], PrymatexSettings):
+                self[name].reload(value)
+            else:
+                self.set(name, value)
+
     def set(self, name, value):
+        super(PrymatexSettings, self).set(name, value)
         item = self._items.get(name)
         if item:
             if name in self and value == item.getDefault():
                 self.erase(name)
-            else:
-                super(PrymatexSettings, self).set(name, value)
             if self._tm and item.tm_name:
                 self._tm.set(item.tm_name, value)
             for listener in self._listeners:
@@ -72,82 +92,6 @@ class PrymatexSettings(settings.Settings):
     def configure(self, obj):
         for name, item in self._items.items():
             value = self.get(name)
-            if value is not None:
-                setattr(obj, name, value)
-
-class SettingsGroup(object):
-    def __init__(self, name, settings, tmsettings):
-        self.__groupName = name
-        self.settings = settings
-        self.tmsettings = tmsettings
-        # Listener classes
-        self.listeners = set()
-        # Setting attrs
-        self.configurableItems = {}
-        # Setting hooks
-        self.configurableHooks = {}
-        # Hooks
-        self.hooks = {}
-        
-    def groupName(self):
-        return self.__groupName
-
-    def default(self, name):
-        return self.configurableItems.get(name).getDefault()
-
-    def setValue(self, name, value):
-        item = self.configurableItems.get(name)
-        if item:
-            # If default value then pop from settings
-            if name in self.settings and value == item.getDefault():
-                self.settings.pop(name)
-            else:
-                self.settings[name] = value
-            if item.tm_name is not None:
-                self.tmsettings.setValue(item.tm_name, value)
-            for listener in self.listeners:
-                setattr(listener, name, value)
-            for hookFunction in self.hooks.get(name, []):
-                hookFunction(value)
-
-    def value(self, name, default = None):
-        value = self.settings.get(name, default)
-        if value is None and name in self.configurableItems:
-            value = self.configurableItems.get(name).getDefault()
-        return value
-	
-    def hasValue(self, name):
-        value = self.settings.get(name)
-        return name in self.configurableItems and value is not None
-
-    def addConfigurableItem(self, item):
-        self.configurableItems[item.name] = item
-        if item.tm_name is not None and self.tmsettings.value(item.tm_name) is None:
-            self.tmsettings.setValue(item.tm_name, item.getDefault())
-        
-    def addConfigurableHook(self, hook):
-        self.configurableHooks[hook.path] = hook
-
-    def addListener(self, listener):
-        self.listeners.add(listener)
-
-    def removeListener(self, listener):
-        self.listeners.remove(listener)
-
-    def addHook(self, name, handler):
-        # Add hook
-        hooks = self.hooks.setdefault(name, [])
-        if handler not in hooks:
-            hooks.append(handler)
-
-    def removeHook(self, name, handler):
-        hooks = self.hooks.setdefault(name, [])
-        if handler in hooks:
-            hooks.remove(handler)
-
-    def configure(self, obj):
-        for name, item in self.configurableItems.items():
-            value = self.settings.get(name, item.getDefault())
             if value is not None:
                 setattr(obj, name, value)
 
