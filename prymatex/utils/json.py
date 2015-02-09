@@ -4,6 +4,13 @@ from __future__ import absolute_import
 
 import json
 import logging
+import re
+
+# Regular expression for comments
+comment_re = re.compile(
+    '(^)?[^\S\n]*/(?:\*(.*?)\*/[^\S\n]*|/[^\n]*)($)?',
+    re.DOTALL | re.MULTILINE
+)
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +27,14 @@ load = lambda fp, **kwargs: json.load(fp, **kwargs)
 def read_file(path):
     try:
         with open(path, 'r') as fp:
-            return load(fp)
+            content = ''.join(fp.readlines())
+            ## Looking for comments
+            match = comment_re.search(content)
+            while match:
+                # single line comment
+                content = content[:match.start()] + content[match.end():]
+                match = comment_re.search(content)
+            return loads(content)
     except Exception as exc:
         logger.error('Error reading json file %s' % path)
         logger.error(exc)

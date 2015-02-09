@@ -57,7 +57,8 @@ class PrymatexProfile(object):
     # ------------------------ Setting
     def reload_settings(self, path, changes):
         settings = json.read_file(path)
-        self.settings.reload(settings)
+        if settings:
+            self.settings.reload(settings)
         
     def settingsForClass(self, configurableClass):
         name = configurableClass._settings.name() \

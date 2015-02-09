@@ -31,7 +31,11 @@ class Settings(dict):
         if callback not in callbacks:
             callbacks.append(callback)
 
-    def remove_callback(self, name, callback):
-        callbacks = self._callbacks.setdefault(name, [])
-        if callback in callbacks:
-            callbacks.remove(callback)
+    def remove_callback(self, name, callback=None):
+        if callback:
+            callbacks = self._callbacks.setdefault(name, [])
+            if callback in callbacks:
+                callbacks.remove(callback)
+        elif name in self._callbacks:
+            del self._callbacks[name]
+        

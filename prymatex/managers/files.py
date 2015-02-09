@@ -198,7 +198,7 @@ class FileManager(PrymatexComponent, QtCore.QObject):
     def lastModification(self, filePath):
         return QtCore.QFileInfo(filePath).lastModified()
 
-    def compareFiles(self, filePath1, filePath2, compareBy = "name"):
+    def compareFiles(self, filePath1, filePath2, compareBy="name"):
         value1, value2 = filePath1, filePath2
         if compareBy == "size":
             value1, value2 = os.path.getsize(filePath1), os.path.getsize(filePath2)
