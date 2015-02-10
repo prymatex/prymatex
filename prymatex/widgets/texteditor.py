@@ -221,7 +221,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             cursor.setPosition(anchor, QtGui.QTextCursor.KeepAnchor)
         return cursor
 
-    def selectionBlockStartEnd(self, cursor = None):
+    def selectionBlockStartEnd(self, cursor=None):
         cursor = cursor or self.textCursor()
         return ( self.document().findBlock(cursor.selectionStart()),
             self.document().findBlock(cursor.selectionEnd()))
