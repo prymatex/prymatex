@@ -34,13 +34,13 @@ class PrymatexProfile(object):
         self.tmsettings = TextMateSettings('tm', tm)
 
         settings = json.read_file(self.PMX_SETTINGS_PATH)
-        self.settings = PrymatexSettings('settings', settings)
+        self.settings = PrymatexSettings('settings', settings or {})
         self.settings.setTm(self.tmsettings)
         # Reload settings
         notifier.watch(self.PMX_SETTINGS_PATH, notifier.CHANGED, self.reload_settings)
 
         state = json.read_file(self.PMX_STATE_PATH)
-        self.state = PrymatexSettings('state', state)
+        self.state = PrymatexSettings('state', state or {})
 
     # ------------------------ Paths
     def ensure_paths(self):

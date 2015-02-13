@@ -405,7 +405,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
         
     @QtCore.Slot()
     def on_actionOpenSystemEditor_triggered(self):
-        QtWidgets.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % self.currentPath(), QtCore.QUrl.TolerantMode))
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % self.currentPath(), QtCore.QUrl.TolerantMode))
     
     @QtCore.Slot()
     def on_pushButtonCollapseAll_pressed(self):

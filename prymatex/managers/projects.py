@@ -102,7 +102,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
             except exceptions.FileNotExistsException as e:
                 print(e)
                 self.knownProjects.remove(path)
-                self._settings.setValue('knownProjects', self.knownProjects)
+                self.settings().set('knownProjects', self.knownProjects)
         self.messageHandler = None
 
     def isOpen(self, project):
@@ -110,11 +110,11 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
 
     def appendToKnowProjects(self, project):
         self.knownProjects.append(project.path())
-        self._settings.setValue('knownProjects', self.knownProjects)
+        self.settings().set('knownProjects', self.knownProjects)
 
     def removeFromKnowProjects(self, project):
         self.knownProjects.remove(project.path())
-        self._settings.setValue('knownProjects', self.knownProjects)
+        self.settings().set('knownProjects', self.knownProjects)
 
     # ------------------- Properties
     def registerPropertyWidget(self, propertyWidget):
