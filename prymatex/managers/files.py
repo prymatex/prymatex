@@ -156,9 +156,7 @@ class FileManager(PrymatexComponent, QtCore.QObject):
             raise exceptions.IOException("%s is not a file" % filePath)
         self.last_directory = os.path.dirname(filePath)
         self.add_file_history(filePath)
-        watch = notifier.watch(filePath, notifier.DELETED | notifier.CHANGED,
-            self.application().on_fileSytemChanged)
-        self._open_files[filePath] = watch
+        self._open_files[filePath] = filePath 
 
     def readFile(self, filePath):
         """Read from file"""
@@ -166,12 +164,10 @@ class FileManager(PrymatexComponent, QtCore.QObject):
 
     def writeFile(self, filePath, content, encode=None):
         """Function that actually save the content of a file."""
-        self._open_files[filePath].skip = True
         encode = encoding.write(content, filePath, encode or self.defaultEncoding)
         return encode
 
     def closeFile(self, filePath):
-        notifier.unwatch(self._open_files[filePath])
         del self._open_files[filePath]
 
     def directory(self, filePath = None):
