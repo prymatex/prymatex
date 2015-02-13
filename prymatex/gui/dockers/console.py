@@ -1,8 +1,10 @@
 #-*- encoding: utf-8 -*-
 from __future__ import unicode_literals
 
-import os, sys
+import os
+import sys
 import random
+import traceback
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 
@@ -11,7 +13,7 @@ from prymatex.core import PrymatexDock
 from prymatex.core.settings import ConfigurableItem
 
 class Console(QtWidgets.QPlainTextEdit):
-    def __init__(self, prompt='$> ', startup_message='', parent=None):
+    def __init__(self, prompt='>>> ', startup_message='', parent=None):
         super(Console, self).__init__(parent)
         self.prompt = prompt
         self.history = []
