@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/codeeditor/status.ui'
 #
-# Created: Thu Jan 29 12:30:37 2015
+# Created: Wed Feb 18 07:43:55 2015
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_CodeEditorStatus(object):
     def setupUi(self, CodeEditorStatus):
         CodeEditorStatus.setObjectName("CodeEditorStatus")
-        CodeEditorStatus.resize(1100, 230)
+        CodeEditorStatus.resize(721, 277)
         self.verticalLayout = QtWidgets.QVBoxLayout(CodeEditorStatus)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
@@ -332,10 +332,16 @@ class Ui_CodeEditorStatus(object):
         self.horizontalLayout_2.setSpacing(2)
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.labelPosition = QtWidgets.QLabel(self.widgetStatus)
-        self.labelPosition.setMaximumSize(QtCore.QSize(300, 16777215))
-        self.labelPosition.setObjectName("labelPosition")
-        self.horizontalLayout_2.addWidget(self.labelPosition)
+        self.labelMessage = QtWidgets.QLabel(self.widgetStatus)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.labelMessage.sizePolicy().hasHeightForWidth())
+        self.labelMessage.setSizePolicy(sizePolicy)
+        self.labelMessage.setObjectName("labelMessage")
+        self.horizontalLayout_2.addWidget(self.labelMessage)
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem)
         self.line_5 = QtWidgets.QFrame(self.widgetStatus)
         self.line_5.setFrameShape(QtWidgets.QFrame.VLine)
         self.line_5.setFrameShadow(QtWidgets.QFrame.Sunken)
@@ -350,17 +356,6 @@ class Ui_CodeEditorStatus(object):
         self.line_6.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_6.setObjectName("line_6")
         self.horizontalLayout_2.addWidget(self.line_6)
-        self.labelStatus = QtWidgets.QLabel(self.widgetStatus)
-        self.labelStatus.setMaximumSize(QtCore.QSize(150, 16777215))
-        self.labelStatus.setObjectName("labelStatus")
-        self.horizontalLayout_2.addWidget(self.labelStatus)
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem)
-        self.toolButtonMenuBundles = QtWidgets.QToolButton(self.widgetStatus)
-        icon = QtGui.QIcon.fromTheme("menu-bundles")
-        self.toolButtonMenuBundles.setIcon(icon)
-        self.toolButtonMenuBundles.setObjectName("toolButtonMenuBundles")
-        self.horizontalLayout_2.addWidget(self.toolButtonMenuBundles)
         self.comboBoxSyntaxes = QtWidgets.QComboBox(self.widgetStatus)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -369,14 +364,6 @@ class Ui_CodeEditorStatus(object):
         self.comboBoxSyntaxes.setSizePolicy(sizePolicy)
         self.comboBoxSyntaxes.setObjectName("comboBoxSyntaxes")
         self.horizontalLayout_2.addWidget(self.comboBoxSyntaxes)
-        self.comboBoxSymbols = QtWidgets.QComboBox(self.widgetStatus)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.comboBoxSymbols.sizePolicy().hasHeightForWidth())
-        self.comboBoxSymbols.setSizePolicy(sizePolicy)
-        self.comboBoxSymbols.setObjectName("comboBoxSymbols")
-        self.horizontalLayout_2.addWidget(self.comboBoxSymbols)
         self.verticalLayout.addWidget(self.widgetStatus)
 
         self.retranslateUi(CodeEditorStatus)
@@ -422,7 +409,6 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonFindInFilesFind.setText(_translate("CodeEditorStatus", "Find"))
         self.pushButtonFindInFilesReplace.setText(_translate("CodeEditorStatus", "Replace"))
         self.pushButtonFindInFilesWhere.setText(_translate("CodeEditorStatus", "..."))
-        self.labelPosition.setText(_translate("CodeEditorStatus", "Position"))
+        self.labelMessage.setText(_translate("CodeEditorStatus", "Message"))
         self.labelContent.setText(_translate("CodeEditorStatus", "Content"))
-        self.labelStatus.setText(_translate("CodeEditorStatus", "Status"))
 

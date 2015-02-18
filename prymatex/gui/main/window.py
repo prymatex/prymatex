@@ -237,8 +237,8 @@ html_footer
                 toolBar.show()
 
     # ---------- Componer la mainWindow
-    def addStatusBar(self, statusBar):
-        self.statusBar().addPermanentWidget(statusBar)
+    def addStatusBar(self, status_bar):
+        self.statusBar().addStatusBar(status_bar)
 
     def addDock(self, dock, area):
         self.addDockWidget(area, dock)

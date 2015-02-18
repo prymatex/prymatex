@@ -37,22 +37,17 @@ class StatusMixin(object):
         # Connect tab size context menu
         self.labelContent.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.labelContent.customContextMenuRequested.connect(self.on_labelContent_customContextMenuRequested)
-        
-        # Create bundle menu
-        self.menuBundle = QtWidgets.QMenu(self)
-        self.application().supportManager.appendMenuToBundleMenuGroup(self.menuBundle)
-        self.toolButtonMenuBundles.setMenu(self.menuBundle)
+    
+    def showMessage(self, message):
+        self.labelMessage.setText(message)
 
     # -------------- Position tool
     def _update_position(self, editor):
         cursor = editor.textCursor()
-        self.labelPosition.setText("Line %d, Column %d, Selection %d" % (
+        self.labelMessage.setText("Line %d, Column %d, Selection %d" % (
             cursor.blockNumber() + 1, cursor.positionInBlock() + 1, 
             cursor.selectionEnd() - cursor.selectionStart())
         )
-        if cursor.position() > 0:
-            symbolModel = self.comboBoxSymbols.model()
-            self.comboBoxSymbols.setCurrentIndex(symbolModel.findSymbolIndex(cursor))
 
     # -------------- Content tool
     def _update_content(self, editor):
@@ -63,10 +58,6 @@ class StatusMixin(object):
             eol and eol[0][2] or "?",
             editor.encoding)
         )
-    
-    # -------------- Mode tool
-    def _update_mode(self, editor):
-        self.labelStatus.setText(editor.currentMode().name())
     
     # -------------- Syntax tool
     def _update_syntax(self, editor):
@@ -87,13 +78,10 @@ class StatusMixin(object):
         editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
         editor.textChanged.connect(self.on_editor_textChanged)
         editor.syntaxChanged.connect(self.on_editor_syntaxChanged)
-        editor.modeChanged.connect(self.on_editor_modeChanged)
     
     def on_window_editorChanged(self, editor):
-        self.comboBoxSymbols.setModel(editor.symbolListModel)
         self._update_position(editor)
         self._update_content(editor)
-        self._update_mode(editor)
         self._update_syntax(editor)
 
     def on_window_aboutToEditorChange(self, editor):
@@ -103,20 +91,12 @@ class StatusMixin(object):
         editor.cursorPositionChanged.disconnect(self.on_editor_cursorPositionChanged)
         editor.textChanged.disconnect(self.on_editor_textChanged)
         editor.syntaxChanged.disconnect(self.on_editor_syntaxChanged)
-        editor.modeChanged.disconnect(self.on_editor_modeChanged)
 
     @QtCore.Slot(int)
     def on_comboBoxSyntaxes_activated(self, index):
         model = self.comboBoxSyntaxes.model()
         node = model.node(model.index(index))
         self.window().currentEditor().insertBundleItem(node)
-
-    @QtCore.Slot(int)
-    def on_comboBoxSymbols_activated(self, index):
-        model = self.comboBoxSymbols.model()
-        cursor = model.symbolCursor(model.index(index))
-        if not cursor.isNull():
-            self.window().currentEditor().setTextCursor(cursor)
 
     # -------------- Editor signals
     @QtCore.Slot()
@@ -130,8 +110,3 @@ class StatusMixin(object):
     @QtCore.Slot(object)    
     def on_editor_syntaxChanged(self, syntax):
         self._update_syntax(self.sender())
-
-    @QtCore.Slot()
-    def on_editor_modeChanged(self):
-        self._update_mode(self.sender())
-
