@@ -831,6 +831,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor.insertText("\n%s" % blockIndent)
         self.ensureCursorVisible()
 
+    # ------------ Command API
+    def commandHistory(self, index):
+        return self._command_history
+        
     # ------------ Bundle Items
     def findProcessor(self, nameType):
         for processor in self.processors:

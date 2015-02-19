@@ -21,9 +21,29 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
         self.suggestionsCompletionModel = SuggestionsCompletionModel(parent = self.editor)
         self.registerModel(self.suggestionsCompletionModel)
 
-        # Install method
-        self.editor.runCompleter = self.__editor_run_completer
+        # Add new command to editor
+        self.editor.addCommand('auto_complete', self.__auto_complete)
+        self.editor.addCommand('hide_auto_complete', self.__hide_auto_complete)
     
+    # Command
+    def __auto_complete(self, args):
+        print(args)
+        self.completer.runCompleter()
+        return
+        #self.suggestionsCompletionModel.setSuggestions(suggestions)
+        #self.suggestionsCompletionModel.setCompletionCallback(callback or
+        #    self.defaultCompletionCallback)
+        self.completer.setCaseSensitivity(case_insensitive and QtCore.Qt.CaseInsensitive or QtCore.Qt.CaseSensitive)
+        #self.completer.setCompletionMode(QtGui.QCompleter.InlineCompletion)
+        if not self.completer.isVisible():
+            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
+            self.completer.setCompletionPrefix(already_typed or alreadyTyped or "")
+        if self.completer.trySetModel(self.suggestionsCompletionModel):
+            self.completer.complete(self.editor.cursorRect())
+
+    def __hide_auto_complete(self, args):
+        self.completer.hide()
+
     def name(self):
         return "COMPLITION"
     
@@ -76,26 +96,10 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
         alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
         self.completer.setCompletionPrefix(alreadyTyped)
         if self.isActive() and not (self.completer.setCurrentRow(0) or self.completer.trySetNextModel()):
-            print("Hide completer")
             self.completer.hide()
         elif not self.isActive() and not (event.modifiers() & QtCore.Qt.ControlModifier) and (text.asciify(event.text()) in COMPLETER_CHARS) and end - start >= self.editor.wordLengthToComplete:
-            print("Run completer")
             self.completer.runCompleter()
         elif self.isActive():
-            self.completer.complete(self.editor.cursorRect())
-            
-    def __editor_run_completer(self, suggestions, already_typed=None, callback = None, 
-        case_insensitive=True, disable_auto_insert = True, api_completions_only = True,
-        next_completion_if_showing = False, auto_complete_commit_on_tab = True):
-        self.suggestionsCompletionModel.setSuggestions(suggestions)
-        self.suggestionsCompletionModel.setCompletionCallback(callback or
-            self.defaultCompletionCallback)
-        self.completer.setCaseSensitivity(case_insensitive and QtCore.Qt.CaseInsensitive or QtCore.Qt.CaseSensitive)
-        #self.completer.setCompletionMode(QtGui.QCompleter.InlineCompletion)
-        if not self.completer.isVisible():
-            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-            self.completer.setCompletionPrefix(already_typed or alreadyTyped or "")
-        if self.completer.trySetModel(self.suggestionsCompletionModel):
             self.completer.complete(self.editor.cursorRect())
 
     # ------ Mode handlers

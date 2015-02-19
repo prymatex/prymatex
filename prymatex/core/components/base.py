@@ -7,18 +7,30 @@ class PrymatexComponent(object):
     def __init__(self, *args, **kwargs):
         super(PrymatexComponent, self).__init__(*args, **kwargs)
         self._components = []
+        self._commands = {}
 
     def initialize(self, *args, **kwargs):
         pass
     
     def finalize(self, *args, **kwargs):
         pass
-    
+
+    # --------- Component API    
     def components(self):
         return self._components
  
     def addComponent(self, component):
         self._components.append(component)
+
+    # --------- Command API
+    def commands(self):
+        return self._commands
+
+    def addCommand(self, string, callback):
+        self._commands[string] = callback
+        
+    def runCommand(self, string, args=None):
+        self._commands[string](args)
 
     @classmethod
     def contributeToSettings(cls):
