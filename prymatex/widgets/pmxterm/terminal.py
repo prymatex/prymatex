@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 # This code is based on AjaxTerm/Web-Shell which included a fairly complete
 # vt100 implementation as well as a stable process multiplexer.
@@ -10,12 +11,13 @@
 import sys
 import time
 
-from prymatex.qt import QtCore, QtGui, QtWidgets, API
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from .backend import constants
 from .schemes import ColorScheme
 
 DEBUG = False
+
 
 class TerminalWidget(QtWidgets.QWidget):
     keymap = {
@@ -46,7 +48,9 @@ class TerminalWidget(QtWidgets.QWidget):
        QtCore.Qt.Key_F12:  "~l", 
     }
 
-    sessionClosed = QtCore.Signal()
+
+    sessionClosed = QtCore.pyqtSignal()
+
 
     def __init__(self, session, scheme = None, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
@@ -114,6 +118,7 @@ class TerminalWidget(QtWidgets.QWidget):
         self._history_index = value
         self.update()
 
+
     # ------------------ Colors
     def setColorScheme(self, scheme):
         self.scheme = scheme
@@ -125,7 +130,7 @@ class TerminalWidget(QtWidgets.QWidget):
         if attrs & constants.SGR49:
             return self.scheme.background()
         return self.scheme.color(index)
-        
+         
     def foregroundColor(self, index = None, attrs = constants.DEFAULTSGR):
         if index is None:
              return self.scheme.foreground()
@@ -202,14 +207,12 @@ class TerminalWidget(QtWidgets.QWidget):
         cx, cy = self._pos2pixel(self._cursor_col, self._cursor_row)
         self._cursor_rect = QtCore.QRect(cx, cy, self._char_width, self._char_height)
 
-        
     def _reset(self):
         self._update_metrics()
         self._update_cursor_rect()
         self.resizeEvent(None)
         self.update()
 
-        
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
         self._paint_screen(painter)
@@ -237,6 +240,7 @@ class TerminalWidget(QtWidgets.QWidget):
         else:
             painter.drawRect(self._cursor_rect)
 
+
     def _paint_screen(self, painter):
         # Speed hacks: local name lookups are faster
         vars().update(QColor=QtGui.QColor, QBrush=QtGui.QBrush, QPen=QtGui.QPen, QRect=QtCore.QRect)
@@ -261,7 +265,7 @@ class TerminalWidget(QtWidgets.QWidget):
             col = 0
             text_line = ""
             for item in line:
-                if isinstance(item, tuple):
+                if isinstance(item, list):
                     foreground_color_idx, background_color_idx, flags = item
                     foregroundColor, backgroundColor, font = self.mapToStyle(
                         foreground_color_idx, 
@@ -295,6 +299,7 @@ class TerminalWidget(QtWidgets.QWidget):
         brush = QtGui.QBrush(self.backgroundColor())
         painter_fillRect(rect, brush)
 
+
     def _paint_selection(self, painter):
         pcol = QtGui.QColor(200, 200, 200, 50)
         pen = QtGui.QPen(pcol)
@@ -320,7 +325,7 @@ class TerminalWidget(QtWidgets.QWidget):
         font.setPointSize(size)
         self.setFont(font)
         self._reset()
-        
+
     def zoom_out(self):
         font = self.font()
         size = font.pointSize()
@@ -331,7 +336,7 @@ class TerminalWidget(QtWidgets.QWidget):
         self.setFont(font)
         self._reset()
 
-    return_pressed = QtCore.Signal()
+    return_pressed = QtCore.pyqtSignal()
 
     def keyPressEvent(self, event):
         text = event.text()
@@ -353,8 +358,8 @@ class TerminalWidget(QtWidgets.QWidget):
                     self.send(s)
                 elif DEBUG:
                     print("Unkonwn key combination")
-                    print("Modifiers:", modifiers)
-                    print("Key:", key)
+                    print("Modifiers: %s" % modifiers)
+                    print("Key: %s" % key)
                     for name in dir(Qt):
                         if not name.startswith("Key_"):
                             continue
@@ -367,10 +372,6 @@ class TerminalWidget(QtWidgets.QWidget):
             self.return_pressed.emit()
 
     def wheelEvent(self, event):
-        if API == "pyqt5":
-            delta = event.angleDelta().y()
-        else:
-            delta = event.delta()
         if event.modifiers() == QtCore.Qt.ControlModifier:
             if delta > 0:
                 self.zoom_in()
@@ -427,7 +428,7 @@ class TerminalWidget(QtWidgets.QWidget):
              (0, start_row + 1, self._columns, end_row - 1),
              (0, end_row - 1, end_col, end_row)
              ]
-             
+
     def text(self, rect=None):
         if rect is None:
             return "\n".join(self._text)
@@ -437,20 +438,20 @@ class TerminalWidget(QtWidgets.QWidget):
             for row in range(start_row, end_row):
                 text.append(self._text[row][start_col:end_col])
             return text
-        
+
     def text_selection(self):
         text = []
         for (start_col, start_row, end_col, end_row) in self._selection:
             for row in range(start_row, end_row):
                 text.append(self._text[row][start_col:end_col])
         return "\n".join(text)
-    
+
     def column_count(self):
         return self._columns
     
     def row_count(self):
         return self._rows
-
+    
     def mouseMoveEvent(self, event):
         if self._press_pos:
             move_pos = event.pos()
@@ -462,7 +463,7 @@ class TerminalWidget(QtWidgets.QWidget):
             self._clipboard.setText(sel, QtGui.QClipboard.Selection)
             
             self.update()
-        
+
     def mouseDoubleClickEvent(self, event):
         self._press_pos = None
         # double clicks create a selection for the word under the cursor
@@ -496,6 +497,6 @@ class TerminalWidget(QtWidgets.QWidget):
         self._clipboard.setText(sel, QtGui.QClipboard.Selection)
 
         self.update()
-        
+
     def is_alive(self):
         return self.session and self.session.is_alive()

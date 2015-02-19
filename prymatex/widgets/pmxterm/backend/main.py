@@ -3,153 +3,146 @@
 
 import os
 import sys
-import zmq
 import argparse
 import stat
 import signal
 import tempfile
 import constants
+import socket
+import json
+import queue
 
 from multiprocessing import Process, Queue
+from multiprocessing.reduction import recv_handle, send_handle
 from multiplexer import Multiplexer
 
+queue_multiplexer = Queue()
+queue_notifier = Queue()
 procs = set()
 shutdown = False
 
 # ===========
 # = Workers =
 # ===========
-def worker_multiplexer(queue_multiplexer, queue_notifier, addr):
+def worker_multiplexer(queue_multiplexer, queue_notifier):
     global shutdown
+
+    def debug(*args, **kwargs):
+        print(args, kwargs)
+
     multiplexer = Multiplexer(queue_notifier)
-        
-    context = zmq.Context()
-    zrep = context.socket(zmq.REP)
-    
-    if addr[1]:
-        port = zrep.bind_to_random_port(addr[0])
-        queue_multiplexer.put("%s:%d" % (addr[0], port))
-    else:
-        zrep.bind(addr[0])
-        queue_multiplexer.put(addr[0])
-    
-    should_continue = True
-    while not shutdown and should_continue:
-        pycmd = zrep.recv_pyobj()
-        method = getattr(multiplexer, pycmd["command"], None)
-        if method is not None:
-            zrep.send_pyobj(method(*pycmd["args"]))
-        else:
-            zrep.send_pyobj(None)
-        should_continue = pycmd["command"] != "proc_buryall"
+    while not shutdown:
+        pycmd = queue_multiplexer.get()
+        getattr(multiplexer, pycmd["command"], debug)(*pycmd["args"])
 
-def worker_notifier(queue_notifier, addr):
+def worker_notifier(queue_notifier):
     global shutdown
-    context = zmq.Context()
-    zpub = context.socket(zmq.PUB)
     
-    if addr[1]:
-        port = zpub.bind_to_random_port(addr[0])
-        queue_notifier.put("%s:%d" % (addr[0], port))
-    else:
-        zpub.bind(addr[0])
-        queue_notifier.put(addr[0])
-        
-    should_continue = True
-    while not shutdown and should_continue:
-        data = queue_notifier.get()
-        if isinstance(data, (tuple, list)):
-            zpub.send_multipart([ s.encode(constants.FS_ENCODING) for s in data ])
-        elif isinstance(data, int) and data == constants.BURIEDALL:
-            should_continue = False
+    channels = {}
+    while not shutdown:
+        message = queue_notifier.get()
+        if message['cmd'] == 'send':
+            channel = channels[message['channel']]
+            data = json.dumps(message['payload']).encode(constants.FS_ENCODING)
+            channel.send(data)
+            channel.send(b"\n\n")
+        elif message['cmd'] == 'buried_all':
+            for channel in channels.values():
+                channel.close()
+        elif message['cmd'] == 'setup_channel':
+            s = socket.socket(socket.AF_UNIX)
+            s.connect(message['address'])
+            channels[message['channel']] = s
+            
+def worker_client(queue_multiplexer, queue_notifier, sock):
+    global shutdown
 
-# ==============
-# = Parse args =
-# ==============
-DESCRIPTION = 'pmxterm backend.'
-
-# Dictionary of command-line help messages
-HELP = {
-    'rep_port': 'Port number of the request/responce socket',
-    'pub_port': 'Port number of the publisher socket',
-    'type': 'The zmq socket type "ipc", "tcp"',
-    'address': 'TCP and UDP bind address'
-}
-
-def parse_arguments():
-    """Creates argument parser for parsing command-line arguments. Returns parsed
-    arguments in a form of a namespace.
-    """
-    # Setting up argument parses
-    parser = argparse.ArgumentParser(description=DESCRIPTION)
-    parser.add_argument('-t', metavar='<type>', dest='type', type=str, default="tcp", help=HELP['type'])
-    parser.add_argument('-a', metavar='<address>', dest='address', type=str, help=HELP['address'])
-    parser.add_argument('-pp', metavar='<pub_port>', dest='pub_port', type=int, help=HELP['pub_port'])
-    parser.add_argument('-rp', metavar='<rep_port>', dest='rep_port', type=int, help=HELP['rep_port'])
-    args = parser.parse_args()
-    if args.type == "ipc" and args.address is not None:
-        parser.print_help()
-        sys.exit()
-    return args
+    _id = sock.fileno()
+    while not shutdown:
+        data = sock.recv(4096)
+        pycmd = json.loads(data.decode(constants.FS_ENCODING))
+        pycmd["args"].insert(0, _id)
+        queue_multiplexer.put(pycmd)
 
 def get_addresses(args):
     pub_addr = rep_addr = None
-    if args.type == "ipc":
-        pub_addr = "ipc://%s" % tempfile.mkstemp(prefix="pmx")[1]
-        rep_addr = "ipc://%s" % tempfile.mkstemp(prefix="pmx")[1]
-        return (rep_addr, False), (pub_addr, False)
-    elif args.type == "tcp":
+    if args.type == "unix":
+        return "%s" % tempfile.mktemp(prefix="pmx")
+    elif args.type == "inet":
         address = args.address if args.address is not None else '127.0.0.1'
-        pub_addr = "tcp://%s" % address
-        rep_addr = "tcp://%s" % address
-        pub_port = rep_port = True
-        if args.pub_port is not None:
-            pub_port = False
-            pub_addr += ":%i" % args.pub_port
-        if args.rep_port is not None:
-            rep_port = False
-            rep_addr += ":%i" % args.rep_port
-        return (rep_addr, rep_port), (pub_addr, pub_port)
-    return None, None
+        return (address, 0)
+    return None
+
+# Install singla handler
+def signal_handler(signum, frame):
+    global shutdown
+    shutdown = True
+    queue_multiplexer.close()
+    queue_notifier.close()
+    for proc in procs:
+        proc.terminate()
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
+if sys.platform == "win32":
+    signal.signal(signal.SIGBREAK, signal_handler)
 
 if __name__ == "__main__":
-    rep_addr, pub_addr = get_addresses(parse_arguments())
-
-    if not rep_addr or not pub_addr:
-        print("Address error, please read help")
+    # Creates argument parser for parsing command-line arguments.
+    parser = argparse.ArgumentParser(description="Prymatex's terminal backend.")
+    parser.add_argument('-t', metavar='<type>', dest='type', type=str, 
+        default="unix", help='The zmq socket type "unix", "inet"'
+    )
+    parser.add_argument('-a', metavar='<address>', dest='address',
+        type=str, help='Bind address'
+    )
+    parser.add_argument('-p', metavar='<port>', dest='pub_port',
+        type=int, help='Port number of the socket'
+    )
+    args = parser.parse_args()
+    if args.type == "unix" and args.address is not None:
+        parser.print_help()
+        sys.exit()
+    
+    address = get_addresses(args)
+    
+    if not isinstance(address, (str, tuple)):
+        parser.print_help()
         sys.exit(-1)
 
-    queue_multiplexer = Queue()
-    queue_notifier = Queue()
-    
-    # Start the notifier
-    nproc = Process(target=worker_notifier, args=(queue_notifier, pub_addr))
-    nproc.start()
-    procs.add(nproc)
-    
-    naddress = queue_notifier.get()    
-    
-    # Start the multiplexer
-    mproc = Process(target=worker_multiplexer, args=(queue_multiplexer, queue_notifier, rep_addr))
-    mproc.start()
-    procs.add(nproc)
-    
-    maddress = queue_multiplexer.get()
-        
-    info = { "multiplexer": maddress, "notifier": naddress }
-    
-    print("To connect another client to this backend, use:")
-    print(info)
+    server = socket.socket(args.type == "unix" and socket.AF_UNIX or socket.AF_INET)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+    server.bind(address)
+    server.listen(5)
+
+    print("To connect a client to this backend, use:")
+    print(json.dumps({'address': server.getsockname()}))
     sys.stdout.flush()
     
-    def signal_handler(signum, frame):
-        global shutdown
-        shutdown = True
-        for proc in procs:
-            proc.terminate()
-            proc.join()
-    
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-    if sys.platform == "win32":
-        signal.signal(signal.SIGBREAK, signal_handler)
+    # Start the multiplexer
+    mproc = Process(target=worker_multiplexer,
+        args=(queue_multiplexer, queue_notifier), name="multiplexer"
+    )
+    mproc.start()
+    procs.add(mproc)
+
+    # Start the notifier
+    nproc = Process(target=worker_notifier,
+        args=(queue_notifier, ), name="notifier"
+    )
+    nproc.start()
+    procs.add(nproc)
+    while not shutdown:
+        try:
+            conn, address = server.accept()
+        except InterruptedError:
+            continue
+
+        # Start the notifier
+        cproc = Process(target=worker_client, 
+            args=(queue_multiplexer, queue_notifier, conn), name="client"
+        )
+        cproc.start()
+        procs.add(cproc)
+        
+        conn.close()

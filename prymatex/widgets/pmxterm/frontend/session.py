@@ -11,9 +11,9 @@ import signal
 from prymatex.qt import QtCore
 
 class Session(QtCore.QObject):
-    readyRead = QtCore.Signal()
-    screenReady = QtCore.Signal(tuple)
-    finished = QtCore.Signal(int)
+    readyRead = QtCore.pyqtSignal()
+    screenReady = QtCore.pyqtSignal(list)
+    finished = QtCore.pyqtSignal(int)
     
     def __init__(self, backend, width=80, height=24):
         QtCore.QObject.__init__(self, backend)
@@ -27,7 +27,18 @@ class Session(QtCore.QObject):
         self._width = width
         self._height = height
         self._started = False
+        self._state = 'stop'
         self._pid = None
+        
+    def message(self, message):
+        self._state = message['state']
+        if self._state == 'alive':
+            self.screenReady.emit(message['screen'])
+        elif self._state == 'dead':
+            self.finished.emit(0)
+        else:
+            self.readyRead.emit()
+        return True
         
     def sid(self):
         return self._session_id
@@ -42,40 +53,28 @@ class Session(QtCore.QObject):
         args = [self._session_id, self._width, self._height]
         if largs:
             args.extend(largs)
-        self._started = self.backend.execute("proc_keepalive", args)
+        self.backend.execute("proc_keepalive", args)
+        self._started = True
         return self._started
 
     def close(self):
-        return self.backend.execute("proc_bury", [self._session_id])
+        self.backend.execute("proc_bury", [self._session_id])
     
     stop = close
 
     def is_alive(self):
-        return self.backend.execute("is_session_alive", [self._session_id])
+        return self._state == 'alive'
 
-        
     def keepalive(self):
-        return self.backend.execute("proc_keepalive", [self._session_id, self._width, self._height])
-
+        self.backend.execute("proc_keepalive", [self._session_id, self._width, self._height])
 
     def dump(self):
-        if self.keepalive():
-            return self.backend.execute("proc_dump", [self._session_id])
-
+        if self.is_alive():
+            self.backend.execute("proc_dump", [self._session_id])
 
     def write(self, data):
-        if self.keepalive():
-            return self.backend.execute("proc_write", [self._session_id, data])
-
-
-    def last_change(self):
-        return self.backend.execute("last_session_change", [self._session_id])
-        
+        if self.is_alive():
+            self.backend.execute("proc_write", [self._session_id, data])
     
-    def pid(self):
-        if self._pid is None:
-            self._pid = self.backend.execute("session_pid", [self._session_id])
-        return self._pid
-        
     def info(self):
-        return self.backend.execute("session_info", [self._session_id])
+        self.backend.execute("session_info", [self._session_id])

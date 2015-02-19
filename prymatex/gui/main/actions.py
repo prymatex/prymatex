@@ -415,8 +415,13 @@ class MainWindowActionsMixin(object):
                 "triggered": lambda mw, checked: getattr(mw, checked and "showDistractionFreeMode" or "showNormal")(),
                 "sequence": ("Global", "ShowDistractionFreeMode", "Shift+F11")
             }, "-", {
-                "text": "Settings",
+                "text": "Settings - Dialog",
                 "triggered": lambda mw, checked=False: mw.settingsDialog.exec_()
+            }, {
+                "text": "Settings - File",
+                "triggered": lambda mw, checked=False: mw.application().openFile(
+                    mw.profile().PMX_SETTINGS_PATH
+                    )
             }]
         }
 

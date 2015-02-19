@@ -22,7 +22,8 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.scope = None
         self.state = self.NO_STATE
         self.stacks = {}
-        self.setScopeName("")
+        default_syntax = self.editor.application().supportManager.getBundleItem(self.editor.defaultSyntax)
+        self.setScopeName(default_syntax.scopeName)
     
     def setScopeName(self, name):
         self.scope_name = name
@@ -30,6 +31,9 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.empty_token = CodeEditorToken(0, 0, self.empty_scope, "")
         self.empty_user_data = CodeEditorBlockUserData((self.empty_token, ), self.NO_STATE, -1, "", True)
     
+    def scopeName(self):
+        return self.scope_name
+
     def emptyUserData(self):
         return self.empty_user_data
 
@@ -103,7 +107,6 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.stack = [(self.bundleItem.grammar, None)]
 
     def endParse(self, scopeName):
-        self.setScopeName("")
         self.scope.pop_scope()
         self.stack = []
 

@@ -5,10 +5,6 @@ import sys
 
 FS_ENCODING = sys.getfilesystemencoding()
 
-# Multiplexer process constants
-BURIED = 0
-BURIEDALL = 1
-
 # VT100 Constants and masks
 
 #modesoff SGR0         Turn off character attributes          ^[[m
