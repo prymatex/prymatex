@@ -312,6 +312,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             )
         return self.window().showTooltip(*largs, **kwargs)
 
+    def showStatus(self, *largs, **kwargs):
+        return self.window().showStatus(*largs, **kwargs)
+
     # OVERRIDE: TextEditWidget.setPlainText()
     def setPlainText(self, text):
         self.syntaxHighlighter.stop()
@@ -611,8 +614,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 st.append('%d lines' % (end.blockNumber() - start.blockNumber() + 1))
             st.append('%d characters selected' % (cursor.selectionEnd() - cursor.selectionStart()))
         else:
-            st.append('line %d' % (cursor.blockNumber() + 1))
-            st.append('column %d' % (cursor.positionInBlock() + 1))
+            st.append('Line %d' % (cursor.blockNumber() + 1))
+            st.append('Column %d' % (cursor.positionInBlock() + 1))
         self.window().setStatus('position', ', '.join(st))
 
     #-------------------- Highlight Editor on signal trigger

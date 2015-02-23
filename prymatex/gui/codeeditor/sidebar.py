@@ -125,7 +125,7 @@ class LineNumberSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
             if block.isVisible():
                 numberText = str(line_count)
                 if block == current_block:
-                    painter.fillRect(blockGeometry, self.palette().linkVisited().color())
+                    painter.fillRect(blockGeometry, self.palette().alternateBase().color())
                     painter.setFont(self.boldFont)
                     leftPosition = self.width() - (self.boldMetrics.width(numberText) + self.MARGIN)
                     topPosition = blockGeometry.y() + self.boldMetrics.ascent()
@@ -184,7 +184,7 @@ class BookmarkSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
                 break
             
             if block == current_block:
-                painter.fillRect(blockGeometry, self.palette().linkVisited().color())
+                painter.fillRect(blockGeometry, self.palette().alternateBase().color())
 
             # Draw the line number right justified at the y position of the line.
             if block.isVisible() and self.editor.bookmarkListModel.bookmarksCount(block) > 0:
@@ -247,7 +247,7 @@ class FoldingSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
                 break
 
             if block == current_block:
-                painter.fillRect(blockGeometry, self.palette().linkVisited().color())
+                painter.fillRect(blockGeometry, self.palette().alternateBase().color())
 
             # Draw the line number right justified at the y position of the line.
             if block.isVisible():

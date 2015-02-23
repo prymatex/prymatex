@@ -270,7 +270,12 @@ html_footer
         tooltip = self.notifier.tooltip(*largs, **kwargs)
         tooltip.show()
         return tooltip
-        
+
+    def showStatus(self, *largs, **kwargs):
+        status = self.notifier.status(*largs, **kwargs)
+        status.show()
+        return status
+
     # -------------------- Status
     def setStatus(self, key, value, timeout=None):
         return self.statusBar().setStatus(key, value, timeout)

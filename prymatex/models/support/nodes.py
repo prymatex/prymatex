@@ -152,6 +152,10 @@ class BundleItemTreeNode(TreeNodeBase):
             palette.setColor(QtGui.QPalette.WindowText, settings['foreground'])
             #QPalette::Text	6	The foreground color used with Base. This is usually the same as the WindowText, in which case it must provide good contrast with Window and Base.
             palette.setColor(QtGui.QPalette.Text, settings['foreground'])
+            #QPalette::ToolTipText	19	Used as the foreground color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
+            palette.setColor(QtGui.QPalette.ToolTipText, settings['foreground'])
+            #QPalette::ButtonText	    8	A foreground color used with the Button color.
+            palette.setColor(QtGui.QPalette.ButtonText, settings['foreground'])
         if 'background' in settings:
             #QPalette::Background	10	This value is obsolete. Use Window instead.
             palette.setColor(QtGui.QPalette.Background, settings['background'])
@@ -159,6 +163,10 @@ class BundleItemTreeNode(TreeNodeBase):
             palette.setColor(QtGui.QPalette.Window, settings['background'])
             #QPalette::Base	9	Used mostly as the background color for text entry widgets, but can also be used for other painting - such as the background of combobox drop down lists and toolbar handles. It is usually white or another light color.
             palette.setColor(QtGui.QPalette.Base, settings['background'])
+            #QPalette::ToolTipBase	18	Used as the background color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
+            palette.setColor(QtGui.QPalette.ToolTipBase, settings['background'])
+            #QPalette::Button	    1	The general button background color. This background can be different from Window as some styles require a different background color for buttons.
+            palette.setColor(QtGui.QPalette.Button, settings['background'])
         if 'selection' in settings:
             #QPalette::Highlight	12	A color to indicate a selected item or the current item. By default, the highlight color is Qt::darkBlue.
             palette.setColor(QtGui.QPalette.Highlight, settings['selection'])
@@ -171,16 +179,14 @@ class BundleItemTreeNode(TreeNodeBase):
         if 'caret' in settings:
             #QPalette::BrightText	7	A text color that is very different from WindowText, and contrasts well with e.g. Dark. Typically used for text that needs to be drawn where Text or WindowText would give poor contrast, such as on pressed push buttons. Note that text colors can be used for things other than just words; text colors are usually used for text, but it's quite common to use the text color roles for lines, icons, etc.
             palette.setColor(QtGui.QPalette.BrightText, settings['caret'])
-        if 'gutterBackground' in settings:
-            print("color back")
+            #QPalette::HighlightedText	13	A text color that contrasts with Highlight. By default, the highlighted text color is Qt::white.
+            palette.setColor(QtGui.QPalette.HighlightedText, settings['caret'])
+        if 'gutterBackground' in settings and settings['gutterBackground'].name().upper() != DEFAULT_THEME_SETTINGS['gutterBackground']:
             #QPalette::ToolTipBase	18	Used as the background color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
             palette.setColor(QtGui.QPalette.ToolTipBase, settings['gutterBackground'])
-        if 'gutterForeground' in settings:
+        if 'gutterForeground' in settings and settings['gutterForeground'].name().upper() != DEFAULT_THEME_SETTINGS['gutterForeground']:
             #QPalette::ToolTipText	19	Used as the foreground color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
             palette.setColor(QtGui.QPalette.ToolTipText, settings['gutterForeground'])
-        #QPalette::Button	1	The general button background color. This background can be different from Window as some styles require a different background color for buttons.
-        #QPalette::ButtonText	8	A foreground color used with the Button color.
-        #QPalette::HighlightedText	13	A text color that contrasts with Highlight. By default, the highlighted text color is Qt::white.
         #QPalette::Link	14	A text color used for unvisited hyperlinks. By default, the link color is Qt::blue.
         if not cache:
             return palette
