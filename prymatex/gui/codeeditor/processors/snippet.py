@@ -60,10 +60,13 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
             self.editor.showFlatPopupMenu(choices, self.setHolderChoiceIndex)
             
     def runShellScript(self, script):
+        command = script
+        environment = self.environmentVariables()
+        variables = self.shellVariables(environment)
         context = self.editor.application().supportManager.runSystemCommand(
-            shellCommand = script,
-            environment = self.environmentVariables(),
-            shellVariables = self.shellVariables()
+            command = command,
+            environment = environment,
+            variables = variables
         )
         return context.outputValue.strip()
     
