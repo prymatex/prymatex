@@ -125,6 +125,7 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
                 return True
         return False
 
+    @QtCore.Slot()
     def on_model_suggestionsReady(self):
         model = self.sender()
         if not self.isVisible():

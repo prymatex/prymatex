@@ -271,11 +271,18 @@ html_footer
         tooltip.show()
         return tooltip
         
-    def showStatus(self, *largs, **kwargs):
-        status = self.notifier.status(*largs, **kwargs)
-        status.show()
-        return status
+    # -------------------- Status
+    def setStatus(self, key, value, timeout=None):
+        return self.statusBar().setStatus(key, value, timeout)
 
+    def status(self, key):
+        """return String	Returns the previously assigned value associated with the key, if any."""
+        return self.statusBar().status(key)
+
+    def eraseStatus(self, key):
+        """return None	Clears the named status."""
+        return self.statusBar().eraseStatus(key)
+    
     # ---------------- Create and manage groups
     def addEmptyGroup(self):
         pass

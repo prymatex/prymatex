@@ -41,14 +41,6 @@ class StatusMixin(object):
     def showMessage(self, message):
         self.labelMessage.setText(message)
 
-    # -------------- Position tool
-    def _update_position(self, editor):
-        cursor = editor.textCursor()
-        self.labelMessage.setText("Line %d, Column %d, Selection %d" % (
-            cursor.blockNumber() + 1, cursor.positionInBlock() + 1, 
-            cursor.selectionEnd() - cursor.selectionStart())
-        )
-
     # -------------- Content tool
     def _update_content(self, editor):
         eol = [ eol for eol in textutils.EOLS if eol[0] == editor.eolChars() ]
@@ -75,12 +67,10 @@ class StatusMixin(object):
 
     # -------------- Window signals
     def on_window_editorCreated(self, editor):
-        editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
         editor.textChanged.connect(self.on_editor_textChanged)
         editor.syntaxChanged.connect(self.on_editor_syntaxChanged)
     
     def on_window_editorChanged(self, editor):
-        self._update_position(editor)
         self._update_content(editor)
         self._update_syntax(editor)
 
@@ -88,7 +78,6 @@ class StatusMixin(object):
         pass
 
     def on_window_aboutToEditorDelete(self, editor):
-        editor.cursorPositionChanged.disconnect(self.on_editor_cursorPositionChanged)
         editor.textChanged.disconnect(self.on_editor_textChanged)
         editor.syntaxChanged.disconnect(self.on_editor_syntaxChanged)
 
@@ -99,10 +88,6 @@ class StatusMixin(object):
         self.window().currentEditor().insertBundleItem(node)
 
     # -------------- Editor signals
-    @QtCore.Slot()
-    def on_editor_cursorPositionChanged(self):
-        self._update_position(self.sender())
-
     @QtCore.Slot()
     def on_editor_textChanged(self):
         self._update_content(self.sender())

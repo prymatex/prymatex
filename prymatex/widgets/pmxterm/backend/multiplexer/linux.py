@@ -218,7 +218,7 @@ class Multiplexer(base.Multiplexer):
             del self.session[sid]
 
     @synchronized
-    def proc_buryall(self, client):
+    def proc_buryall(self, client=None):
         for sid in list(self.session.keys()):
             self.proc_bury(client, sid)
         self._command('buried_all', client)

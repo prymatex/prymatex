@@ -174,6 +174,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.updateRequest.connect(self.updateSideBars)
         self.themeChanged.connect(self._update_highlight)
         self.cursorPositionChanged.connect(self._update_highlight)
+        self.cursorPositionChanged.connect(self._update_position)
 
         self.syntaxChanged.connect(lambda syntax, editor=self: 
             editor.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
@@ -310,9 +311,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 self.cursorRect(self.textCursor()).bottomRight()
             )
         return self.window().showTooltip(*largs, **kwargs)
-    
-    def showStatus(self, *largs, **kwargs):
-        return self.window().showStatus(*largs, **kwargs)
 
     # OVERRIDE: TextEditWidget.setPlainText()
     def setPlainText(self, text):
@@ -336,6 +334,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.aboutToSave.emit()
         self.encoding = self.application().fileManager.writeFile(filePath, self.toPlainTextWithEol(), self.encoding)
         super(CodeEditor, self).save(filePath)
+        self.window().setStatus("saved", "Saved %s (%s)" % (filePath, self.encoding), 2000)
         self.saved.emit()
 
     def close(self):
@@ -602,6 +601,19 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 break
         cursor.endEditBlock()
         return replaced
+
+    def _update_position(self):
+        cursor = self.textCursor()
+        st = []
+        if cursor.hasSelection():
+            start, end = self.selectionBlockStartEnd(cursor)
+            if start != end:
+                st.append('%d lines' % (end.blockNumber() - start.blockNumber() + 1))
+            st.append('%d characters selected' % (cursor.selectionEnd() - cursor.selectionStart()))
+        else:
+            st.append('line %d' % (cursor.blockNumber() + 1))
+            st.append('column %d' % (cursor.positionInBlock() + 1))
+        self.window().setStatus('position', ', '.join(st))
 
     #-------------------- Highlight Editor on signal trigger
     def _update_highlight(self):
