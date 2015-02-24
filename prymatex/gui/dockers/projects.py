@@ -62,7 +62,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
         
     def initialize(self, **kwargs):
         super(ProjectsDock, self).initialize(**kwargs)
-        self.projectDialog = self.window().findChild(QtWidgets.QDialog, "ProjectDialog")
+        self.newProjectDialog = self.window().findChild(QtWidgets.QDialog, "NewProjectDialog")
         self.templateDialog = self.window().findChild(QtWidgets.QDialog, "TemplateDialog")
         self.bundleEditorDialog = self.window().findChild(QtWidgets.QDialog, "BundleEditorDialog")
         self.propertiesDialog = self.window().findChild(QtWidgets.QDialog, "PropertiesDialog")
@@ -322,7 +322,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
 
     @QtCore.Slot()
     def on_actionNewProject_triggered(self):
-        self.projectDialog.createProject()
+        self.newProjectDialog.createProject()
 
     @QtCore.Slot()
     def on_actionDelete_triggered(self):

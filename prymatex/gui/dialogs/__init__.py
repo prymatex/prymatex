@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .project import ProjectDialog
+from .newproject import NewProjectDialog
 from .about import AboutDialog
 from .selector import SelectorDialog
 #from .selector2 import SelectorDialog
@@ -13,7 +13,7 @@ from .properties import PropertiesDialog
 from .environment import EnvironmentDialog
 
 def registerPlugin(manager, descriptor):
-    manager.registerComponent(ProjectDialog)
+    manager.registerComponent(NewProjectDialog)
     manager.registerComponent(AboutDialog)
     manager.registerComponent(SelectorDialog)
     manager.registerComponent(SettingsDialog)

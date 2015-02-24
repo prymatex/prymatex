@@ -151,65 +151,63 @@ class MainWindowActionsMixin(object):
         menu["file"] = {
             "text": "&File",
             "items": [{
-                "text": "New",
-                "items": [{
-                    "text": "Editor",
+                    "text": "New File",
                     "sequence": "New",
                     "triggered": lambda mw, checked=False: mw.addEmptyEditor(),
                     "icon": "new-editor",
-                }, "-", {
-                    "text": "From Template",
+                }, {
+                    "text": "New From Template",
                     "triggered": lambda mw, checked=False: mw.templateDialog.createFile(),
                     "icon": "new-from-template",
                 }, {
-                    "text": "Project",
-                    "triggered": lambda mw, checked=False: mw.projectDialog.createProject(),
+                    "text": "New Project",
+                    "triggered": lambda mw, checked=False: mw.newProjectDialog.createProject(),
                     "icon": "new-project",
-                }]
-            }, {
-                "text": "Open",
-                "triggered": cls.on_actionOpen_triggered
-            }, {
-                "text": "Recent Files",
-                "aboutToShow": cls.on_menuRecentFiles_aboutToShow,
-                "items": ["-", {
-                    "text": "Open All Recent Files",
-                    "triggered": lambda mw, checked=False: [ mw.application().openFile(path)
-                        for path in mw.application().fileManager.fileHistory ]
+                }, "-", {
+                    "text": "Open File",
+                    "triggered": cls.on_actionOpen_triggered
                 }, {
-                    "text": "Remove all recent files",
-                    "triggered": lambda mw, checked=False: mw.application().fileManager.clearFileHistory()
-                }]
-            }, {
-                "text": "Import Project",
-                "triggered": cls.on_actionImportProject_triggered,
-            }, "-", {
-                "text": "Save",
-                "triggered": lambda mw, checked=False: mw.saveEditor()
-            }, {
-                "text": "Save As",
-                "triggered": lambda mw, checked=False: mw.saveEditor(saveAs=True)
-            }, {
-                "text": "Save All",
-                "sequence": ("Global", "SaveAll", "Ctrl+Shift+S"),
-                "triggered": lambda mw, checked=False: [ mw.saveEditor(editor=editor) for editor in mw.editors() ]
-            }, "-", {
-                "text": "Close",
-                "triggered": lambda mw: mw.closeEditor()
-            }, {
-                "text": "Close All",
-                "sequence": ("Global", "CloseAll", "Ctrl+Shift+W"),
-                "triggered": lambda mw: [ mw.closeEditor(editor=editor) for editor in mw.editors() ]
-            }, {
-                "text": "Close Others",
-                "tirgger": cls.on_actionCloseOthers_triggered
-            }, "-", {
-                "text": "Switch Profile",
-                "triggered": cls.on_actionSwitchProfile_triggered
-            }, "-", {
-                "text": "Quit",
-                "triggered": lambda mw, checked=False: mw.application().quit()
-            }]
+                    "text": "Recent Files",
+                    "aboutToShow": cls.on_menuRecentFiles_aboutToShow,
+                    "items": ["-", {
+                        "text": "Open All Recent Files",
+                        "triggered": lambda mw, checked=False: [ mw.application().openFile(path)
+                            for path in mw.application().fileManager.fileHistory ]
+                    }, {
+                        "text": "Remove all recent files",
+                        "triggered": lambda mw, checked=False: mw.application().fileManager.clearFileHistory()
+                    }]
+                }, {
+                    "text": "Import Project",
+                    "triggered": cls.on_actionImportProject_triggered,
+                }, "-", {
+                    "text": "Save",
+                    "triggered": lambda mw, checked=False: mw.saveEditor()
+                }, {
+                    "text": "Save As",
+                    "triggered": lambda mw, checked=False: mw.saveEditor(saveAs=True)
+                }, {
+                    "text": "Save All",
+                    "sequence": ("Global", "SaveAll", "Ctrl+Shift+S"),
+                    "triggered": lambda mw, checked=False: [ mw.saveEditor(editor=editor) for editor in mw.editors() ]
+                }, "-", {
+                    "text": "Close",
+                    "triggered": lambda mw: mw.closeEditor()
+                }, {
+                    "text": "Close All",
+                    "sequence": ("Global", "CloseAll", "Ctrl+Shift+W"),
+                    "triggered": lambda mw: [ mw.closeEditor(editor=editor) for editor in mw.editors() ]
+                }, {
+                    "text": "Close Others",
+                    "tirgger": cls.on_actionCloseOthers_triggered
+                }, "-", {
+                    "text": "Switch Profile",
+                    "triggered": cls.on_actionSwitchProfile_triggered
+                }, "-", {
+                    "text": "Quit",
+                    "triggered": lambda mw, checked=False: mw.application().quit()
+                }
+            ]
         }
 
         # ------------- Edit menu

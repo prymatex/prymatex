@@ -132,7 +132,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
         self.bundleEditorDialog = self.findChild(QtWidgets.QDialog, "BundleEditorDialog")
         self.profileDialog = self.findChild(QtWidgets.QDialog, "ProfileDialog")
         self.templateDialog = self.findChild(QtWidgets.QDialog, "TemplateDialog")
-        self.projectDialog = self.findChild(QtWidgets.QDialog, "ProjectDialog")
+        self.newProjectDialog = self.findChild(QtWidgets.QDialog, "NewProjectDialog")
 
         # Dockers
         self.browserDock = self.findChild(QtWidgets.QDockWidget, "BrowserDock")

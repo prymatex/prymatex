@@ -11,7 +11,7 @@ from prymatex.core import config
 
 from prymatex.utils.i18n import ugettext as _
 
-from prymatex.ui.dialogs.project import Ui_NewProjectDialog
+from prymatex.ui.dialogs.newproject import Ui_NewProjectDialog
 
 class NewProjectDialog(PrymatexDialog, Ui_NewProjectDialog, QtWidgets.QDialog):
     def __init__(self, **kwargs):
@@ -132,7 +132,7 @@ class NewProjectDialog(PrymatexDialog, Ui_NewProjectDialog, QtWidgets.QDialog):
             self.projectCreated = self.application().projectManager.createProject(name, file_path, folders=folders)
         except exceptions.ProjectExistsException:
             rslt = QtWidgets.QMessageBox.information(None, 
-                _("Project file already exists") % name,
+                _("Project file already exists"),
                 _("The %s path already exists. "
                 "Unless you know what you are doing, Cancel and open project,"
                 " if it still fails, choose overwirte. Overwrite?") % file_path,
@@ -142,7 +142,7 @@ class NewProjectDialog(PrymatexDialog, Ui_NewProjectDialog, QtWidgets.QDialog):
             self.projectCreated = self.application().projectManager.createProject(name, file_path, folders=folders, overwrite=True)
 
         self.application().projectManager.updateProject(self.projectCreated,
-            description = self.textDescription.toPlainText(),
+            description = self.textEditDescription.toPlainText(),
             licence = self.comboBoxLicence.currentText(),
             keywords = self.comboBoxKeywords.model().selectedItems())
 
