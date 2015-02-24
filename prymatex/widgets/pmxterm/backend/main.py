@@ -34,7 +34,9 @@ def worker_multiplexer(queue_multiplexer, queue_notifier):
     while not shutdown:
         pycmd = queue_multiplexer.get()
         getattr(multiplexer, pycmd["command"], debug)(*pycmd["args"])
-
+        if pycmd['command'] == 'buried_all':
+            break
+            
 def worker_notifier(queue_notifier):
     global shutdown
     
@@ -49,6 +51,7 @@ def worker_notifier(queue_notifier):
         elif message['cmd'] == 'buried_all':
             for channel in channels.values():
                 channel.close()
+            break
         elif message['cmd'] == 'setup_channel':
             s = socket.socket(socket.AF_UNIX)
             s.connect(message['address'])
@@ -63,6 +66,8 @@ def worker_client(queue_multiplexer, queue_notifier, sock):
         pycmd = json.loads(data.decode(constants.FS_ENCODING))
         pycmd["args"].insert(0, _id)
         queue_multiplexer.put(pycmd)
+        if pycmd['command'] == 'buried_all':
+            break
 
 def get_addresses(args):
     pub_addr = rep_addr = None

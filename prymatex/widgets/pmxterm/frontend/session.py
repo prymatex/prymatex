@@ -35,6 +35,7 @@ class Session(QtCore.QObject):
         if self._state == 'alive':
             self.screenReady.emit(message['screen'])
         elif self._state == 'dead':
+            print("Termino session")
             self.finished.emit(0)
         else:
             self.readyRead.emit()

@@ -93,7 +93,7 @@ class Backend(QtCore.QObject):
             address, port = address.split(':')
             self.multiplexer.connectToHost(address, int(port), QtCore.QIODevice.WriteOnly)
         
-    def execute(self, command, args=None):
+    def execute(self, command, args=()):
         if not isinstance(args, (tuple, list)):
             args = [ args ]
         data = {"command": command, "args": args}
@@ -121,7 +121,6 @@ class Backend(QtCore.QObject):
     def stop(self):
         self.execute("proc_buryall")
         self._set_state(self.NotRunning)
-        self.finished.emit(0)
 
     def platform(self):
         return self.execute("platform")
@@ -129,13 +128,22 @@ class Backend(QtCore.QObject):
     def session(self):
         session = Session(self)
         self.sessions[session.sid()] = session
+        session.finished.connect(self.on_session_finished)
         return session
+
+    @QtCore.Slot(int)
+    def on_session_finished(self, value):
+        session = self.sender()
+        del self.sessions[session.sid()]
+        session.deleteLater()
+        if not self.sessions:
+            self.finished.emit()
 
 class LocalBackend(Backend):
     def __init__(self, parent=None):
         Backend.__init__(self, 'local', parent)
         self.process = QtCore.QProcess(self)
-
+        
     def start(self):
         self._set_state(self.Starting)
         args = [LOCAL_BACKEND_SCRIPT, "-t", self.protocol()]
@@ -164,11 +172,6 @@ class LocalBackend(Backend):
         self.process.readyReadStandardError.connect(backend_start_readyReadStandardError)
         self.process.readyReadStandardOutput.connect(backend_start_readyReadStandardOutput)
         self.process.start(sys.executable, args)
-
-    def stop(self):
-        Backend.stop(self)
-        os.kill(self.process.pid(), signal.SIGTERM)
-        self.process.waitForFinished()
 
     #------------ Process Normal Signals
     def backend_finished(self):

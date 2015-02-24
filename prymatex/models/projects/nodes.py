@@ -140,16 +140,16 @@ class ProjectTreeNode(FileSystemTreeNode):
     @classmethod
     def loadProject(cls, project_path, manager):
         if not os.path.isfile(project_path):
-            raise exceptions.FileNotExistsException(fileInfo)
+            raise exceptions.FileNotExistsException(project_path)
         try:
             data = json.read_file(project_path)
-            project = cls(path, data)
+            project = cls(project_path, data)
             manager.addProject(project)
             return project
         except Exception as e:
             import traceback
             traceback.print_exc()
-            print("Error in project %s (%s)" % (path, e))
+            print("Error in project %s (%s)" % (project_path, e))
     
     def setManager(self, manager):
         self.manager = manager
