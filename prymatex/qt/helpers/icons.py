@@ -48,3 +48,7 @@ def get_path_icon(path):
     
 def get_type_icon(_type):
     return _FileIconProvider.icon(_type)
+    
+def get_type(path):
+    return _FileIconProvider.type(QtCore.QFileInfo(path))
+

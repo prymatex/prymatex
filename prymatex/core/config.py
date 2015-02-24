@@ -32,7 +32,6 @@ PMX_LOG_DATETIME_FORMAT = '%s %s' % (PMX_LOG_DATE_FORMAT, PMX_LOG_TIME_FORMAT)
 # Configuration names
 #============================================================================
 PMX_HOME_NAME = '.prymatex'
-PMX_PROJECT_NAME = PMX_HOME_NAME
 PMX_BUNDLES_NAME = 'Bundles'
 PMX_PLUGINS_NAME = 'Plugins'
 PMX_PROFILES_NAME = 'Profiles'
@@ -40,7 +39,8 @@ PMX_SUPPORT_NAME = 'Support'
 PMX_SETTINGS_NAME = 'settings.json'
 PMX_STATE_NAME = 'state.json'
 PMX_DESCRIPTOR_NAME = 'info.json'
-PMX_PROPERTIES_NAME = '.pmxproperties'
+PMX_PROJECT_EXTENSION = 'prymatex-project'
+PMX_PROPERTIES_NAME = '.prymatex-properties'
 TM_SETTINGS_NAME = 'com.macromates.textmate.plist'
 TM_WEBPREVIEW_NAME = 'com.macromates.textmate.webpreview.plist'
 TM_PREFERENCE_NAMES = ['Library', 'Preferences']

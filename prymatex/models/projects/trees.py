@@ -9,7 +9,7 @@ from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.models.trees import AbstractTreeModel
 from prymatex.models.trees import FlatTreeProxyModel
 from prymatex.models.configure import SortFilterConfigureProxyModel
-from prymatex.models.projects.nodes import FileSystemTreeNode
+from prymatex.models.projects.nodes import FileSystemTreeNode, ProjectFolderTreeNode
 
 
 __all__ = [ 'ProjectTreeModel', 'ProjectTreeProxyModel', 'FileSystemProxyModel', 'ProjectMenuProxyModel' ]
@@ -24,16 +24,20 @@ class ProjectTreeModel(AbstractTreeModel):
         self.fileManager = projectManager.fileManager
 
     def treeNodeFactory(self, nodeName, nodeParent):
-        if nodeParent is not None:
-            return FileSystemTreeNode(nodeName, nodeParent)
-        else:
-            # TODO: Quiza sea mejor hacer un custom root node
+        if nodeParent is None:
             return AbstractTreeModel.treeNodeFactory(self, nodeName, nodeParent)
-
+        elif nodeParent.isproject:
+            return ProjectFolderTreeNode(nodeName, nodeParent)
+        else:
+            return FileSystemTreeNode(nodeName, nodeParent)
+        
     def rowCount(self, parent):
         parentNode = self.node(parent)
-        if not parentNode.isRootNode() and parentNode.isdir and not parentNode._populated:
-            self._load_directory(parentNode, parent)
+        if not parentNode.isRootNode() and not parentNode._populated:
+            if parentNode.isdir:
+                self._load_directory(parentNode, parent)
+            elif parentNode.isproject:
+                self._load_project(parentNode, parent)
         return parentNode.childCount()
 
     def data(self, index, role):
@@ -44,7 +48,6 @@ class ProjectTreeModel(AbstractTreeModel):
             return node.nodeName()
         elif role == QtCore.Qt.DecorationRole:
             return node.icon()
-
 
     def indexForPath(self, path):
         currentIndex = QtCore.QModelIndex()
@@ -62,7 +65,7 @@ class ProjectTreeModel(AbstractTreeModel):
     #========================================================================
     # Custom methods
     #========================================================================
-    def _load_directory(self, parentNode, parentIndex, notify = False):
+    def _load_directory(self, parentNode, parentIndex, notify=False):
         names = self.fileManager.listDirectory(parentNode.path())
         if notify: 
             self.beginInsertRows(parentIndex, 0, len(names) - 1)
@@ -75,6 +78,18 @@ class ProjectTreeModel(AbstractTreeModel):
             child._populated = False
         parentNode._populated = True
 	
+    def _load_project(self, parentNode, parentIndex, notify=False):
+        if notify: 
+            self.beginInsertRows(parentIndex, 0, len(names) - 1)
+        for folder in parentNode.folders:
+            node = self.treeNodeFactory(folder, parentNode)
+            parentNode.appendChild(node)
+        if notify: 
+            self.endInsertRows()
+        for child in parentNode.childNodes():
+            child._populated = False
+        parentNode._populated = True
+
     def _update_directory(self, parentNode, parentIndex, notify = False):
         names = self.fileManager.listDirectory(parentNode.path())
         addNames = [name for name in names if parentNode.findChildByName(name) is None]

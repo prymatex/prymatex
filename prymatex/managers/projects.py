@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, string, unicodedata
+import os
+import string
+import unicodedata
 import fnmatch
 
 from prymatex.qt import QtCore, QtGui
@@ -129,13 +131,14 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
     #---------------------------------------------------
     # PROJECT CRUD
     #---------------------------------------------------
-    def createProject(self, name, directory, overwrite = False):
+    def createProject(self, name, file_path, folders=(), overwrite=False):
         """Crea un proyecto nuevo y lo retorna"""
-        project = ProjectTreeNode(directory, { "name": name })
-        if not overwrite and os.path.exists(project.projectPath):
+        if not overwrite and os.path.exists(file_path):
             raise exceptions.ProjectExistsException()
 
+        project = ProjectTreeNode(file_path, { "name": name, "folders": folders })
         project.save()
+
         self.addProject(project)
         self.appendToKnowProjects(project)
         return project
@@ -146,9 +149,9 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         project.save()
         return project
 
-    def importProject(self, directory):
+    def importProject(self, file_path):
         try:
-            project = ProjectTreeNode.loadProject(directory, self)
+            project = ProjectTreeNode.loadProject(file_path, self)
         except exceptions.FileNotExistsException:
             raise exceptions.LocationIsNotProject()
         self.appendToKnowProjects(project)
@@ -164,7 +167,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
     def addProject(self, project):
         project.setManager(self)
         # Todo proyecto define un namespace en el manager de support
-        self.application().supportManager.addProjectNamespace(project)
+        # self.application().supportManager.addProjectNamespace(project)
         self.projectTreeModel.appendProject(project)
         self.projectAdded.emit(project)
 
@@ -181,11 +184,11 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
 
     def openProject(self, project):
         # Cuando abro un proyecto agrego su namespace al support para aportar bundles y themes
-        print(project.directory)
+        print(project.path())
 
     def closeProject(self, project):
         # Cuando cierro un proyecto quito su namespace al support
-        print(project.directory)
+        print(project.path())
 
     def addProjectBundleMenu(self, project, bundle):
         project.addBundleMenu(bundle)

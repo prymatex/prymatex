@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/codeeditor/status.ui'
 #
-# Created: Wed Feb 18 07:43:55 2015
+# Created: Tue Feb 24 11:50:13 2015
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -136,6 +136,7 @@ class Ui_CodeEditorStatus(object):
         self.gridLayout.setSpacing(2)
         self.gridLayout.setObjectName("gridLayout")
         self.labelFindMode_2 = QtWidgets.QLabel(self.widgetReplace)
+        self.labelFindMode_2.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.labelFindMode_2.setObjectName("labelFindMode_2")
         self.gridLayout.addWidget(self.labelFindMode_2, 1, 6, 1, 1)
         self.pushButtonReplaceWrap = QtWidgets.QPushButton(self.widgetReplace)
@@ -154,6 +155,7 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonReplaceInSelection.setObjectName("pushButtonReplaceInSelection")
         self.gridLayout.addWidget(self.pushButtonReplaceInSelection, 0, 5, 1, 1)
         self.labelFindMode_3 = QtWidgets.QLabel(self.widgetReplace)
+        self.labelFindMode_3.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.labelFindMode_3.setObjectName("labelFindMode_3")
         self.gridLayout.addWidget(self.labelFindMode_3, 0, 6, 1, 1)
         self.line_3 = QtWidgets.QFrame(self.widgetReplace)
@@ -250,12 +252,15 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonFindInFilesUseEditor.setObjectName("pushButtonFindInFilesUseEditor")
         self.gridLayout_2.addWidget(self.pushButtonFindInFilesUseEditor, 0, 5, 1, 1)
         self.labelFindMode_6 = QtWidgets.QLabel(self.widgetFindInFiles)
+        self.labelFindMode_6.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.labelFindMode_6.setObjectName("labelFindMode_6")
         self.gridLayout_2.addWidget(self.labelFindMode_6, 2, 6, 1, 1)
         self.labelFindMode_5 = QtWidgets.QLabel(self.widgetFindInFiles)
+        self.labelFindMode_5.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.labelFindMode_5.setObjectName("labelFindMode_5")
         self.gridLayout_2.addWidget(self.labelFindMode_5, 0, 6, 1, 1)
         self.labelFindMode_4 = QtWidgets.QLabel(self.widgetFindInFiles)
+        self.labelFindMode_4.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.labelFindMode_4.setObjectName("labelFindMode_4")
         self.gridLayout_2.addWidget(self.labelFindMode_4, 1, 6, 1, 1)
         self.pushButtonFindInFilesWholeWord = QtWidgets.QPushButton(self.widgetFindInFiles)
