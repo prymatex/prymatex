@@ -1,14 +1,9 @@
-Prymatex Text Editor
---------------------
+# What is Prymatex
 
-What is Prymatex
-================
-
-Prymatex is a simple and flexible text editor. It's written in PyQt4 and
+Prymatex is a simple and flexible text editor. It's written in PyQt and
 it's main aim is to support TextMate bundles.
 
-Why Prymatex?
-=============
+# Why Prymatex?
 
 There are *enough* text editors out there, and many of them are
 focused on writing code, just to name a few, Notepad++, Kate, Gedit,
@@ -23,18 +18,27 @@ shell variables and stdin/stdout pipes.
 
 There are a lots of these extensions (actually called Bundles) maintained by
 enthusiasts. From Ruby on Rails, to OpenGL programming, these bundles come
-with 3 basic components:
+with some basic components like:
 
-    * **Syntax** An extensible syntax format (allowing inclusion/usage, ie: PHP includes HTML and JS)
+* **Syntax** An extensible syntax format (allowing inclusion/usage, ie: PHP includes HTML and JS)
 
-    * **Commands** They're like what we all know as marcros
+* **Commands** They're like what we all know as marcros
 
-    * **Snippets** Pieces of text that can be tirggered in certain situations
+* **Snippets** Pieces of text that can be tirggered in certain situations
 
-    * **Templates** File templates
-    
+* **Templates** File templates
 
-Running Prymatex
-================
+# License
 
-See INSTALL.rst to setup your enviroment.
+If not otherwise specified (see below), Prymatex code is distributed under the
+terms of GPL V.2 licence, please refer to licenses/GPL.txt.
+
+An exception is made for files in readable text which contain their own license
+information, or files where an accompanying file exists (in the “licenses“ directory)
+with a “-license” suffix added to the base-name name of the original file, and an
+extension of txt, html, or similar. For example “pyqt” is accompanied by
+“pyqt-license.txt”.
+
+# Running Prymatex
+
+See INSTALL.md to setup your enviroment.
