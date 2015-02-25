@@ -171,7 +171,7 @@ def _section_number_range(items, index):
     end = items.index(section[-1]) + 1 if section else 1
     return begin, end
 
-def extend_menu_section(menu, newItems, section = 0, position = None):
+def extend_menu_section(menu, newItems, section=0, position=None):
     # TODO: Implementar algo para usar section = None, puedo ponerlo en cualquier lugar del menu con su posicion
     if not isinstance(newItems, list):
         newItems = [ newItems ]

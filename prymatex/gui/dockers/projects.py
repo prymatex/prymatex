@@ -198,8 +198,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
             self.extendFileSystemItemMenu(contextMenu, node)
             self.extendAddonsItemMenu(contextMenu, node)
             self.extendProjectBundleItemMenu(contextMenu, node)
-        # contextMenu = create_menu(contextMenu, self, separatorName = True)
-        contextMenu, objects = create_menu(self, contextMenu, separatorName = True)
+        contextMenu, objects = create_menu(self, contextMenu, separatorName=True)
         
         contextMenu.aboutToShow.connect(self.on_contextMenu_aboutToShow)
         contextMenu.aboutToHide.connect(self.on_contextMenu_aboutToHide)
@@ -237,18 +236,26 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
         #extend_menu_section(menu, ["--interact", self.actionSetInTerminal ], section = -1)
         # TODO Quiza sea mejor ponerle un type y controlar contra una cadena
         if isinstance(node, ProjectTreeNode):
-            extend_menu_section(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
+            extend_menu_section(menu,
+                [self.actionPaste, self.actionRemove], 
+                section="handlepaths", position=0)
             #extend_menu_section(menu, [self.actionBashInit], section = "interact")
-            extend_menu_section(menu, [self.actionProjectBundles, self.actionSelectRelatedBundles], section = "bundles")
+            extend_menu_section(menu, 
+                [self.actionProjectBundles, self.actionSelectRelatedBundles], 
+                section="bundles")
         else:
-            extend_menu_section(menu, [self.actionCut, self.actionCopy, self.actionPaste], section = "handlepaths", position = 0)
+            extend_menu_section(menu, 
+                [self.actionCut, self.actionCopy, self.actionPaste],
+                section = "handlepaths", position = 0)
         if node.isfile:
-            extend_menu_section(menu, self.actionOpen, section = "open", position = 0)
+            extend_menu_section(menu,
+                self.actionOpen, section="open", position = 0)
         if node.isdir or isinstance(node, ProjectTreeNode):
-            extend_menu_section(menu, [self.actionGoDown], section = "refresh")
+            extend_menu_section(menu, [self.actionGoDown], section="refresh")
             
         #El final
-        extend_menu_section(menu, ["--properties", self.actionProperties], section = -1)
+        extend_menu_section(menu, 
+            ["--properties", self.actionProperties], section=-1)
 
     def extendAddonsItemMenu(self, menu, node):
         #Menu de los addons
@@ -256,7 +263,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
         for component in self.components():
             addonMenues.extend(component.contributeToContextMenu(node))
         if len(addonMenues) > 1:
-            extend_menu_section(menu, addonMenues, section = 'properties')
+            extend_menu_section(menu, addonMenues, section='properties')
         
     def extendProjectBundleItemMenu(self, menu, node):
         #Menu de los bundles relacionados al proyecto
@@ -268,16 +275,16 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
         bundles = sorted(bundles, key=lambda bundle: bundle.name)
         if bundles:
             bundleMenues = [self.application().supportManager.menuForBundle(bundle) for bundle in bundles]
-            extend_menu_section(menu, bundleMenues, section = "bundles", position = 0)
+            extend_menu_section(menu, bundleMenues, section="bundles", position=0)
 
     #================================================
     # Tree View Project
     #================================================
     def showProjectTreeViewContextMenu(self, point):
         index = self.treeViewProjects.indexAt(point)
-        if not index.isValid():
-            index = self.treeViewProjects.currentIndex()
-        self.buildContextMenu(index).popup(self.treeViewProjects.mapToGlobal(point))
+        if index.isValid():
+            self.treeViewProjects.setCurrentIndex(index)
+            self.buildContextMenu(index).popup(self.treeViewProjects.mapToGlobal(point))
     
     def on_treeViewProjects_doubleClicked(self, index):
         self.on_actionOpen_triggered()
@@ -469,18 +476,17 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
 
     @QtCore.Slot()
     def on_actionGoDown_triggered(self):
-        directory = self.currentNode()
-        index = self.projectTreeProxyModel.indexForPath(directory.path())
-        self.treeViewProjects.setRootIndex(index)
+        self.treeViewProjects.setRootIndex(self.treeViewProjects.currentIndex())
     
     #================================================
     # Navigation
     #================================================
     @QtCore.Slot()
     def on_pushButtonGoUp_pressed(self):
-        index = self.treeViewProjects.rootIndex()
-        parentIndex = self.projectTreeProxyModel.parent(index)
-        self.treeViewProjects.setRootIndex(parentIndex)
+        index = self.projectTreeProxyModel.parent(
+            self.treeViewProjects.rootIndex()
+        )
+        self.treeViewProjects.setRootIndex(index)
     
     #================================================
     # Custom filters
