@@ -32,7 +32,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     The application loads the Support."""
 
     # ---------------------- Settings
-    SETTINGS = "Global"
+    SETTINGS = "global"
     RESOURCES = (config.USR_NS_NAME, config.PMX_NS_NAME)
 
     @ConfigurableItem()

@@ -37,7 +37,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
     editorChanged = QtCore.Signal(object)
 
     # --------------------- Settings
-    SETTINGS = 'MainWindow'
+    SETTINGS = 'window'
 
     @ConfigurableItem(default = "$TM_DISPLAYNAME - $PMX_APP_NAME ($PMX_VERSION)")
     def windowTitleTemplate(self, titleTemplate):
@@ -52,7 +52,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
     def showMenuBar(self, value):
         self.menuBar().setVisible(value)
 
-    @ConfigurableHook("CodeEditor.defaultTheme")
+    @ConfigurableHook("code_editor.defaultTheme")
     def defaultTheme(self, themeUUID):
         theme = self.application().supportManager.getBundleItem(themeUUID)
         self.notifier.setPalette(theme.palette())

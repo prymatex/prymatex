@@ -98,8 +98,7 @@ class PrymatexSettings(settings.Settings):
 # --------------- Items and Hooks
 class ConfigurableItem(object):
     """Configuration descriptor"""
-    def __init__(self, name = None, default = None, fset = None,
-            tm_name = None):
+    def __init__(self, name=None, default=None, fset=None, tm_name=None):
         self.name = name
         self.default = default
         self.fset = fset
@@ -134,5 +133,3 @@ class ConfigurableHook(object):
     def __call__(self, function):
         self.fset = function
         return self
-
-pmxConfigPorperty = ConfigurableItem

@@ -113,6 +113,7 @@ class PrymatexProfile(object):
         settings = self.settings
         for name in names[:-1]:
             settings = settings.get(name)
+        print(settingPath)
         settings.add_callback(names[-1], handler)
 
     def unregisterSettingCallback(self, settingPath, handler):

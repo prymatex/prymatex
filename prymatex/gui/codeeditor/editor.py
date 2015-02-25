@@ -62,7 +62,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     HighlightCurrentLine  = 1<<5
 
     # ------------------- Settings
-    SETTINGS = 'CodeEditor'
+    SETTINGS = 'code_editor'
 
     removeTrailingSpaces = ConfigurableItem(default = False)
     autoBrackets = ConfigurableItem(default = True)
