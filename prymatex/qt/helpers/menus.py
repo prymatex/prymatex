@@ -16,7 +16,7 @@ from prymatex.utils import six
 import collections
 
 def create_menu(parent, settings, dispatcher = None, separatorName = False,
-    sequence_handler = None, icon_handler = None):
+    sequence_handler = None, icon_handler=None):
     text = settings["text"]
     menu = QtWidgets.QMenu(text, parent)
     
@@ -24,7 +24,7 @@ def create_menu(parent, settings, dispatcher = None, separatorName = False,
     menu.menuAction().setObjectName(text_to_objectname(text, prefix = "actionMenu"))
 
     icon = settings.get("icon", text_to_iconname(text))
-    if icon_handler is not None:
+    if icon and icon_handler is not None:
         icon_handler(menu, icon)
     elif isinstance(icon, QtGui.QIcon) and not icon.isNull():
         menu.setIcon(icon)

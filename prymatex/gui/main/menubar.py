@@ -57,7 +57,7 @@ class PrymatexMainMenuBar(QtWidgets.QMenuBar):
         for name, settings in menuExtensions.items():
             # Find parent menu
             menu = self.parent().findChild(QtWidgets.QMenu, 
-                text_to_objectname(name, prefix = "menu"))
+                text_to_objectname(name, prefix="menu"))
 
             # Extend menu or create new one
             if menu is None:

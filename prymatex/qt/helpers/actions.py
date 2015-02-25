@@ -33,7 +33,7 @@ def create_action(parent, settings, dispatcher = None, sequence_handler=None, ic
     action.setObjectName(text_to_objectname(text, prefix="action"))
     
     icon = settings.get("icon", text_to_iconname(text))
-    if icon_handler is not None:
+    if icon and icon_handler is not None:
         icon_handler(action, icon)
     elif isinstance(icon, QtGui.QIcon) and not icon.isNull():
         action.setIcon(icon)

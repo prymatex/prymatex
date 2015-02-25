@@ -150,6 +150,7 @@ class MainWindowActionsMixin(object):
         # ------------- File menu
         menu["file"] = {
             "text": "&File",
+            "icon": None,
             "items": [{
                     "text": "New File",
                     "sequence": "New",
@@ -220,6 +221,7 @@ class MainWindowActionsMixin(object):
             
         menu["edit"] = {
             "text": "&Edit",
+            "icon": None,
             "items": [ globalEditAction(name) for name in ("&Undo", "&Redo") ] + ["-"] +
             [ globalEditAction(name) for name in ("Cu&t", "&Copy", "&Paste", "&Delete") ]
         }
@@ -227,6 +229,7 @@ class MainWindowActionsMixin(object):
         # ------------- View menu
         menu["view"] = {
             "text": "&View",
+            "icon": None,
             "items": [{
                 "text": "Panels",
                 "items": []
@@ -343,6 +346,7 @@ class MainWindowActionsMixin(object):
         # ------------- Navigation menu
         menu["navigation"] = {
             "text": "&Navigation",
+            "icon": None,
             "items": [{
                 "text": "Next Tab",
                 "sequence": "NextChild",
@@ -373,6 +377,7 @@ class MainWindowActionsMixin(object):
         # ------------- Bundles menu
         menu["bundles"] = {
             "text": "&Bundles",
+            "icon": None,
             "items": [{
                 "text": "Bundle Editor",
                 "items": [{
@@ -401,6 +406,7 @@ class MainWindowActionsMixin(object):
         # ------------- Preferences menu
         menu["preferences"] = {
             "text": "&Preferences",
+            "icon": None,
             "items": [ {
                 "text": "Full Screen",
                 "checkable": True,
@@ -426,6 +432,7 @@ class MainWindowActionsMixin(object):
         # ------------- Help menu
         menu["help"] = {
             "text": "&Help",
+            "icon": None,
             "items": [ {
                 "text": "Read Documentation",
                 "triggered": lambda mw, checked=False: mw.application().openUrl(prymatex.__source__ + '/wiki')
