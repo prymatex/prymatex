@@ -70,13 +70,13 @@ class MainWindowActionsMixin(object):
                 focus = selected_paths[-1] == file_path   # Focus on last editor
             )
 
-    def on_actionImportProject_triggered(self, checked=False):
-        directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Choose project location", self.application().fileManager.directory())
-        if directory:
+    def on_actionOpenProject_triggered(self, checked=False):
+        file_path, filters = QtWidgets.QFileDialog.getOpenFileName(self, "Choose project file", self.application().fileManager.directory())
+        if file_path:
             try:
-                self.application().projectManager.importProject(directory)
+                self.application().projectManager.openProject(file_path)
             except exceptions.LocationIsNotProject:
-                QtWidgets.QMessageBox.critical(self, "Critical", "A error has occurred.\n%s is not a valid project location." % directory)
+                QtWidgets.QMessageBox.critical(self, "Critical", "A error has occurred.\n%s is not a valid project file." % file_path)
 
     def on_actionCloseOthers_triggered(self, checked=False):
         current = self.currentEditor()
@@ -168,6 +168,9 @@ class MainWindowActionsMixin(object):
                     "text": "Open File",
                     "triggered": cls.on_actionOpen_triggered
                 }, {
+                    "text": "Open Project",
+                    "triggered": cls.on_actionOpenProject_triggered,
+                }, {
                     "text": "Recent Files",
                     "aboutToShow": cls.on_menuRecentFiles_aboutToShow,
                     "items": ["-", {
@@ -178,9 +181,6 @@ class MainWindowActionsMixin(object):
                         "text": "Remove all recent files",
                         "triggered": lambda mw, checked=False: mw.application().fileManager.clearFileHistory()
                     }]
-                }, {
-                    "text": "Import Project",
-                    "triggered": cls.on_actionImportProject_triggered,
                 }, "-", {
                     "text": "Save",
                     "triggered": lambda mw, checked=False: mw.saveEditor()

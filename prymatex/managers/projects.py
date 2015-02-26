@@ -110,11 +110,11 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
 
     def appendToKnowProjects(self, project):
         self.known_projects.append(project.path())
-        self.settings().set('knownProjects', self.knownProjects)
+        self.settings().set('known_projects', self.known_projects)
 
     def removeFromKnowProjects(self, project):
         self.known_projects.remove(project.path())
-        self.settings().set('knownProjects', self.knownProjects)
+        self.settings().set('known_projects', self.known_projects)
 
     # ------------------- Properties
     def registerPropertyWidget(self, propertyWidget):
@@ -147,7 +147,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         project.save()
         return project
 
-    def importProject(self, file_path):
+    def openProject(self, file_path):
         try:
             project = ProjectTreeNode.loadProject(file_path, self)
         except exceptions.FileNotExistsException:
@@ -179,10 +179,6 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
     def getAllProjects(self):
         #TODO: devolver un copia o no hace falta?
         return self.projectTreeModel.rootNode.childNodes()
-
-    def openProject(self, project):
-        # Cuando abro un proyecto agrego su namespace al support para aportar bundles y themes
-        print(project.path())
 
     def closeProject(self, project):
         # Cuando cierro un proyecto quito su namespace al support

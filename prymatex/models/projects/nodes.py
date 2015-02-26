@@ -117,6 +117,9 @@ class ProjectTreeNode(FileSystemTreeNode):
         return self._variables
 
     def save(self):
+        directory = os.path.dirname(self.path())
+        if not os.path.exists(directory):
+            os.makedirs(directory)
         json.write_file(self.dataHash(), self.path())
 
     def delete(self, removeFiles=False):
