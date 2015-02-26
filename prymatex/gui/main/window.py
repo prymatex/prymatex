@@ -37,24 +37,22 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
     editorChanged = QtCore.Signal(object)
 
     # --------------------- Settings
-    SETTINGS = 'window'
-
     @ConfigurableItem(default = "$TM_DISPLAYNAME - $PMX_APP_NAME ($PMX_VERSION)")
-    def windowTitleTemplate(self, titleTemplate):
-        self.titleTemplate = Template(titleTemplate)
+    def window_title_template(self, template):
+        self.title_template = Template(template)
         self.updateWindowTitle()
 
     @ConfigurableItem(default = False)
-    def showTabsIfMoreThanOne(self, value):
+    def show_tabs_if_more_than_one(self, value):
         self.centralWidget().setShowTabs(not value)
 
     @ConfigurableItem(default = True)
-    def showMenuBar(self, value):
+    def show_menu_bar(self, value):
         self.menuBar().setVisible(value)
 
-    @ConfigurableHook("code_editor.defaultTheme")
-    def defaultTheme(self, themeUUID):
-        theme = self.application().supportManager.getBundleItem(themeUUID)
+    @ConfigurableHook("code_editor.default_theme")
+    def defaultTheme(self, theme_uuid):
+        theme = self.application().supportManager.getBundleItem(theme_uuid)
         self.notifier.setPalette(theme.palette())
 
     _editorHistory = []
@@ -404,7 +402,7 @@ html_footer
         self.editorChanged.emit(editor)
 
     def updateWindowTitle(self):
-        self.setWindowTitle(self.titleTemplate.substitute(
+        self.setWindowTitle(self.title_template.substitute(
             (self.currentEditor() or self).environmentVariables()))
 
     def saveEditor(self, editor = None, saveAs = False):

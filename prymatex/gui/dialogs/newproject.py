@@ -89,20 +89,20 @@ class NewProjectDialog(PrymatexDialog, Ui_NewProjectDialog, QtWidgets.QDialog):
 
     def on_lineEditName_textChanged(self, text):
         if self.checkBoxUseSourceFolder.isChecked():
-            folder_path = os.path.join(self.application().projectManager.defaultDirectory, text)
+            folder_path = os.path.join(self.application().projectManager.default_directory, text)
             self.lineEditFolder.setText(folder_path)
         self.pushButtonCreate.setEnabled(bool(text))
 
     def on_lineEditFolder_textChanged(self, text):
         file_path = os.path.join(
-            text or self.application().projectManager.defaultDirectory,
+            text or self.application().projectManager.default_directory,
             "%s.%s" % (self.lineEditName.text(), config.PMX_PROJECT_EXTENSION)
         )
         self.lineEditFile.setText(file_path)
 
     def on_checkBoxUseSourceFolder_toggled(self, checked):
         self.pushButtonChooseFolder.setEnabled(checked)
-        folder_path = os.path.join(self.application().projectManager.defaultDirectory, self.lineEditName.text()) \
+        folder_path = os.path.join(self.application().projectManager.default_directory, self.lineEditName.text()) \
             if checked \
             else ""
         self.lineEditFolder.setText(folder_path)

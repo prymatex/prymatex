@@ -22,7 +22,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.scope = None
         self.state = self.NO_STATE
         self.stacks = {}
-        default_syntax = self.editor.application().supportManager.getBundleItem(self.editor.defaultSyntax)
+        default_syntax = self.editor.application().supportManager.getBundleItem(self.editor.default_syntax)
         self.setScopeName(default_syntax.scopeName)
     
     def setScopeName(self, name):

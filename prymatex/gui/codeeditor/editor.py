@@ -69,7 +69,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     word_length_to_complete = ConfigurableItem(default=3)
 
     adjust_indentation_on_paste = ConfigurableItem(default=False)
-    default_encoding = ConfigurableItem(default='utf_8')
+    encoding = ConfigurableItem(default='utf_8')
 
     @ConfigurableItem(default=80)
     def margin_line_size(self, size):
@@ -723,8 +723,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                     if blockPattern.isValid():
                         indentLen = len(self.blockUserData(blockPattern).indentation)
                         padding = characterWidth + offset.x()
-                        for s in range(0, indentLen // self.indentationWidth):
-                            positionX = (characterWidth * self.indentationWidth * s) + padding
+                        for s in range(0, indentLen // self.indentation_width):
+                            positionX = (characterWidth * self.indentation_width * s) + padding
                             painter.drawLine(positionX, positionY, positionX, positionY + characterHeight)
                 
                 # -------------- Highlight Cursors
@@ -741,7 +741,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         if self.showMarginLine:
             painter.setPen(self.palette().highlight().color())
-            pos_margin = characterWidth * self.marginLineSize
+            pos_margin = characterWidth * self.margin_line_size
             painter.drawLine(pos_margin + offset.x(), 0, pos_margin + offset.x(), self.viewport().height())
 
         # -------------- Extra Cursors
@@ -899,7 +899,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         current_text, start, end = self.currentText()
         current_word, start, end = self.currentWord()
 
-        theme = self.application().supportManager.getBundleItem(self.defaultTheme)
+        theme = self.theme()
 
         # Build environment
         environment.update({
@@ -1280,7 +1280,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                     'checkable': True,
                     'triggered': lambda ed, checked, size = size: ed.on_actionMarginLine_triggered(checked, size = size),
                     'testChecked': lambda ed, size = size: bool(ed.getFlags() & ed.MarginLine) and \
-                        ed.marginLineSize == size
+                        ed.margin_line_size == size
                 } for size in cls.STANDARD_SIZES]) ]
             }, '-',
             {'text': "Indent Guide",
@@ -1373,12 +1373,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                     {'text': 'Indent Using Spaces',
                      'checkable': True,
                      'triggered': lambda ed, checked: ed.on_actionIndentation_triggered(checked),
-                     'testChecked': lambda ed: ed.indentUsingSpaces
+                     'testChecked': lambda ed: ed.indent_using_spaces
                      }, '-', ] + [ tuple([
                     {'text': 'Width: %d' % size,
                      'checkable': True,
-                     'triggered': lambda ed, checked, size = size: ed.on_actionIndentation_triggered(ed.indentUsingSpaces, size = size),
-                     'testChecked': lambda ed, size = size: (ed.indentUsingSpaces and ed.indentationWidth == size) or (not ed.indentUsingSpaces and ed.tabWidth == size)
+                     'triggered': lambda ed, checked, size = size: ed.on_actionIndentation_triggered(ed.indent_using_spaces, size = size),
+                     'testChecked': lambda ed, size = size: (ed.indent_using_spaces and ed.indentation_width == size) or (not ed.indent_using_spaces and ed.tabWidth == size)
                      } for size in range(1, 9) ]) ]
                 },
                 {'text': 'Line Endings',
@@ -1473,10 +1473,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # ------------------ Menu Actions
     def on_actionIndentation_triggered(self, checked, size = None):
         if size is None:
-          size = self.indentationWidth if self.indentUsingSpaces else self.tabWidth
-        self.indentUsingSpaces = checked
-        if self.indentUsingSpaces:
-            self.indentationWidth = size
+          size = self.indentation_width if self.indent_using_spaces else self.tabWidth
+        self.indent_using_spaces = checked
+        if self.indent_using_spaces:
+            self.indentation_width = size
         else:
             self.tabWidth = size
         self.update()
@@ -1519,7 +1519,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def on_actionMarginLine_triggered(self, checked, size = None):
         if isinstance(size, int):
-            self.marginLineSize = size
+            self.margin_line_size = size
         if checked:
             flags = self.getFlags() | self.MarginLine
         else:

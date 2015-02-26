@@ -56,17 +56,17 @@ class FileManager(PrymatexComponent, QtCore.QObject):
             callbacks.remove(callback)
         
     # -------------- History
-    def add_file_history(self, filePath):
-        if filePath in self.fileHistory:
-            self.fileHistory.remove(filePath)
-        self.fileHistory.insert(0, filePath)
-        if len(self.fileHistory) > self.fileHistoryLength:
-            self.fileHistory = self.fileHistory[0:self.fileHistoryLength]
-        self.settings().set("fileHistory", self.fileHistory)
+    def add_file_history(self, file_path):
+        if file_path in self.file_history:
+            self.file_history.remove(file_path)
+        self.file_history.insert(0, file_path)
+        if len(self.file_history) > self.file_history_length:
+            self.file_history = self.fileHistory[0:self.file_history_length]
+        self.settings().set("file_history", self.file_history)
     
     def clearFileHistory(self):
-        self.fileHistory = []
-        self.settings().set("fileHistory", self.fileHistory)
+        self.file_history = []
+        self.settings().set("file_history", self.file_history)
     
     #========================================================
     # Path handling, create, move, copy, link, delete

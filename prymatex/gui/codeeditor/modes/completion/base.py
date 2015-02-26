@@ -97,7 +97,7 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
         self.completer.setCompletionPrefix(alreadyTyped)
         if self.isActive() and not (self.completer.setCurrentRow(0) or self.completer.trySetNextModel()):
             self.completer.hide()
-        elif not self.isActive() and not (event.modifiers() & QtCore.Qt.ControlModifier) and (text.asciify(event.text()) in COMPLETER_CHARS) and end - start >= self.editor.wordLengthToComplete:
+        elif not self.isActive() and not (event.modifiers() & QtCore.Qt.ControlModifier) and (text.asciify(event.text()) in COMPLETER_CHARS) and end - start >= self.editor.word_length_to_complete:
             self.completer.runCompleter()
         elif self.isActive():
             self.completer.complete(self.editor.cursorRect())

@@ -26,7 +26,7 @@ class MainWindowActionsMixin(object):
         for action in self.menuRecentFiles.actions():
             if action not in actions:
                 self.menuRecentFiles.removeAction(action)
-        for index, filePath in enumerate(self.application().fileManager.fileHistory, 1):
+        for index, filePath in enumerate(self.application().fileManager.file_history, 1):
             action = create_action(self, {
                 "text": "%s (%s)\t&%d" % (self.application().fileManager.basename(filePath), filePath, index),
                 "triggered": lambda checked=False, file=filePath: self.application().openFile(file)
@@ -173,7 +173,7 @@ class MainWindowActionsMixin(object):
                     "items": ["-", {
                         "text": "Open All Recent Files",
                         "triggered": lambda mw, checked=False: [ mw.application().openFile(path)
-                            for path in mw.application().fileManager.fileHistory ]
+                            for path in mw.application().fileManager.file_history ]
                     }, {
                         "text": "Remove all recent files",
                         "triggered": lambda mw, checked=False: mw.application().fileManager.clearFileHistory()

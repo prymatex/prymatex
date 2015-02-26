@@ -33,9 +33,9 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
         self.selectableProjectFileModel.setBaseFilters(filters)
         self.projectTreeProxyModel.setFilterRegExp(",".join(filters))
     
-    @ConfigurableHook("code_editor.defaultTheme")
-    def default_theme(self, themeUUID):
-        theme = self.application().supportManager.getBundleItem(themeUUID)
+    @ConfigurableHook("code_editor.default_theme")
+    def default_theme(self, theme_uuid):
+        theme = self.application().supportManager.getBundleItem(theme_uuid)
         self.treeViewProjects.setPalette(theme.palette())
         self.treeViewProjects.viewport().setPalette(theme.palette())
     
