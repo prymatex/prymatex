@@ -9,10 +9,15 @@ from prymatex.resources import (Resource, ResourceProvider, load_media,
 class ResourceManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
         super(ResourceManager, self).__init__(**kwargs)
-        self.base = None
+        # Icon Handler
+        QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
+        QtGui.QIcon.fromTheme = self.icon_from_theme
+
         self.resources = []
         self.providers = {}
         
+        self.base = Resource('base')
+
     def add_source(self, name, path, default=False):
         res = Resource(name, path, default)
         res.update(load_fonts(path))
@@ -33,13 +38,6 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
     def providerForClass(self, componentClass):
         sources = getattr(componentClass, "RESOURCES", self.defaults())
         return self.get_provider(sources)
-
-    def install(self):
-        # Icon Handler
-        QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
-        QtGui.QIcon.fromTheme = self.icon_from_theme
-        
-        self.base = Resource('base')
 
     def icon_from_theme(self, index):
         # TODO: default provider

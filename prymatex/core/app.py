@@ -74,7 +74,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         self.componentInstances = {}
 
         # Base Managers
-        self.resourceManager = self.profileManager = self.pluginManager = None
+        self.resourceManager = self.profileManager = self.pluginManager = self.settingsManager = None
         # Windows
         self._main_windows = []
 
@@ -136,21 +136,21 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         # Bootstrap
         from prymatex.managers.resources import ResourceManager
         from prymatex.managers.profiles import ProfileManager
+        from prymatex.managers.settings import SettingsManager
         from prymatex.managers.plugins import PluginManager
         
         # Populate components
         app.populateComponentClass(ResourceManager)
         app.populateComponentClass(ProfileManager)
+        app.populateComponentClass(SettingsManager)
         app.populateComponentClass(PluginManager)
         app.populateComponentClass(PrymatexApplication)
         
         # Build instances
         app.resourceManager = ResourceManager(parent=app)
         app.profileManager = ProfileManager(parent=app)
+        app.settingsManager = SettingsManager(parent=app)
         app.pluginManager = PluginManager(parent=app)
-        
-        app.profileManager.install()
-        app.resourceManager.install()
         
         # Namespaces
         for ns, path in config.NAMESPACES:
@@ -160,14 +160,15 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         # Populate configurable
         app.populateConfigurableClass(ResourceManager)
         app.populateConfigurableClass(ProfileManager)
+        app.populateConfigurableClass(SettingsManager)
         app.populateConfigurableClass(PluginManager)
         app.populateConfigurableClass(PrymatexApplication)
 
         # Configure
-        app.profile().registerConfigurableInstance(app.resourceManager) 
-        app.profile().registerConfigurableInstance(app.profileManager)        
-        app.profile().registerConfigurableInstance(app.pluginManager)
-        app.profile().registerConfigurableInstance(app)
+        app.settingsManager.registerConfigurableInstance(app.resourceManager) 
+        app.settingsManager.registerConfigurableInstance(app.profileManager)        
+        app.settingsManager.registerConfigurableInstance(app.pluginManager)
+        app.settingsManager.registerConfigurableInstance(app)
 
         app.applyOptions()
         return app
@@ -258,7 +259,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             # Load standard shortcuts
             self.shortcutsTreeModel.loadStandardSequences(self.resources())
 
-            self.profile().restoreState(self)
+            self.settingsManager.restoreState(self)
             window = self.currentWindow() or self.buildMainWindow(editor=True)
             
             # Change messages handler
@@ -368,8 +369,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         self.logger().debug("Close")
 
         self.storageManager.close()
-        self.profile().saveState(self)
-        self.profile().sync()
+        self.settingsManager.saveState(self)
+        self.settingsManager.sync()
         if os.path.exists(self.fileLock):
             os.unlink(self.fileLock)
 
@@ -410,8 +411,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         componentClass._settings = None
         def get_settings(app):
             def _get_settings(cls):
-                if cls._settings is None and cls.profile() is not None:
-                    cls._settings = cls.profile().settingsForClass(cls)
+                if cls._settings is None and app.settingsManager is not None:
+                    cls._settings = app.settingsManager.settingsForClass(cls)
                 return cls._settings
             return _get_settings
         componentClass.settings = classmethod(get_settings(self))
@@ -453,7 +454,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
         # ------------------- Configure Bottom-up
         for instance, args, kwargs in buildedInstances[::-1]:
-            instance.profile().registerConfigurableInstance(instance)
+            self.settingsManager.registerConfigurableInstance(instance)
 
         # ------------------- Initialize Top-down
         for instance, args, kwargs in buildedInstances:
@@ -470,7 +471,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         return component
 
     def deleteComponentInstance(self, component):
-        self.profile().unregisterConfigurableInstance(component)
+        self.settingsManager.unregisterConfigurableInstance(component)
         component.deleteLater()
 
     # ------------ Find Component
@@ -485,13 +486,13 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         print("Cambiaron los settings", path)
         
     def settingValue(self, settingPath):
-        return self.profile().settingValue(settingPath)
+        return self.settingsManager.settingValue(settingPath)
 
     def registerSettingCallback(self, settingPath, handler):
-        self.profile().registerSettingCallback(settingPath, handler)
+        self.settingsManager.registerSettingCallback(settingPath, handler)
 
     def unregisterSettingCallback(self, settingPath, handler):
-        self.profile().unregisterSettingCallback(settingPath, handler)
+        self.settingsManager.unregisterSettingCallback(settingPath, handler)
 
     # ------------- Main windows handlers
     def findEditorForFile(self, filepath):

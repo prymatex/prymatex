@@ -22,12 +22,14 @@ class PrymatexSettings(settings.Settings):
     def setTm(self, tm):
         self._tm = tm
         
-    def scope(self, name):
-        if name not in self or not isinstance(self[name], PrymatexSettings):
+    def scope(self, name, create=False):
+        if create and (name not in self or not isinstance(self[name], PrymatexSettings)):
             self[name] = PrymatexSettings(name, self.setdefault(name, {}))
             self[name].setTm(self._tm)
-        return self[name]
-    
+            return self[name]
+        elif name in self and isinstance(self[name], PrymatexSettings):
+            return self[name]
+
     def default(self, name):
         return self._items.get(name).getDefault()
 

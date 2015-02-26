@@ -30,9 +30,6 @@ class ProfileManager(PrymatexComponent, QtCore.QObject):
         
         self.profilesListModel = ProfilesListModel(self)
         
-        self.__current_profile = None
-        self.__dontAsk = True
-        
         self.profilesFile = os.path.join(PMX_PROFILES_PATH, self.PMX_PROFILES_FILE)
         config = configparser.RawConfigParser()
         if os.path.exists(self.profilesFile):
@@ -47,6 +44,19 @@ class ProfileManager(PrymatexComponent, QtCore.QObject):
             self.__dontAsk = config.getboolean("General", "dontAsk")
         else:
             self.createProfile(self.DEFAULT_PROFILE_NAME, default = True)
+        
+        self.__current_profile = None
+        self.__dontAsk = True
+        suggested = self.application().options.profile
+        if suggested is None or not self.__dontAsk:
+            self.__current_profile = ProfileDialog.selectStartupProfile(self)
+        elif suggested == "":
+            self.__current_profile = self.defaultProfile()
+        else:
+            self.__current_profile = self.profilesListModel.findProfileByName(suggested)
+        if self.__current_profile is None:
+            self.__current_profile = self.createProfile(suggested, default = True)
+        self.__current_profile.ensure_paths()
 
     # --------------- Profile
     def saveProfiles(self):
@@ -75,18 +85,6 @@ class ProfileManager(PrymatexComponent, QtCore.QObject):
             self.saveProfiles()
             return profile
 
-    def install(self):
-        suggested = self.application().options.profile
-        if suggested is None or not self.__dontAsk:
-            self.__current_profile = ProfileDialog.selectStartupProfile(self)
-        elif suggested == "":
-            self.__current_profile = self.defaultProfile()
-        else:
-            self.__current_profile = self.profilesListModel.findProfileByName(suggested)
-        if self.__current_profile is None:
-            self.__current_profile = self.createProfile(suggested, default = True)
-        self.__current_profile.ensure_paths()
-    
     def renameProfile(self, profile, newName):
         newName = newName.lower()
         profile = self.profilesListModel.findProfileByName(profile.PMX_PROFILE_NAME)

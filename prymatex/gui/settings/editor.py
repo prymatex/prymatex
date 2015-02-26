@@ -31,10 +31,10 @@ class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtWidgets.QWidget):
         super(EditorSettingsWidget, self).loadSettings()
 
         # Get addons groups from profile
-        self.bookmarksBarGroup = self.profile.settingsForClass(BookmarkSideBarAddon)
-        self.lineNumberBarGroup = self.profile.settingsForClass(LineNumberSideBarAddon)
-        self.foldingBarGroup = self.profile.settingsForClass(FoldingSideBarAddon)
-        self.selectionBarGroup = self.profile.settingsForClass(SelectionSideBarAddon)
+        self.bookmarksBarGroup = self.application().settingsManager.settingsForClass(BookmarkSideBarAddon)
+        self.lineNumberBarGroup = self.application().settingsManager.settingsForClass(LineNumberSideBarAddon)
+        self.foldingBarGroup = self.application().settingsManager.settingsForClass(FoldingSideBarAddon)
+        self.selectionBarGroup = self.application().settingsManager.settingsForClass(SelectionSideBarAddon)
 
         self.comboBoxDefaultSyntax.setModel(self.application().supportManager.syntaxProxyModel)
         self.comboBoxDefaultSyntax.setModelColumn(0)
