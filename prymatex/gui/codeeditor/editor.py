@@ -62,62 +62,60 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     HighlightCurrentLine  = 1<<5
 
     # ------------------- Settings
-    SETTINGS = 'code_editor'
+    remove_trailing_spaces = ConfigurableItem(default=False)
+    auto_brackets = ConfigurableItem(default=True)
+    smart_home_smart_end = ConfigurableItem(default=True)
+    enable_auto_completion = ConfigurableItem(default=True)
+    word_length_to_complete = ConfigurableItem(default=3)
 
-    removeTrailingSpaces = ConfigurableItem(default = False)
-    autoBrackets = ConfigurableItem(default = True)
-    smartHomeSmartEnd = ConfigurableItem(default = True)
-    enableAutoCompletion = ConfigurableItem(default = True)
-    wordLengthToComplete = ConfigurableItem(default = 3)
+    adjust_indentation_on_paste = ConfigurableItem(default=False)
+    default_encoding = ConfigurableItem(default='utf_8')
 
-    adjustIndentationOnPaste = ConfigurableItem(default = False)
-    encoding = ConfigurableItem(default = 'utf_8')
-
-    @ConfigurableItem(default = 80)
-    def marginLineSize(self, size):
+    @ConfigurableItem(default=80)
+    def margin_line_size(self, size):
         self.viewport().update()
 
-    @ConfigurableItem(default = Qt.QWIDGETSIZE_MAX)
-    def wordWrapSize(self, size):
+    @ConfigurableItem(default=Qt.QWIDGETSIZE_MAX)
+    def word_wrap_size(self, size):
         # TODO: Ver que hacer con este offset tan feo de 2
         size = (size * self.characterWidth()) + 2
         self.viewport().setMaximumWidth(size < Qt.QWIDGETSIZE_MAX \
             and size or Qt.QWIDGETSIZE_MAX)
     
-    @ConfigurableItem(default = True)
-    def indentUsingSpaces(self, soft):
+    @ConfigurableItem(default=True)
+    def indent_using_spaces(self, soft):
         self.setSoftTabs(soft)
 
-    @ConfigurableItem(default = 4)
-    def indentationWidth(self, size):
+    @ConfigurableItem(default=4)
+    def indentation_width(self, size):
         self.setTabSize(size)
         self.viewport().update()
 
-    @ConfigurableItem(default = ("Monospace", 10))
-    def defaultFont(self, value):
+    @ConfigurableItem(default=("Monospace", 10))
+    def default_font(self, value):
         font = QtGui.QFont(*value)
         font.setStyleStrategy(QtGui.QFont.ForceIntegerMetrics)
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
         self.setFont(font)
 
-    @ConfigurableItem(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
-    def defaultSyntax(self, uuid):
+    @ConfigurableItem(default="3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name='OakDefaultLanguage')
+    def default_syntax(self, uuid):
         self._default_syntax = self.application().supportManager.getBundleItem(uuid)
         if self._default_syntax is None:
             # Load original default syntax
             self._default_syntax = self.application().supportManager.getBundleItem(self._settings.default("defaultSyntax"))
         self.insertBundleItem(self._default_syntax)
 
-    @ConfigurableItem(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
-    def defaultTheme(self, uuid):
+    @ConfigurableItem(default='766026CB-703D-4610-B070-8DE07D967C5F', tm_name='OakThemeManagerSelectedTheme')
+    def default_theme(self, uuid):
         self._default_theme = self.application().supportManager.getBundleItem(uuid)
         if self._default_theme is None:
             # Load original default theme
             self._default_theme = self.application().supportManager.getBundleItem(self._settings.default("defaultTheme"))
         self.insertBundleItem(self._default_theme)
 
-    @ConfigurableItem(default = MarginLine | IndentGuide | HighlightCurrentLine)
-    def defaultFlags(self, flags):
+    @ConfigurableItem(default=MarginLine | IndentGuide | HighlightCurrentLine)
+    def default_flags(self, flags):
         self.setFlags(flags)
 
     # --------------------- init

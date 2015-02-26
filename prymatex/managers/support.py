@@ -160,9 +160,10 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     themeRemoved = QtCore.Signal(object)
     themeChanged = QtCore.Signal(object)
     
-    #Settings
-    shellVariables = ConfigurableItem(default=[], tm_name='OakShelVariables')
+    # ------------- Settings
+    shell_variables = ConfigurableItem(default=[], tm_name='OakShelVariables')
     
+    # TODO: Mejores nombres por aca
     @ConfigurableItem(default=[], tm_name='OakBundleManagerDeletedBundles')
     def deleted(self, deleted):
         self.deletedObjects = [uuidmodule.UUID(uuid) for uuid in deleted]
@@ -173,10 +174,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     
     #http://manual.macromates.com/en/expert_preferences.html
     #When you create a new item in the bundle editor without having selected a bundle first, then the bundle with the UUID held by this defaults key is used as the target
-    defaultBundleForNewBundleItems = ConfigurableItem(default = 'B7BC3FFD-6E4B-11D9-91AF-000D93589AF6', tm_name = 'OakDefaultBundleForNewBundleItems')
-    
-    # ------------- Settings
-    SETTINGS = 'SupportManager'
+    default_bundle_for_new_bundle_items = ConfigurableItem(default = 'B7BC3FFD-6E4B-11D9-91AF-000D93589AF6', tm_name = 'OakDefaultBundleForNewBundleItems')
     
     def __init__(self, **kwargs):
         super(SupportManager, self).__init__(**kwargs)

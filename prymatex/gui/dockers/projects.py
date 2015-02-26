@@ -26,18 +26,15 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
     ICON = "dock-projects"
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
 
-    #=======================================================================
-    # Settings
-    #=======================================================================
-    SETTINGS = 'ProjectsDock'
+    # -------------- Settings
     @ConfigurableItem(default = '')
-    def customFilters(self, filters):
+    def custom_filters(self, filters):
         filters = [p.strip() for p in filters.split(",")]
         self.selectableProjectFileModel.setBaseFilters(filters)
         self.projectTreeProxyModel.setFilterRegExp(",".join(filters))
     
     @ConfigurableHook("code_editor.defaultTheme")
-    def defaultTheme(self, themeUUID):
+    def default_theme(self, themeUUID):
         theme = self.application().supportManager.getBundleItem(themeUUID)
         self.treeViewProjects.setPalette(theme.palette())
         self.treeViewProjects.viewport().setPalette(theme.palette())

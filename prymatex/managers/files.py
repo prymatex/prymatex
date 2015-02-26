@@ -21,15 +21,13 @@ from prymatex.core import exceptions
 
 class FileManager(PrymatexComponent, QtCore.QObject):
     """A File Manager"""
-    # ------------- Settings
-    SETTINGS = 'FileManager'
 
-    fileHistory = ConfigurableItem(default = [])
-    fileHistoryLength = ConfigurableItem(default = 10)
-    defaultEncoding = ConfigurableItem(default = 'utf_8')
-    defaultEndOfLine = ConfigurableItem(default = 'unix')
-    detectEndOfLine = ConfigurableItem(default = False)
-    removeTrailingSpaces = ConfigurableItem(default = False)
+    file_history = ConfigurableItem(default = [])
+    file_history_length = ConfigurableItem(default = 10)
+    default_encoding = ConfigurableItem(default = 'utf_8')
+    default_end_of_line = ConfigurableItem(default = 'unix')
+    detect_end_of_line = ConfigurableItem(default = False)
+    remove_trailing_spaces = ConfigurableItem(default = False)
 
     def __init__(self, **kwargs):
         super(FileManager, self).__init__(**kwargs)

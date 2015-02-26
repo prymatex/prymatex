@@ -182,7 +182,6 @@ class ConsoleDock(PrymatexDock, QtWidgets.QDockWidget):
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
     # ------------------ Settings
-    SETTINGS = 'ConsoleDock'
     
     def __init__(self, **kwargs):
         super(ConsoleDock, self).__init__(**kwargs)

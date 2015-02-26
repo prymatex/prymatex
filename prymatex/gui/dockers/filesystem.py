@@ -22,9 +22,8 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtWidgets
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
 
     # ----------- Settings
-    SETTINGS = 'FilesDock'
     @ConfigurableItem(default = '')
-    def customFilters(self, filters):
+    def custom_filters(self, filters):
         self.fileSystemProxyModel.setFilterRegExp(filters)
 
     _pushButtonHistoryBack = []

@@ -21,7 +21,6 @@ from prymatex.gui.dialogs.profile import ProfileDialog
 # The very very first manager
 class ProfileManager(PrymatexComponent, QtCore.QObject):
     # ------------- Settings
-    SETTINGS = 'ProfileManager'
     PMX_PROFILES_FILE = "profiles.ini"
     DEFAULT_PROFILE_NAME = "default"
 

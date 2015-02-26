@@ -19,8 +19,6 @@ from prymatex.utils import encoding
 # TODO: por ahora este nombre esta bien, pero algo mas orientado a Prymatex server taria bueno
 class ServerManager(PrymatexComponent, QtCore.QObject):
     # ------------- Settings
-    SETTINGS = 'ServerManager'
-    
     def __init__(self, **kwargs):
         super(ServerManager, self).__init__(**kwargs)
         self.dialogs = {}
