@@ -31,7 +31,7 @@ with some basic components like:
 # License
 
 If not otherwise specified (see below), Prymatex code is distributed under the
-terms of GPL V.2 licence, please refer to licenses/GPL.txt.
+terms of GPL V.2 licence, please refer to licenses/GPL2-license.txt.
 
 An exception is made for files in readable text which contain their own license
 information, or files where an accompanying file exists (in the “licenses“ directory)
