@@ -39,54 +39,55 @@ class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtWidgets.QWidget):
         self.comboBoxDefaultSyntax.setModel(self.application().supportManager.syntaxProxyModel)
         self.comboBoxDefaultSyntax.setModelColumn(0)
 
-        uuid = self.settings.get('defaultSyntax')
-        syntax = self.application().supportManager.getBundleItem(uuid)
-        index = self.comboBoxDefaultSyntax.model().nodeIndex(syntax).row()
-        # TODO Ver porque no esta el valor
-        if index:
-            self.comboBoxDefaultSyntax.setCurrentIndex(index)
+        syntax_uuid = self.settings.get('default_syntax')
+        if syntax_uuid is not None:
+            default_syntax = self.application().supportManager.getBundleItem(syntax_uuid)
+            index = self.comboBoxDefaultSyntax.model().nodeIndex(default_syntax).row()
+            if index:
+                self.comboBoxDefaultSyntax.setCurrentIndex(index)
 
         # Flags
-        flags = int(self.settings.get('defaultFlags'))
+        flags = int(self.settings.get('default_flags'))
         for check, flag in self.checks:
             check.setChecked(bool(flags & flag))
 
-        self.spinBoxMarginLineSpace.setValue(self.settings.get("marginLineSize"))
+        self.spinBoxMarginLineSpace.setValue(self.settings.get("margin_line_size"))
 
-        self.checkBoxLineNumbers.setChecked(self.lineNumberBarGroup.get("showLineNumbers", False))
-        self.checkBoxBookmarks.setChecked(self.bookmarksBarGroup.get("showBookmarks", False))
-        self.checkBoxFolding.setChecked(self.foldingBarGroup.get("showFolding", False))
-        self.checkBoxSelection.setChecked(self.selectionBarGroup.get("showSelection", False))
+        self.checkBoxLineNumbers.setChecked(self.lineNumberBarGroup.get("show_line_numbers", False))
+        self.checkBoxBookmarks.setChecked(self.bookmarksBarGroup.get("show_bookmarks", False))
+        self.checkBoxFolding.setChecked(self.foldingBarGroup.get("show_folding", False))
+        self.checkBoxSelection.setChecked(self.selectionBarGroup.get("show_selection", False))
 
     @QtCore.Slot(bool)
     def on_checkBoxLineNumbers_clicked(self, checked):
-        self.lineNumberBarGroup.set('showLineNumbers', self.checkBoxLineNumbers.isChecked())
+        self.lineNumberBarGroup.set('show_line_numbers', self.checkBoxLineNumbers.isChecked())
 
     @QtCore.Slot(bool)
     def on_checkBoxBookmarks_clicked(self, checked):
-        self.bookmarksBarGroup.set('showBookmarks', self.checkBoxBookmarks.isChecked())
+        self.bookmarksBarGroup.set('show_bookmarks', self.checkBoxBookmarks.isChecked())
 
     @QtCore.Slot(bool)
     def on_checkBoxFolding_clicked(self, checked):
-        self.foldingBarGroup.set('showFolding', self.checkBoxFolding.isChecked())
+        self.foldingBarGroup.set('show_folding', self.checkBoxFolding.isChecked())
 
     @QtCore.Slot(bool)
     def on_checkBoxSelection_clicked(self, checked):
-        self.selectionBarGroup.set('showSelection', self.checkBoxSelection.isChecked())
+        self.selectionBarGroup.set('show_selection', self.checkBoxSelection.isChecked())
 
     @QtCore.Slot(int)
     def on_spinBoxMarginLineSpace_valueChanged(self, value):
-        self.settings.set('marginLineSize', value)
+        self.settings.set('margin_line_size', value)
 
     @QtCore.Slot(int)
     def on_comboBoxDefaultSyntax_activated(self, index):
         model = self.comboBoxDefaultSyntax.model()
-        node = model.mapToSource(model.createIndex(index, 0))
-        self.settings.set('defaultSyntax', str(node.internalPointer().uuid).upper())
+        index = model.mapToSource(model.createIndex(index, 0))
+        self.settings.set('default_syntax', str(index.internalPointer().uuid).upper())
 
     def on_editorFlags_clicked(self, checked):
         flags = 0
         for check, flag in self.checks:
             if check.isChecked():
                 flags |= flag
-        self.settings.set('defaultFlags', flags)
+        self.settings.set('default_flags', flags)
+

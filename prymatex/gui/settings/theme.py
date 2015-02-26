@@ -31,15 +31,17 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
         self.comboBoxThemes.setModel(self.application().supportManager.themeProxyModel)
         self.tableViewStyles.setModel(self.application().supportManager.themeStyleProxyModel)
         
-        currentThemeUUID = self.settings.get('defaultTheme')
-        currentTheme = self.application().supportManager.getBundleItem(currentThemeUUID)
-        if currentTheme is not None:
-            self.updateUi(currentTheme)
+        theme_uuid = self.settings.get('default_theme')
+        if theme_uuid is not None:
+            default_theme = self.application().supportManager.getBundleItem(theme_uuid)
+            if default_theme is not None:
+                self.updateUi(default_theme)
         
         # Font
-        font = self.settings.get('defaultFont')
-        self.fontComboBoxName.setCurrentFont(QtGui.QFont(*font))
-        self.spinBoxFontSize.setValue(font[1])
+        default_font = self.settings.get('default_font')
+        if default_font is not None:
+            self.fontComboBoxName.setCurrentFont(QtGui.QFont(*default_font))
+            self.spinBoxFontSize.setValue(default_font[1])
         #self.checkBoxAntialias.setChecked(test_font_strategy(font, QtGui.QFont.PreferAntialias))
         
         # Connect font signals
@@ -54,7 +56,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
         if self.checkBoxAntialias.isChecked():
             pass
             #font.setStyleStrategy(font.styleStrategy() | QtGui.QFont.PreferAntialias)
-        self.settings.set('defaultFont', 
+        self.settings.set('default_font', 
             ( self.fontComboBoxName.currentFont().family(), 
               self.spinBoxFontSize.value())
         )
@@ -65,7 +67,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
         modelIndex = self.comboBoxThemes.model().index(index)
         theme = self.comboBoxThemes.model().node(modelIndex)
         self.updateUi(theme)
-        self.settings.set('defaultTheme', theme.uuidAsText())
+        self.settings.set('default_theme', theme.uuidAsText())
         message = "<b>%s</b> theme set " % theme.name
         if theme.author is not None:
             message += "<i>(by %s)</i>" % theme.author
