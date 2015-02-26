@@ -253,7 +253,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def environmentVariables(self):
         environment = SupportBaseManager.environmentVariables(self)
         #Extend wiht the user shell variables
-        for var in self.shellVariables:
+        for var in self.shell_variables:
             if var['enabled']:
                 environment[var['variable']] = var['value']
         return environment

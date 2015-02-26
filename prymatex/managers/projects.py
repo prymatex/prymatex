@@ -96,24 +96,24 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
     # -------------------- Load projects
     def loadProjects(self, messageHandler = None):
         self.messageHandler = messageHandler
-        for path in self.knownProjects[:]:
+        for path in self.known_projects[:]:
             try:
                 ProjectTreeNode.loadProject(path, self)
             except exceptions.FileNotExistsException as e:
                 print(e)
-                self.knownProjects.remove(path)
-                self.settings().set('knownProjects', self.knownProjects)
+                self.known_projects.remove(path)
+                self.settings().set('known_projects', self.known_projects)
         self.messageHandler = None
 
     def isOpen(self, project):
         return True
 
     def appendToKnowProjects(self, project):
-        self.knownProjects.append(project.path())
+        self.known_projects.append(project.path())
         self.settings().set('knownProjects', self.knownProjects)
 
     def removeFromKnowProjects(self, project):
-        self.knownProjects.remove(project.path())
+        self.known_projects.remove(project.path())
         self.settings().set('knownProjects', self.knownProjects)
 
     # ------------------- Properties
