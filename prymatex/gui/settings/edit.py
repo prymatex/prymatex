@@ -9,14 +9,14 @@ from prymatex.models.settings import SettingsTreeNode
 class EditSettingsWidget(SettingsTreeNode, Ui_Edit, QtWidgets.QWidget):
     NAMESPACE = "editor"
 
-    def __init__(self, **kwargs):
-        super(EditSettingsWidget, self).__init__(nodeName = "edit", **kwargs)
+    def __init__(self, component_class, **kwargs):
+        super(EditSettingsWidget, self).__init__(component_class, nodeName="edit", **kwargs)
         self.setupUi(self)
-        self.setTitle("Edit")
-        self.setIcon(self.resources().get_icon("settings-edit"))
-
+        
     def loadSettings(self):
         super(EditSettingsWidget, self).loadSettings()
+        self.setTitle("Edit")
+        self.setIcon(self.application().resources().get_icon("settings-edit"))
 
         self.spinBoxIndentationWidth.setValue(self.settings.get("indentation_width"))
         self.spinBoxWordLengthToComplete.setValue(self.settings.get("word_length_to_complete"))

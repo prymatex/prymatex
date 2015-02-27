@@ -17,16 +17,17 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
     """Changes font and theme"""
     NAMESPACE = "editor"
 
-    def __init__(self, **kwargs):
-        super(ThemeSettingsWidget, self).__init__(nodeName = "theme", **kwargs)
+    def __init__(self, component_class, **kwargs):
+        super(ThemeSettingsWidget, self).__init__(component_class, nodeName="theme", **kwargs)
         self.setupUi(self)
-        self.setTitle("Appearance")
-        self.setIcon(self.resources().get_icon("settings-theme"))
         self.setupTableView()
         self.setupPushButton()
 
     def loadSettings(self):
         super(ThemeSettingsWidget, self).loadSettings()
+        self.setTitle("Appearance")
+        self.setIcon(self.application().resources().get_icon("settings-theme"))
+
         # Set models
         self.comboBoxThemes.setModel(self.application().supportManager.themeProxyModel)
         self.tableViewStyles.setModel(self.application().supportManager.themeStyleProxyModel)

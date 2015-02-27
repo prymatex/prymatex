@@ -11,16 +11,16 @@ from prymatex.models.settings import SettingsTreeNode
 class FilesSettingsWidget(SettingsTreeNode, Ui_Files, QtWidgets.QWidget):
     NAMESPACE = "general"
 
-    def __init__(self, **kwargs):
-        super(FilesSettingsWidget, self).__init__(nodeName = "files", **kwargs)
+    def __init__(self, component_class, **kwargs):
+        super(FilesSettingsWidget, self).__init__(component_class, nodeName="files", **kwargs)
         self.setupUi(self)
-        self.setTitle("Files")
-        self.setIcon(self.resources().get_icon("settings-files"))
         self.loadEncodings()
         self.setupLineEndings()
 
     def loadSettings(self):
         super(FilesSettingsWidget, self).loadSettings()
+        self.setTitle("Files")
+        self.setIcon(self.application().resources().get_icon("settings-files"))
 
     def setupLineEndings(self):
         """Populate line endings"""

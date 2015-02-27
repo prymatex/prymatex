@@ -18,14 +18,10 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
     """Environment variables"""
     NAMESPACE = "general"
 
-    def __init__(self, **kwargs):
-        super(ShortcutsSettingsWidget, self).__init__(nodeName="shortcuts", **kwargs)
+    def __init__(self, component_class, **kwargs):
+        super(ShortcutsSettingsWidget, self).__init__(component_class, nodeName="shortcuts", **kwargs)
         self.setupUi(self)
-        self.setTitle("Shortcuts")
-        self.setIcon(self.resources().get_icon("settings-shortcuts"))
-        self.shortcutsTreeModel = self.application().shortcutsTreeModel
-        self.configTreeView()
-        self.configActivation()
+        self.lineEditShortcut.installEventFilter(self)
 
     def configTreeView(self):
         self.treeViewShortcuts.setModel(self.shortcutsTreeModel)
@@ -34,11 +30,12 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
             self.on_treeViewShortcuts_selectionChanged
         )
 
-    def configActivation(self):
-        self.lineEditShortcut.installEventFilter(self)
-        
     def loadSettings(self):
         super(ShortcutsSettingsWidget, self).loadSettings()
+        self.setTitle("Shortcuts")
+        self.setIcon(self.application().resources().get_icon("settings-shortcuts"))
+        self.shortcutsTreeModel = self.application().shortcutsTreeModel
+        self.configTreeView()
 
     def currentShortcut(self):
         return self.shortcutsTreeModel.node(self.treeViewShortcuts.currentIndex())

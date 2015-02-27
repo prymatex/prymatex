@@ -10,33 +10,33 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.widgets.pmxterm.schemes import ColorScheme
 
 class TerminalSettingsWidget(SettingsTreeNode, Ui_Terminal, QtWidgets.QWidget):
-    def __init__(self, **kwargs):
-        super(TerminalSettingsWidget, self).__init__(nodeName = "terminal", **kwargs)
+    def __init__(self, component_class, **kwargs):
+        super(TerminalSettingsWidget, self).__init__(component_class, nodeName = "terminal", **kwargs)
         self.setupUi(self)
-        self.setTitle("Terminal")
-        self.setIcon(self.resources().get_icon("settings-terminal"))
 
     def loadSettings(self):
         super(TerminalSettingsWidget, self).loadSettings()
-        defaultScheme = self.settings.get('defaultScheme')
+        self.setTitle("Terminal")
+        self.setIcon(self.application().resources().get_icon("settings-terminal"))
+        defaultScheme = self.settings().get('defaultScheme')
         
         for index, scheme in enumerate(ColorScheme.SCHEMES):
             self.comboBoxScheme.addItem(scheme.name)
             if defaultScheme == scheme.name:
                 self.comboBoxScheme.setCurrentIndex(index)
         
-        editorTheme = self.settings.get('editorTheme')
+        editorTheme = self.settings().get('editorTheme')
         self.checkBoxEditorTheme.setChecked(editorTheme)
         self.comboBoxScheme.setDisabled(editorTheme)
 
         # Font
-        defaultFont = self.settings.get('defaultFont')
+        defaultFont = self.settings().get('defaultFont')
         self.fontComboBoxName.setCurrentFont(defaultFont)
         self.spinBoxFontSize.setValue(defaultFont.pointSize())
         self.checkBoxAntialias.setChecked(test_font_strategy(defaultFont, QtGui.QFont.PreferAntialias))
         
-        self.checkBoxSynchronize.setChecked(self.settings.get('synchronizeEditor'))
-        self.spinBoxBufferSize.setValue(self.settings.get('bufferSize'))
+        self.checkBoxSynchronize.setChecked(self.settings().get('synchronizeEditor'))
+        self.spinBoxBufferSize.setValue(self.settings().get('bufferSize'))
         
         # Connect font signals
         self.checkBoxAntialias.stateChanged[int].connect(self.setDefaultFontSetting)

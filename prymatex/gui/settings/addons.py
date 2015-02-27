@@ -10,9 +10,12 @@ def AddonsSettingsWidgetFactory(namespace):
     class AddonsSettingsWidget(SettingsTreeNode, Ui_Addons, QtWidgets.QWidget):
         NAMESPACE = namespace
         
-        def __init__(self, **kwargs):
-            super(AddonsSettingsWidget, self).__init__(nodeName = "addons", **kwargs)
+        def __init__(self, component_class, **kwargs):
+            super(AddonsSettingsWidget, self).__init__(component_class, nodeName="addons", **kwargs)
             self.setupUi(self)
+
+        def loadSettings(self):
+            super(AddonsSettingsWidget, self).loadSettings()
             self.setTitle("Addons")
-            self.setIcon(self.resources().get_icon("settings-addons"))
+            self.setIcon(self.application().resources().get_icon("settings-addons"))
     return AddonsSettingsWidget

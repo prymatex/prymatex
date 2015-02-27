@@ -7,14 +7,14 @@ from prymatex.ui.configure.general import Ui_General
 from prymatex.models.settings import SettingsTreeNode
 
 class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtWidgets.QWidget):
-    def __init__(self, **kwargs):
-        super(GeneralSettingsWidget, self).__init__(nodeName = "general", **kwargs)
+    def __init__(self, component_class, **kwargs):
+        super(GeneralSettingsWidget, self).__init__(component_class, nodeName="general", **kwargs)
         self.setupUi(self)
-        self.setTitle("General")
-        self.setIcon(self.resources().get_icon("settings-general"))
 
     def loadSettings(self):
         super(GeneralSettingsWidget, self).loadSettings()
+        self.setTitle("General")
+        self.setIcon(self.application().resources().get_icon("settings-general"))
         currentStyleName = self.settings.get('qtStyle')
         currentStyleSheetName = self.settings.get('qtStyleSheet')
         currentIconTheme = self.settings.get('iconTheme')

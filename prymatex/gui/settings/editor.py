@@ -10,11 +10,9 @@ from prymatex.gui.codeeditor.sidebar import (LineNumberSideBarAddon,
     BookmarkSideBarAddon, FoldingSideBarAddon, SelectionSideBarAddon)
 
 class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtWidgets.QWidget):
-    def __init__(self, **kwargs):
-        super(EditorSettingsWidget, self).__init__(nodeName = "editor", **kwargs)
+    def __init__(self, component_class, **kwargs):
+        super(EditorSettingsWidget, self).__init__(component_class, nodeName="editor", **kwargs)
         self.setupUi(self)
-        self.setTitle("Editor")
-        self.setIcon(self.resources().get_icon("settings-editor"))
 
         self.checks = [(self.checkBoxWrapLines, CodeEditor.WordWrap),
             (self.checkBoxShowTabSpaces, CodeEditor.ShowTabsAndSpaces),
@@ -29,6 +27,8 @@ class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtWidgets.QWidget):
 	
     def loadSettings(self):
         super(EditorSettingsWidget, self).loadSettings()
+        self.setTitle("Editor")
+        self.setIcon(self.application().resources().get_icon("settings-editor"))
 
         # Get addons groups from profile
         self.bookmarksBarGroup = self.application().settingsManager.settingsForClass(BookmarkSideBarAddon)

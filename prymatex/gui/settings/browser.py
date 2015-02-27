@@ -10,11 +10,9 @@ from prymatex.models.settings import SettingsTreeNode
 from prymatex.gui.dockers.browser import BrowserDock
 
 class NetworkSettingsWidget(SettingsTreeNode, Ui_Browser, QtWidgets.QWidget):
-    def __init__(self, **kwargs):
-        super(NetworkSettingsWidget, self).__init__(nodeName = "network", **kwargs)
+    def __init__(self, component_class, **kwargs):
+        super(NetworkSettingsWidget, self).__init__(component_class, nodeName="network", **kwargs)
         self.setupUi(self)
-        self.setTitle("Network")
-        self.setIcon(self.resources().get_icon("settings-network"))
 
         self.checks = [(self.checkBoxDeveloperExtrasEnabled, BrowserDock.DeveloperExtrasEnabled),
             (self.checkBoxPluginsEnabled, BrowserDock.PluginsEnabled),
@@ -34,6 +32,8 @@ class NetworkSettingsWidget(SettingsTreeNode, Ui_Browser, QtWidgets.QWidget):
 
     def loadSettings(self):
         super(NetworkSettingsWidget, self).loadSettings()
+	self.setTitle("Network")
+        self.setIcon(self.application().resources().get_icon("settings-network"))
 
         # Flags
         flags = int(self.settings.get('defaultWebSettings'))

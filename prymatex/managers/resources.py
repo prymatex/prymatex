@@ -5,6 +5,8 @@ from prymatex.core import PrymatexComponent, config
 
 from prymatex.resources import (Resource, ResourceProvider, load_media,
     load_fonts, load_stylesheets)
+    
+from prymatex.models.shortcuts import ShortcutsTreeModel
 
 class ResourceManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
@@ -17,7 +19,23 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
         self.providers = {}
         
         self.base = Resource('base')
+        # Shortcut Models
+        self.shortcutsTreeModel = ShortcutsTreeModel(self)
 
+    @classmethod
+    def contributeToSettings(cls):
+        from prymatex.gui.settings.shortcuts import ShortcutsSettingsWidget
+
+        return [ ShortcutsSettingsWidget ]
+
+    # -------------------- Public API
+    def loadResources(self, message_handler):
+        # Load standard shortcuts
+        self.shortcutsTreeModel.loadStandardSequences(self.resources())
+
+    def registerShortcut(self, qobject, sequence):
+        return self.shortcutsTreeModel.registerShortcut(qobject, sequence)
+        
     def add_source(self, name, path, default=False):
         res = Resource(name, path, default)
         res.update(load_fonts(path))

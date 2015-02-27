@@ -15,10 +15,6 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import six
 from prymatex.utils.processes import get_process_map
 
-from prymatex.models.shortcuts import ShortcutsTreeModel
-from prymatex.models.settings import SettingsTreeModel
-from prymatex.models.settings import SortFilterSettingsProxyModel
-
 from . import config
 from . import exceptions
 from .components import PrymatexComponent, PrymatexEditor
@@ -62,6 +58,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
         # Some init's
         self.setApplicationName(prymatex.__name__.title())
+        self.setObjectName(prymatex.__name__.title())
         self.setApplicationVersion(prymatex.__version__)
         self.setOrganizationDomain(prymatex.__url__)
         self.setOrganizationName(prymatex.__author__)
@@ -81,14 +78,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         # Connects
         self.aboutToQuit.connect(self.closePrymatex)
         
-        # Shortcut Models
-        self.shortcutsTreeModel = ShortcutsTreeModel(self)
-
-        # Settings Models
-        self.settingsTreeModel = SettingsTreeModel(parent=self)
-        self.sortFilterSettingsProxyModel = SortFilterSettingsProxyModel(parent=self)
-        self.sortFilterSettingsProxyModel.setSourceModel(self.settingsTreeModel)
-
         # Exceptions
         self.replaceSysExceptHook()
         
@@ -156,17 +145,18 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         for ns, path in config.NAMESPACES:
             app.resourceManager.add_source(ns, path, True)
             app.pluginManager.addNamespace(ns, path)
-        
-        # Populate configurable
-        app.populateConfigurableClass(ResourceManager)
-        app.populateConfigurableClass(ProfileManager)
-        app.populateConfigurableClass(SettingsManager)
-        app.populateConfigurableClass(PluginManager)
-        app.populateConfigurableClass(PrymatexApplication)
 
-        # Configure
+	# Populate configurables
+        app.settingsManager.populateConfigurableClass(ResourceManager)
+        app.settingsManager.populateConfigurableClass(ProfileManager)
+        app.settingsManager.populateConfigurableClass(SettingsManager)
+        app.settingsManager.populateConfigurableClass(PluginManager)
+        app.settingsManager.populateConfigurableClass(PrymatexApplication)
+
+        # Configure instances
         app.settingsManager.registerConfigurableInstance(app.resourceManager) 
-        app.settingsManager.registerConfigurableInstance(app.profileManager)        
+        app.settingsManager.registerConfigurableInstance(app.profileManager)
+        app.settingsManager.registerConfigurableInstance(app.settingsManager)
         app.settingsManager.registerConfigurableInstance(app.pluginManager)
         app.settingsManager.registerConfigurableInstance(app)
 
@@ -195,9 +185,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import GeneralSettingsWidget
-        from prymatex.gui.settings.shortcuts import ShortcutsSettingsWidget
 
-        return [ GeneralSettingsWidget, ShortcutsSettingsWidget ]
+        return [ GeneralSettingsWidget ]
 
     def environmentVariables(self):
         env = {
@@ -245,6 +234,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             self.projectManager = self.buildProjectManager()    # Project Manager
             self.schedulerManager = self.buildSchedulerManager()
             self.serverManager = self.buildServerManager()
+
+            # Load Resources
+            self.resourceManager.loadResources(self.showMessage)
             
             # Load Bundles
             self.supportManager.loadSupport(self.showMessage)
@@ -252,15 +244,10 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             # Load Projects
             self.projectManager.loadProjects(self.showMessage)
 
-            # Load Projects
+            # Load Settings
             self.settingsManager.loadSettings(self.showMessage)
 
-            # Load Settings
-            self.settingsTreeModel.loadSettings()
-            
-            # Load standard shortcuts
-            self.shortcutsTreeModel.loadStandardSequences(self.resources())
-
+            # Restore State
             self.settingsManager.restoreState(self)
             window = self.currentWindow() or self.buildMainWindow(editor=True)
             
@@ -416,18 +403,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
                 return cls._settings
             return _get_settings
         componentClass.settings = classmethod(get_settings(self))
-    
-    def populateConfigurableClass(self, componentClass):
-        if hasattr(componentClass, '_setting_widgets'):
-            return
-        componentClass._setting_widgets = []
-        for settingWidget in componentClass.contributeToSettings():
-            self.populateComponentClass(settingWidget)
-            settings = componentClass.settings()
-            profile = componentClass.profile()
-            widget = settingWidget(settings=settings, profile=profile)
-            componentClass._setting_widgets.append(widget)
-            self.settingsTreeModel.addConfigNode(widget)
+        if self.settingsManager is not None:
+            self.settingsManager.populateConfigurableClass(componentClass)
 
     # ------------------- Create components
     def createComponentInstance(self, componentClass, *args, **kwargs):
@@ -436,7 +413,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
         def buildComponentInstance(klass, *args, **kwargs):
             self.populateComponentClass(klass)
-            self.populateConfigurableClass(klass)
 
             component = klass(*args, **kwargs)
 
@@ -600,7 +576,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         sequence = ContextKeySequence(*sequence)
         # TODO: Algo interesante si no hago esto podria registrar para todo lo que tenga keysequence
         if sequence:    
-            shortcut = self.shortcutsTreeModel.registerShortcut(qobject, sequence)
+            shortcut = self.resourceManager.registerShortcut(qobject, sequence)
             if shortcut.identifier() in self.shortcuts:
                 shortcut.setKeySequence(self.shortcuts[shortcut.identifier()])
 
