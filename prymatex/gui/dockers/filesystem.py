@@ -114,23 +114,14 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtWidgets
             "items": [
                 {   "text": "New",
                     "items": [
-                        self.actionNewFolder, self.actionNewFile, self.actionNewFromTemplate
                     ]
                 },
                 "-",
-                self.actionOpen,
                 {   "text": "Open With",
                     "items": [
-                        self.actionOpenDefaultEditor, self.actionOpenSystemEditor
                     ]
                 },
-                self.actionSetInTerminal,
                 "-",
-                self.actionRename,
-                self.actionCut,
-                self.actionCopy,
-                self.actionPaste,
-                self.actionDelete,
             ]
         }
         self.fileSystemMenu, objects = create_menu(self, contextMenu)
@@ -141,15 +132,34 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtWidgets
             "items": [
                 {   "text": "Order",
                     "items": [
-                        (self.actionOrderByName, self.actionOrderBySize, self.actionOrderByDate, self.actionOrderByType),
-                        "-", self.actionOrderDescending, self.actionOrderFoldersFirst
+                        {
+                            'text': "By name",
+                            'triggered': self.on_actionOrderByName_triggered
+                        },
+                        {
+                            'text': "By size",
+                            'triggered': self.on_actionOrderBySize_triggered
+                        },
+                        {
+                            'text': "By date",
+                            'triggered': self.on_actionOrderByDate_triggered
+                        },
+                        {
+                            'text': "By type",
+                            'triggered': self.on_actionOrderByType_triggered
+                        }, "-", 
+                        {
+                            'text': "Descending",
+                            'triggered': self.on_actionOrderDescending_triggered
+                        },
+                        {
+                            'text': "Folders first",
+                            'triggered': self.on_actionOrderFoldersFirst_triggered
+                        }
                     ]
                 }
             ]
         }
-
-        self.actionOrderFoldersFirst.setChecked(True)
-        self.actionOrderByName.trigger()
 
         self.fileSystemOptionsMenu, objects = create_menu(self, optionsMenu)
         self.toolButtonOptions.setMenu(self.fileSystemOptionsMenu)

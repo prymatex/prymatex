@@ -30,7 +30,6 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
 
     # ------------- Settings
     default_directory  = ConfigurableItem(default=os.path.join(get_home_dir(), "Projects"))
-    known_projects = ConfigurableItem(default=[])
 
     VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
 
@@ -56,14 +55,41 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         self.supportManager.bundleRemoved.connect(self.on_supportManager_bundleRemoved)
         self.supportManager.bundleItemAdded.connect(self.on_supportManager_bundleItemAdded)
         self.supportManager.bundleItemRemoved.connect(self.on_supportManager_bundleItemRemoved)
-        
         self.messageHandler = None
     
+    # ---------- OVERRIDE: PrymatexComponent.contributeToSettings()
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.projects import ProjectSettingsWidget
         from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
         return [ ProjectSettingsWidget, AddonsSettingsWidgetFactory("projects") ]
+
+    # ---------- OVERRIDE: PrymatexComponent.componentState()
+    def componentState(self):
+        componentState = super(ProjectManager, self).componentState()
+
+        componentState["projects"] = []
+        for project in self.projectTreeModel.projects():
+            componentState["projects"].append(project.path())
+
+        return componentState
+
+    # ---------- OVERRIDE: PrymatexComponent.setComponentState()
+    def setComponentState(self, componentState):
+        super(ProjectManager, self).setComponentState(componentState)
+        
+        # Restore projects
+        for project_path in componentState.get("projects", []):
+            self.openProject(project_path)
+        
+    def setupPropertiesWidgets(self):
+        from prymatex.gui.properties.project import ProjectPropertiesWidget
+        from prymatex.gui.properties.environment import EnvironmentPropertiesWidget
+        from prymatex.gui.properties.resource import ResoucePropertiesWidget
+        
+        for property_class in [ProjectPropertiesWidget, EnvironmentPropertiesWidget, ResoucePropertiesWidget]:
+            property_class.application = self.application
+            self.registerPropertyWidget(property_class())
 
     def convertToValidPath(self, name):
         #TODO: este y el del manager de bundles pasarlos a utils
@@ -96,25 +122,11 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
     # -------------------- Load projects
     def loadProjects(self, messageHandler = None):
         self.messageHandler = messageHandler
-        for path in self.known_projects[:]:
-            try:
-                ProjectTreeNode.loadProject(path, self)
-            except exceptions.FileNotExistsException as e:
-                print(e)
-                self.known_projects.remove(path)
-                self.settings().set('known_projects', self.known_projects)
+        self.setupPropertiesWidgets()
         self.messageHandler = None
 
     def isOpen(self, project):
         return True
-
-    def appendToKnowProjects(self, project):
-        self.known_projects.append(project.path())
-        self.settings().set('known_projects', self.known_projects)
-
-    def removeFromKnowProjects(self, project):
-        self.known_projects.remove(project.path())
-        self.settings().set('known_projects', self.known_projects)
 
     # ------------------- Properties
     def registerPropertyWidget(self, propertyWidget):
@@ -138,7 +150,6 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         project.save()
 
         self.addProject(project)
-        self.appendToKnowProjects(project)
         return project
 
     def updateProject(self, project, **attrs):
@@ -151,8 +162,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         try:
             project = ProjectTreeNode.loadProject(file_path, self)
         except exceptions.FileNotExistsException:
-            raise exceptions.LocationIsNotProject()
-        self.appendToKnowProjects(project)
+            raise exceptions.FileIsNotProject()
 
     def deleteProject(self, project, removeFiles = False):
         """Elimina un proyecto"""
@@ -173,7 +183,6 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         pass
 
     def removeProject(self, project):
-        self.removeFromKnowProjects(project)
         self.projectTreeModel.removeProject(project)
 
     def getAllProjects(self):

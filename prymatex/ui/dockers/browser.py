@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/browser.ui'
 #
-# Created: Thu Jan 29 12:30:38 2015
+# Created: Fri Feb 27 10:43:32 2015
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -69,18 +69,6 @@ class Ui_BrowserDock(object):
         self.horizontalLayout.addWidget(self.toolButtonOptions)
         self.verticalLayout.addLayout(self.horizontalLayout)
         BrowserDock.setWidget(self.dockWidgetContents)
-        self.actionSyncEditor = QtWidgets.QAction(BrowserDock)
-        self.actionSyncEditor.setCheckable(True)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/icons/actions/system-switch-user.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionSyncEditor.setIcon(icon)
-        self.actionSyncEditor.setObjectName("actionSyncEditor")
-        self.actionConnectEditor = QtWidgets.QAction(BrowserDock)
-        self.actionConnectEditor.setCheckable(True)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/icons/actions/network-connect.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionConnectEditor.setIcon(icon1)
-        self.actionConnectEditor.setObjectName("actionConnectEditor")
 
         self.retranslateUi(BrowserDock)
         QtCore.QMetaObject.connectSlotsByName(BrowserDock)
@@ -92,8 +80,4 @@ class Ui_BrowserDock(object):
         self.pushButtonGoNext.setToolTip(_translate("BrowserDock", "Next"))
         self.pushButtonReload.setToolTip(_translate("BrowserDock", "Reload"))
         self.pushButtonStop.setToolTip(_translate("BrowserDock", "Stop"))
-        self.actionSyncEditor.setText(_translate("BrowserDock", "Sync Editor"))
-        self.actionSyncEditor.setToolTip(_translate("BrowserDock", "Sync browser with current editor content"))
-        self.actionConnectEditor.setText(_translate("BrowserDock", "Connect Editor"))
-        self.actionConnectEditor.setToolTip(_translate("BrowserDock", "Connect browser with current editor"))
 

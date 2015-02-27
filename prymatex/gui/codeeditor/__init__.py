@@ -30,7 +30,7 @@ def registerPlugin(manager, descriptor):
     manager.registerComponent(HighlightCurrentSelectionAddon, CodeEditor)
 
     # ---------------- Sidebars
-    #manager.registerComponent(MiniMapAddon, CodeEditor)
+    manager.registerComponent(MiniMapAddon, CodeEditor)
     manager.registerComponent(BookmarkSideBarAddon, CodeEditor)
     manager.registerComponent(LineNumberSideBarAddon, CodeEditor)
     manager.registerComponent(FoldingSideBarAddon, CodeEditor)

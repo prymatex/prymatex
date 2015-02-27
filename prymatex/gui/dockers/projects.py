@@ -27,7 +27,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
 
     # -------------- Settings
-    @ConfigurableItem(default = '')
+    @ConfigurableItem(default='')
     def custom_filters(self, filters):
         filters = [p.strip() for p in filters.split(",")]
         self.selectableProjectFileModel.setBaseFilters(filters)
@@ -63,7 +63,6 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
         self.templateDialog = self.window().findChild(QtWidgets.QDialog, "TemplateDialog")
         self.bundleEditorDialog = self.window().findChild(QtWidgets.QDialog, "BundleEditorDialog")
         self.propertiesDialog = self.window().findChild(QtWidgets.QDialog, "PropertiesDialog")
-        self.setupPropertiesWidgets()
 
     @classmethod
     def contributeToSettings(cls):
@@ -116,15 +115,6 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
                 'TM_SELECTED_FILES': " ".join(["'%s'" % path for path in paths ])
             })
         return environment
-    
-    def setupPropertiesWidgets(self):
-        from prymatex.gui.properties.project import ProjectPropertiesWidget
-        from prymatex.gui.properties.environment import EnvironmentPropertiesWidget
-        from prymatex.gui.properties.resource import ResoucePropertiesWidget
-        
-        for propertyClass in [ProjectPropertiesWidget, EnvironmentPropertiesWidget, ResoucePropertiesWidget]:
-            self.application().populateComponentClass(propertyClass)
-            self.application().projectManager.registerPropertyWidget(propertyClass(parent = self.propertiesDialog))
 
     def setupTreeViewProjects(self):
         self.treeViewProjects.setModel(self.projectTreeProxyModel)
@@ -138,22 +128,42 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
             "items": [
                 {   "text": "Order",
                     "items": [
-                        (self.actionOrderByName, self.actionOrderBySize, self.actionOrderByDate, self.actionOrderByType),
-                        "-", self.actionOrderDescending, self.actionOrderFoldersFirst
+                        {
+                            'text': "By name",
+                            'triggered': self.on_actionOrderByName_triggered
+                        },
+                        {
+                            'text': "By size",
+                            'triggered': self.on_actionOrderBySize_triggered
+                        },
+                        {
+                            'text': "By date",
+                            'triggered': self.on_actionOrderByDate_triggered
+                        },
+                        {
+                            'text': "By type",
+                            'triggered': self.on_actionOrderByType_triggered
+                        }, "-", 
+                        {
+                            'text': "Descending",
+                            'triggered': self.on_actionOrderDescending_triggered
+                        },
+                        {
+                            'text': "Folders first",
+                            'triggered': self.on_actionOrderFoldersFirst_triggered
+                        }
                     ]
                 }
             ]
         }
-
-        self.actionOrderFoldersFirst.setChecked(True)
-        self.actionOrderByName.trigger()
         
         self.projectOptionsMenu, objects = create_menu(self, optionsMenu)
         self.toolButtonOptions.setMenu(self.projectOptionsMenu)
 
         #Connect context menu
         self.treeViewProjects.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.treeViewProjects.customContextMenuRequested.connect(self.showProjectTreeViewContextMenu)
+        self.treeViewProjects.customContextMenuRequested.connect(
+            self.on_treeViewProjects_customContextMenuRequested)
         
         #=======================================================================
         # Drag and Drop (see the proxy model)
@@ -170,7 +180,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
         self.treeViewProjects.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
     
     #================================================
-    # Build Menus
+    # DEPRECATED: Build Menus
     #================================================
     def buildContextMenu(self, index):    
         contextMenu = { 
@@ -195,11 +205,61 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
             self.extendFileSystemItemMenu(contextMenu, node)
             self.extendAddonsItemMenu(contextMenu, node)
             self.extendProjectBundleItemMenu(contextMenu, node)
-        contextMenu, objects = create_menu(self, contextMenu, separatorName=True)
+        # contextMenu = create_menu(contextMenu, self, separatorName = True)
+        contextMenu, objects = create_menu(self, contextMenu, separatorName = True)
         
         contextMenu.aboutToShow.connect(self.on_contextMenu_aboutToShow)
         contextMenu.aboutToHide.connect(self.on_contextMenu_aboutToHide)
         contextMenu.triggered.connect(self.on_contextMenu_triggered)
+        return contextMenu
+
+    # -------------- Build none context menu
+    def _not_index_context_menu(self):    
+        contextMenu = { 
+            'text': "Not index context",
+            'items': [
+                {   
+                    'text': "New Project"
+                },
+                {   
+                    'text': "Open Project"
+                }
+            ]
+        }
+        contextMenu, objects = create_menu(self, contextMenu)
+        return contextMenu
+        
+    def _index_context_menu(self, index):    
+        contextMenu = { 
+            'text': "Index context",
+            'items': [
+                {   
+                    'text': "Open"
+                },
+                {   
+                    'text': "Close"
+                }
+            ]
+        }
+        contextMenu, objects = create_menu(self, contextMenu)
+        return contextMenu
+        
+    def _indexes_context_menu(self, indexes):
+        if len(indexes) == 1:
+            return self._index_context_menu(indexes[0])
+
+        contextMenu = { 
+            'text': "Indexes context",
+            'items': [
+                {   
+                    'text': "Copy"
+                },
+                {   
+                    'text': "Paste"
+                }
+            ]
+        }
+        contextMenu, objects = create_menu(self, contextMenu)
         return contextMenu
         
     def on_contextMenu_aboutToShow(self):      
@@ -274,15 +334,22 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
             bundleMenues = [self.application().supportManager.menuForBundle(bundle) for bundle in bundles]
             extend_menu_section(menu, bundleMenues, section="bundles", position=0)
 
-    #================================================
-    # Tree View Project
-    #================================================
-    def showProjectTreeViewContextMenu(self, point):
-        index = self.treeViewProjects.indexAt(point)
+    # ---------- SIGNAL: treeViewProjects.customContextMenuRequested
+    QtCore.Slot(QtCore.QPoint)
+    def on_treeViewProjects_customContextMenuRequested(self, point):
+        # Aca vamos, esto puede tener multiple seleccion o estar apuntando
+        # a un nuevo lugar, hay que identificar el o los indices involucrados
+        point_index = self.treeViewProjects.indexAt(point)
+        index = point_index.isValid() and point_index or self.treeViewProjects.rootIndex()
         if index.isValid():
-            self.treeViewProjects.setCurrentIndex(index)
-            self.buildContextMenu(index).popup(self.treeViewProjects.mapToGlobal(point))
-    
+            menu = self._indexes_context_menu(self.treeViewProjects.selectedIndexes())
+        else:
+            menu = self._not_index_context_menu()
+        menu.popup(self.treeViewProjects.mapToGlobal(point))
+        #if index.isValid():
+        #    self.treeViewProjects.setCurrentIndex(index)
+        #    self.buildContextMenu(index).popup(self.treeViewProjects.mapToGlobal(point))
+
     def on_treeViewProjects_doubleClicked(self, index):
         self.on_actionOpen_triggered()
 

@@ -797,6 +797,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def focusInEvent(self, event):
         super(CodeEditor, self).focusInEvent(event)
+        self._update_position()
         self.activated.emit()
 
     def focusOutEvent(self, event):

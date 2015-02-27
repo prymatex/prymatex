@@ -9,7 +9,7 @@ from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.models.trees import AbstractTreeModel
 from prymatex.models.trees import FlatTreeProxyModel
 from prymatex.models.configure import SortFilterConfigureProxyModel
-from prymatex.models.projects.nodes import FileSystemTreeNode, ProjectFolderTreeNode
+from prymatex.models.projects.nodes import FileSystemTreeNode, SourceFolderTreeNode
 
 
 __all__ = [ 'ProjectTreeModel', 'ProjectTreeProxyModel', 'FileSystemProxyModel', 'ProjectMenuProxyModel' ]
@@ -27,7 +27,7 @@ class ProjectTreeModel(AbstractTreeModel):
         if nodeParent is None:
             return AbstractTreeModel.treeNodeFactory(self, nodeName, nodeParent)
         elif nodeParent.isproject:
-            return ProjectFolderTreeNode(nodeName, nodeParent)
+            return SourceFolderTreeNode(nodeName, nodeParent)
         else:
             return FileSystemTreeNode(nodeName, nodeParent)
         
@@ -136,9 +136,10 @@ class ProjectTreeModel(AbstractTreeModel):
         return self.node(self.indexForPath)
 
     def projectForPath(self, path):
-        for project in self.rootNode.childNodes():
-            if self.fileManager.issubpath(project.path(), path):
-                return project
+        for project in self.projects():
+            for source_folder in project.folders:
+                if self.fileManager.issubpath(source_folder.path(), path):
+                    return project
         
     def filePath(self, index):
         node = self.node(index)
@@ -155,6 +156,9 @@ class ProjectTreeModel(AbstractTreeModel):
     
     def removeProject(self, project):
         self.removeNode(project)
+
+    def projects(self):
+        return self.rootNode.childNodes()
 
 #=========================================
 # Proxies

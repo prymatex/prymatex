@@ -11,13 +11,13 @@ from prymatex.models.plugins import PluginsTableModel
 class PluginsSettingsWidget(SettingsTreeNode, Ui_Plugins, QtWidgets.QWidget):
     NAMESPACE = "general"
     
-    def __init__(self, **kwargs):
-        super(PluginsSettingsWidget, self).__init__(nodeName = "plugins", **kwargs)
+    def __init__(self, component_class, **kwargs):
+        super(PluginsSettingsWidget, self).__init__(component_class, nodeName="plugins", **kwargs)
         self.setupUi(self)
-        self.setTitle("Plugins")
-        self.setIcon(self.resources().get_icon("settings-plugins"))
 
     def loadSettings(self):
         super(PluginsSettingsWidget, self).loadSettings()
+        self.setTitle("Plugins")
+        self.setIcon(self.application().resources().get_icon("settings-plugins"))
         self.pluginManager = PluginsTableModel(self.application().pluginManager)
         self.listViewPlugins.setModel(self.pluginManager)

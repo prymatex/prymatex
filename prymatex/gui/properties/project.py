@@ -21,7 +21,7 @@ class ProjectPropertiesWidget(PropertyTreeNode, Ui_Project, QtWidgets.QWidget):
         return fileSystemItem.isproject
     
     def setupComboLicences(self):
-        for licence in self.parent().resources().get_software_licenses():
+        for licence in self.application().resources().get_software_licenses():
             self.comboBoxLicence.addItem(licence)
     
     def setupComboKeywords(self):

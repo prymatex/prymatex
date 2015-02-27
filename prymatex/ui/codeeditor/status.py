@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/codeeditor/status.ui'
 #
-# Created: Tue Feb 24 11:50:13 2015
+# Created: Fri Feb 27 12:36:37 2015
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -343,6 +343,7 @@ class Ui_CodeEditorStatus(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.labelMessage.sizePolicy().hasHeightForWidth())
         self.labelMessage.setSizePolicy(sizePolicy)
+        self.labelMessage.setText("")
         self.labelMessage.setObjectName("labelMessage")
         self.horizontalLayout_2.addWidget(self.labelMessage)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
@@ -414,6 +415,5 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonFindInFilesFind.setText(_translate("CodeEditorStatus", "Find"))
         self.pushButtonFindInFilesReplace.setText(_translate("CodeEditorStatus", "Replace"))
         self.pushButtonFindInFilesWhere.setText(_translate("CodeEditorStatus", "..."))
-        self.labelMessage.setText(_translate("CodeEditorStatus", "Message"))
         self.labelContent.setText(_translate("CodeEditorStatus", "Content"))
 

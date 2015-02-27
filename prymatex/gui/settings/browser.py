@@ -10,11 +10,9 @@ from prymatex.models.settings import SettingsTreeNode
 from prymatex.gui.dockers.browser import BrowserDock
 
 class NetworkSettingsWidget(SettingsTreeNode, Ui_Browser, QtWidgets.QWidget):
-    def __init__(self, **kwargs):
-        super(NetworkSettingsWidget, self).__init__(nodeName = "network", **kwargs)
+    def __init__(self, component_class, **kwargs):
+        super(NetworkSettingsWidget, self).__init__(component_class, nodeName="network", **kwargs)
         self.setupUi(self)
-        self.setTitle("Network")
-        self.setIcon(self.resources().get_icon("settings-network"))
 
         self.checks = [(self.checkBoxDeveloperExtrasEnabled, BrowserDock.DeveloperExtrasEnabled),
             (self.checkBoxPluginsEnabled, BrowserDock.PluginsEnabled),
@@ -34,45 +32,47 @@ class NetworkSettingsWidget(SettingsTreeNode, Ui_Browser, QtWidgets.QWidget):
 
     def loadSettings(self):
         super(NetworkSettingsWidget, self).loadSettings()
+        self.setTitle("Network")
+        self.setIcon(self.application().resources().get_icon("settings-network"))
 
         # Flags
-        flags = int(self.settings.get('defaultWebSettings'))
+        flags = int(self.settings().get('default_web_settings'))
         for check, flag in self.checks:
             check.setChecked(bool(flags & flag))
 
-        self.lineEditHomePage.setText(self.settings.get('homePage'))
-        self.lineEditProxyAddress.setText(self.settings.get('proxyAddress'))
+        self.lineEditHomePage.setText(self.settings().get('home_page'))
+        self.lineEditProxyAddress.setText(self.settings().get('proxy_address'))
 
-        proxyType = self.settings.get('proxyType')
+        proxyType = self.settings().get('proxy_type')
         for radio in self.radios:
             radio[0].setChecked(proxyType == radio[1])
         self.lineEditProxyAddress.setEnabled(proxyType == BrowserDock.ManualProxy)
 
     def on_lineEditHomePage_textEdited(self, text):
-        self.settings.set("homePage", text)
+        self.settings().set("home_page", text)
 
     def on_lineEditProxyAddress_textEdited(self, text):
-        self.settings.set("proxyAddress", text)
+        self.settings().set("proxy_address", text)
 
     @QtCore.Slot(bool)
     def on_radioButtonNoProxy_clicked(self, checked):
-        self.settings.set('proxyType', BrowserDock.NoProxy)
+        self.settings().set('proxy_type', BrowserDock.NoProxy)
 
     @QtCore.Slot(bool)
     def on_radioButtonSystemProxy_clicked(self, checked):
         if checked:
-            self.settings.set('proxyType', BrowserDock.SystemProxy)
+            self.settings().set('proxy_type', BrowserDock.SystemProxy)
 
     @QtCore.Slot(bool)
     def on_radioButtonSystemProxy_clicked(self, checked):
         if checked:
-            self.settings.set('proxyType', BrowserDock.SystemProxy)
+            self.settings().set('proxy_type', BrowserDock.SystemProxy)
 
     @QtCore.Slot(bool)
     def on_radioButtonManualProxy_clicked(self, checked):
         self.lineEditProxyAddress.setEnabled(checked)
         if checked:
-            self.settings.set('proxyType', BrowserDock.ManualProxy)
+            self.settings().set('proxy_type', BrowserDock.ManualProxy)
 
     @QtCore.Slot(bool)
     def on_browserWebSettings_clicked(self, checked):
@@ -80,4 +80,5 @@ class NetworkSettingsWidget(SettingsTreeNode, Ui_Browser, QtWidgets.QWidget):
         for check, flag in self.checks:
             if check.isChecked():
                 flags |= flag
-        self.settings.set('defaultWebSettings', flags)
+        self.settings().set('default_web_settings', flags)
+

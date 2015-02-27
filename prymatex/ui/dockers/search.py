@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/search.ui'
 #
-# Created: Thu Jan 29 12:30:38 2015
+# Created: Fri Feb 27 10:43:32 2015
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_SearchDock(object):
     def setupUi(self, SearchDock):
         SearchDock.setObjectName("SearchDock")
-        SearchDock.resize(262, 220)
+        SearchDock.resize(262, 144)
         self.dockWidgetContents = QtWidgets.QWidget()
         self.dockWidgetContents.setObjectName("dockWidgetContents")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.dockWidgetContents)
