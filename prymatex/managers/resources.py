@@ -15,8 +15,8 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
         QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
         QtGui.QIcon.fromTheme = self.icon_from_theme
 
-        self.resources = []
-        self.providers = {}
+        self.prymatex_resources = []
+        self.prymatex_providers = {}
         
         self.base = Resource('base')
         # Shortcut Models
@@ -41,17 +41,17 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
         res.update(load_fonts(path))
         res.update(load_media(path))
         res.update(load_stylesheets(path))
-        self.resources.insert(0, res)
+        self.prymatex_resources.insert(0, res)
 
     def get_provider(self, sources):
-        if sources not in self.providers:
-            self.providers[sources] = ResourceProvider(
-                [ res for res in self.resources if res.name() in sources ] + [ self.base ]
+        if sources not in self.prymatex_providers:
+            self.prymatex_providers[sources] = ResourceProvider(
+                [ res for res in self.prymatex_resources if res.name() in sources ] + [ self.base ]
             )
-        return self.providers[sources]
+        return self.prymatex_providers[sources]
 
     def defaults(self):
-        return tuple([ res.name() for res in self.resources if res.default() ])
+        return tuple([ res.name() for res in self.prymatex_resources if res.default() ])
 
     def providerForClass(self, componentClass):
         sources = getattr(componentClass, "RESOURCES", self.defaults())
@@ -59,7 +59,7 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
 
     def icon_from_theme(self, index):
         # TODO: default provider
-        for res in self.resources:
+        for res in self.prymatex_resources:
             icon = res.get_icon(index)
             if not icon.isNull():
                 return icon

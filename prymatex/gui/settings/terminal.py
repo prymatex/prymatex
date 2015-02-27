@@ -51,25 +51,25 @@ class TerminalSettingsWidget(SettingsTreeNode, Ui_Terminal, QtWidgets.QWidget):
         font.setPointSize(self.spinBoxFontSize.value())
         if self.checkBoxAntialias.isChecked():
             font.setStyleStrategy(font.styleStrategy() | QtGui.QFont.PreferAntialias)
-        self.settings.set('defaultFont', font)
+        self.settings().set('defaultFont', font)
 
     def setSynchronizeEditorSetting(self, state):
-        self.settings.set('synchronizeEditor', state == QtCore.Qt.Checked)
+        self.settings().set('synchronizeEditor', state == QtCore.Qt.Checked)
         
     def setEditorThemeSetting(self, state):
         self.comboBoxScheme.setDisabled(state == QtCore.Qt.Checked)
-        self.settings.set('editorTheme', state == QtCore.Qt.Checked)
+        self.settings().set('editorTheme', state == QtCore.Qt.Checked)
 
     @QtCore.Slot(str)
     def on_comboBoxScheme_activated(self, name):
-        self.settings.set('defaultScheme', name)
+        self.settings().set('defaultScheme', name)
 
     @QtCore.Slot()
     def on_pushButtonChangeFont_pressed(self):
-        font = self.settings.get('font')
+        font = self.settings().get('font')
         font, ok = QtWidgets.QFontDialog.getFont(font, self, _("Select terminal font"))
         if ok:
-            self.settings.setValue('font', font)
+            self.settings().set('font', font)
             self.comboBoxFontName.setCurrentFont(font)
             self.spinBoxFontSize.set(font.pointSize())
     

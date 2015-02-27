@@ -15,9 +15,9 @@ class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtWidgets.QWidget):
         super(GeneralSettingsWidget, self).loadSettings()
         self.setTitle("General")
         self.setIcon(self.application().resources().get_icon("settings-general"))
-        currentStyleName = self.settings.get('qtStyle')
-        currentStyleSheetName = self.settings.get('qtStyleSheet')
-        currentIconTheme = self.settings.get('iconTheme')
+        currentStyleName = self.settings().get('qtStyle')
+        currentStyleSheetName = self.settings().get('qtStyleSheet')
+        currentIconTheme = self.settings().get('iconTheme')
         resources = self.application().resources()
         for index, styleName in enumerate(QtWidgets.QStyleFactory.keys()):
             self.comboBoxQtStyle.addItem(styleName, styleName)
@@ -36,26 +36,27 @@ class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtWidgets.QWidget):
 
         checks = ( self.checkBoxAskAboutExternalDeletions, self.checkBoxAskAboutExternalChanges )
         [ check.blockSignals(True) for check in checks ]
-        self.checkBoxAskAboutExternalDeletions.setChecked(self.settings.get('askAboutExternalDeletions'))
-        self.checkBoxAskAboutExternalChanges.setChecked(self.settings.get('askAboutExternalChanges'))
+        self.checkBoxAskAboutExternalDeletions.setChecked(self.settings().get('askAboutExternalDeletions'))
+        self.checkBoxAskAboutExternalChanges.setChecked(self.settings().get('askAboutExternalChanges'))
         [ check.blockSignals(False) for check in checks ]
 
     @QtCore.Slot(int)
     def on_checkBoxAskAboutExternalDeletions_stateChanged(self, state):
-        self.settings.set('askAboutExternalDeletions', state == QtCore.Qt.Checked)
+        self.settings().set('askAboutExternalDeletions', state == QtCore.Qt.Checked)
         
     @QtCore.Slot(int)
     def on_checkBoxAskAboutExternalChanges_stateChanged(self, state):
-        self.settings.set('askAboutExternalChanges', state == QtCore.Qt.Checked)
+        self.settings().set('askAboutExternalChanges', state == QtCore.Qt.Checked)
         
     @QtCore.Slot(str)
     def on_comboBoxQtStyle_activated(self, styleName):
-        self.settings.set('qtStyle', styleName)
+        self.settings().set('qtStyle', styleName)
 
     @QtCore.Slot(str)
     def on_comboBoxQtStyleSheet_activated(self, styleSheetName):
-        self.settings.set('qtStyleSheet', styleSheetName)
+        self.settings().set('qtStyleSheet', styleSheetName)
         
     @QtCore.Slot(str)
     def on_comboBoxIconTheme_activated(self, iconThemeName):
-        self.settings.set('iconTheme', iconThemeName)
+        self.settings().set('iconTheme', iconThemeName)
+

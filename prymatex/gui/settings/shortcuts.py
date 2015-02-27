@@ -34,7 +34,7 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
         super(ShortcutsSettingsWidget, self).loadSettings()
         self.setTitle("Shortcuts")
         self.setIcon(self.application().resources().get_icon("settings-shortcuts"))
-        self.shortcutsTreeModel = self.application().shortcutsTreeModel
+        self.shortcutsTreeModel = self.application().resourceManager.shortcutsTreeModel
         self.configTreeView()
 
     def currentShortcut(self):
@@ -63,7 +63,7 @@ class ShortcutsSettingsWidget(SettingsTreeNode, Ui_Shortcuts, QtWidgets.QWidget)
     
     def _set_shortcuts_to_settings(self):
         shortcuts = self.shortcutsTreeModel.dictionary()
-        self.settings.set('shortcuts', shortcuts)
+        self.settings().set('shortcuts', shortcuts)
         
     # ---------- AUTOCONNECT: Button Export
     def on_pushButtonExport_pressed(self):

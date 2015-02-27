@@ -32,14 +32,14 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
         self.comboBoxThemes.setModel(self.application().supportManager.themeProxyModel)
         self.tableViewStyles.setModel(self.application().supportManager.themeStyleProxyModel)
         
-        theme_uuid = self.settings.get('default_theme')
+        theme_uuid = self.settings().get('default_theme')
         if theme_uuid is not None:
             default_theme = self.application().supportManager.getBundleItem(theme_uuid)
             if default_theme is not None:
                 self.updateUi(default_theme)
         
         # Font
-        default_font = self.settings.get('default_font')
+        default_font = self.settings().get('default_font')
         if default_font is not None:
             font = QtGui.QFont(*default_font)
             self.fontComboBoxName.setCurrentFont(font)
@@ -57,7 +57,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
         font = self.fontComboBoxName.currentFont()
         if self.checkBoxAntialias.isChecked():
             font.setStyleStrategy(font.styleStrategy() | QtGui.QFont.PreferAntialias)
-        self.settings.set('default_font', 
+        self.settings().set('default_font', 
             ( self.fontComboBoxName.currentFont().family(), 
               self.spinBoxFontSize.value())
         )
@@ -68,7 +68,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
         modelIndex = self.comboBoxThemes.model().index(index)
         theme = self.comboBoxThemes.model().node(modelIndex)
         self.updateUi(theme)
-        self.settings.set('default_theme', theme.uuidAsText())
+        self.settings().set('default_theme', theme.uuidAsText())
         message = "<b>%s</b> theme set " % theme.name
         if theme.author is not None:
             message += "<i>(by %s)</i>" % theme.author

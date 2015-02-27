@@ -32,47 +32,47 @@ class NetworkSettingsWidget(SettingsTreeNode, Ui_Browser, QtWidgets.QWidget):
 
     def loadSettings(self):
         super(NetworkSettingsWidget, self).loadSettings()
-	self.setTitle("Network")
+        self.setTitle("Network")
         self.setIcon(self.application().resources().get_icon("settings-network"))
 
         # Flags
-        flags = int(self.settings.get('defaultWebSettings'))
+        flags = int(self.settings().get('defaultWebSettings'))
         for check, flag in self.checks:
             check.setChecked(bool(flags & flag))
 
-        self.lineEditHomePage.setText(self.settings.get('homePage'))
-        self.lineEditProxyAddress.setText(self.settings.get('proxyAddress'))
+        self.lineEditHomePage.setText(self.settings().get('homePage'))
+        self.lineEditProxyAddress.setText(self.settings().get('proxyAddress'))
 
-        proxyType = self.settings.get('proxyType')
+        proxyType = self.settings().get('proxyType')
         for radio in self.radios:
             radio[0].setChecked(proxyType == radio[1])
         self.lineEditProxyAddress.setEnabled(proxyType == BrowserDock.ManualProxy)
 
     def on_lineEditHomePage_textEdited(self, text):
-        self.settings.set("homePage", text)
+        self.settings().set("homePage", text)
 
     def on_lineEditProxyAddress_textEdited(self, text):
-        self.settings.set("proxyAddress", text)
+        self.settings().set("proxyAddress", text)
 
     @QtCore.Slot(bool)
     def on_radioButtonNoProxy_clicked(self, checked):
-        self.settings.set('proxyType', BrowserDock.NoProxy)
+        self.settings().set('proxyType', BrowserDock.NoProxy)
 
     @QtCore.Slot(bool)
     def on_radioButtonSystemProxy_clicked(self, checked):
         if checked:
-            self.settings.set('proxyType', BrowserDock.SystemProxy)
+            self.settings().set('proxyType', BrowserDock.SystemProxy)
 
     @QtCore.Slot(bool)
     def on_radioButtonSystemProxy_clicked(self, checked):
         if checked:
-            self.settings.set('proxyType', BrowserDock.SystemProxy)
+            self.settings().set('proxyType', BrowserDock.SystemProxy)
 
     @QtCore.Slot(bool)
     def on_radioButtonManualProxy_clicked(self, checked):
         self.lineEditProxyAddress.setEnabled(checked)
         if checked:
-            self.settings.set('proxyType', BrowserDock.ManualProxy)
+            self.settings().set('proxyType', BrowserDock.ManualProxy)
 
     @QtCore.Slot(bool)
     def on_browserWebSettings_clicked(self, checked):
@@ -80,4 +80,5 @@ class NetworkSettingsWidget(SettingsTreeNode, Ui_Browser, QtWidgets.QWidget):
         for check, flag in self.checks:
             if check.isChecked():
                 flags |= flag
-        self.settings.set('defaultWebSettings', flags)
+        self.settings().set('defaultWebSettings', flags)
+

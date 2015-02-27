@@ -57,7 +57,6 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
             setattr(componentClass, "RESOURCES", self.currentPluginDescriptor.resources.names())
         
         self.application().populateComponentClass(componentClass)
-        self.application().populateConfigurableClass(componentClass)
 
         componentClass._plugin = self.currentPluginDescriptor
         componentClass.plugin = classmethod(lambda cls: cls._plugin)
