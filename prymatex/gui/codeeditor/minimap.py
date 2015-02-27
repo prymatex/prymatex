@@ -9,12 +9,12 @@ from .sidebar import SideBarWidgetMixin
 
 class MiniMapAddon(SideBarWidgetMixin, QtWidgets.QPlainTextEdit):
     ALIGNMENT = QtCore.Qt.AlignRight
-    WIDTH = 100
+    WIDTH = 120
     MAX_OPACITY = 0.8
     MIN_OPACITY = 0.2
     
-    @ConfigurableItem(default = True)
-    def showMiniMap(self, value):
+    @ConfigurableItem(default=True)
+    def show_mini_map(self, value):
         self.setVisible(value)
     
     def __init__(self, **kwargs):
@@ -41,7 +41,7 @@ class MiniMapAddon(SideBarWidgetMixin, QtWidgets.QPlainTextEdit):
 
     def initialize(self, **kwargs):
         super(MiniMapAddon, self).initialize(**kwargs)
-        self.editor.highlightChanged.connect(self.on_editor_highlightChanged)
+        self.editor.syntaxHighlighter.changed.connect(self.on_syntaxHighlighter_changed)
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
         self.editor.updateRequest.connect(self.update_visible_area)
         
@@ -69,7 +69,7 @@ selection-background-color: %s; }""" % (
 
     def setFont(self, font):
         font = QtGui.QFont(font)
-        font.setPointSize(1)
+        font.setPointSize(1.8)
         super(MiniMapAddon, self).setFont(font)
         
     def _apply_aditional_formats(self, block, line_count):
@@ -85,7 +85,7 @@ selection-background-color: %s; }""" % (
 
         self.document().markContentsDirty(position, length)
 
-    def on_editor_highlightChanged(self):
+    def on_syntaxHighlighter_changed(self):
         block = self.editor.document().begin()
         line_count = self.editor.document().lineCount()
         self._apply_aditional_formats(block, line_count)
