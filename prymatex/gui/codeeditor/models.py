@@ -156,7 +156,7 @@ class FoldingListModel(QtCore.QAbstractListModel):
         if self.isFolded(start):
             self.unfold(start)
         if not self.isFoldingMarker(start):
-            self._add_folding_cursor(start, self.FOLDING_START)
+            self._add_folding_cursor(start, constants.FOLDING_START)
         self.folded.append((start, stop))
         block = startBlock = start.block()
         while block.isValid():
