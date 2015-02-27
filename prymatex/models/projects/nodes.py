@@ -67,10 +67,10 @@ class FileSystemTreeNode(TreeNodeBase):
     def mtime(self):
         return os.path.getmtime(self.paht())
 
-class ProjectFolderTreeNode(FileSystemTreeNode):
+class SourceFolderTreeNode(FileSystemTreeNode):
     def __init__(self, path, project):
         self._path = path
-        super(ProjectFolderTreeNode, self).__init__(os.path.basename(path), project)
+        super(SourceFolderTreeNode, self).__init__(os.path.basename(path), project)
     
     def path(self):
         return self._path

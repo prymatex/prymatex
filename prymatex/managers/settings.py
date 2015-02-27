@@ -26,10 +26,6 @@ class SettingsManager(PrymatexComponent, QtCore.QObject):
         self.prymatex_settings = PrymatexSettings('settings', settings or {})
         self.prymatex_settings.setTm(self.textmate_settings)
 
-        # Prymatex state
-        state = json.read_file(self.profile().PMX_STATE_PATH)
-        self.state = PrymatexSettings('state', state or {})
-
         # Settings Models
         self.settingsTreeModel = SettingsTreeModel(parent=self)
         self.sortFilterSettingsProxyModel = SortFilterSettingsProxyModel(parent=self)
@@ -42,14 +38,13 @@ class SettingsManager(PrymatexComponent, QtCore.QObject):
     # ------------------- Signals
     def on_application_aboutToQuit(self):
         # Save state
-        self.saveState(self.application())
         plist.writePlist(self.textmate_settings, self.profile().TM_PREFERENCES_PATH)
         # Save settings
         self.prymatex_settings.purge()
         json.write_file(self.prymatex_settings, self.profile().PMX_SETTINGS_PATH)
-        # Save state
-        self.state.purge()
-        json.write_file(self.state, self.profile().PMX_STATE_PATH)
+
+        state = self.application().componentState()
+        json.write_file(state, self.profile().PMX_STATE_PATH)
 
     # -------------------- Public API
     def loadSettings(self, message_handler):
@@ -103,14 +98,10 @@ class SettingsManager(PrymatexComponent, QtCore.QObject):
         # Unregister hooks
         for path, hook in settings.hooks().items():
             self.unregisterSettingCallback(path, hook.fset)
-        
-    def saveState(self, configurable):
-        self.state[configurable.objectName()] = configurable.componentState()
 
-    def restoreState(self, configurable):
-        componentState = self.state.get(configurable.objectName())
-        if componentState is not None:
-            configurable.setComponentState(componentState)
+    def restoreApplicationState(self):
+        state = json.read_file(self.profile().PMX_STATE_PATH)
+        self.application().setComponentState(state)
 
     def settingValue(self, settingPath):
         names = settingPath.split(".")

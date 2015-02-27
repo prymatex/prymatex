@@ -49,7 +49,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     askAboutExternalDeletions = ConfigurableItem(default=False)
     askAboutExternalChanges = ConfigurableItem(default=False)
     shortcuts = ConfigurableItem(default={})
-        
+
     RESTART_CODE = 1000
 
     def __init__(self, options, *args, **kwargs):
@@ -248,7 +248,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             self.settingsManager.loadSettings(self.showMessage)
 
             # Restore State
-            self.settingsManager.restoreState(self)
+            self.settingsManager.restoreApplicationState()
             window = self.currentWindow() or self.buildMainWindow(editor=True)
             
             # Change messages handler
@@ -335,7 +335,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         from prymatex.managers.server import ServerManager
         return self.createComponentInstance(ServerManager, parent=self)
 
-    # ---------- MainWindow State
+    # ---------- OVERRIDE: PrymatexComponent.componentState()
     def componentState(self):
         componentState = super(PrymatexApplication, self).componentState()
 
@@ -343,10 +343,16 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         for window in self.mainWindows():
             componentState["windows"].append(window.componentState())
         
+        componentState["project_manager"] = self.projectManager.componentState()
+
         return componentState
 
+    # ---------- OVERRIDE: PrymatexComponent.setComponentState()
     def setComponentState(self, componentState):
         super(PrymatexApplication, self).setComponentState(componentState)
+
+        if "project_manager" in componentState:
+            self.projectManager.setComponentState(componentState["project_manager"])
 
         # Restore open documents
         for windowState in componentState.get("windows", []):

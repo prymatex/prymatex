@@ -683,7 +683,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Message</string>
+         <string/>
         </property>
        </widget>
       </item>
