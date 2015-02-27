@@ -104,19 +104,17 @@ class TerminalDock(PrymatexDock, QtWidgets.QDockWidget):
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
     # ------------------ Settings
-    SETTINGS = 'TerminalDock'
-
-    @ConfigurableItem(default = "default")
-    def defaultScheme(self, name):
-        if not self.editorTheme:
+    @ConfigurableItem(default="default")
+    def default_scheme(self, name):
+        if not self.editor_theme:
             self.tabTerminals.setColorScheme(name)
     
-    @ConfigurableItem(default = QtGui.QFont("Monospace", 9))
-    def defaultFont(self, font):
-        self.tabTerminals.setFont(font)
+    @ConfigurableItem(default=("Monospace", 9))
+    def default_font(self, font):
+        self.tabTerminals.setFont(QtGui.QFont(*font))
 
-    @ConfigurableItem(default = False)
-    def editorTheme(self, value):
+    @ConfigurableItem(default=False)
+    def editor_theme(self, value):
         if value:
             # Trigger on register
             self.application().registerSettingCallback("code_editor.defaultTheme", self.on_defaultTheme_changed)
@@ -124,8 +122,8 @@ class TerminalDock(PrymatexDock, QtWidgets.QDockWidget):
             self.application().unregisterSettingCallback("code_editor.defaultTheme", self.on_defaultTheme_changed)
             self.tabTerminals.setColorScheme(self.settings().get("defaultScheme"))
 
-    synchronizeEditor = ConfigurableItem(default = False)
-    bufferSize = ConfigurableItem(default = 300)
+    synchronize_editor = ConfigurableItem(default=False)
+    buffer_size = ConfigurableItem(default=300)
         
     def __init__(self, **kwargs):
         super(TerminalDock, self).__init__(**kwargs)
@@ -172,7 +170,7 @@ class TerminalDock(PrymatexDock, QtWidgets.QDockWidget):
         
     # ---------------- Signals
     def on_window_editorChanged(self, editor):
-        if self.synchronizeEditor:
+        if self.synchronize_editor:
             if editor is not None and not editor.isNew():
                 dirname = self.application().fileManager.dirname(editor.filePath())
                 self.runCommand('cd "%s"' % dirname)

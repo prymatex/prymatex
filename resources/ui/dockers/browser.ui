@@ -125,36 +125,6 @@
     </item>
    </layout>
   </widget>
-  <action name="actionSyncEditor">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>:/icons/actions/system-switch-user.png</normaloff>:/icons/actions/system-switch-user.png</iconset>
-   </property>
-   <property name="text">
-    <string>Sync Editor</string>
-   </property>
-   <property name="toolTip">
-    <string>Sync browser with current editor content</string>
-   </property>
-  </action>
-  <action name="actionConnectEditor">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>:/icons/actions/network-connect.png</normaloff>:/icons/actions/network-connect.png</iconset>
-   </property>
-   <property name="text">
-    <string>Connect Editor</string>
-   </property>
-   <property name="toolTip">
-    <string>Connect browser with current editor</string>
-   </property>
-  </action>
  </widget>
  <resources/>
  <connections/>

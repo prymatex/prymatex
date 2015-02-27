@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/support/editor.ui'
 #
-# Created: Thu Jan 29 12:30:35 2015
+# Created: Fri Feb 27 10:43:32 2015
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -53,8 +53,6 @@ class Ui_BundleEditorDialog(object):
         spacerItem = QtWidgets.QSpacerItem(98, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.toolbarLayout.addItem(spacerItem)
         self.pushButtonFilter = QtWidgets.QPushButton(self.verticalLayoutWidget)
-        icon = QtGui.QIcon.fromTheme("filter")
-        self.pushButtonFilter.setIcon(icon)
         self.pushButtonFilter.setObjectName("pushButtonFilter")
         self.toolbarLayout.addWidget(self.pushButtonFilter)
         self.treeLayout.addLayout(self.toolbarLayout)
@@ -105,7 +103,7 @@ class Ui_BundleEditorDialog(object):
         self.horizontalLayout.addWidget(self.lineEditKeyEquivalentActivation)
         self.pushButtonCleanKeyEquivalent = QtWidgets.QPushButton(self.verticalLayoutWidget_2)
         self.pushButtonCleanKeyEquivalent.setText("")
-        icon = QtGui.QIcon.fromTheme("clear-shortcut")
+        icon = QtGui.QIcon.fromTheme("shortcut")
         self.pushButtonCleanKeyEquivalent.setIcon(icon)
         self.pushButtonCleanKeyEquivalent.setObjectName("pushButtonCleanKeyEquivalent")
         self.horizontalLayout.addWidget(self.pushButtonCleanKeyEquivalent)

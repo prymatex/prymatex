@@ -39,25 +39,23 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtWidgets.QDockWidget):
     ManualProxy = 1<<2
     
     # -------------- Settings
-    SETTINGS = "BrowserDock"
-    
-    updateInterval = ConfigurableItem(default = 3000)
-    homePage = ConfigurableItem(default = "https://github.com/prymatex")
+    update_interval = ConfigurableItem(default = 3000)
+    home_page = ConfigurableItem(default = "https://github.com/prymatex")
     
     @ConfigurableItem(default = NoProxy)
-    def proxyType(self, value):
+    def proxy_type(self, value):
         if value == self.NoProxy:
             setGlobalApplicationProxyAddress("")
         elif value == self.SystemProxy:
             setGlobalApplicationProxyAddress(os.environ.get('http_proxy'))
     
     @ConfigurableItem(default = os.environ.get('http_proxy', ''))
-    def proxyAddress(self, value):
-        if self.proxyType == self.ManualProxy:
+    def proxy_address(self, value):
+        if self.proxy_type == self.ManualProxy:
             setGlobalApplicationProxyAddress(value)
 
     @ConfigurableItem(default = DeveloperExtrasEnabled | PluginsEnabled | JavascriptEnabled | AutoLoadImages)
-    def defaultWebSettings(self, flags):
+    def default_web_settings(self, flags):
         QtWebKit.QWebSettings.globalSettings().setAttribute(
             QtWebKit.QWebSettings.DeveloperExtrasEnabled,
             flags & self.DeveloperExtrasEnabled)
@@ -123,7 +121,7 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtWidgets.QDockWidget):
         #Setup Context Menu
         optionsMenu = { 
             "text": "Browser Options",
-            "items": [ self.actionSyncEditor, self.actionConnectEditor ]
+            "items": [ ]
         }
 
         self.browserOptionsMenu, objects = create_menu(self, optionsMenu)
@@ -193,7 +191,7 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtWidgets.QDockWidget):
     
     def on_tabWebView_webViewNewRequested(self):
         webView = self.createWebView()
-        webView.setUrl(QtCore.QUrl(self.homePage))
+        webView.setUrl(QtCore.QUrl(self.home_page))
     
     def on_tabWebView_webViewCloseRequested(self, webView):
         if self.tabWebView.count() > 1:
@@ -201,7 +199,7 @@ class BrowserDock(PrymatexDock, Ui_BrowserDock, QtWidgets.QDockWidget):
             webView.loadProgress.disconnect(self.on_webView_loadProgress)
             self.tabWebView.removeWebView(webView)
         elif self.tabWebView.count() == 1:
-            webView.setUrl(QtCore.QUrl(self.homePage))
+            webView.setUrl(QtCore.QUrl(self.home_page))
 
     # ------------ Browser Signals handlers
     def on_manager_commandUrlRequested(self, url):

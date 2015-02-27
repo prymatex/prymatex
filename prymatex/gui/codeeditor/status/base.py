@@ -182,6 +182,7 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
         menu = {}
         menu["find"] = {
             'before': 'view',
+            'icon': None,
             'name': 'find',
             'text': 'F&ind',
             'items': [

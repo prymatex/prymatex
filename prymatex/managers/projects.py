@@ -65,6 +65,15 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         from prymatex.gui.settings.addons import AddonsSettingsWidgetFactory
         return [ ProjectSettingsWidget, AddonsSettingsWidgetFactory("projects") ]
 
+    def setupPropertiesWidgets(self):
+        from prymatex.gui.properties.project import ProjectPropertiesWidget
+        from prymatex.gui.properties.environment import EnvironmentPropertiesWidget
+        from prymatex.gui.properties.resource import ResoucePropertiesWidget
+        
+        for property_class in [ProjectPropertiesWidget, EnvironmentPropertiesWidget, ResoucePropertiesWidget]:
+            property_class.application = self.application
+            self.registerPropertyWidget(property_class())
+
     def convertToValidPath(self, name):
         #TODO: este y el del manager de bundles pasarlos a utils
         validPath = []
@@ -95,6 +104,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
 
     # -------------------- Load projects
     def loadProjects(self, messageHandler = None):
+        self.setupPropertiesWidgets()
         self.messageHandler = messageHandler
         for path in self.known_projects[:]:
             try:

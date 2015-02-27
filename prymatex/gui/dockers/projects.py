@@ -63,7 +63,6 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
         self.templateDialog = self.window().findChild(QtWidgets.QDialog, "TemplateDialog")
         self.bundleEditorDialog = self.window().findChild(QtWidgets.QDialog, "BundleEditorDialog")
         self.propertiesDialog = self.window().findChild(QtWidgets.QDialog, "PropertiesDialog")
-        self.setupPropertiesWidgets()
 
     @classmethod
     def contributeToSettings(cls):
@@ -116,15 +115,6 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
                 'TM_SELECTED_FILES': " ".join(["'%s'" % path for path in paths ])
             })
         return environment
-    
-    def setupPropertiesWidgets(self):
-        from prymatex.gui.properties.project import ProjectPropertiesWidget
-        from prymatex.gui.properties.environment import EnvironmentPropertiesWidget
-        from prymatex.gui.properties.resource import ResoucePropertiesWidget
-        
-        for propertyClass in [ProjectPropertiesWidget, EnvironmentPropertiesWidget, ResoucePropertiesWidget]:
-            self.application().populateComponentClass(propertyClass)
-            self.application().projectManager.registerPropertyWidget(propertyClass(parent = self.propertiesDialog))
 
     def setupTreeViewProjects(self):
         self.treeViewProjects.setModel(self.projectTreeProxyModel)
@@ -138,15 +128,34 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
             "items": [
                 {   "text": "Order",
                     "items": [
-                        (self.actionOrderByName, self.actionOrderBySize, self.actionOrderByDate, self.actionOrderByType),
-                        "-", self.actionOrderDescending, self.actionOrderFoldersFirst
+                        {
+                            'text': "By name",
+                            'triggered': self.on_actionOrderByName_triggered
+                        },
+                        {
+                            'text': "By size",
+                            'triggered': self.on_actionOrderBySize_triggered
+                        },
+                        {
+                            'text': "By date",
+                            'triggered': self.on_actionOrderByDate_triggered
+                        },
+                        {
+                            'text': "By type",
+                            'triggered': self.on_actionOrderByType_triggered
+                        }, "-", 
+                        {
+                            'text': "Descending",
+                            'triggered': self.on_actionOrderDescending_triggered
+                        },
+                        {
+                            'text': "Folders first",
+                            'triggered': self.on_actionOrderFoldersFirst_triggered
+                        }
                     ]
                 }
             ]
         }
-
-        self.actionOrderFoldersFirst.setChecked(True)
-        self.actionOrderByName.trigger()
         
         self.projectOptionsMenu, objects = create_menu(self, optionsMenu)
         self.toolButtonOptions.setMenu(self.projectOptionsMenu)
