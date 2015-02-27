@@ -40,9 +40,10 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
         # Font
         default_font = self.settings.get('default_font')
         if default_font is not None:
-            self.fontComboBoxName.setCurrentFont(QtGui.QFont(*default_font))
+            font = QtGui.QFont(*default_font)
+            self.fontComboBoxName.setCurrentFont(font)
             self.spinBoxFontSize.setValue(default_font[1])
-        #self.checkBoxAntialias.setChecked(test_font_strategy(font, QtGui.QFont.PreferAntialias))
+            self.checkBoxAntialias.setChecked(test_font_strategy(font, QtGui.QFont.PreferAntialias))
         
         # Connect font signals
         self.checkBoxAntialias.stateChanged.connect(self.setDefaultFontSetting)
@@ -54,8 +55,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
         # TODO Un dict ? en lugar de una tupla
         font = self.fontComboBoxName.currentFont()
         if self.checkBoxAntialias.isChecked():
-            pass
-            #font.setStyleStrategy(font.styleStrategy() | QtGui.QFont.PreferAntialias)
+            font.setStyleStrategy(font.styleStrategy() | QtGui.QFont.PreferAntialias)
         self.settings.set('default_font', 
             ( self.fontComboBoxName.currentFont().family(), 
               self.spinBoxFontSize.value())

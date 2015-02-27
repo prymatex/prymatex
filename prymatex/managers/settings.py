@@ -5,29 +5,66 @@ from prymatex.qt import QtCore
 from prymatex.core.components import PrymatexComponent 
 from prymatex.core.settings import (TextMateSettings, PrymatexSettings,
                                     ConfigurableItem, ConfigurableHook)
+                                    
 from prymatex.utils import text as textutils
 from prymatex.utils import json
 from prymatex.utils import plist
+
+from prymatex.models.shortcuts import ShortcutsTreeModel
+from prymatex.models.settings import SettingsTreeModel
+from prymatex.models.settings import SortFilterSettingsProxyModel
 
 class SettingsManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
         super(SettingsManager, self).__init__(**kwargs)
         
-        tm = {}
-        try:
-            tm = plist.readPlist(self.profile().TM_PREFERENCES_PATH)
-        except Exception as e:
-            print(("Exception raised while reading settings file: %s" % e))
-        self.tmsettings = TextMateSettings('tm', tm)
+        # Textmate Settings
+        tm = plist.readPlist(self.profile().TM_PREFERENCES_PATH)
+        self.tmsettings = TextMateSettings('tm', tm or {})
 
+        # Prymatex Settings
         settings = json.read_file(self.profile().PMX_SETTINGS_PATH)
         self.settings = PrymatexSettings('settings', settings or {})
         self.settings.setTm(self.tmsettings)
+
+        # Prymatex state
+        state = json.read_file(self.profile().PMX_STATE_PATH)
+        self.state = PrymatexSettings('state', state or {})
+
+        # Shortcut Models
+        self.shortcutsTreeModel = ShortcutsTreeModel(self)
+
+        # Settings Models
+        self.settingsTreeModel = SettingsTreeModel(parent=self)
+        self.sortFilterSettingsProxyModel = SortFilterSettingsProxyModel(parent=self)
+        self.sortFilterSettingsProxyModel.setSourceModel(self.settingsTreeModel)
+                
+        self.application().aboutToQuit.connect(self.on_application_aboutToQuit)
         # Reload settings
         #notifier.watch(self.PMX_SETTINGS_PATH, notifier.CHANGED, self.reload_settings)
 
-        state = json.read_file(self.profile().PMX_STATE_PATH)
-        self.state = PrymatexSettings('state', state or {})
+    # ------------------- Signals
+    def on_application_aboutToQuit(self):
+        # Save state
+        self.saveState(self.application())
+        plist.writePlist(self.tmsettings, self.profile().TM_PREFERENCES_PATH)
+        # Save settings
+        self.settings.purge()
+        json.write_file(self.settings, self.profile().PMX_SETTINGS_PATH)
+        # Save state
+        self.state.purge()
+        json.write_file(self.state, self.profile().PMX_STATE_PATH)
+
+    # -------------------- Manager load settings
+    def loadSettings(self, message_handler):
+        # Load settings
+        self.settingsTreeModel.loadSettings()
+        
+        # Load standard shortcuts
+        self.shortcutsTreeModel.loadStandardSequences(self.resources())
+        
+        # Restore state
+        self.restoreState(self.application())
 
     # ------------------------ Setting
     def reload_settings(self, path, changes):
@@ -99,11 +136,3 @@ class SettingsManager(PrymatexComponent, QtCore.QObject):
         
     def clear(self):
         self.settings.clear()
-
-    def sync(self):
-        #Save capture values from qt
-        plist.writePlist(self.tmsettings, self.profile().TM_PREFERENCES_PATH)
-        self.settings.purge()
-        json.write_file(self.settings, self.profile().PMX_SETTINGS_PATH)
-        self.state.purge()
-        json.write_file(self.state, self.profile().PMX_STATE_PATH)

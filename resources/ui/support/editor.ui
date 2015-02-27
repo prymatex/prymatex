@@ -89,11 +89,6 @@
            <property name="text">
             <string>Filter</string>
            </property>
-           <property name="icon">
-            <iconset theme="filter">
-             <normaloff/>
-            </iconset>
-           </property>
           </widget>
          </item>
         </layout>
@@ -181,9 +176,7 @@
               <string/>
              </property>
              <property name="icon">
-              <iconset theme="clear-shortcut">
-               <normaloff/>
-              </iconset>
+              <iconset theme="shortcut"/>
              </property>
             </widget>
            </item>

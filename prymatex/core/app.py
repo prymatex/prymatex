@@ -239,7 +239,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             splash.show()
             self.showMessage = splash.showMessage
         try:
-            # Build Managers WARN: Order is important
             self.storageManager = self.buildStorageManager()    # Persistence system Manager  # NOQA
             self.supportManager = self.buildSupportManager()    # Support Manager
             self.fileManager = self.buildFileManager()          # File Manager
@@ -253,7 +252,10 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             # Load Projects
             self.projectManager.loadProjects(self.showMessage)
 
-            # Load settings
+            # Load Projects
+            self.settingsManager.loadSettings(self.showMessage)
+
+            # Load Settings
             self.settingsTreeModel.loadSettings()
             
             # Load standard shortcuts
@@ -369,8 +371,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         self.logger().debug("Close")
 
         self.storageManager.close()
-        self.settingsManager.saveState(self)
-        self.settingsManager.sync()
         if os.path.exists(self.fileLock):
             os.unlink(self.fileLock)
 
