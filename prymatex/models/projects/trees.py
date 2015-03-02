@@ -9,7 +9,7 @@ from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.models.trees import AbstractTreeModel
 from prymatex.models.trees import FlatTreeProxyModel
 from prymatex.models.configure import SortFilterConfigureProxyModel
-from prymatex.models.projects.nodes import FileSystemTreeNode, SourceFolderTreeNode
+from prymatex.models.projects.nodes import (ProjectTreeNode, FileSystemTreeNode, SourceFolderTreeNode)
 
 
 __all__ = [ 'ProjectTreeModel', 'ProjectTreeProxyModel', 'FileSystemProxyModel', 'ProjectMenuProxyModel' ]
@@ -26,7 +26,7 @@ class ProjectTreeModel(AbstractTreeModel):
     def treeNodeFactory(self, nodeName, nodeParent):
         if nodeParent is None:
             return AbstractTreeModel.treeNodeFactory(self, nodeName, nodeParent)
-        elif nodeParent.isproject:
+        elif isinstance(nodeParent, ProjectTreeNode):
             return SourceFolderTreeNode(nodeName, nodeParent)
         else:
             return FileSystemTreeNode(nodeName, nodeParent)
@@ -34,10 +34,10 @@ class ProjectTreeModel(AbstractTreeModel):
     def rowCount(self, parent):
         parentNode = self.node(parent)
         if not parentNode.isRootNode() and not parentNode._populated:
-            if parentNode.isdir:
-                self._load_directory(parentNode, parent)
-            elif parentNode.isproject:
+            if isinstance(parentNode, ProjectTreeNode):
                 self._load_project(parentNode, parent)
+            elif parentNode.isdir:
+                self._load_directory(parentNode, parent)
         return parentNode.childCount()
 
     def data(self, index, role):
@@ -185,7 +185,7 @@ class ProjectTreeProxyModel(QtCore.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = self.sourceModel().node(sIndex)
-        if node.isproject: return True
+        if isinstance(node, ProjectTreeNode): return True
         #TODO: Esto depende de alguna configuracion tambien
         if node.ishidden: return False
         if node.isdir: return True
@@ -207,7 +207,7 @@ class ProjectTreeProxyModel(QtCore.QSortFilterProxyModel):
             return not self.descending
         elif self.folderFirst and not leftNode.isdir and rightNode.isdir:
             return self.descending
-        elif self.orderBy == "name" and rightNode.isproject and leftNode.isproject:
+        elif self.orderBy == "name" and isinstance(rightNode, ProjectTreeNode) and isinstance(leftNode, ProjectTreeNode):
             return leftNode.name < rightNode.name
         else:
             return self.fileManager.compareFiles(leftNode.path(), rightNode.path(), self.orderBy) < 0

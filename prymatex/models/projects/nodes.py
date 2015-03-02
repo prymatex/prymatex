@@ -22,13 +22,11 @@ __all__ = [ 'FileSystemTreeNode', 'ProjectTreeNode' ]
 # Nodes
 #=========================================
 class FileSystemTreeNode(TreeNodeBase):
-    FileIconProvider = QtWidgets.QFileIconProvider()
     def __init__(self, name, parent=None):
         TreeNodeBase.__init__(self, name, parent)
         self.isdir = os.path.isdir(self.path())
         self.isfile = os.path.isfile(self.path())
         self.ishidden = name.startswith('.')
-        self.isproject = isinstance(self, ProjectTreeNode)
 
     def project(self):
         if not hasattr(self, "_project"):
@@ -54,12 +52,8 @@ class FileSystemTreeNode(TreeNodeBase):
 	#QFileIconProvider::File	6
         return icons.get_path_icon(self.path())
     
-    # TODO: Cambiar la signatura type
-    def type(self):
-        if self.isproject:
-            return "Project"
-        else:
-            return icons.get_type(self.path())
+    def nodeType(self):
+        return icons.get_type(self.path()).lower()
   
     def size(self):
         return os.path.getsize(self.path())
@@ -75,7 +69,7 @@ class SourceFolderTreeNode(FileSystemTreeNode):
     def path(self):
         return self._path
 
-class ProjectTreeNode(FileSystemTreeNode):
+class ProjectTreeNode(TreeNodeBase):
     KEYS = [    'name', 'description', 'licence', 'keywords', 'folders', 
                 'currentDocument', 'metaData', 'openDocuments',
                 'shellVariables', 'bundleMenu' ]
@@ -83,10 +77,16 @@ class ProjectTreeNode(FileSystemTreeNode):
     def __init__(self, path, dataHash):
         self._project_path = path
         super(ProjectTreeNode, self).__init__(dataHash.get("name"))
+        self.isdir = os.path.isdir(self.path())
+        self.isfile = os.path.isfile(self.path())
+        self.ishidden = False
         self.manager = None
         self.namespaceName = ""
         self.load(dataHash)
     
+    def nodeType(self):
+        return "project"
+            
     # ----------- Load, update and dump
     def load(self, hash):
         for key in ProjectTreeNode.KEYS:

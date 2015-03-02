@@ -18,7 +18,7 @@ from prymatex.core.settings import ConfigurableItem, ConfigurableHook
 
 from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
 
-from prymatex.models.projects import ProjectTreeNode
+from prymatex.models.projects import ProjectTreeNode, FileSystemTreeNode
 from prymatex.models.projects.lists import SelectableProjectFileProxyModel
 
 class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDockWidget):
@@ -213,37 +213,41 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
         contextMenu.triggered.connect(self.on_contextMenu_triggered)
         return contextMenu
 
-    # -------------- Build none context menu
-    def _not_index_context_menu(self):    
+    # -------------- Build context menu
+    def _not_index_context_menu(self):
+        action_new_project = self.window().findChild(
+            QtWidgets.QAction, "actionNewProject"
+        )
+        action_open_project = self.window().findChild(
+            QtWidgets.QAction, "actionOpenProject"
+        )
         contextMenu = { 
             'text': "Not index context",
-            'items': [
-                {   
-                    'text': "New Project"
-                },
-                {   
-                    'text': "Open Project"
-                }
-            ]
+            'items': [ action_new_project, action_open_project ]
         }
         contextMenu, objects = create_menu(self, contextMenu)
         return contextMenu
         
-    def _index_context_menu(self, index):    
+    def _index_context_menu(self, index):
+        node = self.projectTreeProxyModel.node(index)
+        items = []
+        if isinstance(node, FileSystemTreeNode):
+            if node.isdir:
+                items.extend(self._directory_menu_items([ index ]))
+            items.extend(["-"] + self._path_menu_items([ index ]))
+        if node.childCount() > 1:
+            items.extend(["-"] + self._has_children_menu_items(node, [ index ]))
+        items.extend(["-"] + self._bundles_menu_items(node, [ index ]))
+        items.extend([ "-", {
+            'text': "Properties"
+        }])
         contextMenu = { 
             'text': "Index context",
-            'items': [
-                {   
-                    'text': "Open"
-                },
-                {   
-                    'text': "Close"
-                }
-            ]
+            'items': items
         }
         contextMenu, objects = create_menu(self, contextMenu)
         return contextMenu
-        
+
     def _indexes_context_menu(self, indexes):
         if len(indexes) == 1:
             return self._index_context_menu(indexes[0])
@@ -288,41 +292,60 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
             env.update(node.project().environmentVariables())
             self.window().insertBundleItem(action.bundleTreeNode, environment = env)
     
-    def extendFileSystemItemMenu(self, menu, node):
-        extend_menu_section(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete, self.actionRename])
-        #extend_menu_section(menu, ["--interact", self.actionSetInTerminal ], section = -1)
-        # TODO Quiza sea mejor ponerle un type y controlar contra una cadena
-        if isinstance(node, ProjectTreeNode):
-            extend_menu_section(menu,
-                [self.actionPaste, self.actionRemove], 
-                section="handlepaths", position=0)
-            #extend_menu_section(menu, [self.actionBashInit], section = "interact")
-            extend_menu_section(menu, 
-                [self.actionProjectBundles, self.actionSelectRelatedBundles], 
-                section="bundles")
-        else:
-            extend_menu_section(menu, 
-                [self.actionCut, self.actionCopy, self.actionPaste],
-                section = "handlepaths", position = 0)
-        if node.isfile:
-            extend_menu_section(menu,
-                self.actionOpen, section="open", position = 0)
-        if node.isdir or isinstance(node, ProjectTreeNode):
-            extend_menu_section(menu, [self.actionGoDown], section="refresh")
-            
-        #El final
-        extend_menu_section(menu, 
-            ["--properties", self.actionProperties], section=-1)
+    def _path_menu_items(self, indexes):
+        return [
+            {
+                'text': "Cut" 
+            },
+            {
+                'text': "Copy" 
+            },
+            {
+                'text': "Paste" 
+            },
+            {
+                'text': "Delete" 
+            },
+            {
+                'text': "Rename" 
+            },
+        ]
 
-    def extendAddonsItemMenu(self, menu, node):
+    def _directory_menu_items(self, indexes):
+        return [
+            {
+                 'text': "New Folder"   
+            },
+            {
+                 'text': "New File"
+            },
+            {
+                 'text': "New From Template"
+            }, "-",
+            {
+                 'text': "Open System Editor"   
+            }
+        ]
+    
+    def _has_children_menu_items(self, node, indexes):
+        return [
+            {
+                 'text': "Go Down"   
+            },
+            {
+                 'text': "Refresh"
+            }
+        ]
+
+    def _addons_menu_item(self, node, indexes):
         #Menu de los addons
-        addonMenues = [ "-" ]
+        addon_menues = [ "-" ]
         for component in self.components():
-            addonMenues.extend(component.contributeToContextMenu(node))
-        if len(addonMenues) > 1:
-            extend_menu_section(menu, addonMenues, section='properties')
+            addon_menues.extend(component.contributeToContextMenu(node))
+        if len(addon_menues) > 1:
+            return addon_menues
         
-    def extendProjectBundleItemMenu(self, menu, node):
+    def _bundles_menu_items(self, node, indexes):
         #Menu de los bundles relacionados al proyecto
         #Try get all bundles for project bundle definition
         bundles = [self.application().supportManager.getManagedObject(uuid) for uuid in node.project().bundleMenu or []]
@@ -331,8 +354,7 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
         #Sort by name
         bundles = sorted(bundles, key=lambda bundle: bundle.name)
         if bundles:
-            bundleMenues = [self.application().supportManager.menuForBundle(bundle) for bundle in bundles]
-            extend_menu_section(menu, bundleMenues, section="bundles", position=0)
+            return [self.application().supportManager.menuForBundle(bundle) for bundle in bundles]
 
     # ---------- SIGNAL: treeViewProjects.customContextMenuRequested
     QtCore.Slot(QtCore.QPoint)
@@ -344,11 +366,9 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
         if index.isValid():
             menu = self._indexes_context_menu(self.treeViewProjects.selectedIndexes())
         else:
+            self.treeViewProjects.clearSelection()
             menu = self._not_index_context_menu()
         menu.popup(self.treeViewProjects.mapToGlobal(point))
-        #if index.isValid():
-        #    self.treeViewProjects.setCurrentIndex(index)
-        #    self.buildContextMenu(index).popup(self.treeViewProjects.mapToGlobal(point))
 
     def on_treeViewProjects_doubleClicked(self, index):
         self.on_actionOpen_triggered()
@@ -559,10 +579,10 @@ class ProjectsDock(PrymatexDock, FileSystemTasks, Ui_ProjectsDock, QtWidgets.QDo
     def on_pushButtonCustomFilters_pressed(self):
         filters, accepted = QtWidgets.QInputDialog.getText(self, _("Custom Filter"), 
                                 _("Enter the filters (separated by comma)\nOnly * and ? may be used for custom matching"), 
-                                text = self.customFilters)
+                                text = self.custom_filters)
         if accepted:
             #Save and set filters
-            self._settings.setValue('customFilters', filters)
+            self._settings.setValue('custom_filters', filters)
             self.projectTreeProxyModel.setFilterRegExp(filters)
             
     #================================================
