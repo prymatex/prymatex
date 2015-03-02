@@ -23,22 +23,22 @@ class ProjectTreeModel(AbstractTreeModel):
         self.projectManager = projectManager
         self.fileManager = projectManager.fileManager
 
-    def treeNodeFactory(self, nodeName, nodeParent):
-        if nodeParent is None:
-            return AbstractTreeModel.treeNodeFactory(self, nodeName, nodeParent)
-        elif isinstance(nodeParent, ProjectTreeNode):
-            return SourceFolderTreeNode(nodeName, nodeParent)
+    def treeNodeFactory(self, name, parent):
+        if parent is None:
+            return AbstractTreeModel.treeNodeFactory(self, name, parent)
+        elif parent.isProject():
+            return SourceFolderTreeNode(name, parent)
         else:
-            return FileSystemTreeNode(nodeName, nodeParent)
+            return FileSystemTreeNode(name, parent)
         
     def rowCount(self, parent):
-        parentNode = self.node(parent)
-        if not parentNode.isRootNode() and not parentNode._populated:
-            if isinstance(parentNode, ProjectTreeNode):
-                self._load_project(parentNode, parent)
-            elif parentNode.isdir:
-                self._load_directory(parentNode, parent)
-        return parentNode.childCount()
+        node = self.node(parent)
+        if not node.isRootNode() and not node._populated:
+            if node.isProject():
+                self._load_project(node, parent)
+            elif node.isDirectory():
+                self._load_directory(node, parent)
+        return node.childCount()
 
     def data(self, index, role):
         if not index.isValid():
@@ -62,66 +62,64 @@ class ProjectTreeModel(AbstractTreeModel):
                 break
         return currentIndex
 
-    #========================================================================
-    # Custom methods
-    #========================================================================
-    def _load_directory(self, parentNode, parentIndex, notify=False):
-        names = self.fileManager.listDirectory(parentNode.path())
+    # -------------- Custom load methods
+    def _load_directory(self, node, index, notify=False):
+        names = self.fileManager.listDirectory(node.path())
         if notify: 
-            self.beginInsertRows(parentIndex, 0, len(names) - 1)
+            self.beginInsertRows(index, 0, len(names) - 1)
         for name in names:
-            node = self.treeNodeFactory(name, parentNode)
-            parentNode.appendChild(node)
+            child_node = self.treeNodeFactory(name, node)
+            node.appendChild(child_node)
         if notify: 
             self.endInsertRows()
-        for child in parentNode.childNodes():
+        for child in node.childNodes():
             child._populated = False
-        parentNode._populated = True
+        node._populated = True
 	
-    def _load_project(self, parentNode, parentIndex, notify=False):
+    def _load_project(self, node, index, notify=False):
         if notify: 
-            self.beginInsertRows(parentIndex, 0, len(names) - 1)
-        for folder in parentNode.folders:
-            node = self.treeNodeFactory(folder, parentNode)
-            parentNode.appendChild(node)
+            self.beginInsertRows(index, 0, len(names) - 1)
+        for folder in node.source_folders:
+            child_node = self.treeNodeFactory(folder, node)
+            node.appendChild(child_node)
         if notify: 
             self.endInsertRows()
-        for child in parentNode.childNodes():
+        for child in node.childNodes():
             child._populated = False
-        parentNode._populated = True
+        node._populated = True
 
-    def _update_directory(self, parentNode, parentIndex, notify = False):
-        names = self.fileManager.listDirectory(parentNode.path())
-        addNames = [name for name in names if parentNode.findChildByName(name) is None]
-        removeNodes = [node for node in parentNode.childNodes() if node.nodeName() not in names]
+    def _update_directory(self, parent_node, parent_index, notify=False):
+        names = self.fileManager.listDirectory(parent_node.path())
+        addNames = [name for name in names if parent_node.findChildByName(name) is None]
+        removeNodes = [node for node in parent_node.childNodes() if node.nodeName() not in names]
                 
         #Quitamos elementos eliminados
         for node in removeNodes:
             if notify:
-                self.beginRemoveRows(parentIndex, node.row(), node.row())
-            parentNode.removeChild(node)
+                self.beginRemoveRows(parent_index, node.row(), node.row())
+            parent_node.removeChild(node)
             if notify:
                 self.endRemoveRows()
 
         #Agregamos elementos nuevos
         if notify: 
-            self.beginInsertRows(parentIndex, parentNode.childCount(), parentNode.childCount() + len(addNames) - 1)
+            self.beginInsertRows(parent_index, parent_node.childCount(), parent_node.childCount() + len(addNames) - 1)
         for name in addNames:
-            node = self.treeNodeFactory(name, parentNode)
+            node = self.treeNodeFactory(name, parent_node)
             node._populated = False
-            parentNode.appendChild(node)
+            parent_node.appendChild(node)
         if notify: 
             self.endInsertRows()
 
-    def _collect_expanded_subdirs(self, parentNode):
-        return [node for node in parentNode.childNodes() if node.isdir and node._populated]
+    def _collect_expanded_subdirs(self, parent_node):
+        return [node for node in parent_node.childNodes() if node.isDirectory() and node._populated]
 
     def refresh(self, updateIndex):
         updateNode = self.node(updateIndex)
         while not updateNode.isRootNode() and not self.fileManager.exists(updateNode.path()):
             updateIndex = updateIndex.parent()
             updateNode = self.node(updateIndex)
-        if not updateNode.isRootNode() and updateNode.isdir:
+        if not updateNode.isRootNode() and updateNode.isDirectory():
             updateNodes = [ updateNode ]
             while updateNodes:
                 node = updateNodes.pop(0)
@@ -146,9 +144,9 @@ class ProjectTreeModel(AbstractTreeModel):
         if not node.isRootNode():
             return node.path()
     
-    def isDir(self, index):
+    def isDirectory(self, index):
         node = self.node(index)
-        return node.isdir if not node.isRootNode() else False
+        return node.isDirectory() if not node.isRootNode() else False
         
     def appendProject(self, project):
         project._populated = False
@@ -187,8 +185,8 @@ class ProjectTreeProxyModel(QtCore.QSortFilterProxyModel):
         node = self.sourceModel().node(sIndex)
         if isinstance(node, ProjectTreeNode): return True
         #TODO: Esto depende de alguna configuracion tambien
-        if node.ishidden: return False
-        if node.isdir: return True
+        if node.isHidden(): return False
+        if node.isDirectory(): return True
         
         regexp = self.filterRegExp()        
         if not regexp.isEmpty():
@@ -203,9 +201,9 @@ class ProjectTreeProxyModel(QtCore.QSortFilterProxyModel):
     def lessThan(self, left, right):
         leftNode = self.sourceModel().node(left)
         rightNode = self.sourceModel().node(right)
-        if self.folderFirst and leftNode.isdir and not rightNode.isdir:
+        if self.folderFirst and leftNode.isDirectory() and not rightNode.isDirectory():
             return not self.descending
-        elif self.folderFirst and not leftNode.isdir and rightNode.isdir:
+        elif self.folderFirst and not leftNode.isDirectory() and rightNode.isDirectory():
             return self.descending
         elif self.orderBy == "name" and isinstance(rightNode, ProjectTreeNode) and isinstance(leftNode, ProjectTreeNode):
             return leftNode.name < rightNode.name
@@ -240,16 +238,15 @@ class ProjectTreeProxyModel(QtCore.QSortFilterProxyModel):
         self.descending = descending
         QtCore.QSortFilterProxyModel.sort(self, 0, order)
         
-    def isDir(self, index):
-        sIndex = self.mapToSource(index)
-        return self.sourceModel().isDir(sIndex)
+    def isDirectory(self, index):
+        return self.sourceModel().isDirectory(self.mapToSource(index))
 
     #=======================================================
     # Drag and Drop support
     #=======================================================
     def flags(self, index):
         defaultFlags = QtCore.QSortFilterProxyModel.flags(self, index)
-        if not self.isDir(index):
+        if not self.isDirectory(index):
             return defaultFlags | QtCore.Qt.ItemIsDragEnabled
         return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled 
 
@@ -306,7 +303,7 @@ class FileSystemProxyModel(FlatTreeProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = self.sourceModel().node(sIndex)
-        return node.isfile and not node.ishidden
+        return node.isFile() and not node.isHidden()
         
     def comparableValue(self, index):
         node = self.sourceModel().node(index)

@@ -146,7 +146,10 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         if not overwrite and os.path.exists(file_path):
             raise exceptions.ProjectExistsException()
 
-        project = ProjectTreeNode(file_path, { "name": name, "folders": folders })
+        project = ProjectTreeNode(file_path, { 
+            "name": name, 
+            "source_folders": folders 
+        })
         project.save()
 
         self.addProject(project)

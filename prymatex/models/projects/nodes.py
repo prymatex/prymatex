@@ -16,18 +16,31 @@ from prymatex.core import exceptions
 from prymatex.utils import json
 import shutil
 
-__all__ = [ 'FileSystemTreeNode', 'ProjectTreeNode' ]
+__all__ = [ 'FileSystemTreeNode', 'SourceFolderTreeNode', 'ProjectTreeNode' ]
 
-#=========================================
-# Nodes
-#=========================================
-class FileSystemTreeNode(TreeNodeBase):
+class ProjectItemTreeNodeBase(TreeNodeBase):
     def __init__(self, name, parent=None):
         TreeNodeBase.__init__(self, name, parent)
-        self.isdir = os.path.isdir(self.path())
-        self.isfile = os.path.isfile(self.path())
-        self.ishidden = name.startswith('.')
+    
+    def path(self):
+        raise NotImplemented
 
+    isDirectory = lambda self: os.path.isdir(self.path())
+    isFile = lambda self: os.path.isdir(self.path())
+    isHidden = lambda self: self.nodeName().startswith('.')
+    isProject = lambda self: isinstance(self, ProjectTreeNode)
+    
+    def project(self):
+        if not hasattr(self, "_project"):
+            self._project = self
+            while not isinstance(self._project, ProjectTreeNode):
+                self._project = self._project.nodeParent()
+        return self._project
+
+    def itemType(self):
+        return ""
+        
+class FileSystemTreeNode(ProjectItemTreeNodeBase):
     def project(self):
         if not hasattr(self, "_project"):
             self._project = self
@@ -38,22 +51,11 @@ class FileSystemTreeNode(TreeNodeBase):
     def path(self):
         return os.path.join(self.nodeParent().path(), self.nodeName())
     
-    def relpath(self):
-        return os.path.join(self.nodeParent().relpath(), self.nodeName())
-    
     def icon(self):
-        # TODO:
-	#QFileIconProvider::Computer	0
-	#QFileIconProvider::Desktop	1
-	#QFileIconProvider::Trashcan	2
-	#QFileIconProvider::Network	3
-	#QFileIconProvider::Drive	4
-	#QFileIconProvider::Folder	5
-	#QFileIconProvider::File	6
         return icons.get_path_icon(self.path())
     
-    def nodeType(self):
-        return icons.get_type(self.path()).lower()
+    def itemType(self):
+        return icons.get_type(self.path())
   
     def size(self):
         return os.path.getsize(self.path())
@@ -61,31 +63,39 @@ class FileSystemTreeNode(TreeNodeBase):
     def mtime(self):
         return os.path.getmtime(self.paht())
 
-class SourceFolderTreeNode(FileSystemTreeNode):
+class SourceFolderTreeNode(ProjectItemTreeNodeBase):
     def __init__(self, path, project):
-        self._path = path
         super(SourceFolderTreeNode, self).__init__(os.path.basename(path), project)
+        self._path = path
     
     def path(self):
         return self._path
+        
+    def icon(self):
+        return icons.get_path_icon(self.path())
 
-class ProjectTreeNode(TreeNodeBase):
-    KEYS = [    'name', 'description', 'licence', 'keywords', 'folders', 
-                'currentDocument', 'metaData', 'openDocuments',
-                'shellVariables', 'bundleMenu' ]
+    def itemType(self):
+        return "Source Folder"
+    
+    def size(self):
+        return os.path.getsize(self.path())
+
+    def mtime(self):
+        return os.path.getmtime(self.paht())
+
+class ProjectTreeNode(ProjectItemTreeNodeBase):
+    KEYS = [    'name', 'description', 'licence', 'keywords', 'source_folders', 
+                'shell_variables', 'bundles' ]
     
     def __init__(self, path, dataHash):
-        self._project_path = path
         super(ProjectTreeNode, self).__init__(dataHash.get("name"))
-        self.isdir = os.path.isdir(self.path())
-        self.isfile = os.path.isfile(self.path())
-        self.ishidden = False
+        self._project_path = path
         self.manager = None
         self.namespaceName = ""
         self.load(dataHash)
     
     def nodeType(self):
-        return "project"
+        return "Project"
             
     # ----------- Load, update and dump
     def load(self, hash):
@@ -133,8 +143,8 @@ class ProjectTreeNode(TreeNodeBase):
     
     def environmentVariables(self):
         environment = self.manager.environmentVariables()
-        if isinstance(self.shellVariables, list):
-            for var in self.shellVariables:
+        if isinstance(self.shell_variables, list):
+            for var in self.shell_variables:
                 if var['enabled']:
                     environment[var['variable']] = var['value']
         environment.update(self.variables)
@@ -159,27 +169,23 @@ class ProjectTreeNode(TreeNodeBase):
     
     def path(self):
         return self._project_path
-    
-    def relpath(self):
-        return os.path.basename(self._project_path)
         
     def icon(self):
-        if self.manager.isOpen(self):
-            return self.manager.resources().get_icon("project")
+        return self.manager.resources().get_icon("project")
 
     # --------------- Bundle Menu
     def addBundleMenu(self, bundle):
-        if not isinstance(self.bundleMenu, list):
-            self.bundleMenu = []
-        self.bundleMenu.append(bundle.uuidAsText())
+        if not isinstance(self.bundles, list):
+            self.bundles = []
+        self.bundles.append(bundle.uuidAsText())
         
     def removeBundleMenu(self, bundle):
         uuid = bundle.uuidAsText()
-        if uuid in self.bundleMenu:
-            self.bundleMenu.remove(uuid)
-        if not self.bundleMenu:
-            self.bundleMenu = None
+        if uuid in self.bundles:
+            self.bundles.remove(uuid)
+        if not self.bundles:
+            self.bundles = None
             
     def hasBundleMenu(self, bundle):
-        if self.bundleMenu is None: return False
-        return bundle.uuidAsText() in self.bundleMenu
+        if self.bundles is None: return False
+        return bundle.uuidAsText() in self.bundles
