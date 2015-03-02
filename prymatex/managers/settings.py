@@ -101,7 +101,7 @@ class SettingsManager(PrymatexComponent, QtCore.QObject):
 
     def restoreApplicationState(self):
         state = json.read_file(self.profile().PMX_STATE_PATH)
-        self.application().setComponentState(state)
+        self.application().setComponentState(state or {})
 
     def settingValue(self, settingPath):
         names = settingPath.split(".")

@@ -231,7 +231,7 @@ class ProjectTreeProxyModel(QtCore.QSortFilterProxyModel):
         sIndex = self.mapToSource(index)
         return self.sourceModel().filePath(sIndex)
     
-    def sortBy(self, orderBy, folderFirst = True, descending = False):
+    def sortBy(self, orderBy, folderFirst=True, descending=False):
         order = QtCore.Qt.AscendingOrder if not descending else QtCore.Qt.DescendingOrder
         self.orderBy = orderBy
         self.folderFirst = folderFirst

@@ -7,34 +7,36 @@ from prymatex.qt.helpers import create_menu
 class ProjectsDockActionsMixin(object):
     def setupMenues(self):
         #Setup Context Menu
-        menu_options = { 
+        self._current_order_by = "name"
+        def order_by(attr):
+            def _order_by(checked):
+                self._current_order_by = attr
+                self.projectTreeProxyModel.sortBy(
+                    attr, 
+                    self.actionFoldersFirst.isChecked(),
+                    self.actionDescending.isChecked()
+                )
+            return _order_by
+        menu_options = {
             "text": "Project Options",
             "items": [
                 {   "text": "Order",
                     "items": [
-                        {
-                            'text': "By name",
-                            'triggered': self.on_actionOrderByName_triggered
-                        },
-                        {
-                            'text': "By size",
-                            'triggered': self.on_actionOrderBySize_triggered
-                        },
-                        {
-                            'text': "By date",
-                            'triggered': self.on_actionOrderByDate_triggered
-                        },
-                        {
-                            'text': "By type",
-                            'triggered': self.on_actionOrderByType_triggered
-                        }, "-", 
+                        tuple([{
+                            'text': "By %s" % attr,
+                            'checkable': True,
+                            'triggered': order_by(attr)
+                        } for attr in ["name", "size", "date", "type"]
+                        ]), "-", 
                         {
                             'text': "Descending",
-                            'triggered': self.on_actionOrderDescending_triggered
+                            'checkable': True,
+                            'triggered': order_by(self._current_order_by)
                         },
                         {
                             'text': "Folders first",
-                            'triggered': self.on_actionOrderFoldersFirst_triggered
+                            'checkable': True,
+                            'triggered': order_by(self._current_order_by)
                         }
                     ]
                 }
@@ -42,6 +44,11 @@ class ProjectsDockActionsMixin(object):
         }
         
         self.projectOptionsMenu, objects = create_menu(self, menu_options)
+        self.actionByName = [obj for obj in objects if obj.objectName() == 'actionByName'].pop()
+        self.actionDescending = [obj for obj in objects if obj.objectName() == 'actionDescending'].pop()
+        self.actionFoldersFirst = [obj for obj in objects if obj.objectName() == 'actionFoldersFirst'].pop()
+        self.actionByName.setChecked(True)
+        self.actionFoldersFirst.trigger()
         self.toolButtonOptions.setMenu(self.projectOptionsMenu)
 
         #Connect context menu
