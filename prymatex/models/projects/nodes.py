@@ -19,16 +19,14 @@ import shutil
 __all__ = [ 'FileSystemTreeNode', 'SourceFolderTreeNode', 'ProjectTreeNode' ]
 
 class ProjectItemTreeNodeBase(TreeNodeBase):
-    def __init__(self, name, parent=None):
-        TreeNodeBase.__init__(self, name, parent)
-    
     def path(self):
         raise NotImplemented
 
     isDirectory = lambda self: os.path.isdir(self.path())
-    isFile = lambda self: os.path.isdir(self.path())
+    isFile = lambda self: os.path.isfile(self.path())
     isHidden = lambda self: self.nodeName().startswith('.')
     isProject = lambda self: isinstance(self, ProjectTreeNode)
+    isSourceFolder = lambda self: isinstance(self, SourceFolderTreeNode)
     
     def project(self):
         if not hasattr(self, "_project"):
@@ -120,7 +118,7 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
     def variables(self):
         if not hasattr(self, '_variables'):
             self._variables = {
-            'TM_PROJECT_FOLDERS': " ".join(["'%s'" % folder for folder in self.folders ]),
+            'TM_PROJECT_FOLDERS': " ".join(["'%s'" % folder for folder in self.source_folders ]),
             'TM_PROJECT_NAME': self.nodeName(),
             'TM_PROJECT_PATH': self.path(),
             'TM_PROJECT_NAMESPACE': self.namespaceName }
@@ -136,7 +134,7 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
         shutil.rmtree(self.path())
         if removeFiles:
             try:
-                for folder in self.folders:
+                for folder in self.source_folders:
                     shutil.rmtree(folder)
             except OSError:
                 pass
