@@ -81,15 +81,15 @@ class FileManager(PrymatexComponent, QtCore.QObject):
             raise
         
     def createDirectory(self, directory):
-        """
-        Create a new directory.
+        """Create a new directory.
         """
         if os.path.exists(directory):
             raise exceptions.FileExistsException("The directory already exist", directory) 
         os.makedirs(directory)
 
     def createFile(self, filePath):
-        """Create a new file."""
+        """Create a new file.
+        """
         if os.path.exists(filePath):
             raise exceptions.IOException("The file already exist") 
         open(filePath, 'w').close()
@@ -106,9 +106,7 @@ class FileManager(PrymatexComponent, QtCore.QObject):
         else:
             shutil.rmtree(path, onerror = self._onerror)
     
-    #==================================================================
     # Path data
-    #==================================================================
     exists = lambda self, path: os.path.exists(path)
     isdir = lambda self, path: os.path.isdir(path)
     isfile = lambda self, path: os.path.isfile(path)
@@ -202,3 +200,80 @@ class FileManager(PrymatexComponent, QtCore.QObject):
             _, value1 = os.path.splitext(filePath1)
             _, value2 = os.path.splitext(filePath2)
         return (value1 > value2) - (value1 < value2)
+
+    def createDirectoryDialog(self, directory):
+        while True:
+            newDirName, accepted = QtWidgets.QInputDialog.getText(self, _("Create Directory"), 
+                                                        _("Please specify the new directory name"), 
+                                                        text = _("New Folder"))
+            if not accepted:
+                break
+            absNewDirName = os.path.join(directory, newDirName)
+            try:
+                self.application().fileManager.createDirectory(absNewDirName)
+                return absNewDirName
+            except exceptions.PrymatexFileExistsException as e:
+                QtWidgets.QMessageBox.warning(self, _("Error creating directory"), 
+                                          _("%s already exists") % newDirName)
+            # Permissions? Bad Disk? 
+            except Exception as e:
+                # TODO: Show some info about the reason
+                QtWidgets.QMessageBox.warning(self, _("Error creating directory"), 
+                                          _("An error occured while creating %s") % newDirName)
+    
+    def createFileDialog(self, directory):
+        while True:
+            newFileName, accepted = QtWidgets.QInputDialog.getText(self, _("Create file"), 
+                                                        _("Please specify the file name"), 
+                                                        text = _("NewFile"))
+            if not accepted:
+                break
+        
+            absNewFileName = os.path.join(directory, newFileName)
+            try:
+                self.application().fileManager.createFile(absNewFileName)
+                return absNewFileName
+            except exceptions.FileExistsException as e:
+                QtWidgets.QMessageBox.warning(self, _("Error creating file"), _("%s already exists") % newFileName)
+            except Exception as e:
+                # TODO: Show some info about the reason
+                QtWidgets.QMessageBox.warning(self, _("Error creating file"), 
+                                          _("An error occured while creating %s") % absNewFileName)
+    
+    def deletePathDialog(self, path):
+        basePath, pathTail = os.path.split(path)
+        result = QtWidgets.QMessageBox.question(self, _("Are you sure?"), 
+                                        _("Are you sure you want to delete %s<br>"
+                                          "This action can not be undone.") % pathTail,
+                                            buttons = QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+                                            defaultButton = QtWidgets.QMessageBox.Cancel)
+        if result == QtWidgets.QMessageBox.Ok:
+            self.application().fileManager.deletePath(path)
+            
+    def renamePathDialog(self, path):
+        ''' Renames files and folders '''
+        basePath, pathTail = os.path.split(path)
+        if os.path.isdir(path):
+            pathType = _('directory')
+        elif os.path.isfile(path):
+            pathType = _('file')
+        while True:
+            newName, accepted = QtWidgets.QInputDialog.getText(self, _("Choose new name for %s") % pathTail, 
+                                                           _("Rename {0} {1}").format(pathType, pathTail),
+                                                           text = pathTail)
+            if accepted:
+                if newName == pathTail:
+                    continue # Same name
+                newFullPath = os.path.join(basePath, newName)
+                if os.path.exists(newFullPath):
+                    rslt = QtWidgets.QMessageBox.warning(self, _("Destination already exists"), 
+                                              _("{0} already exists").format(newName), 
+                                                buttons=QtWidgets.QMessageBox.Retry | QtWidgets.QMessageBox.Cancel,
+                                                defaultButton=QtWidgets.QMessageBox.Retry)
+                    if rslt == QtWidgets.QMessageBox.Cancel:
+                        return
+                    continue
+                self.application().fileManager.move(path, newFullPath)
+                return newFullPath
+            else:
+                return 

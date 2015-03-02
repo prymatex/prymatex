@@ -36,7 +36,7 @@ class ProjectTreeModel(AbstractTreeModel):
         if not node.isRootNode() and not node._populated:
             if node.isProject():
                 self._load_project(node, parent)
-            elif node.isDirectory():
+            elif node.isDirectory() or node.isSourceFolder():
                 self._load_directory(node, parent)
         return node.childCount()
 

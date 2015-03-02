@@ -22,9 +22,9 @@ class ProjectItemTreeNodeBase(TreeNodeBase):
     def path(self):
         raise NotImplemented
 
-    isDirectory = lambda self: os.path.isdir(self.path())
-    isFile = lambda self: os.path.isfile(self.path())
-    isHidden = lambda self: self.nodeName().startswith('.')
+    isDirectory = lambda self: isinstance(self, FileSystemTreeNode) and os.path.isdir(self.path())
+    isFile = lambda self: isinstance(self, FileSystemTreeNode) and os.path.isfile(self.path())
+    isHidden = lambda self: isinstance(self, FileSystemTreeNode) and self.nodeName().startswith('.')
     isProject = lambda self: isinstance(self, ProjectTreeNode)
     isSourceFolder = lambda self: isinstance(self, SourceFolderTreeNode)
     
