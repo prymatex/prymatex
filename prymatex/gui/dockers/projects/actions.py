@@ -186,7 +186,7 @@ class ProjectsDockActionsMixin(object):
         return [
             {
                  'text': "Go Down",
-                 'triggered': lambda checked=False, indexes=indexes: [self.treeViewProjects.setRootIndex(index) for index in indexes]
+                 'triggered': lambda checked=False, indexes=indexes: [self.goDown(index) for index in indexes]
             },
             {
                  'text': "Refresh",
@@ -297,4 +297,8 @@ class ProjectsDockActionsMixin(object):
         if directory_path is not None:
             #TODO: si esta en auto update ver como hacer los refresh
             self.projectTreeProxyModel.refreshPath(node.path())
-            
+
+    def goDown(self, index):
+        node = self.projectTreeProxyModel.node(index)
+        self.setWindowTitle(node)
+        self.treeViewProjects.setRootIndex(index)

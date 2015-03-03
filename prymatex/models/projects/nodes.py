@@ -16,7 +16,7 @@ from prymatex.core import exceptions
 from prymatex.utils import json
 import shutil
 
-__all__ = [ 'FileSystemTreeNode', 'SourceFolderTreeNode', 'ProjectTreeNode' ]
+__all__ = [ 'FileSystemTreeNode', 'SourceFolderTreeNode', 'ProjectTreeNode', 'ProjectItemTreeNodeBase' ]
 
 class ProjectItemTreeNodeBase(TreeNodeBase):
     def path(self):

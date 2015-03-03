@@ -14,7 +14,7 @@ from prymatex.core.settings import ConfigurableItem, ConfigurableHook
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
 
-from prymatex.models.projects import ProjectTreeNode, FileSystemTreeNode
+from prymatex.models.projects import ProjectItemTreeNodeBase
 from prymatex.models.projects.lists import SelectableProjectFileProxyModel
 
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
@@ -129,7 +129,19 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
         
         # Selection Mode
         self.treeViewProjects.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-    
+
+    # ---------- OVERRIDE: QWidget.setWindowTitle
+    def setWindowTitle(self, node_or_str):
+        if isinstance(node_or_str, ProjectItemTreeNodeBase):
+            if node_or_str.isRootNode():
+                node_or_str = "Projects"
+            else:
+                node_or_str = "%s (%s)" % (
+                    node_or_str.nodeName(), 
+                    node_or_str.project().nodeName()
+                )
+        super(ProjectsDock, self).setWindowTitle(node_or_str)
+        
     def on_treeViewProjects_doubleClicked(self, index):
         node = self.projectTreeProxyModel.node(index)
         if node.isFile():
@@ -288,10 +300,10 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
     # # ---------- SIGNAL: pushButtonGoUp.pressed
     @QtCore.Slot()
     def on_pushButtonGoUp_pressed(self):
-        index = self.projectTreeProxyModel.parent(
-            self.treeViewProjects.rootIndex()
-        )
+        index = self.projectTreeProxyModel.parent(self.treeViewProjects.rootIndex())
         self.treeViewProjects.setRootIndex(index)
+        node = self.projectTreeProxyModel.node(index)
+        self.setWindowTitle(node)
     
     #================================================
     # Custom filters

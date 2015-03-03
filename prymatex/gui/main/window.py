@@ -208,7 +208,7 @@ html_footer
                 'name': html.escape(title),
                 'output': html.htmlize(summary),
                 'exitcode': exitcode}
-        bundle = self.application().supportManager.getBundle(self.application().supportManager.defaultBundleForNewBundleItems)
+        bundle = self.application().supportManager.getBundle(self.application().supportManager.default_bundle_for_new_bundle_items)
         command = self.application().supportManager.buildAdHocCommand(commandScript,
             bundle,
             name = "%s error" % title,

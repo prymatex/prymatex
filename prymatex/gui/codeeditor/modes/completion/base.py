@@ -93,14 +93,22 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
         self.editor.insertSnippet(snippet, textCursor = cursor)
 
     def on_editor_keyPressed(self, event):
-        alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-        self.completer.setCompletionPrefix(alreadyTyped)
-        if self.isActive() and not (self.completer.setCurrentRow(0) or self.completer.trySetNextModel()):
+        alreadyTyped, start, end = self.editor.wordUnderCursor(
+            direction="left", search=True
+        )
+        if alreadyTyped is None:
             self.completer.hide()
-        elif not self.isActive() and not (event.modifiers() & QtCore.Qt.ControlModifier) and (text.asciify(event.text()) in COMPLETER_CHARS) and end - start >= self.editor.word_length_to_complete:
-            self.completer.runCompleter()
-        elif self.isActive():
-            self.completer.complete(self.editor.cursorRect())
+        else:
+            self.completer.setCompletionPrefix(alreadyTyped)
+            if self.isActive():
+                if not (self.completer.setCurrentRow(0) or self.completer.trySetNextModel()):
+                    self.completer.hide()
+                else:
+                    self.completer.complete(self.editor.cursorRect())
+            elif not (event.modifiers() & QtCore.Qt.ControlModifier) and \
+                    (text.asciify(event.text()) in COMPLETER_CHARS) and \
+                    end - start >= self.editor.word_length_to_complete:
+                self.completer.runCompleter()
 
     # ------ Mode handlers
     def __next_model(self, event):
