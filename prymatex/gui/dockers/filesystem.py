@@ -98,7 +98,6 @@ class FileSystemDock(PrymatexDock, FileSystemTasks, Ui_FileSystemDock, QtWidgets
         self.comboBoxLocation.setCurrentIndex(comboIndex.row())
 
     def setupButtons(self):
-        self.pushButtonSync.setCheckable(True)
         self.pushButtonGoPrevious.setEnabled(False)
         self.pushButtonGoNext.setEnabled(False)
 

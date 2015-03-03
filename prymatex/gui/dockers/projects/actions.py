@@ -7,10 +7,8 @@ from prymatex.qt.helpers import create_menu
 class ProjectsDockActionsMixin(object):
     def setupMenues(self):
         #Setup Context Menu
-        self._current_order_by = "name"
         def order_by(attr):
             def _order_by(checked):
-                self._current_order_by = attr
                 self.projectTreeProxyModel.sortBy(
                     attr, 
                     self.actionFoldersFirst.isChecked(),
@@ -20,6 +18,14 @@ class ProjectsDockActionsMixin(object):
         menu_options = {
             "text": "Project Options",
             "items": [
+                {
+                    'text': "Sync with current editor",
+                    'checkable': True
+                },
+                {
+                    'text': "Collapse all",
+                    'triggered': lambda checked=False: self.treeViewProjects.collapseAll()
+                },
                 {   "text": "Order",
                     "items": [
                         tuple([{
@@ -27,16 +33,16 @@ class ProjectsDockActionsMixin(object):
                             'checkable': True,
                             'triggered': order_by(attr)
                         } for attr in ["name", "size", "date", "type"]
-                        ]), "-", 
+                        ]), "-",
                         {
                             'text': "Descending",
                             'checkable': True,
-                            'triggered': order_by(self._current_order_by)
+                            'triggered': order_by(self.projectTreeProxyModel.orderBy)
                         },
                         {
                             'text': "Folders first",
                             'checkable': True,
-                            'triggered': order_by(self._current_order_by)
+                            'triggered': order_by(self.projectTreeProxyModel.orderBy)
                         }
                     ]
                 }
@@ -84,7 +90,7 @@ class ProjectsDockActionsMixin(object):
             items.extend(self._file_menu_items([ index ]))
         if node.isDirectory() or node.isFile() and not node.isSourceFolder():
             items.extend(["-"] + self._path_menu_items([ index ]))
-        if node.childCount() > 1:
+        if node.childCount() > 0:
             items.extend(["-"] + self._has_children_menu_items(node, [ index ]))
         items.extend(["-"] + self._bundles_menu_items(node, [ index ]))
         items.extend([ "-", {
@@ -140,7 +146,8 @@ class ProjectsDockActionsMixin(object):
                  'triggered': lambda checked=False, indexes=indexes: [ self.openFolder(index) for index in indexes ]
             },
             {
-                 'text': "Open System Editor"   
+                 'text': "Open System Editor",
+                 'triggered': lambda checked=False, indexes=indexes: [ self.openSystemEditor(index) for index in indexes ]
             }
         ]
     
@@ -151,7 +158,8 @@ class ProjectsDockActionsMixin(object):
                  'triggered': lambda checked=False, indexes=indexes: [ self.openFile(index) for index in indexes ]
             },
             {
-                 'text': "Open System Editor"   
+                 'text': "Open System Editor",
+                 'triggered': lambda checked=False, indexes=indexes: [ self.openSystemEditor(index) for index in indexes ]
             }
         ]
 
@@ -177,10 +185,12 @@ class ProjectsDockActionsMixin(object):
     def _has_children_menu_items(self, node, indexes):
         return [
             {
-                 'text': "Go Down"   
+                 'text': "Go Down",
+                 'triggered': lambda checked=False, indexes=indexes: [self.treeViewProjects.setRootIndex(index) for index in indexes]
             },
             {
-                 'text': "Refresh"
+                 'text': "Refresh",
+                 'triggered': lambda checked=False, indexes=indexes: [self.projectTreeProxyModel.refresh(index) for index in indexes]
             }
         ]
 
@@ -256,10 +266,14 @@ class ProjectsDockActionsMixin(object):
     def openFolder(self, index):
         node = self.projectTreeProxyModel.node(index)
         self.application().openDirectory(node.path())
-            
+
     def openFile(self, index):
         node = self.projectTreeProxyModel.node(index)
         self.application().openFile(node.path())
+
+    def openSystemEditor(self, index):
+        node = self.projectTreeProxyModel.node(index)
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % node.path(), QtCore.QUrl.TolerantMode))
 
     def newFile(self, index):
         node = self.projectTreeProxyModel.node(index)
@@ -279,7 +293,8 @@ class ProjectsDockActionsMixin(object):
     
     def newFolder(self, index):
         node = self.projectTreeProxyModel.node(index)
-        directory_path = self.createDirectory(node.path())
+        directory_path = self.fileManager.createDirectoryDialog(node.path())
         if directory_path is not None:
             #TODO: si esta en auto update ver como hacer los refresh
             self.projectTreeProxyModel.refreshPath(node.path())
+            

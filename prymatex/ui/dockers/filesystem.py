@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/dockers/filesystem.ui'
+# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/dockers/filesystem.ui'
 #
-# Created: Fri Feb 27 10:43:32 2015
-#      by: PyQt5 UI code generator 5.2.1
+# Created by: PyQt5 UI code generator 5.4.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -45,24 +44,6 @@ class Ui_FileSystemDock(object):
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line.setObjectName("line")
         self.buttonsLayout.addWidget(self.line)
-        self.pushButtonSync = QtWidgets.QPushButton(self.dockWidgetContents)
-        icon = QtGui.QIcon.fromTheme("sync")
-        self.pushButtonSync.setIcon(icon)
-        self.pushButtonSync.setCheckable(True)
-        self.pushButtonSync.setObjectName("pushButtonSync")
-        self.buttonsLayout.addWidget(self.pushButtonSync)
-        self.pushButtonCollapse = QtWidgets.QPushButton(self.dockWidgetContents)
-        self.pushButtonCollapse.setText("")
-        icon = QtGui.QIcon.fromTheme("collapse")
-        self.pushButtonCollapse.setIcon(icon)
-        self.pushButtonCollapse.setObjectName("pushButtonCollapse")
-        self.buttonsLayout.addWidget(self.pushButtonCollapse)
-        self.pushButtonFilter = QtWidgets.QPushButton(self.dockWidgetContents)
-        self.pushButtonFilter.setText("")
-        icon = QtGui.QIcon.fromTheme("filter")
-        self.pushButtonFilter.setIcon(icon)
-        self.pushButtonFilter.setObjectName("pushButtonFilter")
-        self.buttonsLayout.addWidget(self.pushButtonFilter)
         self.toolButtonOptions = QtWidgets.QToolButton(self.dockWidgetContents)
         icon = QtGui.QIcon.fromTheme("options")
         self.toolButtonOptions.setIcon(icon)
@@ -92,6 +73,5 @@ class Ui_FileSystemDock(object):
         self.pushButtonGoPrevious.setToolTip(_translate("FileSystemDock", "Go previous place"))
         self.pushButtonGoNext.setToolTip(_translate("FileSystemDock", "Go next place"))
         self.pushButtonGoUp.setToolTip(_translate("FileSystemDock", "Go up one level"))
-        self.pushButtonSync.setToolTip(_translate("FileSystemDock", "Sync folder with current editor file path"))
         self.comboBoxLocation.setToolTip(_translate("FileSystemDock", "Folders"))
 

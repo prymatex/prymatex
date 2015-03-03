@@ -145,10 +145,6 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
         return self.application().fileManager.directory(self.currentPath())
 
     @QtCore.Slot()
-    def on_actionNewProject_triggered(self):
-        self.newProjectDialog.createProject()
-
-    @QtCore.Slot()
     def on_actionDelete_triggered(self):
         indexes = self.treeViewProjects.selectedIndexes()
         projects = []
@@ -289,9 +285,7 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
     def on_actionGoDown_triggered(self):
         self.treeViewProjects.setRootIndex(self.treeViewProjects.currentIndex())
     
-    #================================================
-    # Navigation
-    #================================================
+    # # ---------- SIGNAL: pushButtonGoUp.pressed
     @QtCore.Slot()
     def on_pushButtonGoUp_pressed(self):
         index = self.projectTreeProxyModel.parent(
@@ -311,33 +305,6 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
             #Save and set filters
             self._settings.setValue('custom_filters', filters)
             self.projectTreeProxyModel.setFilterRegExp(filters)
-            
-    #================================================
-    # Sort and order Actions
-    #================================================      
-    @QtCore.Slot()
-    def on_actionOrderByName_triggered(self):
-        self.projectTreeProxyModel.sortBy("name", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
-    
-    @QtCore.Slot()
-    def on_actionOrderBySize_triggered(self):
-        self.projectTreeProxyModel.sortBy("size", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
-    
-    @QtCore.Slot()
-    def on_actionOrderByDate_triggered(self):
-        self.projectTreeProxyModel.sortBy("date", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
-    
-    @QtCore.Slot()
-    def on_actionOrderByType_triggered(self):
-        self.projectTreeProxyModel.sortBy("type", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
-    
-    @QtCore.Slot()
-    def on_actionOrderDescending_triggered(self):
-        self.projectTreeProxyModel.sortBy(self.projectTreeProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
-    
-    @QtCore.Slot()
-    def on_actionOrderFoldersFirst_triggered(self):
-        self.projectTreeProxyModel.sortBy(self.projectTreeProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
 
     #================================================
     # Helper actions

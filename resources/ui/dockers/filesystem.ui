@@ -89,45 +89,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonSync">
-        <property name="toolTip">
-         <string>Sync folder with current editor file path</string>
-        </property>
-        <property name="icon">
-         <iconset theme="sync">
-          <normaloff/>
-         </iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pushButtonCollapse">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset theme="collapse">
-          <normaloff/>
-         </iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pushButtonFilter">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset theme="filter">
-          <normaloff/>
-         </iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QToolButton" name="toolButtonOptions">
         <property name="icon">
          <iconset theme="options">
