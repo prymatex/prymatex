@@ -36,7 +36,8 @@ def worker_multiplexer(queue_multiplexer, queue_notifier):
         getattr(multiplexer, pycmd["command"], debug)(*pycmd["args"])
         if pycmd['command'] == 'buried_all':
             break
-            
+    multiplexer.stop()
+
 def worker_notifier(queue_notifier):
     global shutdown
     

@@ -35,7 +35,7 @@ class Backend(QtCore.QObject):
     started = QtCore.pyqtSignal()
     finished = QtCore.pyqtSignal(int)
     stateChanged = QtCore.pyqtSignal(int)
-    
+
     def __init__(self, name, parent=None):
         QtCore.QObject.__init__(self, parent)
         self.name = name
@@ -136,8 +136,8 @@ class Backend(QtCore.QObject):
         session = self.sender()
         del self.sessions[session.sid()]
         session.deleteLater()
-        if not self.sessions:
-            self.finished.emit()
+        if not self.sessions and self.state() == self.NotRunning:
+            self.finished.emit(0)
 
 class LocalBackend(Backend):
     def __init__(self, parent=None):
