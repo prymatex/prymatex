@@ -102,6 +102,7 @@ class LineNumberSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
         current_block = self.editor.textCursor().block()
+        line_height = self.fontMetrics().height()
         
         painter = QtGui.QPainter(self)
         painter.setPen(self.palette().toolTipText().color())
@@ -111,7 +112,7 @@ class LineNumberSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
         block = self.editor.firstVisibleBlock()
         offset = self.editor.contentOffset()
         line_count = block.blockNumber()
-        
+
         while block.isValid():
             line_count += 1
             # The top left position of the block in the document
@@ -125,7 +126,12 @@ class LineNumberSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
             if block.isVisible():
                 numberText = str(line_count)
                 if block == current_block:
-                    painter.fillRect(blockGeometry, self.palette().alternateBase().color())
+                    painter.fillRect(
+                        blockGeometry.x(),
+                        blockGeometry.y(),
+                        self.width(),
+                        line_height,
+                        self.palette().alternateBase().color())
                     painter.setFont(self.boldFont)
                     leftPosition = self.width() - (self.boldMetrics.width(numberText) + self.MARGIN)
                     topPosition = blockGeometry.y() + self.boldMetrics.ascent()
@@ -137,7 +143,7 @@ class LineNumberSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
                     painter.drawText(leftPosition, topPosition, numberText)
             
             block = block.next()
-
+        
         painter.end()
         QtWidgets.QWidget.paintEvent(self, event)
 
@@ -169,6 +175,7 @@ class BookmarkSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
         current_block = self.editor.textCursor().block()
+        line_height = self.fontMetrics().height()
         
         painter = QtGui.QPainter(self)
         painter.fillRect(self.rect(), self.palette().toolTipBase().color())
@@ -184,11 +191,16 @@ class BookmarkSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
                 break
             
             if block == current_block:
-                painter.fillRect(blockGeometry, self.palette().alternateBase().color())
+                painter.fillRect(
+                        blockGeometry.x(),
+                        blockGeometry.y(),
+                        self.width(),
+                        line_height,
+                        self.palette().alternateBase().color())
 
             # Draw the line number right justified at the y position of the line.
             if block.isVisible() and self.editor.bookmarkListModel.bookmarksCount(block) > 0:
-                positionY = blockGeometry.top() + ((blockGeometry.height() - self.imagesHeight) / 2)
+                positionY = blockGeometry.top() + ((line_height - self.imagesHeight) / 2)
                 painter.drawPixmap(0, positionY, self.bookmarkflagImage)
 
             block = block.next()
@@ -231,6 +243,7 @@ class FoldingSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
         current_block = self.editor.textCursor().block()
+        line_height = self.fontMetrics().height()
         
         painter = QtGui.QPainter(self)
         painter.fillRect(self.rect(), self.palette().toolTipBase().color())
@@ -247,11 +260,16 @@ class FoldingSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
                 break
 
             if block == current_block:
-                painter.fillRect(blockGeometry, self.palette().alternateBase().color())
+                painter.fillRect(
+                        blockGeometry.x(),
+                        blockGeometry.y(),
+                        self.width(),
+                        line_height,
+                        self.palette().alternateBase().color())
 
             # Draw the line number right justified at the y position of the line.
             if block.isVisible():
-                positionY = blockGeometry.top() + ((blockGeometry.height() - self.imagesHeight) / 2)
+                positionY = blockGeometry.top() + ((line_height - self.imagesHeight) / 2)
                 cursor = self.editor.newCursorAtPosition(block.position())
                 if self.editor.foldingListModel.isStart(cursor):
                     if self.editor.foldingListModel.isFolded(cursor):
@@ -301,14 +319,13 @@ class SelectionSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
-        
-        lineHeight = self.fontMetrics().height()
+        line_height = self.fontMetrics().height()
 
         scrollBar = self.editor.verticalScrollBar()
         if scrollBar.isVisible():
             rectRelation = float(scrollBar.height()) / float(self.editor.document().blockCount())
         else:
-            rectRelation = lineHeight
+            rectRelation = line_height
         rectHeight = round(rectRelation) if rectRelation >= 1 else 1
 
         painter = QtGui.QPainter(self)
@@ -318,7 +335,7 @@ class SelectionSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
 
         for cursor in self.editor.highlightCursors():
             y = round(cursor.block().blockNumber() * rectRelation)
-            if rectRelation == lineHeight:
+            if rectRelation == line_height:
                 y += offset.y()
             painter.fillRect(0, y, 10, rectHeight, self.palette().highlight().color())
 
