@@ -14,7 +14,7 @@ from prymatex.core.settings import ConfigurableItem, ConfigurableHook
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.dialogs.bundles.filter import BundleFilterDialog
 
-from prymatex.models.projects import ProjectItemTreeNodeBase
+from prymatex.models.trees import TreeNodeBase
 from prymatex.models.projects.lists import SelectableProjectFileProxyModel
 
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
@@ -132,7 +132,7 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
 
     # ---------- OVERRIDE: QWidget.setWindowTitle
     def setWindowTitle(self, node_or_str):
-        if isinstance(node_or_str, ProjectItemTreeNodeBase):
+        if isinstance(node_or_str, TreeNodeBase):
             if node_or_str.isRootNode():
                 node_or_str = "Projects"
             else:

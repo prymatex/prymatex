@@ -3,7 +3,7 @@
 
 from prymatex.support import Scope
 from prymatex.support.processor import SyntaxProcessorMixin
-from prymatex.utils import text
+from prymatex.utils import text as textutils
 
 from .base import CodeEditorBaseProcessor
 from ..userdata import CodeEditorBlockUserData, CodeEditorToken
@@ -81,24 +81,29 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     def testRevision(self, block):
         return block.userData() is not None and block.userData().revision == self.blockRevision(block)
             
-    def blockUserData(self, block, previous_user_data=None):
+    def textUserData(self, text, previous_user_data):
         if not self.isReady():
             return self.empty_user_data
 
         # ------ Restore State
-        self.restore(previous_user_data or block.previous().userData() or self.empty_user_data)
+        self.restore(previous_user_data)
                 
-        block_text = block.text() + "\n"
-        revision = _revision(self.scope_name, block_text, self.state)
-        self.bundleItem.parseLine(self.stack, block_text, self)
+        revision = _revision(self.scope_name, text, self.state)
+        self.bundleItem.parseLine(self.stack, text, self)
         self.state = len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
 
         user_data = CodeEditorBlockUserData(tuple(self.__tokens), self.state, 
-            revision, text.white_space(block_text), block_text.strip() == "")
+            revision, textutils.white_space(text), text.strip() == "")
         
         # ------- Save State
         self.save(user_data)
         return user_data
+        
+    def blockUserData(self, block, previous_user_data=None):
+        return self.textUserData(
+            block.text() + "\n",
+            previous_user_data or block.previous().userData() or self.empty_user_data
+        )
 
     # -------- Parsing
     def beginParse(self, scopeName):
