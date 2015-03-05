@@ -3,6 +3,7 @@
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import create_menu
+from prymatex.qt.compat import getExistingDirectory
 
 class ProjectsDockActionsMixin(object):
     def setupMenues(self):
@@ -82,9 +83,9 @@ class ProjectsDockActionsMixin(object):
         items = []
         if node.isProject():
             items.extend(self._project_menu_items([ index ]))
-        elif node.isSourceFolder():
-            items.extend(self._source_folder_menu_items([ index ]))
         elif node.isDirectory():
+            if node.isSourceFolder():
+                items.extend(self._source_folder_menu_items([ index ]))
             items.extend(self._directory_menu_items([ index ]))
         elif node.isFile():
             items.extend(self._file_menu_items([ index ]))
@@ -122,10 +123,20 @@ class ProjectsDockActionsMixin(object):
         return contextMenu
     
     def _project_menu_items(self, indexes):
-        return []
+        return [
+            {
+                'text': "Add Source Folder",
+                'triggered': lambda checked=False, indexes=indexes: [ self.addSourceFolder(index) for index in indexes ]
+            }
+        ]
     
     def _source_folder_menu_items(self, indexes):
-        return []
+        return [
+            {
+                'text': "Remove Source Folder",
+                'triggered': lambda checked=False, indexes=indexes: [ self.removeSourceFolder(index) for index in indexes ]
+            }
+        ]
             
     def _directory_menu_items(self, indexes):
         return [
@@ -261,6 +272,20 @@ class ProjectsDockActionsMixin(object):
             return _triggered
         contex_menu.triggered.connect(triggered(self.window(), self.projectTreeProxyModel, indexes))
         contex_menu.popup(self.treeViewProjects.mapToGlobal(point))
+
+    # --------- Remove and add source Folders
+    def removeSourceFolder(self, index):
+        node = self.projectTreeProxyModel.node(index)
+        project = node.project()
+        project.removeSourceFolder(node.path())
+        self.projectTreeProxyModel.refresh(index.parent())
+
+    def addSourceFolder(self, index):
+        node = self.projectTreeProxyModel.node(index)
+        source_folder_path = getExistingDirectory(self, caption="Add Source Folder to %s" % node.nodeName())
+        if source_folder_path:
+            node.addSourceFolder(source_folder_path)
+            self.projectTreeProxyModel.refresh(index)
 
     # Open indexes, files or directories
     def openFolder(self, index):

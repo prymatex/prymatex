@@ -22,7 +22,7 @@ class ProjectItemTreeNodeBase(TreeNodeBase):
     def path(self):
         raise NotImplemented
 
-    isDirectory = lambda self: isinstance(self, FileSystemTreeNode) and os.path.isdir(self.path())
+    isDirectory = lambda self: os.path.isdir(self.path())
     isFile = lambda self: isinstance(self, FileSystemTreeNode) and os.path.isfile(self.path())
     isHidden = lambda self: isinstance(self, FileSystemTreeNode) and self.nodeName().startswith('.')
     isProject = lambda self: isinstance(self, ProjectTreeNode)
@@ -85,34 +85,40 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
     KEYS = [    'name', 'description', 'licence', 'keywords', 'source_folders', 
                 'shell_variables', 'bundles' ]
     
-    def __init__(self, path, dataHash):
-        super(ProjectTreeNode, self).__init__(dataHash.get("name"))
+    def __init__(self, name, path):
+        super(ProjectTreeNode, self).__init__(name)
         self._project_path = path
         self.manager = None
         self.namespaceName = ""
-        self.load(dataHash)
+        self.bundles = []
+        self.source_folders = []
     
     def nodeType(self):
         return "Project"
             
-    # ----------- Load, update and dump
-    def load(self, hash):
+    # ---------------- Load, update, dump
+    def __load_update(self, data_hash, initialize):
         for key in ProjectTreeNode.KEYS:
-            value = hash.get(key, None)
-            setattr(self, key, value)
+            if key in data_hash or initialize:
+                value = data_hash.get(key, None)
+                if value is None and key in ('source_folders', 'bundles'):
+                    value = []
+                setattr(self, key, value)
 
-    def update(self, dataHash):
-        for key in list(dataHash.keys()):
-            setattr(self, key, dataHash[key])
+    def load(self, data_hash):
+        self.__load_update(data_hash, True)
 
-    def dataHash(self):
-        dataHash = {}
+    def update(self, data_hash):
+        self.__load_update(data_hash, False)
+
+    def dump(self, allKeys=False):
+        data_hash = {}
         for key in ProjectTreeNode.KEYS:
-            value = getattr(self, key)
-            if value != None:
-                dataHash[key] = value
-        return dataHash
-    
+            value = getattr(self, key, None)
+            if allKeys or value:
+                data_hash[key] = value
+        return data_hash
+
     # ---------------- Variables
     @property
     def variables(self):
@@ -128,7 +134,7 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
         directory = os.path.dirname(self.path())
         if not os.path.exists(directory):
             os.makedirs(directory)
-        json.write_file(self.dataHash(), self.path())
+        json.write_file(self.dump(), self.path())
 
     def delete(self, removeFiles=False):
         shutil.rmtree(self.path())
@@ -154,7 +160,8 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
             raise exceptions.FileNotExistsException(project_path)
         try:
             data = json.read_file(project_path)
-            project = cls(project_path, data)
+            project = cls(data["name"], project_path)
+            project.load(data)
             manager.addProject(project)
             return project
         except Exception as e:
@@ -171,6 +178,16 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
     def icon(self):
         return self.manager.resources().get_icon("project")
 
+    # --------------- Source folders
+    def addSourceFolder(self, path):
+        if not isinstance(self.source_folders, list):
+            self.source_folders = []
+        self.source_folders.append(path)
+
+    def removeSourceFolder(self, path):
+        if path in self.source_folders:
+            self.source_folders.remove(path)
+
     # --------------- Bundle Menu
     def addBundleMenu(self, bundle):
         if not isinstance(self.bundles, list):
@@ -181,8 +198,6 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
         uuid = bundle.uuidAsText()
         if uuid in self.bundles:
             self.bundles.remove(uuid)
-        if not self.bundles:
-            self.bundles = None
             
     def hasBundleMenu(self, bundle):
         if self.bundles is None: return False

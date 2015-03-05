@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
-
+import os
 import codecs
 import fnmatch
 
@@ -36,7 +36,7 @@ class ProjectTreeModel(AbstractTreeModel):
         if not node.isRootNode() and not node._populated:
             if node.isProject():
                 self._load_project(node, parent)
-            elif node.isDirectory() or node.isSourceFolder():
+            elif node.isDirectory():
                 self._load_directory(node, parent)
         return node.childCount()
 
@@ -111,19 +111,46 @@ class ProjectTreeModel(AbstractTreeModel):
         if notify: 
             self.endInsertRows()
 
+    def _update_project(self, parent_node, parent_index, notify=False):
+        names = [os.path.basename(path) for path in parent_node.source_folders]
+        addPaths = [path for path in parent_node.source_folders \
+            if parent_node.findChildByName(os.path.basename(path)) is None]
+        removeNodes = [node for node in parent_node.childNodes() \
+            if node.nodeName() not in names]
+                
+        #Quitamos elementos eliminados
+        for node in removeNodes:
+            if notify:
+                self.beginRemoveRows(parent_index, node.row(), node.row())
+            parent_node.removeChild(node)
+            if notify:
+                self.endRemoveRows()
+
+        #Agregamos elementos nuevos
+        if notify: 
+            self.beginInsertRows(parent_index, parent_node.childCount(), parent_node.childCount() + len(addPaths) - 1)
+        for path in addPaths:
+            node = self.treeNodeFactory(path, parent_node)
+            node._populated = False
+            parent_node.appendChild(node)
+        if notify: 
+            self.endInsertRows()    
+
     def _collect_expanded_subdirs(self, parent_node):
         return [node for node in parent_node.childNodes() if node.isDirectory() and node._populated]
 
     def refresh(self, updateIndex):
         updateNode = self.node(updateIndex)
         while not updateNode.isRootNode() and not self.fileManager.exists(updateNode.path()):
-            updateIndex = updateIndex.parent()
-            updateNode = self.node(updateIndex)
-        if not updateNode.isRootNode() and updateNode.isDirectory():
+            updateNode = updateNode.nodeParent()
+        if not updateNode.isRootNode():
             updateNodes = [ updateNode ]
             while updateNodes:
                 node = updateNodes.pop(0)
-                self._update_directory(node, self.createIndex(node.row(), 0, node), True)
+                if node.isDirectory():
+                    self._update_directory(node, self.createIndex(node.row(), 0, node), True)
+                elif node.isProject():
+                    self._update_project(node, self.createIndex(node.row(), 0, node), True)
                 updateNodes += self._collect_expanded_subdirs(node)
 
     def refreshPath(self, path):
