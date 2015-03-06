@@ -304,9 +304,9 @@ class ProjectsDockActionsMixin(object):
         node = self.projectTreeProxyModel.node(index)
         file_path = self.fileManager.createFileDialog(node.path())
         if file_path is not None:
-            self.application().openFile(filePath)
+            self.application().openFile(file_path)
             #TODO: si esta en auto update ver como hacer los refresh
-            self.projectTreeProxyModel.refreshPath(node.path())
+            self.projectTreeProxyModel.refresh(index)
     
     def newFromTemplate(self, index):
         node = self.projectTreeProxyModel.node(index)
@@ -314,14 +314,14 @@ class ProjectsDockActionsMixin(object):
         if file_path is not None:
             self.application().openFile(file_path)
             #TODO: si esta en auto update ver como hacer los refresh
-            self.projectTreeProxyModel.refreshPath(node.path())
+            self.projectTreeProxyModel.refresh(index)
     
     def newFolder(self, index):
         node = self.projectTreeProxyModel.node(index)
         directory_path = self.fileManager.createDirectoryDialog(node.path())
         if directory_path is not None:
             #TODO: si esta en auto update ver como hacer los refresh
-            self.projectTreeProxyModel.refreshPath(node.path())
+            self.projectTreeProxyModel.refresh(index)
 
     def goDown(self, index):
         node = self.projectTreeProxyModel.node(index)
