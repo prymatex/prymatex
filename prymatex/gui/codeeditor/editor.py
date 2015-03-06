@@ -22,7 +22,7 @@ from .processors import (CodeEditorCommandProcessor, CodeEditorSnippetProcessor,
     CodeEditorMacroProcessor, CodeEditorSyntaxProcessor, CodeEditorThemeProcessor)
 from .modes import CodeEditorBaseMode
 
-from .highlighter import CodeEditorSyntaxHighlighter
+from ._highlighter import CodeEditorSyntaxHighlighter
 from .models import (SymbolListModel, BookmarkListModel, FoldingListModel,
     bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
     symbolSelectableModelFactory)
@@ -178,7 +178,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             editor.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
         )
         
-        self.syntaxHighlighter.ready.connect(self.on_highlighter_ready)
+        #self.syntaxHighlighter.ready.connect(self.on_highlighter_ready)
 
     def highlighter(self):
         return self.syntaxHighlighter

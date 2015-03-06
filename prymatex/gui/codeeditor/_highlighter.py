@@ -33,16 +33,15 @@ class _HighlighterThread(QtCore.QThread):
             self.ready.emit(user_datas)
 
 class HighlighterThread(QtCore.QThread):
-    ready = QtCore.Signal()
     userDataReady = QtCore.Signal(int, CodeEditorBlockUserData)
     def __init__(self, processor):
         super(HighlighterThread, self).__init__()
-        self._lines = []
+        self._lines = {}
         self._processor = processor
         self._stopped = False
 
-    def addLine(self, index, text, previous_state, previous_revision):
-        self._lines.append((index, text, previous_state, previous_revision))
+    def setLine(self, index, text, previous_state, previous_revision):
+        self._lines[index] = (index, text, previous_state, previous_revision)
 
     def start(self):
         self._stopped = False
@@ -50,33 +49,31 @@ class HighlighterThread(QtCore.QThread):
         
     def stop(self):
         self._stopped = True
-        self._lines = []
+        self._lines = {}
         self.wait()
-        #self.deleteLater()
 
     def run(self):
-        self.msleep(100)
-        next_index = revision = state = -1
+        index = next_index = -1
+        user_data = None
+        self.first = self.last = self._lines and min(self._lines.keys()) or 0
         while not self._stopped and self._lines:
-            index, text, previous_state, previous_revision = self._lines.pop(0)
-            if index == next_index:
-                previous_revision = revision
-                prevouse_state = state
+            self.last = sorted(self._lines.keys())[0]
+            if self.last < self.first:
+                self.first = self.last
+            index, text, previous_state, previous_revision = self._lines.pop(self.last)
+            if user_data is not None and index == next_index:
+                previous_revision = user_data.revision
+                prevouse_state = user_data.state
             user_data = self._processor.textUserData(
                 text, previous_state, previous_revision
             )
-            state = user_data.state
-            revision = user_data.revision
             next_index = index + 1
             self.userDataReady.emit(index, user_data)
-        if not self._stopped:
-            self.ready.emit()
+            self.usleep(1)
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
-    aboutToChange = QtCore.Signal()  # When the highlight go to change allways triggered
-    ready = QtCore.Signal()       # When the highlight is ready not allways triggered
     changed = QtCore.Signal()        # On the highlight changed allways triggered
-
+    
     def __init__(self, editor):
         super(CodeEditorSyntaxHighlighter, self).__init__(editor)
         self.editor = editor
@@ -84,23 +81,23 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.themeProcessor = editor.findProcessor("theme")
         self.editor.aboutToClose.connect(self.stop)
         self.thread = HighlighterThread(
-                self.syntaxProcessor
-            )
+            self.syntaxProcessor
+        )
         self.thread.userDataReady.connect(self.on_thread_userDataReady)
-        self.thread.ready.connect(self.ready.emit)
-        self.thread.started.connect(self.aboutToChange.emit)
-        self.thread.finished.connect(self.changed.emit)
+        self.thread.finished.connect(self.print_number)
 
+    def print_number(self):
+        print(self.thread.first, self.thread.last, self.syntaxProcessor.scope_name)
+        
     def on_thread_userDataReady(self, index, user_data):
         block = self.document().findBlockByNumber(index)
         block.setUserData(user_data)
-        block.setUserState(user_data.state)
         self.rehighlightBlock(block)
-
+    
     def stop(self):
+        self.setDocument(None)
         if self.thread.isRunning():
             self.thread.stop()
-        self.setDocument(None)
 
     def start(self, callback=None):
         self.setDocument(self.editor.document())
@@ -111,11 +108,12 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         # ------ No changes
         if self.syntaxProcessor.testRevision(block):
             user_data = block.userData()
+            self.setCurrentBlockState(user_data.state)
         else:
             user_data = block.previous().userData()
-            self.thread.addLine(block.blockNumber(), text + '\n', self.previousBlockState(), user_data and user_data.revision or -1)
+            self.thread.setLine(block.blockNumber(), text + '\n', self.previousBlockState(), user_data and user_data.revision or -1)
             if not self.thread.isRunning():
-                self.thread.start()
+                QtCore.QTimer.singleShot(0, self.thread.start)
             user_data = block.userData() or self.syntaxProcessor.emptyUserData()
 
         # ------ Formats

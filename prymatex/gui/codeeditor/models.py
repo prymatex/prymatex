@@ -27,15 +27,15 @@ class FoldingListModel(QtCore.QAbstractListModel):
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
 
         #Connects
-        self.editor.highlighter().aboutToChange.connect(
-            self.on_editor_aboutToHighlightChange
-        )
-        self.editor.highlighter().ready.connect(
-            self.on_editor_highlightingReady
-        )
-        self.editor.highlighter().changed.connect(
-            self.on_editor_highlightChanged
-        )
+        #self.editor.highlighter().aboutToChange.connect(
+        #    self.on_editor_aboutToHighlightChange
+        #)
+        #self.editor.highlighter().ready.connect(
+        #    self.on_editor_highlightingReady
+        #)
+        #self.editor.highlighter().changed.connect(
+        #    self.on_editor_highlightChanged
+        #)
 
         # Images
         self.foldingellipsisImage = self.editor.resources().get_image(":/sidebar/folding-ellipsis.png")
@@ -335,15 +335,15 @@ class SymbolListModel(QtCore.QAbstractListModel):
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
 
         #Connects
-        self.editor.highlighter().aboutToChange.connect(
-            self.on_editor_aboutToHighlightChange
-        )
-        self.editor.highlighter().ready.connect(
-            self.on_editor_highlightingReady
-        )
-        self.editor.highlighter().changed.connect(
-            self.on_editor_highlightChanged
-        )
+        #self.editor.highlighter().aboutToChange.connect(
+        #    self.on_editor_aboutToHighlightChange
+        #)
+        #self.editor.highlighter().ready.connect(
+        #    self.on_editor_highlightingReady
+        #)
+        #self.editor.highlighter().changed.connect(
+        #    self.on_editor_highlightChanged
+        #)
      
     # --------------- Signals   
     def on_document_contentsChange(self, position, removed, added):
