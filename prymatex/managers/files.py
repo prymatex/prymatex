@@ -120,6 +120,7 @@ class FileManager(PrymatexComponent, QtCore.QObject):
     basename = lambda self, path: os.path.basename(path)
     mimeType = lambda self, path: mimetypes.guess_type(path)[0] or ""
     issubpath = lambda self, childPath, parentPath, **kwargs: osextra.path.issubpath(childPath, parentPath, **kwargs)
+    commonpath = lambda self, *args, **kwargs: osextra.path.commonpath(*args, **kwargs)
     fullsplit = lambda self, path: osextra.path.fullsplit(path)
     normcase = lambda self, path: os.path.normcase(path)
     normpath = lambda self, path: os.path.normpath(path)
