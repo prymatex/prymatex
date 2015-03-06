@@ -16,12 +16,21 @@ class ProjectsDockActionsMixin(object):
                     self.actionDescending.isChecked()
                 )
             return _order_by
+        def sync_editor(checked):
+            if checked:
+                #Conectar señal
+                self.window().editorChanged.connect(self.on_window_editorChanged)
+                self.on_window_editorChanged(self.window().currentEditor())
+            else:
+                #Desconectar señal
+                self.window().editorChanged.disconnect(self.on_window_editorChanged)
         menu_options = {
             "text": "Project Options",
             "items": [
                 {
                     'text': "Sync with current editor",
-                    'checkable': True
+                    'checkable': True,
+                    'triggered': sync_editor
                 },
                 {
                     'text': "Collapse all",

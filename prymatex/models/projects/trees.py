@@ -50,17 +50,20 @@ class ProjectTreeModel(AbstractTreeModel):
             return node.icon()
 
     def indexForPath(self, path):
-        currentIndex = QtCore.QModelIndex()
-        while self.rowCount(currentIndex):
-            goAhead = False
-            for node in self.node(currentIndex).childNodes():
-                if self.fileManager.issubpath(path, node.path()):
-                    currentIndex = self.createIndex(node.row(), 0, node)
-                    goAhead = True
+        for project in self.projects():
+            current_index = self.createIndex(project.row(), 0, project)
+            while self.rowCount(current_index):
+                go_ahead = False
+                for node in self.node(current_index).childNodes():
+                    if self.fileManager.issubpath(path, node.path()):
+                        current_index = self.createIndex(node.row(), 0, node)
+                        if self.fileManager.commonpath(path, node.path()) == path:
+                            return current_index
+                        go_ahead = True
+                        break
+                if not go_ahead:
                     break
-            if not goAhead:
-                break
-        return currentIndex
+        return QtCore.QModelIndex()
 
     # -------------- Custom load methods
     def _load_directory(self, node, index, notify=False):

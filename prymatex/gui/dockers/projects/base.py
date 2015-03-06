@@ -223,32 +223,8 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
         self.propertiesDialog.setModel(self.application().projectManager.propertiesProxyModel)
         self.propertiesDialog.exec_(self.currentNode())
 
-    @QtCore.Slot()
-    def on_actionRefresh_triggered(self):
-        indexes = self.treeViewProjects.selectedIndexes()
-        for index in indexes:
-            self.projectTreeProxyModel.refresh(index)
-        
-    @QtCore.Slot()
-    def on_actionOpenSystemEditor_triggered(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % self.currentPath(), QtCore.QUrl.TolerantMode))
-    
-    @QtCore.Slot()
-    def on_pushButtonCollapseAll_pressed(self):
-        self.treeViewProjects.collapseAll()
-
-    @QtCore.Slot(bool)
-    def on_pushButtonSync_toggled(self, checked):
-        if checked:
-            #Conectar señal
-            self.window().editorChanged.connect(self.on_window_editorChanged)
-            self.on_window_editorChanged(self.window().currentEditor())
-        else:
-            #Desconectar señal
-            self.window().editorChanged.disconnect(self.on_window_editorChanged)
-    
     def on_window_editorChanged(self, editor):
-        if editor is not None and editor.hasFile():
+        if editor.hasFile():
             index = self.projectTreeProxyModel.indexForPath(editor.filePath())
             self.treeViewProjects.setCurrentIndex(index)
 
@@ -292,11 +268,7 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
                 else:
                     self.application().fileManager.copy(srcPath, dstPath)
             self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
-
-    @QtCore.Slot()
-    def on_actionGoDown_triggered(self):
-        self.treeViewProjects.setRootIndex(self.treeViewProjects.currentIndex())
-    
+ 
     # # ---------- SIGNAL: pushButtonGoUp.pressed
     @QtCore.Slot()
     def on_pushButtonGoUp_pressed(self):
@@ -305,19 +277,6 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
         node = self.projectTreeProxyModel.node(index)
         self.setWindowTitle(node)
     
-    #================================================
-    # Custom filters
-    #================================================
-    @QtCore.Slot()
-    def on_pushButtonCustomFilters_pressed(self):
-        filters, accepted = QtWidgets.QInputDialog.getText(self, _("Custom Filter"), 
-                                _("Enter the filters (separated by comma)\nOnly * and ? may be used for custom matching"), 
-                                text = self.custom_filters)
-        if accepted:
-            #Save and set filters
-            self._settings.setValue('custom_filters', filters)
-            self.projectTreeProxyModel.setFilterRegExp(filters)
-
     #================================================
     # Helper actions
     #================================================
