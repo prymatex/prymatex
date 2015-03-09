@@ -7,31 +7,6 @@ import time
 from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserData
 from prymatex.qt import QtCore, QtGui, QtWidgets, helpers
 
-class _HighlighterThread(QtCore.QThread):
-    ready = QtCore.Signal(dict)
-    def __init__(self, document, processor):
-        super(HighlighterThread, self).__init__(document)
-        self._document = document
-        self._processor = processor
-        self._stopped = False
-
-    def stop(self):
-        self._stopped = True
-        self.wait()
-        self.deleteLater()
-
-    def run(self):
-        self.msleep(300)
-        block = self._document.begin()
-        user_datas = {}
-        user_data = None
-        while block.isValid() and not self._stopped:
-            user_data = self._processor.blockUserData(block, user_data)
-            user_datas[block.blockNumber()] = user_data
-            block = block.next()
-        if not self._stopped:
-            self.ready.emit(user_datas)
-
 class HighlighterThread(QtCore.QThread):
     userDataReady = QtCore.Signal(int, CodeEditorBlockUserData)
     def __init__(self, processor):
