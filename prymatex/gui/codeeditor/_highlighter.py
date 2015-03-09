@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import re
 
+import re
 import time
+from bisect import bisect
+
 from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserData
 from prymatex.qt import QtCore, QtGui, QtWidgets, helpers
 
@@ -12,11 +14,14 @@ class HighlighterThread(QtCore.QThread):
     def __init__(self, processor):
         super(HighlighterThread, self).__init__()
         self._lines = {}
+        self._order = []
         self._processor = processor
         self._stopped = False
 
     def setLine(self, index, text, previous_state, previous_revision):
         self._lines[index] = (index, text, previous_state, previous_revision)
+        if index not in self._order:
+            self._order.insert(bisect(self._order, index), index)
 
     def start(self):
         self._stopped = False
@@ -25,14 +30,15 @@ class HighlighterThread(QtCore.QThread):
     def stop(self):
         self._stopped = True
         self._lines = {}
+        self._order = []
         self.wait()
 
     def run(self):
         index = next_index = -1
         user_data = None
-        self.first = self.last = self._lines and min(self._lines.keys()) or 0
+        self.first = self.last = self._order and self._order[0] or 0
         while not self._stopped and self._lines:
-            self.last = sorted(self._lines.keys())[0]
+            self.last = self._order.pop(0)
             if self.last < self.first:
                 self.first = self.last
             index, text, previous_state, previous_revision = self._lines.pop(self.last)
