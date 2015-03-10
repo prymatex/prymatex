@@ -4,29 +4,32 @@
 from collections import namedtuple
 
 from prymatex.qt import QtGui
-from prymatex.support import Scope
+from prymatex.utils import text as textutils
 
 class CodeEditorToken(namedtuple('CodeEditorToken', 'start end scope chunk')):
-    __slots__ = ()
     @property
     def group(self):
         return self.scope.rootGroupName()
 
 class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
-    __slots__ = ('tokens', 'state', 'revision', 'indentation', 'blank')
-    def __init__(self, tokens, state, revision, indentation, blank):
+    __slots__ = ('tokens', 'text', 'state', 'revision', 'indentation', 'blank')
+    def __init__(self, tokens, text, state, revision):
         super(CodeEditorBlockUserData, self).__init__()
         self.tokens = tokens
+        self.text = text
         self.state = state
         self.revision = revision
-        self.indentation = indentation
-        self.blank = blank
+        self.indentation = textutils.white_space(text)
+        self.blank = text.strip() == ""
 
     def tokenAt(self, pos):
         for token in self.tokens[::-1]:
             if token.start <= pos < token.end:
                 return token
         return self.tokens[0]
+
+    def blockText(self):
+        return self.text
 
     def syntaxScope(self, cursor):
         left = cursor.position() - cursor.selectionStart() - 1

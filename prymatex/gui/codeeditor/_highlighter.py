@@ -86,7 +86,6 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def highlightBlock(self, text):
         text = text + '\n'
         user_data = self.currentBlockUserData()
-        
         if user_data is not None and user_data.revision == self.syntaxProcessor.textRevision(text, self.previousBlockState()):
             self.setCurrentBlockState(user_data.state)
         else:
@@ -97,7 +96,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             if not self.thread.isRunning():
                 QtCore.QTimer.singleShot(0, self.thread.start)
             user_data = block.userData() or self.syntaxProcessor.emptyUserData()
-        
+
         # ------ Formats
         for token in user_data.tokens:
             self.setFormat(token.start, token.end - token.start,

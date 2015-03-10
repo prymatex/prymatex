@@ -3,7 +3,6 @@
 
 from prymatex.support import Scope
 from prymatex.support.processor import SyntaxProcessorMixin
-from prymatex.utils import text as textutils
 
 from .base import CodeEditorBaseProcessor
 from ..userdata import CodeEditorBlockUserData, CodeEditorToken
@@ -30,7 +29,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.scope_name = name
         self.empty_scope = Scope(self.scope_name)
         self.empty_token = CodeEditorToken(0, 0, self.empty_scope, "")
-        self.empty_user_data = CodeEditorBlockUserData((self.empty_token, ), self.NO_STATE, self.NO_REVISION, "", True)
+        self.empty_user_data = CodeEditorBlockUserData((self.empty_token, ), "", self.NO_STATE, self.NO_REVISION)
     
     def scopeName(self):
         return self.scope_name
@@ -100,8 +99,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
             # ------- Save Stack State
             self.save(self.state, revision)
             
-            self.CACHE[revision] = (tuple(self.__tokens), self.state, 
-                revision, textutils.white_space(text), text.strip() == "")
+            self.CACHE[revision] = (tuple(self.__tokens), text, self.state, revision)
         return CodeEditorBlockUserData(*self.CACHE[revision])
         
     def blockUserData(self, block, previous_user_data=None):
