@@ -50,7 +50,7 @@ class HighlighterThread(QtCore.QThread):
             )
             next_index = index + 1
             self.userDataReady.emit(index, user_data)
-            self.usleep(1)
+            self.usleep(0.5)
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     changed = QtCore.Signal()        # On the highlight changed allways triggered
@@ -84,19 +84,20 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.setDocument(self.editor.document())
 
     def highlightBlock(self, text):
-        block = self.currentBlock()
-
-        # ------ No changes
-        if self.syntaxProcessor.testRevision(block):
-            user_data = block.userData()
+        text = text + '\n'
+        user_data = self.currentBlockUserData()
+        
+        if user_data is not None and user_data.revision == self.syntaxProcessor.textRevision(text, self.previousBlockState()):
             self.setCurrentBlockState(user_data.state)
         else:
-            user_data = block.previous().userData()
-            self.thread.setLine(block.blockNumber(), text + '\n', self.previousBlockState(), user_data and user_data.revision or -1)
+            block = self.currentBlock()
+            previous_block = block.previous()
+            previous_user_data = previous_block.userData()
+            self.thread.setLine(block.blockNumber(), text, self.previousBlockState(), previous_user_data and previous_user_data.revision or -1)
             if not self.thread.isRunning():
                 QtCore.QTimer.singleShot(0, self.thread.start)
             user_data = block.userData() or self.syntaxProcessor.emptyUserData()
-
+        
         # ------ Formats
         for token in user_data.tokens:
             self.setFormat(token.start, token.end - token.start,
