@@ -99,11 +99,11 @@ class ProjectsDockActionsMixin(object):
         elif node.isFile():
             items.extend(self._file_menu_items([ index ]))
         if node.isDirectory() or node.isFile() and not node.isSourceFolder():
-            items.extend(["-"] + self._path_menu_items([ index ]))
+            items.extend(self._path_menu_items([ index ]))
         if node.childCount() > 0:
-            items.extend(["-"] + self._has_children_menu_items(node, [ index ]))
-        items.extend(["-"] + self._bundles_menu_items(node, [ index ]))
-        items.extend([ "-", {
+            items.extend(self._has_children_menu_items(node, [ index ]))
+        items.extend(self._bundles_menu_items(node, [ index ]))
+        items.extend([{
             'text': "Properties"
         }])
         contextMenu = { 
@@ -125,7 +125,7 @@ class ProjectsDockActionsMixin(object):
                 },
                 {   
                     'text': "Paste"
-                }
+                }, "-"
             ]
         }
         contextMenu, objects = create_menu(self, contextMenu)
@@ -136,7 +136,13 @@ class ProjectsDockActionsMixin(object):
             {
                 'text': "Add Source Folder",
                 'triggered': lambda checked=False, indexes=indexes: [ self.addSourceFolder(index) for index in indexes ]
-            }
+            }, {
+                'text': "Project Bundles",
+                'triggered': lambda checked=False, indexes=indexes: [ self.projectBundles(index) for index in indexes ]
+            }, {
+                'text': "Select Related Bundles ",
+                'triggered': lambda checked=False, indexes=indexes: [ self.selectRelatedBundles(index) for index in indexes ]
+            }, "-"
         ]
     
     def _source_folder_menu_items(self, indexes):
@@ -144,7 +150,7 @@ class ProjectsDockActionsMixin(object):
             {
                 'text': "Remove Source Folder",
                 'triggered': lambda checked=False, indexes=indexes: [ self.removeSourceFolder(index) for index in indexes ]
-            }
+            }, "-"
         ]
             
     def _directory_menu_items(self, indexes):
@@ -168,7 +174,7 @@ class ProjectsDockActionsMixin(object):
             {
                  'text': "Open System Editor",
                  'triggered': lambda checked=False, indexes=indexes: [ self.openSystemEditor(index) for index in indexes ]
-            }
+            }, "-"
         ]
     
     def _file_menu_items(self, indexes):
@@ -180,7 +186,7 @@ class ProjectsDockActionsMixin(object):
             {
                  'text': "Open System Editor",
                  'triggered': lambda checked=False, indexes=indexes: [ self.openSystemEditor(index) for index in indexes ]
-            }
+            }, "-"
         ]
 
     def _path_menu_items(self, indexes):
@@ -199,7 +205,7 @@ class ProjectsDockActionsMixin(object):
             },
             {
                 'text': "Rename" 
-            },
+            }, "-"
         ]
 
     def _has_children_menu_items(self, node, indexes):
@@ -211,26 +217,30 @@ class ProjectsDockActionsMixin(object):
             {
                  'text': "Refresh",
                  'triggered': lambda checked=False, indexes=indexes: [self.projectTreeProxyModel.refresh(index) for index in indexes]
-            }
+            }, "-"
         ]
 
     def _addons_menu_item(self, node, indexes):
-        #Menu de los addons
-        addon_menues = [ "-" ]
-        for component in self.components():
-            addon_menues.extend(component.contributeToContextMenu(node))
-        if len(addon_menues) > 1:
-            return addon_menues
+        # Menu de addons
+        addon_menues = [component.contributeToContextMenu(node) for \
+            component in self.components()]
+        if addon_menues:
+            addon_menues.append("-")
+        return addon_menues
         
     def _bundles_menu_items(self, node, indexes):
-        #Menu de los bundles relacionados al proyecto
-        #Try get all bundles for project bundle definition
-        bundles = [self.application().supportManager.getManagedObject(uuid) for uuid in node.project().bundles or []]
+        # Menu de bundles relacionados al proyecto
+        bundles = [self.application().supportManager.getManagedObject(uuid) for \
+            uuid in node.project().bundles ]
         #Filter None bundles
-        bundles = [bundle for bundle in bundles if bundle is not None]
-        return [
-            self.application().supportManager.menuForBundle(bundle) \
-            for bundle in sorted(bundles, key=lambda bundle: bundle.name) ]
+        bundles = sorted(filter(lambda bundle: bundle is not None, bundles), 
+            key=lambda bundle: bundle.name
+        )
+        bundle_menues = [self.application().supportManager.menuForBundle(bundle) for \
+            bundle in bundles]
+        if bundle_menues:
+            bundle_menues.append("-")
+        return bundle_menues
 
     # ---------- SIGNAL: treeViewProjects.customContextMenuRequested
     QtCore.Slot(QtCore.QPoint)
@@ -296,7 +306,14 @@ class ProjectsDockActionsMixin(object):
             node.addSourceFolder(source_folder_path)
             self.projectTreeProxyModel.refresh(index)
 
-    # Open indexes, files or directories
+    # -------------- Project Bundles
+    def selectRelatedBundles(self, index):
+        pass
+        
+    def projectBundles(self, index):
+        pass
+
+    # -------------- Open indexes, files or directories
     def openFolder(self, index):
         node = self.projectTreeProxyModel.node(index)
         self.application().openDirectory(node.path())
