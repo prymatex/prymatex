@@ -35,7 +35,6 @@ class HighlighterThread(QtCore.QThread):
         if not self.isRunning() and self._indexes:
             self._scheduled = True
             time = previous_revision == -1 and 100 or 0
-            print(time)
             QtCore.QTimer.singleShot(time, self.start)
 
     def start(self):
@@ -44,11 +43,10 @@ class HighlighterThread(QtCore.QThread):
         self._scheduled = False
         
     def stop(self):
-        self._stopped = True
-        self._scheduled = False
         self._indexes = set()
         self._texts = {}
         self._states = {}
+        self._stopped = True
         self.wait()
         
     def run(self):
@@ -108,22 +106,24 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def highlightBlock(self, text):
         if not self._stopped:
             text = text + '\n'
-            block = self.currentBlock()
-            previous_block = block.previous()
             user_data = self.currentBlockUserData()
-            previous_user_data = previous_block.userData()
-            if user_data is None:
-                self.thread.addLine(block.blockNumber(), text, self.previousBlockState(), previous_user_data and previous_user_data.revision or -1)
-                user_data = self.syntaxProcessor.emptyUserData()
-            elif user_data.revision == self.syntaxProcessor.textRevision(text, self.previousBlockState()):
+            if user_data is not None and user_data.revision == self.syntaxProcessor.textRevision(text, self.previousBlockState()):
                 self.setCurrentBlockState(user_data.state)
-            elif user_data.blockText() != text:
-                # tengo que agregar el block pero tambien tengo que mentir un poco con el formato
-                self.thread.addLine(block.blockNumber(), text, self.previousBlockState(), previous_user_data and previous_user_data.revision or -1)
-            elif user_data.state != self.previousBlockState():
-                # tegno que agregar el block y apurar el tramite de los proximos agregados
-                self.setCurrentBlockState(self.previousBlockState())
-                self.thread.addLine(block.blockNumber(), text, self.previousBlockState(), previous_user_data and previous_user_data.revision or -1)
+            else:
+                if user_data and user_data.blockText() != text:
+                    # Mentir un poco con el formato
+                    pass
+                elif user_data and user_data.state != self.previousBlockState() or self.previousBlockState() == self.syntaxProcessor.MULTI_LINE:
+                    # Apurar el tramite de los proximos agregados
+                    self.setCurrentBlockState(self.previousBlockState())
+                previous_user_data = self.currentBlock().previous().userData()
+                self.thread.addLine(
+                    self.currentBlock().blockNumber(),
+                    text,
+                    self.previousBlockState(),
+                    previous_user_data and previous_user_data.revision or -1
+                )
+                user_data = user_data or self.syntaxProcessor.emptyUserData()
 
             # ------ Formats
             for token in user_data.tokens:
