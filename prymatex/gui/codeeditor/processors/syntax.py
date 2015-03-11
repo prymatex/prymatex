@@ -11,16 +11,16 @@ def _revision(scope, text, state):
     return hash("%s:%s:%d" % (scope, text, state))
 
 class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
-    NO_STATE = -1
+    NOT_STATE = -1
+    NOT_REVISION = -1
     SINGLE_LINE = 1
     MULTI_LINE = 2
-    NO_REVISION = -1
     CACHE = {}
     def __init__(self, editor):
         CodeEditorBaseProcessor.__init__(self, editor)
         self.stack = []
         self.scope = None
-        self.state = self.NO_STATE
+        self.state = self.NOT_STATE
         self.stacks = {}
         default_syntax = self.editor.application().supportManager.getBundleItem(self.editor.default_syntax)
         self.setScopeName(default_syntax.scopeName)
@@ -29,7 +29,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.scope_name = name
         self.empty_scope = Scope(self.scope_name)
         self.empty_token = CodeEditorToken(0, 0, self.empty_scope, "")
-        self.empty_user_data = CodeEditorBlockUserData((self.empty_token, ), "", self.NO_STATE, self.NO_REVISION)
+        self.empty_user_data = CodeEditorBlockUserData((self.empty_token, ), "", self.NOT_STATE, self.NOT_REVISION)
     
     def scopeName(self):
         return self.scope_name
@@ -73,7 +73,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     def testRevision(self, block):
         return block.userData() is not None and block.userData().revision == self.blockRevision(block)
         
-    def textUserData(self, text, previous_state=NO_STATE, previous_revision=NO_REVISION):
+    def textUserData(self, text, previous_state=NOT_STATE, previous_revision=NOT_REVISION):
         if not self.isReady():
             return self.empty_user_data
 
@@ -81,8 +81,8 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         if revision not in self.CACHE:
             # ------ Restore Stack State
             self.state = previous_state
-            if revision in self.stacks:
-                self.stack, self.scope = self.stacks[revision]
+            if previous_revision in self.stacks:
+                self.stack, self.scope = self.stacks[previous_revision]
             else:
                 self.stack, self.scope = ([(self.bundleItem.grammar, None)], Scope(self.bundleItem.scopeName))
     
@@ -101,7 +101,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         return self.textUserData(
             block.text() + "\n",
             block.previous().userState(),
-            user_data and user_data.revision or self.NO_REVISION
+            user_data and user_data.revision or self.NOT_REVISION
         )
 
     # -------- Parsing

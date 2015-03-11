@@ -8,7 +8,7 @@ from .base import CodeEditorBaseMode
 class CodeEditorSnippetMode(CodeEditorBaseMode):
     def name(self):
         return "SNIPPET"
-    
+
     def initialize(self, **kwargs):
         super(CodeEditorSnippetMode, self).initialize(**kwargs)
         self.processor = self.editor.findProcessor("snippet")
