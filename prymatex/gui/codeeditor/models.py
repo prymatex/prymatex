@@ -24,19 +24,13 @@ class FoldingListModel(QtCore.QAbstractListModel):
         self.flags = []
         self.folded = []
         
-        self.editor.document().contentsChange.connect(self.on_document_contentsChange)
-
         #Connects
-        #self.editor.highlighter().aboutToChange.connect(
-        #    self.on_editor_aboutToHighlightChange
-        #)
-        #self.editor.highlighter().ready.connect(
-        #    self.on_editor_highlightingReady
-        #)
-        #self.editor.highlighter().changed.connect(
-        #    self.on_editor_highlightChanged
-        #)
-
+        self.editor.highlighter().changed.connect(
+            self.on_highlighter_changed
+        )
+        self.editor.highlighter().aboutToChange.connect(
+            self.on_highlighter_aboutToChange
+        )
         # Images
         self.foldingellipsisImage = self.editor.resources().get_image(":/sidebar/folding-ellipsis.png")
 
@@ -62,34 +56,20 @@ class FoldingListModel(QtCore.QAbstractListModel):
             return self.foldingellipsisImage
 
     # --------------- Signals   
-    def on_document_contentsChange(self, position, removed, added):
+    def on_highlighter_changed(self, indexes):
+        position = self.editor.document().findBlockByNumber(indexes[0]).position()
         remove = [ folding_cursor 
             for folding_cursor in self.foldings \
             if folding_cursor.position() == position ]
         for folding_cursor in remove:
             self._remove_folding_cursor(folding_cursor)
-        block = self.editor.document().findBlock(position)
-        last = self.editor.document().findBlock(position + added)
-        while self.editor.isBlockReady(block):
+        for index in indexes:
+            block = self.editor.document().findBlockByNumber(index)
             self._add_folding(block)
-            if block == last:
-                break
-            block = block.next()
 
-    def on_editor_aboutToHighlightChange(self):
+    def on_highlighter_aboutToChange(self):
         self.foldings = []
         self.flags = []
-        self.editor.document().contentsChange.disconnect(self.on_document_contentsChange)
-        self.layoutChanged.emit()
-    
-    def on_editor_highlightingReady(self):
-        block = self.editor.document().begin()
-        while block.isValid():
-            self._add_folding(block)
-            block = block.next()
-        
-    def on_editor_highlightChanged(self):
-        self.editor.document().contentsChange.connect(self.on_document_contentsChange)
         self.layoutChanged.emit()
         
     def _add_folding(self, block):
@@ -331,22 +311,17 @@ class SymbolListModel(QtCore.QAbstractListModel):
             ("meta", "typedef"): editor.resources().get_icon("symbol-typedef"),
             ("meta", "variable"): editor.resources().get_icon("symbol-variable")
         }
-        
-        self.editor.document().contentsChange.connect(self.on_document_contentsChange)
-
         #Connects
-        #self.editor.highlighter().aboutToChange.connect(
-        #    self.on_editor_aboutToHighlightChange
-        #)
-        #self.editor.highlighter().ready.connect(
-        #    self.on_editor_highlightingReady
-        #)
-        #self.editor.highlighter().changed.connect(
-        #    self.on_editor_highlightChanged
-        #)
+        self.editor.highlighter().changed.connect(
+            self.on_highlighter_changed
+        )
+        self.editor.highlighter().aboutToChange.connect(
+            self.on_highlighter_aboutToChange
+        )
      
     # --------------- Signals   
-    def on_document_contentsChange(self, position, removed, added):
+    def on_highlighter_changed(self, indexes):
+        position = self.editor.document().findBlockByNumber(indexes[0]).position()
         remove = [ symbol_cursor 
             for symbol_cursor in self.symbols \
             if symbol_cursor.position() == position ]
@@ -355,29 +330,14 @@ class SymbolListModel(QtCore.QAbstractListModel):
             self.beginRemoveRows(QtCore.QModelIndex(), index, index)
             self.symbols.remove(symbol_cursor)
             self.endRemoveRows()
-        block = self.editor.document().findBlock(position)
-        last = self.editor.document().findBlock(position + added)
-        while self.editor.isBlockReady(block):
+        for index in indexes:
+            block = self.editor.document().findBlockByNumber(index)
             self._add_symbol(block)
-            if block == last:
-                break
-            block = block.next()
 
-    def on_editor_aboutToHighlightChange(self):
+    def on_highlighter_aboutToChange(self):
         self.symbols = []
-        self.editor.document().contentsChange.disconnect(self.on_document_contentsChange)
         self.layoutChanged.emit()
     
-    def on_editor_highlightingReady(self):
-        block = self.editor.document().begin()
-        while block.isValid():
-            self._add_symbol(block)
-            block = block.next()
-        
-    def on_editor_highlightChanged(self):
-        self.editor.document().contentsChange.connect(self.on_document_contentsChange)
-        self.layoutChanged.emit()
-
     def _add_symbol(self, block):
         symbol_cursor = self.editor.newCursorAtPosition(block.position())
         settings = self.editor.preferenceSettings(symbol_cursor)
