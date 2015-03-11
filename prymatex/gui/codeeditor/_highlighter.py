@@ -24,21 +24,19 @@ class HighlighterThread(QtCore.QThread):
         self._stopped = False
         self._scheduled = False
 
-    def isScheduled(self):
-        return self._scheduled
-    
-    def schedule(self):
-        self._scheduled = True
-        QtCore.QTimer.singleShot(2, self.start)
-
-    def setLine(self, index, text, previous_state, previous_revision):
+    def isRunning(self):
+        return self._scheduled or super(HighlighterThread, self).isRunning()
+        
+    def addLine(self, index, text, previous_state, previous_revision):
         if index not in self._running_states:
             self._indexes.add(index)
             self._texts[index] = text
             self._states[index] = (previous_state, previous_revision)
-        
-    def hasLines(self):
-        return bool(self._indexes)
+        if not self.isRunning() and self._indexes:
+            self._scheduled = True
+            time = previous_revision == -1 and 100 or 0
+            print(time)
+            QtCore.QTimer.singleShot(time, self.start)
 
     def start(self):
         self._stopped = False
@@ -74,18 +72,19 @@ class HighlighterThread(QtCore.QThread):
             self._running_texts = {}
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
-    changed = QtCore.Signal()        # On the highlight changed allways triggered
-    
+    changed = QtCore.Signal(list)        # On the highlight changed allways triggered
+    aboutToChange = QtCore.Signal()  
     def __init__(self, editor):
-        super(CodeEditorSyntaxHighlighter, self).__init__(editor.document())
-        self.editor = editor
         self._stopped = True
+        self.editor = editor
+        super(CodeEditorSyntaxHighlighter, self).__init__(editor.document())
         self.syntaxProcessor = editor.findProcessor("syntax")
         self.themeProcessor = editor.findProcessor("theme")
         self.editor.aboutToClose.connect(self.stop)
         self.thread = HighlighterThread(editor)
         self.thread.ready.connect(self.on_thread_ready)
         self.thread.changed.connect(self.on_thread_changed)
+        self.thread.changed.connect(self.changed.emit)
 
     def on_thread_changed(self, changes):
         print(changes[0], changes[-1], len(changes), changes[-1] - changes[0], self.syntaxProcessor.scope_name)
@@ -102,6 +101,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def start(self, callback=None):
         self._stopped = False
+        self.aboutToChange.emit()
         self.rehighlight()
 
     def highlightBlock(self, text):
@@ -110,7 +110,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             block = self.currentBlock()
             user_data = self.currentBlockUserData()
             if user_data is None:
-                self.thread.setLine(block.blockNumber(), text, -1, -1)
+                self.thread.addLine(block.blockNumber(), text, -1, -1)
                 user_data = self.syntaxProcessor.emptyUserData()
             elif user_data.revision == self.syntaxProcessor.textRevision(text, self.previousBlockState()):
                 self.setCurrentBlockState(user_data.state)
@@ -118,15 +118,13 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 # tengo que agregar el block pero tambien tengo que mentir un poco con el formato
                 previous_block = block.previous()
                 previous_user_data = previous_block.userData()
-                self.thread.setLine(block.blockNumber(), text, self.previousBlockState(), previous_user_data and previous_user_data.revision or -1)
+                self.thread.addLine(block.blockNumber(), text, self.previousBlockState(), previous_user_data and previous_user_data.revision or -1)
             elif user_data.state != self.previousBlockState():
                 # tegno que agregar el block y apurar el tramite de los proximos agregados
                 previous_block = block.previous()
                 previous_user_data = previous_block.userData()
-                self.thread.setLine(block.blockNumber(), text, self.previousBlockState(), previous_user_data and previous_user_data.revision or -1)
-            if self.thread.hasLines() and not (self.thread.isScheduled() or self.thread.isRunning()):
-                self.thread.schedule()
-
+                self.thread.addLine(block.blockNumber(), text, self.previousBlockState(), previous_user_data and previous_user_data.revision or -1)
+            
             # ------ Formats
             for token in user_data.tokens:
                 self.setFormat(token.start, token.end - token.start,
