@@ -63,17 +63,6 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     def endExecution(self, bundleItem):
         self.endParse(bundleItem.scopeName)
         CodeEditorBaseProcessor.endExecution(self, bundleItem)
-    
-    def restore(self, state, revision):
-        self.state = state
-        if revision in self.stacks:
-            self.stack, self.scope = self.stacks[revision]
-        elif self.isReady():
-            self.stack, self.scope = ([(self.bundleItem.grammar, None)], Scope(self.bundleItem.scopeName))
-
-    def save(self, state, revision):
-        if state == self.MULTI_LINE:
-            self.stacks[revision] = (self.stack[:], self.scope.clone())
 
     def textRevision(self, text, previous_state):
         return _revision(self.scope_name, text, previous_state)
@@ -83,7 +72,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
 
     def testRevision(self, block):
         return block.userData() is not None and block.userData().revision == self.blockRevision(block)
-            
+        
     def textUserData(self, text, previous_state=NO_STATE, previous_revision=NO_REVISION):
         if not self.isReady():
             return self.empty_user_data
@@ -91,13 +80,18 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         revision = _revision(self.scope_name, text, previous_state)
         if revision not in self.CACHE:
             # ------ Restore Stack State
-            self.restore(previous_state, previous_revision)
+            self.state = previous_state
+            if revision in self.stacks:
+                self.stack, self.scope = self.stacks[revision]
+            else:
+                self.stack, self.scope = ([(self.bundleItem.grammar, None)], Scope(self.bundleItem.scopeName))
     
             self.bundleItem.parseLine(self.stack, text, self)
             self.state = len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
             
             # ------- Save Stack State
-            self.save(self.state, revision)
+            if self.state == self.MULTI_LINE:
+                self.stacks[revision] = (self.stack[:], self.scope.clone())
             
             self.CACHE[revision] = (tuple(self.__tokens), text, self.state, revision)
         return CodeEditorBlockUserData(*self.CACHE[revision])

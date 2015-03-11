@@ -56,11 +56,9 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
     def activate(self):
         CodeEditorBaseMode.activate(self)
         self.editor.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
-        self.editor.syntaxHighlighter.stop()
 
     def deactivate(self):
         self.editor.viewport().setCursor(self.standardCursor)
-        self.editor.syntaxHighlighter.start()
         CodeEditorBaseMode.deactivate(self)
 
     def on_editor_cursorPositionChanged(self):

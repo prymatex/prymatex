@@ -10,94 +10,124 @@ from prymatex.gui.codeeditor.userdata import CodeEditorBlockUserData
 from prymatex.qt import QtCore, QtGui, QtWidgets, helpers
 
 class HighlighterThread(QtCore.QThread):
-    userDataReady = QtCore.Signal(int, CodeEditorBlockUserData)
-    def __init__(self, processor):
-        super(HighlighterThread, self).__init__()
-        self._lines = {}
-        self._order = []
-        self._processor = processor
+    ready = QtCore.Signal(int, CodeEditorBlockUserData)
+    changed = QtCore.Signal(list)
+    def __init__(self, editor):
+        super(HighlighterThread, self).__init__(editor)
+        self._indexes = set()
+        self._running_indexes = set()
+        self._texts = {}
+        self._running_texts = {}
+        self._states = {}
+        self._running_states = {}
+        self._processor = editor.findProcessor("syntax")
         self._stopped = False
+        self._scheduled = False
+
+    def isScheduled(self):
+        return self._scheduled
+    
+    def schedule(self):
+        self._scheduled = True
+        QtCore.QTimer.singleShot(2, self.start)
 
     def setLine(self, index, text, previous_state, previous_revision):
-        self._lines[index] = (index, text, previous_state, previous_revision)
-        if index not in self._order:
-            self._order.insert(bisect(self._order, index), index)
+        if index not in self._running_states:
+            self._indexes.add(index)
+            self._texts[index] = text
+            self._states[index] = (previous_state, previous_revision)
+        
+    def hasLines(self):
+        return bool(self._indexes)
 
     def start(self):
         self._stopped = False
         super(HighlighterThread, self).start()
+        self._scheduled = False
         
     def stop(self):
         self._stopped = True
-        self._lines = {}
-        self._order = []
+        self._indexes = set()
+        self._texts = {}
+        self._states = {}
         self.wait()
-
+        
     def run(self):
-        index = next_index = -1
-        user_data = None
-        self.first = self.last = self._order and self._order[0] or 0
-        while not self._stopped and self._lines:
-            self.last = self._order.pop(0)
-            if self.last < self.first:
-                self.first = self.last
-            index, text, previous_state, previous_revision = self._lines.pop(self.last)
-            if user_data is not None and index == next_index:
-                previous_revision = user_data.revision
-                prevouse_state = user_data.state
-            user_data = self._processor.textUserData(
-                text, previous_state, previous_revision
-            )
-            next_index = index + 1
-            self.userDataReady.emit(index, user_data)
-            self.usleep(0.5)
+        while not self._stopped and self._indexes:
+            self._running_indexes = sorted(self._indexes)
+            self._running_states = self._states.copy()
+            self._running_texts = self._texts.copy()
+            self._indexes = set()
+            self._texts = {}
+            self._states = {}
+            for index in self._running_indexes:
+                text = self._running_texts[index]
+                previous_state, previous_revision = self._running_states[index]
+                user_data = self._processor.textUserData(
+                    text, previous_state, previous_revision
+                )
+                self._running_states[index + 1] = (user_data.state, user_data.revision)
+                self.ready.emit(index, user_data)
+            self.changed.emit(self._running_indexes)
+            self._running_indexes = set()
+            self._running_states = {}
+            self._running_texts = {}
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     changed = QtCore.Signal()        # On the highlight changed allways triggered
     
     def __init__(self, editor):
-        super(CodeEditorSyntaxHighlighter, self).__init__(editor)
+        super(CodeEditorSyntaxHighlighter, self).__init__(editor.document())
         self.editor = editor
+        self._stopped = True
         self.syntaxProcessor = editor.findProcessor("syntax")
         self.themeProcessor = editor.findProcessor("theme")
         self.editor.aboutToClose.connect(self.stop)
-        self.thread = HighlighterThread(
-            self.syntaxProcessor
-        )
-        self.thread.userDataReady.connect(self.on_thread_userDataReady)
-        self.thread.finished.connect(self.print_number)
+        self.thread = HighlighterThread(editor)
+        self.thread.ready.connect(self.on_thread_ready)
+        self.thread.changed.connect(self.on_thread_changed)
 
-    def print_number(self):
-        print(self.thread.first, self.thread.last, self.syntaxProcessor.scope_name)
+    def on_thread_changed(self, changes):
+        print(changes[0], changes[-1], len(changes), changes[-1] - changes[0], self.syntaxProcessor.scope_name)
         
-    def on_thread_userDataReady(self, index, user_data):
+    def on_thread_ready(self, index, user_data):
         block = self.document().findBlockByNumber(index)
         block.setUserData(user_data)
         self.rehighlightBlock(block)
     
     def stop(self):
-        self.setDocument(None)
         if self.thread.isRunning():
             self.thread.stop()
+        self._stopped = True
 
     def start(self, callback=None):
-        self.setDocument(self.editor.document())
+        self._stopped = False
+        self.rehighlight()
 
     def highlightBlock(self, text):
-        text = text + '\n'
-        user_data = self.currentBlockUserData()
-        if user_data is not None and user_data.revision == self.syntaxProcessor.textRevision(text, self.previousBlockState()):
-            self.setCurrentBlockState(user_data.state)
-        else:
+        if not self._stopped:
+            text = text + '\n'
             block = self.currentBlock()
-            previous_block = block.previous()
-            previous_user_data = previous_block.userData()
-            self.thread.setLine(block.blockNumber(), text, self.previousBlockState(), previous_user_data and previous_user_data.revision or -1)
-            if not self.thread.isRunning():
-                QtCore.QTimer.singleShot(0, self.thread.start)
-            user_data = block.userData() or self.syntaxProcessor.emptyUserData()
+            user_data = self.currentBlockUserData()
+            if user_data is None:
+                self.thread.setLine(block.blockNumber(), text, -1, -1)
+                user_data = self.syntaxProcessor.emptyUserData()
+            elif user_data.revision == self.syntaxProcessor.textRevision(text, self.previousBlockState()):
+                self.setCurrentBlockState(user_data.state)
+            elif user_data.blockText() != text:
+                # tengo que agregar el block pero tambien tengo que mentir un poco con el formato
+                previous_block = block.previous()
+                previous_user_data = previous_block.userData()
+                self.thread.setLine(block.blockNumber(), text, self.previousBlockState(), previous_user_data and previous_user_data.revision or -1)
+            elif user_data.state != self.previousBlockState():
+                # tegno que agregar el block y apurar el tramite de los proximos agregados
+                previous_block = block.previous()
+                previous_user_data = previous_block.userData()
+                self.thread.setLine(block.blockNumber(), text, self.previousBlockState(), previous_user_data and previous_user_data.revision or -1)
+            if self.thread.hasLines() and not (self.thread.isScheduled() or self.thread.isRunning()):
+                self.thread.schedule()
 
-        # ------ Formats
-        for token in user_data.tokens:
-            self.setFormat(token.start, token.end - token.start,
-                self.themeProcessor.textCharFormat(token.scope))
+            # ------ Formats
+            for token in user_data.tokens:
+                self.setFormat(token.start, token.end - token.start,
+                    self.themeProcessor.textCharFormat(token.scope))
