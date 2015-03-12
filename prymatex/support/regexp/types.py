@@ -265,16 +265,21 @@ class PlaceholderTransformType(PlaceholderTypeMixin):
             "".join([ "%s" % frmt for frmt in self.format]),
             "".join(self.options))
     
-    def replace(self, memodict, holders = None, match = None, variables = None):
+    def replace(self, memodict, holders=None, match=None, variables=None):
         text = ""
         value = holders[self.index].replace(memodict, holders, match, variables)
         match = self.pattern.search(value)
+        index = 0
         while match:
-            text += "".join([ frmt.replace(memodict, holders, match, variables) for frmt in self.format])
+            if self.format:
+                text += value[index:match.start()] + "".join([ frmt.replace(memodict, holders, match, variables) for frmt in self.format])
+            else:
+                text += value[index:match.start()]
+            index = match.end()
             if 'g' not in self.options:
                 break
             match = self.pattern.search(value, match.end())
-        return text
+        return text + value[index:]
 
     def render(self, visitor, memodict, holders = None, match = None):
         memo = memodict.get_or_create(self)
