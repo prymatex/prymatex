@@ -114,124 +114,163 @@ class ProjectsDockActionsMixin(object):
         return contextMenu
 
     def _indexes_context_menu(self, indexes):
-        if len(indexes) == 1:
-            return self._index_context_menu(indexes[0])
-
+        indexed_nodes = [(index, self.projectTreeProxyModel.node(index)) \
+            for index in indexes]
+        items = []
+        items.extend(self._project_menu_items(indexed_nodes))
+        items.extend(self._source_folder_menu_items(indexed_nodes))
+        items.extend(self._directory_menu_items(indexed_nodes))
+        items.extend(self._file_menu_items(indexed_nodes))
+        items.extend(self._path_menu_items(indexed_nodes))
+        items.extend(self._has_children_menu_items(indexed_nodes))
+        items.extend(self._bundles_menu_items(indexed_nodes))
+        items.extend([{
+            'text': "Properties"
+        }])
         contextMenu = { 
-            'text': "Indexes context",
-            'items': [
-                {   
-                    'text': "Copy"
-                },
-                {   
-                    'text': "Paste"
-                }, "-"
-            ]
+            'text': "Index context",
+            'items': items
         }
         contextMenu, objects = create_menu(self, contextMenu)
         return contextMenu
+
+    def _project_menu_items(self, indexed_nodes):
+        items = []
+        projects = [ indexed_node for indexed_node in indexed_nodes if \
+            indexed_node[1].isProject()]
+        if projects:
+            items.extend([
+                {
+                    'text': "Add Source Folder",
+                    'triggered': lambda checked=False, values=projects: [ self.addSourceFolder(*value) for value in values ]
+                }, {
+                    'text': "Project Bundles",
+                    'triggered': lambda checked=False, values=projects: [ self.projectBundles(*value) for value in values ]
+                }, {
+                    'text': "Select Related Bundles ",
+                    'triggered': lambda checked=False, values=projects: [ self.selectRelatedBundles(*value) for value in values ]
+                }, "-"
+            ])
+        return items
     
-    def _project_menu_items(self, indexes):
-        return [
-            {
-                'text': "Add Source Folder",
-                'triggered': lambda checked=False, indexes=indexes: [ self.addSourceFolder(index) for index in indexes ]
-            }, {
-                'text': "Project Bundles",
-                'triggered': lambda checked=False, indexes=indexes: [ self.projectBundles(index) for index in indexes ]
-            }, {
-                'text': "Select Related Bundles ",
-                'triggered': lambda checked=False, indexes=indexes: [ self.selectRelatedBundles(index) for index in indexes ]
-            }, "-"
-        ]
-    
-    def _source_folder_menu_items(self, indexes):
-        return [
-            {
-                'text': "Remove Source Folder",
-                'triggered': lambda checked=False, indexes=indexes: [ self.removeSourceFolder(index) for index in indexes ]
-            }, "-"
-        ]
+    def _source_folder_menu_items(self, indexed_nodes):
+        items = []
+        sources = [ indexed_node for indexed_node in indexed_nodes if \
+            indexed_node[1].isSourceFolder()]
+        if sources:
+            items.extend([
+                {
+                    'text': "Remove Source Folder",
+                    'triggered': lambda checked=False, values=sources: [ self.removeSourceFolder(*value) for value in values ]
+                }, "-"
+            ])
+        return items
             
-    def _directory_menu_items(self, indexes):
-        return [
-            {
-                'text': "New Folder",
-                'triggered': lambda checked=False, indexes=indexes: [ self.newFolder(index) for index in indexes ]
-            },
-            {
-                'text': "New File",
-                'triggered': lambda checked=False, indexes=indexes: [ self.newFile(index) for index in indexes ]
-            },
-            {
-                 'text': "New From Template",
-                 'triggered': lambda checked=False, indexes=indexes: [ self.newFromTemplate(index) for index in indexes ]
-            }, "-",
-            {
-                 'text': "Open Folder",
-                 'triggered': lambda checked=False, indexes=indexes: [ self.openFolder(index) for index in indexes ]
-            },
-            {
-                 'text': "Open System Editor",
-                 'triggered': lambda checked=False, indexes=indexes: [ self.openSystemEditor(index) for index in indexes ]
-            }, "-"
-        ]
+    def _directory_menu_items(self, indexed_nodes):
+        items = []
+        directories = [ indexed_node for indexed_node in indexed_nodes if \
+            indexed_node[1].isDirectory()]
+        if directories:
+            items.extend([
+                {
+                    'text': "New Folder",
+                    'triggered': lambda checked=False, values=directories: [ self.newFolder(*value) for value in values ]
+                },
+                {
+                    'text': "New File",
+                    'triggered': lambda checked=False, values=directories: [ self.newFile(*value) for value in values ]
+                },
+                {
+                     'text': "New From Template",
+                     'triggered': lambda checked=False, values=directories: [ self.newFromTemplate(*value) for value in values ]
+                }, "-",
+                {
+                     'text': "Open Folder",
+                     'triggered': lambda checked=False, values=directories: [ self.openFolder(*value) for value in values ]
+                },
+                {
+                     'text': "Open System Editor",
+                     'triggered': lambda checked=False, values=directories: [ self.openSystemEditor(*value) for value in values ]
+                }, "-"
+            ])
+        return items
     
-    def _file_menu_items(self, indexes):
-        return [
-            {
-                 'text': "Open File",
-                 'triggered': lambda checked=False, indexes=indexes: [ self.openFile(index) for index in indexes ]
-            },
-            {
-                 'text': "Open System Editor",
-                 'triggered': lambda checked=False, indexes=indexes: [ self.openSystemEditor(index) for index in indexes ]
-            }, "-"
-        ]
+    def _file_menu_items(self, indexed_nodes):
+        items = []
+        files = [ indexed_node for indexed_node in indexed_nodes if \
+            indexed_node[1].isFile()]
+        if files:
+            items.extend([
+                {
+                     'text': "Open File",
+                     'triggered': lambda checked=False, values=files: [ self.openFile(*value) for value in values ]
+                },
+                {
+                     'text': "Open System Editor",
+                     'triggered': lambda checked=False, values=files: [ self.openSystemEditor(*value) for value in values ]
+                }, "-"
+            ])
+        return items
 
-    def _path_menu_items(self, indexes):
-        return [
-            {
-                'text': "Cut" 
-            },
-            {
-                'text': "Copy" 
-            },
-            {
-                'text': "Paste" 
-            },
-            {
-                'text': "Delete" 
-            },
-            {
-                'text': "Rename" 
-            }, "-"
-        ]
+    def _path_menu_items(self, indexed_nodes):
+        items = []
+        paths = [ indexed_node for indexed_node in indexed_nodes if \
+            indexed_node[1].isDirectory() or indexed_node[1].isFile() and not indexed_node[1].isSourceFolder()]
+        if paths:
+            items.extend([
+                {
+                    'text': "Cut",
+                    'triggered': lambda checked=False, values=paths: self.cut(values)
+                },
+                {
+                    'text': "Copy",
+                    'triggered': lambda checked=False, values=paths: self.copy(values)
+                },
+                {
+                    'text': "Paste",
+                    'triggered': lambda checked=False, values=paths: self.paste(values)
+                },
+                {
+                    'text': "Delete",
+                    'triggered': lambda checked=False, values=paths: self.delete(values)
+                },
+                {
+                    'text': "Rename",
+                    'triggered': lambda checked=False, values=paths: self.rename(values)
+                }, "-"
+            ])
+        return items
 
-    def _has_children_menu_items(self, node, indexes):
-        return [
-            {
-                 'text': "Go Down",
-                 'triggered': lambda checked=False, indexes=indexes: [self.goDown(index) for index in indexes]
-            },
-            {
-                 'text': "Refresh",
-                 'triggered': lambda checked=False, indexes=indexes: [self.projectTreeProxyModel.refresh(index) for index in indexes]
-            }, "-"
-        ]
+    def _has_children_menu_items(self, indexed_nodes):
+        items = []
+        parents = [ indexed_node for indexed_node in indexed_nodes if \
+            indexed_node[1].hasChildren()]
+        if parents:
+            items.extend([
+                {
+                     'text': "Go Down",
+                     'triggered': lambda checked=False, values=parents: [self.goDown(*value) for value in values]
+                },
+                {
+                     'text': "Refresh",
+                     'triggered': lambda checked=False, values=parents: [self.projectTreeProxyModel.refresh(*value) for value in values]
+                }, "-"
+            ])
+        return items
 
-    def _addons_menu_item(self, node, indexes):
+    def _addons_menu_item(self, indexed_nodes):
         # Menu de addons
-        addon_menues = [component.contributeToContextMenu(node) for \
+        addon_menues = [component.contributeToContextMenu(indexed_nodes) for \
             component in self.components()]
         if addon_menues:
             addon_menues.append("-")
         return addon_menues
         
-    def _bundles_menu_items(self, node, indexes):
+    def _bundles_menu_items(self, indexed_nodes):
         # Menu de bundles relacionados al proyecto
+        indexes, nodes = zip(*indexed_nodes)
         bundles = [self.application().supportManager.getManagedObject(uuid) for \
-            uuid in node.project().bundles ]
+            uuid in nodes[0].project().bundles ]
         #Filter None bundles
         bundles = sorted(filter(lambda bundle: bundle is not None, bundles), 
             key=lambda bundle: bundle.name
@@ -293,63 +332,63 @@ class ProjectsDockActionsMixin(object):
         contex_menu.popup(self.treeViewProjects.mapToGlobal(point))
 
     # --------- Remove and add source Folders
-    def removeSourceFolder(self, index):
-        node = self.projectTreeProxyModel.node(index)
+    def removeSourceFolder(self, index, node=None):
+        node = node or self.projectTreeProxyModel.node(index)
         project = node.project()
         project.removeSourceFolder(node.path())
         self.projectTreeProxyModel.refresh(index.parent())
 
-    def addSourceFolder(self, index):
-        node = self.projectTreeProxyModel.node(index)
+    def addSourceFolder(self, index, node=None):
+        node = node or self.projectTreeProxyModel.node(index)
         source_folder_path = getExistingDirectory(self, caption="Add Source Folder to %s" % node.nodeName())
         if source_folder_path:
             node.addSourceFolder(source_folder_path)
             self.projectTreeProxyModel.refresh(index)
 
     # -------------- Project Bundles
-    def selectRelatedBundles(self, index):
+    def selectRelatedBundles(self, index, node=None):
         pass
         
-    def projectBundles(self, index):
+    def projectBundles(self, index, node=None):
         pass
 
     # -------------- Open indexes, files or directories
-    def openFolder(self, index):
-        node = self.projectTreeProxyModel.node(index)
+    def openFolder(self, index, node=None):
+        node = node or self.projectTreeProxyModel.node(index)
         self.application().openDirectory(node.path())
 
-    def openFile(self, index):
-        node = self.projectTreeProxyModel.node(index)
+    def openFile(self, index, node=None):
+        node = node or self.projectTreeProxyModel.node(index)
         self.application().openFile(node.path())
 
-    def openSystemEditor(self, index):
-        node = self.projectTreeProxyModel.node(index)
+    def openSystemEditor(self, index, node=None):
+        node = node or self.projectTreeProxyModel.node(index)
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % node.path(), QtCore.QUrl.TolerantMode))
 
-    def newFile(self, index):
-        node = self.projectTreeProxyModel.node(index)
+    def newFile(self, index, node=None):
+        node = node or self.projectTreeProxyModel.node(index)
         file_path = self.fileManager.createFileDialog(node.path())
         if file_path is not None:
             self.application().openFile(file_path)
             #TODO: si esta en auto update ver como hacer los refresh
             self.projectTreeProxyModel.refresh(index)
     
-    def newFromTemplate(self, index):
-        node = self.projectTreeProxyModel.node(index)
+    def newFromTemplate(self, index, node=None):
+        node = node or self.projectTreeProxyModel.node(index)
         file_path = self.templateDialog.createFile(fileDirectory = node.path())
         if file_path is not None:
             self.application().openFile(file_path)
             #TODO: si esta en auto update ver como hacer los refresh
             self.projectTreeProxyModel.refresh(index)
     
-    def newFolder(self, index):
-        node = self.projectTreeProxyModel.node(index)
+    def newFolder(self, index, node=None):
+        node = node or self.projectTreeProxyModel.node(index)
         directory_path = self.fileManager.createDirectoryDialog(node.path())
         if directory_path is not None:
             #TODO: si esta en auto update ver como hacer los refresh
             self.projectTreeProxyModel.refresh(index)
 
-    def goDown(self, index):
-        node = self.projectTreeProxyModel.node(index)
+    def goDown(self, index, node=None):
+        node = node or self.projectTreeProxyModel.node(index)
         self.setWindowTitle(node)
         self.treeViewProjects.setRootIndex(index)
