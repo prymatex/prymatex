@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import create_menu
@@ -83,32 +84,6 @@ class ProjectsDockActionsMixin(object):
         contextMenu = { 
             'text': "Not index context",
             'items': [ action_new_project, action_open_project ]
-        }
-        contextMenu, objects = create_menu(self, contextMenu)
-        return contextMenu
-        
-    def _index_context_menu(self, index):
-        node = self.projectTreeProxyModel.node(index)
-        items = []
-        if node.isProject():
-            items.extend(self._project_menu_items([ index ]))
-        elif node.isDirectory():
-            if node.isSourceFolder():
-                items.extend(self._source_folder_menu_items([ index ]))
-            items.extend(self._directory_menu_items([ index ]))
-        elif node.isFile():
-            items.extend(self._file_menu_items([ index ]))
-        if node.isDirectory() or node.isFile() and not node.isSourceFolder():
-            items.extend(self._path_menu_items([ index ]))
-        if node.childCount() > 0:
-            items.extend(self._has_children_menu_items(node, [ index ]))
-        items.extend(self._bundles_menu_items(node, [ index ]))
-        items.extend([{
-            'text': "Properties"
-        }])
-        contextMenu = { 
-            'text': "Index context",
-            'items': items
         }
         contextMenu, objects = create_menu(self, contextMenu)
         return contextMenu
@@ -347,10 +322,13 @@ class ProjectsDockActionsMixin(object):
 
     # -------------- Project Bundles
     def selectRelatedBundles(self, index, node=None):
-        pass
+        node = node or self.projectTreeProxyModel.node(index)
+        self.projectManager.projectMenuProxyModel.setCurrentProject(node)
+        self.bundleFilterDialog.exec_()
         
     def projectBundles(self, index, node=None):
-        pass
+        node = node or self.projectTreeProxyModel.node(index)
+        self.bundleEditorDialog.execEditor(namespaceFilter=node.namespaceName)
 
     # -------------- Open indexes, files or directories
     def openFolder(self, index, node=None):
@@ -392,3 +370,90 @@ class ProjectsDockActionsMixin(object):
         node = node or self.projectTreeProxyModel.node(index)
         self.setWindowTitle(node)
         self.treeViewProjects.setRootIndex(index)
+
+    def copy(self, indexes_nodes=None):
+        if indexes_nodes:
+            indexes, _ = zip(*indexes_nodes)
+        else:
+            indexes = self.treeViewProjects.selectedIndexes()
+        mimeData = self.projectTreeProxyModel.mimeData(indexes)
+        self.application().clipboard().setMimeData(mimeData)
+        
+    def cut(self, indexes_nodes=None):
+        if indexes_nodes:
+            indexes, _ = zip(*indexes_nodes)
+        else:
+            indexes = self.treeViewProjects.selectedIndexes()
+        mimeData = self.projectTreeProxyModel.mimeData(indexes)
+        self.application().clipboard().setMimeData(mimeData)
+        
+    def paste(self, indexes_nodes=None):
+        if indexes_nodes is None:
+            indexes_nodes = [ (index, self.projectTreeProxyModel.node(index)) \
+                for index in self.treeViewProjects.selectedIndexes() ]
+
+        mimeData = self.application().clipboard().mimeData()
+        for index, node in indexes_nodes:
+            if mimeData.hasUrls() and node.isDirectory():
+                for url in mimeData.urls():
+                    srcPath = url.toLocalFile()
+                    basename = self.application().fileManager.basename(srcPath)
+                    dstPath = os.path.join(node.path(), basename)
+                    while self.application().fileManager.exists(dstPath):
+                        basename, ret = ReplaceRenameInputDialog.getText(self, _("Already exists"), 
+                            _("Destiny already exists\nReplace or or replace?"), text = basename, )
+                        if ret == ReplaceRenameInputDialog.Cancel: return
+                        if ret == ReplaceRenameInputDialog.Replace: break
+                        dstPath = os.path.join(node.path(), basename)
+                    if os.path.isdir(srcPath):
+                        self.application().fileManager.copytree(srcPath, dstPath)
+                    else:
+                        self.application().fileManager.copy(srcPath, dstPath)
+                self.projectTreeProxyModel.refresh(index)
+    
+    def delete(self, indexes_nodes=None):
+        if indexes_nodes is None:
+            indexes_nodes = [ (index, self.projectTreeProxyModel.node(index)) \
+                for index in self.treeViewProjects.selectedIndexes() ]
+        projects = []
+        sources = []
+        paths = []
+
+        for index, node in indexes_nodes:
+            if node.isProject():
+                #Es proyecto
+                question = CheckableMessageBox.questionFactory(self,
+                    "Delete project",
+                    "Are you sure you want to delete project '%s' from the workspace?" % node.nodeName(),
+                    "Delete project contents on disk (cannot be undone)",
+                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel,
+                    QtWidgets.QMessageBox.Yes
+                )
+                question.setDetailedText("Project location:\n%s" % node.path())
+                ret = question.exec_()
+                if ret == QtWidgets.QMessageBox.Yes:
+                    projects.append((index, node, question.isChecked()))
+                elif ret == QtWidgets.QMessageBox.Cancel:
+                    return
+            elif node.isSourceFolder():
+                sources.append((index, node))
+            else:
+                paths.append((index, node))
+        
+        # TODO Que pasa con los proyectos y si un path es subpath de otro?
+        for index, node in paths:
+            self.fileManager.deletePathDialog(node.path())
+            self.projectTreeProxyModel.refresh(index.parent())
+        for index, node in sources:
+            self.removeSourceFolder(index, node)
+        for index, node in projects:
+            # TODO Esto de eliminar proyectos
+            pass
+        
+    def rename(self, indexes_nodes=None):
+        if indexes_nodes is None:
+            indexes_nodes = [ (index, self.projectTreeProxyModel.node(index)) \
+                for index in self.treeViewProjects.selectedIndexes() ]
+        for index, node in indexes_nodes:
+            self.renamePath(node.path())
+            self.projectTreeProxyModel.refresh(index)

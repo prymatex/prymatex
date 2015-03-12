@@ -157,38 +157,6 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
         return self.application().fileManager.directory(self.currentPath())
 
     @QtCore.Slot()
-    def on_actionDelete_triggered(self):
-        indexes = self.treeViewProjects.selectedIndexes()
-        projects = []
-        paths = []
-
-        for index in indexes:
-            node = self.projectTreeProxyModel.node(index)
-            if node.isproject:
-                #Es proyecto
-                question = CheckableMessageBox.questionFactory(self,
-                    "Delete project",
-                    "Are you sure you want to delete project '%s' from the workspace?" % node.name,
-                    "Delete project contents on disk (cannot be undone)",
-                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel,
-                    QtWidgets.QMessageBox.Yes
-                )
-                question.setDetailedText("Project location:\n%s" % node.path())
-                ret = question.exec_()
-                if ret == QtWidgets.QMessageBox.Yes:
-                    projects.append((node, question.isChecked()))
-                elif ret == QtWidgets.QMessageBox.Cancel:
-                    return
-            else:
-                paths.append(node)
-        
-        # TODO Que pasa con los proyectos y si un path es subpath de otro?
-        for node in paths:
-            self.deletePath(node.path())
-        for index in indexes:
-            self.projectTreeProxyModel.refresh(index.parent())
-
-    @QtCore.Slot()
     def on_actionRemove_triggered(self):
         node = self.currentNode()
         if node.isproject:
@@ -200,23 +168,6 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
             )
             if ret == QtWidgets.QMessageBox.Ok:
                 self.application().projectManager.removeProject(node)
-
-    @QtCore.Slot()
-    def on_actionRename_triggered(self):
-        self.renamePath(self.currentPath())
-        self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
-
-    @QtCore.Slot()
-    def on_actionCloseProject_triggered(self):
-        treeNode = self.currentNode()
-        if treeNode.isproject:
-            self.application().projectManager.closeProject(treeNode)
-    
-    @QtCore.Slot()
-    def on_actionOpenProject_triggered(self):
-        treeNode = self.currentNode()
-        if treeNode.isproject:
-            self.application().projectManager.openProject(treeNode)
     
     @QtCore.Slot()
     def on_actionProperties_triggered(self):
@@ -227,74 +178,11 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
         if editor.hasFile():
             index = self.projectTreeProxyModel.indexForPath(editor.filePath())
             self.treeViewProjects.setCurrentIndex(index)
-
-    @QtCore.Slot()
-    def on_actionProjectBundles_triggered(self):
-        self.bundleEditorDialog.execEditor(namespaceFilter = self.currentNode().namespaceName)
-    
-    @QtCore.Slot()
-    def on_actionSelectRelatedBundles_triggered(self):
-        project = self.currentNode()
-        self.projectManager.projectMenuProxyModel.setCurrentProject(project)
-        self.bundleFilterDialog.exec_()
-        
-    @QtCore.Slot()
-    def on_actionCopy_triggered(self):
-        mimeData = self.projectTreeProxyModel.mimeData( self.treeViewProjects.selectedIndexes() )
-        self.application().clipboard().setMimeData(mimeData)
-        
-    @QtCore.Slot()
-    def on_actionCut_triggered(self):
-        mimeData = self.projectTreeProxyModel.mimeData( self.treeViewProjects.selectedIndexes() )
-        self.application().clipboard().setMimeData(mimeData)
-        
-    @QtCore.Slot()
-    def on_actionPaste_triggered(self):
-        parentPath = self.currentPath()
-        mimeData = self.application().clipboard().mimeData()
-        if mimeData.hasUrls() and os.path.isdir(parentPath):
-            for url in mimeData.urls():
-                srcPath = url.toLocalFile()
-                basename = self.application().fileManager.basename(srcPath)
-                dstPath = os.path.join(parentPath, basename)
-                while self.application().fileManager.exists(dstPath):
-                    basename, ret = ReplaceRenameInputDialog.getText(self, _("Already exists"), 
-                        _("Destiny already exists\nReplace or or replace?"), text = basename, )
-                    if ret == ReplaceRenameInputDialog.Cancel: return
-                    if ret == ReplaceRenameInputDialog.Replace: break
-                    dstPath = os.path.join(parentPath, basename)
-                if os.path.isdir(srcPath):
-                    self.application().fileManager.copytree(srcPath, dstPath)
-                else:
-                    self.application().fileManager.copy(srcPath, dstPath)
-            self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
  
-    # # ---------- SIGNAL: pushButtonGoUp.pressed
+    # ---------- SIGNAL: pushButtonGoUp.pressed
     @QtCore.Slot()
     def on_pushButtonGoUp_pressed(self):
         index = self.projectTreeProxyModel.parent(self.treeViewProjects.rootIndex())
         self.treeViewProjects.setRootIndex(index)
         node = self.projectTreeProxyModel.node(index)
         self.setWindowTitle(node)
-    
-    #================================================
-    # Helper actions
-    #================================================
-    def refresh(self):
-        self.on_actionRefresh_triggered()
-        
-    def copy(self, checked=False):
-        self.on_actionCopy_triggered()
-        
-    def paste(self, checked=False):
-        self.on_actionPaste_triggered()
-        
-    def cut(self, checked=False):
-        self.on_actionCut_triggereda()
-
-    def delete(self, checked=False):
-        self.on_actionDelete_triggered()
-        
-    def rename(self):
-        self.on_actionRefresh_triggered()
-
