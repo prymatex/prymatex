@@ -190,7 +190,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
 
     def getAllProjects(self):
         #TODO: devolver un copia o no hace falta?
-        return self.projectTreeModel.rootNode.childNodes()
+        return self.projectTreeModel.rootNode.children()
 
     def closeProject(self, project):
         # Cuando cierro un proyecto quito su namespace al support

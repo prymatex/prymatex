@@ -38,7 +38,7 @@ class ProjectTreeModel(AbstractTreeModel):
                 self._load_project(node, parent)
             elif node.isDirectory():
                 self._load_directory(node, parent)
-        return node.childCount()
+        return node.childrenCount()
 
     def data(self, index, role):
         if not index.isValid():
@@ -54,7 +54,7 @@ class ProjectTreeModel(AbstractTreeModel):
             current_index = self.createIndex(project.row(), 0, project)
             while self.rowCount(current_index):
                 go_ahead = False
-                for node in self.node(current_index).childNodes():
+                for node in self.node(current_index).children():
                     if self.fileManager.issubpath(path, node.path()):
                         current_index = self.createIndex(node.row(), 0, node)
                         if self.fileManager.commonpath(path, node.path()) == path:
@@ -75,7 +75,7 @@ class ProjectTreeModel(AbstractTreeModel):
             node.appendChild(child_node)
         if notify: 
             self.endInsertRows()
-        for child in node.childNodes():
+        for child in node.children():
             child._populated = False
         node._populated = True
 	
@@ -87,14 +87,14 @@ class ProjectTreeModel(AbstractTreeModel):
             node.appendChild(child_node)
         if notify: 
             self.endInsertRows()
-        for child in node.childNodes():
+        for child in node.children():
             child._populated = False
         node._populated = True
 
     def _update_directory(self, parent_node, parent_index, notify=False):
         names = self.fileManager.listDirectory(parent_node.path())
         addNames = [name for name in names if parent_node.findChildByName(name) is None]
-        removeNodes = [node for node in parent_node.childNodes() if node.nodeName() not in names]
+        removeNodes = [node for node in parent_node.children() if node.nodeName() not in names]
                 
         #Quitamos elementos eliminados
         for node in removeNodes:
@@ -106,7 +106,7 @@ class ProjectTreeModel(AbstractTreeModel):
 
         #Agregamos elementos nuevos
         if notify: 
-            self.beginInsertRows(parent_index, parent_node.childCount(), parent_node.childCount() + len(addNames) - 1)
+            self.beginInsertRows(parent_index, parent_node.childrenCount(), parent_node.childrenCount() + len(addNames) - 1)
         for name in addNames:
             node = self.treeNodeFactory(name, parent_node)
             node._populated = False
@@ -118,7 +118,7 @@ class ProjectTreeModel(AbstractTreeModel):
         names = [os.path.basename(path) for path in parent_node.source_folders]
         addPaths = [path for path in parent_node.source_folders \
             if parent_node.findChildByName(os.path.basename(path)) is None]
-        removeNodes = [node for node in parent_node.childNodes() \
+        removeNodes = [node for node in parent_node.children() \
             if node.nodeName() not in names]
                 
         #Quitamos elementos eliminados
@@ -131,7 +131,7 @@ class ProjectTreeModel(AbstractTreeModel):
 
         #Agregamos elementos nuevos
         if notify: 
-            self.beginInsertRows(parent_index, parent_node.childCount(), parent_node.childCount() + len(addPaths) - 1)
+            self.beginInsertRows(parent_index, parent_node.childrenCount(), parent_node.childrenCount() + len(addPaths) - 1)
         for path in addPaths:
             node = self.treeNodeFactory(path, parent_node)
             node._populated = False
@@ -140,7 +140,7 @@ class ProjectTreeModel(AbstractTreeModel):
             self.endInsertRows()    
 
     def _collect_expanded_subdirs(self, parent_node):
-        return [node for node in parent_node.childNodes() if node.isDirectory() and node._populated]
+        return [node for node in parent_node.children() if node.isDirectory() and node._populated]
 
     def refresh(self, updateIndex):
         updateNode = self.node(updateIndex)
@@ -186,7 +186,7 @@ class ProjectTreeModel(AbstractTreeModel):
         self.removeNode(project)
 
     def projects(self):
-        return self.rootNode.childNodes()
+        return self.rootNode.children()
 
 #=========================================
 # Proxies

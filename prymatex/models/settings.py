@@ -14,13 +14,13 @@ class SettingsTreeNode(ConfigureTreeNode):
     def loadSettings(self):
         self.settings = self.component_class.settings
         self.application = self.component_class.application
-        for settingsNode in self.childNodes():
+        for settingsNode in self.children():
             settingsNode.loadSettings()
 
 # Proxy for namespaced models
 class SettingsTreeProxyNode(ConfigureTreeProxyNode):
     def loadSettings(self):
-        for proxyNode in self.childNodes():
+        for proxyNode in self.children():
             proxyNode.loadSettings()
 
 class SettingsTreeModel(ConfigureTreeModelBase):

@@ -4,7 +4,7 @@
 from prymatex.qt import QtCore
 
 class TreeNodeBase(object):
-    def __init__(self, nodeName = "", nodeParent = None, **kwargs):
+    def __init__(self, nodeName="", nodeParent=None, **kwargs):
         super(TreeNodeBase, self).__init__(**kwargs)
         self.__nodeName = nodeName
         self.__nodeParent = nodeParent
@@ -22,7 +22,10 @@ class TreeNodeBase(object):
     def nodeParent(self):
         return self.__nodeParent
     
-    def childNodes(self):
+    def hasChildren(self):
+        return bool(self.__children)
+        
+    def children(self):
         return self.__children
 
     def isRootNode(self):
@@ -45,7 +48,7 @@ class TreeNodeBase(object):
             if child.nodeName() == nodeName:
                 return child
 
-    def removeAllChild(self):
+    def removeAllChildren(self):
         self.__children = []
 
     def popChild(self, index = -1):
@@ -54,7 +57,7 @@ class TreeNodeBase(object):
     def childIndex(self, child):
         return self.__children.index(child)
         
-    def childCount(self):
+    def childrenCount(self):
         return len(self.__children)
 
     def child(self, row):
@@ -76,7 +79,7 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
         return TreeNodeBase(nodeName, nodeParent)
 
     def rowCount(self, parentIndex):
-        return self.node(parentIndex).childCount()
+        return self.node(parentIndex).childrenCount()
         
     def columnCount(self, parentIndex):
         return 1
@@ -112,7 +115,7 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
         def _collect(node):
             nodes = [ node ]
             if node.childCount():
-                for child in node.childNodes():
+                for child in node.children():
                     nodes.extend(_collect(child))
             return nodes
         return _collect(self.rootNode)
@@ -125,7 +128,7 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
         # TODO: validar y retornar falso si no se puede, ver si el parent puede ser index y node
         parentNode = parentNode or self.rootNode
         parentIndex = self.nodeIndex(parentNode)
-        self.beginInsertRows(parentIndex, parentNode.childCount(), parentNode.childCount())
+        self.beginInsertRows(parentIndex, parentNode.childrenCount(), parentNode.childrenCount())
         parentNode.appendChild(node)
         self.endInsertRows()
         return True
@@ -173,7 +176,7 @@ class AbstractNamespaceTreeModel(AbstractTreeModel):
         if proxy != None:
             if proxy._isproxy:
                 #Reparent
-                for child in proxy.childNodes():
+                for child in proxy.children():
                     node.appendChild(child)
                 parentNode.removeChild(proxy)
             else:
