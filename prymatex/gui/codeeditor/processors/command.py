@@ -96,11 +96,11 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
         return ret
 
     def saveActiveFile(self):
-        self.editor.window().saveEditor(editor = self.editor)
+        self.editor.window().saveEditor(editor=self.editor)
         return self.editor.hasFile() and not self.editor.isModified()
 
     # ------------------- Outpus function
-    def error(self, context, outputFormat = None):
+    def error(self, context, outputFormat=None):
         if self.errorCommand:
             raise Exception(context.errorValue)
         else:
@@ -108,7 +108,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
                 context.description(),
                 context.errorValue,
                 context.outputType,
-                errorCommand = True
+                errorCommand=True
             )
 
     def discard(self, context, outputFormat = None):

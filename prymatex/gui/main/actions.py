@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.compat import getOpenFileNames
 from prymatex.qt.helpers import text_to_objectname, text_to_iconname, create_action
 
 from prymatex.core import exceptions
+from prymatex.core import config
 from prymatex.models.selectable import selectableModelFactory
 
 from prymatex.utils.i18n import ugettext as _
@@ -419,12 +421,17 @@ class MainWindowActionsMixin(object):
                 "triggered": lambda mw, checked: getattr(mw, checked and "showDistractionFreeMode" or "showNormal")(),
                 "sequence": ("Global", "ShowDistractionFreeMode", "Shift+F11")
             }, "-", {
-                "text": "Settings - Dialog",
+                "text": "Settings",
                 "triggered": lambda mw, checked=False: mw.settingsDialog.exec_()
-            }, {
-                "text": "Settings - File",
+            }, "-", {
+                "text": "User Settings File",
                 "triggered": lambda mw, checked=False: mw.application().openFile(
                     mw.profile().PMX_SETTINGS_PATH
+                    )
+            }, {
+                "text": "User Properties File",
+                "triggered": lambda mw, checked=False: mw.application().openFile(
+                    os.path.join(config.USER_HOME_PATH, config.PMX_PROPERTIES_NAME)
                     )
             }]
         }
