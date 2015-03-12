@@ -129,7 +129,7 @@ def import_module(name, package=None):
 
     return sys.modules[name]
 
-def import_from_directories(directories, name, remove = False):
+def import_from_directories(directories, name, remove=False):
     """Import a module from directory"""
     sys.path = sys.path[:1] + directories + sys.path[1:]
     try:

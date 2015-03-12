@@ -177,7 +177,7 @@ class ProjectTreeModel(AbstractTreeModel):
     def isDirectory(self, index):
         node = self.node(index)
         return node.isDirectory() if not node.isRootNode() else False
-        
+
     def appendProject(self, project):
         project._populated = False
         self.appendNode(project)

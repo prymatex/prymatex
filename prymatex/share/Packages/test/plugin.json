@@ -1,0 +1,14 @@
+{
+    "id": "org.prymatex.test",
+    "title" : "Code intelligence plugin",
+    "details": "https://github.com/SublimeCodeIntel/SublimeCodeIntel",
+    "description" : "",
+    "icon": "share/Icons/python.png",
+    "version" : "1.0",
+    "homepage": "http://sublimecodeintel.github.io/SublimeCodeIntel/",
+    "readme": "https://raw.github.com/SublimeCodeIntel/SublimeCodeIntel/master/README.rst",
+    "donate": "http://sublimecodeintel.github.io/SublimeCodeIntel/donate.html",
+    "labels": ["test"],
+    "author" : "Prymatex Team",
+    "depends" : [ "org.prymatex.codeeditor" ]
+}

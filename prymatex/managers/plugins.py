@@ -180,7 +180,7 @@ class PluginManager(PrymatexComponent, QtCore.QObject):
                         self.loadPlugin(pluginEntry)
                     else:
                         loadLaterEntries.append(pluginEntry)
-        #Cargar las que quedaron bloqueadas por dependencias hasta consumirlas
+        # Cargar las que quedaron bloqueadas por dependencias hasta consumirlas
         # dependencias circulares? son ridiculas pero por lo menos detectarlas
         unsolvedCount = len(loadLaterEntries)
         while True:

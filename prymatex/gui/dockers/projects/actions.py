@@ -455,5 +455,5 @@ class ProjectsDockActionsMixin(object):
             indexes_nodes = [ (index, self.projectTreeProxyModel.node(index)) \
                 for index in self.treeViewProjects.selectedIndexes() ]
         for index, node in indexes_nodes:
-            self.renamePath(node.path())
+            self.fileManager.renamePathDialog(node.path())
             self.projectTreeProxyModel.refresh(index)
