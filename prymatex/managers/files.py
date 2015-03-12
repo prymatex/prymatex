@@ -8,17 +8,18 @@ import mimetypes
 import fnmatch
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
+from prymatex.qt.extensions import CheckableMessageBox, ReplaceRenameInputDialog
+
+from prymatex.core import PrymatexComponent
+from prymatex.core.settings import ConfigurableItem
+from prymatex.core import notifier
+from prymatex.core import exceptions
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import osextra
 from prymatex.utils.decorators import deprecated
 from prymatex.utils import encoding
-
-from prymatex.core import PrymatexComponent
-from prymatex.core.settings import ConfigurableItem
-from prymatex.core import notifier
 from prymatex.utils.misc import get_home_dir
-from prymatex.core import exceptions
 
 class FileManager(PrymatexComponent, QtCore.QObject):
     """A File Manager"""
@@ -278,4 +279,19 @@ class FileManager(PrymatexComponent, QtCore.QObject):
                 self.move(path, newFullPath)
                 return newFullPath
             else:
-                return 
+                return
+    
+    def copyPathDialog(self, srcPath, dstPath, widget=None, override=False):
+        ''' Copy files and folders '''
+        basename = self.basename(dstPath)
+        dirname = self.dirname(dstPath)
+        while not override and self.exists(dstPath):
+            basename, ret = ReplaceRenameInputDialog.getText(widget, _("Already exists"), 
+                _("Destiny already exists\nReplace or or replace?"), text = basename, )
+            if ret == ReplaceRenameInputDialog.Cancel: return
+            if ret == ReplaceRenameInputDialog.Replace: break
+            dstPath = os.path.join(dirname, basename)
+        if os.path.isdir(srcPath):
+            self.copytree(srcPath, dstPath)
+        else:
+            self.copy(srcPath, dstPath)

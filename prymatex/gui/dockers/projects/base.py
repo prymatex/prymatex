@@ -6,7 +6,6 @@ import codecs
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import create_menu
-from prymatex.qt.extensions import CheckableMessageBox, ReplaceRenameInputDialog
 
 from prymatex.core import PrymatexDock
 from prymatex.core.settings import ConfigurableItem, ConfigurableHook

@@ -397,18 +397,9 @@ class ProjectsDockActionsMixin(object):
             if mimeData.hasUrls() and node.isDirectory():
                 for url in mimeData.urls():
                     srcPath = url.toLocalFile()
-                    basename = self.application().fileManager.basename(srcPath)
+                    basename = self.fileManager.basename(srcPath)
                     dstPath = os.path.join(node.path(), basename)
-                    while self.application().fileManager.exists(dstPath):
-                        basename, ret = ReplaceRenameInputDialog.getText(self, _("Already exists"), 
-                            _("Destiny already exists\nReplace or or replace?"), text = basename, )
-                        if ret == ReplaceRenameInputDialog.Cancel: return
-                        if ret == ReplaceRenameInputDialog.Replace: break
-                        dstPath = os.path.join(node.path(), basename)
-                    if os.path.isdir(srcPath):
-                        self.application().fileManager.copytree(srcPath, dstPath)
-                    else:
-                        self.application().fileManager.copy(srcPath, dstPath)
+                    self.fileManager.copyPathDialog(srcPath, dstPath, widget=self)
                 self.projectTreeProxyModel.refresh(index)
     
     def delete(self, indexes_nodes=None):
