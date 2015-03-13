@@ -228,7 +228,7 @@ class ProjectsDockActionsMixin(object):
                 },
                 {
                      'text': "Refresh",
-                     'triggered': lambda checked=False, values=parents: [self.projectTreeProxyModel.refresh(*value) for value in values]
+                     'triggered': lambda checked=False, values=parents: [self.refresh(*value) for value in values]
                 }, "-"
             ])
         return items
@@ -371,6 +371,9 @@ class ProjectsDockActionsMixin(object):
         self.setWindowTitle(node)
         self.treeViewProjects.setRootIndex(index)
 
+    def refresh(self, index, node=None):
+        self.projectTreeProxyModel.refresh(index)
+        
     def copy(self, indexes_nodes=None):
         if indexes_nodes:
             indexes, _ = zip(*indexes_nodes)
