@@ -258,10 +258,9 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
                 environment[var['variable']] = var['value']
         return environment
 
-    # Override loadSupport for emit signals
-    def loadSupport(self, *largs, **kwargs):
+    def loadSupport(self, message_handler):
         self.bundleProxyTreeModel.setDynamicSortFilter(True)
-        SupportBaseManager.loadSupport(self, *largs, **kwargs)
+        SupportBaseManager.loadSupport(self, message_handler)
         #self.bundleProxyTreeModel.sort(0, QtCore.Qt.AscendingOrder)
 
     def runSystemCommand(self, **attrs):

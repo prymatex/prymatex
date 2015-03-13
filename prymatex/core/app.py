@@ -220,7 +220,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
     def loadGraphicalUserInterface(self):
         self.showMessage = self.logger().info
-        self.packageManager.loadPackages()
+        self.packageManager.initialize(self.showMessage)
 
         if not self.options.no_splash:
             from prymatex.widgets.splash import SplashScreen
@@ -244,7 +244,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             self.serverManager = self.buildServerManager()
 
             # Load Resources
-            self.resourceManager.loadResources(self.showMessage)
+            self.resourceManager.initialize(self.showMessage)
             
             # Load Bundles
             self.supportManager.loadSupport(self.showMessage)
@@ -253,7 +253,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             self.projectManager.loadProjects(self.showMessage)
 
             # Load Settings
-            self.settingsManager.loadSettings(self.showMessage)
+            self.settingsManager.initialize(self.showMessage)
 
             # Restore State
             self.settingsManager.restoreApplicationState()

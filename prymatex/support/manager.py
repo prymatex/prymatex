@@ -255,20 +255,20 @@ class SupportBaseManager(object):
 
     #---------------- Message Handler ----------------
     def showMessage(self, message):
-        if self.messageHandler is not None:
-            self.messageHandler(message)
+        if self.message_handler is not None:
+            self.message_handler(message)
 
     #------------ LOAD ALL SUPPORT ----------------------------
-    def loadSupport(self, messageHandler=None):
+    def loadSupport(self, message_handler=None):
         # Install message handler
-        self.messageHandler = messageHandler
+        self.message_handler = message_handler
         for namespace in self.namespaces.values():
             self.loadBundles(namespace)
         for bundle in self.getAllBundles():
             if bundle.enabled():
                 self.populateBundle(bundle)
         # Uninstall message handler
-        self.messageHandler = None
+        self.message_handler = None
         self.ready = True
 
     #------------- LOAD BUNDLES ------------------
@@ -337,10 +337,10 @@ class SupportBaseManager(object):
         return bundleItem
 
     # -------------------- RELOAD SUPPORT
-    def reloadSupport(self, messageHandler = None):
+    def reloadSupport(self, message_handler = None):
         # Reload Implica ver en todos los espacios de nombre instalados por cambios en los items
         # Install message handler
-        self.messageHandler = messageHandler
+        self.message_handler = message_handler
         self.logger().debug("Begin reload support.")
         for namespace in self.namespaces.values():
             self.logger().debug("Search in %s, %s." % (namespace.name, namespace.bundles))
@@ -349,7 +349,7 @@ class SupportBaseManager(object):
             if bundle.enabled():
                 self.repopulateBundle(bundle)
         # Uninstall message handler
-        self.messageHandler = None
+        self.message_handler = None
         self.logger().debug("End reload support.")
 
     # ---------------- RELOAD BUNDLES

@@ -82,7 +82,7 @@ class SourceFolderTreeNode(ProjectItemTreeNodeBase):
         return os.path.getmtime(self.paht())
 
 class ProjectTreeNode(ProjectItemTreeNodeBase):
-    KEYS = [    'name', 'description', 'licence', 'keywords', 'source_folders', 
+    KEYS = [    'description', 'licence', 'keywords', 'source_folders', 
                 'shell_variables', 'bundles' ]
     
     def __init__(self, name, path):
@@ -112,7 +112,7 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
         self.__load_update(data_hash, False)
 
     def dump(self, allKeys=False):
-        data_hash = {}
+        data_hash = { 'name': self.nodeName() }
         for key in ProjectTreeNode.KEYS:
             value = getattr(self, key, None)
             if allKeys or value:

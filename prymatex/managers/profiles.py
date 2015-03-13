@@ -8,7 +8,7 @@ try:
 except ImportError:
     import ConfigParser as configparser
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.core.profile import PrymatexProfile
 from prymatex.core.config import PMX_PROFILES_PATH
@@ -55,7 +55,7 @@ class ProfileManager(PrymatexComponent, QtCore.QObject):
             self.__current_profile = self.createProfile(suggested, default = True)
         self.__current_profile.ensure_paths()
 
-    def initialize(self, **kwargs):
+    def initialize(self, message_handler=None, *args, **kwargs):
         super(ProfileManager, self).initialize(**kwargs)
 
         # Dialogs

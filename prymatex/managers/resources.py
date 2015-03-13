@@ -22,16 +22,16 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
         # Shortcut Models
         self.shortcutsTreeModel = ShortcutsTreeModel(self)
 
+    # OVERRIDE: PrymatexComponent.initialize
+    def initialize(self, message_handler=None):
+        # Load standard shortcuts
+        self.shortcutsTreeModel.loadStandardSequences(self.resources())
+
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.shortcuts import ShortcutsSettingsWidget
 
         return [ ShortcutsSettingsWidget ]
-
-    # -------------------- Public API
-    def loadResources(self, message_handler):
-        # Load standard shortcuts
-        self.shortcutsTreeModel.loadStandardSequences(self.resources())
 
     def registerShortcut(self, qobject, sequence):
         return self.shortcutsTreeModel.registerShortcut(qobject, sequence)

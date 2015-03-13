@@ -54,9 +54,48 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
 
         self.namespaces = {}
         self.packages = {}
-        
-        self.currentPluginDescriptor = None
-        
+
+    def initialize(self, message_handler=None):
+        self.loadCorePackage('prymatex.gui.codeeditor', 'org.prymatex.codeeditor')
+        self.loadCorePackage('prymatex.gui.dockers', 'org.prymatex.dockers')
+        self.loadCorePackage('prymatex.gui.dialogs', 'org.prymatex.dialogs')
+        loadLaterEntries = []
+        for name, directory in self.namespaces.items():
+            for name in os.listdir(directory):
+                plugin_path = os.path.join(directory, name)
+                plugin_descriptor_path = os.path.join(plugin_path, config.PMX_PACKAGE_DESCRIPTOR)
+                entry = { "id": name }
+                if os.path.isfile(plugin_descriptor_path):
+                    with open(plugin_descriptor_path, 'r') as f:
+                        entry.update(json.load(f))
+
+                # Package name
+                entry["name"] = name
+
+                # Load paths
+                entry["path"] = plugin_path
+
+                if self.hasDependenciesResolved(entry):
+                    self.loadPackage(entry)
+                else:
+                    loadLaterEntries.append(entry)
+        # Cargar las que quedaron bloqueadas por dependencias hasta consumirlas
+        # dependencias circulares? son ridiculas pero por lo menos detectarlas
+        unsolvedCount = len(loadLaterEntries)
+        while True:
+            loadLater = []
+            for entry in loadLaterEntries:
+                if self.hasDependenciesResolved(entry):
+                    self.loadPlugin(entry)
+                else:
+                    loadLater.append(entry)
+            if not loadLater or unsolvedCount == len(loadLater):
+                break
+            else:
+                loadLaterEntries = loadLater
+                unsolvedCount = len(loadLaterEntries)
+        #Si me quedan plugins tendira que avisar o mostrar algo es que no se cumplieron todas las dependencias
+
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.plugins import PluginsSettingsWidget
@@ -124,44 +163,4 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
         
     def hasDependenciesResolved(self, entry):
         return all([dep in self.packages for dep in entry.get("depends", [])])
-    
-    def loadPackages(self):
-        self.loadCorePackage('prymatex.gui.codeeditor', 'org.prymatex.codeeditor')
-        self.loadCorePackage('prymatex.gui.dockers', 'org.prymatex.dockers')
-        self.loadCorePackage('prymatex.gui.dialogs', 'org.prymatex.dialogs')
-        loadLaterEntries = []
-        for name, directory in self.namespaces.items():
-            for name in os.listdir(directory):
-                plugin_path = os.path.join(directory, name)
-                plugin_descriptor_path = os.path.join(plugin_path, config.PMX_PACKAGE_DESCRIPTOR)
-                entry = { "id": name }
-                if os.path.isfile(plugin_descriptor_path):
-                    with open(plugin_descriptor_path, 'r') as f:
-                        entry.update(json.load(f))
-
-                # Package name
-                entry["name"] = name
-
-                # Load paths
-                entry["path"] = plugin_path
-
-                if self.hasDependenciesResolved(entry):
-                    self.loadPackage(entry)
-                else:
-                    loadLaterEntries.append(entry)
-        # Cargar las que quedaron bloqueadas por dependencias hasta consumirlas
-        # dependencias circulares? son ridiculas pero por lo menos detectarlas
-        unsolvedCount = len(loadLaterEntries)
-        while True:
-            loadLater = []
-            for entry in loadLaterEntries:
-                if self.hasDependenciesResolved(entry):
-                    self.loadPlugin(entry)
-                else:
-                    loadLater.append(entry)
-            if not loadLater or unsolvedCount == len(loadLater):
-                break
-            else:
-                loadLaterEntries = loadLater
-                unsolvedCount = len(loadLaterEntries)
-        #Si me quedan plugins tendira que avisar o mostrar algo es que no se cumplieron todas las dependencias
+        

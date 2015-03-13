@@ -40,7 +40,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
 
         self.projectTreeModel = ProjectTreeModel(self)
         self.keywordsListModel = CheckableListModel(self)
-        self.propertiesTreeModel = PropertiesTreeModel(parent = self)
+        self.propertiesTreeModel = PropertiesTreeModel(parent=self)
 
         self.projectTreeProxyModel = ProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
@@ -55,7 +55,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         self.supportManager.bundleRemoved.connect(self.on_supportManager_bundleRemoved)
         self.supportManager.bundleItemAdded.connect(self.on_supportManager_bundleItemAdded)
         self.supportManager.bundleItemRemoved.connect(self.on_supportManager_bundleItemRemoved)
-        self.messageHandler = None
+        self.message_handler = None
     
     # ---------- OVERRIDE: PrymatexComponent.contributeToSettings()
     @classmethod
@@ -80,7 +80,10 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         
         # Restore projects
         for project_path in componentState.get("projects", []):
-            self.openProject(project_path)
+            try:
+                self.openProject(project_path)
+            except exceptions.FileIsNotProject as ex:
+                pass
         
     def setupPropertiesWidgets(self):
         from prymatex.gui.properties.project import ProjectPropertiesWidget
@@ -120,10 +123,10 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
             self.keywordsListModel.removeItems(bundleItem.scopeName.split('.'))
 
     # -------------------- Load projects
-    def loadProjects(self, messageHandler = None):
-        self.messageHandler = messageHandler
+    def loadProjects(self, message_handler=None, *args, **kwargs):
+        self.message_handler = message_handler
         self.setupPropertiesWidgets()
-        self.messageHandler = None
+        self.message_handler = None
 
     def isOpen(self, project):
         return True
