@@ -103,26 +103,30 @@ class SettingsManager(PrymatexComponent, QtCore.QObject):
         state = json.read_file(self.profile().PMX_STATE_PATH)
         self.application().setComponentState(state or {})
 
-    def settingValue(self, settingPath):
+    def settingValue(self, settingPath, default=None):
         names = settingPath.split(".")
         settings = self.prymatex_settings
         for name in names[:-1]:
             settings = settings.scope(name)
-        return settings.get(names[-1])
+        if settings:
+            return settings.get(names[-1], default)
+        return default
 
     def registerSettingCallback(self, settingPath, handler):
         names = settingPath.split(".")
         settings = self.prymatex_settings
         for name in names[:-1]:
             settings = settings.scope(name)
-        settings.add_callback(names[-1], handler)
+        if settings:
+            settings.add_callback(names[-1], handler)
 
     def unregisterSettingCallback(self, settingPath, handler):
         names = settingPath.split(".")
         settings = self.prymatex_settings
         for name in names[:-1]:
             settings = settings.get(name)
-        settings.remove_callback(names[-1], handler)
+        if settings:
+            settings.remove_callback(names[-1], handler)
         
     def clear(self):
         self.prymatex_settings.clear()

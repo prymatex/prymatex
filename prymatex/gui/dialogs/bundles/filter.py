@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
+from prymatex.core.components import PrymatexDialog
 
-class BundleFilterDialog(QtWidgets.QDialog):
+class BundleFilterDialog(PrymatexDialog, QtWidgets.QDialog):
     def __init__(self, parent = None):
         super(BundleFilterDialog, self).__init__(parent)
         self.setupUi(self)
@@ -15,7 +16,7 @@ class BundleFilterDialog(QtWidgets.QDialog):
         self.proxy.setSourceModel(model)
 
     def setupUi(self, BundleFilter):
-        BundleFilter.setObjectName("BundleFilter")
+        BundleFilter.setObjectName("BundleFilterDialog")
         BundleFilter.resize(330, 400)
         BundleFilter.setMinimumSize(QtCore.QSize(330, 400))
         self.verticalLayout = QtWidgets.QVBoxLayout(BundleFilter)

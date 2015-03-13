@@ -16,8 +16,6 @@ from prymatex.core import PrymatexComponent
 
 from prymatex.models.profiles import ProfilesListModel
 
-from prymatex.gui.dialogs.profile import ProfileDialog
-
 # The very very first manager
 class ProfileManager(PrymatexComponent, QtCore.QObject):
     # ------------- Settings
@@ -48,7 +46,7 @@ class ProfileManager(PrymatexComponent, QtCore.QObject):
         self.__dontAsk = True
         suggested = self.application().options.profile
         if suggested is None or not self.__dontAsk:
-            self.__current_profile = ProfileDialog.selectStartupProfile(self)
+            self.__current_profile = self.profileDialog.selectStartupProfile(self)
         elif suggested == "":
             self.__current_profile = self.defaultProfile()
         else:
@@ -56,6 +54,12 @@ class ProfileManager(PrymatexComponent, QtCore.QObject):
         if self.__current_profile is None:
             self.__current_profile = self.createProfile(suggested, default = True)
         self.__current_profile.ensure_paths()
+
+    def initialize(self, **kwargs):
+        super(ProfileManager, self).initialize(**kwargs)
+
+        # Dialogs
+        self.profileDialog = self.findChild(QtWidgets.QDialog, "ProfileDialog")
 
     # --------------- Profile
     def saveProfiles(self):

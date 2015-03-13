@@ -19,5 +19,5 @@ class PluginsSettingsWidget(SettingsTreeNode, Ui_Plugins, QtWidgets.QWidget):
         super(PluginsSettingsWidget, self).loadSettings()
         self.setTitle("Plugins")
         self.setIcon(self.application().resources().get_icon("settings-plugins"))
-        self.pluginManager = PluginsTableModel(self.application().pluginManager)
-        self.listViewPlugins.setModel(self.pluginManager)
+        self.packageTableModel = PluginsTableModel(self.application().packageManager)
+        self.listViewPlugins.setModel(self.packageTableModel)

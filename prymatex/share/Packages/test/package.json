@@ -1,0 +1,14 @@
+{
+    "id": "org.prymatex.test",
+    "title" : "Test package",
+    "details": "http://github.com/prymatex/prymatex",
+    "description" : "",
+    "icon": "prymatex",
+    "version" : "1.0",
+    "homepage": "http://github.com/prymatex/prymatex",
+    "readme": "http://github.com/prymatex/prymatex/README.md",
+    "donate": "http://github.com/prymatex/prymatex/donate.html",
+    "labels": [ "test" ],
+    "author" : "Prymatex Team",
+    "depends" : [ "org.prymatex.codeeditor" ]
+}

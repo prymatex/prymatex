@@ -11,11 +11,10 @@ from .console import ConsoleDock
 from .search import SearchResultsDock
 from .process import ExternalProcessDock
 
-def registerPlugin(manager, descriptor):
-    manager.registerComponent(ProjectsDock)
-    manager.registerComponent(FileSystemDock)
-    manager.registerComponent(TerminalDock)
-    manager.registerComponent(ConsoleDock)
-    manager.registerComponent(BrowserDock)
-    manager.registerComponent(SearchResultsDock)
-    manager.registerComponent(ExternalProcessDock)
+__plugin__.registerComponent(ProjectsDock)
+__plugin__.registerComponent(FileSystemDock)
+__plugin__.registerComponent(TerminalDock)
+__plugin__.registerComponent(ConsoleDock)
+__plugin__.registerComponent(BrowserDock)
+__plugin__.registerComponent(SearchResultsDock)
+__plugin__.registerComponent(ExternalProcessDock)

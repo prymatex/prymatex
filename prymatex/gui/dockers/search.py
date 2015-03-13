@@ -10,7 +10,6 @@ from prymatex.core import PrymatexDock
 from prymatex.ui.dockers.search import Ui_SearchDock
 from prymatex.utils.i18n import ugettext as _
 from prymatex.models.search import SearchTreeModel, LineTreeNode
-from prymatex.gui.dialogs.filesearch import PMXFileSearchDialog
 
 class SearchResultsDock(PrymatexDock, Ui_SearchDock, QtWidgets.QDockWidget):
     ICON = "dock-search-results"
@@ -26,7 +25,7 @@ class SearchResultsDock(PrymatexDock, Ui_SearchDock, QtWidgets.QDockWidget):
         if not self.isVisible():
             self.show()
         self.raise_()
-        fileSearch = PMXFileSearchDialog.search(self.searchTreeModel, self)
+        #fileSearch = PMXFileSearchDialog.search(self.searchTreeModel, self)
         #TODO: Si no se encontro nada o se cancelo cerrarlo
     
     @classmethod

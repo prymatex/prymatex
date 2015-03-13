@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+import os
 import sys
 import imp
 try:
@@ -129,15 +130,17 @@ def import_module(name, package=None):
 
     return sys.modules[name]
 
-def import_from_directories(directories, name, remove=False):
+def import_from_directory(directory, name=None):
     """Import a module from directory"""
-    sys.path = sys.path[:1] + directories + sys.path[1:]
-    try:
-        module = import_module(name)
-    except ImportError as reason:
-        print(reason)
-        raise reason
-    finally:
-        if remove:
-            del sys.path[1:len(directories) + 1]
-    return module
+    sys.path.insert(1, directory)
+    modules = []
+    file_names = [name] if name is not None else os.listdir(directory)
+    for file_name in file_names:
+        try:
+            name, ext = os.path.splitext(file_name)
+            if ext == ".py":
+                modules.append(import_module(name))
+        except ImportError as reason:
+            modules.append(reason)
+    del sys.path[1]
+    return name is None and modules[0] or modules

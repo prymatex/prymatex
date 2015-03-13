@@ -12,26 +12,25 @@ from .modes import (CodeEditorEditMode, CodeEditorMultiCursorMode,
     CodeEditorSnippetMode, CodeEditorComplitionMode)
 from .status import CodeEditorStatus
 
-def registerPlugin(manager, descriptor):
-    manager.registerComponent(CodeEditor, default = True)
-    manager.registerComponent(CodeEditorStatus)
-    manager.registerComponent(CodeEditorSymbolsDock)
-    manager.registerComponent(CodeEditorBookmarksDock)
+__plugin__.registerComponent(CodeEditor, default=True)
+__plugin__.registerComponent(CodeEditorStatus)
+__plugin__.registerComponent(CodeEditorSymbolsDock)
+__plugin__.registerComponent(CodeEditorBookmarksDock)
 
     # ---------------- Modes
-    manager.registerComponent(CodeEditorEditMode, CodeEditor) # First is default mode
-    manager.registerComponent(CodeEditorMultiCursorMode, CodeEditor)
-    manager.registerComponent(CodeEditorSnippetMode, CodeEditor)
-    manager.registerComponent(CodeEditorComplitionMode, CodeEditor)
+__plugin__.registerComponent(CodeEditorEditMode, CodeEditor) # First is default mode
+__plugin__.registerComponent(CodeEditorMultiCursorMode, CodeEditor)
+__plugin__.registerComponent(CodeEditorSnippetMode, CodeEditor)
+__plugin__.registerComponent(CodeEditorComplitionMode, CodeEditor)
 
     # ---------------- Addons
     #manager.registerComponent(SmartUnindentAddon, CodeEditor)
     #manager.registerComponent(SpellCheckerAddon, CodeEditor)
-    manager.registerComponent(HighlightCurrentSelectionAddon, CodeEditor)
+__plugin__.registerComponent(HighlightCurrentSelectionAddon, CodeEditor)
 
     # ---------------- Sidebars
-    manager.registerComponent(MiniMapAddon, CodeEditor)
-    manager.registerComponent(BookmarkSideBarAddon, CodeEditor)
-    manager.registerComponent(LineNumberSideBarAddon, CodeEditor)
-    manager.registerComponent(FoldingSideBarAddon, CodeEditor)
-    manager.registerComponent(SelectionSideBarAddon, CodeEditor)
+__plugin__.registerComponent(MiniMapAddon, CodeEditor)
+__plugin__.registerComponent(BookmarkSideBarAddon, CodeEditor)
+__plugin__.registerComponent(LineNumberSideBarAddon, CodeEditor)
+__plugin__.registerComponent(FoldingSideBarAddon, CodeEditor)
+__plugin__.registerComponent(SelectionSideBarAddon, CodeEditor)

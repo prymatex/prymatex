@@ -54,7 +54,7 @@ class PrymatexEditor(PrymatexComponentWidget):
         self._file_path = file_path
         self._project = self.application().projectManager.findProjectForPath(self._file_path)
         self._title = self.application().fileManager.basename(file_path)
-        self.modificationChanged.emit(False)
+        #self.modificationChanged.emit(False)
 
     def icon(self):
         baseIcon = QtGui.QIcon()
@@ -103,7 +103,7 @@ class PrymatexEditor(PrymatexComponentWidget):
         
     def setExternalAction(self, actions):
         self._external_actions = actions
-        self.modificationChanged.emit(False)
+        #self.modificationChanged.emit(False)
 
     def isExternalChanged(self):
         return self._external_actions & notifier.CHANGED
@@ -117,7 +117,8 @@ class PrymatexEditor(PrymatexComponentWidget):
         
     #------------ Global navigation api
     def saveLocationMemento(self, memento):
-        self.newLocationMemento.emit(memento)
+        pass
+        #self.newLocationMemento.emit(memento)
         
     def restoreLocationMemento(self, memento):
         pass

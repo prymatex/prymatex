@@ -15,6 +15,9 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import six
 from prymatex.utils.processes import get_process_map
 
+from prymatex.gui.main import PrymatexMainWindow
+from prymatex.widgets.texteditor import TextEditWidget
+
 from . import config
 from . import exceptions
 from .components import PrymatexComponent, PrymatexEditor
@@ -68,10 +71,12 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         #self._event_loop = QEventLoop(self)
         #asyncio.set_event_loop(self._event_loop)
 
-        self.componentInstances = {}
+        self.component_classes = {}
+        self.component_instances = {}
+        self.default_component = type("DefaultComponent", (PrymatexEditor, TextEditWidget), {})
 
         # Base Managers
-        self.resourceManager = self.profileManager = self.pluginManager = self.settingsManager = None
+        self.resourceManager = self.profileManager = self.packageManager = self.settingsManager = None
         # Windows
         self._main_windows = []
 
@@ -126,38 +131,38 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         from prymatex.managers.resources import ResourceManager
         from prymatex.managers.profiles import ProfileManager
         from prymatex.managers.settings import SettingsManager
-        from prymatex.managers.plugins import PluginManager
+        from prymatex.managers.packages import PackageManager
         
         # Populate components
         app.populateComponentClass(ResourceManager)
         app.populateComponentClass(ProfileManager)
         app.populateComponentClass(SettingsManager)
-        app.populateComponentClass(PluginManager)
+        app.populateComponentClass(PackageManager)
         app.populateComponentClass(PrymatexApplication)
         
         # Build instances
         app.resourceManager = ResourceManager(parent=app)
         app.profileManager = ProfileManager(parent=app)
         app.settingsManager = SettingsManager(parent=app)
-        app.pluginManager = PluginManager(parent=app)
+        app.packageManager = PackageManager(parent=app)
         
         # Namespaces
         for ns, path in config.NAMESPACES:
             app.resourceManager.add_source(ns, path, True)
-            app.pluginManager.addNamespace(ns, path)
+            app.packageManager.addNamespace(ns, path)
 
 	# Populate configurables
         app.settingsManager.populateConfigurableClass(ResourceManager)
         app.settingsManager.populateConfigurableClass(ProfileManager)
         app.settingsManager.populateConfigurableClass(SettingsManager)
-        app.settingsManager.populateConfigurableClass(PluginManager)
+        app.settingsManager.populateConfigurableClass(PackageManager)
         app.settingsManager.populateConfigurableClass(PrymatexApplication)
 
         # Configure instances
         app.settingsManager.registerConfigurableInstance(app.resourceManager) 
         app.settingsManager.registerConfigurableInstance(app.profileManager)
         app.settingsManager.registerConfigurableInstance(app.settingsManager)
-        app.settingsManager.registerConfigurableInstance(app.pluginManager)
+        app.settingsManager.registerConfigurableInstance(app.packageManager)
         app.settingsManager.registerConfigurableInstance(app)
 
         app.applyOptions()
@@ -204,7 +209,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             'PMX_LOG_PATH': self.profile().get('PMX_LOG_PATH')
         }
         for manager in [self.resourceManager, self.profileManager,
-            self.pluginManager, self.storageManager, self.supportManager,
+            self.packageManager, self.storageManager, self.supportManager,
             self.fileManager, self.projectManager, self.schedulerManager,
             self.serverManager]:
             env.update(manager.environmentVariables())
@@ -212,7 +217,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
     def loadGraphicalUserInterface(self):
         self.showMessage = self.logger().info
-        self.pluginManager.loadPlugins()
+        self.packageManager.loadPackages()
 
         if not self.options.no_splash:
             from prymatex.widgets.splash import SplashScreen
@@ -423,7 +428,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             component = klass(*args, **kwargs)
 
             # Add components
-            for componentClass in self.pluginManager.findComponentsForClass(klass):
+            for componentClass in self.findComponentsForClass(klass):
                 # Filter editors, editors create explicit
                 if issubclass(componentClass, PrymatexEditor):
                     continue
@@ -448,7 +453,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
                                                          instance.__class__))
 
         # -------------------- Store
-        self.componentInstances.setdefault(componentClass, []).append(component)
+        self.component_instances.setdefault(componentClass, []).append(component)
 
         return component
 
@@ -456,12 +461,42 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         self.settingsManager.unregisterConfigurableInstance(component)
         component.deleteLater()
 
-    # ------------ Find Component
-    def componentHierarchyForClass(self, componentClass):
-        return self.pluginManager.componentHierarchyForClass(componentClass)
+    # ------------ Handle component classes
+    def registerComponent(self, klass, base, default):
+        self.populateComponentClass(klass)
+        self.component_classes.setdefault(base, []).append(klass)
+        if default:
+            self.default_component = klass
 
-    def findComponentsForClass(self, componentClass):
-        return self.pluginManager.findComponentsForClass(componentClass)
+    def componentHierarchyForClass(self, klass):
+        hierarchy = []
+        while klass != PrymatexMainWindow:
+            hierarchy.append(klass)
+            for parent, childs in self.component_classes.items():
+                if klass in childs:
+                    klass = parent
+                    break
+        return hierarchy[::-1]
+
+    def findComponentsForClass(self, klass):
+        return self.component_classes.get(klass, [])
+
+    # ------------ Handle editor classes
+    def findEditorClassByName(self, name):
+        editors = (cmp for cmp in self.component_classes.get(PrymatexMainWindow, []) if issubclass(cmp, PrymatexEditor))
+        for klass in editors:
+            if name == klass.__name__:
+                return klass
+
+    def findEditorClassForFile(self, filepath):
+        mimetype = self.fileManager.mimeType(filepath)
+        editors = (cmp for cmp in self.component_classes.get(PrymatexMainWindow, []) if issubclass(cmp, PrymatexEditor))
+        for klass in editors:
+            if klass.acceptFile(filepath, mimetype):
+                return klass
+    
+    def defaultEditor(self):
+        return self.default_component
 
     # ------------- Settings access
     def on_settings_changed(self, path):

@@ -52,8 +52,9 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
 
     @ConfigurableHook("code_editor.default_theme")
     def defaultTheme(self, theme_uuid):
-        theme = self.application().supportManager.getBundleItem(theme_uuid)
-        self.notifier.setPalette(theme.palette())
+        if theme_uuid:
+            theme = self.application().supportManager.getBundleItem(theme_uuid)
+            self.notifier.setPalette(theme.palette())
 
     _editorHistory = []
     _editorHistoryIndex = 0
@@ -319,11 +320,11 @@ html_footer
             position=None):
         editorClass = None
         if class_name is not None:
-            editorClass = self.application().pluginManager.findEditorClassByName(class_name)
+            editorClass = self.application().findEditorClassByName(class_name)
         elif file_path is not None:
-            editorClass = self.application().pluginManager.findEditorClassForFile(file_path)
+            editorClass = self.application().findEditorClassForFile(file_path)
         if editorClass is None:
-            editorClass = self.application().pluginManager.defaultEditor()
+            editorClass = self.application().defaultEditor()
 
         # Exists file ?
         if file_path and not self.application().fileManager.isfile(file_path):
@@ -348,14 +349,14 @@ html_footer
         self.addEditor(editor)
 
     def removeEditor(self, editor):
-        editor.newLocationMemento.disconnect(self.on_editor_newLocationMemento)
+        #editor.newLocationMemento.disconnect(self.on_editor_newLocationMemento)
         self.centralWidget().removeTabWidget(editor)
         # TODO Clean history ?
 
     def addEditor(self, editor, focus=True):
         current = self.currentEditor()
         self.centralWidget().addTabWidget(editor)
-        editor.newLocationMemento.connect(self.on_editor_newLocationMemento)
+        #editor.newLocationMemento.connect(self.on_editor_newLocationMemento)
         # If new editor has file, try to close current editor
         if current and editor.hasFile():
             self.tryCloseEmptyEditor(current)
@@ -511,17 +512,12 @@ html_footer
 
         # Restore open documents
         for editorState in componentState.get("editors", []):
-            if 'file' in editorState:
-                editor = self.application().openFile(
-                    editorState["file"],
-                    editor=editorState["name"],
-                )
-            else:
-                editor = self.createEditor(
-                    class_name=editorState["name"])
+            editor = self.createEditor(
+                class_name=editorState["name"],
+                file_path=editorState.get("file", None))
+            self.addEditor(editor)
             editor.setComponentState(editorState)
             editor.setModified(editorState.get("modified", False))
-            self.addEditor(editor)
 
         # Restore geometry
         if "geometry" in componentState:

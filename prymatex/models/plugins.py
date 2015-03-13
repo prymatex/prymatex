@@ -11,8 +11,8 @@ from prymatex import resources
 class PluginsTableModel(QtCore.QAbstractTableModel):
     def __init__(self, manager, parent = None): 
         QtCore.QAbstractTableModel.__init__(self, parent)
-        self.pluginManager = manager
-        self.pluginDescriptors = list(self.pluginManager.plugins.values())
+        self.packageManager = manager
+        self.pluginDescriptors = list(self.packageManager.packages.values())
 
     def index(self, row, column, parent = None):
         return self.createIndex(row, column, self.pluginDescriptors[row])

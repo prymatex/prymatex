@@ -80,7 +80,7 @@ class PrymatexMainMenuBar(QtWidgets.QMenuBar):
         # Store all actions for component
         # self.componentActions.setdefault(klass, []).extend(actions + [m.menuAction() for m in menus])
         
-        for componentClass in self.parent().application().pluginManager.findComponentsForClass(klass):
+        for componentClass in self.parent().application().findComponentsForClass(klass):
             self.extend(componentClass, parent)
 
     def componentInstanceDispatcher(self, componentClass, handler, *args):

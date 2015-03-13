@@ -33,18 +33,17 @@ PMX_LOG_DATETIME_FORMAT = '%s %s' % (PMX_LOG_DATE_FORMAT, PMX_LOG_TIME_FORMAT)
 #============================================================================
 PMX_HOME_NAME = '.prymatex'
 PMX_BUNDLES_NAME = 'Bundles'
-PMX_PLUGINS_NAME = 'Plugins'
+PMX_PACKAGES_NAME = 'Packages'
+PMX_PACKAGE_DESCRIPTOR_NAME = 'package.json'
 PMX_PROFILES_NAME = 'Profiles'
 PMX_SUPPORT_NAME = 'Support'
 PMX_SETTINGS_NAME = 'settings.json'
 PMX_STATE_NAME = 'state.json'
-PMX_DESCRIPTOR_NAME = 'info.json'
 PMX_PROJECT_EXTENSION = 'pmxproject'
 PMX_PROPERTIES_NAME = '.pmxproperties'
 TM_SETTINGS_NAME = 'com.macromates.textmate.plist'
 TM_WEBPREVIEW_NAME = 'com.macromates.textmate.webpreview.plist'
 TM_PREFERENCE_NAMES = ['Library', 'Preferences']
-PMX_PLUGIN_GLOB = '*.pmxplugin'
 PMX_NS_NAME = 'prymatex'
 USR_NS_NAME = 'user'
 
@@ -63,7 +62,7 @@ def get_prymatex_home_path():
     if not os.path.exists(path):
         os.makedirs(path)
     #Create extra paths
-    for extra in (PMX_BUNDLES_NAME, PMX_PLUGINS_NAME, PMX_PROFILES_NAME, PMX_SUPPORT_NAME):
+    for extra in (PMX_BUNDLES_NAME, PMX_PACKAGES_NAME, PMX_PROFILES_NAME, PMX_SUPPORT_NAME):
         extraPath = os.path.join(path, extra)
         if not os.path.exists(extraPath):
             os.makedirs(extraPath, 0o700)
@@ -73,7 +72,7 @@ PMX_APP_PATH = os.path.dirname(prymatex.__file__)
 PMX_SHARE_PATH = os.path.join(PMX_APP_PATH, 'share')
 PMX_HOME_PATH = get_prymatex_home_path()
 PMX_PROFILES_PATH = os.path.join(PMX_HOME_PATH, PMX_PROFILES_NAME)
-PMX_PLUGINS_PATH = os.path.join(PMX_HOME_PATH, PMX_PLUGINS_NAME)
+PMX_PACKAGES_PATH = os.path.join(PMX_HOME_PATH, PMX_PACKAGES_NAME)
 
 def get_textmate_preferences_user_path():
     path = os.path.join(USER_HOME_PATH, *TM_PREFERENCE_NAMES)
