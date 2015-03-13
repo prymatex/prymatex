@@ -71,14 +71,20 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
     def loadResources(self, directory, entry):
         defaults = self.application().resourceManager.defaults()
         #  TODO: Dependencias
-        if "share" in entry:
-            entry["share"] = os.path.join(directory, entry["share"])
-            self.application().resourceManager.add_source(entry["name"], entry["share"])
+        share_path = os.path.join(directory, entry.get("share", config.PMX_SHARE_NAME))
+        if os.path.isdir(share_path):
+            self.application().resourceManager.add_source(entry["name"], share_path)
             defaults = (entry["name"],) + defaults
         entry["resources"] = self.application().resourceManager.get_provider(defaults)
         if "icon" in entry:
-            entry["icon"] = entry["resources"].get_icon(entry["icon"])
+            entry["icon"] = entry["resources"].get_icon(entry.get("icon", ":/prymatex.png"))
 
+    def loadBundles(self, directory, entry):
+        defaults = self.application().resourceManager.defaults()
+        bundles_path = os.path.join(directory, entry.get("bundles", config.PMX_BUNDLES_NAME))
+        if os.path.isdir(bundles_path):
+            print("Bundles en", bundles_path)
+            
     def _import_package(self, entry, name=None, directory=None):
         descriptor = PluginDescriptor(self.application(), entry)
         builtins.__plugin__ = descriptor
@@ -92,8 +98,9 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
     def loadPackage(self, entry):
         _id = entry.get("id")
         directory = entry.get("path")
-        self.loadResources(directory, entry)
         try:
+            self.loadResources(directory, entry)
+            self.loadBundles(directory, entry)
             self.packages[_id] = self._import_package(entry, directory=directory)
         except Exception as reason:
             # On exception remove entry
@@ -127,20 +134,21 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
             for name in os.listdir(directory):
                 plugin_path = os.path.join(directory, name)
                 plugin_descriptor_path = os.path.join(plugin_path, config.PMX_PACKAGE_DESCRIPTOR_NAME)
+                entry = { "id": name }
                 if os.path.isfile(plugin_descriptor_path):
                     with open(plugin_descriptor_path, 'r') as f:
-                        entry = json.load(f)
+                        entry.update(json.load(f))
 
-                    # Package name
-                    entry["name"] = name
+                # Package name
+                entry["name"] = name
 
-                    # Load paths
-                    entry["path"] = plugin_path
+                # Load paths
+                entry["path"] = plugin_path
 
-                    if self.hasDependenciesResolved(entry):
-                        self.loadPackage(entry)
-                    else:
-                        loadLaterEntries.append(entry)
+                if self.hasDependenciesResolved(entry):
+                    self.loadPackage(entry)
+                else:
+                    loadLaterEntries.append(entry)
         # Cargar las que quedaron bloqueadas por dependencias hasta consumirlas
         # dependencias circulares? son ridiculas pero por lo menos detectarlas
         unsolvedCount = len(loadLaterEntries)

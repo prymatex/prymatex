@@ -41,6 +41,7 @@ PMX_SETTINGS_NAME = 'settings.json'
 PMX_STATE_NAME = 'state.json'
 PMX_PROJECT_EXTENSION = 'pmxproject'
 PMX_PROPERTIES_NAME = '.pmxproperties'
+PMX_SHARE_NAME = 'share'
 TM_SETTINGS_NAME = 'com.macromates.textmate.plist'
 TM_WEBPREVIEW_NAME = 'com.macromates.textmate.webpreview.plist'
 TM_PREFERENCE_NAMES = ['Library', 'Preferences']
@@ -69,7 +70,7 @@ def get_prymatex_home_path():
     return path
 
 PMX_APP_PATH = os.path.dirname(prymatex.__file__)
-PMX_SHARE_PATH = os.path.join(PMX_APP_PATH, 'share')
+PMX_SHARE_PATH = os.path.join(PMX_APP_PATH, PMX_SHARE_NAME)
 PMX_HOME_PATH = get_prymatex_home_path()
 PMX_PROFILES_PATH = os.path.join(PMX_HOME_PATH, PMX_PROFILES_NAME)
 PMX_PACKAGES_PATH = os.path.join(PMX_HOME_PATH, PMX_PACKAGES_NAME)
