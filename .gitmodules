@@ -100,3 +100,6 @@
 [submodule "prymatex/share/Bundles/markdown.tmbundle"]
 	path = prymatex/share/Bundles/markdown.tmbundle
 	url = git@github.com:prymatex/markdown.tmbundle.git
+[submodule "prymatex/share/Packages/sublime"]
+	path = prymatex/share/Packages/sublime
+	url = git@github.com:prymatex/sublime.git

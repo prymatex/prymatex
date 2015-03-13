@@ -137,10 +137,12 @@ def import_from_directory(directory, name=None):
     file_names = [name] if name is not None else os.listdir(directory)
     for file_name in file_names:
         try:
-            name, ext = os.path.splitext(file_name)
-            if ext == ".py":
-                modules.append(import_module(name))
+            if os.path.isdir(os.path.join(directory, file_name)) and \
+                os.path.exists(os.path.join(directory, file_name, '__init__.py')):
+                modules.append(import_module(file_name, package="."))
+            elif file_name.endswith(".py"):
+                modules.append(import_module(file_name[:-3]))
         except ImportError as reason:
             modules.append(reason)
     del sys.path[1]
-    return name is None and modules[0] or modules
+    return modules if name is None else modules[0]
