@@ -22,7 +22,7 @@ from .processors import (CodeEditorCommandProcessor, CodeEditorSnippetProcessor,
     CodeEditorMacroProcessor, CodeEditorSyntaxProcessor, CodeEditorThemeProcessor)
 from .modes import CodeEditorBaseMode
 
-from ._highlighter import CodeEditorSyntaxHighlighter
+from .highlighter import CodeEditorSyntaxHighlighter
 from .models import (SymbolListModel, BookmarkListModel, FoldingListModel,
     bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
     symbolSelectableModelFactory)

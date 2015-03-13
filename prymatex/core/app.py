@@ -89,6 +89,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         # File Notifier
         notifier.start_notifier()
     
+    def setTimeout(self, delay, callback):
+        return QtCore.QTimer.singleShot(delay, callback)
+        
     def eventLoop(self):
         return self._event_loop
 

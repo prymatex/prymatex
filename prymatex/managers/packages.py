@@ -133,7 +133,7 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
         for name, directory in self.namespaces.items():
             for name in os.listdir(directory):
                 plugin_path = os.path.join(directory, name)
-                plugin_descriptor_path = os.path.join(plugin_path, config.PMX_PACKAGE_DESCRIPTOR_NAME)
+                plugin_descriptor_path = os.path.join(plugin_path, config.PMX_PACKAGE_DESCRIPTOR)
                 entry = { "id": name }
                 if os.path.isfile(plugin_descriptor_path):
                     with open(plugin_descriptor_path, 'r') as f:

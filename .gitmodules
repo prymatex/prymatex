@@ -103,3 +103,6 @@
 [submodule "prymatex/share/Packages/sublime"]
 	path = prymatex/share/Packages/sublime
 	url = git@github.com:prymatex/sublime.git
+[submodule "prymatex/share/Packages/SublimeCodeIntel"]
+	path = prymatex/share/Packages/SublimeCodeIntel
+	url = git@github.com:prymatex/codeintel.git
