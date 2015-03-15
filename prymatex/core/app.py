@@ -4,6 +4,7 @@
 import os
 import sys
 from functools import partial
+from collections import namedtuple
 
 import prymatex
 
@@ -20,10 +21,11 @@ from prymatex.widgets.texteditor import TextEditWidget
 
 from . import config
 from . import exceptions
-from .components import PrymatexComponent, PrymatexEditor
 from . import logger
-from .settings import ConfigurableItem, ConfigurableHook
 from . import notifier
+from .components import PrymatexComponent, PrymatexEditor
+from .settings import ConfigurableItem, ConfigurableHook
+from .namespace import Namespace
 
 class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     """The application instance.
@@ -70,7 +72,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
         #self._event_loop = QEventLoop(self)
         #asyncio.set_event_loop(self._event_loop)
-
+        self.namespaces = []
         self.component_classes = {}
         self.component_instances = {}
         self.default_component = type("DefaultComponent", (PrymatexEditor, TextEditWidget), {})
@@ -87,11 +89,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         self.replaceSysExceptHook()
         
         # File Notifier
-        notifier.start_notifier()
+        #notifier.start_notifier()
     
-    def setTimeout(self, delay, callback):
-        return QtCore.QTimer.singleShot(delay, callback)
-        
     def eventLoop(self):
         return self._event_loop
 
@@ -312,6 +311,18 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         f = open(self.fileLock, 'w')
         f.write('%s' % self.applicationPid())
         f.close()
+    
+    def setTimeout(self, delay, callback):
+        return QtCore.QTimer.singleShot(delay, callback)
+    
+    # ----------- Namespaces
+    def addNamespace(self, name, path, builtin=False):
+        index = 0 if builtin else 1
+        namespace = Namespace(name, path)
+        self.namespaces.insert(index, namespace)
+        self.resourceManager.add_source(namespace, True)
+        self.packageManager.addNamespace(namespace)
+        return namespace
         
     # -------------------- Managers
     def buildSupportManager(self):
