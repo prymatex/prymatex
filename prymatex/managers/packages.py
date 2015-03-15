@@ -55,7 +55,7 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
         self.namespaces = {}
         self.packages = {}
 
-    def initialize(self, message_handler=None):
+    def loadPackages(self, message_handler):
         self.loadCorePackage('prymatex.gui.codeeditor', 'org.prymatex.codeeditor')
         self.loadCorePackage('prymatex.gui.dockers', 'org.prymatex.dockers')
         self.loadCorePackage('prymatex.gui.dialogs', 'org.prymatex.dialogs')

@@ -137,35 +137,38 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         from prymatex.managers.packages import PackageManager
         
         # Populate components
-        app.populateComponentClass(ResourceManager)
-        app.populateComponentClass(ProfileManager)
-        app.populateComponentClass(SettingsManager)
-        app.populateComponentClass(PackageManager)
+        #app.populateComponentClass(ResourceManager)
+        #app.populateComponentClass(ProfileManager)
+        #app.populateComponentClass(SettingsManager)
+        #app.populateComponentClass(PackageManager)
         app.populateComponentClass(PrymatexApplication)
         
         # Build instances
-        app.resourceManager = ResourceManager(parent=app)
-        app.profileManager = ProfileManager(parent=app)
-        app.settingsManager = SettingsManager(parent=app)
-        app.packageManager = PackageManager(parent=app)
-        
+        #app.resourceManager = ResourceManager(parent=app)
+        #app.profileManager = ProfileManager(parent=app)
+        #app.settingsManager = SettingsManager(parent=app)
+        #app.packageManager = PackageManager(parent=app)
+        app.resourceManager = app.createComponentInstance(ResourceManager, parent=app)
+        app.profileManager = app.createComponentInstance(ProfileManager, parent=app)
+        app.settingsManager = app.createComponentInstance(SettingsManager, parent=app)
+        app.packageManager = app.createComponentInstance(PackageManager, parent=app)
         # Namespaces
         for ns, path in config.NAMESPACES:
             app.resourceManager.add_source(ns, path, True)
             app.packageManager.addNamespace(ns, path)
 
-	# Populate configurables
-        app.settingsManager.populateConfigurableClass(ResourceManager)
-        app.settingsManager.populateConfigurableClass(ProfileManager)
-        app.settingsManager.populateConfigurableClass(SettingsManager)
-        app.settingsManager.populateConfigurableClass(PackageManager)
+	    # Populate configurables
+        #app.settingsManager.populateConfigurableClass(ResourceManager)
+        #app.settingsManager.populateConfigurableClass(ProfileManager)
+        #app.settingsManager.populateConfigurableClass(SettingsManager)
+        #app.settingsManager.populateConfigurableClass(PackageManager)
         app.settingsManager.populateConfigurableClass(PrymatexApplication)
 
         # Configure instances
-        app.settingsManager.registerConfigurableInstance(app.resourceManager) 
-        app.settingsManager.registerConfigurableInstance(app.profileManager)
-        app.settingsManager.registerConfigurableInstance(app.settingsManager)
-        app.settingsManager.registerConfigurableInstance(app.packageManager)
+        #app.settingsManager.registerConfigurableInstance(app.resourceManager) 
+        #app.settingsManager.registerConfigurableInstance(app.profileManager)
+        #app.settingsManager.registerConfigurableInstance(app.settingsManager)
+        #app.settingsManager.registerConfigurableInstance(app.packageManager)
         app.settingsManager.registerConfigurableInstance(app)
 
         app.applyOptions()
@@ -220,7 +223,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
     def loadGraphicalUserInterface(self):
         self.showMessage = self.logger().info
-        self.packageManager.initialize(self.showMessage)
+        self.packageManager.loadPackages(self.showMessage)
 
         if not self.options.no_splash:
             from prymatex.widgets.splash import SplashScreen
@@ -244,7 +247,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             self.serverManager = self.buildServerManager()
 
             # Load Resources
-            self.resourceManager.initialize(self.showMessage)
+            self.resourceManager.loadResources(self.showMessage)
             
             # Load Bundles
             self.supportManager.loadSupport(self.showMessage)
@@ -253,7 +256,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             self.projectManager.loadProjects(self.showMessage)
 
             # Load Settings
-            self.settingsManager.initialize(self.showMessage)
+            self.settingsManager.loadSettings(self.showMessage)
 
             # Restore State
             self.settingsManager.restoreApplicationState()
@@ -443,8 +446,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         component = buildComponentInstance(componentClass, *args, **kwargs)
 
         # ------------------- Configure Bottom-up
-        for instance, args, kwargs in buildedInstances[::-1]:
-            self.settingsManager.registerConfigurableInstance(instance)
+        if self.settingsManager is not None:
+            for instance, args, kwargs in buildedInstances[::-1]:
+                self.settingsManager.registerConfigurableInstance(instance)
 
         # ------------------- Initialize Top-down
         for instance, args, kwargs in buildedInstances:

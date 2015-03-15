@@ -22,8 +22,7 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
         # Shortcut Models
         self.shortcutsTreeModel = ShortcutsTreeModel(self)
 
-    # OVERRIDE: PrymatexComponent.initialize
-    def initialize(self, message_handler=None):
+    def loadResources(self, message_handler):
         # Load standard shortcuts
         self.shortcutsTreeModel.loadStandardSequences(self.resources())
 

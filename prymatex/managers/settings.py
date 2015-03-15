@@ -47,7 +47,7 @@ class SettingsManager(PrymatexComponent, QtCore.QObject):
         json.write_file(state, self.profile().PMX_STATE_PATH)
 
     # -------------------- Public API
-    def initialize(self, message_handler):
+    def loadSettings(self, message_handler):
         # Load settings
         self.settingsTreeModel.loadSettings()
 
