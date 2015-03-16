@@ -28,8 +28,6 @@ from . import scope
 from .staticfile import StaticFile
 from .process import RunningContext
 
-Namespace = namedtuple("Namespace", "name protected bundles")
-
 # ------- Tool function for compare bundle items by attributes
 def compare(obj, keys, tests):
     if not len(keys):
@@ -51,8 +49,6 @@ def compare(obj, keys, tests):
 # Every set of items lives inside a namespace
 # ======================================================
 class SupportBaseManager(object):
-    PROTECTEDNS = 0  # El primero es el protected
-    DEFAULTNS = 1  # El segundo es el default
     BUNDLEITEM_CLASSES = dict([ (cls.type(), cls) for cls in (
         bundleitem.Syntax,
         bundleitem.Snippet,
@@ -70,8 +66,6 @@ class SupportBaseManager(object):
 
     def __init__(self, **kwargs):
         super(SupportBaseManager, self).__init__(**kwargs)
-        self.namespaces = OrderedDict()
-        
         self.ready = False
         self.environment = {}
         self.managedObjects = {}
@@ -87,7 +81,6 @@ class SupportBaseManager(object):
         
     # ------------ Namespaces ----------------------
     def addNamespace(self, namespace, bultin=False):
-        self.namespaces[namespace.name] = namespace
         bundles = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
         # Update environment
         if namespace.name == config.PMX_NS_NAME:
@@ -99,28 +92,11 @@ class SupportBaseManager(object):
                 bundles
             )
 
-    def hasNamespace(self, name):
-        return name in self.namespaces
-
-    def protectedNamespace(self):
-        return list(self.namespaces.values())[self.PROTECTEDNS]
-
-    def defaultNamespace(self):
-        return list(self.namespaces.values())[self.DEFAULTNS]
-
-    def safeNamespaceNames(self):
-        return list(self.namespaces.keys())[self.DEFAULTNS:]
-
-    def safeNamespace(self, name = None):
-        if name is None:
-            return self.defaultNamespace()
-        namespace = self.namespaces[name]
-        if namespace.protected:
-            return self.defaultNamespace()
-        return namespace
-
     def namespace(self, name):
-        return self.namespaces.get(name)
+        pass
+
+    def namespaces(self):
+        return []
 
     def addProjectNamespace(self, project):
         # TODO Un nombre mas pulenta
@@ -260,7 +236,7 @@ class SupportBaseManager(object):
     def loadSupport(self, message_handler=None):
         # Install message handler
         self.message_handler = message_handler
-        for namespace in self.namespaces.values():
+        for namespace in self.namespaces():
             self.loadBundles(namespace)
         for bundle in self.getAllBundles():
             if bundle.enabled():
@@ -298,7 +274,7 @@ class SupportBaseManager(object):
 
     # ----------- POPULATE BUNDLE AND LOAD BUNDLE ITEMS
     def populateBundle(self, bundle):
-        for namespace in self.namespaces.values():
+        for namespace in self.namespaces():
             if not bundle.hasSource(namespace.name):
                 continue
             bundleDirectory = os.path.dirname(bundle.sourcePath(namespace.name))
@@ -340,7 +316,7 @@ class SupportBaseManager(object):
         # Install message handler
         self.message_handler = message_handler
         self.logger().debug("Begin reload support.")
-        for namespace in self.namespaces.values():
+        for namespace in self.namespaces():
             self.logger().debug("Search in %s, %s." % (namespace.name, os.path.join(namespace.path, config.PMX_BUNDLES_NAME)))
             self.reloadBundles(namespace)
         for bundle in self.getAllBundles():
@@ -389,7 +365,7 @@ class SupportBaseManager(object):
 
     # ----- REPOPULATED BUNDLE AND RELOAD BUNDLE ITEMS
     def repopulateBundle(self, bundle):
-        for namespace in self.namespaces.values():
+        for namespace in self.namespaces():
             if not bundle.hasSource(namespace.name):
                 continue
             bundlePath = bundle.sourcePath(namespace.name)
@@ -574,14 +550,15 @@ class SupportBaseManager(object):
                 bundles.append(bundle)
         return bundles
 
-    def createBundle(self, namespaceName, **attrs):
+    def createBundle(self, ns_name=config.USR_NS_NAME, **attrs):
         """Crea un bundle nuevo lo agrega en los bundles y lo retorna.
         Precondiciones:
             Tenes por lo menos dos espacios de nombre el base o proteguido y
             uno donde generar los nuevos bundles
         """
-        namespace = self.safeNamespace(namespaceName)
-        
+        namespace = self.namespace(ns_name)
+        assert namespace is not None, "No namespace for %s" % ns_name
+
         bundleAttributes = Bundle.DEFAULTS.copy()
         bundleAttributes.update(attrs)
         
@@ -616,9 +593,10 @@ class SupportBaseManager(object):
             self.logger().debug("Add namespace '%s' in source %s for bundle." % (namespace.name, bundle.sourcePath(namespace.name)))
         return bundle
 
-    def updateBundle(self, bundle, namespaceName, **attrs):
+    def updateBundle(self, bundle, ns_name=config.USR_NS_NAME, **attrs):
         """Actualiza un bundle"""
-        namespace = self.safeNamespace(namespaceName)
+        namespace = self.namespace(ns_name)
+        assert namespace is not None, "No namespace for %s" % ns_name
 
         bundle = self.ensureBundleIsSafe(bundle, namespace)
         
@@ -648,7 +626,7 @@ class SupportBaseManager(object):
         for bundleItem in bundleItems:
             self.deleteBundleItem(bundleItem)
 
-        for namespace in self.namespaces.values():
+        for namespace in self.namespaces():
             if not bundle.hasSource(namespace.name):
                 continue
             #Si el espacio de nombres es distinto al protegido lo elimino
@@ -692,7 +670,7 @@ class SupportBaseManager(object):
                 bundleItems.append(bundleItem)
         return bundleItems
     
-    def createBundleItem(self, typeName, bundle, namespaceName, **attrs):
+    def createBundleItem(self, typeName, bundle, ns_name=config.USR_NS_NAME, **attrs):
         """
         Crea un bundle item nuevo lo agrega en los bundle items y lo retorna,
         Precondiciones:
@@ -700,7 +678,8 @@ class SupportBaseManager(object):
             El typeName tiene que ser uno de los conocidos
         Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle item nuevo.
         """
-        namespace = self.safeNamespace(namespaceName)
+        namespace = self.namespace(ns_name)
+        assert namespace is not None, "No namespace for %s" % ns_name
         
         bundle = self.ensureBundleIsSafe(bundle, namespace)
 
@@ -741,11 +720,12 @@ class SupportBaseManager(object):
             self.logger().debug("Add namespace '%s' in source %s for bundle item." % (namespace.name, bundle.sourcePath(namespace.name)))
         return bundleItem
     
-    def updateBundleItem(self, bundleItem, namespaceName, **attrs):
+    def updateBundleItem(self, bundleItem, ns_name=config.USR_NS_NAME, **attrs):
         """Actualiza un bundle item"""
         self.updateBundleItemCacheCoherence(bundleItem, attrs)
 
-        namespace = self.safeNamespace(namespaceName)
+        namespace = self.namespace(ns_name)
+        assert namespace is not None, "No namespace for %s" % ns_name
 
         bundleItem = self.ensureBundleItemIsSafe(bundleItem, namespace)
         
@@ -769,7 +749,7 @@ class SupportBaseManager(object):
         """Elimina un bundle por su uuid,
         si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
         """
-        for namespace in self.namespaces.values():
+        for namespace in self.namespaces():
             if not bundleItem.hasSource(namespace.name):
                 continue
             #Si el espacio de nombres es distinto al protegido lo elimino
@@ -789,8 +769,9 @@ class SupportBaseManager(object):
         pass
 
     # -------------- STATICFILE CRUD
-    def createStaticFile(self, parentItem, namespaceName=None):
-        namespace = self.safeNamespace(namespaceName)
+    def createStaticFile(self, parentItem, ns_name=config.USR_NS_NAME):
+        namespace = self.namespace(ns_name)
+        assert namespace is not None, "No namespace for %s" % ns_name
         
         if self.isProtected(parentItem) and not self.isSafe(parentItem):
             self.updateBundleItem(parentItem, namespace)
@@ -803,8 +784,10 @@ class SupportBaseManager(object):
         staticFile.save()
         return staticFile
 
-    def updateStaticFile(self, staticFile, namespaceName, **attrs):
-        namespace = self.safeNamespace(namespaceName)
+    def updateStaticFile(self, staticFile, ns_name=config.USR_NS_NAME, **attrs):
+        namespace = self.namespace(ns_name)
+        assert namespace is not None, "No namespace for %s" % ns_name
+
         parentItem = staticFile.parentItem
         if self.isProtected(parentItem) and not self.isSafe(parentItem):
             self.updateBundleItem(parentItem, namespace)
@@ -829,8 +812,9 @@ class SupportBaseManager(object):
         pass
 
     # ------------ THEMESTYLE CRUD
-    def createThemeStyle(self, theme, namespaceName = None, **attrs):
-        namespace = self.safeNamespace(namespaceName)
+    def createThemeStyle(self, theme, ns_name=config.USR_NS_NAME, **attrs):
+        namespace = self.namespace(ns_name)
+        assert namespace is not None, "No namespace for %s" % ns_name
         
         theme = self.ensureBundleItemIsSafe(theme, namespace)
         
@@ -840,8 +824,9 @@ class SupportBaseManager(object):
         self.saveManagedObject(theme, namespace)
         return style
 
-    def updateThemeStyle(self, style, namespaceName = None, **attrs):
-        namespace = self.safeNamespace(namespaceName)
+    def updateThemeStyle(self, style, ns_name=config.USR_NS_NAME, **attrs):
+        namespace = self.namespace(ns_name)
+        assert namespace is not None, "No namespace for %s" % ns_name
         
         theme = self.ensureBundleItemIsSafe(style.theme, namespace)
         
@@ -851,8 +836,9 @@ class SupportBaseManager(object):
         self.modifyBundleItem(theme)
         return style
 
-    def deleteThemeStyle(self, style, namespaceName = None):
-        namespace = self.safeNamespace(namespaceName)
+    def deleteThemeStyle(self, style, ns_name=config.USR_NS_NAME):
+        namespace = self.namespace(ns_name)
+        assert namespace is not None, "No namespace for %s" % ns_name
         
         theme = self.ensureBundleItemIsSafe(style.theme, namespace)
         theme.removeThemeStyle(style)

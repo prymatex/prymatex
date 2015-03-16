@@ -240,6 +240,14 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def menuForBundle(self, bundle):
         return self.bundleMenuGroup.menuForBundle(bundle)
 
+    # OVERRIDE: SupportManager.namespace
+    def namespace(self, name):
+        return self.application().namespace(name)
+
+    # OVERRIDE: SupportManager.namespaces
+    def namespaces(self):
+        return self.application().namespaces()
+
     # Override buildPlistFileStorage for custom storage
     def buildPlistFileStorage(self):
         return self.application().storageManager.singleFileStorage("support-plist")
@@ -397,7 +405,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def getAllBundleItems(self):
         nodes = []
         for bundle in self.getAllBundles():
-            for node in bundle.childNodes():
+            for node in bundle.children():
                 nodes.append(node)
         return nodes
         

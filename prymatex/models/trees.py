@@ -121,7 +121,7 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
         return _collect(self.rootNode)
 
     def clear(self):
-        self.rootNode.removeAllChild()
+        self.rootNode.removeAllChildren()
         self.layoutChanged.emit()
     
     def appendNode(self, node, parentNode = None):

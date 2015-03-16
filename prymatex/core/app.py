@@ -70,7 +70,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         self.platform = sys.platform
         self.options = options
 
-        self.namespaces = []
+        self._namespaces = []
         self.component_classes = {}
         self.component_instances = {}
         self.default_component = type("DefaultComponent", (PrymatexEditor, TextEditWidget), {})
@@ -301,12 +301,21 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     def addNamespace(self, name, path, builtin=False):
         index = 0 if builtin else 1
         namespace = Namespace(name, path)
-        self.namespaces.insert(index, namespace)
+        self._namespaces.insert(index, namespace)
         self.resourceManager.addNamespace(namespace, builtin)
         self.packageManager.addNamespace(namespace, builtin)
         self.supportManager.addNamespace(namespace, builtin)
         return namespace
     
+    def namespace(self, name):
+        namespaces = [ namespace for namespace in self._namespaces \
+            if namespace.name == name ]
+        if namespaces:
+            return namespace[0]
+
+    def namespaces(self):
+        return self._namespaces
+
     # ---------- OVERRIDE: PrymatexComponent.componentState()
     def componentState(self):
         componentState = super(PrymatexApplication, self).componentState()
