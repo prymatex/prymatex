@@ -15,11 +15,9 @@ class HighlighterThread(QtCore.QThread):
     def __init__(self, editor):
         super(HighlighterThread, self).__init__(editor)
         self._indexes = set()
-        self._running_indexes = set()
+        self._ready_indexes = set()
         self._texts = {}
-        self._running_texts = {}
         self._states = {}
-        self._running_states = {}
         self._processor = editor.findProcessor("syntax")
         self._stopped = False
         self._scheduled = False
@@ -28,7 +26,7 @@ class HighlighterThread(QtCore.QThread):
         return self._scheduled or super(HighlighterThread, self).isRunning()
         
     def addLine(self, index, text, previous_state, previous_revision):
-        if index not in self._running_indexes:
+        if index not in self._ready_indexes:
             self._indexes.add(index)
             self._texts[index] = text
             self._states[index] = (previous_state, previous_revision)
@@ -49,21 +47,19 @@ class HighlighterThread(QtCore.QThread):
         self.wait()
         
     def run(self):
-        self.msleep(300)
         while not self._stopped and self._indexes:
-            self._running_indexes, self._indexes = sorted(self._indexes), set()
+            self._ready_indexes, self._indexes = sorted(self._indexes), set()
             states, self._states = self._states.copy(), {}
             texts, self._texts = self._texts.copy(), {}
-            for index in self._running_indexes:
+            for index in self._ready_indexes:
                 previous_state, previous_revision = states[index]
                 user_data = self._processor.textUserData(
                     texts[index], previous_state, previous_revision
                 )
                 states[index + 1] = (user_data.state, user_data.revision)
                 self.ready.emit(index, user_data)
-            self.changed.emit(self._running_indexes)
-            self._running_indexes = set()
-            self.msleep(100)
+            self.changed.emit(self._ready_indexes)
+            #self._running_indexes = set()
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     changed = QtCore.Signal(list)        # On the highlight changed allways triggered
@@ -89,13 +85,11 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.rehighlightBlock(block)
     
     def stop(self):
-        print("stop")
         if self.thread.isRunning():
             self.thread.stop()
         self._stopped = True
 
     def start(self):
-        print("start")
         self._stopped = False
         self.aboutToChange.emit()
         self.rehighlight()
