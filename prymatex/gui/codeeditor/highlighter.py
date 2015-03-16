@@ -28,14 +28,13 @@ class HighlighterThread(QtCore.QThread):
         return self._scheduled or super(HighlighterThread, self).isRunning()
         
     def addLine(self, index, text, previous_state, previous_revision):
-        if index not in self._running_states:
+        if index not in self._running_indexes:
             self._indexes.add(index)
             self._texts[index] = text
             self._states[index] = (previous_state, previous_revision)
-        if not self.isRunning() and self._indexes:
-            self._scheduled = True
-            time = previous_revision == -1 and 100 or 0
-            QtCore.QTimer.singleShot(time, self.start)
+            if not self.isRunning() and self._indexes:
+                self._scheduled = True
+                QtCore.QTimer.singleShot(0, self.start)
 
     def start(self):
         self._stopped = False
@@ -50,25 +49,21 @@ class HighlighterThread(QtCore.QThread):
         self.wait()
         
     def run(self):
+        self.msleep(300)
         while not self._stopped and self._indexes:
-            self._running_indexes = sorted(self._indexes)
-            self._running_states = self._states.copy()
-            self._running_texts = self._texts.copy()
-            self._indexes = set()
-            self._texts = {}
-            self._states = {}
+            self._running_indexes, self._indexes = sorted(self._indexes), set()
+            states, self._states = self._states.copy(), {}
+            texts, self._texts = self._texts.copy(), {}
             for index in self._running_indexes:
-                text = self._running_texts[index]
-                previous_state, previous_revision = self._running_states[index]
+                previous_state, previous_revision = states[index]
                 user_data = self._processor.textUserData(
-                    text, previous_state, previous_revision
+                    texts[index], previous_state, previous_revision
                 )
-                self._running_states[index + 1] = (user_data.state, user_data.revision)
+                states[index + 1] = (user_data.state, user_data.revision)
                 self.ready.emit(index, user_data)
             self.changed.emit(self._running_indexes)
             self._running_indexes = set()
-            self._running_states = {}
-            self._running_texts = {}
+            self.msleep(100)
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     changed = QtCore.Signal(list)        # On the highlight changed allways triggered
@@ -94,11 +89,13 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.rehighlightBlock(block)
     
     def stop(self):
+        print("stop")
         if self.thread.isRunning():
             self.thread.stop()
         self._stopped = True
 
-    def start(self, callback=None):
+    def start(self):
+        print("start")
         self._stopped = False
         self.aboutToChange.emit()
         self.rehighlight()
@@ -113,7 +110,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 if user_data and user_data.blockText() != text:
                     # Mentir un poco con el formato
                     pass
-                elif user_data and user_data.state != self.previousBlockState() or self.previousBlockState() == self.syntaxProcessor.MULTI_LINE:
+                elif user_data and user_data.state != self.previousBlockState() and self.previousBlockState() == self.syntaxProcessor.MULTI_LINE:
                     # Apurar el tramite de los proximos agregados
                     self.setCurrentBlockState(self.previousBlockState())
                 previous_user_data = self.currentBlock().previous().userData()
