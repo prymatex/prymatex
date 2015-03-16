@@ -35,11 +35,11 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
     def registerShortcut(self, qobject, sequence):
         return self.shortcutsTreeModel.registerShortcut(qobject, sequence)
         
-    def add_source(self, name, path, default=False):
-        res = Resource(name, path, default)
-        res.update(load_fonts(path))
-        res.update(load_media(path))
-        res.update(load_stylesheets(path))
+    def addNamespace(self, namespace, builtin=False):
+        res = Resource(namespace.name, namespace.path, builtin)
+        res.update(load_fonts(namespace.path))
+        res.update(load_media(namespace.path))
+        res.update(load_stylesheets(namespace.path))
         self.prymatex_resources.insert(0, res)
 
     def get_provider(self, sources):
@@ -49,11 +49,11 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
             )
         return self.prymatex_providers[sources]
 
-    def defaults(self):
-        return tuple([ res.name() for res in self.prymatex_resources if res.default() ])
+    def builtins(self):
+        return tuple([ res.name() for res in self.prymatex_resources if res.builtin() ])
 
     def providerForClass(self, componentClass):
-        sources = getattr(componentClass, "RESOURCES", self.defaults())
+        sources = getattr(componentClass, "RESOURCES", self.builtins())
         return self.get_provider(sources)
 
     def icon_from_theme(self, index):

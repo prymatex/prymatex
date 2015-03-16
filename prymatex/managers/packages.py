@@ -101,25 +101,24 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
         from prymatex.gui.settings.plugins import PluginsSettingsWidget
         return [ PluginsSettingsWidget ]
 
-    def addNamespace(self, name, base_path):
-        directory=os.path.join(base_path, config.PMX_PACKAGES_NAME)
+    def addNamespace(self, namespace, bultin=False):
+        directory=os.path.join(namespace.path, config.PMX_PACKAGES_NAME)
         if os.path.exists(directory) and os.path.isdir(directory):
-            self.namespaces[name] = directory
+            self.namespaces[namespace.name] = directory
 
     # ---------- Load plugins
     def loadResources(self, directory, entry):
-        defaults = self.application().resourceManager.defaults()
+        builtins = self.application().resourceManager.builtins()
         #  TODO: Dependencias
         share_path = os.path.join(directory, entry.get("share", config.PMX_SHARE_NAME))
         if os.path.isdir(share_path):
-            self.application().resourceManager.add_source(entry["name"], share_path)
-            defaults = (entry["name"],) + defaults
-        entry["resources"] = self.application().resourceManager.get_provider(defaults)
+            self.application().addNamespace(entry["name"], share_path)
+            defaults = (entry["name"],) + builtins
+        entry["resources"] = self.application().resourceManager.get_provider(builtins)
         if "icon" in entry:
             entry["icon"] = entry["resources"].get_icon(entry.get("icon", ":/prymatex.png"))
 
     def loadBundles(self, directory, entry):
-        defaults = self.application().resourceManager.defaults()
         bundles_path = os.path.join(directory, entry.get("bundles", config.PMX_BUNDLES_NAME))
         if os.path.isdir(bundles_path):
             print("Bundles en", bundles_path)

@@ -70,8 +70,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         self.platform = sys.platform
         self.options = options
 
-        #self._event_loop = QEventLoop(self)
-        #asyncio.set_event_loop(self._event_loop)
         self.namespaces = []
         self.component_classes = {}
         self.component_instances = {}
@@ -91,9 +89,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         # File Notifier
         #notifier.start_notifier()
     
-    def eventLoop(self):
-        return self._event_loop
-
     # ------ exception and logger handlers
     def getLogger(self, *largs, **kwargs):
         return logger.getLogger(*largs, **kwargs)
@@ -134,40 +129,36 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         from prymatex.managers.profiles import ProfileManager
         from prymatex.managers.settings import SettingsManager
         from prymatex.managers.packages import PackageManager
+        from prymatex.managers.storage import StorageManager
+        from prymatex.managers.support import SupportManager
+        from prymatex.managers.files import FileManager
+        from prymatex.managers.projects import ProjectManager
+        #from prymatex.managers.coroutines import SchedulerManager
+        from prymatex.managers.server import ServerManager
         
-        # Populate components
-        #app.populateComponentClass(ResourceManager)
-        #app.populateComponentClass(ProfileManager)
-        #app.populateComponentClass(SettingsManager)
-        #app.populateComponentClass(PackageManager)
+        # Populate Application
         app.populateComponentClass(PrymatexApplication)
         
-        # Build instances
-        #app.resourceManager = ResourceManager(parent=app)
-        #app.profileManager = ProfileManager(parent=app)
-        #app.settingsManager = SettingsManager(parent=app)
-        #app.packageManager = PackageManager(parent=app)
+        # Build Managers
         app.resourceManager = app.createComponentInstance(ResourceManager, parent=app)
         app.profileManager = app.createComponentInstance(ProfileManager, parent=app)
         app.settingsManager = app.createComponentInstance(SettingsManager, parent=app)
         app.packageManager = app.createComponentInstance(PackageManager, parent=app)
-        # Namespaces
-        for ns, path in config.NAMESPACES:
-            app.resourceManager.add_source(ns, path, True)
-            app.packageManager.addNamespace(ns, path)
+        app.storageManager = app.createComponentInstance(StorageManager, parent=app)
+        app.supportManager = app.createComponentInstance(SupportManager, parent=app) 
+        app.fileManager = app.createComponentInstance(FileManager, parent=app)
+        app.projectManager = app.createComponentInstance(ProjectManager, parent=app)
+        #app.schedulerManager = app.createComponentInstance(SchedulerManager, parent=app)
+        app.serverManager = app.createComponentInstance(ServerManager, parent=app)
+        
+        # Add builtin Namespaces
+        for name, path in config.NAMESPACES:
+            app.addNamespace(name, path)
 
-	    # Populate configurables
-        #app.settingsManager.populateConfigurableClass(ResourceManager)
-        #app.settingsManager.populateConfigurableClass(ProfileManager)
-        #app.settingsManager.populateConfigurableClass(SettingsManager)
-        #app.settingsManager.populateConfigurableClass(PackageManager)
+	    # Populate Application
         app.settingsManager.populateConfigurableClass(PrymatexApplication)
 
-        # Configure instances
-        #app.settingsManager.registerConfigurableInstance(app.resourceManager) 
-        #app.settingsManager.registerConfigurableInstance(app.profileManager)
-        #app.settingsManager.registerConfigurableInstance(app.settingsManager)
-        #app.settingsManager.registerConfigurableInstance(app.packageManager)
+        # Configure Application
         app.settingsManager.registerConfigurableInstance(app)
 
         app.applyOptions()
@@ -215,14 +206,13 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         }
         for manager in [self.resourceManager, self.profileManager,
             self.packageManager, self.storageManager, self.supportManager,
-            self.fileManager, self.projectManager, self.schedulerManager,
+            self.fileManager, self.projectManager,
             self.serverManager]:
             env.update(manager.environmentVariables())
         return env
 
     def loadGraphicalUserInterface(self):
         self.showMessage = self.logger().info
-        self.packageManager.loadPackages(self.showMessage)
 
         if not self.options.no_splash:
             from prymatex.widgets.splash import SplashScreen
@@ -238,22 +228,14 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             splash.show()
             self.showMessage = splash.showMessage
         try:
-            self.storageManager = self.buildStorageManager()    # Persistence system Manager  # NOQA
-            self.supportManager = self.buildSupportManager()    # Support Manager
-            self.fileManager = self.buildFileManager()          # File Manager
-            self.projectManager = self.buildProjectManager()    # Project Manager
-            self.schedulerManager = self.buildSchedulerManager()
-            self.serverManager = self.buildServerManager()
-
+            # Load Packages
+            self.packageManager.loadPackages(self.showMessage)            
             # Load Resources
             self.resourceManager.loadResources(self.showMessage)
-            
             # Load Bundles
             self.supportManager.loadSupport(self.showMessage)
-
             # Load Projects
             self.projectManager.loadProjects(self.showMessage)
-
             # Load Settings
             self.settingsManager.loadSettings(self.showMessage)
 
@@ -320,43 +302,11 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         index = 0 if builtin else 1
         namespace = Namespace(name, path)
         self.namespaces.insert(index, namespace)
-        self.resourceManager.add_source(namespace, True)
-        self.packageManager.addNamespace(namespace)
+        self.resourceManager.addNamespace(namespace, builtin)
+        self.packageManager.addNamespace(namespace, builtin)
+        self.supportManager.addNamespace(namespace, builtin)
         return namespace
-        
-    # -------------------- Managers
-    def buildSupportManager(self):
-        from prymatex.managers.support import SupportManager
-        manager = self.createComponentInstance(SupportManager, parent=self)
-
-        for ns, path in reversed(config.NAMESPACES):
-            manager.addNamespace(ns, path)
-
-        return manager
-
-    def buildFileManager(self):
-        from prymatex.managers.files import FileManager
-        manager = self.createComponentInstance(FileManager, parent=self)
-        #manager.add_change_callback(self.profile().PMX_SETTINGS_PATH, self.on_settings_changed)
-        #manager.fileSytemChanged.connect(self.on_fileManager_fileSytemChanged)
-        return manager
-
-    def buildProjectManager(self):
-        from prymatex.managers.projects import ProjectManager
-        return self.createComponentInstance(ProjectManager, parent=self)
-
-    def buildStorageManager(self):
-        from prymatex.managers.storage import StorageManager
-        return self.createComponentInstance(StorageManager, parent=self)
-
-    def buildSchedulerManager(self):
-        from prymatex.managers.coroutines import SchedulerManager
-        return self.createComponentInstance(SchedulerManager, parent=self)
-
-    def buildServerManager(self):
-        from prymatex.managers.server import ServerManager
-        return self.createComponentInstance(ServerManager, parent=self)
-
+    
     # ---------- OVERRIDE: PrymatexComponent.componentState()
     def componentState(self):
         componentState = super(PrymatexApplication, self).componentState()

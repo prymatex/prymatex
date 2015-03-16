@@ -86,20 +86,18 @@ class SupportBaseManager(object):
         self.plistFileCache = self.buildPlistFileStorage()
         
     # ------------ Namespaces ----------------------
-    def addNamespace(self, name, base_path):
-        namespace = Namespace(
-            name = name, 
-            protected = len(self.namespaces) == 0,
-            bundles = os.path.join(base_path, config.PMX_BUNDLES_NAME))
-        self.namespaces[name] = namespace
+    def addNamespace(self, namespace, bultin=False):
+        self.namespaces[namespace.name] = namespace
+        bundles = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
         # Update environment
-        if namespace.protected:
-            self.addToEnvironment("PMX_BUNDLES_PATH", namespace.bundles)
-            self.addToEnvironment("TM_BUNDLES_PATH", namespace.bundles)
+        if namespace.name == config.PMX_NS_NAME:
+            self.addToEnvironment("PMX_BUNDLES_PATH", bundles)
+            self.addToEnvironment("TM_BUNDLES_PATH", bundles)
         else:
-            self.addToEnvironment("PMX_%s_BUNDLES_PATH" % namespace.name.upper(),
-                namespace.bundles)
-        return namespace
+            self.addToEnvironment(
+                "PMX_%s_BUNDLES_PATH" % namespace.name.upper(),
+                bundles
+            )
 
     def hasNamespace(self, name):
         return name in self.namespaces
@@ -274,7 +272,7 @@ class SupportBaseManager(object):
     #------------- LOAD BUNDLES ------------------
     def loadBundles(self, namespace):
         loadedBundles = set()
-        for sourceBundlePath in Bundle.sourcePaths(namespace.bundles):
+        for sourceBundlePath in Bundle.sourcePaths(os.path.join(namespace.path, config.PMX_BUNDLES_NAME)):
             try:
                 bundle = self.loadBundle(sourceBundlePath, namespace)
                 loadedBundles.add(bundle)
@@ -343,7 +341,7 @@ class SupportBaseManager(object):
         self.message_handler = message_handler
         self.logger().debug("Begin reload support.")
         for namespace in self.namespaces.values():
-            self.logger().debug("Search in %s, %s." % (namespace.name, namespace.bundles))
+            self.logger().debug("Search in %s, %s." % (namespace.name, os.path.join(namespace.path, config.PMX_BUNDLES_NAME)))
             self.reloadBundles(namespace)
         for bundle in self.getAllBundles():
             if bundle.enabled():
@@ -355,7 +353,7 @@ class SupportBaseManager(object):
     # ---------------- RELOAD BUNDLES
     def reloadBundles(self, namespace):
         installedBundles = [bundle for bundle in self.getAllBundles() if bundle.hasSource(namespace.name)]
-        bundlePaths = list(Bundle.sourcePaths(namespace.bundles))
+        bundlePaths = list(Bundle.sourcePaths(os.path.join(namespace.path, config.PMX_BUNDLES_NAME)))
         for bundle in installedBundles:
             bundlePath = bundle.sourcePath(namespace.name)
             if bundlePath in bundlePaths:
@@ -590,7 +588,7 @@ class SupportBaseManager(object):
         # Create Bundle
         bundle = Bundle(self.uuidgen(), self)
         bundle.load(bundleAttributes)
-        bundle.addSource(namespace.name, bundle.createSourcePath(namespace.bundles))
+        bundle.addSource(namespace.name, bundle.createSourcePath(os.path.join(namespace.path, config.PMX_BUNDLES_NAME)))
         
         self.saveManagedObject(bundle, namespace)
         
@@ -612,7 +610,7 @@ class SupportBaseManager(object):
         """Ensure the bundle is safe"""
         if self.isProtected(bundle) and not self.isSafe(bundle):
             #Safe bundle
-            bundle.addSource(namespace.name, bundle.createSourcePath(namespace.bundles))
+            bundle.addSource(namespace.name, bundle.createSourcePath(os.path.join(namespace.path, config.PMX_BUNDLES_NAME)))
             bundle.setCurrentSource(namespace.name)
             self.saveManagedObject(bundle, namespace)
             self.logger().debug("Add namespace '%s' in source %s for bundle." % (namespace.name, bundle.sourcePath(namespace.name)))
@@ -633,7 +631,7 @@ class SupportBaseManager(object):
         if moveSource:
             # Para mover hay que renombrar el directorio y mover todos los items del bundle
             bundleSourcePath = bundle.currentSourcePath()
-            bundleDestinyPath = bundle.createSourcePath(namespace.bundles)
+            bundleDestinyPath = bundle.createSourcePath(os.path.join(namespace.path, config.PMX_BUNDLES_NAME))
             shutil.move(bundleSourcePath, bundleDestinyPath)
             bundle.setSourcePath(namespace.name, bundleDestinyPath)
             for bundleItem in self.findBundleItems(bundle = bundle):

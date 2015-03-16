@@ -36,15 +36,15 @@ def build_resource_key(path):
     return ":/%s" % "/".join(osextra.path.fullsplit(path))
 
 class Resource(dict):
-    def __init__(self, name, path=None, default=False):
+    def __init__(self, name, path=None, builtin=False):
         self._name = name
         self._path = path
-        self._default = default
+        self._builtin = builtin
         self._mapper = default_media_mapper
         self._from_theme = QtGui.QIcon._fromTheme
 
-    def default(self):
-        return self._default
+    def builtin(self):
+        return self._builtin
 
     def name(self):
         return self._name
