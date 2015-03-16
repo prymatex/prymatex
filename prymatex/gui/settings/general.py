@@ -15,9 +15,9 @@ class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtWidgets.QWidget):
         super(GeneralSettingsWidget, self).loadSettings()
         self.setTitle("General")
         self.setIcon(self.application().resources().get_icon("settings-general"))
-        currentStyleName = self.settings().get('qtStyle')
-        currentStyleSheetName = self.settings().get('qtStyleSheet')
-        currentIconTheme = self.settings().get('iconTheme')
+        currentStyleName = self.settings().get('qt_style')
+        currentStyleSheetName = self.settings().get('qt_style_sheet')
+        currentIconTheme = self.settings().get('icon_theme')
         resources = self.application().resources()
         for index, styleName in enumerate(QtWidgets.QStyleFactory.keys()):
             self.comboBoxQtStyle.addItem(styleName, styleName)
@@ -50,13 +50,13 @@ class GeneralSettingsWidget(SettingsTreeNode, Ui_General, QtWidgets.QWidget):
         
     @QtCore.Slot(str)
     def on_comboBoxQtStyle_activated(self, styleName):
-        self.settings().set('qtStyle', styleName)
+        self.settings().set('qt_style', styleName)
 
     @QtCore.Slot(str)
     def on_comboBoxQtStyleSheet_activated(self, styleSheetName):
-        self.settings().set('qtStyleSheet', styleSheetName)
+        self.settings().set('qt_style_sheet', styleSheetName)
         
     @QtCore.Slot(str)
     def on_comboBoxIconTheme_activated(self, iconThemeName):
-        self.settings().set('iconTheme', iconThemeName)
+        self.settings().set('icon_theme', iconThemeName)
 

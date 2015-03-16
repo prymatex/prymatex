@@ -91,26 +91,16 @@ class SupportBaseManager(object):
                 "PMX_%s_BUNDLES_PATH" % namespace.name.upper(),
                 bundles
             )
+        if self.ready:
+            for bundle in self.loadBundles(namespace):
+                if bundle.enabled():
+                    self.populateBundle(bundle)
 
     def namespace(self, name):
         pass
 
     def namespaces(self):
         return []
-
-    def addProjectNamespace(self, project):
-        # TODO Un nombre mas pulenta
-        project.namespaceName = project.name
-        counter = 1
-        while project.namespaceName in self.namespaces:
-            project.namespaceName = "%s%d" % (project.namespaceName, counter)
-            counter += 1
-        namespace = self.addNamespace(project.namespaceName, project.projectPath)
-        #Ya esta listo tengo que cargar este namespace
-        if self.ready:
-            for bundle in self.loadBundles(namespace):
-                if bundle.enabled():
-                    self.populateBundle(bundle)
 
     #-------------- Environment ---------------------
     def environmentVariables(self):

@@ -37,18 +37,18 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     RESOURCES = (config.USR_NS_NAME, config.PMX_NS_NAME)
 
     @ConfigurableItem()
-    def qtStyle(self, styleName):
+    def qt_style(self, styleName):
         if styleName:
             self.setStyle(styleName)
 
     @ConfigurableItem(default="default")
-    def qtStyleSheet(self, styleSheetName):
+    def qt_style_sheet(self, styleSheetName):
         styleSheet = self.resources().get_stylesheets().get(styleSheetName)
         if styleSheet is not None:
             self.setStyleSheet(styleSheet.content)
 
     @ConfigurableItem(default=QtGui.QIcon.themeName())
-    def iconTheme(self, iconThemeName):
+    def icon_theme(self, iconThemeName):
         self.resources().set_theme(iconThemeName)
 
     askAboutExternalDeletions = ConfigurableItem(default=False)
@@ -122,8 +122,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     # ------- Prymatex's micro kernel
     @staticmethod
     def instance(*args, **kwargs):
-        app = PrymatexApplication(*args, **kwargs)
-        
         # Bootstrap
         from prymatex.managers.resources import ResourceManager
         from prymatex.managers.profiles import ProfileManager
@@ -136,30 +134,33 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         #from prymatex.managers.coroutines import SchedulerManager
         from prymatex.managers.server import ServerManager
         
-        # Populate Application
-        app.populateComponentClass(PrymatexApplication)
-        
-        # Build Managers
+        # Build Application
+        app = PrymatexApplication(*args, **kwargs)
+
+        # Build Managers resources, profile and settings are the backbone of prymatex
         app.resourceManager = app.createComponentInstance(ResourceManager, parent=app)
         app.profileManager = app.createComponentInstance(ProfileManager, parent=app)
         app.settingsManager = app.createComponentInstance(SettingsManager, parent=app)
-        app.packageManager = app.createComponentInstance(PackageManager, parent=app)
+        
+        # Populate application's class and configurable
+        app.populateComponentClass(PrymatexApplication)
+        app.settingsManager.populateConfigurableClass(PrymatexApplication)
+
+        # Build more Managers
+        app.packageManager = app.createComponentInstance(PackageManager, parent=app)        
         app.storageManager = app.createComponentInstance(StorageManager, parent=app)
         app.supportManager = app.createComponentInstance(SupportManager, parent=app) 
         app.fileManager = app.createComponentInstance(FileManager, parent=app)
         app.projectManager = app.createComponentInstance(ProjectManager, parent=app)
         #app.schedulerManager = app.createComponentInstance(SchedulerManager, parent=app)
         app.serverManager = app.createComponentInstance(ServerManager, parent=app)
+
+        # Configure Application instance
+        app.settingsManager.registerConfigurableInstance(app)
         
         # Add builtin Namespaces
         for name, path in config.NAMESPACES:
             app.addNamespace(name, path)
-
-	    # Populate Application
-        app.settingsManager.populateConfigurableClass(PrymatexApplication)
-
-        # Configure Application
-        app.settingsManager.registerConfigurableInstance(app)
 
         app.applyOptions()
         return app
@@ -213,7 +214,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
     def loadGraphicalUserInterface(self):
         self.showMessage = self.logger().info
-
         if not self.options.no_splash:
             from prymatex.widgets.splash import SplashScreen
             splash_image = self.resources().get_image('newsplash')
@@ -244,7 +244,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             window = self.currentWindow() or self.buildMainWindow(editor=True)
             
             # Change messages handler
-            self.showMessage = window.showMessage
+            self.showMessage = lambda self, *args, **kwargs: self.currentWindow().showMessage(*args, **kwargs)
 
             if not self.options.no_splash:
                 splash.finish(window)
@@ -300,6 +300,11 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     # ----------- Namespaces
     def addNamespace(self, name, path, builtin=False):
         index = 0 if builtin else 1
+        # Build one unique name
+        counter = 1
+        while self.namespace(name):
+            name = "%s%d" % (name, counter)
+            counter += 1
         namespace = Namespace(name, path)
         self._namespaces.insert(index, namespace)
         self.resourceManager.addNamespace(namespace, builtin)
