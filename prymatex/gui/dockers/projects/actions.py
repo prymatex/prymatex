@@ -119,6 +119,9 @@ class ProjectsDockActionsMixin(object):
                     'text': "Add Source Folder",
                     'triggered': lambda checked=False, values=projects: [ self.addSourceFolder(*value) for value in values ]
                 }, {
+                    'text': "Add Namespace Folder",
+                    'triggered': lambda checked=False, values=projects: [ self.addNamespaceFolder(*value) for value in values ]
+                }, "-", {
                     'text': "Project Bundles",
                     'triggered': lambda checked=False, values=projects: [ self.projectBundles(*value) for value in values ]
                 }, {
@@ -320,6 +323,20 @@ class ProjectsDockActionsMixin(object):
             node.addSourceFolder(source_folder_path)
             self.projectTreeProxyModel.refresh(index)
 
+    # -------------- Remove and add namespace folders
+    def removeNamespaceFolder(self, index, node=None):
+        node = node or self.projectTreeProxyModel.node(index)
+        project = node.project()
+        self.projectManager.removeNamespaceFolder(project, node.namespace())
+        self.projectTreeProxyModel.refresh(index.parent())
+
+    def addNamespaceFolder(self, index, node=None):
+        node = node or self.projectTreeProxyModel.node(index)
+        namespace_folder_path = getExistingDirectory(self, caption="Add Namespace Folder to %s" % node.nodeName())
+        if namespace_folder_path:
+            self.projectManager.addNamespaceFolder(node, namespace_folder_path)
+            self.projectTreeProxyModel.refresh(index)
+
     # -------------- Project Bundles
     def selectRelatedBundles(self, index, node=None):
         node = node or self.projectTreeProxyModel.node(index)
@@ -328,7 +345,7 @@ class ProjectsDockActionsMixin(object):
         
     def projectBundles(self, index, node=None):
         node = node or self.projectTreeProxyModel.node(index)
-        self.bundleEditorDialog.execEditor(namespaceFilter=node.namespaceName)
+        self.bundleEditorDialog.execEditor(namespaces=[ns.name for ns in node.namespaces])
 
     # -------------- Open indexes, files or directories
     def openFolder(self, index, node=None):

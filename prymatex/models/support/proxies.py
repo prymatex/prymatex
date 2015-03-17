@@ -2,6 +2,9 @@
 #-*- encoding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui
+
+from prymatex.core import config
+
 from prymatex.models.trees import FlatTreeProxyModel
 
 class BundleItemProxyTreeModel(QtCore.QSortFilterProxyModel):
@@ -10,7 +13,7 @@ class BundleItemProxyTreeModel(QtCore.QSortFilterProxyModel):
     def __init__(self, manager, parent = None):
         super(BundleItemProxyTreeModel, self).__init__(parent)
         self.manager = manager
-        self.namespacesFilter = ("prymatex", "user")
+        self.namespaces = (config.PMX_NS_NAME, config.USR_NS_NAME)
         self.bundleItemTypesFilter = self.bundleItemTypeOrder
     
     def filterAcceptsRow(self, sourceRow, sourceParent):
@@ -18,8 +21,8 @@ class BundleItemProxyTreeModel(QtCore.QSortFilterProxyModel):
         node = self.sourceModel().node(index)
         if node.isRootNode() or not node.enabled():
             return False
-        if self.namespacesFilter:
-            if not any([node.hasSource(ns) for ns in self.namespacesFilter]):
+        if self.namespaces:
+            if not any([node.hasSource(ns) for ns in self.namespaces]):
                 return False
         if self.bundleItemTypesFilter:
             if node.type() not in self.bundleItemTypesFilter:
@@ -46,27 +49,27 @@ class BundleItemProxyTreeModel(QtCore.QSortFilterProxyModel):
             node = self.node(index)
             if node.name != value:
                 if node.type() == "bundle":
-                    self.manager.updateBundle(node, self.namespacesFilter[-1], name = value)
+                    self.manager.updateBundle(node, self.namespaces[-1], name = value)
                 elif node.type() == "staticfile":
-                    self.manager.updateStaticFile(node, self.namespacesFilter[-1], name = value)
+                    self.manager.updateStaticFile(node, self.namespaces[-1], name = value)
                 else:
-                    self.manager.updateBundleItem(node, self.namespacesFilter[-1], name = value)
+                    self.manager.updateBundleItem(node, self.namespaces[-1], name = value)
                 return True
         return False
         
     def node(self, index):
         return self.sourceModel().node(self.mapToSource(index))
     
-    def setFilterNamespace(self, namespace):
-        if namespace:
-            self.namespacesFilter = (namespace)
+    def setFilterNamespace(self, namespaces):
+        if isinstance(namespaces, (tuple, list)):
+            self.namespaces = namespaces
         else:
-            self.namespacesFilter = ("prymatex", "user")
+            self.namespaces = (config.PMX_NS_NAME, config.USR_NS_NAME)
         self.setFilterRegExp("")
     
     def setFilterBundleItemType(self, bundleItemType):
-        if bundleItemType:
-            self.bundleItemTypesFilter = ("bundle") + tuple(bundleItemType.split())
+        if isinstance(bundleItemType, (tuple, list)):
+            self.bundleItemTypesFilter = ("bundle") + tuple(bundleItemType)
         else:
             self.bundleItemTypesFilter = self.bundleItemTypeOrder
         self.setFilterRegExp("")

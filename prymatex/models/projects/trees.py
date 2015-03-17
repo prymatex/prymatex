@@ -22,14 +22,6 @@ class ProjectTreeModel(AbstractTreeModel):
         super(ProjectTreeModel, self).__init__(parent = projectManager)
         self.projectManager = projectManager
         self.fileManager = projectManager.fileManager
-
-    def treeNodeFactory(self, name, parent):
-        if parent is None:
-            return AbstractTreeModel.treeNodeFactory(self, name, parent)
-        elif parent.isProject():
-            return SourceFolderTreeNode(name, parent)
-        else:
-            return FileSystemTreeNode(name, parent)
         
     def rowCount(self, parent):
         node = self.node(parent)
@@ -71,7 +63,7 @@ class ProjectTreeModel(AbstractTreeModel):
         if notify: 
             self.beginInsertRows(index, 0, len(names) - 1)
         for name in names:
-            child_node = self.treeNodeFactory(name, node)
+            child_node = FileSystemTreeNode(name, node)
             node.appendChild(child_node)
         if notify: 
             self.endInsertRows()
@@ -83,7 +75,10 @@ class ProjectTreeModel(AbstractTreeModel):
         if notify: 
             self.beginInsertRows(index, 0, len(names) - 1)
         for folder in node.source_folders:
-            child_node = self.treeNodeFactory(folder, node)
+            child_node = SourceFolderTreeNode(folder, node)
+            node.appendChild(child_node)
+        for namespace in node.namespaces:
+            child_node = NamespaceFolderTreeNode(namespace, node)
             node.appendChild(child_node)
         if notify: 
             self.endInsertRows()
@@ -108,21 +103,25 @@ class ProjectTreeModel(AbstractTreeModel):
         if notify: 
             self.beginInsertRows(parent_index, parent_node.childrenCount(), parent_node.childrenCount() + len(addNames) - 1)
         for name in addNames:
-            node = self.treeNodeFactory(name, parent_node)
+            node = FileSystemTreeNode(name, parent_node)
             node._populated = False
             parent_node.appendChild(node)
         if notify: 
             self.endInsertRows()
 
     def _update_project(self, parent_node, parent_index, notify=False):
-        names = [os.path.basename(path) for path in parent_node.source_folders]
-        addPaths = [path for path in parent_node.source_folders \
+        source_names = [os.path.basename(path) for path in parent_node.source_folders]
+        source_folders = [path for path in parent_node.source_folders \
             if parent_node.findChildByName(os.path.basename(path)) is None]
-        removeNodes = [node for node in parent_node.children() \
+        namespace_names = [ns.name for ns in parent_node.namespaces]
+        namespaces = [ns for ns in parent_node.namespaces \
+            if parent_node.findChildByName(ns.name) is None]
+        names = source_names + namespace_names
+        remove_nodes = [node for node in parent_node.children() \
             if node.nodeName() not in names]
                 
         #Quitamos elementos eliminados
-        for node in removeNodes:
+        for node in remove_nodes:
             if notify:
                 self.beginRemoveRows(parent_index, node.row(), node.row())
             parent_node.removeChild(node)
@@ -131,9 +130,13 @@ class ProjectTreeModel(AbstractTreeModel):
 
         #Agregamos elementos nuevos
         if notify: 
-            self.beginInsertRows(parent_index, parent_node.childrenCount(), parent_node.childrenCount() + len(addPaths) - 1)
-        for path in addPaths:
-            node = self.treeNodeFactory(path, parent_node)
+            self.beginInsertRows(parent_index, parent_node.childrenCount(), parent_node.childrenCount() + len(source_folders) + len(namespaces) - 1)
+        for path in source_folders:
+            node = SourceFolderTreeNode(path, parent_node)
+            node._populated = False
+            parent_node.appendChild(node)
+        for namespace in namespaces:
+            node = NamespaceFolderTreeNode(namespace, parent_node)
             node._populated = False
             parent_node.appendChild(node)
         if notify: 

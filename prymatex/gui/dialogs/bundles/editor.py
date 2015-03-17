@@ -4,6 +4,7 @@
 from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from prymatex.core.components import PrymatexDialog
+from prymatex.core import config
 
 # UI
 from prymatex.ui.support.editor import Ui_BundleEditorDialog
@@ -18,6 +19,7 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtWidgets.QDialo
         super(BundleEditorDialog, self).__init__(**kwargs)
         self.setupUi(self)
         self.namespace = None
+        self.namespaces = []
         
         self.manager = self.application().supportManager
         self.proxyTreeModel = self.manager.bundleProxyTreeModel
@@ -57,15 +59,15 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtWidgets.QDialo
         
         return super(BundleEditorDialog, self).exec_()
 
-    def execEditor(self, typeFilter = None, namespaceFilter = None, title = "Bundle Editor"):
+    def execEditor(self, types=None, namespaces=None, title="Bundle Editor"):
         # Title
         self.setWindowTitle(title)
         
         # Set namespace and filters
-        self.namespace = namespaceFilter
-        self.proxyTreeModel.setFilterNamespace(namespaceFilter)
-        self.proxyTreeModel.setFilterBundleItemType(typeFilter)
-        index = self.comboBoxItemFilter.findData(typeFilter)
+        self.namespace = namespaces and namespaces[0] or self.application().namespace(config.USR_NS_NAME)
+        self.proxyTreeModel.setFilterNamespace(namespaces)
+        self.proxyTreeModel.setFilterBundleItemType(types)
+        index = self.comboBoxItemFilter.findData(types)
         self.comboBoxItemFilter.setCurrentIndex(index)
         
         # Go!

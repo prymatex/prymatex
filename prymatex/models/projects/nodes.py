@@ -81,15 +81,39 @@ class SourceFolderTreeNode(ProjectItemTreeNodeBase):
     def mtime(self):
         return os.path.getmtime(self.paht())
 
+class NamespaceFolderTreeNode(ProjectItemTreeNodeBase):
+    def __init__(self, namespace, project):
+        super(SourceFolderTreeNode, self).__init__(os.path.basename(path), project)
+        self._namespace = namespace
+    
+    def namespace(self):
+        return self._namespace
+
+    def path(self):
+        return self._namespace.path
+        
+    def icon(self):
+        return icons.get_path_icon(self.path())
+
+    def itemType(self):
+        return "Namespace Folder"
+    
+    def size(self):
+        return os.path.getsize(self.path())
+
+    def mtime(self):
+        return os.path.getmtime(self.paht())
+
 class ProjectTreeNode(ProjectItemTreeNodeBase):
     KEYS = [    'description', 'licence', 'keywords', 'source_folders', 
-                'shell_variables', 'bundles' ]
+                'shell_variables', 'bundles', 'namespace_folders' ]
     
     def __init__(self, name, path):
         super(ProjectTreeNode, self).__init__(name)
         self._project_path = path
         self.manager = None
-        self.namespaceName = ""
+        self.namespaces = []
+        self.namespace_folders = []
         self.bundles = []
         self.source_folders = []
     
@@ -101,7 +125,7 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
         for key in ProjectTreeNode.KEYS:
             if key in data_hash or initialize:
                 value = data_hash.get(key, None)
-                if value is None and key in ('source_folders', 'bundles'):
+                if value is None and key in ('source_folders', 'bundles', 'namespace_folders'):
                     value = []
                 setattr(self, key, value)
 
@@ -125,9 +149,9 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
         if not hasattr(self, '_variables'):
             self._variables = {
             'TM_PROJECT_FOLDERS': " ".join(["'%s'" % folder for folder in self.source_folders ]),
+            'TM_PROJECT_NAMESPACES': " ".join(["'%s'" % folder for folder in self.namespace_folders ]),
             'TM_PROJECT_NAME': self.nodeName(),
-            'TM_PROJECT_PATH': self.path(),
-            'TM_PROJECT_NAMESPACE': self.namespaceName }
+            'TM_PROJECT_PATH': self.path() }
         return self._variables
 
     def save(self):
