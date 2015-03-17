@@ -316,7 +316,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         namespaces = [ namespace for namespace in self._namespaces \
             if namespace.name == name ]
         if namespaces:
-            return namespace[0]
+            return namespaces[0]
 
     def namespaces(self):
         return self._namespaces
