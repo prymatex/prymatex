@@ -113,9 +113,9 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 if user_data and user_data.blockText() != text:
                     # Mentir un poco con el formato
                     pass
-                elif user_data and self.previousBlockState() not in (-1, user_data.state):
+                elif user_data and self.previousBlockState() not in (-1, self.currentBlockState()):
                     # Apurar el tramite de los proximos agregados
-                    self.setCurrentBlockState(self.previousBlockState())
+                    self.setCurrentBlockState(-2)
                 previous_user_data = block.previous().userData()
                 self.thread.addLine(
                     block.blockNumber(),
