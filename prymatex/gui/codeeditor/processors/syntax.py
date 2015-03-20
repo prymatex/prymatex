@@ -123,7 +123,8 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
             self.openToken(0)
 
     def endLine(self, line):
-        self.closeToken(len(self.line), closeAll=True)
+        while self.__indexes:
+            self.closeToken(len(self.line))
 
     # -------- Tag
     def openTag(self, scopeName, position):
@@ -140,14 +141,11 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.__tokens.append(None)
         self.__indexes.append((start, len(self.__tokens) - 1))
 
-    def closeToken(self, end, closeAll=False):
-        while self.__indexes:
-            start, index = self.__indexes.pop()
-            self.__tokens[index] = CodeEditorToken(
-                start=start,
-                end=end,
-                scope=self.scope.clone(),
-                chunk=self.line[start:end]
-            )
-            if not closeAll:
-                break
+    def closeToken(self, end):
+        start, index = self.__indexes.pop()
+        self.__tokens[index] = CodeEditorToken(
+            start=start,
+            end=end,
+            scope=self.scope.clone(),
+            chunk=self.line[start:end]
+        )
