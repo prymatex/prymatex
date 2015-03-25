@@ -13,8 +13,6 @@ def _revision(scope, text, state):
 class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     NOT_STATE = -1
     NOT_REVISION = -1
-    SINGLE_LINE = 1
-    MULTI_LINE = 2
     CACHE = {}
     def __init__(self, editor):
         CodeEditorBaseProcessor.__init__(self, editor)
@@ -28,7 +26,9 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.scope_name = name
         self.empty_scope = Scope(self.scope_name)
         self.empty_token = CodeEditorToken(0, 0, self.empty_scope, "")
-        self.empty_user_data = CodeEditorBlockUserData((self.empty_token, ), "", self.NOT_STATE, self.NOT_REVISION)
+        self.empty_user_data = CodeEditorBlockUserData(
+            (self.empty_token, ), "", self.NOT_STATE, self.NOT_REVISION
+        )
     
     def scopeName(self):
         return self.scope_name
@@ -88,7 +88,9 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
             # ------- Save Stack State
             if len(self.stack) > 1:
                 self.stacks[revision] = (self.stack[:], self.scope.clone())
-            self.CACHE[revision] = (tuple(self.__tokens), text, hash(self.scope) & (0xFFFFFFFF >> 2), revision)
+            self.CACHE[revision] = (tuple(self.__tokens), text,
+                hash(self.scope) & (0xFFFFFFFF >> 2), revision
+            )
         return CodeEditorBlockUserData(*self.CACHE[revision])
         
     def blockUserData(self, block, previous_user_data=None):
