@@ -313,21 +313,21 @@ class ProjectsDockActionsMixin(object):
     def removeSourceFolder(self, index, node=None):
         node = node or self.projectTreeProxyModel.node(index)
         project = node.project()
-        project.removeSourceFolder(node.path())
+        self.projectManager.removeSourceFolder(project, node.path())
         self.projectTreeProxyModel.refresh(index.parent())
 
     def addSourceFolder(self, index, node=None):
         node = node or self.projectTreeProxyModel.node(index)
         source_folder_path = getExistingDirectory(self, caption="Add Source Folder to %s" % node.nodeName())
         if source_folder_path:
-            node.addSourceFolder(source_folder_path)
+            self.projectManager.addSourceFolder(node, source_folder_path)
             self.projectTreeProxyModel.refresh(index)
 
     # -------------- Remove and add namespace folders
     def removeNamespaceFolder(self, index, node=None):
         node = node or self.projectTreeProxyModel.node(index)
         project = node.project()
-        self.projectManager.removeNamespaceFolder(project, node.namespace())
+        self.projectManager.removeNamespace(project, node.namespace())
         self.projectTreeProxyModel.refresh(index.parent())
 
     def addNamespaceFolder(self, index, node=None):

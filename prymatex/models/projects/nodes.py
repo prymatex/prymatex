@@ -140,6 +140,8 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
         for key in ProjectTreeNode.KEYS:
             value = getattr(self, key, None)
             if allKeys or value:
+                if key in ("source_folders", "namespace_folders"):
+                    print(self.path(), os.path.relpath(path, value))
                 data_hash[key] = value
         return data_hash
 
@@ -211,6 +213,16 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
     def removeSourceFolder(self, path):
         if path in self.source_folders:
             self.source_folders.remove(path)
+
+    # --------------- namespace folders
+    def addNamespace(self, namespace):
+        if not isinstance(self.namespaces, list):
+            self.namespaces = []
+        self.namespaces.append(namespace)
+
+    def removeNamespace(self, namespace):
+        if path in self.namespaces:
+            self.namespaces.remove(namespace)
 
     # --------------- Bundle Menu
     def addBundleMenu(self, bundle):

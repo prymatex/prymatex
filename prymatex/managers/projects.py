@@ -175,12 +175,20 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         project.delete(removeFiles)
         self.removeProject(project)
 
+    # ---------------- Project sources
+    def addSourceFolder(self, project, path):
+        project.addSourceFolder(path)
+
+    def removeSourceFolder(self, project, path):
+        project.removeSourceFolder(path)
+        
     # ---------------- Project namespaces
     def addNamespaceFolder(self, project, path):
-        pass
+        namespace = self.application().addNamespace(project.name(), path)
+        project.addNamespace(namespace)
 
-    def removeProjectNamespace(self, project, path):
-        pass
+    def removeNamespace(self, project, namespace):
+        project.removeNamespace(namespace)
 
     #---------------------------------------------------
     # PROJECT INTERFACE
