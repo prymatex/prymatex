@@ -20,7 +20,6 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         CodeEditorBaseProcessor.__init__(self, editor)
         self.stack = []
         self.scope = None
-        self.state = self.NOT_STATE
         self.stacks = {}
         default_syntax = self.editor.application().supportManager.getBundleItem(self.editor.default_syntax)
         self.setScopeName(default_syntax.scopeName)
@@ -80,20 +79,16 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         revision = _revision(self.scope_name, text, previous_state)
         if revision not in self.CACHE:
             # ------ Restore Stack State
-            self.state = previous_state
             if previous_revision in self.stacks:
                 self.stack, self.scope = self.stacks[previous_revision]
             else:
                 self.stack, self.scope = ([(self.bundleItem.grammar, None)], Scope(self.bundleItem.scopeName))
     
             self.bundleItem.parseLine(self.stack, text, self)
-            self.state = len(self.stack) > 1 and self.MULTI_LINE or self.SINGLE_LINE
-            
             # ------- Save Stack State
-            if self.state == self.MULTI_LINE:
+            if len(self.stack) > 1:
                 self.stacks[revision] = (self.stack[:], self.scope.clone())
-            
-            self.CACHE[revision] = (tuple(self.__tokens), text, self.state, revision)
+            self.CACHE[revision] = (tuple(self.__tokens), text, hash(self.scope) & (0xFFFFFFFF >> 2), revision)
         return CodeEditorBlockUserData(*self.CACHE[revision])
         
     def blockUserData(self, block, previous_user_data=None):

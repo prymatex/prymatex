@@ -73,10 +73,12 @@ class MainWindowActionsMixin(object):
             )
 
     def on_actionOpenProject_triggered(self, checked=False):
-        file_path, filters = QtWidgets.QFileDialog.getOpenFileName(self, "Choose project file", self.application().fileManager.directory())
+        file_path, filters = QtWidgets.QFileDialog.getOpenFileName(self,
+            "Choose project file", self.application().fileManager.directory())
         if file_path:
             try:
                 self.application().projectManager.openProject(file_path)
+                self.projectsDock.show()
             except exceptions.LocationIsNotProject:
                 QtWidgets.QMessageBox.critical(self, "Critical", "A error has occurred.\n%s is not a valid project file." % file_path)
 

@@ -33,8 +33,6 @@ class HighlighterThread(QtCore.QThread):
             if not self.isRunning() and self._indexes:
                 self._scheduled = True
                 QtCore.QTimer.singleShot(0, self.start)
-        else:
-            print("ya esta", index)
 
     def start(self):
         self._stopped = False
@@ -83,14 +81,15 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         
     def on_thread_ready(self, index, user_data):
         block = self.document().findBlockByNumber(index)
+        block.layout().setAdditionalFormats(
+            self.themeProcessor.textCharFormats(user_data)
+        )
         block.setUserData(user_data)
-        if block.userState() in (-1, user_data.state):
-            formats = self.themeProcessor.textCharFormats(user_data)
-            block.layout().setAdditionalFormats(formats)
-            block.setUserState(user_data.state)
-            self.document().markContentsDirty(block.position(), block.length())
-        else:
-            self.rehighlightBlock(block)
+        renext = block.userState() not in (-1, user_data.state)
+        block.setUserState(user_data.state)
+        self.document().markContentsDirty(block.position(), block.length())
+        if renext:
+            self.rehighlightBlock(block.next())
     
     def stop(self):
         if self.thread.isRunning():
@@ -105,25 +104,25 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def highlightBlock(self, text):
         if not self._stopped:
             text = text + '\n'
-            user_data = self.currentBlockUserData()
-            if user_data is not None and user_data.revision == self.syntaxProcessor.textRevision(text, self.previousBlockState()):
+            user_data = self.currentBlockUserData() or self.syntaxProcessor.emptyUserData() 
+            previous_state = self.previousBlockState()
+            if user_data.revision == self.syntaxProcessor.textRevision(text, previous_state):
                 self.setCurrentBlockState(user_data.state)
             else:
                 block = self.currentBlock()
-                if user_data and user_data.blockText() != text:
+                if user_data.blockText() != text:
                     # Mentir un poco con el formato
                     pass
-                elif user_data and self.previousBlockState() not in (-1, self.currentBlockState()):
+                elif previous_state != self.currentBlockState():
                     # Apurar el tramite de los proximos agregados
-                    self.setCurrentBlockState(-2)
-                previous_user_data = block.previous().userData()
+                    self.setCurrentBlockState(-1)
+                previous_user_data = block.previous().userData() or self.syntaxProcessor.emptyUserData()
                 self.thread.addLine(
                     block.blockNumber(),
                     text,
-                    self.previousBlockState(),
-                    previous_user_data and previous_user_data.revision or -1
+                    previous_state,
+                    previous_user_data.revision
                 )
-                user_data = user_data or self.syntaxProcessor.emptyUserData()
 
             # ------ Formats
             for token in user_data.tokens:
