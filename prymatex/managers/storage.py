@@ -68,7 +68,8 @@ class SingleFileStorage(ManagedStorage):
         self.objs.close()
 
 class MemoryStorage(dict, ManagedStorage):
-    pass
+    def __init__(self, *args, **kwargs):
+        super(MemoryStorage, self).__init__(*args, **kwargs)
 
 class StorageManager(PrymatexComponent, QtCore.QObject):
     # ------------- Settings

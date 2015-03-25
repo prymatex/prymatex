@@ -299,6 +299,10 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     
     # ----------- Namespaces
     def addNamespace(self, name, path, builtin=False):
+        namespaces = [ namespace for namespace in self._namespaces \
+            if namespace.path == path ] 
+        if namespaces:
+            return namespaces[0]
         index = 0 if builtin else 1
         # Build one unique name
         counter = 1
@@ -311,7 +315,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         self.packageManager.addNamespace(namespace, builtin)
         self.supportManager.addNamespace(namespace, builtin)
         return namespace
-    
+
     def namespace(self, name):
         namespaces = [ namespace for namespace in self._namespaces \
             if namespace.name == name ]

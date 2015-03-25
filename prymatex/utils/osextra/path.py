@@ -5,7 +5,7 @@ import os
 import re
 from functools import partial
 
-#from prymatex.utils import six
+from .. import six
 
 RE_SHELL_VAR = re.compile('\$([\w\d]+)')
 

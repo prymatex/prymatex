@@ -9,7 +9,7 @@ from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.models.trees import AbstractTreeModel
 from prymatex.models.trees import FlatTreeProxyModel
 from prymatex.models.configure import SortFilterConfigureProxyModel
-from prymatex.models.projects.nodes import (ProjectTreeNode, FileSystemTreeNode, SourceFolderTreeNode)
+from prymatex.models.projects.nodes import (ProjectTreeNode, FileSystemTreeNode, SourceFolderTreeNode, NamespaceFolderTreeNode)
 
 
 __all__ = [ 'ProjectTreeModel', 'ProjectTreeProxyModel', 'FileSystemProxyModel', 'ProjectMenuProxyModel' ]

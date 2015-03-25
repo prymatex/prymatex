@@ -83,7 +83,7 @@ class SourceFolderTreeNode(ProjectItemTreeNodeBase):
 
 class NamespaceFolderTreeNode(ProjectItemTreeNodeBase):
     def __init__(self, namespace, project):
-        super(SourceFolderTreeNode, self).__init__(os.path.basename(path), project)
+        super(NamespaceFolderTreeNode, self).__init__(namespace.name, project)
         self._namespace = namespace
     
     def namespace(self):
@@ -122,11 +122,14 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
             
     # ---------------- Load, update, dump
     def __load_update(self, data_hash, initialize):
+        dirname = os.path.dirname(self.path())
         for key in ProjectTreeNode.KEYS:
             if key in data_hash or initialize:
                 value = data_hash.get(key, None)
                 if value is None and key in ('source_folders', 'bundles', 'namespace_folders'):
                     value = []
+                if key in ('source_folders', 'namespace_folders'):
+                    value = [os.path.normpath(os.path.join(dirname, v)) for v in value]
                 setattr(self, key, value)
 
     def load(self, data_hash):
@@ -137,11 +140,12 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
 
     def dump(self, allKeys=False):
         data_hash = { 'name': self.nodeName() }
+        dirname = os.path.dirname(self.path())
         for key in ProjectTreeNode.KEYS:
             value = getattr(self, key, None)
             if allKeys or value:
                 if key in ("source_folders", "namespace_folders"):
-                    print(self.path(), os.path.relpath(path, value))
+                    value = [os.path.relpath(v, dirname) for v in value]
                 data_hash[key] = value
         return data_hash
 
@@ -206,9 +210,8 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
 
     # --------------- Source folders
     def addSourceFolder(self, path):
-        if not isinstance(self.source_folders, list):
-            self.source_folders = []
-        self.source_folders.append(path)
+        if path not in self.source_folders:
+            self.source_folders.append(path)
 
     def removeSourceFolder(self, path):
         if path in self.source_folders:
@@ -216,12 +219,15 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
 
     # --------------- namespace folders
     def addNamespace(self, namespace):
-        if not isinstance(self.namespaces, list):
-            self.namespaces = []
-        self.namespaces.append(namespace)
+        if namespace.path not in self.namespace_folders: 
+            self.namespace_folders.append(namespace.path)
+        if namespace not in self.namespaces:
+            self.namespaces.append(namespace)
 
     def removeNamespace(self, namespace):
-        if path in self.namespaces:
+        if path in self.namespace_folders:
+            self.namespace_folders.remove(namespace.path)
+        if namespace in self.namespaces:
             self.namespaces.remove(namespace)
 
     # --------------- Bundle Menu

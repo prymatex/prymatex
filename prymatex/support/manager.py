@@ -243,9 +243,7 @@ class SupportBaseManager(object):
                 bundle = self.loadBundle(sourceBundlePath, namespace)
                 loadedBundles.add(bundle)
             except Exception as ex:
-                import traceback
                 print("Error in laod bundle %s (%s)" % (sourceBundlePath, ex))
-                traceback.print_exc()
         return loadedBundles
 
     def loadBundle(self, sourceBundlePath, namespace):

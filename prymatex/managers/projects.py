@@ -178,25 +178,30 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
     # ---------------- Project sources
     def addSourceFolder(self, project, path):
         project.addSourceFolder(path)
-
+        project.save()
+        
     def removeSourceFolder(self, project, path):
         project.removeSourceFolder(path)
+        project.save()
         
     # ---------------- Project namespaces
     def addNamespaceFolder(self, project, path):
-        namespace = self.application().addNamespace(project.name(), path)
+        namespace = self.application().addNamespace(project.nodeName(), path)
         project.addNamespace(namespace)
-
+        project.save()
+        
     def removeNamespace(self, project, namespace):
         project.removeNamespace(namespace)
-
+        project.save()
+        
     #---------------------------------------------------
     # PROJECT INTERFACE
     #---------------------------------------------------
     def addProject(self, project):
         project.setManager(self)
-        # Todo proyecto define un namespace en el manager de support
-        # self.application().supportManager.addProjectNamespace(project)
+        # Agregar los namespace folders
+        for folder in project.namespace_folders:
+            self.addNamespaceFolder(project, folder)
         self.projectTreeModel.appendProject(project)
         self.projectAdded.emit(project)
 
