@@ -21,7 +21,7 @@ class ConfigureTreeNode(TreeNodeBase):
         string = string.lower()
         if string in (self.nodeName() + self.title()).lower():
             return True
-        for child in self.childNodes():
+        for child in self.children():
             if child.filterAcceptsNode(string):
                 return True
         textItems = [value for value in [getattr(self, key) for key in dir(self)] if isinstance(getattr(value, "text", None), collections.Callable)]
@@ -64,7 +64,7 @@ class ConfigureTreeModelBase(AbstractNamespaceTreeModel):
 
     def __collect_nodes(self, parentNode):
         nodes = [ parentNode ]
-        for node in parentNode.childNodes():
+        for node in parentNode.children():
             nodes.extend(self.__collect_nodes(node))
         return nodes
 

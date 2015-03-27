@@ -166,11 +166,6 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
             if ret == QtWidgets.QMessageBox.Ok:
                 self.application().projectManager.removeProject(node)
     
-    @QtCore.Slot()
-    def on_actionProperties_triggered(self):
-        self.propertiesDialog.setModel(self.application().projectManager.propertiesProxyModel)
-        self.propertiesDialog.exec_(self.currentNode())
-
     def on_window_editorChanged(self, editor):
         if editor.hasFile():
             index = self.projectTreeProxyModel.indexForPath(editor.filePath())

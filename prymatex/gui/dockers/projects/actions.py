@@ -100,9 +100,13 @@ class ProjectsDockActionsMixin(object):
         items.extend(self._has_children_menu_items(indexed_nodes))
         items.extend(self._bundles_menu_items(indexed_nodes))
         items.extend([{
-            'text': "Properties"
+            'text': "Properties",
+            'triggered': lambda checked=False, values=indexes: [ self.properties(value) for value in values ]
+            }, {
+            'text': "Properties File",
+            'triggered': lambda checked=False, values=indexes: [ self.propertiesFile(value) for value in values ]
         }])
-        contextMenu = { 
+        contextMenu = {
             'text': "Index context",
             'items': items
         }
@@ -390,7 +394,15 @@ class ProjectsDockActionsMixin(object):
 
     def refresh(self, index, node=None):
         self.projectTreeProxyModel.refresh(index)
-        
+    
+    def properties(self, index, node=None):
+        node = node or self.projectTreeProxyModel.node(index)
+        self.propertiesDialog.setModel(self.projectManager.propertiesProxyModel)
+        self.propertiesDialog.exec_(node)
+    
+    def propertiesFile(self, index, node=None):
+        pass
+
     def copy(self, indexes_nodes=None):
         if indexes_nodes:
             indexes, _ = zip(*indexes_nodes)

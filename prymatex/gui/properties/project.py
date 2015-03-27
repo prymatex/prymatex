@@ -10,7 +10,7 @@ class ProjectPropertiesWidget(PropertyTreeNode, Ui_Project, QtWidgets.QWidget):
     """ Project Settings """
     NAMESPACE = ""
     def __init__(self, **kwargs):
-        super(ProjectPropertiesWidget, self).__init__(nodeName = "project", **kwargs)
+        super(ProjectPropertiesWidget, self).__init__(nodeName="project", **kwargs)
         self.setTitle("Project")
         self.setupUi(self)
         self.projectNode = None
@@ -18,7 +18,7 @@ class ProjectPropertiesWidget(PropertyTreeNode, Ui_Project, QtWidgets.QWidget):
         #self.setupComboKeywords()
 
     def acceptFileSystemItem(self, fileSystemItem):
-        return fileSystemItem.isproject
+        return fileSystemItem.isProject()
     
     def setupComboLicences(self):
         for licence in self.application().resources().get_software_licenses():
@@ -40,7 +40,7 @@ class ProjectPropertiesWidget(PropertyTreeNode, Ui_Project, QtWidgets.QWidget):
     
     def edit(self, projectNode):
         self.projectNode = projectNode
-        self.lineProjectName.setText(self.projectNode.name)
+        self.lineProjectName.setText(self.projectNode.nodeName())
         if self.projectNode.description:
             self.textDescription.setText(self.projectNode.description)
         if self.projectNode.keywords:

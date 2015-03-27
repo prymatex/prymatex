@@ -20,7 +20,7 @@ class ResoucePropertiesWidget(PropertyTreeNode, Ui_ResouceWidget, QtWidgets.QWid
     )
 
     def __init__(self, **kwargs):
-        super(ResoucePropertiesWidget, self).__init__(nodeName = "resouce", **kwargs)
+        super(ResoucePropertiesWidget, self).__init__(nodeName="resouce", **kwargs)
         self.setTitle("Resouce")
         self.setupUi(self)
         self.fileSystemItem = None
@@ -30,7 +30,7 @@ class ResoucePropertiesWidget(PropertyTreeNode, Ui_ResouceWidget, QtWidgets.QWid
     
     def edit(self, fileSystemItem):
         self.fileSystemItem = fileSystemItem
-        self.textLabelPath.setText(self.fileSystemItem.relpath())
+        self.textLabelPath.setText(self.fileSystemItem.path())
         self.textLabelType.setText(self.fileSystemItem.type())
         self.textLabelLocation.setText(self.fileSystemItem.path())
         self.textLabelSize.setText("%d bytes" % self.fileSystemItem.size())
