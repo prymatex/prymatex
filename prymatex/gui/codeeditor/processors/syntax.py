@@ -89,7 +89,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
             if len(self.stack) > 1:
                 self.stacks[revision] = (self.stack[:], self.scope.clone())
             self.CACHE[revision] = (tuple(self.__tokens), text,
-                hash(self.scope) & (0xFFFFFFFF >> 2), revision
+                hash(self.scope.back()) & (0xFFFFFFFF >> 2), revision
             )
         return CodeEditorBlockUserData(*self.CACHE[revision])
         
