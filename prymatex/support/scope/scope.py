@@ -36,11 +36,7 @@ class Scope(object):
                 self.push_scope(atom)
 
     def __hash__(self):
-        if self.node is None:
-            return hash("")
-        if self.node._hash is None:
-            self.node._hash = hash("%s" % self)
-        return self.node._hash
+        return hash("%s" % self)
 
     def __eq__(self, rhs):
         n1, n2 = self.node, rhs.node
