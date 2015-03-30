@@ -22,7 +22,7 @@ class Scope(object):
         def number_of_atoms(self):
             return len(self)
 
-    def __init__(self, source = None):
+    def __init__(self, source=None):
         self.node = None
         if isinstance(source, Scope.Node):
             # From node
@@ -75,7 +75,8 @@ class Scope(object):
         return Scope(self)
     
     def extend(self, other):
-        [self.push(n) for n in other]
+        for node in other:
+            self.push(node)
 
     def empty(self):
         return self.node is None

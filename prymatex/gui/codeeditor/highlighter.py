@@ -73,7 +73,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.editor.aboutToClose.connect(self.stop)
         self.thread = HighlighterThread(editor)
         self.thread.ready.connect(self.on_thread_ready)
-        self.thread.changed.connect(self.on_thread_changed)
+        #self.thread.changed.connect(self.on_thread_changed)
         self.thread.changed.connect(self.changed.emit)
 
     def on_thread_changed(self, changes):
