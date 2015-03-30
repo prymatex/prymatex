@@ -15,7 +15,7 @@ class ProjectPropertiesWidget(PropertyTreeNode, Ui_Project, QtWidgets.QWidget):
         self.setupUi(self)
         self.projectNode = None
         self.setupComboLicences()
-        #self.setupComboKeywords()
+        self.setupComboKeywords()
 
     def acceptFileSystemItem(self, fileSystemItem):
         return fileSystemItem.isProject()

@@ -31,7 +31,7 @@ class ResoucePropertiesWidget(PropertyTreeNode, Ui_ResouceWidget, QtWidgets.QWid
     def edit(self, fileSystemItem):
         self.fileSystemItem = fileSystemItem
         self.textLabelPath.setText(self.fileSystemItem.path())
-        self.textLabelType.setText(self.fileSystemItem.type())
+        self.textLabelType.setText(self.fileSystemItem.itemType())
         self.textLabelLocation.setText(self.fileSystemItem.path())
         self.textLabelSize.setText("%d bytes" % self.fileSystemItem.size())
         mtime = self.application().fileManager.getmtime(self.fileSystemItem.path())

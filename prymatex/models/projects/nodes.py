@@ -35,8 +35,17 @@ class ProjectItemTreeNodeBase(TreeNodeBase):
                 self._project = self._project.nodeParent()
         return self._project
 
+    def icon(self):
+        return icons.get_path_icon(self.path())
+
     def itemType(self):
-        return ""
+        return icons.get_type(self.path())
+  
+    def size(self):
+        return os.path.getsize(self.path())
+
+    def mtime(self):
+        return os.path.getmtime(self.paht())
         
 class FileSystemTreeNode(ProjectItemTreeNodeBase):
     def project(self):
@@ -48,18 +57,6 @@ class FileSystemTreeNode(ProjectItemTreeNodeBase):
 
     def path(self):
         return os.path.join(self.nodeParent().path(), self.nodeName())
-    
-    def icon(self):
-        return icons.get_path_icon(self.path())
-    
-    def itemType(self):
-        return icons.get_type(self.path())
-  
-    def size(self):
-        return os.path.getsize(self.path())
-
-    def mtime(self):
-        return os.path.getmtime(self.paht())
 
 class SourceFolderTreeNode(ProjectItemTreeNodeBase):
     def __init__(self, path, project):
@@ -68,19 +65,10 @@ class SourceFolderTreeNode(ProjectItemTreeNodeBase):
     
     def path(self):
         return self._path
-        
-    def icon(self):
-        return icons.get_path_icon(self.path())
 
     def itemType(self):
         return "Source Folder"
     
-    def size(self):
-        return os.path.getsize(self.path())
-
-    def mtime(self):
-        return os.path.getmtime(self.paht())
-
 class NamespaceFolderTreeNode(ProjectItemTreeNodeBase):
     def __init__(self, namespace, project):
         super(NamespaceFolderTreeNode, self).__init__(namespace.name, project)
@@ -91,18 +79,9 @@ class NamespaceFolderTreeNode(ProjectItemTreeNodeBase):
 
     def path(self):
         return self._namespace.path
-        
-    def icon(self):
-        return icons.get_path_icon(self.path())
 
     def itemType(self):
         return "Namespace Folder"
-    
-    def size(self):
-        return os.path.getsize(self.path())
-
-    def mtime(self):
-        return os.path.getmtime(self.paht())
 
 class ProjectTreeNode(ProjectItemTreeNodeBase):
     KEYS = [    'description', 'licence', 'keywords', 'source_folders', 
@@ -116,10 +95,16 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
         self.namespace_folders = []
         self.bundles = []
         self.source_folders = []
+
+    def path(self):
+        return self._project_path
+        
+    def icon(self):
+        return self.manager.resources().get_icon("project")
     
-    def nodeType(self):
+    def itemType(self):
         return "Project"
-            
+
     # ---------------- Load, update, dump
     def __load_update(self, data_hash, initialize):
         dirname = os.path.dirname(self.path())
@@ -202,12 +187,6 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
     def setManager(self, manager):
         self.manager = manager
     
-    def path(self):
-        return self._project_path
-        
-    def icon(self):
-        return self.manager.resources().get_icon("project")
-
     # --------------- Source folders
     def addSourceFolder(self, path):
         if path not in self.source_folders:
