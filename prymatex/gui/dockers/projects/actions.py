@@ -318,28 +318,24 @@ class ProjectsDockActionsMixin(object):
         node = node or self.projectTreeProxyModel.node(index)
         project = node.project()
         self.projectManager.removeSourceFolder(project, node.path())
-        self.projectTreeProxyModel.refresh(index.parent())
 
     def addSourceFolder(self, index, node=None):
         node = node or self.projectTreeProxyModel.node(index)
         source_folder_path = getExistingDirectory(self, caption="Add Source Folder to %s" % node.nodeName())
         if source_folder_path:
             self.projectManager.addSourceFolder(node, source_folder_path)
-            self.projectTreeProxyModel.refresh(index)
 
     # -------------- Remove and add namespace folders
     def removeNamespaceFolder(self, index, node=None):
         node = node or self.projectTreeProxyModel.node(index)
         project = node.project()
         self.projectManager.removeNamespace(project, node.namespace())
-        self.projectTreeProxyModel.refresh(index.parent())
 
     def addNamespaceFolder(self, index, node=None):
         node = node or self.projectTreeProxyModel.node(index)
         namespace_folder_path = getExistingDirectory(self, caption="Add Namespace Folder to %s" % node.nodeName())
         if namespace_folder_path:
             self.projectManager.addNamespaceFolder(node, namespace_folder_path)
-            self.projectTreeProxyModel.refresh(index)
 
     # -------------- Project Bundles
     def selectRelatedBundles(self, index, node=None):
@@ -369,23 +365,17 @@ class ProjectsDockActionsMixin(object):
         file_path = self.fileManager.createFileDialog(node.path())
         if file_path is not None:
             self.application().openFile(file_path)
-            #TODO: si esta en auto update ver como hacer los refresh
-            self.projectTreeProxyModel.refresh(index)
     
     def newFromTemplate(self, index, node=None):
         node = node or self.projectTreeProxyModel.node(index)
         file_path = self.templateDialog.createFile(fileDirectory = node.path())
         if file_path is not None:
             self.application().openFile(file_path)
-            #TODO: si esta en auto update ver como hacer los refresh
-            self.projectTreeProxyModel.refresh(index)
     
     def newFolder(self, index, node=None):
         node = node or self.projectTreeProxyModel.node(index)
         directory_path = self.fileManager.createDirectoryDialog(node.path())
         if directory_path is not None:
-            #TODO: si esta en auto update ver como hacer los refresh
-            self.projectTreeProxyModel.refresh(index)
 
     def goDown(self, index, node=None):
         node = node or self.projectTreeProxyModel.node(index)
@@ -432,7 +422,6 @@ class ProjectsDockActionsMixin(object):
                     basename = self.fileManager.basename(srcPath)
                     dstPath = os.path.join(node.path(), basename)
                     self.fileManager.copyPathDialog(srcPath, dstPath, widget=self)
-                self.projectTreeProxyModel.refresh(index)
     
     def delete(self, indexes_nodes=None):
         if indexes_nodes is None:
@@ -466,7 +455,6 @@ class ProjectsDockActionsMixin(object):
         # TODO Que pasa con los proyectos y si un path es subpath de otro?
         for index, node in paths:
             self.fileManager.deletePathDialog(node.path())
-            self.projectTreeProxyModel.refresh(index.parent())
         for index, node in sources:
             self.removeSourceFolder(index, node)
         for index, node in projects:
@@ -479,4 +467,3 @@ class ProjectsDockActionsMixin(object):
                 for index in self.treeViewProjects.selectedIndexes() ]
         for index, node in indexes_nodes:
             self.fileManager.renamePathDialog(node.path())
-            self.projectTreeProxyModel.refresh(index)
