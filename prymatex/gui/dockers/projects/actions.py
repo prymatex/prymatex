@@ -374,8 +374,7 @@ class ProjectsDockActionsMixin(object):
     
     def newFolder(self, index, node=None):
         node = node or self.projectTreeProxyModel.node(index)
-        directory_path = self.fileManager.createDirectoryDialog(node.path())
-        if directory_path is not None:
+        self.fileManager.createDirectoryDialog(node.path())
 
     def goDown(self, index, node=None):
         node = node or self.projectTreeProxyModel.node(index)
