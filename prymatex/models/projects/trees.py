@@ -14,15 +14,16 @@ from prymatex.models.projects.nodes import (ProjectTreeNode, FileSystemTreeNode,
 
 __all__ = [ 'ProjectTreeModel', 'ProjectTreeProxyModel', 'FileSystemProxyModel', 'ProjectMenuProxyModel' ]
 
-#=========================================
-# Models
-#=========================================
+# ------------- Project Model
 class ProjectTreeModel(AbstractTreeModel):  
     def __init__(self, projectManager):
-        super(ProjectTreeModel, self).__init__(parent = projectManager)
+        super(ProjectTreeModel, self).__init__(parent=projectManager)
         self.projectManager = projectManager
         self.fileManager = projectManager.fileManager
-        
+        self.fileSystemWatcher = QtCore.QFileSystemWatcher()
+        self.fileSystemWatcher.directoryChanged.connect(self.refreshPath)
+        self.fileSystemWatcher.fileChanged.connect(self.refreshPath)
+
     def rowCount(self, parent):
         node = self.node(parent)
         if not node.isRootNode() and not node._populated:
@@ -70,6 +71,7 @@ class ProjectTreeModel(AbstractTreeModel):
         for child in node.children():
             child._populated = False
         node._populated = True
+        self.fileSystemWatcher.addPath(node.path())
 	
     def _load_project(self, node, index, notify=False):
         if notify: 
@@ -85,6 +87,7 @@ class ProjectTreeModel(AbstractTreeModel):
         for child in node.children():
             child._populated = False
         node._populated = True
+        self.fileSystemWatcher.addPath(node.path())
 
     def _update_directory(self, parent_node, parent_index, notify=False):
         names = self.fileManager.listDirectory(parent_node.path())
@@ -160,11 +163,10 @@ class ProjectTreeModel(AbstractTreeModel):
                 updateNodes += self._collect_expanded_subdirs(node)
 
     def refreshPath(self, path):
-        index = self.indexForPath(path)
-        self.refresh(index)
+        self.refresh(self.indexForPath(path))
     
     def nodeForPath(self, path):
-        return self.node(self.indexForPath)
+        return self.node(self.indexForPath(path))
 
     def projectForPath(self, path):
         for project in self.projects():
