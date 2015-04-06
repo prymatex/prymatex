@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+import re
 import os
 import codecs
 
@@ -114,7 +115,10 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
                 if value is None and key in ('source_folders', 'bundles', 'namespace_folders'):
                     value = []
                 if key in ('source_folders', 'namespace_folders'):
-                    value = [os.path.normpath(os.path.join(dirname, v)) for v in value]
+                    value = [
+                        os.path.normpath(
+                            os.path.join(dirname, os.path.expanduser(v))
+                        ) for v in value ]
                 setattr(self, key, value)
 
     def load(self, data_hash):
@@ -130,7 +134,10 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
             value = getattr(self, key, None)
             if allKeys or value:
                 if key in ("source_folders", "namespace_folders"):
-                    value = [os.path.relpath(v, dirname) for v in value]
+                    value = [
+                        re.sub(
+                            "^%s" % config.USER_HOME_PATH, "~", os.path.relpath(v, dirname)
+                        ) for v in value ]
                 data_hash[key] = value
         return data_hash
 
@@ -168,6 +175,11 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
                     environment[var['variable']] = var['value']
         environment.update(self.variables)
         return environment
+
+    def reload(self):
+        data = json.read_file(self.path())
+        self.setNodeName(data["name"])
+        self.update(data)
 
     @classmethod
     def loadProject(cls, project_path, manager):

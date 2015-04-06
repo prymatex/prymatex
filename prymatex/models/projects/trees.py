@@ -45,6 +45,8 @@ class ProjectTreeModel(AbstractTreeModel):
     def indexForPath(self, path):
         for project in self.projects():
             current_index = self.createIndex(project.row(), 0, project)
+            if project.path() == path:
+                return current_index
             while self.rowCount(current_index):
                 go_ahead = False
                 for node in self.node(current_index).children():
@@ -113,6 +115,7 @@ class ProjectTreeModel(AbstractTreeModel):
             self.endInsertRows()
 
     def _update_project(self, parent_node, parent_index, notify=False):
+        parent_node.reload()
         source_names = [os.path.basename(path) for path in parent_node.source_folders]
         source_folders = [path for path in parent_node.source_folders \
             if parent_node.findChildByName(os.path.basename(path)) is None]
@@ -122,7 +125,7 @@ class ProjectTreeModel(AbstractTreeModel):
         names = source_names + namespace_names
         remove_nodes = [node for node in parent_node.children() \
             if node.nodeName() not in names]
-                
+
         #Quitamos elementos eliminados
         for node in remove_nodes:
             if notify:
