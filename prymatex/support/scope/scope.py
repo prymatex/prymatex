@@ -192,7 +192,7 @@ class Context(object):
     __unicode__ = __str__
     
 class Selector(object):
-    def __init__(self, source = None):
+    def __init__(self, source=None):
         self._selector = None
         if source is not None:
             self._selector = Parser.selector(source)
@@ -211,7 +211,7 @@ class Selector(object):
     __unicode__ = __str__
     
     # ------- Matching 
-    def does_match(self, context, rank = None):
+    def does_match(self, context, rank=None):
         if not isinstance(context, Context):
             context = Context(context)
         if self:

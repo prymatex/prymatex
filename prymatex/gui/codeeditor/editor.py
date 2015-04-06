@@ -178,7 +178,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             editor.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
         )
         
-        #self.syntaxHighlighter.ready.connect(self.on_highlighter_ready)
+        self.syntaxHighlighter.changed.connect(self.on_highlighter_changed)
 
     def highlighter(self):
         return self.syntaxHighlighter
@@ -197,7 +197,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.selectorDialog = self.window().findChild(QtWidgets.QDialog, "SelectorDialog")
         self.browserDock = self.window().findChild(QtWidgets.QDockWidget, "BrowserDock")
 
-    def on_highlighter_ready(self):
+    def on_highlighter_changed(self, changes):
         properties = self.propertiesSettings()
         if properties.lineEndings:
             self.setEolChars(properties.lineEndings)

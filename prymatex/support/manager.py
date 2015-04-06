@@ -18,7 +18,6 @@ except ImportError:
 from prymatex.core import config
 from prymatex.utils import plist, osextra, six
 from prymatex.utils import encoding
-from prymatex.utils.fnmatch import translate as fntranslate
 from prymatex.utils.decorators import printtime, printparams
 
 from .bundle import Bundle
@@ -205,7 +204,7 @@ class SupportBaseManager(object):
             return self._auxiliaries[path]
         return self._auxiliaries.setdefault(path, scope.auxiliary(path))
     
-    def __filter_items(self, items, leftScope, rightScope = None, sort=True):
+    def __filter_items(self, items, leftScope, rightScope=None, sort=True):
         context = self.contextFactory(leftScope, rightScope)
         if not sort:
             return [ item for item in items if item.selector.does_match(context) ]
@@ -214,7 +213,7 @@ class SupportBaseManager(object):
             rank = []
             if item.selector.does_match(context, rank):
                 sortFilterItems.append((rank.pop(), item))
-        sortFilterItems.sort(key=lambda t: t[0], reverse = True)
+        sortFilterItems.sort(key=lambda t: t[0], reverse=True)
         return [score_item[1] for score_item in sortFilterItems]
 
     #---------------- Message Handler ----------------
@@ -859,62 +858,53 @@ class SupportBaseManager(object):
 
     #----------------- PROPERTIES ---------------------
     def _load_parser(self, directory):
-        properties_path = os.path.join(directory, config.PMX_PROPERTIES_NAME)
+        parser = configparser.ConfigParser()
+        parser.optionxform = str
+        parser.directory = directory
+        properties_path = os.path.join(parser.directory, config.PMX_PROPERTIES_NAME)
         if os.path.isfile(properties_path):
-            parser = configparser.ConfigParser()
-            parser.optionxform = str
-            parser.directory = directory
             parser.read(properties_path)
-            return parser
+        return parser
 
     def _load_parsers(self, directory):
         if directory and directory not in self._configparsers:
             parsers = []
-            parser = self._load_parser(directory)
-            if parser:
-                parsers.append(parser)
+            parsers.append(self._load_parser(directory))
             if directory not in (os.sep, config.USER_HOME_PATH):
                 parsers += self._load_parsers(os.path.dirname(directory))
             elif directory == os.sep:
-                parser = self._load_parser(config.USER_HOME_PATH)
-                if parser:
-                    parsers.append(parser)
+                parsers.append(self._load_parser(config.USER_HOME_PATH))
             self._configparsers[directory] = parsers
         return directory and self._configparsers[directory] or []
 
-    def _build_properites(self, path):
-        directory = path if os.path.isdir(path) else os.path.dirname(path)
+    def loadProperties(self, directory):
         parsers = self._load_parsers(directory)
-        properties = Properties()
-        sections = set()
-        for parser in parsers:
-            sections.update(parser.sections())
-        for section in sections:
-            selector = section.strip()
-            if selector[0] in ("'", '"') and selector[0] == selector[-1]:
-                selector = selector[1:-1]
-            pattern = re.compile(fntranslate(selector))
-            selector = self.selectorFactory(selector)
-            if pattern.search(path) or selector:
-                properties.append(selector, section, parsers)
+        properties = Properties(self)
+        properties.load(parsers)
+        properties = self.addProperties(properties)
         return properties
 
-    def getProperties(self, path=None):
-        path = path or ""
-        if path not in self._properties:
-            self._properties[path] = self._build_properites(path)
-        return self._properties[path]
+    def getProperties(self, path):
+        directory = path if os.path.isdir(path) else os.path.dirname(path)
+        if directory not in self._properties:
+            self._properties[directory] = self.loadProperties(directory)
+        return self._properties[directory]
 
-    def getPropertiesSettings(self, path=None, leftScope = None, rightScope = None):
+    def getPropertiesSettings(self, path=None, leftScope=None, rightScope=None):
         memoizedKey = ("getPropertiesSettings", path, leftScope, rightScope)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
-        properties = self.getProperties(path)
+        properties = self.getProperties(path or "")
         return self.bundleItemCache.setdefault(memoizedKey,
-            Properties.buildSettings(
-                self.__filter_items(properties.settings, leftScope, rightScope)
+            properties.buildSettings(
+                path or "",
+                self.contextFactory(leftScope, rightScope) 
             )
         )
+
+    # --------------- PROPERTIES INTERFACE
+    def addProperties(self, properties):
+        return properties
 
     # ----------------- TABTRIGGERS INTERFACE
     def getAllTabTriggerItems(self):

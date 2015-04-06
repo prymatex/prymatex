@@ -50,10 +50,9 @@ class Settings(object):
         'foldingIndentedBlockStart', 'foldingIndentedBlockIgnore',
         'foldingStartMarker', 'foldingStopMarker' )
 
-    def __init__(self, dataHash = {}, preference = None):
+    def __init__(self, dataHash={}, preference=None):
         self.preference = preference
         self.update(dataHash)
-
 
     @property
     def bundle(self):

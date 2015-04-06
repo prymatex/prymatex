@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 #-*- encoding: utf-8 -*-
+import re
 import codecs
     
 from prymatex.qt import QtCore, QtGui
+from prymatex.utils.fnmatch import translate as fntranslate
 
 from . import regexp
 
@@ -12,18 +14,21 @@ class Settings(object):
         'lineEndings', 'theme', 'fontName', 'fontSize', 'showInvisibles', 'tabSize',
         'spellChecking', 'projectDirectory', 'windowTitle', 'scopeAttributes', 
         'wrapColumn', 'softWrap']
-    def __init__(self, selector, section, configs):
-        self.selector = selector
-        self.section = section
-        self.configs = configs
-    
+    def __init__(self, name, properties):
+        self.name = selector = name
+        self.properties = properties
+        if selector[0] in ("'", '"') and selector[0] == selector[-1]:
+            selector = selector[1:-1]
+        self.pattern = re.compile(fntranslate(selector))
+        self.selector = self.properties.manager.selectorFactory(selector)
+
     def _remove_quotes(self, value):
         return value[1:-1] if value and value[0] in ("'", '"') and value[0] == value[-1] else value
 
     def sections(self):
-        for config in self.configs:
-            section = self.section \
-                if self.section in config.sections() \
+        for config in self.properties.configs:
+            section = self.name \
+                if self.name in config.sections() \
                 else 'DEFAULT'
             yield config.directory, config[section]
 
@@ -174,12 +179,24 @@ class ContextSettings(object):
         return shellVariables
 
 class Properties(object):
-    def __init__(self):
+    def __init__(self, manager):
         self.settings = []
+        self.configs = []
+        self.manager = manager
     
-    def append(self, selector, section, config):
-        self.settings.append(Settings(selector, section, config))
+    def append(self, selector, section, configs):
+        self.settings.append(Settings(selector, section, configs))
 
-    @staticmethod
-    def buildSettings(settings):
+    def buildSettings(self, path, context):
+        settings = []
+        for s in self.settings:
+            if s.pattern.search(path) or s.selector.does_match(context):
+                settings.append(s)
         return ContextSettings(settings)
+    
+    def load(self, configs):
+        self.configs = configs
+        sections = set()
+        for parser in configs:
+            sections.update(parser.sections())
+        self.settings = [ Settings(section.strip(), self) for section in sections ]

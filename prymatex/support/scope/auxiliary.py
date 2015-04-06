@@ -34,7 +34,7 @@ def _path(scope, path):
 
 def _glob(scope, path):
     if path:
-        source =  os.path.split(path)[0]
+        source = os.path.split(path)[0]
         groups = []
         while True:
             for rule in GLOB_RULES:

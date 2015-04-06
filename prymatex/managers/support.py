@@ -142,6 +142,9 @@ class BundleItemMenuGroup(QtCore.QObject):
     def on_manager_bundleRemoved(self, bundle):
         self.removeFromContainers(self.menus[bundle])
 
+class Properties(QtCore.QObject):
+    pass
+    
 class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     #Signals for bundle
     bundleAdded = QtCore.Signal(object)
