@@ -13,7 +13,7 @@ from .process import ExternalProcessDock
 
 __plugin__.registerComponent(ProjectsDock)
 __plugin__.registerComponent(FileSystemDock)
-__plugin__.registerComponent(TerminalDock)
+#__plugin__.registerComponent(TerminalDock)
 __plugin__.registerComponent(ConsoleDock)
 __plugin__.registerComponent(BrowserDock)
 __plugin__.registerComponent(SearchResultsDock)
