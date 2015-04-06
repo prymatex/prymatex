@@ -14,6 +14,7 @@ from prymatex.qt.extensions import ContextKeySequence
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import six
+from prymatex.utils import text as textutils
 from prymatex.utils.processes import get_process_map
 
 from prymatex.gui.main import PrymatexMainWindow
@@ -306,8 +307,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         index = 0 if builtin else 1
         # Build one unique name
         counter = 1
+        name = textutils.slugify(name)
         while self.namespace(name):
-            name = "%s%d" % (name, counter)
+            name = textutils.slugify("%s %d" % (name, counter))
             counter += 1
         namespace = Namespace(name, path)
         self._namespaces.insert(index, namespace)
