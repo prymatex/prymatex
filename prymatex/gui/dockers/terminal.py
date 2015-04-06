@@ -10,7 +10,6 @@ from prymatex.core import config
 from prymatex.core import PrymatexDock
 from prymatex.core.settings import ConfigurableItem
 from prymatex.utils.i18n import ugettext as _
-from prymatex.utils.misc import get_home_dir
 from prymatex.utils import six
 
 from prymatex.widgets.pmxterm import Backend, BackendManager, TerminalWidget, ColorScheme

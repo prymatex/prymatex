@@ -11,7 +11,6 @@ import plistlib
 
 import prymatex
 from prymatex.utils import six
-from prymatex.utils.misc import get_home_dir
 
 #============================================================================
 # Debug helpers
@@ -56,7 +55,7 @@ RE_WORD = re.compile(r'[A-Za-z_]+', re.UNICODE)
 #============================================================================
 # Configuration paths
 #============================================================================
-USER_HOME_PATH = get_home_dir()
+USER_HOME_PATH = os.path.expanduser('~')
 
 def get_prymatex_home_path():
     path = os.path.join(USER_HOME_PATH, PMX_HOME_NAME)
@@ -90,8 +89,7 @@ TM_PREFERENCES_PATH = get_textmate_preferences_user_path()
 def get_conf_path(filename=None):
     """Return absolute path for configuration file with specified filename"""
     # TODO: Hacerlo para el profile
-    from prymatex.utils.misc import get_home_dir
-    conf_dir = os.path.join(get_home_dir(), PMX_HOME_NAME)
+    conf_dir = os.path.join(USER_HOME_PATH, PMX_HOME_NAME)
     if not os.path.isdir(conf_dir):
         os.mkdir(conf_dir)
     if filename is None:

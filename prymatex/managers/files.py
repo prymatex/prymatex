@@ -10,6 +10,7 @@ import fnmatch
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.extensions import CheckableMessageBox, ReplaceRenameInputDialog
 
+from prymatex.core import config
 from prymatex.core import PrymatexComponent
 from prymatex.core.settings import ConfigurableItem
 from prymatex.core import notifier
@@ -19,7 +20,6 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import osextra
 from prymatex.utils.decorators import deprecated
 from prymatex.utils import encoding
-from prymatex.utils.misc import get_home_dir
 
 class FileManager(PrymatexComponent, QtCore.QObject):
     """A File Manager"""
@@ -34,7 +34,7 @@ class FileManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
         super(FileManager, self).__init__(**kwargs)
         
-        self.last_directory = get_home_dir()
+        self.last_directory = config.USER_HOME_PATH
         self._open_files = {}
 
     @classmethod

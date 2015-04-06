@@ -159,21 +159,6 @@ def get_common_path(pathlist):
             else:
                 return os.path.abspath(common)
 
-def get_home_dir():
-    """Return user home directory"""
-    try:
-        path = os.path.expanduser('~')
-    except:
-        path = ''
-    for env_var in ('HOME', 'USERPROFILE', 'TMP'):
-        if os.path.isdir(path):
-            break
-        path = os.environ.get(env_var, '')
-    if path:
-        return path
-    else:
-        raise RuntimeError('Please define environment variable $HOME')
-
 if __name__ == '__main__':
     assert get_common_path([
                             'D:\\Python\\spyder-v21\\spyderlib\\widgets',
