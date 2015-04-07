@@ -178,7 +178,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             editor.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
         )
         
-        self.syntaxHighlighter.changed.connect(self.on_highlighter_changed)
+        self.syntaxChanged.connect(self._update_properties)
+        self.filePathChanged.connect(self._update_properties)
 
     def highlighter(self):
         return self.syntaxHighlighter
@@ -197,7 +198,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.selectorDialog = self.window().findChild(QtWidgets.QDialog, "SelectorDialog")
         self.browserDock = self.window().findChild(QtWidgets.QDockWidget, "BrowserDock")
 
-    def on_highlighter_changed(self, changes):
+    def _update_properties(self, *args, **kwargs):
         properties = self.propertiesSettings()
         if properties.lineEndings:
             self.setEolChars(properties.lineEndings)
@@ -277,7 +278,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.modeChanged.emit(mode)
 
     def endMode(self, mode):
-        print(self.__modes, mode)
         if mode == self.__modes[-1]:
             self.modeChanged.emit(self.__modes.pop())
 
@@ -404,12 +404,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return (left_syntax_scope + left_cursor_scope + auxiliary_scope, 
             right_syntax_scope + right_cursor_scope + auxiliary_scope)
         
-    def preferenceSettings(self, cursor = None):
+    def preferenceSettings(self, cursor=None):
         return self.application().supportManager.getPreferenceSettings(
             *self.scope(cursor or self.textCursor())
         )
 
-    def propertiesSettings(self, cursor = None):
+    def propertiesSettings(self, cursor=None):
         return self.application().supportManager.getPropertiesSettings(
             self.filePath(), *self.scope(cursor or self.textCursor())
         )
@@ -1057,7 +1057,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def bookmarkPrevious(self, cursor = None):
         cursor = cursor or self.textCursor()
         cursor = self.bookmarkListModel.previousBookmark(cursor)
-        print(cursor)
         if cursor is not None:
             self.setTextCursor(cursor)
 
