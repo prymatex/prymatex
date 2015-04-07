@@ -16,7 +16,7 @@ class ManagedObject(object):
         self.uuid = uuid
         self.manager = manager
         self.sources = {}
-        self.pointer = None
+        self.current_source = None
         self.static_files = []
 
     @classmethod
@@ -52,8 +52,9 @@ class ManagedObject(object):
     # ------------ Object Sources
     def addSource(self, name, path):
         mtime = os.path.exists(path) and os.path.getmtime(path) or 0
-        self.sources[name] = Source(name=name, path=path, mtime=mtime)
-        self.pointer = name
+        self.current_source = self.sources.setdefault(name, 
+            Source(name=name, path=path, mtime=mtime)
+        )
 
     def removeSource(self, name):
         del self.sources[name]
@@ -76,22 +77,25 @@ class ManagedObject(object):
         source = self.sources[name]
         self.sources[name] = source._replace(mtime=os.path.getmtime(source.path))
 
-    # ------------ Current Source, is the source in self.pointer
+    # ------------ Current Source, is the source in self.current_source
     def setCurrentSource(self, name):
         assert name in self.sources
-        self.pointer = name
+        self.current_source = self.sources[name]
 
+    def currentSource(self):
+        return self.current_source
+        
     def currentSourceName(self):
-        return self.pointer
+        return self.current_source.name
     
     def currentSourcePath(self):
-        return self.sourcePath(self.pointer)
+        return self.current_source.path
 
-    def addStaticFile(self, staticPath):
-        self.static_files.append(staticPath)
+    def addStaticFile(self, static_path):
+        self.static_files.append(static_path)
 
-    def removeStaticFile(self, staticPath):
-        self.static_files.remove(staticPath)
+    def removeStaticFile(self, static_path):
+        self.static_files.remove(static_path)
 
     def createSourcePath(self, baseDirectory):
         return baseDirectory
