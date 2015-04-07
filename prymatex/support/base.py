@@ -2,12 +2,11 @@
 
 import os
 import glob
-from collections import namedtuple
 
 from prymatex.support import scripts
 from prymatex.utils import six
 
-Source = namedtuple("Source", "name path mtime")
+from .source import Source
 
 class ManagedObject(object):
     PATTERNS = ()
@@ -51,9 +50,8 @@ class ManagedObject(object):
 
     # ------------ Object Sources
     def addSource(self, name, path):
-        mtime = os.path.exists(path) and os.path.getmtime(path) or 0
         self.current_source = self.sources.setdefault(name, 
-            Source(name=name, path=path, mtime=mtime)
+            Source(name=name, path=path)
         )
 
     def removeSource(self, name):
@@ -67,15 +65,15 @@ class ManagedObject(object):
 
     def setSourcePath(self, name, path):
         source = self.sources[name]
-        self.sources[name] = source._replace(path=path, mtime=os.path.getmtime(path))
+        self.sources[name] = source.newPath(path)
 
-    def sourceChanged(self, name):
+    def sourceHasChanged(self, name):
         source = self.sources[name]
-        return source.mtime != os.path.getmtime(source.path)
+        return source.hasChanged()
 
-    def updateMtime(self, name):
+    def updateTime(self, name):
         source = self.sources[name]
-        self.sources[name] = source._replace(mtime=os.path.getmtime(source.path))
+        self.sources[name] = source.newUpdatedTime()
 
     # ------------ Current Source, is the source in self.current_source
     def setCurrentSource(self, name):

@@ -2,6 +2,7 @@
 
 #-*- encoding: utf-8 -*-
 import re
+import os
 import codecs
     
 from prymatex.qt import QtCore, QtGui
@@ -30,7 +31,7 @@ class Settings(object):
             section = self.name \
                 if self.name in config.sections() \
                 else 'DEFAULT'
-            yield config.directory, config[section]
+            yield os.path.dirname(config.source.path), config[section]
 
     def get_snippet(self, key, default=None):
         variables = { key: '' }

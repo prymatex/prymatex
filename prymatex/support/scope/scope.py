@@ -14,7 +14,6 @@ class Scope(object):
 
         def __init__(self, iter, parent):
             self.parent = parent
-            self._hash = None
 
         def is_auxiliary_scope(self):
             return self[0] in ("attr", "dyn")

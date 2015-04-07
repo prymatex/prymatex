@@ -25,6 +25,7 @@ from .properties import Properties
 from . import bundleitem
 from . import scope
 from .staticfile import StaticFile
+from .source import Source
 from .process import RunningContext
 
 # ------- Tool function for compare bundle items by attributes
@@ -320,7 +321,7 @@ class SupportBaseManager(object):
         for bundle in installedBundles:
             bundlePath = bundle.sourcePath(namespace.name)
             if bundlePath in bundlePaths:
-                if namespace.name == bundle.currentSourceName() and bundle.sourceChanged(namespace.name):
+                if namespace.name == bundle.currentSourceName() and bundle.sourceHasChanged(namespace.name):
                     self.loadBundle(bundlePath, namespace)
                     self.modifyBundle(bundle)
                 bundlePaths.remove(bundlePath)
@@ -363,7 +364,7 @@ class SupportBaseManager(object):
                     continue
                 bundleItemPath = bundleItem.sourcePath(namespace.name)
                 if bundleItemPath in bundleItemPaths[bundleItem.type()]:
-                    if namespace.name == bundleItem.currentSourceName() and bundleItem.sourceChanged(namespace.name):
+                    if namespace.name == bundleItem.currentSourceName() and bundleItem.sourceHasChanged(namespace.name):
                         self.logger().debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, bundleItemPath))
                         self.loadBundleItem(self.BUNDLEITEM_CLASSES[bundleItem.type()], bundleItemPath, namespace, bundle)
                         self.modifyBundleItem(bundleItem)
@@ -860,10 +861,11 @@ class SupportBaseManager(object):
     def _load_parser(self, directory):
         parser = configparser.ConfigParser()
         parser.optionxform = str
-        parser.directory = directory
-        parser.file = os.path.join(parser.directory, config.PMX_PROPERTIES_NAME)
-        if os.path.isfile(parser.file):
-            parser.read(parser.file) 
+        parser.source = Source(os.path.dirname(directory), 
+            os.path.join(directory, config.PMX_PROPERTIES_NAME)
+        )
+        if parser.source.exists:
+            parser.read(parser.source.path) 
         return parser
 
     def _load_parsers(self, directory):
