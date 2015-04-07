@@ -180,7 +180,7 @@ class ProjectTreeNode(ProjectItemTreeNodeBase):
         data = json.read_file(self.path())
         self.setNodeName(data["name"])
         self.update(data)
-
+        
     @classmethod
     def loadProject(cls, project_path, manager):
         if not os.path.isfile(project_path):

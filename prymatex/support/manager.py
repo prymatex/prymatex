@@ -861,9 +861,9 @@ class SupportBaseManager(object):
         parser = configparser.ConfigParser()
         parser.optionxform = str
         parser.directory = directory
-        properties_path = os.path.join(parser.directory, config.PMX_PROPERTIES_NAME)
-        if os.path.isfile(properties_path):
-            parser.read(properties_path)
+        parser.file = os.path.join(parser.directory, config.PMX_PROPERTIES_NAME)
+        if os.path.isfile(parser.file):
+            parser.read(parser.file) 
         return parser
 
     def _load_parsers(self, directory):

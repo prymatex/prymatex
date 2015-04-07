@@ -17,6 +17,7 @@ class ManagedObject(object):
         self.manager = manager
         self.sources = {}
         self.pointer = None
+        self.static_files = []
 
     @classmethod
     def type(cls):
@@ -27,8 +28,8 @@ class ManagedObject(object):
         return self.manager.uuidtotext(self.uuid)
 
     # ----------- Load from dictionary
-    def load(self, dataHash):
-        self.statics = []
+    def load(self, data_hash):
+        self.static_files = []
 
     # ----------- Update from dictionary
     def update(self, dataHash):
@@ -39,7 +40,7 @@ class ManagedObject(object):
         return { 'uuid': self.uuidAsText() }
     
     def hasChanged(self, dataHash):
-        currentHash = self.dump(allKeys = True)
+        currentHash = self.dump(allKeys=True)
         for key, value in dataHash.items():
             if key not in currentHash or currentHash[key] != value:
                 return True
@@ -51,7 +52,7 @@ class ManagedObject(object):
     # ------------ Object Sources
     def addSource(self, name, path):
         mtime = os.path.exists(path) and os.path.getmtime(path) or 0
-        self.sources[name] = Source(name = name, path = path, mtime = mtime)
+        self.sources[name] = Source(name=name, path=path, mtime=mtime)
         self.pointer = name
 
     def removeSource(self, name):
@@ -65,7 +66,7 @@ class ManagedObject(object):
 
     def setSourcePath(self, name, path):
         source = self.sources[name]
-        self.sources[name] = source._replace(path = path, mtime = os.path.getmtime(path))
+        self.sources[name] = source._replace(path=path, mtime=os.path.getmtime(path))
 
     def sourceChanged(self, name):
         source = self.sources[name]
@@ -73,7 +74,7 @@ class ManagedObject(object):
 
     def updateMtime(self, name):
         source = self.sources[name]
-        self.sources[name] = source._replace(mtime = os.path.getmtime(source.path))
+        self.sources[name] = source._replace(mtime=os.path.getmtime(source.path))
 
     # ------------ Current Source, is the source in self.pointer
     def setCurrentSource(self, name):
@@ -87,10 +88,10 @@ class ManagedObject(object):
         return self.sourcePath(self.pointer)
 
     def addStaticFile(self, staticPath):
-        self.statics.append(staticPath)
+        self.static_files.append(staticPath)
 
     def removeStaticFile(self, staticPath):
-        self.statics.remove(staticPath)
+        self.static_files.remove(staticPath)
 
     def createSourcePath(self, baseDirectory):
         return baseDirectory
