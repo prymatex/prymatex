@@ -31,6 +31,7 @@ class Settings(object):
             section = self.name \
                 if self.name in config.sections() \
                 else 'DEFAULT'
+            print(config.source)
             yield os.path.dirname(config.source.path), config[section]
 
     def get_snippet(self, key, default=None):
@@ -194,7 +195,7 @@ class Properties(object):
             if s.pattern.search(path) or s.selector.does_match(context):
                 settings.append(s)
         return ContextSettings(settings)
-    
+
     def load(self, configs):
         self.configs = configs
         sections = set()
