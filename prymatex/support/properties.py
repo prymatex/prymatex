@@ -31,8 +31,7 @@ class Settings(object):
             section = self.name \
                 if self.name in config.sections() \
                 else 'DEFAULT'
-            print(config.source)
-            yield os.path.dirname(config.source.path), config[section]
+            yield config.source.name, config[section]
 
     def get_snippet(self, key, default=None):
         variables = { key: '' }

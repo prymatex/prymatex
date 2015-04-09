@@ -861,24 +861,25 @@ class SupportBaseManager(object):
     def _load_parser(self, directory):
         parser = configparser.ConfigParser()
         parser.optionxform = str
-        parser.source = Source(os.path.basename(directory), 
+        parser.source = Source(directory, 
             os.path.join(directory, config.PMX_PROPERTIES_NAME)
         )
-        print(parser.source)
         if parser.source.exists:
             parser.read(parser.source.path) 
         return parser
 
     def _load_parsers(self, directory):
-        if directory and directory not in self._configparsers:
+        if directory not in self._configparsers:
             parsers = []
             parsers.append(self._load_parser(directory))
             if directory not in (os.sep, config.USER_HOME_PATH):
-                parsers += self._load_parsers(os.path.dirname(directory))
+                parsers += self._load_parsers(
+                    os.path.dirname(directory)
+                )
             elif directory == os.sep:
-                parsers.append(self._load_parser(config.USER_HOME_PATH))
+                parsers += self._load_parsers(config.USER_HOME_PATH)
             self._configparsers[directory] = parsers
-        return directory and self._configparsers[directory] or []
+        return self._configparsers[directory]
 
     def loadProperties(self, directory):
         parsers = self._load_parsers(directory)
@@ -894,19 +895,21 @@ class SupportBaseManager(object):
         return self._properties[directory]
 
     def getPropertiesSettings(self, path=None, leftScope=None, rightScope=None):
+        print(path, leftScope, rightScope)
         memoizedKey = ("getPropertiesSettings", path, leftScope, rightScope)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
-        properties = self.getProperties(path or "")
+        properties = self.getProperties(path or config.USER_HOME_PATH)
         return self.bundleItemCache.setdefault(memoizedKey,
             properties.buildSettings(
-                path or "",
+                path or config.USER_HOME_PATH,
                 self.contextFactory(leftScope, rightScope) 
             )
         )
 
     # --------------- PROPERTIES INTERFACE
     def addProperties(self, properties):
+        print([ c.source for c in properties.configs ])
         return properties
 
     # ----------------- TABTRIGGERS INTERFACE

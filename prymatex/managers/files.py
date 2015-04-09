@@ -35,7 +35,6 @@ class FileManager(PrymatexComponent, QtCore.QObject):
         super(FileManager, self).__init__(**kwargs)
         
         self.last_directory = config.USER_HOME_PATH
-        self._open_files = {}
 
     @classmethod
     def contributeToSettings(cls):
@@ -141,10 +140,6 @@ class FileManager(PrymatexComponent, QtCore.QObject):
     def fnmatchany(self, filename, patterns):
         return any([fnmatch.fnmatch(filename, pattern) for pattern in patterns])
 
-    # -------------- Open file control
-    def isOpen(self, filePath):
-        return filePath in self._open_files
-    
     # ---------- Handling files for retrieving data. open, read, write, close
     def openFile(self, filePath):
         """Open and read a file, return the content.
@@ -154,8 +149,7 @@ class FileManager(PrymatexComponent, QtCore.QObject):
         if not os.path.isfile(filePath):
             raise exceptions.IOException("%s is not a file" % filePath)
         self.last_directory = os.path.dirname(filePath)
-        self.add_file_history(filePath)
-        self._open_files[filePath] = filePath 
+        self.add_file_history(filePath) 
 
     def readFile(self, filePath):
         """Read from file"""
@@ -167,7 +161,7 @@ class FileManager(PrymatexComponent, QtCore.QObject):
         return encode
 
     def closeFile(self, filePath):
-        del self._open_files[filePath]
+        pass
 
     def directory(self, filePath = None):
         """Obtiene un directorio para el path
