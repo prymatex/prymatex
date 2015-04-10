@@ -3,7 +3,6 @@
 
 from prymatex.qt import QtGui, QtCore
 from prymatex.qt.helpers.icons import combine_icons
-from prymatex.core import notifier
 
 from prymatex.core.components.base import (PrymatexComponentWidget, PrymatexAddon)
 
@@ -16,7 +15,7 @@ class PrymatexEditor(PrymatexComponentWidget):
         super(PrymatexEditor, self).__init__(**kwargs)
         self._file_path = file_path
         self._project = None
-        self._external_actions = notifier.NONE
+        self._external_action = None
         self._title = self.UNTITLED_FILE_TEMPLATE
 
     def open(self, file_path):
@@ -32,7 +31,6 @@ class PrymatexEditor(PrymatexComponentWidget):
                 self.application().fileManager.openFile(file_path)
             self.setFilePath(file_path)
         self.setModified(False)
-        self.setExternalAction(notifier.NONE)
     
     def close(self):
         """ Close editor """
@@ -42,8 +40,7 @@ class PrymatexEditor(PrymatexComponentWidget):
     def reload(self):
         """ Reload current file """
         self.setModified(False)
-        self.setExternalAction(notifier.NONE)
-
+        
     def project(self):
         return self._project
 
@@ -62,7 +59,7 @@ class PrymatexEditor(PrymatexComponentWidget):
             baseIcon = self.resources().get_icon(self._file_path)
         if self.isModified():
             baseIcon = self.resources().get_icon("document-save")
-        if self._external_actions & notifier.CHANGED:
+        if self._external_action is not None:
             importantIcon = self.resources().get_icon("information")
             baseIcon = combine_icons(baseIcon, importantIcon, 0.8)
         return baseIcon
@@ -99,17 +96,11 @@ class PrymatexEditor(PrymatexComponentWidget):
         return False
         
     def externalAction(self):
-        return self._external_actions
+        return self._external_action
         
-    def setExternalAction(self, actions):
-        self._external_actions = actions
+    def setExternalAction(self, action):
+        self._external_action = action
         #self.modificationChanged.emit(False)
-
-    def isExternalChanged(self):
-        return self._external_actions & notifier.CHANGED
-
-    def isExternalDeleted(self):
-        return self._external_actions & notifier.DELETED   
 
     #------------ Bundle Item Handler
     def bundleItemHandler(self):

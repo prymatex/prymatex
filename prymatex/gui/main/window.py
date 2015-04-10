@@ -406,12 +406,12 @@ html_footer
         self.setWindowTitle(self.title_template.substitute(
             (self.currentEditor() or self).environmentVariables()))
 
-    def saveEditor(self, editor = None, saveAs = False):
+    def saveEditor(self, editor=None, saveAs=False):
         editor = editor or self.currentEditor()
-        if editor.isExternalChanged():
+        if editor.externalAction() == self.application().EXTERNAL_CHANGED:
             message = "The file '%s' has been changed on the file system, Do you want save the file with other name?"
-            result = QtWidgets.QMessageBox.question(editor, _("File changed"),
-                _(message) % editor.filePath(),
+            result = QtWidgets.QMessageBox.question(editor, "File changed",
+                message % editor.filePath(),
                 buttons = QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
                 defaultButton = QtWidgets.QMessageBox.Yes)
             if result == QtWidgets.QMessageBox.Yes:

@@ -163,6 +163,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         for name, path in config.NAMESPACES:
             app.addNamespace(name, path)
 
+        # Connect signals
+        app.fileManager.openFileChanged.connect(app.on_fileManager_openFileChanged)
         app.applyOptions()
         return app
 
@@ -336,6 +338,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             componentState["windows"].append(window.componentState())
         
         componentState["project_manager"] = self.projectManager.componentState()
+        componentState["file_manager"] = self.fileManager.componentState()
 
         return componentState
 
@@ -345,6 +348,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
         if "project_manager" in componentState:
             self.projectManager.setComponentState(componentState["project_manager"])
+
+        if "file_manager" in componentState:
+            self.fileManager.setComponentState(componentState["file_manager"])
 
         # Restore open documents
         for windowState in componentState.get("windows", []):
@@ -609,8 +615,11 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             if shortcut.identifier() in self.shortcuts:
                 shortcut.setKeySequence(self.shortcuts[shortcut.identifier()])
 
+    EXTERNAL_DELETED = 1 << 0
+    EXTERNAL_CHANGED = 1 << 1
     def checkExternalAction(self, window, editor):
-        if editor.isExternalChanged():
+        action = editor.externalAction()
+        if action == self.EXTERNAL_CHANGED:
             message = ("The file '%s' has been changed on the file system, Do you want to "
             "replace the editor contents with these changes?")
             result = QtWidgets.QMessageBox.question(editor, _("File changed"),
@@ -621,7 +630,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
                 editor.reload()
             elif result == QtWidgets.QMessageBox.No:
                 pass
-        elif editor.isExternalDeleted():
+        elif action == self.EXTERNAL_DELETED:
             message = ("The file '%s' has been deleted or is not accessible. Do you want "
                        "to save your changes or close the editor without saving?")
             result = QtWidgets.QMessageBox.question(
@@ -634,11 +643,11 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             elif result == QtWidgets.QMessageBox.Save:
                 window.saveEditor(editor)
 
-    def on_fileSytemChanged(self, filePath, actions):
-        print("Cambio este archivo", filePath)
-        editor = self.findEditorForFile(filePath)
+    def on_fileManager_openFileChanged(self, file_path):
+        editor = self.findEditorForFile(file_path)
         window = editor.window()
-        editor.setExternalAction(actions)
+        action = self.fileManager.exists(file_path) and self.EXTERNAL_CHANGED or self.EXTERNAL_DELETED
+        editor.setExternalAction(action)
         if window.currentEditor() == editor:
             self.checkExternalAction(window, editor)
 
