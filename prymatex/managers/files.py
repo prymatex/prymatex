@@ -22,24 +22,41 @@ from prymatex.utils.decorators import deprecated
 from prymatex.utils import encoding
 
 class FileManager(PrymatexComponent, QtCore.QObject):
-    """A File Manager"""
-
-    file_history = ConfigurableItem(default = [])
-    file_history_length = ConfigurableItem(default = 10)
-    default_encoding = ConfigurableItem(default = 'utf_8')
-    default_end_of_line = ConfigurableItem(default = 'unix')
-    detect_end_of_line = ConfigurableItem(default = False)
-    remove_trailing_spaces = ConfigurableItem(default = False)
+    #Signals
+    openFileChanged = QtCore.Signal(str)
+    
+    #Configuration
+    file_history_length = ConfigurableItem(default=10)
+    default_encoding = ConfigurableItem(default='utf_8')
+    default_end_of_line = ConfigurableItem(default='unix')
+    detect_end_of_line = ConfigurableItem(default=False)
+    remove_trailing_spaces = ConfigurableItem(default=False)
 
     def __init__(self, **kwargs):
         super(FileManager, self).__init__(**kwargs)
-        
         self.last_directory = config.USER_HOME_PATH
+        self.file_history = []
+        self.fileSystemWatcher = QtCore.QFileSystemWatcher()
+        self.fileSystemWatcher.fileChanged.connect(self.openFileChanged.emit)
 
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.files import FilesSettingsWidget
         return [ FilesSettingsWidget ]
+
+    # ---------- OVERRIDE: PrymatexComponent.componentState()
+    def componentState(self):
+        componentState = super(FileManager, self).componentState()
+
+        componentState["file_history"] = self.file_history
+        return componentState
+
+    # ---------- OVERRIDE: PrymatexComponent.setComponentState()
+    def setComponentState(self, componentState):
+        super(FileManager, self).setComponentState(componentState)
+        
+        # Restore file history
+        self.file_history = componentState.get("file_history", [])
 
     # -------------- File Changes callbacks
     def _apply_callback(self, path):
@@ -63,11 +80,9 @@ class FileManager(PrymatexComponent, QtCore.QObject):
         self.file_history.insert(0, file_path)
         if len(self.file_history) > self.file_history_length:
             self.file_history = self.file_history[0:self.file_history_length]
-        self.settings().set("file_history", self.file_history)
     
     def clearFileHistory(self):
         self.file_history = []
-        self.settings().set("file_history", self.file_history)
     
     #========================================================
     # Path handling, create, move, copy, link, delete
@@ -82,18 +97,17 @@ class FileManager(PrymatexComponent, QtCore.QObject):
             raise
         
     def createDirectory(self, directory):
-        """Create a new directory.
-        """
+        """Create a new directory."""
         if os.path.exists(directory):
             raise exceptions.FileExistsException("The directory already exist", directory) 
         os.makedirs(directory)
 
-    def createFile(self, filePath):
+    def createFile(self, file_path):
         """Create a new file.
         """
-        if os.path.exists(filePath):
+        if os.path.exists(file_path):
             raise exceptions.IOException("The file already exist") 
-        open(filePath, 'w').close()
+        open(file_path, 'w').close()
     
     move = lambda self, src, dst: shutil.move(src, dst)
     copytree = lambda self, src, dst: shutil.copytree(src, dst)
@@ -141,37 +155,38 @@ class FileManager(PrymatexComponent, QtCore.QObject):
         return any([fnmatch.fnmatch(filename, pattern) for pattern in patterns])
 
     # ---------- Handling files for retrieving data. open, read, write, close
-    def openFile(self, filePath):
+    def openFile(self, file_path):
         """Open and read a file, return the content.
         """
-        if not os.path.exists(filePath):
-            raise exceptions.IOException("The file does not exist: %s" % filePath)
-        if not os.path.isfile(filePath):
-            raise exceptions.IOException("%s is not a file" % filePath)
-        self.last_directory = os.path.dirname(filePath)
-        self.add_file_history(filePath) 
+        if not os.path.exists(file_path):
+            raise exceptions.IOException("The file does not exist: %s" % file_path)
+        if not os.path.isfile(file_path):
+            raise exceptions.IOException("%s is not a file" % file_path)
+        self.last_directory = os.path.dirname(file_path)
+        self.add_file_history(file_path)
+        self.fileSystemWatcher.addPath(file_path)
 
-    def readFile(self, filePath):
+    def readFile(self, file_path):
         """Read from file"""
-        return encoding.read(filePath)
+        return encoding.read(file_path)
 
-    def writeFile(self, filePath, content, encode=None):
+    def writeFile(self, file_path, content, encode=None):
         """Function that actually save the content of a file."""
-        encode = encoding.write(content, filePath, encode or self.defaultEncoding)
+        encode = encoding.write(content, file_path, encode or self.defaultEncoding)
         return encode
 
-    def closeFile(self, filePath):
-        pass
+    def closeFile(self, file_path):
+        self.fileSystemWatcher.removePath(file_path)
 
-    def directory(self, filePath = None):
+    def directory(self, file_path = None):
         """Obtiene un directorio para el path
         """
-        if filePath is None:
+        if file_path is None:
             #if fileInfo is None return the las directory or the home directory
             return self.last_directory
-        if os.path.isdir(filePath):
-            return filePath
-        return os.path.dirname(filePath)
+        if os.path.isdir(file_path):
+            return file_path
+        return os.path.dirname(file_path)
     
     def listDirectory(self, directory, absolute=False, filePatterns=[]):
         if not os.path.isdir(directory):
