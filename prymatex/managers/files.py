@@ -172,7 +172,9 @@ class FileManager(PrymatexComponent, QtCore.QObject):
 
     def writeFile(self, file_path, content, encode=None):
         """Function that actually save the content of a file."""
+        self.fileSystemWatcher.removePath(file_path)
         encode = encoding.write(content, file_path, encode or self.defaultEncoding)
+        self.fileSystemWatcher.addPath(file_path)
         return encode
 
     def closeFile(self, file_path):

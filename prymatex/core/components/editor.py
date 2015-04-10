@@ -11,7 +11,7 @@ from prymatex.utils.decorators import deprecated
 class PrymatexEditor(PrymatexComponentWidget):
     UNTITLED_FILE_TEMPLATE = "Untitled"
     
-    def __init__(self, file_path = None, **kwargs):
+    def __init__(self, file_path=None, **kwargs):
         super(PrymatexEditor, self).__init__(**kwargs)
         self._file_path = file_path
         self._project = None
