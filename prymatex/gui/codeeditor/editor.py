@@ -180,6 +180,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         
         self.syntaxChanged.connect(self._update_properties)
         self.filePathChanged.connect(self._update_properties)
+        self.application().supportManager.propertiesChanged.connect(self._update_properties)
 
     def highlighter(self):
         return self.syntaxHighlighter

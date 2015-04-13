@@ -68,7 +68,7 @@ class SupportBaseManager(object):
         super(SupportBaseManager, self).__init__(**kwargs)
         self.ready = False
         self.environment = {}
-        self.managedObjects = {}
+        self._managed_objects = {}
 
         # Cache
         self._configparsers = {}
@@ -465,16 +465,16 @@ class SupportBaseManager(object):
         return obj.currentSourceName() != self.protectedNamespace().name
 
     def addManagedObject(self, obj):
-        self.managedObjects[obj.uuid] = obj
+        self._managed_objects[obj.uuid] = obj
 
     def removeManagedObject(self, obj):
-        self.managedObjects.pop(obj.uuid)
+        self._managed_objects.pop(obj.uuid)
 
     def getManagedObject(self, uuid):
         if not isinstance(uuid, uuidmodule.UUID):
             uuid = uuidmodule.UUID(uuid)
         if not self.isDeleted(uuid):
-            return self.managedObjects.get(uuid, None)
+            return self._managed_objects.get(uuid, None)
 
     def saveManagedObject(self, obj, namespace):
         
@@ -839,7 +839,7 @@ class SupportBaseManager(object):
         raise NotImplementedError
 
     #----------------- PREFERENCES ---------------------
-    def getPreferences(self, leftScope = None, rightScope = None):
+    def getPreferences(self, leftScope=None, rightScope=None):
         memoizedKey = ("getPreferences", None, leftScope, rightScope)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
@@ -881,6 +881,17 @@ class SupportBaseManager(object):
             self._configparsers[directory] = parsers
         return self._configparsers[directory]
 
+    def isGlobalProperties(self, directory):
+        return directory == config.USER_HOME_PATH
+
+    def deleteProperties(self, directory):
+        if self.isGlobalProperties(directory):
+            self._properties.clear()
+            self._configparsers.clear()
+        else:
+            self._properties.pop(directory)
+            self._configparsers.pop(directory)
+        
     def loadProperties(self, directory):
         parsers = self._load_parsers(directory)
         properties = Properties(self)
@@ -895,21 +906,14 @@ class SupportBaseManager(object):
         return self._properties[directory]
 
     def getPropertiesSettings(self, path=None, leftScope=None, rightScope=None):
-        print(path, leftScope, rightScope)
-        memoizedKey = ("getPropertiesSettings", path, leftScope, rightScope)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
         properties = self.getProperties(path or config.USER_HOME_PATH)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            properties.buildSettings(
-                path or config.USER_HOME_PATH,
-                self.contextFactory(leftScope, rightScope) 
-            )
+        return properties.buildSettings(
+            path or config.USER_HOME_PATH,
+            self.contextFactory(leftScope, rightScope)
         )
 
     # --------------- PROPERTIES INTERFACE
     def addProperties(self, properties):
-        print([ c.source for c in properties.configs ])
         return properties
 
     # ----------------- TABTRIGGERS INTERFACE

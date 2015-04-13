@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
 import fnmatch
 from bisect import bisect
 import uuid as uuidmodule
@@ -143,25 +144,30 @@ class BundleItemMenuGroup(QtCore.QObject):
         self.removeFromContainers(self.menus[bundle])
 
 class Properties(QtCore.QObject):
-    pass
+    def __init__(self, properties):
+        """docstring for __init__"""
+        self._properties = properties
     
 class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
-    #Signals for bundle
+    # Signals for bundle
     bundleAdded = QtCore.Signal(object)
     bundleRemoved = QtCore.Signal(object)
     bundleChanged = QtCore.Signal(object)
     bundlePopulated = QtCore.Signal(object)
 
-    #Signals for bundle items
+    # Signals for bundle items
     bundleItemAdded = QtCore.Signal(object)
     bundleItemRemoved = QtCore.Signal(object)
     bundleItemChanged = QtCore.Signal(object)
     bundleItemTriggered = QtCore.Signal(object)
     
-    #Signals for themes
+    # Signals for themes
     themeAdded = QtCore.Signal(object)
     themeRemoved = QtCore.Signal(object)
     themeChanged = QtCore.Signal(object)
+    
+    # Signals for properties
+    propertiesChanged = QtCore.Signal(str, bool)
     
     # ------------- Settings
     shell_variables = ConfigurableItem(default=[], tm_name='OakShelVariables')
@@ -228,6 +234,10 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         
         #BUNDLEMENUGROUP
         self.bundleMenuGroup = BundleItemMenuGroup(self)
+        
+        # File System Watcher
+        self.fileSystemWatcher = QtCore.QFileSystemWatcher()
+        self.fileSystemWatcher.fileChanged.connect(self.on_fileSystemWatcher_fileChanged)
 
     @classmethod
     def contributeToSettings(cls):
@@ -257,6 +267,12 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         
     def buildBundleItemStorage(self):
         return SupportBaseManager.buildBundleItemStorage(self)
+    
+    # ------------------- Signals
+    def on_fileSystemWatcher_fileChanged(self, path):
+        directory = path if os.path.isdir(path) else os.path.dirname(path)
+        self.deleteProperties(directory)
+        self.propertiesChanged.emit(directory, self.isGlobalProperties(directory))
         
     #---------------------------------------------------
     # Environment
@@ -279,7 +295,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
             return self.runQtProcessCommand(**attrs)
         else:
             return SupportBaseManager.runSystemCommand(self, **attrs)
-            
+
     #Interface
     def runQtProcessCommand(self, **attrs):
         context = RunningContext(**attrs)
@@ -411,6 +427,13 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
             for node in bundle.children():
                 nodes.append(node)
         return nodes
+    
+    # --------------- PROPERTIES OVERRIDE INTERFACE
+    def addProperties(self, properties):
+        paths = [ cfg.source.exists and cfg.source.path or cfg.source.name \
+            for cfg in properties.configs ]
+        self.fileSystemWatcher.addPaths(paths)
+        return properties
         
     #---------------------------------------------------
     # STATICFILE OVERRIDE INTERFACE

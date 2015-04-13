@@ -184,13 +184,11 @@ class Properties(object):
         self.settings = []
         self.configs = []
         self.manager = manager
-    
-    def append(self, selector, section, configs):
-        self.settings.append(Settings(selector, section, configs))
 
     def buildSettings(self, path, context):
         settings = []
         for s in self.settings:
+            print(s.selector, context)
             if s.pattern.search(path) or s.selector.does_match(context):
                 settings.append(s)
         return ContextSettings(settings)
