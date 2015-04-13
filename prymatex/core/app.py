@@ -247,7 +247,11 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             window = self.currentWindow() or self.buildMainWindow(editor=True)
             
             # Change messages handler
-            self.showMessage = lambda self, *args, **kwargs: self.currentWindow().showMessage(*args, **kwargs)
+            def show_message(app):
+                def _show_message(*args, **kwargs):
+                    app.currentWindow().showMessage(*args, **kwargs)
+                return _show_message
+            self.showMessage = show_message(self)
 
             if not self.options.no_splash:
                 splash.finish(window)
