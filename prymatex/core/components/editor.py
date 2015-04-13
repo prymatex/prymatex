@@ -15,13 +15,12 @@ class PrymatexEditor(PrymatexComponentWidget):
         super(PrymatexEditor, self).__init__(**kwargs)
         self._file_path = file_path
         self._project = None
-        self._external_action = None
         self._title = self.UNTITLED_FILE_TEMPLATE
+        self._external_action = None
 
     def open(self, file_path):
         """ Open file """
         self.application().fileManager.openFile(file_path)
-        self.setFilePath(file_path)
 
     def save(self, file_path):
         """ Open close file """
@@ -49,8 +48,10 @@ class PrymatexEditor(PrymatexComponentWidget):
     
     def setFilePath(self, file_path):
         self._file_path = file_path
-        self._project = self.application().projectManager.findProjectForPath(self._file_path)
-        self._title = self.application().fileManager.basename(file_path)
+        self._project = self.application().projectManager.findProjectForPath(file_path) \
+            if file_path else None
+        self._title = self.application().fileManager.basename(file_path) \
+            if file_path else self.UNTITLED_FILE_TEMPLATE
         #self.modificationChanged.emit(False)
 
     def icon(self):

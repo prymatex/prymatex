@@ -316,8 +316,7 @@ html_footer
         self.centralWidget().moveWidgetToPreviousGroup(self.currentEditor())
 
     # ---------------- Create and manage editors
-    def createEditor(self, class_name=None, file_path=None,
-            position=None):
+    def createEditor(self, file_path=None, class_name=None):
         editorClass = None
         if class_name is not None:
             editorClass = self.application().findEditorClassByName(class_name)
@@ -326,16 +325,14 @@ html_footer
         if editorClass is None:
             editorClass = self.application().defaultEditor()
 
-        # Exists file ?
-        if file_path and not self.application().fileManager.isfile(file_path):
-            file_path = None
         editor = self.application().createComponentInstance(editorClass,
                                               parent=self,
                                               file_path=file_path)
+        # Exists file ?
         if file_path:
-            editor.open(file_path)
-        if position:
-            editor.setCursorPosition(position)
+            if self.application().fileManager.isfile(file_path):
+                editor.open(file_path)
+            editor.setFilePath(file_path)
         self.editorCreated.emit(editor)
         return editor
 

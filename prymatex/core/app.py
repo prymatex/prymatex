@@ -546,24 +546,23 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
                 return True
         return False
 
-    # ---- Open (file, directory, url, canelones)
-    def openFile(self, path, position=None, focus=True, editor=None, window=None):
+    # ---- Open (file)
+    def openFile(self, path, position=None, editor_name=None, focus=True, window=None):
         """Open a editor in current window"""
         path = self.fileManager.normcase(path)
 
         editor = self.findEditorForFile(path)
-        if editor is not None:
-            window = editor.window()
-            window.setCurrentEditor(editor)
-            if position is not None:
-                editor.setCursorPosition(position)
-        elif self.fileManager.exists(path):
+        if editor is None:
             window = window or self.currentWindow()
             editor = window.createEditor(
                 file_path=path,
-                class_name=editor,
-                position=position)
+                class_name=editor_name)
             window.addEditor(editor, focus)
+        elif focus:
+            window = editor.window()
+            window.setCurrentEditor(editor)
+        if position is not None:
+            editor.setCursorPosition(position)
         return editor
 
     def openDirectory(self, directoryPath):
