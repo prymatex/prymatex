@@ -188,7 +188,6 @@ class Properties(object):
     def buildSettings(self, path, context):
         settings = []
         for s in self.settings:
-            print(s.selector, context)
             if s.pattern.search(path) or s.selector.does_match(context):
                 settings.append(s)
         return ContextSettings(settings)

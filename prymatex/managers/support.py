@@ -237,7 +237,8 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         
         # File System Watcher
         self.fileSystemWatcher = QtCore.QFileSystemWatcher()
-        self.fileSystemWatcher.fileChanged.connect(self.on_fileSystemWatcher_fileChanged)
+        self.fileSystemWatcher.fileChanged.connect(self.on_fileSystemWatcher_pathChanged)
+        self.fileSystemWatcher.directoryChanged.connect(self.on_fileSystemWatcher_pathChanged)
 
     @classmethod
     def contributeToSettings(cls):
@@ -269,10 +270,12 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         return SupportBaseManager.buildBundleItemStorage(self)
     
     # ------------------- Signals
-    def on_fileSystemWatcher_fileChanged(self, path):
+    def on_fileSystemWatcher_pathChanged(self, path):
         directory = path if os.path.isdir(path) else os.path.dirname(path)
-        self.deleteProperties(directory)
-        self.propertiesChanged.emit(directory, self.isGlobalProperties(directory))
+        print(directory)
+        if self.propertiesHasChanged(directory):
+            self.deleteProperties(directory)
+            self.propertiesChanged.emit(directory, self.isUserProperties(directory))
         
     #---------------------------------------------------
     # Environment
