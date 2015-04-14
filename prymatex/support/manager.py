@@ -883,19 +883,16 @@ class SupportBaseManager(object):
 
     def propertiesHasChanged(self, directory):
         assert directory in self._configparsers
-        return any((p.source.hasChanged() for p in self._configparsers[directory]))
+        changes = [ p.source.hasChanged() for p in self._configparsers[directory] ]
+        return any(changes)
 
     def isUserProperties(self, directory):
         return directory == config.USER_HOME_PATH
 
     def deleteProperties(self, directory):
-        if self.isUserProperties(directory):
-            self._properties.clear()
-            self._configparsers.clear()
-        else:
-            self._properties.pop(directory)
-            self._configparsers.pop(directory)
-        
+        self._properties.clear()
+        self._configparsers.clear()
+
     def loadProperties(self, directory):
         parsers = self._load_parsers(directory)
         properties = Properties(self)

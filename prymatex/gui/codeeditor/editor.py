@@ -1175,9 +1175,17 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 {   "text": "Path to Clipboard",
                     "triggered": lambda checked, ed=self: self.application().clipboard().setText(ed.filePath())  },
                 {   "text": "Name to Clipboard",
-                    "triggered": lambda checked, ed=self: self.application().clipboard().setText(ed.application.fileManager.basename(ed.filePath()))  },
+                    "triggered": lambda checked, ed=self: \
+                        self.application().clipboard().setText(
+                            ed.application().fileManager.basename(ed.filePath())
+                        )  
+                },
                 {   "text": "Directory to Clipboard",
-                    "triggered": lambda checked, ed=self: self.application().clipboard().setText(ed.application.fileManager.dirname(ed.filePath()))  },
+                    "triggered": lambda checked, ed=self: \
+                        self.application().clipboard().setText(
+                            ed.application().fileManager.dirname(ed.filePath())
+                        )  
+                }
                 ])
         return menues
 
