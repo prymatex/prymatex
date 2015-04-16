@@ -237,7 +237,12 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         
         # File System Watcher
         self.fileSystemWatcher = QtCore.QFileSystemWatcher()
-        self.fileSystemWatcher.directoryChanged.connect(self.on_fileSystemWatcher_directoryChanged)
+        self.fileSystemWatcher.directoryChanged.connect(
+            self.on_fileSystemWatcher_pathChanged
+        )
+        self.fileSystemWatcher.fileChanged.connect(
+            self.on_fileSystemWatcher_pathChanged
+        )
 
     @classmethod
     def contributeToSettings(cls):
@@ -269,12 +274,14 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         return SupportBaseManager.buildBundleItemStorage(self)
     
     # ------------------- Signals
-    def on_fileSystemWatcher_directoryChanged(self, directory):
-        print(directory)
+    def on_fileSystemWatcher_pathChanged(self, path):
+        directory = path if os.path.isdir(path) else os.path.dirname(path)
+        user = self.isUserProperties(directory)
         if self.propertiesHasChanged(directory):
-            self.deleteProperties(directory)
-            self.propertiesChanged.emit(directory, self.isUserProperties(directory))
-        
+            paths = self.removeProperties(not user and directory)
+            self.fileSystemWatcher.removePaths(paths)
+            self.propertiesChanged.emit(directory, user)
+
     #---------------------------------------------------
     # Environment
     #---------------------------------------------------
@@ -432,7 +439,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     # --------------- PROPERTIES OVERRIDE INTERFACE
     def addProperties(self, properties):
         self.fileSystemWatcher.addPaths(
-            [cfg.source.name for cfg in properties.configs]
+            [ cfg.source.exists and cfg.source.path or cfg.source.name for cfg in properties.configs]
         )
         return properties
         
