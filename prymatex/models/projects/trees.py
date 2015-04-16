@@ -244,7 +244,7 @@ class ProjectTreeProxyModel(QtCore.QSortFilterProxyModel):
         elif self.folderFirst and not leftNode.isDirectory() and rightNode.isDirectory():
             return self.descending
         elif self.orderBy == "name" and isinstance(rightNode, ProjectTreeNode) and isinstance(leftNode, ProjectTreeNode):
-            return leftNode.name < rightNode.name
+            return leftNode.nodeName() < rightNode.nodeName()
         else:
             return self.fileManager.compareFiles(leftNode.path(), rightNode.path(), self.orderBy) < 0
 
@@ -345,12 +345,12 @@ class FileSystemProxyModel(FlatTreeProxyModel):
         
     def comparableValue(self, index):
         node = self.sourceModel().node(index)
-        return node.name.lower()
+        return node.nodeName().lower()
     
     def compareIndex(self, xindex, yindex):
         xnode = self.sourceModel().node(xindex)
         ynode = self.sourceModel().node(yindex)
-        return (xnode.name > ynode.name) - (xnode.name < ynode.name)
+        return (xnode.nodeName() > ynode.nodeName()) - (xnode.nodeName() < ynode.nodeName())
     
     def findItemIndex(self, item):
         for num, index in enumerate(self.indexMap()):
