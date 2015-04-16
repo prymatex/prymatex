@@ -16,6 +16,7 @@ class Settings(object):
         'spellChecking', 'projectDirectory', 'windowTitle', 'scopeAttributes', 
         'wrapColumn', 'softWrap']
     def __init__(self, name, properties):
+        print(name)
         self.name = selector = name
         self.properties = properties
         if selector[0] in ("'", '"') and selector[0] == selector[-1]:

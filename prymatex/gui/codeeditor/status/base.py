@@ -240,15 +240,15 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
                 {'text': "Find Results",
                  'items': [
                      {'text': "Show Results Panel",
-                      'triggered': lambda st, checked=False: st.showFindReplace()
+                      'triggered': lambda st, checked=False: st.showResultsPanel()
                      },
                      {'text': "Next Result",
                       'sequence': ("StatusBar", "NextResult", "F4"),
-                      'triggered': lambda st, checked=False: st.showFindReplace()
+                      'triggered': lambda st, checked=False: st.nextResult()
                      },
                      {'text': "Previous Result",
                       'sequence': ("StatusBar", "PreviousResult", "Shift+F4"),
-                      'triggered': lambda st, checked=False: st.showFindReplace()
+                      'triggered': lambda st, checked=False: st.previousResult()
                     }]
                 }]
             }

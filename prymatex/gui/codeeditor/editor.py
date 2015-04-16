@@ -210,6 +210,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             font = QtGui.QFont(properties.fontName)
         else:
             font = self.font()
+        print(properties.fontSize)
         if properties.fontSize:
             font.setPointSize(properties.fontSize)
         self.setFont(font)

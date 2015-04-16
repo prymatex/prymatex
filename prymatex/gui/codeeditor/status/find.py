@@ -107,3 +107,12 @@ class FindMixin(object):
         self.widgetFind.setVisible(True)
         self.comboBoxFind.lineEdit().selectAll()
         self.comboBoxFind.lineEdit().setFocus()
+
+    def showResultsPanel(self):
+        pass
+    
+    def nextResult(self):
+        pass
+        
+    def previousResult(self):
+        pass
