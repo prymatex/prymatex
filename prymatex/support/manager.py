@@ -887,21 +887,28 @@ class SupportBaseManager(object):
             ( p.source.hasChanged() for p in self._configparsers[directory] )
         )
 
-    def isUserProperties(self, directory):
-        return directory == config.USER_HOME_PATH
-
-    def removeProperties(self, directory):
-        paths = set()
-        cfg_parsers = [ self._configparsers[directory] ] if \
-            directory else list(self._configparsers.values())
-        for parsers in cfg_parsers:
-            for parser in parsers:
-                paths.add(parser.source.exists and parser.source.path or parser.source.name)
-                if parser.source.name in self._properties:
-                    self._properties.pop(parser.source.name)
-                if parser.source.name in self._configparsers:
-                    self._configparsers.pop(parser.source.name)
-        return paths
+    def updateProperties(self, directory):
+        remove = None
+        # Buscar los parsers que este relacionado con el directorio
+        parsers = self._configparsers[directory]
+        # Filtrar el que cambio
+        parser = [ parser for parser in parsers if parser.source.hasChanged() ].pop()
+        # Reload parser
+        parser.source = Source(directory, 
+            os.path.join(directory, config.PMX_PROPERTIES_NAME)
+        )
+        if parser.source.exists:
+            remove = directory
+            parser.read(parser.source.path)
+        else:
+            remove = os.path.join(directory, config.PMX_PROPERTIES_NAME)
+            parser.clear()
+        # Remove properties
+        self._properties = {
+            key: value for (key, value) in self._properties.items() \
+            if not (directory == config.USER_HOME_PATH or key.startswith(directory))             
+        }
+        return remove
 
     def loadProperties(self, directory):
         parsers = self._load_parsers(directory)

@@ -342,6 +342,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def close(self):
         self.aboutToClose.emit()
+        self.application().supportManager.propertiesChanged.disconnect(self._update_properties)
         super(CodeEditor, self).close()
         self.closed.emit()
 

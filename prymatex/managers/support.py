@@ -167,7 +167,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     themeChanged = QtCore.Signal(object)
     
     # Signals for properties
-    propertiesChanged = QtCore.Signal(str, bool)
+    propertiesChanged = QtCore.Signal(str)
     
     # ------------- Settings
     shell_variables = ConfigurableItem(default=[], tm_name='OakShelVariables')
@@ -276,11 +276,10 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     # ------------------- Signals
     def on_fileSystemWatcher_pathChanged(self, path):
         directory = path if os.path.isdir(path) else os.path.dirname(path)
-        user = self.isUserProperties(directory)
         if self.propertiesHasChanged(directory):
-            paths = self.removeProperties(not user and directory)
-            self.fileSystemWatcher.removePaths(paths)
-            self.propertiesChanged.emit(directory, user)
+            remove = self.updateProperties(directory)
+            self.fileSystemWatcher.removePath(remove)
+            self.propertiesChanged.emit(directory)
 
     #---------------------------------------------------
     # Environment

@@ -16,7 +16,7 @@ class Settings(object):
         'spellChecking', 'projectDirectory', 'windowTitle', 'scopeAttributes', 
         'wrapColumn', 'softWrap']
     def __init__(self, name, properties):
-        print(name)
+        # print(name)
         self.name = selector = name
         self.properties = properties
         if selector[0] in ("'", '"') and selector[0] == selector[-1]:
@@ -189,8 +189,10 @@ class Properties(object):
     def buildSettings(self, path, context):
         settings = []
         for s in self.settings:
-            if s.pattern.search(path) or s.selector.does_match(context):
+            if (s.pattern and s.pattern.search(path)) or \
+                (s.selector and s.selector.does_match(context)):
                 settings.append(s)
+        print([s.name for s in settings])
         return ContextSettings(settings)
 
     def load(self, configs):
