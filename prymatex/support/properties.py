@@ -16,13 +16,13 @@ class Settings(object):
         'spellChecking', 'projectDirectory', 'windowTitle', 'scopeAttributes', 
         'wrapColumn', 'softWrap']
     def __init__(self, name, properties):
-        # print(name)
-        self.name = selector = name
+        self.name = name
         self.properties = properties
-        if selector[0] in ("'", '"') and selector[0] == selector[-1]:
-            selector = selector[1:-1]
-        self.pattern = re.compile(fntranslate(selector))
-        self.selector = self.properties.manager.selectorFactory(selector)
+        value = self.name.strip()
+        if value[0] in ("'", '"') and value[0] == value[-1]:
+            value = value[1:-1]
+        self.pattern = re.compile(fntranslate(value))
+        self.selector = self.properties.manager.selectorFactory(value)
 
     def _remove_quotes(self, value):
         return value[1:-1] if value and value[0] in ("'", '"') and value[0] == value[-1] else value
@@ -192,7 +192,6 @@ class Properties(object):
             if (s.pattern and s.pattern.search(path)) or \
                 (s.selector and s.selector.does_match(context)):
                 settings.append(s)
-        print([s.name for s in settings])
         return ContextSettings(settings)
 
     def load(self, configs):
@@ -200,4 +199,4 @@ class Properties(object):
         sections = set()
         for parser in configs:
             sections.update(parser.sections())
-        self.settings = [ Settings(section.strip(), self) for section in sections ]
+        self.settings = [ Settings(section, self) for section in sections ]
