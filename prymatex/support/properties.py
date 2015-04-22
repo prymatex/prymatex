@@ -146,7 +146,7 @@ class ContextSettings(object):
     excludeFilesInBrowser = property(lambda self: self._merge("excludeFilesInBrowser", value_type='snippet'))
     excludeDirectoriesInBrowser = property(lambda self: self._merge("excludeDirectoriesInBrowser", value_type='snippet'))
     
-    include = property(lambda self: self._merge("include", value_type='snippet'))
+    include = property(lambda self: self._merge("include", default="*", value_type='snippet'))
     includeFiles = property(lambda self: self._merge("includeFiles", value_type='snippet'))
     includeDirectories = property(lambda self: self._merge("includeDirectories", value_type='snippet'))
     includeInBrowser = property(lambda self: self._merge("includeInBrowser", value_type='snippet'))

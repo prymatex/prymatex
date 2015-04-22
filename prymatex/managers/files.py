@@ -5,7 +5,6 @@ import os
 import codecs
 import shutil
 import mimetypes
-import fnmatch
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.extensions import CheckableMessageBox, ReplaceRenameInputDialog
@@ -20,6 +19,7 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.utils import osextra
 from prymatex.utils.decorators import deprecated
 from prymatex.utils import encoding
+from prymatex.utils import fnmatch
 
 class FileManager(PrymatexComponent, QtCore.QObject):
     #Signals
@@ -151,9 +151,6 @@ class FileManager(PrymatexComponent, QtCore.QObject):
         if os.path.exists(path):
             return path
     
-    def fnmatchany(self, filename, patterns):
-        return any([fnmatch.fnmatch(filename, pattern) for pattern in patterns])
-
     # ---------- Handling files for retrieving data. open, read, write, close
     def openFile(self, file_path):
         """Open and read a file, return the content.

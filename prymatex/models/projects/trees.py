@@ -226,36 +226,37 @@ class ProjectTreeProxyModel(QtCore.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = self.sourceModel().node(sIndex)
-        properties = self.sourceModel().propertiesSettings(node)
-        print(properties.exclude)
-        print(properties.excludeFiles)
-        print(properties.excludeDirectories)
-        print(properties.excludeInBrowser)
-        print(properties.excludeInFolderSearch)
-        print(properties.excludeInFileChooser)
-        print(properties.excludeFilesInBrowser)
-        print(properties.excludeDirectoriesInBrowser)
-        print(properties.include)
-        print(properties.includeFiles)
-        print(properties.includeDirectories)
-        print(properties.includeInBrowser)
-        print(properties.includeInFileChooser)
-        print(properties.includeFilesInBrowser)
-        print(properties.includeDirectoriesInBrowser)
-        print(properties.includeFilesInFileChooser)
-        print(properties.fileBrowserGlob)
-        print(properties.fileChooserGlob)
-    
-        if isinstance(node, ProjectTreeNode): return True
-        #TODO: Esto depende de alguna configuracion tambien
-        if node.isHidden(): return False
-        if node.isDirectory(): return True
         
-        regexp = self.filterRegExp()        
+        if isinstance(node, ProjectTreeNode): return True
+        regexp = self.filterRegExp()
         if not regexp.isEmpty():
             pattern = regexp.pattern()
-            match = self.fileManager.fnmatchany(node.path(), pattern.split(","))
-            return not match
+            return self.fileManager.fnmatch(node.path(), pattern)
+
+        properties = self.sourceModel().propertiesSettings(node)
+        # Orden
+        excludes = [
+            node.isDirectory() and "excludeDirectoriesInBrowser" or "excludeFilesInBrowser", 
+            "excludeInBrowser", 
+            node.isDirectory() and "excludeDirectories" or "excludeFiles", 
+            "exclude"
+        ]
+        includes = [
+            node.isDirectory() and "includeDirectoriesInBrowser" or "includeFilesInBrowser", 
+            "includeInBrowser", 
+            node.isDirectory() and "includeDirectories" or "includeFiles", 
+            "include"
+        ]
+        
+        for exclude in excludes:
+            pattern = getattr(properties, exclude)
+            if pattern and self.fileManager.fnmatch(node.nodeName(), pattern):
+                return False
+        
+        for include in includes:
+            pattern = getattr(properties, include)
+            if pattern and self.fileManager.fnmatch(node.nodeName(), pattern):
+                return True
         return True
 
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
