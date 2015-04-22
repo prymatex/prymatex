@@ -78,6 +78,9 @@ class ContextSettings(object):
                 return value
         return default
 
+    # TODO: el merge
+    _merge = _first
+        
     ### List of Settings
     ## I/O
     #* `binary` — If set for a file, file browser will open it with external program
@@ -134,27 +137,27 @@ class ContextSettings(object):
     # The default include key is * (so no hidden files, although see the default
     # .tm_properties which include .htaccess and .tm_properties). The default
     # exclude key is the empty string (nothing matches).
-    exclude = property(lambda self: self._first("exclude", value_type='snippet'))
-    excludeFiles = property(lambda self: self._first("excludeFiles", value_type='snippet'))
-    excludeDirectories = property(lambda self: self._first("excludeDirectories", value_type='snippet'))
-    excludeInBrowser = property(lambda self: self._first("excludeInBrowser", value_type='snippet'))
-    excludeInFolderSearch = property(lambda self: self._first("excludeInFolderSearch", value_type='snippet'))
-    excludeInFileChooser = property(lambda self: self._first("excludeInFileChooser", value_type='snippet'))
-    excludeFilesInBrowser = property(lambda self: self._first("excludeFilesInBrowser", value_type='snippet'))
-    excludeDirectoriesInBrowser = property(lambda self: self._first("excludeDirectoriesInBrowser", value_type='snippet'))
+    exclude = property(lambda self: self._merge("exclude", value_type='snippet'))
+    excludeFiles = property(lambda self: self._merge("excludeFiles", value_type='snippet'))
+    excludeDirectories = property(lambda self: self._merge("excludeDirectories", value_type='snippet'))
+    excludeInBrowser = property(lambda self: self._merge("excludeInBrowser", value_type='snippet'))
+    excludeInFolderSearch = property(lambda self: self._merge("excludeInFolderSearch", value_type='snippet'))
+    excludeInFileChooser = property(lambda self: self._merge("excludeInFileChooser", value_type='snippet'))
+    excludeFilesInBrowser = property(lambda self: self._merge("excludeFilesInBrowser", value_type='snippet'))
+    excludeDirectoriesInBrowser = property(lambda self: self._merge("excludeDirectoriesInBrowser", value_type='snippet'))
     
-    include = property(lambda self: self._first("include", value_type='snippet'))
-    includeFiles = property(lambda self: self._first("includeFiles", value_type='snippet'))
-    includeDirectories = property(lambda self: self._first("includeDirectories", value_type='snippet'))
-    includeInBrowser = property(lambda self: self._first("includeInBrowser", value_type='snippet'))
-    includeInFileChooser = property(lambda self: self._first("includeInFileChooser", value_type='snippet'))
-    includeFilesInBrowser = property(lambda self: self._first("includeFilesInBrowser", value_type='snippet'))
-    includeDirectoriesInBrowser = property(lambda self: self._first("includeDirectoriesInBrowser", value_type='snippet'))
-    includeFilesInFileChooser = property(lambda self: self._first("includeFilesInFileChooser", value_type='snippet'))
+    include = property(lambda self: self._merge("include", value_type='snippet'))
+    includeFiles = property(lambda self: self._merge("includeFiles", value_type='snippet'))
+    includeDirectories = property(lambda self: self._merge("includeDirectories", value_type='snippet'))
+    includeInBrowser = property(lambda self: self._merge("includeInBrowser", value_type='snippet'))
+    includeInFileChooser = property(lambda self: self._merge("includeInFileChooser", value_type='snippet'))
+    includeFilesInBrowser = property(lambda self: self._merge("includeFilesInBrowser", value_type='snippet'))
+    includeDirectoriesInBrowser = property(lambda self: self._merge("includeDirectoriesInBrowser", value_type='snippet'))
+    includeFilesInFileChooser = property(lambda self: self._merge("includeFilesInFileChooser", value_type='snippet'))
 
     ## File Browsing
-    fileBrowserGlob = property(lambda self: self._first("fileBrowserGlob", value_type='snippet'))
-    fileChooserGlob = property(lambda self: self._first("fileChooserGlob", value_type='snippet'))
+    fileBrowserGlob = property(lambda self: self._merge("fileBrowserGlob", value_type='snippet'))
+    fileChooserGlob = property(lambda self: self._merge("fileChooserGlob", value_type='snippet'))
 
     def shellVariables(self, environment):
         shellVariables = []
@@ -181,7 +184,7 @@ class Properties(object):
             elif s.selector and s.selector.does_match(context, rank):
                 settings.append((rank.pop(), s))
         settings.sort(key=lambda t: t[0], reverse=True)
-        print([(s[0], s[1].name, s[1].config.source.name) for s in settings])
+        # print([(s[0], s[1].name, s[1].config.source.name) for s in settings])
         return ContextSettings([s[1] for s in settings])
     
     def load(self, configs):

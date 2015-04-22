@@ -20,6 +20,7 @@ class ProjectTreeModel(AbstractTreeModel):
         super(ProjectTreeModel, self).__init__(parent=projectManager)
         self.projectManager = projectManager
         self.fileManager = projectManager.fileManager
+        self.supportManager = projectManager.supportManager
         self.fileSystemWatcher = QtCore.QFileSystemWatcher()
         self.fileSystemWatcher.directoryChanged.connect(self.refreshPath)
         self.fileSystemWatcher.fileChanged.connect(self.refreshPath)
@@ -59,6 +60,10 @@ class ProjectTreeModel(AbstractTreeModel):
                 if not go_ahead:
                     break
         return QtCore.QModelIndex()
+
+    # -------------- Get properties settings
+    def propertiesSettings(self, node):
+        return self.supportManager.getPropertiesSettings(node.path())
 
     # -------------- Custom load methods
     def _load_directory(self, node, index, notify=False):
@@ -221,6 +226,26 @@ class ProjectTreeProxyModel(QtCore.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = self.sourceModel().node(sIndex)
+        properties = self.sourceModel().propertiesSettings(node)
+        print(properties.exclude)
+        print(properties.excludeFiles)
+        print(properties.excludeDirectories)
+        print(properties.excludeInBrowser)
+        print(properties.excludeInFolderSearch)
+        print(properties.excludeInFileChooser)
+        print(properties.excludeFilesInBrowser)
+        print(properties.excludeDirectoriesInBrowser)
+        print(properties.include)
+        print(properties.includeFiles)
+        print(properties.includeDirectories)
+        print(properties.includeInBrowser)
+        print(properties.includeInFileChooser)
+        print(properties.includeFilesInBrowser)
+        print(properties.includeDirectoriesInBrowser)
+        print(properties.includeFilesInFileChooser)
+        print(properties.fileBrowserGlob)
+        print(properties.fileChooserGlob)
+    
         if isinstance(node, ProjectTreeNode): return True
         #TODO: Esto depende de alguna configuracion tambien
         if node.isHidden(): return False
