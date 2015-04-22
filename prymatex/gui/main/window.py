@@ -430,7 +430,7 @@ html_footer
         if file_path:
             editor.save(file_path)
 
-    def closeEditor(self, editor = None, cancel = False):
+    def closeEditor(self, editor=None, cancel=False):
         editor = editor or self.currentEditor()
         buttons = QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No
         if cancel:
