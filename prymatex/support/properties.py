@@ -9,78 +9,62 @@ from prymatex.qt import QtCore, QtGui
 from prymatex.utils.fnmatch import translate as fntranslate
 
 from . import regexp
+from . import scope
 
 class Settings(object):
     WELL_KNOWN_SETTINGS = ['binary', 'encoding', 'fileType', 'useBOM', 'softTabs',
         'lineEndings', 'theme', 'fontName', 'fontSize', 'showInvisibles', 'tabSize',
         'spellChecking', 'projectDirectory', 'windowTitle', 'scopeAttributes', 
         'wrapColumn', 'softWrap']
-    def __init__(self, name, properties):
+    def __init__(self, name, config):
         self.name = name
-        self.properties = properties
-        value = self.name.strip()
+        self.config = config
+        value = name.strip()
         if value[0] in ("'", '"') and value[0] == value[-1]:
             value = value[1:-1]
         self.pattern = re.compile(fntranslate(value))
-        self.selector = self.properties.manager.selectorFactory(value)
+        self.selector = scope.Selector(value)
 
     def _remove_quotes(self, value):
         return value[1:-1] if value and value[0] in ("'", '"') and value[0] == value[-1] else value
 
-    def sections(self):
-        for config in self.properties.configs:
-            section = self.name \
-                if self.name in config.sections() \
-                else 'DEFAULT'
-            yield config.source.name, config[section]
-
     def get_snippet(self, key, default=None):
         variables = { key: '' }
-        for directory, section in self.sections():
-            value = section.get(key, fallback=None)
-            if value is not None:
-                value = self._remove_quotes(value)
-                variables["CWD"] = directory
-                variables.update(dict(
-                    ((item[0], self._remove_quotes(item[1])) \
-                        for item in section.items() \
-                        if item[0] not in self.WELL_KNOWN_SETTINGS \
-                            and not item[0].isupper() \
-                            and item[0] != key)
-                ))
-                variables[key] = regexp.Snippet(value).substitute(variables)
+        value = self.config[self.name].get(key, fallback=default)
+        if value is not None:
+            value = self._remove_quotes(value)
+            variables["CWD"] = self.config.source.name
+            variables.update({ item[0]: self._remove_quotes(item[1]) \
+                    for item in self.config[self.name].items() \
+                    if item[0] not in self.WELL_KNOWN_SETTINGS \
+                        and not item[0].isupper() \
+                        and item[0] != key
+            })
+            variables[key] = regexp.Snippet(value).substitute(variables)
         return variables.get(key)
-        
+
     def get_str(self, key, default=None):
-        value = default
-        for directory, section in self.sections():
-            value = section.get(key, fallback=value)
-        return self._remove_quotes(value)
+        return self._remove_quotes(
+            self.config[self.name].get(key, fallback=default)
+        )
 
     def get_bool(self, key, default=None):
-        value = default
-        for directory, section in self.sections():
-            value = section.getboolean(key, fallback=value)
-        return value
+        return self.config[self.name].getboolean(key, fallback=default)
 
     def get_int(self, key, default=None):
-        value = default
-        for directory, section in self.sections():
-            value = section.getint(key, fallback=value)
-        return value
+        return self.config[self.name].getint(key, fallback=default)
 
     def get_variables(self, environment):
         variables = []
         env = environment.copy()
-        for directory, section in self.sections():
-            env["CWD"] = directory
-            variables.extend(
-                [ ( item[0], 
-                    regexp.Snippet(
-                        self._remove_quotes(item[1])
-                    ).substitute(env)) \
-                    for item in section.items() if item[0].isupper() ]
-            )
+        env["CWD"] = self.config.source.name
+        variables.extend(
+            [ ( item[0], 
+                regexp.Snippet(
+                    self._remove_quotes(item[1])
+                ).substitute(env)) \
+                for item in self.config[self.name].items() if item[0].isupper() ]
+        )
         return variables
 
 class ContextSettings(object):
@@ -189,14 +173,21 @@ class Properties(object):
     def buildSettings(self, path, context):
         settings = []
         for s in self.settings:
-            if (s.pattern and s.pattern.search(path)) or \
-                (s.selector and s.selector.does_match(context)):
-                settings.append(s)
-        return ContextSettings(settings)
-
+            rank = []
+            if s.name == "DEFAULT" and s.config.source.exists:
+                settings.append((0, s))
+            elif s.pattern and s.pattern.search(path):
+                settings.append((1, s))
+            elif s.selector and s.selector.does_match(context, rank):
+                settings.append((rank.pop(), s))
+        settings.sort(key=lambda t: t[0], reverse=True)
+        print([(s[0], s[1].name, s[1].config.source.name) for s in settings])
+        return ContextSettings([s[1] for s in settings])
+    
     def load(self, configs):
         self.configs = configs
-        sections = set()
-        for parser in configs:
-            sections.update(parser.sections())
-        self.settings = [ Settings(section, self) for section in sections ]
+        self.settings = []
+        for config in configs:
+            self.settings += [ 
+                Settings(section, config) for section in config.sections() + ["DEFAULT"] 
+            ]

@@ -888,7 +888,6 @@ class SupportBaseManager(object):
         )
 
     def updateProperties(self, directory):
-        remove = None
         # Buscar los parsers que este relacionado con el directorio
         parsers = self._configparsers[directory]
         # Filtrar el que cambio
@@ -897,18 +896,17 @@ class SupportBaseManager(object):
         parser.source = Source(directory, 
             os.path.join(directory, config.PMX_PROPERTIES_NAME)
         )
+        parser.clear()
         if parser.source.exists:
-            remove = directory
             parser.read(parser.source.path)
-        else:
-            remove = os.path.join(directory, config.PMX_PROPERTIES_NAME)
-            parser.clear()
+
         # Remove properties
         self._properties = {
             key: value for (key, value) in self._properties.items() \
             if not (directory == config.USER_HOME_PATH or key.startswith(directory))             
         }
-        return remove
+        return parser.source.exists and directory or \
+            os.path.join(directory, config.PMX_PROPERTIES_NAME)
 
     def loadProperties(self, directory):
         parsers = self._load_parsers(directory)
