@@ -416,9 +416,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
     # ------------------- Create components
     def createComponentInstance(self, componentClass, *args, **kwargs):
-        # ------------------- Build
-        buildedInstances = []
 
+        # ------------------- Build
         def buildComponentInstance(klass, *args, **kwargs):
             self.populateComponentClass(klass)
 
@@ -431,24 +430,23 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
                     continue
                 subComponent = buildComponentInstance(componentClass, parent=component)
                 component.addComponent(subComponent)
-            buildedInstances.append((component, args, kwargs))
             return component
 
         component = buildComponentInstance(componentClass, *args, **kwargs)
 
-        # ------------------- Configure Bottom-up
-        if self.settingsManager is not None:
-            for instance, args, kwargs in buildedInstances[::-1]:
+        # ------------------- Setup components Bottom-up
+        components = [ component ] + list(component.components())
+        for instance in components[::-1]:
+            # Settings
+            if self.settingsManager is not None:
                 self.settingsManager.registerConfigurableInstance(instance)
-
-        # ------------------- Initialize Top-down
-        for instance, args, kwargs in buildedInstances:
-            instance.initialize(*args, **kwargs)
+            # Initialize
+            instance.initialize()
             # Shortcuts
             for settings in instance.contributeToShortcuts():
                 create_shortcut(component, settings,
-                                sequence_handler=partial(self.registerShortcut,
-                                                         instance.__class__))
+                            sequence_handler=partial(self.registerShortcut,
+                                                     instance.__class__))
 
         # -------------------- Store
         self.component_instances.setdefault(componentClass, []).append(component)
@@ -456,7 +454,17 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         return component
 
     def deleteComponentInstance(self, component):
-        self.settingsManager.unregisterConfigurableInstance(component)
+        # ------------------- Remove
+        self.component_instances[component.__class__].remove(component)
+
+        # ------------------- Unsetup components Bottom-up
+        components = [ component ] + list(component.components())
+        for instance in components[::-1]:
+            if self.settingsManager is not None:
+                self.settingsManager.unregisterConfigurableInstance(instance)
+            instance.finalize()
+
+        # ------------------- Delete
         component.deleteLater()
 
     # ------------ Handle component classes
