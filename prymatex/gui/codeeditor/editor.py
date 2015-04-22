@@ -178,10 +178,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             editor.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
         )
         
-        self.syntaxChanged.connect(self._update_properties)
-        self.filePathChanged.connect(self._update_properties)
-        self.application().supportManager.propertiesChanged.connect(self._update_properties)
-
     def highlighter(self):
         return self.syntaxHighlighter
 
@@ -195,10 +191,19 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def initialize(self, **kwargs):
         super(CodeEditor, self).initialize(**kwargs)
         
+        # Update properties
+        self._update_properties()
+        self.syntaxChanged.connect(self._update_properties)
+        self.filePathChanged.connect(self._update_properties)
+        self.application().supportManager.propertiesChanged.connect(self._update_properties)
+
         # Get dialogs
         self.selectorDialog = self.window().findChild(QtWidgets.QDialog, "SelectorDialog")
         self.browserDock = self.window().findChild(QtWidgets.QDockWidget, "BrowserDock")
 
+    def finalize(self):
+        self.application().supportManager.propertiesChanged.disconnect(self._update_properties)
+        
     def _update_properties(self, *args, **kwargs):
         properties = self.propertiesSettings()
         if properties.lineEndings:
@@ -342,7 +347,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     def close(self):
         self.aboutToClose.emit()
-        self.application().supportManager.propertiesChanged.disconnect(self._update_properties)
         super(CodeEditor, self).close()
         self.closed.emit()
 
