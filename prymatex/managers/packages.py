@@ -33,16 +33,20 @@ class PluginDescriptor(object):
     title = ""
     description = ""
     icon = None
+    namespace = None
+    resources = None
 
     def __init__(self, application, entry):
         for key, value in entry.items():
             setattr(self, key, value)
         self.application = application
         self.modules = []
+        self.resources = application.resourceManager.get_provider(self.namespace and self.namespace.name)
+        self.icon = self.resources.get_icon(self.icon or ":/prymatex.png", ":/prymatex.png")
 
     def registerComponent(self, klass, base=PrymatexMainWindow, default=False):
-        if not hasattr(klass, "RESOURCES"):
-            setattr(klass, "RESOURCES", self.resources.names())
+        if self.namespace and not hasattr(klass, "RESOURCES"):
+            setattr(klass, "RESOURCES", self.namespace.name)
         klass._plugin = self
         klass.plugin = classmethod(lambda cls: cls._plugin)
         self.application.registerComponent(klass, base, default)
@@ -106,23 +110,7 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
         if os.path.exists(directory) and os.path.isdir(directory):
             self.namespaces[namespace.name] = directory
 
-    # ---------- Load plugins
-    def loadResources(self, directory, entry):
-        builtins = self.application().resourceManager.builtins()
-        #  TODO: Dependencias
-        share_path = os.path.join(directory, entry.get("share", config.PMX_SHARE_NAME))
-        if os.path.isdir(share_path):
-            self.application().addNamespace(entry["name"], share_path)
-            defaults = (entry["name"],) + builtins
-        entry["resources"] = self.application().resourceManager.get_provider(builtins)
-        if "icon" in entry:
-            entry["icon"] = entry["resources"].get_icon(entry.get("icon", ":/prymatex.png"))
-
-    def loadBundles(self, directory, entry):
-        bundles_path = os.path.join(directory, entry.get("bundles", config.PMX_BUNDLES_NAME))
-        if os.path.isdir(bundles_path):
-            print("Bundles en", bundles_path)
-            
+    # ---------- Load packages
     def _import_package(self, entry, name=None, directory=None):
         descriptor = PluginDescriptor(self.application(), entry)
         builtins.__plugin__ = descriptor
@@ -137,8 +125,9 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
         _id = entry.get("id")
         directory = entry.get("path")
         try:
-            self.loadResources(directory, entry)
-            self.loadBundles(directory, entry)
+            share_path = os.path.join(directory, entry.get("share", config.PMX_SHARE_NAME))
+            if os.path.isdir(share_path):
+                entry["namespace"] = self.application().addNamespace(entry["name"], share_path)
             self.packages[_id] = self._import_package(entry, directory=directory)
         except Exception as reason:
             # On exception remove entry
@@ -149,8 +138,7 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
     def loadCorePackage(self, module_name, _id):
         entry = {
             "id": _id,
-            "icon": self.application().resources().get_icon(':/prymatex.png'),
-            "resources": self.application().resources()
+            "icon": ':/prymatex.png'
         }
         try:
             self.packages[_id] = self._import_package(entry, name=module_name)

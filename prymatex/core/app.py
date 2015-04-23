@@ -35,7 +35,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
     # ---------------------- Settings
     SETTINGS = "global"
-    RESOURCES = (config.USR_NS_NAME, config.PMX_NS_NAME)
 
     @ConfigurableItem()
     def qt_style(self, styleName):

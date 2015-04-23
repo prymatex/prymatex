@@ -121,7 +121,7 @@ class ResourceProvider(object):
         return section
     
     # ------------- Get data
-    def get_image(self, index, fallback = None):
+    def get_image(self, index, fallback=None):
         fallback = fallback or QtGui.QPixmap()
         for res in self.resources:
             image = res.get_image(index)
