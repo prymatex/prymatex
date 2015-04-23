@@ -140,7 +140,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         from prymatex.managers.support import SupportManager
         from prymatex.managers.files import FileManager
         from prymatex.managers.projects import ProjectManager
-        #from prymatex.managers.coroutines import SchedulerManager
         from prymatex.managers.server import ServerManager
         
         # Build Application
@@ -161,7 +160,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         app.supportManager = app.createComponentInstance(SupportManager, parent=app) 
         app.fileManager = app.createComponentInstance(FileManager, parent=app)
         app.projectManager = app.createComponentInstance(ProjectManager, parent=app)
-        #app.schedulerManager = app.createComponentInstance(SchedulerManager, parent=app)
         app.serverManager = app.createComponentInstance(ServerManager, parent=app)
 
         # Add builtin Namespaces
