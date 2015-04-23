@@ -218,6 +218,10 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             anchor = self.cursorForPosition(anchor).position()
         cursor.setPosition(position)
         if anchor is not None:
+            if anchor < 0:
+                anchor = 0
+            elif anchor >= self.document().characterCount():
+                anchor = self.document().characterCount() - 1
             cursor.setPosition(anchor, QtGui.QTextCursor.KeepAnchor)
         return cursor
 
