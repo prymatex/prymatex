@@ -25,6 +25,7 @@ class ProjectTreeModel(AbstractTreeModel):
         self.fileSystemWatcher = QtCore.QFileSystemWatcher()
         self.fileSystemWatcher.directoryChanged.connect(self.refreshPath)
         self.fileSystemWatcher.fileChanged.connect(self.refreshPath)
+        self.supportManager.propertiesChanged.connect(self.refreshPath)
 
     def rowCount(self, parent):
         node = self.node(parent)
@@ -63,7 +64,6 @@ class ProjectTreeModel(AbstractTreeModel):
         return QtCore.QModelIndex()
 
     # -------------- Custom load methods
-    
     def _load_directory_names(self, node):
         properties = self.supportManager.getPropertiesSettings(node.path())
         names = glob.globdir(node.path(), properties.fileBrowserGlob)
