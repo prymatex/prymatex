@@ -17,13 +17,16 @@ Changes to original fnmatch module:
 - translate function supports ``*`` and ``**`` similarly to fnmatch C library
 """
 
-import os
 import re
 
-__all__ = ["fnmatch", "fnmatchcase", "translate"]
+__all__ = ["filter", "fnmatch", "fnmatchcase", "translate"]
 
 _cache = {}
+_MAXCACHE = 100
 
+def _purge():
+    """Clear the pattern cache"""
+    _cache.clear()
 
 def fnmatch(name, pat):
     """Test whether FILENAME matches PATTERN.
@@ -43,9 +46,36 @@ def fnmatch(name, pat):
     If you don't want this, use fnmatchcase(FILENAME, PATTERN).
     """
 
-    name = os.path.normcase(name).replace(os.sep, "/")
-    return fnmatchcase(name, pat)
+    import os
+    name = os.path.normcase(name)
+    patterns = [ os.path.normcase(pat) ]
+    if pat[0] == '{' and pat[-1] == '}':
+        patterns = [p for p in pat[1:-1].split(',') if p]
+    return any((fnmatchcase(name, pat) for pat in patterns))
 
+def filter(names, pat):
+    """Return the subset of the list NAMES that match PAT"""
+    import os, posixpath
+    result=[]
+    pat=os.path.normcase(pat)
+    try:
+        re_pat = _cache[pat]
+    except KeyError:
+        res = translate(pat)
+        if len(_cache) >= _MAXCACHE:
+            _purge()
+        _cache[pat] = re_pat = re.compile(res)
+    match = re_pat.search
+    if os.path is posixpath:
+        # normcase on posix is NOP. Optimize it away from the loop.
+        for name in names:
+            if match(name):
+                result.append(name)
+    else:
+        for name in names:
+            if match(os.path.normcase(name)):
+                result.append(name)
+    return result
 
 def fnmatchcase(name, pat):
     """Test whether FILENAME matches PATTERN, including case.
@@ -53,12 +83,15 @@ def fnmatchcase(name, pat):
     This is a version of fnmatch() which doesn't case-normalize
     its arguments.
     """
-
-    if not pat in _cache:
+    
+    try:
+        re_pat = _cache[pat]
+    except KeyError:
         res = translate(pat)
-        _cache[pat] = re.compile(res)
-    return _cache[pat].match(name) is not None
-
+        if len(_cache) >= _MAXCACHE:
+            _purge()
+        _cache[pat] = re_pat = re.compile(res)
+    return re_pat.search(name) is not None
 
 def translate(pat):
     """Translate a shell PATTERN to a regular expression.
@@ -68,59 +101,34 @@ def translate(pat):
 
     i, n = 0, len(pat)
     res = ''
-    escaped = False
     while i < n:
         c = pat[i]
-        i = i + 1
+        i = i+1
         if c == '*':
-            j = i
-            if j < n and pat[j] == '*':
-                res = res + '.*'
-            else:
-                res = res + '[^/]*'
+            res = res + '.*'
         elif c == '?':
             res = res + '.'
         elif c == '[':
             j = i
             if j < n and pat[j] == '!':
-                j = j + 1
+                j = j+1
             if j < n and pat[j] == ']':
-                j = j + 1
-            while j < n and (pat[j] != ']' or escaped):
-                escaped = pat[j] == '\\' and not escaped
-                j = j + 1
+                j = j+1
+            while j < n and pat[j] != ']':
+                j = j+1
             if j >= n:
                 res = res + '\\['
             else:
-                stuff = pat[i:j]
-                i = j + 1
+                stuff = pat[i:j].replace('\\','\\\\')
+                i = j+1
                 if stuff[0] == '!':
                     stuff = '^' + stuff[1:]
                 elif stuff[0] == '^':
                     stuff = '\\' + stuff
                 res = '%s[%s]' % (res, stuff)
-        elif c == '{':
-            j = i
-            groups = []
-            while j < n and pat[j] != '}':
-                k = j
-                while k < n and (pat[k] not in (',', '}') or escaped):
-                    escaped = pat[k] == '\\' and not escaped
-                    k = k + 1
-                group = pat[j:k]
-                for char in (',', '}', '\\'):
-                    group = group.replace('\\' + char, char)
-                groups.append(group)
-                j = k
-                if j < n and pat[j] == ',':
-                    j = j + 1
-                    if j < n and pat[j] == '}':
-                        groups.append('')
-            if j >= n or len(groups) < 2:
-                res = res + '\\{'
-            else:
-                res = '%s(%s)' % (res, '|'.join(map(re.escape, groups)))
-                i = j + 1
         else:
             res = res + re.escape(c)
     return res + '\Z(?ms)'
+
+if __name__ == '__main__':
+    print(fnmatch("/hola/mundo/pepe.py", "pepe.py"))
