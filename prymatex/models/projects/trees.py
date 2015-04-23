@@ -2,7 +2,6 @@
 #-*- encoding: utf-8 -*-
 import os
 import codecs
-import fnmatch
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 
@@ -11,6 +10,8 @@ from prymatex.models.trees import FlatTreeProxyModel
 from prymatex.models.configure import SortFilterConfigureProxyModel
 from prymatex.models.projects.nodes import (ProjectTreeNode, FileSystemTreeNode, SourceFolderTreeNode, NamespaceFolderTreeNode)
 
+from prymatex.utils import fnmatch
+from prymatex.utils import glob
 
 __all__ = [ 'ProjectTreeModel', 'ProjectTreeProxyModel', 'FileSystemProxyModel', 'ProjectMenuProxyModel' ]
 
@@ -61,13 +62,17 @@ class ProjectTreeModel(AbstractTreeModel):
                     break
         return QtCore.QModelIndex()
 
-    # -------------- Get properties settings
-    def propertiesSettings(self, node):
-        return self.supportManager.getPropertiesSettings(node.path())
-
     # -------------- Custom load methods
+    
+    def _load_directory_names(self, node):
+        properties = self.supportManager.getPropertiesSettings(node.path())
+        names = glob.globdir(node.path(), properties.fileBrowserGlob)
+        return [ name for name in names if properties.pathInBrowser(
+            os.path.join(node.path(), name)
+        )]
+             
     def _load_directory(self, node, index, notify=False):
-        names = self.fileManager.listDirectory(node.path())
+        names = self._load_directory_names(node)
         if notify: 
             self.beginInsertRows(index, 0, len(names) - 1)
         for name in names:
@@ -97,7 +102,7 @@ class ProjectTreeModel(AbstractTreeModel):
         self.fileSystemWatcher.addPath(node.path())
 
     def _update_directory(self, parent_node, parent_index, notify=False):
-        names = self.fileManager.listDirectory(parent_node.path())
+        names = self._load_directory_names(parent_node)
         addNames = [name for name in names if parent_node.findChildByName(name) is None]
         removeNodes = [node for node in parent_node.children() if node.nodeName() not in names]
                 
@@ -231,32 +236,7 @@ class ProjectTreeProxyModel(QtCore.QSortFilterProxyModel):
         regexp = self.filterRegExp()
         if not regexp.isEmpty():
             pattern = regexp.pattern()
-            return self.fileManager.fnmatch(node.path(), pattern)
-
-        properties = self.sourceModel().propertiesSettings(node)
-        # Orden
-        excludes = [
-            node.isDirectory() and "excludeDirectoriesInBrowser" or "excludeFilesInBrowser", 
-            "excludeInBrowser", 
-            node.isDirectory() and "excludeDirectories" or "excludeFiles", 
-            "exclude"
-        ]
-        includes = [
-            node.isDirectory() and "includeDirectoriesInBrowser" or "includeFilesInBrowser", 
-            "includeInBrowser", 
-            node.isDirectory() and "includeDirectories" or "includeFiles", 
-            "include"
-        ]
-        
-        for exclude in excludes:
-            pattern = getattr(properties, exclude)
-            if pattern and self.fileManager.fnmatch(node.nodeName(), pattern):
-                return False
-        
-        for include in includes:
-            pattern = getattr(properties, include)
-            if pattern and self.fileManager.fnmatch(node.nodeName(), pattern):
-                return True
+            return fnmatch.fnmatch(node.path(), pattern)
         return True
 
     def filterAcceptsColumn(self, sourceColumn, sourceParent):

@@ -215,7 +215,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             font = QtGui.QFont(properties.fontName)
         else:
             font = self.font()
-        print(properties.fontSize)
         if properties.fontSize:
             font.setPointSize(properties.fontSize)
         self.setFont(font)
@@ -241,14 +240,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             theme = self.application().supportManager.getBundleItem(properties.theme)
             if theme is not None:
                 self.insertBundleItem(theme)
-
-        # TODO: Probar esta linea extensa queno funciona al hacer la indentacion, hay que tomar la indentacion desde otr lugar o ver que pasa
-#        for p in ['exclude', 'excludeFiles', 'excludeDirectories', 'excludeInBrowser',
-#        'excludeInFolderSearch', 'excludeInFileChooser', 'excludeFilesInBrowser',
-#        'excludeDirectoriesInBrowser', 'include', 'includeFiles', 'includeDirectories',
-#        'includeInBrowser', 'includeInFileChooser', 'includeFilesInBrowser',
-#        'includeDirectoriesInBrowser', 'includeFilesInFileChooser']:
-#            print(p, getattr(properties, p))
 
     # -------------- Extra Cursors
     def clearExtraCursors(self):

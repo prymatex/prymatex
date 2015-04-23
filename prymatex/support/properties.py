@@ -6,7 +6,7 @@ import os
 import codecs
     
 from prymatex.qt import QtCore, QtGui
-from prymatex.utils.fnmatch import translate as fntranslate
+from prymatex.utils import fnmatch
 
 from . import regexp
 from . import scope
@@ -22,7 +22,7 @@ class Settings(object):
         value = name.strip()
         if value[0] in ("'", '"') and value[0] == value[-1]:
             value = value[1:-1]
-        self.pattern = re.compile(fntranslate(value))
+        self.pattern = value
         self.selector = scope.Selector(value)
 
     def _remove_quotes(self, value):
@@ -68,6 +68,21 @@ class Settings(object):
         return variables
 
 class ContextSettings(object):
+    BROWSER = {
+        'excludes': {
+            'files': [ "excludeFilesInBrowser", "excludeInBrowser", 
+                "excludeFiles", "exclude" ],
+            'directories': [ "excludeDirectoriesInBrowser", "excludeInBrowser",
+                "excludeDirectories", "exclude" ]
+        },
+        'includes': {
+            'files': [ "includeFilesInBrowser", "includeInBrowser",
+                "includeFiles", "include" ],
+            'directories': [ "includeDirectoriesInBrowser", "includeInBrowser",
+                "includeDirectories", "include" ]
+        }
+    }
+
     def __init__(self, settings):
         self.settings = settings
 
@@ -146,7 +161,7 @@ class ContextSettings(object):
     excludeFilesInBrowser = property(lambda self: self._merge("excludeFilesInBrowser", value_type='snippet'))
     excludeDirectoriesInBrowser = property(lambda self: self._merge("excludeDirectoriesInBrowser", value_type='snippet'))
     
-    include = property(lambda self: self._merge("include", default="*", value_type='snippet'))
+    include = property(lambda self: self._merge("include", value_type='snippet'))
     includeFiles = property(lambda self: self._merge("includeFiles", value_type='snippet'))
     includeDirectories = property(lambda self: self._merge("includeDirectories", value_type='snippet'))
     includeInBrowser = property(lambda self: self._merge("includeInBrowser", value_type='snippet'))
@@ -156,9 +171,25 @@ class ContextSettings(object):
     includeFilesInFileChooser = property(lambda self: self._merge("includeFilesInFileChooser", value_type='snippet'))
 
     ## File Browsing
-    fileBrowserGlob = property(lambda self: self._merge("fileBrowserGlob", value_type='snippet'))
-    fileChooserGlob = property(lambda self: self._merge("fileChooserGlob", value_type='snippet'))
+    fileBrowserGlob = property(lambda self: self._merge("fileBrowserGlob", default="*", value_type='snippet'))
+    fileChooserGlob = property(lambda self: self._merge("fileChooserGlob", default="*", value_type='snippet'))
 
+    def pathInBrowser(self, path):
+        key = os.path.isdir(path) and "directories" or "files"
+        excludes = [ pat for pat in 
+            [ getattr(self, exclude) for exclude in self.BROWSER['excludes'][key] ]
+            if pat is not None
+        ]
+        if any((fnmatch.fnmatch(path, pat) for pat in excludes)):
+            return False
+        includes = [ pat for pat in 
+            [ getattr(self, include) for include in self.BROWSER['includes'][key] ]
+            if pat is not None
+        ]
+        if any((fnmatch.fnmatch(path, pat) for pat in includes)):
+            return True
+        return True
+                
     def shellVariables(self, environment):
         shellVariables = []
         for settings in self.settings:
@@ -179,12 +210,12 @@ class Properties(object):
             rank = []
             if s.name == "DEFAULT" and s.config.source.exists:
                 settings.append((0, s))
-            elif s.pattern and s.pattern.search(path):
+            elif s.pattern and fnmatch.fnmatch(path, s.pattern):
                 settings.append((1, s))
             elif s.selector and s.selector.does_match(context, rank):
                 settings.append((rank.pop(), s))
         settings.sort(key=lambda t: t[0], reverse=True)
-        # print([(s[0], s[1].name, s[1].config.source.name) for s in settings])
+        #print([(s[0], s[1].name, s[1].config.source.name) for s in settings])
         return ContextSettings([s[1] for s in settings])
     
     def load(self, configs):
