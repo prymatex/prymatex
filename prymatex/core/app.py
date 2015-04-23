@@ -120,6 +120,14 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         elif args[0] == QtCore.QtSystemMsg:
             self.logger().debug("System: %s" % args[-1])
 
+    def initialize(self):
+        # Connect signals
+        self.fileManager.openFileChanged.connect(self.on_fileManager_openFileChanged)
+        self.applyOptions()
+
+    def finalize(self):
+        pass
+
     # ------- Prymatex's micro kernel
     @staticmethod
     def instance(*args, **kwargs):
@@ -156,16 +164,14 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         #app.schedulerManager = app.createComponentInstance(SchedulerManager, parent=app)
         app.serverManager = app.createComponentInstance(ServerManager, parent=app)
 
-        # Configure Application instance
-        app.settingsManager.registerConfigurableInstance(app)
-        
         # Add builtin Namespaces
         for name, path in config.NAMESPACES:
-            app.addNamespace(name, path)
+            app.addNamespace(name, path, builtin=True)
+        
+        # Configure Application instance
+        app.settingsManager.registerConfigurableInstance(app)
+        app.initialize()
 
-        # Connect signals
-        app.fileManager.openFileChanged.connect(app.on_fileManager_openFileChanged)
-        app.applyOptions()
         return app
 
     def applyOptions(self):
