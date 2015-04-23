@@ -86,7 +86,7 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
             loadLater = []
             for entry in loadLaterEntries:
                 if self.hasDependenciesResolved(entry):
-                    self.loadPlugin(entry)
+                    self.loadPackage(entry)
                 else:
                     loadLater.append(entry)
             if not loadLater or unsolvedCount == len(loadLater):
