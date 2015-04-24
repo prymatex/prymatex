@@ -28,11 +28,11 @@ from prymatex.utils.importlib import import_module, import_from_directory
 
 from prymatex.gui.main import PrymatexMainWindow
 
-class PluginDescriptor(object):
+class PackageDescriptor(object):
     name = ""
     title = ""
     description = ""
-    icon = None
+    icon = ":/prymatex.png"
     namespace = None
     resources = None
 
@@ -42,13 +42,15 @@ class PluginDescriptor(object):
         self.application = application
         self.modules = []
         self.resources = application.resourceManager.get_provider(self.namespace and self.namespace.name)
-        self.icon = self.resources.get_icon(self.icon or ":/prymatex.png", ":/prymatex.png")
+        self.icon = self.resources.get_icon(self.icon)
+        if self.icon.isNull():
+            self.icon = self.resources.get_icon(":/prymatex.png")
 
     def registerComponent(self, klass, base=PrymatexMainWindow, default=False):
         if self.namespace and not hasattr(klass, "RESOURCES"):
             setattr(klass, "RESOURCES", self.namespace.name)
-        klass._plugin = self
-        klass.plugin = classmethod(lambda cls: cls._plugin)
+        klass._package = self
+        klass.package = classmethod(lambda cls: cls._package)
         self.application.registerComponent(klass, base, default)
 
 class PackageManager(PrymatexComponent, QtCore.QObject):
@@ -66,18 +68,18 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
         loadLaterEntries = []
         for name, directory in self.namespaces.items():
             for name in os.listdir(directory):
-                plugin_path = os.path.join(directory, name)
-                plugin_descriptor_path = os.path.join(plugin_path, config.PMX_PACKAGE_DESCRIPTOR)
+                package_path = os.path.join(directory, name)
+                package_descriptor_path = os.path.join(package_path, config.PMX_PACKAGE_DESCRIPTOR)
                 entry = { "id": name }
-                if os.path.isfile(plugin_descriptor_path):
-                    with open(plugin_descriptor_path, 'r') as f:
+                if os.path.isfile(package_descriptor_path):
+                    with open(package_descriptor_path, 'r') as f:
                         entry.update(json.load(f))
 
                 # Package name
                 entry["name"] = name
 
                 # Load paths
-                entry["path"] = plugin_path
+                entry["path"] = package_path
 
                 if self.hasDependenciesResolved(entry):
                     self.loadPackage(entry)
@@ -98,7 +100,7 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
             else:
                 loadLaterEntries = loadLater
                 unsolvedCount = len(loadLaterEntries)
-        #Si me quedan plugins tendira que avisar o mostrar algo es que no se cumplieron todas las dependencias
+        #Si me quedan packages tendira que avisar o mostrar algo es que no se cumplieron todas las dependencias
 
     @classmethod
     def contributeToSettings(cls):
@@ -112,13 +114,13 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
 
     # ---------- Load packages
     def _import_package(self, entry, name=None, directory=None):
-        descriptor = PluginDescriptor(self.application(), entry)
-        builtins.__plugin__ = descriptor
+        descriptor = PackageDescriptor(self.application(), entry)
+        builtins.__prymatex__ = descriptor
         if directory:
             descriptor.modules.extend(import_from_directory(directory))
         elif name:
             descriptor.modules.append(import_module(name)) 
-        del(builtins.__plugin__)
+        del(builtins.__prymatex__)
         return descriptor
 
     def loadPackage(self, entry):
@@ -136,10 +138,7 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
             traceback.print_exc()
     
     def loadCorePackage(self, module_name, _id):
-        entry = {
-            "id": _id,
-            "icon": ':/prymatex.png'
-        }
+        entry = {"id": _id}
         try:
             self.packages[_id] = self._import_package(entry, name=module_name)
         except (ImportError, AttributeError) as reason:

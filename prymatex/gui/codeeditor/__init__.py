@@ -12,25 +12,25 @@ from .modes import (CodeEditorEditMode, CodeEditorMultiCursorMode,
     CodeEditorSnippetMode, CodeEditorComplitionMode)
 from .status import CodeEditorStatus
 
-__plugin__.registerComponent(CodeEditor, default=True)
-__plugin__.registerComponent(CodeEditorStatus)
-__plugin__.registerComponent(CodeEditorSymbolsDock)
-__plugin__.registerComponent(CodeEditorBookmarksDock)
+__prymatex__.registerComponent(CodeEditor, default=True)
+__prymatex__.registerComponent(CodeEditorStatus)
+__prymatex__.registerComponent(CodeEditorSymbolsDock)
+__prymatex__.registerComponent(CodeEditorBookmarksDock)
 
     # ---------------- Modes
-__plugin__.registerComponent(CodeEditorEditMode, CodeEditor) # First is default mode
-__plugin__.registerComponent(CodeEditorMultiCursorMode, CodeEditor)
-__plugin__.registerComponent(CodeEditorSnippetMode, CodeEditor)
-__plugin__.registerComponent(CodeEditorComplitionMode, CodeEditor)
+__prymatex__.registerComponent(CodeEditorEditMode, CodeEditor) # First is default mode
+__prymatex__.registerComponent(CodeEditorMultiCursorMode, CodeEditor)
+__prymatex__.registerComponent(CodeEditorSnippetMode, CodeEditor)
+__prymatex__.registerComponent(CodeEditorComplitionMode, CodeEditor)
 
-    # ---------------- Addons
-    #manager.registerComponent(SmartUnindentAddon, CodeEditor)
-    #manager.registerComponent(SpellCheckerAddon, CodeEditor)
-__plugin__.registerComponent(HighlightCurrentSelectionAddon, CodeEditor)
+# ---------------- Addons
+#__prymatex__.registerComponent(SmartUnindentAddon, CodeEditor)
+#__prymatex__.registerComponent(SpellCheckerAddon, CodeEditor)
+__prymatex__.registerComponent(HighlightCurrentSelectionAddon, CodeEditor)
 
     # ---------------- Sidebars
-__plugin__.registerComponent(MiniMapAddon, CodeEditor)
-__plugin__.registerComponent(BookmarkSideBarAddon, CodeEditor)
-__plugin__.registerComponent(LineNumberSideBarAddon, CodeEditor)
-__plugin__.registerComponent(FoldingSideBarAddon, CodeEditor)
-__plugin__.registerComponent(SelectionSideBarAddon, CodeEditor)
+__prymatex__.registerComponent(MiniMapAddon, CodeEditor)
+__prymatex__.registerComponent(BookmarkSideBarAddon, CodeEditor)
+__prymatex__.registerComponent(LineNumberSideBarAddon, CodeEditor)
+__prymatex__.registerComponent(FoldingSideBarAddon, CodeEditor)
+__prymatex__.registerComponent(SelectionSideBarAddon, CodeEditor)

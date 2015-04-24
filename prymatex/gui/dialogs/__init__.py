@@ -12,13 +12,13 @@ from .template import TemplateDialog
 from .properties import PropertiesDialog
 from .environment import EnvironmentDialog
 
-__plugin__.registerComponent(NewProjectDialog)
-__plugin__.registerComponent(AboutDialog)
-__plugin__.registerComponent(BundleFilterDialog)
-__plugin__.registerComponent(SelectorDialog)
-__plugin__.registerComponent(SettingsDialog)
-__plugin__.registerComponent(BundleEditorDialog)
-__plugin__.registerComponent(ProfileDialog)
-__plugin__.registerComponent(TemplateDialog)
-__plugin__.registerComponent(PropertiesDialog)
-__plugin__.registerComponent(EnvironmentDialog)
+__prymatex__.registerComponent(NewProjectDialog)
+__prymatex__.registerComponent(AboutDialog)
+__prymatex__.registerComponent(BundleFilterDialog)
+__prymatex__.registerComponent(SelectorDialog)
+__prymatex__.registerComponent(SettingsDialog)
+__prymatex__.registerComponent(BundleEditorDialog)
+__prymatex__.registerComponent(ProfileDialog)
+__prymatex__.registerComponent(TemplateDialog)
+__prymatex__.registerComponent(PropertiesDialog)
+__prymatex__.registerComponent(EnvironmentDialog)
