@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import os
-
 from prymatex.utils import settings
+from prymatex.utils import plist
 
 # --------------- Settings
 class TextMateSettings(settings.Settings):
-    pass
+    def write(self, path):
+        plist.writePlist(self, path)
+
+    @staticmethod
+    def get_data(path):
+        return plist.readPlist(path) or {}
 
 class PrymatexSettings(settings.Settings):
     def __init__(self, name, settings):

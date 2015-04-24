@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from . import json
+
 class Settings(dict):
     def __init__(self, name, settings):
         super(Settings, self).__init__(settings)
@@ -22,6 +24,10 @@ class Settings(dict):
         if name in self:
             del self[name]
 
+    def reload(self, attrs):
+        for name, value in attrs.items():
+            self.set(name, value)
+
     def has(self, name):
         return name in self.items
 
@@ -39,3 +45,9 @@ class Settings(dict):
         elif name in self._callbacks:
             del self._callbacks[name]
         
+    def write(self, path):
+        json.write_file(self, path)
+
+    @staticmethod
+    def get_data(path):
+        return json.read_file(path) or {}

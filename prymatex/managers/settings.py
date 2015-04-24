@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import os
 from prymatex.qt import QtCore
 
 from prymatex.core.components import PrymatexComponent 
@@ -8,7 +8,7 @@ from prymatex.core.settings import (TextMateSettings, PrymatexSettings,
                                     
 from prymatex.utils import text as textutils
 from prymatex.utils import json
-from prymatex.utils import plist
+from prymatex.utils import settings
 
 from prymatex.models.settings import SettingsTreeModel
 from prymatex.models.settings import SortFilterSettingsProxyModel
@@ -16,32 +16,48 @@ from prymatex.models.settings import SortFilterSettingsProxyModel
 class SettingsManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
         super(SettingsManager, self).__init__(**kwargs)
-        
-        # Textmate Settings
-        tm = plist.readPlist(self.profile().TM_PREFERENCES_PATH)
-        self.textmate_settings = TextMateSettings('tm', tm or {})
-
-        # Prymatex Settings
-        settings = json.read_file(self.profile().PMX_SETTINGS_PATH)
-        self.prymatex_settings = PrymatexSettings('settings', settings or {})
-        self.prymatex_settings.setTm(self.textmate_settings)
+        self.settings_files = {}
 
         # Settings Models
         self.settingsTreeModel = SettingsTreeModel(parent=self)
         self.sortFilterSettingsProxyModel = SortFilterSettingsProxyModel(parent=self)
         self.sortFilterSettingsProxyModel.setSourceModel(self.settingsTreeModel)
-                
+        
         self.application().aboutToQuit.connect(self.on_application_aboutToQuit)
+        
         # Reload settings
-        #notifier.watch(self.PMX_SETTINGS_PATH, notifier.CHANGED, self.reload_settings)
+        self.fileSystemWatcher = QtCore.QFileSystemWatcher()
+        self.fileSystemWatcher.fileChanged.connect(self.reload_settings)
 
+    def getSettings(self, path, klass=settings.Settings):
+        if path not in self.settings_files:
+            basename = os.path.basename(path)
+            data = klass.get_data(path) if os.path.exists(path) else {}
+            self.settings_files[path] = klass(basename, data)
+            self.fileSystemWatcher.addPath(path)
+        return self.settings_files[path]
+    
+    def initialize(self):
+        # Textmate Settings
+        self.textmate_settings = self.getSettings(
+            self.profile().TM_PREFERENCES_PATH,
+            TextMateSettings
+        )
+        
+        # Prymatex Settings
+        self.prymatex_settings = self.getSettings(
+            self.profile().PMX_SETTINGS_PATH,
+            PrymatexSettings
+        )
+        self.prymatex_settings.setTm(self.textmate_settings)
+        
     # ------------------- Signals
     def on_application_aboutToQuit(self):
-        # Save state
-        plist.writePlist(self.textmate_settings, self.profile().TM_PREFERENCES_PATH)
+        # Save textmate
+        self.textmate_settings.write(self.profile().TM_PREFERENCES_PATH)
         # Save settings
         self.prymatex_settings.purge()
-        json.write_file(self.prymatex_settings, self.profile().PMX_SETTINGS_PATH)
+        self.prymatex_settings.write(self.profile().PMX_SETTINGS_PATH)
 
         state = self.application().componentState()
         json.write_file(state, self.profile().PMX_STATE_PATH)
@@ -61,10 +77,10 @@ class SettingsManager(PrymatexComponent, QtCore.QObject):
             self.settingsTreeModel.addConfigNode(settings_widget)
 
     # ------------------------ Setting
-    def reload_settings(self, path, changes):
-        settings = json.read_file(path)
-        if settings:
-            self.prymatex_settings.reload(settings)
+    def reload_settings(self, path):
+        settings = self.getSettings(path)
+        data = settings.get_data(path) if os.path.exists(path) else {}
+        settings.reload(data)
         
     def settingsForClass(self, configurableClass):
         scope_name = getattr(configurableClass, 'SETTINGS',
