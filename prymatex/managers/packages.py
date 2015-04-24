@@ -113,15 +113,13 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
             self.namespaces[namespace.name] = directory
 
     # ---------- Load packages
-    def _import_package(self, entry, name=None, directory=None):
-        descriptor = PackageDescriptor(self.application(), entry)
+    def _import_package(self, descriptor, name=None, directory=None):
         builtins.__prymatex__ = descriptor
         if directory:
             descriptor.modules.extend(import_from_directory(directory))
         elif name:
             descriptor.modules.append(import_module(name)) 
         del(builtins.__prymatex__)
-        return descriptor
 
     def loadPackage(self, entry):
         _id = entry.get("id")
@@ -130,7 +128,8 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
             share_path = os.path.join(directory, entry.get("share", config.PMX_SHARE_NAME))
             if os.path.isdir(share_path):
                 entry["namespace"] = self.application().addNamespace(entry["name"], share_path)
-            self.packages[_id] = self._import_package(entry, directory=directory)
+            self.packages[_id] = PackageDescriptor(self.application(), entry)
+            self._import_package(self.packages[_id], directory=directory)
         except Exception as reason:
             # On exception remove entry
             if _id in self.packages:
@@ -140,7 +139,10 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
     def loadCorePackage(self, module_name, _id):
         entry = {"id": _id}
         try:
-            self.packages[_id] = self._import_package(entry, name=module_name)
+            self.packages[_id] = PackageDescriptor(self.application(), entry)
+            self._import_package(self.packages[_id], name=module_name)
+            # Core path
+            self.packages[_id].path = self.packages[_id].modules[0].__path__[0]
         except (ImportError, AttributeError) as reason:
             # On exception remove entry
             if _id in self.packages:
