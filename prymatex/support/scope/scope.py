@@ -139,7 +139,7 @@ class Scope(object):
         return Scope(n1)
     
     @staticmethod
-    def xml_difference(frm, to, open_string = "<", close_string = ">"):
+    def xml_difference(frm, to, open_string="<", close_string=">"):
         fromScopes, toScopes = [], []
         tmp = Scope(frm)
         while not tmp.empty():

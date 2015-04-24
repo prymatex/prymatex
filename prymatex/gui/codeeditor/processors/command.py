@@ -17,7 +17,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
         
     def _format_input(self, source, f):
         if f == "xml":
-            # TODO Terminar la salida en XML
+            # TODO Terminar la salida en XML, esta mal, hay que usar xml_difference de scope
             firstBlock, lastBlock = self.editor.selectionBlockStartEnd(self.inputWrapper)
             startIndex = self.inputWrapper.selectionStart() - firstBlock.position()
             endIndex = self.inputWrapper.selectionEnd() - lastBlock.position()
@@ -35,10 +35,10 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
                     ranges = userData.ranges()
                 lineXML = ""
                 start = ranges.pop(0)
-                token = userData.tokenAtPosition(start)
+                token = userData.tokenAt(start)
                 for index in ranges:
                     lineXML += token.scope.to_xml(line[start:index])
-                    token = userData.tokenAtPosition(index)
+                    token = userData.tokenAt(index)
                     start = index
                 result.append(lineXML)
                 if block == lastBlock:
@@ -69,10 +69,10 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
         self.inputWrapper.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
         return self._format_input(self._get_input(inputMode), inputFormat)
 
-    def scope(self, inputFormat = None, inputMode = None):
-        token = self.editor.tokenAtPosition(self.inputWrapper.position())
-        self.inputWrapper.setPosition(token.start)
-        self.inputWrapper.setPosition(token.end, QtGui.QTextCursor.KeepAnchor)
+    def scope(self, inputFormat=None, inputMode=None):
+        start, end = self.blockUserData(self.inputWrapper.block()).scopePosition(self.inputWrapper)
+        self.inputWrapper.setPosition(start)
+        self.inputWrapper.setPosition(end, QtGui.QTextCursor.KeepAnchor)
         return self._format_input(self._get_input(inputMode), inputFormat)
 
     def selectedText(self, inputFormat = None, inputMode = None):

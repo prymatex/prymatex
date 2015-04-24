@@ -1018,7 +1018,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.replaceMatch(match, "\t", QtGui.QTextDocument.FindFlags(), True)
 
     # -------------- Add select text functions
-    def selectEnclosingBrackets(self, cursor = None):
+    def selectEnclosingBrackets(self, cursor=None):
         cursor = cursor or self.textCursor()
         settings = self.preferenceSettings(cursor)
         flags = QtGui.QTextDocument.FindFlags()
@@ -1033,13 +1033,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 cursor.setPosition(closeCursor.selectionStart(), QtGui.QTextCursor.KeepAnchor)
                 self.setTextCursor(cursor)
 
-    def selectScope(self, cursor = None):
+    def selectScope(self, cursor=None):
         cursor = cursor or self.textCursor()
-        block = cursor.block()
-        token = self.tokenAt(cursor.position())
-        cursor = self.newCursorAtPosition(block.position() + token.start,
-            block.position() + token.end)
-        self.setTextCursor(cursor)
+        start, end = self.blockUserData(cursor.block()).scopePosition(cursor)
+        self.setTextCursor(self.newCursorAtPosition(start, end))
 
     # ---------- Bookmarks and gotos
     def toggleBookmark(self, cursor = None):

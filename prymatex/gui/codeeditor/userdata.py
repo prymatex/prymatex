@@ -32,9 +32,13 @@ class CodeEditorBlockUserData(QtGui.QTextBlockUserData):
         return self.text
 
     def syntaxScope(self, cursor):
-        left = cursor.position() - cursor.selectionStart() - 1
-        right = cursor.position() - cursor.selectionStart()
-        return (self.tokenAt(left).scope, self.tokenAt(right).scope)
+        position = cursor.positionInBlock()
+        return (self.tokenAt(position - 1).scope, self.tokenAt(position).scope)
 
+    def scopePosition(self, cursor):
+        block = cursor.block()
+        token = self.tokenAt(cursor.positionInBlock())
+        return (block.position() + token.start, block.position() + token.end)
+        
     def isEmpty(self):
         return self.state == -1
