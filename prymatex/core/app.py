@@ -374,44 +374,44 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
     # --------------------- Populate components
     def populateComponentClass(self, componentClass):
-        if hasattr(componentClass, '_application'):
+        if hasattr(componentClass, '__application'):
             return
 
         # ------- Application
-        componentClass._application = self
-        componentClass.application = classmethod(lambda cls: cls._application)
+        componentClass.__application = self
+        componentClass.application = classmethod(lambda cls: cls.__application)
 
         # ------- Logger
-        componentClass._logger = self.getLogger('.'.join([componentClass.__module__, componentClass.__name__]))
-        componentClass.logger = classmethod(lambda cls: cls._logger)
+        componentClass.__logger = self.getLogger('.'.join([componentClass.__module__, componentClass.__name__]))
+        componentClass.logger = classmethod(lambda cls: cls.__logger)
 
         # ------- Resources
-        componentClass._resources = None
+        componentClass.__resources = None
         def get_resources(app):
             def _get_resources(cls):
-                if cls._resources is None and app.resourceManager is not None:
-                    cls._resources = app.resourceManager.providerForClass(cls)
-                return cls._resources
+                if cls.__resources is None and app.resourceManager is not None:
+                    cls.__resources = app.resourceManager.providerForClass(cls)
+                return cls.__resources
             return _get_resources
         componentClass.resources = classmethod(get_resources(self))
 
         # ------- Profile
-        componentClass._profile = None
+        componentClass.__profile = None
         def get_profile(app):
             def _get_profile(cls):
-                if cls._profile is None and app.profileManager is not None:
-                    cls._profile = app.profileManager.profileForClass(cls)
-                return cls._profile
+                if cls.__profile is None and app.profileManager is not None:
+                    cls.__profile = app.profileManager.profileForClass(cls)
+                return cls.__profile
             return _get_profile
         componentClass.profile = classmethod(get_profile(self))
 
         # ------- Settings
-        componentClass._settings = None
+        componentClass.__settings = None
         def get_settings(app):
             def _get_settings(cls):
-                if cls._settings is None and app.settingsManager is not None:
-                    cls._settings = app.settingsManager.settingsForClass(cls)
-                return cls._settings
+                if cls.__settings is None and app.settingsManager is not None:
+                    cls.__settings = app.settingsManager.settingsForClass(cls)
+                return cls.__settings
             return _get_settings
         componentClass.settings = classmethod(get_settings(self))
         if self.settingsManager is not None:
