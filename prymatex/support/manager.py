@@ -16,6 +16,7 @@ except ImportError:
     import ConfigParser as configparser
 
 from prymatex.core import config
+from prymatex.core import source
 from prymatex.utils import plist, osextra, six
 from prymatex.utils import encoding
 from prymatex.utils.decorators import printtime, printparams
@@ -25,7 +26,6 @@ from .properties import Properties
 from . import bundleitem
 from . import scope
 from .staticfile import StaticFile
-from .source import Source
 from .process import RunningContext
 
 # ------- Tool function for compare bundle items by attributes
@@ -861,7 +861,7 @@ class SupportBaseManager(object):
     def _load_parser(self, directory):
         parser = configparser.ConfigParser()
         parser.optionxform = str
-        parser.source = Source(directory, 
+        parser.source = source.Source(directory, 
             os.path.join(directory, config.PMX_PROPERTIES_NAME)
         )
         if parser.source.exists:
@@ -893,7 +893,7 @@ class SupportBaseManager(object):
         # Filtrar el que cambio
         parser = [ parser for parser in parsers if parser.source.hasChanged() ].pop()
         # Reload parser
-        parser.source = Source(directory, 
+        parser.source = source.Source(directory, 
             os.path.join(directory, config.PMX_PROPERTIES_NAME)
         )
         parser.clear()

@@ -6,7 +6,7 @@ import glob
 from prymatex.support import scripts
 from prymatex.utils import six
 
-from .source import Source
+from prymatex.core import source
 
 class ManagedObject(object):
     PATTERNS = ()
@@ -51,7 +51,7 @@ class ManagedObject(object):
     # ------------ Object Sources
     def addSource(self, name, path):
         self.current_source = self.sources.setdefault(name, 
-            Source(name=name, path=path)
+            source.Source(name=name, path=path)
         )
 
     def removeSource(self, name):
