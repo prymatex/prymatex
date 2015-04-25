@@ -5,6 +5,7 @@ from prymatex.qt import QtCore
 from prymatex.core.components import PrymatexComponent 
 from prymatex.core.settings import (TextMateSettings, PrymatexSettings,
                                     ConfigurableItem, ConfigurableHook)
+from prymatex.core import source
                                     
 from prymatex.utils import text as textutils
 from prymatex.utils import json
@@ -16,7 +17,7 @@ from prymatex.models.settings import SortFilterSettingsProxyModel
 class SettingsManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
         super(SettingsManager, self).__init__(**kwargs)
-        self.settings_files = {}
+        self._settings = []
 
         # Settings Models
         self.settingsTreeModel = SettingsTreeModel(parent=self)
@@ -27,15 +28,36 @@ class SettingsManager(PrymatexComponent, QtCore.QObject):
         
         # Reload settings
         self.fileSystemWatcher = QtCore.QFileSystemWatcher()
-        self.fileSystemWatcher.fileChanged.connect(self.reload_settings)
+        self.fileSystemWatcher.fileChanged.connect(
+            self.on_fileSystemWatcher_pathChanged
+        )
+        self.fileSystemWatcher.directoryChanged.connect(
+            self.on_fileSystemWatcher_pathChanged
+        )
+
+    def on_fileSystemWatcher_pathChanged(self, path):
+        settings = [s for s in self._settings if s.source.name == path or s.source.path == path].pop()
+        if settings.source.hasChanged():
+            if settings.source.exists:
+                data = settings.get_data(settings.source.path)
+                settings.reload(data)
+            else:
+                settings.reload({})
+            settings.source = settings.source.newUpdatedTime()
 
     def getSettings(self, path, klass=settings.Settings):
-        if path not in self.settings_files:
-            basename = os.path.basename(path)
-            data = klass.get_data(path) if os.path.exists(path) else {}
-            self.settings_files[path] = klass(basename, data)
-            self.fileSystemWatcher.addPath(path)
-        return self.settings_files[path]
+        settings = [s for s in self._settings if s.source.name == path or s.source.path == path]
+        if settings:
+            return settings[0]
+        basename = os.path.basename(path)
+        directory = os.path.dirname(path)
+        _source = source.Source(directory, path)
+        data = klass.get_data(_source.path) if _source.exists else {}
+        settings = klass(basename, data)
+        settings.source = _source
+        self._settings.append(settings)
+        self.fileSystemWatcher.addPath(_source.exists and _source.path or _source.name)
+        return settings
     
     def initialize(self):
         # Textmate Settings
@@ -77,11 +99,6 @@ class SettingsManager(PrymatexComponent, QtCore.QObject):
             self.settingsTreeModel.addConfigNode(settings_widget)
 
     # ------------------------ Setting
-    def reload_settings(self, path):
-        settings = self.getSettings(path)
-        data = settings.get_data(path) if os.path.exists(path) else {}
-        settings.reload(data)
-        
     def settingsForClass(self, configurableClass):
         scope_name = getattr(configurableClass, 'SETTINGS',
             "_".join(textutils.camelcase_to_text(configurableClass.__name__).split())

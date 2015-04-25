@@ -22,6 +22,7 @@ class Source(namedtuple('Source', 'name path time')):
         time = self.exists and os.path.getmtime(self.path) or 0
         return self._replace(time=time)
 
+    # TODO Migrar a not property
     @property
     def exists(self):
         return os.path.exists(self.path)
