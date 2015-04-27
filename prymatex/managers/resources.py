@@ -41,9 +41,9 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
         res.update(load_stylesheets(namespace.path))
         self.prymatex_resources.insert(0, res)
 
-    def get_provider(self, resource_name=None, builtins=True):
-        resources = [res for res in self.prymatex_resources if res.name() == resource_name] if \
-            resource_name is not None else []  
+    def get_provider(self, names, builtins=True):
+        names = names if isinstance(names, (list, tuple)) else [ names ]  
+        resources = [res for res in self.prymatex_resources if res.name() in names]
         if builtins:
             resources = resources + self.builtins()
         resources.append(self.base)

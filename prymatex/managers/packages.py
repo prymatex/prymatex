@@ -32,35 +32,34 @@ class PackageDescriptor(object):
     name = ""
     title = ""
     description = ""
-    icon = ":/prymatex.png"
+    icon = None
     namespace = None
     resources = None
 
     def __init__(self, application, entry):
+        self.name = entry.get("name")
         self.application = application
-        self.resources = application.resources()
         self.depends = entry.pop('depends', [])
+        self.share = entry.pop('share', None)
+        if self.share:
+            self.namespace = application.addNamespace(self.name, self.share)
+        self._icon = entry.pop('icon', ":/prymatex.png")
         self._load = False
         self.modules = []
-        self._icon = entry.pop('icon', ":/prymatex.png")
-        self.icon = self.resources.get_icon(self._icon)
 
         # TODO: Controlar que no todo porque es un despelote
         for key, value in entry.items():
             setattr(self, key, value)
+
+    def loadResources(self, names):
+        self.resources = self.application.resourceManager.get_provider(names)
+        self.icon = self.resources.get_icon(self._icon)
 
     def load(self):
         return self._load
 
     def setLoad(self, _load):
         self._load = _load
-
-    def addShare(self, directory):
-        self.namespace = self.application.addNamespace(self.name, directory)
-        self.resources = self.application.resourceManager.get_provider(self.namespace)
-        icon = self.resources.get_icon(self._icon)
-        if not icon.isNull():
-            self.icon = icon
 
     def registerComponent(self, klass, base=PrymatexMainWindow, default=False):
         if self.namespace and not hasattr(klass, "RESOURCES"):
@@ -76,6 +75,16 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
 
         self.namespaces = {}
         self.packages = {}
+
+    @classmethod
+    def contributeToSettings(cls):
+        from prymatex.gui.settings.plugins import PluginsSettingsWidget
+        return [ PluginsSettingsWidget ]
+
+    def addNamespace(self, namespace, bultin=False):
+        directory=os.path.join(namespace.path, config.PMX_PACKAGES_NAME)
+        if os.path.exists(directory) and os.path.isdir(directory):
+            self.namespaces[namespace.name] = directory
 
     def loadPackages(self, message_handler):
         # Core packages
@@ -109,49 +118,45 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
                 entry["name"] = name
                 entry["directory"] = package_path
                 entry["core"] = False
+                share_path = os.path.join(package_path, entry.get("share", config.PMX_SHARE_NAME))
+                if os.path.isdir(share_path):
+                    entry["share"] = share_path
 
                 self.packages[entry.get('id', name)] = PackageDescriptor(self.application(), entry)
         # Cargar las que quedaron bloqueadas por dependencias hasta consumirlas
         # dependencias circulares? son ridiculas pero por lo menos detectarlas
         while any((not desc.load() for desc in self.packages.values())):
             for descriptor in list(self.packages.values()):
-                if not descriptor.load() and self.hasDependenciesResolved(descriptor):
-                    descriptor.setLoad(self.loadPackage(descriptor))
-                    if not descriptor.load():
+                # If not load and has all deps
+                if not descriptor.load() and \
+                    all((self.packages[dep].load() for dep in descriptor.depends)):
+                    try:
+                        self._import_package(descriptor)
+                        descriptor.setLoad(True)
+                    except Exception as reason:
+                        traceback.print_exc()
                         del self.packages[descriptor.id]
-                        #Tendira que avisar o mostrar algo es que no se cumplieron todas las dependencias
-
-    @classmethod
-    def contributeToSettings(cls):
-        from prymatex.gui.settings.plugins import PluginsSettingsWidget
-        return [ PluginsSettingsWidget ]
-
-    def addNamespace(self, namespace, bultin=False):
-        directory=os.path.join(namespace.path, config.PMX_PACKAGES_NAME)
-        if os.path.exists(directory) and os.path.isdir(directory):
-            self.namespaces[namespace.name] = directory
-
-    # ---------- Load packages
+    
+    # ---------- Import package
     def _import_package(self, descriptor):
         builtins.__prymatex__ = descriptor
         if descriptor.core:
             descriptor.modules.append(import_module(descriptor.name)) 
         else:
-            descriptor.modules.extend(import_from_directory(descriptor.directory))
-        del(builtins.__prymatex__)
+            # Collect deps
+            deps = self.collect_deps(descriptor)
+            paths = [dep.directory for dep in deps]
+            resources = [dep.namespace.name for dep in deps + [descriptor] if dep.namespace]
+            descriptor.loadResources(resources)
+            descriptor.modules.extend(import_from_directory(descriptor.directory, paths=paths))
 
-    def loadPackage(self, descriptor):
-        try:
-            share_path = os.path.join(descriptor.directory, config.PMX_SHARE_NAME)
-            if os.path.isdir(share_path):
-                descriptor.addShare(share_path)
-            self._import_package(descriptor)
-        except Exception as reason:
-            # On exception remove entry
-            traceback.print_exc()
-            return False
-        return True
+        del(builtins.__prymatex__)
         
-    def hasDependenciesResolved(self, descriptor):
-        return all((self.packages[dep].load() for dep in descriptor.depends))
-        
+    def collect_deps(self, descriptor):
+        def _collect_deps(descriptor):
+            deps = []
+            for dep in descriptor.depends:
+                deps.append(self.packages[dep])
+                deps.extend(_collect_deps(self.packages[dep]))
+            return deps
+        return _collect_deps(descriptor)

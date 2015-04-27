@@ -13,8 +13,6 @@ except ImportError as ex:
 _baseimport = builtins.__import__
 _dependencies = dict()
 _parent = None
-_path = None
-_paths = dict()
 
 def _import(name, globals=None, locals=None, fromlist=None, level=-1):
     # Track our current parent module.  This is used to find our current
@@ -34,9 +32,7 @@ def _import(name, globals=None, locals=None, fromlist=None, level=-1):
     if parent is not None and hasattr(m, '__file__'):
         l = _dependencies.setdefault(parent, [])
         l.append(m)
-    if _path is not None:
-        _paths[name] = _path
-
+    
     # Lastly, we always restore our global _parent pointer.
     _parent = parent
 
@@ -101,14 +97,8 @@ def reload_module(m):
     """Reload an existing module.
 
     Any known dependencies of the module will also be reloaded."""
-    path = _paths.get(m.__name__, None)
-    if path:
-        print(path)
-        sys.path.insert(1, path)
     _reload(m, set())
-    if path:
-        del sys.path[1]
-
+    
 def import_module(name, package=None):
     """Import a module.
 
@@ -141,11 +131,11 @@ def import_module(name, package=None):
 
     return sys.modules[name]
 
-def import_from_directory(directory):
+def import_from_directory(directory, paths=()):
     """Import a module from directory"""
-    global _directory
-    _directory = directory
-    sys.path.insert(1, directory)
+    paths = paths + [directory]
+    for path in paths:
+        sys.path.insert(1, path)
     modules = []
     for file_path in glob.glob(os.path.join(directory, "*.py")):
         try:
@@ -154,6 +144,6 @@ def import_from_directory(directory):
         except ImportError as reason:
             print(reason)
             modules.append(reason)
-    del sys.path[1]
-    _directory = None
+    for path in paths:
+        del sys.path[1]
     return modules
