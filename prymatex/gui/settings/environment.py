@@ -16,7 +16,6 @@ class VariablesSettingsWidget(SettingsTreeNode, MultiDictTableEditorWidget):
         super(VariablesSettingsWidget, self).loadSettings()
         self.setTitle("Variables")
         self.setIcon(self.application().resources().get_icon("settings-variables"))
-
         values = [ (value["variable"], value["value"], value["enabled"]) 
             for value in self.settings().get("shell_variables", [])]
         self.addTuples('user', values, editable=True, selectable=True)

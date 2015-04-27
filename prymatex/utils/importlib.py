@@ -4,6 +4,7 @@
 import os
 import sys
 import imp
+import glob
 try:
     import builtins
 except ImportError as ex:
@@ -12,6 +13,8 @@ except ImportError as ex:
 _baseimport = builtins.__import__
 _dependencies = dict()
 _parent = None
+_path = None
+_paths = dict()
 
 def _import(name, globals=None, locals=None, fromlist=None, level=-1):
     # Track our current parent module.  This is used to find our current
@@ -31,6 +34,8 @@ def _import(name, globals=None, locals=None, fromlist=None, level=-1):
     if parent is not None and hasattr(m, '__file__'):
         l = _dependencies.setdefault(parent, [])
         l.append(m)
+    if _path is not None:
+        _paths[name] = _path
 
     # Lastly, we always restore our global _parent pointer.
     _parent = parent
@@ -75,7 +80,6 @@ def _reload(m, visited):
     _parent = name
 
     # Perform the reload operation.
-    print(m)
     imp.reload(m)
 
     # Reset our parent pointer.
@@ -97,7 +101,13 @@ def reload_module(m):
     """Reload an existing module.
 
     Any known dependencies of the module will also be reloaded."""
+    path = _paths.get(m.__name__, None)
+    if path:
+        print(path)
+        sys.path.insert(1, path)
     _reload(m, set())
+    if path:
+        del sys.path[1]
 
 def import_module(name, package=None):
     """Import a module.
@@ -131,19 +141,19 @@ def import_module(name, package=None):
 
     return sys.modules[name]
 
-def import_from_directory(directory, name=None):
+def import_from_directory(directory):
     """Import a module from directory"""
+    global _directory
+    _directory = directory
     sys.path.insert(1, directory)
     modules = []
-    file_names = [name] if name is not None else os.listdir(directory)
-    for file_name in file_names:
+    for file_path in glob.glob(os.path.join(directory, "*.py")):
         try:
-            if os.path.isdir(os.path.join(directory, file_name)) and \
-                os.path.exists(os.path.join(directory, file_name, '__init__.py')):
-                modules.append(import_module(file_name, package="."))
-            elif file_name.endswith(".py"):
-                modules.append(import_module(file_name[:-3]))
+            file_name = os.path.splitext(os.path.basename(file_path))[0]
+            modules.append(import_module(file_name))
         except ImportError as reason:
+            print(reason)
             modules.append(reason)
     del sys.path[1]
-    return modules if name is None else modules[0]
+    _directory = None
+    return modules

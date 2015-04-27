@@ -143,7 +143,6 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
     def loadPackage(self, descriptor):
         try:
             share_path = os.path.join(descriptor.directory, config.PMX_SHARE_NAME)
-            print(share_path)
             if os.path.isdir(share_path):
                 descriptor.addShare(share_path)
             self._import_package(descriptor)
