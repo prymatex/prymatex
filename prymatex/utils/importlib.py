@@ -75,6 +75,7 @@ def _reload(m, visited):
     _parent = name
 
     # Perform the reload operation.
+    print(m)
     imp.reload(m)
 
     # Reset our parent pointer.
