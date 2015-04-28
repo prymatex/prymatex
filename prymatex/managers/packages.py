@@ -146,16 +146,18 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
             # Collect deps
             deps = self.collect_deps(descriptor)
             paths = [dep.directory for dep in deps]
-            resources = [dep.namespace.name for dep in deps + [descriptor] if dep.namespace]
+            resources = [dep.namespace.name for dep in [descriptor] + deps if dep.namespace]
             descriptor.loadResources(resources)
             descriptor.modules.extend(import_from_directory(descriptor.directory, paths=paths))
 
         del(builtins.__prymatex__)
         
-    def collect_deps(self, descriptor):
+    def collect_deps(self, descriptor, core=False):
         def _collect_deps(descriptor):
             deps = []
             for dep in descriptor.depends:
+                if not core and self.packages[dep].core:
+                    continue
                 deps.append(self.packages[dep])
                 deps.extend(_collect_deps(self.packages[dep]))
             return deps

@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
+import sys
 from . import json
 
 class Settings(dict):
     def __init__(self, name, settings):
-        super(Settings, self).__init__(settings)
+        super().__init__(settings)
         self._name = name
         # Callbacks
         self._callbacks = {}
@@ -16,9 +17,6 @@ class Settings(dict):
         self[name] = value
         for callback in self._callbacks.get(name, []):
             callback(value)
-
-    def get(self, name, default=None):
-        return super(Settings, self).get(name, default)
 
     def erase(self, name):
         if name in self:
