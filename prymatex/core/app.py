@@ -32,6 +32,11 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     """The application instance.
     There can't be two apps running simultaneously, since configuration issues may occur.
     The application loads the Support."""
+    # --------------------- Signals
+    windowCreated = QtCore.Signal(object)
+    aboutToWindowDelete = QtCore.Signal(object)
+    aboutToWindowChange = QtCore.Signal(object)
+    windowChanged = QtCore.Signal(object)
 
     # ---------------------- Settings
     SETTINGS = "global"
@@ -247,7 +252,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
             # Restore State
             self.settingsManager.restoreApplicationState()
-            window = self.currentWindow() or self.buildMainWindow(editor=True)
+            window = self.currentWindow()
+            if not window:
+                window = self.createMainWindow(editor=True)
             
             # Change messages handler
             def show_message(app):
@@ -361,7 +368,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
         # Restore open documents
         for windowState in componentState.get("windows", []):
-            window = self.buildMainWindow()
+            window = self.createMainWindow()
             window.setComponentState(windowState)
 
     # --------------------- Application events
@@ -530,19 +537,21 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     def mainWindows(self):
         return self._main_windows
 
-    def buildMainWindow(self, editor=False):
+    def createMainWindow(self, editor=False):
         """Creates the windows"""
         from prymatex.gui.main import PrymatexMainWindow
 
         window = self.createComponentInstance(PrymatexMainWindow)
+        self.windowCreated.emit(window)
         if editor:
             window.addEmptyEditor()
         self._main_windows.append(window)    
         return window
 
     def currentWindow(self):
-        # TODO Aca retornar la window actual
-        return self._main_windows and self._main_windows[0]
+        windows = self.mainWindows()
+        if windows:
+            return windows[0]
 
     def canBeHandled(self, filepath):
         # from prymatex.utils.pyqtdebug import ipdb_set_trace
