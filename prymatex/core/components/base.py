@@ -26,11 +26,11 @@ class PrymatexComponent(object):
     def commands(self):
         return self._commands
 
-    def addCommand(self, string, callback):
-        self._commands[string] = callback
+    def addCommand(self, string, command):
+        self._commands[string] = command
         
-    def runCommand(self, string, args=None):
-        self._commands[string](args)
+    def runCommand(self, string, *args, **kwargs):
+        self._commands[string].run(*args, **kwargs)
 
     @classmethod
     def contributeToSettings(cls):
@@ -67,6 +67,19 @@ class PrymatexComponent(object):
                 if componentName in componentState["components"]:
                     component.setComponentState(componentState["components"][componentName])
 
+class PrymatexCommand(object):
+    def run(self, edit, *args, **kwargs):
+        pass
+    
+    def is_enabled(self, *args, **kwargs):
+        pass
+        
+    def is_visible(self, *args, **kwargs):
+        pass
+
+    def description(self, *args, **kwargs):
+        pass
+        
 class PrymatexAddon(PrymatexComponent):
     def contributeToContextMenu(self, *args, **kwargs):
         return []

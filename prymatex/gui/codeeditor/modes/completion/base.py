@@ -22,8 +22,8 @@ class CodeEditorComplitionMode(CodeEditorBaseMode):
         self.registerModel(self.suggestionsCompletionModel)
 
         # Add new command to editor
-        self.editor.addCommand('auto_complete', self.__auto_complete)
-        self.editor.addCommand('hide_auto_complete', self.__hide_auto_complete)
+        #self.editor.addCommand('auto_complete', self.__auto_complete)
+        #self.editor.addCommand('hide_auto_complete', self.__hide_auto_complete)
     
     # Command
     def __auto_complete(self, args):
