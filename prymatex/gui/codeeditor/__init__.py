@@ -21,7 +21,7 @@ __prymatex__.registerComponent(CodeEditorBookmarksDock)
 __prymatex__.registerComponent(CodeEditorEditMode, CodeEditor) # First is default mode
 __prymatex__.registerComponent(CodeEditorMultiCursorMode, CodeEditor)
 __prymatex__.registerComponent(CodeEditorSnippetMode, CodeEditor)
-__prymatex__.registerComponent(CodeEditorComplitionMode, CodeEditor)
+#__prymatex__.registerComponent(CodeEditorComplitionMode, CodeEditor)
 
 # ---------------- Addons
 #__prymatex__.registerComponent(SmartUnindentAddon, CodeEditor)
