@@ -24,7 +24,7 @@ class HtmlItemDelegate(QtWidgets.QItemDelegate):
         self.document.setHtml(text)
         self.document.setTextWidth(option.rect.width() - option.decorationSize.width())
         
-        ctx = QtWidgets.QAbstractTextDocumentLayout.PaintContext()
+        ctx = QtGui.QAbstractTextDocumentLayout.PaintContext()
         painter.save()
         
         painter.translate(QtCore.QPoint(rect.left(), option.rect.top()))
@@ -87,7 +87,7 @@ class HtmlLinkItemDelegate(QtWidgets.QItemDelegate):
         
         painter.save()
         painter.translate(QtCore.QPoint(rect.left(), option.rect.top()))
-        ctx = QtWidgets.QAbstractTextDocumentLayout.PaintContext()
+        ctx = QtGui.QAbstractTextDocumentLayout.PaintContext()
         ctx.palette = option.palette
         doc.documentLayout().draw(painter, ctx)
         painter.restore()
