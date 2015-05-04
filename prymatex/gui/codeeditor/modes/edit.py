@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.qt import QtCore, QtGui
+from prymatex.qt import QtCore, QtGui, QtWidgets
+
+from prymatex.core import config
 
 from .base import CodeEditorBaseMode
 
@@ -20,6 +22,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__backspace_behavior)
         self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__delete_behavior)
         self.registerKeyPressHandler(QtCore.Qt.Key_Insert, self.__toggle_overwrite)
+        self.registerKeyPressHandler(QtCore.Qt.Key_Space, self.__run_completer)
 
     # ------------ Key press handlers
     def __insert_new_line(self, event):
@@ -179,3 +182,25 @@ class CodeEditorEditMode(CodeEditorBaseMode):
 
     def __toggle_overwrite(self, event):
         self.editor.setOverwriteMode(not self.editor.overwriteMode())
+
+    def __run_completer(self, event):
+        if event.modifiers() & QtCore.Qt.ControlModifier:
+            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
+            suggestions = set()
+            block = self.editor.document().begin()
+            # TODO: No usar la linea actual, quiza algo de niveles de anidamiento
+            while block.isValid():
+                user_data = self.editor.blockUserData(block)
+                all_words = map(lambda token: config.RE_WORD.findall(token.chunk),
+                    user_data.tokens[::-1])
+                for words in all_words:
+                    suggestions.update(words)
+                block = block.next()
+    
+            suggestions.update(self.editor.preferenceSettings().completions)
+            suggestions.discard(alreadyTyped)
+            suggestions = sorted(list(suggestions))
+            self.editor.completer.setCompletions(suggestions)
+            self.editor.completer.setCompletionPrefix(alreadyTyped)
+            self.editor.completer.complete(self.editor.cursorRect())
+            return True

@@ -61,17 +61,6 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         if self.completionMode() == QtWidgets.QCompleter.PopupCompletion:
             self.popup().hide()
 
-    def fixPopupView(self):
-        if self.completionMode() == QtWidgets.QCompleter.PopupCompletion:
-            self.popup().resizeColumnsToContents()
-            self.popup().resizeRowsToContents()
-            width = self.popup().verticalScrollBar().sizeHint().width()
-            for columnIndex in range(self.model().columnCount()):
-                width += self.popup().columnWidth(columnIndex)
-            self.popup().setMinimumWidth(width > 212 and width or 212)
-            height = self.popup().rowHeight(0) * self.completionCount()
-            self.popup().setMinimumHeight(height > 343 and 343 or height)
-
     def activatedCompletion(self, index):
         self.model().activatedCompletion(self.completionModel().mapToSource(index))
         
@@ -92,7 +81,10 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         QtWidgets.QCompleter.setCompletionPrefix(self, prefix)
     
     def complete(self, rect):
-        self.fixPopupView()
+        width = 0
+        for index in range(self.model().columnCount()):
+            width += self.popup().sizeHintForColumn(index)
+        rect.setWidth(width + self.popup().verticalScrollBar().sizeHint().width())
         super(CodeEditorCompleter, self).complete(rect)
 
     # ----------- Set or try to set model
