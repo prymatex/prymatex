@@ -21,6 +21,7 @@ from .sidebar import CodeEditorSideBar, SideBarWidgetMixin
 from .processors import (CodeEditorCommandProcessor, CodeEditorSnippetProcessor,
     CodeEditorMacroProcessor, CodeEditorSyntaxProcessor, CodeEditorThemeProcessor)
 from .modes import CodeEditorBaseMode
+from .completer import CodeEditorCompleter
 
 from .highlighter import CodeEditorSyntaxHighlighter
 from .models import (SymbolListModel, BookmarkListModel, FoldingListModel,
@@ -143,6 +144,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             CodeEditorThemeProcessor(self)
         ]
 
+        # Completer
+        self.completer = CodeEditorCompleter(self)
+        
         # Highlighter
         self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
 
@@ -643,6 +647,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.viewport().setPalette(palette)
         self.leftBar.setPalette(palette)
         self.rightBar.setPalette(palette)
+        self.completer.setPalette(palette)
         
         # Register selection textCharFormat
         # Register lineHighlight textCharFormat
@@ -770,6 +775,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
         super(CodeEditor, self).keyPressEvent(event)
+        if self.completer.popup().isVisible():
+            alreadyTyped, start, end = self.wordUnderCursor(direction="left", search=True)
+            self.completer.setCompletionPrefix(alreadyTyped)
+            self.completer.complete(self.cursorRect())
         self.keyPressed.emit(event)
 
     # OVERRIDE: TextEditWidget.mouseReleaseEvent(),
