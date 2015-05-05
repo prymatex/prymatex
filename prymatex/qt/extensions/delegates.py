@@ -12,7 +12,7 @@ class HtmlItemDelegate(QtWidgets.QItemDelegate):
     def drawDisplay(self, painter, option, rect, text):
         # Fix if not table
         text = "<table width='100%%'><tr><td>%s</td></tr></table>" % text
-        
+
         if option.state & QtWidgets.QStyle.State_Selected:
             background = option.palette.color(QtWidgets.QPalette.Active, QtWidgets.QPalette.Highlight)
             color = option.palette.color(QtWidgets.QPalette.Active, QtWidgets.QPalette.HighlightedText)
@@ -67,7 +67,7 @@ class HtmlLinkItemDelegate(QtWidgets.QItemDelegate):
         # we have to check if it is over the item too
         mouseOver = option.state & QtWidgets.QStyle.State_MouseOver \
             and rect.contains(self.parent().viewport() \
-                .mapFromGlobal(QtWidgets.QCursor.pos())) \
+                .mapFromGlobal(QtGui.QCursor.pos())) \
             and option.state & QtWidgets.QStyle.State_Enabled
 
         if mouseOver:

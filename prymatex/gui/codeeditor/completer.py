@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui, Qt, QtWidgets, API
-from prymatex.qt.extensions import HtmlItemDelegate
+from prymatex.qt.extensions import HtmlLinkItemDelegate
 
 from prymatex.core import config
 
@@ -48,7 +48,7 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         self.editor = editor
         self.__model = CompleterListModel(parent=editor)
         self.popup().setAlternatingRowColors(True)
-        self.popup().setItemDelegateForColumn(0, HtmlItemDelegate(self.popup()))
+        #self.popup().setItemDelegateForColumn(0, HtmlLinkItemDelegate(self.popup()))
         # Role
         self.setCompletionRole(QtCore.Qt.MatchRole)
         self.setWidget(self.editor)
