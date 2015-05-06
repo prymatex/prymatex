@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import re
 import os
+import sys
 import difflib
 
 from prymatex.qt import API
@@ -15,6 +16,151 @@ from prymatex.qt.helpers import textcursor_to_tuple
 from prymatex.core import config
 from functools import reduce
 
+class CompletionWidget(QtWidgets.QListWidget):
+    activated = QtCore.Signal(object)
+    highlighted = QtCore.Signal(object)
+    def __init__(self, textedit, parent):
+        super().__init__(parent)
+        self.setWindowFlags(QtCore.Qt.SubWindow | QtCore.Qt.FramelessWindowHint)
+        self.textedit = textedit
+        self.completion_list = None
+        self.case_sensitive = False
+        self.enter_select = None
+        self.hide()
+        self.itemActivated.connect(self.__item_activated)
+        self.currentRowChanged.connect(self.__item_highlighted)
+        self.setMinimumWidth(212)
+        self.setMinimumHeight(343)
+        self.setAlternatingRowColors(True)
+        
+    def complete(self, completion_list, completion_prefix=None, automatic=True):
+        if len(completion_list) == 1 and not automatic:
+            self.activated.emit(completion_list[0])
+        elif completion_list:
+            self.completion_list = completion_list
+            self.clear()
+            self.addItems(completion_list)
+            self.setCurrentRow(0)
+            
+            QtWidgets.QApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.show()
+            self.setFocus()
+            self.raise_()
+            
+            # Retrieving current screen height
+            desktop = QtWidgets.QApplication.desktop()
+            srect = desktop.availableGeometry(desktop.screenNumber(self))
+            screen_right = srect.right()
+            screen_bottom = srect.bottom()
+            
+            point = self.textedit.cursorRect().bottomRight()
+            offset = self.textedit.contentOffset()
+            point.setX(point.x() + offset.x())
+            point = self.textedit.mapToGlobal(point)
+    
+            # Computing completion widget and its parent right positions
+            comp_right = point.x() + self.width()
+            ancestor = self.parent()
+            if ancestor is None:
+                anc_right = screen_right
+            else:
+                anc_right = min([ancestor.x() + ancestor.width(), screen_right])
+            
+            # Moving completion widget to the left
+            # if there is not enough space to the right
+            if comp_right > anc_right:
+                point.setX(point.x() - self.width())
+            
+            # Computing completion widget and its parent bottom positions
+            comp_bottom = point.y() + self.height()
+            ancestor = self.parent()
+            if ancestor is None:
+                anc_bottom = screen_bottom
+            else:
+                anc_bottom = min([ancestor.y()+ancestor.height(), screen_bottom])
+            
+            # Moving completion widget above if there is not enough space below
+            x_position = point.x()
+            if comp_bottom > anc_bottom:
+                point = self.textedit.cursorRect().topRight()
+                point = self.textedit.mapToGlobal(point)
+                point.setX(x_position)
+                point.setY(point.y() - self.height())
+                
+            if ancestor is not None:
+                # Useful only if we set parent to 'ancestor' in __init__
+                point = ancestor.mapFromGlobal(point)
+            self.move(point)
+            
+            if completion_prefix:
+                # When initialized, if completion text is not empty, we need 
+                # to update the displayed list:
+                self.setCompletionPrefix(completion_prefix)
+        
+    def hide(self):
+        super().hide()
+        self.textedit.setFocus()
+        
+    def keyPressEvent(self, event):
+        text, key = event.text(), event.key()
+        alt = event.modifiers() & QtCore.Qt.AltModifier
+        shift = event.modifiers() & QtCore.Qt.ShiftModifier
+        ctrl = event.modifiers() & QtCore.Qt.ControlModifier
+        modifier = shift or ctrl or alt
+        if (key in (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter) and self.enter_select) \
+           or key == QtCore.Qt.Key_Tab:
+            self.__item_activated()
+        elif key in (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter,
+                     QtCore.Qt.Key_Left, QtCore.Qt.Key_Right) or text in ('.', ':'):
+            self.hide()
+            self.textedit.keyPressEvent(event)
+        elif key in (QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown,
+                     QtCore.Qt.Key_Home, QtCore.Qt.Key_End,
+                     QtCore.Qt.Key_CapsLock) and not modifier:
+            super().keyPressEvent(event)
+        elif len(text) or key == QtCore.Qt.Key_Backspace:
+            self.textedit.keyPressEvent(event)
+            alreadyTyped, start, end = self.textedit.wordUnderCursor(direction="left", search=True)
+            self.setCompletionPrefix(alreadyTyped)
+        elif modifier:
+            self.textedit.keyPressEvent(event)
+        else:
+            self.hide()
+            super().keyPressEvent(event)
+    
+    def setCompletionPrefix(self, completion_prefix):
+        if completion_prefix:
+            for row, completion in enumerate(self.completion_list):
+                if not self.case_sensitive:
+                    completion = completion.lower()
+                    completion_prefix = completion_prefix.lower()
+                if completion.startswith(completion_prefix):
+                    self.setCurrentRow(row)
+                    break
+            else:
+                self.hide()
+        else:
+            self.hide()
+    
+    def focusOutEvent(self, event):
+        event.ignore()
+        # Don't hide it on Mac when main window loses focus because
+        # keyboard input is lost
+        # Fixes Issue 1318
+        if sys.platform == "darwin":
+            if event.reason() != Qt.ActiveWindowFocusReason:
+                self.hide()
+        else:
+            self.hide()
+        
+    def __item_activated(self, item=None):
+        index = self.currentRow()
+        self.activated.emit(self.completion_list[index])
+        self.hide()
+
+    def __item_highlighted(self, index=None):
+        self.highlighted.emit(self.completion_list[index])
+        
 class TextEditWidget(QtWidgets.QPlainTextEdit):
     # ------------------ Constants
     EOL_CHARS = [ item[0] for item in text.EOLS ]
@@ -24,7 +170,9 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     
     # ------------------ Signals
     extraSelectionChanged = QtCore.Signal()
-
+    completionActivated = QtCore.Signal(object)
+    completionHighlighted = QtCore.Signal(object)
+    
     # ------------------ Find Flags
     FindBackward           = 1<<0
     FindCaseSensitive      = 1<<1
@@ -37,11 +185,26 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         self.__scopedExtraSelections = {}
         self.__textCharFormat = {}
 
+        # Completer
+        self.completer = CompletionWidget(self, self.parent())
+        self.completer.activated.connect(self.completionActivated.emit)
+        self.completer.highlighted.connect(self.completionHighlighted.emit)
+
         # Defaults
         self.eol_chars = os.linesep
         self.soft_tabs = False
         self.tab_size = 2
 
+    # OVERRIDE: QtWidgets.QPlainTextEdit.setPalette()
+    def setPalette(self, palette):
+        super().setPalette(palette)
+        self.completer.setPalette(palette)
+
+    # OVERRIDE: QtWidgets.QPlainTextEdit.setFont()
+    def setFont(self, font):
+        super().setFont(font)
+        self.completer.setFont(font)
+        
     #------ EOL characters
     def setEolChars(self, eol_chars):
         """Set widget end-of-line (EOL) characters from chars_or_text"""
@@ -114,8 +277,8 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
 
     # OVERRIDE: QPlainTextEdit.keyPressEvent()
     def keyPressEvent(self, event):
-        cursor = self.textCursor()
         if event.key() == QtCore.Qt.Key_Tab:
+            cursor = self.textCursor()
             if not cursor.hasSelection():
                 cursor.insertText(self.tabKeyBehavior())
             else:
@@ -124,7 +287,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             self.unindent()
         else:
             super(TextEditWidget, self).keyPressEvent(event)
-
+        
     # OVERRIDE: QPlainTextEdit.wheelEvent()
     def wheelEvent(self, event):
         if API == "pyqt5":

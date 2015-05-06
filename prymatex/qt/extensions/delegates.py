@@ -11,8 +11,6 @@ class HtmlItemDelegate(QtWidgets.QItemDelegate):
 
     def drawDisplay(self, painter, option, rect, text):
         # Fix if not table
-        text = "<table width='100%%'><tr><td>%s</td></tr></table>" % text
-
         if option.state & QtWidgets.QStyle.State_Selected:
             background = option.palette.color(QtWidgets.QPalette.Active, QtWidgets.QPalette.Highlight)
             color = option.palette.color(QtWidgets.QPalette.Active, QtWidgets.QPalette.HighlightedText)
@@ -21,15 +19,16 @@ class HtmlItemDelegate(QtWidgets.QItemDelegate):
         else:
             self.document.setDefaultStyleSheet("")
         
-        self.document.setHtml(text)
-        self.document.setTextWidth(option.rect.width() - option.decorationSize.width())
+        doc = self.document
+        doc.setDefaultFont(option.font)
+        doc.setHtml(text)
+        doc.setTextWidth(option.rect.width() - option.decorationSize.width())
         
-        ctx = QtGui.QAbstractTextDocumentLayout.PaintContext()
         painter.save()
-        
         painter.translate(QtCore.QPoint(rect.left(), option.rect.top()))
-        dl = self.document.documentLayout()
-        dl.draw(painter, ctx)
+        ctx = QtGui.QAbstractTextDocumentLayout.PaintContext()
+        ctx.palette = option.palette
+        doc.documentLayout().draw(painter, ctx)
         painter.restore()
 
     def sizeHint(self, option, index):

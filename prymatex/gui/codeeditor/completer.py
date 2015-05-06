@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui, Qt, QtWidgets, API
-from prymatex.qt.extensions import HtmlLinkItemDelegate
+from prymatex.qt.extensions import HtmlItemDelegate
 
 from prymatex.core import config
 
@@ -13,7 +13,7 @@ class CompleterListModel(QtCore.QAbstractListModel):
         """docstring for __init__"""
         super().__init__(*args, **kwargs)
         self.completions = []
-    
+
     def setCompletions(self, completions):
         self.modelAboutToBeReset.emit()
         self.completions = completions
@@ -33,7 +33,7 @@ class CompleterListModel(QtCore.QAbstractListModel):
             return None
         completion = self.completions[index.row()]
         if role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
-            return "<i>%s</i>" % completion
+            return completion
         elif role == QtCore.Qt.ToolTipRole:
             return completion
         elif role == QtCore.Qt.MatchRole:
@@ -48,7 +48,7 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
         self.editor = editor
         self.__model = CompleterListModel(parent=editor)
         self.popup().setAlternatingRowColors(True)
-        #self.popup().setItemDelegateForColumn(0, HtmlLinkItemDelegate(self.popup()))
+        #self.popup().setItemDelegateForColumn(0, HtmlItemDelegate(self.popup()))
         # Role
         self.setCompletionRole(QtCore.Qt.MatchRole)
         self.setWidget(self.editor)
@@ -66,3 +66,4 @@ class CodeEditorCompleter(QtWidgets.QCompleter):
             + self.popup().verticalScrollBar().sizeHint().width())
         super().complete(rect)
         self.popup().setCurrentIndex(self.completionModel().index(0,0))
+    

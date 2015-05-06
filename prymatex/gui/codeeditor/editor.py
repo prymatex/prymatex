@@ -11,6 +11,7 @@ from prymatex.qt import QtCore, QtGui, Qt, QtWidgets, API
 from prymatex.core import PrymatexEditor
 from prymatex.core import constants
 from prymatex.widgets.texteditor import TextEditWidget
+from prymatex.widgets.texteditor import CompletionWidget
 
 from prymatex.core.settings import ConfigurableItem
 from prymatex.qt.helpers import (extend_menu, keyevent_to_keysequence, keyevent_to_tuple)
@@ -21,7 +22,6 @@ from .sidebar import CodeEditorSideBar, SideBarWidgetMixin
 from .processors import (CodeEditorCommandProcessor, CodeEditorSnippetProcessor,
     CodeEditorMacroProcessor, CodeEditorSyntaxProcessor, CodeEditorThemeProcessor)
 from .modes import CodeEditorBaseMode
-from .completer import CodeEditorCompleter
 
 from .highlighter import CodeEditorSyntaxHighlighter
 from .models import (SymbolListModel, BookmarkListModel, FoldingListModel,
@@ -144,9 +144,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             CodeEditorThemeProcessor(self)
         ]
 
-        # Completer
-        self.completer = CodeEditorCompleter(self)
-        
         # Highlighter
         self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
 
@@ -775,10 +772,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
         super(CodeEditor, self).keyPressEvent(event)
-        if self.completer.popup().isVisible():
-            alreadyTyped, start, end = self.wordUnderCursor(direction="left", search=True)
-            self.completer.setCompletionPrefix(alreadyTyped)
-            self.completer.complete(self.cursorRect())
         self.keyPressed.emit(event)
 
     # OVERRIDE: TextEditWidget.mouseReleaseEvent(),

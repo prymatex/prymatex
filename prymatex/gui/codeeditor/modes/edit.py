@@ -200,7 +200,5 @@ class CodeEditorEditMode(CodeEditorBaseMode):
             suggestions.update(self.editor.preferenceSettings().completions)
             suggestions.discard(alreadyTyped)
             suggestions = sorted(list(suggestions))
-            self.editor.completer.setCompletions(suggestions)
-            self.editor.completer.setCompletionPrefix(alreadyTyped)
-            self.editor.completer.complete(self.editor.cursorRect())
+            self.editor.completer.complete(suggestions, completion_prefix=alreadyTyped)
             return True
