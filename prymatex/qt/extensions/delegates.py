@@ -12,9 +12,9 @@ class HtmlItemDelegate(QtWidgets.QItemDelegate):
     def drawDisplay(self, painter, option, rect, text):
         # Fix if not table
         if option.state & QtWidgets.QStyle.State_Selected:
-            background = option.palette.color(QtWidgets.QPalette.Active, QtWidgets.QPalette.Highlight)
-            color = option.palette.color(QtWidgets.QPalette.Active, QtWidgets.QPalette.HighlightedText)
-            self.document.setDefaultStyleSheet("""table { background-color: %s;
+            background = option.palette.color(QtGui.QPalette.Active, QtGui.QPalette.Highlight)
+            color = option.palette.color(QtGui.QPalette.Active, QtGui.QPalette.HighlightedText)
+            self.document.setDefaultStyleSheet("""{ background-color: %s;
                 color: %s; }""" % (background.name(), color.name()))
         else:
             self.document.setDefaultStyleSheet("")

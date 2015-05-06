@@ -9,6 +9,7 @@ import sys
 import difflib
 
 from prymatex.qt import API
+from prymatex.qt.extensions import HtmlItemDelegate
 from prymatex.utils import text
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
@@ -32,6 +33,7 @@ class CompletionWidget(QtWidgets.QListWidget):
         self.setMinimumWidth(212)
         self.setMinimumHeight(343)
         self.setAlternatingRowColors(True)
+        self.setItemDelegate(HtmlItemDelegate(self))
         
     def complete(self, completion_list, completion_prefix=None, automatic=True):
         if len(completion_list) == 1 and not automatic:
