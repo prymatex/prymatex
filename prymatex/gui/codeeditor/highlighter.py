@@ -29,8 +29,6 @@ class HighlighterThread(QtCore.QThread):
             self._indexes.add(index)
             self._texts[index] = text
             self._states[index] = (previous_state, previous_revision)
-            if not self.isRunning() and self._indexes:
-                self.start()
     
     def start(self):
         self._stopped = False
@@ -44,26 +42,26 @@ class HighlighterThread(QtCore.QThread):
         self.wait()
         
     def run(self):
-        while not self._stopped and self._indexes:
-            self._ready_indexes, self._indexes = sorted(self._indexes), set()
-            states, self._states = self._states.copy(), {}
-            texts, self._texts = self._texts.copy(), {}
-            for index in self._ready_indexes:
-                previous_state, previous_revision = states[index]
-                user_data = self._processor.textUserData(
-                    texts[index], previous_state, previous_revision
-                )
-                states[index + 1] = (user_data.state, user_data.revision)
-                self.ready.emit(index, user_data)
-            self.changed.emit(self._ready_indexes)
-        self._ready_indexes = set()
-        # self.terminate()
+        while not self._stopped:
+            if self._indexes:
+                self._ready_indexes, self._indexes = sorted(self._indexes), set()
+                states, self._states = self._states.copy(), {}
+                texts, self._texts = self._texts.copy(), {}
+                for index in self._ready_indexes:
+                    previous_state, previous_revision = states[index]
+                    user_data = self._processor.textUserData(
+                        texts[index], previous_state, previous_revision
+                    )
+                    states[index + 1] = (user_data.state, user_data.revision)
+                    self.ready.emit(index, user_data)
+                self.changed.emit(list(self._ready_indexes))
+                self._ready_indexes = set()
+            self.msleep(1)
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     changed = QtCore.Signal(list)        # On the highlight changed allways triggered
     aboutToChange = QtCore.Signal()  
     def __init__(self, editor):
-        self._stopped = True
         self.editor = editor
         super(CodeEditorSyntaxHighlighter, self).__init__(editor.document())
         self.syntaxProcessor = editor.findProcessor("syntax")
@@ -90,39 +88,36 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.rehighlightBlock(block.next())
     
     def stop(self):
-        if self.thread.isRunning():
-            self.thread.stop()
-        self._stopped = True
+        self.thread.stop()
 
     def start(self):
-        self._stopped = False
         self.aboutToChange.emit()
         self.rehighlight()
+        QtCore.QTimer.singleShot(0, self.thread.start)
     
     def highlightBlock(self, text):
-        if not self._stopped:
-            text = text + '\n'
-            user_data = self.currentBlockUserData() or self.syntaxProcessor.emptyUserData() 
-            previous_state = self.previousBlockState()
-            if user_data.revision == self.syntaxProcessor.textRevision(text, previous_state):
-                self.setCurrentBlockState(user_data.state)
-            else:
-                block = self.currentBlock()
-                if user_data.blockText() != text:
-                    # Mentir un poco con el formato
-                    pass
-                elif previous_state != self.currentBlockState():
-                    # Apurar el tramite de los proximos agregados
-                    self.setCurrentBlockState(-1)
-                previous_user_data = block.previous().userData() or self.syntaxProcessor.emptyUserData()
-                self.thread.addLine(
-                    block.blockNumber(),
-                    text,
-                    previous_state,
-                    previous_user_data.revision
-                )
+        text = text + '\n'
+        user_data = self.currentBlockUserData() or self.syntaxProcessor.emptyUserData() 
+        previous_state = self.previousBlockState()
+        if user_data.revision == self.syntaxProcessor.textRevision(text, previous_state):
+            self.setCurrentBlockState(user_data.state)
+        else:
+            block = self.currentBlock()
+            if user_data.blockText() != text:
+                # Mentir un poco con el formato
+                pass
+            elif previous_state != self.currentBlockState():
+                # Apurar el tramite de los proximos agregados
+                self.setCurrentBlockState(-1)
+            previous_user_data = block.previous().userData() or self.syntaxProcessor.emptyUserData()
+            self.thread.addLine(
+                block.blockNumber(),
+                text,
+                previous_state,
+                previous_user_data.revision
+            )
 
-            # ------ Formats
-            for token in user_data.tokens:
-                self.setFormat(token.start, token.end - token.start,
-                    self.themeProcessor.textCharFormat(token.scope))
+        # ------ Formats
+        for token in user_data.tokens:
+            self.setFormat(token.start, token.end - token.start,
+                self.themeProcessor.textCharFormat(token.scope))
