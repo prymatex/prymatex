@@ -37,9 +37,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     MAX_FOLD_LEVEL = 10
     
     # -------------------- Signals
-    activated = QtCore.Signal()
-    deactivated = QtCore.Signal()
-    
     aboutToSave = QtCore.Signal()
     saved = QtCore.Signal()
     aboutToClose = QtCore.Signal()
@@ -796,13 +793,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             TextEditWidget.mouseReleaseEvent(self, event)
 
     def focusInEvent(self, event):
-        super(CodeEditor, self).focusInEvent(event)
+        super().focusInEvent(event)
         self._update_position()
-        self.activated.emit()
-
-    def focusOutEvent(self, event):
-        super(CodeEditor, self).focusOutEvent(event)
-        self.deactivated.emit()
 
     # --------------- Key press pre and post
     def trySyntaxByText(self, cursor):

@@ -41,7 +41,7 @@ class MiniMapAddon(SideBarWidgetMixin, QtWidgets.QPlainTextEdit):
 
     def initialize(self, **kwargs):
         super(MiniMapAddon, self).initialize(**kwargs)
-        self.editor.syntaxHighlighter.changed.connect(self.on_syntaxHighlighter_changed)
+        self.editor.highlighter().blockHighlightChanged.connect(self.on_highlighter_blockHighlightChanged)
         self.editor.document().contentsChange.connect(self.on_document_contentsChange)
         self.editor.updateRequest.connect(self.update_visible_area)
         
@@ -72,23 +72,16 @@ selection-background-color: %s; }""" % (
         font.setPointSize(1.8)
         super(MiniMapAddon, self).setFont(font)
         
-    def _apply_aditional_formats(self, block, line_count):
+    def _apply_aditional_formats(self, block):
         position = block.position()
         length = 0
-        while block.isValid() and line_count:
-            miniBlock = self.document().findBlockByNumber(block.blockNumber())
-            miniBlock.layout().setAdditionalFormats(
-                block.layout().additionalFormats())
-            length += block.length()
-            block = block.next()
-            line_count -= 1
+        miniBlock = self.document().findBlockByNumber(block.blockNumber())
+        miniBlock.layout().setAdditionalFormats(
+            block.layout().additionalFormats())
+        self.document().markContentsDirty(position, block.length())
 
-        self.document().markContentsDirty(position, length)
-
-    def on_syntaxHighlighter_changed(self):
-        block = self.editor.document().begin()
-        line_count = self.editor.document().lineCount()
-        self._apply_aditional_formats(block, line_count)
+    def on_highlighter_blockHighlightChanged(self, block):
+        self._apply_aditional_formats(block)
         
     def on_document_contentsChange(self, position, charsRemoved, charsAdded):
         cursor = QtGui.QTextCursor(self.document())
@@ -99,7 +92,7 @@ selection-background-color: %s; }""" % (
         text = self.editor.document().toPlainText()[position: position + charsAdded]
         cursor.insertText(text)
         block = self.editor.document().findBlock(position)
-        self._apply_aditional_formats(block, len(text.split()))
+        self._apply_aditional_formats(block)
 
     def update_visible_area(self):
         if not self.slider.pressed:

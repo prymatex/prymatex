@@ -25,11 +25,8 @@ class FoldingListModel(QtCore.QAbstractListModel):
         self.folded = []
         
         #Connects
-        self.editor.highlighter().changed.connect(
-            self.on_highlighter_changed
-        )
-        self.editor.highlighter().aboutToChange.connect(
-            self.on_highlighter_aboutToChange
+        self.editor.highlighter().blockHighlightChanged.connect(
+            self.on_highlighter_blockHighlightChanged
         )
         # Images
         self.foldingellipsisImage = self.editor.resources().get_image(":/sidebar/folding-ellipsis.png")
@@ -56,22 +53,14 @@ class FoldingListModel(QtCore.QAbstractListModel):
             return self.foldingellipsisImage
 
     # --------------- Signals   
-    def on_highlighter_changed(self, indexes):
-        position = self.editor.document().findBlockByNumber(indexes[0]).position()
+    def on_highlighter_blockHighlightChanged(self, block):
         remove = [ folding_cursor 
             for folding_cursor in self.foldings \
-            if folding_cursor.position() == position ]
+            if folding_cursor.block() == block ]
         for folding_cursor in remove:
             self._remove_folding_cursor(folding_cursor)
-        for index in indexes:
-            block = self.editor.document().findBlockByNumber(index)
-            self._add_folding(block)
-
-    def on_highlighter_aboutToChange(self):
-        self.foldings = []
-        self.flags = []
-        self.layoutChanged.emit()
-        
+        self._add_folding(block)
+    
     def _add_folding(self, block):
         folding_cursor = self.editor.newCursorAtPosition(block.position())
         self.editor.preferenceSettings(folding_cursor).folding(block.text())
@@ -312,32 +301,22 @@ class SymbolListModel(QtCore.QAbstractListModel):
             ("meta", "variable"): editor.resources().get_icon("symbol-variable")
         }
         #Connects
-        self.editor.highlighter().changed.connect(
-            self.on_highlighter_changed
+        self.editor.highlighter().blockHighlightChanged.connect(
+            self.on_highlighter_blockHighlightChanged
         )
-        self.editor.highlighter().aboutToChange.connect(
-            self.on_highlighter_aboutToChange
-        )
-     
+        
     # --------------- Signals   
-    def on_highlighter_changed(self, indexes):
-        position = self.editor.document().findBlockByNumber(indexes[0]).position()
+    def on_highlighter_blockHighlightChanged(self, block):
         remove = [ symbol_cursor 
             for symbol_cursor in self.symbols \
-            if symbol_cursor.position() == position ]
+            if symbol_cursor.block() == block ]
         for symbol_cursor in remove:
             index = self.symbols.index(symbol_cursor)
             self.beginRemoveRows(QtCore.QModelIndex(), index, index)
             self.symbols.remove(symbol_cursor)
             self.endRemoveRows()
-        for index in indexes:
-            block = self.editor.document().findBlockByNumber(index)
-            self._add_symbol(block)
+        self._add_symbol(block)
 
-    def on_highlighter_aboutToChange(self):
-        self.symbols = []
-        self.layoutChanged.emit()
-    
     def _add_symbol(self, block):
         symbol_cursor = self.editor.newCursorAtPosition(block.position())
         settings = self.editor.preferenceSettings(symbol_cursor)

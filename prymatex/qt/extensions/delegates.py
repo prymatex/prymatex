@@ -32,10 +32,11 @@ class HtmlItemDelegate(QtWidgets.QItemDelegate):
         painter.restore()
 
     def sizeHint(self, option, index):
-        record = index.data()
-        self.document.setHtml(record)
-        self.document.setTextWidth(option.rect.width())
-        return QtCore.QSize(self.document.idealWidth(), self.document.size().height())
+        return super().sizeHint(option, index)
+        #record = index.data()
+        #self.document.setHtml(record)
+        #self.document.setTextWidth(option.rect.width())
+        #return QtCore.QSize(self.document.idealWidth(), self.document.size().height())
 
 class HtmlLinkItemDelegate(QtWidgets.QItemDelegate):
     linkActivated = QtCore.Signal(str)

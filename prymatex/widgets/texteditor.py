@@ -171,6 +171,9 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     CHARACTER = "#"
     
     # ------------------ Signals
+    activated = QtCore.Signal()
+    deactivated = QtCore.Signal()
+    
     extraSelectionChanged = QtCore.Signal()
     completionActivated = QtCore.Signal(object)
     completionHighlighted = QtCore.Signal(object)
@@ -206,7 +209,17 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     def setFont(self, font):
         super().setFont(font)
         self.completer.setFont(font)
-        
+    
+    # OVERRIDE: QtWidgets.QPlainTextEdit.focusInEvent()
+    def focusInEvent(self, event):
+        super().focusInEvent(event)
+        self.activated.emit()
+
+    # OVERRIDE: QtWidgets.QPlainTextEdit.focusOutEvent()
+    def focusOutEvent(self, event):
+        super().focusOutEvent(event)
+        self.deactivated.emit()
+
     #------ EOL characters
     def setEolChars(self, eol_chars):
         """Set widget end-of-line (EOL) characters from chars_or_text"""

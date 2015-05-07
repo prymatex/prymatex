@@ -59,8 +59,7 @@ class HighlighterThread(QtCore.QThread):
             self.msleep(1)
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
-    changed = QtCore.Signal(list)        # On the highlight changed allways triggered
-    aboutToChange = QtCore.Signal()  
+    blockHighlightChanged = QtCore.Signal(QtGui.QTextBlock)        # On the highlight changed allways triggered
     def __init__(self, editor):
         self.editor = editor
         super(CodeEditorSyntaxHighlighter, self).__init__(editor.document())
@@ -69,12 +68,16 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.editor.aboutToClose.connect(self.stop)
         self.thread = HighlighterThread(editor)
         self.thread.ready.connect(self.on_thread_ready)
-        #self.thread.changed.connect(self.on_thread_changed)
-        self.thread.changed.connect(self.changed.emit)
-
-    def on_thread_changed(self, changes):
-        print(changes[0], changes[-1], len(changes), changes[-1] - changes[0], self.syntaxProcessor.scope_name)
+        self.thread.changed.connect(self.on_thread_changed)
+        self.editor.activated.connect(self.start)
+        self.editor.deactivated.connect(self.stop)
         
+    def on_thread_changed(self, indexes):
+        for index in indexes:
+            self.blockHighlightChanged.emit(
+                self.document().findBlockByNumber(index)
+            )
+
     def on_thread_ready(self, index, user_data):
         block = self.document().findBlockByNumber(index)
         block.layout().setAdditionalFormats(
@@ -91,7 +94,6 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.thread.stop()
 
     def start(self):
-        self.aboutToChange.emit()
         self.rehighlight()
         QtCore.QTimer.singleShot(0, self.thread.start)
     
