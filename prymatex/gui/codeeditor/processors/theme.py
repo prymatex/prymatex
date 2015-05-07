@@ -14,6 +14,8 @@ class CodeEditorThemeProcessor(CodeEditorBaseProcessor, ThemeProcessorMixin):
         if self.bundleItem == bundleItem:
             return
 
+        self.editor.syntaxHighlighter.stop()
+
         # Get Wrapped Theme
         theme = self.editor.application().supportManager.getBundleItem(bundleItem.uuid)
 
@@ -25,6 +27,7 @@ class CodeEditorThemeProcessor(CodeEditorBaseProcessor, ThemeProcessorMixin):
 
         self.editor.setCurrentCharFormat(theme.textCharFormat())
         self.editor.setPalette(theme.palette())
+        self.editor.syntaxHighlighter.start()
         self.editor.syntaxHighlighter.rehighlight()
         self.editor.themeChanged.emit(theme)
 

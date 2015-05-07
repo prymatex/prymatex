@@ -57,6 +57,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.beginParse(syntax.scopeName)
         
         self.editor.syntaxHighlighter.start()
+        self.editor.syntaxHighlighter.rehighlight()
         self.editor.syntaxChanged.emit(syntax)
 
     def endExecution(self, bundleItem):

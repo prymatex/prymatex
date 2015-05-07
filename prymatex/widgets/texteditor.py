@@ -175,8 +175,10 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     deactivated = QtCore.Signal()
     
     extraSelectionChanged = QtCore.Signal()
+    
     completionActivated = QtCore.Signal(object)
     completionHighlighted = QtCore.Signal(object)
+    queryCompletions = QtCore.Signal()
     
     # ------------------ Find Flags
     FindBackward           = 1<<0
@@ -199,6 +201,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         self.eol_chars = os.linesep
         self.soft_tabs = False
         self.tab_size = 2
+        self.completion_auto = False
 
     # OVERRIDE: QtWidgets.QPlainTextEdit.setPalette()
     def setPalette(self, palette):
@@ -220,6 +223,10 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         super().focusOutEvent(event)
         self.deactivated.emit()
 
+    #------ Completion
+    def setCompletionAuto(self, auto):
+        self.completion_auto = auto
+        
     #------ EOL characters
     def setEolChars(self, eol_chars):
         """Set widget end-of-line (EOL) characters from chars_or_text"""

@@ -749,7 +749,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 painter.drawLine(rec.x(), rec.y(), rec.x(), rec.y() + characterHeight)
 
         painter.end()
-    
+
     # -------------- Event handling
     def keyPress_handlers(self, key):
         for mode in self.__modes[::-1]:
@@ -759,17 +759,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     def _handle_event(self, handlers, event):
         for handler in handlers:
             yield handler(event)
-                   
-    def event(self, event):
-        if event.type() == QtCore.QEvent.KeyPress and \
-                any(self._handle_event(self.keyPress_handlers(event.key()), event)):
-            return True
-        return super(CodeEditor, self).event(event)
-
+    
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
-        super(CodeEditor, self).keyPressEvent(event)
-        self.keyPressed.emit(event)
+        if not any(self._handle_event(self.keyPress_handlers(event.key()), event)):
+            super(CodeEditor, self).keyPressEvent(event)
+            self.keyPressed.emit(event)
 
     # OVERRIDE: TextEditWidget.mouseReleaseEvent(),
     def mouseReleaseEvent(self, event):
