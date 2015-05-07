@@ -14,18 +14,18 @@ class HighlighterThread(QtCore.QThread):
     changed = QtCore.Signal(list)
     def __init__(self, editor):
         super(HighlighterThread, self).__init__(editor)
+        self._processor = editor.findProcessor("syntax")
         self._indexes = set()
-        self._ready_indexes = set()
+        self._doing_indexes = set()
         self._texts = {}
         self._states = {}
-        self._processor = editor.findProcessor("syntax")
-        self._stopped = False
-    
+        self._stopped = True
+ 
     def __del__(self):
         self.wait()
 
     def addLine(self, index, text, previous_state, previous_revision):
-        if index not in self._ready_indexes:
+        if index not in self._doing_indexes:
             self._indexes.add(index)
             self._texts[index] = text
             self._states[index] = (previous_state, previous_revision)
@@ -35,27 +35,24 @@ class HighlighterThread(QtCore.QThread):
         super(HighlighterThread, self).start()
 
     def stop(self):
-        self._indexes = set()
-        self._texts = {}
-        self._states = {}
         self._stopped = True
         self.wait()
-        
+
     def run(self):
         while not self._stopped:
             if self._indexes:
-                self._ready_indexes, self._indexes = sorted(self._indexes), set()
-                states, self._states = self._states.copy(), {}
-                texts, self._texts = self._texts.copy(), {}
-                for index in self._ready_indexes:
+                self._doing_indexes, self._indexes = sorted(self._indexes), set()
+                states = self._states.copy()
+                print(self._doing_indexes)
+                for index in self._doing_indexes:
                     previous_state, previous_revision = states[index]
                     user_data = self._processor.textUserData(
-                        texts[index], previous_state, previous_revision
+                        self._texts[index], previous_state, previous_revision
                     )
-                    states[index + 1] = (user_data.state, user_data.revision)
+                    self._states[index + 1] = states[index + 1] = (user_data.state, user_data.revision)
                     self.ready.emit(index, user_data)
-                self.changed.emit(list(self._ready_indexes))
-                self._ready_indexes = set()
+                self._doing_indexes = set()
+                self.changed.emit(list(self._doing_indexes))
             self.msleep(1)
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
@@ -91,7 +88,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.rehighlightBlock(block.next())
     
     def stop(self):
-        self.thread.stop()
+        QtCore.QTimer.singleShot(0, self.thread.stop)
 
     def start(self):
         QtCore.QTimer.singleShot(0, self.thread.start)
