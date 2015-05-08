@@ -131,6 +131,11 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # Modes
         self.__modes = []
+        
+        # Command api
+        self.__command_history = []
+        self.__command_index = -1
+        self.__last_content = ""
 
         # Processors
         self.processors = [
@@ -165,6 +170,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # Document signals
         self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)
+        self.document().contentsChange.connect(self.on_document_contentsChange)
 
         # Editor signals
         self.updateRequest.connect(self.updateSideBars)
@@ -833,9 +839,40 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.ensureCursorVisible()
 
     # ------------ Command API
-    def commandHistory(self, index):
-        return self._command_history
-        
+    def commandHistory(self, index, modifying_only=None):
+        index = self.__command_index + index
+        if 0 <= index < len(self.__command_history):
+            return self.__command_history[index]
+        return (None, None, 0)
+
+    def on_document_contentsChange(self, position, charsRemoved, charsAdded):
+        text = self.toPlainText()
+        if charsRemoved and charsAdded:
+            self.__command_history.append(
+                ('replace', { 
+                    'characters': self.__last_content[position:position + charsRemoved],
+                    'by': text[position:position + charsAdded],
+                    'position': position
+                }, 0)
+            )
+        elif charsRemoved:
+            self.__command_history.append(
+                ('delete', { 
+                    'characters': self.__last_content[position:position + charsRemoved],
+                    'position': position
+                }, 0)
+            )
+        elif charsAdded:
+            self.__command_history.append(
+                ('insert', { 
+                    'characters': text[position:position + charsAdded],
+                    'position': position
+                }, 0)
+            )
+        self.__last_content = text
+        self.__command_index = len(self.__command_history) - 1
+        #print(self.__command_history[-1])
+
     # ------------ Bundle Items
     def findProcessor(self, nameType):
         for processor in self.processors:

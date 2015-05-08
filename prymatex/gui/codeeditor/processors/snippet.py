@@ -7,6 +7,13 @@ from .base import CodeEditorBaseProcessor
 from prymatex.support.processor import SnippetProcessorMixin
 
 class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin):
+    def __init__(self, editor):
+        CodeEditorBaseProcessor.__init__(self, editor)
+        self.__render = False
+        
+    def isRendering(self):
+        return self.__render
+        
     def configure(self, **kwargs):
         CodeEditorBaseProcessor.configure(self, **kwargs)
         self.snippetWrapper = QtGui.QTextCursor(self.textCursor)
@@ -81,7 +88,9 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         self.endExecution(self.bundleItem)
 
     def render(self):
+        self.__render = True
         self.bundleItem.render(self)
+        self.__render = False
 
     # ---------- Holder navigation
     def nextHolder(self):

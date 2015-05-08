@@ -21,46 +21,43 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         self.registerKeyPressHandler(QtCore.Qt.Key_Backtab, self.__snippet_navigation)
         self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__snippet_backspace)
         self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__snippet_delete)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__snippet_update)
+        #self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__snippet_update)
 
-    # ------------ Key press handlers
-    def __snippet_update(self, event):
+    def activate(self):
         cursor = self.editor.textCursor()
-        if not self.processor.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
-            self.processor.stop()
-        elif event.text():
-            holderStart, holderEnd = self.processor.currentPosition()
-            holderPositionBefore = cursor.selectionStart() - holderStart
-            positionBefore = cursor.selectionStart()
-            charactersBefore = cursor.document().characterCount()
-            self.editor.keyPressEvent(event)
+        self.cursor_position_before = cursor.selectionStart()
+        self.document_characters_before = cursor.document().characterCount()
+        self.editor.textChanged.connect(self.on_editor_textChanged)
+        super().activate()
+        
+    def deactivate(self):
+        self.editor.textChanged.disconnect(self.on_editor_textChanged)
+        super().deactivate()
 
-            positionAfter = cursor.position()
-            charactersAfter = cursor.document().characterCount()
-            length = charactersBefore - charactersAfter 
-            
-            # Capture Text
-            cursor.setPosition(holderStart)
-            cursor.setPosition(holderEnd - length, QtGui.QTextCursor.KeepAnchor)
+    def on_editor_textChanged(self):
+        if self.processor.isRendering():
+            return 
+        command, args, _ = self.editor.commandHistory(0)
+        if not self.processor.setHolder(args['position'], args['position']):
+            self.processor.stop()
+        elif command == 'insert':
+            holderStart, holderEnd = self.processor.currentPosition()
+            holder_position = args['position'] - holderStart + len(args['characters'])
+            cursor = self.editor.newCursorAtPosition(holderStart, holderEnd + len(args['characters']))
             selectedText = self.editor.selectedTextWithEol(cursor)
-            cursor.removeSelectedText()
-            
             # Update holder
             self.processor.setHolderContent(selectedText)
     
             # Render
             self.processor.render()
             
-            if selectedText:
-                newHolderStart, _ = self.processor.currentPosition()
-                self.editor.setTextCursor(
-                    self.editor.newCursorAtPosition(
-                        newHolderStart + holderPositionBefore + (positionAfter - positionBefore)
-                    )
+            newHolderStart, _ = self.processor.currentPosition()
+            self.editor.setTextCursor(
+                self.editor.newCursorAtPosition(
+                    newHolderStart + holder_position
                 )
-            return True
-        return False
-    
+            )
+
     def __snippet_end(self, event):
         self.processor.stop()
         return True

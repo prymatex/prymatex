@@ -43,7 +43,6 @@ class HighlighterThread(QtCore.QThread):
             if self._indexes:
                 self._doing_indexes, self._indexes = sorted(self._indexes), set()
                 states = self._states.copy()
-                print(self._doing_indexes)
                 for index in self._doing_indexes:
                     previous_state, previous_revision = states[index]
                     user_data = self._processor.textUserData(
