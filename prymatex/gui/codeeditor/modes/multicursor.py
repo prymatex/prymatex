@@ -51,15 +51,27 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
 
         # ------------ Handlers
         self.registerKeyPressHandler(QtCore.Qt.Key_Escape, self.__multicursor_end)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__cursors_update)
+        #self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__cursors_update)
 
     def activate(self):
-        CodeEditorBaseMode.activate(self)
+        self.editor.commandAdded.connect(self.on_editor_commandAdded)
         self.editor.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
+        super().activate()
 
     def deactivate(self):
+        self.editor.commandAdded.disconnect(self.on_editor_commandAdded)
         self.editor.viewport().setCursor(self.standardCursor)
-        CodeEditorBaseMode.deactivate(self)
+        super().deactivate()
+
+    def on_editor_commandAdded(self):
+        command, args, _ = self.editor.commandHistory(0, True)
+        if command in ("insert", "replace"):
+            text = args[command == "insert" and "characters" or "by"]
+            new_cursors = [ ]
+            for cursor in self.cursors():
+                cursor.insertText(text)
+                new_cursors.append(cursor)
+            self.setCursors(_build_cursors(self.editor, _build_set(new_cursors)))
 
     def on_editor_cursorPositionChanged(self):
         # Test and switch state
@@ -86,25 +98,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.editor.clearExtraCursors()
         return True
     
-    def __cursors_update(self, event):
-        # TODO Separar lo que sea insertar texto de los shortcuts
-        if event.text():
-            new_cursors = [ ]
-            for cursor in self.cursors():
-                cursor.insertText(event.text())
-                new_cursors.append(cursor)
-            self.setCursors(_build_cursors(self.editor, _build_set(new_cursors)))
-            return True
-        new_cursors = [ ]
-        for cursor in self.cursors():
-            self.editor.setTextCursor(cursor)
-            self.editor.keyPressEvent(event)
-            new_cursors.append(cursor)
-            new_cursors.append(self.editor.textCursor())
-        self.setCursors(_build_cursors(self.editor, _build_set(new_cursors)))
-        return True
-
-    # ------- Handle events
+    # ------- Handle Mouse events
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.MouseButtonRelease and \
             (self.isActive() or event.modifiers() & QtCore.Qt.ControlModifier):

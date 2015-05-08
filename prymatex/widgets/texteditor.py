@@ -703,18 +703,14 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         sequenceMatcher = difflib.SequenceMatcher(None, sourceText, text)
         opcodes = sequenceMatcher.get_opcodes()
 
+        # Frozen cursors
         actions = [perform_action(
                 code[0],
                 self.newCursorAtPosition(code[1] + sourceOffset, code[2] + sourceOffset), text[code[3]:code[4]]
             ) for code in opcodes]
-
-        cursor = self.textCursor()
-
-        cursor.beginEditBlock()
-        list(map(lambda action: action(), actions))
-        cursor.endEditBlock()
-
-        self.ensureCursorVisible()
+        # Doit
+        for action in actions:
+            action()
 
     #------ Text Zoom
     def zoomIn(self):

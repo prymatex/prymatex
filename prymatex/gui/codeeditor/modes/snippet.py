@@ -24,39 +24,46 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         #self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__snippet_update)
 
     def activate(self):
-        cursor = self.editor.textCursor()
-        self.cursor_position_before = cursor.selectionStart()
-        self.document_characters_before = cursor.document().characterCount()
-        self.editor.textChanged.connect(self.on_editor_textChanged)
+        self.editor.commandAdded.connect(self.on_editor_commandAdded)
         super().activate()
         
     def deactivate(self):
-        self.editor.textChanged.disconnect(self.on_editor_textChanged)
+        self.editor.commandAdded.disconnect(self.on_editor_commandAdded)
         super().deactivate()
 
-    def on_editor_textChanged(self):
+    def on_editor_commandAdded(self):
         if self.processor.isRendering():
-            return 
-        command, args, _ = self.editor.commandHistory(0)
+            return
+        command, args, _ = self.editor.commandHistory(0, True)
         if not self.processor.setHolder(args['position'], args['position']):
             self.processor.stop()
-        elif command == 'insert':
-            holderStart, holderEnd = self.processor.currentPosition()
-            holder_position = args['position'] - holderStart + len(args['characters'])
-            cursor = self.editor.newCursorAtPosition(holderStart, holderEnd + len(args['characters']))
-            selectedText = self.editor.selectedTextWithEol(cursor)
-            # Update holder
-            self.processor.setHolderContent(selectedText)
-    
-            # Render
-            self.processor.render()
-            
-            newHolderStart, _ = self.processor.currentPosition()
-            self.editor.setTextCursor(
-                self.editor.newCursorAtPosition(
-                    newHolderStart + holder_position
-                )
+            return
+        holder_start, holder_end = self.processor.currentPosition()
+        if command == 'insert':
+            holder_position = args['position'] - holder_start + len(args['characters'])
+            cursor = self.editor.newCursorAtPosition(holder_start, holder_end + len(args['characters']))
+        elif command == 'delete':
+            holder_position = args['position'] - holder_start
+            cursor = self.editor.newCursorAtPosition(holder_start, holder_end - len(args['characters']))
+        elif command == 'replace':
+            holder_position = args['position'] - holder_start + len(args['by'])
+            cursor = self.editor.newCursorAtPosition(holder_start, holder_end - (len(args['characters']) - len(args['by'])))
+
+        cursor.joinPreviousEditBlock()        
+        selected_text = self.editor.selectedTextWithEol(cursor)
+        # Update holder
+        self.processor.setHolderContent(selected_text)
+
+        # Render
+        self.processor.render()
+        
+        new_holder_start, _ = self.processor.currentPosition()
+        self.editor.setTextCursor(
+            self.editor.newCursorAtPosition(
+                new_holder_start + holder_position
             )
+        )
+        cursor.endEditBlock()
 
     def __snippet_end(self, event):
         self.processor.stop()

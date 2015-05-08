@@ -45,9 +45,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     syntaxChanged = QtCore.Signal(object)
     themeChanged = QtCore.Signal(object)
     filePathChanged = QtCore.Signal(str)
+    
     modeChanged = QtCore.Signal(object)
     beginMode = QtCore.Signal(object)
     endMode = QtCore.Signal(object)
+    
+    commandAdded = QtCore.Signal()
     newLocationMemento = QtCore.Signal(object)
     keyPressed = QtCore.Signal(QtCore.QEvent)
     
@@ -839,39 +842,48 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.ensureCursorVisible()
 
     # ------------ Command API
-    def commandHistory(self, index, modifying_only=None):
+    def commandHistory(self, index, modifying_only=False):
         index = self.__command_index + index
         if 0 <= index < len(self.__command_history):
-            return self.__command_history[index]
+            command = self.__command_history[index]
+            if not modifying_only or command[0] in ('replace', 'delete', 'insert'):
+                return self.__command_history[index]
         return (None, None, 0)
+
+    def __run_command(self, name, args):
+        repeat = 0
+        if self.__command_history and \
+            self.__command_history[-1][0] == name and \
+            self.__command_history[-1][1] == args:
+                repeat = self.__command_history[-1][2] + 1
+        self.__command_history.append((name, args, repeat))
+        self.__command_index = len(self.__command_history) - 1
+        self.commandAdded.emit()
 
     def on_document_contentsChange(self, position, charsRemoved, charsAdded):
         text = self.toPlainText()
+        command = None
         if charsRemoved and charsAdded:
-            self.__command_history.append(
-                ('replace', { 
+            command = ('replace', { 
                     'characters': self.__last_content[position:position + charsRemoved],
                     'by': text[position:position + charsAdded],
                     'position': position
-                }, 0)
-            )
+                })
+            if command[1]['characters'] == command[1]['by']:
+                command = None
         elif charsRemoved:
-            self.__command_history.append(
-                ('delete', { 
+            command = ('delete', { 
                     'characters': self.__last_content[position:position + charsRemoved],
                     'position': position
-                }, 0)
-            )
+                })
         elif charsAdded:
-            self.__command_history.append(
-                ('insert', { 
+            command = ('insert', { 
                     'characters': text[position:position + charsAdded],
                     'position': position
-                }, 0)
-            )
+                })
         self.__last_content = text
-        self.__command_index = len(self.__command_history) - 1
-        #print(self.__command_history[-1])
+        if command is not None:
+            self.__run_command(*command)
 
     # ------------ Bundle Items
     def findProcessor(self, nameType):

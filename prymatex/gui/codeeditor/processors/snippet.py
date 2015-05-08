@@ -37,6 +37,7 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         self.status.close()
 
     def beginRender(self):
+        self.__render = True
         self.output = ""
         self.__startPosition = self.caretPosition()
 
@@ -47,6 +48,7 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
             self.__startPosition, self.__endPosition)
         # Select holder
         self.selectHolder()
+        self.__render = False
         
     def caretPosition(self):
         return self.snippetWrapper.selectionStart() + len(self.output)
@@ -88,9 +90,7 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         self.endExecution(self.bundleItem)
 
     def render(self):
-        self.__render = True
         self.bundleItem.render(self)
-        self.__render = False
 
     # ---------- Holder navigation
     def nextHolder(self):
