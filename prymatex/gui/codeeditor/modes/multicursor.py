@@ -51,7 +51,8 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
 
         # ------------ Handlers
         self.registerKeyPressHandler(QtCore.Qt.Key_Escape, self.__multicursor_end)
-        #self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__cursors_update)
+        self.registerKeyPressHandler(QtCore.Qt.Key_Up, self.__cursors_move)
+        self.registerKeyPressHandler(QtCore.Qt.Key_Down, self.__cursors_move)
 
     def activate(self):
         self.editor.commandAdded.connect(self.on_editor_commandAdded)
@@ -67,17 +68,20 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         command, args, _ = self.editor.commandHistory(0, True)
         if command in ("insert", "replace"):
             text = args[command == "insert" and "characters" or "by"]
+            cursors = self.editor.textCursors()[1:]
             new_cursors = [ ]
-            for cursor in self.cursors():
+            for cursor in cursors:
                 cursor.insertText(text)
                 new_cursors.append(cursor)
-            self.setCursors(_build_cursors(self.editor, _build_set(new_cursors)))
+            new_cursors = _build_cursors(self.editor, _build_set(new_cursors))
+            self.text.setTextCursors(new_cursors)
 
     def on_editor_cursorPositionChanged(self):
         # Test and switch state
-        if len(self.cursors()) > 1 and not self.isActive():
+        cursors = self.editor.textCursors()
+        if len(cursors) > 1 and not self.isActive():
             self.activate()
-        elif len(self.cursors()) == 1 and self.isActive():
+        elif len(cursors) == 1 and self.isActive():
             self.deactivate()
 
     # OVERRIDE: CodeEditorAddon.setPalette()
@@ -98,6 +102,15 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.editor.clearExtraCursors()
         return True
     
+    def __cursors_move(self, event):
+        cursors = self.editor.textCursors()
+        new_cursors = [ ]
+        for cursor in cursors:
+            cursor.move(QtGui.QTextCursor.Up)
+            new_cursors.append(cursor)
+        new_cursors = _build_cursors(self.editor, _build_set(new_cursors))
+        self.editor.setTextCursors(new_cursors)
+
     # ------- Handle Mouse events
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.MouseButtonRelease and \
@@ -175,18 +188,16 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.editor.setExtraSelectionCursors("dyn.caret.mixed.dragged", dragged)
         self.editor.updateExtraSelections()
 
-    def cursors(self):
-        return self.editor.textCursors()
-        
-    def setCursors(self, cursors):
-        self.editor.setTextCursors(cursors)
-
     def addMergeCursor(self, cursors):
         set1 = _build_set(self.cursors())
         set2 = _build_set(cursors)
-        self.setCursors(_build_cursors(self.editor, set1.union(set2)))
+        self.editor.setTextCursors(
+            _build_cursors(self.editor, set1.union(set2))
+        )
 
     def removeBreakCursor(self, cursors):
         set1 = _build_set(self.cursors())
         set2 = _build_set(cursors)
-        self.setCursors(_build_cursors(self.editor, set1.difference(set2)))
+        self.editor.setTextCursors(
+            _build_cursors(self.editor, set1.difference(set2))
+        )

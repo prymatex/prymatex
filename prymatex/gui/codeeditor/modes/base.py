@@ -14,8 +14,10 @@ class CodeEditorBaseMode(CodeEditorAddon):
         }
         self.setObjectName(self.__class__.__name__)
 
-    def registerKeyPressHandler(self, key, handler):
-        self.eventHandlers[QtCore.QEvent.KeyPress].setdefault(key, []).append(handler)
+    def registerKeyPressHandler(self, keys, handler):
+        keys = keys if isinstance(keys, (list, tuple)) else (keys, )
+        for key in keys:
+            self.eventHandlers[QtCore.QEvent.KeyPress].setdefault(key, []).append(handler)
         
     def unregisterKeyPressHandler(self, handler):
         for handlers in self.eventHandlers.values():
@@ -24,7 +26,7 @@ class CodeEditorBaseMode(CodeEditorAddon):
 
     def keyPress_handlers(self, key):
         for _key, handlers in self.eventHandlers[QtCore.QEvent.KeyPress].items():
-            if self.isActive() and _key in (key, QtCore.Qt.Key_Any):
+            if self.isActive() and _key == key:
                 for handler in handlers:
                     yield handler
 
