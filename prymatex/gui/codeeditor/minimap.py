@@ -73,12 +73,12 @@ selection-background-color: %s; }""" % (
         super(MiniMapAddon, self).setFont(font)
         
     def _apply_aditional_formats(self, block):
-        position = block.position()
-        length = 0
-        miniBlock = self.document().findBlockByNumber(block.blockNumber())
-        miniBlock.layout().setAdditionalFormats(
-            block.layout().additionalFormats())
-        self.document().markContentsDirty(position, block.length())
+        mini_block = self.document().findBlockByNumber(block.blockNumber())
+        if mini_block.isValid():
+            mini_block.layout().setAdditionalFormats(
+                block.layout().additionalFormats()
+            )
+            self.document().markContentsDirty(block.position(), block.length())
 
     def on_highlighter_blockHighlightChanged(self, block):
         self._apply_aditional_formats(block)

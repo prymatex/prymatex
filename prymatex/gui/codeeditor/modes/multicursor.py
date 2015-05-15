@@ -86,6 +86,7 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
 
     def on_editor_commandAdded(self):
         command, args, _ = self.editor.commandHistory(0, True)
+        print(command, args)
         if command in ("insert", "replace"):
             text = args[command == "insert" and "characters" or "by"]
             cursors = self.editor.textCursors()
@@ -97,7 +98,11 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
             new_cursors[0].endEditBlock()
             new_cursors = _build_cursors(self.editor, _build_set(new_cursors))
             self.editor.setTextCursors(new_cursors)
-
+        elif command == 'remove':
+            prev_command, prev_args, _ = self.editor.commandHistory(-1, True)
+            print(prev_args)
+            print("quita texto")
+            
     def on_editor_cursorPositionChanged(self):
         # Test and switch state
         cursors = self.editor.textCursors()
