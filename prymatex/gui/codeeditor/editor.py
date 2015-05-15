@@ -760,9 +760,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         painter.end()
 
     # -------------- Event handling
-    def keyPress_handlers(self, key):
+    def keyPress_handlers(self, event):
         for mode in self.__modes[::-1]:
-            for handler in mode.keyPress_handlers(key):
+            for handler in mode.keyPress_handlers(event):
                 yield handler
      
     def _handle_event(self, handlers, event):
@@ -771,7 +771,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
-        if not any(self._handle_event(self.keyPress_handlers(event.key()), event)):
+        if not any(self._handle_event(self.keyPress_handlers(event), event)):
             super(CodeEditor, self).keyPressEvent(event)
             self.keyPressed.emit(event)
 

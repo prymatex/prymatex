@@ -22,7 +22,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__backspace_behavior)
         self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__delete_behavior)
         self.registerKeyPressHandler(QtCore.Qt.Key_Insert, self.__toggle_overwrite)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Space, self.__run_completer)
+        self.registerKeyPressHandler("Ctrl+Space", self.__run_completer)
 
     # ------------ Key press handlers
     def __insert_new_line(self, event):
@@ -184,21 +184,20 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         self.editor.setOverwriteMode(not self.editor.overwriteMode())
 
     def __run_completer(self, event):
-        if event.modifiers() & QtCore.Qt.ControlModifier:
-            alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-            suggestions = set()
-            block = self.editor.document().begin()
-            # TODO: No usar la linea actual, quiza algo de niveles de anidamiento
-            while block.isValid():
-                user_data = self.editor.blockUserData(block)
-                all_words = map(lambda token: config.RE_WORD.findall(token.chunk),
-                    user_data.tokens[::-1])
-                for words in all_words:
-                    suggestions.update(words)
-                block = block.next()
-    
-            suggestions.update(self.editor.preferenceSettings().completions)
-            suggestions.discard(alreadyTyped)
-            suggestions = sorted(list(suggestions))
-            self.editor.completer.complete(suggestions, completion_prefix=alreadyTyped)
-            return True
+        alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
+        suggestions = set()
+        block = self.editor.document().begin()
+        # TODO: No usar la linea actual, quiza algo de niveles de anidamiento
+        while block.isValid():
+            user_data = self.editor.blockUserData(block)
+            all_words = map(lambda token: config.RE_WORD.findall(token.chunk),
+                user_data.tokens[::-1])
+            for words in all_words:
+                suggestions.update(words)
+            block = block.next()
+
+        suggestions.update(self.editor.preferenceSettings().completions)
+        suggestions.discard(alreadyTyped)
+        suggestions = sorted(list(suggestions))
+        self.editor.completer.complete(suggestions, completion_prefix=alreadyTyped)
+        return True

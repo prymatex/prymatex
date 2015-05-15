@@ -32,6 +32,16 @@ def _build_cursors(editor, s):
     return cursors
     
 class CodeEditorMultiCursorMode(CodeEditorBaseMode):
+    MOVE_CHARACTERS = { 
+        QtCore.Qt.Key_Up: QtGui.QTextCursor.Up,
+        QtCore.Qt.Key_Down: QtGui.QTextCursor.Down,
+        QtCore.Qt.Key_Right: QtGui.QTextCursor.Right,
+        QtCore.Qt.Key_Left: QtGui.QTextCursor.Left
+    }
+    MOVE_WORDS = { 
+        QtCore.Qt.Key_Right: QtGui.QTextCursor.WordRight,
+        QtCore.Qt.Key_Left: QtGui.QTextCursor.WordLeft
+    }
     def __init__(self, **kwargs):
         super(CodeEditorMultiCursorMode, self).__init__(**kwargs)
         self.draggedCursors = self.startPoint = None
@@ -50,9 +60,19 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.standardCursor = self.editor.viewport().cursor()
 
         # ------------ Handlers
-        self.registerKeyPressHandler(QtCore.Qt.Key_Escape, self.__multicursor_end)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Up, self.__cursors_move)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Down, self.__cursors_move)
+        self.registerKeyPressHandler("esc", self.__multicursor_end)
+        self.registerKeyPressHandler([
+            "Up", "Down", "Right", "Left",
+            "Shift+Up", "Shift+Down", "Shift+Right", "Shift+Left"
+            ],
+            self.__cursors_move_by_character
+        )
+        self.registerKeyPressHandler([
+            "Ctrl+Right", "Ctrl+Left",
+            "Ctrl+Shift+Right", "Ctrl+Shift+Left"
+            ],
+            self.__cursors_move_by_word
+        )
 
     def activate(self):
         self.editor.commandAdded.connect(self.on_editor_commandAdded)
@@ -68,13 +88,15 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         command, args, _ = self.editor.commandHistory(0, True)
         if command in ("insert", "replace"):
             text = args[command == "insert" and "characters" or "by"]
-            cursors = self.editor.textCursors()[1:]
-            new_cursors = [ ]
-            for cursor in cursors:
+            cursors = self.editor.textCursors()
+            cursors[0].joinPreviousEditBlock() 
+            new_cursors = [ cursors[0] ]
+            for cursor in cursors[1:]:
                 cursor.insertText(text)
                 new_cursors.append(cursor)
+            new_cursors[0].endEditBlock()
             new_cursors = _build_cursors(self.editor, _build_set(new_cursors))
-            self.text.setTextCursors(new_cursors)
+            self.editor.setTextCursors(new_cursors)
 
     def on_editor_cursorPositionChanged(self):
         # Test and switch state
@@ -102,14 +124,24 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.editor.clearExtraCursors()
         return True
     
-    def __cursors_move(self, event):
+    def __cursors_move(self, move, event):
+        mode = event.modifiers() & QtCore.Qt.ShiftModifier and \
+            QtGui.QTextCursor.KeepAnchor or \
+            QtGui.QTextCursor.MoveAnchor
         cursors = self.editor.textCursors()
         new_cursors = [ ]
         for cursor in cursors:
-            cursor.move(QtGui.QTextCursor.Up)
+            cursor.movePosition(move, mode)
             new_cursors.append(cursor)
         new_cursors = _build_cursors(self.editor, _build_set(new_cursors))
         self.editor.setTextCursors(new_cursors)
+        return True
+
+    def __cursors_move_by_character(self, event):
+        return self.__cursors_move(self.MOVE_CHARACTERS[event.key()], event)
+    
+    def __cursors_move_by_word(self, event):
+        return self.__cursors_move(self.MOVE_WORDS[event.key()], event)
 
     # ------- Handle Mouse events
     def eventFilter(self, obj, event):
