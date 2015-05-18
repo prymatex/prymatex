@@ -24,17 +24,17 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         #self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__snippet_update)
 
     def activate(self):
-        self.editor.commandAdded.connect(self.on_editor_commandAdded)
+        self.editor.keyPressed.connect(self.on_editor_keyPressed)
         super().activate()
         
     def deactivate(self):
-        self.editor.commandAdded.disconnect(self.on_editor_commandAdded)
+        self.editor.keyPressed.disconnect(self.on_editor_keyPressed)
         super().deactivate()
 
-    def on_editor_commandAdded(self):
-        command, args, _ = self.editor.commandHistory(0, True)
-        if command == 'replace' and args['by'] == self.processor.lastOutput():
+    def on_editor_keyPressed(self, event):
+        if not event.text():
             return
+        command, args, _ = self.editor.commandHistory(0, True)
         if not self.processor.setHolder(args['position'], args['position']):
             self.processor.stop()
             return

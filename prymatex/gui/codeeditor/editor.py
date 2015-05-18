@@ -47,10 +47,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     filePathChanged = QtCore.Signal(str)
     
     modeChanged = QtCore.Signal(object)
-    beginMode = QtCore.Signal(object)
-    endMode = QtCore.Signal(object)
-    
-    commandAdded = QtCore.Signal()
+
     newLocationMemento = QtCore.Signal(object)
     keyPressed = QtCore.Signal(QtCore.QEvent)
     
@@ -173,7 +170,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # Document signals
         self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)
-        self.document().contentsChange.connect(self.on_document_contentsChange, QtCore.Qt.QueuedConnection)
+        self.document().contentsChange.connect(self.on_document_contentsChange)
 
         # Editor signals
         self.updateRequest.connect(self.updateSideBars)
@@ -847,7 +844,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         if 0 <= index < len(self.__command_history):
             command = self.__command_history[index]
             if not modifying_only or command[0] in ('replace', 'delete', 'insert'):
-                return self.__command_history[index]
+                return command
         return (None, None, 0)
 
     def __run_command(self, name, args):
@@ -858,7 +855,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 repeat = self.__command_history[-1][2] + 1
         self.__command_history.append((name, args, repeat))
         self.__command_index = len(self.__command_history) - 1
-        self.commandAdded.emit()
 
     def on_document_contentsChange(self, position, charsRemoved, charsAdded):
         text = self.toPlainText()
@@ -901,8 +897,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         def _insert_item(index):
             if index >= 0:
-                processor = self.findProcessor(items[index].type())
+                name = items[index].type()
+                processor = self.findProcessor(name)
                 processor.configure(**kwargs)
+                self.__run_command("insert_%s" % name, kwargs)
                 items[index].execute(processor)
 
         if len(items) > 1:
