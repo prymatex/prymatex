@@ -91,8 +91,21 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def start(self):
         QtCore.QTimer.singleShot(0, self.thread.start)
-    
+
     def highlightBlock(self, text):
+        block = self.currentBlock()
+        previous_user_data = block.previous().userData() or self.syntaxProcessor.emptyUserData() 
+        user_data = self.syntaxProcessor.textUserData(
+            text + '\n', self.previousBlockState(), previous_user_data.revision
+        )
+        self.setCurrentBlockUserData(user_data)
+        self.setCurrentBlockState(user_data.state)
+        # ------ Formats
+        for token in user_data.tokens:
+            self.setFormat(token.start, token.end - token.start,
+                self.themeProcessor.textCharFormat(token.scope))
+    
+    def _highlightBlock(self, text):
         text = text + '\n'
         user_data = self.currentBlockUserData() or self.syntaxProcessor.emptyUserData() 
         previous_state = self.previousBlockState()
