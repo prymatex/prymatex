@@ -32,9 +32,9 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         super().deactivate()
 
     def on_editor_commandAdded(self):
-        if self.processor.isRendering():
-            return
         command, args, _ = self.editor.commandHistory(0, True)
+        if command == 'replace' and args['by'] == self.processor.lastOutput():
+            return
         if not self.processor.setHolder(args['position'], args['position']):
             self.processor.stop()
             return

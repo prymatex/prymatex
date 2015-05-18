@@ -9,10 +9,10 @@ from prymatex.support.processor import SnippetProcessorMixin
 class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin):
     def __init__(self, editor):
         CodeEditorBaseProcessor.__init__(self, editor)
-        self.__render = False
+        self.__output = ""
         
-    def isRendering(self):
-        return self.__render
+    def lastOutput(self):
+        return self.__output
         
     def configure(self, **kwargs):
         CodeEditorBaseProcessor.configure(self, **kwargs)
@@ -37,13 +37,12 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         self.status.close()
 
     def beginRender(self):
-        self.__render = True
-        self.output = ""
+        self.__output = ""
         self.__startPosition = self.caretPosition()
 
     def endRender(self):
         self.__endPosition = self.caretPosition()
-        self.editor.updatePlainText(self.output, self.snippetWrapper)
+        self.editor.updatePlainText(self.__output, self.snippetWrapper)
         self.snippetWrapper = self.editor.newCursorAtPosition(
             self.__startPosition, self.__endPosition)
         # Select holder
@@ -51,12 +50,12 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         self.__render = False
         
     def caretPosition(self):
-        return self.snippetWrapper.selectionStart() + len(self.output)
+        return self.snippetWrapper.selectionStart() + len(self.__output)
 
     def insertText(self, text):
         # Replace new lines and tabs
         text = text.replace('\n', '\n' + self.indentation)
-        self.output += text.replace('\t', self.tabKeyBehavior)
+        self.__output += text.replace('\t', self.tabKeyBehavior)
     
     def selectHolder(self):
         start, end = self.bundleItem.currentPosition()

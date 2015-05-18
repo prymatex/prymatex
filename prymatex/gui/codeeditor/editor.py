@@ -173,7 +173,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # Document signals
         self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)
-        self.document().contentsChange.connect(self.on_document_contentsChange)
+        self.document().contentsChange.connect(self.on_document_contentsChange, QtCore.Qt.QueuedConnection)
 
         # Editor signals
         self.updateRequest.connect(self.updateSideBars)
@@ -884,7 +884,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.__last_content = text
         if command is not None:
             self.__run_command(*command)
-
+        
     # ------------ Bundle Items
     def findProcessor(self, nameType):
         for processor in self.processors:
