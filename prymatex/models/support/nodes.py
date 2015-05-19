@@ -48,9 +48,9 @@ class BundleItemTreeNode(TreeNodeBase):
             return keyequivalent_to_keysequence(self.__bundleItem.keyEquivalent)
     
     def keyCode(self):
-        keyseq = self.keySequence()
-        if keyseq is not None and keyseq.count() > 0:
-            return keyseq[0]
+        sec =self.keySequence()
+        if sec is not None and sec.count() > 0:
+            return sec
     
     def setIcon(self, icon):
         self._icon = icon

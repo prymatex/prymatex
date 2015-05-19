@@ -18,8 +18,6 @@ from prymatex.core import config
 from functools import reduce
 
 class CompletionWidget(QtWidgets.QListWidget):
-    activated = QtCore.Signal(object)
-    highlighted = QtCore.Signal(object)
     def __init__(self, textedit, parent):
         super().__init__(parent)
         self.setWindowFlags(QtCore.Qt.SubWindow | QtCore.Qt.FramelessWindowHint)
@@ -35,13 +33,25 @@ class CompletionWidget(QtWidgets.QListWidget):
         self.setAlternatingRowColors(True)
         self.setItemDelegate(HtmlItemDelegate(self))
         
+    def _map_completions(self, completions):
+        for completion in completions:
+            item = QtWidgets.QListWidgetItem(self)
+            if isinstance(completion, (tuple, list)):
+                item.setText("%s" % completion[0])
+                item.setData(QtCore.Qt.MatchRole, "%s" % completion[1])
+            else:
+                item.setText("%s" % completion)
+                item.setData(QtCore.Qt.MatchRole, "%s" % completion)
+            yield item
+
     def complete(self, completion_list, completion_prefix=None, automatic=True):
         if len(completion_list) == 1 and not automatic:
-            self.activated.emit(completion_list[0])
+            self.__item_activated(completion_list[0])
         elif completion_list:
             self.completion_list = completion_list
             self.clear()
-            self.addItems(completion_list)
+            for item in self._map_completions(completion_list):
+                self.addItem(item)
             self.setCurrentRow(0)
             
             QtWidgets.QApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
@@ -132,12 +142,14 @@ class CompletionWidget(QtWidgets.QListWidget):
     
     def setCompletionPrefix(self, completion_prefix):
         if completion_prefix:
-            for row, completion in enumerate(self.completion_list):
+            for index in range(self.count()):
+                item = self.item(index)
+                completion = item.data(QtCore.Qt.MatchRole)
                 if not self.case_sensitive:
                     completion = completion.lower()
                     completion_prefix = completion_prefix.lower()
                 if completion.startswith(completion_prefix):
-                    self.setCurrentRow(row)
+                    self.setCurrentRow(index)
                     break
             else:
                 self.hide()
@@ -156,12 +168,15 @@ class CompletionWidget(QtWidgets.QListWidget):
             self.hide()
         
     def __item_activated(self, item=None):
-        index = self.currentRow()
-        self.activated.emit(self.completion_list[index])
+        if item is None:
+            index = self.currentRow()
+            item = self.completion_list[index]
+        self.textedit.insertCompletion(item)
         self.hide()
 
     def __item_highlighted(self, index=None):
-        self.highlighted.emit(self.completion_list[index])
+        item = self.completion_list[index]
+        print(item)
         
 class TextEditWidget(QtWidgets.QPlainTextEdit):
     # ------------------ Constants
@@ -176,8 +191,6 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     
     extraSelectionChanged = QtCore.Signal()
     
-    completionActivated = QtCore.Signal(object)
-    completionHighlighted = QtCore.Signal(object)
     queryCompletions = QtCore.Signal()
     
     # ------------------ Find Flags
@@ -193,9 +206,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         self.__textCharFormat = {}
 
         # Completer
-        self.completer = CompletionWidget(self, self.parent())
-        self.completer.activated.connect(self.completionActivated.emit)
-        self.completer.highlighted.connect(self.completionHighlighted.emit)
+        self.__completer = CompletionWidget(self, self.parent())
 
         # Defaults
         self.eol_chars = os.linesep
@@ -206,12 +217,12 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     # OVERRIDE: QtWidgets.QPlainTextEdit.setPalette()
     def setPalette(self, palette):
         super().setPalette(palette)
-        self.completer.setPalette(palette)
+        self.__completer.setPalette(palette)
 
     # OVERRIDE: QtWidgets.QPlainTextEdit.setFont()
     def setFont(self, font):
         super().setFont(font)
-        self.completer.setFont(font)
+        self.__completer.setFont(font)
     
     # OVERRIDE: QtWidgets.QPlainTextEdit.focusInEvent()
     def focusInEvent(self, event):
@@ -226,7 +237,25 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     #------ Completion
     def setCompletionAuto(self, auto):
         self.completion_auto = auto
-        
+
+    def showCompletion(self, completions, completion_prefix="",
+            automatic=True):
+        """Display the possible completions"""
+        if len(completions) == 0 or completions == [completion_prefix]:
+            return
+        # Sorting completion list (entries starting with underscore are 
+        # put at the end of the list):
+        # underscore = set([comp for comp in completions
+        #                  if comp.startswith('_')])
+        #completions = sorted(set(completions)-underscore, key=str_lower)+\
+        #              sorted(underscore, key=str_lower)
+        self.__completer.complete(completions, 
+            completion_prefix=completion_prefix,
+            automatic=automatic)
+                
+    def insertCompletion(self, item):
+        print(item)
+
     #------ EOL characters
     def setEolChars(self, eol_chars):
         """Set widget end-of-line (EOL) characters from chars_or_text"""

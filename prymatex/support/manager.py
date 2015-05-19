@@ -994,7 +994,7 @@ class SupportBaseManager(object):
             [item.keyCode() for item in self.getAllKeyEquivalentItems()])
 
     def getKeyEquivalentItem(self, keyCode, leftScope, rightScope):
-        memoizedKey = ("getKeyEquivalentItem", keyCode, leftScope, rightScope)
+        memoizedKey = ("getKeyEquivalentItem", "%s" % keyCode, leftScope, rightScope)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         return self.bundleItemCache.setdefault(memoizedKey,

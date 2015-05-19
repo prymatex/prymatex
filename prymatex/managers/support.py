@@ -517,7 +517,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
             keyCode)
         
     def getAllBundleItemsByKeyEquivalent(self, keyCode):
-        memoizedKey = ("getAllBundleItemsByKeyEquivalent", keyCode, None, None)
+        memoizedKey = ("getAllBundleItemsByKeyEquivalent", "%s" % keyCode, None, None)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
         items = []

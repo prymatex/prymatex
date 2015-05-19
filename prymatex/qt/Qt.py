@@ -9,4 +9,3 @@ elif os.environ['QT_API'] == 'pyqt5':
     from PyQt5.Qt import *
 
 QWIDGETSIZE_MAX = 16777215
-Key_Any = 0

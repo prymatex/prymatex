@@ -647,7 +647,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.viewport().setPalette(palette)
         self.leftBar.setPalette(palette)
         self.rightBar.setPalette(palette)
-        self.completer.setPalette(palette)
         
         # Register selection textCharFormat
         # Register lineHighlight textCharFormat

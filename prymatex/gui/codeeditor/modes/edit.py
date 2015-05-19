@@ -2,6 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
+from prymatex.qt.helpers import keyevent_to_keysequence
 
 from prymatex.core import config
 
@@ -13,8 +14,8 @@ class CodeEditorEditMode(CodeEditorBaseMode):
 
     def initialize(self, **kwargs):
         super(CodeEditorEditMode, self).initialize(**kwargs)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__insert_key_bundle_item)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__insert_typing_pairs)
+        #self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__insert_key_bundle_item)
+        #self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__insert_typing_pairs)
         self.registerKeyPressHandler(QtCore.Qt.Key_Return, self.__insert_new_line)
         self.registerKeyPressHandler(QtCore.Qt.Key_Tab, self.__insert_tab_bundle_item)
         self.registerKeyPressHandler(QtCore.Qt.Key_Home, self.__move_cursor_to_home)
@@ -24,20 +25,27 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         self.registerKeyPressHandler(QtCore.Qt.Key_Insert, self.__toggle_overwrite)
         self.registerKeyPressHandler("Ctrl+Space", self.__run_completer)
 
+    # OVERRIDE: CodeEditorBaseMode.keyPress_handlers()
+    def keyPress_handlers(self, event):
+        for handler in super().keyPress_handlers(event):
+            yield handler
+        # Bundle items 
+        trigger = keyevent_to_keysequence(event)
+        if trigger in self.application().supportManager.getAllKeyEquivalentCodes():
+            yield self.__insert_key_bundle_item
+
     # ------------ Key press handlers
     def __insert_new_line(self, event):
         self.editor.insertNewLine(self.editor.textCursor())
         return True
     
     def __insert_key_bundle_item(self, event):
-        keyseq = int(event.modifiers()) + event.key()
-        # Try key equivalent
-        if keyseq in self.application().supportManager.getAllKeyEquivalentCodes():
-            leftScope, rightScope = self.editor.scope(self.editor.textCursor())
-            items = self.application().supportManager.getKeyEquivalentItem(
-                keyseq, leftScope, rightScope)
-            self.editor.insertBundleItem(items)
-            return bool(items)
+        trigger = keyevent_to_keysequence(event)
+        leftScope, rightScope = self.editor.scope(self.editor.textCursor())
+        items = self.application().supportManager.getKeyEquivalentItem(
+            trigger, leftScope, rightScope)
+        self.editor.insertBundleItem(items)
+        return bool(items)
     
     def __insert_tab_bundle_item(self, event):
         cursor = self.editor.textCursor()
@@ -198,5 +206,5 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         suggestions.update(self.editor.preferenceSettings().completions)
         suggestions.discard(alreadyTyped)
         suggestions = sorted(list(suggestions))
-        self.editor.completer.complete(suggestions, completion_prefix=alreadyTyped)
+        self.editor.showCompletion(suggestions, completion_prefix=alreadyTyped)
         return True
