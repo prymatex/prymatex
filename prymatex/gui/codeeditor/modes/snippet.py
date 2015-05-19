@@ -21,7 +21,6 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         self.registerKeyPressHandler(QtCore.Qt.Key_Backtab, self.__snippet_navigation)
         self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__snippet_backspace)
         self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__snippet_delete)
-        #self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__snippet_update)
 
     def activate(self):
         self.editor.keyPressed.connect(self.on_editor_keyPressed)
