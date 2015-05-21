@@ -11,6 +11,7 @@ import difflib
 from prymatex.qt import API
 from prymatex.qt.extensions import HtmlItemDelegate
 from prymatex.utils import text
+from prymatex import resources
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import textcursor_to_tuple
@@ -23,7 +24,9 @@ class CompletionWidget(QtWidgets.QListWidget):
         self.setWindowFlags(QtCore.Qt.SubWindow | QtCore.Qt.FramelessWindowHint)
         self.textedit = textedit
         self.completion_list = None
-        self.case_sensitive = False
+        self.match_flags = QtCore.Qt.MatchWrap | QtCore.Qt.MatchWildcard | QtCore.Qt.MatchCaseSensitive
+        self.match_indexes = []
+        self.current_index = -1
         self.enter_select = None
         self.hide()
         self.itemActivated.connect(self.__item_activated)
@@ -37,6 +40,19 @@ class CompletionWidget(QtWidgets.QListWidget):
             if isinstance(completion, (tuple, list)):
                 item.setText("%s" % completion[0])
                 item.setData(QtCore.Qt.MatchRole, "%s" % completion[1])
+            elif isinstance(completion, dict):
+                text = completion.get("display", completion.get('title')) 
+                item.setText("%s" % text)
+                match = completion.get("match", text) 
+                item.setData(QtCore.Qt.MatchRole, "%s" % match)
+                image = completion.get("image")
+                if image:
+                    # TODO Obtener el icono del lugar correcto
+                    image = resources.get_icon(image)
+                    item.setIcon(icon)
+                tooltip = completion.get("tool_tip")
+                if tooltip:
+                    item.setToolTip(tooltip)
             else:
                 item.setText("%s" % completion)
                 item.setData(QtCore.Qt.MatchRole, "%s" % completion)
@@ -133,6 +149,11 @@ class CompletionWidget(QtWidgets.QListWidget):
             self.textedit.keyPressEvent(event)
             alreadyTyped, start, end = self.textedit.wordUnderCursor(direction="left", search=True)
             self.setCompletionPrefix(alreadyTyped)
+        elif ctrl and key == QtCore.Qt.Key_Space:
+            self.current_index += 1
+            if self.current_index >= len(self.match_indexes):
+                self.current_index = 0
+            self.setCurrentRow(self.match_indexes[self.current_index].row())
         elif modifier:
             self.textedit.keyPressEvent(event)
         else:
@@ -141,15 +162,14 @@ class CompletionWidget(QtWidgets.QListWidget):
     
     def setCompletionPrefix(self, completion_prefix):
         if completion_prefix:
-            for index in range(self.count()):
-                item = self.item(index)
-                completion = item.data(QtCore.Qt.MatchRole)
-                if not self.case_sensitive:
-                    completion = completion.lower()
-                    completion_prefix = completion_prefix.lower()
-                if completion.startswith(completion_prefix):
-                    self.setCurrentRow(index)
-                    break
+            model = self.model()
+            if self.match_flags & QtCore.Qt.MatchWildcard:
+                completion_prefix = "*" + "*".join(list(completion_prefix)) + "*"
+            self.match_indexes = model.match(model.index(0, 0, QtCore.QModelIndex()),
+                QtCore.Qt.MatchRole, completion_prefix, -1, self.match_flags)
+            if self.match_indexes:
+                self.current_index = 0
+                self.setCurrentRow(self.match_indexes[self.current_index].row())
             else:
                 self.hide()
         else:
@@ -240,7 +260,16 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         self.deactivated.emit()
 
     #------ Completion
+    def setCompletionMatchFlags(self, flags):
+        """Match flags completion"""
+        self.__completer.match_flags = flags
+        
+    def setCompletionEnter(self, state):
+        """Enable Enter key to select completion"""
+        self.__completer.enter_select = state
+        
     def setCompletionAuto(self, auto):
+        """Set code completion state"""
         self.completion_auto = auto
 
     def showCompletion(self, completions, completion_prefix="",
@@ -261,6 +290,10 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     def insertCompletion(self, completion):
         currentWord, start, end = self.currentWord()
         cursor = self.newCursorAtPosition(start, end)
+        if isinstance(completion, (tuple, list)):
+            completion = completion[1]
+        elif isinstance(completion, dict):
+            completion = completion.get('match', completion.get('display', completion.get('title')))
         cursor.insertText(completion)
 
     #------ EOL characters
