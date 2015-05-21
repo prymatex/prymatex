@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
+from prymatex.utils import text as textutils
 
 class HtmlItemDelegate(QtWidgets.QItemDelegate):
     def __init__(self, parentView):
@@ -18,10 +19,9 @@ class HtmlItemDelegate(QtWidgets.QItemDelegate):
                 color: %s; }""" % (background.name(), color.name()))
         else:
             self.document.setDefaultStyleSheet("")
-        
-        doc = self.document
+        doc = self.document 
         doc.setDefaultFont(option.font)
-        doc.setHtml(text)
+        doc.setHtml(textutils.asciify(text))
         doc.setTextWidth(option.rect.width() - option.decorationSize.width())
         
         painter.save()

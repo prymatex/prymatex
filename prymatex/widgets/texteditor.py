@@ -253,8 +253,10 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             completion_prefix=completion_prefix,
             automatic=automatic)
                 
-    def insertCompletion(self, item):
-        print(item)
+    def insertCompletion(self, completion):
+        currentWord, start, end = self.currentWord()
+        cursor = self.newCursorAtPosition(start, end)
+        cursor.insertText(completion)
 
     #------ EOL characters
     def setEolChars(self, eol_chars):

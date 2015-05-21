@@ -63,6 +63,8 @@ class unaccented_map(dict):
         0x2019: "'", #  RIGHT SINGLE QUOTATION MARK
         0x201c: '"', #  LEFT DOUBLE QUOTATION MARK
         0x201d: '"', #  RIGHT DOUBLE QUOTATION MARK
+        0x3014: "(", # 
+        0x3015: ")", # 
     }
 
     # Maps a unicode character code (the key) to a replacement code
