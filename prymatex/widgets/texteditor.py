@@ -28,8 +28,6 @@ class CompletionWidget(QtWidgets.QListWidget):
         self.hide()
         self.itemActivated.connect(self.__item_activated)
         self.currentRowChanged.connect(self.__item_highlighted)
-        self.setMinimumWidth(212)
-        self.setMinimumHeight(343)
         self.setAlternatingRowColors(True)
         self.setItemDelegate(HtmlItemDelegate(self))
         
@@ -52,6 +50,7 @@ class CompletionWidget(QtWidgets.QListWidget):
             self.clear()
             for item in self._map_completions(completion_list):
                 self.addItem(item)
+            self.resize(self.sizeHint())
             self.setCurrentRow(0)
             
             QtWidgets.QApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
@@ -177,7 +176,13 @@ class CompletionWidget(QtWidgets.QListWidget):
     def __item_highlighted(self, index=None):
         item = self.completion_list[index]
         print(item)
-        
+
+    def sizeHint(self):
+        size = QtCore.QSize()
+        size.setHeight(super().sizeHint().height())
+        size.setWidth(self.sizeHintForColumn(0))
+        return size
+    
 class TextEditWidget(QtWidgets.QPlainTextEdit):
     # ------------------ Constants
     EOL_CHARS = [ item[0] for item in text.EOLS ]
