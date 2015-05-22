@@ -10,10 +10,12 @@ from prymatex.qt import QtCore, QtGui, Qt, QtWidgets, API
 
 from prymatex.core import PrymatexEditor
 from prymatex.core import constants
+from prymatex.core import config
+from prymatex.core.settings import ConfigurableItem
+
 from prymatex.widgets.texteditor import TextEditWidget
 from prymatex.widgets.texteditor import CompletionWidget
 
-from prymatex.core.settings import ConfigurableItem
 from prymatex.qt.helpers import (extend_menu, keyevent_to_keysequence, keyevent_to_tuple)
 from prymatex.models.support import BundleItemTreeNode
 
@@ -48,6 +50,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     
     modeChanged = QtCore.Signal(object)
 
+    queryCompletions = QtCore.Signal(bool)
     newLocationMemento = QtCore.Signal(object)
     keyPressed = QtCore.Signal(QtCore.QEvent)
     
@@ -508,6 +511,29 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             rightBarPosition -= self.verticalScrollBar().width()
         self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
 
+    # -------------- Completions
+    def extractCompletions(self, prefix, position=None):
+        print(prefix)
+        return []
+        suggestions = set()
+        block = self.document().begin()
+        while block.isValid():
+            user_data = self.blockUserData(block)
+            all_words = map(lambda token: config.RE_WORD.findall(token.chunk),
+                user_data.tokens[::-1])
+            for words in all_words:
+                suggestions.update(words)
+            block = block.next()
+        suggestions.discard(prefix)
+        # TODO Ordenarlas por position
+        return list(suggestions)
+
+    def _query_completions(self, automatic=True):
+        print("Go")
+        """Trigger completion"""
+        if not self.isCompletionWidgetVisible():
+            self.queryCompletions.emit(automatic)
+        
     # -------------- Smart Typing Pairs
     def _smart_typing_pairs(self, cursor):
         settings = self.preferenceSettings(cursor)
@@ -1504,6 +1530,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
              },
             {'sequence': ("Editor", "MoveColumnRight", 'Meta+Ctrl+Right'),
              'activated': self.moveRight,
+             'context': QtCore.Qt.WidgetShortcut
+             },
+            {'sequence': ("Editor", "CodeCompletion", 'Ctrl+Space'),
+             'activated': self._query_completions,
              'context': QtCore.Qt.WidgetShortcut
              }
         ]

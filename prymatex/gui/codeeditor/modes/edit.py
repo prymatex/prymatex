@@ -4,8 +4,6 @@
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import keyevent_to_keysequence
 
-from prymatex.core import config
-
 from .base import CodeEditorBaseMode
 
 class CodeEditorEditMode(CodeEditorBaseMode):
@@ -23,7 +21,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__backspace_behavior)
         self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__delete_behavior)
         self.registerKeyPressHandler(QtCore.Qt.Key_Insert, self.__toggle_overwrite)
-        self.registerKeyPressHandler("Ctrl+Space", self.__run_completer)
+        self.editor.queryCompletions.connect(self.__run_completer)
 
     # OVERRIDE: CodeEditorBaseMode.keyPress_handlers()
     def keyPress_handlers(self, event):
@@ -190,21 +188,10 @@ class CodeEditorEditMode(CodeEditorBaseMode):
     def __toggle_overwrite(self, event):
         self.editor.setOverwriteMode(not self.editor.overwriteMode())
 
-    def __run_completer(self, event):
+    def __run_completer(self):
         alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-        suggestions = set()
-        block = self.editor.document().begin()
-        # TODO: No usar la linea actual, quiza algo de niveles de anidamiento
-        while block.isValid():
-            user_data = self.editor.blockUserData(block)
-            all_words = map(lambda token: config.RE_WORD.findall(token.chunk),
-                user_data.tokens[::-1])
-            for words in all_words:
-                suggestions.update(words)
-            block = block.next()
-
+        suggestions = set(self.editor.extractCompletions(alreadyTyped))
         suggestions.update(self.editor.preferenceSettings().completions)
-        suggestions.discard(alreadyTyped)
         suggestions = sorted(list(suggestions))
-        self.editor.showCompletion(suggestions, completion_prefix=alreadyTyped)
+        self.editor.showCompletionWidget(suggestions, completion_prefix=alreadyTyped)
         return True
