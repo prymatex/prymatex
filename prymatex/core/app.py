@@ -150,9 +150,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         app = PrymatexApplication(*args, **kwargs)
 
         # Build Managers resources, profile and settings are the backbone of prymatex
-        app.resourceManager = app.createComponentInstance(ResourceManager, parent=app)
         app.profileManager = app.createComponentInstance(ProfileManager, parent=app)
         app.settingsManager = app.createComponentInstance(SettingsManager, parent=app)
+        app.resourceManager = app.createComponentInstance(ResourceManager, parent=app)
         
         # Populate application's class and configurable
         app.populateComponentClass(PrymatexApplication)
