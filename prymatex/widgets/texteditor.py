@@ -26,14 +26,14 @@ class CompletionWidget(QtWidgets.QListWidget):
         self.completion_list = None
         self.match_flags = QtCore.Qt.MatchWrap | QtCore.Qt.MatchWildcard | QtCore.Qt.MatchCaseSensitive
         self.match_indexes = []
-        self.current_index = -1
+        self.current_match_index = -1
         self.enter_select = None
         self.hide()
         self.itemActivated.connect(self.__item_activated)
         self.currentRowChanged.connect(self.__item_highlighted)
         self.setAlternatingRowColors(True)
-        self.setItemDelegate(HtmlItemDelegate(self))
-        
+        #self.setItemDelegate(HtmlItemDelegate(self))
+
     def _map_completions(self, completions):
         for completion in completions:
             item = QtWidgets.QListWidgetItem(self)
@@ -119,7 +119,7 @@ class CompletionWidget(QtWidgets.QListWidget):
                 point = ancestor.mapFromGlobal(point)
             self.move(point)
             
-            if completion_prefix:
+            if completion_prefix is not None:
                 # When initialized, if completion text is not empty, we need 
                 # to update the displayed list:
                 self.setCompletionPrefix(completion_prefix)
@@ -145,33 +145,44 @@ class CompletionWidget(QtWidgets.QListWidget):
                      QtCore.Qt.Key_Home, QtCore.Qt.Key_End,
                      QtCore.Qt.Key_CapsLock) and not modifier:
             super().keyPressEvent(event)
+        elif ctrl and shift and key == QtCore.Qt.Key_Space:
+            self.previousMatchCompletion()
+        elif ctrl and key == QtCore.Qt.Key_Space:
+            self.nextMatchCompletion()
         elif len(text) or key == QtCore.Qt.Key_Backspace:
             self.textedit.keyPressEvent(event)
             alreadyTyped, start, end = self.textedit.wordUnderCursor(direction="left", search=True)
-            self.setCompletionPrefix(alreadyTyped)
-        elif ctrl and key == QtCore.Qt.Key_Space:
-            self.current_index += 1
-            if self.current_index >= len(self.match_indexes):
-                self.current_index = 0
-            self.setCurrentRow(self.match_indexes[self.current_index].row())
+            if alreadyTyped:
+                self.setCompletionPrefix(alreadyTyped)
+            else:
+                self.hide()
         elif modifier:
             self.textedit.keyPressEvent(event)
         else:
             self.hide()
             super().keyPressEvent(event)
     
+    def nextMatchCompletion(self):
+        self.current_match_index += 1
+        if self.current_match_index >= len(self.match_indexes):
+            self.current_match_index = 0
+        self.setCurrentRow(self.match_indexes[self.current_match_index].row())
+
+    def previousMatchCompletion(self):
+        self.current_match_index -= 1
+        if self.current_match_index < 0:
+            self.current_match_index = len(self.match_indexes) - 1
+        self.setCurrentRow(self.match_indexes[self.current_match_index].row())
+
     def setCompletionPrefix(self, completion_prefix):
-        if completion_prefix:
-            model = self.model()
-            if self.match_flags & QtCore.Qt.MatchWildcard:
-                completion_prefix = "*" + "*".join(list(completion_prefix)) + "*"
-            self.match_indexes = model.match(model.index(0, 0, QtCore.QModelIndex()),
-                QtCore.Qt.MatchRole, completion_prefix, -1, self.match_flags)
-            if self.match_indexes:
-                self.current_index = 0
-                self.setCurrentRow(self.match_indexes[self.current_index].row())
-            else:
-                self.hide()
+        model = self.model()
+        if self.match_flags & QtCore.Qt.MatchWildcard:
+            completion_prefix = "*" + "*".join(list(completion_prefix)) + "*"
+        self.match_indexes = model.match(model.index(0, 0, QtCore.QModelIndex()),
+            QtCore.Qt.MatchRole, completion_prefix, -1, self.match_flags)
+        if self.match_indexes:
+            self.current_match_index = 0
+            self.setCurrentRow(self.match_indexes[self.current_match_index].row())
         else:
             self.hide()
     
@@ -195,7 +206,6 @@ class CompletionWidget(QtWidgets.QListWidget):
 
     def __item_highlighted(self, index=None):
         item = self.completion_list[index]
-        print(item)
 
     def sizeHint(self):
         size = QtCore.QSize()
@@ -216,8 +226,6 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     
     extraSelectionChanged = QtCore.Signal()
     
-    queryCompletions = QtCore.Signal()
-    
     # ------------------ Find Flags
     FindBackward           = 1<<0
     FindCaseSensitive      = 1<<1
@@ -231,7 +239,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         self.__textCharFormat = {}
 
         # Completer
-        self.__completer = CompletionWidget(self, self.parent())
+        self.__completion_widget = CompletionWidget(self, self.parent())
 
         # Defaults
         self.eol_chars = os.linesep
@@ -242,12 +250,12 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     # OVERRIDE: QtWidgets.QPlainTextEdit.setPalette()
     def setPalette(self, palette):
         super().setPalette(palette)
-        self.__completer.setPalette(palette)
+        self.__completion_widget.setPalette(palette)
 
     # OVERRIDE: QtWidgets.QPlainTextEdit.setFont()
     def setFont(self, font):
         super().setFont(font)
-        self.__completer.setFont(font)
+        self.__completion_widget.setFont(font)
     
     # OVERRIDE: QtWidgets.QPlainTextEdit.focusInEvent()
     def focusInEvent(self, event):
@@ -260,30 +268,28 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         self.deactivated.emit()
 
     #------ Completion
+    def isCompletionWidgetVisible(self):
+        """Return True is completion list widget is visible"""
+        return self.__completion_widget.isVisible()
+        
     def setCompletionMatchFlags(self, flags):
         """Match flags completion"""
-        self.__completer.match_flags = flags
+        self.__completion_widget.match_flags = flags
         
     def setCompletionEnter(self, state):
         """Enable Enter key to select completion"""
-        self.__completer.enter_select = state
+        self.__completion_widget.enter_select = state
         
     def setCompletionAuto(self, auto):
         """Set code completion state"""
         self.completion_auto = auto
 
-    def showCompletion(self, completions, completion_prefix="",
+    def showCompletionWidget(self, completions, completion_prefix="",
             automatic=True):
         """Display the possible completions"""
         if len(completions) == 0 or completions == [completion_prefix]:
             return
-        # Sorting completion list (entries starting with underscore are 
-        # put at the end of the list):
-        # underscore = set([comp for comp in completions
-        #                  if comp.startswith('_')])
-        #completions = sorted(set(completions)-underscore, key=str_lower)+\
-        #              sorted(underscore, key=str_lower)
-        self.__completer.complete(completions, 
+        self.__completion_widget.complete(completions, 
             completion_prefix=completion_prefix,
             automatic=automatic)
                 
@@ -401,8 +407,8 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     def currentText(self):
         return self.textUnderCursor(self.textCursor(), search=True)
 
-    def wordUnderCursor(self, cursor = None, pattern = config.RE_WORD,
-        direction = "both", search = False):
+    def wordUnderCursor(self, cursor=None, pattern=config.RE_WORD,
+        direction="both", search=False):
         #Como cambio el cursor hago una copia
         cursor = cursor or self.textCursor()
         selectCursor = QtGui.QTextCursor(cursor)
@@ -420,7 +426,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             elif direction == "right":
                 index = end - cursor.position()
                 return wordUnderCursor[len(wordUnderCursor) - index:], end - index, end
-        return None, cursor.position(), cursor.position()
+        return "", cursor.position(), cursor.position()
             
     def textUnderCursor(self, cursor = None, pattern = config.RE_WORD,
         direction = "both", search = False):
@@ -461,7 +467,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             # Si estamos aca es porque es both
             if lmatch is not None:
                 return line[start - blockPosition : end - blockPosition], start, end
-        return None, cursor.position(), cursor.position()
+        return "", cursor.position(), cursor.position()
 
     #------ Retrieve cursors and blocks
     def newCursorAtPosition(self, position, anchor=None):
