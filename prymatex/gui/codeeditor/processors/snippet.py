@@ -29,7 +29,7 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
 
     def beginExecution(self, bundleItem):
         super(CodeEditorSnippetProcessor, self).beginExecution(bundleItem)
-        self.status = self.editor.showMessage("Snippet: %s" % bundleItem.name)
+        self.status = self.editor.showMessage("Snippet: %s" % bundleItem.name, timeout=0)
         self.render()
 
     def endExecution(self, bundleItem):

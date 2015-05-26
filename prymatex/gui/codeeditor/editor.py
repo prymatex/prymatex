@@ -909,10 +909,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 name = item.type()
                 processor = self.findProcessor(name)
                 processor.configure(**kwargs)
-                command_args = kwargs.copy()
-                command_args.update(item.dump(allKeys=True))
-                print(command_args)
-                self.__run_command("insert_%s" % name, command_args)
+                self.__run_command("insert_%s" % name, item.dump(allKeys=True))
                 item.execute(processor)
 
         if len(items) > 1:
