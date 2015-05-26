@@ -10,7 +10,6 @@ from prymatex.qt import QtCore, QtGui, Qt, QtWidgets, API
 
 from prymatex.core import PrymatexEditor
 from prymatex.core import constants
-from prymatex.core import config
 from prymatex.core.settings import ConfigurableItem
 
 from prymatex.widgets.texteditor import TextEditWidget
@@ -307,16 +306,16 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # -------------------- Notifications
     def showMessage(self, *largs, **kwargs):
         return self.window().showMessage(*largs, **kwargs)
-        
-    def showTooltip(self, *largs, **kwargs):
-        if "point" not in kwargs:
-            kwargs["point"] = self.viewport().mapToGlobal(
-                self.cursorRect(self.textCursor()).bottomRight()
-            )
-        return self.window().showTooltip(*largs, **kwargs)
+    
+    # -------------------- Status
+    def setStatus(self, key, value, timeout=None):
+        return self.window().setStatus(key, value, timeout)
 
-    def showStatus(self, *largs, **kwargs):
-        return self.window().showStatus(*largs, **kwargs)
+    def status(self, key):
+        return self.window().status(key)
+
+    def eraseStatus(self, key):
+        return self.window().eraseStatus(key)
 
     # OVERRIDE: TextEditWidget.setPlainText()
     def setPlainText(self, text):
@@ -512,22 +511,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
 
     # -------------- Completions
-    def extractCompletions(self, prefix, position=None):
-        print(prefix)
-        return []
-        suggestions = set()
-        block = self.document().begin()
-        while block.isValid():
-            user_data = self.blockUserData(block)
-            all_words = map(lambda token: config.RE_WORD.findall(token.chunk),
-                user_data.tokens[::-1])
-            for words in all_words:
-                suggestions.update(words)
-            block = block.next()
-        suggestions.discard(prefix)
-        # TODO Ordenarlas por position
-        return list(suggestions)
-
     def _query_completions(self, automatic=True):
         print("Go")
         """Trigger completion"""
@@ -922,11 +905,15 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         def _insert_item(index):
             if index >= 0:
-                name = items[index].type()
+                item = items[index]
+                name = item.type()
                 processor = self.findProcessor(name)
                 processor.configure(**kwargs)
-                self.__run_command("insert_%s" % name, kwargs)
-                items[index].execute(processor)
+                command_args = kwargs.copy()
+                command_args.update(item.dump(allKeys=True))
+                print(command_args)
+                self.__run_command("insert_%s" % name, command_args)
+                item.execute(processor)
 
         if len(items) > 1:
             syntax = any((item.type() == 'syntax' for item in items))

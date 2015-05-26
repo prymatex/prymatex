@@ -35,7 +35,7 @@ class ManagedObject(object):
         pass
     
     # ----------- Dump to dictionary
-    def dump(self, allKeys = False):
+    def dump(self, allKeys=False):
         return { 'uuid': self.uuidAsText() }
     
     def hasChanged(self, dataHash):

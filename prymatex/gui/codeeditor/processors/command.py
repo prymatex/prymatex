@@ -169,9 +169,15 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
             'copy': lambda s = message: self.editor.application().clipboard().setText(s)
         }
 
+        point = self.editor.viewport().mapToGlobal(
+            self.editor.cursorRect(self.editor.textCursor()).bottomRight()
+        )
+
         self.editor.showTooltip(message,
-            frmt = outputFormat or "text", timeout = timeout,
-            links = callbacks)
+            frmt=outputFormat or "text", 
+            timeout=timeout,
+            point=point,
+            links=callbacks)
 
     def toolTip(self, context, outputFormat=None):
         self.showAsTooltip(context, outputFormat)

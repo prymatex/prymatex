@@ -11,11 +11,11 @@ import difflib
 from prymatex.qt import API
 from prymatex.qt.extensions import HtmlItemDelegate
 from prymatex.utils import text
+from prymatex.core import config
 from prymatex import resources
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import textcursor_to_tuple
-from prymatex.core import config
 from functools import reduce
 
 class CompletionWidget(QtWidgets.QListWidget):
@@ -301,6 +301,17 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         elif isinstance(completion, dict):
             completion = completion.get('match', completion.get('display', completion.get('title')))
         cursor.insertText(completion)
+
+    def extractCompletions(self, prefix, position=None):
+        text = self.toPlainText()
+        all_words = filter(
+            lambda w: w.startswith(prefix),
+            config.RE_WORD.findall(text)
+        )
+        suggestions = set(all_words)
+        suggestions.discard(prefix)
+        # TODO Ordenarlas por position
+        return list(suggestions)
 
     #------ EOL characters
     def setEolChars(self, eol_chars):

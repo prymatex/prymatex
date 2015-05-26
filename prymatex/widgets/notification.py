@@ -9,7 +9,7 @@ class Notification(QtWidgets.QWidget):
     contentChanged = QtCore.Signal()
     def __init__(self, text, parent, timeout=None, icon=None, links=None,
         recyclable=None):
-        super(Notification, self).__init__(parent)
+        super().__init__(parent)
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.horizontalLayout = QtWidgets.QHBoxLayout(self)
@@ -59,7 +59,7 @@ class Notification(QtWidgets.QWidget):
         self.animationOut.setStartValue(1.0)
         self.animationOut.setEndValue(0)
 
-        if timeout is not None:
+        if timeout:
             self.timeoutTimer.setInterval(timeout)
             self.animationIn.finished.connect(self.timeoutTimer.start)
             self.timeoutTimer.timeout.connect(recyclable and self.hide or self.close)
@@ -104,16 +104,16 @@ class Notification(QtWidgets.QWidget):
         if text is not None:
             self.setText(text)
         self.setWindowOpacity(0.0)
-        super(Notification, self).show()
+        super().show()
         self.animationIn.start()
 
     def hide(self):
-        self.animationOut.finished.connect(super(Notification, self).hide)
+        self.animationOut.finished.connect(super().hide)
         self.animationOut.start()
     
     def close(self):
         self.aboutToClose.emit()
-        self.animationOut.finished.connect(super(Notification, self).close)
+        self.animationOut.finished.connect(super().close)
         self.animationOut.start()
     
     def linkHandler(self, link):
@@ -132,7 +132,7 @@ class OverlayNotifier(QtCore.QObject):
     margin = 10
     timeout = 2000
     def __init__(self, parent = None):
-        super(OverlayNotifier, self).__init__(parent)
+        super().__init__(parent)
         parent.installEventFilter(self)
         self.notifications = []
         self.palette = QtGui.QPalette()
@@ -155,7 +155,7 @@ class OverlayNotifier(QtCore.QObject):
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.Resize:
             self._fix_positions()
-        return super(OverlayNotifier, self).eventFilter(obj, event)
+        return super().eventFilter(obj, event)
 
     def _remove_notification(self):
         notification = self.sender()
@@ -205,27 +205,17 @@ class OverlayNotifier(QtCore.QObject):
         notification.adjustSize()
         return notification
 
-    def message(self, *args, **kwargs):
+    def create(self, *args, **kwargs):
         kwargs.setdefault("timeout", self.timeout)
+        point = kwargs.get("point")
         notification = self._notification(*args, **kwargs)
         notification.aboutToClose.connect(self._remove_notification)
         notification.contentChanged.connect(self._fix_positions)
         self.notifications.insert(0, notification)
-        self._fix_positions()
+        if point is not None:
+            notification.setGeometry(point.x(), point.y(),
+                notification.width(), notification.height())
+        else:
+            self._fix_positions()
         return notification
 
-    def status(self, *args, **kwargs):
-        notification = self._notification(*args, **kwargs)
-        notification.aboutToClose.connect(self._remove_notification)
-        notification.contentChanged.connect(self._fix_positions)
-        self.notifications.insert(0, notification)
-        self._fix_positions()
-        return notification
-
-    def tooltip(self, *args, **kwargs):
-        kwargs.setdefault("timeout", self.timeout)
-        point = kwargs.pop("point", QtCore.QPoint(self.margin,self.margin))
-        notification = self._notification(*args, **kwargs)
-        notification.setGeometry(point.x(), point.y(),
-            notification.width(), notification.height())
-        return notification

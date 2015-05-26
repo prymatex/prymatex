@@ -261,20 +261,10 @@ html_footer
 
     # -------------- Notifications
     def showMessage(self, *largs, **kwargs):
-        message = self.notifier.message(*largs, **kwargs)
+        message = self.notifier.create(*largs, **kwargs)
         message.show()
         return message
-
-    def showTooltip(self, *largs, **kwargs):
-        tooltip = self.notifier.tooltip(*largs, **kwargs)
-        tooltip.show()
-        return tooltip
-
-    def showStatus(self, *largs, **kwargs):
-        status = self.notifier.status(*largs, **kwargs)
-        status.show()
-        return status
-
+    
     # -------------------- Status
     def setStatus(self, key, value, timeout=None):
         return self.statusBar().setStatus(key, value, timeout)

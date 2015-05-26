@@ -35,7 +35,7 @@ Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}'''
         if 'content' in dataHash and hasattr(self, '_snippetNode'):
             delattr(self, '_snippetNode')
 
-    def dump(self, allKeys = False):
+    def dump(self, allKeys=False):
         dataHash = super(Snippet, self).dump(allKeys)
         for key in Snippet.KEYS:
             value = getattr(self, key)
