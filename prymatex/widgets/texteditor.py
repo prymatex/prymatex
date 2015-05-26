@@ -13,6 +13,7 @@ from prymatex.qt.extensions import HtmlItemDelegate
 from prymatex.utils import text
 from prymatex.core import config
 from prymatex import resources
+from prymatex.utils import text as textutils
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import textcursor_to_tuple
@@ -38,7 +39,7 @@ class CompletionWidget(QtWidgets.QListWidget):
         for completion in completions:
             item = QtWidgets.QListWidgetItem(self)
             if isinstance(completion, (tuple, list)):
-                item.setText("%s" % completion[0])
+                item.setText("%s" % textutils.asciify(completion[0]))
                 item.setData(QtCore.Qt.MatchRole, "%s" % completion[1])
             elif isinstance(completion, dict):
                 text = completion.get("display", completion.get('title')) 
@@ -181,6 +182,9 @@ class CompletionWidget(QtWidgets.QListWidget):
         self.match_indexes = model.match(model.index(0, 0, QtCore.QModelIndex()),
             QtCore.Qt.MatchRole, completion_prefix, -1, self.match_flags)
         if self.match_indexes:
+            match_rows = [ index.row() for index in self.match_indexes ]
+            for row in range(self.count()):
+                self.setRowHidden(row, row not in match_rows)
             self.current_match_index = 0
             self.setCurrentRow(self.match_indexes[self.current_match_index].row())
         else:
