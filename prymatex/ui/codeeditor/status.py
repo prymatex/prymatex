@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/media/sda5/Projects/Prymatex/prymatex/resources/ui/codeeditor/status.ui'
+# Form implementation generated from reading ui file '/home/diego/Projects/prymatex/resources/ui/codeeditor/status.ui'
 #
-# Created by: PyQt5 UI code generator 5.4.1
+# Created: Wed May 27 08:01:35 2015
+#      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -337,12 +338,7 @@ class Ui_CodeEditorStatus(object):
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.labelMessage = QtWidgets.QLabel(self.widgetStatus)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.labelMessage.sizePolicy().hasHeightForWidth())
-        self.labelMessage.setSizePolicy(sizePolicy)
-        self.labelMessage.setText("")
+        self.labelMessage.setMinimumSize(QtCore.QSize(1, 0))
         self.labelMessage.setObjectName("labelMessage")
         self.horizontalLayout_2.addWidget(self.labelMessage)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
@@ -353,7 +349,6 @@ class Ui_CodeEditorStatus(object):
         self.line_5.setObjectName("line_5")
         self.horizontalLayout_2.addWidget(self.line_5)
         self.labelContent = QtWidgets.QLabel(self.widgetStatus)
-        self.labelContent.setMaximumSize(QtCore.QSize(350, 16777215))
         self.labelContent.setObjectName("labelContent")
         self.horizontalLayout_2.addWidget(self.labelContent)
         self.line_6 = QtWidgets.QFrame(self.widgetStatus)
@@ -414,5 +409,4 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonFindInFilesFind.setText(_translate("CodeEditorStatus", "Find"))
         self.pushButtonFindInFilesReplace.setText(_translate("CodeEditorStatus", "Replace"))
         self.pushButtonFindInFilesWhere.setText(_translate("CodeEditorStatus", "..."))
-        self.labelContent.setText(_translate("CodeEditorStatus", "Content"))
 

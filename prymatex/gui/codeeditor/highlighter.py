@@ -76,15 +76,16 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def on_thread_ready(self, index, user_data):
         block = self.document().findBlockByNumber(index)
-        block.layout().setAdditionalFormats(
-            self.themeProcessor.textCharFormats(user_data)
-        )
-        block.setUserData(user_data)
-        renext = block.userState() not in (-1, user_data.state)
-        block.setUserState(user_data.state)
-        self.document().markContentsDirty(block.position(), block.length())
-        if renext:
-            self.rehighlightBlock(block.next())
+        if block.isValid():
+            block.layout().setAdditionalFormats(
+                self.themeProcessor.textCharFormats(user_data)
+            )
+            block.setUserData(user_data)
+            renext = block.userState() not in (-1, user_data.state)
+            block.setUserState(user_data.state)
+            self.document().markContentsDirty(block.position(), block.length())
+            if renext:
+                self.rehighlightBlock(block.next())
     
     def stop(self):
         QtCore.QTimer.singleShot(0, self.thread.stop)

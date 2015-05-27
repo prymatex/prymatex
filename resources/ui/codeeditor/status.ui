@@ -676,14 +676,11 @@
       </property>
       <item>
        <widget class="QLabel" name="labelMessage">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string/>
+        <property name="minimumSize">
+         <size>
+          <width>1</width>
+          <height>0</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -708,17 +705,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="labelContent">
-        <property name="maximumSize">
-         <size>
-          <width>350</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Content</string>
-        </property>
-       </widget>
+       <widget class="QLabel" name="labelContent"/>
       </item>
       <item>
        <widget class="Line" name="line_6">
