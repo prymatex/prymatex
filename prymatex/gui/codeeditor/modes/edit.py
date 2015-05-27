@@ -12,8 +12,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
 
     def initialize(self, **kwargs):
         super(CodeEditorEditMode, self).initialize(**kwargs)
-        #self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__insert_key_bundle_item)
-        #self.registerKeyPressHandler(QtCore.Qt.Key_Any, self.__insert_typing_pairs)
         self.registerKeyPressHandler(QtCore.Qt.Key_Return, self.__insert_new_line)
         self.registerKeyPressHandler(QtCore.Qt.Key_Tab, self.__insert_tab_bundle_item)
         self.registerKeyPressHandler(QtCore.Qt.Key_Home, self.__move_cursor_to_home)
@@ -27,11 +25,18 @@ class CodeEditorEditMode(CodeEditorBaseMode):
     def keyPress_handlers(self, event):
         for handler in super().keyPress_handlers(event):
             yield handler
+
         # Bundle items 
         trigger = keyevent_to_keysequence(event)
         if trigger in self.application().supportManager.getAllKeyEquivalentCodes():
             yield self.__insert_key_bundle_item
 
+        # Pairs
+        settings = self.editor.currentPreferenceSettings()
+        character = event.text()
+        if any((pair for pair in settings.smartTypingPairs if character in pair)):
+            yield self.__insert_typing_pairs
+        
     # ------------ Key press handlers
     def __insert_new_line(self, event):
         self.editor.insertNewLine(self.editor.textCursor())
@@ -115,16 +120,12 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                 return True
         
     def __insert_typing_pairs(self, event):
-        cursor = self.editor.textCursor()
-        settings = self.editor.preferenceSettings(cursor)
+        settings = self.editor.currentPreferenceSettings()
         character = event.text()
-        pairs = [pair for pair in settings.smartTypingPairs if character in pair]
-        
-        # No pairs
-        if not pairs: return False
+        pair = [pair for pair in settings.smartTypingPairs if character in pair][0]
+
+        cursor = self.editor.textCursor()
         cl, cr, clo, cro = self.editor._smart_typing_pairs(cursor)
-        
-        pair = pairs[0]
         
         isOpen = character == pair[0]
         isClose = character == pair[1]

@@ -121,6 +121,15 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # --------------------- init
     def __init__(self, **kwargs):
         super(CodeEditor, self).__init__(**kwargs)
+
+	# Processors
+        self.processors = [
+            CodeEditorSnippetProcessor(self),
+            CodeEditorCommandProcessor(self),
+            CodeEditorSyntaxProcessor(self),
+            CodeEditorMacroProcessor(self),
+            CodeEditorThemeProcessor(self)
+        ]
         
         # By default
         self.showMarginLine = True
@@ -139,14 +148,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.__command_index = -1
         self.__last_content = ""
 
-        # Processors
-        self.processors = [
-            CodeEditorSnippetProcessor(self),
-            CodeEditorCommandProcessor(self),
-            CodeEditorSyntaxProcessor(self),
-            CodeEditorMacroProcessor(self),
-            CodeEditorThemeProcessor(self)
-        ]
+        # Current state
+        self.__current_scope = None
+        self.__current_preference_settings = None
+        self.__current_properties_settings = None
 
         # Highlighter
         self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
@@ -176,10 +181,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
         # Editor signals
         self.updateRequest.connect(self.updateSideBars)
-        self.themeChanged.connect(self._update_highlight)
-        self.cursorPositionChanged.connect(self._update_highlight)
-        self.cursorPositionChanged.connect(self._update_position)
-
+        self.themeChanged.connect(self._highlight)
+        self.cursorPositionChanged.connect(self.on_cursorPositionChanged)
         self.syntaxChanged.connect(lambda syntax, editor=self: 
             editor.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
         )
@@ -211,7 +214,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.application().supportManager.propertiesChanged.disconnect(self._update_properties)
         
     def _update_properties(self, *args, **kwargs):
-        properties = self.propertiesSettings()
+        properties = self.currentPropertiesSettings()
+        if properties is None:
+            return
         if properties.lineEndings:
             self.setEolChars(properties.lineEndings)
         if properties.encoding:
@@ -408,16 +413,25 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return (left_syntax_scope + left_cursor_scope + auxiliary_scope, 
             right_syntax_scope + right_cursor_scope + auxiliary_scope)
         
-    def preferenceSettings(self, cursor=None):
+    def preferenceSettings(self, cursor):
         return self.application().supportManager.getPreferenceSettings(
             *self.scope(cursor or self.textCursor())
         )
 
-    def propertiesSettings(self, cursor=None):
+    def propertiesSettings(self, cursor):
         return self.application().supportManager.getPropertiesSettings(
             self.filePath(), *self.scope(cursor or self.textCursor())
         )
     
+    def currentScope(self):
+        return self.__current_scope
+        
+    def currentPreferenceSettings(self):
+        return self.__current_preference_settings
+        
+    def currentPropertiesSettings(self):
+        return self.__current_properties_settings
+
     # --------------- Block User Data
     def blockUserData(self, block):
         return block.userData() or self.findProcessor("syntax").emptyUserData()
@@ -614,8 +628,15 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         cursor.endEditBlock()
         return replaced
 
-    def _update_position(self):
+    def on_cursorPositionChanged(self):
+        # Se movio el cursor preparar el nuevo estado del editor
+        # Update state
         cursor = self.textCursor()
+        self.__current_scope = self.scope(cursor)
+        self.__current_preference_settings = self.preferenceSettings(cursor)
+        self.__current_properties_settings = self.propertiesSettings(cursor)
+        
+        # Update status
         st = []
         if cursor.hasSelection():
             start, end = self.selectionBlockStartEnd(cursor)
@@ -627,14 +648,16 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             st.append('Column %d' % (cursor.positionInBlock() + 1))
         self.window().setStatus('position', ', '.join(st))
 
+        # Update highlight
+        self._highlight()
+
     #-------------------- Highlight Editor on signal trigger
-    def _update_highlight(self):
+    def _highlight(self):
         selections = []
         lines = []
         pairs = []
-        current = self.textCursor()
-        for cursor in self.textCursors():
-            if cursor.hasSelection() and current != cursor:
+        for cursor in self.textCursors()[1:]:
+            if cursor.hasSelection():
                 selections.append(QtGui.QTextCursor(cursor))
             cursor.clearSelection()
             if self.showHighlightCurrentLine and not any(
@@ -801,10 +824,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         else:
             TextEditWidget.mouseReleaseEvent(self, event)
 
-    def focusInEvent(self, event):
-        super().focusInEvent(event)
-        self._update_position()
-
     # --------------- Key press pre and post
     def trySyntaxByText(self, cursor):
         text = cursor.block().text()[:cursor.positionInBlock()]
@@ -820,7 +839,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
             self.trySyntaxByText(cursor)
         block = cursor.block()
         positionInBlock = cursor.positionInBlock()
-        settings = self.preferenceSettings(cursor)
+        settings = self.currentPreferenceSettings()
 
         indentationFlag = settings.indentationFlag(block.text()[:positionInBlock])
 
@@ -1065,7 +1084,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     # -------------- Add select text functions
     def selectEnclosingBrackets(self, cursor=None):
         cursor = cursor or self.textCursor()
-        settings = self.preferenceSettings(cursor)
+        settings = self.currentPreferenceSettings()
         flags = QtGui.QTextDocument.FindFlags()
         flags |= QtGui.QTextDocument.FindBackward
         foundCursors = [(self.document().find(openBrace_closeBrace[0], cursor.selectionStart(), flags), openBrace_closeBrace[1]) for openBrace_closeBrace in settings.highlightPairs]
