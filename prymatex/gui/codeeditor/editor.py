@@ -875,6 +875,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return (None, None, 0)
 
     def __run_command(self, name, args):
+        print(name, args)
         repeat = 0
         if self.__command_history and \
             self.__command_history[-1][0] == name and \
@@ -1673,6 +1674,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.setTextCursor(memento)
 
     def on_document_undoCommandAdded(self):
+        print("undo added")
         cursor = self.textCursor()
 
         if not (cursor.atEnd() or cursor.atStart()):
