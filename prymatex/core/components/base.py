@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from prymatex.utils import text as textutils
 #http://pyqt.sourceforge.net/Docs/PyQt5/multiinheritance.html#ref-cooperative-multiinheritance
 
 class PrymatexComponent(object):
@@ -29,8 +30,15 @@ class PrymatexComponent(object):
     def addCommand(self, string, command):
         self._commands[string] = command
         
+    def addCommandsByName(self):
+        for method in dir(self):
+            if method.startswith("command_"):
+                name = "_".join(textutils.camelcase_to_text(method[8:]).split())
+                self.addCommand(name, getattr(self, method))
+
     def runCommand(self, string, *args, **kwargs):
-        self._commands[string].run(*args, **kwargs)
+        command = self._commands[string]
+        getattr(command, "run", command)(*args, **kwargs)
 
     @classmethod
     def contributeToSettings(cls):
