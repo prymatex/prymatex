@@ -142,10 +142,11 @@ class SnippetHandler(object):
         return False
 
     def lastHolder(self):
+        # Si el snippet esta fixeado tons last holder son dos el utimo y el fix
         index = self.taborder.index(self.__current_holder().index)
         if self.snippet.lastHolderFixed():
             index += 1
-        return index + 1 == len(self.taborder) 
+        return index + 1 >= len(self.taborder) 
 
     def holderNumber(self):
         return self.holderIndex + 1
