@@ -60,7 +60,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                 leftScope, rightScope = self.editor.scope(triggerCursor)
                 items = self.application().supportManager.getTabTriggerItem(
                     trigger, leftScope, rightScope)
-                self.editor.insertBundleItem(items, textCursor = triggerCursor)
+                self.editor.insertBundleItem(items, textCursor=triggerCursor)
                 return bool(items)
 
     def __move_cursor_to_home(self, event):

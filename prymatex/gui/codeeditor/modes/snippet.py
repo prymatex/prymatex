@@ -52,7 +52,7 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         holder_start, holder_end = self.processor.translateToHolderPosition(
             cursor.selectionStart(), cursor.selectionEnd()
         )
-        if not holder_start:
+        if not holder_start or self.processor.isLastHolder():
             self.processor.stop()
             return False
         holder_position = cursor.selectionStart() - holder_start

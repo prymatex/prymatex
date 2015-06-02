@@ -521,10 +521,18 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
 
     # -------------- Completions
     def _query_completions(self, automatic=True):
-        print("Go")
         """Trigger completion"""
         if not self.isCompletionWidgetVisible():
             self.queryCompletions.emit(automatic)
+    
+    def insertCompletion(self, completion):
+        currentWord, start, end = self.currentWord()
+        cursor = self.newCursorAtPosition(start, end)
+        if isinstance(completion, (tuple, list)):
+            text = completion[1]
+        elif isinstance(completion, dict):
+            text = completion.get('match', completion.get('display', completion.get('title')))
+        self.insertSnippet(text, textCursor=cursor)
         
     # -------------- Smart Typing Pairs
     def _smart_typing_pairs(self, cursor):
@@ -794,6 +802,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
+        if event.text():
+            self.__run_command("insert", {'characters': event.text()})
         if not any(self._handle_event(self.keyPress_handlers(event), event)):
             super(CodeEditor, self).keyPressEvent(event)
             self.keyPressed.emit(event)
@@ -865,11 +875,12 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         index = self.__command_index + index
         if 0 <= index < len(self.__command_history):
             command = self.__command_history[index]
-            if not modifying_only or command[0] in ('replace', 'delete', 'insert'):
+            if not modifying_only or command[0] in ('delete', 'insert'):
                 return command
         return (None, None, 0)
 
     def __run_command(self, name, args):
+        # Add command to history
         repeat = 0
         if self.__command_history and \
             self.__command_history[-1][0] == name and \
@@ -908,7 +919,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         elif items:
             _insert_item(0)
 
-    def insertSnippet(self, snippetContent, commandInput = "none", commandOutput = "insertText", **kwargs):
+    def insertSnippet(self, snippetContent, commandInput="none", commandOutput="insertText", **kwargs):
         snippet = self.application().supportManager.buildAdHocSnippet(
             snippetContent, self.syntax().bundle)
         self.insertBundleItem(snippet, **kwargs)
