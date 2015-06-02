@@ -149,9 +149,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.__last_content = ""
 
         # Current state
-        self.__current_scope = None
-        self.__current_preference_settings = None
-        self.__current_properties_settings = None
+        cursor = self.textCursor()
+        self.__current_scope = self.scope(cursor)
+        self.__current_preference_settings = self.preferenceSettings(cursor)
+        self.__current_properties_settings = self.propertiesSettings(cursor)
 
         # Highlighter
         self.syntaxHighlighter = CodeEditorSyntaxHighlighter(self)
@@ -176,17 +177,16 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.leftBar.updateRequest.connect(self.updateViewportMargins)
 
         # Document signals
-        self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)
-        self.document().contentsChange.connect(self.on_document_contentsChange)
-
-        # Editor signals
-        self.updateRequest.connect(self.updateSideBars)
+        #self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)
+        
+        # Connect Editor signals
+        self.updateRequest.connect(self.on_updateRequest)
         self.themeChanged.connect(self._highlight)
         self.cursorPositionChanged.connect(self.on_cursorPositionChanged)
-        self.syntaxChanged.connect(lambda syntax, editor=self: 
-            editor.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
-        )
-        
+        self.syntaxChanged.connect(self._update_properties)
+        self.filePathChanged.connect(self._update_properties)
+        self.application().supportManager.propertiesChanged.connect(self._update_properties)
+
     def highlighter(self):
         return self.syntaxHighlighter
 
@@ -202,10 +202,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         
         # Update properties
         self._update_properties()
-        self.syntaxChanged.connect(self._update_properties)
-        self.filePathChanged.connect(self._update_properties)
-        self.application().supportManager.propertiesChanged.connect(self._update_properties)
-
+        
         # Get dialogs
         self.selectorDialog = self.window().findChild(QtWidgets.QDialog, "SelectorDialog")
         self.browserDock = self.window().findChild(QtWidgets.QDockWidget, "BrowserDock")
@@ -215,8 +212,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         
     def _update_properties(self, *args, **kwargs):
         properties = self.currentPropertiesSettings()
-        if properties is None:
-            return
         if properties.lineEndings:
             self.setEolChars(properties.lineEndings)
         if properties.encoding:
@@ -503,7 +498,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.setViewportMargins(self.leftBar.width(), 0, 0, 0)
         #self.setViewportMargins(self.leftBar.width(), 0, self.rightBar.width(), 0)
 
-    def updateSideBars(self, rect, dy):
+    def on_updateRequest(self, rect, dy):
         if dy:
             self.rightBar.scroll(0, dy)
             self.leftBar.scroll(0, dy)
@@ -875,7 +870,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         return (None, None, 0)
 
     def __run_command(self, name, args):
-        print(name, args)
         repeat = 0
         if self.__command_history and \
             self.__command_history[-1][0] == name and \
@@ -883,31 +877,6 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 repeat = self.__command_history[-1][2] + 1
         self.__command_history.append((name, args, repeat))
         self.__command_index = len(self.__command_history) - 1
-
-    def on_document_contentsChange(self, position, charsRemoved, charsAdded):
-        text = self.toPlainText()
-        command = None
-        if charsRemoved and charsAdded:
-            command = ('replace', { 
-                    'characters': self.__last_content[position:position + charsRemoved],
-                    'by': text[position:position + charsAdded],
-                    'position': position
-                })
-            if command[1]['characters'] == command[1]['by']:
-                command = None
-        elif charsRemoved:
-            command = ('delete', { 
-                    'characters': self.__last_content[position:position + charsRemoved],
-                    'position': position
-                })
-        elif charsAdded:
-            command = ('insert', { 
-                    'characters': text[position:position + charsAdded],
-                    'position': position
-                })
-        self.__last_content = text
-        if command is not None:
-            self.__run_command(*command)
         
     # ------------ Bundle Items
     def findProcessor(self, nameType):

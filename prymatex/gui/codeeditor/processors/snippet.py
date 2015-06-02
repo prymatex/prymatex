@@ -118,6 +118,12 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
     def setHolderContent(self, content):
         self.bundleItem.setHolderContent(content)
 
+    def translateToHolderPosition(self, start, end):
+        if self.setHolder(start, end):
+            return self.currentPosition()
+        self.stop()
+        return None, None
+        
     # -------------- Snippet position
     def currentPosition(self):
         return self.bundleItem.currentPosition()

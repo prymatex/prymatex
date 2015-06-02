@@ -58,6 +58,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         
         self.editor.syntaxHighlighter.start()
         self.editor.syntaxHighlighter.rehighlight()
+        self.editor.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
         self.editor.syntaxChanged.emit(syntax)
 
     def endExecution(self, bundleItem):

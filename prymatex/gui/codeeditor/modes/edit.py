@@ -192,7 +192,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
     def __run_completer(self):
         alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
         suggestions = set(self.editor.extractCompletions(alreadyTyped))
-        suggestions.update(self.editor.preferenceSettings().completions)
+        suggestions.update(self.editor.currentPreferenceSettings().completions)
         suggestions = sorted(list(suggestions))
         self.editor.showCompletionWidget(suggestions, completion_prefix=alreadyTyped)
         return True

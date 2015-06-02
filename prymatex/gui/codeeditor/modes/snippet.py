@@ -19,8 +19,8 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         self.registerKeyPressHandler(QtCore.Qt.Key_Enter, self.__snippet_return)
         self.registerKeyPressHandler(QtCore.Qt.Key_Tab, self.__snippet_navigation)
         self.registerKeyPressHandler(QtCore.Qt.Key_Backtab, self.__snippet_navigation)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__snippet_backspace)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__snippet_delete)
+        self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__snippet_remove)
+        self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__snippet_remove)
 
     def activate(self):
         self.editor.keyPressed.connect(self.on_editor_keyPressed)
@@ -33,21 +33,14 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
     def on_editor_keyPressed(self, event):
         if not event.text():
             return
-        command, args, _ = self.editor.commandHistory(0, True)
-        if not self.processor.setHolder(args['position'], args['position']):
+        position = self.editor.textCursor().position() - len(event.text())
+        if not self.processor.setHolder(position, position):
             self.processor.stop()
             return
         holder_start, holder_end = self.processor.currentPosition()
-        if command == 'insert':
-            holder_position = args['position'] - holder_start + len(args['characters'])
-            cursor = self.editor.newCursorAtPosition(holder_start, holder_end + len(args['characters']))
-        elif command == 'delete':
-            holder_position = args['position'] - holder_start
-            cursor = self.editor.newCursorAtPosition(holder_start, holder_end - len(args['characters']))
-        elif command == 'replace':
-            holder_position = args['position'] - holder_start + len(args['by'])
-            cursor = self.editor.newCursorAtPosition(holder_start, holder_end - (len(args['characters']) - len(args['by'])))
-
+        holder_position = position - holder_start + len(event.text())
+        cursor = self.editor.newCursorAtPosition(holder_start, holder_end + len(event.text()))
+            
         cursor.joinPreviousEditBlock()        
         selected_text = self.editor.selectedTextWithEol(cursor)
         # Update holder
@@ -78,21 +71,34 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
             return True
         self.processor.stop()
 
-    def __snippet_backspace(self, event):
+    def __snippet_remove(self, event):
         cursor = self.editor.textCursor()
-        if self.processor.isReady():
-            holderStart, holderEnd = self.processor.currentPosition()
-            if not cursor.hasSelection() and cursor.position() == holderStart:
-                self.processor.stop()
+        holder_start, holder_end = self.processor.translateToHolderPosition(
+            cursor.selectionStart(), cursor.selectionEnd()
+        )
+        if not holder_start:
+            return False
+        position = cursor.selectionStart() - holder_start
+        remove = len(cursor.selectedText()) or 1
+        if event.key() == QtCore.Qt.Key_Backspace:
+            cursor.deletePreviousChar()
+        else:
+            cursor.deleteChar()
+        content = self.editor.toPlainTextWithEol()[holder_start:holder_end - remove]
+        # Update holder
+        self.processor.setHolderContent(content)
 
-    def __snippet_delete(self, event):
-        cursor = self.editor.textCursor()
-        if self.processor.isReady():
-            holderStart, holderEnd = self.processor.currentPosition()
-            if not cursor.hasSelection() and cursor.position() == holderEnd:
-                self.processor.stop()
+        # Render
+        self.processor.render()
+        
+        new_holder_start, _ = self.processor.currentPosition()
+        self.editor.setTextCursor(
+            self.editor.newCursorAtPosition(
+                new_holder_start + position - remove
+            )
+        )
+        return True
 
     def __snippet_return(self, event):
-        print(self.processor.isLastHolder())
         if self.processor.isLastHolder():
             self.processor.stop()
