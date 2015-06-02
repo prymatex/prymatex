@@ -173,7 +173,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
             self.editor.cursorRect(self.editor.textCursor()).bottomRight()
         )
 
-        self.editor.showTooltip(message,
+        self.editor.showMessage(message,
             frmt=outputFormat or "text", 
             timeout=timeout,
             point=point,
