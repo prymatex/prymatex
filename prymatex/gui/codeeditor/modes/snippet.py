@@ -19,32 +19,22 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         self.registerKeyPressHandler(QtCore.Qt.Key_Enter, self.__snippet_return)
         self.registerKeyPressHandler(QtCore.Qt.Key_Tab, self.__snippet_navigation)
         self.registerKeyPressHandler(QtCore.Qt.Key_Backtab, self.__snippet_navigation)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__snippet_remove)
-        self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__snippet_remove)
+        self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__snippet_backspace)
+        self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__snippet_delete)
 
-    def activate(self):
-        self.editor.keyPressed.connect(self.on_editor_keyPressed)
-        super().activate()
-        
-    def deactivate(self):
-        self.editor.keyPressed.disconnect(self.on_editor_keyPressed)
-        super().deactivate()
+    # OVERRIDE: CodeEditorBaseMode.keyPress_handlers()
+    def keyPress_handlers(self, event):
+        for handler in super().keyPress_handlers(event):
+            yield handler
 
-    def on_editor_keyPressed(self, event):
-        if not event.text():
-            return
-        position = self.editor.textCursor().position() - len(event.text())
-        if not self.processor.setHolder(position, position):
-            self.processor.stop()
-            return
-        holder_start, holder_end = self.processor.currentPosition()
-        holder_position = position - holder_start + len(event.text())
-        cursor = self.editor.newCursorAtPosition(holder_start, holder_end + len(event.text()))
-            
-        cursor.joinPreviousEditBlock()        
-        selected_text = self.editor.selectedTextWithEol(cursor)
+        # Text event
+        if event.text():
+            yield self.__keyPressed
+
+    # -------------- Tools
+    def _update_and_render(self, content, position):
         # Update holder
-        self.processor.setHolderContent(selected_text)
+        self.processor.setHolderContent(content)
 
         # Render
         self.processor.render()
@@ -52,11 +42,30 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         new_holder_start, _ = self.processor.currentPosition()
         self.editor.setTextCursor(
             self.editor.newCursorAtPosition(
-                new_holder_start + holder_position
+                new_holder_start + position
             )
         )
+    
+    # -------------- Editor text keyPressed handler
+    def __keyPressed(self, event):
+        cursor = self.editor.textCursor()
+        holder_start, holder_end = self.processor.translateToHolderPosition(
+            cursor.selectionStart(), cursor.selectionEnd()
+        )
+        if not holder_start:
+            self.processor.stop()
+            return False
+        holder_position = cursor.selectionStart() - holder_start
+        add = len(event.text())
+        remove = len(cursor.selectedText()) if cursor.hasSelection() else 0
+        cursor.beginEditBlock()
+        cursor.insertText(event.text())
+        content = self.editor.toPlainTextWithEol()[holder_start:holder_end - remove + add]
+        self._update_and_render(content, holder_position + add)
         cursor.endEditBlock()
+        return True
 
+    # -------------- Editor key handlers
     def __snippet_end(self, event):
         self.processor.stop()
         return True
@@ -71,32 +80,41 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
             return True
         self.processor.stop()
 
-    def __snippet_remove(self, event):
+    def __snippet_backspace(self, event):
         cursor = self.editor.textCursor()
         holder_start, holder_end = self.processor.translateToHolderPosition(
             cursor.selectionStart(), cursor.selectionEnd()
         )
         if not holder_start:
+            self.processor.stop()
             return False
-        position = cursor.selectionStart() - holder_start
-        remove = len(cursor.selectedText()) or 1
-        if event.key() == QtCore.Qt.Key_Backspace:
-            cursor.deletePreviousChar()
-        else:
-            cursor.deleteChar()
+        holder_position = cursor.selectionStart() - holder_start
+        remove = len(cursor.selectedText())
+        if not cursor.hasSelection():
+            remove = 1
+            holder_position -= 1
+        cursor.beginEditBlock()
+        cursor.deletePreviousChar()
         content = self.editor.toPlainTextWithEol()[holder_start:holder_end - remove]
-        # Update holder
-        self.processor.setHolderContent(content)
-
-        # Render
-        self.processor.render()
-        
-        new_holder_start, _ = self.processor.currentPosition()
-        self.editor.setTextCursor(
-            self.editor.newCursorAtPosition(
-                new_holder_start + position - remove
-            )
+        self._update_and_render(content, holder_position)
+        cursor.endEditBlock()
+        return True
+    
+    def __snippet_delete(self, event):
+        cursor = self.editor.textCursor()
+        holder_start, holder_end = self.processor.translateToHolderPosition(
+            cursor.selectionStart(), cursor.selectionEnd()
         )
+        if not holder_start:
+            self.processor.stop()
+            return False
+        holder_position = cursor.selectionStart() - holder_start
+        remove = len(cursor.selectedText()) if cursor.hasSelection() else 1
+        cursor.beginEditBlock()
+        cursor.deleteChar()
+        content = self.editor.toPlainTextWithEol()[holder_start:holder_end - remove]
+        self._update_and_render(content, holder_position)
+        cursor.endEditBlock()
         return True
 
     def __snippet_return(self, event):
