@@ -75,31 +75,34 @@ class CodeEditorMultiCursorMode(CodeEditorBaseMode):
         self.registerKeyPressHandler("Backspace", self.__cursors_backspace)
         self.registerKeyPressHandler("Delete", self.__cursors_delete)
 
+    # OVERRIDE: CodeEditorBaseMode.keyPress_handlers()
+    def keyPress_handlers(self, event):
+        for handler in super().keyPress_handlers(event):
+            yield handler
+
+        # Text event
+        if event.text():
+            yield self.__keyPressed
+
     def activate(self):
-        self.editor.keyPressed.connect(self.on_editor_keyPressed)
         self.editor.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
         super().activate()
 
     def deactivate(self):
-        self.editor.keyPressed.disconnect(self.on_editor_keyPressed)
         self.editor.viewport().setCursor(self.standardCursor)
         super().deactivate()
 
-    def on_editor_keyPressed(self, event):
-        if not event.text():
-            return
-        name, args, _ = self.editor.commandHistory(0, True)
-        if name in ("insert", "replace"):
-            text = args[name == "insert" and "characters" or "by"]
-            cursors = self.editor.textCursors()
-            cursors[0].joinPreviousEditBlock() 
-            new_cursors = [ cursors[0] ]
-            for cursor in cursors[1:]:
-                cursor.insertText(text)
-                new_cursors.append(cursor)
-            new_cursors[0].endEditBlock()
-            new_cursors = _build_cursors(self.editor, _build_set(new_cursors))
-            self.editor.setTextCursors(new_cursors)
+    def __keyPressed(self, event):
+        cursor = self.editor.textCursor()
+        cursor.beginEditBlock()
+        new_cursors = []
+        for c in self.editor.textCursors():
+            c.insertText(event.text())
+            new_cursors.append(c)
+        cursor.endEditBlock()
+        new_cursors = _build_cursors(self.editor, _build_set(new_cursors))
+        self.editor.setTextCursors(new_cursors)
+        return True
 
     def on_editor_cursorPositionChanged(self):
         # Test and switch state
