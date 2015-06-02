@@ -93,6 +93,9 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         if not cursor.hasSelection():
             remove = 1
             holder_position -= 1
+        if not(holder_start <= cursor.position() - remove <= holder_end):
+            self.processor.stop()
+            return False
         cursor.beginEditBlock()
         cursor.deletePreviousChar()
         content = self.editor.toPlainTextWithEol()[holder_start:holder_end - remove]
@@ -110,6 +113,9 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
             return False
         holder_position = cursor.selectionStart() - holder_start
         remove = len(cursor.selectedText()) if cursor.hasSelection() else 1
+        if not(holder_start <= cursor.position() - remove <= holder_end):
+            self.processor.stop()
+            return False
         cursor.beginEditBlock()
         cursor.deleteChar()
         content = self.editor.toPlainTextWithEol()[holder_start:holder_end - remove]

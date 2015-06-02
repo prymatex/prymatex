@@ -533,6 +533,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         elif isinstance(completion, dict):
             text = completion.get('match', completion.get('display', completion.get('title')))
         self.insertSnippet(text, textCursor=cursor)
+        self.__run_command("commit_completion", {})
         
     # -------------- Smart Typing Pairs
     def _smart_typing_pairs(self, cursor):
@@ -909,9 +910,9 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
                 name = item.type()
                 processor = self.findProcessor(name)
                 processor.configure(**kwargs)
-                self.__run_command("insert_%s" % name, item.dump(allKeys=True))
                 item.execute(processor)
-
+                self.__run_command("insert_%s" % name, item.dump(allKeys=True))
+                
         if len(items) > 1:
             syntax = any((item.type() == 'syntax' for item in items))
 

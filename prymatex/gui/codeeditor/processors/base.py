@@ -8,7 +8,7 @@ class CodeEditorBaseProcessor(QtCore.QObject):
     end = QtCore.Signal()
 
     def __init__(self, editor):
-        QtCore.QObject.__init__(self, editor)
+        super().__init__(editor)
         self.editor = editor
         self.textCursor = None
         self.bundleItem = None
@@ -25,11 +25,14 @@ class CodeEditorBaseProcessor(QtCore.QObject):
         self.baseEnvironment = kwargs.get("environment", {})
 
     def beginExecution(self, bundleItem):
+        if self.isReady():
+            self.endExecution(self.bundleItem)
         self.bundleItem = bundleItem
         self.__env = None
         self.begin.emit()
 
     def endExecution(self, bundleItem):
+        assert self.bundleItem == bundleItem, ""
         self.bundleItem = None
         self.end.emit()
 

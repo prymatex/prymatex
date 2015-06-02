@@ -15,7 +15,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
     NOT_REVISION = -1
     CACHE = {}
     def __init__(self, editor):
-        CodeEditorBaseProcessor.__init__(self, editor)
+        super().__init__(editor)
         self.stack = []
         self.scope = None
         self.stacks = {}
@@ -48,11 +48,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         # Get Wrapped Syntax
         syntax = self.editor.application().supportManager.getBundleItem(bundleItem.uuid)
 
-        # ------------ Previous syntax
-        if self.isReady():
-            self.endExecution(self.bundleItem)
-
-        CodeEditorBaseProcessor.beginExecution(self, syntax)
+        super().beginExecution(syntax)
         
         self.beginParse(syntax.scopeName)
         

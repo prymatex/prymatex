@@ -19,11 +19,7 @@ class CodeEditorThemeProcessor(CodeEditorBaseProcessor, ThemeProcessorMixin):
         # Get Wrapped Theme
         theme = self.editor.application().supportManager.getBundleItem(bundleItem.uuid)
 
-        # ------------ Previous theme
-        if self.isReady():
-            self.endExecution(self.bundleItem)
-
-        CodeEditorBaseProcessor.beginExecution(self, theme)
+        super().beginExecution(theme)
 
         self.editor.setCurrentCharFormat(theme.textCharFormat())
         self.editor.setPalette(theme.palette())

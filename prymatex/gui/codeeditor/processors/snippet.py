@@ -28,12 +28,12 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         return True
 
     def beginExecution(self, bundleItem):
-        super(CodeEditorSnippetProcessor, self).beginExecution(bundleItem)
+        super().beginExecution(bundleItem)
         self.status = self.editor.showMessage("Snippet: %s" % bundleItem.name, timeout=0)
         self.render()
 
     def endExecution(self, bundleItem):
-        super(CodeEditorSnippetProcessor, self).endExecution(bundleItem)
+        super().endExecution(bundleItem)
         self.status.close()
 
     def beginRender(self):
@@ -42,13 +42,14 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
 
     def endRender(self):
         self.__endPosition = self.caretPosition()
+        self.snippetWrapper.beginEditBlock()
         self.editor.updatePlainText(self.__output, self.snippetWrapper)
-        self.snippetWrapper = self.editor.newCursorAtPosition(
-            self.__startPosition, self.__endPosition)
         # Select holder
         self.selectHolder()
-        self.__render = False
-        
+        self.snippetWrapper.endEditBlock()
+        self.snippetWrapper = self.editor.newCursorAtPosition(
+            self.__startPosition, self.__endPosition)
+                
     def caretPosition(self):
         return self.snippetWrapper.selectionStart() + len(self.__output)
 
