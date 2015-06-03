@@ -129,7 +129,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         
         isOpen = character == pair[0]
         isClose = character == pair[1]
-        isSame = pair[0] == pair[1]
         control_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
         if isClose and not cursor.hasSelection() \
             and cr and cro and character == cr.selectedText():
@@ -179,11 +178,8 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                     return True
                     
         word, wordStart, wordEnd = self.editor.currentWord()
-        if isOpen and not isSame and not (wordStart <= cursor.position() < wordEnd):
-            position = cursor.position()
-            cursor.insertText("%s%s" % (pair[0], pair[1]))
-            cursor.setPosition(position + 1)
-            self.editor.setTextCursor(cursor)
+        if isOpen and not (wordStart <= cursor.position() < wordEnd):
+            self.editor.insertSnippet("%s$0%s" % (pair[0], pair[1]))
             return True
 
     def __toggle_overwrite(self, event):
