@@ -207,7 +207,7 @@ class OverlayNotifier(QtCore.QObject):
 
     def create(self, *args, **kwargs):
         kwargs.setdefault("timeout", self.timeout)
-        point = kwargs.get("point")
+        point = kwargs.pop("point", None)
         notification = self._notification(*args, **kwargs)
         notification.aboutToClose.connect(self._remove_notification)
         notification.contentChanged.connect(self._fix_positions)

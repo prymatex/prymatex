@@ -64,7 +64,7 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtWidgets.QDialo
         self.setWindowTitle(title)
         
         # Set namespace and filters
-        self.namespace = namespaces and namespaces[0] or self.application().namespace(config.USR_NS_NAME)
+        self.namespace = namespaces and namespaces[0] or config.USR_NS_NAME
         self.proxyTreeModel.setFilterNamespace(namespaces)
         self.proxyTreeModel.setFilterBundleItemType(types)
         index = self.comboBoxItemFilter.findData(types)

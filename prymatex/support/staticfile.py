@@ -26,7 +26,16 @@ class StaticFile(object):
     
     def hasSource(self, sourceName):
         return self.parentItem.hasSource(sourceName)
-        
+    
+    # ----------- Update from dictionary
+    def update(self, data_hash):
+        for key in data_hash.keys():
+            setattr(self, key, data_hash[key])
+    
+    # ----------- Dump to dictionary
+    def dump(self, allKeys=False):
+        return { 'content': self.content }
+
     # TODO Mejorar esto del content
     def getFileContent(self):
         content = ""
@@ -41,10 +50,6 @@ class StaticFile(object):
                 f.write(encoding.to_fs(content))
     content = property(getFileContent, setFileContent)
 
-    def update(self, dataHash):
-        for key in dataHash.keys():
-            setattr(self, key, dataHash[key])
-    
     def relocate(self, path):
         if os.path.exists(self.path):
             shutil.move(self.path, path)

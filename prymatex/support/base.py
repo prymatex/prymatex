@@ -31,16 +31,16 @@ class ManagedObject(object):
         self.static_files = []
 
     # ----------- Update from dictionary
-    def update(self, dataHash):
+    def update(self, data_hash):
         pass
     
     # ----------- Dump to dictionary
     def dump(self, allKeys=False):
         return { 'uuid': self.uuidAsText() }
     
-    def hasChanged(self, dataHash):
+    def hasChanged(self, data_hash):
         currentHash = self.dump(allKeys=True)
-        for key, value in dataHash.items():
+        for key, value in data_hash.items():
             if key not in currentHash or currentHash[key] != value:
                 return True
         return False
