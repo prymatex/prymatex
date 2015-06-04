@@ -37,6 +37,9 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         if any((pair for pair in settings.smartTypingPairs if character in pair)):
             yield self.__insert_typing_pairs
         
+        #if event.text():
+        #    self.editor.runCommand("insert", characters=event.text())
+        
     # ------------ Key press handlers
     def __insert_new_line(self, event):
         self.editor.insertNewLine(self.editor.textCursor())

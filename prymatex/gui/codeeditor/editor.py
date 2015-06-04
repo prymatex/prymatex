@@ -17,6 +17,9 @@ from prymatex.widgets.texteditor import CompletionWidget
 
 from prymatex.qt.helpers import (extend_menu, keyevent_to_keysequence, keyevent_to_tuple)
 from prymatex.models.support import BundleItemTreeNode
+from prymatex.utils import text, encoding
+from prymatex.utils.i18n import ugettext as _
+from functools import reduce
 
 from .addons import CodeEditorAddon
 from .sidebar import CodeEditorSideBar, SideBarWidgetMixin
@@ -28,12 +31,9 @@ from .highlighter import CodeEditorSyntaxHighlighter
 from .models import (SymbolListModel, BookmarkListModel, FoldingListModel,
     bundleItemSelectableModelFactory, bookmarkSelectableModelFactory,
     symbolSelectableModelFactory)
+from .commands import CodeEditorCommandsMixin
 
-from prymatex.utils import text, encoding
-from prymatex.utils.i18n import ugettext as _
-from functools import reduce
-
-class CodeEditor(PrymatexEditor, TextEditWidget):
+class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
     STANDARD_SIZES = (70, 78, 80, 100, 120)
     MAX_FOLD_LEVEL = 10
     
@@ -186,6 +186,8 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.syntaxChanged.connect(self._update_properties)
         self.filePathChanged.connect(self._update_properties)
         self.application().supportManager.propertiesChanged.connect(self._update_properties)
+
+        self.addCommandsByName()
 
     def highlighter(self):
         return self.syntaxHighlighter
@@ -803,6 +805,7 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
     
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
+        #Emula el comportamiento del comando insert
         if event.text():
             self.__run_command("insert", {'characters': event.text()})
         if not any(self._handle_event(self.keyPress_handlers(event), event)):
@@ -872,6 +875,10 @@ class CodeEditor(PrymatexEditor, TextEditWidget):
         self.ensureCursorVisible()
 
     # ------------ Command API
+    def runCommand(self, string, **kwargs):
+        super().runCommand(string, **kwargs)
+        self.__run_command(string, kwargs)
+        
     def commandHistory(self, index, modifying_only=False):
         index = self.__command_index + index
         if 0 <= index < len(self.__command_history):
