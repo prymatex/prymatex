@@ -36,9 +36,9 @@ class PrymatexComponent(object):
                 name = "_".join(textutils.camelcase_to_text(method[8:]).split())
                 self.addCommand(name, getattr(self, method))
 
-    def runCommand(self, string, *args, **kwargs):
+    def runCommand(self, string, **kwargs):
         command = self._commands[string]
-        getattr(command, "run", command)(*args, **kwargs)
+        getattr(command, "run", command)(**kwargs)
 
     @classmethod
     def contributeToSettings(cls):
