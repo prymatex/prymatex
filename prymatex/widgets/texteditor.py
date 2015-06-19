@@ -28,7 +28,8 @@ class CompletionWidget(QtWidgets.QListWidget):
         self.match_flags = QtCore.Qt.MatchWrap | QtCore.Qt.MatchWildcard | QtCore.Qt.MatchCaseSensitive
         self.match_indexes = []
         self.current_match_index = -1
-        self.enter_select = None
+        #self.select_keys = (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter)
+        self.select_keys = (QtCore.Qt.Key_Tab, )
         self.hide()
         self.itemActivated.connect(self.__item_activated)
         self.currentRowChanged.connect(self.__item_highlighted)
@@ -135,8 +136,7 @@ class CompletionWidget(QtWidgets.QListWidget):
         shift = event.modifiers() & QtCore.Qt.ShiftModifier
         ctrl = event.modifiers() & QtCore.Qt.ControlModifier
         modifier = shift or ctrl or alt
-        if (key in (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter) and self.enter_select) \
-           or key == QtCore.Qt.Key_Tab:
+        if key in self.select_keys:
             self.__item_activated()
         elif key in (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter,
                      QtCore.Qt.Key_Left, QtCore.Qt.Key_Right) or text in ('.', ':'):
@@ -280,9 +280,9 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         """Match flags completion"""
         self.__completion_widget.match_flags = flags
         
-    def setCompletionEnter(self, state):
-        """Enable Enter key to select completion"""
-        self.__completion_widget.enter_select = state
+    def setCompletionKeys(self, *keys):
+        """Enabled keys to select completion"""
+        self.__completion_widget.select_keys = keys
         
     def setCompletionAuto(self, auto):
         """Set code completion state"""
