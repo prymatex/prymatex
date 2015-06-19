@@ -31,11 +31,11 @@ class Snippet(object):
         return not self.__hasLastHolder
 
     def replace(self, memodict):
-        return "".join([node.replace(memodict, holders = self.placeholders) for node in self.nodes])
+        return "".join([node.replace(memodict, holders=self.placeholders) for node in self.nodes])
 
     def render(self, visitor, memodict):
         for node in self.nodes:
-            node.render(visitor, memodict, holders = self.placeholders)
+            node.render(visitor, memodict, holders=self.placeholders)
 
     def __len__(self):
         return len(self.placeholders)
@@ -74,7 +74,7 @@ class SnippetHandler(object):
         self.taborder = None
         self.holderIndex = None
         self.memodict = None
-        
+
     def hasSnippet(self):
         return self.snippet is not None
 
@@ -154,6 +154,9 @@ class SnippetHandler(object):
     def setHolderContent(self, text):
         self.__current_holder().setContent(text, self.memodict)
 
+    def holderContent(self):
+        return self.__current_holder().getContent(self.memodict)
+        
     def hasHolderContent(self):
         return self.__current_holder().hasContent(self.memodict)
     

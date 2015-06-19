@@ -121,8 +121,8 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
     # --------------------- init
     def __init__(self, **kwargs):
         super(CodeEditor, self).__init__(**kwargs)
-
-	# Processors
+        
+        # Processors
         self.processors = [
             CodeEditorSnippetProcessor(self),
             CodeEditorCommandProcessor(self),

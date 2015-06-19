@@ -157,9 +157,12 @@ class PlaceholderTypeMixin(object):
         return memodict.get_or_create(self).content is not None
         
     def setContent(self, text, memodict):
-        memodict.set(self, memodict.get_or_create(self)._replace(content = text))
+        memodict.set(self, memodict.get_or_create(self)._replace(content=text))
         return True
     
+    def getContent(self, memodict):
+        return memodict.get_or_create(self).content
+
     def position(self, memodict):
         memo = memodict.get_or_create(self)
         return memo.start, memo.end
@@ -199,7 +202,7 @@ class PlaceholderType(PlaceholderTypeMixin):
             return "".join([node.replace(memodict, holders, match, variables)
                 for node in self.content ])
     
-    def render(self, visitor, memodict, holders = None, match = None):
+    def render(self, visitor, memodict, holders=None, match=None):
         memo = memodict.get_or_create(self)
         start = visitor.caretPosition()
         
@@ -213,13 +216,13 @@ class PlaceholderType(PlaceholderTypeMixin):
                 node.render(visitor, memodict, holders, match)
 
         end = visitor.caretPosition()
-        memodict.set(self, memo._replace(start = start, end = end))
+        memodict.set(self, memo._replace(start=start, end=end))
     
     def hasContent(self, memodict):
         return PlaceholderTypeMixin.hasContent(self, memodict) or bool(self.content)
     
     def memoFactory(self, identifier):
-        return Memo(identifier = identifier, start = 0, end = 0, content = None)
+        return Memo(identifier=identifier, start=0, end=0, content=None)
         
 #struct placeholder_choice_t { size_t index; std::vector<nodes_t> choices; WATCH_LEAKS(parser::placeholder_choice_t); };
 class PlaceholderChoiceType(PlaceholderTypeMixin):
@@ -249,7 +252,7 @@ class PlaceholderChoiceType(PlaceholderTypeMixin):
         return PlaceholderTypeMixin.hasContent(self, memodict) or bool(self.choices)
     
     def memoFactory(self, identifier):
-        return Memo(identifier = identifier, start = 0, end = 0, content = 0)
+        return Memo(identifier=identifier, start=0, end=0, content=0)
         
 #struct placeholder_transform_t { size_t index; regexp::pattern_t pattern; nodes_t format; regexp_options::type options; WATCH_LEAKS(parser::placeholder_transform_t); };
 class PlaceholderTransformType(PlaceholderTypeMixin):
@@ -294,7 +297,7 @@ class PlaceholderTransformType(PlaceholderTypeMixin):
         return PlaceholderTypeMixin.hasContent(self, memodict) or True
 
     def memoFactory(self, identifier):
-        return Memo(identifier = identifier, start = 0, end = 0, content = None)
+        return Memo(identifier=identifier, start=0, end=0, content=None)
         
 #struct variable_fallback_t { std::string name; nodes_t fallback; WATCH_LEAKS(parser::variable_fallback_t); };
 class VariableFallbackType(object):
@@ -400,4 +403,4 @@ class CodeType(object):
         visitor.insertText(self.replace(memodict, holders, match, visitor.environmentVariables()))
     
     def memoFactory(self, identifier):
-        return Memo(identifier = identifier, start = 0, end = 0, content = None)
+        return Memo(identifier=identifier, start=0, end=0, content=None)
