@@ -47,13 +47,15 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
         if builtins:
             resources = resources + self.builtins()
         resources.append(self.base)
+        print(names, builtins, [r.name() for r in resources])
         return ResourceProvider(resources)
 
     def builtins(self):
         return [res for res in self.prymatex_resources if res.builtin()]
 
     def providerForClass(self, componentClass):
-        resource_name = getattr(componentClass, "RESOURCES", None)
+        print(componentClass)
+        resource_name = getattr(componentClass, "RESOURCES", '')
         return self.get_provider(resource_name)
 
     def icon_from_theme(self, index):
