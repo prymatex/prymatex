@@ -42,7 +42,10 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         
     # ------------ Key press handlers
     def __insert_new_line(self, event):
-        self.editor.insertNewLine(self.editor.textCursor())
+        cursor = self.editor.textCursor()
+        if cursor.blockNumber() == 0:
+            self.editor.trySyntaxByText(cursor)
+        self.editor.runCommand("insert", characters = '\n')
         return True
     
     def __insert_key_bundle_item(self, event):

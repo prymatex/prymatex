@@ -9,7 +9,6 @@ import operator
 from prymatex.qt import QtCore, QtGui, Qt, QtWidgets, API
 
 from prymatex.core import PrymatexEditor
-from prymatex.core import constants
 from prymatex.core.settings import ConfigurableItem
 
 from prymatex.widgets.texteditor import TextEditWidget
@@ -839,45 +838,11 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         syntax = self.application().supportManager.findSyntaxByFirstLine(text)
         if syntax is not None:
             self.insertBundleItem(syntax)
-        
-    # ------------ Insert API
-    def insertNewLine(self, cursor = None):
-        cursor = cursor or self.textCursor()
-        # TODO: Is first line ? then try new syntax
-        if cursor.blockNumber() == 0:
-            self.trySyntaxByText(cursor)
-        block = cursor.block()
-        positionInBlock = cursor.positionInBlock()
-        settings = self.currentPreferenceSettings()
-
-        indentationFlag = settings.indentationFlag(block.text()[:positionInBlock])
-
-        tab_behavior = self.tabKeyBehavior()
-        indentation = self.blockIndentation(block)
-
-        if indentationFlag is constants.INDENT_INCREASE:
-            self.logger().debug("Increase indentation")
-            blockIndent = indentation + tab_behavior
-        elif indentationFlag is constants.INDENT_NEXTLINE:
-            #TODO: Creo que este no es el correcto
-            self.logger().debug("Increase next line indentation")
-            blockIndent = indentation + tab_behavior
-        elif indentationFlag is constants.INDENT_UNINDENT:
-            self.logger().debug("Unindent")
-            blockIndent = ""
-        elif indentationFlag is constants.INDENT_DECREASE:
-            self.logger().debug("Decrease indentation")
-            blockIndent = indentation[:-len(tab_behavior)]
-        else:
-            self.logger().debug("Preserve indentation")
-            blockIndent = indentation[:positionInBlock]
-        cursor.insertText("\n%s" % blockIndent)
-        self.ensureCursorVisible()
 
     # ------------ Command API
     def runCommand(self, string, **kwargs):
-        super().runCommand(string, **kwargs)
         self.__run_command(string, kwargs)
+        super().runCommand(string, **kwargs)
         
     def commandHistory(self, index, modifying_only=False):
         index = self.__command_index + index
