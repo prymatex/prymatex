@@ -7,19 +7,19 @@ from prymatex.qt import QtCore
 # Process
 #=========================================================
 class ExternalProcessTableModel(QtCore.QAbstractTableModel):
+    STATES = {
+        0: "NotRunning",
+        1: "Starting",
+        2: "Running" 
+    }
+    ICONS = {
+        0: "porcess-not-running",
+        1: "porcess-starting",
+        2: "porcess-running" 
+    }
     def __init__(self, manager, parent = None): 
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.manager = manager
-        self.states = {
-            0: "NotRunning",
-            1: "Starting",
-            2: "Running" 
-        }
-        self.icons = {
-            0: manager.resources().get_icon("porcess-not-running"),
-            1: manager.resources().get_icon("porcess-starting"),
-            2: manager.resources().get_icon("porcess-running") 
-        }
         self.processItems = []
 
     def index(self, row, column, parent = None):
@@ -41,9 +41,11 @@ class ExternalProcessTableModel(QtCore.QAbstractTableModel):
             elif index.column() == 1:
                 return item["description"]
             elif index.column() == 2:
-                return self.states[item["process"].state()]
+                return self.STATES[item["process"].state()]
         elif role == QtCore.Qt.DecorationRole and index.column() == 0:
-            return self.icons[item["process"].state()]
+            return self.manager.resources().get_icon(
+                self.ICONS[item["process"].state()]
+            )
             
     def findRowIndex(self, process):
         items = [item for item in self.processItems if item["process"] == process]

@@ -191,7 +191,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         self.bundleTreeModel = BundleItemTreeModel(self)
         self.themeStylesTableModel = ThemeStylesTableModel(self)
         self.processTableModel = ExternalProcessTableModel(self)
-        
+
         #STYLE PROXY
         self.themeStyleProxyModel = ThemeStyleProxyTableModel(self)
         self.themeStyleProxyModel.setSourceModel(self.themeStylesTableModel)

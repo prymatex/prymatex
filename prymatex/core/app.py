@@ -161,7 +161,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         # Build more Managers
         app.packageManager = app.createComponentInstance(PackageManager, parent=app)        
         app.storageManager = app.createComponentInstance(StorageManager, parent=app)
-        app.supportManager = app.createComponentInstance(SupportManager, parent=app) 
+        app.supportManager = app.createComponentInstance(SupportManager, parent=app)
         app.fileManager = app.createComponentInstance(FileManager, parent=app)
         app.projectManager = app.createComponentInstance(ProjectManager, parent=app)
         app.serverManager = app.createComponentInstance(ServerManager, parent=app)
