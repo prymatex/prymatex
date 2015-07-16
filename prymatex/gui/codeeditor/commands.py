@@ -38,3 +38,43 @@ class CodeEditorCommandsMixin(object):
             current_indentation = new_indentation
         cursor.endEditBlock()
         self.ensureCursorVisible()
+
+    def command_left_delete(self):
+        cursor = self.textCursor()
+        if not cursor.hasSelection():
+            # TODO Quiza esto sea una macro
+            # ----------- Remove Braces
+            cl, cr, clo, cro = self._smart_typing_pairs(cursor)
+            if cl and clo  and (cl.selectionStart() == clo.selectionEnd() or cl.selectionEnd() == clo.selectionStart()):
+                cursor.beginEditBlock()
+                cl.removeSelectedText()
+                clo.removeSelectedText()
+                cursor.endEditBlock()
+                return
+            
+            # ----------- Remove Tab_behavior
+            tab_behavior = self.tabKeyBehavior()
+            ncursor = self.newCursorAtPosition(cursor.position(), cursor.position() - len(tab_behavior))
+            if ncursor.selectedText() == tab_behavior:
+                ncursor.removeSelectedText()
+                return
+        cursor.deletePreviousChar()
+
+    def command_right_delete(self):
+        cursor = self.textCursor()
+        if not cursor.hasSelection():
+            # ----------- Remove Braces
+            cl, cr, clo, cro = self._smart_typing_pairs(cursor)
+            if cr and cro  and (cr.selectionStart() == cro.selectionEnd() or cr.selectionEnd() == cro.selectionStart()):
+                cursor.beginEditBlock()
+                cr.removeSelectedText()
+                cro.removeSelectedText()
+                cursor.endEditBlock()
+                return
+            # ----------- Remove Tab_behavior
+            tab_behavior = self.tabKeyBehavior()
+            ncursor = self.newCursorAtPosition(cursor.position(), cursor.position() + len(tab_behavior))
+            if ncursor.selectedText() == tab_behavior:
+                ncursor.removeSelectedText()
+                return
+        cursor.deleteChar()

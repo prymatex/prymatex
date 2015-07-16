@@ -90,40 +90,12 @@ class CodeEditorEditMode(CodeEditorBaseMode):
             return True
 
     def __backspace_behavior(self, event):
-        cursor = self.editor.textCursor()
-        if not cursor.hasSelection():
-            # ----------- Remove Braces
-            cl, cr, clo, cro = self.editor._smart_typing_pairs(cursor)
-            if cl and clo  and (cl.selectionStart() == clo.selectionEnd() or cl.selectionEnd() == clo.selectionStart()):
-                cursor.beginEditBlock()
-                cl.removeSelectedText()
-                clo.removeSelectedText()
-                cursor.endEditBlock()
-                return True
-            # ----------- Remove Tab_behavior
-            tab_behavior = self.editor.tabKeyBehavior()
-            cursor = self.editor.newCursorAtPosition(cursor.position(), cursor.position() - len(tab_behavior))
-            if cursor.selectedText() == tab_behavior:
-                cursor.removeSelectedText()
-                return True
+        self.editor.runCommand("left_delete")
+        return True
 
     def __delete_behavior(self, event):
-        cursor = self.editor.textCursor()
-        if not cursor.hasSelection():
-            # ----------- Remove Braces
-            cl, cr, clo, cro = self.editor._smart_typing_pairs(cursor)
-            if cr and cro  and (cr.selectionStart() == cro.selectionEnd() or cr.selectionEnd() == cro.selectionStart()):
-                cursor.beginEditBlock()
-                cr.removeSelectedText()
-                cro.removeSelectedText()
-                cursor.endEditBlock()
-                return True
-            # ----------- Remove Tab_behavior
-            tab_behavior = self.editor.tabKeyBehavior()
-            cursor = self.editor.newCursorAtPosition(cursor.position(), cursor.position() + len(tab_behavior))
-            if cursor.selectedText() == tab_behavior:
-                cursor.removeSelectedText()
-                return True
+        self.editor.runCommand("right_delete")
+        return True
         
     def __insert_typing_pairs(self, event):
         settings = self.editor.currentPreferenceSettings()

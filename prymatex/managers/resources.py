@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 
+import logging
+
 from prymatex.qt import QtCore, QtGui
 from prymatex.core import PrymatexComponent, config
 
 from prymatex.resources import (Resource, ResourceProvider, load_media,
     load_fonts, load_stylesheets)
-    
+
 from prymatex.models.shortcuts import ShortcutsTreeModel
+
+logger = logging.getLogger(__name__)
 
 class ResourceManager(PrymatexComponent, QtCore.QObject):
     def __init__(self, **kwargs):
@@ -47,14 +51,16 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
         if builtins:
             resources = resources + self.builtins()
         resources.append(self.base)
-        print(names, builtins, [r.name() for r in resources])
+        logger.debug("get_provider for [%s] got [%s]" % (
+            ",".join(names), 
+            ",".join([r.name() for r in resources])
+        ))
         return ResourceProvider(resources)
 
     def builtins(self):
         return [res for res in self.prymatex_resources if res.builtin()]
 
     def providerForClass(self, componentClass):
-        print(componentClass)
         resource_name = getattr(componentClass, "RESOURCES", '')
         return self.get_provider(resource_name)
 
