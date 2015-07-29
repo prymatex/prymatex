@@ -7,4 +7,4 @@ def qbytearray_to_hex(qbytearray):
     return encoding.force_text(qbytearray.toHex().data())
 
 def hex_to_qbytearray(hexadecimal):
-    return QtCore.QByteArray.fromHex(hexadecimal)
+    return QtCore.QByteArray.fromHex(encoding.force_bytes(hexadecimal))

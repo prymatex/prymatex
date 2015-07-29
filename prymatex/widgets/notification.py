@@ -48,13 +48,13 @@ class Notification(QtWidgets.QWidget):
         self.setGraphicsEffect(self.goe)
         
         # Fade in
-        self.animationIn = QtCore.QPropertyAnimation(self.goe, "opacity")
+        self.animationIn = QtCore.QPropertyAnimation(self.goe, b"opacity")
         self.animationIn.setDuration(300)
         self.animationIn.setStartValue(0)
         self.animationIn.setEndValue(1.0)
 
         # Fade out
-        self.animationOut = QtCore.QPropertyAnimation(self.goe, "opacity")
+        self.animationOut = QtCore.QPropertyAnimation(self.goe, b"opacity")
         self.animationOut.setDuration(300)
         self.animationOut.setStartValue(1.0)
         self.animationOut.setEndValue(0)

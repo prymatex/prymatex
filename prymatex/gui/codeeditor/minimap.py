@@ -33,7 +33,7 @@ class MiniMapAddon(SideBarWidgetMixin, QtWidgets.QPlainTextEdit):
         self.goe = QtWidgets.QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.goe)
         self.goe.setOpacity(self.MIN_OPACITY)
-        self.animation = QtCore.QPropertyAnimation(self.goe, "opacity")
+        self.animation = QtCore.QPropertyAnimation(self.goe, b"opacity")
         
         self.slider = SliderArea(self)
         self.slider.show()
