@@ -26,10 +26,9 @@ class CompletionWidget(QtWidgets.QListWidget):
         self.textedit = textedit
         self.completion_list = None
         self.match_flags = QtCore.Qt.MatchWrap | QtCore.Qt.MatchWildcard | QtCore.Qt.MatchCaseSensitive
-        self.match_indexes = []
+        self._match_indexes = []
         self.current_match_index = -1
-        #self.select_keys = (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter)
-        self.select_keys = (QtCore.Qt.Key_Tab, )
+        self.select_keys = (QtCore.Qt.Key_Tab, QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter)
         self.hide()
         self.itemActivated.connect(self.__item_activated)
         self.currentRowChanged.connect(self.__item_highlighted)
@@ -165,42 +164,36 @@ class CompletionWidget(QtWidgets.QListWidget):
     
     def nextMatchCompletion(self):
         self.current_match_index += 1
-        if self.current_match_index >= len(self.match_indexes):
+        if self.current_match_index >= len(self._match_indexes):
             self.current_match_index = 0
-        self.setCurrentRow(self.match_indexes[self.current_match_index].row())
+        self.setCurrentRow(self._match_indexes[self.current_match_index].row())
 
     def previousMatchCompletion(self):
         self.current_match_index -= 1
         if self.current_match_index < 0:
-            self.current_match_index = len(self.match_indexes) - 1
-        self.setCurrentRow(self.match_indexes[self.current_match_index].row())
+            self.current_match_index = len(self._match_indexes) - 1
+        self.setCurrentRow(self._match_indexes[self.current_match_index].row())
 
-    def setCompletionPrefix(self, completion_prefix):
+    def setCompletionPrefix(self, prefix):
         model = self.model()
+        match = prefix
         if self.match_flags & QtCore.Qt.MatchWildcard:
-            completion_prefix = "*" + "*".join(list(completion_prefix)) + "*"
-        self.match_indexes = model.match(model.index(0, 0, QtCore.QModelIndex()),
-            QtCore.Qt.MatchRole, completion_prefix, -1, self.match_flags)
-        if self.match_indexes:
-            match_rows = [ index.row() for index in self.match_indexes ]
-            for row in range(self.count()):
-                self.setRowHidden(row, row not in match_rows)
-            self.current_match_index = 0
-            self.setCurrentRow(self.match_indexes[self.current_match_index].row())
-        else:
+            match = "*" + "*".join(list(match)) + "*"
+        self._match_indexes = model.match(model.index(0, 0, QtCore.QModelIndex()),
+            QtCore.Qt.MatchRole, match, -1, self.match_flags)
+        if not self._match_indexes:
             self.hide()
+            return
+        selfsame = self._match_indexes[0].data(QtCore.Qt.MatchRole) == prefix
+        if len(self._match_indexes) == 1 and selfsame:
+            self.hide()
+            return
+        match_rows = [ index.row() for index in self._match_indexes ]
+        for row in range(self.count()):
+            self.setRowHidden(row, row not in match_rows)
+        self.current_match_index = 1 if selfsame else 0 
+        self.setCurrentRow(self._match_indexes[self.current_match_index].row())
     
-    def focusOutEvent(self, event):
-        event.ignore()
-        # Don't hide it on Mac when main window loses focus because
-        # keyboard input is lost
-        # Fixes Issue 1318
-        if sys.platform == "darwin":
-            if event.reason() != Qt.ActiveWindowFocusReason:
-                self.hide()
-        else:
-            self.hide()
-        
     def __item_activated(self, item=None):
         if item is None:
             index = self.currentRow()
@@ -216,7 +209,17 @@ class CompletionWidget(QtWidgets.QListWidget):
         size.setHeight(super().sizeHint().height())
         size.setWidth(self.sizeHintForColumn(0))
         return size
-    
+
+    def setMatchFlags(self, flags):
+        self.match_flags = flags
+        
+    def setSelectKeys(self, keys):
+        self.select_keys = keys
+
+    def setCurrentRow(self, row):
+        super().setCurrentRow(row)
+        self.scrollToItem(self.item(row))
+
 class TextEditWidget(QtWidgets.QPlainTextEdit):
     # ------------------ Constants
     EOL_CHARS = [ item[0] for item in text.EOLS ]
