@@ -40,7 +40,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         return True
 
     def beginExecution(self, bundleItem):
-        if self.bundleItem == bundleItem:
+        if self.bundleItem is not None and self.bundleItem == bundleItem:
             return
         
         self.editor.syntaxHighlighter.stop()

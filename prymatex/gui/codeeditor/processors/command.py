@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.qt import QtGui
+from prymatex.qt import QtCore, QtGui
 from prymatex.utils import html
 
 from .base import CodeEditorBaseProcessor
@@ -104,12 +104,18 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
         if self.errorCommand:
             raise Exception(context.errorValue)
         else:
-            self.editor.window().showErrorInBrowser(
+            print(context)
+            def show_error(window, desc, value, _type):
+                def _show_error():
+                    window.showErrorInBrowser(desc, value, _type,
+                        errorCommand=True)
+                return _show_error
+            QtCore.QTimer.singleShot(0, show_error(
+                self.editor.window(),
                 context.description(),
                 context.errorValue,
-                context.outputType,
-                errorCommand=True
-            )
+                context.outputType           
+            ))
 
     def discard(self, context, outputFormat = None):
         pass

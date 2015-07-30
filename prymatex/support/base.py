@@ -18,6 +18,12 @@ class ManagedObject(object):
         self.current_source = None
         self.static_files = []
 
+    def __eq__(self, other):
+        return self.uuid == other.uuid
+    
+    def __hash__(self):
+        return hash(self.uuid)
+
     @classmethod
     def type(cls):
         "Return a string based on class name"
