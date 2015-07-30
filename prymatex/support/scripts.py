@@ -179,7 +179,7 @@ def makeExecutableTempFile(content, directory, prefix="script"):
     #tempFile = tempfile.NamedTemporaryFile(prefix='pmx', dir = directory)
     descriptor, name = tempfile.mkstemp(prefix=prefix, dir = directory)
     tempFile = os.fdopen(descriptor, 'w+')
-    tempFile.write(encoding.to_fs(content))
+    tempFile.write(encoding.force_text(content))
     tempFile.close()
     os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
     return name
