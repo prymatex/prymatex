@@ -197,12 +197,10 @@ echo Selection: "$TM_SELECTED_TEXT"''',
 
     def afterExecute(self, processor, context):
         outputHandler = self.getOutputHandler(context.outputType)
-        
         handlerFunction = getattr(processor, outputHandler, None)
         if handlerFunction is not None:
             handlerFunction(context, self.outputFormat)
         # TODO: Ver que pasa con el outputCaret
-        # Delete temp file
         if outputHandler != "error":
             context.removeScriptFile()
         processor.endExecution(self)

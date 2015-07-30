@@ -61,13 +61,17 @@ class PrymatexMainCommandProcessor(CommandProcessorMixin, QtCore.QObject):
         if self.errorCommand:
             raise Exception(context.errorValue)
         else:
-            print(context.workingDirectory)
-            self.window().showErrorInBrowser(
+            def show_error(window, desc, value, _type):
+                def _show_error():
+                    window.showErrorInBrowser(desc, value, _type,
+                        errorCommand=True)
+                return _show_error
+            QtCore.QTimer.singleShot(0, show_error(
+                self.window(),
                 context.description(),
                 context.errorValue,
-                context.outputType,
-                errorCommand = True
-            )
+                context.outputType           
+            ))
 
     def showAsHTML(self, context, outputFormat = None):
         self.window().browserDock.setRunningContext(context)
