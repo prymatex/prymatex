@@ -289,9 +289,9 @@ Apply force_text in Python 3 and force_bytes in Python 2.
 #  Functions for encoding and decoding bytes that come from
 #  the *file system*.
 #------------------------------------------------------------------------------
-def from_fs(string):
-    return six.text_type(string, FS_ENCODING)
+def from_fs(_bytes):
+    return smart_text(_bytes, encoding=FS_ENCODING)
 
-def to_fs(string):
-    """Return a string version of unic encoded using the file system encoding."""
-    return smart_str(string, encoding = FS_ENCODING)
+def to_fs(text):
+    """Return a bytes version of text using the file system encoding."""
+    return smart_bytes(text, encoding=FS_ENCODING)
