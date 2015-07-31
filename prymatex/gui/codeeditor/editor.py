@@ -533,6 +533,8 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
             text = completion[1]
         elif isinstance(completion, dict):
             text = completion.get('match', completion.get('display', completion.get('title')))
+        else:
+            text = completion
         self.insertSnippet(text, textCursor=cursor)
         self.__run_command("commit_completion", {})
         
