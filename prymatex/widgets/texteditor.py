@@ -299,7 +299,10 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         self.__completion_widget.complete(completions, 
             completion_prefix=completion_prefix,
             automatic=automatic)
-                
+    
+    def hideCompletionWidget(self):
+        self.__completion_widget.hide()
+            
     def insertCompletion(self, completion):
         currentWord, start, end = self.currentWord()
         cursor = self.newCursorAtPosition(start, end)

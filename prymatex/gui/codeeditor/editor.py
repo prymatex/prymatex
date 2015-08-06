@@ -1492,7 +1492,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
              'context': QtCore.Qt.WidgetShortcut
              },
             {'sequence': ("Editor", "CodeCompletion", 'Ctrl+Space'),
-             'activated': self._query_completions,
+             'activated': lambda editor=self: editor._query_completions(False),
              'context': QtCore.Qt.WidgetShortcut
              }
         ]

@@ -19,7 +19,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         self.registerKeyPressHandler(QtCore.Qt.Key_Backspace, self.__backspace_behavior)
         self.registerKeyPressHandler(QtCore.Qt.Key_Delete, self.__delete_behavior)
         self.registerKeyPressHandler(QtCore.Qt.Key_Insert, self.__toggle_overwrite)
-        self.editor.queryCompletions.connect(self.__run_completer)
+        self.editor.queryCompletions.connect(self.on_editor_queryCompletions)
 
     # OVERRIDE: CodeEditorBaseMode.keyPress_handlers()
     def keyPress_handlers(self, event):
@@ -163,10 +163,13 @@ class CodeEditorEditMode(CodeEditorBaseMode):
     def __toggle_overwrite(self, event):
         self.editor.setOverwriteMode(not self.editor.overwriteMode())
 
-    def __run_completer(self):
+    def on_editor_queryCompletions(self, automatic):
         alreadyTyped, start, end = self.editor.wordUnderCursor(direction="left", search = True)
-        suggestions = set(self.editor.extractCompletions(alreadyTyped))
-        suggestions.update(self.editor.currentPreferenceSettings().completions)
-        suggestions = sorted(list(suggestions))
+        leftScope, rightScope = self.editor.scope(self.editor.textCursor())
+        # Suggestions
+        words = self.editor.extractCompletions(alreadyTyped)
+        keywords = self.editor.currentPreferenceSettings().completions
+        bundleitems = self.editor.application().supportManager.getAllTabTriggerItemsByScope(leftScope, rightScope)
+        triggers = {item.tabTrigger: item for item in bundleitems}
+        suggestions = sorted(set(words + keywords + triggers.keys()))
         self.editor.showCompletionWidget(suggestions, completion_prefix=alreadyTyped)
-        return True

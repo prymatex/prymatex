@@ -78,3 +78,9 @@ class CodeEditorCommandsMixin(object):
                 ncursor.removeSelectedText()
                 return
         cursor.deleteChar()
+
+    def command_auto_complete(self, *args, **kwargs):
+        self._query_completions(True)
+        
+    def command_hide_auto_complete(self):
+        self.hideCompletionWidget()
