@@ -171,5 +171,5 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         keywords = self.editor.currentPreferenceSettings().completions
         bundleitems = self.editor.application().supportManager.getAllTabTriggerItemsByScope(leftScope, rightScope)
         triggers = {item.tabTrigger: item for item in bundleitems}
-        suggestions = sorted(set(words + keywords + triggers.keys()))
+        suggestions = sorted(set(words + keywords + list(triggers.keys())))
         self.editor.showCompletionWidget(suggestions, completion_prefix=alreadyTyped)
