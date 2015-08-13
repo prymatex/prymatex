@@ -194,11 +194,11 @@ class CompletionWidget(QtWidgets.QListWidget):
         self.current_match_index = 1 if selfsame else 0 
         self.setCurrentRow(self._match_indexes[self.current_match_index].row())
     
-    def __item_activated(self, item=None):
-        if item is None:
-            index = self.currentRow()
-            item = self.completion_list[index]
-        self.textedit.insertCompletion(item)
+    def __item_activated(self, widget_item=None):
+        row = self.currentRow() if widget_item is None \
+            else self.row(widget_item)
+        completion = self.completion_list[row]
+        self.textedit.insertCompletion(completion)
         self.hide()
 
     def __item_highlighted(self, index=None):
