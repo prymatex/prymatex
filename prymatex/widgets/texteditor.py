@@ -24,7 +24,7 @@ class CompletionWidget(QtWidgets.QListWidget):
         super().__init__(parent)
         self.setWindowFlags(QtCore.Qt.SubWindow | QtCore.Qt.FramelessWindowHint)
         self.textedit = textedit
-        self.completion_list = None
+        self.completions = None
         self.match_flags = QtCore.Qt.MatchWrap | QtCore.Qt.MatchWildcard | QtCore.Qt.MatchCaseSensitive
         self._match_indexes = []
         self.current_match_index = -1
@@ -42,89 +42,95 @@ class CompletionWidget(QtWidgets.QListWidget):
                 item.setText("%s" % textutils.asciify(completion[0]))
                 item.setData(QtCore.Qt.MatchRole, "%s" % completion[1])
             elif isinstance(completion, dict):
-                text = completion.get("display", completion.get('title')) 
-                item.setText("%s" % text)
+                text = completion.get("display", completion.get('title'))
+                item.setText("%s" % textutils.asciify(text))
                 match = completion.get("match", text) 
                 item.setData(QtCore.Qt.MatchRole, "%s" % match)
                 image = completion.get("image")
-                if image:
+                if image is not None:
                     # TODO Obtener el icono del lugar correcto
                     image = resources.get_icon(image)
                     item.setIcon(icon)
                 tooltip = completion.get("tool_tip")
-                if tooltip:
+                if tooltip is not None:
                     item.setToolTip(tooltip)
             else:
                 item.setText("%s" % completion)
                 item.setData(QtCore.Qt.MatchRole, "%s" % completion)
-            yield item
+            yield completion, item
 
-    def complete(self, completion_list, completion_prefix=None, automatic=True):
-        if len(completion_list) == 1 and not automatic:
-            self.__item_activated(completion_list[0])
-        elif completion_list:
-            self.completion_list = completion_list
+    def complete(self, completions, completion_prefix=None, automatic=True):
+        # Todo esto tiene que ser mejor, cuando ya tengo algo hay que filtrar
+        if not self.isVisible():
             self.clear()
-            for item in self._map_completions(completion_list):
-                self.addItem(item)
-            self.resize(self.sizeHint())
-            self.setCurrentRow(0)
-            
-            QtWidgets.QApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
-            self.show()
-            self.setFocus()
-            self.raise_()
-            
-            # Retrieving current screen height
-            desktop = QtWidgets.QApplication.desktop()
-            srect = desktop.availableGeometry(desktop.screenNumber(self))
-            screen_right = srect.right()
-            screen_bottom = srect.bottom()
-            
-            point = self.textedit.cursorRect().bottomRight()
-            offset = self.textedit.contentOffset()
-            point.setX(point.x() + offset.x())
-            point = self.textedit.mapToGlobal(point)
-    
-            # Computing completion widget and its parent right positions
-            comp_right = point.x() + self.width()
-            ancestor = self.parent()
-            if ancestor is None:
-                anc_right = screen_right
-            else:
-                anc_right = min([ancestor.x() + ancestor.width(), screen_right])
-            
-            # Moving completion widget to the left
-            # if there is not enough space to the right
-            if comp_right > anc_right:
-                point.setX(point.x() - self.width())
-            
-            # Computing completion widget and its parent bottom positions
-            comp_bottom = point.y() + self.height()
-            ancestor = self.parent()
-            if ancestor is None:
-                anc_bottom = screen_bottom
-            else:
-                anc_bottom = min([ancestor.y()+ancestor.height(), screen_bottom])
-            
-            # Moving completion widget above if there is not enough space below
-            x_position = point.x()
-            if comp_bottom > anc_bottom:
-                point = self.textedit.cursorRect().topRight()
-                point = self.textedit.mapToGlobal(point)
-                point.setX(x_position)
-                point.setY(point.y() - self.height())
-                
-            if ancestor is not None:
-                # Useful only if we set parent to 'ancestor' in __init__
-                point = ancestor.mapFromGlobal(point)
-            self.move(point)
-            
-            if completion_prefix is not None:
-                # When initialized, if completion text is not empty, we need 
-                # to update the displayed list:
-                self.setCompletionPrefix(completion_prefix)
+        for completion, item in self._map_completions(completions):
+            self.completions.append(completion)
+            self.addItem(item)
+        if len(self.completions) == 1 and not automatic:
+            self.__item_activated(self.completions[0])
+            return
+        self.resize(self.sizeHint())
+        self.setCurrentRow(0)
         
+        QtWidgets.QApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+        self.show()
+        self.setFocus()
+        self.raise_()
+
+        # Retrieving current screen height
+        desktop = QtWidgets.QApplication.desktop()
+        srect = desktop.availableGeometry(desktop.screenNumber(self))
+        screen_right = srect.right()
+        screen_bottom = srect.bottom()
+        
+        point = self.textedit.cursorRect().bottomRight()
+        offset = self.textedit.contentOffset()
+        point.setX(point.x() + offset.x())
+        point = self.textedit.mapToGlobal(point)
+
+        # Computing completion widget and its parent right positions
+        comp_right = point.x() + self.width()
+        ancestor = self.parent()
+        if ancestor is None:
+            anc_right = screen_right
+        else:
+            anc_right = min([ancestor.x() + ancestor.width(), screen_right])
+        
+        # Moving completion widget to the left
+        # if there is not enough space to the right
+        if comp_right > anc_right:
+            point.setX(point.x() - self.width())
+        
+        # Computing completion widget and its parent bottom positions
+        comp_bottom = point.y() + self.height()
+        ancestor = self.parent()
+        if ancestor is None:
+            anc_bottom = screen_bottom
+        else:
+            anc_bottom = min([ancestor.y()+ancestor.height(), screen_bottom])
+        
+        # Moving completion widget above if there is not enough space below
+        x_position = point.x()
+        if comp_bottom > anc_bottom:
+            point = self.textedit.cursorRect().topRight()
+            point = self.textedit.mapToGlobal(point)
+            point.setX(x_position)
+            point.setY(point.y() - self.height())
+            
+        if ancestor is not None:
+            # Useful only if we set parent to 'ancestor' in __init__
+            point = ancestor.mapFromGlobal(point)
+        self.move(point)
+        
+        if completion_prefix is not None:
+            # When initialized, if completion text is not empty, we need 
+            # to update the displayed list:
+            self.setCompletionPrefix(completion_prefix)
+        
+    def clear(self):
+        super().clear()
+        self.completions = []
+
     def hide(self):
         super().hide()
         self.textedit.setFocus()
@@ -197,12 +203,12 @@ class CompletionWidget(QtWidgets.QListWidget):
     def __item_activated(self, widget_item=None):
         row = self.currentRow() if widget_item is None \
             else self.row(widget_item)
-        completion = self.completion_list[row]
+        completion = self.completions[row]
         self.textedit.insertCompletion(completion)
         self.hide()
 
     def __item_highlighted(self, index=None):
-        item = self.completion_list[index]
+        item = self.completions[index]
 
     def sizeHint(self):
         size = QtCore.QSize()
@@ -294,8 +300,6 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     def showCompletionWidget(self, completions, completion_prefix="",
             automatic=True):
         """Display the possible completions"""
-        if len(completions) == 0 or completions == [completion_prefix]:
-            return
         self.__completion_widget.complete(completions, 
             completion_prefix=completion_prefix,
             automatic=automatic)

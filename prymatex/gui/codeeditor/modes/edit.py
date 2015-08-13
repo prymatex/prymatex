@@ -172,4 +172,23 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         bundleitems = self.editor.application().supportManager.getAllTabTriggerItemsByScope(leftScope, rightScope)
         triggers = {item.tabTrigger: item for item in bundleitems}
         suggestions = sorted(set(words + keywords + list(triggers.keys())))
-        self.editor.showCompletionWidget(suggestions, completion_prefix=alreadyTyped)
+        def suggestions_generator(suggestions, words, keywords, triggers):
+            def _generator():
+                for suggestion in suggestions:
+                    # Is bundle item
+                    if suggestion in triggers:
+                        item = triggers[suggestion]
+                        yield {
+                            "match": suggestion, 
+                            "display": "%s(%s)" % (suggestion, item.name),
+                            "item": item
+                        }
+                    elif suggestion in keywords:
+                        yield (suggestion, "%s(keyword)" % suggestion)
+                    else:
+                        yield (suggestion, "%s(word)" % suggestion)
+            return _generator()
+        self.editor.showCompletionWidget(
+            suggestions_generator(suggestions, words, keywords, triggers), 
+            completion_prefix=alreadyTyped
+        )
