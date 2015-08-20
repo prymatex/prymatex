@@ -70,24 +70,26 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
 
     def __snippet_navigation(self, event):
         cursor = self.editor.textCursor()
+        ret = False
         if self.processor.setHolder(cursor.selectionStart(), cursor.selectionEnd()):
-            if event.key() == QtCore.Qt.Key_Tab:
-                self.processor.nextHolder()
-            else:
-                self.processor.previousHolder()
-            return True
-        self.processor.stop()
+            ret = self.processor.nextHolder() \
+                if event.key() == QtCore.Qt.Key_Tab \
+                else self.processor.previousHolder()
+        if not ret:
+            self.processor.stop()
+        return ret
 
     def __snippet_backspace(self, event):
         cursor = self.editor.textCursor()
         holder_start, holder_end = self.processor.translateToHolderPosition(
             cursor.selectionStart(), cursor.selectionEnd()
         )
-        if not holder_start:
+        if not holder_start or cursor.selectionStart() - 1 < holder_start:
             self.processor.stop()
             return False
         holder_position = cursor.selectionStart() - holder_start
-        holder_text = self.editor.newCursorAtPosition(holder_start, holder_end).selectedText()
+        holder_text = self.editor.newCursorAtPosition(
+            holder_start, holder_end).selectedText()
         holder_content = holder_text[holder_start - holder_start:cursor.selectionStart() - holder_start - 1] + \
             holder_text[cursor.selectionEnd() - holder_start:holder_end - holder_start]
         self._update_and_render(holder_content, holder_position - 1)
@@ -98,11 +100,12 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         holder_start, holder_end = self.processor.translateToHolderPosition(
             cursor.selectionStart(), cursor.selectionEnd()
         )
-        if not holder_start:
+        if not holder_end or cursor.selectionStart() + 1 > holder_end:
             self.processor.stop()
             return False
         holder_position = cursor.selectionStart() - holder_start
-        holder_text = self.editor.newCursorAtPosition(holder_start, holder_end).selectedText()
+        holder_text = self.editor.newCursorAtPosition(
+            holder_start, holder_end).selectedText()
         holder_content = holder_text[holder_start - holder_start:cursor.selectionStart() - holder_start] + \
             holder_text[cursor.selectionEnd() - holder_start + 1:holder_end - holder_start]
         self._update_and_render(holder_content, holder_position)

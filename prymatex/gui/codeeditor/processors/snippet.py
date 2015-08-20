@@ -98,12 +98,14 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
         if self.bundleItem.nextHolder():
             self.selectHolder()
             return True
+        return False
 
     def previousHolder(self):
         self.backward = True
         if self.bundleItem.previousHolder():
             self.selectHolder()
             return True
+        return False
 
     def isLastHolder(self):
         return self.isReady() and self.bundleItem.lastHolder()
