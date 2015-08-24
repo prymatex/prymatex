@@ -535,8 +535,10 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
             text = completion.get('match', completion.get('display', completion.get('title')))
         else:
             text = completion
-        self.insertSnippet(text, textCursor=cursor)
+        snippet = self.application().supportManager.buildAdHocSnippet(
+            text, self.syntax().bundle)
         self.__run_command("commit_completion", {})
+        self.insertBundleItem(snippet, textCursor=cursor)
         
     # -------------- Smart Typing Pairs
     def _smart_typing_pairs(self, cursor):
@@ -885,7 +887,6 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
                 processor = self.findProcessor(name)
                 processor.configure(**kwargs)
                 item.execute(processor)
-                self.__run_command("insert_%s" % name, item.dump(allKeys=True))
                 
         if len(items) > 1:
             syntax = any((item.type() == 'syntax' for item in items))
@@ -897,6 +898,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
     def insertSnippet(self, snippetContent, commandInput="none", commandOutput="insertText", **kwargs):
         snippet = self.application().supportManager.buildAdHocSnippet(
             snippetContent, self.syntax().bundle)
+        self.__run_command("insert_snippet", snippet.dump(allKeys=True))
         self.insertBundleItem(snippet, **kwargs)
         
     def insertCommand(self, commandScript, commandInput = "none", commandOutput = "insertText", **kwargs):
