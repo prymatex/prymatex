@@ -530,13 +530,20 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         currentWord, start, end = self.currentWord()
         cursor = self.newCursorAtPosition(start, end)
         if isinstance(completion, (tuple, list)):
-            text = completion[1]
+            snippet = self.application().supportManager.buildAdHocSnippet(
+                completion[1], self.syntax().bundle)
         elif isinstance(completion, dict):
-            text = completion.get('match', completion.get('display', completion.get('title')))
+            if "item" in completion:
+                snippet = completion["item"]
+            else:
+                snippet = self.application().supportManager.buildAdHocSnippet(
+                    completion.get('match', 
+                        completion.get('display', 
+                        completion.get('title'))), 
+                    self.syntax().bundle)
         else:
-            text = completion
-        snippet = self.application().supportManager.buildAdHocSnippet(
-            text, self.syntax().bundle)
+            snippet = self.application().supportManager.buildAdHocSnippet(
+                completion, self.syntax().bundle)
         self.__run_command("commit_completion", {})
         self.insertBundleItem(snippet, textCursor=cursor)
         
