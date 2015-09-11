@@ -238,7 +238,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     deactivated = QtCore.Signal()
     
     extraSelectionChanged = QtCore.Signal()
-    
+
     # ------------------ Find Flags
     FindBackward           = 1<<0
     FindCaseSensitive      = 1<<1

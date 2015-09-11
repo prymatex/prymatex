@@ -45,7 +45,8 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
     syntaxChanged = QtCore.Signal(object)
     themeChanged = QtCore.Signal(object)
     filePathChanged = QtCore.Signal(str)
-    
+    titleChanged = QtCore.Signal()    
+
     modeChanged = QtCore.Signal(object)
 
     queryCompletions = QtCore.Signal(bool)
@@ -118,8 +119,8 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         self.setFlags(flags)
 
     # --------------------- init
-    def __init__(self, **kwargs):
-        super(CodeEditor, self).__init__(**kwargs)
+    def __init__(self, file_path=None, **kwargs):
+        super().__init__(**kwargs)
         
         # Processors
         self.processors = [
@@ -135,6 +136,9 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         self.showIndentGuide = True
         self.showHighlightCurrentLine = True
 
+        # Project
+        self.__window_project = None
+        
         # Cursors
         self.__text_cursors = []
         self.__highlight_cursors = []
@@ -293,7 +297,12 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
             self.addSideBarWidget(component)
         elif isinstance(component, CodeEditorBaseMode):
             self.addCodeEditorMode(component)
-            
+    
+    # OVERRIDE: PrymatexEditor.setTitle()
+    def setTitle(self, title):
+        super().setTitle(title)
+        self.titleChanged.emit()
+
     def addSideBarWidget(self, widget):
         if widget.ALIGNMENT == QtCore.Qt.AlignRight:
             self.rightBar.addWidget(widget)
@@ -326,38 +335,45 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
 
     # ------------- Base Editor Api
     @classmethod
-    def acceptFile(cls, filePath, mimetype):
+    def acceptFile(cls, file_path, mimetype):
         return re.compile("text/.*").match(mimetype) is not None
 
-    def open(self, filePath):
+    def open(self, file_path):
         """ Custom open for large files """
-        super(CodeEditor, self).open(filePath)
-        content, self.encoding = self.application().fileManager.readFile(filePath)
+        self.setWindowFilePath(file_path)
+        self.application().fileManager.openFile(file_path)
+        content, self.encoding = self.application().fileManager.readFile(file_path)
         self.setPlainText(content)
         
-    def save(self, filePath):
+    def save(self, file_path):
         """ Save content of editor in a file """
         self.aboutToSave.emit()
-        self.encoding = self.application().fileManager.writeFile(filePath, self.toPlainTextWithEol(), self.encoding)
-        super(CodeEditor, self).save(filePath)
-        self.window().setStatus("saved", "Saved %s (%s)" % (filePath, self.encoding), 2000)
+        self.encoding = self.application().fileManager.writeFile(file_path, self.toPlainTextWithEol(), self.encoding)
+        if file_path != self.windowFilePath():
+            if self.windowFilePath():
+                self.application().fileManager.closeFile(self.windowFilePath())
+                self.application().fileManager.openFile(file_path)
+            self.setWindowFilePath(file_path)
+        self.setWindowModified(False)
+        self.window().setStatus("saved", "Saved %s (%s)" % (file_path, self.encoding), 2000)
         self.saved.emit()
 
     def close(self):
         self.aboutToClose.emit()
-        super(CodeEditor, self).close()
+        if self.windowFilePath():
+            self.application().fileManager.closeFile(self.windowFilePath())
         self.closed.emit()
 
     def reload(self):
-        super(CodeEditor, self).reload()
-        content, self.encoding = self.application().fileManager.readFile(self.filePath())
+        self.setWindowModified(False)
+        content, self.encoding = self.application().fileManager.readFile(self.windowFilePath())
         self.updatePlainText(content)
 
     # ------------ Component State save and restore
     def componentState(self):
         """Returns a Python dictionary containing the state of the editor."""
         state = super(CodeEditor, self).componentState()
-        if self.isModified():
+        if self.isWindowModified():
             state["text"] = self.toPlainTextWithEol()
 
         #Bookmarks
@@ -380,22 +396,47 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
             syntax = self.application().supportManager.getBundleItem(uuid)
             self.insertBundleItem(syntax)
 
-    def isModified(self):
-        return self.document().isModified()
-
     def isEmpty(self):
         return self.document().isEmpty()
 
-    def setModified(self, modified):
-        self.document().setModified(modified)
+    def setWindowProject(self, project):
+        self.__window_project = project
+        
+    def windowProject(self):
+        return self.__window_project
 
-    def setFilePath(self, filePath):
-        super(CodeEditor, self).setFilePath(filePath)
-        extension = self.application().fileManager.extension(filePath)
+    def windowTitle(self):
+        title = super().windowTitle() or "Untitled"
+        title = title.replace("[*]", self.isWindowModified() and "*" or "")
+        return title
+
+    # OVERRIDE: TextEditWidget.setWindowFilePath()
+    def setWindowFilePath(self, file_path):
+        super().setWindowFilePath(file_path)
+        project = self.application().projectManager.findProjectForPath(file_path)
+        self.setWindowProject(project)
+        extension = self.application().fileManager.extension(file_path)
         syntax = self.application().supportManager.findSyntaxByFileType(extension)
         if syntax is not None:
             self.insertBundleItem(syntax)
-        self.filePathChanged.emit(filePath)
+        self.filePathChanged.emit(file_path)
+
+    def windowFileDirectory(self):
+        return self.application().fileManager.dirname(self.windowFilePath())
+    
+    def windowFileName(self):
+        return self.application().fileManager.basename(self.windowFilePath())
+
+    def windowIcon(self):
+        baseIcon = QtGui.QIcon()
+        if self.windowFilePath():
+            baseIcon = self.resources().get_icon(self.windowFilePath())
+        if self.isWindowModified():
+            baseIcon = self.resources().get_icon("document-save")
+        if self._external_action is not None:
+            importantIcon = self.resources().get_icon("information")
+            baseIcon = combine_icons(baseIcon, importantIcon, 0.8)
+        return baseIcon
 
     def fileFilters(self):
         return [ "%s (%s)" % (self.syntax().bundle.name, " ".join(["*." + ft for ft in self.syntax().fileTypes])) ]
@@ -405,7 +446,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
     def scope(self, cursor):
         left_syntax_scope, right_syntax_scope = self.blockUserData(cursor.block()).syntaxScope(cursor)
         left_cursor_scope, right_cursor_scope = self.application().supportManager.cursorScope(cursor)
-        auxiliary_scope = self.application().supportManager.auxiliaryScope(self.filePath())
+        auxiliary_scope = self.application().supportManager.auxiliaryScope(self.windowFilePath())
         return (left_syntax_scope + left_cursor_scope + auxiliary_scope, 
             right_syntax_scope + right_cursor_scope + auxiliary_scope)
         
@@ -416,7 +457,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
 
     def propertiesSettings(self, cursor):
         return self.application().supportManager.getPropertiesSettings(
-            self.filePath(), *self.scope(cursor or self.textCursor())
+            self.windowFilePath(), *self.scope(cursor or self.textCursor())
         )
     
     def currentScope(self):
@@ -931,7 +972,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
 
         # Build environment
         environment.update({
-            'TM_DISPLAYNAME': self.title(),
+            'TM_DISPLAYNAME': self.windowTitle(),
             'TM_CURRENT_LINE': line,
             'TM_LINE_INDEX': cursor.positionInBlock(),
             'TM_LINE_NUMBER': block.blockNumber() + 1,
@@ -952,14 +993,14 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         if current_text:
             self.logger().debug("Add current text to environment")
             environment['TM_CURRENT_TEXT'] = current_text
-        if self.filePath():
+        if self.windowFilePath():
             self.logger().debug("Add file path to environment")
-            environment['TM_FILEPATH'] = self.filePath()
-            environment['TM_FILENAME'] = self.application().fileManager.basename(self.filePath())
-            environment['TM_DIRECTORY'] = self.application().fileManager.dirname(self.filePath())
-        if self.project():
+            environment['TM_FILEPATH'] = self.windowFilePath()
+            environment['TM_FILENAME'] = self.application().fileManager.basename(self.windowFilePath())
+            environment['TM_DIRECTORY'] = self.application().fileManager.dirname(self.windowFilePath())
+        if self.windowProject():
             self.logger().debug("Add project to environment")
-            environment.update(self.project().environmentVariables())
+            environment.update(self.windowProject().environmentVariables())
         if cursor.hasSelection():
             self.logger().debug("Add selection to environment")
             environment['TM_SELECTED_TEXT'] = self.selectedTextWithEol(cursor)
@@ -1193,20 +1234,20 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         if bundleMenu is not None:
             menues.append(bundleMenu)
             menues.append("-")
-        if self.filePath() is not None:
+        if self.windowFilePath() is not None:
             menues.extend([
                 {   "text": "Path to Clipboard",
-                    "triggered": lambda checked, ed=self: self.application().clipboard().setText(ed.filePath())  },
+                    "triggered": lambda checked, ed=self: self.application().clipboard().setText(ed.windowFilePath())  },
                 {   "text": "Name to Clipboard",
                     "triggered": lambda checked, ed=self: \
                         self.application().clipboard().setText(
-                            ed.application().fileManager.basename(ed.filePath())
+                            ed.application().fileManager.basename(ed.windowFilePath())
                         )  
                 },
                 {   "text": "Directory to Clipboard",
                     "triggered": lambda checked, ed=self: \
                         self.application().clipboard().setText(
-                            ed.application().fileManager.dirname(ed.filePath())
+                            ed.application().fileManager.dirname(ed.windowFilePath())
                         )  
                 }
                 ])

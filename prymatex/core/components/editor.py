@@ -9,88 +9,27 @@ from prymatex.core.components.base import (PrymatexComponentWidget, PrymatexAddo
 from prymatex.utils.decorators import deprecated
 
 class PrymatexEditor(PrymatexComponentWidget):
-    UNTITLED_FILE_TEMPLATE = "Untitled"
-    
-    def __init__(self, file_path=None, **kwargs):
-        super(PrymatexEditor, self).__init__(**kwargs)
-        self._file_path = file_path
-        self._project = None
-        self._title = self.UNTITLED_FILE_TEMPLATE
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._external_action = None
 
     def open(self, file_path):
-        """ Open file """
-        self.application().fileManager.openFile(file_path)
+        pass
 
     def save(self, file_path):
-        """ Open close file """
-        if file_path != self._file_path:
-            if self._file_path is not None:
-                self.application().fileManager.closeFile(self._file_path)
-                self.application().fileManager.openFile(file_path)
-            self.setFilePath(file_path)
-        self.setModified(False)
+        pass
     
     def close(self):
-        """ Close editor """
-        if self._file_path is not None:
-            self.application().fileManager.closeFile(self._file_path)
+        pass
 
     def reload(self):
-        """ Reload current file """
-        self.setModified(False)
-        
-    def project(self):
-        return self._project
+        pass
 
-    def filePath(self):
-        return self._file_path
-    
-    def setFilePath(self, file_path):
-        self._file_path = file_path
-        self._project = self.application().projectManager.findProjectForPath(file_path) \
-            if file_path else None
-        self._title = self.application().fileManager.basename(file_path) \
-            if file_path else self.UNTITLED_FILE_TEMPLATE
-        #self.modificationChanged.emit(False)
-
-    def icon(self):
-        baseIcon = QtGui.QIcon()
-        if self._file_path is not None:
-            baseIcon = self.resources().get_icon(self._file_path)
-        if self.isModified():
-            baseIcon = self.resources().get_icon("document-save")
-        if self._external_action is not None:
-            importantIcon = self.resources().get_icon("information")
-            baseIcon = combine_icons(baseIcon, importantIcon, 0.8)
-        return baseIcon
-    
-    def title(self):
-        return self._title
-
-    def tooltip(self):
-        return self.hasFile() and self.filePath() or self.title()
-    
-    def fileDirectory(self):
-        return self.application().fileManager.dirname(self._file_path)
-    
-    def fileName(self):
-        return self.application().fileManager.basename(self._file_path)
-        
     def fileFilters(self):
         return []
-    
-    def hasFile(self):
-        return bool(self._file_path)
-        
+            
     def isEmpty(self):
         return True
-    
-    def isModified(self):
-        return False
-    
-    def setModified(self, modified):
-        pass 
     
     def isReadOnly(self):
         """Returns true if the editor may not be modified."""
@@ -101,7 +40,6 @@ class PrymatexEditor(PrymatexComponentWidget):
         
     def setExternalAction(self, action):
         self._external_action = action
-        #self.modificationChanged.emit(False)
 
     #------------ Bundle Item Handler
     def bundleItemHandler(self):

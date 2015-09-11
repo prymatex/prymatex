@@ -196,9 +196,10 @@ class SplitterWidget(QtWidgets.QSplitter):
                 self.addWidget(group)
         
         idx = group.addTab(widget, self._disambiguate_title(widget))
-        self.setWidgetToolTip(widget, widget.tooltip())
-        self.setWidgetIcon(widget, widget.icon())
+        self.setWidgetToolTip(widget, widget.toolTip())
+        self.setWidgetIcon(widget, widget.windowIcon())
         widget.modificationChanged[bool].connect(self._update_tab_status)
+        widget.titleChanged.connect(self._update_tab_status)
 
         # If the tab has been added to the current group then make it the current tab.
         if group is not self._current_group:
@@ -213,6 +214,7 @@ class SplitterWidget(QtWidgets.QSplitter):
         tw, tidx = self._tab_widget(widget)
         if tw is not None:
             widget.modificationChanged[bool].disconnect(self._update_tab_status)
+            widget.titleChanged.disconnect(self._update_tab_status)
             self._remove_tab(tw, tidx)
             if tw.count() == 0 and self.count() > 0:
                 for tw in self.findChildren(GroupWidget):
@@ -464,38 +466,35 @@ class SplitterWidget(QtWidgets.QSplitter):
         if tw is not None:
             tw.setTabIcon(tidx, icon)
     
-    def _disambiguate_title(self, newWidget):  
+    def _disambiguate_title(self, newWidget): 
         #Search all widgets with the same title
         def title_from_file(widget):
-            subTitles = widget.filePath().split(os.sep)[::-1]
+            subTitles = widget.windowFilePath().split(os.sep)[::-1]
             for subTitle in subTitles[1:]:
-                title = "%s (%s)" % (widget.title(), subTitle)
+                title = "%s (%s)" % (widget.windowTitle(), subTitle)
                 if not self._has_tabs_with_same_title(widget, title):
                     return title
         
         def title_from_counter(widget):
             c = 1
             while True:
-                title = "%s %d" % (widget.title(), c)
+                title = "%s %d" % (widget.windowTitle(), c)
                 if not self._has_tabs_with_same_title(widget, title):
                     return title
                 c += 1
         
-        if not newWidget.hasFile():
-            return title_from_counter(newWidget)
-        
-        newWidgetTitle = newWidget.title()
+        newWidgetTitle = newWidget.windowTitle()
         addedWidgets = self._widgets_with_same_title(newWidget)
         if not addedWidgets:
             return newWidgetTitle
 
         for addedWidget in addedWidgets:
-            if self.widgetTitle(addedWidget) == addedWidget.title():
+            if self.widgetTitle(addedWidget) == addedWidget.windowTitle():
                 self.setWidgetTitle(addedWidget, 
-                    addedWidget.hasFile() and \
-                    title_from_file(addedWidget) or\
+                    addedWidget.windowFilePath() and \
+                    title_from_file(addedWidget) or \
                     title_from_counter(addedWidget))
-        return title_from_file(newWidget)
+        return newWidget.windowFilePath() and title_from_file(newWidget) or title_from_counter(newWidget)
     
     def _has_tabs_with_same_title(self, newWidget, title):
         for tw in self.findChildren(GroupWidget):
@@ -507,19 +506,19 @@ class SplitterWidget(QtWidgets.QSplitter):
 
     def _widgets_with_same_title(self, newWidget, title=None):
         widgets = []
-        title = title or newWidget.title()
+        title = title or newWidget.windowTitle()
         for tw in self.findChildren(GroupWidget):
             for index in range(tw.count()):
                 widget = tw.widget(index)
-                if widget.title() == title and widget != newWidget:
+                if widget.windowTitle() == title and widget != newWidget:
                     widgets.append(widget)
         return widgets
 
-    def _update_tab_status(self, changed = None):
+    def _update_tab_status(self, changed=None):
         sender = self.sender()
         self.setWidgetTitle(sender, self._disambiguate_title(sender))
-        self.setWidgetIcon(sender, sender.icon())
-        self.setWidgetToolTip(sender, sender.tooltip())
+        self.setWidgetIcon(sender, sender.windowIcon())
+        self.setWidgetToolTip(sender, sender.toolTip())
 
     def _tab_widget(self, widget):
         """ Return the tab widget and index containing the given widget. """

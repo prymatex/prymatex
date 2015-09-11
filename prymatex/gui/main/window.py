@@ -322,7 +322,7 @@ html_footer
         if file_path:
             if self.application().fileManager.isfile(file_path):
                 editor.open(file_path)
-            editor.setFilePath(file_path)
+            editor.setWindowFilePath(file_path)
         self.editorCreated.emit(editor)
         return editor
 
@@ -345,7 +345,7 @@ html_footer
         self.centralWidget().addTabWidget(editor)
         #editor.newLocationMemento.connect(self.on_editor_newLocationMemento)
         # If new editor has file, try to close current editor
-        if current and editor.hasFile():
+        if current and editor.windowFilePath():
             self.tryCloseEmptyEditor(current)
         if focus:
             self.setCurrentEditor(editor)
@@ -353,7 +353,7 @@ html_footer
     def findEditorForFile(self, filePath):
         # Find open editor for fileInfo
         for editor in self.centralWidget().tabWidgets():
-            if editor.filePath() == filePath:
+            if editor.windowFilePath() == filePath:
                 return editor
 
     def editors(self):
@@ -398,13 +398,13 @@ html_footer
         if editor.externalAction() == self.application().EXTERNAL_CHANGED:
             message = "The file '%s' has been changed on the file system, Do you want save the file with other name?"
             result = QtWidgets.QMessageBox.question(editor, "File changed",
-                message % editor.filePath(),
+                message % editor.windowFilePath(),
                 buttons = QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
                 defaultButton = QtWidgets.QMessageBox.Yes)
             if result == QtWidgets.QMessageBox.Yes:
                 saveAs = True
-        if not editor.hasFile() or saveAs:
-            fileDirectory = self.application().fileManager.directory(self.projectsDock.currentPath()) if not editor.hasFile() else editor.fileDirectory()
+        if not editor.windowFilePath() or saveAs:
+            fileDirectory = self.application().fileManager.directory(self.projectsDock.currentPath()) if not editor.windowFilePath() else editor.fileDirectory()
             fileName = editor.title()
             fileFilters = editor.fileFilters()
             # TODO Armar el archivo destino y no solo el basedir
@@ -415,7 +415,7 @@ html_footer
                 filters = fileFilters
             )
         else:
-            file_path = editor.filePath()
+            file_path = editor.windowFilePath()
 
         if file_path:
             editor.save(file_path)
@@ -426,7 +426,7 @@ html_footer
         if cancel:
             buttons |= QtWidgets.QMessageBox.Cancel
         if editor is None: return
-        while editor and editor.isModified():
+        while editor and editor.isWindowModified():
             response = QtWidgets.QMessageBox.question(self, "Save",
                 "Save %s" % editor.title(),
                 buttons = buttons,
@@ -441,7 +441,7 @@ html_footer
         self.deleteEditor(editor)
 
     def tryCloseEmptyEditor(self, editor):
-        if not editor.hasFile() and editor.isEmpty():
+        if not editor.windowFilePath() and editor.isEmpty():
             self.closeEditor(editor)
 
     # ---------------- Handle location history
@@ -460,7 +460,7 @@ html_footer
     # ---------------- MainWindow Events
     def closeEvent(self, event):
         for editor in self.editors():
-            while editor and editor.isModified():
+            while editor and editor.isWindowModified():
                 response = QtWidgets.QMessageBox.question(self, "Save",
                     "Save %s" % editor.title(),
                     buttons = QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel,
@@ -481,9 +481,9 @@ html_footer
         for editor in self.editors():
             editorState = editor.componentState()
             editorState["name"] = editor.__class__.__name__
-            editorState["modified"] = editor.isModified()
-            if editor.hasFile():
-                editorState["file"] = editor.filePath()
+            editorState["modified"] = editor.isWindowModified()
+            if editor.windowFilePath():
+                editorState["file"] = editor.windowFilePath()
             componentState["editors"].append(editorState)
 
         # Store geometry
@@ -504,7 +504,7 @@ html_footer
                 file_path=editorState.get("file", None))
             self.addEditor(editor)
             editor.setComponentState(editorState)
-            editor.setModified(editorState.get("modified", False))
+            editor.setWindowModified(editorState.get("modified", False))
 
         # Restore geometry
         if "geometry" in componentState:
