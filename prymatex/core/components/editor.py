@@ -11,7 +11,7 @@ from prymatex.utils.decorators import deprecated
 class PrymatexEditor(PrymatexComponentWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._external_action = None
+        self.__external_action = None
 
     def open(self, file_path):
         pass
@@ -36,10 +36,10 @@ class PrymatexEditor(PrymatexComponentWidget):
         return False
         
     def externalAction(self):
-        return self._external_action
+        return self.__external_action
         
     def setExternalAction(self, action):
-        self._external_action = action
+        self.__external_action = action
 
     #------------ Bundle Item Handler
     def bundleItemHandler(self):

@@ -60,7 +60,7 @@ class MainWindowActionsMixin(object):
     # ------------ File Actions
     def on_actionOpen_triggered(self, checked=False):
         current_editor = self.currentEditor()
-        file_path = current_editor and current_editor.filePath() or None
+        file_path = current_editor and current_editor.windowFilePath() or None
         selected_paths, selected_filter = getOpenFileNames(
             self,
             caption="Open files",
@@ -474,7 +474,7 @@ def tabSelectableModelFactory(mainWindow):
     def dataFunction():
         return [dict(data=tab,
                 template="<table width='100%%'><tr><td><h4>%(name)s</h4></td></tr><tr><td><small>%(file)s</small></td></tr></table>",
-                display={"name": tab.title(), "file": tab.filePath()},
+                display={"name": tab.windowTitle(), "file": tab.windowFilePath()},
                 image=tab.icon()) for tab in mainWindow.centralWidget().allWidgets()]
 
     return selectableModelFactory(

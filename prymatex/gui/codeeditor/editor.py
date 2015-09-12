@@ -405,11 +405,6 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
     def windowProject(self):
         return self.__window_project
 
-    def windowTitle(self):
-        title = super().windowTitle() or "Untitled"
-        title = title.replace("[*]", self.isWindowModified() and "*" or "")
-        return title
-
     # OVERRIDE: TextEditWidget.setWindowFilePath()
     def setWindowFilePath(self, file_path):
         super().setWindowFilePath(file_path)
@@ -427,13 +422,12 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
     def windowFileName(self):
         return self.application().fileManager.basename(self.windowFilePath())
 
+    # OVERRIDE: TextEditWidget.windowIcon()
     def windowIcon(self):
-        baseIcon = QtGui.QIcon()
+        baseIcon = super().windowIcon()
         if self.windowFilePath():
             baseIcon = self.resources().get_icon(self.windowFilePath())
-        if self.isWindowModified():
-            baseIcon = self.resources().get_icon("document-save")
-        if self._external_action is not None:
+        if self.externalAction() is not None:
             importantIcon = self.resources().get_icon("information")
             baseIcon = combine_icons(baseIcon, importantIcon, 0.8)
         return baseIcon

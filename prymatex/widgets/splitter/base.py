@@ -8,6 +8,13 @@ from prymatex.qt import QtCore, QtGui, QtWidgets
 
 from .group import GroupWidget, DragableTabBar
 
+# ******* Tools *********
+def _wt(widget):
+    """Build title for widget"""
+    title = widget.windowTitle() or "Untitled"
+    title = title.replace("[*]", widget.isWindowModified() and "*" or "")
+    return title
+
 class SplitterWidget(QtWidgets.QSplitter):
     """ The SplitterWidget class is a hierarchy of QSplitters the leaves of
     which are QTabWidgets.  Any tab may be moved around with the hierarchy
@@ -470,26 +477,28 @@ class SplitterWidget(QtWidgets.QSplitter):
         #Search all widgets with the same title
         def title_from_file(widget):
             subTitles = widget.windowFilePath().split(os.sep)[::-1]
+            mainTitle = _wt(widget)
             for subTitle in subTitles[1:]:
-                title = "%s (%s)" % (widget.windowTitle(), subTitle)
+                title = "%s (%s)" % (mainTitle, subTitle)
                 if not self._has_tabs_with_same_title(widget, title):
                     return title
         
         def title_from_counter(widget):
             c = 1
+            mainTitle = _wt(widget)
             while True:
-                title = "%s %d" % (widget.windowTitle(), c)
+                title = "%s %d" % (mainTitle, c)
                 if not self._has_tabs_with_same_title(widget, title):
                     return title
                 c += 1
         
-        newWidgetTitle = newWidget.windowTitle()
-        addedWidgets = self._widgets_with_same_title(newWidget)
+        newWidgetTitle = _wt(newWidget)
+        addedWidgets = self._widgets_with_same_title(newWidget, newWidgetTitle)
         if not addedWidgets:
             return newWidgetTitle
 
         for addedWidget in addedWidgets:
-            if self.widgetTitle(addedWidget) == addedWidget.windowTitle():
+            if self.widgetTitle(addedWidget) == _wt(addedWidget):
                 self.setWidgetTitle(addedWidget, 
                     addedWidget.windowFilePath() and \
                     title_from_file(addedWidget) or \
@@ -504,13 +513,12 @@ class SplitterWidget(QtWidgets.QSplitter):
                     return True
         return False
 
-    def _widgets_with_same_title(self, newWidget, title=None):
+    def _widgets_with_same_title(self, newWidget, title):
         widgets = []
-        title = title or newWidget.windowTitle()
         for tw in self.findChildren(GroupWidget):
             for index in range(tw.count()):
                 widget = tw.widget(index)
-                if widget.windowTitle() == title and widget != newWidget:
+                if _wt(widget) == title and widget != newWidget:
                     widgets.append(widget)
         return widgets
 
