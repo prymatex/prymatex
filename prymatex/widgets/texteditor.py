@@ -260,6 +260,10 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         self.tab_size = 2
         self.completion_auto = False
 
+    # OVERRIDE: QtWidget.QPlainTextEdit.windowTitle()
+    def windowTitle(self):
+        return  super().windowTitle() or "Untitled[*]"
+
     # OVERRIDE: QtWidgets.QPlainTextEdit.setPalette()
     def setPalette(self, palette):
         super().setPalette(palette)

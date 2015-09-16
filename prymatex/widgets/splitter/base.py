@@ -11,7 +11,7 @@ from .group import GroupWidget, DragableTabBar
 # ******* Tools *********
 def _wt(widget):
     """Build title for widget"""
-    title = widget.windowTitle() or "Untitled"
+    title = widget.windowTitle()
     title = title.replace("[*]", widget.isWindowModified() and "*" or "")
     return title
 
