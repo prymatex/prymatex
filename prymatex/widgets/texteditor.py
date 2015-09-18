@@ -66,6 +66,8 @@ class CompletionWidget(QtWidgets.QListWidget):
         for completion, item in self._map_completions(completions):
             self.completions.append(completion)
             self.addItem(item)
+        if len(self.completions) == 0:
+            return
         if len(self.completions) == 1 and not automatic:
             self.__item_activated(self.completions[0])
             return
@@ -123,6 +125,7 @@ class CompletionWidget(QtWidgets.QListWidget):
         self.move(point)
         
         if completion_prefix is not None:
+            print(completion_prefix)
             # When initialized, if completion text is not empty, we need 
             # to update the displayed list:
             self.setCompletionPrefix(completion_prefix)
@@ -157,7 +160,7 @@ class CompletionWidget(QtWidgets.QListWidget):
             self.nextMatchCompletion()
         elif len(text) or key == QtCore.Qt.Key_Backspace:
             self.textedit.keyPressEvent(event)
-            alreadyTyped, start, end = self.textedit.wordUnderCursor(direction="left", search=True)
+            alreadyTyped, start, end = self.textedit.textUnderCursor(direction="left", search=True)
             if alreadyTyped:
                 self.setCompletionPrefix(alreadyTyped)
             else:
@@ -179,7 +182,7 @@ class CompletionWidget(QtWidgets.QListWidget):
         if self.current_match_index < 0:
             self.current_match_index = len(self._match_indexes) - 1
         self.setCurrentRow(self._match_indexes[self.current_match_index].row())
-
+        
     def setCompletionPrefix(self, prefix):
         model = self.model()
         match = prefix
@@ -301,11 +304,9 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         """Set code completion state"""
         self.completion_auto = auto
 
-    def showCompletionWidget(self, completions, completion_prefix="",
-            automatic=True):
+    def showCompletionWidget(self, completions, automatic=True):
         """Display the possible completions"""
         self.__completion_widget.complete(completions, 
-            completion_prefix=completion_prefix,
             automatic=automatic)
     
     def hideCompletionWidget(self):

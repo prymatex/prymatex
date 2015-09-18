@@ -563,7 +563,6 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
     
     def insertCompletion(self, completion):
         currentWord, start, end = self.currentWord()
-        cursor = self.newCursorAtPosition(start, end)
         if isinstance(completion, (tuple, list)):
             snippet = self.application().supportManager.buildAdHocSnippet(
                 completion[1], self.syntax().bundle)
@@ -579,6 +578,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         else:
             snippet = self.application().supportManager.buildAdHocSnippet(
                 completion, self.syntax().bundle)
+        cursor = self.newCursorAtPosition(start, end)    
         self.__run_command("commit_completion", {})
         self.insertBundleItem(snippet, textCursor=cursor)
         
