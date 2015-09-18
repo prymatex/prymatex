@@ -187,7 +187,8 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                         if suggestion in words:
                             yield ("%s" % suggestion, suggestion)
                 return _generator()
-            self.editor.showCompletionWidget(
-                suggestions_generator(suggestions, words, triggers)
-            )
+            if suggestions:
+                self.editor.showCompletionWidget(
+                    suggestions_generator(suggestions, words, triggers)
+                )
     
