@@ -405,7 +405,7 @@ html_footer
                 saveAs = True
         if not editor.windowFilePath() or saveAs:
             fileDirectory = self.application().fileManager.directory(self.projectsDock.currentPath()) if not editor.windowFilePath() else editor.fileDirectory()
-            fileName = editor.title()
+            fileName = editor.windowTitle()
             fileFilters = editor.fileFilters()
             # TODO Armar el archivo destino y no solo el basedir
             file_path, _ = getSaveFileName(
@@ -428,7 +428,7 @@ html_footer
         if editor is None: return
         while editor and editor.isWindowModified():
             response = QtWidgets.QMessageBox.question(self, "Save",
-                "Save %s" % editor.title(),
+                "Save %s" % editor.windowTitle(),
                 buttons = buttons,
                 defaultButton = QtWidgets.QMessageBox.Ok)
             if response == QtWidgets.QMessageBox.Ok:
@@ -462,7 +462,7 @@ html_footer
         for editor in self.editors():
             while editor and editor.isWindowModified():
                 response = QtWidgets.QMessageBox.question(self, "Save",
-                    "Save %s" % editor.title(),
+                    "Save %s" % editor.windowTitle(),
                     buttons = QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel,
                     defaultButton = QtWidgets.QMessageBox.Ok)
                 if response == QtWidgets.QMessageBox.Ok:
