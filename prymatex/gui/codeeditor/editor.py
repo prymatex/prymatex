@@ -645,6 +645,8 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
             cursor = self.findMatchCursor(match, flags, cursor=cursor)
         if not cursor.isNull():
             self.setTextCursor(cursor)
+        else:
+            self.showMessage("Unable to find <strong>%s</strong>" % match, timeout=1000)    
         return not cursor.isNull()
 
     def findAll(self, match, flags):

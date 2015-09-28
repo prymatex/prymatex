@@ -38,9 +38,6 @@ class StatusMixin(object):
         self.labelContent.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.labelContent.customContextMenuRequested.connect(self.on_labelContent_customContextMenuRequested)
 
-    def showWindowMessage(self, message):
-        return self.window().showMessage(message, timeout=2000)    
-
     def setStatus(self, message):
         self.labelMessage.setText(message)
 

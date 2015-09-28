@@ -19,12 +19,14 @@ class FindMixin(object):
         #     ("StatusBar", "FindAll", "Alt+Return")
         # )
 
-    def _find(self, backward=False):
+    def _find(self, incremental=False, backward=False):
         editor, cursor, *cursors = self._find_context()
         flags = self.flags()
         if backward:
             flags |= self.Backward
         cursor = cursor if flags & self.InSelection else None
+        if incremental:
+            cursor = editor.newCursorAtPosition(0)
         cyclic = bool(flags & self.Wrap)
         match = self.comboBoxFind.lineEdit().text()
         editor.findMatch(match, flags, cursor=cursor, cyclic=cyclic)
@@ -53,8 +55,8 @@ class FindMixin(object):
             self.on_pushButtonFindFind_pressed()
             
     def on_lineEditFind_textChanged(self, text):
-        if not self.pushButtonFindFind.isVisible():
-            print(text)
+        if not self.pushButtonFindFind.isVisible() and text:
+            self._find(incremental=True)
             
     # ------- QuickFind, menu actions
     def quickFind(self):
