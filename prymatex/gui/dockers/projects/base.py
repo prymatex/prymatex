@@ -167,7 +167,7 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
                 self.application().projectManager.removeProject(node)
     
     def on_window_editorChanged(self, editor):
-        if editor.hasFile():
+        if editor.windowFilePath():
             index = self.projectTreeProxyModel.indexForPath(editor.filePath())
             self.treeViewProjects.setCurrentIndex(index)
  
