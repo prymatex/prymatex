@@ -188,9 +188,19 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         self.cursorPositionChanged.connect(self.on_cursorPositionChanged)
         self.syntaxChanged.connect(self._update_properties)
         self.filePathChanged.connect(self._update_properties)
-        self.application().supportManager.propertiesChanged.connect(self._update_properties)
-
+        self.application().supportManager.propertiesChanged.connect(
+            self._update_properties)
+        self.syntaxHighlighter.blockHighlightChanged.connect(
+            self.on_highlighter_blockHighlightChanged)
         self.addCommandsByName()
+
+    def on_highlighter_blockHighlightChanged(self, block):
+        if block.blockNumber() == 0:
+            text = block.text()
+            syntax = self.application().supportManager.findSyntaxByFirstLine(text)
+            if syntax is not None:
+                self.insertBundleItem(syntax)
+            self.setWindowTitle(text)
 
     def highlighter(self):
         return self.syntaxHighlighter
@@ -879,13 +889,6 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
                 TextEditWidget.mouseReleaseEvent(self, event)
         else:
             TextEditWidget.mouseReleaseEvent(self, event)
-
-    # --------------- Key press pre and post
-    def trySyntaxByText(self, cursor):
-        text = cursor.block().text()[:cursor.positionInBlock()]
-        syntax = self.application().supportManager.findSyntaxByFirstLine(text)
-        if syntax is not None:
-            self.insertBundleItem(syntax)
 
     # ------------ Command API
     def runCommand(self, string, **kwargs):

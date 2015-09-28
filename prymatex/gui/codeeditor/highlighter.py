@@ -50,8 +50,8 @@ class HighlighterThread(QtCore.QThread):
                     )
                     self._states[index + 1] = states[index + 1] = (user_data.state, user_data.revision)
                     self.ready.emit(index, user_data)
-                self._doing_indexes = set()
                 self.changed.emit(list(self._doing_indexes))
+                self._doing_indexes = set()
             self.msleep(1)
 
 class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
