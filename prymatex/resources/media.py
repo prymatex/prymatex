@@ -97,9 +97,12 @@ default_media_mapper = {
     "settings-variables": "accessories-dictionary",
     "project": "package-x-generic",
     "sync": "reload",
+    "case-sensitive": "insert-text",
+    "whole-word": "tools-check-spelling",
     "custom-filters": "format-justify-left",
     "collapse-all": "zoom-out",
     "prymatex": ":/prymatex.png",
+    "distraction-free-mode": "zoom-fit-best",
     "bundle-item-bundle": ":/bundles/bundle.png",
     "bundle-item-command": ":/bundles/commands.png",
     "bundle-item-dragcommand": ":/bundles/drag-commands.png",
@@ -125,5 +128,9 @@ default_media_mapper = {
     "replace": "edit-find-replace",
     "about-prymatex": ":/prymatex.png",
     "about-qt": "help-about",
-    "new-from-template": "text-x-generic-template"
+    "new-from-template": "text-x-generic-template",
+    "wrap": "view-refresh",
+    "highlight-matches": "format-justify-fill",
+    "regular-expression": "format-text-underline",
+    "preserve-case": "accessories-character-map"
 }
