@@ -96,6 +96,7 @@ default_media_mapper = {
     "sync": "reload",
     "custom-filters": "format-justify-left",
     "collapse-all": "zoom-out",
+    "prymatex": ":/prymatex.png",
     "bundle-item-bundle": ":/bundles/bundle.png",
     "bundle-item-command": ":/bundles/commands.png",
     "bundle-item-dragcommand": ":/bundles/drag-commands.png",
