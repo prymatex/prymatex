@@ -45,32 +45,30 @@ class CompletionWidget(QtWidgets.QListWidget):
         
     def _map_completions(self, completions):
         for completion in completions:
-            print(completion)
-            item = QtWidgets.QListWidgetItem(self)
+            tooltip = icon = text = match = None
             if isinstance(completion, (tuple, list)):
-                if not self._set_match(item, completion[1]):
-                    continue
-                item.setText("%s" % textutils.asciify(completion[0]))
+                match = completion[1]
+                text = textutils.asciify(completion[0])
             elif isinstance(completion, dict):
-                text = completion.get("display", completion.get('title'))
-                item.setText("%s" % textutils.asciify(text))
-                match = completion.get("match", text)
-                if not self._set_match(item, match):
-                    continue
-                image = completion.get("image")
-                if image is not None:
-                    # TODO Obtener el icono del lugar correcto
-                    image = resources.get_icon(image)
-                    item.setIcon(icon)
+                display = completion.get("display", completion.get('title'))
+                text = textutils.asciify(display)
+                match = completion.get("match", display)
+                icon = completion.get("image")
                 tooltip = completion.get("tool_tip")
+            else:
+                match = text = completion
+            if hash(match) not in self._match_hashes:
+                item = QtWidgets.QListWidgetItem(text, self)
+                item.setData(QtCore.Qt.MatchRole, match)
+                if icon is not None:
+                    # TODO Obtener el icono del lugar correcto
+                    icon = resources.get_icon(icon)
+                    item.setIcon(icon)
                 if tooltip is not None:
                     item.setToolTip(tooltip)
-            else:
-                if not self._set_match(item, completion):
-                    continue
-                item.setText("%s" % completion)
-            yield completion, item
-    
+                self._match_hashes.add(hash(match))
+                yield completion, item
+
     def complete(self, completions, completion_prefix=None, automatic=True):
         # Todo esto tiene que ser mejor, cuando ya tengo algo hay que filtrar
         if not self.isVisible():
