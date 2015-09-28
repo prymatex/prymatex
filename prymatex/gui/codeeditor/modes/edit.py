@@ -165,7 +165,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
 
     def on_editor_queryCompletions(self, automatic):
         alreadyTyped, start, end = self.editor.textUnderCursor(direction="left", search = True)
-        if alreadyTyped:
+        if alreadyTyped or not automatic:
             leftScope, rightScope = self.editor.scope(self.editor.textCursor())
             # Suggestions
             words = self.editor.extractCompletions(alreadyTyped)

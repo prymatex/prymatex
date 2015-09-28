@@ -102,7 +102,7 @@ class FindMixin(object):
         self.pushButtonFindPrev.setVisible(False)
         self.pushButtonFindAll.setVisible(False)
         self.widgetFind.setVisible(True)
-        self.comboBoxFind.lineEdit().selectAll()
+        self.comboBoxFind.lineEdit().clear()
         self.comboBoxFind.lineEdit().setFocus()
 
     # ------- Show find

@@ -24,9 +24,10 @@ class CompletionWidget(QtWidgets.QListWidget):
         super().__init__(parent)
         self.setWindowFlags(QtCore.Qt.SubWindow | QtCore.Qt.FramelessWindowHint)
         self.textedit = textedit
-        self.completions = None
         self.match_flags = QtCore.Qt.MatchWrap | QtCore.Qt.MatchWildcard | QtCore.Qt.MatchCaseSensitive
+        self._completions = None
         self._match_indexes = []
+        self._match_hashes = set()
         self.current_match_index = -1
         self.select_keys = (QtCore.Qt.Key_Tab, QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter)
         self.hide()
@@ -35,17 +36,27 @@ class CompletionWidget(QtWidgets.QListWidget):
         self.setAlternatingRowColors(True)
         #self.setItemDelegate(HtmlItemDelegate(self))
 
+    def _set_match(self, item, match):
+        if hash(match) not in self._match_hashes:
+            self._match_hashes.add(hash(match))
+            item.setData(QtCore.Qt.MatchRole, match)
+            return True
+        return False
+        
     def _map_completions(self, completions):
         for completion in completions:
+            print(completion)
             item = QtWidgets.QListWidgetItem(self)
             if isinstance(completion, (tuple, list)):
+                if not self._set_match(item, completion[1]):
+                    continue
                 item.setText("%s" % textutils.asciify(completion[0]))
-                item.setData(QtCore.Qt.MatchRole, "%s" % completion[1])
             elif isinstance(completion, dict):
                 text = completion.get("display", completion.get('title'))
                 item.setText("%s" % textutils.asciify(text))
-                match = completion.get("match", text) 
-                item.setData(QtCore.Qt.MatchRole, "%s" % match)
+                match = completion.get("match", text)
+                if not self._set_match(item, match):
+                    continue
                 image = completion.get("image")
                 if image is not None:
                     # TODO Obtener el icono del lugar correcto
@@ -55,21 +66,22 @@ class CompletionWidget(QtWidgets.QListWidget):
                 if tooltip is not None:
                     item.setToolTip(tooltip)
             else:
+                if not self._set_match(item, completion):
+                    continue
                 item.setText("%s" % completion)
-                item.setData(QtCore.Qt.MatchRole, "%s" % completion)
             yield completion, item
-
+    
     def complete(self, completions, completion_prefix=None, automatic=True):
         # Todo esto tiene que ser mejor, cuando ya tengo algo hay que filtrar
         if not self.isVisible():
             self.clear()
         for completion, item in self._map_completions(completions):
-            self.completions.append(completion)
+            self._completions.append(completion)
             self.addItem(item)
-        if len(self.completions) == 0:
+        if len(self._completions) == 0:
             return
-        if len(self.completions) == 1 and not automatic:
-            self.__item_activated(self.completions[0])
+        if len(self._completions) == 1 and not automatic:
+            self.__item_activated(self._completions[0])
             return
         self.resize(self.sizeHint())
         self.setCurrentRow(0)
@@ -125,14 +137,15 @@ class CompletionWidget(QtWidgets.QListWidget):
         self.move(point)
         
         if completion_prefix is not None:
-            print(completion_prefix)
             # When initialized, if completion text is not empty, we need 
             # to update the displayed list:
             self.setCompletionPrefix(completion_prefix)
         
     def clear(self):
         super().clear()
-        self.completions = []
+        self._completions = []
+        self._match_indexes = []
+        self._match_hashes = set()
 
     def hide(self):
         super().hide()
@@ -206,12 +219,12 @@ class CompletionWidget(QtWidgets.QListWidget):
     def __item_activated(self, widget_item=None):
         row = self.currentRow() if widget_item is None \
             else self.row(widget_item)
-        completion = self.completions[row]
+        completion = self._completions[row]
         self.textedit.insertCompletion(completion)
         self.hide()
 
     def __item_highlighted(self, index=None):
-        item = self.completions[index]
+        item = self._completions[index]
 
     def sizeHint(self):
         size = QtCore.QSize()
