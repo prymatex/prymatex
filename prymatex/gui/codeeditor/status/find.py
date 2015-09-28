@@ -7,10 +7,13 @@ class FindMixin(object):
     """docstring for FindMixin"""
     def __init__(self, **kwargs):
         super(FindMixin, self).__init__(**kwargs)
-
+        
     def initialize(self, *args, **kwargs):
         self.widgetFind.setVisible(False)
-        self.comboBoxFind.lineEdit().returnPressed.connect(self.on_lineEditFind_returnPressed)
+        self.comboBoxFind.lineEdit().returnPressed.connect(
+            self.on_lineEditFind_returnPressed)
+        self.comboBoxFind.lineEdit().textChanged.connect(
+            self.on_lineEditFind_textChanged)
         # TODO Migrar a esta forma de shortcuts eventualmente
         # self.application().registerShortcut(self, self.pushButtonFindAll,
         #     ("StatusBar", "FindAll", "Alt+Return")
@@ -48,7 +51,11 @@ class FindMixin(object):
             self.on_pushButtonFindAll_pressed()
         else:
             self.on_pushButtonFindFind_pressed()
-         
+            
+    def on_lineEditFind_textChanged(self, text):
+        if not self.pushButtonFindFind.isVisible():
+            print(text)
+            
     # ------- QuickFind, menu actions
     def quickFind(self):
         editor, cursor, *cursors = self._find_context(select=True)
@@ -93,6 +100,8 @@ class FindMixin(object):
         self.pushButtonFindPrev.setVisible(False)
         self.pushButtonFindAll.setVisible(False)
         self.widgetFind.setVisible(True)
+        self.comboBoxFind.lineEdit().selectAll()
+        self.comboBoxFind.lineEdit().setFocus()
 
     # ------- Show find
     def find(self):
