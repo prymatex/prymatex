@@ -49,10 +49,7 @@ class CodeEditorStatus(PrymatexStatusBar, FindMixin, FindInFilesMixin,
     def hideAll(self):
         for widget in [self.widgetFind, self.widgetReplace, self.widgetCommand, self.widgetFindInFiles]:
             widget.setVisible(False)
-
-    def showMessage(self, message):
-        return self.window().showMessage(message, timeout=2000)
-               
+           
     def initialize(self, *args, **kwargs):
         super(CodeEditorStatus, self).initialize(*args, **kwargs)
         FindMixin.initialize(self, *args, **kwargs)

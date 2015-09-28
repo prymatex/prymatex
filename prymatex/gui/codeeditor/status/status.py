@@ -37,8 +37,11 @@ class StatusMixin(object):
         # Connect tab size context menu
         self.labelContent.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.labelContent.customContextMenuRequested.connect(self.on_labelContent_customContextMenuRequested)
-    
-    def showMessage(self, message):
+
+    def showWindowMessage(self, message):
+        return self.window().showMessage(message, timeout=2000)    
+
+    def setStatus(self, message):
         self.labelMessage.setText(message)
 
     # -------------- Content tool

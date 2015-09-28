@@ -13,7 +13,7 @@ class PrymatexMainStatusBar(QtWidgets.QStatusBar):
         self._status = OrderedDict()
 
     def addStatusBar(self, status_bar):
-        if hasattr(status_bar, 'showMessage'):
+        if hasattr(status_bar, 'setStatus'):
             self.addPermanentWidget(status_bar, 1)
         else:
             self.addWidget(status_bar, 1)
@@ -25,18 +25,18 @@ class PrymatexMainStatusBar(QtWidgets.QStatusBar):
     def on_window_editorChanged(self, editor):
         for status_bar in self.statusBars():
             status_bar.setVisible(status_bar.acceptEditor(editor))
-
-    def showMessage(self, message):
+            
+    def _set_status(self, message):
         super(PrymatexMainStatusBar, self).showMessage(message)
         for status_bar in self.statusBars():
-            status_bar.showMessage(message)
-            
+            status_bar.setStatus(message)
+
     # -------------------- Status
     def setStatus(self, key, value, timeout=None):
         self._status[key] = value
         if timeout is not None:
             QtCore.QTimer.singleShot(timeout, lambda key=key: self.eraseStatus(key))
-        self.showMessage('; '.join(self._status.values()))
+        self._set_status('; '.join(self._status.values()))
 
     def status(self, key):
         return self._status.get(key, '')
@@ -44,4 +44,4 @@ class PrymatexMainStatusBar(QtWidgets.QStatusBar):
     def eraseStatus(self, key):
         if key in self._status:
             del self._status[key]
-        self.showMessage('; '.join(self._status.values()))
+        self._set_status('; '.join(self._status.values()))
