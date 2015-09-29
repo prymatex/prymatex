@@ -200,7 +200,8 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
             syntax = self.application().supportManager.findSyntaxByFirstLine(text)
             if syntax is not None:
                 self.insertBundleItem(syntax)
-            self.setWindowTitle(text)
+            if self.windowTitle() == self.UNTITLED:
+                self.setWindowTitle(text)
 
     def highlighter(self):
         return self.syntaxHighlighter
