@@ -253,6 +253,9 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     deactivated = QtCore.Signal()
     
     extraSelectionChanged = QtCore.Signal()
+    windowTitleChanged = QtCore.Signal()
+    windowIconChanged = QtCore.Signal()
+    toolTipChanged = QtCore.Signal()
 
     # ------------------ Find Flags
     FindBackward           = 1<<0
@@ -281,8 +284,8 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
 
     # OVERRIDE: QtWidget.QPlainTextEdit.setWindowTitle(title)
     def setWindowTitle(self, title):
-        print(title)
         super().setWindowTitle(title)
+        self.windowTitleChanged.emit()
 
     # OVERRIDE: QtWidgets.QPlainTextEdit.setPalette()
     def setPalette(self, palette):

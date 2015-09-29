@@ -45,7 +45,6 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
     syntaxChanged = QtCore.Signal(object)
     themeChanged = QtCore.Signal(object)
     filePathChanged = QtCore.Signal(str)
-    titleChanged = QtCore.Signal()    
 
     modeChanged = QtCore.Signal(object)
 
@@ -200,8 +199,8 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
             syntax = self.application().supportManager.findSyntaxByFirstLine(text)
             if syntax is not None:
                 self.insertBundleItem(syntax)
-            if self.windowTitle() == self.UNTITLED:
-                self.setWindowTitle(text)
+            if super().windowTitle() == self.UNTITLED:
+                self.windowTitleChanged.emit()
 
     def highlighter(self):
         return self.syntaxHighlighter
@@ -309,11 +308,6 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         elif isinstance(component, CodeEditorBaseMode):
             self.addCodeEditorMode(component)
     
-    # OVERRIDE: PrymatexEditor.setTitle()
-    def setTitle(self, title):
-        super().setTitle(title)
-        self.titleChanged.emit()
-
     def addSideBarWidget(self, widget):
         if widget.ALIGNMENT == QtCore.Qt.AlignRight:
             self.rightBar.addWidget(widget)
@@ -338,6 +332,15 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
     def eraseStatus(self, key):
         return self.window().eraseStatus(key)
 
+    # OVERRIDE: TextEditWidget.windowTitle()
+    def windowTitle(self):
+        title = super().windowTitle()
+        if title == self.UNTITLED:
+            alternative_title = self.document().firstBlock().text().strip()
+            if alternative_title:
+                return alternative_title
+        return title
+        
     # OVERRIDE: TextEditWidget.setPlainText()
     def setPlainText(self, text):
         self.syntaxHighlighter.stop()

@@ -206,7 +206,7 @@ class SplitterWidget(QtWidgets.QSplitter):
         self.setWidgetToolTip(widget, widget.toolTip())
         self.setWidgetIcon(widget, widget.windowIcon())
         widget.modificationChanged[bool].connect(self._update_tab_status)
-        widget.titleChanged.connect(self._update_tab_status)
+        widget.windowTitleChanged.connect(self._update_tab_status)
 
         # If the tab has been added to the current group then make it the current tab.
         if group is not self._current_group:
@@ -221,7 +221,7 @@ class SplitterWidget(QtWidgets.QSplitter):
         tw, tidx = self._tab_widget(widget)
         if tw is not None:
             widget.modificationChanged[bool].disconnect(self._update_tab_status)
-            widget.titleChanged.disconnect(self._update_tab_status)
+            widget.windowTitleChanged.disconnect(self._update_tab_status)
             self._remove_tab(tw, tidx)
             if tw.count() == 0 and self.count() > 0:
                 for tw in self.findChildren(GroupWidget):

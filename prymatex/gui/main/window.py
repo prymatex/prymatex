@@ -395,6 +395,8 @@ html_footer
 
     def saveEditor(self, editor=None, saveAs=False):
         editor = editor or self.currentEditor()
+        has_file_path = editor.windowFilePath()
+        file_manager = self.application().fileManager
         if editor.externalAction() == self.application().EXTERNAL_CHANGED:
             message = "The file '%s' has been changed on the file system, Do you want save the file with other name?"
             result = QtWidgets.QMessageBox.question(editor, "File changed",
@@ -403,16 +405,18 @@ html_footer
                 defaultButton = QtWidgets.QMessageBox.Yes)
             if result == QtWidgets.QMessageBox.Yes:
                 saveAs = True
-        if not editor.windowFilePath() or saveAs:
-            fileDirectory = self.application().fileManager.directory(self.projectsDock.currentPath()) if not editor.windowFilePath() else editor.fileDirectory()
-            fileName = editor.windowTitle()
-            fileFilters = editor.fileFilters()
+        if not has_file_path or saveAs:
+            dirname = file_manager.directory(self.projectsDock.currentPath()) \
+                if not has_file_path \
+                else editor.windowFileDirectory()
+            basename = editor.windowTitle()
+            filters = editor.fileFilters()
             # TODO Armar el archivo destino y no solo el basedir
             file_path, _ = getSaveFileName(
                 self,
                 caption = "Save file as" if saveAs else "Save file",
-                basedir = fileDirectory,
-                filters = fileFilters
+                basedir = file_manager.join(dirname, basename),
+                filters = filters
             )
         else:
             file_path = editor.windowFilePath()
