@@ -646,7 +646,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             message = ("The file '%s' has been changed on the file system, Do you want to "
             "replace the editor contents with these changes?")
             result = QtWidgets.QMessageBox.question(editor, _("File changed"),
-                                                _(message) % editor.filePath(),
+                                                _(message) % editor.windowFilePath(),
                                                 buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,  # NOQA
                                                 defaultButton=QtWidgets.QMessageBox.Yes) if self.askAboutExternalChanges else QtWidgets.QMessageBox.Yes  # NOQA
             if result == QtWidgets.QMessageBox.Yes:
@@ -658,7 +658,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
                        "to save your changes or close the editor without saving?")
             result = QtWidgets.QMessageBox.question(
                 editor, _("File deleted"),
-                _(message) % editor.filePath(),
+                _(message) % editor.windowFilePath(),
                 buttons=QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Close,
                 defaultButton=QtWidgets.QMessageBox.Close) if self.askAboutExternalDeletions else QtWidgets.QMessageBox.Close  # NOQA
             if result == QtWidgets.QMessageBox.Close:
