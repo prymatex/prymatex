@@ -88,16 +88,16 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
     def saveModifiedFiles(self):
         ret = True
         for editor in self.editor.window().editors():
-            if editor.isModified():
+            if editor.isWindowModified():
                 self.editor.window().saveEditor(editor = editor)
-                ret = ret and not editor.isModified()
+                ret = ret and not editor.isWindowModified()
             if ret == False:
                 break
         return ret
 
     def saveActiveFile(self):
         self.editor.window().saveEditor(editor=self.editor)
-        return self.editor.hasFile() and not self.editor.isModified()
+        return self.editor.hasFile() and not self.editor.isWindowModified()
 
     # ------------------- Outpus function
     def error(self, context, outputFormat=None):
