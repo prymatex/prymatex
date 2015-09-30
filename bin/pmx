@@ -30,12 +30,12 @@ fi
 
 
 if [ -z $VIRTUAL_ENV ]; then
-    PYTHON=$(which python)
+    PYTHON=$(which python3)
 else
     # Could be improved using virtualenv's own shellscripts
     #source $VIRTUAL_ENV/bin/activate
     #deactivate
-    PYTHON=/usr/bin/python
+    PYTHON=/usr/bin/python3
 fi
 
 $PYTHON $PMX_PATH/prymatex.py $@ &
