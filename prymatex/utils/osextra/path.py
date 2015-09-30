@@ -63,7 +63,7 @@ def _fixpath(p, normpath=True, realpath=False):
 def issubpath(childPath, parentPath, normpath=True, realpath=False):
     return _fixpath(childPath, normpath, realpath).startswith(_fixpath(parentPath, normpath, realpath))
 
-def commonpath(*args, normpath=True, realpath=False):
+def commonpath(*args):
     common = []
     for ziped in zip(*list(map(fullsplit, args))):
         if len(set(ziped)) != 1:

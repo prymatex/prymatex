@@ -5,7 +5,7 @@ from . import json
 
 class Settings(dict):
     def __init__(self, name, settings):
-        super().__init__(settings)
+        super(Settings, self).__init__(settings)
         self._name = name
         # Callbacks
         self._callbacks = {}
