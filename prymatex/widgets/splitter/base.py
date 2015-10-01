@@ -205,7 +205,7 @@ class SplitterWidget(QtWidgets.QSplitter):
         idx = group.addTab(widget, self._disambiguate_title(widget))
         self.setWidgetToolTip(widget, widget.toolTip())
         self.setWidgetIcon(widget, widget.windowIcon())
-        widget.modificationChanged[bool].connect(self._update_tab_status)
+        widget.modificationChanged.connect(self._update_tab_status)
         widget.windowTitleChanged.connect(self._update_tab_status)
 
         # If the tab has been added to the current group then make it the current tab.
@@ -220,7 +220,7 @@ class SplitterWidget(QtWidgets.QSplitter):
         """ Remove tab to the tab widget."""
         tw, tidx = self._tab_widget(widget)
         if tw is not None:
-            widget.modificationChanged[bool].disconnect(self._update_tab_status)
+            widget.modificationChanged.disconnect(self._update_tab_status)
             widget.windowTitleChanged.disconnect(self._update_tab_status)
             self._remove_tab(tw, tidx)
             if tw.count() == 0 and self.count() > 0:
@@ -523,6 +523,7 @@ class SplitterWidget(QtWidgets.QSplitter):
         return widgets
 
     def _update_tab_status(self, changed=None):
+        print(changed)
         sender = self.sender()
         self.setWidgetTitle(sender, self._disambiguate_title(sender))
         self.setWidgetIcon(sender, sender.windowIcon())

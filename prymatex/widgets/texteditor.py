@@ -256,6 +256,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     windowTitleChanged = QtCore.Signal()
     windowIconChanged = QtCore.Signal()
     toolTipChanged = QtCore.Signal()
+    modificationChanged = QtCore.Signal(bool)
 
     # ------------------ Find Flags
     FindBackward           = 1<<0
@@ -277,6 +278,9 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         self.soft_tabs = False
         self.tab_size = 2
         self.completion_auto = False
+        self.document().modificationChanged.connect(
+            lambda changed: self.modificationChanged.emit(changed)        
+        )
 
     # OVERRIDE: QtWidget.QPlainTextEdit.windowTitle()
     def windowTitle(self):
@@ -286,6 +290,15 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     def setWindowTitle(self, title):
         super().setWindowTitle(title)
         self.windowTitleChanged.emit()
+
+    # OVERRIDE: QtWidget.QPlainTextEdit.isWindowModified()
+    def isWindowModified(self):
+        return super().isWindowModified() or self.document().isModified()
+
+    # OVERRIDE: QtWidget.QPlainTextEdit.setWindowModified(bool)
+    def setWindowModified(self, bool):
+        super().setWindowModified(bool)
+        self.document().setModified(bool)
 
     # OVERRIDE: QtWidgets.QPlainTextEdit.setPalette()
     def setPalette(self, palette):
@@ -358,7 +371,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         
         if eol_chars in self.EOL_CHARS and self.eol_chars != eol_chars:
             self.eol_chars = eol_chars
-            self.setModified(True)
+            self.document().setModified(True)
         self.textChanged.emit()
 
     def eolChars(self):
