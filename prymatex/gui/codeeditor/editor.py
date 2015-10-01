@@ -336,9 +336,9 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
     def windowTitle(self):
         title = super().windowTitle()
         if title == self.UNTITLED:
-            alternative_title = self.document().firstBlock().text().strip()
-            if alternative_title:
-                return alternative_title
+            alt_title = self.document().firstBlock().text().strip()
+            if alt_title:
+                return self.isWindowModified() and "%s[*]" % alt_title or alt_title
         return title
         
     # OVERRIDE: TextEditWidget.setPlainText()
