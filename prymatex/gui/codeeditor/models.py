@@ -87,6 +87,19 @@ class FoldingListModel(QtCore.QAbstractListModel):
         self.flags.pop(index)
         self.endRemoveRows()
 
+    # ---------- State API
+    def saveState(self):
+        return [ (cursor[0].position(), cursor[1].position()) for cursor in self.folded ]
+
+    def restoreState(self, state):
+        try:
+            self.folded = [
+                (self.editor.newCursorAtPosition(position[0]),
+                    self.editor.newCursorAtPosition(position[1])) for position in state    
+            ]
+        except:
+            self.editor.logger.warn("State warning")
+
     # ----------- Public api
     def isFoldingMarker(self, cursor):
         return cursor in self.foldings
@@ -221,11 +234,20 @@ class BookmarkListModel(QtCore.QAbstractListModel):
         elif role == QtCore.Qt.DecorationRole:
             return self.icon_bookmark
     
+    # ---------- State API
+    def saveState(self):
+        return [ cursor.position() for cursor in self.bookmarks ]
+
+    def restoreState(self, state):
+        self.bookmarks = [
+            self.editor.newCursorAtPosition(position) for position in state    
+        ]
+
     # ----------- Public api
     def bookmark(self, row):
         return self.bookmarks[row]
 
-    def lineNumbers(self):
+    def _lineNumbers(self):
         return [cursor.block().lineCount() for cursor in self.bookmarks]
 
     def toggleBookmark(self, cursor):

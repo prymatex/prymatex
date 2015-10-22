@@ -392,8 +392,11 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         if self.isWindowModified():
             state["text"] = self.toPlainTextWithEol()
 
+        #Folds
+        state['folds'] = self.foldingListModel.saveState()
+        
         #Bookmarks
-        state['bookmarks'] = self.bookmarkListModel.lineNumbers()
+        state['bookmarks'] = self.bookmarkListModel.saveState()
         
         #Syntax
         state['syntax'] = self.syntax().uuidAsText()
@@ -411,6 +414,14 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         if uuid is not None:
             syntax = self.application().supportManager.getBundleItem(uuid)
             self.insertBundleItem(syntax)
+
+        #Folds
+        if "folds" in componentState:
+            self.foldingListModel.restoreState(componentState["folds"])
+        
+        #Bookmarks
+        if "bookmarks" in componentState:
+            self.foldingListModel.restoreState(componentState["bookmarks"])
 
     def isEmpty(self):
         return self.document().isEmpty()
