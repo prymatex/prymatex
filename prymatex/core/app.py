@@ -154,9 +154,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         app.settingsManager = app.createComponentInstance(SettingsManager, parent=app)
         app.resourceManager = app.createComponentInstance(ResourceManager, parent=app)
         
-        # Populate application's class and configurable
+        # Populate application's class
         app.populateComponentClass(PrymatexApplication)
-        app.settingsManager.populateConfigurableClass(PrymatexApplication)
 
         # Build more Managers
         app.packageManager = app.createComponentInstance(PackageManager, parent=app)        
@@ -198,7 +197,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import GeneralSettingsWidget
-
+        
         return [ GeneralSettingsWidget ]
 
     def environmentVariables(self):
@@ -380,49 +379,50 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
             os.unlink(self.fileLock)
 
     # --------------------- Populate components
-    def populateComponentClass(self, componentClass):
-        if hasattr(componentClass, '__application'):
+    def populateComponentClass(self, component_class):
+        if component_class._populated:
             return
 
         # ------- Application
-        componentClass.__application = self
-        componentClass.application = classmethod(lambda cls: cls.__application)
+        component_class.__application = self
+        component_class.application = classmethod(lambda cls: cls.__application)
 
         # ------- Logger
-        componentClass.__logger = self.getLogger('.'.join([componentClass.__module__, componentClass.__name__]))
-        componentClass.logger = classmethod(lambda cls: cls.__logger)
+        component_class.__logger = self.getLogger('.'.join([component_class.__module__, component_class.__name__]))
+        component_class.logger = classmethod(lambda cls: cls.__logger)
 
         # ------- Resources
-        componentClass.__resources = None
+        component_class.__resources = None
         def get_resources(app):
             def _get_resources(cls):
                 if cls.__resources is None and app.resourceManager is not None:
                     cls.__resources = app.resourceManager.providerForClass(cls)
                 return cls.__resources
             return _get_resources
-        componentClass.resources = classmethod(get_resources(self))
+        component_class.resources = classmethod(get_resources(self))
 
         # ------- Profile
-        componentClass.__profile = None
+        component_class.__profile = None
         def get_profile(app):
             def _get_profile(cls):
                 if cls.__profile is None and app.profileManager is not None:
                     cls.__profile = app.profileManager.profileForClass(cls)
                 return cls.__profile
             return _get_profile
-        componentClass.profile = classmethod(get_profile(self))
+        component_class.profile = classmethod(get_profile(self))
 
         # ------- Settings
-        componentClass.__settings = None
+        component_class.__settings = None
         def get_settings(app):
             def _get_settings(cls):
                 if cls.__settings is None and app.settingsManager is not None:
                     cls.__settings = app.settingsManager.settingsForClass(cls)
                 return cls.__settings
             return _get_settings
-        componentClass.settings = classmethod(get_settings(self))
+        component_class.settings = classmethod(get_settings(self))
         if self.settingsManager is not None:
-            self.settingsManager.populateConfigurableClass(componentClass)
+            self.settingsManager.populateConfigurableClass(component_class)
+        component_class._populated = True
 
     # ------------------- Create components
     def createComponentInstance(self, componentClass, *args, **kwargs):

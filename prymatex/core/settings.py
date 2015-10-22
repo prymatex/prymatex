@@ -17,6 +17,7 @@ class PrymatexSettings(settings.Settings):
     def __init__(self, name, settings):
         super(PrymatexSettings, self).__init__(name, settings)
         self._tm = None
+        self._widgets = []
         self._listeners = set()
         # Setting attrs
         self._items = {}
@@ -91,9 +92,12 @@ class PrymatexSettings(settings.Settings):
 
     def addListener(self, listener):
         self._listeners.add(listener)
-
+    
     def removeListener(self, listener):
         self._listeners.remove(listener)
+
+    def addWidget(self, widget):
+        self._widgets.append(widget)
 
     def configure(self, obj):
         for name, item in self._items.items():

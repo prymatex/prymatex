@@ -90,13 +90,11 @@ class SettingsManager(PrymatexComponent, QtCore.QObject):
         self.settingsTreeModel.loadSettings()
 
     def populateConfigurableClass(self, component_class):
-        if hasattr(component_class, '_settings_widgets'):
-            return
-        component_class._settings_widgets = []
+        settings = component_class.settings()
         for klass in component_class.contributeToSettings():
-            settings_widget = klass(component_class)
-            component_class._settings_widgets.append(settings_widget)
-            self.settingsTreeModel.addConfigNode(settings_widget)
+            widget = klass(component_class)
+            self.settingsTreeModel.addConfigNode(widget)
+            settings.addWidget(widget)
 
     # ------------------------ Setting
     def settingsForClass(self, configurableClass):
