@@ -182,6 +182,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.mainwindow import MainWindowSettingsWidget
+
         return [ MainWindowSettingsWidget ]
 
     # --------------- Bundle Items
@@ -367,16 +368,18 @@ html_footer
 
     def on_splitter_aboutToWidgetChange(self, editor):
         if editor is not None:
+            # Disconnect
+            editor.deactivate()
+            editor.windowTitleChanged.disconnect(self.updateWindowTitle)
+            editor.modificationChanged.disconnect(self.updateWindowModified)
             self.aboutToEditorChange.emit(editor)
         
     def on_splitter_widgetChanged(self, editor):
         # ----- Not allow None
         if editor is None:
             return self.addEmptyEditor()
-
-        # Update Menu Bar
-        #self.updateMenuForEditor(editor)
-
+        
+        editor.activate()
         # Avisar al manager de bundles del editor y preparar el handler de bundle items
         self.application().supportManager.setEditorAvailable(True)
         self.bundleItem_handler = editor.bundleItemHandler() or self.insertBundleItem
@@ -384,14 +387,21 @@ html_footer
         self.addEditorToHistory(editor)
         editor.setFocus()
         self.application().checkExternalAction(self, editor)
+        editor.windowTitleChanged.connect(self.updateWindowTitle)
+        editor.modificationChanged.connect(self.updateWindowModified)
         self.updateWindowTitle()
+        self.updateWindowModified(editor.isWindowModified())
         
         #Emitir señal de cambio
         self.editorChanged.emit(editor)
 
+    def updateWindowModified(self, modified):
+        self.setWindowModified(modified)
+
     def updateWindowTitle(self):
-        self.setWindowTitle(self.title_template.substitute(
-            (self.currentEditor() or self).environmentVariables()))
+        widget = self.currentEditor() or self
+        variables = widget.environmentVariables()
+        self.setWindowTitle(self.title_template.substitute(variables))
 
     def saveEditor(self, editor=None, saveAs=False):
         editor = editor or self.currentEditor()
@@ -409,7 +419,7 @@ html_footer
             dirname = file_manager.directory(self.projectsDock.currentPath()) \
                 if not has_file_path \
                 else editor.windowFileDirectory()
-            basename = editor.windowTitle()
+            basename = editor.accessibleName()
             filters = editor.fileFilters()
             # TODO Armar el archivo destino y no solo el basedir
             file_path, _ = getSaveFileName(
@@ -432,7 +442,7 @@ html_footer
         if editor is None: return
         while editor and editor.isWindowModified():
             response = QtWidgets.QMessageBox.question(self, "Save",
-                "Save %s" % editor.windowTitle(),
+                "Save %s" % editor.accessibleName(),
                 buttons = buttons,
                 defaultButton = QtWidgets.QMessageBox.Ok)
             if response == QtWidgets.QMessageBox.Ok:
@@ -466,7 +476,7 @@ html_footer
         for editor in self.editors():
             while editor and editor.isWindowModified():
                 response = QtWidgets.QMessageBox.question(self, "Save",
-                    "Save %s" % editor.windowTitle(),
+                    "Save %s" % editor.accessibleName(),
                     buttons = QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel,
                     defaultButton = QtWidgets.QMessageBox.Ok)
                 if response == QtWidgets.QMessageBox.Ok:

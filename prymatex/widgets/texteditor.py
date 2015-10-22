@@ -248,10 +248,6 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     CHARACTER = "#"
     UNTITLED = "Untitled"
     
-    # ------------------ Signals
-    activated = QtCore.Signal()
-    deactivated = QtCore.Signal()
-    
     extraSelectionChanged = QtCore.Signal()
     windowTitleChanged = QtCore.Signal()
     windowIconChanged = QtCore.Signal()
@@ -323,16 +319,6 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         super().setFont(font)
         self.__completion_widget.setFont(font)
     
-    # OVERRIDE: QtWidgets.QPlainTextEdit.focusInEvent()
-    def focusInEvent(self, event):
-        super().focusInEvent(event)
-        self.activated.emit()
-
-    # OVERRIDE: QtWidgets.QPlainTextEdit.focusOutEvent()
-    def focusOutEvent(self, event):
-        super().focusOutEvent(event)
-        self.deactivated.emit()
-
     #------ Completion
     def isCompletionWidgetVisible(self):
         """Return True is completion list widget is visible"""

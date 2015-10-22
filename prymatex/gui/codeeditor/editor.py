@@ -37,6 +37,9 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
     MAX_FOLD_LEVEL = 10
     
     # -------------------- Signals
+    activated = QtCore.Signal()
+    deactivated = QtCore.Signal()
+    
     aboutToSave = QtCore.Signal()
     saved = QtCore.Signal()
     aboutToClose = QtCore.Signal()
@@ -210,6 +213,14 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
             parent = parent.parent()
         return parent
 
+    # OVERRIDE: PrymatexEditor.activate()
+    def activate(self):
+        self.activated.emit()
+
+    # OVERRIDE: PrymatexEditor.deactivate()
+    def deactivate(self):
+        self.deactivated.emit()
+
     # OVERRIDE: PrymatexEditor.initialize()
     def initialize(self, **kwargs):
         super(CodeEditor, self).initialize(**kwargs)
@@ -221,6 +232,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         self.selectorDialog = self.window().findChild(QtWidgets.QDialog, "SelectorDialog")
         self.browserDock = self.window().findChild(QtWidgets.QDockWidget, "BrowserDock")
 
+    # OVERRIDE: PrymatexEditor.finalize()
     def finalize(self):
         self.application().supportManager.propertiesChanged.disconnect(self._update_properties)
         

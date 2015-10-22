@@ -5,6 +5,7 @@ from prymatex.utils import text as textutils
 #http://pyqt.sourceforge.net/Docs/PyQt5/multiinheritance.html#ref-cooperative-multiinheritance
 
 class PrymatexComponent(object):
+    _populated = False
     def __init__(self, *args, **kwargs):
         super(PrymatexComponent, self).__init__(*args, **kwargs)
         self._components = []
@@ -14,6 +15,13 @@ class PrymatexComponent(object):
         pass
     
     def finalize(self, *args, **kwargs):
+        pass
+
+    # --------- Activation API
+    def activate(self):
+        pass
+
+    def deactivate(self):
         pass
 
     # --------- Component API    
