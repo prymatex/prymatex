@@ -199,8 +199,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
             syntax = self.application().supportManager.findSyntaxByFirstLine(text)
             if syntax is not None:
                 self.insertBundleItem(syntax)
-            if super().windowTitle() == self.UNTITLED:
-                self.windowTitleChanged.emit()
+            self.windowTitleChanged.emit()
 
     def highlighter(self):
         return self.syntaxHighlighter
@@ -331,16 +330,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
 
     def eraseStatus(self, key):
         return self.window().eraseStatus(key)
-
-    # OVERRIDE: TextEditWidget.windowTitle()
-    def windowTitle(self):
-        title = super().windowTitle()
-        if title == self.UNTITLED:
-            alt_title = self.document().firstBlock().text().strip()
-            if alt_title:
-                return self.isWindowModified() and "%s[*]" % alt_title or alt_title
-        return title
-        
+    
     # OVERRIDE: TextEditWidget.setPlainText()
     def setPlainText(self, text):
         self.syntaxHighlighter.stop()

@@ -246,7 +246,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     FONT_MAX_SIZE = 32
     FONT_MIN_SIZE = 6
     CHARACTER = "#"
-    UNTITLED = "Untitled[*]"
+    UNTITLED = "Untitled"
     
     # ------------------ Signals
     activated = QtCore.Signal()
@@ -282,9 +282,22 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
             lambda changed: self.modificationChanged.emit(changed)        
         )
 
+    # OVERRIDE: QtWidget.QPlainTextEdit.accessibleName()
+    def accessibleName(self):
+        name = super().accessibleName()
+        if not name:
+            name = self.document().firstBlock().text().strip()
+        if not name:
+            name = self.UNTITLED
+        return name
+
     # OVERRIDE: QtWidget.QPlainTextEdit.windowTitle()
     def windowTitle(self):
-        return super().windowTitle() or self.UNTITLED
+        title = super().windowTitle()
+        if not title:
+            title = self.accessibleName()
+            title = self.isWindowModified() and "%s[*]" % title or title
+        return title
 
     # OVERRIDE: QtWidget.QPlainTextEdit.setWindowTitle(title)
     def setWindowTitle(self, title):
