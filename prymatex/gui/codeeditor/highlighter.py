@@ -105,7 +105,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         for token in user_data.tokens:
             self.setFormat(token.start, token.end - token.start,
                 self.themeProcessor.textCharFormat(token.scope))
-    
+
     def highlightBlock(self, text):
         text = text + '\n'
         user_data = self.currentBlockUserData() or self.syntaxProcessor.emptyUserData() 
