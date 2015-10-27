@@ -106,3 +106,6 @@
 [submodule "prymatex/share/Packages/SublimeCodeIntel"]
 	path = prymatex/share/Packages/SublimeCodeIntel
 	url = git@github.com:prymatex/codeintel.git
+[submodule "prymatex/share/Bundles/cmake.tmbundle"]
+	path = prymatex/share/Bundles/cmake.tmbundle
+	url = git@github.com:prymatex/cmake.tmbundle
