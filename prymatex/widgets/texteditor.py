@@ -138,7 +138,7 @@ class CompletionWidget(QtWidgets.QListWidget):
             # When initialized, if completion text is not empty, we need 
             # to update the displayed list:
             self.setCompletionPrefix(completion_prefix)
-        
+
     def clear(self):
         super().clear()
         self._completions = []
@@ -657,10 +657,13 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         return extraSelections
 
     def extendExtraSelectionCursors(self, key, cursors):
-        self.__scopedExtraSelections.setdefault(key, []).extend(self.__build_extra_selections(scope, cursors))
+        self.__scopedExtraSelections.setdefault(key, []).extend(
+            self.__build_extra_selections(scope, cursors)
+        )
 
     def setExtraSelectionCursors(self, key, cursors):
-        self.__scopedExtraSelections[key] = self.__build_extra_selections(key, cursors)
+        self.__scopedExtraSelections[key] = self.__build_extra_selections(
+            key, cursors)
 
     def updateExtraSelectionCursors(self, cursorsDict):
         for key, cursors in cursorsDict.items():

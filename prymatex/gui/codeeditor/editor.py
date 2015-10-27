@@ -735,13 +735,13 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         selections = []
         lines = []
         pairs = []
-        for cursor in self.textCursors()[1:]:
+        for cursor in self.textCursors():
             if cursor.hasSelection():
                 selections.append(QtGui.QTextCursor(cursor))
             cursor.clearSelection()
             if self.showHighlightCurrentLine and not any(
                 filter(lambda c: c.block() == cursor.block(), lines)):
-                lines.append(cursor)
+                lines.append(QtGui.QTextCursor(cursor))
             pairs.extend([c for c in self._highlight_pairs(cursor) if c is not None])
 
         # Extra cursors selection
@@ -765,7 +765,6 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         self.rightBar.setPalette(palette)
         
         # Register selection textCharFormat
-        # Register lineHighlight textCharFormat
         textCharFormat = QtGui.QTextCharFormat()
         textCharFormat.setBackground(palette.highlight().color())
         self.registerTextCharFormat("dyn.selection", textCharFormat)
