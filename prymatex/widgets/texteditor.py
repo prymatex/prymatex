@@ -272,7 +272,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         # Defaults
         self.eol_chars = os.linesep
         self.soft_tabs = False
-        self.tab_size = 2
+        self._tab_size = 2
         self.completion_auto = False
         self.document().modificationChanged.connect(
             lambda changed: self.modificationChanged.emit(changed)        
@@ -390,11 +390,11 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
         
     #------ Tab Size
     def setTabSize(self, size):
-        self.tab_size = size
-        self.setTabStopWidth(self.tab_size * self.characterWidth())
+        self._tab_size = size
+        self.setTabStopWidth(self._tab_size * self.characterWidth())
     
     def tabSize(self):
-        return self.tab_size
+        return self._tab_size
 
     def tabKeyBehavior(self):
         return ' ' * self.tabSize() if self.softTabs() else '\t'

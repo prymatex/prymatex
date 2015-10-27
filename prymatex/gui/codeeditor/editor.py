@@ -89,10 +89,9 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         self.setSoftTabs(soft)
 
     @ConfigurableItem(default=4)
-    def indentation_width(self, size):
+    def tab_size(self, size):
         self.setTabSize(size)
-        self.viewport().update()
-
+    
     @ConfigurableItem(default=("Monospace", 10))
     def default_font(self, value):
         font = QtGui.QFont(*value)
@@ -753,6 +752,11 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         self.setExtraSelectionCursors("dyn.highlight.pairs", pairs)
         self.updateExtraSelections()
 
+    # OVERRIDE: TextEditWidget.setTabSize()
+    def setTabSize(self, size):
+        super().setTabSize(size)
+        self.viewport().update()
+
     # OVERRIDE: TextEditWidget.setPalette()
     def setPalette(self, palette):
         super(CodeEditor, self).setPalette(palette)
@@ -837,8 +841,8 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
                     if blockPattern.isValid():
                         indentLen = len(self.blockUserData(blockPattern).indentation)
                         padding = characterWidth + offset.x()
-                        for s in range(0, indentLen // self.indentation_width):
-                            positionX = (characterWidth * self.indentation_width * s) + padding
+                        for s in range(0, indentLen // self.tabSize()):
+                            positionX = (characterWidth * self.tabSize() * s) + padding
                             painter.drawLine(positionX, positionY, positionX, positionY + characterHeight)
                 
                 # -------------- Highlight Cursors
@@ -1457,7 +1461,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
                      'triggered': lambda ed, checked=False: ed.convertTranspose(),
                      }
                 ]}, '-',
-                {'text': 'Indentation',
+                {'text': 'Tab Size',
                  'items': [
                     {'text': 'Indent Using Spaces',
                      'checkable': True,
@@ -1467,7 +1471,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
                     {'text': 'Width: %d' % size,
                      'checkable': True,
                      'triggered': lambda ed, checked, size = size: ed.on_actionIndentation_triggered(ed.indent_using_spaces, size = size),
-                     'testChecked': lambda ed, size = size: (ed.indent_using_spaces and ed.indentation_width == size) or (not ed.indent_using_spaces and ed.tabWidth == size)
+                     'testChecked': lambda ed, size = size: (ed.indent_using_spaces and ed.tabSize() == size) or (not ed.indent_using_spaces and ed.tabWidth == size)
                      } for size in range(1, 9) ]) ]
                 },
                 {'text': 'Line Endings',
@@ -1566,10 +1570,10 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
     # ------------------ Menu Actions
     def on_actionIndentation_triggered(self, checked, size = None):
         if size is None:
-          size = self.indentation_width if self.indent_using_spaces else self.tabWidth
+          size = self.tabSeize() if self.indent_using_spaces else self.tabWidth
         self.indent_using_spaces = checked
         if self.indent_using_spaces:
-            self.indentation_width = size
+            self.setTabSize(size)
         else:
             self.tabWidth = size
         self.update()

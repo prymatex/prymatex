@@ -60,7 +60,7 @@ class StatusMixin(object):
     def on_labelContent_customContextMenuRequested(self, point):
         #Setup Context Menu
         menu = QtWidgets.QMenu(self)
-        menu.addMenu(self.window().findChild(QtWidgets.QMenu, "menuIndentation"))
+        menu.addMenu(self.window().findChild(QtWidgets.QMenu, "menuTabSize"))
         menu.addMenu(self.window().findChild(QtWidgets.QMenu, "menuLineEndings"))
         menu.addMenu(self.window().findChild(QtWidgets.QMenu, "menuEncoding"))
         menu.popup(self.labelContent.mapToGlobal(point))

@@ -88,9 +88,11 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 self.rehighlightBlock(block.next())
     
     def stop(self):
+        print("stop highlighter")
         QtCore.QTimer.singleShot(0, self.thread.stop)
 
     def start(self):
+        print("start highlighter")
         QtCore.QTimer.singleShot(0, self.thread.start)
 
     def _highlightBlock(self, text):
@@ -117,7 +119,7 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             if user_data.blockText() != text:
                 # Mentir un poco con el formato
                 pass
-            elif previous_state != self.currentBlockState():
+            elif not user_data.blank and previous_state != self.currentBlockState():
                 # Apurar el tramite de los proximos agregados
                 self.setCurrentBlockState(-1)
             previous_user_data = block.previous().userData() or self.syntaxProcessor.emptyUserData()

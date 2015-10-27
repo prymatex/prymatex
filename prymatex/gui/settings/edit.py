@@ -18,7 +18,7 @@ class EditSettingsWidget(SettingsTreeNode, Ui_Edit, QtWidgets.QWidget):
         self.setTitle("Edit")
         self.setIcon(self.application().resources().get_icon("settings-edit"))
 
-        self.spinBoxIndentationWidth.setValue(self.settings().get("indentation_width"))
+        self.spinBoxIndentationWidth.setValue(self.settings().get("tab_size"))
         self.spinBoxWordLengthToComplete.setValue(self.settings().get("word_length_to_complete"))
 
         self.checkBoxRemoveTrailingSpaces.setChecked(self.settings().get("remove_trailing_spaces"))
@@ -55,7 +55,7 @@ class EditSettingsWidget(SettingsTreeNode, Ui_Edit, QtWidgets.QWidget):
 
     @QtCore.Slot(int)
     def on_spinBoxIndentationWidth_valueChanged(self, value):
-        self.settings().set('indentation_width', value)
+        self.settings().set('tab_size', value)
 
     @QtCore.Slot(int)
     def on_spinBoxWordLengthToComplete_valueChanged(self, value):
