@@ -735,8 +735,8 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         selections = []
         lines = []
         pairs = []
-        for cursor in self.textCursors():
-            if cursor.hasSelection():
+        for index, cursor in enumerate(self.textCursors()):
+            if index and cursor.hasSelection():
                 selections.append(QtGui.QTextCursor(cursor))
             cursor.clearSelection()
             if self.showHighlightCurrentLine and not any(
@@ -803,7 +803,6 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         super(TextEditWidget, self).paintEvent(event)
 
         painter = QtGui.QPainter(self.viewport())
-        painter.setRenderHint(QtGui.QPainter.Antialiasing)
         
         cursorPosition = self.getPaintContext().cursorPosition
         page_bottom = self.viewport().height()
@@ -822,6 +821,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
             if blockGeometry.top() > page_bottom:
                 break
             if block.isVisible():
+                painter.setRenderHint(QtGui.QPainter.Antialiasing, False)
                 positionY = blockGeometry.top()
 
                 # -------------- Folding Image
@@ -845,6 +845,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
                             painter.drawLine(positionX, positionY, positionX, positionY + characterHeight)
                 
                 # -------------- Highlight Cursors
+                painter.setRenderHint(QtGui.QPainter.Antialiasing, True)
                 painter.setPen(self.palette().brightText().color())
                 for c in [c for c in highlight if c.block() == block and c.hasSelection()]:
                     topLeft = self.cursorRect(self.newCursorAtPosition(c.selectionStart())).topLeft()
@@ -856,6 +857,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
 
             block = block.next()
 
+        painter.setRenderHint(QtGui.QPainter.Antialiasing, False)
         if self.showMarginLine:
             painter.setPen(self.palette().highlight().color())
             pos_margin = characterWidth * self.margin_line_size
