@@ -35,14 +35,7 @@ class CompletionWidget(QtWidgets.QListWidget):
         self.currentRowChanged.connect(self.__item_highlighted)
         self.setAlternatingRowColors(True)
         #self.setItemDelegate(HtmlItemDelegate(self))
-
-    def _set_match(self, item, match):
-        if hash(match) not in self._match_hashes:
-            self._match_hashes.add(hash(match))
-            item.setData(QtCore.Qt.MatchRole, match)
-            return True
-        return False
-        
+    
     def _map_completions(self, completions):
         for completion in completions:
             tooltip = icon = text = match = None
@@ -57,30 +50,33 @@ class CompletionWidget(QtWidgets.QListWidget):
                 tooltip = completion.get("tool_tip")
             else:
                 match = text = completion
-            if hash(match) not in self._match_hashes:
-                item = QtWidgets.QListWidgetItem(text, self)
-                item.setData(QtCore.Qt.MatchRole, match)
-                if icon is not None:
-                    # TODO Obtener el icono del lugar correcto
-                    icon = resources.get_icon(icon)
-                    item.setIcon(icon)
-                if tooltip is not None:
-                    item.setToolTip(tooltip)
-                self._match_hashes.add(hash(match))
-                yield completion, item
+            yield text, match, icon, tooltip
 
     def complete(self, completions, completion_prefix=None, automatic=True):
-        # Todo esto tiene que ser mejor, cuando ya tengo algo hay que filtrar
         if not self.isVisible():
             self.clear()
-        for completion, item in self._map_completions(completions):
-            self._completions.append(completion)
+
+        hashes = set()
+        for txt, mt, ico, tip in self._map_completions(completions):
+            item = QtWidgets.QListWidgetItem(txt, self)
+            item.setData(QtCore.Qt.MatchRole, mt)
+            if ico is not None:
+                # TODO Obtener el icono del lugar correcto
+                item.setIcon(resources.get_icon(ico))
+            if tip is not None:
+                item.setToolTip(tip)
+            hashes.add(hash(mt))
             self.addItem(item)
+        self._match_hashes.update(hashes)
+        self._completions.extend(completions)
+
         if len(self._completions) == 0:
             return
+
         if len(self._completions) == 1 and not automatic:
             self.__item_activated(self._completions[0])
             return
+
         self.resize(self.sizeHint())
         self.setCurrentRow(0)
         
