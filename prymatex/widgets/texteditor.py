@@ -79,7 +79,7 @@ class CompletionWidget(QtWidgets.QListWidget):
 
         self.resize(self.sizeHint())
         self.setCurrentRow(0)
-        
+
         QtWidgets.QApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
         self.show()
         self.setFocus()
@@ -144,7 +144,10 @@ class CompletionWidget(QtWidgets.QListWidget):
     def hide(self):
         super().hide()
         self.textedit.setFocus()
-        
+    
+    def focusOutEvent(self, event):
+        self.hide()
+
     def keyPressEvent(self, event):
         text, key = event.text(), event.key()
         alt = event.modifiers() & QtCore.Qt.AltModifier
@@ -207,7 +210,7 @@ class CompletionWidget(QtWidgets.QListWidget):
         match_rows = [ index.row() for index in self._match_indexes ]
         for row in range(self.count()):
             self.setRowHidden(row, row not in match_rows)
-        self.current_match_index = 1 if selfsame else 0 
+        self.current_match_index = 1 if selfsame else 0
         self.setCurrentRow(self._match_indexes[self.current_match_index].row())
     
     def __item_activated(self, widget_item=None):
