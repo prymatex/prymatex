@@ -50,14 +50,14 @@ class CompletionWidget(QtWidgets.QListWidget):
                 tooltip = completion.get("tool_tip")
             else:
                 match = text = completion
-            yield text, match, icon, tooltip
+            yield completion, text, match, icon, tooltip
 
     def complete(self, completions, completion_prefix=None, automatic=True):
         if not self.isVisible():
             self.clear()
 
         hashes = set()
-        for txt, mt, ico, tip in self._map_completions(completions):
+        for comp, txt, mt, ico, tip in self._map_completions(completions):
             item = QtWidgets.QListWidgetItem(txt, self)
             item.setData(QtCore.Qt.MatchRole, mt)
             if ico is not None:
@@ -67,8 +67,8 @@ class CompletionWidget(QtWidgets.QListWidget):
                 item.setToolTip(tip)
             hashes.add(hash(mt))
             self.addItem(item)
+            self._completions.append(comp)
         self._match_hashes.update(hashes)
-        self._completions.extend(completions)
 
         if len(self._completions) == 0:
             return

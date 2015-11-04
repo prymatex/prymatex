@@ -186,6 +186,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                 return _generator()
             if suggestions:
                 self.editor.showCompletionWidget(
-                    suggestions_generator(suggestions, words, triggers)
+                    suggestions_generator(suggestions, words, triggers),
+                    automatic
                 )
-    
