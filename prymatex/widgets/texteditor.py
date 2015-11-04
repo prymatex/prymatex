@@ -290,8 +290,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     def windowTitle(self):
         title = super().windowTitle()
         if not title:
-            title = self.accessibleName()
-            title = self.isWindowModified() and "%s[*]" % title or title
+            title = "%s[*]" % self.accessibleName()
         return title
 
     # OVERRIDE: QtWidget.QPlainTextEdit.setWindowFilePath(path)
