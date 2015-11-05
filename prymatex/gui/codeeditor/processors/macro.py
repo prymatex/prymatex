@@ -77,10 +77,10 @@ class CodeEditorMacroProcessor(CodeEditorBaseProcessor, MacroProcessorMixin):
         self.editor.textCursor().deleteChar()
         
     def insertNewline(self):
-        self.editor.insertNewLine()
+        self.editor.runCommand("insert", characters='\n')
 
     def insertText(self, text):
-        self.editor.insertPlainText(text)
+        self.editor.runCommand("insert", characters=text)
 
     def executeCommandWithOptions(self, commandHash):
         command = self.editor.application().supportManager.buildAdHocCommand(**commandHash)
