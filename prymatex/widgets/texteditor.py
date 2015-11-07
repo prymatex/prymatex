@@ -317,6 +317,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     def setPalette(self, palette):
         super().setPalette(palette)
         self.__completion_widget.setPalette(palette)
+        self.__completion_widget.viewport().setPalette(palette)
 
     # OVERRIDE: QtWidgets.QPlainTextEdit.setFont()
     def setFont(self, font):
