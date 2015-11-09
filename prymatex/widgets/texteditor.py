@@ -24,7 +24,7 @@ class CompletionWidget(QtWidgets.QListWidget):
         super().__init__(parent)
         self.setWindowFlags(QtCore.Qt.SubWindow | QtCore.Qt.FramelessWindowHint)
         self.textedit = textedit
-        self.match_flags = QtCore.Qt.MatchWrap | QtCore.Qt.MatchWildcard | QtCore.Qt.MatchCaseSensitive
+        self._case_sensitive = False
         self._completions = None
         self._match_indexes = []
         self._match_hashes = set()
@@ -198,10 +198,18 @@ class CompletionWidget(QtWidgets.QListWidget):
     def setCompletionPrefix(self, prefix):
         model = self.model()
         match = prefix
-        if self.match_flags & QtCore.Qt.MatchWildcard:
-            match = "*" + "*".join(list(match)) + "*"
-        self._match_indexes = model.match(model.index(0, 0, QtCore.QModelIndex()),
-            QtCore.Qt.MatchRole, match, -1, self.match_flags)
+        for match_flag in [QtCore.Qt.MatchFixedString, QtCore.Qt.MatchStartsWith,
+            QtCore.Qt.MatchEndsWith, QtCore.Qt.MatchContains, QtCore.Qt.MatchRegExp]:
+            flags = match_flag | QtCore.Qt.MatchWrap
+            if match_flag == QtCore.Qt.MatchRegExp:
+                match = QtCore.QRegExp(".*?".join(match))
+                print(match)
+            if self._case_sensitive:
+                flags |= QtCore.Qt.MatchCaseSensitive
+            self._match_indexes = model.match(model.index(0, 0, QtCore.QModelIndex()),
+                QtCore.Qt.MatchRole, match, -1, flags)
+            if self._match_indexes:
+                break
         if not self._match_indexes:
             self.hide()
             return
@@ -231,9 +239,6 @@ class CompletionWidget(QtWidgets.QListWidget):
         size.setWidth(self.sizeHintForColumn(0))
         return size
 
-    def setMatchFlags(self, flags):
-        self.match_flags = flags
-        
     def setSelectKeys(self, keys):
         self.select_keys = keys
 
@@ -328,10 +333,6 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     def isCompletionWidgetVisible(self):
         """Return True is completion list widget is visible"""
         return self.__completion_widget.isVisible()
-        
-    def setCompletionMatchFlags(self, flags):
-        """Match flags completion"""
-        self.__completion_widget.match_flags = flags
         
     def setCompletionKeys(self, *keys):
         """Enabled keys to select completion"""
