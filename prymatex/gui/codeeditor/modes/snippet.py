@@ -84,15 +84,16 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         holder_start, holder_end = self.processor.translateToHolderPosition(
             cursor.selectionStart(), cursor.selectionEnd()
         )
-        if not holder_start or cursor.selectionStart() - 1 < holder_start:
+        offset = 0 if cursor.hasSelection() else 1 
+        if not holder_start or cursor.selectionStart() - offset < holder_start:
             self.processor.stop()
             return False
         holder_position = cursor.selectionStart() - holder_start
         holder_text = self.editor.newCursorAtPosition(
             holder_start, holder_end).selectedText()
-        holder_content = holder_text[holder_start - holder_start:cursor.selectionStart() - holder_start - 1] + \
+        holder_content = holder_text[holder_start - holder_start:cursor.selectionStart() - holder_start - offset] + \
             holder_text[cursor.selectionEnd() - holder_start:holder_end - holder_start]
-        self._update_and_render(holder_content, holder_position - 1)
+        self._update_and_render(holder_content, holder_position - offset)
         return True
     
     def __snippet_delete(self, event):
@@ -100,14 +101,15 @@ class CodeEditorSnippetMode(CodeEditorBaseMode):
         holder_start, holder_end = self.processor.translateToHolderPosition(
             cursor.selectionStart(), cursor.selectionEnd()
         )
-        if not holder_end or cursor.selectionStart() + 1 > holder_end:
+        offset = 0 if cursor.hasSelection() else 1 
+        if not holder_end or cursor.selectionEnd() + offset > holder_end:
             self.processor.stop()
             return False
         holder_position = cursor.selectionStart() - holder_start
         holder_text = self.editor.newCursorAtPosition(
             holder_start, holder_end).selectedText()
         holder_content = holder_text[holder_start - holder_start:cursor.selectionStart() - holder_start] + \
-            holder_text[cursor.selectionEnd() - holder_start + 1:holder_end - holder_start]
+            holder_text[cursor.selectionEnd() - holder_start + offset:holder_end - holder_start]
         self._update_and_render(holder_content, holder_position)
         return True
 
