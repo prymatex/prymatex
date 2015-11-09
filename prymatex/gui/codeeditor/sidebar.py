@@ -102,7 +102,6 @@ class LineNumberSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
         current_block = self.editor.textCursor().block()
-        line_height = self.fontMetrics().height()
         
         painter = QtGui.QPainter(self)
         painter.setPen(self.palette().toolTipText().color())
@@ -114,47 +113,34 @@ class LineNumberSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
 
         while block.isValid():
             line_count += 1
+
             # The top left position of the block in the document
-            blockGeometry = self.editor.blockBoundingGeometry(block)
-            blockGeometry.translate(offset)
-            # Check if the position of the block is out side of the visible area
-            if blockGeometry.top() > page_bottom:
-                painter.fillRect(
-                    blockGeometry.x(),
-                    blockGeometry.y(),
-                    self.width(),
-                    line_height + self.normalMetrics.ascent(),
-                    self.palette().toolTipBase().color())
+            block_geometry = self.editor.blockBoundingGeometry(block)
+            block_geometry.translate(offset)
+            if block_geometry.top() > page_bottom:
                 break
 
-            # Draw the line number right justified at the y position of the line.
             if block.isVisible():
-                numberText = str(line_count)
-                if block == current_block:
-                    painter.fillRect(
-                        blockGeometry.x(),
-                        blockGeometry.y(),
-                        self.width(),
-                        line_height + self.boldMetrics.ascent(),
-                        self.palette().alternateBase().color())
-                    painter.setFont(self.boldFont)
-                    leftPosition = self.width() - (self.boldMetrics.width(numberText) + self.MARGIN)
-                    topPosition = blockGeometry.y() + self.boldMetrics.ascent()
-                    painter.drawText(leftPosition, topPosition, numberText)
-                else:
-                    painter.fillRect(
-                        blockGeometry.x(),
-                        blockGeometry.y(),
-                        self.width(),
-                        line_height + self.normalMetrics.ascent(),
-                        self.palette().toolTipBase().color())
-                    painter.setFont(self.normalFont)
-                    leftPosition = self.width() - (self.normalMetrics.width(numberText) + self.MARGIN)
-                    topPosition = blockGeometry.y() + self.normalMetrics.ascent()
-                    painter.drawText(leftPosition, topPosition, numberText)
+                text = "%d" % line_count
+                painter.setFont(
+                    block == current_block and self.boldFont or self.normalFont)
+                metrics = painter.fontMetrics()
+                color = (block == current_block and \
+                    self.palette().alternateBase() or \
+                    self.palette().toolTipBase()).color()
+                painter.fillRect(
+                    block_geometry.x(),
+                    block_geometry.y(),
+                    self.width(),
+                    metrics.height(),
+                    color)
+                left_position = self.width() - (metrics.width(text) + self.MARGIN)
+                top_position = block_geometry.y() + metrics.ascent()
+                painter.drawText(left_position, top_position, text)
             
+            # Setup painter and geometry again
             block = block.next()
-        
+
         painter.end()
         QtWidgets.QWidget.paintEvent(self, event)
 
@@ -370,3 +356,4 @@ class SelectionSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     def mousePressEvent(self, event):
         cursor = self.editor.cursorForPosition(event.pos())
         print(cursor)
+ 
