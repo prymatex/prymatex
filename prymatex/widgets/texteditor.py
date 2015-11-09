@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 from __future__ import unicode_literals
-
+        
 import re
 import os
 import sys
@@ -46,7 +46,7 @@ class CompletionWidget(QtWidgets.QListWidget):
                 display = completion.get("display", completion.get('title'))
                 text = textutils.asciify(display)
                 match = completion.get("match", display)
-                icon = completion.get("image")
+                icon = completion.get("icon", completion.get('image'))
                 tooltip = completion.get("tool_tip")
             else:
                 match = text = completion
@@ -61,8 +61,10 @@ class CompletionWidget(QtWidgets.QListWidget):
             item = QtWidgets.QListWidgetItem(txt, self)
             item.setData(QtCore.Qt.MatchRole, mt)
             if ico is not None:
-                # TODO Obtener el icono del lugar correcto
-                item.setIcon(resources.get_icon(ico))
+                if not isinstance(ico, QtGui.QIcon):
+                    # TODO Obtener el icono del lugar correcto
+                    ico = resources.get_icon(ico)
+                item.setIcon(ico)
             if tip is not None:
                 item.setToolTip(tip)
             hashes.add(hash(mt))

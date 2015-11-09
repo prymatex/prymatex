@@ -177,8 +177,10 @@ class CodeEditorEditMode(CodeEditorBaseMode):
                         if suggestion in triggers:
                             item = triggers[suggestion]
                             yield {
-                                "match": suggestion, 
-                                "display": "%s(%s)" % (suggestion, item.name),
+                                "icon": item.icon(), 
+                                "match": suggestion,
+                                "tool_tip": "%s - %s" % (item.name, item.bundle.name),
+                                 "display": "%s(%s)" % (suggestion, item.name),
                                 "item": item
                             }
                         if suggestion in words:
