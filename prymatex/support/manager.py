@@ -459,10 +459,12 @@ class SupportBaseManager(object):
         pass
 
     def isProtected(self, obj):
-        return obj.hasSource(self.protectedNamespace().name)
+        namespace = self.namespaces()[0]
+        return obj.hasSource(namespace.name)
         
     def isSafe(self, obj):
-        return obj.currentSourceName() != self.protectedNamespace().name
+        namespace = self.namespaces()[0]
+        return obj.currentSourceName() != namespace.name
 
     def addManagedObject(self, obj):
         self._managed_objects[obj.uuid] = obj
