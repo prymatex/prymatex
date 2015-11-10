@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 from __future__ import unicode_literals
-
+        
 import re
 import os
 import sys
@@ -24,7 +24,7 @@ class CompletionWidget(QtWidgets.QListWidget):
         super().__init__(parent)
         self.setWindowFlags(QtCore.Qt.SubWindow | QtCore.Qt.FramelessWindowHint)
         self.textedit = textedit
-        self.match_flags = QtCore.Qt.MatchWrap | QtCore.Qt.MatchWildcard | QtCore.Qt.MatchCaseSensitive
+        self._case_sensitive = False
         self._completions = None
         self._match_indexes = []
         self._match_hashes = set()
@@ -46,7 +46,7 @@ class CompletionWidget(QtWidgets.QListWidget):
                 display = completion.get("display", completion.get('title'))
                 text = textutils.asciify(display)
                 match = completion.get("match", display)
-                icon = completion.get("image")
+                icon = completion.get("icon", completion.get('image'))
                 tooltip = completion.get("tool_tip")
             else:
                 match = text = completion
@@ -61,8 +61,10 @@ class CompletionWidget(QtWidgets.QListWidget):
             item = QtWidgets.QListWidgetItem(txt, self)
             item.setData(QtCore.Qt.MatchRole, mt)
             if ico is not None:
-                # TODO Obtener el icono del lugar correcto
-                item.setIcon(resources.get_icon(ico))
+                if not isinstance(ico, QtGui.QIcon):
+                    # TODO Obtener el icono del lugar correcto
+                    ico = resources.get_icon(ico)
+                item.setIcon(ico)
             if tip is not None:
                 item.setToolTip(tip)
             hashes.add(hash(mt))
@@ -196,10 +198,18 @@ class CompletionWidget(QtWidgets.QListWidget):
     def setCompletionPrefix(self, prefix):
         model = self.model()
         match = prefix
-        if self.match_flags & QtCore.Qt.MatchWildcard:
-            match = "*" + "*".join(list(match)) + "*"
-        self._match_indexes = model.match(model.index(0, 0, QtCore.QModelIndex()),
-            QtCore.Qt.MatchRole, match, -1, self.match_flags)
+        for match_flag in [QtCore.Qt.MatchFixedString, QtCore.Qt.MatchStartsWith,
+            QtCore.Qt.MatchEndsWith, QtCore.Qt.MatchContains, QtCore.Qt.MatchRegExp]:
+            flags = match_flag | QtCore.Qt.MatchWrap
+            if match_flag == QtCore.Qt.MatchRegExp:
+                match = QtCore.QRegExp(".*?".join(match))
+                print(match)
+            if self._case_sensitive:
+                flags |= QtCore.Qt.MatchCaseSensitive
+            self._match_indexes = model.match(model.index(0, 0, QtCore.QModelIndex()),
+                QtCore.Qt.MatchRole, match, -1, flags)
+            if self._match_indexes:
+                break
         if not self._match_indexes:
             self.hide()
             return
@@ -229,9 +239,6 @@ class CompletionWidget(QtWidgets.QListWidget):
         size.setWidth(self.sizeHintForColumn(0))
         return size
 
-    def setMatchFlags(self, flags):
-        self.match_flags = flags
-        
     def setSelectKeys(self, keys):
         self.select_keys = keys
 
@@ -290,8 +297,7 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     def windowTitle(self):
         title = super().windowTitle()
         if not title:
-            title = self.accessibleName()
-            title = self.isWindowModified() and "%s[*]" % title or title
+            title = "%s[*]" % self.accessibleName()
         return title
 
     # OVERRIDE: QtWidget.QPlainTextEdit.setWindowFilePath(path)
@@ -328,10 +334,6 @@ class TextEditWidget(QtWidgets.QPlainTextEdit):
     def isCompletionWidgetVisible(self):
         """Return True is completion list widget is visible"""
         return self.__completion_widget.isVisible()
-        
-    def setCompletionMatchFlags(self, flags):
-        """Match flags completion"""
-        self.__completion_widget.match_flags = flags
         
     def setCompletionKeys(self, *keys):
         """Enabled keys to select completion"""

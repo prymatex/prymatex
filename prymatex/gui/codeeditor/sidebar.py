@@ -54,8 +54,6 @@ class SideBarWidgetMixin(PrymatexEditorAddon):
         self.normalFont = QtGui.QFont(font)
         self.boldFont = QtGui.QFont(font)
         self.boldFont.setBold(True)
-        self.normalMetrics = QtGui.QFontMetrics(self.normalFont)
-        self.boldMetrics = QtGui.QFontMetrics(self.boldFont)
 
 #=======================================
 # SideBar Widgets
@@ -83,7 +81,7 @@ class LineNumberSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
         self.__update_width(self.editor.document().lineCount())
         
     def __update_width(self, lineCount):
-        width = self.boldMetrics.width("%s" % lineCount) + self.MARGIN * 2
+        width = self.fontMetrics().width("%s" % lineCount) + self.MARGIN * 2
         if self.width() != width:
             self.setFixedWidth(width)
             self.editor.updateViewportMargins()
@@ -102,7 +100,6 @@ class LineNumberSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
         current_block = self.editor.textCursor().block()
-        line_height = self.fontMetrics().height()
         
         painter = QtGui.QPainter(self)
         painter.setPen(self.palette().toolTipText().color())
@@ -114,47 +111,34 @@ class LineNumberSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
 
         while block.isValid():
             line_count += 1
+
             # The top left position of the block in the document
-            blockGeometry = self.editor.blockBoundingGeometry(block)
-            blockGeometry.translate(offset)
-            # Check if the position of the block is out side of the visible area
-            if blockGeometry.top() > page_bottom:
-                painter.fillRect(
-                    blockGeometry.x(),
-                    blockGeometry.y(),
-                    self.width(),
-                    line_height + self.normalMetrics.ascent(),
-                    self.palette().toolTipBase().color())
+            block_geometry = self.editor.blockBoundingGeometry(block)
+            block_geometry.translate(offset)
+            if block_geometry.top() > page_bottom:
                 break
 
-            # Draw the line number right justified at the y position of the line.
             if block.isVisible():
-                numberText = str(line_count)
-                if block == current_block:
-                    painter.fillRect(
-                        blockGeometry.x(),
-                        blockGeometry.y(),
-                        self.width(),
-                        line_height + self.boldMetrics.ascent(),
-                        self.palette().alternateBase().color())
-                    painter.setFont(self.boldFont)
-                    leftPosition = self.width() - (self.boldMetrics.width(numberText) + self.MARGIN)
-                    topPosition = blockGeometry.y() + self.boldMetrics.ascent()
-                    painter.drawText(leftPosition, topPosition, numberText)
-                else:
-                    painter.fillRect(
-                        blockGeometry.x(),
-                        blockGeometry.y(),
-                        self.width(),
-                        line_height + self.normalMetrics.ascent(),
-                        self.palette().toolTipBase().color())
-                    painter.setFont(self.normalFont)
-                    leftPosition = self.width() - (self.normalMetrics.width(numberText) + self.MARGIN)
-                    topPosition = blockGeometry.y() + self.normalMetrics.ascent()
-                    painter.drawText(leftPosition, topPosition, numberText)
+                text = "%d" % line_count
+                painter.setFont(
+                    block == current_block and self.boldFont or self.normalFont)
+                metrics = painter.fontMetrics()
+                color = (block == current_block and \
+                    self.palette().alternateBase() or \
+                    self.palette().toolTipBase()).color()
+                painter.fillRect(
+                    block_geometry.x(),
+                    block_geometry.y(),
+                    self.width(),
+                    metrics.height(),
+                    color)
+                left_position = self.width() - (metrics.width(text) + self.MARGIN)
+                top_position = block_geometry.y() + metrics.ascent()
+                painter.drawText(left_position, top_position, text)
             
+            # Setup painter and geometry again
             block = block.next()
-        
+
         painter.end()
         QtWidgets.QWidget.paintEvent(self, event)
 
@@ -186,7 +170,6 @@ class BookmarkSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
         current_block = self.editor.textCursor().block()
-        line_height = self.fontMetrics().height()
 
         painter = QtGui.QPainter(self)
         painter.fillRect(self.rect(), self.palette().toolTipBase().color())
@@ -201,25 +184,24 @@ class BookmarkSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
             if blockGeometry.top() > page_bottom:
                 break
             
-            if block == current_block:
+            if block.isVisible():
+                painter.setFont(
+                    block == current_block and self.boldFont or self.normalFont)
+                metrics = painter.fontMetrics()
+                color = (block == current_block and \
+                    self.palette().alternateBase() or \
+                    self.palette().toolTipBase()).color()
                 painter.fillRect(
-                        blockGeometry.x(),
-                        blockGeometry.y(),
-                        self.width(),
-                        line_height + self.boldMetrics.ascent(),
-                        self.palette().alternateBase().color())
-            else:
-                painter.fillRect(
-                        blockGeometry.x(),
-                        blockGeometry.y(),
-                        self.width(),
-                        line_height + self.normalMetrics.ascent(),
-                        self.palette().toolTipBase().color())
-
-            # Draw the line number right justified at the y position of the line.
-            if block.isVisible() and self.editor.bookmarkListModel.bookmarksCount(block) > 0:
-                positionY = blockGeometry.top() + ((line_height - self.imagesHeight) / 2)
-                painter.drawPixmap(0, positionY, self.bookmarkflagImage)
+                    block_geometry.x(),
+                    block_geometry.y(),
+                    self.width(),
+                    metrics.height(),
+                    color)
+    
+                # Draw the line number right justified at the y position of the line.
+                if self.editor.bookmarkListModel.bookmarksCount(block) > 0:
+                    positionY = blockGeometry.top() + ((metrics.height() - self.imagesHeight) / 2)
+                    painter.drawPixmap(0, positionY, self.bookmarkflagImage)
 
             block = block.next()
 
@@ -261,7 +243,6 @@ class FoldingSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
         current_block = self.editor.textCursor().block()
-        line_height = self.fontMetrics().height()
         
         painter = QtGui.QPainter(self)
         painter.fillRect(self.rect(), self.palette().toolTipBase().color())
@@ -270,39 +251,39 @@ class FoldingSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
         offset = self.editor.contentOffset()
         
         while block.isValid():
-            blockGeometry = self.editor.blockBoundingGeometry(block)
-            blockGeometry.translate(offset)
+            block_geometry = self.editor.blockBoundingGeometry(block)
+            block_geometry.translate(offset)
             
             # Check if the position of the block is out side of the visible area
-            if blockGeometry.top() > page_bottom:
+            if block_geometry.top() > page_bottom:
                 break
-
-            if block == current_block:
-                painter.fillRect(
-                        blockGeometry.x(),
-                        blockGeometry.y(),
-                        self.width(),
-                        line_height + self.boldMetrics.ascent(),
-                        self.palette().alternateBase().color())
-            else:
-                painter.fillRect(
-                        blockGeometry.x(),
-                        blockGeometry.y(),
-                        self.width(),
-                        line_height + self.normalMetrics.ascent(),
-                        self.palette().toolTipBase().color())
-
-            # Draw the line number right justified at the y position of the line.
+            
             if block.isVisible():
-                positionY = blockGeometry.top() + ((line_height - self.imagesHeight) / 2)
+                painter.setFont(
+                    block == current_block and self.boldFont or self.normalFont)
+                metrics = painter.fontMetrics()
+                color = (block == current_block and \
+                    self.palette().alternateBase() or \
+                    self.palette().toolTipBase()).color()
+                painter.fillRect(
+                    block_geometry.x(),
+                    block_geometry.y(),
+                    self.width(),
+                    metrics.height(),
+                    color)
+                
                 cursor = self.editor.newCursorAtPosition(block.position())
+                image = None
                 if self.editor.foldingListModel.isStart(cursor):
                     if self.editor.foldingListModel.isFolded(cursor):
-                        painter.drawPixmap(0, positionY, self.foldingcollapsedImage)
+                        image = self.foldingcollapsedImage
                     else:
-                        painter.drawPixmap(0, positionY, self.foldingtopImage)
+                        image = self.foldingtopImage
                 elif self.editor.foldingListModel.isStop(cursor):
-                    painter.drawPixmap(0, positionY, self.foldingbottomImage)
+                    image = self.foldingbottomImage
+                if image is not None:
+                    positionY = block_geometry.top() + ((metrics.height() - self.imagesHeight) / 2)
+                    painter.drawPixmap(0, positionY, image)
 
             block = block.next()
 
@@ -370,3 +351,4 @@ class SelectionSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     def mousePressEvent(self, event):
         cursor = self.editor.cursorForPosition(event.pos())
         print(cursor)
+ 

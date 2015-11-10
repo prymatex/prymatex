@@ -400,8 +400,10 @@ html_footer
 
     def updateWindowTitle(self):
         widget = self.currentEditor() or self
-        variables = widget.environmentVariables()
-        self.setWindowTitle(self.title_template.substitute(variables))
+        widget_variables = widget.environmentVariables()
+        window_title = self.title_template.substitute(widget_variables)
+        print(window_title)
+        self.setWindowTitle(window_title)
 
     def saveEditor(self, editor=None, saveAs=False):
         editor = editor or self.currentEditor()

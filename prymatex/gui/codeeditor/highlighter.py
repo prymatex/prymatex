@@ -88,11 +88,9 @@ class CodeEditorSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 self.rehighlightBlock(block.next())
     
     def stop(self):
-        print("stop highlighter")
         QtCore.QTimer.singleShot(0, self.thread.stop)
 
     def start(self):
-        print("start highlighter")
         QtCore.QTimer.singleShot(0, self.thread.start)
 
     def _highlightBlock(self, text):
