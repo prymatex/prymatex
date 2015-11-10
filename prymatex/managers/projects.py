@@ -230,6 +230,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         project.save()
 
     def findProjectForPath(self, path):
+        file_manager = self.application().fileManager
         for project in self.getAllProjects():
-            if self.application().fileManager.issubpath(path, project.path()):
+            if any(file_manager.issubpath(path, source) for source in project.source_folders):
                 return project
