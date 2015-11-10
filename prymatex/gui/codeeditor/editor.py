@@ -138,7 +138,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         self.showHighlightCurrentLine = True
 
         # Project
-        self.__window_project = None
+        self.__project = None
         
         # Cursors
         self.__text_cursors = []
@@ -425,17 +425,17 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
     def isEmpty(self):
         return self.document().isEmpty()
 
-    def setWindowProject(self, project):
-        self.__window_project = project
+    def setProject(self, project):
+        self.__project = project
         
-    def windowProject(self):
-        return self.__window_project
+    def project(self):
+        return self.__project
 
     # OVERRIDE: TextEditWidget.setWindowFilePath()
     def setWindowFilePath(self, file_path):
         super().setWindowFilePath(file_path)
         project = self.application().projectManager.findProjectForPath(file_path)
-        self.setWindowProject(project)
+        self.setProject(project)
         extension = self.application().fileManager.extension(file_path)
         syntax = self.application().supportManager.findSyntaxByFileType(extension)
         if syntax is not None:
@@ -1019,9 +1019,9 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
             environment['TM_FILEPATH'] = self.windowFilePath()
             environment['TM_FILENAME'] = self.application().fileManager.basename(self.windowFilePath())
             environment['TM_DIRECTORY'] = self.application().fileManager.dirname(self.windowFilePath())
-        if self.windowProject():
+        if self.project():
             self.logger().debug("Add project to environment")
-            environment.update(self.windowProject().environmentVariables())
+            environment.update(self.project().environmentVariables())
         if cursor.hasSelection():
             self.logger().debug("Add selection to environment")
             environment['TM_SELECTED_TEXT'] = self.selectedTextWithEol(cursor)
