@@ -28,9 +28,17 @@ class Settings(object):
     def _remove_quotes(self, value):
         return value[1:-1] if value and value[0] in ("'", '"') and value[0] == value[-1] else value
 
+    def _get_own_option(self, key, default=None,
+            getter=lambda s, k, f: s.get(k, fallback=f)):
+        if self.name == self.config.default_section or \
+		key in self.config.options(self.name, no_defaults=True):
+            section = self.config[self.name]
+            return getter(section, key, default)
+        return default
+
     def get_snippet(self, key, default=None):
         variables = { key: '' }
-        value = self.config[self.name].get(key, fallback=default)
+        value = self._get_own_option(key, default)
         if value is not None:
             value = self._remove_quotes(value)
             variables["CWD"] = self.config.source.name
@@ -45,14 +53,16 @@ class Settings(object):
 
     def get_str(self, key, default=None):
         return self._remove_quotes(
-            self.config[self.name].get(key, fallback=default)
+            self._get_own_option(key, default)
         )
 
     def get_bool(self, key, default=None):
-        return self.config[self.name].getboolean(key, fallback=default)
+        return self._get_own_option(key, default, 
+            getter=lambda s, k, f: s.getboolean(k, fallback=f))
 
     def get_int(self, key, default=None):
-        return self.config[self.name].getint(key, fallback=default)
+        return self._get_own_option(key, default, 
+            getter=lambda s, k, f: s.getint(k, fallback=f))
 
     def get_variables(self, environment):
         variables = []

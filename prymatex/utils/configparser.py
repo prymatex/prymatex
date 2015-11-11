@@ -1,7 +1,6 @@
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+#!/usr/bin/env python
+
+from .six.moves import configparser
 
 RawConfigParser = configparser.RawConfigParser
 
@@ -12,6 +11,6 @@ class ConfigParser(configparser.ConfigParser):
             try:
                 return list(self._sections[section].keys())
             except KeyError:
-                raise NoSectionError(section)
+                raise configparser.NoSectionError(section)
         else:
             return super().options(section, **kwargs)

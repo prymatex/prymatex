@@ -3,12 +3,9 @@
 
 import os
 import glob
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
 
 from prymatex.qt import QtGui, QtWidgets
+from prymatex.utils import configparser
 
 from .colortrans import SHORT2RGB_DICT
 
