@@ -26,9 +26,6 @@ class Settings(dict):
         for name, value in attrs.items():
             self.set(name, value)
 
-    def has(self, name):
-        return name in self.items
-
     def add_callback(self, name, callback):
         # Add callback
         callbacks = self._callbacks.setdefault(name, [])

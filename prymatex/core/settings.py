@@ -77,7 +77,7 @@ class PrymatexSettings(settings.Settings):
         return value
 
     def has(self, name):
-        return name in self.items
+        return name in self._items
 
     def addItem(self, item):
         self._items[item.name] = item
