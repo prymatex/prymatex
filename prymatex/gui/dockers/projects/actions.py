@@ -102,7 +102,7 @@ class ProjectsDockActionsMixin(object):
         items.extend(self._bundles_menu_items(indexed_nodes))
         items.extend([{
             'text': "Settings",
-            'triggered': lambda checked=False, values=indexes: [ self.settings(value) for value in values ]
+            'triggered': lambda checked=False, values=indexes: [ self.settingsDialog(value) for value in values ]
             }])
         contextMenu = {
             'text': "Index context",
@@ -391,7 +391,7 @@ class ProjectsDockActionsMixin(object):
     def refresh(self, index, node=None):
         self.projectTreeProxyModel.refresh(index)
     
-    def settings(self, index, node=None):
+    def settingsDialog(self, index, node=None):
         node = node or self.projectTreeProxyModel.node(index)
         self.propertiesDialog.setModel(self.projectManager.propertiesProxyModel)
         self.propertiesDialog.exec_(node)
