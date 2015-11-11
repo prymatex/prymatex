@@ -100,12 +100,9 @@ class ProjectsDockActionsMixin(object):
         items.extend(self._has_children_menu_items(indexed_nodes))
         items.extend(self._bundles_menu_items(indexed_nodes))
         items.extend([{
-            'text': "Properties",
+            'text': "Settings",
             'triggered': lambda checked=False, values=indexes: [ self.properties(value) for value in values ]
-            }, {
-            'text': "Properties File",
-            'triggered': lambda checked=False, values=indexes: [ self.propertiesFile(value) for value in values ]
-        }])
+            }])
         contextMenu = {
             'text': "Index context",
             'items': items
@@ -131,6 +128,12 @@ class ProjectsDockActionsMixin(object):
                 }, {
                     'text': "Select Related Bundles ",
                     'triggered': lambda checked=False, values=projects: [ self.selectRelatedBundles(*value) for value in values ]
+                }, "-", {
+                    'text': "Settings File",
+                    'triggered': lambda checked=False, values=projects: [ self.propertiesFile(value) for value in values ]
+                }, {
+                    'text': "Properties File",
+                    'triggered': lambda checked=False, values=projects: [ self.propertiesFile(value) for value in values ]
                 }, "-"
             ])
         return items
@@ -173,6 +176,9 @@ class ProjectsDockActionsMixin(object):
                 {
                      'text': "Open System Editor",
                      'triggered': lambda checked=False, values=directories: [ self.openSystemEditor(*value) for value in values ]
+                }, "-", {
+                    'text': "Properties File",
+                    'triggered': lambda checked=False, values=directories: [ self.propertiesFile(value) for value in values ]
                 }, "-"
             ])
         return items
