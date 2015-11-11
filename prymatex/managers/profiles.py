@@ -3,13 +3,11 @@
 
 import os
 import shutil
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 
+from prymatex.utils import configparser
 from prymatex.core.profile import PrymatexProfile
 from prymatex.core.config import PMX_PROFILES_PATH
 from prymatex.core import PrymatexComponent

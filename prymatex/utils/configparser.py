@@ -3,6 +3,8 @@ try:
 except ImportError:
     import ConfigParser as configparser
 
+RawConfigParser = configparser.RawConfigParser
+
 class ConfigParser(configparser.ConfigParser):
     """Can get options() without defaults"""
     def options(self, section, no_defaults=False, **kwargs):
