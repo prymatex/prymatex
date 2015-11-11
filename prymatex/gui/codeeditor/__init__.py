@@ -17,7 +17,7 @@ __prymatex__.registerComponent(CodeEditorStatus)
 __prymatex__.registerComponent(CodeEditorSymbolsDock)
 __prymatex__.registerComponent(CodeEditorBookmarksDock)
 
-    # ---------------- Modes
+# ---------------- Modes
 __prymatex__.registerComponent(CodeEditorEditMode, CodeEditor) # First is default mode
 __prymatex__.registerComponent(CodeEditorMultiCursorMode, CodeEditor)
 __prymatex__.registerComponent(CodeEditorSnippetMode, CodeEditor)
@@ -28,7 +28,7 @@ __prymatex__.registerComponent(CodeEditorSnippetMode, CodeEditor)
 #__prymatex__.registerComponent(SpellCheckerAddon, CodeEditor)
 __prymatex__.registerComponent(HighlightCurrentSelectionAddon, CodeEditor)
 
-    # ---------------- Sidebars
+# ---------------- Sidebars
 __prymatex__.registerComponent(MiniMapAddon, CodeEditor)
 __prymatex__.registerComponent(BookmarkSideBarAddon, CodeEditor)
 __prymatex__.registerComponent(LineNumberSideBarAddon, CodeEditor)

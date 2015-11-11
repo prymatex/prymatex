@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 
+from prymatex.core import config
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import create_menu
 from prymatex.qt.compat import getExistingDirectory
@@ -12,7 +13,7 @@ class ProjectsDockActionsMixin(object):
         def order_by(attr):
             def _order_by(checked):
                 self.projectTreeProxyModel.sortBy(
-                    attr, 
+                    attr,
                     self.actionFoldersFirst.isChecked(),
                     self.actionDescending.isChecked()
                 )
@@ -101,7 +102,7 @@ class ProjectsDockActionsMixin(object):
         items.extend(self._bundles_menu_items(indexed_nodes))
         items.extend([{
             'text': "Settings",
-            'triggered': lambda checked=False, values=indexes: [ self.properties(value) for value in values ]
+            'triggered': lambda checked=False, values=indexes: [ self.settings(value) for value in values ]
             }])
         contextMenu = {
             'text': "Index context",
@@ -130,10 +131,10 @@ class ProjectsDockActionsMixin(object):
                     'triggered': lambda checked=False, values=projects: [ self.selectRelatedBundles(*value) for value in values ]
                 }, "-", {
                     'text': "Settings File",
-                    'triggered': lambda checked=False, values=projects: [ self.propertiesFile(value) for value in values ]
+                    'triggered': lambda checked=False, values=projects: [ self.settingsFile(*value) for value in values ]
                 }, {
                     'text': "Properties File",
-                    'triggered': lambda checked=False, values=projects: [ self.propertiesFile(value) for value in values ]
+                    'triggered': lambda checked=False, values=projects: [ self.propertiesFile(*value) for value in values ]
                 }, "-"
             ])
         return items
@@ -178,7 +179,7 @@ class ProjectsDockActionsMixin(object):
                      'triggered': lambda checked=False, values=directories: [ self.openSystemEditor(*value) for value in values ]
                 }, "-", {
                     'text': "Properties File",
-                    'triggered': lambda checked=False, values=directories: [ self.propertiesFile(value) for value in values ]
+                    'triggered': lambda checked=False, values=directories: [ self.propertiesFile(*value) for value in values ]
                 }, "-"
             ])
         return items
@@ -390,13 +391,22 @@ class ProjectsDockActionsMixin(object):
     def refresh(self, index, node=None):
         self.projectTreeProxyModel.refresh(index)
     
-    def properties(self, index, node=None):
+    def settings(self, index, node=None):
         node = node or self.projectTreeProxyModel.node(index)
         self.propertiesDialog.setModel(self.projectManager.propertiesProxyModel)
         self.propertiesDialog.exec_(node)
     
     def propertiesFile(self, index, node=None):
-        pass
+        node = node or self.projectTreeProxyModel.node(index)
+        self.application().openFile(
+            self.fileManager.join(node.path(), config.PMX_PROPERTIES_NAME)
+        )
+
+    def settingsFile(self, index, node=None):
+        node = node or self.projectTreeProxyModel.node(index)
+        self.application().openFile(
+            node.path()
+        )
 
     def copy(self, indexes_nodes=None):
         if indexes_nodes:

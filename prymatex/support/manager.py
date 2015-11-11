@@ -10,13 +10,10 @@ import subprocess
 from glob import glob
 from collections import namedtuple, OrderedDict
 from functools import reduce
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
 
 from prymatex.core import config
 from prymatex.core import source
+from prymatex.utils import configparser
 from prymatex.utils import plist, osextra, six
 from prymatex.utils import encoding
 from prymatex.utils.decorators import printtime, printparams
