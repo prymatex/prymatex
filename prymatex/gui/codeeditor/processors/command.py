@@ -176,7 +176,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
         }
 
         point = self.editor.viewport().mapToGlobal(
-            self.editor.cursorRect(self.editor.textCursor()).bottomRight()
+            self.editor.cursorRect().bottomRight()
         )
 
         self.editor.showMessage(message,

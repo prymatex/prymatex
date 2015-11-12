@@ -32,7 +32,6 @@ class CodeEditorBaseProcessor(QtCore.QObject):
         self.begin.emit()
 
     def endExecution(self, bundleItem):
-        assert self.bundleItem == bundleItem, ""
         self.bundleItem = None
         self.end.emit()
 
