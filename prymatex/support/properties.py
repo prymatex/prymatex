@@ -4,12 +4,15 @@
 import re
 import os
 import codecs
-    
+import logging
+
 from prymatex.qt import QtCore, QtGui
 from prymatex.utils import fnmatch
 
 from . import regexp
 from . import scope
+
+logger = logging.getLogger(__name__)
 
 class Settings(object):
     WELL_KNOWN_SETTINGS = ['binary', 'encoding', 'fileType', 'useBOM', 'softTabs',
@@ -33,7 +36,11 @@ class Settings(object):
         if self.name == self.config.default_section or \
 		key in self.config.options(self.name, no_defaults=True):
             section = self.config[self.name]
-            return getter(section, key, default)
+            try:
+                return getter(section, key, default)
+            except Exception as exception:
+                logger.error('Error reading property file %s, %s on %s section (%s)' % 
+                    (self.config.source.path, key, self.name, exception))
         return default
 
     def get_snippet(self, key, default=None):
