@@ -7,7 +7,6 @@ import string
 import shutil
 import uuid as uuidmodule
 import subprocess
-from glob import glob
 from collections import namedtuple, OrderedDict
 from functools import reduce
 
@@ -240,7 +239,7 @@ class SupportBaseManager(object):
                 bundle = self.loadBundle(sourceBundlePath, namespace)
                 loadedBundles.add(bundle)
             except Exception as ex:
-                print("Error in laod bundle %s (%s)" % (sourceBundlePath, ex))
+                self.logger().error("Error in laod bundle %s (%s)" % (sourceBundlePath, ex))
         return loadedBundles
 
     def loadBundle(self, sourceBundlePath, namespace):
@@ -269,10 +268,8 @@ class SupportBaseManager(object):
                 for sourceBundleItemPath in klass.sourcePaths(bundle.sourcePath(namespace.name)):
                     try:
                         bundleItem = self.loadBundleItem(klass, sourceBundleItemPath, namespace, bundle)
-                    except Exception as e:
-                        import traceback
-                        print("Error in bundle item %s (%s)" % (sourceBundleItemPath, e))
-                        traceback.print_exc()
+                    except Exception as exc:
+                        self.logger().error("Error in bundle item %s (%s)" % (sourceBundleItemPath, exc))
         bundle.setPopulated(True)
         self.populatedBundle(bundle)
 
@@ -343,10 +340,8 @@ class SupportBaseManager(object):
             self.logger().debug("New bundle %s." % bundlePath)
             try:
                 bundle = self.loadBundle(bundlePath, namespace)
-            except Exception as ex:
-                import traceback
-                print("Error in laod bundle %s (%s)" % (bundlePath, ex))
-                traceback.print_exc()
+            except Exception as exc:
+                self.logger().error("Error in laod bundle %s (%s)" % (bundlePath, exc))
 
     # ----- REPOPULATED BUNDLE AND RELOAD BUNDLE ITEMS
     def repopulateBundle(self, bundle):
@@ -378,12 +373,10 @@ class SupportBaseManager(object):
                 klass = self.BUNDLEITEM_CLASSES[itemType]
                 for itemPath in itemPaths:
                     try:
-                        self.logger.debug("New bundle item %s." % itemPath)
+                        self.logger().debug("New bundle item %s." % itemPath)
                         item = self.loadBundleItem(klass, itemPath, namespace, bundle)
-                    except Exception as e:
-                        import traceback
-                        print("Error in bundle item %s (%s)" % (itemPath, e))
-                        traceback.print_exc()
+                    except Exception as exc:
+                        self.logger().error("Error in bundle item %s (%s)" % (itemPath, exc))
         self.populatedBundle(bundle)
 
     # ------------ Build Storages --------------------
@@ -900,6 +893,7 @@ class SupportBaseManager(object):
             parser.read(parser.source.path)
 
         # Remove properties
+        print(list(self._properties.keys()), directory)
         self._properties = {
             key: value for (key, value) in self._properties.items() \
             if not (directory == config.USER_HOME_PATH or key.startswith(directory))             
@@ -921,6 +915,7 @@ class SupportBaseManager(object):
         return self._properties[directory]
 
     def getPropertiesSettings(self, path=None, leftScope=None, rightScope=None):
+        self.logger().debug("Loading properties for %s" % path)
         properties = self.getProperties(path or config.USER_HOME_PATH)
         return properties.buildSettings(
             path or config.USER_HOME_PATH,
