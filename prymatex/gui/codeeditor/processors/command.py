@@ -167,9 +167,7 @@ class CodeEditorCommandProcessor(CodeEditorBaseProcessor, CommandProcessorMixin)
 
     def showAsTooltip(self, context, outputFormat=None):
         message = html.escape(context.outputValue.strip())
-        timeout = len(message) * 20
-        if timeout > 2000:
-            timeout = 2000
+        timeout = len(message) * 20 if 0 < len(message) <= 100 else 2000
         
         callbacks = {
             'copy': lambda s = message: self.editor.application().clipboard().setText(s)

@@ -2,7 +2,10 @@
 
 import collections
 
-from prymatex.qt import QtCore, QtGui, QtWidgets
+from prymatex.qt import QtCore
+from prymatex.qt import QtGui
+from prymatex.qt import QtWidgets
+from prymatex.qt.helpers import move_widget
 
 class Notification(QtWidgets.QWidget):
     aboutToClose = QtCore.Signal()
@@ -213,8 +216,7 @@ class OverlayNotifier(QtCore.QObject):
         notification.contentChanged.connect(self._fix_positions)
         self.notifications.insert(0, notification)
         if point is not None:
-            notification.setGeometry(point.x(), point.y(),
-                notification.width(), notification.height())
+            move_widget(notification, point)
         else:
             self._fix_positions()
         return notification

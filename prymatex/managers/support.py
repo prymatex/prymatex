@@ -277,6 +277,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def on_fileSystemWatcher_pathChanged(self, path):
         directory = path if os.path.isdir(path) else os.path.dirname(path)
         if self.propertiesHasChanged(directory):
+            self.logger().debug("Properties in %s has changed" % directory)
             remove = self.updateProperties(directory)
             self.fileSystemWatcher.removePath(remove)
             self.propertiesChanged.emit(directory)
@@ -437,9 +438,8 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     
     # --------------- PROPERTIES OVERRIDE INTERFACE
     def addProperties(self, properties):
-        self.fileSystemWatcher.addPaths(
-            [ cfg.source.exists and cfg.source.path or cfg.source.name for cfg in properties.configs]
-        )
+        watch = [ cfg.source.exists and cfg.source.path or cfg.source.name for cfg in properties.configs]
+        self.fileSystemWatcher.addPaths(watch)
         return properties
         
     #---------------------------------------------------
