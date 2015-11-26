@@ -17,6 +17,7 @@ from prymatex.utils import text as textutils
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import textcursor_to_tuple
+from prymatex.qt.helpers import move_widget
 from functools import reduce
 
 class CompletionWidget(QtWidgets.QListWidget):
@@ -86,51 +87,12 @@ class CompletionWidget(QtWidgets.QListWidget):
         self.show()
         self.setFocus()
         self.raise_()
+        
+        cursor_rect = self.textedit.cursorRect()
+        top_left = self.textedit.mapToGlobal(cursor_rect.topLeft())
+        bottom_right = self.textedit.mapToGlobal(cursor_rect.bottomRight())
 
-        # Retrieving current screen height
-        desktop = QtWidgets.QApplication.desktop()
-        srect = desktop.availableGeometry(desktop.screenNumber(self))
-        screen_right = srect.right()
-        screen_bottom = srect.bottom()
-        
-        point = self.textedit.cursorRect().bottomRight()
-        offset = self.textedit.contentOffset()
-        point.setX(point.x() + offset.x())
-        point = self.textedit.mapToGlobal(point)
-
-        # Computing completion widget and its parent right positions
-        comp_right = point.x() + self.width()
-        ancestor = self.parent()
-        if ancestor is None:
-            anc_right = screen_right
-        else:
-            anc_right = min([ancestor.x() + ancestor.width(), screen_right])
-        
-        # Moving completion widget to the left
-        # if there is not enough space to the right
-        if comp_right > anc_right:
-            point.setX(point.x() - self.width())
-        
-        # Computing completion widget and its parent bottom positions
-        comp_bottom = point.y() + self.height()
-        ancestor = self.parent()
-        if ancestor is None:
-            anc_bottom = screen_bottom
-        else:
-            anc_bottom = min([ancestor.y()+ancestor.height(), screen_bottom])
-        
-        # Moving completion widget above if there is not enough space below
-        x_position = point.x()
-        if comp_bottom > anc_bottom:
-            point = self.textedit.cursorRect().topRight()
-            point = self.textedit.mapToGlobal(point)
-            point.setX(x_position)
-            point.setY(point.y() - self.height())
-            
-        if ancestor is not None:
-            # Useful only if we set parent to 'ancestor' in __init__
-            point = ancestor.mapFromGlobal(point)
-        self.move(point)
+        move_widget(self, QtCore.QRect(top_left, bottom_right))
         
         if completion_prefix is not None:
             # When initialized, if completion text is not empty, we need 
