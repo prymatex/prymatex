@@ -52,9 +52,8 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
 
     @ConfigurableHook("code_editor.default_theme")
     def defaultTheme(self, theme_uuid):
-        if theme_uuid:
-            theme = self.application().supportManager.getBundleItem(theme_uuid)
-            self.notifier.setPalette(theme.palette())
+        theme = self.application().supportManager.getBundleItem(theme_uuid)
+        self.notifier.setPalette(theme.palette())
 
     _editorHistory = []
     _editorHistoryIndex = 0
@@ -82,9 +81,6 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
         self.notifier = OverlayNotifier(self)
         self.notifier.setBackgroundRole(QtGui.QPalette.Window)
         self.notifier.setForegroundRole(QtGui.QPalette.WindowText)
-        font = self.font()
-        font.setPointSize(font.pointSize() * 0.8)
-        self.notifier.setFont(font)
         
         #Processor de comandos local a la main window
         self.commandProcessor = PrymatexMainCommandProcessor(parent = self)
@@ -236,6 +232,12 @@ html_footer
             else:
                 toolBar.show()
 
+    # OVERRIDE QMainWindow.setFont(font):
+    def setFont(self, font):
+        super().setFont(font)
+        font.setPointSize(font.pointSize() * 0.9)
+        self.notifier.setFont(font)
+        
     # ---------- Componer la mainWindow
     def addStatusBar(self, status_bar):
         self.statusBar().addStatusBar(status_bar)
