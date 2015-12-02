@@ -38,8 +38,8 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
     def registerShortcut(self, qobject, sequence):
         return self.shortcutsTreeModel.registerShortcut(qobject, sequence)
         
-    def addNamespace(self, namespace, builtin=False):
-        res = Resource(namespace.name, namespace.path, builtin)
+    def addNamespace(self, namespace):
+        res = Resource(namespace.name, namespace.path, namespace.builtin)
         res.update(load_fonts(namespace.path))
         res.update(load_media(namespace.path))
         res.update(load_stylesheets(namespace.path))

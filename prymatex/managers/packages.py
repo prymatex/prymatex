@@ -8,21 +8,15 @@ from glob import glob
 import collections
 
 try:
-    import json
-except ImportError:
-    import simplejson as json
-
-try:
     import builtins
 except ImportError as ex:
     import __builtin__ as builtins
 
 from prymatex import resources
-
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.core import config
 from prymatex.core.components import PrymatexComponent, PrymatexEditor
-
+from prymatex.utils import json
 from prymatex.utils import osextra
 from prymatex.utils.importlib import import_module, import_from_directory
 
@@ -42,7 +36,8 @@ class PackageDescriptor(object):
         self.depends = entry.pop('depends', [])
         self.share = entry.pop('share', None)
         if self.share:
-            self.namespace = application.addNamespace(self.name, self.share)
+            self.namespace = application.createNamespace(self.name, self.share)
+            application.addNamespace(self.namespace)
         self._icon = entry.pop('icon', ":/prymatex.png")
         self._load = False
         self.modules = []
@@ -81,7 +76,7 @@ class PackageManager(PrymatexComponent, QtCore.QObject):
         from prymatex.gui.settings.plugins import PluginsSettingsWidget
         return [ PluginsSettingsWidget ]
 
-    def addNamespace(self, namespace, bultin=False):
+    def addNamespace(self, namespace):
         directory=os.path.join(namespace.path, config.PMX_PACKAGES_NAME)
         if os.path.exists(directory) and os.path.isdir(directory):
             self.namespaces[namespace.name] = directory

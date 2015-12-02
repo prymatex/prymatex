@@ -167,7 +167,8 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
         # Add builtin Namespaces
         for name, path in config.BUILTINS:
-            app.addNamespace(name, path, builtin=True)
+            namespace = app.createNamespace(name, path, builtin=True)
+            app.addNamespace(namespace)
         
         # Configure Application instance
         app.settingsManager.registerConfigurableInstance(app)
@@ -314,19 +315,21 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         return QtCore.QTimer.singleShot(delay, callback)
     
     # ----------- Namespaces
-    def addNamespace(self, name, path, builtin=False):
-        assert not [ ns for ns in self._namespaces.values() if ns.path == path ], "Namespace is allready registered"
+    def createNamespace(self, name, path, builtin=False):
         # Build one unique name
         counter = 1
         name = textutils.slugify(name)
         while name in self._namespaces:
             name = textutils.slugify("%s %d" % (name, counter))
             counter += 1
-        namespace = Namespace(name, path, builtin)
-        self._namespaces[name] = namespace
-        self.resourceManager.addNamespace(namespace, builtin)
-        self.packageManager.addNamespace(namespace, builtin)
-        self.supportManager.addNamespace(namespace, builtin)
+        return Namespace(name, path, builtin)
+        
+    def addNamespace(self, namespace):
+        assert not [ ns for ns in self._namespaces.values() if ns.path == namespace.path ], "Namespace is allready registered"
+        self._namespaces[namespace.name] = namespace
+        self.resourceManager.addNamespace(namespace)
+        self.packageManager.addNamespace(namespace)
+        self.supportManager.addNamespace(namespace)
 
     def namespace(self, name):
         return self._namespaces.get(name)

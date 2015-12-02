@@ -75,7 +75,7 @@ class SupportBaseManager(object):
         self.plistFileCache = self.buildPlistFileStorage()
         
     # ------------ Namespaces ----------------------
-    def addNamespace(self, namespace, bultin=False):
+    def addNamespace(self, namespace):
         bundles = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
         # Update environment
         if namespace.name == config.PMX_NS_NAME:
