@@ -7,7 +7,6 @@ import string
 import shutil
 import uuid as uuidmodule
 import subprocess
-from collections import namedtuple, OrderedDict
 from functools import reduce
 
 from prymatex.core import config
@@ -450,6 +449,7 @@ class SupportBaseManager(object):
 
     def isProtected(self, obj):
         namespace = self.namespaces()[0]
+        print(namespace)
         return obj.hasSource(namespace.name)
         
     def isSafe(self, obj):
@@ -469,7 +469,6 @@ class SupportBaseManager(object):
             return self._managed_objects.get(uuid, None)
 
     def saveManagedObject(self, obj, namespace):
-        
         # Save obj
         filePath = obj.dataFilePath(obj.sourcePath(namespace.name))
         dirname = os.path.dirname(filePath)
@@ -546,7 +545,6 @@ class SupportBaseManager(object):
         bundle = Bundle(self.uuidgen(), self)
         bundle.load(bundleAttributes)
         bundle.addSource(namespace.name, bundle.createSourcePath(os.path.join(namespace.path, config.PMX_BUNDLES_NAME)))
-        
         self.saveManagedObject(bundle, namespace)
         
         bundle = self.addBundle(bundle)
@@ -567,7 +565,8 @@ class SupportBaseManager(object):
         """Ensure the bundle is safe"""
         if self.isProtected(bundle) and not self.isSafe(bundle):
             #Safe bundle
-            bundle.addSource(namespace.name, bundle.createSourcePath(os.path.join(namespace.path, config.PMX_BUNDLES_NAME)))
+            bundle.addSource(namespace.name, bundle.createSourcePath(
+                os.path.join(namespace.path, config.PMX_BUNDLES_NAME)))
             bundle.setCurrentSource(namespace.name)
             self.saveManagedObject(bundle, namespace)
             self.logger().debug("Add namespace '%s' in source %s for bundle." % (namespace.name, bundle.sourcePath(namespace.name)))
@@ -671,7 +670,9 @@ class SupportBaseManager(object):
         bundleItem = klass(self.uuidgen(), self, bundle)
         bundleItem.load(bundleAttributes)
         
-        bundleItem.addSource(namespace.name, bundleItem.createSourcePath(bundle.sourcePath(namespace.name)))
+        print(namespace, bundle.sources, bundle.currentSourceName())
+        bundleItem.addSource(namespace.name, bundleItem.createSourcePath(
+            bundle.sourcePath(namespace.name)))
         self.saveManagedObject(bundleItem, namespace)
         
         bundleItem = self.addBundleItem(bundleItem)
