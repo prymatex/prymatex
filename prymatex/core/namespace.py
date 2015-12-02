@@ -2,5 +2,5 @@
 
 from collections import namedtuple
 
-Namespace = namedtuple("Namespace", 'name path')
+Namespace = namedtuple("Namespace", 'name path builtin')
 

@@ -166,7 +166,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         app.serverManager = app.createComponentInstance(ServerManager, parent=app)
 
         # Add builtin Namespaces
-        for name, path in config.NAMESPACES:
+        for name, path in config.BUILTINS:
             app.addNamespace(name, path, builtin=True)
         
         # Configure Application instance
@@ -326,7 +326,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         while self.namespace(name):
             name = textutils.slugify("%s %d" % (name, counter))
             counter += 1
-        namespace = Namespace(name, path)
+        namespace = Namespace(name, path, builtin)
         self._namespaces.insert(index, namespace)
         self.resourceManager.addNamespace(namespace, builtin)
         self.packageManager.addNamespace(namespace, builtin)
