@@ -109,3 +109,6 @@
 [submodule "prymatex/share/Bundles/cmake.tmbundle"]
 	path = prymatex/share/Bundles/cmake.tmbundle
 	url = git@github.com:prymatex/cmake.tmbundle
+[submodule "prymatex/share/Packages/Python"]
+	path = prymatex/share/Packages/Python
+	url = git@github.com:prymatex/Python.git
