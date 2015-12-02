@@ -5,9 +5,7 @@ import logging
 from prymatex.qt import QtCore, QtGui
 from prymatex.core import PrymatexComponent, config
 
-from prymatex.resources import (Resource, ResourceProvider, load_media,
-    load_fonts, load_stylesheets)
-
+from prymatex.resources import (Resource, ResourceProvider)
 from prymatex.models.shortcuts import ShortcutsTreeModel
 
 logger = logging.getLogger(__name__)
@@ -21,7 +19,7 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
 
         self.prymatex_resources = []
         
-        self.base = Resource('base')
+        self.base = Resource(self.application().createNamespace('base', ''))
         # Shortcut Models
         self.shortcutsTreeModel = ShortcutsTreeModel(self)
 
@@ -39,26 +37,22 @@ class ResourceManager(PrymatexComponent, QtCore.QObject):
         return self.shortcutsTreeModel.registerShortcut(qobject, sequence)
         
     def addNamespace(self, namespace):
-        res = Resource(namespace.name, namespace.path, namespace.builtin)
-        res.update(load_fonts(namespace.path))
-        res.update(load_media(namespace.path))
-        res.update(load_stylesheets(namespace.path))
-        self.prymatex_resources.insert(0, res)
+        self.prymatex_resources.insert(0, Resource(namespace))
 
     def get_provider(self, names, builtins=True):
         names = names if isinstance(names, (list, tuple)) else [ names ]  
-        resources = [res for res in self.prymatex_resources if res.name() in names]
+        resources = [res for res in self.prymatex_resources if res.namespace().name in names]
         if builtins:
             resources = resources + self.builtins()
         resources.append(self.base)
         logger.debug("get_provider for [%s] got [%s]" % (
             ",".join(names), 
-            ",".join([r.name() for r in resources])
+            ",".join([r.namespace().name for r in resources])
         ))
         return ResourceProvider(resources)
 
     def builtins(self):
-        return [res for res in self.prymatex_resources if res.builtin()]
+        return [res for res in self.prymatex_resources if res.namespace().builtin]
 
     def providerForClass(self, componentClass):
         resource_name = getattr(componentClass, "RESOURCES", '')

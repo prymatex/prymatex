@@ -190,7 +190,8 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         
     # ---------------- Project namespaces
     def addNamespaceFolder(self, project, path):
-        namespace = self.application().addNamespace(project.nodeName(), path)
+        namespace = self.application().createNamespace(project.nodeName(), path)
+        self.application().addNamespace(namespace)
         project.addNamespace(namespace)
         project.save()
         

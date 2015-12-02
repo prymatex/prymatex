@@ -10,9 +10,10 @@ from prymatex.qt.helpers import get_std_icon, get_path_icon, get_type_icon
 from prymatex.core import PrymatexComponent
 from prymatex.utils import text as textutils
 
-from .media import default_media_mapper
+from .media import default_media_mapper, load_media
 from .stylesheets import load_stylesheets
 from .styles import default_styles
+from .fonts import load_fonts
 
 __all__ = ["LICENSES", "build_resource_key", "Resource", "ResourceProvider"]
 
@@ -36,21 +37,16 @@ def build_resource_key(path):
     return ":/%s" % "/".join(osextra.path.fullsplit(path))
 
 class Resource(dict):
-    def __init__(self, name, path=None, builtin=False):
-        self._name = name
-        self._path = path
-        self._builtin = builtin
+    def __init__(self, namespace):
+        self._namespace = namespace
         self._mapper = default_media_mapper
         self._from_theme = QtGui.QIcon._fromTheme
+        self.update(load_fonts(self._namespace.path))
+        self.update(load_media(self._namespace.path))
+        self.update(load_stylesheets(self._namespace.path))
 
-    def builtin(self):
-        return self._builtin
-
-    def name(self):
-        return self._name
-
-    def path(self):
-        return self._path
+    def namespace(self):
+        return self._namespace
 
     def map_index(self, index):
         return self._mapper.get(index, index)
@@ -108,7 +104,7 @@ class ResourceProvider(object):
         self.resources = resources
 
     def names(self):
-        return tuple([ res.name() for res in self.resources ])
+        return tuple([ res.namespace().name() for res in self.resources ])
 
     def sources(self):
         return self.resources[:]
