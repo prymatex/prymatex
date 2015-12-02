@@ -30,27 +30,27 @@ class Snippet(object):
     def lastHolderFixed(self):
         return not self.__hasLastHolder
 
-    def replace(self, memodict):
-        return "".join([node.replace(memodict, holders=self.placeholders) for node in self.nodes])
+    def _replace(self):
+        return "".join([node.replace(types.Memodict(), holders=self.placeholders) for node in self.nodes])
 
-    def render(self, visitor, memodict):
+    def render(self, visitor, expand=False):
         for node in self.nodes:
-            node.render(visitor, memodict, holders=self.placeholders)
+            node.render(visitor, types.Memodict(), holders=self.placeholders, expand=expand)
+        return visitor
 
     def __len__(self):
         return len(self.placeholders)
-    
-    # TODO: Add parameter for partial resolution
-    # $PATH:$HOME/Scripts if environement has not PATH then dont resolve 
-    def substitute(self, variables = {}):
-        v = Visitor(variables)
-        self.render(v, types.Memodict())
-        return v.output
+
+    def substitute(self, environment={}):
+        return self.render(Visitor(environment)).output
         
+    def expand(self, environment={}):
+        return self.render(Visitor(environment), expand=True).output
+
 class Visitor(object):
-    def __init__(self, variables = {}):
+    def __init__(self, environment = {}):
         self.output = ""
-        self.variables = variables
+        self.environment = environment
 
     def startRender(self):
         self.output = ""
@@ -65,7 +65,7 @@ class Visitor(object):
         return len(self.output)
         
     def environmentVariables(self):
-        return self.variables
+        return self.environment
 
 class SnippetHandler(object):
     def __init__(self):

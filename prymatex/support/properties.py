@@ -44,19 +44,19 @@ class Settings(object):
         return default
 
     def get_snippet(self, key, default=None):
-        variables = { key: '' }
+        env = { key: '' }
         value = self._get_own_option(key, default)
         if value is not None:
             value = self._remove_quotes(value)
-            variables["CWD"] = self.config.source.name
-            variables.update({ item[0]: self._remove_quotes(item[1]) \
+            env["CWD"] = self.config.source.name
+            env.update({ item[0]: self._remove_quotes(item[1]) \
                     for item in self.config[self.name].items() \
                     if item[0] not in self.WELL_KNOWN_SETTINGS \
                         and not item[0].isupper() \
                         and item[0] != key
             })
-            variables[key] = regexp.Snippet(value).substitute(variables)
-        return variables.get(key)
+            env[key] = regexp.Snippet(value).substitute(env)
+        return env.get(key)
 
     def get_str(self, key, default=None):
         return self._remove_quotes(
@@ -79,7 +79,7 @@ class Settings(object):
             [ ( item[0], 
                 regexp.Snippet(
                     self._remove_quotes(item[1])
-                ).substitute(env)) \
+                ).expand(env)) \
                 for item in self.config[self.name].items() if item[0].isupper() ]
         )
         return variables
