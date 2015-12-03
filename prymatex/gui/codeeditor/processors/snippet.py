@@ -60,6 +60,7 @@ class CodeEditorSnippetProcessor(CodeEditorBaseProcessor, SnippetProcessorMixin)
     
     def selectHolder(self):
         start, end = self.bundleItem.currentPosition()
+        print(start, end)
         self.editor.setTextCursor(self.editor.newCursorAtPosition(start, end))
         self.status.setText("Snippet: %s Holder: %d" % (self.bundleItem.name, self.bundleItem.holderNumber()))
         

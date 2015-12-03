@@ -33,19 +33,22 @@ class Snippet(object):
     def _replace(self):
         return "".join([node.replace(types.Memodict(), holders=self.placeholders) for node in self.nodes])
 
-    def render(self, visitor, expand=False):
+    def render(self, visitor, memo, expand=False):
         for node in self.nodes:
-            node.render(visitor, types.Memodict(), holders=self.placeholders, expand=expand)
+            node.render(visitor, 
+                memo,
+                holders=self.placeholders,
+                expand=expand)
         return visitor
 
     def __len__(self):
         return len(self.placeholders)
 
     def substitute(self, environment={}):
-        return self.render(Visitor(environment)).output
+        return self.render(Visitor(environment), types.Memodict()).output
         
     def expand(self, environment={}):
-        return self.render(Visitor(environment), expand=True).output
+        return self.render(Visitor(environment), types.Memodict(), expand=True).output
 
 class Visitor(object):
     def __init__(self, environment = {}):
