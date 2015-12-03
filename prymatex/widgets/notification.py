@@ -66,7 +66,12 @@ class Notification(QtWidgets.QWidget):
             self.timeoutTimer.setInterval(timeout)
             self.animationIn.finished.connect(self.timeoutTimer.start)
             self.timeoutTimer.timeout.connect(recyclable and self.hide or self.close)
-            
+    
+    def setFont(self, font):
+        self.label.setFont(font)
+        if self.pixmap:
+            self.pixmap.setFont(font)
+        
     def setText(self, text):
         self.label.setText(text)
         self.adjustSize()
@@ -134,12 +139,13 @@ class Notification(QtWidgets.QWidget):
 class OverlayNotifier(QtCore.QObject):
     margin = 10
     timeout = 2000
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         parent.installEventFilter(self)
         self.notifications = []
         self.palette = QtGui.QPalette()
-        self.font = QtGui.QFont()
+        self.font = parent.font() or QtGui.QFont()
+        self.font.setPointSize(self.font.pointSize() * 0.9)
         self.background_role = QtGui.QPalette.ToolTipBase
         self.foreground_role = QtGui.QPalette.ToolTipText
 

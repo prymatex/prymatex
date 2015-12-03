@@ -19,6 +19,7 @@ from prymatex.models.projects import (ProjectTreeNode, ProjectTreeModel,
 from prymatex.models.properties import PropertiesProxyModel, PropertiesTreeModel
 from prymatex.core.exceptions import ProjectExistsException, FileException
 
+from prymatex.projects import Project
 from prymatex.utils.i18n import ugettext as _
 
 class ProjectManager(PrymatexComponent, QtCore.QObject):
@@ -152,7 +153,8 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
             raise exceptions.ProjectExistsException()
 
         project = ProjectTreeNode(name, file_path)
-        project.load({ 
+        project.load({
+            "name": name,
             "source_folders": folders 
         })
         project.save()
@@ -188,7 +190,8 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         
     # ---------------- Project namespaces
     def addNamespaceFolder(self, project, path):
-        namespace = self.application().addNamespace(project.nodeName(), path)
+        namespace = self.application().createNamespace(project.nodeName(), path)
+        self.application().addNamespace(namespace)
         project.addNamespace(namespace)
         project.save()
         

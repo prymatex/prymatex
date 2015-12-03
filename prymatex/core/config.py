@@ -144,7 +144,7 @@ def get_module_source_path(modname, basename=None):
 #============================================================================
 # Configuration namespaces
 #============================================================================
-NAMESPACES = (
+BUILTINS = (
     (PMX_NS_NAME, PMX_SHARE_PATH),
     (USR_NS_NAME, PMX_HOME_PATH)
 )

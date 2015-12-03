@@ -4,7 +4,7 @@
 import os
 import sys
 from functools import partial
-from collections import namedtuple
+from collections import OrderedDict
 
 import prymatex
 
@@ -75,7 +75,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         self.platform = sys.platform
         self.options = options
 
-        self._namespaces = []
+        self._namespaces = OrderedDict()
         self.component_classes = {}
         self.component_instances = {}
         self.default_component = type("DefaultComponent", (PrymatexEditor, TextEditWidget), {})
@@ -166,8 +166,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         app.serverManager = app.createComponentInstance(ServerManager, parent=app)
 
         # Add builtin Namespaces
-        for name, path in config.NAMESPACES:
-            app.addNamespace(name, path, builtin=True)
+        for name, path in config.BUILTINS:
+            namespace = app.createNamespace(name, path, builtin=True)
+            app.addNamespace(namespace)
         
         # Configure Application instance
         app.settingsManager.registerConfigurableInstance(app)
@@ -314,34 +315,31 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         return QtCore.QTimer.singleShot(delay, callback)
     
     # ----------- Namespaces
-    def addNamespace(self, name, path, builtin=False):
-        namespaces = [ namespace for namespace in self._namespaces \
-            if namespace.path == path ] 
-        if namespaces:
-            return namespaces[0]
-        index = 0 if builtin else 1
+    def createNamespace(self, name, path, builtin=False):
         # Build one unique name
         counter = 1
         name = textutils.slugify(name)
-        while self.namespace(name):
+        while name in self._namespaces:
             name = textutils.slugify("%s %d" % (name, counter))
             counter += 1
-        namespace = Namespace(name, path)
-        self._namespaces.insert(index, namespace)
-        self.resourceManager.addNamespace(namespace, builtin)
-        self.packageManager.addNamespace(namespace, builtin)
-        self.supportManager.addNamespace(namespace, builtin)
-        return namespace
+        return Namespace(name, path, builtin)
+        
+    def addNamespace(self, namespace):
+        assert not [ ns for ns in self._namespaces.values() if ns.path == namespace.path ], "Namespace is allready registered"
+        self._namespaces[namespace.name] = namespace
+        self.resourceManager.addNamespace(namespace)
+        self.packageManager.addNamespace(namespace)
+        self.supportManager.addNamespace(namespace)
 
     def namespace(self, name):
-        namespaces = [ namespace for namespace in self._namespaces \
-            if namespace.name == name ]
-        if namespaces:
-            return namespaces[0]
+        return self._namespaces.get(name)
 
     def namespaces(self):
-        return self._namespaces
+        return list(self._namespaces.values())
 
+    def builtins(self):
+        return [ ns for ns in self.namespaces() if ns.builtin ]
+        
     # ---------- OVERRIDE: PrymatexComponent.componentState()
     def componentState(self):
         componentState = super(PrymatexApplication, self).componentState()
