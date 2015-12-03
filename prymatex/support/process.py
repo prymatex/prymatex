@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import os
+import pprint
 
 from prymatex.support import scripts
 
@@ -10,9 +11,12 @@ TEMPLATE = """Description: {description}
 Asynchronous: {asynchronous}
 Command: {command}
 Working Directory: {workingDirectory}
-Input:  Type {inputType}, Value {inputValue}
 Variables: {variables}
 Environment: {environment}
+Script Path: {scriptFilePath}
+Script Environment: {scriptFileEnvironment}
+Input Type: {inputType}
+Input Value: {inputValue}
 OutputType: {outputType}
 OutputValue: {outputValue}
 ErrorValue: {errorValue}
@@ -70,10 +74,12 @@ class RunningContext(object):
             asynchronous=self.asynchronous,
             command=self.command,
             workingDirectory=self.workingDirectory,
+            variables=pprint.pformat(self.variables),
+            environment=pprint.pformat(self.environment),
             inputType=self.inputType,
             inputValue=self.inputValue,
-            variables=self.variables,
-            environment=self.environment,
+            scriptFilePath=self.scriptFilePath,
+            scriptFileEnvironment=pprint.pformat(self.scriptFileEnvironment),
             outputType=self.outputType,
             outputValue=self.outputValue,
             errorValue=self.errorValue
