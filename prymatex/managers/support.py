@@ -438,7 +438,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     
     # --------------- PROPERTIES OVERRIDE INTERFACE
     def addProperties(self, properties):
-        watch = [ cfg.source.exists and cfg.source.path or cfg.source.name for cfg in properties.configs]
+        watch = [ cfg.source.exists() and cfg.source.path or cfg.source.name for cfg in properties.configs]
         self.fileSystemWatcher.addPaths(watch)
         return properties
         

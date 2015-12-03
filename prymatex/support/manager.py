@@ -232,17 +232,19 @@ class SupportBaseManager(object):
 
     #------------- LOAD BUNDLES ------------------
     def loadBundles(self, namespace):
-        loadedBundles = set()
-        for sourceBundlePath in Bundle.sourcePaths(os.path.join(namespace.path, config.PMX_BUNDLES_NAME)):
+        loaded = set()
+        base = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
+        for path in Bundle.sourcePaths(base):
+            bundle_source = source.Source(namespace.name, path)
             try:
-                bundle = self.loadBundle(sourceBundlePath, namespace)
-                loadedBundles.add(bundle)
+                bundle = self.loadBundle(bundle_source)
+                loaded.add(bundle)
             except Exception as ex:
-                self.logger().error("Error in laod bundle %s (%s)" % (sourceBundlePath, ex))
-        return loadedBundles
+                self.logger().error("Error in laod bundle %s (%s)" % (path, ex))
+        return loaded
 
-    def loadBundle(self, sourceBundlePath, namespace):
-        data = self.readPlist(Bundle.dataFilePath(sourceBundlePath))
+    def loadBundle(self, source):
+        data = self.readPlist(Bundle.dataFilePath(source.path))
         uuid = self.uuidgen(data.get('uuid'))
         bundle = self.getManagedObject(uuid)
         if bundle is None:
@@ -252,7 +254,7 @@ class SupportBaseManager(object):
             self.addManagedObject(bundle)
         else:
             bundle.load(data)
-        bundle.addSource(namespace.name, sourceBundlePath)
+        bundle.addSource(source)
         return bundle
 
     # ----------- POPULATE BUNDLE AND LOAD BUNDLE ITEMS
@@ -260,27 +262,27 @@ class SupportBaseManager(object):
         for namespace in self.namespaces():
             if not bundle.hasSource(namespace.name):
                 continue
-            bundleDirectory = os.path.dirname(bundle.sourcePath(namespace.name))
-
             self.showMessage("Populating\n%s" % bundle.name)
             for klass in self.BUNDLEITEM_CLASSES.values():
-                for sourceBundleItemPath in klass.sourcePaths(bundle.sourcePath(namespace.name)):
+                base = bundle.sourcePath(namespace.name)
+                for path in klass.sourcePaths(base):
+                    item_source = source.Source(namespace.name, path)
                     try:
-                        bundleItem = self.loadBundleItem(klass, sourceBundleItemPath, namespace, bundle)
+                        bundleItem = self.loadBundleItem(klass, item_source, bundle)
                     except Exception as exc:
-                        self.logger().error("Error in bundle item %s (%s)" % (sourceBundleItemPath, exc))
+                        self.logger().error("Error in bundle item %s (%s)" % (path, exc))
         bundle.setPopulated(True)
         self.populatedBundle(bundle)
 
-    def loadBundleItem(self, klass, sourceBundleItemPath, namespace, bundle):
-        data = self.readPlist(klass.dataFilePath(sourceBundleItemPath))
+    def loadBundleItem(self, klass, source, bundle):
+        data = self.readPlist(klass.dataFilePath(source.path))
         uuid = self.uuidgen(data.get('uuid'))
         bundleItem = self.getManagedObject(uuid)
         if bundleItem is None:
             bundleItem = klass(uuid, self, bundle)
             bundleItem.load(data)
             bundleItem = self.addBundleItem(bundleItem)
-            for staticPath in klass.staticFilePaths(sourceBundleItemPath):
+            for staticPath in klass.staticFilePaths(source.path):
                 # TODO: Ver que hacer con directorios
                 staticFile = StaticFile(staticPath, bundleItem)
                 staticFile = self.addStaticFile(staticFile)
@@ -288,7 +290,7 @@ class SupportBaseManager(object):
             self.addManagedObject(bundleItem)
         else:
             bundleItem.load(data)
-        bundleItem.addSource(namespace.name, sourceBundleItemPath)
+        bundleItem.addSource(source)
         return bundleItem
 
     # -------------------- RELOAD SUPPORT
@@ -309,20 +311,22 @@ class SupportBaseManager(object):
 
     # ---------------- RELOAD BUNDLES
     def reloadBundles(self, namespace):
-        installedBundles = [bundle for bundle in self.getAllBundles() if bundle.hasSource(namespace.name)]
-        bundlePaths = list(Bundle.sourcePaths(os.path.join(namespace.path, config.PMX_BUNDLES_NAME)))
+        installedBundles = [bundle for bundle in self.getAllBundles() 
+            if bundle.hasSource(namespace.name)]
+        base = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
+        paths_to_find = list(Bundle.sourcePaths(base))
         for bundle in installedBundles:
-            bundlePath = bundle.sourcePath(namespace.name)
-            if bundlePath in bundlePaths:
-                if namespace.name == bundle.currentSourceName() and bundle.sourceHasChanged(namespace.name):
-                    self.loadBundle(bundlePath, namespace)
+            source = bundle.getSource(namespace.name)
+            if source.exists():
+                if source == bundle.currentSource() and source.hasChanged():
+                    self.loadBundle(source)
                     self.modifyBundle(bundle)
-                bundlePaths.remove(bundlePath)
+                paths_to_find.remove(source.path)
             else:
                 bundleItems = self.findBundleItems(bundle=bundle)
                 for item in bundleItems:
                     item.removeSource(namespace.name)
-                bundle.removeSource(namespace)
+                bundle.removeSource(namespace.name)
                 if not bundle.hasSources():
                     self.logger().debug("Bundle %s removed." % bundle.name)
                     for item in bundleItems:
@@ -335,31 +339,32 @@ class SupportBaseManager(object):
                         item.setDirty()
                     bundle.setSupportPath(None)
                     bundle.setDirty()
-        for bundlePath in bundlePaths:
-            self.logger().debug("New bundle %s." % bundlePath)
+        for path in paths_to_find:
+            self.logger().debug("New bundle %s." % path)
+            bundle_source = source.Source(namespace.name, path)
             try:
-                bundle = self.loadBundle(bundlePath, namespace)
+                bundle = self.loadBundle(bundle_source)
             except Exception as exc:
-                self.logger().error("Error in laod bundle %s (%s)" % (bundlePath, exc))
+                self.logger().error("Error in laod bundle %s (%s)" % (path, exc))
 
     # ----- REPOPULATED BUNDLE AND RELOAD BUNDLE ITEMS
     def repopulateBundle(self, bundle):
         for namespace in self.namespaces():
             if not bundle.hasSource(namespace.name):
                 continue
-            bundlePath = bundle.sourcePath(namespace.name)
-            bundleItemPaths = { klass.type(): list(klass.sourcePaths(bundlePath)) 
+            bundle_source = bundle.getSource(namespace.name)
+            paths_to_find = { klass.type(): list(klass.sourcePaths(bundle_source.path)) 
                 for klass in self.BUNDLEITEM_CLASSES.values() }
             for bundleItem in self.findBundleItems(bundle=bundle):
                 if not bundleItem.hasSource(namespace.name):
                     continue
-                bundleItemPath = bundleItem.sourcePath(namespace.name)
-                if bundleItemPath in bundleItemPaths[bundleItem.type()]:
-                    if namespace.name == bundleItem.currentSourceName() and bundleItem.sourceHasChanged(namespace.name):
-                        self.logger().debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, bundleItemPath))
-                        self.loadBundleItem(self.BUNDLEITEM_CLASSES[bundleItem.type()], bundleItemPath, namespace, bundle)
+                item_source = bundleItem.source(namespace.name)
+                if item_source.path in paths_to_find[bundleItem.type()]:
+                    if item_source == bundleItem.currentSource() and item_source.hasChanged():
+                        self.logger().debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, item_source.path))
+                        self.loadBundleItem(self.BUNDLEITEM_CLASSES[bundleItem.type()], item_source, bundle)
                         self.modifyBundleItem(bundleItem)
-                    bundleItemPaths[bundleItem.type()].remove(bundleItemPath)
+                    paths_to_find[bundleItem.type()].remove(item_source.path)
                 else:
                     bundleItem.removeSource(namespace.name)
                     if not bundleItem.hasSources():
@@ -368,14 +373,15 @@ class SupportBaseManager(object):
                         self.removeBundleItem(bundleItem)
                     else:
                         bundleItem.setDirty()
-            for itemType, itemPaths in bundleItemPaths.items():
+            for itemType, itemPaths in paths_to_find.items():
                 klass = self.BUNDLEITEM_CLASSES[itemType]
-                for itemPath in itemPaths:
+                for path in itemPaths:
+                    item_source = source.Source(namespace.name, path)
                     try:
-                        self.logger().debug("New bundle item %s." % itemPath)
-                        item = self.loadBundleItem(klass, itemPath, namespace, bundle)
+                        self.logger().debug("New bundle item %s." % path)
+                        item = self.loadBundleItem(klass, item_source, bundle)
                     except Exception as exc:
-                        self.logger().error("Error in bundle item %s (%s)" % (itemPath, exc))
+                        self.logger().error("Error in bundle item %s (%s)" % (path, exc))
         self.populatedBundle(bundle)
 
     # ------------ Build Storages --------------------
@@ -447,14 +453,12 @@ class SupportBaseManager(object):
     def setEnabled(self, uuid):
         pass
 
-    def isProtected(self, obj):
-        namespace = self.namespaces()[0]
-        print(namespace)
-        return obj.hasSource(namespace.name)
+    def isProtectedNamespace(self, name):
+        return self.namespaces()[0].name == name
         
     def isSafe(self, obj):
         namespace = self.namespaces()[0]
-        return obj.currentSourceName() != namespace.name
+        return obj.currentSource().name != namespace.name
 
     def addManagedObject(self, obj):
         self._managed_objects[obj.uuid] = obj
@@ -468,29 +472,28 @@ class SupportBaseManager(object):
         if not self.isDeleted(uuid):
             return self._managed_objects.get(uuid, None)
 
-    def saveManagedObject(self, obj, namespace):
+    def saveManagedObject(self, obj, source):
         # Save obj
-        filePath = obj.dataFilePath(obj.sourcePath(namespace.name))
-        dirname = os.path.dirname(filePath)
+        path = obj.dataFilePath(source.path)
+        dirname = os.path.dirname(path)
                 
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
-        self.writePlist(obj.dump(), filePath)
+        self.writePlist(obj.dump(), path)
         
         # Save static files
         for static in obj.statics:
             static.save(dirname)
         
-        obj.updateMtime(namespace.name)
+        obj.setSource(source.newUpdateTime())
         
-    def moveManagedObject(self, obj, namespace, dst):
-        src = obj.path(namespace)
-        shutil.move(src, dst)
-        obj.addSource(namespace.name, path)
+    def moveManagedObject(self, obj, source, dst):
+        shutil.move(source.path, dst)
+        obj.setSource(source.newPath(dst))
         
-    def deleteManagedObject(self, obj, namespace):
-        filePath = obj.dataFilePath(obj.sourcePath(namespace.name))
+    def deleteManagedObject(self, obj, source):
+        filePath = obj.dataFilePath(source.path)
         dirname = os.path.dirname(filePath)
         
         # Delete static files
@@ -500,7 +503,16 @@ class SupportBaseManager(object):
         os.unlink(filePath)
         if not os.listdir(dirname):
             os.rmdir(dirname)
-
+    
+    def ensureManagedObjectIsSafe(self, obj, name, base):
+        """Ensure the object is safe"""
+        if self.isProtectedNamespace(name) and not self.isSafe(obj):
+            #Safe obj
+            obj_source = source.Source(name, obj.createSourcePath(base))
+            obj.addSource(obj_source)
+            self.saveManagedObject(obj, obj_source)
+            self.logger().debug("Add source '%s' in %s for object." % (name, obj_source.path))
+        
     # ------------- BUNDLE INTERFACE
     def addBundle(self, bundle):
         return bundle
@@ -544,8 +556,10 @@ class SupportBaseManager(object):
         # Create Bundle
         bundle = Bundle(self.uuidgen(), self)
         bundle.load(bundleAttributes)
-        bundle.addSource(namespace.name, bundle.createSourcePath(os.path.join(namespace.path, config.PMX_BUNDLES_NAME)))
-        self.saveManagedObject(bundle, namespace)
+        base = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
+        bundle_source = source.Source(ns_name, bundle.createSourcePath(base))
+        bundle.addSource(bundle_source)
+        self.saveManagedObject(bundle, bundle_source)
         
         bundle = self.addBundle(bundle)
         self.addManagedObject(bundle)
@@ -561,40 +575,31 @@ class SupportBaseManager(object):
     def getBundle(self, uuid):
         return self.getManagedObject(uuid)
 
-    def ensureBundleIsSafe(self, bundle, namespace):
-        """Ensure the bundle is safe"""
-        if self.isProtected(bundle) and not self.isSafe(bundle):
-            #Safe bundle
-            bundle.addSource(namespace.name, bundle.createSourcePath(
-                os.path.join(namespace.path, config.PMX_BUNDLES_NAME)))
-            bundle.setCurrentSource(namespace.name)
-            self.saveManagedObject(bundle, namespace)
-            self.logger().debug("Add namespace '%s' in source %s for bundle." % (namespace.name, bundle.sourcePath(namespace.name)))
-        return bundle
-
     def updateBundle(self, bundle, ns_name=config.USR_NS_NAME, **attrs):
         """Actualiza un bundle"""
         namespace = self.namespace(ns_name)
         assert namespace is not None, "No namespace for %s" % ns_name
 
-        bundle = self.ensureBundleIsSafe(bundle, namespace)
+        base = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
+        self.ensureManagedObjectIsSafe(bundle, ns_name, base)
         
-        moveSource = not self.isProtected(bundle) and "name" in attrs
+        moveSource = not self.isProtectedNamespace(ns_name) and "name" in attrs
         
         # Do update and save
         bundle.update(attrs)
-        self.saveManagedObject(bundle, namespace)
+        bundle_source = bundle.currentSource()
+        self.saveManagedObject(bundle, bundle_source)
         self.modifyBundle(bundle)
         if moveSource:
             # Para mover hay que renombrar el directorio y mover todos los items del bundle
-            bundleSourcePath = bundle.currentSourcePath()
-            bundleDestinyPath = bundle.createSourcePath(os.path.join(namespace.path, config.PMX_BUNDLES_NAME))
-            shutil.move(bundleSourcePath, bundleDestinyPath)
-            bundle.setSourcePath(namespace.name, bundleDestinyPath)
-            for bundleItem in self.findBundleItems(bundle = bundle):
-                bundleItemSourcePath = bundleItem.currentSourcePath()
-                bundleItemDestinyPath = bundleDestinyPath + bundleItemSourcePath[len(bundleSourcePath):]
-                bundleItem.setSourcePath(namespace.name, bundleItemDestinyPath)
+            bundle_destiny = bundle.createSourcePath(base)
+            shutil.move(bundle_source.path, bundle_destiny.path)
+            bundle.setSource(bundle_destiny)
+            for bundleItem in self.findBundleItems(bundle=bundle):
+                item_source = bundleItem.currentSource()
+                path = bundle_destiny.path + item_source.path[len(bundle_source):]
+                item_destiny = source.Source(ns_name, path)
+                bundleItem.setSource(item_destiny)
         return bundle
 
     def deleteBundle(self, bundle):
@@ -609,10 +614,12 @@ class SupportBaseManager(object):
             if not bundle.hasSource(namespace.name):
                 continue
             #Si el espacio de nombres es distinto al protegido lo elimino
-            if namespace.protected:
+            if self.isProtectedNamespace(namespace.name):
                 self.setDeleted(bundle.uuid)
             else:
-                self.deleteManagedObject(bundle, namespace)
+                source = bundle.getSource(namespace.name)
+                if source:
+                    self.deleteManagedObject(bundle, source)
         self.removeManagedObject(bundle)
         self.removeBundle(bundle)
 
@@ -660,7 +667,8 @@ class SupportBaseManager(object):
         namespace = self.namespace(ns_name)
         assert namespace is not None, "No namespace for %s" % ns_name
         
-        bundle = self.ensureBundleIsSafe(bundle, namespace)
+        base = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
+        self.ensureManagedObjectIsSafe(bundle, ns_name, base)
 
         klass = self.BUNDLEITEM_CLASSES[typeName]
         
@@ -670,10 +678,10 @@ class SupportBaseManager(object):
         bundleItem = klass(self.uuidgen(), self, bundle)
         bundleItem.load(bundleAttributes)
         
-        print(namespace, bundle.sources, bundle.currentSourceName())
-        bundleItem.addSource(namespace.name, bundleItem.createSourcePath(
-            bundle.sourcePath(namespace.name)))
-        self.saveManagedObject(bundleItem, namespace)
+        base = bundle.sourcePath(ns_name)
+        item_source = source.Source(ns_name, bundleItem.createSourcePath(base))
+        bundleItem.addSource(item_source)
+        self.saveManagedObject(bundleItem, item_source)
         
         bundleItem = self.addBundleItem(bundleItem)
         self.addManagedObject(bundleItem)
@@ -689,41 +697,32 @@ class SupportBaseManager(object):
     def getBundleItem(self, uuid):
         return self.getManagedObject(uuid)
     
-    def ensureBundleItemIsSafe(self, bundleItem, namespace):
-        """Ensure the bundle item is safe"""
-        if self.isProtected(bundleItem) and not self.isSafe(bundleItem):
-            #Safe Bundle Item
-            bundle = self.ensureBundleIsSafe(bundleItem.bundle, namespace)
-            path = bundleItem.createSourcePath(bundle.sourcePath(namespace.name))
-            bundleItem.addSource(namespace.name, path)
-            bundleItem.setCurrentSource(namespace.name)
-            self.saveManagedObject(bundleItem, namespace)
-            self.logger().debug("Add namespace '%s' in source %s for bundle item." % (namespace.name, bundle.sourcePath(namespace.name)))
-        return bundleItem
-    
     def updateBundleItem(self, bundleItem, ns_name=config.USR_NS_NAME, **attrs):
         """Actualiza un bundle item"""
         self.updateBundleItemCacheCoherence(bundleItem, attrs)
 
         namespace = self.namespace(ns_name)
         assert namespace is not None, "No namespace for %s" % ns_name
-
-        bundleItem = self.ensureBundleItemIsSafe(bundleItem, namespace)
         
-        moveSource = not self.isProtected(bundleItem) and "name" in attrs
+        base = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
+        self.ensureManagedObjectIsSafe(bundleItem.bundle, ns_name, base)
+        source = bundleItem.bundle.currentSource()
+        self.ensureManagedObjectIsSafe(bundleItem, name, source.path)
+        
+        moveSource = not self.isProtectedNamespace(ns_name) and "name" in attrs
 
         # Do update and save
         bundleItem.update(attrs)
-        self.saveManagedObject(bundleItem, namespace)
+        item_source = bundleItem.currentSource()
+        self.saveManagedObject(bundleItem, item_source)
         self.modifyBundleItem(bundleItem)
         if moveSource:
             # Para mover hay que renombrar el item
-            bundleItemSourcePath = bundleItem.currentSourcePath()
             bundleItemDestinyPath = bundleItem.createSourcePath(
-                bundleItem.bundle.sourcePath(namespace.name))
-            print(bundleItemSourcePath, bundleItemDestinyPath)
-            shutil.move(bundleItemSourcePath, bundleItemDestinyPath)
-            bundleItem.setSourcePath(namespace.name, bundleItemDestinyPath)
+                bundleItem.bundle.getSource(ns_name).path)
+            print(item_source.path, bundleItemDestinyPath)
+            shutil.move(source.path, bundleItemDestinyPath)
+            bundleItem.setSource(item_source.newPath(bundleItemDestinyPath))
         return bundleItem
 
     def deleteBundleItem(self, bundleItem):
@@ -734,7 +733,7 @@ class SupportBaseManager(object):
             if not bundleItem.hasSource(namespace.name):
                 continue
             #Si el espacio de nombres es distinto al protegido lo elimino
-            if namespace.protected:
+            if self.isProtectedNamespace(namespace.name):
                 self.setDeleted(bundleItem.uuid)
             else:
                 self.deleteManagedObject(bundleItem, namespace)
@@ -754,7 +753,7 @@ class SupportBaseManager(object):
         namespace = self.namespace(ns_name)
         assert namespace is not None, "No namespace for %s" % ns_name
         
-        if self.isProtected(parentItem) and not self.isSafe(parentItem):
+        if self.isProtectedNamespace(ns_name) and not self.isSafe(parentItem):
             self.updateBundleItem(parentItem, namespace)
 
         path = osextra.path.ensure_not_exists(os.path.join(parentItem.path(namespace), "%s"), osextra.to_valid_name(name))
@@ -770,7 +769,7 @@ class SupportBaseManager(object):
         assert namespace is not None, "No namespace for %s" % ns_name
 
         parentItem = staticFile.parentItem
-        if self.isProtected(parentItem) and not self.isSafe(parentItem):
+        if self.isProtectedNamespace(ns_name) and not self.isSafe(parentItem):
             self.updateBundleItem(parentItem, namespace)
         if "name" in attrs:
             path = osextra.path.ensure_not_exists(os.path.join(parentItem.path(namespace), "%s"), osextra.to_valid_name(attrs["name"]))
@@ -781,7 +780,7 @@ class SupportBaseManager(object):
 
     def deleteStaticFile(self, staticFile):
         parentItem = staticFile.parentItem
-        if self.isProtected(parentItem) and not self.isSafe(parentItem):
+        if self.isProtectedNamespace(ns_name) and not self.isSafe(parentItem):
             self.deleteBundleItem(parentItem)
         self.removeStaticFile(staticFile)
 
@@ -890,7 +889,7 @@ class SupportBaseManager(object):
             os.path.join(directory, config.PMX_PROPERTIES_NAME)
         )
         parser.clear()
-        if parser.source.exists:
+        if parser.source.exists():
             parser.read(parser.source.path)
 
         # Remove properties
@@ -899,7 +898,7 @@ class SupportBaseManager(object):
             key: value for (key, value) in self._properties.items() \
             if not (directory == config.USER_HOME_PATH or key.startswith(directory))             
         }
-        return parser.source.exists and directory or \
+        return parser.source.exists() and directory or \
             os.path.join(directory, config.PMX_PROPERTIES_NAME)
 
     def loadProperties(self, directory):

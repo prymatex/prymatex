@@ -225,7 +225,7 @@ class Properties(object):
         settings = []
         for s in self.settings:
             rank = []
-            if s.name == "DEFAULT" and s.config.source.exists:
+            if s.name == "DEFAULT" and s.config.source.exists():
                 settings.append((0, s))
             elif s.pattern and fnmatch.fnmatch(path, s.pattern):
                 settings.append((1, s))

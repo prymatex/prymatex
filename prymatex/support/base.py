@@ -55,17 +55,24 @@ class ManagedObject(object):
         return self.manager.isEnabled(self.uuid)
 
     # ------------ Object Sources
-    def addSource(self, name, path):
-        self.current_source = self.sources.setdefault(name, 
-            source.Source(name=name, path=path)
-        )
+    def addSource(self, source):
+        self.current_source = self.sources.setdefault(source.name, source)
+        
+    def setSource(self, source):
+        self.sources[source.name] = source
 
     def removeSource(self, name):
         del self.sources[name]
 
     def hasSource(self, name):
         return name in self.sources
+        
+    def hasSources(self):
+        return bool(self.sources)
     
+    def getSource(self, name):
+        return self.sources.get(name)
+
     def sourcePath(self, name):
         return self.sources[name].path
 
@@ -79,7 +86,7 @@ class ManagedObject(object):
 
     def updateTime(self, name):
         source = self.sources[name]
-        self.sources[name] = source.newUpdatedTime()
+        self.sources[name] = source.newUpdateTime()
 
     # ------------ Current Source, is the source in self.current_source
     def setCurrentSource(self, name):
