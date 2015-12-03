@@ -87,6 +87,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
         # Connects
         self.aboutToQuit.connect(self.closePrymatex)
+        self.lastWindowClosed.connect(self.quit)
         
         # Exceptions
         self.replaceSysExceptHook()
@@ -551,18 +552,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         if windows:
             return windows[0]
 
-    def canBeHandled(self, filepath):
-        # from prymatex.utils.pyqtdebug import ipdb_set_trace
-        # ipdb_set_trace()
-        ext = os.path.splitext(filepath)[1].replace('.', '')
-        for fileTypes in [syntax.item.fileTypes for syntax in
-                          self.supportManager.getAllSyntaxes()
-                          if hasattr(syntax.item, 'fileTypes') and
-                          syntax.item.fileTypes]:
-
-            if ext in fileTypes:
-                return True
-        return False
+    def closeAllWindows(self):
+        for window in self._main_windows:
+            window.close()
 
     # ---- Open (file)
     def openFile(self, path, position=None, editor_name=None, focus=True, window=None):

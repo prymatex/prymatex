@@ -210,7 +210,7 @@ class MainWindowActionsMixin(object):
                     "triggered": cls.on_actionSwitchProfile_triggered
                 }, "-", {
                     "text": "Quit",
-                    "triggered": lambda mw, checked=False: mw.application().quit()
+                    "triggered": lambda mw, checked=False: mw.application().closeAllWindows()
                 }
             ]
         }
