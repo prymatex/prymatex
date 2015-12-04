@@ -38,12 +38,16 @@ class BundleItemTreeModel(AbstractTreeModel):
     def data(self, index, role):  
         if not index.isValid():  
             return None
-        elif role in [ QtCore.Qt.DisplayRole, QtCore.Qt.EditRole ]:
+
+        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.EditRole ]:
             node = self.node(index)
-            return node.name
+            return node.nodeName()
         elif role == QtCore.Qt.DecorationRole:
             node = self.node(index)
             return node.icon()
+        elif role == QtCore.Qt.UUIDRole:
+            node = self.node(index)
+            return node.uuid()
 
     def flags(self, index):
         if not index.isValid():  
@@ -66,17 +70,17 @@ class BundleItemTreeModel(AbstractTreeModel):
     def removeBundle(self, bundle):
         self.removeNode(bundle)
     
-    def appendBundleItem(self, bundleItem):
-        self.appendNode(bundleItem, bundleItem.bundle)
+    def appendBundleItem(self, bundle_item, bundle):
+        self.appendNode(bundle_item, bundle)
 
-    def removeBundleItem(self, bundleItem):
-        self.removeNode(bundleItem, bundleItem.bundle)
+    def removeBundleItem(self, bundle_item, bundle):
+        self.removeNode(bundle_item, bundle)
     
-    def appendStaticFile(self, staticFile):
-        self.appendNode(staticFile, staticFile.parentItem)
+    def appendStaticFile(self, static_file, bundle_item):
+        self.appendNode(static_file, bundle_item)
 
     def removeStaticFile(self, staticFile):
-        self.removeNode(staticFile, staticFile.parentItem)
+        self.removeNode(static_file, bundle_item)
 
 #===============================================
 # Bundle Menu Tree Model

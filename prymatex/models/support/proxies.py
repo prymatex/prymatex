@@ -98,8 +98,8 @@ class BundleListModel(BundleItemTypeProxyModel):
         BundleItemTypeProxyModel.__init__(self, 'bundle', parent)
     
     def data(self, index, role):
-        if self.sourceModel() is None:
-            return QtCore.QVariant()
+        if not index.isValid() or self.sourceModel() is None:
+            return None
         
         if role == QtCore.Qt.CheckStateRole:
             bundle = self.node(index)
@@ -127,10 +127,7 @@ class SyntaxListModel(BundleItemTypeProxyModel):
         BundleItemTypeProxyModel.__init__(self, 'syntax', parent)
     
     def data(self, index, role):
-        if self.sourceModel() is None:
-            return None
-        
-        if not index.isValid():
+        if not index.isValid() or self.sourceModel() is None:
             return None
         
         sIndex = self.mapToSource(index)
@@ -149,10 +146,7 @@ class TemplateListModel(BundleItemTypeProxyModel):
         BundleItemTypeProxyModel.__init__(self, 'template', parent)
     
     def data(self, index, role):
-        if self.sourceModel() is None:
-            return None
-        
-        if not index.isValid():
+        if not index.isValid() or self.sourceModel() is None:
             return None
         
         sIndex = self.mapToSource(index)
@@ -171,10 +165,7 @@ class ProjectListModel(BundleItemTypeProxyModel):
         BundleItemTypeProxyModel.__init__(self, 'project', parent)
     
     def data(self, index, role):
-        if self.sourceModel() is None:
-            return None
-        
-        if not index.isValid():
+        if not index.isValid() or self.sourceModel() is None:
             return None
         
         sIndex = self.mapToSource(index)

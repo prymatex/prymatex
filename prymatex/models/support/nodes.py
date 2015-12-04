@@ -29,18 +29,70 @@ class BundleItemTreeNode(TreeNodeBase):
         self._style_base = { key_value[0]: rgba2color(key_value[1]) \
             for key_value in DEFAULT_THEME_SETTINGS.items() if key_value[1].startswith('#') }
 
-    # ----------- Bundle Item attrs assessors -----------
-    def __getattr__(self, name):
-        return getattr(self.__bundleItem, name)
-
-    def __eq__(self, other):
-        return self.uuid == other.uuid
-        
-    def __hash__(self):
-        return hash(self.uuid)
-    
+    # ----------- Bundle Item assessors -----------
     def bundleItem(self):
         return self.__bundleItem
+
+    def uuid(self):
+        return self.__bundleItem.uuid
+
+    # ----------- Bundle Item decorator -----------
+    def __hash__(self):
+        return hash(self.__bundleItem.uuid)
+
+    @property
+    def name(self):
+        return self.__bundleItem.name
+
+    @property
+    def bundle(self):
+        return self.__bundleItem.bundle
+
+
+    @property
+    def scopeName(self):
+        return self.__bundleItem.scopeName
+
+    @property
+    def selector(self):
+        return self.__bundleItem.selector
+
+    @property
+    def settings(self):
+        return self.__bundleItem.settings
+
+    @property
+    def grammar(self):
+        return self.__bundleItem.grammar
+
+    @property
+    def injectionSelector(self):
+        return self.__bundleItem.injectionSelector
+
+    @property
+    def patterns(self):
+        return self.__bundleItem.patterns
+
+    def type(self):
+        return self.__bundleItem.type()
+
+    def enabled(self):
+        return self.__bundleItem.enabled()
+
+    def execute(self, *args, **kwargs):
+        return self.__bundleItem.execute(*args, **kwargs)
+
+    def hasSource(self, *args, **kwargs):
+        return self.__bundleItem.hasSource(*args, **kwargs)
+
+    def addSource(self, *args, **kwargs):
+        return self.__bundleItem.addSource(*args, **kwargs)
+
+    def sourcePath(self, *args, **kwargs):
+        return self.__bundleItem.sourcePath(*args, **kwargs)
+
+    def setPopulated(self, *args, **kwargs):
+        return self.__bundleItem.setPopulated(*args, **kwargs)
 
     # ----------- Bundle Item decoration -----------
     def keySequence(self):
@@ -61,14 +113,14 @@ class BundleItemTreeNode(TreeNodeBase):
     
     def trigger(self):
         trigger = []
-        if self.tabTrigger != None:
-            trigger.append("%s⇥" % (self.tabTrigger))
-        if self.keyEquivalent != None:
+        if self.__bundleItem.tabTrigger != None:
+            trigger.append("%s⇥" % (self.__bundleItem.tabTrigger))
+        if self.__bundleItem.keyEquivalent != None:
             trigger.append("%s" % self.keySequence().toString())
         return ", ".join(trigger)
     
     def buildBundleAccelerator(self):
-        name = self.name
+        name = self.nodeName()
         for index, char in enumerate(name):
             if char in self.BANNED_ACCEL:
                 continue
@@ -79,7 +131,7 @@ class BundleItemTreeNode(TreeNodeBase):
         return name
     
     def buildMenuTextEntry(self, mnemonic = True):
-        text = self.name
+        text = self.nodeName()
         if mnemonic:
             text += "\t%s" % (self.trigger())
         return text.replace('&', '&&')
@@ -253,11 +305,19 @@ class ThemeStyleTableRow(object):
         self.__settings = None             # Settings cache
         
     # ----------- Item attrs assessors -----------
-    def __getattr__(self, name):
-        return getattr(self.__styleItem, name)
-
     def styleItem(self):
         return self.__styleItem
+
+    def uuid(self):
+        return self.__styleItem.uuid
+
+    # ----------- Style decorator -----------
+    @property
+    def scopeSelector(self):
+        return self.__styleItem.scopeSelector
+
+    def load(self, *args, **kwargs):
+        return self.__styleItem.load(*args, **kwargs)
 
     # ----------- Item decoration -----------
     def settings(self):

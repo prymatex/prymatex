@@ -28,7 +28,7 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
         settings = style.settings()
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.EditRole ]:
             if column == 0:
-                return style.name
+                return style.styleItem().name
             elif column == 1 and 'foreground' in settings:
                 return settings['foreground']
             elif column == 2 and 'background' in settings:
@@ -55,6 +55,8 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
                 return settings['foreground']
             elif column == 2 and 'background' in settings:
                 return settings['background']
+        elif role is QtCore.Qt.UUIDRole:
+            return style.uuid()
 
     def setData(self, index, value, role):
         """Retornar verdadero si se puedo hacer el camio, falso en caso contratio"""

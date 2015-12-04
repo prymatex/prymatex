@@ -124,7 +124,7 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
         self.rootNode.removeAllChildren()
         self.layoutChanged.emit()
     
-    def appendNode(self, node, parentNode = None):
+    def appendNode(self, node, parentNode=None):
         # TODO: validar y retornar falso si no se puede, ver si el parent puede ser index y node
         parentNode = parentNode or self.rootNode
         parentIndex = self.nodeIndex(parentNode)
@@ -133,7 +133,7 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
         self.endInsertRows()
         return True
         
-    def removeNode(self, node, parentNode = None):
+    def removeNode(self, node, parentNode=None):
         # TODO: validar y retornar falso si no se puede, ver si el parent puede ser index y node
         parentNode = parentNode or self.rootNode
         parentIndex = self.nodeIndex(parentNode)
