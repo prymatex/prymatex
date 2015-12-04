@@ -118,12 +118,12 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
 
     def on_supportManager_bundleItemAdded(self, bundleItem):
         if bundleItem.type() == "syntax":
-            self.keywordsListModel.addItems(bundleItem.scopeName.split('.'))
+            self.keywordsListModel.addItems(bundleItem.bundleItem().scopeName.split('.'))
 
 
     def on_supportManager_bundleItemRemoved(self, bundleItem):
         if bundleItem.type() == "syntax":
-            self.keywordsListModel.removeItems(bundleItem.scopeName.split('.'))
+            self.keywordsListModel.removeItems(bundleItem.bundleItem().scopeName.split('.'))
 
     # -------------------- Load projects
     def loadProjects(self, message_handler=None, *args, **kwargs):

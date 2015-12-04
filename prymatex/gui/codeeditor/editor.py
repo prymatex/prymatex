@@ -104,16 +104,18 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         self._default_syntax = self.application().supportManager.getBundleItem(uuid)
         if self._default_syntax is None:
             # Load original default syntax
-            self._default_syntax = self.application().supportManager.getBundleItem(self._settings.default("defaultSyntax"))
-        self.insertBundleItem(self._default_syntax)
+            self._default_syntax = self.application().supportManager.getBundleItem(self.settings().default("default_syntax"))
+        if self._default_syntax is not None:
+            self.insertBundleItem(self._default_syntax)
 
     @ConfigurableItem(default='766026CB-703D-4610-B070-8DE07D967C5F', tm_name='OakThemeManagerSelectedTheme')
     def default_theme(self, uuid):
         self._default_theme = self.application().supportManager.getBundleItem(uuid)
         if self._default_theme is None:
             # Load original default theme
-            self._default_theme = self.application().supportManager.getBundleItem(self._settings.default("defaultTheme"))
-        self.insertBundleItem(self._default_theme)
+            self._default_theme = self.application().supportManager.getBundleItem(self.settings().default("default_theme"))
+        if self._default_theme is not None:
+            self.insertBundleItem(self._default_theme)
 
     @ConfigurableItem(default=MarginLine | IndentGuide | HighlightCurrentLine)
     def default_flags(self, flags):

@@ -53,7 +53,8 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
     @ConfigurableHook("code_editor.default_theme")
     def defaultTheme(self, theme_uuid):
         theme = self.application().supportManager.getBundleItem(theme_uuid)
-        self.notifier.setPalette(theme.palette())
+        if theme is not None:
+            self.notifier.setPalette(theme.palette())
 
     _editorHistory = []
     _editorHistoryIndex = 0

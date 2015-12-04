@@ -109,17 +109,19 @@ class SupportBaseManager(object):
 
     #--------------- Plist --------------------
     def readPlist(self, path):
+        return plist.readPlist(path)
+        # TODO Los chache
         if path in self.plistFileCache:
             return self.plistFileCache.get(path)
         return self.plistFileCache.setdefault(path, plist.readPlist(path))
 
     def writePlist(self, hashData, path):
-        # TODO Ver que pasa con este set que falta
-        self.plistFileCache.set(path, hashData)
+        # TODO Los chache
+        #self.plistFileCache.set(path, hashData)
         return plist.writePlist(hashData, path)
 
     #--------------- Tools --------------------
-    def uuidgen(self, uuid = None):
+    def uuidgen(self, uuid=None):
         if uuid is None:
             return uuidmodule.uuid1()
         try:
@@ -221,9 +223,10 @@ class SupportBaseManager(object):
     def loadSupport(self, message_handler=None):
         # Install message handler
         self.message_handler = message_handler
+        bundles = set()
         for namespace in self.namespaces():
-            self.loadBundles(namespace)
-        for bundle in self.getAllBundles():
+            bundles.update(self.loadBundles(namespace))
+        for bundle in bundles:
             if bundle.enabled():
                 self.populateBundle(bundle)
         # Uninstall message handler
@@ -236,11 +239,8 @@ class SupportBaseManager(object):
         base = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
         for path in Bundle.sourcePaths(base):
             bundle_source = source.Source(namespace.name, path)
-            try:
-                bundle = self.loadBundle(bundle_source)
-                loaded.add(bundle)
-            except Exception as ex:
-                self.logger().error("Error in laod bundle %s (%s)" % (path, ex))
+            bundle = self.loadBundle(bundle_source)
+            loaded.add(bundle)
         return loaded
 
     def loadBundle(self, source):
@@ -250,7 +250,7 @@ class SupportBaseManager(object):
         if bundle is None:
             bundle = Bundle(uuid, self)
             bundle.load(data)
-            bundle = self.addBundle(bundle)
+            self.addBundle(bundle)
             self.addManagedObject(bundle)
         else:
             bundle.load(data)
@@ -267,10 +267,7 @@ class SupportBaseManager(object):
                 base = bundle.sourcePath(namespace.name)
                 for path in klass.sourcePaths(base):
                     item_source = source.Source(namespace.name, path)
-                    try:
-                        bundleItem = self.loadBundleItem(klass, item_source, bundle)
-                    except Exception as exc:
-                        self.logger().error("Error in bundle item %s (%s)" % (path, exc))
+                    bundleItem = self.loadBundleItem(klass, item_source, bundle)
         bundle.setPopulated(True)
         self.populatedBundle(bundle)
 
@@ -281,11 +278,11 @@ class SupportBaseManager(object):
         if bundleItem is None:
             bundleItem = klass(uuid, self, bundle)
             bundleItem.load(data)
-            bundleItem = self.addBundleItem(bundleItem)
+            self.addBundleItem(bundleItem)
             for staticPath in klass.staticFilePaths(source.path):
                 # TODO: Ver que hacer con directorios
                 staticFile = StaticFile(staticPath, bundleItem)
-                staticFile = self.addStaticFile(staticFile)
+                self.addStaticFile(staticFile)
                 bundleItem.addStaticFile(staticFile)
             self.addManagedObject(bundleItem)
         else:
@@ -342,10 +339,7 @@ class SupportBaseManager(object):
         for path in paths_to_find:
             self.logger().debug("New bundle %s." % path)
             bundle_source = source.Source(namespace.name, path)
-            try:
-                bundle = self.loadBundle(bundle_source)
-            except Exception as exc:
-                self.logger().error("Error in laod bundle %s (%s)" % (path, exc))
+            bundle = self.loadBundle(bundle_source)
 
     # ----- REPOPULATED BUNDLE AND RELOAD BUNDLE ITEMS
     def repopulateBundle(self, bundle):
@@ -377,11 +371,8 @@ class SupportBaseManager(object):
                 klass = self.BUNDLEITEM_CLASSES[itemType]
                 for path in itemPaths:
                     item_source = source.Source(namespace.name, path)
-                    try:
-                        self.logger().debug("New bundle item %s." % path)
-                        item = self.loadBundleItem(klass, item_source, bundle)
-                    except Exception as exc:
-                        self.logger().error("Error in bundle item %s (%s)" % (path, exc))
+                    self.logger().debug("New bundle item %s." % path)
+                    item = self.loadBundleItem(klass, item_source, bundle)
         self.populatedBundle(bundle)
 
     # ------------ Build Storages --------------------
@@ -453,11 +444,11 @@ class SupportBaseManager(object):
     def setEnabled(self, uuid):
         pass
 
-    def isProtectedNamespace(self, name):
-        return self.namespaces()[0].name == name
-        
+    def protectedNamespace(self):
+        pass
+    
     def isSafe(self, obj):
-        namespace = self.namespaces()[0]
+        namespace = self.protectedNamespace()
         return obj.currentSource().name != namespace.name
 
     def addManagedObject(self, obj):
@@ -470,7 +461,7 @@ class SupportBaseManager(object):
         if not isinstance(uuid, uuidmodule.UUID):
             uuid = uuidmodule.UUID(uuid)
         if not self.isDeleted(uuid):
-            return self._managed_objects.get(uuid, None)
+            return self._managed_objects.get(uuid)
 
     def saveManagedObject(self, obj, source):
         # Save obj
@@ -483,8 +474,8 @@ class SupportBaseManager(object):
         self.writePlist(obj.dump(), path)
         
         # Save static files
-        for static in obj.statics:
-            static.save(dirname)
+        for static_file in obj.static_files:
+            static_file.save(dirname)
         
         obj.setSource(source.newUpdateTime())
         
@@ -493,20 +484,20 @@ class SupportBaseManager(object):
         obj.setSource(source.newPath(dst))
         
     def deleteManagedObject(self, obj, source):
-        filePath = obj.dataFilePath(source.path)
-        dirname = os.path.dirname(filePath)
+        path = obj.dataFilePath(source.path)
+        dirname = os.path.dirname(path)
         
         # Delete static files
-        for static in obj.statics:
-            os.unlink(static.path)
+        for static_file in obj.static_files:
+            os.unlink(static_file.path)
 
-        os.unlink(filePath)
+        os.unlink(path)
         if not os.listdir(dirname):
             os.rmdir(dirname)
     
     def ensureManagedObjectIsSafe(self, obj, name, base):
         """Ensure the object is safe"""
-        if self.isProtectedNamespace(name) and not self.isSafe(obj):
+        if not self.isSafe(obj):
             #Safe obj
             obj_source = source.Source(name, obj.createSourcePath(base))
             obj.addSource(obj_source)
@@ -514,8 +505,11 @@ class SupportBaseManager(object):
             self.logger().debug("Add source '%s' in %s for object." % (name, obj_source.path))
         
     # ------------- BUNDLE INTERFACE
+    def getBundleItem(self, uuid):
+        return self.getManagedObject(uuid)
+
     def addBundle(self, bundle):
-        return bundle
+        pass
 
     def modifyBundle(self, bundle):
         """Llamado luego de modificar un bundle"""
@@ -561,7 +555,7 @@ class SupportBaseManager(object):
         bundle.addSource(bundle_source)
         self.saveManagedObject(bundle, bundle_source)
         
-        bundle = self.addBundle(bundle)
+        self.addBundle(bundle)
         self.addManagedObject(bundle)
         return bundle
 
@@ -572,18 +566,16 @@ class SupportBaseManager(object):
             raise Exception("More than one bundle")
         return bundles[0]
 
-    def getBundle(self, uuid):
-        return self.getManagedObject(uuid)
-
     def updateBundle(self, bundle, ns_name=config.USR_NS_NAME, **attrs):
         """Actualiza un bundle"""
         namespace = self.namespace(ns_name)
+        p_ns_name = self.protectedNamespace().name
         assert namespace is not None, "No namespace for %s" % ns_name
 
         base = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
         self.ensureManagedObjectIsSafe(bundle, ns_name, base)
         
-        moveSource = not self.isProtectedNamespace(ns_name) and "name" in attrs
+        moveSource = not bundle.hasSource(p_ns_name) and "name" in attrs
         
         # Do update and save
         bundle.update(attrs)
@@ -609,7 +601,8 @@ class SupportBaseManager(object):
 
         for bundleItem in bundleItems:
             self.deleteBundleItem(bundleItem)
-
+        
+        
         for namespace in self.namespaces():
             if not bundle.hasSource(namespace.name):
                 continue
@@ -633,8 +626,11 @@ class SupportBaseManager(object):
         self.modifyBundle(bundle)
 
     # --------------- BUNDLEITEM INTERFACE
+    def getBundleItem(self, uuid):
+        return self.getManagedObject(uuid)
+
     def addBundleItem(self, bundleItem):
-        return bundleItem
+        pass
 
     def modifyBundleItem(self, bundleItem):
         pass
@@ -683,7 +679,7 @@ class SupportBaseManager(object):
         bundleItem.addSource(item_source)
         self.saveManagedObject(bundleItem, item_source)
         
-        bundleItem = self.addBundleItem(bundleItem)
+        self.addBundleItem(bundleItem)
         self.addManagedObject(bundleItem)
         return bundleItem
 
@@ -693,36 +689,34 @@ class SupportBaseManager(object):
         if len(items) > 1:
             raise Exception("More than one bundle item")
         return items[0]
-
-    def getBundleItem(self, uuid):
-        return self.getManagedObject(uuid)
     
     def updateBundleItem(self, bundleItem, ns_name=config.USR_NS_NAME, **attrs):
         """Actualiza un bundle item"""
         self.updateBundleItemCacheCoherence(bundleItem, attrs)
 
         namespace = self.namespace(ns_name)
+        p_ns_name = self.protectedNamespace().name
         assert namespace is not None, "No namespace for %s" % ns_name
         
         base = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
         self.ensureManagedObjectIsSafe(bundleItem.bundle, ns_name, base)
-        source = bundleItem.bundle.currentSource()
-        self.ensureManagedObjectIsSafe(bundleItem, name, source.path)
+        bundle_source = bundleItem.bundle.currentSource()
+        self.ensureManagedObjectIsSafe(bundleItem, ns_name, bundle_source.path)
         
-        moveSource = not self.isProtectedNamespace(ns_name) and "name" in attrs
+        moveSource = not bundleItem.hasSource(p_ns_name) and "name" in attrs
 
-        # Do update and save
+        # Do update, move and save
         bundleItem.update(attrs)
         item_source = bundleItem.currentSource()
-        self.saveManagedObject(bundleItem, item_source)
-        self.modifyBundleItem(bundleItem)
         if moveSource:
             # Para mover hay que renombrar el item
-            bundleItemDestinyPath = bundleItem.createSourcePath(
-                bundleItem.bundle.getSource(ns_name).path)
-            print(item_source.path, bundleItemDestinyPath)
-            shutil.move(source.path, bundleItemDestinyPath)
-            bundleItem.setSource(item_source.newPath(bundleItemDestinyPath))
+            new_path = bundleItem.createSourcePath(bundle_source.path)
+            shutil.move(item_source.path, new_path)
+            item_source = item_source.newPath(new_path)
+            bundleItem.setSource(item_source)
+
+        self.saveManagedObject(bundleItem, item_source)
+        self.modifyBundleItem(bundleItem)
         return bundleItem
 
     def deleteBundleItem(self, bundleItem):
@@ -743,7 +737,7 @@ class SupportBaseManager(object):
 
     # ------------- STATICFILE INTERFACE
     def addStaticFile(self, file):
-        return file
+        pass
 
     def removeStaticFile(self, file):
         pass
@@ -759,7 +753,7 @@ class SupportBaseManager(object):
         path = osextra.path.ensure_not_exists(os.path.join(parentItem.path(namespace), "%s"), osextra.to_valid_name(name))
         staticFile = StaticFile(path, parentItem)
         #No es la mejor forma pero es la forma de guardar el archivo
-        staticFile = self.addStaticFile(staticFile)
+        self.addStaticFile(staticFile)
         parentItem.addStaticFile(staticFile)
         staticFile.save()
         return staticFile
@@ -785,6 +779,9 @@ class SupportBaseManager(object):
         self.removeStaticFile(staticFile)
 
     # ----------------- THEMESTYLE INTERFACE
+    def getThemeStyle(self, uuid):
+        return self.getManagedObject(uuid)
+
     def addThemeStyle(self, style):
         return style
 
@@ -905,7 +902,7 @@ class SupportBaseManager(object):
         parsers = self._load_parsers(directory)
         properties = Properties(self)
         properties.load(parsers)
-        properties = self.addProperties(properties)
+        self.addProperties(properties)
         return properties
 
     def getProperties(self, path):
@@ -924,7 +921,7 @@ class SupportBaseManager(object):
 
     # --------------- PROPERTIES INTERFACE
     def addProperties(self, properties):
-        return properties
+        pass
 
     # ----------------- TABTRIGGERS INTERFACE
     def getAllTabTriggerItems(self):
@@ -1056,11 +1053,13 @@ class SupportBaseManager(object):
             [score_syntax[1] for score_syntax in syntaxes])
 
     def findSyntaxByFirstLine(self, line):
-        for syntax in self.getAllSyntaxes():
+        syntaxes = filter(lambda i: i.type() == "syntax", self._managed_objects.values())
+        for syntax in syntaxes:
             if syntax.firstLineMatch != None and syntax.firstLineMatch.search(line):
                 return syntax
 
     def findSyntaxByFileType(self, fileType):
-        for syntax in self.getAllSyntaxes():
+        syntaxes = filter(lambda i: i.type() == "syntax", self._managed_objects.values())
+        for syntax in syntaxes:
             if syntax.fileTypes is not None and any([fileType == "%s" % ft for ft in syntax.fileTypes]):
                 return syntax

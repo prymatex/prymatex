@@ -65,7 +65,7 @@ class BundleItemMenuGroup(QtCore.QObject):
 
     def buildBundleMenu(self, bundle):
         menu = QtWidgets.QMenu(bundle.buildBundleAccelerator())
-        menu.ID = id(bundle.mainMenu)
+        menu.ID = id(bundle.bundleItem().mainMenu)
         
         #Conectamos el about to show para filtar un poco los items cuando se muestra el menu
         menu.aboutToShow.connect(self.on_bundleMenu_aboutToShow)
@@ -76,13 +76,13 @@ class BundleItemMenuGroup(QtCore.QObject):
             Add bundle to menu collection, all bundle has one QMenu in the collection
         """
         menu = self.buildBundleMenu(bundle)
-        menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
+        menu.menuAction().setVisible(bundle.enabled and bundle.bundleItem().mainMenu is not None)
         # Primero agregarlo a los containers porque estos usan self.menus para ordenar
         self.addToContainers(menu)
-        self.menus[bundle] = menu
+        self.menus[bundle.uuid()] = menu
 
     def menuForBundle(self, bundle):
-        return self.menus.get(bundle)
+        return self.menus.get(bundle.uuid())
 
     def addToContainers(self, menu):
         currentTitles = sorted([menu.title().replace("&","").lower() for menu in list(self.menus.values())])
@@ -112,36 +112,36 @@ class BundleItemMenuGroup(QtCore.QObject):
                 action.setText(text)
                 
     def on_manager_bundleChanged(self, bundle):
-        menu = self.menus[bundle]
+        menu = self.menus[bundle.uuid()]
         title = bundle.buildBundleAccelerator()
         if title != menu.title():
             self.removeFromContainers(menu)
             menu.setTitle(title)
             self.addToContainers(menu)
         if bundle.enabled != menu.menuAction().isVisible():
-            menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
-        if id(bundle.mainMenu) != menu.ID:
+            menu.menuAction().setVisible(bundle.enabled and bundle.bundleItem().mainMenu is not None)
+        if id(bundle.bundleItem().mainMenu) != menu.ID:
             # TODO Ver si no tengo que desconectar las señales de los submenues
             menu.clear()
-            submenus = bundle.mainMenu['submenus'] if bundle.mainMenu is not None and 'submenus' in bundle.mainMenu else {}
-            items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
+            submenus = bundle.bundleItem().mainMenu['submenus'] if bundle.bundleItem().mainMenu is not None and 'submenus' in bundle.bundleItem().mainMenu else {}
+            items = bundle.bundleItem().mainMenu['items'] if 'items' in bundle.bundleItem().mainMenu else []
             self.buildMenu(items, menu, submenus, menu)
-            menu.ID = id(bundle.mainMenu)
+            menu.ID = id(bundle.bundleItem().mainMenu)
 
     def on_manager_bundleAdded(self, bundle):
         assert bundle not in self.menus, "The bundle is in menus"
         self.addBundle(bundle)
 
     def on_manager_bundlePopulated(self, bundle):
-        menu = self.menus[bundle]
+        menu = self.menus[bundle.uuid()]
         menu.clear()
-        if bundle.mainMenu is not None:
-            submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
-            items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
+        if bundle.bundleItem().mainMenu is not None:
+            submenus = bundle.bundleItem().mainMenu['submenus'] if 'submenus' in bundle.bundleItem().mainMenu else {}
+            items = bundle.bundleItem().mainMenu['items'] if 'items' in bundle.bundleItem().mainMenu else []
             self.buildMenu(items, menu, submenus, menu)
 
     def on_manager_bundleRemoved(self, bundle):
-        self.removeFromContainers(self.menus[bundle])
+        self.removeFromContainers(self.menus[bundle.uuid()])
 
 class Properties(QtCore.QObject):
     def __init__(self, properties):
@@ -266,6 +266,10 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def namespaces(self):
         return self.application().namespaces()
 
+    # OVERRIDE: SupportManager.protectedNamespace()
+    def protectedNamespace(self):
+        return self.application().protectedNamespace()
+
     # Override buildPlistFileStorage for custom storage
     def buildPlistFileStorage(self):
         return self.application().storageManager.singleFileStorage("support-plist")
@@ -387,13 +391,21 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     #---------------------------------------------------
     # BUNDLE OVERRIDE INTERFACE 
     #---------------------------------------------------
+    def getBundle(self, uuid):
+        if not isinstance(uuid, uuidmodule.UUID):
+            uuid = uuidmodule.UUID(uuid)
+        start_index = self.bundleTreeModel.index(0, 0, QtCore.QModelIndex())
+        indexes = self.bundleTreeModel.match(start_index, 
+            QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive | QtCore.Qt.MatchWrap)
+        if indexes:
+            return self.bundleTreeModel.node(indexes[0])
+
     def addBundle(self, bundle):
-        bundleNode = BundleItemTreeNode(bundle)
-        icon = self.resources().get_icon("bundle-item-%s" % bundleNode.type())
-        bundleNode.setIcon(icon)
-        self.bundleTreeModel.appendBundle(bundleNode)
-        self.bundleAdded.emit(bundleNode)
-        return bundleNode
+        bundle_node = BundleItemTreeNode(bundle)
+        icon = self.resources().get_icon("bundle-item-%s" % bundle.type())
+        bundle_node.setIcon(icon)
+        self.bundleTreeModel.appendBundle(bundle_node)
+        self.bundleAdded.emit(bundle_node)
     
     def modifyBundle(self, bundle):
         self.bundleChanged.emit(bundle)
@@ -409,18 +421,27 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         return self.getBundle(self.defaultBundleForNewBundleItems)
     
     def populatedBundle(self, bundle):
-        self.bundlePopulated.emit(bundle)
+        self.bundlePopulated.emit(self.getBundle(bundle.uuid))
         
     #---------------------------------------------------
     # BUNDLEITEM OVERRIDE INTERFACE 
     #---------------------------------------------------
-    def addBundleItem(self, bundleItem):
-        bundleItemNode = BundleItemTreeNode(bundleItem)
-        icon = self.resources().get_icon("bundle-item-%s" % bundleItemNode.type())
-        bundleItemNode.setIcon(icon)
-        self.bundleTreeModel.appendBundleItem(bundleItemNode)
-        self.bundleItemAdded.emit(bundleItemNode)
-        return bundleItemNode
+    def getBundleItem(self, uuid):
+        if not isinstance(uuid, uuidmodule.UUID):
+            uuid = uuidmodule.UUID(uuid)
+        start_index = self.bundleTreeModel.index(0, 0, QtCore.QModelIndex())
+        indexes = self.bundleTreeModel.match(start_index, 
+            QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive | QtCore.Qt.MatchWrap)
+        if indexes:
+            return self.bundleTreeModel.node(indexes[0])
+
+    def addBundleItem(self, bundle_item):
+        bundle_item_node = BundleItemTreeNode(bundle_item)
+        bundle_node = self.getBundle(bundle_item.bundle.uuid)
+        icon = self.resources().get_icon("bundle-item-%s" % bundle_item.type())
+        bundle_item_node.setIcon(icon)
+        self.bundleTreeModel.appendBundleItem(bundle_item_node, bundle_node)
+        self.bundleItemAdded.emit(bundle_item_node)
 
     def modifyBundleItem(self, bundleItem):
         self.bundleItemChanged.emit(bundleItem)
@@ -445,10 +466,10 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     #---------------------------------------------------
     # STATICFILE OVERRIDE INTERFACE
     #---------------------------------------------------
-    def addStaticFile(self, staticFile):
-        bundleStaticFileNode = BundleItemTreeNode(staticFile)
-        self.bundleTreeModel.appendStaticFile(bundleStaticFileNode)
-        return bundleStaticFileNode
+    def addStaticFile(self, static_file):
+        static_file_node = BundleItemTreeNode(static_file)
+        bundle_item_node = self.getBundleItem(static_file.parentItem.uuid)
+        self.bundleTreeModel.appendStaticFile(static_file_node, bundle_item_node)
     
     def removeStaticFile(self, file):
         pass
@@ -456,11 +477,20 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     #---------------------------------------------------
     # THEME STYLE OVERRIDE INTERFACE
     #---------------------------------------------------
+    def getThemeStyle(self, uuid):
+        if not isinstance(uuid, uuidmodule.UUID):
+            uuid = uuidmodule.UUID(uuid)
+        start_index = self.themeStylesTableModel.index(0, 0, QtCore.QModelIndex())
+        indexes = self.themeStylesTableModel.match(start_index,
+            QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive | QtCore.Qt.MatchWrap)
+        if indexes:
+            return self.themeStylesTableModel.style(indexes[0])
+
     def addThemeStyle(self, style):
-        themeStyle = ThemeStyleTableRow(style)
-        self.themeStylesTableModel.appendStyle(themeStyle)
-        return themeStyle
-    
+        theme_style = ThemeStyleTableRow(style)
+        self.themeStylesTableModel.appendStyle(theme_style)
+        return style
+
     def removeThemeStyle(self, style):
         self.themeStylesTableModel.removeStyle(style)
 
