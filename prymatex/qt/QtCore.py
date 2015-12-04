@@ -25,3 +25,4 @@ else:
     from PySide.QtCore import *
     
 Qt.MatchRole = Qt.UserRole + 1
+Qt.UUIDRole = Qt.UserRole + 2
