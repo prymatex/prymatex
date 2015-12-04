@@ -18,8 +18,9 @@ class Source(namedtuple('Source', 'name path time')):
         return self.time != self.getTime()
     
     def newPath(self, path):
-        time = self.exists() and os.path.getmtime(path) or 0
-        return self._replace(path=path, time=time)
+        return self._replace(
+            path=path,
+            time=os.path.exists(path) and os.path.getmtime(path) or 0)
 
     def newUpdateTime(self):
         return self._replace(time=self.getTime())
