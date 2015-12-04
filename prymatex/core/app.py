@@ -341,6 +341,9 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
     def builtins(self):
         return [ ns for ns in self.namespaces() if ns.builtin ]
         
+    def protectedNamespace(self):
+        return self.namespaces()[0]
+        
     # ---------- OVERRIDE: PrymatexComponent.componentState()
     def componentState(self):
         componentState = super(PrymatexApplication, self).componentState()
