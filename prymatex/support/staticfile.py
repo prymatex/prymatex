@@ -16,6 +16,7 @@ class StaticFile(object):
         self.path = path
         self.name = os.path.basename(path)
         self.parentItem = parentItem
+        self.uuid = parentItem.manager.uuidgen()
 
     @classmethod    
     def type(cls):
