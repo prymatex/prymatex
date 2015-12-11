@@ -87,10 +87,7 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
     def index(self, row, column, parentIndex):
         parentNode = self.node(parentIndex)
         childNode = parentNode.child(row)
-        if childNode is not None:
-            return self.createIndex(row, column, childNode)
-        else:
-            return QtCore.QModelIndex()
+        return self.createIndex(row, column, childNode)
     
     def parent(self, index):
         node = self.node(index)
@@ -101,10 +98,10 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
         return self.createIndex(parentNode.row(), parentNode.column(), parentNode)
     
     def nodeIndex(self, node):
-        if not node.isRootNode():
-            return self.createIndex(node.row(), node.column(), node)
+        if node.isRootNode():
+            return self.createIndex(0, 0, node)
         else:
-            return QtCore.QModelIndex()
+            return self.createIndex(node.row(), node.column(), node)
     
     def node(self, index):
         if index.isValid():
@@ -114,7 +111,7 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
     def nodes(self):
         def _collect(node):
             nodes = [ node ]
-            if node.childCount():
+            if node.childrenCount():
                 for child in node.children():
                     nodes.extend(_collect(child))
             return nodes
@@ -147,7 +144,7 @@ class AbstractNamespaceTreeModel(AbstractTreeModel):
         super(AbstractNamespaceTreeModel, self).__init__(**kwargs)
         self.separator = separator
         
-    def nodeForNamespace(self, namespace, createProxy = False):
+    def nodeForNamespace(self, namespace, createProxy=False):
         if not namespace:
             return self.rootNode
         node = self.rootNode
@@ -265,7 +262,7 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
     def hasChildren(self, index):
         return False
 
-    def index(self, row, column = 0, parent = QtCore.QModelIndex()):
+    def index(self, row, column=0, parent=QtCore.QModelIndex()):
         if self.hasIndex(row, column, parent):
             return self.createIndex(row, column)
         return QtCore.QModelIndex()

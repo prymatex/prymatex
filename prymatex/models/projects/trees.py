@@ -245,7 +245,9 @@ class ProjectTreeProxyModel(QtCore.QSortFilterProxyModel):
     def lessThan(self, left, right):
         leftNode = self.sourceModel().node(left)
         rightNode = self.sourceModel().node(right)
-        if self.folderFirst and leftNode.isDirectory() and not rightNode.isDirectory():
+        if leftNode.isRootNode() or rightNode.isRootNode():
+            return False
+        elif self.folderFirst and leftNode.isDirectory() and not rightNode.isDirectory():
             return not self.descending
         elif self.folderFirst and not leftNode.isDirectory() and rightNode.isDirectory():
             return self.descending

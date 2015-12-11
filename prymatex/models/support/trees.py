@@ -35,10 +35,9 @@ class BundleItemTreeModel(AbstractTreeModel):
             return True
         return False
     
-    def data(self, index, role):  
-        if not index.isValid():  
+    def data(self, index, role):
+        if not index.isValid():
             return None
-
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.EditRole ]:
             node = self.node(index)
             return node.nodeName()

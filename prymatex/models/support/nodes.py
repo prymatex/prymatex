@@ -10,8 +10,6 @@ from prymatex.models.trees import TreeNodeBase
 
 from prymatex.utils import six
 
-from prymatex.support.bundleitem.theme import DEFAULT_THEME_SETTINGS
-
 #====================================================
 # Bundle Tree Node
 #====================================================
@@ -24,21 +22,17 @@ class BundleItemTreeNode(TreeNodeBase):
         TreeNodeBase.__init__(self, bundleItem.name, nodeParent)
         self.__bundleItem = bundleItem
         self._icon = None
-        self._format_cache = {}
-        self._palette_cache = {}
-        self._style_base = { key_value[0]: rgba2color(key_value[1]) \
-            for key_value in DEFAULT_THEME_SETTINGS.items() if key_value[1].startswith('#') }
 
     # ----------- Bundle Item assessors -----------
     def bundleItem(self):
         return self.__bundleItem
 
     def uuid(self):
-        return self.__bundleItem.uuid
+        return self.__bundleItem.uuidAsText()
 
     # ----------- Bundle Item decorator -----------
     def __hash__(self):
-        return hash(self.__bundleItem.uuid)
+        return hash(self.uuid())
 
     @property
     def name(self):
@@ -174,97 +168,6 @@ class BundleItemTreeNode(TreeNodeBase):
         dataHash["keySequence"] = self.keySequence()
         return dataHash
 
-    # ----------- Theme decoration -----------
-    def clearCache(self):
-        self._format_cache = {}
-        self._palette_cache = {}
-
-    def style(self, scope = None):
-        styles = []
-        for style in self.__bundleItem.settings:
-            rank = []
-            if style.scopeSelector.does_match(scope, rank):
-                styles.append((rank.pop(), style))
-        styles.sort(key = lambda t: t[0])
-        style = self._style_base.copy()
-        for s in styles:
-            style.update(s[1].settings())
-        return style
-    
-    def palette(self, scope = None, cache = True):
-        if cache and scope in self._palette_cache:
-            return self._palette_cache[scope]
-        
-        palette = qapplication().palette()
-        settings = self.style(scope)
-        if 'foreground' in settings:
-            #QPalette::Foreground	0	This value is obsolete. Use WindowText instead.
-            palette.setColor(QtGui.QPalette.Foreground, settings['background'])
-            #QPalette::WindowText	0	A general foreground color.
-            palette.setColor(QtGui.QPalette.WindowText, settings['foreground'])
-            #QPalette::Text	6	The foreground color used with Base. This is usually the same as the WindowText, in which case it must provide good contrast with Window and Base.
-            palette.setColor(QtGui.QPalette.Text, settings['foreground'])
-            #QPalette::ToolTipText	19	Used as the foreground color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
-            palette.setColor(QtGui.QPalette.ToolTipText, settings['foreground'])
-            #QPalette::ButtonText	    8	A foreground color used with the Button color.
-            palette.setColor(QtGui.QPalette.ButtonText, settings['foreground'])
-        if 'background' in settings:
-            #QPalette::Background	10	This value is obsolete. Use Window instead.
-            palette.setColor(QtGui.QPalette.Background, settings['background'])
-            #QPalette::Window	10	A general background color.
-            palette.setColor(QtGui.QPalette.Window, settings['background'])
-            #QPalette::Base	9	Used mostly as the background color for text entry widgets, but can also be used for other painting - such as the background of combobox drop down lists and toolbar handles. It is usually white or another light color.
-            palette.setColor(QtGui.QPalette.Base, settings['background'])
-            #QPalette::ToolTipBase	18	Used as the background color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
-            palette.setColor(QtGui.QPalette.ToolTipBase, settings['background'])
-            #QPalette::Button	    1	The general button background color. This background can be different from Window as some styles require a different background color for buttons.
-            palette.setColor(QtGui.QPalette.Button, settings['background'])
-        if 'selection' in settings:
-            #QPalette::Highlight	12	A color to indicate a selected item or the current item. By default, the highlight color is Qt::darkBlue.
-            palette.setColor(QtGui.QPalette.Highlight, settings['selection'])
-        if 'invisibles' in settings:
-            #QPalette::LinkVisited	15	A text color used for already visited hyperlinks. By default, the linkvisited color is Qt::magenta.
-            palette.setColor(QtGui.QPalette.LinkVisited, settings['invisibles'])
-        if 'lineHighlight' in settings:
-            #QPalette::AlternateBase	16	Used as the alternate background color in views with alternating row colors (see QAbstractItemView::setAlternatingRowColors()).
-            palette.setColor(QtGui.QPalette.AlternateBase, settings['lineHighlight'])
-        if 'caret' in settings:
-            #QPalette::BrightText	7	A text color that is very different from WindowText, and contrasts well with e.g. Dark. Typically used for text that needs to be drawn where Text or WindowText would give poor contrast, such as on pressed push buttons. Note that text colors can be used for things other than just words; text colors are usually used for text, but it's quite common to use the text color roles for lines, icons, etc.
-            palette.setColor(QtGui.QPalette.BrightText, settings['caret'])
-            #QPalette::HighlightedText	13	A text color that contrasts with Highlight. By default, the highlighted text color is Qt::white.
-            palette.setColor(QtGui.QPalette.HighlightedText, settings['caret'])
-        if 'gutterBackground' in settings and settings['gutterBackground'].name().upper() != DEFAULT_THEME_SETTINGS['gutterBackground']:
-            #QPalette::ToolTipBase	18	Used as the background color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
-            palette.setColor(QtGui.QPalette.ToolTipBase, settings['gutterBackground'])
-        if 'gutterForeground' in settings and settings['gutterForeground'].name().upper() != DEFAULT_THEME_SETTINGS['gutterForeground']:
-            #QPalette::ToolTipText	19	Used as the foreground color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
-            palette.setColor(QtGui.QPalette.ToolTipText, settings['gutterForeground'])
-        #QPalette::Link	14	A text color used for unvisited hyperlinks. By default, the link color is Qt::blue.
-        if not cache:
-            return palette
-        return self._palette_cache.setdefault(scope, palette)
-        
-    def textCharFormat(self, scope = None, cache = True):
-        if cache and scope in self._format_cache:
-            return self._format_cache[scope]
-
-        frmt = QtGui.QTextCharFormat()
-        settings = self.style(scope)
-        if 'foreground' in settings:
-            frmt.setForeground(settings['foreground'])
-        if 'background' in settings:
-            frmt.setBackground(settings['background'])
-        if 'fontStyle' in settings:
-            if 'bold' in settings['fontStyle']:
-                frmt.setFontWeight(QtGui.QFont.Bold)
-            if 'underline' in settings['fontStyle']:
-                frmt.setFontUnderline(True)
-            if 'italic' in settings['fontStyle']:
-                frmt.setFontItalic(True)
-        if not cache:
-            return frmt
-        return self._format_cache.setdefault(scope, frmt)
-
     def isEditorNeeded(self):
         return self.isTextInputNeeded() or self.producingOutputText()
 
@@ -309,7 +212,7 @@ class ThemeStyleTableRow(object):
         return self.__styleItem
 
     def uuid(self):
-        return self.__styleItem.uuid
+        return self.__styleItem.uuidAsText()
 
     # ----------- Style decorator -----------
     @property
