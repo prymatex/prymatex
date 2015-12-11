@@ -16,22 +16,25 @@ class CodeEditorThemeProcessor(CodeEditorBaseProcessor, ThemeProcessorMixin):
 
         self.editor.syntaxHighlighter.stop()
 
-        # Get Wrapped Theme
-        theme = self.editor.application().supportManager.getBundleItem(bundleItem.uuid)
+        super().beginExecution(bundleItem)
+        
+        char_format = self.editor.application().supportManager.getThemeTextCharFormat(bundleItem)
+        palette = self.editor.application().supportManager.getThemePalette(bundleItem)
 
-        super().beginExecution(theme)
-
-        self.editor.setCurrentCharFormat(theme.textCharFormat())
-        self.editor.setPalette(theme.palette())
+        self.editor.setCurrentCharFormat(char_format)
+        self.editor.setPalette(palette)
         self.editor.syntaxHighlighter.start()
         self.editor.syntaxHighlighter.rehighlight()
-        self.editor.themeChanged.emit(theme)
+        self.editor.themeChanged.emit(bundleItem)
 
     def endExecution(self, bundleItem):
         CodeEditorBaseProcessor.endExecution(self, bundleItem)
 
     def textCharFormat(self, scope):
-        return self.isReady() and self.bundleItem.textCharFormat(scope) or QtGui.QTextCharFormat()
+        if self.isReady():
+            return self.editor.application().supportManager.getThemeTextCharFormat(self.bundleItem, scope)
+        else:
+            return QtGui.QTextCharFormat()
 
     def textCharFormats(self, user_data):
         formats = []

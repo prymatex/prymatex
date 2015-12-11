@@ -76,9 +76,9 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
 
     def updateUi(self, theme):
         self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.model().nodeIndex(theme).row())    
-        palette = theme.palette()
+        palette = self.application().supportManager.getThemePalette(theme.bundleItem())
         # Filter theme proxy model
-        self.application().supportManager.themeStyleProxyModel.setFilterRegExp(str(theme.uuid))
+        self.application().supportManager.themeStyleProxyModel.setFilterRegExp(theme.uuid())
 
         # Set color for table view
         self.tableViewStyles.setPalette(palette)

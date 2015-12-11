@@ -20,6 +20,7 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.scope = None
         self.stacks = {}
         node = self.editor.application().supportManager.getBundleItem(self.editor.default_syntax)
+        print(node)
         self.setScopeName(node and node.bundleItem().scopeName or "")
     
     def setScopeName(self, name):
@@ -46,16 +47,14 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.editor.syntaxHighlighter.stop()
 
         # Get Wrapped Syntax
-        syntax = self.editor.application().supportManager.getBundleItem(bundleItem.uuid)
-
-        super().beginExecution(syntax)
+        super().beginExecution(bundleItem)
         
-        self.beginParse(syntax.scopeName)
+        self.beginParse(bundleItem.scopeName)
         
         self.editor.syntaxHighlighter.start()
         self.editor.syntaxHighlighter.rehighlight()
-        self.editor.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
-        self.editor.syntaxChanged.emit(syntax)
+        self.editor.showMessage("Syntax changed to <b>%s</b>" % bundleItem.name)
+        self.editor.syntaxChanged.emit(bundleItem)
 
     def endExecution(self, bundleItem):
         self.endParse(bundleItem.scopeName)

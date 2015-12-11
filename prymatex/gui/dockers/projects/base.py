@@ -30,8 +30,9 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
         if theme_uuid:
             theme = self.application().supportManager.getBundleItem(theme_uuid)
             if theme is not None:
-                self.treeViewProjects.setPalette(theme.palette())
-                self.treeViewProjects.viewport().setPalette(theme.palette())
+                palette = self.application().supportManager.getThemePalette(theme.bundleItem())
+                self.treeViewProjects.setPalette(palette)
+                self.treeViewProjects.viewport().setPalette(palette)
     
     def __init__(self, **kwargs):
         super(ProjectsDock, self).__init__(**kwargs)

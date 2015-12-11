@@ -54,7 +54,8 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
     def defaultTheme(self, theme_uuid):
         theme = self.application().supportManager.getBundleItem(theme_uuid)
         if theme is not None:
-            self.notifier.setPalette(theme.palette())
+            palette = self.application().supportManager.getThemePalette(theme.bundleItem())
+            self.notifier.setPalette(palette)
 
     _editorHistory = []
     _editorHistoryIndex = 0
