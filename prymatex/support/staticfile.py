@@ -18,6 +18,9 @@ class StaticFile(object):
         self.parentItem = parentItem
         self.uuid = parentItem.manager.uuidgen()
 
+    def uuidAsText(self):
+        return self.parentItem.manager.uuidtotext(self.uuid)
+
     @classmethod    
     def type(cls):
         return cls.__name__.lower()
