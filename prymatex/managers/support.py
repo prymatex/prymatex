@@ -555,9 +555,9 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         self.themeStylesTableModel.removeStyle(style)
 
     #---------------------------------------------------
-    # PREFERENCES OVERRIDE INTERFACE
+    # PREFERENCES INTERFACE
     #---------------------------------------------------
-    def getAllPreferences(self):
+    def getAllPreferencesNodes(self):
         memoizedKey = ("getAllPreferences", None, None, None)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
@@ -567,7 +567,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     #---------------------------------------------------
     # TABTRIGGERS OVERRIDE INTERFACE
     #---------------------------------------------------
-    def getAllTabTriggerItems(self):
+    def getAllTabTriggerItemsNodes(self):
         memoizedKey = ("getAllTabTriggerItems", None, None, None)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
@@ -578,7 +578,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         return self.bundleItemCache.setdefault(memoizedKey,
             tabTriggers)
         
-    def getAllBundleItemsByTabTrigger(self, tabTrigger):
+    def getAllBundleItemsNodesByTabTrigger(self, tabTrigger):
         memoizedKey = ("getAllBundleItemsByTabTrigger", tabTrigger, None, None)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
@@ -592,7 +592,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     #---------------------------------------------------
     # KEYEQUIVALENT OVERRIDE INTERFACE
     #---------------------------------------------------
-    def getAllKeyEquivalentItems(self):
+    def getAllKeyEquivalentItemsNodes(self):
         memoizedKey = ("getAllKeyEquivalentItems", None, None, None)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache[memoizedKey]
@@ -606,7 +606,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         return self.bundleItemCache.setdefault(memoizedKey,
             keyCode)
         
-    def getAllBundleItemsByKeyEquivalent(self, keyCode):
+    def getAllBundleItemsNodesByKeyEquivalent(self, keyCode):
         memoizedKey = ("getAllBundleItemsByKeyEquivalent", "%s" % keyCode, None, None)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
@@ -623,7 +623,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     #---------------------------------------------------
     # FILE EXTENSION OVERRIDE INTERFACE
     #---------------------------------------------------
-    def getAllBundleItemsByFileExtension(self, path):
+    def getAllBundleItemsNodesByFileExtension(self, path):
         items = []
         for item in self.dragcommandProxyModel.nodes():
             if any([fnmatch.fnmatch(path, "*.%s" % extension) for extension in item.draggedFileExtensions]):

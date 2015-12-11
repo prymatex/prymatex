@@ -187,14 +187,14 @@ class ThemeStyleProxyTableModel(QtCore.QSortFilterProxyModel):
             return True
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = index.internalPointer()
-        return regexp.exactMatch(str(node.styleItem().theme.uuid))
+        return regexp == node.styleItem().theme.uuidAsText()
 
     def lessThan(self, left, right):
-        leftData = left.internalPointer()
-        rightData = right.internalPointer()
-        return rightData.name > leftData.name
+        leftData = self.sourceModel().style(left)
+        rightData = self.sourceModel().style(right)
+        return rightData.styleItem().name > leftData.styleItem().name
 
     # ------------------ Custom functions
     def style(self, index):
         return self.sourceModel().style(self.mapToSource(index))
-        
+

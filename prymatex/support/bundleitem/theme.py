@@ -147,7 +147,7 @@ class Theme(BundleItem):
     def buildSettings(settings):
         """El orden si importa, los settings vienen ordenados por score de mayor a menor"""
         base = DEFAULT_THEME_SETTINGS.copy()
-        for s in settings:
+        for s in settings[::-1]:
             base.update(s.settings())
         return base
     

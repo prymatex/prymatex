@@ -854,7 +854,7 @@ class SupportBaseManager(object):
     # ----------- PREFERENCES INTERFACE
     def getAllPreferences(self):
         """Return a list of all preferences bundle items"""
-        raise NotImplementedError
+        return filter(lambda i: i.type() in ["preference"], self._managed_objects.values())
 
     #----------------- PREFERENCES ---------------------
     def getPreferences(self, leftScope=None, rightScope=None):
@@ -919,7 +919,6 @@ class SupportBaseManager(object):
             parser.read(parser.source.path)
 
         # Remove properties
-        print(list(self._properties.keys()), directory)
         self._properties = {
             key: value for (key, value) in self._properties.items() \
             if not (directory == config.USER_HOME_PATH or key.startswith(directory))             
@@ -955,11 +954,20 @@ class SupportBaseManager(object):
     # ----------------- TABTRIGGERS INTERFACE
     def getAllTabTriggerItems(self):
         """Return a list of all tab triggers items"""
-        raise NotImplementedError
+        actions = self.getAllActionItems()
+        tabTriggers = []
+        for item in actions:
+            if item.tabTrigger is not None:
+                tabTriggers.append(item)
+        return tabTriggers
 
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
         """Return a list of tab triggers bundle items"""
-        raise NotImplementedError
+        items = []
+        for item in self.getAllTabTriggerItems():
+            if item.tabTrigger == tabTrigger:
+                items.append(item)
+        return items
 
     # --------------- TABTRIGGERS
     def getAllTabTriggerSymbols(self):
@@ -999,11 +1007,24 @@ class SupportBaseManager(object):
         """
         Return a list of all key equivalent items
         """
-        raise NotImplementedError
+        actions = self.getAllActionItems()
+        keyEquivalents = []
+        for item in actions:
+            if item.keyEquivalent is not None:
+                keyEquivalents.append(item)
+        syntaxes = self.getAllSyntaxes()
+        for item in syntaxes:
+            if item.keyEquivalent is not None:
+                keyEquivalents.append(item)
+        return keyEquivalents
 
-    def getAllBundleItemsByKeyEquivalent(self, keyCode):
+    def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
         """Return a list of key equivalent bundle items"""
-        raise NotImplementedError
+        items = []
+        for item in self.getAllKeyEquivalentItems():
+            if item.keyEquivalent == keyEquivalent:
+                items.append(item)
+        return items
 
     #-------------- KEYEQUIVALENT ------------------------
     def getAllKeyEquivalentCodes(self):
@@ -1022,10 +1043,13 @@ class SupportBaseManager(object):
 
     # --------------- FILE EXTENSION INTERFACE
     def getAllBundleItemsByFileExtension(self, path):
-        """
-        Return a list of file extension bundle items
-        """
-        raise NotImplementedError
+        commands = filter(lambda i: i.type() in ["dragcommand"], self._managed_objects.values())
+        items = []
+        for item in commands:
+            if any([fnmatch.fnmatch(path, "*.%s" % extension) for extension in item.draggedFileExtensions]):
+                items.append(item)
+        return items
+        
 
     #------------- FILE EXTENSION, for drag commands -------------------------
     def getFileExtensionItem(self, path, scope):
@@ -1074,7 +1098,7 @@ class SupportBaseManager(object):
             rank = []
             if syntax.scopeNameSelector.does_match(context, rank):
                 syntaxes.append((rank.pop(), syntax))
-        syntaxes.sort(key=lambda t: t[0], reverse = True)
+        syntaxes.sort(key=lambda t: t[0], reverse=True)
         return self.bundleItemCache.setdefault(memoizedKey, 
             [score_syntax[1] for score_syntax in syntaxes])
 

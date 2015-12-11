@@ -68,10 +68,11 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
         modelIndex = self.comboBoxThemes.model().index(index)
         theme = self.comboBoxThemes.model().node(modelIndex)
         self.updateUi(theme)
-        self.settings().set('default_theme', theme.uuidAsText())
-        message = "<b>%s</b> theme set " % theme.name
-        if theme.author is not None:
-            message += "<i>(by %s)</i>" % theme.author
+        self.settings().set('default_theme', theme.uuid())
+        item = theme.bundleItem()
+        message = "<b>%s</b> theme set " % item.name
+        if item.author is not None:
+            message += "<i>(by %s)</i>" % item.author
         self.application().showMessage(message)
 
     def updateUi(self, theme):
