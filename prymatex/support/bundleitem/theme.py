@@ -68,7 +68,7 @@ class ThemeStyle(object):
                     self.__settings = dict([ item for item in self.__settings.items() if item[1] is not None])
                     continue
                 elif key == 'scope':
-                    self.scopeSelector = self.theme.manager.selectorFactory(value)
+                    self.selector = self.theme.manager.selectorFactory(value)
                 setattr(self, key, value)
 
     def load(self, dataHash):
@@ -143,6 +143,14 @@ class Theme(BundleItem):
         style.load(settings)
         return style
 
+    @staticmethod
+    def buildSettings(settings):
+        """El orden si importa, los settings vienen ordenados por score de mayor a menor"""
+        base = DEFAULT_THEME_SETTINGS.copy()
+        for s in settings:
+            base.update(s.settings())
+        return base
+    
     def removeThemeStyle(self, style):
         self.styles.remove(style)
 

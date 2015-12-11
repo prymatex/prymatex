@@ -8,12 +8,14 @@ from bisect import bisect
 import uuid as uuidmodule
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
+from prymatex.qt.helpers import rgba2color
 
 from prymatex.core import PrymatexComponent
 from prymatex.core.settings import ConfigurableItem
 
 from prymatex.support.manager import SupportBaseManager
 from prymatex.support.process import RunningContext
+from prymatex.support.bundleitem.theme import DEFAULT_THEME_SETTINGS
 
 from prymatex.utils import encoding
 
@@ -392,11 +394,8 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     # BUNDLE OVERRIDE INTERFACE 
     #---------------------------------------------------
     def getBundle(self, uuid):
-        if not isinstance(uuid, uuidmodule.UUID):
-            uuid = uuidmodule.UUID(uuid)
-        start_index = self.bundleTreeModel.index(0, 0, QtCore.QModelIndex())
-        indexes = self.bundleTreeModel.match(start_index, 
-            QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive | QtCore.Qt.MatchWrap)
+        indexes = self.bundleTreeModel.match(self.bundleTreeModel.index(0, 0, QtCore.QModelIndex()), 
+            QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchFixedString | QtCore.Qt.MatchRecursive)
         if indexes:
             return self.bundleTreeModel.node(indexes[0])
 
@@ -421,17 +420,16 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         return self.getBundle(self.defaultBundleForNewBundleItems)
     
     def populatedBundle(self, bundle):
-        self.bundlePopulated.emit(self.getBundle(bundle.uuid))
+        bundle_node = self.getBundle(bundle.uuid)
+        if bundle_node is not None:
+            self.bundlePopulated.emit(bundle_node)
         
     #---------------------------------------------------
     # BUNDLEITEM OVERRIDE INTERFACE 
     #---------------------------------------------------
     def getBundleItem(self, uuid):
-        if not isinstance(uuid, uuidmodule.UUID):
-            uuid = uuidmodule.UUID(uuid)
-        start_index = self.bundleTreeModel.index(0, 0, QtCore.QModelIndex())
-        indexes = self.bundleTreeModel.match(start_index, 
-            QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive | QtCore.Qt.MatchWrap)
+        indexes = self.bundleTreeModel.match(self.bundleTreeModel.index(0, 0, QtCore.QModelIndex()),
+            QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchFixedString | QtCore.Qt.MatchRecursive)
         if indexes:
             return self.bundleTreeModel.node(indexes[0])
 
@@ -456,7 +454,72 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
             for node in bundle.children():
                 nodes.append(node)
         return nodes
-    
+
+        # ----------------- THEME OVERRIDE INTERFACE
+    def getThemePalette(self, theme, scope=None):
+        settings = self.getThemeSettings(theme, scope)
+        palette = self.application().palette()
+        if 'foreground' in settings:
+            #QPalette::Foreground	0	This value is obsolete. Use WindowText instead.
+            palette.setColor(QtGui.QPalette.Foreground, rgba2color(settings['background']))
+            #QPalette::WindowText	0	A general foreground color.
+            palette.setColor(QtGui.QPalette.WindowText, rgba2color(settings['foreground']))
+            #QPalette::Text	6	The foreground color used with Base. This is usually the same as the WindowText, in which case it must provide good contrast with Window and Base.
+            palette.setColor(QtGui.QPalette.Text, rgba2color(settings['foreground']))
+            #QPalette::ToolTipText	19	Used as the foreground color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
+            palette.setColor(QtGui.QPalette.ToolTipText, rgba2color(settings['foreground']))
+            #QPalette::ButtonText	    8	A foreground color used with the Button color.
+            palette.setColor(QtGui.QPalette.ButtonText, rgba2color(settings['foreground']))
+        if 'background' in settings:
+            #QPalette::Background	10	This value is obsolete. Use Window instead.
+            palette.setColor(QtGui.QPalette.Background, rgba2color(settings['background']))
+            #QPalette::Window	10	A general background color.
+            palette.setColor(QtGui.QPalette.Window, rgba2color(settings['background']))
+            #QPalette::Base	9	Used mostly as the background color for text entry widgets, but can also be used for other painting - such as the background of combobox drop down lists and toolbar handles. It is usually white or another light color.
+            palette.setColor(QtGui.QPalette.Base, rgba2color(settings['background']))
+            #QPalette::ToolTipBase	18	Used as the background color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
+            palette.setColor(QtGui.QPalette.ToolTipBase, rgba2color(settings['background']))
+            #QPalette::Button	    1	The general button background color. This background can be different from Window as some styles require a different background color for buttons.
+            palette.setColor(QtGui.QPalette.Button, rgba2color(settings['background']))
+        if 'selection' in settings:
+            #QPalette::Highlight	12	A color to indicate a selected item or the current item. By default, the highlight color is Qt::darkBlue.
+            palette.setColor(QtGui.QPalette.Highlight, rgba2color(settings['selection']))
+        if 'invisibles' in settings:
+            #QPalette::LinkVisited	15	A text color used for already visited hyperlinks. By default, the linkvisited color is Qt::magenta.
+            palette.setColor(QtGui.QPalette.LinkVisited, rgba2color(settings['invisibles']))
+        if 'lineHighlight' in settings:
+            #QPalette::AlternateBase	16	Used as the alternate background color in views with alternating row colors (see QAbstractItemView::setAlternatingRowColors()).
+            palette.setColor(QtGui.QPalette.AlternateBase, rgba2color(settings['lineHighlight']))
+        if 'caret' in settings:
+            #QPalette::BrightText	7	A text color that is very different from WindowText, and contrasts well with e.g. Dark. Typically used for text that needs to be drawn where Text or WindowText would give poor contrast, such as on pressed push buttons. Note that text colors can be used for things other than just words; text colors are usually used for text, but it's quite common to use the text color roles for lines, icons, etc.
+            palette.setColor(QtGui.QPalette.BrightText, rgba2color(settings['caret']))
+            #QPalette::HighlightedText	13	A text color that contrasts with Highlight. By default, the highlighted text color is Qt::white.
+            palette.setColor(QtGui.QPalette.HighlightedText, rgba2color(settings['caret']))
+        if 'gutterBackground' in settings and settings['gutterBackground'] != DEFAULT_THEME_SETTINGS['gutterBackground']:
+            #QPalette::ToolTipBase	18	Used as the background color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
+            palette.setColor(QtGui.QPalette.ToolTipBase, rgba2color(settings['gutterBackground']))
+        if 'gutterForeground' in settings and settings['gutterForeground'] != DEFAULT_THEME_SETTINGS['gutterForeground']:
+            #QPalette::ToolTipText	19	Used as the foreground color for QToolTip and QWhatsThis. Tool tips use the Inactive color group of QPalette, because tool tips are not active windows.
+            palette.setColor(QtGui.QPalette.ToolTipText, rgba2color(settings['gutterForeground']))
+        #QPalette::Link	14	A text color used for unvisited hyperlinks. By default, the link color is Qt::blue.
+        return palette
+        
+    def getThemeTextCharFormat(self, theme, scope=None):
+        settings = self.getThemeSettings(theme, scope)
+        frmt = QtGui.QTextCharFormat()
+        if 'foreground' in settings:
+            frmt.setForeground(rgba2color(settings['foreground']))
+        if 'background' in settings:
+            frmt.setBackground(rgba2color(settings['background']))
+        if 'fontStyle' in settings:
+            if 'bold' in settings['fontStyle']:
+                frmt.setFontWeight(QtGui.QFont.Bold)
+            if 'underline' in settings['fontStyle']:
+                frmt.setFontUnderline(True)
+            if 'italic' in settings['fontStyle']:
+                frmt.setFontItalic(True)
+        return frmt
+
     # --------------- PROPERTIES OVERRIDE INTERFACE
     def addProperties(self, properties):
         watch = [ cfg.source.exists() and cfg.source.path or cfg.source.name for cfg in properties.configs]
@@ -473,16 +536,13 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     
     def removeStaticFile(self, file):
         pass
-    
+
     #---------------------------------------------------
     # THEME STYLE OVERRIDE INTERFACE
     #---------------------------------------------------
     def getThemeStyle(self, uuid):
-        if not isinstance(uuid, uuidmodule.UUID):
-            uuid = uuidmodule.UUID(uuid)
-        start_index = self.themeStylesTableModel.index(0, 0, QtCore.QModelIndex())
-        indexes = self.themeStylesTableModel.match(start_index,
-            QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive | QtCore.Qt.MatchWrap)
+        indexes = self.themeStylesTableModel.match(self.bundleTreeModel.index(0, 0, QtCore.QModelIndex()),
+            QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchFixedString | QtCore.Qt.MatchRecursive)
         if indexes:
             return self.themeStylesTableModel.style(indexes[0])
 
@@ -571,15 +631,15 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         return items
     
     #---------------------------------------------------
-    # ACTION ITEMS OVERRIDE INTERFACE
+    # ACTION ITEMS INTERFACE
     #---------------------------------------------------
-    def getAllActionItems(self):
+    def getAllActionItemsNodes(self):
         return self.actionItemsProxyModel.nodes()
     
     #---------------------------------------------------
-    # SYNTAXES OVERRIDE INTERFACE
+    # SYNTAXES INTERFACE
     #---------------------------------------------------
-    def getAllSyntaxes(self):
+    def getAllSyntaxesNodes(self):
         return self.syntaxProxyModel.nodes()
 
     #---------------------------------------------------

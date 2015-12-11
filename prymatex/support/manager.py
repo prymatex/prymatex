@@ -735,6 +735,35 @@ class SupportBaseManager(object):
         self.removeManagedObject(bundleItem)
         self.removeBundleItem(bundleItem)
 
+    # ----------------- THEME INTERFACE
+    def getTheme(self, uuid):
+        return self.getManagedObject(uuid)
+
+    def addTheme(self, theme):
+        return style
+
+    def removeTheme(self, theme):
+        pass
+
+    # ------------ THEME CRUD
+    def createTheme(self, ns_name=config.USR_NS_NAME, **attrs):
+        pass
+
+    def updateTheme(self, theme, ns_name=config.USR_NS_NAME, **attrs):
+        pass
+
+    def deleteTheme(self, theme, ns_name=config.USR_NS_NAME):
+        pass
+
+    def getThemeSettings(self, theme, leftScope=None, rightScope=None):
+        # If leftScope == rightScope == None then return base settings
+        memoizedKey = ("getThemeSettings", theme.uuidAsText(), leftScope, rightScope)
+        if memoizedKey in self.bundleItemCache:
+            return self.bundleItemCache.get(memoizedKey)
+        return self.bundleItemCache.setdefault(memoizedKey,
+            bundleitem.Theme.buildSettings(
+                self.__filter_items(theme.settings, leftScope, rightScope)))
+
     # ------------- STATICFILE INTERFACE
     def addStaticFile(self, file):
         pass
@@ -835,7 +864,7 @@ class SupportBaseManager(object):
         return self.bundleItemCache.setdefault(memoizedKey,
             self.__filter_items(self.getAllPreferences(), leftScope, rightScope))
 
-    def getPreferenceSettings(self, leftScope = None, rightScope = None):
+    def getPreferenceSettings(self, leftScope=None, rightScope=None):
         # If leftScope == rightScope == None then return base settings
         memoizedKey = ("getPreferenceSettings", None, leftScope, rightScope)
         if memoizedKey in self.bundleItemCache:
@@ -1004,10 +1033,7 @@ class SupportBaseManager(object):
 
     # ------------- ACTION ITEMS INTERFACE
     def getAllActionItems(self):
-        """
-        Return action items
-        """
-        raise NotImplementedError
+        return filter(lambda i: i.type() in ["command", "snippet", "macro"], self._managed_objects.values())
 
     #---------------- ACTION ITEMS FOR SCOPE ---------------------------------
     def getActionItemsByScope(self, leftScope, rightScope):
@@ -1020,7 +1046,7 @@ class SupportBaseManager(object):
 
     # ------------------ SYNTAXES INTERFACE
     def getAllSyntaxes(self):
-        raise NotImplementedError
+        return filter(lambda i: i.type() == "syntax", self._managed_objects.values())
 
     # ------------------ SYNTAXES
     def getSyntaxesAsDictionary(self):
